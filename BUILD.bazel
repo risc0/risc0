@@ -1,0 +1,6 @@
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "clang_tidy_config",
+    data = [".clang-tidy"],
+)

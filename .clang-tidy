@@ -1,0 +1,18 @@
+AnalyzeTemporaryDtors: false
+Checks: >
+  -*
+  clang-diagnostic-*
+  clang-analyzer-*
+  bugprone-*
+  readability-*
+  -readability-convert-member-functions-to-static
+  -readability-magic-numbers
+  -readability-implicit-bool-conversion
+  -readability-function-cognitive-complexity
+  -bugprone-macro-parentheses
+CheckOptions:
+  - key: bugprone-argument-comment.CommentBoolLiterals
+    value: "0"
+HeaderFilterRegex: ""
+UseColor: true
+WarningsAsErrors: ""

@@ -1,0 +1,9 @@
+[package]
+name = "battleship"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+battleship-proof = { path = "proof" }
+log = "0.4"
+risc0-host = { path = "../../../risc0/r0vm/rust/host" }

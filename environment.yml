@@ -1,0 +1,5 @@
+channels:
+  - conda-forge
+dependencies:
+  - doxygen=1.9.2
+  - livereload=2.6.3

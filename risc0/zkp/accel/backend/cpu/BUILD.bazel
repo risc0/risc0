@@ -1,0 +1,20 @@
+package(default_visibility = ["//visibility:public"])
+
+config_setting(
+    name = "select",
+    flag_values = {"//risc0/zkp/accel:flag": "cpu"},
+)
+
+cc_library(
+    name = "cpu",
+    srcs = ["impl.cpp"],
+    target_compatible_with = select({
+        ":select": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    deps = [
+        "//risc0/zkp/accel",
+        "//risc0/zkp/core",
+        "@oneTBB//:tbb",
+    ],
+)

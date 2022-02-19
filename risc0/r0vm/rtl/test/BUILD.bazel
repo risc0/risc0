@@ -1,0 +1,9 @@
+load(":defs.bzl", "riscv_test_suite")
+
+cc_binary(
+    name = "risc0-simulate",
+    srcs = ["risc0-simulate.cpp"],
+    deps = ["//risc0/zkp/prove/step"],
+)
+
+riscv_test_suite()

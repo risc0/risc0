@@ -1,0 +1,45 @@
+load("@risc0_crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+load("//bazel/rules/rust:defs.bzl", "risc0_rust_binary")
+
+rust_library(
+    name = "risc0",
+    srcs = [
+        "src/alloc.rs",
+        "src/env.rs",
+        "src/gpio.rs",
+        "src/lib.rs",
+        "src/sha.rs",
+    ],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        "//risc0/r0vm/cpp/device:crt0",
+    ],
+)
+
+risc0_rust_binary(
+    name = "test_sha",
+    srcs = ["tests/sha.rs"],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        ":risc0",
+    ],
+)
+
+risc0_rust_binary(
+    name = "test_mem",
+    srcs = ["tests/io.rs"],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        ":risc0",
+    ],
+)
+
+risc0_rust_binary(
+    name = "test_fail",
+    srcs = ["tests/fail.rs"],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        ":risc0",
+    ],
+)

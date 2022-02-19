@@ -1,0 +1,58 @@
+load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary", "risc0_cc_library")
+
+risc0_cc_binary(
+    name = "init_proof",
+    srcs = ["init_proof.cpp"],
+    deps = [
+        ":core",
+        "//risc0/r0vm/cpp/device",
+    ],
+)
+
+risc0_cc_binary(
+    name = "round_proof",
+    srcs = ["round_proof.cpp"],
+    deps = [
+        ":core",
+        "//risc0/r0vm/cpp/device",
+    ],
+)
+
+cc_binary(
+    name = "battleship",
+    srcs = ["battleship.cpp"],
+    deps = [":lib"],
+)
+
+risc0_cc_library(
+    name = "core",
+    srcs = ["core.cpp"],
+    hdrs = ["battleship.h"],
+)
+
+cc_library(
+    name = "lib",
+    srcs = [
+        "core.cpp",
+        "protocol.cpp",
+    ],
+    hdrs = [
+        "battleship.h",
+        "protocol.h",
+    ],
+    data = [
+        ":init_proof",
+        ":round_proof",
+    ],
+    deps = ["//risc0/zkp/prove"],
+)
+
+cc_test(
+    name = "test",
+    srcs = ["test.cpp"],
+    deps = [
+        ":lib",
+        "//risc0/core/test:gtest_main",
+        "//risc0/zkp/prove",
+    ],
+)

@@ -1,0 +1,21 @@
+load("@rules_python//python:defs.bzl", "py_binary")
+load("//bazel/rules/doxygen:defs.bzl", "doxygen")
+
+SRCS = [
+    "//risc0/r0vm/cpp/device:docs",
+]
+
+doxygen(
+    name = "doxygen",
+    srcs = SRCS,
+    anchor = "//risc0:docs_anchor",
+    doxyfile = "Doxyfile",
+)
+
+py_binary(
+    name = "docs",
+    srcs = ["docs.py"],
+    data = SRCS + [
+        "Doxyfile",
+    ],
+)

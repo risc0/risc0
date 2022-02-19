@@ -1,0 +1,16 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "kernels",
+    srcs = ["all.cpp"],
+    hdrs = [
+        "all.h",
+        "check.h",
+        "eltwise.h",
+        "fri.h",
+        "mix.h",
+        "sha.h",
+        "shared.h",
+        "zk.h",
+    ],
+)

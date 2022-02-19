@@ -1,0 +1,8 @@
+[package]
+name = "battleship-proof"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0 = { path = "../../../../risc0/r0vm/rust/device" }
+serde = { version = "1.0", default-features = false, features = ["derive"] }

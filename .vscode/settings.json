@@ -1,0 +1,9 @@
+{
+  "[rust]": {
+    "editor.formatOnSave": true
+  },
+  "[starlark]": {
+    "editor.formatOnSave": true
+  }
+  "files.eol": "\n"
+}

@@ -1,0 +1,17 @@
+cc_library(
+    name = "core",
+    srcs = [
+        "elf.cpp",
+        "log.cpp",
+        "rng.cpp",
+    ],
+    hdrs = [
+        "elf.h",
+        "key.h",
+        "log.h",
+        "rng.h",
+        "source_loc.h",
+        "util.h",
+    ],
+    visibility = ["//visibility:public"],
+)

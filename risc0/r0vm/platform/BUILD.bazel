@@ -1,0 +1,12 @@
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["risc0.ld"])
+
+cc_library(
+    name = "platform",
+    hdrs = [
+        "io.h",
+        "memory.h",
+    ],
+    deps = ["//risc0/zkp/core:devs"],
+)

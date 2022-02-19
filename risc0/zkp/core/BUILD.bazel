@@ -1,0 +1,29 @@
+cc_library(
+    name = "core",
+    srcs = [
+        "ntt.cpp",
+        "poly.cpp",
+        "sha_rng.cpp",
+    ],
+    hdrs = [
+        "fp.h",
+        "fp4.h",
+        "ntt.h",
+        "poly.h",
+        "rou.h",
+        "sha256.h",
+        "sha256_cpu.h",
+        "sha_rng.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":devs",
+        "//risc0/core",
+    ],
+)
+
+cc_library(
+    name = "devs",
+    hdrs = ["devs.h"],
+    visibility = ["//visibility:public"],
+)

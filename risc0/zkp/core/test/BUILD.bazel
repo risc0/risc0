@@ -1,0 +1,13 @@
+cc_test(
+    name = "test",
+    srcs = [
+        "fp.cpp",
+        "fp4.cpp",
+        "ntt.cpp",
+        "sha256.cpp",
+    ],
+    deps = [
+        "//risc0/core/test:gtest_main",
+        "//risc0/zkp/core",
+    ],
+)

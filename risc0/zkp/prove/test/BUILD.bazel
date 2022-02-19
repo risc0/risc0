@@ -1,0 +1,11 @@
+cc_test(
+    name = "test",
+    srcs = [
+        "fri.cpp",
+        "merkle.cpp",
+    ],
+    deps = [
+        "//risc0/core/test:gtest_main",
+        "//risc0/zkp/prove",
+    ],
+)

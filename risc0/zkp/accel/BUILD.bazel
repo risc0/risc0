@@ -1,0 +1,26 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "accel",
+    hdrs = [
+        "accel.h",
+        "check.h",
+        "mix.h",
+        "pp.h",
+    ],
+    deps = [
+        "//risc0/zkp/accel/kernels",
+        "//risc0/zkp/circuit:inc",
+        "//risc0/zkp/prove/step",
+    ],
+)
+
+string_flag(
+    name = "flag",
+    build_setting_default = "cpu",
+    values = [
+        "cpu",
+    ],
+)

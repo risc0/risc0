@@ -1,0 +1,7 @@
+platform(
+    name = "risc0",
+    constraint_values = [
+        "//bazel/platform/cpu:riscv32im",
+        "//bazel/platform/os:risc0",
+    ],
+)

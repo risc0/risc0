@@ -1,0 +1,8 @@
+*~
+*.swp
+*.swo
+.bazelrc.local
+.DS_Store
+bazel-*
+target/
+tmp/

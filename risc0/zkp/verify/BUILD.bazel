@@ -1,0 +1,21 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "verify",
+    srcs = [
+        "fri.cpp",
+        "merkle.cpp",
+        "verify.cpp",
+    ],
+    hdrs = [
+        "fri.h",
+        "merkle.h",
+        "read_iop.h",
+        "verify.h",
+    ],
+    deps = [
+        "//risc0/zkp/accel",
+        "//risc0/zkp/core",
+        "//risc0/zkp/prove/step",
+    ],
+)

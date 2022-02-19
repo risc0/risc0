@@ -1,0 +1,36 @@
+load("//risc0/zkp/circuit/make-circuit:defs.bzl", "make_circuit")
+
+package(default_visibility = ["//visibility:public"])
+
+make_circuit(
+    name = "step_inc_gen",
+    out = "step.cpp.inc",
+)
+
+cc_library(
+    name = "step",
+    srcs = [
+        "exec.cpp",
+        "io_handler.cpp",
+        "step_context.cpp",
+    ],
+    hdrs = ["exec.h"],
+    deps = [
+        ":compile_step",
+        "//risc0/zkp/core",
+    ],
+)
+
+cc_library(
+    name = "compile_step",
+    srcs = [
+        "step.cpp",
+        ":step_inc_gen",
+    ],
+    hdrs = ["step.h"],
+    copts = ["-w"],
+    deps = [
+        "//risc0/zkp/circuit:inc",
+        "//risc0/zkp/core",
+    ],
+)

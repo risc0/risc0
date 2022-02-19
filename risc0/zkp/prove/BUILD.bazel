@@ -1,0 +1,28 @@
+load("//risc0/zkp/accel:build_defs.bzl", "ACCEL_DEPS")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "prove",
+    srcs = [
+        "c_api.cpp",
+        "fri.cpp",
+        "merkle.cpp",
+        "poly_group.cpp",
+        "proof.cpp",
+        "prove.cpp",
+    ],
+    hdrs = [
+        "c_api.h",
+        "fri.h",
+        "merkle.h",
+        "poly_group.h",
+        "proof.h",
+        "prove.h",
+        "write_iop.h",
+    ],
+    deps = [
+        "//risc0/zkp/prove/step",
+        "//risc0/zkp/verify",
+    ] + select(ACCEL_DEPS),
+)

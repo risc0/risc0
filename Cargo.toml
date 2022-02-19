@@ -1,0 +1,7 @@
+[workspace]
+members = [
+  "examples/rust/battleship",
+  "examples/rust/battleship/proof",
+  "risc0/r0vm/rust/device",
+  "risc0/r0vm/rust/host",
+]

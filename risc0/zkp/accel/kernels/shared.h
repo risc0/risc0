@@ -1,0 +1,6 @@
+#include "risc0/zkp/accel/kernels/check.h"
+#include "risc0/zkp/accel/kernels/eltwise.h"
+#include "risc0/zkp/accel/kernels/fri.h"
+#include "risc0/zkp/accel/kernels/mix.h"
+#include "risc0/zkp/accel/kernels/sha.h"
+#include "risc0/zkp/accel/kernels/zk.h"

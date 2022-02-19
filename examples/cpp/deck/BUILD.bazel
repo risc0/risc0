@@ -1,0 +1,40 @@
+load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary", "risc0_cc_library")
+
+risc0_cc_library(
+    name = "lib",
+    srcs = ["deck.cpp"],
+    hdrs = ["deck.h"],
+    deps = ["//risc0/r0vm/cpp/device"],
+)
+
+risc0_cc_binary(
+    name = "shuffle_proof",
+    srcs = ["shuffle_proof.cpp"],
+    deps = [":lib"],
+)
+
+risc0_cc_binary(
+    name = "card_proof",
+    srcs = ["card_proof.cpp"],
+    deps = [":lib"],
+)
+
+cc_library(
+    name = "protocol",
+    srcs = ["protocol.cpp"],
+    hdrs = ["protocol.h"],
+    data = [
+        ":card_proof",
+        ":shuffle_proof",
+    ],
+    deps = ["//risc0/zkp/prove"],
+)
+
+cc_test(
+    name = "test",
+    srcs = ["test.cpp"],
+    deps = [
+        ":protocol",
+        "//risc0/core/test:gtest_main",
+    ],
+)

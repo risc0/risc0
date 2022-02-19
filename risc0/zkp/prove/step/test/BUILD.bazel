@@ -1,0 +1,28 @@
+load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary")
+
+cc_test(
+    name = "test",
+    srcs = [
+        "hw.cpp",
+    ],
+    data = [
+        ":test_wom_diff",
+        ":test_wom_same",
+    ],
+    deps = [
+        "//risc0/core/test:gtest_main",
+        "//risc0/zkp/prove/step",
+    ],
+)
+
+risc0_cc_binary(
+    name = "test_wom_diff",
+    srcs = ["test_wom_diff.cpp"],
+    deps = ["//risc0/r0vm/cpp/device"],
+)
+
+risc0_cc_binary(
+    name = "test_wom_same",
+    srcs = ["test_wom_same.cpp"],
+    deps = ["//risc0/r0vm/cpp/device"],
+)
