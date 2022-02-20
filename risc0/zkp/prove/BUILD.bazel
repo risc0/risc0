@@ -6,6 +6,7 @@ cc_library(
     name = "prove",
     srcs = [
         "c_api.cpp",
+        "code_id.cpp",
         "fri.cpp",
         "merkle.cpp",
         "poly_group.cpp",
@@ -14,6 +15,7 @@ cc_library(
     ],
     hdrs = [
         "c_api.h",
+        "code_id.h",
         "fri.h",
         "merkle.h",
         "poly_group.h",

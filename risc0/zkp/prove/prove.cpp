@@ -45,7 +45,7 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
 
   // Do main execution + get size
   ExecState exec(elfFile);
-  exec.run(1 << 20, io);
+  exec.run(kMaxCycles, io);
   size_t size = exec.context.numSteps;
   uint32_t po2 = log2Ceil(size);
 
