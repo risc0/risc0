@@ -10,7 +10,7 @@ CodeID readCodeID(const std::string& filename) {
     throw std::runtime_error("Unable to open file: " + filename);
   }
   CodeID id;
-  file.read(reinterpret_cast<char*>(&id), sizeof(CodeID)); 
+  file.read(reinterpret_cast<char*>(&id), sizeof(CodeID));
   file.close();
   if (!file.good()) {
     throw std::runtime_error("Error reading code id file: " + filename);
@@ -18,4 +18,4 @@ CodeID readCodeID(const std::string& filename) {
   return id;
 }
 
-}  // namespace risc0
+} // namespace risc0

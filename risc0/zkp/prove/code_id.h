@@ -8,5 +8,3 @@ CodeID makeCodeID(const std::string& elfFile);
 void writeCodeID(const std::string& filename, const CodeID& id);
 
 } // namespace risc0
-
-

@@ -92,9 +92,7 @@ risc0_proof* risc0_prover_run(risc0_error* err, risc0_prover* ptr) {
 }
 
 void risc0_proof_verify(risc0_error* err, const char* elf_path, const risc0_proof* ptr) {
-  ffi_wrap_void(err, [&] { 
-      ptr->proof.verify(elf_path); 
-  });
+  ffi_wrap_void(err, [&] { ptr->proof.verify(elf_path); });
 }
 
 const uint32_t* risc0_proof_get_core_buf(risc0_error* err, const risc0_proof* ptr) {

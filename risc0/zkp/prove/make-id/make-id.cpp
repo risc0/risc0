@@ -1,5 +1,4 @@
 #include <iostream>
-#include <iostream>
 
 #include "risc0/zkp/prove/code_id.h"
 

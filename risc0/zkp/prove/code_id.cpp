@@ -1,7 +1,7 @@
 #include "risc0/zkp/prove/code_id.h"
 
-#include <map>
 #include <fstream>
+#include <map>
 
 #include "risc0/core/elf.h"
 #include "risc0/zkp/prove/poly_group.h"
@@ -13,12 +13,12 @@ CodeID makeCodeID(const std::string& elfFile) {
   // Load the ELF file into an image
   std::map<uint32_t, uint32_t> image;
   uint32_t startAddr = loadElf(elfFile, kMemSize, image);
- 
-  // Start with an empty return value 
+
+  // Start with an empty return value
   CodeID ret;
 
   // Make the digest for each level
-  for(size_t i = 0; i < kCodeDigestCount; i++) {
+  for (size_t i = 0; i < kCodeDigestCount; i++) {
     size_t cycles = kMinCycles * (1 << i);
     if (cycles < image.size() + 3 + kZkCycles) {
       // Can't even fit the program in this cycle size, just set to zero
@@ -41,7 +41,7 @@ CodeID makeCodeID(const std::string& elfFile) {
 }
 
 void writeCodeID(const std::string& filename, const CodeID& id) {
-  std::ofstream file(filename, std::ios::out | std::ios::binary );
+  std::ofstream file(filename, std::ios::out | std::ios::binary);
   if (!file) {
     throw std::runtime_error("Unable to open file: " + filename);
   }
@@ -52,4 +52,4 @@ void writeCodeID(const std::string& filename, const CodeID& id) {
   }
 }
 
-}  // namespace risc0
+} // namespace risc0

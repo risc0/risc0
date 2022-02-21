@@ -82,7 +82,6 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
   size_t whichCode = po2 - log2Ceil(kMinCycles);
   REQUIRE(code[whichCode] == codeMerkle.getRoot());
 
-
   // Fill in accum mix
   for (size_t i = 0; i < kAccumMixGlobalSize; i++) {
     globals[kAccumMixGlobalOffset + i] = Fp::random(iop);

@@ -15,5 +15,3 @@ using CodeID = std::array<ShaDigest, kCodeDigestCount>;
 CodeID readCodeID(const std::string& filename);
 
 } // namespace risc0
-
-
