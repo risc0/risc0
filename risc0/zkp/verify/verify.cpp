@@ -52,7 +52,7 @@ struct MixState {
 } // namespace
 
 // NOLINTNEXTLINE(readability-function-size)
-void verify(const uint32_t* proofData, size_t proofSize) {
+void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
   // Construct the IOP object
   ReadIOP iop(proofData, proofSize);
 
@@ -77,6 +77,11 @@ void verify(const uint32_t* proofData, size_t proofSize) {
   LOG(1, "codeRoot = " << codeMerkle.getRoot());
   MerkleTreeVerifier dataMerkle(iop, domain, kDataSize, kQueries);
   LOG(1, "dataRoot = " << dataMerkle.getRoot());
+
+  // Verify the code is what we expect
+  size_t whichCode = po2 - log2Ceil(kMinCycles);
+  REQUIRE(code[whichCode] == codeMerkle.getRoot());
+
 
   // Fill in accum mix
   for (size_t i = 0; i < kAccumMixGlobalSize; i++) {

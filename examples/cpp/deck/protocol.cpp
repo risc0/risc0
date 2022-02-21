@@ -56,7 +56,7 @@ PlayerCommitMessage Player::getCommit(const DealerCommitMessage& msg) {
 }
 
 void Player::verifyShuffleProof(const ShuffleProofMessage& msg) {
-  msg.proof.verify();
+  msg.proof.verify("examples/cpp/deck/shuffle_proof");
   REQUIRE(msg.proof.message.size() == sizeof(ShuffleProofContents));
   const ShuffleProofContents* data =
       reinterpret_cast<const ShuffleProofContents*>(msg.proof.message.data());
@@ -73,7 +73,7 @@ CardRequestMessage Player::makeRequest(uint32_t pos) {
 }
 
 uint32_t Player::verifyResponse(const CardResponseMessage& msg) {
-  msg.proof.verify();
+  msg.proof.verify("examples/cpp/deck/card_proof");
   REQUIRE(msg.proof.message.size() == sizeof(CardResponseContents));
   const CardResponseContents* data =
       reinterpret_cast<const CardResponseContents*>(msg.proof.message.data());
