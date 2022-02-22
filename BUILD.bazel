@@ -19,3 +19,8 @@ toolchain(
     toolchain = "clang_format_toolchain_impl",
     toolchain_type = "//bazel/rules/clang_format:toolchain_type",
 )
+
+py_binary(
+    name = "clang-format",
+    srcs = ["clang-format.py"],
+)
