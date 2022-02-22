@@ -20,7 +20,7 @@ protected:
     prover.addInput(static_cast<uint32_t>(str.size()));
     prover.addInput(str.data(), str.size());
     Proof proof = prover.run();
-    proof.verify();
+    proof.verify(GetParam().prefix + "test_sha");
     return *reinterpret_cast<ShaDigest*>(proof.message.data());
   }
 
@@ -32,7 +32,7 @@ protected:
       prover.addInput(pair.second);
     }
     auto proof = prover.run();
-    proof.verify();
+    proof.verify(GetParam().prefix + "test_mem");
   }
 };
 
@@ -143,7 +143,7 @@ void doMemcpyTest(uint32_t srcOffset, uint32_t destOffset, uint32_t size) {
   prover.addInput(destOffset);
   prover.addInput(size);
   auto proof = prover.run();
-  proof.verify();
+  proof.verify("risc0/r0vm/cpp/device/test/test_memcpy");
   // Do the memcpy/memset on the host
   if (srcOffset == 1024) {
     memset(destBuf.data() + destOffset, 0xff, size);

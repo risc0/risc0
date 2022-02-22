@@ -36,7 +36,7 @@ InitMessage Battleship::init() {
 
 void Battleship::onInitMsg(const InitMessage& msg) {
   LOG(1, name << "> onInitMsg");
-  msg.proof.verify();
+  msg.proof.verify("examples/cpp/battleship/init_proof");
   peer_state = msg.getParts().state;
   LOG(1, name << "> peer_state: " << peer_state);
 }
@@ -64,7 +64,7 @@ RoundMessage Battleship::onTurnMsg(const TurnMessage& msg) {
 void Battleship::onRoundMsg(const RoundMessage& msg) {
   LOG(1, name << "> onRoundMsg");
 
-  msg.proof.verify();
+  msg.proof.verify("examples/cpp/battleship/round_proof");
   const RoundMessage::Parts& parts = msg.getParts();
 
   if (parts.old_state != peer_state) {

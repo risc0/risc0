@@ -63,7 +63,7 @@ impl Battleship {
     }
 
     pub fn on_init_msg(&mut self, msg: &InitMessage) -> Result<()> {
-        msg.proof.verify()?;
+        msg.proof.verify("examples/rust/battleship/proof/init")?;
         self.peer_state = msg.get_state()?;
         Ok(())
     }
@@ -89,7 +89,7 @@ impl Battleship {
     }
 
     pub fn on_round_msg(&mut self, msg: &RoundMessage) -> Result<HitType> {
-        msg.proof.verify()?;
+        msg.proof.verify("examples/rust/battleship/proof/turn")?;
         let parts = msg.get_parts()?;
 
         if parts.old_state != self.peer_state {
