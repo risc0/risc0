@@ -16,6 +16,10 @@ void ExecState::run(size_t maxSteps, MemoryHandler& io) {
   context.curStep = 0;
   context.mem.data[0] = 0;
   context.numSteps = nearestPo2(image.size() + 3 + kZkCycles);
+  if (context.numSteps > maxSteps) {
+    throw std::runtime_error("Elf too large to fix in maxSteps");
+  }
+
   LOG(1, "image.size() = " << image.size());
   LOG(1, "numSteps = " << context.numSteps);
   io.onInit(context.mem);

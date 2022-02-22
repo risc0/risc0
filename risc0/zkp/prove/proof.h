@@ -3,6 +3,7 @@
 #include "risc0/core/key.h"
 #include "risc0/zkp/core/sha256.h"
 #include "risc0/zkp/prove/step/step.h"
+#include "risc0/zkp/verify/code_id.h"
 
 #include <memory>
 #include <vector>
@@ -13,7 +14,8 @@ struct Proof {
   BufferU32 core;
   Buffer message;
 
-  void verify() const;
+  // Verify proof based on elf file
+  void verify(const std::string& filename) const;
 };
 
 class Prover {

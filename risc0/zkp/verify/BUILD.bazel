@@ -3,11 +3,13 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "verify",
     srcs = [
+        "code_id.cpp",
         "fri.cpp",
         "merkle.cpp",
         "verify.cpp",
     ],
     hdrs = [
+        "code_id.h",
         "fri.h",
         "merkle.h",
         "read_iop.h",

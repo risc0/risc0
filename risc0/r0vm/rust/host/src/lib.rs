@@ -63,9 +63,10 @@ impl TryFrom<&[u8]> for Digest {
 }
 
 impl Proof {
-    pub fn verify(&self) -> Result<()> {
+    pub fn verify(&self, elf_path: &str) -> Result<()> {
         let mut err = ffi::RawError::default();
-        unsafe { ffi::risc0_proof_verify(&mut err, self.ptr) };
+        let str = CString::new(elf_path).unwrap();
+        unsafe { ffi::risc0_proof_verify(&mut err, str.as_ptr(), self.ptr) };
         ffi::check(err, || ())
     }
 

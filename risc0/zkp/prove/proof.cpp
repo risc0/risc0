@@ -2,6 +2,7 @@
 
 #include "risc0/core/log.h"
 #include "risc0/zkp/core/sha256_cpu.h"
+#include "risc0/zkp/prove/code_id.h"
 #include "risc0/zkp/prove/prove.h"
 #include "risc0/zkp/verify/verify.h"
 
@@ -9,8 +10,20 @@
 
 namespace risc0 {
 
-void Proof::verify() const {
-  risc0::verify(core.data(), core.size());
+void Proof::verify(const std::string& filename) const {
+  CodeID code;
+  // Currently we produce the .id on demand
+  // TODO: Move to the build proccess
+  try {
+    LOG(0, "Reading code id from " << filename + ".id");
+    code = readCodeID(filename + ".id");
+  } catch (const std::exception& e) {
+    LOG(0, "Reading elf " << filename);
+    code = makeCodeID(filename);
+    LOG(0, "Reading code id to " << filename + ".id");
+    writeCodeID(filename + ".id", code);
+  }
+  risc0::verify(code, core.data(), core.size());
   if (message.size() != core[8]) {
     std::stringstream ss;
     ss << "Proof::verify> Message size (" << message.size() << ") does not match proof core ("
@@ -89,11 +102,16 @@ const void* Prover::getOutput(size_t idx, size_t size) {
 }
 
 Proof Prover::run() {
+  // Set the memory handlers to call back to the impl
   MemoryHandler handler(impl.get());
+  // Generate the actual proof
   BufferU32 core = prove(impl->elfPath.c_str(), handler);
-  verify(core.data(), core.size());
+  // Attach the full version of the output message + construct proof object
   Buffer message = impl->outputs.at(getNumOutputs() - 1);
-  return Proof{core, message};
+  Proof proof{core, message};
+  // Verify proof to make sure it works
+  proof.verify(impl->elfPath);
+  return proof;
 }
 
 } // namespace risc0
