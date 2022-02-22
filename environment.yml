@@ -1,5 +1,6 @@
 channels:
   - conda-forge
 dependencies:
+  - clang-format=13.0.1
   - doxygen=1.9.2
   - livereload=2.6.3
