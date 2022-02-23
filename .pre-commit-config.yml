@@ -1,0 +1,9 @@
+repos:
+- repo: local
+  hooks:
+    - id: clang-format
+      name: clang-format
+      entry: clang-format
+      language: system
+      files: \.(cpp|h)$
+      args: ["-i"]

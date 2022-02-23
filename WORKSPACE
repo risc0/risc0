@@ -4,6 +4,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 register_toolchains(
     "//bazel/toolchain/risc0",
+    "//:clang_format_toolchain",
 )
 
 http_archive(

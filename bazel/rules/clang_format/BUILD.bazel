@@ -1,0 +1,57 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_list_flag")
+
+package(default_visibility = ["//visibility:public"])
+
+toolchain_type(name = "toolchain_type")
+
+label_flag(
+    name = "config",
+    build_setting_default = "//:.clang-format",
+)
+
+string_list_flag(
+    name = "source_attrs",
+    build_setting_default = [
+        "srcs",
+        "hdrs",
+        "textual_hdrs",
+    ],
+)
+
+string_list_flag(
+    name = "extensions",
+    build_setting_default = [
+        "bc",
+        "c",
+        "c++",
+        "cc",
+        "cl",
+        "cpp",
+        "cu",
+        "cxx",
+        "h",
+        "h++",
+        "hh",
+        "hpp",
+        "hxx",
+        "i",
+        "ii",
+        "inc",
+        "inc",
+        "inl",
+        "ipb",
+        "ipp",
+        "m",
+        "mm",
+        "opb",
+        "pch",
+        "tcc",
+        "tlh",
+        "tli",
+    ],
+)
+
+cc_binary(
+    name = "wrapper",
+    srcs = ["wrapper.cc"],
+)
