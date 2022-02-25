@@ -43,7 +43,7 @@ bazelisk test ...
 
 ## Running the 'Battleship' Examples
 
-'Battleship' is a 2-player hidden information game is implemented in C++ & Rust.
+'Battleship' is a 2-player hidden information game implemented in C++ & Rust.
 
 Players produce proofs of game-state and the result of their actions to enable
 two players play fairly with no intermediaries.
