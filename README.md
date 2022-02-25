@@ -13,6 +13,11 @@ features and performance.
 We recommend using [Bazelisk](https://github.com/bazelbuild/bazelisk) to make
 bazel version management seamless.
 
+In order to build Risc0 executables you'll need a RISC-V toolchain. Bazel will automatically fetch and manage the toolchain for the following platforms:
+
+* macOS (x86_64)
+* macOS (arm64)
+
 You should be able to build and run all tests with:
 
 ```
