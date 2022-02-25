@@ -23,7 +23,7 @@ build --riscv_root=/<path>/<to>/<riscv>/<toolchain>
 
 ### macOS
 
-Rust development on macOS to **requires a full install of Xcode**.
+Rust development on macOS **requires a full install of Xcode**.
 
 Using Brew:
  * Follow instructions here https://github.com/riscv-software-src/homebrew-riscv
