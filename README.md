@@ -1,6 +1,6 @@
-<img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="200">
+<img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100">
 
-# risc0
+# Risc0
 
 Risc0 is a zero-knowledge verifiable general computing platform based on
 zk-STARKs and the Risc-V microarchitecture.
