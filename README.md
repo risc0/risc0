@@ -52,13 +52,14 @@ The best way to understand how the game works currently is to read the code
 and run the tests with logging on:
 
 ### CPP
-
 ```
-RISC0_LOG=1 bazelisk test //examples/cpp/battleship:test --test_output=streamed
+RISC0_LOG=1 bazelisk run //examples/cpp/battleship:test --test_output=streamed
 ```
 
 ### Rust
-
+```
+RISC0_LOG=1 bazelisk run //examples/rust/battleship:test --test_output=streamed
+```
 
 
 ##
