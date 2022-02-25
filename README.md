@@ -10,7 +10,7 @@ We use [Bazel](https://bazel.build) for its strong multi-language multi-platform
 features and performance.
 
 We recommend using [Bazelisk](https://github.com/bazelbuild/bazelisk) to make
-bazel version management seemless
+bazel version management seamless.
 
 In order to build Risc0 executables you'll need a RISC-V toolchain. See the
 platform specific instructions below.
