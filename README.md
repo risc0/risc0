@@ -60,6 +60,6 @@ RISC0_LOG=1 bazelisk run //examples/cpp/battleship:test --test_output=streamed
 ```
 RISC0_LOG=1 bazelisk run //examples/rust/battleship:test --test_output=streamed
 ```
-
+bazelisk run //examples/rust/battleship:test
 
 ##
