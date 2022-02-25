@@ -12,21 +12,31 @@ load(
 )
 load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "ACTION_NAMES")
 
+_TOOL_PATHS = {
+    "ar": "llvm-ar",
+    "cpp": "clang-cpp",
+    "gcc": "clang",
+    "gcov": "llvm-profdata",
+    "ld": "ld.lld",
+    "llvm-cov": "llvm-cov",
+    "nm": "llvm-nm",
+    "objcopy": "llvm-objcopy",
+    "objdump": "llvm-objdump",
+    "strip": "llvm-strip",
+    "dwp": "llvm-dwp",
+    "llvm-profdata": "llvm-profdata",
+}
+
 def _impl(ctx):
-    root = ctx.attr.root[BuildSettingInfo].value
-    tool_paths = [tool_path(name = tool, path = "{}/bin/riscv64-unknown-elf-{}".format(root, tool)) for tool in [
-        "ar",
-        "cpp",
-        "gcc",
-        "gcov",
-        "ld",
-        "nm",
-        "objdump",
-        "strip",
-    ]]
+    sysroot = ctx.attr.sysroot[BuildSettingInfo].value
+
+    tool_paths = [
+        tool_path(name = name, path = "{}/bin/{}".format(sysroot, path))
+        for name, path in _TOOL_PATHS.items()
+    ]
 
     compile_actions = [
-        ACTION_NAMES.assemble,
+        # ACTION_NAMES.assemble,
         ACTION_NAMES.preprocess_assemble,
         ACTION_NAMES.linkstamp_compile,
         ACTION_NAMES.c_compile,
@@ -43,19 +53,26 @@ def _impl(ctx):
     ]
 
     common_flags = [
-        "-DRISCV=1",
+        "--target=riscv32",
         "-mabi=ilp32",
         "-march=rv32im",
+        "-mno-relax",
         "-nostdlib",
-        "-ffreestanding",
-        "-fno-common",
-        "-fno-exceptions",
-        "-fno-non-call-exceptions",
-        "-fno-rtti",
-        "-fno-strict-aliasing",
-        "-fno-threadsafe-statics",
-        "-fno-use-cxa-atexit",
+        "-Wall",
     ]
+
+    assemble_flags_feature = feature(
+        name = "assemble_flags",
+        enabled = True,
+        flag_sets = [
+            flag_set(
+                actions = [ACTION_NAMES.assemble],
+                flag_groups = [
+                    flag_group(flags = common_flags),
+                ],
+            ),
+        ],
+    )
 
     default_compile_flags_feature = feature(
         name = "default_compile_flags",
@@ -66,11 +83,20 @@ def _impl(ctx):
                 flag_groups = [
                     flag_group(
                         flags = common_flags + [
-                            "-Wall",
-                            "-Wunused-but-set-parameter",
-                            "-Wno-free-nonheap-object",
-                            "-Wno-error=pragmas",
-                            "-Wno-unknown-pragmas",
+                            "-DRISCV=1",
+                            "-ffreestanding",
+                            "-fno-common",
+                            "-fno-exceptions",
+                            "-fno-non-call-exceptions",
+                            "-fno-rtti",
+                            "-fno-strict-aliasing",
+                            "-fno-threadsafe-statics",
+                            "-fno-use-cxa-atexit",
+                            "-fcolor-diagnostics",
+                            # "-Wunused-but-set-parameter",
+                            # "-Wno-free-nonheap-object",
+                            # "-Wno-error=pragmas",
+                            # "-Wno-unknown-pragmas",
                         ],
                     ),
                 ],
@@ -83,6 +109,7 @@ def _impl(ctx):
             flag_set(
                 actions = compile_actions,
                 flag_groups = [flag_group(flags = [
+                    "-DNDEBUG",
                     "-fdata-sections",
                     "-ffunction-sections",
                     "-g0",
@@ -102,7 +129,7 @@ def _impl(ctx):
                 flag_groups = [
                     flag_group(
                         flags = [
-                            "-fno-canonical-system-headers",
+                            # "-fno-canonical-system-headers",
                             "-Wno-builtin-macro-redefined",
                             '-D__DATE__="redacted"',
                             '-D__TIMESTAMP__="redacted"',
@@ -138,12 +165,9 @@ def _impl(ctx):
             flag_set(
                 actions = link_actions,
                 flag_groups = [
-                    flag_group(
-                        flags = common_flags + [
-                            "-Wl,--orphan-handling=warn",
-                            "-pass-exit-codes",
-                        ],
-                    ),
+                    flag_group(flags = common_flags + [
+                        "-fcolor-diagnostics",
+                    ]),
                 ],
             ),
             flag_set(
@@ -155,22 +179,52 @@ def _impl(ctx):
     )
 
     cxx_builtin_include_directories = [
-        root + "/riscv64-unknown-elf/include/c++/11.1.0",
-        root + "/riscv64-unknown-elf/include/c++/11.1.0/riscv64-unknown-elf",
-        root + "/riscv64-unknown-elf/include/c++/11.1.0/backward",
-        root + "/lib/gcc/riscv64-unknown-elf/11.1.0/include",
-        root + "/lib/gcc/riscv64-unknown-elf/11.1.0/include-fixed",
-        root + "/riscv64-unknown-elf/include",
+        "{}/include/c++/v1".format(sysroot),
+        "{}/lib/clang/13.0.1/include".format(sysroot),
     ]
 
     dbg_feature = feature(name = "dbg")
     opt_feature = feature(name = "opt")
 
+    sysroot_feature = feature(
+        name = "sysroot",
+        enabled = True,
+        flag_sets = [
+            flag_set(
+                actions = [
+                    ACTION_NAMES.preprocess_assemble,
+                    ACTION_NAMES.linkstamp_compile,
+                    ACTION_NAMES.c_compile,
+                    ACTION_NAMES.cpp_compile,
+                    ACTION_NAMES.cpp_header_parsing,
+                    ACTION_NAMES.cpp_module_compile,
+                    ACTION_NAMES.cpp_module_codegen,
+                    ACTION_NAMES.lto_backend,
+                    ACTION_NAMES.clif_match,
+                ] + link_actions,
+                flag_groups = [
+                    flag_group(
+                        flags = ["--sysroot=%{sysroot}"],
+                        expand_if_available = "sysroot",
+                    ),
+                ],
+            ),
+        ],
+    )
+
+    supports_start_end_lib_feature = feature(
+        name = "supports_start_end_lib",
+        enabled = True,
+    )
+
     features = [
         default_compile_flags_feature,
         default_link_flags_feature,
+        assemble_flags_feature,
         dbg_feature,
         opt_feature,
+        supports_start_end_lib_feature,
+        sysroot_feature,
         user_compile_flags_feature,
         unfiltered_compile_flags_feature,
     ]
@@ -179,20 +233,21 @@ def _impl(ctx):
         ctx = ctx,
         abi_libc_version = "unknown",
         abi_version = "unknown",
-        compiler = "riscv64-unknown-elf-gcc (GCC) 11.1.0",
+        compiler = "clang",
         cxx_builtin_include_directories = cxx_builtin_include_directories,
         features = features,
         host_system_name = "local",
         target_cpu = "riscv32",
         target_libc = "unknown",
-        target_system_name = "riscv64-unknown-elf",
+        target_system_name = "riscv32-unknown-elf",
         tool_paths = tool_paths,
-        toolchain_identifier = "riscv64-unknown-elf-gcc",
+        toolchain_identifier = "clang-riscv32im-none",
+        builtin_sysroot = sysroot,
     )
 
-gcc_toolchain_config = rule(
+clang_toolchain_config = rule(
     attrs = {
-        "root": attr.label(),
+        "sysroot": attr.label(),
     },
     provides = [CcToolchainConfigInfo],
     implementation = _impl,

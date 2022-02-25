@@ -11,7 +11,6 @@ risc0_cc_library(
     name = "device",
     srcs = [
         "cppstd.cpp",
-        "cstd.cpp",
         "env.cpp",
         "fail.cpp",
         "key.cpp",
@@ -19,8 +18,11 @@ risc0_cc_library(
         "memset.s",
         "prng.cpp",
         "sha.cpp",
+        "stdlib.cpp",
+        "string.cpp",
     ],
     hdrs = [
+        "align.h",
         "env.h",
         "fail.h",
         "key.h",
@@ -30,6 +32,7 @@ risc0_cc_library(
     ],
     deps = [
         ":crt0",
+        "//risc0/r0vm/cpp/stdlib",
         "//risc0/r0vm/platform",
     ],
 )

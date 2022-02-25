@@ -17,3 +17,11 @@ namespace risc0 {
 }
 
 } // namespace risc0
+
+extern "C" {
+
+void abort() {
+  risc0::fail("abort");
+}
+
+} // extern "C"

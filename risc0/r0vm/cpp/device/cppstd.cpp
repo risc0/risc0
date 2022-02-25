@@ -8,9 +8,17 @@ void* operator new[](std::size_t count) {
   return malloc(count);
 }
 
-void operator delete(void*, unsigned int) {}
+void operator delete(void*) {
+  // no-op
+}
 
-void operator delete[](void*, unsigned int) {}
+void operator delete(void*, unsigned int) {
+  // no-op
+}
+
+void operator delete[](void*, unsigned int) {
+  // no-op
+}
 
 namespace std {
 
