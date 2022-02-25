@@ -29,7 +29,7 @@ Using Brew:
  * Follow instructions here https://github.com/riscv-software-src/homebrew-riscv
  * You may need to `brew install gettext`
 
-Your `.bazelrc.local` file will contain a line _like_ this
+Your `.bazelrc.local` file should contain a line _like_ this
 (check your exact path):
 ```
 build --riscv_root=/usr/local/Cellar/riscv-gnu-toolchain/main
