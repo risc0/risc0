@@ -1,4 +1,5 @@
-<img src="docs/assets/images/risc0-logo.svg" height="200">
+<img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="200">
+
 # risc0
 
 Risc0 is a zero-knowledge verifiable general computing platform based on
