@@ -11,6 +11,12 @@ TOOLCHAINS = [
         host_os = "@platforms//os:osx",
         sha256 = "6cad684a275c32b4cd2a75643c0417447807245a60c2130422cc14e33eb7e8a8",
     ),
+    struct(
+        archive = "riscv32im-ubuntu18-amd64",
+        host_arch = "@platforms//cpu:x86_64",
+        host_os = "@platforms//os:linux",
+        sha256 = "bec46711fa6f5c7bd8e09610b0b4643136a6b47318a70fea0817e6fce02233f2",
+    ),
 ]
 
 def _repo_impl(rctx):

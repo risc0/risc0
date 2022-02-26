@@ -15,8 +15,11 @@ bazel version management seamless.
 
 In order to build Risc0 executables you'll need a RISC-V toolchain. Bazel will automatically fetch and manage the toolchain for the following platforms:
 
+* Linux - Ubuntu 18+ (x86_64)
 * macOS (x86_64)
 * macOS (arm64)
+
+Other platforms will be supported in the future.
 
 You should be able to build and run all tests with:
 
