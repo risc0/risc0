@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: [self-hosted, ${{ matrix.os }}]
+    runs-on: [self-hosted, "${{ matrix.os }}"]
     strategy:
       matrix:
         os: [Linux, macOS]
