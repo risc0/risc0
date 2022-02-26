@@ -33,6 +33,7 @@ cc_library(
 cc_test(
     name = "test",
     srcs = ["test.cpp"],
+    tags = ["exclusive"],
     deps = [
         ":protocol",
         "//risc0/core/test:gtest_main",
