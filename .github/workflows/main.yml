@@ -11,11 +11,10 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: [self-hosted, ${{ matrix.os }}]
     strategy:
       matrix:
         os: [Linux, macOS]
-        node: [10, 12, 14]
 
     steps:
       - uses: actions/checkout@v2
