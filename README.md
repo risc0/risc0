@@ -4,6 +4,7 @@
 
 Risc0 is a zero-knowledge verifiable general computing platform based on
 zk-STARKs and the RISC-V microarchitecture.
+
 ## Building Risc0
 
 We use [Bazel](https://bazel.build) for its strong multi-language multi-platform
@@ -12,34 +13,23 @@ features and performance.
 We recommend using [Bazelisk](https://github.com/bazelbuild/bazelisk) to make
 bazel version management seamless.
 
-In order to build Risc0 executables you'll need a RISC-V toolchain. See the
-platform specific instructions below.
+In order to build Risc0 executables you'll need a RISC-V toolchain. Bazel will automatically fetch and manage the toolchain for the following platforms:
 
-**Note**: to configure the location of the RISC-V toolchain on your system, add a
-`.bazelrc.local` file to the root of the project with this line:
+* Linux - Ubuntu 18+ (x86_64)
+* macOS (x86_64)
+* macOS (arm64)
+
+Other platforms will be supported in the future.
+
+You should be able to build and run all tests with:
+
 ```
-build --riscv_root=/<path>/<to>/<riscv>/<toolchain>
+bazelisk test //...
 ```
 
 ### macOS
 
-Rust development on macOS **requires a full install of Xcode**.
-
-Using Brew:
- * Follow instructions here https://github.com/riscv-software-src/homebrew-riscv
- * You may need to `brew install gettext`
-
-Your `.bazelrc.local` file should contain a line _like_ this
-(check your exact path):
-```
-build --riscv_root=/usr/local/Cellar/riscv-gnu-toolchain/main
-```
-
-Once the prerequisites are installed you should be able to build and run all of
-the tests:
-```
-bazelisk test ...
-```
+Rust development on macOS **requires a full installation of Xcode**.
 
 ## Running the 'Battleship' Examples
 
@@ -52,11 +42,13 @@ The best way to understand how the game works currently is to read the code
 and run the tests with debug logging enabled:
 
 ### C++
+
 ```
 RISC0_LOG=1 bazelisk run //examples/cpp/battleship:test
 ```
 
 ### Rust
+
 ```
 RISC0_LOG=1 bazelisk run //examples/rust/battleship:test
 ```

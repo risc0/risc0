@@ -8,9 +8,9 @@
 
 namespace risc0 {
 
-struct Env;
+class Env;
 struct Digest;
-struct SHA256;
+class SHA256;
 
 /// A pointer to a Digest.
 using DigestPtr = const Digest*;

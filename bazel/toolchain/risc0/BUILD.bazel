@@ -1,14 +1,14 @@
 load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
-load(":toolchain.bzl", "gcc_toolchain_config")
+load(":clang_toolchain.bzl", "clang_toolchain_config")
 
 string_flag(
     name = "root",
     build_setting_default = "/opt/riscv",
 )
 
-gcc_toolchain_config(
-    name = "gcc_toolchain_config_riscv",
-    root = ":root",
+clang_toolchain_config(
+    name = "clang-toolchain-config",
+    sysroot = ":root",
 )
 
 filegroup(name = "empty")
@@ -19,36 +19,24 @@ filegroup(
 )
 
 cc_toolchain(
-    name = "cc_toolchain_riscv",
+    name = "cc-clang-risc0",
     all_files = ":empty",
-    # ar_files (optional)
-    # as_files (optional)
-    # compiler (deprecated, optional)
     compiler_files = ":empty",
-    # compiler_files_without_includes (optional)
-    # coverage_files (optional)
-    # cpu (deprecated, optional)
     dwp_files = ":empty",
-    # dynamic_runtime_lib (optional)
-    # libc_top (optional)
     linker_files = ":linker_files",
-    # module_map (optional)
     objcopy_files = ":empty",
-    # static_runtime_lib (optional)
     strip_files = ":empty",
-    supports_header_parsing = False,
     supports_param_files = False,
-    toolchain_config = ":gcc_toolchain_config_riscv",
-    # toolchain_identifier (optional)
+    toolchain_config = ":clang-toolchain-config",
 )
 
 toolchain(
-    name = "risc0",
+    name = "cc-clang-toolchain",
     target_compatible_with = [
         "//bazel/platform/cpu:riscv32im",
         "//bazel/platform/os:risc0",
     ],
-    toolchain = ":cc_toolchain_riscv",
+    toolchain = ":cc-clang-risc0",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
     visibility = ["//visibility:public"],
 )

@@ -36,6 +36,7 @@ cc_test(
         "//risc0/r0vm/rust/device:test_mem",
         "//risc0/r0vm/rust/device:test_sha",
     ],
+    tags = ["exclusive"],
     deps = [
         "//risc0/core/test:gtest_main",
         "//risc0/zkp/prove",
