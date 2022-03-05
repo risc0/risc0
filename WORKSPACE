@@ -94,9 +94,10 @@ load("@rules_rust//crate_universe:defs.bzl", "crate_universe")
 crate_universe(
     name = "crates",
     cargo_toml_files = [
+        "//risc0/core:Cargo.toml",
+        "//risc0/r0vm/rust/host:Cargo.toml",
         "//examples/rust/battleship:Cargo.toml",
         "//examples/rust/battleship/proof:Cargo.toml",
-        "//risc0/r0vm/rust/host:Cargo.toml",
     ],
     resolver = "@rules_rust_crate_universe_bootstrap//:crate_universe_resolver",
     supported_targets = [

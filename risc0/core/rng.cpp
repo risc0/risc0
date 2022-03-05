@@ -1,9 +1,12 @@
 #include "risc0/core/rng.h"
 
-#include "risc0/core/log.h"
 #include <cstdio>
 #include <ctime>
 #include <stdexcept>
+
+#include "risc0/core/log.h"
+
+extern "C" uint32_t rust_rand_random();
 
 namespace risc0 {
 
@@ -17,12 +20,8 @@ PsuedoRng::PsuedoRng() {
   state_ = std::mt19937_64(seed);
 }
 
-CryptoRng::CryptoRng() = default;
-
-CryptoRng::~CryptoRng() = default;
-
 uint32_t CryptoRng::generate() {
-  return rng();
+  return rust_rand_random();
 }
 
 CryptoRng& CryptoRng::shared() {
