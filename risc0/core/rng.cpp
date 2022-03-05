@@ -6,7 +6,7 @@
 
 #include "risc0/core/log.h"
 
-extern "C" uint32_t rust_rand_random();
+extern "C" uint32_t rust_rand_u32();
 
 namespace risc0 {
 
@@ -21,7 +21,7 @@ PsuedoRng::PsuedoRng() {
 }
 
 uint32_t CryptoRng::generate() {
-  return rust_rand_random();
+  return rust_rand_u32();
 }
 
 CryptoRng& CryptoRng::shared() {
@@ -29,4 +29,4 @@ CryptoRng& CryptoRng::shared() {
   return r;
 }
 
-} // End namespace risc0
+} // namespace risc0

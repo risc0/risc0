@@ -10,8 +10,7 @@ def _copts(std):
 def _linkopts():
     return select({
         "@bazel_tools//platforms:windows": ["bcrypt.lib"],
-        "@bazel_tools//platforms:osx": [],
-        "//conditions:default": ["-pthread"],
+        "//conditions:default": [],
     })
 
 def cc_binary(name, std = "c++17", copts = [], linkopts = [], **kwargs):
