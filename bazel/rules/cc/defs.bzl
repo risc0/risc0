@@ -7,10 +7,18 @@ def _copts(std):
         "//conditions:default": ["-std=" + std],
     })
 
-def cc_binary(name, std = "c++17", copts = [], **kwargs):
+def _linkopts():
+    return select({
+        "@bazel_tools//platforms:windows": ["bcrypt.lib"],
+        "@bazel_tools//platforms:osx": [],
+        "//conditions:default": ["-pthread"],
+    })
+
+def cc_binary(name, std = "c++17", copts = [], linkopts = [], **kwargs):
     native.cc_binary(
         name = name,
         copts = copts + _copts(std),
+        linkopts = linkopts + _linkopts(),
         **kwargs
     )
 
@@ -21,9 +29,10 @@ def cc_library(name, std = "c++17", copts = [], **kwargs):
         **kwargs
     )
 
-def cc_test(name, std = "c++17", copts = [], **kwargs):
+def cc_test(name, std = "c++17", copts = [], linkopts = [], **kwargs):
     native.cc_test(
         name = name,
         copts = copts + _copts(std),
+        linkopts = linkopts + _linkopts(),
         **kwargs
     )
