@@ -26,11 +26,11 @@ private:
   std::mt19937_64 state_;
 };
 
-/// A cryptographic RNG using the system entropy pool.  On unix like systems (the only supported
-/// case right now), this is basically /dev/urandom.  TODO: windows support.
+/// A cryptographic RNG using the system entropy pool.
 class CryptoRng {
 private:
-  FILE* rng_ = nullptr;
+  std::random_device rng;
+
   CryptoRng();
   ~CryptoRng();
 

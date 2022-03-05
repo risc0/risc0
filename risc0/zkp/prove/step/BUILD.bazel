@@ -1,3 +1,4 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
 load("//risc0/zkp/circuit/make-circuit:defs.bzl", "make_circuit")
 
 package(default_visibility = ["//visibility:public"])
@@ -12,24 +13,17 @@ cc_library(
     srcs = [
         "exec.cpp",
         "io_handler.cpp",
-        "step_context.cpp",
-    ],
-    hdrs = ["exec.h"],
-    deps = [
-        ":compile_step",
-        "//risc0/zkp/core",
-    ],
-)
-
-cc_library(
-    name = "compile_step",
-    srcs = [
         "step.cpp",
+        "step_context.cpp",
         ":step_inc_gen",
     ],
-    hdrs = ["step.h"],
-    copts = ["-w"],
+    hdrs = [
+        "exec.h",
+        "step.h",
+    ],
+    linkstatic = True,
     deps = [
+        "//risc0/core",
         "//risc0/zkp/circuit:inc",
         "//risc0/zkp/core",
     ],

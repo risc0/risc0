@@ -100,6 +100,8 @@ crate_universe(
     ],
     resolver = "@rules_rust_crate_universe_bootstrap//:crate_universe_resolver",
     supported_targets = [
+        "i686-pc-windows-msvc",
+        "x86_64-pc-windows-msvc",
         "aarch64-apple-darwin",
         "x86_64-apple-darwin",
         "x86_64-unknown-linux-gnu",

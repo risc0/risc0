@@ -76,7 +76,7 @@ void MultiplyCycle::set(StepState& state) {
     risc0Log("  result = 0x%04x%04x", {resultInfo.result.high(), resultInfo.result.low()});        \
   }
 #define OPD(...) /**/
-#include "risc0/r0vm/rtl/riscv32im.def"
+#include "risc0/r0vm/rtl/riscv32im.inl"
 #undef OPC
 #undef OPM
 #undef OPD

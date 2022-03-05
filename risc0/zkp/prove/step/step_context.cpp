@@ -109,7 +109,7 @@ std::array<Fp, 5> StepContext::memCheck() {
   }
   MemoryEvent evt = *mem.history.begin();
   mem.history.erase(mem.history.begin());
-  return {evt.cycle, evt.addr, int(evt.isWrite), evt.data & 0xffff, evt.data >> 16};
+  return {evt.cycle, evt.addr, evt.isWrite, evt.data & 0xffff, evt.data >> 16};
 }
 
 std::array<Fp, 4> StepContext::divide(Fp numerLow, Fp numerHigh, Fp denomLow, Fp denomHigh) {

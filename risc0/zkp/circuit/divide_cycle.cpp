@@ -131,7 +131,7 @@ void DivideCycle::set(StepState& state) {
 #define OPM(...) /**/
 #define OPD(id, mnem, opc, f3, f7, immFmt, numerExpr, denomExpr, signType, resultRem)              \
   BYZ_IF(decode.opID1.is((id)&7)) { doDivide(numerExpr, denomExpr, signType, resultRem); }
-#include "risc0/r0vm/rtl/riscv32im.def"
+#include "risc0/r0vm/rtl/riscv32im.inl"
 #undef OPC
 #undef OPM
 #undef OPD

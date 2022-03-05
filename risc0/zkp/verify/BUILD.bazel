@@ -1,3 +1,5 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -15,6 +17,7 @@ cc_library(
         "read_iop.h",
         "verify.h",
     ],
+    linkstatic = True,
     deps = [
         "//risc0/zkp/accel",
         "//risc0/zkp/core",

@@ -17,30 +17,16 @@ PsuedoRng::PsuedoRng() {
   state_ = std::mt19937_64(seed);
 }
 
-CryptoRng::CryptoRng() {
-  rng_ = fopen("/dev/urandom", "rb");
-  if (rng_ == nullptr) {
-    throw std::runtime_error("Unable to open RNG device");
-  }
-}
+CryptoRng::CryptoRng() = default;
 
-CryptoRng::~CryptoRng() {
-  if (rng_ != nullptr) {
-    fclose(rng_);
-  }
-}
+CryptoRng::~CryptoRng() = default;
 
 uint32_t CryptoRng::generate() {
-  uint32_t val;
-  size_t r = fread(&val, sizeof(uint32_t), 1, rng_);
-  if (r != 1) {
-    throw std::runtime_error("Unable to read from RNG device");
-  }
-  return val;
+  return rng();
 }
 
 CryptoRng& CryptoRng::shared() {
-  static CryptoRng r = CryptoRng();
+  static CryptoRng r;
   return r;
 }
 

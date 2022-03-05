@@ -19,13 +19,13 @@ def _impl(ctx):
 
     ctx.actions.run(
         mnemonic = "doxygen",
-        executable = ctx.executable._tool,
+        executable = ctx.executable.tool,
         arguments = [doxyfile.path],
         inputs = depset(
             direct = [doxyfile] + ctx.files.srcs,
         ),
         outputs = outs,
-        tools = [ctx.executable._tool],
+        tools = [ctx.executable.tool],
     )
 
     return [DefaultInfo(files = depset(outs))]
@@ -36,8 +36,8 @@ doxygen = rule(
         "doxyfile": attr.label(allow_single_file = True),
         "srcs": attr.label_list(allow_files = True),
         "anchor": attr.label(mandatory = True),
-        "_tool": attr.label(
-            default = Label("@py3_env//:py3_env/bin/doxygen"),
+        "tool": attr.label(
+            mandatory = True,
             executable = True,
             allow_files = True,
             cfg = "host",
