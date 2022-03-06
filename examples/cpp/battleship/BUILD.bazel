@@ -1,7 +1,7 @@
-load("//bazel/rules/cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
-load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary", "risc0_cc_library")
+load("//bazel/rules/risc0:defs.bzl", "risc0_cc_proof")
+load("//bazel/rules/cc:defs.bzl", "cc_binary", "cc_gtest", "cc_library")
 
-risc0_cc_binary(
+risc0_cc_proof(
     name = "init_proof",
     srcs = ["init_proof.cpp"],
     deps = [
@@ -10,7 +10,7 @@ risc0_cc_binary(
     ],
 )
 
-risc0_cc_binary(
+risc0_cc_proof(
     name = "round_proof",
     srcs = ["round_proof.cpp"],
     deps = [
@@ -22,39 +22,41 @@ risc0_cc_binary(
 cc_binary(
     name = "battleship",
     srcs = ["battleship.cpp"],
-    deps = [":lib"],
-)
-
-risc0_cc_library(
-    name = "core",
-    srcs = ["core.cpp"],
-    hdrs = ["battleship.h"],
+    deps = [":protocol"],
 )
 
 cc_library(
-    name = "lib",
-    srcs = [
-        "core.cpp",
-        "protocol.cpp",
-    ],
-    hdrs = [
-        "battleship.h",
-        "protocol.h",
-    ],
-    data = [
-        ":init_proof",
-        ":round_proof",
-    ],
-    deps = ["//risc0/zkp/prove"],
+    name = "core",
+    srcs = ["core.cpp"],
+    hdrs = ["battleship.h"],
+    deps = select({
+        "//bazel/platform/os:risc0": [],
+        "//conditions:default": ["//risc0/zkp/prove"],
+    }),
 )
 
-cc_test(
+cc_library(
+    name = "protocol",
+    srcs = ["protocol.cpp"],
+    hdrs = ["protocol.h"],
+    data = [
+        ":init_proof",
+        ":init_proof.id",
+        ":round_proof",
+        ":round_proof.id",
+    ],
+    deps = [
+        ":core",
+        "//risc0/zkp/prove",
+    ],
+)
+
+cc_gtest(
     name = "test",
     srcs = ["test.cpp"],
     tags = ["exclusive"],
     deps = [
-        ":lib",
-        "//risc0/core/test:gtest_main",
+        ":protocol",
         "//risc0/zkp/prove",
     ],
 )

@@ -1,20 +1,21 @@
 #pragma once
 
-#include "risc0/zkp/core/devs.h"
+#include <cstddef>
+#include <cstdint>
 
 namespace risc0 {
 
 #define MEM_REGION(name, start, len)                                                               \
-  CONSTSCALAR size_t kMem##name##Start = start;                                                    \
-  CONSTSCALAR size_t kMem##name##End = start + len;                                                \
-  CONSTSCALAR size_t kMem##name##Len = len;
+  constexpr size_t kMem##name##Start = start;                                                      \
+  constexpr size_t kMem##name##End = start + len;                                                  \
+  constexpr size_t kMem##name##Len = len;
 
-CONSTSCALAR size_t kMemBits = 20;
-CONSTSCALAR size_t kMemSize = (1 << kMemBits) * 4;
+constexpr size_t kMemBits = 20;
+constexpr size_t kMemSize = (1 << kMemBits) * 4;
 
-CONSTSCALAR size_t k256KB = 0x00040000;
-CONSTSCALAR size_t k512KB = 0x00080000;
-CONSTSCALAR size_t k1MB = 0x00100000;
+constexpr size_t k256KB = 0x00040000;
+constexpr size_t k512KB = 0x00080000;
+constexpr size_t k1MB = 0x00100000;
 
 // Must match riscv.ld
 // clang-format off

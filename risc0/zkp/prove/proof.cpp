@@ -12,17 +12,8 @@ namespace risc0 {
 
 void Proof::verify(const std::string& filename) const {
   CodeID code;
-  // Currently we produce the .id on demand
-  // TODO: Move to the build proccess
-  try {
-    LOG(0, "Reading code id from " << filename + ".id");
-    code = readCodeID(filename + ".id");
-  } catch (const std::exception& e) {
-    LOG(0, "Reading elf " << filename);
-    code = makeCodeID(filename);
-    LOG(0, "Reading code id to " << filename + ".id");
-    writeCodeID(filename + ".id", code);
-  }
+  LOG(1, "Reading code id from " << filename + ".id");
+  code = readCodeID(filename + ".id");
   risc0::verify(code, core.data(), core.size());
   if (message.size() != core[8]) {
     std::stringstream ss;

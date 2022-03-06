@@ -1,4 +1,4 @@
-load("//bazel/rules/cc:defs.bzl", "cc_test")
+load("//bazel/rules/cc:defs.bzl", "cc_gtest")
 load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary")
 
 risc0_cc_binary(
@@ -25,7 +25,7 @@ risc0_cc_binary(
     deps = ["//risc0/r0vm/cpp/device"],
 )
 
-cc_test(
+cc_gtest(
     name = "test",
     srcs = ["test.cpp"],
     data = [
@@ -38,8 +38,5 @@ cc_test(
         "//risc0/r0vm/rust/device:test_sha",
     ],
     tags = ["exclusive"],
-    deps = [
-        "//risc0/core/test:gtest_main",
-        "//risc0/zkp/prove",
-    ],
+    deps = ["//risc0/zkp/prove"],
 )

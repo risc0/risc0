@@ -16,6 +16,8 @@
 # use Bazel internally. The Bazel build can have security risks or
 # optimization gaps.
 
+load("@risc0//bazel/rules/cc:defs.bzl", "cc_library")
+
 package(
     default_visibility = ["//visibility:public"],
 )
