@@ -1,5 +1,3 @@
-#include <unistd.h>
-
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -10,6 +8,12 @@
 #define IS_WINDOWS true
 #else
 #define IS_WINDOWS false
+#endif
+
+#if (IS_WINDOWS == true)
+#include <direct.h>
+#else
+#include <unistd.h>
 #endif
 
 std::string get_working_path() {

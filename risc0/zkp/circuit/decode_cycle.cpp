@@ -103,7 +103,7 @@ void DecodeCycle::set(StepState& state) {
     opID1.set(id & 7);                                                                             \
     opID2.set(id >> 3);                                                                            \
   }
-#include "risc0/r0vm/rtl/riscv32im.def"
+#include "risc0/r0vm/rtl/riscv32im.inl"
     // Special case for halt, basically to avoid OPH
     ANYOP(SHA_SYNC, 63, HALT, 0b11100, 0, 0, R, 0)
 #undef ANYOP
@@ -139,7 +139,7 @@ void DecodeCycle::set(StepState& state) {
               imm.high(),                                                                          \
               imm.low()});                                                                         \
   }
-#include "risc0/r0vm/rtl/riscv32im.def"
+#include "risc0/r0vm/rtl/riscv32im.inl"
   ANYOP(SHA_SYNC, 63, HALT, 0b11100, 0, 0, R, 0)
 #undef ANYOP
 

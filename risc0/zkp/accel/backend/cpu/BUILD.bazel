@@ -1,3 +1,5 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 config_setting(
@@ -8,6 +10,7 @@ config_setting(
 cc_library(
     name = "cpu",
     srcs = ["impl.cpp"],
+    linkstatic = True,
     target_compatible_with = select({
         ":select": [],
         "//conditions:default": ["@platforms//:incompatible"],

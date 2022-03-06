@@ -1,3 +1,4 @@
+load("//bazel/rules/cc:defs.bzl", "cc_test")
 load("//risc0/zkp/accel:build_defs.bzl", "ACCEL_DEPS")
 
 cc_test(

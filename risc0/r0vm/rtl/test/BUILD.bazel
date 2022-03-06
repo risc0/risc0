@@ -1,3 +1,4 @@
+load("//bazel/rules/cc:defs.bzl", "cc_binary")
 load(":defs.bzl", "riscv_test_suite")
 
 cc_binary(

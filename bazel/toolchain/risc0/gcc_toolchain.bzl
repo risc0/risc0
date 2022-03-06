@@ -9,7 +9,7 @@ def pkg_path_from_label(label):
     else:
         return label.package
 
-def gcc_toolchain_config(name, sysroot):
+def gcc_toolchain_config(name, sysroot, version):
     sysroot_path = pkg_path_from_label(Label(sysroot))
 
     tool_paths = {tool: "bin/riscv32-unknown-elf-{}".format(tool) for tool in [
@@ -28,9 +28,9 @@ def gcc_toolchain_config(name, sysroot):
         "-DRISCV=1",
         "-mabi=ilp32",
         "-march=rv32im",
-        "-nostdlib",
+        # A freestanding environment is one in which the standard library may not exist,
+        # and program startup may not necessarily be at main.
         "-ffreestanding",
-        "-fno-common",
         "-fno-exceptions",
         "-fno-non-call-exceptions",
         "-fno-rtti",
@@ -59,7 +59,8 @@ def gcc_toolchain_config(name, sysroot):
     cxx_flags = []
 
     link_flags = common_flags + [
-        "-Wl,--orphan-handling=warn",
+        # Do not use the standard system startup files or libraries when linking.
+        "-nostdlib",
         "-pass-exit-codes",
     ]
 
@@ -77,11 +78,11 @@ def gcc_toolchain_config(name, sysroot):
     ]
 
     cxx_builtin_include_directories = [
-        "%sysroot%/riscv32-unknown-elf/include/c++/11.1.0",
-        "%sysroot%/riscv32-unknown-elf/include/c++/11.1.0/riscv32-unknown-elf",
-        "%sysroot%/riscv32-unknown-elf/include/c++/11.1.0/backward",
-        "%sysroot%/lib/gcc/riscv32-unknown-elf/11.1.0/include",
-        "%sysroot%/lib/gcc/riscv32-unknown-elf/11.1.0/include-fixed",
+        "%sysroot%/riscv32-unknown-elf/include/c++/" + version,
+        "%sysroot%/riscv32-unknown-elf/include/c++/" + version + "/riscv32-unknown-elf",
+        "%sysroot%/riscv32-unknown-elf/include/c++/" + version + "/backward",
+        "%sysroot%/lib/gcc/riscv32-unknown-elf/" + version + "/include",
+        "%sysroot%/lib/gcc/riscv32-unknown-elf/" + version + "/include-fixed",
         "%sysroot%/riscv32-unknown-elf/include",
     ]
 

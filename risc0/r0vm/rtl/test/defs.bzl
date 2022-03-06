@@ -1,4 +1,3 @@
-load("@bazel_skylib//lib:paths.bzl", "paths")
 load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary")
 
 INST_TESTS = {
@@ -68,16 +67,17 @@ def riscv_test_suite():
                     aux,
                     "@riscv_tests//:isa/macros/scalar/test_macros.h",
                 ],
-                includes = [
-                    paths.join(src.workspace_root, src.package),
-                    paths.join(src.workspace_root, src.package, "isa/macros/scalar"),
-                    paths.join(native.package_name()),
+                copts = [
+                    "-Iexternal/riscv_tests",
+                    "-Iexternal/riscv_tests/isa/macros/scalar",
+                    "-Irisc0/r0vm/rtl/test",
                 ],
             )
 
-            native.sh_test(
+            native.py_test(
                 name = test + "_test",
-                srcs = ["run_test.sh"],
+                srcs = ["run_test.py"],
+                main = "run_test.py",
                 args = [test],
                 data = [
                     test,

@@ -1,1 +1,1 @@
-exports_files(["riscv32im.def"])
+exports_files(["riscv32im.inl"])

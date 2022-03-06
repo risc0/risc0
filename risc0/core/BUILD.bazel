@@ -1,3 +1,7 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
+load("@rules_rust//rust:defs.bzl", "rust_static_library")
+load("@crates//:defs.bzl", "crates_from")
+
 cc_library(
     name = "core",
     srcs = [
@@ -14,4 +18,11 @@ cc_library(
         "util.h",
     ],
     visibility = ["//visibility:public"],
+    deps = [":lib"],
+)
+
+rust_static_library(
+    name = "lib",
+    srcs = ["src/lib.rs"],
+    deps = crates_from(":Cargo.toml"),
 )

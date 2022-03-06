@@ -13,11 +13,13 @@ features and performance.
 We recommend using [Bazelisk](https://github.com/bazelbuild/bazelisk) to make
 bazel version management seamless.
 
-In order to build Risc0 executables you'll need a RISC-V toolchain. Bazel will automatically fetch and manage the toolchain for the following platforms:
+In order to build Risc0 executables you'll need a RISC-V toolchain.
+Bazel will automatically fetch and manage the toolchain for the following platforms:
 
 * Linux - Ubuntu 18+ (x86_64)
 * macOS (x86_64)
 * macOS (arm64)
+* Windows (x86_64)
 
 Other platforms will be supported in the future.
 
@@ -30,6 +32,12 @@ bazelisk test //...
 ### macOS
 
 Rust development on macOS **requires a full installation of Xcode**.
+
+### Windows
+
+Our usage of Bazel requires [symlink support to be enabled](https://bazel.build/docs/windows#symlink).
+This is possible on Windows by enabling [Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development),
+or by running Bazel as an administrator.
 
 ## Running the 'Battleship' Examples
 

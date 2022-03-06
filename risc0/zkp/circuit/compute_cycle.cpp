@@ -129,7 +129,7 @@ void ComputeCycle::set(StepState& state, int highID) {
   }
 #define OPM(...) /**/
 #define OPD(...) /**/
-#include "risc0/r0vm/rtl/riscv32im.def"
+#include "risc0/r0vm/rtl/riscv32im.inl"
 #undef MS
 #undef EQ
 #undef LT

@@ -11,7 +11,10 @@ filegroup(
 
 clang_format_toolchain(
     name = "clang_format_toolchain_impl",
-    clang_format = "@py3_env//:py3_env/bin/clang-format",
+    clang_format = select({
+        "@bazel_tools//platforms:windows": "@py3_env//:py3_env/Library/bin/clang-format.exe",
+        "//conditions:default": "@py3_env//:py3_env/bin/clang-format",
+    }),
 )
 
 toolchain(

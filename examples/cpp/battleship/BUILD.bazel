@@ -1,3 +1,4 @@
+load("//bazel/rules/cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary", "risc0_cc_library")
 
 risc0_cc_binary(

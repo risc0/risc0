@@ -1,3 +1,5 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
+
 package(default_visibility = ["//visibility:public"])
 
 cc_library(
@@ -38,7 +40,7 @@ cc_library(
         "sha_cycle.h",
         "step_state.h",
         "types.h",
-        "//risc0/r0vm/rtl:riscv32im.def",
+        "//risc0/r0vm/rtl:riscv32im.inl",
     ],
     deps = [
         "//risc0/r0vm/platform",

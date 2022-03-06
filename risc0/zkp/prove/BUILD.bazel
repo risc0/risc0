@@ -1,3 +1,4 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
 load("//risc0/zkp/accel:build_defs.bzl", "ACCEL_DEPS")
 
 package(default_visibility = ["//visibility:public"])
@@ -23,6 +24,7 @@ cc_library(
         "prove.h",
         "write_iop.h",
     ],
+    linkstatic = True,
     deps = [
         "//risc0/zkp/prove/step",
         "//risc0/zkp/verify",
