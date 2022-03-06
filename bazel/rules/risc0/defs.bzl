@@ -11,7 +11,8 @@ def _impl(ctx):
         outputs = [out],
         tools = [ctx.executable._tool],
     )
-    return [DefaultInfo(files = depset([out]))]
+    runfiles = ctx.runfiles(files = [out])
+    return [DefaultInfo(files = depset([out]), runfiles = runfiles)]
 
 risc0_codeid = rule(
     implementation = _impl,

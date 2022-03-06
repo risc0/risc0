@@ -1,6 +1,6 @@
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_proof")
 load("@risc0_crates//:defs.bzl", "crates_from")
 load("@rules_rust//rust:defs.bzl", "rust_library")
-load("//bazel/rules/rust:defs.bzl", "risc0_rust_binary")
 
 rust_library(
     name = "risc0",
@@ -17,7 +17,7 @@ rust_library(
     ],
 )
 
-risc0_rust_binary(
+risc0_rust_proof(
     name = "test_sha",
     srcs = ["tests/sha.rs"],
     visibility = ["//visibility:public"],
@@ -26,7 +26,7 @@ risc0_rust_binary(
     ],
 )
 
-risc0_rust_binary(
+risc0_rust_proof(
     name = "test_mem",
     srcs = ["tests/io.rs"],
     visibility = ["//visibility:public"],
@@ -35,7 +35,7 @@ risc0_rust_binary(
     ],
 )
 
-risc0_rust_binary(
+risc0_rust_proof(
     name = "test_fail",
     srcs = ["tests/fail.rs"],
     visibility = ["//visibility:public"],

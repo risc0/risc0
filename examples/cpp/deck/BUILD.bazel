@@ -26,7 +26,9 @@ cc_library(
     hdrs = ["protocol.h"],
     data = [
         ":card_proof",
+        ":card_proof.id",
         ":shuffle_proof",
+        ":shuffle_proof.id",
     ],
     deps = ["//risc0/zkp/prove"],
 )
