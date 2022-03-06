@@ -10,5 +10,4 @@ cc_library(
         "io.h",
         "memory.h",
     ],
-    deps = ["//risc0/zkp/core:devs"],
 )

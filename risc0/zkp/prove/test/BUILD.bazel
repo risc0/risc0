@@ -1,13 +1,10 @@
-load("//bazel/rules/cc:defs.bzl", "cc_test")
+load("//bazel/rules/cc:defs.bzl", "cc_gtest")
 
-cc_test(
+cc_gtest(
     name = "test",
     srcs = [
         "fri.cpp",
         "merkle.cpp",
     ],
-    deps = [
-        "//risc0/core/test:gtest_main",
-        "//risc0/zkp/prove",
-    ],
+    deps = ["//risc0/zkp/prove"],
 )

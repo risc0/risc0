@@ -12,10 +12,6 @@ rust_binary(
 rust_library(
     name = "lib",
     srcs = ["src/lib.rs"],
-    data = [
-        "//examples/rust/battleship/proof:init",
-        "//examples/rust/battleship/proof:turn",
-    ],
     deps = crates_from(":Cargo.toml") + [
         "//examples/rust/battleship/proof:battleship_proof",
         "//risc0/r0vm/rust/host:risc0-host",
@@ -27,6 +23,8 @@ rust_test(
     crate = ":lib",
     data = [
         "//examples/rust/battleship/proof:init",
+        "//examples/rust/battleship/proof:init.id",
         "//examples/rust/battleship/proof:turn",
+        "//examples/rust/battleship/proof:turn.id",
     ],
 )

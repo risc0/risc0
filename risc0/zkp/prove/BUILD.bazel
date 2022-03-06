@@ -1,5 +1,5 @@
 load("//bazel/rules/cc:defs.bzl", "cc_library")
-load("//risc0/zkp/accel:build_defs.bzl", "ACCEL_DEPS")
+load("//risc0/zkp/accel:defs.bzl", "ACCEL_DEPS")
 
 package(default_visibility = ["//visibility:public"])
 

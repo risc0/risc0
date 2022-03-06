@@ -1,6 +1,6 @@
-load("//bazel/rules/cc:defs.bzl", "cc_test")
+load("//bazel/rules/cc:defs.bzl", "cc_gtest")
 
-cc_test(
+cc_gtest(
     name = "test",
     srcs = [
         "fp.cpp",
@@ -8,8 +8,5 @@ cc_test(
         "ntt.cpp",
         "sha256.cpp",
     ],
-    deps = [
-        "//risc0/core/test:gtest_main",
-        "//risc0/zkp/core",
-    ],
+    deps = ["//risc0/zkp/core"],
 )

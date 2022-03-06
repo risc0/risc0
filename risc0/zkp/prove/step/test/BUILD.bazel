@@ -1,7 +1,7 @@
-load("//bazel/rules/cc:defs.bzl", "cc_test")
+load("//bazel/rules/cc:defs.bzl", "cc_gtest")
 load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary")
 
-cc_test(
+cc_gtest(
     name = "test",
     srcs = [
         "hw.cpp",
@@ -10,10 +10,7 @@ cc_test(
         ":test_wom_diff",
         ":test_wom_same",
     ],
-    deps = [
-        "//risc0/core/test:gtest_main",
-        "//risc0/zkp/prove/step",
-    ],
+    deps = ["//risc0/zkp/prove/step"],
 )
 
 risc0_cc_binary(

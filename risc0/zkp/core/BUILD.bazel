@@ -8,6 +8,7 @@ cc_library(
         "sha_rng.cpp",
     ],
     hdrs = [
+        "devs.h",
         "fp.h",
         "fp4.h",
         "ntt.h",
@@ -19,13 +20,6 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":devs",
         "//risc0/core",
     ],
-)
-
-cc_library(
-    name = "devs",
-    hdrs = ["devs.h"],
-    visibility = ["//visibility:public"],
 )

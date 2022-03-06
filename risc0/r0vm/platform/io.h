@@ -1,15 +1,13 @@
 #pragma once
 
-#include "risc0/zkp/core/devs.h"
-
 namespace risc0 {
 
-CONSTSCALAR size_t kGPIO_SHA = 0x001C0000;
-CONSTSCALAR size_t kGPIO_Read = 0x001C0004;
-CONSTSCALAR size_t kGPIO_Write = 0x001C0008;
-CONSTSCALAR size_t kGPIO_Fault = 0x001C000C;
-CONSTSCALAR size_t kGPIO_Log = 0x001C0010;
-CONSTSCALAR size_t kGPIO_GetKey = 0x001C0014;
+constexpr size_t kGPIO_SHA = 0x001C0000;
+constexpr size_t kGPIO_Read = 0x001C0004;
+constexpr size_t kGPIO_Write = 0x001C0008;
+constexpr size_t kGPIO_Fault = 0x001C000C;
+constexpr size_t kGPIO_Log = 0x001C0010;
+constexpr size_t kGPIO_GetKey = 0x001C0014;
 
 struct IoDescriptor {
   uint32_t size;

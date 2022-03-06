@@ -35,3 +35,12 @@ def cc_test(name, std = "c++17", copts = [], linkopts = [], **kwargs):
         linkopts = linkopts + _linkopts(),
         **kwargs
     )
+
+def cc_gtest(name, std = "c++17", copts = [], linkopts = [], deps = [], **kwargs):
+    native.cc_test(
+        name = name,
+        copts = copts + _copts(std),
+        linkopts = linkopts + _linkopts(),
+        deps = deps + ["//risc0/core/test:gtest_main"],
+        **kwargs
+    )

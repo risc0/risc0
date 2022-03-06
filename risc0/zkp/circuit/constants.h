@@ -1,6 +1,7 @@
 #pragma once
 
 #include "risc0/r0vm/platform/memory.h"
+#include "risc0/zkp/core/devs.h"
 
 namespace risc0 {
 
