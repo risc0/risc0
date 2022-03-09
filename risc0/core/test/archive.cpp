@@ -16,7 +16,6 @@ struct Primitives {
   uint32_t u32;
   int64_t i64;
   uint64_t u64;
-  size_t size;
 
   template <typename Archive> void transfer(Archive& ar) {
     ar.transfer(flag);
@@ -28,12 +27,11 @@ struct Primitives {
     ar.transfer(u32);
     ar.transfer(i64);
     ar.transfer(u64);
-    ar.transfer(size);
   }
 
   bool operator==(const Primitives& rhs) const {
     return flag == rhs.flag && i8 == rhs.i8 && u8 == rhs.u8 && i16 == rhs.i16 && u16 == rhs.u16 &&
-           i32 == rhs.i32 && u32 == rhs.u32 && i64 == rhs.i64 && u64 == rhs.u64 && size == rhs.size;
+           i32 == rhs.i32 && u32 == rhs.u32 && i64 == rhs.i64 && u64 == rhs.u64;
   }
 };
 
@@ -64,7 +62,7 @@ template <typename T> T roundtrip(T pre) {
 }
 
 TEST(Archive, Roundtrip) {
-  Primitives x = roundtrip(Primitives{true, -4, 4, -5, 5, -6, 6, -7, 7, 10});
+  Primitives x = roundtrip(Primitives{true, -4, 4, -5, 5, -6, 6, -7, 7});
   LOG(0,
       "flag: " << x.flag                 //
                << ", i8: " << int(x.i8)  //
@@ -74,8 +72,7 @@ TEST(Archive, Roundtrip) {
                << ", i32: " << x.i32     //
                << ", u32: " << x.u32     //
                << ", i64: " << x.i64     //
-               << ", u64: " << x.u64     //
-               << ", size: " << x.size);
+               << ", u64: " << x.u64);
   roundtrip(StringPair{"a", "a"});
   roundtrip(StringPair{"abcde", "a"});
 }
