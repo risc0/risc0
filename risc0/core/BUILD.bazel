@@ -10,6 +10,7 @@ cc_library(
         "rng.cpp",
     ],
     hdrs = [
+        "archive.h",
         "elf.h",
         "key.h",
         "log.h",
