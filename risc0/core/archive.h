@@ -2,6 +2,8 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -54,8 +56,6 @@ public:
   void transfer(int64_t value) { stream.write_dword(value); }
   void transfer(uint64_t value) { stream.write_dword(value); }
 
-  void transfer(size_t value) { stream.write_word(value); }
-
   void transfer(const void* buf, size_t len) { stream.write_buffer(buf, len); }
 
 private:
@@ -81,8 +81,6 @@ public:
 
   void transfer(int64_t& value) { value = stream.read_dword(); }
   void transfer(uint64_t& value) { value = stream.read_dword(); }
-
-  void transfer(size_t& value) { value = stream.read_word(); }
 
   void transfer(void* buf, size_t len) { stream.read_buffer(buf, len); }
 

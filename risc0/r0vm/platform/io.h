@@ -9,6 +9,8 @@ constexpr size_t kGPIO_Fault = 0x001C000C;
 constexpr size_t kGPIO_Log = 0x001C0010;
 constexpr size_t kGPIO_GetKey = 0x001C0014;
 
+struct ShaDescriptor;
+
 struct IoDescriptor {
   uint32_t size;
   uint32_t addr;
@@ -24,19 +26,28 @@ struct GetKeyDescriptor {
   uint32_t mode;
 };
 
-static volatile IoDescriptor* volatile* GPIO_Read =
-    reinterpret_cast<volatile IoDescriptor* volatile*>(kGPIO_Read);
+inline volatile ShaDescriptor* volatile* GPIO_SHA() {
+  return reinterpret_cast<volatile ShaDescriptor* volatile*>(kGPIO_SHA);
+}
 
-static volatile IoDescriptor* volatile* GPIO_Write =
-    reinterpret_cast<volatile IoDescriptor* volatile*>(kGPIO_Write);
+inline volatile IoDescriptor* volatile* GPIO_Read() {
+  return reinterpret_cast<volatile IoDescriptor* volatile*>(kGPIO_Read);
+}
 
-static volatile FaultDescriptor* volatile* GPIO_Fault =
-    reinterpret_cast<volatile FaultDescriptor* volatile*>(kGPIO_Fault);
+inline volatile IoDescriptor* volatile* GPIO_Write() {
+  return reinterpret_cast<volatile IoDescriptor* volatile*>(kGPIO_Write);
+}
 
-static volatile IoDescriptor* volatile* GPIO_Log =
-    reinterpret_cast<volatile IoDescriptor* volatile*>(kGPIO_Log);
+inline volatile FaultDescriptor* volatile* GPIO_Fault() {
+  return reinterpret_cast<volatile FaultDescriptor* volatile*>(kGPIO_Fault);
+}
 
-static volatile GetKeyDescriptor* volatile* GPIO_GetKey =
-    reinterpret_cast<volatile GetKeyDescriptor* volatile*>(kGPIO_GetKey);
+inline volatile IoDescriptor* volatile* GPIO_Log() {
+  return reinterpret_cast<volatile IoDescriptor* volatile*>(kGPIO_Log);
+}
+
+inline volatile GetKeyDescriptor* volatile* GPIO_GetKey() {
+  return reinterpret_cast<volatile GetKeyDescriptor* volatile*>(kGPIO_GetKey);
+}
 
 } // namespace risc0

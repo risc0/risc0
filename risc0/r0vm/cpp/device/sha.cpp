@@ -23,8 +23,7 @@ static DigestPtr compress(const void* data, size_t total) {
   curDescriptor->source = reinterpret_cast<uint32_t>(data);
   curDescriptor->digest = reinterpret_cast<uint32_t>(digest);
   // Write the descriptor to the oracle for processing
-  volatile ShaDescriptor* volatile* ptr = PTR_TO(volatile ShaDescriptor*, GPIO);
-  *ptr = curDescriptor;
+  *GPIO_SHA() = curDescriptor;
   // Jump to the next descriptor;
   curDescriptor++;
   // Return the result

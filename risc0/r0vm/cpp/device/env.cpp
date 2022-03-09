@@ -38,13 +38,13 @@ Env::~Env() {
 void* Env::read(size_t size) {
   void* buf = malloc(size);
   volatile IoDescriptor io{size, reinterpret_cast<uint32_t>(buf)};
-  *GPIO_Read = &io;
+  *GPIO_Read() = &io;
   return buf;
 }
 
 void Env::write(const void* data, size_t size) {
   volatile IoDescriptor io{size, reinterpret_cast<uint32_t>(data)};
-  *GPIO_Write = &io;
+  *GPIO_Write() = &io;
 }
 
 void Env::commit(const void* data, size_t size) {
@@ -59,7 +59,7 @@ KeyPtr Env::getKey(const char* name, KeyMode mode) {
   volatile GetKeyDescriptor getKey{reinterpret_cast<uint32_t>(name),
                                    reinterpret_cast<uint32_t>(ret),
                                    static_cast<uint32_t>(mode)};
-  *GPIO_GetKey = &getKey;
+  *GPIO_GetKey() = &getKey;
   return ret;
 }
 
