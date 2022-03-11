@@ -64,14 +64,14 @@ template <typename T> T roundtrip(T pre) {
 TEST(Archive, Roundtrip) {
   Primitives x = roundtrip(Primitives{true, -4, 4, -5, 5, -6, 6, -7, 7});
   LOG(0,
-      "flag: " << x.flag                 //
-               << ", i8: " << int(x.i8)  //
-               << ", u8: " << uint(x.u8) //
-               << ", i16: " << x.i16     //
-               << ", u16: " << x.u16     //
-               << ", i32: " << x.i32     //
-               << ", u32: " << x.u32     //
-               << ", i64: " << x.i64     //
+      "flag: " << x.flag                     //
+               << ", i8: " << int32_t(x.i8)  //
+               << ", u8: " << uint32_t(x.u8) //
+               << ", i16: " << x.i16         //
+               << ", u16: " << x.u16         //
+               << ", i32: " << x.i32         //
+               << ", u32: " << x.u32         //
+               << ", i64: " << x.i64         //
                << ", u64: " << x.u64);
   roundtrip(StringPair{"a", "a"});
   roundtrip(StringPair{"abcde", "a"});
