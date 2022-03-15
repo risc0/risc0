@@ -3,14 +3,16 @@ TOOLCHAINS = [
         archive = "riscv32im-darwin-arm64",
         host_arch = "@platforms//cpu:arm64",
         host_os = "@platforms//os:osx",
-        sha256 = "203255aa7466a2f049169e9de4b3a155c03a0f4549e8c30593d86c7d6b93ed9b",
-        gcc_version = "11.1.0",
+        sha256 = "d115cb7ae5cbe34d4d8f5eeab39d3e637196aea3610b8de0265bda8568196b02",
+        version = "2022.03.15",
+        gcc_version = "11.2.0",
     ),
     struct(
         archive = "riscv32im-darwin-x86_64",
         host_arch = "@platforms//cpu:x86_64",
         host_os = "@platforms//os:osx",
         sha256 = "6cad684a275c32b4cd2a75643c0417447807245a60c2130422cc14e33eb7e8a8",
+        version = "2022.02.25",
         gcc_version = "11.1.0",
     ),
     struct(
@@ -18,6 +20,7 @@ TOOLCHAINS = [
         host_arch = "@platforms//cpu:x86_64",
         host_os = "@platforms//os:linux",
         sha256 = "bec46711fa6f5c7bd8e09610b0b4643136a6b47318a70fea0817e6fce02233f2",
+        version = "2022.02.25",
         gcc_version = "11.1.0",
     ),
     struct(
@@ -25,6 +28,7 @@ TOOLCHAINS = [
         host_arch = "@platforms//cpu:x86_64",
         host_os = "@platforms//os:windows",
         sha256 = "edba1410f44a2685caf26dea53c562f4a6e3e16d8f650146b6aea8236043c3e6",
+        version = "2022.02.25",
         gcc_version = "11.2.0",
     ),
 ]
@@ -87,13 +91,13 @@ risc0_toolchain_proxy = repository_rule(
     implementation = _proxy_impl,
 )
 
-def risc0_toolchain(name, version):
+def risc0_toolchain(name):
     toolchain_names = []
     for toolchain in TOOLCHAINS:
         repo_name = "{name}_{suffix}".format(name = name, suffix = toolchain.archive)
         risc0_toolchain_repo(
             name = repo_name,
-            version = version,
+            version = toolchain.version,
             archive = toolchain.archive,
             sha256 = toolchain.sha256,
             gcc_version = toolchain.gcc_version,

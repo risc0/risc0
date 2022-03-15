@@ -21,10 +21,7 @@ bazel_skylib_workspace()
 
 load("//bazel/toolchain/risc0:repo.bzl", "risc0_toolchain")
 
-risc0_toolchain(
-    name = "risc0_toolchain",
-    version = "2022.02.25",
-)
+risc0_toolchain(name = "risc0_toolchain")
 
 http_archive(
     name = "com_google_googletest",
