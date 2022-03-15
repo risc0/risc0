@@ -1,3 +1,17 @@
+// Copyright 2022 Risc0, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #define X -1
 // Predefined values:
 //   R1: The value read from rs1 by instruction decoder
@@ -32,6 +46,7 @@
 //   doStore,   // 1 if we should write the result to memory at X1 // 4
 //   pc)        // New value of PC
 
+// clang-format off
 OPC(  0, ADD,   0b01100, 0,  0, R, R1,    0, R2, X1 + X2,    X3,  1, 0, PC + 4)
 OPC(  1, SUB,   0b01100, 0, 32, R, R1,    0, R2, X1 - X2,    X3,  1, 0, PC + 4)
 OPC(  2, XOR,   0b01100, 4,  0, R, R1,    0, R2, X1 ^ X2,    X3,  1, 0, PC + 4)
@@ -63,6 +78,7 @@ OPC( 28, JAL,   0b11011, X,  X, J, R1,    0, R2, PC + 4,     X3,  1, 0, PC + IM)
 OPC( 29, JALR,  0b11001, 0,  X, I, R1,    0, R2, PC + 4,     X3,  1, 0, R1 + IM)
 OPC( 30, LUI,   0b01101, X,  X, U, R1,    0, R2, IM,         X3,  1, 0, PC + 4)
 OPC( 31, AUIPC, 0b00101, X,  X, U, R1,    0, R2, PC + IM,    X3,  1, 0, PC + 4)
+// clang-format on
 
 // OPM(  // Define a multiply op
 //   id,        // unique numeric value
@@ -77,12 +93,14 @@ OPC( 31, AUIPC, 0b00101, X,  X, U, R1,    0, R2, PC + IM,    X3,  1, 0, PC + 4)
 //   i1Signed,  // Is i1 signed
 //   high)      // Set result to high part (otherwise low)
 //   We start at a multiple of 8 to allow skipping the check on upper ID
+// clang-format off
 OPM( 32, MUL,   0b01100, 0,  1, R, R1, R2, 0, 0, 0)
 OPM( 33, MULH,  0b01100, 1,  1, R, R1, R2, 1, 1, 1)
 OPM( 34, MULSU, 0b01100, 2,  1, R, R1, R2, 1, 0, 1)
 OPM( 35, MULU,  0b01100, 3,  1, R, R1, R2, 0, 0, 1)
 OPM( 36, SLL,   0b01100, 1,  0, R, R1, V2, 0, 0, 0)
 OPM( 37, SLLI,  0b00100, 1,  0, I, R1, V2, 0, 0, 0)
+// clang-format on
 
 // OPD(  // Define a divide op
 //   id,        // unique numeric value
@@ -96,6 +114,7 @@ OPM( 37, SLLI,  0b00100, 1,  0, I, R1, V2, 0, 0, 0)
 //   signType,  // Sign type: 0 = unsigned, 1 = signed, 2 = SRA
 //   rem)       // Return the remainder (instead of the qoutient)
 //   We start at a multiple of 8 to allow skipping the check on upper ID
+// clang-format off
 OPD( 42, DIV,   0b01100, 4,  1, R, R1, R2, 1, 0)
 OPD( 43, DIVU,  0b01100, 5,  1, R, R1, R2, 0, 0)
 OPD( 44, REM,   0b01100, 6,  1, R, R1, R2, 1, 1)
@@ -104,5 +123,6 @@ OPD( 46, SRL,   0b01100, 5,  0, R, R1, V2, 0, 0)
 OPD( 47, SRA,   0b01100, 5, 32, R, R1, V2, 2, 0)
 OPD( 48, SRLI,  0b00100, 5,  0, I, R1, V2, 0, 0)
 OPD( 49, SRAI,  0b00100, 5, 32, I, R1, V2, 2, 0)
+// clang-format on
 
 #undef X
