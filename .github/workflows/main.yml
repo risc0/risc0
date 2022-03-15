@@ -19,7 +19,7 @@ jobs:
           - macos-11
           - ubuntu-18.04
           - ubuntu-20.04
-          - windows-2022
+          - windows-2019
 
     steps:
       - uses: actions/checkout@v2
@@ -29,6 +29,8 @@ jobs:
           path: |
             ~/.cache/bazel
             ~/.cache/bazelisk
+            ~/_bazel_*
+            /private/var/tmp/_bazel_*
           key: ${{ matrix.os }}
 
       - name: Build & test
