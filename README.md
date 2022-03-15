@@ -1,11 +1,11 @@
 <img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100">
 
-# Risc0
+# RISC Zero
 
 Risc0 is a zero-knowledge verifiable general computing platform based on
 zk-STARKs and the RISC-V microarchitecture.
 
-## Building Risc0
+## Building RISC Zero
 
 We use [Bazel](https://bazel.build) for its strong multi-language multi-platform
 features and performance.
