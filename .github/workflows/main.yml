@@ -29,7 +29,7 @@ jobs:
           path: |
             ~/.cache/bazel
             ~/.cache/bazelisk
-          key: ${{ runner.os }}-build
+          key: ${{ matrix.os }}
 
       - name: Build & test
         run: bazelisk test //... --config=ci --config=cpu
