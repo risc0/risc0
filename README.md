@@ -31,7 +31,7 @@ bazelisk test //...
 
 ### macOS
 
-Rust development on macOS **requires a full installation of Xcode**.
+Risc0 development on macOS **requires a full installation of Xcode (not just command line tools)**.
 
 ### Windows
 
