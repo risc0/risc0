@@ -1,3 +1,17 @@
+// Copyright 2022 Risc0, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #![no_std]
 #![feature(alloc_error_handler)]
 #![feature(new_uninit)]
@@ -31,11 +45,7 @@ extern "C" {
 
 #[panic_handler]
 unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
-    use _alloc::string::String;
-    use core::fmt::Write;
-
-    let mut msg = String::new();
-    write!(&mut msg, "{}", panic_info).unwrap_unchecked();
+    let msg = _alloc::format!("{}\0", panic_info);
 
     GPIO_DESC_FAULT.write_volatile(FaultDescriptor {
         addr: msg.as_ptr() as usize,
