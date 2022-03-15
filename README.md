@@ -60,3 +60,4 @@ RISC0_LOG=1 bazelisk run //examples/cpp/battleship:test
 ```
 RISC0_LOG=1 bazelisk run //examples/rust/battleship:test
 ```
+
