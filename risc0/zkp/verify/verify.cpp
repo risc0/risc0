@@ -20,6 +20,7 @@
 #include "risc0/zkp/verify/fri.h"
 #include "risc0/zkp/verify/merkle.h"
 #include "risc0/zkp/verify/read_iop.h"
+#include "risc0/zkp/verify/riscv_taps.h"
 
 namespace risc0 {
 
@@ -67,6 +68,7 @@ struct MixState {
 
 // NOLINTNEXTLINE(readability-function-size)
 void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
+  TapSetRef tapSet = getRiscVTaps();
   // Construct the IOP object
   ReadIOP iop(proofData, proofSize);
 
@@ -125,6 +127,11 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
 #define tap(base, offset, back) size_t tap_##base##_##offset##_##back = numTaps++;
 #define TAPS
 #include "risc0/zkp/prove/step/step.cpp.inc"
+  if (numTaps != tapSet.tapsSize()) {
+    LOG(0, "numTaps = " << numTaps);
+    LOG(0, "tapSet.tapsSize() = " << tapSet.tapsSize());
+    throw std::runtime_error("Bad number of taps");
+  }
   std::vector<Fp4> coeffU(numTaps + 16);
   iop.read(coeffU.data(), coeffU.size());
   auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4);
@@ -137,20 +144,15 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
 
   // Now, convert to evaluated values
   size_t curPos = 0;
-  std::vector<Fp4> evalU(numTaps);
-#define offset_begin(base, off)                                                                    \
-  {                                                                                                \
-    size_t start = curPos;                                                                         \
-    std::vector<Fp4> taps;
-#define tap(base, offset, back)                                                                    \
-  taps.push_back(pow(backOne, back) * Z);                                                          \
-  curPos++;
-#define offset_end(base, offset, combo)                                                            \
-  for (size_t i = 0; i < taps.size(); i++) {                                                       \
-    evalU[start + i] = polyEval(coeffU.data() + start, taps.size(), taps[i]);                      \
-  }                                                                                                \
+  std::vector<Fp4> evalU;
+  for (auto reg : tapSet.regs()) {
+    for (size_t i = 0; i < reg.size(); i++) {
+      auto x = pow(backOne, reg[i]) * Z;
+      auto fx = polyEval(coeffU.data() + curPos, reg.size(), x);
+      evalU.push_back(fx);
+    }
+    curPos += reg.size();
   }
-#include "risc0/zkp/prove/step/step.cpp.inc"
 
   Fp4 polyMix = {globals[kPolyMixGlobalOffset],
                  globals[kPolyMixGlobalOffset + 1],

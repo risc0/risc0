@@ -8,6 +8,8 @@ cc_library(
         "code_id.cpp",
         "fri.cpp",
         "merkle.cpp",
+        "riscv_taps.cpp",
+        "taps.cpp",
         "verify.cpp",
     ],
     hdrs = [
@@ -15,6 +17,8 @@ cc_library(
         "fri.h",
         "merkle.h",
         "read_iop.h",
+        "riscv_taps.h",
+        "taps.h",
         "verify.h",
     ],
     linkstatic = True,
