@@ -8,7 +8,7 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or detailied.
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
@@ -39,7 +39,7 @@ static constexpr size_t kNumRegisterGroups = 3;
 
 namespace detail {
 
-// This class is detailementation detail and carefully built to be efficient on
+// This class is an implementation detail and carefully built to be efficient on
 // RISC-V for use in recursion.
 struct TapData {
   uint16_t offset;     // The offset in register group (reg #)
@@ -64,7 +64,7 @@ struct TapData {
 
 } // namespace detail
 
-// Ref object to hide detailementation details
+// Ref object to hide implementation details
 class TapRef {
 public:
   TapRef(const detail::TapData* data) : data_(data) {}

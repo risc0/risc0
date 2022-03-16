@@ -8,7 +8,7 @@
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or detailied.
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
@@ -32,8 +32,8 @@ TapSetRef TapSet::getRef() {
 }
 
 void TapSet::finalize() {
-  std::vector<reg_t> combos;
-  std::map<reg_t, size_t> combosToID;
+  std::vector<Reg> combos;
+  std::map<Reg, size_t> combosToID;
   // Pre-insert the 'only self' combo
   std::set<size_t> self = {0};
   combos.push_back(self);
@@ -46,14 +46,14 @@ void TapSet::finalize() {
     // Set the group offset
     data_.groupBegin[groupID] = taps_.size();
     // Look at this group
-    group_t& regs = all_[group];
+    Group& regs = all_[group];
     // Get the count of registers (max + 1)
     size_t regCount = regs.rbegin()->first + 1;
     for (size_t reg = 0; reg < regCount; reg++) {
       // Make sure all registers have at least one tap
       REQUIRE(regs.count(reg));
       // Get the taps for the register
-      reg_t combo = regs[reg];
+      Reg combo = regs[reg];
       REQUIRE(combo.size() > 0);
       // If this is a new combo, add it
       if (!combosToID.count(combo)) {
