@@ -71,7 +71,7 @@ public:
   RegisterGroup group() const { return data_->group; }
   size_t offset() const { return data_->offset; }
   size_t back() const { return data_->back; }
-  size_t combo() const { return data_->combo; }
+  size_t comboID() const { return data_->combo; }
 
 private:
   const impl::TapData* data_;
@@ -98,7 +98,7 @@ public:
   // Get tap elements which are fixed for a given register
   RegisterGroup group() const { return data_->group; }
   size_t offset() const { return data_->offset; }
-  size_t combo() const { return data_->combo; }
+  size_t comboID() const { return data_->combo; }
   // Number of taps in the register
   uint32_t size() const { return data_->skip; }
   // Allow registers to be used in range for to get taps

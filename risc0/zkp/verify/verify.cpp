@@ -127,11 +127,6 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
 #define tap(base, offset, back) size_t tap_##base##_##offset##_##back = numTaps++;
 #define TAPS
 #include "risc0/zkp/prove/step/step.cpp.inc"
-  if (numTaps != tapSet.tapsSize()) {
-    LOG(0, "numTaps = " << numTaps);
-    LOG(0, "tapSet.tapsSize() = " << tapSet.tapsSize());
-    throw std::runtime_error("Bad number of taps");
-  }
   std::vector<Fp4> coeffU(numTaps + 16);
   iop.read(coeffU.data(), coeffU.size());
   auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4);
@@ -204,27 +199,19 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
   LOG(1, "mix = " << mix);
 
   // Make the mixed U polynomials
-  std::vector<std::vector<Fp4>> comboU;
-#define combo_begin(i) comboU.emplace_back();
-#define tap(i) comboU.back().emplace_back();
-#undef CHECK_EVAL
-#define COMBOS
-#include "risc0/zkp/prove/step/step.cpp.inc"
-  curPos = 0;
-  Fp4 curMix(1);
-#define offset_begin(base, off)                                                                    \
-  {                                                                                                \
-    size_t start = curPos;
-#define tap(base, offset, back) curPos++;
-#define offset_end(base, offset, combo)                                                            \
-  for (size_t i = 0; i < curPos - start; i++) {                                                    \
-    comboU[combo][i] += curMix * coeffU[start + i];                                                \
-  }                                                                                                \
-  curMix *= mix;                                                                                   \
+  std::vector<std::vector<Fp4>> comboU(tapSet.combosSize());
+  for (size_t i = 0; i < tapSet.combosSize(); i++) {
+    comboU[i].resize(tapSet.getCombo(i).size());
   }
-#undef COMBOS
-#define TAPS
-#include "risc0/zkp/prove/step/step.cpp.inc"
+  Fp4 curMix(1);
+  curPos = 0;
+  for (auto reg : tapSet.regs()) {
+    for (size_t i = 0; i < reg.size(); i++) {
+      comboU[reg.comboID()][i] += curMix * coeffU[curPos + i];
+    }
+    curMix *= mix;
+    curPos += reg.size();
+  }
   // Handle check group
   comboU.emplace_back();
   comboU.back().emplace_back();
@@ -237,32 +224,30 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
   LOG(1, "FRI-verify, size = " << size);
   friVerify(iop, size, [&](ReadIOP& iop, size_t idx) {
     auto x = pow(kRouFwd[log2Ceil(domain)], idx);
-    auto codeRow = codeMerkle.verify(iop, idx);
-    auto dataRow = dataMerkle.verify(iop, idx);
-    auto accumRow = accumMerkle.verify(iop, idx);
+    std::vector<std::vector<Fp>> rows(kNumRegisterGroups);
+    rows[static_cast<int>(RegisterGroup::CODE)] = codeMerkle.verify(iop, idx);
+    rows[static_cast<int>(RegisterGroup::DATA)] = dataMerkle.verify(iop, idx);
+    rows[static_cast<int>(RegisterGroup::ACCUM)] = accumMerkle.verify(iop, idx);
     auto checkRow = checkMerkle.verify(iop, idx);
     Fp4 cur = Fp4(1);
     Fp4 tot[kComboCount + 1];
-#define offset_end(base, offset, combo)                                                            \
-  tot[combo] += cur * base##Row[offset];                                                           \
-  cur *= mix;
-#include "risc0/zkp/prove/step/step.cpp.inc"
+    for (auto reg : tapSet.regs()) {
+      tot[reg.comboID()] += cur * rows[static_cast<int>(reg.group())][reg.offset()];
+      cur *= mix;
+    }
     for (size_t i = 0; i < kCheckSize; i++) {
       tot[kComboCount] += cur * checkRow[i];
       cur *= mix;
     }
     Fp4 ret;
-#define combo_begin(id)                                                                            \
-  {                                                                                                \
-    Fp4 num = tot[id] - polyEval(comboU[id].data(), comboU[id].size(), Fp4(x));                    \
-    Fp4 divisor(1);
-#define tap(back) divisor *= (Fp4(x) - Z * pow(backOne, back));
-#define combo_end(id)                                                                              \
-  ret += num * inv(divisor);                                                                       \
-  }
-#undef TAPS
-#define COMBOS
-#include "risc0/zkp/prove/step/step.cpp.inc"
+    for (size_t id = 0; id < tapSet.combosSize(); id++) {
+      Fp4 num = tot[id] - polyEval(comboU[id].data(), comboU[id].size(), Fp4(x));
+      Fp4 divisor(1);
+      for (auto back : tapSet.getCombo(id)) {
+        divisor *= (Fp4(x) - Z * pow(backOne, back));
+      }
+      ret += num * inv(divisor);
+    }
     Fp4 checkNum = tot[kComboCount] - comboU[kComboCount][0];
     Fp4 checkDivisor = (Fp4(x) - pow(Z, 4));
     ret += checkNum * inv(checkDivisor);

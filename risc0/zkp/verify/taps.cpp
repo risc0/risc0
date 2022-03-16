@@ -87,6 +87,7 @@ void TapSet::finalize() {
       comboTaps_.push_back(tap);
     }
   }
+  comboBegin_.push_back(comboTaps_.size());
   REQUIRE(comboTaps_.size() < 65536);
   data_.combos.taps = comboTaps_.data();
   data_.combos.offsets = comboBegin_.data();
