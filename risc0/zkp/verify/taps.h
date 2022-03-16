@@ -134,7 +134,7 @@ namespace detail {
 
 // Combo data holds the tap set for each 'combo'.  Basically, combo N consists
 // of taps in the range [offsets[n], offsets[n+1]).  Again this is an
-// detailementation detail, and the format is designed to put the actual arrays
+// implementation detail, and the format is designed to put the actual arrays
 // into static data.
 struct ComboData {
   uint16_t* taps;
