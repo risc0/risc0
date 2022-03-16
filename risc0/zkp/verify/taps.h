@@ -86,6 +86,8 @@ public:
     ++data_;
     return *this;
   }
+  bool operator==(const TapIterator& rhs) const { return data_ == rhs.data_; }
+  bool operator!=(const TapIterator& rhs) const { return data_ != rhs.data_; }
 
 private:
   const impl::TapData* data_;
@@ -214,6 +216,11 @@ public:
     size_t groupID = static_cast<size_t>(group);
     return IteratorRange<RegIterator>(data_->taps + data_->groupBegin[groupID],
                                       data_->taps + data_->groupBegin[groupID + 1]);
+  }
+  size_t groupSize(RegisterGroup group) {
+    size_t groupID = static_cast<size_t>(group);
+    size_t last = (data_->taps + data_->groupBegin[groupID + 1] - 1)->offset;
+    return last + 1;
   }
   size_t combosSize() const { return data_->combos.count; }
   IteratorRange<ComboIterator> combos() {
