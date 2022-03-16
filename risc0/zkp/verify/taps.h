@@ -247,7 +247,7 @@ private:
   bool finalized_;
   using Reg = std::set<size_t>;
   using Group = std::map<size_t, Reg>;
-  using All = std::map<RegisterGroup, group_t>;
+  using All = std::map<RegisterGroup, Group>;
   All all_;
 
   // Stuff that exists post finalization
