@@ -22,6 +22,7 @@
 #include "risc0/zkp/prove/poly_group.h"
 #include "risc0/zkp/prove/step/exec.h"
 #include "risc0/zkp/prove/write_iop.h"
+#include "risc0/zkp/verify/riscv_taps.h"
 
 namespace risc0 {
 
@@ -54,6 +55,8 @@ static AccelSlice<Fp> makeCoeffs(std::vector<Fp>& vec, size_t count, bool zkFill
 
 // NOLINTNEXTLINE(readability-function-size)
 BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
+  // Get taps
+  TapSetRef tapSet = getRiscVTaps();
   // Setup output IOP
   WriteIOP iop;
 
@@ -197,49 +200,37 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
 
   // Do evaluations of all of the various polynomials at the appropriate points
   // Compute evalU
-  size_t codeSize = kCodeSize;
-  size_t dataSize = kDataSize;
-  size_t accumSize = kAccumSize;
   std::vector<Fp4> evalU;
-#define base_begin(name)                                                                           \
-  {                                                                                                \
-    AccelConstSlice<Fp> coeffs = name##Group.getCoeffs();                                          \
-    size_t polyCount = name##Size;                                                                 \
-    std::vector<uint32_t> which;                                                                   \
+  auto evalGroup = [&](RegisterGroup id, PolyGroup& pg) {
+    AccelConstSlice<Fp> coeffs = pg.getCoeffs();
+    std::vector<uint32_t> which;
     std::vector<Fp4> xs;
-#define offset_begin(base, off)                                                                    \
-  {                                                                                                \
-    uint32_t offset = off;
-#define tap(base, offset, back)                                                                    \
-  which.push_back(offset);                                                                         \
-  xs.push_back(pow(backOne, back) * Z);                                                            \
-  allXs.push_back(xs[xs.size() - 1]);
-#define offset_end(base, off, combo) }
-#define base_end(name)                                                                             \
-  auto whichAccel = AccelSlice<uint32_t>::copy(which);                                             \
-  auto xsAccel = AccelSlice<Fp4>::copy(xs);                                                        \
-  auto outAccel = AccelSlice<Fp4>::allocate(which.size());                                         \
-  batchEvaluateAny(coeffs, polyCount, whichAccel, xsAccel, outAccel);                              \
-  {                                                                                                \
-    AccelReadLock out(outAccel);                                                                   \
-    std::copy(out.data(), out.data() + out.size(), std::back_inserter(evalU));                     \
-  }                                                                                                \
-  }
-#define TAPS
-#include "risc0/zkp/prove/step/step.cpp.inc"
+    for (auto tap : tapSet.groupTaps(id)) {
+      which.push_back(tap.offset());
+      xs.push_back(pow(backOne, tap.back()) * Z);
+      allXs.push_back(xs.back());
+    }
+    auto whichAccel = AccelSlice<uint32_t>::copy(which);
+    auto xsAccel = AccelSlice<Fp4>::copy(xs);
+    auto outAccel = AccelSlice<Fp4>::allocate(which.size());
+    batchEvaluateAny(coeffs, pg.getCount(), whichAccel, xsAccel, outAccel);
+    {
+      AccelReadLock out(outAccel);
+      std::copy(out.data(), out.data() + out.size(), std::back_inserter(evalU));
+    }
+  };
+  evalGroup(RegisterGroup::ACCUM, accumGroup);
+  evalGroup(RegisterGroup::CODE, codeGroup);
+  evalGroup(RegisterGroup::DATA, dataGroup);
 
   // Now, convert the values to coefficients via interpolation
   size_t curPos = 0;
   std::vector<Fp4> coeffU(evalU.size());
-#define offset_begin(base, off)                                                                    \
-  {                                                                                                \
-    size_t start = curPos;
-#define tap(base, offset, back) curPos++;
-#define offset_end(base, offset, combo)                                                            \
-  polyInterpolate(                                                                                 \
-      coeffU.data() + start, allXs.data() + start, evalU.data() + start, curPos - start);          \
+  for (auto reg : tapSet.regs()) {
+    polyInterpolate(
+        coeffU.data() + curPos, allXs.data() + curPos, evalU.data() + curPos, reg.size());
+    curPos += reg.size();
   }
-#include "risc0/zkp/prove/step/step.cpp.inc"
 
   Fp4 Z4 = pow(Z, 4);
   // Add in the coeffs of the check polynomials.
@@ -287,17 +278,13 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
   // Subtract the U coeffs from the combos
   curPos = 0;
   Fp4 cur = Fp4(1);
-#define offset_begin(base, off)                                                                    \
-  {                                                                                                \
-    size_t start = curPos;
-#define tap(base, offset, back) curPos++;
-#define offset_end(base, offset, combo)                                                            \
-  for (size_t i = 0; i < curPos - start; i++) {                                                    \
-    (*comboCpu)[size * combo + i] -= cur * coeffU[start + i];                                      \
-  }                                                                                                \
-  cur *= mix;                                                                                      \
+  for (auto reg : tapSet.regs()) {
+    for (size_t i = 0; i < reg.size(); i++) {
+      (*comboCpu)[size * reg.comboID() + i] -= cur * coeffU[curPos + i];
+    }
+    cur *= mix;
+    curPos += reg.size();
   }
-#include "risc0/zkp/prove/step/step.cpp.inc"
   // Subtract the final 'check' coefficents
   for (size_t i = 0; i < kCheckSize; i++) {
     (*comboCpu)[size * kComboCount] -= cur * coeffU[curPos++];
@@ -305,13 +292,11 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
   }
 
   // Divide each element by (x - Z * back1^back) for each back
-  size_t curCombo;
-#define combo_begin(id) curCombo = id;
-#define tap(x)                                                                                     \
-  REQUIRE(polyDivide(comboCpu->data() + curCombo * size, size, Z * pow(backOne, x)) == Fp4(0));
-#undef TAPS
-#define COMBOS
-#include "risc0/zkp/prove/step/step.cpp.inc"
+  for (size_t combo = 0; combo < tapSet.combosSize(); combo++) {
+    for (size_t back : tapSet.getCombo(combo)) {
+      REQUIRE(polyDivide(comboCpu->data() + combo * size, size, Z * pow(backOne, back)) == Fp4(0));
+    }
+  }
   // Divide check polys by Z4
   REQUIRE(polyDivide(comboCpu->data() + kComboCount * size, size, Z4) == Fp4(0));
   comboCpu.reset(); // Free lock, move memory back to accelerator

@@ -18,6 +18,7 @@
 /// Small utility functions, mostly common math routines.
 
 #include <cstddef>
+#include <stdexcept>
 
 #define REQUIRE(x)                                                                                 \
   do {                                                                                             \
