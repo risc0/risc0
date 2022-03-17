@@ -1,11 +1,11 @@
 def _impl(ctx):
-    tool_file = ctx.executable._tool
     out_file = ctx.outputs.out
-    ctx.actions.run_shell(
-        command = "$1 > $2",
-        inputs = [tool_file],
+    ctx.actions.run(
+        mnemonic = "MakeCircuit",
+        executable = ctx.executable._tool,
+        arguments = [out_file.path],
         outputs = [out_file],
-        arguments = [tool_file.path, out_file.path],
+        tools = [ctx.executable._tool],
     )
     return [DefaultInfo(files = depset([out_file]))]
 
