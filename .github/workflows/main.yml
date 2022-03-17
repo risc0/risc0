@@ -15,9 +15,14 @@ jobs:
     strategy:
       matrix:
         os: [Linux, macOS, Windows]
+        include:
+          - os: Linux
+            config: --config=ci
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Build & test
-        run: bazelisk test //... --config=ci --config=cpu
+        env:
+          CONFIG: ${{ matrix.config }}
+        run: bazelisk test //... $CONFIG --config=cpu
