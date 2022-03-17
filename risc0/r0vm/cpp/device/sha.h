@@ -32,6 +32,13 @@ class PRNG;
 struct Digest {
   /// @private
   uint32_t words[8];
+
+  /// @private
+  template <typename Archive> void transfer(Archive& ar) {
+    for (uint32_t& word : words) {
+      ar.transfer(word);
+    }
+  }
 };
 
 /// @brief Implementation of the SHA256 cryptographic hashing function.

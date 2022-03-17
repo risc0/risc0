@@ -63,14 +63,46 @@ struct StringPair {
   }
 };
 
+struct Buffer {
+  std::unique_ptr<uint32_t[]> buf;
+  size_t size;
+};
+
+class WordCounter {
+public:
+  void write_word(uint32_t word) { size++; }
+  void write_dword(uint64_t dword) { size += 2; }
+  void write_buffer(const void* buf, size_t len) { size += align(len) / sizeof(uint32_t); }
+
+  size_t size = 0;
+};
+
+template <typename T> Buffer serialize(T& obj) {
+  WordCounter wc;
+  ArchiveWriter writer1(wc);
+  writer1.transfer(obj);
+  Buffer buf{std::unique_ptr<uint32_t[]>(new uint32_t[wc.size]), wc.size};
+  BufferStreamWriter stream(buf.buf.get());
+  ArchiveWriter writer2(stream);
+  writer2.transfer(obj);
+  return buf;
+}
+
+template <typename T> T deserialize(void* ptr) {
+  T obj;
+  BufferStreamReader stream(static_cast<uint32_t*>(ptr));
+  ArchiveReader reader(stream);
+  reader.transfer(obj);
+  return obj;
+}
+
 template <typename T> T roundtrip(T pre) {
   Buffer buf = serialize(pre);
   LOG(0, "buf: ");
   for (size_t i = 0; i < buf.size; i++) {
     LOG(0, "  [" << hex(i, 2) << "]: " << hex(buf.buf[i]));
   }
-  T post;
-  deserialize(buf, post);
+  T post = deserialize<T>(buf.buf.get());
   EXPECT_EQ(pre, post);
   return post;
 }

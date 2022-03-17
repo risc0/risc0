@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "risc0/core/archive.h"
 #include "risc0/core/key.h"
 #include "risc0/zkp/core/sha256.h"
 #include "risc0/zkp/prove/step/step.h"
@@ -24,12 +25,49 @@
 
 namespace risc0 {
 
-struct Proof {
-  BufferU32 core;
-  Buffer message;
+class CheckedStreamReader {
+public:
+  CheckedStreamReader(const Buffer& buffer);
 
+  uint32_t read_word();
+  uint64_t read_dword();
+  void read_buffer(void* buf, size_t len);
+
+private:
+  uint8_t read_byte();
+
+private:
+  const Buffer& buffer;
+  size_t cursor;
+};
+
+class Prover;
+
+struct Proof {
+  friend class Prover;
+
+public:
+  BufferU32 core;
+
+public:
   // Verify proof based on elf file
   void verify(const std::string& filename) const;
+
+  template <typename T> T read() const {
+    T obj;
+    getReader().transfer(obj);
+    return obj;
+  }
+
+  const Buffer& getMessage() const;
+
+private:
+  Proof(const BufferU32& core, const Buffer& message);
+  ArchiveReader<CheckedStreamReader>& getReader() const;
+
+private:
+  struct Impl;
+  std::shared_ptr<Impl> impl;
 };
 
 class Prover {
@@ -40,18 +78,32 @@ public:
   // Allows access to key store to get/set keys
   KeyStore& getKeyStore();
 
-  void addInput(const void* ptr, size_t size);
-  template <typename T> void addInput(const T& obj) { return addInput(&obj, sizeof(T)); }
+  void writeInput(const void* ptr, size_t size);
 
-  size_t getNumOutputs();
+  template <typename T> void writeInput(const T& obj) { getInputWriter().transfer(obj); }
 
-  const void* getOutput(size_t idx, size_t size);
+  const Buffer& getOutput();
 
-  template <typename T> const T& getOutput(size_t idx) {
-    return *static_cast<const T*>(getOutput(idx, sizeof(T)));
+  const Buffer& getCommit();
+
+  template <typename T> T readOutput() {
+    T obj;
+    getOutputReader().transfer(obj);
+    return obj;
+  }
+
+  template <typename T> T readCommit() {
+    T obj;
+    getCommitReader().transfer(obj);
+    return obj;
   }
 
   Proof run();
+
+private:
+  ArchiveWriter<VectorStreamWriter>& getInputWriter();
+  ArchiveReader<CheckedStreamReader>& getOutputReader();
+  ArchiveReader<CheckedStreamReader>& getCommitReader();
 
 private:
   struct Impl;
