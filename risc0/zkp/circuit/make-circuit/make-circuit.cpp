@@ -1,4 +1,4 @@
-  // Copyright 2022 Risc0, Inc.
+// Copyright 2022 Risc0, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,21 +18,10 @@
 #include "risc0/zkp/circuit/poly_context.h"
 #include "risc0/zkp/circuit/step_state.h"
 
-#include <fstream>
-
-using namespace risc0;
-
-int main(int argc, char* argv[]) {
+int main() {
+  using namespace risc0;
   setLogLevel(1);
-
-  if (argc < 2) {
-    LOG(1, "usage: make-circuit <output_path>");
-    return 1;
-  }
-
-  std::ofstream fout(argv[1]);
-
-  fout << "#ifdef STEP_INC\n";
+  std::cout << "#ifdef STEP_INC\n";
   {
     GenContext genContext("dataStepExec");
     setGlobalContext(&genContext);
@@ -42,7 +31,7 @@ int main(int argc, char* argv[]) {
     StepState step(code, data);
     step.setExec();
     setGlobalContext(nullptr);
-    fout << genContext.funcDone();
+    std::cout << genContext.funcDone();
   }
   {
     GenContext genContext("dataStepCheck");
@@ -53,7 +42,7 @@ int main(int argc, char* argv[]) {
     StepState step(code, data);
     step.setMemCheck();
     setGlobalContext(nullptr);
-    fout << genContext.funcDone();
+    std::cout << genContext.funcDone();
   }
   {
     GenContext genContext("accumStep");
@@ -66,9 +55,9 @@ int main(int argc, char* argv[]) {
     AccumRegs accumRegs(accum);
     accumRegs.set(step);
     setGlobalContext(nullptr);
-    fout << genContext.funcDone();
+    std::cout << genContext.funcDone();
   }
-  fout << "#endif // STEP_INC\n";
+  std::cout << "#endif // STEP_INC\n";
   {
     PolyContext polyContext;
     setGlobalContext(&polyContext);
@@ -82,7 +71,6 @@ int main(int argc, char* argv[]) {
     AccumRegs accumRegs(accum);
     accumRegs.set(step);
     setGlobalContext(nullptr);
-    fout << polyContext.done();
+    std::cout << polyContext.done();
   }
-  return 0;
 }
