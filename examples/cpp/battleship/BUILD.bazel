@@ -4,13 +4,19 @@ load("//bazel/rules/cc:defs.bzl", "cc_binary", "cc_gtest", "cc_library")
 risc0_cc_proof(
     name = "init_proof",
     srcs = ["init_proof.cpp"],
-    deps = [":core"],
+    deps = [
+        ":core",
+        "//risc0/r0vm/cpp/device",
+    ],
 )
 
 risc0_cc_proof(
     name = "round_proof",
     srcs = ["round_proof.cpp"],
-    deps = [":core"],
+    deps = [
+        ":core",
+        "//risc0/r0vm/cpp/device",
+    ],
 )
 
 cc_binary(
@@ -23,9 +29,7 @@ cc_library(
     name = "core",
     srcs = ["core.cpp"],
     hdrs = ["battleship.h"],
-    deps = [
-        "//risc0/r0vm/cpp/device",
-    ] + select({
+    deps = select({
         "//bazel/platform/os:risc0": [],
         "//conditions:default": ["//risc0/zkp/prove"],
     }),
