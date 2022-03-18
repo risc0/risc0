@@ -14,29 +14,14 @@
 
 #pragma once
 
-#include <cstddef>
-#include <cstdint>
+#include "risc0/core/align.h"
+
 #include <cstring>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace risc0 {
-
-inline size_t align(size_t value, size_t alignment = sizeof(uint32_t)) {
-  return ((value - 1) & ~(alignment - 1)) + alignment;
-}
-
-inline void* align(void* ptr, size_t alignment = sizeof(uint32_t)) {
-  size_t value = reinterpret_cast<size_t>(ptr);
-  return reinterpret_cast<void*>(align(value, alignment));
-}
-
-inline bool is_aligned(const void* ptr, size_t alignment = sizeof(uint32_t)) {
-  return (reinterpret_cast<size_t>(ptr) & (alignment - 1)) == 0;
-}
-
-namespace detail {
 
 template <typename T> struct Encoder {
   template <typename Archive> static void transfer(Archive& ar, const T& value) {
@@ -52,9 +37,7 @@ template <typename Stream> class ArchiveWriter {
 public:
   ArchiveWriter(Stream& stream) : stream(stream) {}
 
-  template <typename T> void transfer(const T& value) {
-    detail::Encoder<T>::transfer(*this, value);
-  }
+  template <typename T> void transfer(const T& value) { Encoder<T>::transfer(*this, value); }
 
   void transfer(bool value) { stream.write_word(value); }
 
@@ -142,19 +125,7 @@ template <typename CharT> struct Decoder<std::basic_string<CharT>> {
   }
 };
 
-class WordCounter {
-public:
-  void write_word(uint32_t word) { size++; }
-
-  void write_dword(uint64_t dword) { size += 2; }
-
-  void write_buffer(const void* buf, size_t len) { size += align(len) / sizeof(uint32_t); }
-
-  size_t size = 0;
-};
-
-class BufferStreamWriter {
-public:
+struct BufferStreamWriter {
   BufferStreamWriter(uint32_t* ptr) : ptr(ptr) {}
 
   void write_word(uint32_t word) { *ptr++ = word; }
@@ -166,18 +137,16 @@ public:
 
   void write_buffer(const void* buf, size_t len) {
     uint8_t* ptr_u8 = reinterpret_cast<uint8_t*>(ptr);
-    uint32_t* last = static_cast<uint32_t*>(align(ptr_u8 + len)) - 1;
+    uint32_t* last = reinterpret_cast<uint32_t*>(align(ptr_u8 + len)) - 1;
     *last = 0;
     memcpy(ptr, buf, len);
     ptr = ++last;
   }
 
-private:
   uint32_t* ptr;
 };
 
-class BufferStreamReader {
-public:
+struct BufferStreamReader {
   BufferStreamReader(uint32_t* ptr) : ptr(ptr) {}
 
   uint32_t read_word() { return *ptr++; }
@@ -193,32 +162,28 @@ public:
     ptr += align(len) / sizeof(uint32_t);
   }
 
-private:
   uint32_t* ptr;
 };
 
-} // namespace detail
+struct VectorStreamWriter {
+  void write_word(uint32_t word) { vec.push_back(word); }
 
-struct Buffer {
-  std::unique_ptr<uint32_t[]> buf;
-  size_t size;
+  void write_dword(uint64_t dword) {
+    vec.push_back(dword & 0xffffffff);
+    vec.push_back(dword >> 32);
+  }
+
+  void write_buffer(const void* buf, size_t len) {
+    size_t aligned = align(len);
+    auto tmp = std::make_unique<uint8_t[]>(aligned);
+    uint32_t* ptr = reinterpret_cast<uint32_t*>(tmp.get());
+    memcpy(tmp.get(), buf, len);
+    for (size_t i = 0; i < aligned / 4; i++) {
+      vec.push_back(*ptr++);
+    }
+  }
+
+  std::vector<uint32_t> vec;
 };
-
-template <typename T> Buffer serialize(T& obj) {
-  detail::WordCounter wc;
-  detail::ArchiveWriter writer1(wc);
-  obj.transfer(writer1);
-  Buffer buf{std::unique_ptr<uint32_t[]>(new uint32_t[wc.size]), wc.size};
-  detail::BufferStreamWriter stream(buf.buf.get());
-  detail::ArchiveWriter writer2(stream);
-  obj.transfer(writer2);
-  return buf;
-}
-
-template <typename T> void deserialize(const Buffer& buf, T& obj) {
-  detail::BufferStreamReader stream(buf.buf.get());
-  detail::ArchiveReader reader(stream);
-  obj.transfer(reader);
-}
 
 } // namespace risc0

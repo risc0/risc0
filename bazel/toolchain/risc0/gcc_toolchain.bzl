@@ -45,6 +45,7 @@ def gcc_toolchain_config(name, sysroot, version):
         "-Wno-free-nonheap-object",
         "-Wno-error=pragmas",
         "-Wno-unknown-pragmas",
+        "-Wno-strict-aliasing",
     ]
 
     dbg_compile_flags = ["-g"]

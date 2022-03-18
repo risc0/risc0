@@ -31,19 +31,19 @@ class CoreTests : public testing::TestWithParam<TestParam> {
 protected:
   ShaDigest testSHA(const std::string& str) {
     Prover prover(GetParam().prefix + "test_sha");
-    prover.addInput(static_cast<uint32_t>(str.size()));
-    prover.addInput(str.data(), str.size());
+    prover.writeInput(static_cast<uint32_t>(str.size()));
+    prover.writeInput(str.data(), str.size());
     Proof proof = prover.run();
     proof.verify(GetParam().prefix + "test_sha");
-    return *reinterpret_cast<ShaDigest*>(proof.message.data());
+    return proof.read<ShaDigest>();
   }
 
   void testMemIO(const std::vector<std::pair<uint32_t, uint32_t>>& in) {
     Prover prover(GetParam().prefix + "test_mem");
-    prover.addInput(static_cast<uint32_t>(in.size()));
+    prover.writeInput(static_cast<uint32_t>(in.size()));
     for (auto pair : in) {
-      prover.addInput(pair.first);
-      prover.addInput(pair.second);
+      prover.writeInput(pair.first);
+      prover.writeInput(pair.second);
     }
     auto proof = prover.run();
     proof.verify(GetParam().prefix + "test_mem");
@@ -92,10 +92,6 @@ TEST_P(CoreTests, SHA) {
                        0x19db06c1}));
 }
 
-static uint32_t align(uint32_t value, uint32_t multiple) {
-  return ((value - 1u) & ~(multiple - 1u)) + multiple;
-}
-
 TEST_P(CoreTests, Align) {
   ASSERT_EQ(align(0, 64), 0);
   ASSERT_EQ(align(1, 64), 64);
@@ -108,11 +104,21 @@ TEST_P(CoreTests, Align) {
 
 TEST_P(CoreTests, MemoryIO) {
   // Double write to WOM are fine
-  testMemIO({{kMemWOMStart, 1}, {kMemWOMStart, 1}});
-  // Double write to WOM with differnt values throw
-  EXPECT_THROW(testMemIO({{kMemWOMStart, 1}, {kMemWOMStart, 2}}), std::runtime_error);
+  testMemIO({
+      {kMemCommitStart, 1},
+      {kMemCommitStart, 1},
+  });
+  // Double write to WOM with different values throw
+  EXPECT_THROW(testMemIO({
+                   {kMemCommitStart, 1},
+                   {kMemCommitStart, 2},
+               }),
+               std::runtime_error);
   // But they are OK at different addresses
-  testMemIO({{kMemWOMStart, 1}, {kMemWOMStart + 4, 2}});
+  testMemIO({
+      {kMemCommitStart, 1},
+      {kMemCommitStart + 4, 2},
+  });
   // Aligned write is fine
   testMemIO({{kMemHeapStart, 1}});
   // Unaligned write is bad
@@ -151,11 +157,11 @@ void doMemcpyTest(uint32_t srcOffset, uint32_t destOffset, uint32_t size) {
   }
   // Make a prover and have it do a memcpy
   Prover prover("risc0/r0vm/cpp/device/test/test_memcpy");
-  prover.addInput(srcBuf.data(), 1024);
-  prover.addInput(destBuf.data(), 1024);
-  prover.addInput(srcOffset);
-  prover.addInput(destOffset);
-  prover.addInput(size);
+  prover.writeInput(srcBuf.data(), 1024);
+  prover.writeInput(destBuf.data(), 1024);
+  prover.writeInput(srcOffset);
+  prover.writeInput(destOffset);
+  prover.writeInput(size);
   auto proof = prover.run();
   proof.verify("risc0/r0vm/cpp/device/test/test_memcpy");
   // Do the memcpy/memset on the host
@@ -165,7 +171,7 @@ void doMemcpyTest(uint32_t srcOffset, uint32_t destOffset, uint32_t size) {
     memcpy(destBuf.data() + destOffset, srcBuf.data() + srcOffset, size);
   }
   // Compare results
-  EXPECT_EQ(memcmp(destBuf.data(), prover.getOutput(0, 1024), 1024), 0);
+  EXPECT_EQ(memcmp(destBuf.data(), prover.getOutput().data(), 1024), 0);
 }
 
 void doMemsetTest(uint32_t destOffset, uint32_t size) {

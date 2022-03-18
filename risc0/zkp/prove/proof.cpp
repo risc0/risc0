@@ -24,86 +24,174 @@
 
 namespace risc0 {
 
+struct Proof::Impl {
+  Impl(const Buffer& buffer_) : buffer(buffer_), stream(buffer), reader(stream) {}
+
+  Buffer buffer;
+  CheckedStreamReader stream;
+  ArchiveReader<CheckedStreamReader> reader;
+};
+
+Proof::Proof(const BufferU32& core, const Buffer& message) : core(core), impl(new Impl(message)) {}
+
+const Buffer& Proof::getMessage() const {
+  return impl->buffer;
+}
+
+ArchiveReader<CheckedStreamReader>& Proof::getReader() const {
+  return impl->reader;
+}
+
 void Proof::verify(const std::string& filename) const {
   CodeID code;
   LOG(1, "Reading code id from " << filename + ".id");
   code = readCodeID(filename + ".id");
   risc0::verify(code, core.data(), core.size());
-  if (message.size() != core[8]) {
+  if (impl->buffer.size() != core[8]) {
     std::stringstream ss;
-    ss << "Proof::verify> Message size (" << message.size() << ") does not match proof core ("
+    ss << "Proof::verify> Message size (" << impl->buffer.size() << ") does not match proof core ("
        << core[8] << ")";
     throw std::runtime_error(ss.str());
   }
-  if (message.size() > 32) {
-    ShaDigest digest = shaHash(message.data(), message.size());
+  if (impl->buffer.size() > 32) {
+    ShaDigest digest = shaHash(impl->buffer.data(), impl->buffer.size());
     if (memcmp(&digest, core.data(), sizeof(ShaDigest)) != 0) {
       throw std::runtime_error("Proof message/core root mismatch");
     }
   } else {
-    if (memcmp(message.data(), core.data(), message.size()) != 0) {
+    if (memcmp(impl->buffer.data(), core.data(), impl->buffer.size()) != 0) {
       throw std::runtime_error("Proof message/core root mismatch");
     }
   }
 }
 
 struct Prover::Impl : public IoHandler {
-  Impl(const std::string& elfPath) : elfPath(elfPath), idxInput(0) {}
+  Impl(const std::string& elfPath)
+      : elfPath(elfPath)
+      , outputStream(outputBuffer)
+      , commitStream(commitBuffer)
+      , inputWriter(inputStream)
+      , outputReader(outputStream)
+      , commitReader(commitStream) {}
 
   virtual ~Impl() {}
 
-  const void* onRead(size_t size) override {
-    LOG(1, "IoHandler::onRead> " << size);
-    if (idxInput == inputs.size()) {
-      throw std::runtime_error("onRead: Attempting to read too many inputs");
+  void onInit(MemoryState& mem) override {
+    uint32_t addr = kMemInputStart;
+    for (uint32_t word : inputStream.vec) {
+      if (addr > kMemInputEnd) {
+        throw std::runtime_error("Out of memory: inputs");
+      }
+      mem.store(addr, word);
+      addr += sizeof(uint32_t);
     }
-    const auto& buf = inputs.at(idxInput++);
-    if (size != buf.size()) {
-      std::stringstream ss;
-      ss << "Prover::onRead> Size mismatch: expected (" << size << ") != actual (" << buf.size()
-         << ")";
-      throw std::runtime_error(ss.str());
-    }
-    return buf.data();
   }
 
   void onWrite(const Buffer& buf) override {
     LOG(1, "IoHandler::onWrite> " << buf.size());
-    outputs.emplace_back(buf);
+    outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
+  }
+
+  void onCommit(const Buffer& buf) override {
+    LOG(1, "IoHandler::onCommit> " << buf.size());
+    commitBuffer.insert(commitBuffer.end(), buf.begin(), buf.end());
   }
 
   KeyStore& getKeyStore() override { return keyStore; }
 
   std::string elfPath;
-  size_t idxInput;
   KeyStore keyStore;
-  std::vector<Buffer> inputs;
-  std::vector<Buffer> outputs;
+  Buffer outputBuffer;
+  Buffer commitBuffer;
+  VectorStreamWriter inputStream;
+  CheckedStreamReader outputStream;
+  CheckedStreamReader commitStream;
+  ArchiveWriter<VectorStreamWriter> inputWriter;
+  ArchiveReader<CheckedStreamReader> outputReader;
+  ArchiveReader<CheckedStreamReader> commitReader;
 };
+
+CheckedStreamReader::CheckedStreamReader(const Buffer& buffer) : buffer(buffer), cursor(0) {}
+
+uint8_t CheckedStreamReader::read_byte() {
+  if (cursor >= buffer.size()) {
+    throw std::out_of_range("Read out of bounds");
+  }
+  return buffer[cursor++];
+}
+
+uint32_t CheckedStreamReader::read_word() {
+  uint32_t b1 = read_byte();
+  uint32_t b2 = read_byte();
+  uint32_t b3 = read_byte();
+  uint32_t b4 = read_byte();
+  return b1 | b2 << 8 | b3 << 16 | b4 << 24;
+}
+
+uint64_t CheckedStreamReader::read_dword() {
+  uint64_t low = read_word();
+  uint64_t high = read_word();
+  return low | high << 32;
+}
+
+void CheckedStreamReader::read_buffer(void* buf, size_t len) {
+  uint32_t* dst = static_cast<uint32_t*>(buf);
+  for (size_t i = 0; i < len; i++) {
+    *dst++ = read_word();
+  }
+}
 
 Prover::Prover(const std::string& elfPath) : impl(new Impl(elfPath)) {}
 
-Prover::~Prover() {}
+Prover::~Prover() = default;
 
 KeyStore& Prover::getKeyStore() {
   return impl->getKeyStore();
 }
 
-void Prover::addInput(const void* ptr, size_t size) {
-  const uint8_t* ptrU8 = static_cast<const uint8_t*>(ptr);
-  impl->inputs.emplace_back(ptrU8, ptrU8 + size);
-  LOG(1, "Adding input, size = " << size);
+const Buffer& Prover::getOutput() {
+  return impl->outputBuffer;
 }
 
-size_t Prover::getNumOutputs() {
-  return impl->outputs.size();
+const Buffer& Prover::getCommit() {
+  return impl->commitBuffer;
 }
 
-const void* Prover::getOutput(size_t idx, size_t size) {
-  const auto& buf = impl->outputs.at(idx);
-  if (size != buf.size())
-    throw std::runtime_error("getOutput: Size mismatch");
-  return buf.data();
+ArchiveWriter<VectorStreamWriter>& Prover::getInputWriter() {
+  return impl->inputWriter;
+}
+
+ArchiveReader<CheckedStreamReader>& Prover::getOutputReader() {
+  return impl->outputReader;
+}
+
+ArchiveReader<CheckedStreamReader>& Prover::getCommitReader() {
+  return impl->commitReader;
+}
+
+void Prover::writeInput(const void* ptr, size_t size) {
+  LOG(1, "Prover::writeInput> size: " << size);
+  const uint8_t* ptr_u8 = static_cast<const uint8_t*>(ptr);
+  while (size >= sizeof(uint32_t)) {
+    uint32_t word = 0;
+    word |= *ptr_u8++;
+    word |= *ptr_u8++ << 8;
+    word |= *ptr_u8++ << 16;
+    word |= *ptr_u8++ << 24;
+    LOG(1, "  write_word: " << hex(word));
+    impl->inputStream.write_word(word);
+    size -= sizeof(uint32_t);
+  }
+
+  if (size) {
+    LOG(1, "  tail: " << size);
+    uint32_t word = 0;
+    for (size_t i = 0; i < size; i++) {
+      word |= *ptr_u8++ << (8 * i);
+    }
+    LOG(1, "  write_word: " << hex(word));
+    impl->inputStream.write_word(word);
+  }
 }
 
 Proof Prover::run() {
@@ -112,8 +200,7 @@ Proof Prover::run() {
   // Generate the actual proof
   BufferU32 core = prove(impl->elfPath.c_str(), handler);
   // Attach the full version of the output message + construct proof object
-  Buffer message = impl->outputs.at(getNumOutputs() - 1);
-  Proof proof{core, message};
+  Proof proof{core, getCommit()};
   // Verify proof to make sure it works
   proof.verify(impl->elfPath);
   return proof;

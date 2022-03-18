@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use _alloc::{alloc::alloc, boxed::Box};
-use core::{alloc::Layout, mem, ptr::null_mut};
+use _alloc::boxed::Box;
+use core::{mem, ptr::null_mut};
 
 use crate::{
-    gpio::{IoDescriptor, GPIO_DESC_IO, GPIO_LOG, GPIO_READ, GPIO_WRITE},
+    gpio::{IoDescriptor, GPIO_COMMIT, GPIO_DESC_IO, GPIO_LOG, GPIO_WRITE},
     sha::{self, Digest, SHA256},
+    REGION_INPUT_START,
 };
 
 struct Env {
     message: SHA256,
+    read_ptr: *const u8,
 }
 
 static mut ENV: *mut Env = null_mut();
@@ -44,7 +46,7 @@ pub(crate) fn finalize(result: *mut usize) {
 }
 
 pub fn read<T>() -> T {
-    env().read()
+    env_mut().read()
 }
 
 pub fn write<T>(data: &T) {
@@ -60,14 +62,14 @@ pub fn commit_digest(data: &Box<Digest>) {
 }
 
 pub fn read_slice<T>() -> &'static [T] {
-    env().read_slice()
+    env_mut().read_slice()
 }
 
 pub fn write_slice<T>(slice: &[T]) {
     env().write_slice(slice);
 }
 
-pub fn log(msg: &str) {
+pub fn print(msg: &str) {
     unsafe {
         GPIO_DESC_IO.write_volatile(IoDescriptor {
             size: msg.len(),
@@ -81,21 +83,17 @@ impl Env {
     fn new() -> Self {
         Env {
             message: SHA256::with_capacity(256 * 1024),
+            read_ptr: REGION_INPUT_START as _,
         }
     }
 
-    fn read<T>(&self) -> T {
-        let layout = Layout::new::<T>();
-        unsafe {
-            let buf = alloc(layout);
-            GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size: layout.size(),
-                addr: buf as usize,
-            });
-            GPIO_READ.write_volatile(GPIO_DESC_IO);
-            let ptr: *const T = buf.cast();
+    fn read<T>(&mut self) -> T {
+        let ptr: *const T = self.read_ptr.cast();
+        let obj = unsafe {
+            self.read_ptr = self.read_ptr.add(mem::size_of::<T>());
             ptr.read_volatile()
-        }
+        };
+        obj
     }
 
     fn write<T>(&self, data: &T) {
@@ -114,17 +112,12 @@ impl Env {
         self.message.update(data);
     }
 
-    fn read_slice<T>(&self) -> &[T] {
+    fn read_slice<T>(&mut self) -> &[T] {
         let size: usize = self.read();
+        let ptr: *const T = self.read_ptr.cast();
         unsafe {
-            let layout = Layout::from_size_align_unchecked(size, mem::align_of::<u8>());
-            let buf = alloc(layout);
-            GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size,
-                addr: buf as usize,
-            });
-            GPIO_READ.write_volatile(GPIO_DESC_IO);
-            core::slice::from_raw_parts(buf.cast(), size / mem::size_of::<T>())
+            self.read_ptr = self.read_ptr.add(size);
+            core::slice::from_raw_parts(ptr, size / mem::size_of::<T>())
         }
     }
 
@@ -147,7 +140,14 @@ impl Env {
         let (slice_ptr, len_bytes) = {
             let slice = self.message.storage.as_slice();
             // Write the full data out to the host
-            self.write_slice(slice);
+            unsafe {
+                GPIO_DESC_IO.write_volatile(IoDescriptor {
+                    size: slice.len(),
+                    addr: slice.as_ptr() as usize,
+                });
+                GPIO_COMMIT.write_volatile(GPIO_DESC_IO);
+            }
+
             (slice.as_ptr(), slice.len())
         };
 

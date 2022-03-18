@@ -22,7 +22,6 @@ risc0_cc_library(
         "string.cpp",
     ],
     hdrs = [
-        "align.h",
         "env.h",
         "fail.h",
         "key.h",
@@ -32,6 +31,7 @@ risc0_cc_library(
     ],
     deps = [
         ":crt0",
+        "//risc0/core:r0vm",
         "//risc0/r0vm/platform",
     ],
 )
