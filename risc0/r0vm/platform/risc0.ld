@@ -23,7 +23,8 @@ EXTERN(__start)
 MEMORY {
   stack        : ORIGIN = 0x00000000, LENGTH =  256K
   data    (RW) : ORIGIN = 0x00040000, LENGTH =  256K
-  heap         : ORIGIN = 0x00080000, LENGTH =  1280K
+  heap         : ORIGIN = 0x00080000, LENGTH =    1M
+  input        : ORIGIN = 0x00180000, LENGTH =  256K
   gpio         : ORIGIN = 0x001C0000, LENGTH =  256K
   prog    (X)  : ORIGIN = 0x00200000, LENGTH =    1M
   sha          : ORIGIN = 0x00300000, LENGTH =  256K

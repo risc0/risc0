@@ -28,7 +28,12 @@ void _risc0_main(uint32_t* result) {
 extern void initializeSHA256();
 extern void finalizeSHA256();
 
-Env::Env(uint32_t* result) : message(256 * 1024), result(result), commits(0) {
+Env::Env(uint32_t* result)
+    : message(256 * 1024)
+    , result(result)
+    , read_ptr(GPIO_InputBase())
+    , write_ptr(GPIO_OutputBase())
+    , commit_ptr(GPIO_CommitBase()) {
   initializeSHA256();
 }
 
@@ -36,7 +41,9 @@ Env::~Env() {
   const uint8_t* data = message.storage.data();
   const size_t len = message.storage.size();
   // Write the full data out to the host
-  write(data, len);
+  // write(data, len);
+  volatile IoDescriptor io{len, reinterpret_cast<uint32_t>(data)};
+  *GPIO_Commit() = &io;
   // If the total proof message is small (<= 32 bytes), return it directly from the proof,
   // otherwise sha it and return the hash.
   if (len <= 32) {
@@ -50,9 +57,8 @@ Env::~Env() {
 }
 
 void* Env::read(size_t size) {
-  void* buf = malloc(size);
-  volatile IoDescriptor io{size, reinterpret_cast<uint32_t>(buf)};
-  *GPIO_Read() = &io;
+  void* buf = read_ptr;
+  read_ptr += align(size) / sizeof(uint32_t);
   return buf;
 }
 
@@ -64,7 +70,6 @@ void Env::write(const void* data, size_t size) {
 void Env::commit(const void* data, size_t size) {
   write(data, size);
   message.update(data, size);
-  commits++;
 }
 
 KeyPtr Env::getKey(const char* name, KeyMode mode) {
@@ -75,6 +80,11 @@ KeyPtr Env::getKey(const char* name, KeyMode mode) {
                                    static_cast<uint32_t>(mode)};
   *GPIO_GetKey() = &getKey;
   return ret;
+}
+
+void Env::print(const char* msg) {
+  volatile LogDescriptor io{reinterpret_cast<uint32_t>(msg)};
+  *GPIO_Log() = &io;
 }
 
 } // namespace risc0

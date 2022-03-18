@@ -52,29 +52,20 @@ MemoryHandler::MemoryHandler() : io(nullptr) {}
 
 MemoryHandler::MemoryHandler(IoHandler* io) : io(io) {}
 
+void MemoryHandler::onInit(MemoryState& mem) {
+  if (io) {
+    io->onInit(mem);
+  }
+}
+
 void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uint32_t value) {
-  LOG(2, "MemoryHandler::onWrite> " << hex(addr) << ": " << hex(value));
+  LOG(1, "MemoryHandler::onWrite> " << hex(addr) << ": " << hex(value));
   switch (addr) {
   case kGPIO_SHA: {
     LOG(1, "MemoryHandler::onWrite> GPIO_SHA");
     ShaDescriptor desc;
     mem.load(value, &desc, sizeof(desc));
     processSHA(mem, desc);
-  } break;
-  case kGPIO_Read: {
-    LOG(1, "MemoryHandler::onWrite> GPIO_Read");
-    IoDescriptor desc;
-    mem.load(value, &desc, sizeof(desc));
-    LOG(2, "  Addr = " << desc.addr << " size = " << desc.size);
-    if (io) {
-      const void* buf = io->onRead(desc.size);
-      if (getLogLevel() >= 2) {
-        for (size_t i = 0; i < desc.size; i++) {
-          LOG(2, "  buf[" << i << "] = " << reinterpret_cast<const uint8_t*>(buf)[i]);
-        }
-      }
-      mem.store(desc.addr, buf, desc.size);
-    }
   } break;
   case kGPIO_Write: {
     LOG(1, "MemoryHandler::onWrite> GPIO_Write");
@@ -84,6 +75,16 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
       std::vector<uint8_t> buf(desc.size);
       mem.load(desc.addr, buf.data(), desc.size);
       io->onWrite(buf);
+    }
+  } break;
+  case kGPIO_Commit: {
+    LOG(1, "MemoryHandler::onWrite> GPIO_Commit");
+    IoDescriptor desc;
+    mem.load(value, &desc, sizeof(desc));
+    if (io) {
+      std::vector<uint8_t> buf(desc.size);
+      mem.load(desc.addr, buf.data(), desc.size);
+      io->onCommit(buf);
     }
   } break;
   case kGPIO_Fault: {
@@ -100,10 +101,11 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
   } break;
   case kGPIO_Log: {
     LOG(2, "MemoryHandler::onWrite> GPIO_Log");
-    IoDescriptor desc;
+    LogDescriptor desc;
     mem.load(value, &desc, sizeof(desc));
-    std::vector<char> buf(desc.size);
-    mem.load(desc.addr, buf.data(), desc.size);
+    size_t len = mem.strlen(desc.addr);
+    std::vector<char> buf(len);
+    mem.load(desc.addr, buf.data(), len);
     std::string str(buf.data(), buf.size());
     LOG(0, "R0VM[C" << cycle << "]> " << str);
   } break;

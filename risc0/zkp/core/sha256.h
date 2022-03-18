@@ -25,7 +25,7 @@
 // at: https://github.com/B-Con/crypto-algorithms/blob/master/sha256.c which is a public domain
 // implementation by Brad Conte (brad@bradconte.com)
 //
-// We avoid endian conversions by usally keeping thing in the form of uint32_t values.  We do
+// We avoid endian conversions by usually keeping the form of uint32_t values.  We do
 // support hashing of byte arrays including endian conversion and padding, but we generally avoid it
 // when possible.
 
@@ -47,6 +47,12 @@ struct ShaDigest {
   }
   DEVSPEC bool operator==(ShaDigest rhs) const { return cmp(rhs) == 0; }
   DEVSPEC bool operator!=(ShaDigest rhs) const { return cmp(rhs) != 0; }
+
+  template <typename Archive> void transfer(Archive& ar) {
+    for (uint32_t& word : words) {
+      ar.transfer(word);
+    }
+  }
 };
 
 // Namespace to hide away some of the details from the user.

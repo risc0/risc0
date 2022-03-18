@@ -26,6 +26,10 @@ void operator delete(void*) {
   // no-op
 }
 
+void operator delete[](void*) {
+  // no-op
+}
+
 void operator delete(void*, unsigned int) {
   // no-op
 }
