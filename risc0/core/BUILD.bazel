@@ -10,6 +10,7 @@ cc_library(
         "rng.cpp",
     ],
     hdrs = [
+        "align.h",
         "archive.h",
         "elf.h",
         "key.h",
@@ -26,4 +27,13 @@ rust_static_library(
     name = "lib",
     srcs = ["src/lib.rs"],
     deps = crates_from(":Cargo.toml"),
+)
+
+cc_library(
+    name = "r0vm",
+    hdrs = [
+        "align.h",
+        "archive.h",
+    ],
+    visibility = ["//visibility:public"],
 )

@@ -59,9 +59,9 @@ struct MemoryState {
 };
 
 struct IoHandler {
-  virtual const void* onRead(size_t size) = 0;
+  virtual void onInit(MemoryState& mem) {}
   virtual void onWrite(const Buffer& data) {}
-  virtual void onCommit(const void* data, size_t size) {}
+  virtual void onCommit(const Buffer& data) {}
   virtual void onFault(const std::string& msg);
   virtual KeyStore& getKeyStore() = 0;
 };
@@ -73,7 +73,7 @@ public:
 
   // Called before the load of the ELF.  Can write to memory, but any memory loaded from the
   // ELF will override.
-  virtual void onInit(MemoryState& mem) {}
+  virtual void onInit(MemoryState& mem);
 
   // Called after loading an ELF, can write to any memory not already loaded.
   virtual void onLoaded(MemoryState& mem) {}
@@ -82,7 +82,7 @@ public:
   // value.
   virtual uint32_t onRead(MemoryState& mem, uint32_t addr) { return 0; }
 
-  // onWrite is called when a word is wrtten to memory, giving the host a chance to be notified of
+  // onWrite is called when a word is written to memory, giving the host a chance to be notified of
   // new data.
   virtual void onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uint32_t value);
 

@@ -87,15 +87,15 @@ void risc0_prover_free(risc0_error* err, risc0_prover* ptr) {
 }
 
 void risc0_prover_add_input(risc0_error* err, risc0_prover* ptr, const uint8_t* buf, size_t len) {
-  ffi_wrap_void(err, [&] { ptr->prover->addInput(buf, len); });
+  ffi_wrap_void(err, [&] { ptr->prover->writeInput(buf, len); });
 }
 
-size_t risc0_prover_get_num_outputs(risc0_error* err, risc0_prover* ptr) {
-  return ffi_wrap(err, 0, [&] { return ptr->prover->getNumOutputs(); });
+const void* risc0_prover_get_output_buf(risc0_error* err, risc0_prover* ptr) {
+  return ffi_wrap<const void*>(err, nullptr, [&] { return ptr->prover->getOutput().data(); });
 }
 
-const void* risc0_prover_get_output(risc0_error* err, risc0_prover* ptr, size_t idx, size_t len) {
-  return ffi_wrap<const void*>(err, nullptr, [&] { return ptr->prover->getOutput(idx, len); });
+size_t risc0_prover_get_output_len(risc0_error* err, const risc0_prover* ptr) {
+  return ffi_wrap(err, 0, [&] { return ptr->prover->getOutput().size(); });
 }
 
 risc0_proof* risc0_prover_run(risc0_error* err, risc0_prover* ptr) {
@@ -118,11 +118,11 @@ size_t risc0_proof_get_core_len(risc0_error* err, const risc0_proof* ptr) {
 }
 
 const void* risc0_proof_get_message_buf(risc0_error* err, const risc0_proof* ptr) {
-  return ffi_wrap<const void*>(err, nullptr, [&] { return ptr->proof.message.data(); });
+  return ffi_wrap<const void*>(err, nullptr, [&] { return ptr->proof.getMessage().data(); });
 }
 
 size_t risc0_proof_get_message_len(risc0_error* err, const risc0_proof* ptr) {
-  return ffi_wrap(err, 0, [&] { return ptr->proof.message.size(); });
+  return ffi_wrap(err, 0, [&] { return ptr->proof.getMessage().size(); });
 }
 
 void risc0_proof_free(risc0_error* err, const risc0_proof* ptr) {

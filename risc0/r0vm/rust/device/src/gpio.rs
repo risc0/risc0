@@ -13,8 +13,8 @@
 // limitations under the License.
 
 pub(crate) const GPIO_SHA: *mut *const SHADescriptor = 0x001C_0000 as _;
-pub(crate) const GPIO_READ: *mut *const IoDescriptor = 0x001C_0004 as _;
-pub(crate) const GPIO_WRITE: *mut *const IoDescriptor = 0x001C_0008 as _;
+pub(crate) const GPIO_WRITE: *mut *const IoDescriptor = 0x001C_0004 as _;
+pub(crate) const GPIO_COMMIT: *mut *const IoDescriptor = 0x001C_0008 as _;
 pub(crate) const GPIO_FAULT: *mut *const FaultDescriptor = 0x001C_000C as _;
 pub(crate) const GPIO_LOG: *mut *const IoDescriptor = 0x001C_0010 as _;
 

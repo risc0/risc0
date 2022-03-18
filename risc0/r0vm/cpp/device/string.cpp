@@ -14,7 +14,7 @@
 
 #include <string.h>
 
-#include "risc0/r0vm/cpp/device/align.h"
+#include "risc0/core/align.h"
 #include "risc0/r0vm/platform/memory.h"
 
 extern "C" {

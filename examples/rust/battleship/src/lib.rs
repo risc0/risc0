@@ -95,7 +95,7 @@ impl Battleship {
         let slice = unsafe { slice::from_raw_parts(ptr.cast(), mem::size_of::<RoundParams>()) };
         prover.add_input(slice)?;
         let proof = prover.run()?;
-        let slice = prover.get_output(0, mem::size_of::<RoundResult>())?;
+        let slice = prover.get_output()?;
         let ptr: *const RoundResult = slice.as_ptr().cast();
         let result = unsafe { &*ptr };
         self.state = result.state.clone();

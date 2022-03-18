@@ -21,37 +21,27 @@
 
 using risc0::hex;
 
-const InitMessage::Parts& InitMessage::getParts() const {
-  if (proof.message.size() != sizeof(InitMessage::Parts)) {
-    throw std::runtime_error("InitMessage parts size mismatch");
-  }
-  const InitMessage::Parts* parts =
-      reinterpret_cast<const InitMessage::Parts*>(proof.message.data());
-  return *parts;
+InitMessage::Content InitMessage::decode() const {
+  return proof.read<Content>();
 }
 
-const RoundMessage::Parts& RoundMessage::getParts() const {
-  if (proof.message.size() != sizeof(RoundMessage::Parts)) {
-    throw std::runtime_error("RoundMessage parts size mismatch");
-  }
-  const RoundMessage::Parts* parts =
-      reinterpret_cast<const RoundMessage::Parts*>(proof.message.data());
-  return *parts;
+RoundMessage::Content RoundMessage::decode() const {
+  return proof.read<Content>();
 }
 
 InitMessage Battleship::init() {
   risc0::Prover prover("examples/cpp/battleship/init_proof");
-  prover.addInput(state);
+  prover.writeInput(state);
   risc0::Proof proof = prover.run();
   LOG(1, name << "> InitProof: " << proof.core.size());
-  LOG(1, name << "> InitProof outputs: " << prover.getNumOutputs());
   return InitMessage{proof};
 }
 
 void Battleship::onInitMsg(const InitMessage& msg) {
   LOG(1, name << "> onInitMsg");
   msg.proof.verify("examples/cpp/battleship/init_proof");
-  peer_state = msg.getParts().state;
+  InitMessage::Content content = msg.decode();
+  peer_state = content.state;
   LOG(1, name << "> peer_state: " << peer_state);
 }
 
@@ -65,11 +55,10 @@ RoundMessage Battleship::onTurnMsg(const TurnMessage& msg) {
   LOG(1, name << "> onTurnMsg");
   RoundParams params{state, msg.shot};
   risc0::Prover prover("examples/cpp/battleship/round_proof");
-  prover.addInput(params);
+  prover.writeInput(params);
   risc0::Proof proof = prover.run();
   LOG(1, name << "> RoundProof: " << proof.core.size());
-  LOG(1, name << "> RoundProof outputs: " << prover.getNumOutputs());
-  const RoundResult& round = prover.getOutput<RoundResult>(0);
+  const RoundResult& round = prover.readOutput<RoundResult>();
   LOG(1, name << "> RoundResult: " << round);
   state = round.state;
   return RoundMessage{proof};
@@ -79,17 +68,17 @@ void Battleship::onRoundMsg(const RoundMessage& msg) {
   LOG(1, name << "> onRoundMsg");
 
   msg.proof.verify("examples/cpp/battleship/round_proof");
-  const RoundMessage::Parts& parts = msg.getParts();
+  RoundMessage::Content content = msg.decode();
 
-  if (parts.old_state != peer_state) {
+  if (content.old_state != peer_state) {
     throw new std::runtime_error("Cheater: state mismatch");
   }
 
-  if (parts.shot != last_shot) {
+  if (content.shot != last_shot) {
     throw new std::runtime_error("Cheater: shot mismatch");
   }
 
-  LOG(0, name << "> shot: " << parts.shot << " -> hit: " << parts.hit);
+  LOG(0, name << "> shot: " << content.shot << " -> hit: " << content.hit);
 
-  peer_state = parts.new_state;
+  peer_state = content.new_state;
 }

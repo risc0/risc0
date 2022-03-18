@@ -123,17 +123,16 @@ impl Prover {
         ffi::check(err, || ())
     }
 
-    pub fn get_num_outputs(&self) -> Result<usize> {
-        let mut err = ffi::RawError::default();
-        let len = unsafe { ffi::risc0_prover_get_num_outputs(&mut err, self.ptr) };
-        ffi::check(err, || len)
-    }
-
-    pub fn get_output(&self, idx: usize, len: usize) -> Result<&[u8]> {
-        assert!(idx < self.get_num_outputs()?);
-        let mut err = ffi::RawError::default();
-        let buf = unsafe { ffi::risc0_prover_get_output(&mut err, self.ptr, idx, len) };
-        ffi::check(err, || unsafe { std::slice::from_raw_parts(buf, len) })
+    pub fn get_output(&self) -> Result<&[u8]> {
+        unsafe {
+            let mut err = ffi::RawError::default();
+            let buf = ffi::risc0_prover_get_output_buf(&mut err, self.ptr);
+            let buf = ffi::check(err, || buf)?;
+            let mut err = ffi::RawError::default();
+            let len = ffi::risc0_prover_get_output_len(&mut err, self.ptr);
+            let len = ffi::check(err, || len)?;
+            Ok(std::slice::from_raw_parts(buf, len))
+        }
     }
 
     pub fn run(&self) -> Result<Proof> {

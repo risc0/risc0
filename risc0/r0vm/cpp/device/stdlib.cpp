@@ -14,7 +14,7 @@
 
 #include <stdlib.h>
 
-#include "risc0/r0vm/cpp/device/align.h"
+#include "risc0/core/align.h"
 #include "risc0/r0vm/cpp/device/risc0.h"
 #include "risc0/r0vm/platform/memory.h"
 
@@ -32,7 +32,7 @@ void* malloc(size_t size) {
   // For each call to malloc, get current head pointer as our return value
   void* ret = reinterpret_cast<void*>(heap);
   // Increment heap pointer by size and then word align
-  heap = align(heap + size, sizeof(uint32_t));
+  heap = risc0::align(heap + size, sizeof(uint32_t));
   if (heap >= risc0::kMemHeapEnd) {
     std::__throw_bad_alloc();
   }
