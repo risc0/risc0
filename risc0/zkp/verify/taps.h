@@ -18,6 +18,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <stdexcept>
 
 namespace risc0 {
 
