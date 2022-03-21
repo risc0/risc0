@@ -22,7 +22,7 @@
 #include "risc0/zkp/prove/poly_group.h"
 #include "risc0/zkp/prove/step/exec.h"
 #include "risc0/zkp/prove/write_iop.h"
-#include "risc0/zkp/verify/riscv_taps.h"
+#include "risc0/zkp/verify/riscv.h"
 
 namespace risc0 {
 

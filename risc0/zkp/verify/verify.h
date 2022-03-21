@@ -17,11 +17,27 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "risc0/zkp/core/fp4.h"
 #include "risc0/zkp/verify/code_id.h"
+#include "risc0/zkp/verify/taps.h"
 
 namespace risc0 {
 
+using CircuitPolynomial = std::function<Fp4(const Fp4* evalU, const Fp* globals)>;
+
+struct VerifyCircuit {
+  VerifyCircuit(const TapSetRef& tapSet, const CircuitPolynomial& poly)
+      : tapSet(tapSet), poly(poly) {}
+  // The set of 'taps' for the circuit we are verifying
+  TapSetRef tapSet;
+  // The circuit polynomial
+  CircuitPolynomial poly;
+};
+
 // Throws on failure
-void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize);
+void verify(const VerifyCircuit& circuit,
+            const CodeID& code,
+            const uint32_t* proofData,
+            size_t proofSize);
 
 } // namespace risc0

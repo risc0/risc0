@@ -18,6 +18,7 @@
 #include "risc0/zkp/core/sha256_cpu.h"
 #include "risc0/zkp/prove/code_id.h"
 #include "risc0/zkp/prove/prove.h"
+#include "risc0/zkp/verify/riscv.h"
 #include "risc0/zkp/verify/verify.h"
 
 #include <sstream>
@@ -46,7 +47,7 @@ void Proof::verify(const std::string& filename) const {
   CodeID code;
   LOG(1, "Reading code id from " << filename + ".id");
   code = readCodeID(filename + ".id");
-  risc0::verify(code, core.data(), core.size());
+  risc0::verify(getRiscVVerifyCircuit(), code, core.data(), core.size());
   if (impl->buffer.size() != core[8]) {
     std::stringstream ss;
     ss << "Proof::verify> Message size (" << impl->buffer.size() << ") does not match proof core ("
