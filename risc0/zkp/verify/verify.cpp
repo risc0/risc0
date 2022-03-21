@@ -123,10 +123,7 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
   Fp backOne = kRouRev[po2];
 
   // Read the U coeffs, and define the tap variables
-  size_t numTaps = 0;
-#define tap(base, offset, back) size_t tap_##base##_##offset##_##back = numTaps++;
-#define TAPS
-#include "risc0/zkp/prove/step/step.cpp.inc"
+  size_t numTaps = tapSet.tapsSize();
   std::vector<Fp4> coeffU(numTaps + 16);
   iop.read(coeffU.data(), coeffU.size());
   auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4);
@@ -155,9 +152,8 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
                  globals[kPolyMixGlobalOffset + 3]};
 
   // Do the big polynomial eval
-#undef TAPS
 #define CHECK_EVAL
-#define do_get(buf, reg, back) evalU[tap_##buf##_##reg##_##back]
+#define do_get(buf, reg, back, id) evalU[id];
 #define do_get_global(reg) globals[reg]
 #define do_begin() MixState()
 #define do_assert_zero(in, val, loc) in.assert_zero(Fp4(val), polyMix, loc)

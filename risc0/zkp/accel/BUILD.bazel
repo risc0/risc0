@@ -8,7 +8,6 @@ cc_library(
     hdrs = [
         "accel.h",
         "check.h",
-        "mix.h",
         "pp.h",
     ],
     deps = [

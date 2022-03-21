@@ -31,6 +31,7 @@ struct PolyOpInterface : public ValueImplBase,
   virtual int getTypeID() const = 0;
   virtual bool lessThan(const PolyOpInterface& rhs) const = 0;
   virtual int degree() const = 0;
+  virtual void computeTaps(PolyContext::Impl& impl) = 0;
   virtual std::string output(PolyContext::Impl& impl) = 0;
   virtual void findCriticalPath(PolyContext::Impl& impl) = 0;
 };
@@ -59,6 +60,7 @@ struct OpConstant : public PolyOpBase<OpConstant, 0> {
   OpConstant(Fp value) : value(value) {}
   int getDegree() const { return 0; }
   Fp key() const { return value; }
+  void computeTaps(PolyContext::Impl& impl) override {}
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -73,6 +75,7 @@ struct OpGet : public PolyOpBase<OpGet, 1> {
   std::tuple<std::string, size_t, size_t> key() const {
     return std::make_tuple(base, offset, back);
   }
+  void computeTaps(PolyContext::Impl& impl) override;
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -83,6 +86,10 @@ struct OpAdd : public PolyOpBase<OpAdd, 2> {
   OpAdd(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
   int getDegree() const { return std::max(lhs->degree(), rhs->degree()); }
   std::pair<PolyOp, PolyOp> key() const { return std::make_pair(lhs, rhs); }
+  void computeTaps(PolyContext::Impl& impl) override {
+    lhs->computeTaps(impl);
+    rhs->computeTaps(impl);
+  }
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -93,6 +100,10 @@ struct OpSub : public PolyOpBase<OpSub, 3> {
   OpSub(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
   int getDegree() const { return std::max(lhs->degree(), rhs->degree()); }
   std::pair<PolyOp, PolyOp> key() const { return std::make_pair(lhs, rhs); }
+  void computeTaps(PolyContext::Impl& impl) override {
+    lhs->computeTaps(impl);
+    rhs->computeTaps(impl);
+  }
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -103,6 +114,10 @@ struct OpMul : public PolyOpBase<OpMul, 4> {
   OpMul(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
   int getDegree() const { return lhs->degree() + rhs->degree(); }
   std::pair<PolyOp, PolyOp> key() const { return std::make_pair(lhs, rhs); }
+  void computeTaps(PolyContext::Impl& impl) override {
+    lhs->computeTaps(impl);
+    rhs->computeTaps(impl);
+  }
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -110,6 +125,7 @@ struct OpMul : public PolyOpBase<OpMul, 4> {
 struct OpBegin : public PolyOpBase<OpBegin, 5> {
   int getDegree() const { return 0; }
   int key() const { return 0; }
+  void computeTaps(PolyContext::Impl& impl) override {}
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -120,6 +136,10 @@ struct OpAssertZero : public PolyOpBase<OpAssertZero, 6> {
   OpAssertZero(PolyOp prev, PolyOp zero) : prev(prev), zero(zero) {}
   int getDegree() const { return std::max(prev->degree(), zero->degree()); }
   std::pair<PolyOp, PolyOp> key() const { return std::make_pair(prev, zero); }
+  void computeTaps(PolyContext::Impl& impl) override {
+    prev->computeTaps(impl);
+    zero->computeTaps(impl);
+  }
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -131,6 +151,11 @@ struct OpCombine : public PolyOpBase<OpCombine, 7> {
   OpCombine(PolyOp prev, PolyOp mul, PolyOp inner) : prev(prev), mul(mul), inner(inner) {}
   int getDegree() const { return std::max(prev->degree(), mul->degree() + inner->degree()); }
   std::tuple<PolyOp, PolyOp, PolyOp> key() const { return std::make_tuple(prev, mul, inner); }
+  void computeTaps(PolyContext::Impl& impl) override {
+    prev->computeTaps(impl);
+    mul->computeTaps(impl);
+    inner->computeTaps(impl);
+  }
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -140,6 +165,7 @@ struct OpGetGlobal : public PolyOpBase<OpGetGlobal, 8> {
   OpGetGlobal(size_t offset) : offset(offset) {}
   int getDegree() const { return 0; }
   size_t key() const { return offset; }
+  void computeTaps(PolyContext::Impl& impl) override {}
   std::string output(PolyContext::Impl& impl) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
@@ -177,6 +203,7 @@ struct PolyContext::Impl {
     }
   };
   std::set<Tap> taps;
+  std::map<Tap, size_t> tapToID;
 
   template <typename OpClass, typename... Args> PolyOp intern(SourceLoc loc, Args... args) {
     PolyOp newOp = std::make_shared<OpClass>(args...);
@@ -287,10 +314,16 @@ std::string OpConstant::output(PolyContext::Impl& impl) {
 
 void OpConstant::findCriticalPath(PolyContext::Impl& impl) {}
 
-std::string OpGet::output(PolyContext::Impl& impl) {
+void OpGet::computeTaps(PolyContext::Impl& impl) {
   impl.taps.emplace(base, offset, back);
+}
+
+std::string OpGet::output(PolyContext::Impl& impl) {
+  using Tap = PolyContext::Impl::Tap;
+  Tap myTap = {base, offset, back};
+  size_t myID = impl.tapToID[myTap];
   return std::string("do_get(") + base + ", " + std::to_string(offset) + ", " +
-         std::to_string(back) + ")";
+         std::to_string(back) + ", " + std::to_string(myID) + ")";
 }
 
 void OpGet::findCriticalPath(PolyContext::Impl& impl) {
@@ -391,6 +424,11 @@ std::string PolyContext::done() {
   impl->resultStack.pop_back();
   REQUIRE(impl->condStack.empty());
   REQUIRE(impl->resultStack.empty());
+  result->computeTaps(*impl);
+  size_t nextID = 0;
+  for (const auto& tap : impl->taps) {
+    impl->tapToID[tap] = nextID++;
+  }
   std::string finalName = impl->eval(result);
   if (result->degree() > kMaxDegree) {
     result->findCriticalPath(*impl);
@@ -473,31 +511,6 @@ std::string PolyContext::done() {
     LOG(0, "Required " << comboById.size() << " combos");
   }
   REQUIRE(kComboCount == comboById.size());
-  impl->outs << "#ifdef COMBOS";
-  impl->outs << R"**(
-#ifndef combo_begin
-#define combo_begin(id) /**/
-#endif
-#ifndef combo_end
-#define combo_end(id) /**/
-#endif
-#ifndef tap
-#define tap(back) /**/
-#endif
-)**";
-  for (size_t i = 0; i < comboById.size(); i++) {
-    impl->outs << "combo_begin(" << i << ");\n";
-    for (size_t back : comboById[i]) {
-      impl->outs << "tap(" << back << ");\n";
-    }
-    impl->outs << "combo_end(" << i << ");\n";
-  }
-  impl->outs << R"**(
-#undef combo_begin
-#undef combo_end
-#undef tap
-)**";
-  impl->outs << "#endif  // COMBOS\n";
 
   return impl->outs.str();
 }

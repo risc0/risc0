@@ -36,7 +36,7 @@ DEVSPEC Fp4 computePoly(      //
              global[kPolyMixGlobalOffset + 2],
              global[kPolyMixGlobalOffset + 3]};
 #define CHECK_EVAL
-#define do_get(buf, reg, back) buf[reg * size + ((idx - kInvRate * back) & mask)]
+#define do_get(buf, reg, back, id) buf[reg * size + ((idx - kInvRate * back) & mask)]
 #define do_get_global(reg) global[reg]
 #define do_begin()                                                                                 \
   MixState { Fp4(0), Fp4(1) }

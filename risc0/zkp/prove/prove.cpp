@@ -264,14 +264,32 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
   LOG(1, "Mix = " << mix);
 
   // Do the coefficent mixing
-  auto combos = AccelSlice<Fp4>::allocate(size * (kComboCount + 1));
-  mixPolyCoeffsAccel(combos,
-                     codeGroup.getCoeffs(),
-                     dataGroup.getCoeffs(),
-                     accumGroup.getCoeffs(),
-                     checkGroup.getCoeffs(),
-                     AccelSlice<Fp>::copy(exec.context.globals, kGlobalSize),
-                     size);
+  // Begin by making a zeroed output buffer
+  auto combos = AccelSlice<Fp4>::copy(std::vector<Fp4>(size * (kComboCount + 1)));
+  Fp4 curMix(1);
+  auto mixGroup = [&](RegisterGroup id, PolyGroup& pg) {
+    std::vector<uint32_t> which;
+    for (auto reg : tapSet.groupRegs(id)) {
+      which.push_back(reg.comboID());
+    }
+    auto whichAccel = AccelSlice<uint32_t>::copy(which);
+    auto curMixAccel = AccelSlice<Fp4>::copy(&curMix, 1);
+    auto mixAccel = AccelSlice<Fp4>::copy(&mix, 1);
+    size_t gsize = tapSet.groupSize(id);
+    mixPolyCoeffsAccel(combos, curMixAccel, mixAccel, pg.getCoeffs(), whichAccel, gsize, size);
+    curMix *= pow(mix, gsize);
+  };
+  mixGroup(RegisterGroup::ACCUM, accumGroup);
+  mixGroup(RegisterGroup::CODE, codeGroup);
+  mixGroup(RegisterGroup::DATA, dataGroup);
+  {
+    std::vector<uint32_t> which(kCheckSize, kComboCount);
+    auto whichAccel = AccelSlice<uint32_t>::copy(which);
+    auto curMixAccel = AccelSlice<Fp4>::copy(&curMix, 1);
+    auto mixAccel = AccelSlice<Fp4>::copy(&mix, 1);
+    mixPolyCoeffsAccel(
+        combos, curMixAccel, mixAccel, checkGroup.getCoeffs(), whichAccel, kCheckSize, size);
+  }
 
   // Load the near final coefficients back to the CPU
   auto comboCpu = std::make_unique<AccelReadWriteLock<Fp4>>(combos);
