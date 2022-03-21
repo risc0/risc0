@@ -69,15 +69,12 @@ extern "C" {
         len: usize,
     );
 
-    pub(crate) fn risc0_prover_get_num_outputs(err: *mut RawError, prover: *mut RawProver)
-        -> usize;
-
-    pub(crate) fn risc0_prover_get_output(
+    pub(crate) fn risc0_prover_get_output_buf(
         err: *mut RawError,
         prover: *mut RawProver,
-        idx: usize,
-        len: usize,
     ) -> *const u8;
+
+    pub(crate) fn risc0_prover_get_output_len(err: *mut RawError, prover: *mut RawProver) -> usize;
 
     pub(crate) fn risc0_prover_run(err: *mut RawError, prover: *mut RawProver) -> *const RawProof;
 

@@ -39,6 +39,10 @@ const REGION_SHA_START: usize = 0x0030_0000;
 // const REGION_SHA_LEN: usize = REGION_SIZE_256KB;
 // const REGION_SHA_END: usize = REGION_SHA_START + REGION_SHA_LEN;
 
+const REGION_INPUT_START: usize = 0x0018_0000;
+// const REGION_INPUT_LEN: usize = REGION_SIZE_256KB;
+// const REGION_INPUT_END: usize = REGION_INPUT_START + REGION_INPUT_LEN;
+
 extern "C" {
     fn _fault() -> !;
 }

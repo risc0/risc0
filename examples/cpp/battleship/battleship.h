@@ -27,6 +27,11 @@ struct Position {
   uint32_t x;
   uint32_t y;
 
+  template <typename Archive> void transfer(Archive& ar) {
+    ar.transfer(x);
+    ar.transfer(y);
+  }
+
   bool operator==(const Position& rhs) const;
   bool operator!=(const Position& rhs) const;
 };
@@ -51,6 +56,12 @@ struct Ship {
   ShipDirection dir;
   uint16_t hit_mask;
 
+  template <typename Archive> void transfer(Archive& ar) {
+    ar.transfer(pos);
+    ar.transfer(reinterpret_cast<uint16_t&>(dir));
+    ar.transfer(hit_mask);
+  }
+
   bool operator==(const Ship& rhs) const;
 };
 
@@ -74,17 +85,34 @@ struct GameState {
   Ship ships[NUM_SHIPS];
   uint32_t salt;
 
+  template <typename Archive> void transfer(Archive& ar) {
+    for (Ship& ship : ships) {
+      ar.transfer(ship);
+    }
+    ar.transfer(salt);
+  }
+
   bool operator==(const GameState& rhs) const;
 };
 
 struct RoundParams {
   GameState state;
   Position shot;
+
+  template <typename Archive> void transfer(Archive& ar) {
+    ar.transfer(state);
+    ar.transfer(shot);
+  }
 };
 
 struct RoundResult {
   GameState state;
   HitType hit;
+
+  template <typename Archive> void transfer(Archive& ar) {
+    ar.transfer(state);
+    ar.transfer(reinterpret_cast<uint32_t&>(hit));
+  }
 
   bool operator==(const RoundResult& rhs) const;
 };

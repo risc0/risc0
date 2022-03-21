@@ -20,6 +20,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "risc0/core/archive.h"
 #include "risc0/r0vm/cpp/device/key.h"
 #include "risc0/r0vm/cpp/device/sha.h"
 
@@ -43,9 +44,16 @@ public:
 
   /// @brief Reads data from the host.
   ///
-  /// @tparam T The type to cast the resulting buffer to.
-  /// @return A constant reference of type @c T.
-  template <typename T> const T& read() { return *reinterpret_cast<const T*>(read(sizeof(T))); }
+  /// @tparam T The type to deserialize data from the host as.
+  /// @return An object with type @c T.
+  template <typename T> T read() {
+    BufferStreamReader stream(read_ptr);
+    ArchiveReader reader(stream);
+    T obj;
+    reader.transfer(obj);
+    read_ptr = stream.ptr;
+    return obj;
+  }
 
   /// @brief Writes data to the host.
   ///
@@ -55,39 +63,60 @@ public:
 
   /// @brief Writes data to the host.
   ///
-  /// @tparam T
-  /// @param obj
-  template <typename T> void write(const T& obj) { write(&obj, sizeof(T)); }
+  /// @tparam T The type of object to write to the host.
+  /// @param obj The object to serialize and write to the host.
+  template <typename T> void write(const T& obj) {
+    uint32_t* start = write_ptr;
+    BufferStreamWriter stream(write_ptr);
+    ArchiveWriter writer(stream);
+    writer.transfer(obj);
+    size_t size = (stream.ptr - start) * sizeof(uint32_t);
+    write(start, size);
+    write_ptr = stream.ptr;
+  }
 
   /// @brief Writes data to the host.
   ///
-  /// @tparam T
-  /// @param obj
-  template <typename T> void write(const T* obj) { write(obj, sizeof(T)); }
+  /// @tparam T The type of object to write to the host.
+  /// @param obj The object to serialize and write to the host.
+  template <typename T> void write(const T* obj) { write(*obj); }
 
-  /// @brief Writes a buffer to the official proof output.
+  /// @brief Writes data to the official proof output.
   ///
   /// @param data
   /// @param size
   void commit(const void* data, size_t size);
 
-  /// @brief Writes an object to the official proof output.
+  /// @brief Writes data to the official proof output.
   ///
-  /// @tparam T
-  /// @param obj
-  template <typename T> void commit(const T& obj) { commit(&obj, sizeof(T)); }
+  /// @tparam T The type of object to write to the host.
+  /// @param obj The object to serialize and write to the host.
+  template <typename T> void commit(const T& obj) {
+    uint32_t* start = write_ptr;
+    BufferStreamWriter stream(write_ptr);
+    ArchiveWriter writer(stream);
+    writer.transfer(obj);
+    size_t size = (stream.ptr - start) * sizeof(uint32_t);
+    commit(start, size);
+    write_ptr = stream.ptr;
+  }
 
-  /// @brief Writes an object to the official proof output.
+  /// @brief Writes data to the official proof output.
   ///
-  /// @tparam T
-  /// @param obj
-  template <typename T> void commit(const T* obj) { commit(obj, sizeof(T)); }
+  /// @tparam T The type of object to write to the host.
+  /// @param obj The object to serialize and write to the host.
+  template <typename T> void commit(const T* obj) { commit(*obj); }
 
-  /// @brief Gets/creates a key in the host key store.
+  /// @brief Gets or creates a key in from the host keystore.
   ///
   /// @param name
   /// @param mode
   KeyPtr getKey(const char* name, KeyMode mode);
+
+  /// @brief Print a message to the debug console.
+  ///
+  /// @param msg The message to print.
+  void print(const char* msg);
 
 private:
   friend void _risc0_main(uint32_t* result);
@@ -98,7 +127,9 @@ private:
 private:
   SHA256 message;
   uint32_t* result;
-  uint32_t commits;
+  uint32_t* read_ptr;
+  uint32_t* write_ptr;
+  uint32_t* commit_ptr;
 };
 
 /// @private

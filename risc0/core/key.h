@@ -27,6 +27,7 @@ struct Key {
       data[i] = CryptoRng::shared().generate();
     }
   }
+
   bool operator==(const Key& rhs) const {
     for (size_t i = 0; i < 4; i++) {
       if (data[i] != rhs.data[i]) {
@@ -35,7 +36,15 @@ struct Key {
     }
     return true;
   }
+
   bool operator!=(const Key& rhs) { return !(*this == rhs); }
+
+  template <typename Archive> void transfer(Archive& ar) {
+    for (uint32_t& word : data) {
+      ar.transfer(word);
+    }
+  }
+
   uint32_t data[4];
 };
 

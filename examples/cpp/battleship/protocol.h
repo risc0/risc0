@@ -24,11 +24,13 @@
 struct InitMessage {
   risc0::Proof proof;
 
-  struct Parts {
+  struct Content {
     risc0::ShaDigest state;
+
+    template <typename Archive> void transfer(Archive& ar) { ar.transfer(state); }
   };
 
-  const Parts& getParts() const;
+  Content decode() const;
 };
 
 struct TurnMessage {
@@ -38,14 +40,21 @@ struct TurnMessage {
 struct RoundMessage {
   risc0::Proof proof;
 
-  struct Parts {
+  struct Content {
     risc0::ShaDigest old_state;
     risc0::ShaDigest new_state;
     Position shot;
     HitType hit;
+
+    template <typename Archive> void transfer(Archive& ar) {
+      ar.transfer(old_state);
+      ar.transfer(new_state);
+      ar.transfer(shot);
+      ar.transfer(reinterpret_cast<uint32_t&>(hit));
+    }
   };
 
-  const Parts& getParts() const;
+  Content decode() const;
 };
 
 class Battleship {

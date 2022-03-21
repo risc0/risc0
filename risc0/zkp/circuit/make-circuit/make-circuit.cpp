@@ -18,10 +18,21 @@
 #include "risc0/zkp/circuit/poly_context.h"
 #include "risc0/zkp/circuit/step_state.h"
 
-int main() {
-  using namespace risc0;
+#include <fstream>
+
+using namespace risc0;
+
+int main(int argc, char* argv[]) {
   setLogLevel(1);
-  std::cout << "#ifdef STEP_INC\n";
+
+  if (argc < 2) {
+    LOG(1, "usage: make-circuit <output_path>");
+    return 1;
+  }
+
+  std::ofstream fout(argv[1]);
+
+  fout << "#ifdef STEP_INC\n";
   {
     GenContext genContext("dataStepExec");
     setGlobalContext(&genContext);
@@ -31,7 +42,7 @@ int main() {
     StepState step(code, data);
     step.setExec();
     setGlobalContext(nullptr);
-    std::cout << genContext.funcDone();
+    fout << genContext.funcDone();
   }
   {
     GenContext genContext("dataStepCheck");
@@ -42,7 +53,7 @@ int main() {
     StepState step(code, data);
     step.setMemCheck();
     setGlobalContext(nullptr);
-    std::cout << genContext.funcDone();
+    fout << genContext.funcDone();
   }
   {
     GenContext genContext("accumStep");
@@ -55,9 +66,9 @@ int main() {
     AccumRegs accumRegs(accum);
     accumRegs.set(step);
     setGlobalContext(nullptr);
-    std::cout << genContext.funcDone();
+    fout << genContext.funcDone();
   }
-  std::cout << "#endif // STEP_INC\n";
+  fout << "#endif // STEP_INC\n";
   {
     PolyContext polyContext;
     setGlobalContext(&polyContext);
@@ -71,6 +82,8 @@ int main() {
     AccumRegs accumRegs(accum);
     accumRegs.set(step);
     setGlobalContext(nullptr);
-    std::cout << polyContext.done();
+    fout << polyContext.done();
   }
+
+  return 0;
 }

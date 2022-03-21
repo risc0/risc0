@@ -25,5 +25,5 @@ extern "C" void risc0_main(Env* env) {
   env->commit(shaDigest(params.state));
   env->commit(shaDigest(result.state));
   env->commit(params.shot);
-  env->commit(result.hit);
+  env->commit(static_cast<uint32_t>(result.hit));
 }

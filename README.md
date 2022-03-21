@@ -29,6 +29,11 @@ You should be able to build and run all tests with:
 bazelisk test //...
 ```
 
+### Linux
+
+A C++ compiler must be installed; both gcc and clang should work.
+Let us know if you run into any issues.
+
 ### macOS
 
 Risc0 development on macOS **requires a full installation of Xcode (not just command line tools)**.
@@ -38,6 +43,9 @@ Risc0 development on macOS **requires a full installation of Xcode (not just com
 Our usage of Bazel requires [symlink support to be enabled](https://bazel.build/docs/windows#symlink).
 This is possible on Windows by enabling [Developer Mode](https://docs.microsoft.com/en-us/windows/apps/get-started/enable-your-device-for-development),
 or by running Bazel as an administrator.
+
+A C++ compiler must be installed. Visual Studio 2019 Build Tools is known to work (as does the Community edition).
+Let us know if you run into any issues.
 
 ## Running the 'Battleship' Examples
 
