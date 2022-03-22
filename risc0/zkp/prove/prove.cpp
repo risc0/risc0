@@ -132,9 +132,7 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
   LOG(1, "accumGroup: " << accumGroup.getMerkle().getRoot());
 
   // Set the poly mix value
-  for (size_t i = 0; i < kPolyMixGlobalSize; i++) {
-    exec.context.globals[kPolyMixGlobalOffset + i] = Fp::random(iop);
-  }
+  Fp4 polyMix = Fp4::random(iop);
 
   // Now generate the check polynomial
   size_t domain = size * kInvRate;
@@ -145,6 +143,7 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
                      dataGroup.getEvaluated(),
                      accumGroup.getEvaluated(),
                      AccelSlice<Fp>::copy(exec.context.globals, kGlobalSize),
+                     AccelSlice<Fp4>::copy(&polyMix, 1),
                      AccelSlice<Fp>::copy(kRouFwd, kMaxRouPo2 + 1),
                      domain);
   accelEndProfile();
@@ -256,11 +255,8 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
   iop.commit(hashU);
 
   // Set the mix mix value
-  Fp4 mix;
-  for (size_t i = 0; i < kMixMixGlobalSize; i++) {
-    mix.elems[i] = Fp::random(iop);
-    exec.context.globals[kMixMixGlobalOffset + i] = mix.elems[i];
-  }
+  Fp4 mix = Fp4::random(iop);
+  ;
   LOG(1, "Mix = " << mix);
 
   // Do the coefficent mixing

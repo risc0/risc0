@@ -73,12 +73,7 @@ TapSetRef getRiscVTaps() {
   return tapSet.getRef();
 }
 
-static Fp4 RiscVPolynomial(const Fp4* evalU, const Fp* globals) {
-  Fp4 polyMix = {globals[kPolyMixGlobalOffset],
-                 globals[kPolyMixGlobalOffset + 1],
-                 globals[kPolyMixGlobalOffset + 2],
-                 globals[kPolyMixGlobalOffset + 3]};
-
+static Fp4 RiscVPolynomial(const Fp4* evalU, const Fp* globals, Fp4 polyMix) {
   // Do the big polynomial eval
 #define CHECK_EVAL
 #define do_get(buf, reg, back, id) evalU[id];

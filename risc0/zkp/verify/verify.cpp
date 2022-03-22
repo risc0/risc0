@@ -68,9 +68,7 @@ void verify(const VerifyCircuit& circuit,
   LOG(1, "accumRoot = " << accumMerkle.getRoot());
 
   // Set the poly mix value
-  for (size_t i = 0; i < kPolyMixGlobalSize; i++) {
-    globals[kPolyMixGlobalOffset + i] = Fp::random(iop);
-  }
+  Fp4 polyMix = Fp4::random(iop);
 
   MerkleTreeVerifier checkMerkle(iop, domain, kCheckSize, kQueries);
   LOG(1, "checkRoot = " << checkMerkle.getRoot());
@@ -90,11 +88,6 @@ void verify(const VerifyCircuit& circuit,
   auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4);
   iop.commit(hashU);
 
-  // Set the mix mix value
-  for (size_t i = 0; i < kMixMixGlobalSize; i++) {
-    globals[kMixMixGlobalOffset + i] = Fp::random(iop);
-  }
-
   // Now, convert to evaluated values
   size_t curPos = 0;
   std::vector<Fp4> evalU;
@@ -107,7 +100,7 @@ void verify(const VerifyCircuit& circuit,
     curPos += reg.size();
   }
 
-  Fp4 result = circuit.poly(evalU.data(), globals);
+  Fp4 result = circuit.poly(evalU.data(), globals, polyMix);
   LOG(1, "Result = " << result);
 
   // Now generate the check polynomial
@@ -126,11 +119,8 @@ void verify(const VerifyCircuit& circuit,
   // Make sure they match
   REQUIRE(check == result);
 
-  Fp4 mix = {globals[kMixMixGlobalOffset],
-             globals[kMixMixGlobalOffset + 1],
-             globals[kMixMixGlobalOffset + 2],
-             globals[kMixMixGlobalOffset + 3]};
-
+  // Set the mix mix value
+  Fp4 mix = Fp4::random(iop);
   LOG(1, "mix = " << mix);
 
   // Make the mixed U polynomials

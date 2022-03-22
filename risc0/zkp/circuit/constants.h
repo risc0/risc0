@@ -55,11 +55,7 @@ CONSTSCALAR size_t kRegistersGlobalOffset = 0;
 CONSTSCALAR size_t kRegistersGlobalSize = kOutputRegs * 2;
 CONSTSCALAR size_t kAccumMixGlobalOffset = kRegistersGlobalSize;
 CONSTSCALAR size_t kAccumMixGlobalSize = 20;
-CONSTSCALAR size_t kPolyMixGlobalOffset = kAccumMixGlobalOffset + kAccumMixGlobalSize;
-CONSTSCALAR size_t kPolyMixGlobalSize = 4;
-CONSTSCALAR size_t kMixMixGlobalOffset = kPolyMixGlobalOffset + kPolyMixGlobalSize;
-CONSTSCALAR size_t kMixMixGlobalSize = 4;
-CONSTSCALAR size_t kGlobalSize = kMixMixGlobalOffset + kMixMixGlobalSize;
+CONSTSCALAR size_t kGlobalSize = kAccumMixGlobalOffset + kAccumMixGlobalSize;
 
 CONSTSCALAR size_t kComboCount = 5;
 

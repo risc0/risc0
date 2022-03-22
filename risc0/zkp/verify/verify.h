@@ -23,7 +23,7 @@
 
 namespace risc0 {
 
-using CircuitPolynomial = std::function<Fp4(const Fp4* evalU, const Fp* globals)>;
+using CircuitPolynomial = std::function<Fp4(const Fp4* evalU, const Fp* globals, Fp4 polyMix)>;
 
 struct VerifyCircuit {
   VerifyCircuit(const TapSetRef& tapSet, const CircuitPolynomial& poly)

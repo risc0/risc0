@@ -19,12 +19,13 @@ PARALLEL_KERNEL(                 //
      CPTR(Fp, data),             //
      CPTR(Fp, accum),            //
      CPTR(Fp, global),           //
+     CPTR(Fp4, polyMix),         //
      CPTR(Fp, rou),              //
      SIZE(count),                //
      CALC(po2, log2Ceil(count)), //
      REQ(1 << po2 == count)),
     {
-      Fp4 ret = computePoly(code, data, accum, global, idx, count);
+      Fp4 ret = computePoly(code, data, accum, global, *polyMix, idx, count);
       Fp x = pow(rou[po2], idx);
       ret = ret * inv(pow(Fp(3) * x, (1 << (po2 - 2))) - 1);
       out[0 * count + idx] = ret.elems[0];
