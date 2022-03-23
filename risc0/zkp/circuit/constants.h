@@ -42,7 +42,7 @@ enum {
 
 CONSTSCALAR size_t kCodeSize = 16;
 CONSTSCALAR size_t kDataSize = 160;
-CONSTSCALAR size_t kAccumSize = 16;
+CONSTSCALAR size_t kAccumSize = 10;
 CONSTSCALAR size_t kCheckSize = 16;
 
 CONSTSCALAR size_t kOutputRegs = 9;

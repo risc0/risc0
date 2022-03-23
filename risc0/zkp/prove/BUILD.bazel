@@ -13,6 +13,7 @@ cc_library(
         "poly_group.cpp",
         "proof.cpp",
         "prove.cpp",
+        "riscv.cpp",
     ],
     hdrs = [
         "c_api.h",
@@ -22,6 +23,7 @@ cc_library(
         "poly_group.h",
         "proof.h",
         "prove.h",
+        "riscv.h",
         "write_iop.h",
     ],
     linkstatic = True,

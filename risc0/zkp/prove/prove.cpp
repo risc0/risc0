@@ -26,20 +26,7 @@
 
 namespace risc0 {
 
-static AccelSlice<Fp> makeCoeffs(std::vector<Fp>& vec, size_t count, bool zkFill) {
-  size_t size = vec.size() / count;
-
-  // Fill in noise (if desired)
-#ifndef CIRCUIT_DEBUG
-  if (zkFill) {
-    for (size_t i = 0; i < count; i++) {
-      for (size_t j = size - kZkCycles; j < size; j++) {
-        vec[i * size + j] = Fp::random(CryptoRng::shared());
-      }
-    }
-  }
-#endif
-
+static AccelSlice<Fp> makeCoeffs(const std::vector<Fp>& vec, size_t count) {
   // Copy into accel buffer
   auto ret = AccelSlice<Fp>::copy(vec);
 
@@ -54,80 +41,38 @@ static AccelSlice<Fp> makeCoeffs(std::vector<Fp>& vec, size_t count, bool zkFill
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
+BufferU32 prove(ProveCircuit& circuit) {
   // Get taps
   TapSetRef tapSet = getRiscVTaps();
   // Setup output IOP
   WriteIOP iop;
 
   // Do main execution + get size
-  ExecState exec(elfFile);
-  exec.run(kMaxCycles, io);
-  size_t size = exec.context.numSteps;
-  uint32_t po2 = log2Ceil(size);
+  circuit.execute(iop);
+  uint32_t po2 = circuit.getPo2();
+  REQUIRE(po2 <= kMaxCyclesPo2);
+  size_t size = size_t(1) << po2;
 
-  // Write final low register state
-  for (size_t i = 0; i < kOutputRegs; i++) {
-    const Fp* globals = exec.context.globals;
-    uint32_t regVal = globals[2 * i].asUInt32() | (globals[2 * i + 1].asUInt32() << 16);
-    LOG(2, "x" << i + 1 << " = " << hex(regVal));
-    iop.write(&regVal, 1);
-  }
-
-  // Write the po2 for size
-  iop.write(&po2, 1);
-
-  // Now, do memory verification
-  for (size_t i = 0; i < size - kZkCycles; i++) {
-    exec.context.curStep = i;
-    dataStepCheck(exec.context, exec.code.data(), exec.data.data());
-  }
-
-#ifdef CIRCUIT_DEBUG
-  // Set any unset values to dead
-  for (Fp& x : exec.data) {
-    if (x == Fp::invalid()) {
-      x = 0xdead;
-    }
-  }
-#endif
+  // Get sizes
+  size_t codeSize = tapSet.groupSize(RegisterGroup::CODE);
+  size_t dataSize = tapSet.groupSize(RegisterGroup::DATA);
+  size_t accumSize = tapSet.groupSize(RegisterGroup::ACCUM);
 
   // Make code + data PolyGroups + commit them
-  PolyGroup codeGroup(makeCoeffs(exec.code, kCodeSize, false), kCodeSize, size);
-  PolyGroup dataGroup(makeCoeffs(exec.data, kDataSize, true), kDataSize, size);
+  PolyGroup codeGroup(makeCoeffs(circuit.getCode(), codeSize), codeSize, size);
+  PolyGroup dataGroup(makeCoeffs(circuit.getData(), dataSize), dataSize, size);
   codeGroup.getMerkle().commit(iop);
   dataGroup.getMerkle().commit(iop);
 
   LOG(1, "codeGroup: " << codeGroup.getMerkle().getRoot());
   LOG(1, "dataGroup: " << dataGroup.getMerkle().getRoot());
 
-  // Fill in accum mix
-  for (size_t i = 0; i < kAccumMixGlobalSize; i++) {
-    exec.context.globals[kAccumMixGlobalOffset + i] = Fp::random(iop);
-  }
-
-  // Generate accum
-#ifdef CIRCUIT_DEBUG
-  std::vector<Fp> accum(kAccumSize * size, Fp::invalid());
-#else
-  std::vector<Fp> accum(kAccumSize * size);
-#endif
-  for (size_t i = 0; i < size - kZkCycles; i++) {
-    exec.context.curStep = i;
-    accumStep(exec.context, exec.code.data(), exec.data.data(), accum.data());
-  }
-
-#ifdef CIRCUIT_DEBUG
-  // Set any unset values to dead
-  for (Fp& x : accum) {
-    if (x == Fp::invalid()) {
-      x = 0xdead;
-    }
-  }
-#endif
+  circuit.accumulate(iop);
 
   // Make the accum group + commit
-  PolyGroup accumGroup(makeCoeffs(accum, kAccumSize, true), kAccumSize, size);
+  LOG(1, "size = " << size << ", accumSize = " << accumSize);
+  LOG(1, "getAccum.size() = " << circuit.getAccum().size());
+  PolyGroup accumGroup(makeCoeffs(circuit.getAccum(), accumSize), accumSize, size);
   accumGroup.getMerkle().commit(iop);
   LOG(1, "accumGroup: " << accumGroup.getMerkle().getRoot());
 
@@ -137,16 +82,11 @@ BufferU32 prove(const std::string& elfFile, MemoryHandler& io) {
   // Now generate the check polynomial
   size_t domain = size * kInvRate;
   auto checkPoly = AccelSlice<Fp>::allocate(4 * domain);
-  accelBeginProfile();
-  evalCheckPolyAccel(checkPoly,
-                     codeGroup.getEvaluated(),
-                     dataGroup.getEvaluated(),
-                     accumGroup.getEvaluated(),
-                     AccelSlice<Fp>::copy(exec.context.globals, kGlobalSize),
-                     AccelSlice<Fp4>::copy(&polyMix, 1),
-                     AccelSlice<Fp>::copy(kRouFwd, kMaxRouPo2 + 1),
-                     domain);
-  accelEndProfile();
+  circuit.evalCheck(checkPoly,
+                    codeGroup.getEvaluated(),
+                    dataGroup.getEvaluated(),
+                    accumGroup.getEvaluated(),
+                    polyMix);
 
 #ifdef CIRCUIT_DEBUG
   Fp4 badZ; // = Fp4(1);

@@ -14,6 +14,7 @@
 
 #include "risc0/zkp/verify/riscv.h"
 
+#include "risc0/core/log.h"
 #include "risc0/zkp/core/fp4.h"
 #include "risc0/zkp/verify/verify.h"
 

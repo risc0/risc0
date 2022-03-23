@@ -29,6 +29,8 @@ namespace risc0 {
 // as well as access to state data regarding execution trace, etc.
 
 class ProveCircuit {
+public:
+  virtual ~ProveCircuit() {}
   virtual TapSetRef getTaps() const = 0;
   // Perform initial 'execution' setting code + data Additionally, write any
   // 'results' as needed.
@@ -46,13 +48,13 @@ class ProveCircuit {
       Fp4 polyMix) const = 0;
 
   // Po2 size, Code + Data are only available after execute
-  virtual uint32_t getPo2() const;
-  virtual std::vector<Fp>& getCode() const = 0;
-  virtual std::vector<Fp>& getData() const = 0;
+  virtual uint32_t getPo2() const = 0;
+  virtual const std::vector<Fp>& getCode() const = 0;
+  virtual const std::vector<Fp>& getData() const = 0;
   // Accum is only available after accumulate
-  virtual std::vector<Fp>& getAccum() const = 0;
+  virtual const std::vector<Fp>& getAccum() const = 0;
 };
 
-BufferU32 prove(const std::string& elfFile, MemoryHandler& io);
+BufferU32 prove(ProveCircuit& circuit);
 
 } // namespace risc0

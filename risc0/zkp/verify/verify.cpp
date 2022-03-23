@@ -20,7 +20,6 @@
 #include "risc0/zkp/verify/fri.h"
 #include "risc0/zkp/verify/merkle.h"
 #include "risc0/zkp/verify/read_iop.h"
-#include "risc0/zkp/verify/riscv.h"
 
 namespace risc0 {
 
@@ -35,7 +34,7 @@ void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize)
 
   // Get the size
   size_t po2 = circuit.getPo2();
-  REQUIRE(po2 < kMaxCyclesPo2);
+  REQUIRE(po2 <= kMaxCyclesPo2);
   size_t size = size_t(1) << po2;
   size_t domain = size * kInvRate;
   LOG(1, "size = " << size);
