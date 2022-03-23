@@ -22,7 +22,6 @@ namespace risc0 {
 // NOLINTNEXTLINE(readability-function-size)
 void ComputeCycle::set(StepState& state, int highID) {
   Value cycle = state.code.cycle.get();
-  risc0Log("C%u: Compute", {cycle});
 
   // Cache some commonly used values
   auto decode = state.getPrev(1).asDecode();
@@ -133,12 +132,22 @@ void ComputeCycle::set(StepState& state, int highID) {
       resultInfo.setReg.set(sreg);                                                                 \
       resultInfo.doStore.set(dstore);                                                              \
       resultInfo.pcRaw.set(pcExpr);                                                                \
-      risc0Log("  x1 = 0x%04x%04x", {x1.getPart(16, 16), x1.getPart(0, 16)});                      \
-      risc0Log("  x2 = 0x%04x%04x", {x2.getPart(16, 16), x2.getPart(0, 16)});                      \
-      risc0Log("  x3 = 0x%04x%04x", {x3.getPart(16, 16), x3.getPart(0, 16)});                      \
-      risc0Log("  nz = %d, carry = %d, overflow = %d, lt = %d",                                    \
-               {nz.get(), x3CarryHigh.get(), overflow.get(), lt.get()});                           \
-      risc0Log("  result = 0x%04x%04x", {resultInfo.result.high(), resultInfo.result.low()});      \
+      risc0Log(                                                                                    \
+          "C%u: Compute: x1 = 0x%04x%04x, x2 = 0x%04x%04x, x3 = 0x%04x%04x, nz = %d, carry = %d, " \
+          "overflow = %d, lt = %d, result = 0x%04x%04x",                                           \
+          {cycle,                                                                                  \
+           x1.getPart(16, 16),                                                                     \
+           x1.getPart(0, 16),                                                                      \
+           x2.getPart(16, 16),                                                                     \
+           x2.getPart(0, 16),                                                                      \
+           x3.getPart(16, 16),                                                                     \
+           x3.getPart(0, 16),                                                                      \
+           nz.get(),                                                                               \
+           x3CarryHigh.get(),                                                                      \
+           overflow.get(),                                                                         \
+           lt.get(),                                                                               \
+           resultInfo.result.high(),                                                               \
+           resultInfo.result.low()});                                                              \
     }                                                                                              \
   }
 #define OPM(...) /**/

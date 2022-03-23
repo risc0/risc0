@@ -12,15 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{mem, slice};
-
-use battleship_proof::{GameState, HitType, Position, RoundParams, RoundResult};
-use risc0_host::{Digest, Exception, Proof, Prover, Result};
+use battleship_proof::{GameState, HitType, Position, RoundCommit, RoundParams, RoundResult};
+use r0vm_core::Digest;
+use r0vm_host::{Exception, Proof, Prover, Result};
+use r0vm_serde::{from_slice, to_vec};
 
 pub struct InitMessage {
     proof: Proof,
 }
 
+#[derive(Debug)]
 pub struct TurnMessage {
     shot: Position,
 }
@@ -30,13 +31,6 @@ pub struct RoundMessage {
 }
 
 #[derive(Debug)]
-pub struct RoundParts {
-    old_state: Digest,
-    new_state: Digest,
-    shot: Position,
-    hit: HitType,
-}
-
 pub struct Battleship {
     state: GameState,
     last_shot: Position,
@@ -45,16 +39,16 @@ pub struct Battleship {
 
 impl InitMessage {
     pub fn get_state(&self) -> Result<Digest> {
-        let msg = self.proof.get_message()?;
-        Digest::try_from(msg)
+        let msg = self.proof.get_message_vec()?;
+        Ok(from_slice(msg.as_slice()).unwrap())
     }
 }
 
 impl RoundMessage {
-    pub fn get_parts(&self) -> Result<&RoundParts> {
-        let msg = self.proof.get_message()?;
-        let ptr: *const RoundParts = msg.as_ptr().cast();
-        Ok(unsafe { &*ptr })
+    pub fn get_commit(&self) -> Result<RoundCommit> {
+        let msg = self.proof.get_message_vec()?;
+        log::info!("msg: {}, {:x?}", msg.len(), msg);
+        Ok(from_slice(msg.as_slice()).unwrap())
     }
 }
 
@@ -69,72 +63,77 @@ impl Battleship {
 
     pub fn init(&self) -> Result<InitMessage> {
         let mut prover = Prover::new("examples/rust/battleship/proof/init")?;
-        let ptr: *const GameState = &self.state;
-        let slice = unsafe { slice::from_raw_parts(ptr.cast(), mem::size_of::<GameState>()) };
-        prover.add_input(slice)?;
+        let vec = to_vec(&self.state).unwrap();
+        prover.add_input(vec.as_slice())?;
         let proof = prover.run()?;
         Ok(InitMessage { proof })
     }
 
     pub fn on_init_msg(&mut self, msg: &InitMessage) -> Result<()> {
+        log::info!("on_init_msg");
         msg.proof.verify("examples/rust/battleship/proof/init")?;
         self.peer_state = msg.get_state()?;
+        log::info!("  peer_state: {:?}", self.peer_state);
         Ok(())
     }
 
     pub fn turn(&mut self, x: u32, y: u32) -> TurnMessage {
         let shot = Position::new(x, y);
+        log::info!("turn: {}", shot);
         self.last_shot = shot.clone();
         TurnMessage { shot: shot.clone() }
     }
 
     pub fn on_turn_msg(&mut self, msg: &TurnMessage) -> Result<RoundMessage> {
+        log::info!("on_turn_msg: {:?}", msg);
         let params = RoundParams::new(self.state.clone(), msg.shot.x, msg.shot.y);
         let mut prover = Prover::new("examples/rust/battleship/proof/turn")?;
-        let ptr: *const RoundParams = &params;
-        let slice = unsafe { slice::from_raw_parts(ptr.cast(), mem::size_of::<RoundParams>()) };
-        prover.add_input(slice)?;
+        let vec = to_vec(&params).unwrap();
+        prover.add_input(vec.as_slice())?;
         let proof = prover.run()?;
-        let slice = prover.get_output()?;
-        let ptr: *const RoundResult = slice.as_ptr().cast();
-        let result = unsafe { &*ptr };
+        let vec = prover.get_output_vec()?;
+        let result = from_slice::<RoundResult>(vec.as_slice()).unwrap();
+        log::info!("  result: {:?}", result);
         self.state = result.state.clone();
         Ok(RoundMessage { proof })
     }
 
     pub fn on_round_msg(&mut self, msg: &RoundMessage) -> Result<HitType> {
+        log::info!("on_round_msg");
         msg.proof.verify("examples/rust/battleship/proof/turn")?;
-        let parts = msg.get_parts()?;
+        let commit = msg.get_commit()?;
+        log::info!("  commit: {:?}", commit);
 
-        if parts.old_state != self.peer_state {
+        if commit.old_state != self.peer_state {
             return Err(Exception::new(
                 format!(
                     "Cheater: state mismatch. old_state ({}) != peer_state ({})",
-                    parts.old_state, self.peer_state
+                    commit.old_state, self.peer_state
                 )
                 .as_str(),
             ));
         }
 
-        if parts.shot != self.last_shot {
+        if commit.shot != self.last_shot {
             return Err(Exception::new(
                 format!(
                     "Cheater: shot mismatch. cur_shot ({}) != last_shot ({})",
-                    parts.shot, self.last_shot
+                    commit.shot, self.last_shot
                 )
                 .as_str(),
             ));
         }
 
-        self.peer_state = parts.new_state.clone();
+        self.peer_state = commit.new_state.clone();
 
-        Ok(parts.hit.clone())
+        Ok(commit.hit.clone())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use battleship_proof::{Ship, ShipDirection};
+    use r0vm_serde::to_slice;
 
     use super::*;
 
@@ -143,6 +142,29 @@ mod tests {
         player1
             .on_round_msg(&player2.on_turn_msg(&turn).unwrap())
             .unwrap()
+    }
+
+    #[test]
+    fn serde() {
+        struct Logger;
+        impl r0vm_core::Log for Logger {
+            fn log(&self, msg: &str) {
+                log::info!("{}", msg);
+            }
+        }
+        static LOGGER: Logger = Logger;
+        r0vm_core::set_logger(&LOGGER);
+        let commit = RoundCommit {
+            old_state: Digest::new([0, 1, 2, 3, 4, 5, 6, 7]),
+            new_state: Digest::new([8, 7, 6, 5, 4, 3, 2, 1]),
+            shot: Position::new(1, 9),
+            hit: HitType::Hit,
+        };
+        let buf: &mut [u32] = &mut [0; 256];
+        let buf = to_slice(&commit, buf).unwrap();
+        log::info!("buf: {}, {:x?}", buf.len(), buf);
+        let result = from_slice(buf).unwrap();
+        assert_eq!(commit, result);
     }
 
     #[test]

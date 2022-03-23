@@ -109,6 +109,7 @@ void StepContext::memWrite(Fp cycle, Fp addr, Fp low, Fp high) {
 
 std::array<Fp, 2> StepContext::memRead(Fp cycle, Fp addr) {
   if (mem.data.find(addr.asUInt32()) == mem.data.end()) {
+    LOG(1, "io->onRead> " << hex(addr.asUInt32() * 4));
     mem.data[addr.asUInt32()] = io->onRead(mem, addr.asUInt32() * 4);
   }
   uint32_t data = mem.data[addr.asUInt32()];

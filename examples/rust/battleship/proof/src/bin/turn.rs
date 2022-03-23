@@ -15,18 +15,20 @@
 #![no_main]
 #![no_std]
 
-use risc0::{env, sha};
+use r0vm_device::{env, sha};
 
-use battleship_proof::RoundParams;
+use battleship_proof::{RoundCommit, RoundParams};
 
-risc0::entry!(main);
+r0vm_device::entry!(main);
 
 pub fn main() {
     let params: RoundParams = env::read();
     let result = params.process();
     env::write(&result);
-    env::commit_digest(&sha::digest(params.state));
-    env::commit_digest(&sha::digest(result.state));
-    env::commit(&params.shot);
-    env::commit(&result.hit);
+    env::commit(&RoundCommit {
+        old_state: *sha::digest(params.state),
+        new_state: *sha::digest(result.state),
+        shot: params.shot,
+        hit: result.hit,
+    });
 }

@@ -15,15 +15,13 @@
 use _alloc::{boxed::Box, vec::Vec};
 use core::mem;
 
+use r0vm_core::Digest;
+
 use crate::{
     align_up,
     gpio::{SHADescriptor, GPIO_SHA},
     REGION_SHA_START,
 };
-
-pub struct Digest {
-    pub(crate) words: [usize; 8],
-}
 
 pub struct SHA256 {
     pub(crate) storage: Vec<u8>,
@@ -82,33 +80,45 @@ impl SHA256 {
         let total = padded_size(len);
         self.storage.resize(total, 0);
         self.storage[len] = 0x80;
-        let ptr = self.storage.as_mut_ptr();
-        let bits = len * 8;
-        let mut digest = Box::new_uninit();
-        let digest = unsafe {
-            // Write size in bits as big endian.
-            let trailer: *mut usize = ptr.add(total - mem::size_of::<usize>()).cast();
-            trailer.write_volatile(bits.to_be());
-
-            // Set up the next descriptor.
-            let desc = get_cur_desc();
-            desc.write_volatile(SHADescriptor {
-                type_count: total / 64,
-                idx: 0,
-                source: self.storage.as_ptr() as usize,
-                digest: digest.as_mut_ptr() as usize,
-            });
-
-            // Write the descriptor to the oracle for processing.
-            GPIO_SHA.write_volatile(desc);
-
-            // Jump to the next descriptor.
-            CUR_DESC += 1;
-
-            digest.assume_init()
-        };
-        digest
+        let mut digest: Box<mem::MaybeUninit<Digest>> = Box::new_uninit();
+        finalize_into(
+            len,
+            total,
+            self.storage.as_mut_ptr(),
+            digest.as_mut_ptr().cast(),
+        );
+        unsafe { digest.assume_init() }
     }
+}
+
+fn finalize_into(len: usize, total: usize, ptr: *mut u8, result: *mut usize) {
+    let bits = len * 8;
+    unsafe {
+        // Write size in bits as big endian.
+        let trailer: *mut usize = ptr.add(total - mem::size_of::<usize>()).cast();
+        trailer.write_volatile(bits.to_be());
+
+        // Set up the next descriptor.
+        let desc = get_cur_desc();
+        desc.write_volatile(SHADescriptor {
+            type_count: total / 64,
+            idx: 0,
+            source: ptr as usize,
+            digest: result as usize,
+        });
+
+        // Write the descriptor to the oracle for processing.
+        GPIO_SHA.write_volatile(desc);
+
+        // Jump to the next descriptor.
+        CUR_DESC += 1;
+    }
+}
+
+pub(crate) fn digest_commit_into(len: usize, slice: &mut [u32], result: *mut usize) {
+    let total = padded_size(len);
+    slice[len] = 0x80000000;
+    finalize_into(len, total, slice.as_mut_ptr().cast(), result);
 }
 
 pub fn digest<T>(data: T) -> Box<Digest> {

@@ -59,7 +59,7 @@ void MemoryHandler::onInit(MemoryState& mem) {
 }
 
 void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uint32_t value) {
-  LOG(1, "MemoryHandler::onWrite> " << hex(addr) << ": " << hex(value));
+  LOG(2, "MemoryHandler::onWrite> " << hex(addr) << ": " << hex(value));
   switch (addr) {
   case kGPIO_SHA: {
     LOG(1, "MemoryHandler::onWrite> GPIO_SHA");

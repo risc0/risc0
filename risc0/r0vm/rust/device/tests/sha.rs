@@ -16,11 +16,11 @@
 #![no_std]
 #![allow(non_snake_case)]
 
-use risc0::{env, sha};
+use r0vm_device::{env, sha};
 
-risc0::entry!(main);
+r0vm_device::entry!(main);
 
 pub fn main() {
-    let data: &[u8] = env::read_slice();
-    env::commit_digest(&sha::digest_slice(data));
+    let data: &[u8] = env::read();
+    env::commit(&sha::digest_slice(data));
 }
