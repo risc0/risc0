@@ -47,7 +47,6 @@ impl InitMessage {
 impl RoundMessage {
     pub fn get_commit(&self) -> Result<RoundCommit> {
         let msg = self.proof.get_message_vec()?;
-        log::info!("msg: {}, {:x?}", msg.len(), msg);
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 }
@@ -93,7 +92,6 @@ impl Battleship {
         let proof = prover.run()?;
         let vec = prover.get_output_vec()?;
         let result = from_slice::<RoundResult>(vec.as_slice()).unwrap();
-        log::info!("  result: {:?}", result);
         self.state = result.state.clone();
         Ok(RoundMessage { proof })
     }

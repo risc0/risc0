@@ -15,10 +15,9 @@
 use core::{
     alloc::{GlobalAlloc, Layout},
     cell::UnsafeCell,
-    mem,
 };
 
-use crate::{_fault, align_up, REGION_HEAP_END, REGION_HEAP_START};
+use crate::{_fault, align_up, REGION_HEAP_END, REGION_HEAP_START, WORD_SIZE};
 
 // Bump pointer allocator for *single* core systems
 struct BumpPointerAlloc {
@@ -32,7 +31,7 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
         let head = self.head.get();
 
         // move start up to the next alignment boundary
-        let alloc_start = align_up(*head, mem::size_of::<usize>());
+        let alloc_start = align_up(*head, WORD_SIZE);
         let alloc_end = alloc_start.checked_add(layout.size()).unwrap();
         if alloc_end > self.end {
             _fault();

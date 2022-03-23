@@ -47,9 +47,9 @@ struct MemoryState {
   void dump(size_t logLevel);
 
   uint8_t loadByte(uint32_t addr);
-  uint32_t load(uint32_t addr) { return data.at(addr / 4); }
+  uint32_t load(uint32_t addr);
   uint32_t loadBE(uint32_t addr);
-  void load(uint32_t addr, void* ptr, uint32_t len);
+  void loadRegion(uint32_t addr, void* ptr, uint32_t len);
 
   void storeByte(uint32_t addr, uint8_t byte);
   void store(uint32_t addr, uint32_t value);

@@ -7,6 +7,8 @@ use crate::{
     err::{Error, Result},
 };
 
+const WORD_SIZE: usize = mem::size_of::<u32>();
+
 pub fn to_slice<'a, 'b, T>(value: &'b T, buf: &'a mut [u32]) -> Result<&'a [u32]>
 where
     T: Serialize + ?Sized,
@@ -122,7 +124,7 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_char(self, v: char) -> Result<()> {
-        let mut buf = [0u8; mem::size_of::<u32>()];
+        let mut buf = [0u8; WORD_SIZE];
         let str = v.encode_utf8(&mut buf);
         str.serialize(self)
     }
@@ -374,7 +376,7 @@ impl<'a> StreamWriter for Slice<'a> {
 
     fn try_extend(&mut self, data: &[u8]) -> Result<()> {
         let len_bytes = data.len();
-        let len_words = align_up(len_bytes, mem::size_of::<u32>()) / mem::size_of::<u32>();
+        let len_words = align_up(len_bytes, WORD_SIZE) / WORD_SIZE;
 
         if (len_words + self.idx) > self.slice.len() {
             return Err(Error::SerializeBufferFull);
@@ -433,7 +435,7 @@ impl StreamWriter for AllocVec {
     }
 
     fn try_extend(&mut self, data: &[u8]) -> Result<()> {
-        let mut chunks = data.chunks_exact(mem::size_of::<u32>());
+        let mut chunks = data.chunks_exact(WORD_SIZE);
         for chunk in &mut chunks {
             let word = chunk[0] as u32
                 | (chunk[1] as u32) << 8

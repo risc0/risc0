@@ -31,7 +31,6 @@ pub struct Prover {
 }
 
 fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
-    log::info!("into_words: {}, {:02x?}", slice.len(), slice);
     let mut vec = Vec::new();
     let chunks = slice.chunks_exact(4);
     assert!(chunks.remainder().len() == 0);

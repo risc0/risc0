@@ -20,7 +20,7 @@ use r0vm_core::Digest;
 use crate::{
     align_up,
     gpio::{SHADescriptor, GPIO_SHA},
-    REGION_SHA_START,
+    REGION_SHA_START, WORD_SIZE,
 };
 
 pub struct SHA256 {
@@ -95,7 +95,7 @@ fn finalize_into(len: usize, total: usize, ptr: *mut u8, result: *mut usize) {
     let bits = len * 8;
     unsafe {
         // Write size in bits as big endian.
-        let trailer: *mut usize = ptr.add(total - mem::size_of::<usize>()).cast();
+        let trailer: *mut usize = ptr.add(total - WORD_SIZE).cast();
         trailer.write_volatile(bits.to_be());
 
         // Set up the next descriptor.
@@ -117,7 +117,11 @@ fn finalize_into(len: usize, total: usize, ptr: *mut u8, result: *mut usize) {
 
 pub(crate) fn digest_commit_into(len: usize, slice: &mut [u32], result: *mut usize) {
     let total = padded_size(len);
-    slice[len] = 0x80000000;
+    let len_words = len / WORD_SIZE;
+    slice[len_words] = 0x00000080;
+    for i in len_words + 1..total / WORD_SIZE - 1 {
+        slice[i] = 0;
+    }
     finalize_into(len, total, slice.as_mut_ptr().cast(), result);
 }
 

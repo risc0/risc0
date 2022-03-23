@@ -23,7 +23,7 @@ pub mod env;
 mod gpio;
 pub mod sha;
 
-use core::{panic::PanicInfo, ptr};
+use core::{mem, panic::PanicInfo, ptr};
 
 use gpio::{FaultDescriptor, LogDescriptor, GPIO_DESC_FAULT, GPIO_DESC_LOG, GPIO_FAULT, GPIO_LOG};
 use r0vm_core::{set_logger, Log};
@@ -49,6 +49,8 @@ const REGION_OUTPUT_LEN: usize = REGION_SIZE_256KB;
 
 const REGION_COMMIT_START: usize = 0x0038_0000;
 const REGION_COMMIT_LEN: usize = REGION_SIZE_256KB;
+
+const WORD_SIZE: usize = mem::size_of::<u32>();
 
 extern "C" {
     fn _fault() -> !;

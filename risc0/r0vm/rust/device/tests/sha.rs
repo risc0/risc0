@@ -22,5 +22,6 @@ r0vm_device::entry!(main);
 
 pub fn main() {
     let data: &[u8] = env::read();
-    env::commit(&sha::digest_slice(data));
+    let digest = sha::digest_slice(data);
+    env::commit(&digest);
 }

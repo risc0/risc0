@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::{
-    cell::UnsafeCell,
-    mem::{self, MaybeUninit},
-    slice,
-};
+use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 
 use r0vm_serde::{Deserializer, Serializer, Slice};
 use serde::{Deserialize, Serialize};
@@ -25,7 +21,7 @@ use crate::{
     gpio::{IoDescriptor, GPIO_COMMIT, GPIO_DESC_IO, GPIO_WRITE},
     sha::{self, digest_commit_into},
     REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
-    REGION_OUTPUT_LEN, REGION_OUTPUT_START,
+    REGION_OUTPUT_LEN, REGION_OUTPUT_START, WORD_SIZE,
 };
 
 struct Env {
@@ -87,25 +83,15 @@ pub fn commit<T: Serialize>(data: &T) {
 
 impl Env {
     fn new() -> Self {
-        let input: &'static [u32] = unsafe {
-            slice::from_raw_parts(
-                REGION_INPUT_START as _,
-                REGION_INPUT_LEN / mem::size_of::<u32>(),
-            )
-        };
         Env {
-            input: Deserializer::new(input),
+            input: Deserializer::new(unsafe {
+                slice::from_raw_parts(REGION_INPUT_START as _, REGION_INPUT_LEN / WORD_SIZE)
+            }),
             output: Serializer::new(Slice::new(unsafe {
-                slice::from_raw_parts_mut(
-                    REGION_OUTPUT_START as _,
-                    REGION_OUTPUT_LEN / mem::size_of::<u32>(),
-                )
+                slice::from_raw_parts_mut(REGION_OUTPUT_START as _, REGION_OUTPUT_LEN / WORD_SIZE)
             })),
             commit: Serializer::new(Slice::new(unsafe {
-                slice::from_raw_parts_mut(
-                    REGION_COMMIT_START as _,
-                    REGION_COMMIT_LEN / mem::size_of::<u32>(),
-                )
+                slice::from_raw_parts_mut(REGION_COMMIT_START as _, REGION_COMMIT_LEN / WORD_SIZE)
             })),
             commit_len: 0,
         }
@@ -120,7 +106,7 @@ impl Env {
         let buf = self.output.release().unwrap();
         unsafe {
             GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size: buf.len() * mem::size_of::<u32>(),
+                size: buf.len() * WORD_SIZE,
                 addr: buf.as_ptr() as usize,
             });
             GPIO_WRITE.write_volatile(GPIO_DESC_IO);
@@ -130,8 +116,8 @@ impl Env {
     fn commit<T: Serialize>(&mut self, data: &T) {
         data.serialize(&mut self.commit).unwrap();
         let buf = self.commit.release().unwrap();
-        let len_bytes = buf.len() * mem::size_of::<u32>();
-        self.commit_len += len_bytes;
+        self.commit_len += buf.len();
+        let len_bytes = buf.len() * WORD_SIZE;
         unsafe {
             GPIO_DESC_IO.write_volatile(IoDescriptor {
                 size: len_bytes,
@@ -142,13 +128,16 @@ impl Env {
     }
 
     fn finalize(&mut self, result: *mut usize) {
-        let len_bytes = self.commit_len;
-        let slice: &mut [u32] =
-            unsafe { slice::from_raw_parts_mut(REGION_COMMIT_START as _, len_bytes) };
+        let len_words = self.commit_len;
+        let len_bytes = len_words * WORD_SIZE;
+        let slice: &mut [u32] = unsafe {
+            slice::from_raw_parts_mut(REGION_COMMIT_START as _, REGION_COMMIT_LEN / WORD_SIZE)
+        };
+
         // Write the full data out to the host
         unsafe {
             GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size: slice.len(),
+                size: len_bytes,
                 addr: slice.as_ptr() as usize,
             });
             GPIO_COMMIT.write_volatile(GPIO_DESC_IO);
@@ -156,8 +145,17 @@ impl Env {
 
         // If the total proof message is small (<= 32 bytes), return it directly
         // from the proof, otherwise SHA it and return the hash.
-        if len_bytes <= 32 {
-            unsafe { result.copy_from_nonoverlapping(slice.as_ptr().cast(), len_bytes) };
+        if len_words <= 8 {
+            for i in 0..len_words {
+                unsafe {
+                    result
+                        .add(i)
+                        .write_volatile(*slice.get_unchecked(i) as usize)
+                };
+            }
+            for i in len_words..8 {
+                unsafe { result.add(i).write_volatile(0) };
+            }
         } else {
             digest_commit_into(len_bytes, slice, result);
         }
