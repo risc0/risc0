@@ -47,7 +47,8 @@ void Proof::verify(const std::string& filename) const {
   CodeID code;
   LOG(1, "Reading code id from " << filename + ".id");
   code = readCodeID(filename + ".id");
-  risc0::verify(getRiscVVerifyCircuit(), code, core.data(), core.size());
+  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(code);
+  risc0::verify(*circuit, core.data(), core.size());
   if (impl->buffer.size() != core[8]) {
     std::stringstream ss;
     ss << "Proof::verify> Message size (" << impl->buffer.size() << ") does not match proof core ("

@@ -47,7 +47,8 @@ CONSTSCALAR size_t kCheckSize = 16;
 
 CONSTSCALAR size_t kOutputRegs = 9;
 CONSTSCALAR size_t kMinCycles = 512;
-CONSTSCALAR size_t kMaxCycles = 1024 * 1024;
+CONSTSCALAR size_t kMaxCyclesPo2 = 20;
+CONSTSCALAR size_t kMaxCycles = size_t(1) << kMaxCyclesPo2;
 CONSTSCALAR size_t kQueries = 50; // ~100 bits of conjectured security
 CONSTSCALAR size_t kZkCycles = kQueries;
 

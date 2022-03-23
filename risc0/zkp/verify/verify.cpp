@@ -25,26 +25,17 @@
 namespace risc0 {
 
 // NOLINTNEXTLINE(readability-function-size)
-void verify(const VerifyCircuit& circuit,
-            const CodeID& code,
-            const uint32_t* proofData,
-            size_t proofSize) {
-  TapSetRef tapSet = circuit.tapSet;
+void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize) {
+  TapSetRef tapSet = circuit.getTapSet();
   // Construct the IOP object
   ReadIOP iop(proofData, proofSize);
 
-  // Read the low registers + write to globals
-  Fp globals[kGlobalSize];
-  for (size_t i = 0; i < kOutputRegs; i++) {
-    uint32_t reg;
-    iop.read(&reg, 1);
-    globals[2 * i] = reg & 0xffff;
-    globals[2 * i + 1] = reg >> 16;
-  }
+  // Read any execution state
+  circuit.execute(iop);
 
   // Get the size
-  uint32_t po2;
-  iop.read(&po2, 1);
+  size_t po2 = circuit.getPo2();
+  REQUIRE(po2 < kMaxCyclesPo2);
   size_t size = size_t(1) << po2;
   size_t domain = size * kInvRate;
   LOG(1, "size = " << size);
@@ -56,13 +47,10 @@ void verify(const VerifyCircuit& circuit,
   LOG(1, "dataRoot = " << dataMerkle.getRoot());
 
   // Verify the code is what we expect
-  size_t whichCode = po2 - log2Ceil(kMinCycles);
-  REQUIRE(code[whichCode] == codeMerkle.getRoot());
+  REQUIRE(circuit.validCode(codeMerkle.getRoot()));
 
-  // Fill in accum mix
-  for (size_t i = 0; i < kAccumMixGlobalSize; i++) {
-    globals[kAccumMixGlobalOffset + i] = Fp::random(iop);
-  }
+  // Prep accumulation
+  circuit.accumulate(iop);
 
   MerkleTreeVerifier accumMerkle(iop, domain, kAccumSize, kQueries);
   LOG(1, "accumRoot = " << accumMerkle.getRoot());
@@ -100,7 +88,7 @@ void verify(const VerifyCircuit& circuit,
     curPos += reg.size();
   }
 
-  Fp4 result = circuit.poly(evalU.data(), globals, polyMix);
+  Fp4 result = circuit.computePolynomial(evalU.data(), polyMix);
   LOG(1, "Result = " << result);
 
   // Now generate the check polynomial

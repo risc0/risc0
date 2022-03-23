@@ -19,6 +19,6 @@
 namespace risc0 {
 
 TapSetRef getRiscVTaps();
-VerifyCircuit getRiscVVerifyCircuit();
+std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const CodeID& id);
 
 } // namespace risc0

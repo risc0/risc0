@@ -241,8 +241,6 @@ public:
 
 class TapSet {
 private:
-  void finalize();
-
   // Stuff used only while building
   bool finalized_;
   using Reg = std::set<size_t>;
@@ -261,8 +259,13 @@ public:
   TapSet();
   // Add a tap
   void addTap(RegisterGroup group, size_t offset, size_t back);
-  // Convert to TapSetRef for use (finalize if required)
-  TapSetRef getRef();
+  // Called when all done
+  void finalize();
+  // Check if taps are finalized
+  bool finalized() const { return finalized_; }
+
+  // Convert to TapSetRef for use (must be finalized)
+  TapSetRef getRef() const;
 };
 
 } // namespace risc0

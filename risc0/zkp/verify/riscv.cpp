@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "risc0/zkp/verify/riscv.h"
+
 #include "risc0/zkp/core/fp4.h"
 #include "risc0/zkp/verify/verify.h"
 
@@ -56,28 +58,67 @@ struct MixState {
   }
 };
 
+class RiscVVerifyCircuit : public VerifyCircuit {
+public:
+  RiscVVerifyCircuit(const CodeID& codeID) : codeID_(codeID) {}
+  TapSetRef getTapSet() const override { return getRiscVTaps(); }
+  void execute(ReadIOP& iop) override;
+  void accumulate(ReadIOP& iop) override;
+  Fp4 computePolynomial(const Fp4* evalU, Fp4 polyMix) const override;
+  uint32_t getPo2() const override { return po2_; }
+  bool validCode(const ShaDigest& top) const override;
+
+private:
+  CodeID codeID_;
+  uint32_t po2_;
+  Fp globals_[kGlobalSize];
+};
+
 } // namespace
 
 TapSetRef getRiscVTaps() {
-  static TapSet tapSet;
-  static bool computed = false;
-  if (!computed) {
+  static TapSet taps;
+  if (!taps.finalized()) {
     RegisterGroup accum = RegisterGroup::ACCUM;
     RegisterGroup code = RegisterGroup::CODE;
     RegisterGroup data = RegisterGroup::DATA;
-#define tap(base, offset, back) tapSet.addTap(base, offset, back);
+#define tap(base, offset, back) taps.addTap(base, offset, back);
 #define TAPS
 #include "risc0/zkp/prove/step/step.cpp.inc"
-    computed = true;
+    taps.finalize();
   }
-  return tapSet.getRef();
+  return taps.getRef();
 }
 
-static Fp4 RiscVPolynomial(const Fp4* evalU, const Fp* globals, Fp4 polyMix) {
+void RiscVVerifyCircuit::execute(ReadIOP& iop) {
+  // Read the low registers + write to globals
+  for (size_t i = 0; i < kOutputRegs; i++) {
+    uint32_t reg;
+    iop.read(&reg, 1);
+    globals_[2 * i] = reg & 0xffff;
+    globals_[2 * i + 1] = reg >> 16;
+  }
+  // Read the po2 size
+  iop.read(&po2_, 1);
+}
+
+void RiscVVerifyCircuit::accumulate(ReadIOP& iop) {
+  // Fill in accum mix
+  for (size_t i = 0; i < kAccumMixGlobalSize; i++) {
+    globals_[kAccumMixGlobalOffset + i] = Fp::random(iop);
+  }
+}
+
+bool RiscVVerifyCircuit::validCode(const ShaDigest& top) const {
+  size_t whichCode = po2_ - log2Ceil(kMinCycles);
+  return codeID_[whichCode] == top;
+}
+
+Fp4 RiscVVerifyCircuit::computePolynomial(const Fp4* evalU, Fp4 polyMix) const {
   // Do the big polynomial eval
 #define CHECK_EVAL
 #define do_get(buf, reg, back, id) evalU[id];
-#define do_get_global(reg) globals[reg]
+#define do_get_global(reg) globals_[reg]
 #define do_begin() MixState()
 #define do_assert_zero(in, val, loc) in.assert_zero(Fp4(val), polyMix, loc)
 #define do_combine(prev, cond, inner, loc) prev.combine(Fp4(cond), inner, loc)
@@ -94,8 +135,8 @@ static Fp4 RiscVPolynomial(const Fp4* evalU, const Fp* globals, Fp4 polyMix) {
   return result.tot;
 }
 
-VerifyCircuit getRiscVVerifyCircuit() {
-  return VerifyCircuit(getRiscVTaps(), RiscVPolynomial);
+std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const CodeID& id) {
+  return std::make_unique<RiscVVerifyCircuit>(id);
 }
 
 } // namespace risc0
