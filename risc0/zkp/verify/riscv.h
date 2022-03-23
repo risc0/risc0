@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "risc0/zkp/verify/verify.h"
 
 namespace risc0 {
