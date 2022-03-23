@@ -17,6 +17,7 @@
 #include "risc0/zkp/core/sha256.h"
 #include "risc0/zkp/prove/proof.h"
 #include "risc0/zkp/prove/prove.h"
+#include "risc0/zkp/prove/riscv.h"
 
 #include <gtest/gtest.h>
 
@@ -138,7 +139,8 @@ TEST_P(CoreTests, Fail) {
 
   // Check that a host that does not implement onFault will still fault.
   MemoryHandler handler;
-  EXPECT_THROW(prove(elfPath, handler), std::runtime_error);
+  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(elfPath, handler);
+  EXPECT_THROW(prove(*circuit), std::runtime_error);
 }
 
 void doMemcpyTest(uint32_t srcOffset, uint32_t destOffset, uint32_t size) {
