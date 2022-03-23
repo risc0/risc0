@@ -1,9 +1,9 @@
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_proof")
-load("@risc0_crates//:defs.bzl", "crates_from")
+load("@crates//:defs.bzl", "crates_from")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 rust_library(
-    name = "risc0",
+    name = "r0vm-device",
     srcs = [
         "src/alloc.rs",
         "src/env.rs",
@@ -11,9 +11,14 @@ rust_library(
         "src/lib.rs",
         "src/sha.rs",
     ],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
         "//risc0/r0vm/cpp/device:crt0",
+        "//risc0/r0vm/rust/core:r0vm-core",
+        "//risc0/r0vm/rust/serde:r0vm-serde",
     ],
 )
 
@@ -22,7 +27,8 @@ risc0_rust_proof(
     srcs = ["tests/sha.rs"],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        ":risc0",
+        ":r0vm-device",
+        "//risc0/r0vm/rust/core:r0vm-core",
     ],
 )
 
@@ -31,7 +37,7 @@ risc0_rust_proof(
     srcs = ["tests/io.rs"],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        ":risc0",
+        ":r0vm-device",
     ],
 )
 
@@ -40,6 +46,6 @@ risc0_rust_proof(
     srcs = ["tests/fail.rs"],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        ":risc0",
+        ":r0vm-device",
     ],
 )

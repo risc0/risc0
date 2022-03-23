@@ -92,7 +92,10 @@ crate_universe(
     name = "crates",
     cargo_toml_files = [
         "//risc0/core:Cargo.toml",
+        "//risc0/r0vm/rust/core:Cargo.toml",
+        "//risc0/r0vm/rust/device:Cargo.toml",
         "//risc0/r0vm/rust/host:Cargo.toml",
+        "//risc0/r0vm/rust/serde:Cargo.toml",
         "//examples/rust/battleship:Cargo.toml",
         "//examples/rust/battleship/proof:Cargo.toml",
     ],
@@ -103,26 +106,13 @@ crate_universe(
         "aarch64-apple-darwin",
         "x86_64-apple-darwin",
         "x86_64-unknown-linux-gnu",
+        "riscv32im-unknown-none-elf",
     ],
-)
-
-crate_universe(
-    name = "risc0_crates",
-    cargo_toml_files = [
-        "//examples/rust/battleship/proof:Cargo.toml",
-        "//risc0/r0vm/rust/device:Cargo.toml",
-    ],
-    resolver = "@rules_rust_crate_universe_bootstrap//:crate_universe_resolver",
-    supported_targets = ["riscv32im-unknown-none-elf"],
 )
 
 load("@crates//:defs.bzl", "pinned_rust_install")
 
 pinned_rust_install()
-
-load("@risc0_crates//:defs.bzl", risc0_pinned_rust_install = "pinned_rust_install")
-
-risc0_pinned_rust_install()
 
 http_archive(
     name = "oneTBB",

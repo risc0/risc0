@@ -23,9 +23,10 @@ pub mod env;
 mod gpio;
 pub mod sha;
 
-use core::{panic::PanicInfo, ptr};
+use core::{mem, panic::PanicInfo, ptr};
 
-use gpio::{FaultDescriptor, GPIO_DESC_FAULT, GPIO_FAULT};
+use gpio::{FaultDescriptor, LogDescriptor, GPIO_DESC_FAULT, GPIO_DESC_LOG, GPIO_FAULT, GPIO_LOG};
+use r0vm_core::{set_logger, Log};
 
 const REGION_SIZE_256KB: usize = 256 * 1024;
 // const REGION_SIZE_512KB: usize = 0x0008_0000;
@@ -40,8 +41,16 @@ const REGION_SHA_START: usize = 0x0030_0000;
 // const REGION_SHA_END: usize = REGION_SHA_START + REGION_SHA_LEN;
 
 const REGION_INPUT_START: usize = 0x0018_0000;
-// const REGION_INPUT_LEN: usize = REGION_SIZE_256KB;
+const REGION_INPUT_LEN: usize = REGION_SIZE_256KB;
 // const REGION_INPUT_END: usize = REGION_INPUT_START + REGION_INPUT_LEN;
+
+const REGION_OUTPUT_START: usize = 0x0034_0000;
+const REGION_OUTPUT_LEN: usize = REGION_SIZE_256KB;
+
+const REGION_COMMIT_START: usize = 0x0038_0000;
+const REGION_COMMIT_LEN: usize = REGION_SIZE_256KB;
+
+const WORD_SIZE: usize = mem::size_of::<u32>();
 
 extern "C" {
     fn _fault() -> !;
@@ -52,6 +61,7 @@ unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
     let msg = _alloc::format!("{}\0", panic_info);
 
     GPIO_DESC_FAULT.write_volatile(FaultDescriptor {
+        // addr: "panic\0".as_ptr() as usize,
         addr: msg.as_ptr() as usize,
     });
     // A compliant host should fault when it receives this descriptor.
@@ -74,6 +84,22 @@ macro_rules! entry {
     };
 }
 
+struct Logger;
+
+impl Log for Logger {
+    fn log(&self, msg: &str) {
+        let msg = _alloc::format!("{}\0", msg);
+        unsafe {
+            GPIO_DESC_LOG.write_volatile(LogDescriptor {
+                addr: msg.as_ptr() as usize,
+            });
+            GPIO_LOG.write_volatile(GPIO_DESC_LOG);
+        }
+    }
+}
+
+static LOGGER: Logger = Logger;
+
 #[no_mangle]
 unsafe extern "C" fn __start(result: *mut usize) {
     extern "C" {
@@ -81,6 +107,8 @@ unsafe extern "C" fn __start(result: *mut usize) {
         static mut __bss_size: usize;
     }
     ptr::write_bytes(&mut __bss_begin as *mut u8, 0, __bss_size);
+
+    set_logger(&LOGGER);
 
     env::init();
 

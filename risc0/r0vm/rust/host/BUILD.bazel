@@ -2,7 +2,7 @@ load("@crates//:defs.bzl", "crate", "crates_from")
 load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_library")
 
 rust_library(
-    name = "risc0-host",
+    name = "r0vm-host",
     srcs = [
         "src/exception.rs",
         "src/ffi.rs",
@@ -12,10 +12,11 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
         "//risc0/zkp/prove",
+        "//risc0/r0vm/rust/core:r0vm-core",
     ],
 )
 
 rust_doc(
     name = "doc",
-    crate = ":risc0-host",
+    crate = ":r0vm-host",
 )

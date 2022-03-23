@@ -16,19 +16,20 @@
 #![no_std]
 #![allow(non_snake_case)]
 
-use risc0::env;
+use r0vm_device::env;
 
-risc0::entry!(main);
+r0vm_device::entry!(main);
 
 pub fn main() {
-    let count: usize = env::read();
+    let count: u32 = env::read();
     for _ in 0..count {
-        let addr: *mut usize = env::read();
-        let value: usize = env::read();
+        let addr: u32 = env::read();
+        let value: u32 = env::read();
+        let ptr = addr as *mut u32;
         if value != 0 {
-            unsafe { addr.write_volatile(value) };
+            unsafe { ptr.write_volatile(value) };
         } else {
-            let value = unsafe { addr.read_volatile() };
+            let value = unsafe { ptr.read_volatile() };
             env::write(&value);
         }
     }
