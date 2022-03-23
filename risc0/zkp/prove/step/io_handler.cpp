@@ -14,6 +14,8 @@
 
 #include "risc0/zkp/prove/step/step.h"
 
+#include <sstream>
+
 #include "risc0/core/log.h"
 #include "risc0/r0vm/platform/io.h"
 #include "risc0/r0vm/platform/memory.h"
@@ -59,42 +61,42 @@ void MemoryHandler::onInit(MemoryState& mem) {
 }
 
 void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uint32_t value) {
-  LOG(1, "MemoryHandler::onWrite> " << hex(addr) << ": " << hex(value));
+  LOG(2, "MemoryHandler::onWrite> " << hex(addr) << ": " << hex(value));
   switch (addr) {
   case kGPIO_SHA: {
     LOG(1, "MemoryHandler::onWrite> GPIO_SHA");
     ShaDescriptor desc;
-    mem.load(value, &desc, sizeof(desc));
+    mem.loadRegion(value, &desc, sizeof(desc));
     processSHA(mem, desc);
   } break;
   case kGPIO_Write: {
     LOG(1, "MemoryHandler::onWrite> GPIO_Write");
     IoDescriptor desc;
-    mem.load(value, &desc, sizeof(desc));
+    mem.loadRegion(value, &desc, sizeof(desc));
     if (io) {
       std::vector<uint8_t> buf(desc.size);
-      mem.load(desc.addr, buf.data(), desc.size);
+      mem.loadRegion(desc.addr, buf.data(), desc.size);
       io->onWrite(buf);
     }
   } break;
   case kGPIO_Commit: {
     LOG(1, "MemoryHandler::onWrite> GPIO_Commit");
     IoDescriptor desc;
-    mem.load(value, &desc, sizeof(desc));
+    mem.loadRegion(value, &desc, sizeof(desc));
     if (io) {
       std::vector<uint8_t> buf(desc.size);
-      mem.load(desc.addr, buf.data(), desc.size);
+      mem.loadRegion(desc.addr, buf.data(), desc.size);
       io->onCommit(buf);
     }
   } break;
   case kGPIO_Fault: {
     LOG(1, "MemoryHandler::onWrite> GPIO_Fault");
     FaultDescriptor desc;
-    mem.load(value, &desc, sizeof(desc));
+    mem.loadRegion(value, &desc, sizeof(desc));
     if (io) {
       size_t len = mem.strlen(desc.addr);
       std::vector<char> buf(len);
-      mem.load(desc.addr, buf.data(), len);
+      mem.loadRegion(desc.addr, buf.data(), len);
       std::string str(buf.data(), buf.size());
       io->onFault(str);
     }
@@ -102,23 +104,23 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
   case kGPIO_Log: {
     LOG(2, "MemoryHandler::onWrite> GPIO_Log");
     LogDescriptor desc;
-    mem.load(value, &desc, sizeof(desc));
+    mem.loadRegion(value, &desc, sizeof(desc));
     size_t len = mem.strlen(desc.addr);
     std::vector<char> buf(len);
-    mem.load(desc.addr, buf.data(), len);
+    mem.loadRegion(desc.addr, buf.data(), len);
     std::string str(buf.data(), buf.size());
     LOG(0, "R0VM[C" << cycle << "]> " << str);
   } break;
   case kGPIO_GetKey: {
     LOG(1, "MemoryHandler::onWrite> GPIO_GetKey");
     GetKeyDescriptor desc;
-    mem.load(value, &desc, sizeof(desc));
+    mem.loadRegion(value, &desc, sizeof(desc));
     if (!io) {
       throw std::runtime_error("Get key called with no IO handler set");
     }
     size_t len = mem.strlen(desc.name);
     std::vector<char> buf(len);
-    mem.load(desc.name, buf.data(), len);
+    mem.loadRegion(desc.name, buf.data(), len);
     std::string str(buf.data(), buf.size());
     LOG(1, "  addr = " << hex(desc.addr));
     LOG(1, "  key = " << str);
@@ -161,7 +163,17 @@ uint8_t MemoryState::loadByte(uint32_t addr) {
   return (word >> (byte_offset * 8)) & 0xff;
 }
 
-void MemoryState::load(uint32_t addr, void* ptr, uint32_t len) {
+uint32_t MemoryState::load(uint32_t addr) {
+  auto it = data.find(addr / 4);
+  if (it == data.end()) {
+    std::stringstream ss;
+    ss << "addr out of range: " << hex(addr);
+    throw std::out_of_range(ss.str());
+  }
+  return it->second;
+}
+
+void MemoryState::loadRegion(uint32_t addr, void* ptr, uint32_t len) {
   uint8_t* bytes = static_cast<uint8_t*>(ptr);
   for (size_t i = 0; i < len; i++) {
     bytes[i] = loadByte(addr++);

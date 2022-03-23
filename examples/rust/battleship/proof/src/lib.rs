@@ -16,6 +16,7 @@
 
 use core::fmt::Display;
 
+use r0vm_core::Digest;
 use serde::{Deserialize, Serialize};
 
 pub const NUM_SHIPS: usize = 5;
@@ -75,6 +76,14 @@ pub struct RoundResult {
     pub hit: HitType,
 }
 
+#[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct RoundCommit {
+    pub old_state: Digest,
+    pub new_state: Digest,
+    pub shot: Position,
+    pub hit: HitType,
+}
+
 impl GameState {
     pub fn check(&self) -> bool {
         let mut board: [[bool; BOARD_SIZE]; BOARD_SIZE] = [[false; BOARD_SIZE]; BOARD_SIZE];
@@ -120,20 +129,33 @@ impl RoundParams {
     pub fn process(&self) -> RoundResult {
         let mut state = self.state.clone();
         let shot = &self.shot;
+        assert!(shot.check());
+        enum HitShift {
+            Hit(u32),
+            Miss,
+        }
         for i in 0..NUM_SHIPS {
             let ship = &mut state.ships[i];
             let span = SHIP_SPANS[i] as u32;
             let x = ship.pos.x;
             let y = ship.pos.y;
-            let (is_hit, shift) = match ship.dir {
+            let hit_shift = match ship.dir {
                 ShipDirection::Horizontal => {
-                    (shot.y == y && shot.x >= x && shot.x <= x + span, shot.x - x)
+                    if shot.y == y && shot.x >= x && shot.x <= x + span {
+                        HitShift::Hit(shot.x - x)
+                    } else {
+                        HitShift::Miss
+                    }
                 }
                 ShipDirection::Vertical => {
-                    (shot.x == x && shot.y >= y && shot.y <= y + span, shot.y - y)
+                    if shot.x == x && shot.y >= y && shot.y <= y + span {
+                        HitShift::Hit(shot.y - y)
+                    } else {
+                        HitShift::Miss
+                    }
                 }
             };
-            if is_hit {
+            if let HitShift::Hit(shift) = hit_shift {
                 ship.hit_mask |= 1 << shift;
                 let hit = if ship.hit_mask == SUNK_MASKS[i] {
                     HitType::Sunk(i as u8)

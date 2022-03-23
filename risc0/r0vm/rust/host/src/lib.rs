@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use byte_slice_cast::AsSliceOf;
 use log::LevelFilter;
-use std::{ffi::CString, fmt::Debug, fmt::Display};
+use std::{ffi::CString, mem};
 
 mod exception;
 mod ffi;
@@ -31,49 +30,18 @@ pub struct Prover {
     ptr: *mut ffi::RawProver,
 }
 
-const DIGEST_WORDS: usize = 8;
-
-#[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialOrd, PartialEq)]
-pub struct Digest([u32; DIGEST_WORDS]);
-
-impl Digest {
-    /// Constructs a new `Digest` from a byte array.
-    pub fn new(data: [u32; DIGEST_WORDS]) -> Self {
-        Self(data)
+fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
+    let mut vec = Vec::new();
+    let chunks = slice.chunks_exact(4);
+    assert!(chunks.remainder().len() == 0);
+    for chunk in chunks {
+        let word = chunk[0] as u32
+            | (chunk[1] as u32) << 8
+            | (chunk[2] as u32) << 16
+            | (chunk[3] as u32) << 24;
+        vec.push(word);
     }
-
-    pub fn as_slice(&self) -> &[u32] {
-        &self.0
-    }
-}
-
-impl Display for Digest {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        for byte in self.0 {
-            write!(f, "{:02x?}", byte)?;
-        }
-        Ok(())
-    }
-}
-
-impl Debug for Digest {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for byte in self.0 {
-            write!(f, "{:02x?}", byte)?;
-        }
-        Ok(())
-    }
-}
-
-impl TryFrom<&[u8]> for Digest {
-    type Error = Exception;
-
-    fn try_from(value: &[u8]) -> Result<Self> {
-        let slice = value.as_slice_of().unwrap();
-        let mut ret = Digest::new([0; DIGEST_WORDS]);
-        ret.0.copy_from_slice(slice);
-        Ok(ret)
-    }
+    Ok(vec)
 }
 
 impl Proof {
@@ -107,6 +75,10 @@ impl Proof {
             Ok(std::slice::from_raw_parts(buf, len))
         }
     }
+
+    pub fn get_message_vec(&self) -> Result<Vec<u32>> {
+        into_words(self.get_message()?)
+    }
 }
 
 impl Prover {
@@ -117,9 +89,16 @@ impl Prover {
         ffi::check(err, || Prover { ptr })
     }
 
-    pub fn add_input(&mut self, slice: &[u8]) -> Result<()> {
+    pub fn add_input(&mut self, slice: &[u32]) -> Result<()> {
         let mut err = ffi::RawError::default();
-        unsafe { ffi::risc0_prover_add_input(&mut err, self.ptr, slice.as_ptr(), slice.len()) };
+        unsafe {
+            ffi::risc0_prover_add_input(
+                &mut err,
+                self.ptr,
+                slice.as_ptr().cast(),
+                slice.len() * mem::size_of::<u32>(),
+            )
+        };
         ffi::check(err, || ())
     }
 
@@ -133,6 +112,10 @@ impl Prover {
             let len = ffi::check(err, || len)?;
             Ok(std::slice::from_raw_parts(buf, len))
         }
+    }
+
+    pub fn get_output_vec(&self) -> Result<Vec<u32>> {
+        into_words(self.get_output()?)
     }
 
     pub fn run(&self) -> Result<Proof> {

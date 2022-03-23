@@ -80,11 +80,13 @@ struct Prover::Impl : public IoHandler {
   virtual ~Impl() {}
 
   void onInit(MemoryState& mem) override {
+    LOG(1, "Prover::onInit>");
     uint32_t addr = kMemInputStart;
     for (uint32_t word : inputStream.vec) {
       if (addr > kMemInputEnd) {
         throw std::runtime_error("Out of memory: inputs");
       }
+      LOG(1, "  " << hex(addr) << ": " << hex(word));
       mem.store(addr, word);
       addr += sizeof(uint32_t);
     }

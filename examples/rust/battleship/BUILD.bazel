@@ -12,9 +12,14 @@ rust_binary(
 rust_library(
     name = "lib",
     srcs = ["src/lib.rs"],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
     deps = crates_from(":Cargo.toml") + [
         "//examples/rust/battleship/proof:battleship_proof",
-        "//risc0/r0vm/rust/host:risc0-host",
+        "//risc0/r0vm/rust/core:r0vm-core",
+        "//risc0/r0vm/rust/host:r0vm-host",
+        "//risc0/r0vm/rust/serde:r0vm-serde",
     ],
 )
 
@@ -26,5 +31,8 @@ rust_test(
         "//examples/rust/battleship/proof:init.id",
         "//examples/rust/battleship/proof:turn",
         "//examples/rust/battleship/proof:turn.id",
+    ],
+    rustc_flags = [
+        "-Coverflow-checks=on",
     ],
 )

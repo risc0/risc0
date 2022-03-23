@@ -6,4 +6,7 @@ edition = "2021"
 [dependencies]
 battleship-proof = { path = "proof" }
 log = "0.4"
-risc0-host = { path = "../../../risc0/r0vm/rust/host" }
+r0vm-core = { path = "../../../risc0/r0vm/rust/core" }
+r0vm-host = { path = "../../../risc0/r0vm/rust/host" }
+r0vm-serde = { path = "../../../risc0/r0vm/rust/serde" }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
