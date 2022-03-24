@@ -12,20 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "risc0/zkp/prove/poly_group.h"
+#pragma once
 
-#include "risc0/zkp/core/constants.h"
+#include "risc0/zkp/core/devs.h"
 
 namespace risc0 {
 
-PolyGroup::PolyGroup(AccelSlice<Fp> coeffs, size_t count, size_t size)
-    : coeffs(coeffs), count(count), size(coeffs.size() / count), domain(size * kInvRate) {
-  REQUIRE(coeffs.size() == count * size);
-  evaluated = AccelSlice<Fp>::allocate(count * domain);
-  batchExpand(evaluated, coeffs, count);
-  batchEvaluateNTT(evaluated, count, log2Ceil(kInvRate));
-  batchBitReverse(coeffs, count);
-  merkle = std::make_unique<MerkleTreeProver>(evaluated, domain, count, kQueries);
-}
+CONSTSCALAR size_t kMaxCyclesPo2 = 23;
+CONSTSCALAR size_t kMaxCycles = size_t(1) << kMaxCyclesPo2;
+
+CONSTSCALAR size_t kQueries = 50; // ~100 bits of conjectured security
+
+CONSTSCALAR size_t kInvRate = 4;
+CONSTSCALAR size_t kMaxDegree = kInvRate + 1;
+CONSTSCALAR size_t kFriFold = 16;
+CONSTSCALAR size_t kFriMinDegree = 256;
+
+CONSTSCALAR size_t kExtSize = 4;
+CONSTSCALAR size_t kCheckSize = kInvRate * kExtSize;
 
 } // namespace risc0

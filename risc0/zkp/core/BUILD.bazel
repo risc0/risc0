@@ -8,6 +8,7 @@ cc_library(
         "sha_rng.cpp",
     ],
     hdrs = [
+        "constants.h",
         "devs.h",
         "fp.h",
         "fp4.h",

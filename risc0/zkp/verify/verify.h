@@ -18,7 +18,6 @@
 #include <cstdint>
 
 #include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/code_id.h"
 #include "risc0/zkp/verify/read_iop.h"
 #include "risc0/zkp/verify/taps.h"
 

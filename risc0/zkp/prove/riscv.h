@@ -17,6 +17,7 @@
 #include <memory>
 
 #include "risc0/zkp/prove/prove.h"
+#include "risc0/zkp/prove/step/exec.h"
 
 namespace risc0 {
 

@@ -15,7 +15,7 @@
 #pragma once
 
 #include "risc0/r0vm/platform/memory.h"
-#include "risc0/zkp/core/devs.h"
+#include "risc0/zkp/core/constants.h"
 
 namespace risc0 {
 
@@ -43,13 +43,9 @@ enum {
 CONSTSCALAR size_t kCodeSize = 16;
 CONSTSCALAR size_t kDataSize = 160;
 CONSTSCALAR size_t kAccumSize = 10;
-CONSTSCALAR size_t kCheckSize = 16;
 
 CONSTSCALAR size_t kOutputRegs = 9;
 CONSTSCALAR size_t kMinCycles = 512;
-CONSTSCALAR size_t kMaxCyclesPo2 = 20;
-CONSTSCALAR size_t kMaxCycles = size_t(1) << kMaxCyclesPo2;
-CONSTSCALAR size_t kQueries = 50; // ~100 bits of conjectured security
 CONSTSCALAR size_t kZkCycles = kQueries;
 
 CONSTSCALAR size_t kRegistersGlobalOffset = 0;
@@ -59,11 +55,5 @@ CONSTSCALAR size_t kAccumMixGlobalSize = 20;
 CONSTSCALAR size_t kGlobalSize = kAccumMixGlobalOffset + kAccumMixGlobalSize;
 
 CONSTSCALAR size_t kComboCount = 5;
-
-CONSTSCALAR size_t kInvRate = 4;
-CONSTSCALAR size_t kMaxDegree = kInvRate + 1;
-
-CONSTSCALAR size_t kFriFold = 16;
-CONSTSCALAR size_t kFriMinDegree = 256;
 
 } // namespace risc0

@@ -18,7 +18,7 @@
 
 #include "risc0/core/log.h"
 #include "risc0/core/util.h"
-#include "risc0/zkp/circuit/constants.h"
+#include "risc0/zkp/core/constants.h"
 #include "risc0/zkp/prove/merkle.h"
 
 namespace risc0 {

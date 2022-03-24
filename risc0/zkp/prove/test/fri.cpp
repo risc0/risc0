@@ -16,7 +16,7 @@
 #include "risc0/core/log.h"
 #include "risc0/core/rng.h"
 #include "risc0/core/util.h"
-#include "risc0/zkp/circuit/constants.h"
+#include "risc0/zkp/core/constants.h"
 #include "risc0/zkp/core/rou.h"
 #include "risc0/zkp/verify/fri.h"
 

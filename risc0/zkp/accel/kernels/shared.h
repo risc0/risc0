@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "risc0/zkp/accel/kernels/check.h"
 #include "risc0/zkp/accel/kernels/eltwise.h"
 #include "risc0/zkp/accel/kernels/fri.h"
 #include "risc0/zkp/accel/kernels/mix.h"
