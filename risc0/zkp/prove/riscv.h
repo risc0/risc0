@@ -12,23 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "risc0/zkp/verify/taps.h"
+#pragma once
+
+#include <memory>
+
+#include "risc0/zkp/prove/prove.h"
 
 namespace risc0 {
 
-TapSetRef getRiscVTaps() {
-  static TapSet tapSet;
-  static bool computed = false;
-  if (!computed) {
-    RegisterGroup accum = RegisterGroup::ACCUM;
-    RegisterGroup code = RegisterGroup::CODE;
-    RegisterGroup data = RegisterGroup::DATA;
-#define tap(base, offset, back) tapSet.addTap(base, offset, back);
-#define TAPS
-#include "risc0/zkp/prove/step/step.cpp.inc"
-    computed = true;
-  }
-  return tapSet.getRef();
-}
+std::unique_ptr<ProveCircuit> getRiscVProveCircuit(const std::string& elfFile, MemoryHandler& io);
 
 } // namespace risc0

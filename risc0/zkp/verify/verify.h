@@ -17,11 +17,32 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "risc0/zkp/core/fp4.h"
 #include "risc0/zkp/verify/code_id.h"
+#include "risc0/zkp/verify/read_iop.h"
+#include "risc0/zkp/verify/taps.h"
 
 namespace risc0 {
 
+// Abstract base class to define the circuit we are verifying
+class VerifyCircuit {
+public:
+  virtual ~VerifyCircuit() {}
+  // The set of 'taps' for the circuit we are verifying
+  virtual TapSetRef getTapSet() const = 0;
+  // Read any results, perform any setup
+  virtual void execute(ReadIOP& iop) = 0;
+  // Prep any 'accumulate' state
+  virtual void accumulate(ReadIOP& iop) = 0;
+  // Get expected size of execution trace as a power of 2 (called post-execute)
+  virtual uint32_t getPo2() const = 0;
+  // Check if a given code-merkle is valid (called post-execute)
+  virtual bool validCode(const ShaDigest& top) const = 0;
+  // Compute the circuit polynomial (called post-accumulate)
+  virtual Fp4 computePolynomial(const Fp4* evalU, Fp4 polyMix) const = 0;
+};
+
 // Throws on failure
-void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize);
+void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize);
 
 } // namespace risc0

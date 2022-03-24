@@ -20,70 +20,21 @@
 #include "risc0/zkp/verify/fri.h"
 #include "risc0/zkp/verify/merkle.h"
 #include "risc0/zkp/verify/read_iop.h"
-#include "risc0/zkp/verify/riscv_taps.h"
 
 namespace risc0 {
 
-namespace {
-
-struct MixState {
-  Fp4 tot;
-  Fp4 mul;
-#ifdef CIRCUIT_DEBUG
-  std::vector<std::pair<const char*, Fp4>> locs;
-#endif
-
-  MixState() : tot(Fp4(0)), mul(Fp4(1)) {}
-  MixState(Fp4 tot, Fp4 mul) : tot(tot), mul(mul) {}
-  MixState assert_zero(Fp4 val, Fp4 mix, const char* loc) const {
-    MixState ret(tot + mul * val, mul * mix);
-#ifdef CIRCUIT_DEBUG
-    if (locs.empty()) {
-      if (val != Fp4()) {
-        ret.locs.emplace_back(loc, val);
-      }
-    } else {
-      ret.locs = locs;
-    }
-#endif
-    return ret;
-  }
-  MixState combine(Fp4 cond, const MixState& inner, const char* loc) const {
-    MixState ret(tot + cond * mul * inner.tot, mul * inner.mul);
-#ifdef CIRCUIT_DEBUG
-    if (locs.empty()) {
-      if (cond != Fp4() && !inner.locs.empty()) {
-        ret.locs = inner.locs;
-        ret.locs.emplace_back(loc, cond);
-      }
-    } else {
-      ret.locs = locs;
-    }
-#endif
-    return ret;
-  }
-};
-
-} // namespace
-
 // NOLINTNEXTLINE(readability-function-size)
-void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
-  TapSetRef tapSet = getRiscVTaps();
+void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize) {
+  TapSetRef tapSet = circuit.getTapSet();
   // Construct the IOP object
   ReadIOP iop(proofData, proofSize);
 
-  // Read the low registers + write to globals
-  Fp globals[kGlobalSize];
-  for (size_t i = 0; i < kOutputRegs; i++) {
-    uint32_t reg;
-    iop.read(&reg, 1);
-    globals[2 * i] = reg & 0xffff;
-    globals[2 * i + 1] = reg >> 16;
-  }
+  // Read any execution state
+  circuit.execute(iop);
 
   // Get the size
-  uint32_t po2;
-  iop.read(&po2, 1);
+  size_t po2 = circuit.getPo2();
+  REQUIRE(po2 <= kMaxCyclesPo2);
   size_t size = size_t(1) << po2;
   size_t domain = size * kInvRate;
   LOG(1, "size = " << size);
@@ -95,21 +46,16 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
   LOG(1, "dataRoot = " << dataMerkle.getRoot());
 
   // Verify the code is what we expect
-  size_t whichCode = po2 - log2Ceil(kMinCycles);
-  REQUIRE(code[whichCode] == codeMerkle.getRoot());
+  REQUIRE(circuit.validCode(codeMerkle.getRoot()));
 
-  // Fill in accum mix
-  for (size_t i = 0; i < kAccumMixGlobalSize; i++) {
-    globals[kAccumMixGlobalOffset + i] = Fp::random(iop);
-  }
+  // Prep accumulation
+  circuit.accumulate(iop);
 
   MerkleTreeVerifier accumMerkle(iop, domain, kAccumSize, kQueries);
   LOG(1, "accumRoot = " << accumMerkle.getRoot());
 
   // Set the poly mix value
-  for (size_t i = 0; i < kPolyMixGlobalSize; i++) {
-    globals[kPolyMixGlobalOffset + i] = Fp::random(iop);
-  }
+  Fp4 polyMix = Fp4::random(iop);
 
   MerkleTreeVerifier checkMerkle(iop, domain, kCheckSize, kQueries);
   LOG(1, "checkRoot = " << checkMerkle.getRoot());
@@ -123,19 +69,11 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
   Fp backOne = kRouRev[po2];
 
   // Read the U coeffs, and define the tap variables
-  size_t numTaps = 0;
-#define tap(base, offset, back) size_t tap_##base##_##offset##_##back = numTaps++;
-#define TAPS
-#include "risc0/zkp/prove/step/step.cpp.inc"
+  size_t numTaps = tapSet.tapsSize();
   std::vector<Fp4> coeffU(numTaps + 16);
   iop.read(coeffU.data(), coeffU.size());
   auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4);
   iop.commit(hashU);
-
-  // Set the mix mix value
-  for (size_t i = 0; i < kMixMixGlobalSize; i++) {
-    globals[kMixMixGlobalOffset + i] = Fp::random(iop);
-  }
 
   // Now, convert to evaluated values
   size_t curPos = 0;
@@ -149,31 +87,8 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
     curPos += reg.size();
   }
 
-  Fp4 polyMix = {globals[kPolyMixGlobalOffset],
-                 globals[kPolyMixGlobalOffset + 1],
-                 globals[kPolyMixGlobalOffset + 2],
-                 globals[kPolyMixGlobalOffset + 3]};
-
-  // Do the big polynomial eval
-#undef TAPS
-#define CHECK_EVAL
-#define do_get(buf, reg, back) evalU[tap_##buf##_##reg##_##back]
-#define do_get_global(reg) globals[reg]
-#define do_begin() MixState()
-#define do_assert_zero(in, val, loc) in.assert_zero(Fp4(val), polyMix, loc)
-#define do_combine(prev, cond, inner, loc) prev.combine(Fp4(cond), inner, loc)
-#define do_add(a, b) Fp4(a) + Fp4(b)
-#define do_sub(a, b) Fp4(a) - Fp4(b)
-#define do_mul(a, b) Fp4(a) * Fp4(b)
-#include "risc0/zkp/prove/step/step.cpp.inc"
-
-  // Log poly result
-  LOG(1, "Results = " << result.tot);
-#ifdef CIRCUIT_DEBUG
-  for (const auto& loc : result.locs) {
-    LOG(1, "  ERR LOC: " << loc.second << " @ " << loc.first);
-  }
-#endif
+  Fp4 result = circuit.computePolynomial(evalU.data(), polyMix);
+  LOG(1, "Result = " << result);
 
   // Now generate the check polynomial
   Fp4 check;
@@ -189,13 +104,10 @@ void verify(const CodeID& code, const uint32_t* proofData, size_t proofSize) {
   LOG(1, "Check = " << check);
 
   // Make sure they match
-  REQUIRE(check == result.tot);
+  REQUIRE(check == result);
 
-  Fp4 mix = {globals[kMixMixGlobalOffset],
-             globals[kMixMixGlobalOffset + 1],
-             globals[kMixMixGlobalOffset + 2],
-             globals[kMixMixGlobalOffset + 3]};
-
+  // Set the mix mix value
+  Fp4 mix = Fp4::random(iop);
   LOG(1, "mix = " << mix);
 
   // Make the mixed U polynomials

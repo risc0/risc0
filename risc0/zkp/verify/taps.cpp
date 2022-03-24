@@ -24,10 +24,8 @@ void TapSet::addTap(RegisterGroup group, size_t offset, size_t back) {
   all_[group][offset].insert(back);
 }
 
-TapSetRef TapSet::getRef() {
-  if (!finalized_) {
-    finalize();
-  }
+TapSetRef TapSet::getRef() const {
+  REQUIRE(finalized_);
   return TapSetRef(&data_);
 }
 

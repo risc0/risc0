@@ -11,14 +11,21 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-PARALLEL_KERNEL(       //
-    mixPolyCoeffs,     //
-    (PTR(Fp4, out),    //
-     CPTR(Fp, code),   //
-     CPTR(Fp, data),   //
-     CPTR(Fp, accum),  //
-     CPTR(Fp, check),  //
-     CPTR(Fp, global), //
-     SIZE(count)),     //
-    { mixPoly(out, code, data, accum, check, global, idx, count); });
+//
+PARALLEL_KERNEL(             //
+    mixPolyCoeffs,           //
+    (PTR(Fp4, out),          //
+     CPTR(Fp4, mixStart),    //
+     CPTR(Fp4, mixPtr),      //
+     CPTR(Fp, in),           //
+     CPTR(uint32_t, combos), //
+     SIZE(inSize),           //
+     SIZE(count)),
+    {
+      Fp4 cur = *mixStart;
+      Fp4 mix = *mixPtr;
+      for (size_t i = 0; i < inSize; i++) {
+        out[count * combos[i] + idx] += cur * in[count * i + idx];
+        cur *= mix;
+      }
+    });

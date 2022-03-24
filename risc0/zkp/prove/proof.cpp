@@ -18,6 +18,8 @@
 #include "risc0/zkp/core/sha256_cpu.h"
 #include "risc0/zkp/prove/code_id.h"
 #include "risc0/zkp/prove/prove.h"
+#include "risc0/zkp/prove/riscv.h"
+#include "risc0/zkp/verify/riscv.h"
 #include "risc0/zkp/verify/verify.h"
 
 #include <sstream>
@@ -46,7 +48,8 @@ void Proof::verify(const std::string& filename) const {
   CodeID code;
   LOG(1, "Reading code id from " << filename + ".id");
   code = readCodeID(filename + ".id");
-  risc0::verify(code, core.data(), core.size());
+  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(code);
+  risc0::verify(*circuit, core.data(), core.size());
   if (impl->buffer.size() != core[8]) {
     std::stringstream ss;
     ss << "Proof::verify> Message size (" << impl->buffer.size() << ") does not match proof core ("
@@ -199,8 +202,9 @@ void Prover::writeInput(const void* ptr, size_t size) {
 Proof Prover::run() {
   // Set the memory handlers to call back to the impl
   MemoryHandler handler(impl.get());
-  // Generate the actual proof
-  BufferU32 core = prove(impl->elfPath.c_str(), handler);
+  // Make the circuit
+  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfPath.c_str(), handler);
+  BufferU32 core = prove(*circuit);
   // Attach the full version of the output message + construct proof object
   Proof proof{core, getCommit()};
   // Verify proof to make sure it works

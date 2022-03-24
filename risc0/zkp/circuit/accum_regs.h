@@ -29,7 +29,7 @@ struct AccumRegs {
   AccumRegs(Buffer buf)
       : prod1(buf.slice(0, 4))
       , prod2(buf.slice(4, 4))
-      , alloc(buf.slice(0, 0), buf.slice(8, 6))
+      , alloc(buf.slice(0, 0), buf.slice(8, 2))
       , det(alloc)
       , invDet(alloc) {}
 

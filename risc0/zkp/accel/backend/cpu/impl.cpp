@@ -17,7 +17,6 @@
 #include "risc0/core/log.h"
 #include "risc0/zkp/accel/accel.h"
 #include "risc0/zkp/accel/check.h"
-#include "risc0/zkp/accel/mix.h"
 #include "risc0/zkp/accel/pp.h"
 #include "risc0/zkp/core/fp4.h"
 #include "risc0/zkp/core/ntt.h"
