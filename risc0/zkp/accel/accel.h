@@ -31,6 +31,7 @@ struct AccelBufImpl;
 void accelStartup();
 AccelBufImpl* accelAllocBuf(size_t size);
 void accelFreeBuf(AccelBufImpl* impl);
+void* accelDevicePtr(AccelBufImpl* impl, size_t offset);
 void* accelGetContents(AccelBufImpl* impl, size_t offset, size_t size, bool sync);
 void accelIsDirty(AccelBufImpl* impl, size_t offset, size_t size);
 void accelBeginProfile();
@@ -84,6 +85,12 @@ public:
   size_t offset() const { return offset_; }
   AccelBufImpl* buf() const { return buf_->buf; }
 
+  // A way to break the abstraction to access the underlying device pointer,
+  // use at your own risk
+  T* devicePointer() const {
+    return static_cast<T*>(accelDevicePtr(buf_->buf, offset_ * sizeof(T)));
+  }
+
 private:
   std::shared_ptr<AccelBuf> buf_;
   size_t offset_;
@@ -105,6 +112,12 @@ public:
   size_t size() const { return size_; }
   size_t offset() const { return offset_; }
   AccelBufImpl* buf() const { return buf_->buf; }
+
+  // A way to break the abstraction to access the underlying device pointer,
+  // use at your own risk
+  const T* devicePointer() const {
+    return static_cast<T*>(accelDevicePtr(buf_->buf, offset_ * sizeof(T)));
+  }
 
 private:
   std::shared_ptr<AccelBuf> buf_;

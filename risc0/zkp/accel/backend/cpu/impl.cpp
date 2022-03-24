@@ -16,8 +16,8 @@
 
 #include "risc0/core/log.h"
 #include "risc0/zkp/accel/accel.h"
-#include "risc0/zkp/accel/check.h"
 #include "risc0/zkp/accel/pp.h"
+#include "risc0/zkp/core/constants.h"
 #include "risc0/zkp/core/fp4.h"
 #include "risc0/zkp/core/ntt.h"
 #include "risc0/zkp/core/sha256.h"
@@ -57,6 +57,10 @@ void accelFreeBuf(AccelBufImpl* impl) {
 }
 
 void* accelGetContents(AccelBufImpl* impl, size_t offset, size_t size, bool sync) {
+  return impl->buf + offset;
+}
+
+void* accelDevicePtr(AccelBufImpl* impl, size_t offset) {
   return impl->buf + offset;
 }
 

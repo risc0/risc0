@@ -14,7 +14,7 @@
 
 #include "risc0/zkp/prove/poly_group.h"
 
-#include "risc0/zkp/circuit/constants.h"
+#include "risc0/zkp/core/constants.h"
 
 namespace risc0 {
 

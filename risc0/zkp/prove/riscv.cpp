@@ -19,6 +19,9 @@
 #include "risc0/zkp/prove/step/exec.h"
 #include "risc0/zkp/verify/riscv.h"
 
+#include "oneapi/tbb/parallel_for.h"
+using oneapi::tbb::parallel_for;
+
 namespace risc0 {
 
 namespace {
@@ -139,6 +142,15 @@ void RiscVProveCircuit::accumulate(WriteIOP& iop) {
 #endif
 }
 
+namespace {
+
+struct MixState {
+  Fp4 tot;
+  Fp4 mul;
+};
+
+} // namespace
+
 void RiscVProveCircuit::evalCheck( //
     AccelSlice<Fp> check,          // Output: Check polynomial
     // Evaluations of each polynomial on an extended domain
@@ -149,15 +161,45 @@ void RiscVProveCircuit::evalCheck( //
     Fp4 polyMix) const {
   size_t size = size_t(1) << po2_;
   size_t domain = size * kInvRate;
-  evalCheckPolyAccel(check,
-                     codeEval,
-                     dataEval,
-                     accumEval,
-                     AccelSlice<Fp>::copy(exec_.context.globals, kGlobalSize),
-                     AccelSlice<Fp4>::copy(&polyMix, 1),
-                     AccelSlice<Fp>::copy(kRouFwd, kMaxRouPo2 + 1),
-                     domain);
+  uint32_t mask = domain - 1;
+  Fp* out = check.devicePointer();
+  constexpr size_t expPo2 = log2Ceil(kInvRate);
+  const Fp* code = codeEval.devicePointer();
+  const Fp* data = dataEval.devicePointer();
+  const Fp* accum = accumEval.devicePointer();
+  const Fp* global = exec_.context.globals;
+  parallel_for<size_t>(0, domain, [&](size_t idx) {
+#define CHECK_EVAL
+#define do_get(buf, reg, back, id) buf[reg * domain + ((idx - kInvRate * back) & mask)]
+#define do_get_global(reg) global[reg]
+#define do_begin()                                                                                 \
+  MixState { Fp4(0), Fp4(1) }
+#define do_assert_zero(in, val, loc)                                                               \
+  MixState { in.tot + in.mul *val, in.mul *polyMix }
+#define do_combine(prev, cond, inner, loc)                                                         \
+  MixState { prev.tot + cond *prev.mul *inner.tot, prev.mul *inner.mul }
+#define do_add(a, b) a + b
+#define do_sub(a, b) a - b
+#define do_mul(a, b) a* b
+#include "risc0/zkp/prove/step/step.cpp.inc"
+#undef CHECK_EVAL
+#undef do_get
+#undef do_get_global
+#undef do_begin
+#undef do_add
+#undef do_sub
+#undef do_mul
+    Fp4 ret = result.tot;
+    Fp x = pow(kRouFwd[po2_ + expPo2], idx);
+    ret = ret * inv(pow(Fp(3) * x, (1 << (po2_))) - 1);
+    out[0 * domain + idx] = ret.elems[0];
+    out[1 * domain + idx] = ret.elems[1];
+    out[2 * domain + idx] = ret.elems[2];
+    out[3 * domain + idx] = ret.elems[3];
+  });
 }
+
+using oneapi::tbb::parallel_for;
 
 std::unique_ptr<ProveCircuit> getRiscVProveCircuit(const std::string& elfFile, MemoryHandler& io) {
   return std::make_unique<RiscVProveCircuit>(elfFile, io);

@@ -16,6 +16,7 @@
 
 #include <memory>
 
+#include "risc0/zkp/verify/code_id.h"
 #include "risc0/zkp/verify/verify.h"
 
 namespace risc0 {

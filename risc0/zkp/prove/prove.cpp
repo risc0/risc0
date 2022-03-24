@@ -16,13 +16,12 @@
 
 #include "risc0/core/log.h"
 #include "risc0/core/rng.h"
+#include "risc0/zkp/core/constants.h"
 #include "risc0/zkp/core/poly.h"
 #include "risc0/zkp/core/rou.h"
 #include "risc0/zkp/prove/fri.h"
 #include "risc0/zkp/prove/poly_group.h"
-#include "risc0/zkp/prove/step/exec.h"
 #include "risc0/zkp/prove/write_iop.h"
-#include "risc0/zkp/verify/riscv.h"
 
 namespace risc0 {
 
@@ -41,9 +40,9 @@ static AccelSlice<Fp> makeCoeffs(const std::vector<Fp>& vec, size_t count) {
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-BufferU32 prove(ProveCircuit& circuit) {
+std::vector<uint32_t> prove(ProveCircuit& circuit) {
   // Get taps
-  TapSetRef tapSet = getRiscVTaps();
+  TapSetRef tapSet = circuit.getTaps();
   // Setup output IOP
   WriteIOP iop;
 
@@ -57,6 +56,7 @@ BufferU32 prove(ProveCircuit& circuit) {
   size_t codeSize = tapSet.groupSize(RegisterGroup::CODE);
   size_t dataSize = tapSet.groupSize(RegisterGroup::DATA);
   size_t accumSize = tapSet.groupSize(RegisterGroup::ACCUM);
+  size_t comboCount = tapSet.combosSize();
 
   // Make code + data PolyGroups + commit them
   PolyGroup codeGroup(makeCoeffs(circuit.getCode(), codeSize), codeSize, size);
@@ -201,7 +201,7 @@ BufferU32 prove(ProveCircuit& circuit) {
 
   // Do the coefficent mixing
   // Begin by making a zeroed output buffer
-  auto combos = AccelSlice<Fp4>::copy(std::vector<Fp4>(size * (kComboCount + 1)));
+  auto combos = AccelSlice<Fp4>::copy(std::vector<Fp4>(size * (comboCount + 1)));
   Fp4 curMix(1);
   auto mixGroup = [&](RegisterGroup id, PolyGroup& pg) {
     std::vector<uint32_t> which;
@@ -219,7 +219,7 @@ BufferU32 prove(ProveCircuit& circuit) {
   mixGroup(RegisterGroup::CODE, codeGroup);
   mixGroup(RegisterGroup::DATA, dataGroup);
   {
-    std::vector<uint32_t> which(kCheckSize, kComboCount);
+    std::vector<uint32_t> which(kCheckSize, comboCount);
     auto whichAccel = AccelSlice<uint32_t>::copy(which);
     auto curMixAccel = AccelSlice<Fp4>::copy(&curMix, 1);
     auto mixAccel = AccelSlice<Fp4>::copy(&mix, 1);
@@ -241,7 +241,7 @@ BufferU32 prove(ProveCircuit& circuit) {
   }
   // Subtract the final 'check' coefficents
   for (size_t i = 0; i < kCheckSize; i++) {
-    (*comboCpu)[size * kComboCount] -= cur * coeffU[curPos++];
+    (*comboCpu)[size * comboCount] -= cur * coeffU[curPos++];
     cur *= mix;
   }
 
@@ -252,7 +252,7 @@ BufferU32 prove(ProveCircuit& circuit) {
     }
   }
   // Divide check polys by Z4
-  REQUIRE(polyDivide(comboCpu->data() + kComboCount * size, size, Z4) == Fp4(0));
+  REQUIRE(polyDivide(comboCpu->data() + comboCount * size, size, Z4) == Fp4(0));
   comboCpu.reset(); // Free lock, move memory back to accelerator
 
   // Sum the combos up into one final polynomial + make then make it into 4 Fp polys

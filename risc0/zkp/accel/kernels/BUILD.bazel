@@ -7,7 +7,6 @@ cc_library(
     srcs = ["all.cpp"],
     hdrs = [
         "all.h",
-        "check.h",
         "eltwise.h",
         "fri.h",
         "mix.h",

@@ -14,7 +14,7 @@
 
 #include "risc0/zkp/verify/verify.h"
 #include "risc0/core/log.h"
-#include "risc0/zkp/circuit/constants.h"
+#include "risc0/zkp/core/constants.h"
 #include "risc0/zkp/core/poly.h"
 #include "risc0/zkp/core/rou.h"
 #include "risc0/zkp/verify/fri.h"
@@ -39,10 +39,15 @@ void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize)
   size_t domain = size * kInvRate;
   LOG(1, "size = " << size);
 
+  size_t codeSize = tapSet.groupSize(RegisterGroup::CODE);
+  size_t dataSize = tapSet.groupSize(RegisterGroup::DATA);
+  size_t accumSize = tapSet.groupSize(RegisterGroup::ACCUM);
+  size_t comboCount = tapSet.combosSize();
+
   // Read the code + data merkle roots
-  MerkleTreeVerifier codeMerkle(iop, domain, kCodeSize, kQueries);
+  MerkleTreeVerifier codeMerkle(iop, domain, codeSize, kQueries);
   LOG(1, "codeRoot = " << codeMerkle.getRoot());
-  MerkleTreeVerifier dataMerkle(iop, domain, kDataSize, kQueries);
+  MerkleTreeVerifier dataMerkle(iop, domain, dataSize, kQueries);
   LOG(1, "dataRoot = " << dataMerkle.getRoot());
 
   // Verify the code is what we expect
@@ -51,7 +56,7 @@ void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize)
   // Prep accumulation
   circuit.accumulate(iop);
 
-  MerkleTreeVerifier accumMerkle(iop, domain, kAccumSize, kQueries);
+  MerkleTreeVerifier accumMerkle(iop, domain, accumSize, kQueries);
   LOG(1, "accumRoot = " << accumMerkle.getRoot());
 
   // Set the poly mix value
@@ -142,13 +147,13 @@ void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize)
     rows[static_cast<int>(RegisterGroup::ACCUM)] = accumMerkle.verify(iop, idx);
     auto checkRow = checkMerkle.verify(iop, idx);
     Fp4 cur = Fp4(1);
-    Fp4 tot[kComboCount + 1];
+    std::vector<Fp4> tot(comboCount + 1);
     for (auto reg : tapSet.regs()) {
       tot[reg.comboID()] += cur * rows[static_cast<int>(reg.group())][reg.offset()];
       cur *= mix;
     }
     for (size_t i = 0; i < kCheckSize; i++) {
-      tot[kComboCount] += cur * checkRow[i];
+      tot[comboCount] += cur * checkRow[i];
       cur *= mix;
     }
     Fp4 ret;
@@ -160,7 +165,7 @@ void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize)
       }
       ret += num * inv(divisor);
     }
-    Fp4 checkNum = tot[kComboCount] - comboU[kComboCount][0];
+    Fp4 checkNum = tot[comboCount] - comboU[comboCount][0];
     Fp4 checkDivisor = (Fp4(x) - pow(Z, 4));
     ret += checkNum * inv(checkDivisor);
     return ret;

@@ -19,7 +19,6 @@
 
 #include "risc0/zkp/accel/accel.h"
 #include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/prove/step/step.h"
 #include "risc0/zkp/prove/write_iop.h"
 #include "risc0/zkp/verify/taps.h"
 
@@ -55,6 +54,6 @@ public:
   virtual const std::vector<Fp>& getAccum() const = 0;
 };
 
-BufferU32 prove(ProveCircuit& circuit);
+std::vector<uint32_t> prove(ProveCircuit& circuit);
 
 } // namespace risc0
