@@ -11,8 +11,6 @@ cc_library(
     ],
     deps = [
         "//risc0/zkp/accel/kernels",
-        "//risc0/zkp/circuit:inc",
-        "//risc0/zkp/prove/step",
     ],
 )
 

@@ -22,7 +22,7 @@ risc0_codeid = rule(
             allow_single_file = True,
         ),
         "_tool": attr.label(
-            default = "//risc0/zkp/prove/make-id",
+            default = "//risc0/r0vm/prove/make-id",
             executable = True,
             allow_single_file = True,
             cfg = "host",

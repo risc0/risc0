@@ -12,18 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
-
-#include <functional>
+#include "risc0/r0vm/circuit/context.h"
 
 namespace risc0 {
 
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
+namespace {
+Context* gContext;
+}
 
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
+void setGlobalContext(Context* context) {
+  gContext = context;
+}
+
+Context* getGlobalContext() {
+  return gContext;
+}
 
 } // namespace risc0

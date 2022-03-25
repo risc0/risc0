@@ -30,7 +30,7 @@ cc_library(
         ":shuffle_proof",
         ":shuffle_proof.id",
     ],
-    deps = ["//risc0/zkp/prove"],
+    deps = ["//risc0/r0vm/prove"],
 )
 
 cc_gtest(

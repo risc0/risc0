@@ -45,5 +45,5 @@ cc_gtest(
         "//risc0/r0vm/rust/device:test_sha.id",
     ],
     tags = ["exclusive"],
-    deps = ["//risc0/zkp/prove"],
+    deps = ["//risc0/r0vm/prove"],
 )

@@ -14,16 +14,35 @@
 
 #pragma once
 
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
-
-#include <functional>
+#include "risc0/r0vm/circuit/cycle.h"
 
 namespace risc0 {
 
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
+struct FinalCycle {
+  static std::vector<RegU32> allocVec(BufAlloc& alloc) {
+    std::vector<RegU32> out;
+    for (size_t i = 0; i < 32; i++) {
+      out.emplace_back(alloc);
+    }
+    return out;
+  }
 
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
+  FinalCycle(BufAlloc& alloc)
+      : pc(alloc)
+      , rdLow(alloc)
+      , rdHigh(alloc)
+      , carryLow(alloc)
+      , carryHigh(alloc)
+      , regs(allocVec(alloc)) {}
+
+  void set(StepState& state);
+
+  RegDigits<2, 32> pc;
+  RegMux<8> rdLow;
+  RegMux<4> rdHigh;
+  RegBin carryLow;
+  RegBin carryHigh;
+  std::vector<RegU32> regs;
+};
 
 } // namespace risc0

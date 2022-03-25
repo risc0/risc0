@@ -14,16 +14,19 @@
 
 #pragma once
 
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
-
-#include <functional>
+#include "risc0/r0vm/circuit/types.h"
 
 namespace risc0 {
 
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
+struct MemIORegs {
+  Reg address;  /// The address being accessed
+  RegU32 value; /// The value read/written
+  Reg isWrite;
 
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
+  MemIORegs(BufAlloc& alloc) : address(alloc), value(alloc), isWrite(alloc) {}
+
+  void doRead(Value cycle, Value address = 0);
+  void doWrite(Value cycle, Value address, ValueU32 val, Value isWOM);
+};
 
 } // namespace risc0

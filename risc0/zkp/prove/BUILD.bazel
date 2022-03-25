@@ -6,29 +6,20 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "prove",
     srcs = [
-        "c_api.cpp",
-        "code_id.cpp",
         "fri.cpp",
         "merkle.cpp",
         "poly_group.cpp",
-        "proof.cpp",
         "prove.cpp",
-        "riscv.cpp",
     ],
     hdrs = [
-        "c_api.h",
-        "code_id.h",
         "fri.h",
         "merkle.h",
         "poly_group.h",
-        "proof.h",
         "prove.h",
-        "riscv.h",
         "write_iop.h",
     ],
     linkstatic = True,
     deps = [
-        "//risc0/zkp/prove/step",
         "//risc0/zkp/verify",
     ] + select(ACCEL_DEPS),
 )

@@ -5,20 +5,17 @@ package(default_visibility = ["//visibility:public"])
 cc_library(
     name = "verify",
     srcs = [
-        "fri.cpp",
-        "merkle.cpp",
-        "taps.cpp",
-        "verify.cpp",
+        "code_id.cpp",
+        "riscv.cpp",
     ],
     hdrs = [
-        "fri.h",
-        "merkle.h",
-        "read_iop.h",
-        "taps.h",
-        "verify.h",
+        "code_id.h",
+        "riscv.h",
+        "//risc0/r0vm/prove:step_inc_gen",
     ],
     linkstatic = True,
     deps = [
-        "//risc0/zkp/core",
+        "//risc0/zkp/verify",
+        "//risc0/r0vm/circuit:inc",
     ],
 )

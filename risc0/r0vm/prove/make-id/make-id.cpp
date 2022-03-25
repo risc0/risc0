@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#include <iostream>
 
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
+#include "risc0/r0vm/prove/code_id.h"
 
-#include <functional>
-
-namespace risc0 {
-
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
-
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
-
-} // namespace risc0
+int main(int argc, char* argv[]) {
+  if (argc != 3) {
+    std::cerr << "usage: make-id <elf_in> <id_out>" << std::endl;
+    return 1;
+  }
+  try {
+    risc0::CodeID id = risc0::makeCodeID(argv[1]);
+    risc0::writeCodeID(argv[2], id);
+  } catch (const std::exception& e) {
+    std::cerr << "Unable to make code ID: " << e.what() << std::endl;
+    return 1;
+  }
+  return 0;
+}
