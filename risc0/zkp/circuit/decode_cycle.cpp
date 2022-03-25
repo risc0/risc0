@@ -141,7 +141,7 @@ void DecodeCycle::set(StepState& state) {
       val2OH.set(val2Low.getPart(0, 4) + 16 * val2Split.get(0));                                   \
     }                                                                                              \
     nextCycleType.set(DataCycleType::ct + (id < 32 ? id >> 3 : 0));                                \
-    risc0Log("C%u: Decode: @%08x " #mnem " r%u=0x%04x%04x, r%u=0x%04x%04x, imm=0x%04x%04x",        \
+    risc0Log("C%u: pc: %08x Decode: " #mnem " r%u=0x%04x%04x, r%u=0x%04x%04x, imm=0x%04x%04x",     \
              {cycle,                                                                               \
               pc * 4,                                                                              \
               rs1Id,                                                                               \

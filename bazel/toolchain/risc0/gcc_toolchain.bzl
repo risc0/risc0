@@ -42,6 +42,8 @@ def gcc_toolchain_config(name, sysroot):
         "-Wno-error=pragmas",
         "-Wno-unknown-pragmas",
         "-Wno-strict-aliasing",
+        "-isystem",
+        "{}/picolibc/include".format(sysroot_path),
     ]
 
     dbg_compile_flags = ["-g"]
@@ -64,6 +66,13 @@ def gcc_toolchain_config(name, sysroot):
     link_flags = common_flags + [
         # Do not use the standard system startup files or libraries when linking.
         "-nostdlib",
+        "-L{}/picolibc/riscv32-unknown-elf/lib".format(sysroot_path),
+    ]
+
+    link_libs = [
+        "-lc",
+        "-lgcc",
+        "-lsemihost",
     ]
 
     opt_link_flags = [
@@ -79,6 +88,10 @@ def gcc_toolchain_config(name, sysroot):
         '-D__TIME__="redacted"',
     ]
 
+    cxx_builtin_include_directories = [
+        "%sysroot%/picolibc/include",
+    ]
+
     # Source: https://cs.opensource.google/bazel/bazel/+/master:tools/cpp/unix_cc_toolchain_config.bzl
     cc_toolchain_config(
         name = name,
@@ -90,13 +103,14 @@ def gcc_toolchain_config(name, sysroot):
         target_libc = "unknown",
         abi_version = "unknown",
         abi_libc_version = "unknown",
+        cxx_builtin_include_directories = cxx_builtin_include_directories,
         tool_paths = tool_paths,
         compile_flags = compile_flags,
         dbg_compile_flags = dbg_compile_flags,
         opt_compile_flags = opt_compile_flags,
         cxx_flags = cxx_flags,
         link_flags = link_flags,
-        # link_libs = link_libs,
+        link_libs = link_libs,
         opt_link_flags = opt_link_flags,
         unfiltered_compile_flags = unfiltered_compile_flags,
         # coverage_compile_flags = coverage_compile_flags,

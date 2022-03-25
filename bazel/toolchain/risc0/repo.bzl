@@ -3,8 +3,8 @@ TOOLCHAINS = [
         archive = "riscv32im-darwin-arm64",
         host_arch = "@platforms//cpu:arm64",
         host_os = "@platforms//os:osx",
-        sha256 = "d115cb7ae5cbe34d4d8f5eeab39d3e637196aea3610b8de0265bda8568196b02",
-        version = "2022.03.15",
+        sha256 = "f1ed0d43383276d09690399c4984781c816f5092feac6506e416da1b561bd514",
+        version = "2022.03.25",
     ),
     struct(
         archive = "riscv32im-darwin-x86_64",

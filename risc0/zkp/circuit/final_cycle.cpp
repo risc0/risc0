@@ -41,8 +41,9 @@ void FinalCycle::set(StepState& state) {
   // Set the new PC
   carryLow.set(pc.setPart(resultInfo.pcRaw.low(), 0, 16));
   carryHigh.set(pc.setPart(resultInfo.pcRaw.high() + carryLow.get(), 16, 16));
-  risc0Log("C%u: Final: 0x%04x%04x -> r%u, pc = 0x%08x",
+  risc0Log("C%u: pc: %08x Final: 0x%04x%04x -> r%u, next: %08x",
            {cycle,
+            prevFinal.pc.getPart(2, kMemBits) * 4,
             resultInfo.result.high(),
             resultInfo.result.low(),
             decode.inst.getPart(7, 5),

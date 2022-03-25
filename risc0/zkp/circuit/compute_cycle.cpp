@@ -133,9 +133,12 @@ void ComputeCycle::set(StepState& state, int highID) {
       resultInfo.doStore.set(dstore);                                                              \
       resultInfo.pcRaw.set(pcExpr);                                                                \
       risc0Log(                                                                                    \
-          "C%u: Compute: x1 = 0x%04x%04x, x2 = 0x%04x%04x, x3 = 0x%04x%04x, nz = %d, carry = %d, " \
+          "C%u: pc: %04x%04x Compute: x1 = 0x%04x%04x, x2 = 0x%04x%04x, x3 = 0x%04x%04x, nz = "    \
+          "%d, carry = %d, "                                                                       \
           "overflow = %d, lt = %d, result = 0x%04x%04x",                                           \
           {cycle,                                                                                  \
+           PC.high,                                                                                \
+           PC.low,                                                                                 \
            x1.getPart(16, 16),                                                                     \
            x1.getPart(0, 16),                                                                      \
            x2.getPart(16, 16),                                                                     \
