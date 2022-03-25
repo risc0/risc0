@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "risc0/zkp/prove/c_api.h"
+#include "risc0/r0vm/prove/c_api.h"
 
 #include <memory>
 
 #include "risc0/core/log.h"
 #include "risc0/r0vm/prove/proof.h"
-#include "risc0/r0vm/verify/verify.h"
+#include "risc0/zkp/verify/verify.h"
 
 extern "C" {
 

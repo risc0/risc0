@@ -22,7 +22,7 @@ namespace risc0 {
 static std::vector<uint32_t> run(const std::string& name) {
   std::vector<uint32_t> regs;
   MemoryHandler io;
-  ExecState exec(("risc0/zkp/prove/step/test/" + name).c_str());
+  ExecState exec(("risc0/r0vm/prove/test/" + name).c_str());
   exec.run(1 << 20, io);
   size_t size = exec.context.numSteps;
   // Extract registers

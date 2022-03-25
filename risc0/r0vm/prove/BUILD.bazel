@@ -11,6 +11,7 @@ make_circuit(
 cc_library(
     name = "prove",
     srcs = [
+        "c_api.cpp",
         "code_id.cpp",
         "exec.cpp",
         "io_handler.cpp",
@@ -21,6 +22,7 @@ cc_library(
         ":step_inc_gen",
     ],
     hdrs = [
+        "c_api.h",
         "code_id.h",
         "exec.h",
         "proof.h",
