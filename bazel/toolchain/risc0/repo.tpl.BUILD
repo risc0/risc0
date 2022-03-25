@@ -19,7 +19,6 @@ filegroup(
 gcc_toolchain_config(
     name = "gcc-toolchain-config",
     sysroot = "@{workspace}//:sysroot",
-    version = "{gcc_version}",
 )
 
 cc_toolchain(

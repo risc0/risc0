@@ -9,7 +9,7 @@ def pkg_path_from_label(label):
     else:
         return label.package
 
-def gcc_toolchain_config(name, sysroot, version):
+def gcc_toolchain_config(name, sysroot):
     sysroot_path = pkg_path_from_label(Label(sysroot))
 
     tool_paths = {tool: "bin/riscv32-unknown-elf-{}".format(tool) for tool in [
@@ -31,18 +31,14 @@ def gcc_toolchain_config(name, sysroot, version):
         # A freestanding environment is one in which the standard library may not exist,
         # and program startup may not necessarily be at main.
         "-ffreestanding",
-        "-fno-exceptions",
-        "-fno-non-call-exceptions",
-        "-fno-rtti",
         "-fno-strict-aliasing",
-        "-fno-threadsafe-statics",
-        "-fno-use-cxa-atexit",
     ]
 
     compile_flags = common_flags + [
+        "-fno-exceptions",
+        "-fno-non-call-exceptions",
         "-Wall",
         "-Wunused-but-set-parameter",
-        "-Wno-free-nonheap-object",
         "-Wno-error=pragmas",
         "-Wno-unknown-pragmas",
         "-Wno-strict-aliasing",
@@ -53,16 +49,21 @@ def gcc_toolchain_config(name, sysroot, version):
     opt_compile_flags = [
         "-fdata-sections",
         "-ffunction-sections",
+        "-findirect-inlining",
+        "-finline-small-functions",
         "-g0",
         "-O2",
     ]
 
-    cxx_flags = []
+    cxx_flags = [
+        "-fno-rtti",
+        "-fno-threadsafe-statics",
+        "-fno-use-cxa-atexit",
+    ]
 
     link_flags = common_flags + [
         # Do not use the standard system startup files or libraries when linking.
         "-nostdlib",
-        "-pass-exit-codes",
     ]
 
     opt_link_flags = [
@@ -78,15 +79,6 @@ def gcc_toolchain_config(name, sysroot, version):
         '-D__TIME__="redacted"',
     ]
 
-    cxx_builtin_include_directories = [
-        "%sysroot%/riscv32-unknown-elf/include/c++/" + version,
-        "%sysroot%/riscv32-unknown-elf/include/c++/" + version + "/riscv32-unknown-elf",
-        "%sysroot%/riscv32-unknown-elf/include/c++/" + version + "/backward",
-        "%sysroot%/lib/gcc/riscv32-unknown-elf/" + version + "/include",
-        "%sysroot%/lib/gcc/riscv32-unknown-elf/" + version + "/include-fixed",
-        "%sysroot%/riscv32-unknown-elf/include",
-    ]
-
     # Source: https://cs.opensource.google/bazel/bazel/+/master:tools/cpp/unix_cc_toolchain_config.bzl
     cc_toolchain_config(
         name = name,
@@ -98,7 +90,6 @@ def gcc_toolchain_config(name, sysroot, version):
         target_libc = "unknown",
         abi_version = "unknown",
         abi_libc_version = "unknown",
-        cxx_builtin_include_directories = cxx_builtin_include_directories,
         tool_paths = tool_paths,
         compile_flags = compile_flags,
         dbg_compile_flags = dbg_compile_flags,
