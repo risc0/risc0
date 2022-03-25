@@ -13,11 +13,11 @@
 // limitations under the License.
 
 #include "risc0/core/log.h"
+#include "risc0/r0vm/prove/proof.h"
+#include "risc0/r0vm/prove/riscv.h"
 #include "risc0/zkp/accel/accel.h"
 #include "risc0/zkp/core/sha256.h"
-#include "risc0/zkp/prove/proof.h"
 #include "risc0/zkp/prove/prove.h"
-#include "risc0/zkp/prove/riscv.h"
 
 #include <gtest/gtest.h>
 

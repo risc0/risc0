@@ -15,9 +15,8 @@
 #include "protocol.h"
 
 #include "risc0/core/log.h"
+#include "risc0/r0vm/prove/proof.h"
 #include "risc0/zkp/core/sha256_cpu.h"
-#include "risc0/zkp/prove/proof.h"
-#include "risc0/zkp/verify/verify.h"
 
 using risc0::hex;
 

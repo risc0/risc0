@@ -12,18 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
-
-#include <functional>
+#include "risc0/r0vm/circuit/step_state.h"
 
 namespace risc0 {
 
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
+DataRegs& StepState::getPrev(size_t size) {
+  auto it = prev.find(size);
+  if (it == prev.end()) {
+    it = prev.emplace(size, DataRegs(code, dataBuf.back(size))).first;
+  }
+  return it->second;
+}
 
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
+void StepState::setExec() {
+  data.setExec(*this);
+}
+
+void StepState::setMemCheck() {
+  data.setMemCheck(*this);
+}
 
 } // namespace risc0

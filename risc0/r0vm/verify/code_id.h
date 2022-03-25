@@ -14,16 +14,18 @@
 
 #pragma once
 
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
+#include <array>
 
-#include <functional>
+#include "risc0/core/util.h"
+#include "risc0/r0vm/circuit/constants.h"
+#include "risc0/zkp/core/sha256.h"
 
 namespace risc0 {
 
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
+constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
 
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
+using CodeID = std::array<ShaDigest, kCodeDigestCount>;
+
+CodeID readCodeID(const std::string& filename);
 
 } // namespace risc0

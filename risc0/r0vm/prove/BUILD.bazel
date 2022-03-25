@@ -1,0 +1,40 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
+load("//risc0/r0vm/circuit/make-circuit:defs.bzl", "make_circuit")
+
+package(default_visibility = ["//visibility:public"])
+
+make_circuit(
+    name = "step_inc_gen",
+    out = "step.cpp.inc",
+)
+
+cc_library(
+    name = "prove",
+    srcs = [
+        "c_api.cpp",
+        "code_id.cpp",
+        "exec.cpp",
+        "io_handler.cpp",
+        "proof.cpp",
+        "riscv.cpp",
+        "step.cpp",
+        "step_context.cpp",
+        ":step_inc_gen",
+    ],
+    hdrs = [
+        "c_api.h",
+        "code_id.h",
+        "exec.h",
+        "proof.h",
+        "riscv.h",
+        "step.h",
+    ],
+    linkstatic = True,
+    deps = [
+        "//risc0/zkp/prove",
+        "//risc0/r0vm/verify",
+        "//risc0/r0vm/circuit:inc",
+    ],
+)
+
+

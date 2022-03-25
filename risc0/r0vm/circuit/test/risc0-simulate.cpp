@@ -12,18 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#include "risc0/core/elf.h"
+#include "risc0/core/log.h"
+#include "risc0/core/util.h"
+#include "risc0/r0vm/circuit/constants.h"
+#include "risc0/r0vm/prove/exec.h"
 
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
+#include <vector>
 
-#include <functional>
+using namespace risc0;
 
-namespace risc0 {
-
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
-
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
-
-} // namespace risc0
+int main(int argc, char* argv[]) {
+  setLogLevel(2);
+  if (argc < 2) {
+    LOG(1, "usage: risc0-simulate <elf>");
+    exit(1);
+  }
+  LOG(1, "File = " << argv[1]);
+  try {
+    ExecState state(argv[1]);
+    MemoryHandler io;
+    state.run(1 << 20, io);
+  } catch (const std::runtime_error& err) {
+    LOG(1, "Failed: " << err.what());
+    exit(1);
+  }
+}

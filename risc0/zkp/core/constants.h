@@ -18,7 +18,7 @@
 
 namespace risc0 {
 
-CONSTSCALAR size_t kMaxCyclesPo2 = 23;
+CONSTSCALAR size_t kMaxCyclesPo2 = 20;
 CONSTSCALAR size_t kMaxCycles = size_t(1) << kMaxCyclesPo2;
 
 CONSTSCALAR size_t kQueries = 50; // ~100 bits of conjectured security
