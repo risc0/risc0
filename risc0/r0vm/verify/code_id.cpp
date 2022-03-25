@@ -12,18 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#include "risc0/r0vm/verify/code_id.h"
 
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
-
-#include <functional>
+#include <fstream>
 
 namespace risc0 {
 
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
-
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
+CodeID readCodeID(const std::string& filename) {
+  std::ifstream file(filename, std::ios::in | std::ios::binary);
+  if (!file) {
+    throw std::runtime_error("Unable to open file: " + filename);
+  }
+  CodeID id;
+  file.read(reinterpret_cast<char*>(&id), sizeof(CodeID));
+  file.close();
+  if (!file.good()) {
+    throw std::runtime_error("Error reading code id file: " + filename);
+  }
+  return id;
+}
 
 } // namespace risc0

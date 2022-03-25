@@ -15,8 +15,8 @@
 #pragma once
 
 #include "risc0/core/key.h"
+#include "risc0/r0vm/prove/proof.h"
 #include "risc0/zkp/core/sha256_cpu.h"
-#include "risc0/zkp/prove/proof.h"
 
 // Deck protocol:
 // 1) Dealer picks a random key K_d, and sends a commitment to player: H(K_d).

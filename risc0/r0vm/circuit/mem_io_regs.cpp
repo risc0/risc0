@@ -12,18 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include "risc0/zkp/core/fp4.h"
-#include "risc0/zkp/verify/read_iop.h"
-
-#include <functional>
+#include "risc0/r0vm/circuit/mem_io_regs.h"
 
 namespace risc0 {
 
-using InnerVerify = std::function<Fp4(ReadIOP& iop, size_t idx)>;
+void MemIORegs::doRead(Value cycle, Value addr) {
+  address.set(addr);
+  isWrite.set(0);
+  BYZ_NONDET {
+    auto [low, high] = memRead(cycle, addr);
+    value.setLow(low);
+    value.setHigh(high);
+  }
+}
 
-// Verify a polynomial of degree 'deg', whose values at idx are returned by the inner verifier
-void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner);
+void MemIORegs::doWrite(Value cycle, Value addr, ValueU32 val, Value isWOM) {
+  BYZ_NONDET { memWrite(cycle, addr, val.low, val.high); }
+  address.set(addr);
+  isWrite.set(1 - isWOM);
+  value.set(val);
+}
 
 } // namespace risc0

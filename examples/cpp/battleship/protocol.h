@@ -16,8 +16,8 @@
 
 #include "battleship.h"
 
+#include "risc0/r0vm/prove/proof.h"
 #include "risc0/zkp/core/sha256.h"
-#include "risc0/zkp/prove/proof.h"
 
 #include <vector>
 

@@ -47,7 +47,7 @@ cc_library(
     ],
     deps = [
         ":core",
-        "//risc0/zkp/prove",
+        "//risc0/r0vm/prove",
     ],
 )
 
@@ -57,6 +57,6 @@ cc_gtest(
     tags = ["exclusive"],
     deps = [
         ":protocol",
-        "//risc0/zkp/prove",
+        "//risc0/r0vm/prove",
     ],
 )
