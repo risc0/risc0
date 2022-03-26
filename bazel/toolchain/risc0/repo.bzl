@@ -1,31 +1,31 @@
 TOOLCHAINS = [
     struct(
-        archive = "riscv32im-darwin-arm64",
+        archive = "riscv32im-osx-arm64",
         host_arch = "@platforms//cpu:arm64",
         host_os = "@platforms//os:osx",
-        sha256 = "f1ed0d43383276d09690399c4984781c816f5092feac6506e416da1b561bd514",
+        sha256 = "740c69bbad8accc97477cbbb2e720593ee14350fc73a4409f0c10880f288ed1a",
         version = "2022.03.25",
     ),
     struct(
-        archive = "riscv32im-darwin-x86_64",
+        archive = "riscv32im-osx-x86_64",
         host_arch = "@platforms//cpu:x86_64",
         host_os = "@platforms//os:osx",
-        sha256 = "6cad684a275c32b4cd2a75643c0417447807245a60c2130422cc14e33eb7e8a8",
-        version = "2022.02.25",
+        sha256 = "3ed786e06a15a398ef0ee6689ef4b2a49ef48f5a500a9bb5c24bdf876aae5cac",
+        version = "2022.03.25",
     ),
     struct(
-        archive = "riscv32im-ubuntu18-amd64",
+        archive = "riscv32im-linux-x86_64",
         host_arch = "@platforms//cpu:x86_64",
         host_os = "@platforms//os:linux",
-        sha256 = "bec46711fa6f5c7bd8e09610b0b4643136a6b47318a70fea0817e6fce02233f2",
-        version = "2022.02.25",
+        sha256 = "5c9ca976be5410c371d37f8b42ee2a5c86e8b6fb31eedb755e9ee2cac2ccf53b",
+        version = "2022.03.25",
     ),
     struct(
-        archive = "riscv32im-win32-x86_64",
+        archive = "riscv32im-windows-x86_64",
         host_arch = "@platforms//cpu:x86_64",
         host_os = "@platforms//os:windows",
-        sha256 = "edba1410f44a2685caf26dea53c562f4a6e3e16d8f650146b6aea8236043c3e6",
-        version = "2022.02.25",
+        sha256 = "8ec9208f108e79dfbf341d020fc0c49833200b7eac49f1dcae5e33a6028de38a",
+        version = "2022.03.25",
     ),
 ]
 
