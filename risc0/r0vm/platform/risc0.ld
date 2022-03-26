@@ -49,6 +49,7 @@ SECTIONS {
   } >data
 
   . = ALIGN(4);
+
   .bss (NOLOAD) :  {
     __bss_begin = .;
     *(.sbss*)
@@ -61,7 +62,13 @@ SECTIONS {
     /* Result is 9 words * 4 = 36 bytes, 8 words for output, and 1 word for output size*/
     __bss_end = . + 36;
   } >data
+
   __bss_size = __bss_end - __bss_begin;
+
+  __heap_start = ORIGIN(heap);
+  __heap_end = __heap_start + LENGTH(heap);
+  __heap_size = LENGTH(heap);
+
   __stack_init$ = ORIGIN(stack) + LENGTH(stack) - 4;
 
   /DISCARD/ : {
