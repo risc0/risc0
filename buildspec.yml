@@ -3,7 +3,7 @@ version: 0.2
 phases:
   install:
     commands:
-      npm install -g @bazel/bazelisk
+      curl -o bazelisk.exe https://github.com/bazelbuild/bazelisk/releases/download/v1.11.0/bazelisk-windows-amd64.exe
   build:
     commands:
       - bazelisk info
