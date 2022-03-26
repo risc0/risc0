@@ -3,11 +3,11 @@ version: 0.2
 phases:
   install:
     commands:
-      curl -o bazelisk.exe https://github.com/bazelbuild/bazelisk/releases/download/v1.11.0/bazelisk-windows-amd64.exe
+      curl -o c:/bazelisk.exe https://github.com/bazelbuild/bazelisk/releases/download/v1.11.0/bazelisk-windows-amd64.exe
   build:
     commands:
-      - bazelisk info
-      - bazelisk test //...
+      - c:/bazelisk info
+      - c:/bazelisk test //...
 
 cache:
   paths:
