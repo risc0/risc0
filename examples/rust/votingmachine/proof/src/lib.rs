@@ -1,0 +1,141 @@
+// Copyright 2022 Risc0, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#![cfg_attr(not(test), no_std)]
+
+use r0vm_core::Digest;
+use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct PollingStationState {
+    pub polls_open: bool,
+    pub voters: u32,
+    pub count: u32,
+}
+
+impl PollingStationState {
+    pub fn check(&self) -> bool {
+        true
+    }
+
+    pub fn vote(&mut self, voter: u32, vote_yes: bool) -> bool {
+        let mut vote_counted = false;
+        let voter_mask = 1 << voter;
+        if self.polls_open && 0 == self.voters & voter_mask {
+            self.voters |= voter_mask;
+            if vote_yes {
+                self.count += 1;
+            }
+            vote_counted = true
+        }
+        vote_counted
+    }
+}
+
+#[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct InitCommit {
+    pub polls_open: bool,
+    pub voters: u32,
+    pub state: Digest,
+}
+
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct Ballot {
+    pub voter: u32,
+    pub vote_yes: bool,
+}
+
+impl Ballot {
+    pub fn check(&self) -> bool {
+        true
+    }
+}
+
+#[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SubmitBallotCommit {
+    pub old_state: Digest,
+    pub new_state: Digest,
+    pub polls_open: bool,
+    pub voters: u32,
+    pub voter: u32,
+    pub vote_counted: bool,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SubmitBallotParams {
+    pub state: PollingStationState,
+    pub ballot: Ballot,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SubmitBallotResult {
+    pub state: PollingStationState,
+    pub vote_counted: bool,
+}
+
+impl SubmitBallotParams {
+    pub fn new(state: PollingStationState, ballot: Ballot) -> Self {
+        SubmitBallotParams {
+            state: state,
+            ballot: ballot,
+        }
+    }
+
+    pub fn process(&self) -> SubmitBallotResult {
+        let mut state = self.state.clone();
+        let is_valid = state.check() && self.ballot.check();
+        let vote_counted = is_valid && state.vote(self.ballot.voter, self.ballot.vote_yes);
+        SubmitBallotResult {
+            state: state,
+            vote_counted: vote_counted,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct CloseStationCommit {
+    pub old_state: Digest,
+    pub new_state: Digest,
+    pub polls_open: bool,
+    pub voters: u32,
+    pub count: u32,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct CloseStationParams {
+    pub state: PollingStationState,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct CloseStationResult {
+    pub state: PollingStationState,
+
+}
+
+impl CloseStationParams {
+    pub fn new(state: PollingStationState) -> Self {
+        CloseStationParams {
+            state: state,
+        }
+    }
+
+    pub fn process(&self) -> CloseStationResult {
+        let mut state = self.state.clone();
+        state.polls_open = false;
+        CloseStationResult {
+            state: state,
+        }
+    }
+}

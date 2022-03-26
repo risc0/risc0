@@ -2,6 +2,8 @@
 members = [
   "examples/rust/battleship",
   "examples/rust/battleship/proof",
+  "examples/rust/votingmachine",
+  "examples/rust/votingmachine/proof",
   "risc0/core",
   "risc0/r0vm/rust/core",
   "risc0/r0vm/rust/device",
