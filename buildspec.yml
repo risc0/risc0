@@ -11,4 +11,4 @@ phases:
 
 cache:
   paths:
-    - '%HOME%\_bazel_*/**/*'
+    - '$HOME/_bazel_*/**/*'
