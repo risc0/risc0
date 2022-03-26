@@ -6,4 +6,9 @@ phases:
       npm install -g @bazel/bazelisk
   build:
     commands:
-      bazelisk test //...
+      - bazelisk info
+      - bazelisk test //...
+
+cache:
+  paths:
+    - '%HOME%\_bazel_*/**/*'
