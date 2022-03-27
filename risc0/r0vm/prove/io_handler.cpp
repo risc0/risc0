@@ -203,12 +203,21 @@ void MemoryState::store(uint32_t addr, const void* ptr, uint32_t len) {
 }
 
 void MemoryState::store(uint32_t addr, uint32_t value) {
-  // auto it = data.find(addr / 4);
-  // if (it != data.end()) {
-  //   throw std::runtime_error("Host cannot mutate existing memory.");
-  // }
-  // it->second = value;
-  data[addr / 4] = value;
+  if (addr % 4 != 0) {
+    throw std::runtime_error("Unaligned store");
+  }
+  uint32_t key = addr / 4;
+  auto it = data.find(key);
+  if (it != data.end()) {
+    auto txn = history.lower_bound({key, 0, 0, 0});
+    if (txn != history.end() && txn->addr == key && it->second != value) {
+      // The device has actually touched this memory, and we are not writing the same value
+      throw std::runtime_error("Host cannot mutate existing memory.");
+    }
+    it->second = value;
+  } else {
+    data[key] = value;
+  }
 }
 
 } // namespace risc0
