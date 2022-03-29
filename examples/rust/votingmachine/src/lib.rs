@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use votingmachine_proof::{FreezeVotingMachineCommit, FreezeVotingMachineParams, FreezeVotingMachineResult};
-use votingmachine_proof::{InitializeVotingMachineCommit, VotingMachineState};
-use votingmachine_proof::{Ballot, SubmitBallotCommit, SubmitBallotParams, SubmitBallotResult};
 use r0vm_host::{Proof, Prover, Result};
 use r0vm_serde::{from_slice, to_vec};
+use votingmachine_proof::{Ballot, SubmitBallotCommit, SubmitBallotParams, SubmitBallotResult};
+use votingmachine_proof::{
+    FreezeVotingMachineCommit, FreezeVotingMachineParams, FreezeVotingMachineResult,
+};
+use votingmachine_proof::{InitializeVotingMachineCommit, VotingMachineState};
 
 pub struct InitMessage {
     proof: Proof,
@@ -28,12 +30,12 @@ impl InitMessage {
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
-    pub fn verify_and_get_commit(&self) -> Result <InitializeVotingMachineCommit> {
-        self.proof.verify("examples/rust/votingmachine/proof/init")?;
+    pub fn verify_and_get_commit(&self) -> Result<InitializeVotingMachineCommit> {
+        self.proof
+            .verify("examples/rust/votingmachine/proof/init")?;
         self.get_state()
     }
 }
-
 
 pub struct SubmitBallotMessage {
     proof: Proof,
@@ -46,11 +48,11 @@ impl SubmitBallotMessage {
     }
 
     pub fn verify_and_get_commit(&self) -> Result<SubmitBallotCommit> {
-        self.proof.verify("examples/rust/votingmachine/proof/submit")?;
+        self.proof
+            .verify("examples/rust/votingmachine/proof/submit")?;
         self.get_commit()
     }
 }
-
 
 pub struct FreezeStationMessage {
     proof: Proof,
@@ -63,11 +65,11 @@ impl FreezeStationMessage {
     }
 
     pub fn verify_and_get_commit(&self) -> Result<FreezeVotingMachineCommit> {
-        self.proof.verify("examples/rust/votingmachine/proof/freeze")?;
+        self.proof
+            .verify("examples/rust/votingmachine/proof/freeze")?;
         self.get_commit()
     }
 }
-
 
 #[derive(Debug)]
 pub struct PollingStation {
@@ -76,9 +78,7 @@ pub struct PollingStation {
 
 impl PollingStation {
     pub fn new(state: VotingMachineState) -> Self {
-        PollingStation {
-            state,
-        }
+        PollingStation { state }
     }
 
     pub fn init(&self) -> Result<InitMessage> {
@@ -131,12 +131,30 @@ mod tests {
 
         let mut polling_station = PollingStation::new(polling_station_state);
 
-        let ballot1 = Ballot { voter: 0, vote_yes: false };
-        let ballot2 = Ballot { voter: 1, vote_yes: true };
-        let ballot3 = Ballot { voter: 2, vote_yes: true };
-        let ballot4 = Ballot { voter: 1, vote_yes: false };
-        let ballot5 = Ballot { voter: 3, vote_yes: false };
-        let ballot6 = Ballot { voter: 4, vote_yes: true };
+        let ballot1 = Ballot {
+            voter: 0,
+            vote_yes: false,
+        };
+        let ballot2 = Ballot {
+            voter: 1,
+            vote_yes: true,
+        };
+        let ballot3 = Ballot {
+            voter: 2,
+            vote_yes: true,
+        };
+        let ballot4 = Ballot {
+            voter: 1,
+            vote_yes: false,
+        };
+        let ballot5 = Ballot {
+            voter: 3,
+            vote_yes: false,
+        };
+        let ballot6 = Ballot {
+            voter: 4,
+            vote_yes: true,
+        };
 
         let init_msg = polling_station.init().unwrap();
         let ballot_msg1 = polling_station.submit(&ballot1).unwrap();

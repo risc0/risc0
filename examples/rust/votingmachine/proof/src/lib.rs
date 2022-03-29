@@ -50,7 +50,6 @@ pub struct InitializeVotingMachineCommit {
     pub state: Digest,
 }
 
-
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Ballot {
     pub voter: u32,
@@ -121,21 +120,16 @@ pub struct FreezeVotingMachineParams {
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct FreezeVotingMachineResult {
     pub state: VotingMachineState,
-
 }
 
 impl FreezeVotingMachineParams {
     pub fn new(state: VotingMachineState) -> Self {
-        FreezeVotingMachineParams {
-            state: state,
-        }
+        FreezeVotingMachineParams { state: state }
     }
 
     pub fn process(&self) -> FreezeVotingMachineResult {
         let mut state = self.state.clone();
         state.polls_open = false;
-        FreezeVotingMachineResult {
-            state: state,
-        }
+        FreezeVotingMachineResult { state: state }
     }
 }
