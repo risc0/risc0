@@ -14,7 +14,7 @@ A *voting machine* is a state machine with three operations:
 
 Using [Bazelisk](https://github.com/bazelbuild/bazelisk), simply run
 
-`console
+```console
 $ RISC0_LOG=1 bazelisk run //examples/rust/votingmachine:test
 ...
 [2022-03-29T18:13:44Z INFO  test::tests] initial commit: Ok(InitializeVotingMachineCommit { polls_open: true, voter_bitfield: 0, state: c3e42245ffdff31c980d63b232de1414ca2461a08c6efccca2af96737ef4d068 })
