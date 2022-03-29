@@ -17,7 +17,7 @@
 
 use r0vm_device::{env, sha};
 
-use digital_signature_proof::{SigningRequest, SignMessageCommit};
+use digital_signature_proof::{SignMessageCommit, SigningRequest};
 
 r0vm_device::entry!(main);
 

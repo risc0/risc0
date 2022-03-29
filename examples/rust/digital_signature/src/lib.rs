@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use digital_signature_proof::{Message, Passphrase, SigningRequest, SignMessageCommit};
+use digital_signature_proof::{Message, Passphrase, SignMessageCommit, SigningRequest};
 use r0vm_host::{Proof, Prover, Result};
 use r0vm_serde::{from_slice, to_vec};
 
@@ -26,8 +26,9 @@ impl SigningCompleteMessage {
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
-    pub fn verify_and_get_commit(&self) -> Result <SignMessageCommit> {
-        self.proof.verify("examples/rust/digital_signature/proof/sign")?;
+    pub fn verify_and_get_commit(&self) -> Result<SignMessageCommit> {
+        self.proof
+            .verify("examples/rust/digital_signature/proof/sign")?;
         self.get_commit()
     }
 }
@@ -35,7 +36,7 @@ impl SigningCompleteMessage {
 pub fn sign(pass: &Passphrase, msg: &Message) -> Result<SigningCompleteMessage> {
     let params = SigningRequest {
         passphrase: pass.clone(),
-        msg: msg.clone()
+        msg: msg.clone(),
     };
     let mut prover = Prover::new("examples/rust/digital_signature/proof/sign")?;
     let vec = to_vec(&params).unwrap();
@@ -53,9 +54,7 @@ mod tests {
         let pass = Passphrase {
             pass: 0x12345678abcd1234,
         };
-        let msg = Message {
-            msg: 0xc0ffee,
-        };
+        let msg = Message { msg: 0xc0ffee };
 
         let signing_complete_message = sign(&pass, &msg).unwrap();
 
