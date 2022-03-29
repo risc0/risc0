@@ -3,8 +3,8 @@ load("@crates//:defs.bzl", "crates_from")
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 
 risc0_rust_proof(
-    name = "init_polling_station",
-    srcs = ["src/bin/init_polling_station.rs"],
+    name = "init",
+    srcs = ["src/bin/init.rs"],
     rustc_flags = [
         "-Coverflow-checks=on",
     ],
@@ -16,8 +16,8 @@ risc0_rust_proof(
 )
 
 risc0_rust_proof(
-    name = "submit_ballot",
-    srcs = ["src/bin/submit_ballot.rs"],
+    name = "submit",
+    srcs = ["src/bin/submit.rs"],
     rustc_flags = [
         "-Coverflow-checks=on",
     ],
@@ -29,8 +29,8 @@ risc0_rust_proof(
 )
 
 risc0_rust_proof(
-    name = "close_polling_station",
-    srcs = ["src/bin/close_polling_station.rs"],
+    name = "freeze",
+    srcs = ["src/bin/freeze.rs"],
     rustc_flags = [
         "-Coverflow-checks=on",
     ],

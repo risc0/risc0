@@ -17,19 +17,24 @@
 
 use r0vm_device::{env, sha};
 
-use votingmachine_proof::{CloseStationCommit, CloseStationParams};
+use votingmachine_proof::{SubmitBallotCommit, SubmitBallotParams};
 
 r0vm_device::entry!(main);
 
 pub fn main() {
-    let params: CloseStationParams = env::read();
+    let params: SubmitBallotParams = env::read();
     let result = params.process();
     env::write(&result);
-    env::commit(&CloseStationCommit {
-        old_state: *sha::digest(&params.state),
-        new_state: *sha::digest(&result.state),
-        polls_open: result.state.polls_open,
-        voters: result.state.voters,
-        count: result.state.count,
+    let polls_open = result.state.polls_open;
+    let voter_bitfield = result.state.voter_bitfield;
+    let voter = params.ballot.voter;
+    let vote_counted = result.vote_counted;
+    env::commit(&SubmitBallotCommit {
+        old_state: *sha::digest(params.state),
+        new_state: *sha::digest(result.state),
+        polls_open: polls_open,
+        voter_bitfield: voter_bitfield,
+        voter: voter,
+        vote_counted: vote_counted,
     });
 }

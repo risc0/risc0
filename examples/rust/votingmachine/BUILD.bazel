@@ -27,12 +27,12 @@ rust_test(
     name = "test",
     crate = ":lib",
     data = [
-        "//examples/rust/votingmachine/proof:close_polling_station",
-        "//examples/rust/votingmachine/proof:close_polling_station.id",
-        "//examples/rust/votingmachine/proof:init_polling_station",
-        "//examples/rust/votingmachine/proof:init_polling_station.id",
-        "//examples/rust/votingmachine/proof:submit_ballot",
-        "//examples/rust/votingmachine/proof:submit_ballot.id",
+        "//examples/rust/votingmachine/proof:freeze",
+        "//examples/rust/votingmachine/proof:freeze.id",
+        "//examples/rust/votingmachine/proof:init",
+        "//examples/rust/votingmachine/proof:init.id",
+        "//examples/rust/votingmachine/proof:submit",
+        "//examples/rust/votingmachine/proof:submit.id",
     ],
     rustc_flags = [
         "-Coverflow-checks=on",

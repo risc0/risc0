@@ -18,13 +18,13 @@ use r0vm_core::Digest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct PollingStationState {
+pub struct VotingMachineState {
     pub polls_open: bool,
-    pub voters: u32,
+    pub voter_bitfield: u32,
     pub count: u32,
 }
 
-impl PollingStationState {
+impl VotingMachineState {
     pub fn check(&self) -> bool {
         true
     }
@@ -32,8 +32,8 @@ impl PollingStationState {
     pub fn vote(&mut self, voter: u32, vote_yes: bool) -> bool {
         let mut vote_counted = false;
         let voter_mask = 1 << voter;
-        if self.polls_open && 0 == self.voters & voter_mask {
-            self.voters |= voter_mask;
+        if self.polls_open && 0 == self.voter_bitfield & voter_mask {
+            self.voter_bitfield |= voter_mask;
             if vote_yes {
                 self.count += 1;
             }
@@ -44,9 +44,9 @@ impl PollingStationState {
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct InitCommit {
+pub struct InitializeVotingMachineCommit {
     pub polls_open: bool,
-    pub voters: u32,
+    pub voter_bitfield: u32,
     pub state: Digest,
 }
 
@@ -68,25 +68,25 @@ pub struct SubmitBallotCommit {
     pub old_state: Digest,
     pub new_state: Digest,
     pub polls_open: bool,
-    pub voters: u32,
+    pub voter_bitfield: u32,
     pub voter: u32,
     pub vote_counted: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SubmitBallotParams {
-    pub state: PollingStationState,
+    pub state: VotingMachineState,
     pub ballot: Ballot,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SubmitBallotResult {
-    pub state: PollingStationState,
+    pub state: VotingMachineState,
     pub vote_counted: bool,
 }
 
 impl SubmitBallotParams {
-    pub fn new(state: PollingStationState, ballot: Ballot) -> Self {
+    pub fn new(state: VotingMachineState, ballot: Ballot) -> Self {
         SubmitBallotParams {
             state: state,
             ballot: ballot,
@@ -105,36 +105,36 @@ impl SubmitBallotParams {
 }
 
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct CloseStationCommit {
+pub struct FreezeVotingMachineCommit {
     pub old_state: Digest,
     pub new_state: Digest,
     pub polls_open: bool,
-    pub voters: u32,
+    pub voter_bitfield: u32,
     pub count: u32,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct CloseStationParams {
-    pub state: PollingStationState,
+pub struct FreezeVotingMachineParams {
+    pub state: VotingMachineState,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct CloseStationResult {
-    pub state: PollingStationState,
+pub struct FreezeVotingMachineResult {
+    pub state: VotingMachineState,
 
 }
 
-impl CloseStationParams {
-    pub fn new(state: PollingStationState) -> Self {
-        CloseStationParams {
+impl FreezeVotingMachineParams {
+    pub fn new(state: VotingMachineState) -> Self {
+        FreezeVotingMachineParams {
             state: state,
         }
     }
 
-    pub fn process(&self) -> CloseStationResult {
+    pub fn process(&self) -> FreezeVotingMachineResult {
         let mut state = self.state.clone();
         state.polls_open = false;
-        CloseStationResult {
+        FreezeVotingMachineResult {
             state: state,
         }
     }

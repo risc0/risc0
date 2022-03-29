@@ -17,18 +17,18 @@
 
 use r0vm_device::{env, sha};
 
-use votingmachine_proof::{InitCommit, PollingStationState};
+use votingmachine_proof::{InitializeVotingMachineCommit, VotingMachineState};
 
 r0vm_device::entry!(main);
 
 pub fn main() {
-    let state: PollingStationState = env::read();
+    let state: VotingMachineState = env::read();
     if !state.check() {
-        panic!("Invalid PollingStationState");
+        panic!("Invalid VotingMachineState");
     }
-    env::commit(&InitCommit {
+    env::commit(&InitializeVotingMachineCommit {
         polls_open: state.polls_open,
-        voters: state.voters,
+        voter_bitfield: state.voter_bitfield,
         state: *sha::digest(state),
     });
 }

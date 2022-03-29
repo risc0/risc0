@@ -12,43 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use votingmachine_proof::{CloseStationCommit, CloseStationParams, CloseStationResult};
-use votingmachine_proof::{InitCommit, PollingStationState};
+use votingmachine_proof::{FreezeVotingMachineCommit, FreezeVotingMachineParams, FreezeVotingMachineResult};
+use votingmachine_proof::{InitializeVotingMachineCommit, VotingMachineState};
 use votingmachine_proof::{Ballot, SubmitBallotCommit, SubmitBallotParams, SubmitBallotResult};
 use r0vm_host::{Proof, Prover, Result};
 use r0vm_serde::{from_slice, to_vec};
-
-pub struct CloseStationMessage {
-    proof: Proof,
-}
-
-impl CloseStationMessage {
-    pub fn get_commit(&self) -> Result<CloseStationCommit> {
-        let msg = self.proof.get_message_vec()?;
-        Ok(from_slice(msg.as_slice()).unwrap())
-    }
-
-    pub fn verify_and_get_commit(&self) -> Result<CloseStationCommit> {
-        log::info!("CloseStationMessage::verify_and_get_commit");
-        self.proof.verify("examples/rust/votingmachine/proof/close_polling_station")?;
-        self.get_commit()
-    }
-}
-
 
 pub struct InitMessage {
     proof: Proof,
 }
 
 impl InitMessage {
-    pub fn get_state(&self) -> Result<InitCommit> {
+    pub fn get_state(&self) -> Result<InitializeVotingMachineCommit> {
         let msg = self.proof.get_message_vec()?;
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
-    pub fn verify_and_get_state(&self) -> Result <InitCommit> {
-        log::info!("initInitMessage::verify_and_get_state");
-        self.proof.verify("examples/rust/votingmachine/proof/init_polling_station")?;
+    pub fn verify_and_get_commit(&self) -> Result <InitializeVotingMachineCommit> {
+        self.proof.verify("examples/rust/votingmachine/proof/init")?;
         self.get_state()
     }
 }
@@ -65,8 +46,24 @@ impl SubmitBallotMessage {
     }
 
     pub fn verify_and_get_commit(&self) -> Result<SubmitBallotCommit> {
-        log::info!("SubmitBallotMessage::verify_and_get_commit");
-        self.proof.verify("examples/rust/votingmachine/proof/submit_ballot")?;
+        self.proof.verify("examples/rust/votingmachine/proof/submit")?;
+        self.get_commit()
+    }
+}
+
+
+pub struct FreezeStationMessage {
+    proof: Proof,
+}
+
+impl FreezeStationMessage {
+    pub fn get_commit(&self) -> Result<FreezeVotingMachineCommit> {
+        let msg = self.proof.get_message_vec()?;
+        Ok(from_slice(msg.as_slice()).unwrap())
+    }
+
+    pub fn verify_and_get_commit(&self) -> Result<FreezeVotingMachineCommit> {
+        self.proof.verify("examples/rust/votingmachine/proof/freeze")?;
         self.get_commit()
     }
 }
@@ -74,11 +71,11 @@ impl SubmitBallotMessage {
 
 #[derive(Debug)]
 pub struct PollingStation {
-    state: PollingStationState,
+    state: VotingMachineState,
 }
 
 impl PollingStation {
-    pub fn new(state: PollingStationState) -> Self {
+    pub fn new(state: VotingMachineState) -> Self {
         PollingStation {
             state,
         }
@@ -86,17 +83,17 @@ impl PollingStation {
 
     pub fn init(&self) -> Result<InitMessage> {
         log::info!("init");
-        let mut prover = Prover::new("examples/rust/votingmachine/proof/init_polling_station")?;
+        let mut prover = Prover::new("examples/rust/votingmachine/proof/init")?;
         let vec = to_vec(&self.state).unwrap();
         prover.add_input(vec.as_slice())?;
         let proof = prover.run()?;
         Ok(InitMessage { proof })
     }
 
-    pub fn submit_ballot(&mut self, ballot: &Ballot) -> Result<SubmitBallotMessage> {
-        log::info!("submit_ballot: {:?}", ballot);
+    pub fn submit(&mut self, ballot: &Ballot) -> Result<SubmitBallotMessage> {
+        log::info!("submit: {:?}", ballot);
         let params = SubmitBallotParams::new(self.state.clone(), ballot.clone());
-        let mut prover = Prover::new("examples/rust/votingmachine/proof/submit_ballot")?;
+        let mut prover = Prover::new("examples/rust/votingmachine/proof/submit")?;
         let vec = to_vec(&params).unwrap();
         prover.add_input(vec.as_slice())?;
         let proof = prover.run()?;
@@ -106,17 +103,17 @@ impl PollingStation {
         Ok(SubmitBallotMessage { proof })
     }
 
-    pub fn close_station(&mut self) -> Result<CloseStationMessage> {
-        log::info!("close_station");
-        let params = CloseStationParams::new(self.state.clone());
-        let mut prover = Prover::new("examples/rust/votingmachine/proof/close_polling_station")?;
+    pub fn freeze(&mut self) -> Result<FreezeStationMessage> {
+        log::info!("freeze");
+        let params = FreezeVotingMachineParams::new(self.state.clone());
+        let mut prover = Prover::new("examples/rust/votingmachine/proof/freeze")?;
         let vec = to_vec(&params).unwrap();
         prover.add_input(vec.as_slice())?;
         let proof = prover.run()?;
         let vec = prover.get_output_vec()?;
-        let result = from_slice::<CloseStationResult>(vec.as_slice()).unwrap();
+        let result = from_slice::<FreezeVotingMachineResult>(vec.as_slice()).unwrap();
         self.state = result.state.clone();
-        Ok(CloseStationMessage { proof })
+        Ok(FreezeStationMessage { proof })
     }
 }
 
@@ -126,9 +123,9 @@ mod tests {
 
     #[test]
     fn protocol() {
-        let polling_station_state = PollingStationState {
+        let polling_station_state = VotingMachineState {
             polls_open: true,
-            voters: 0,
+            voter_bitfield: 0,
             count: 0,
         };
 
@@ -142,17 +139,17 @@ mod tests {
         let ballot6 = Ballot { voter: 4, vote_yes: true };
 
         let init_msg = polling_station.init().unwrap();
-        let ballot_msg1 = polling_station.submit_ballot(&ballot1).unwrap();
-        let ballot_msg2 = polling_station.submit_ballot(&ballot2).unwrap();
-        let ballot_msg3 = polling_station.submit_ballot(&ballot3).unwrap();
-        let ballot_msg4 = polling_station.submit_ballot(&ballot4).unwrap();
-        let ballot_msg5 = polling_station.submit_ballot(&ballot5).unwrap();
-        let close_msg = polling_station.close_station().unwrap();
-        let ballot_msg6 = polling_station.submit_ballot(&ballot6).unwrap();
+        let ballot_msg1 = polling_station.submit(&ballot1).unwrap();
+        let ballot_msg2 = polling_station.submit(&ballot2).unwrap();
+        let ballot_msg3 = polling_station.submit(&ballot3).unwrap();
+        let ballot_msg4 = polling_station.submit(&ballot4).unwrap();
+        let ballot_msg5 = polling_station.submit(&ballot5).unwrap();
+        let close_msg = polling_station.freeze().unwrap();
+        let ballot_msg6 = polling_station.submit(&ballot6).unwrap();
 
         assert_eq!(polling_station.state.count, 2);
 
-        let init_state = init_msg.verify_and_get_state();
+        let init_state = init_msg.verify_and_get_commit();
         let ballot_commit1 = ballot_msg1.verify_and_get_commit();
         let ballot_commit2 = ballot_msg2.verify_and_get_commit();
         let ballot_commit3 = ballot_msg3.verify_and_get_commit();

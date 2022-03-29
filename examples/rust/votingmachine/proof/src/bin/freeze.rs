@@ -17,20 +17,22 @@
 
 use r0vm_device::{env, sha};
 
-use votingmachine_proof::{SubmitBallotCommit, SubmitBallotParams};
+use votingmachine_proof::{FreezeVotingMachineCommit, FreezeVotingMachineParams};
 
 r0vm_device::entry!(main);
 
 pub fn main() {
-    let params: SubmitBallotParams = env::read();
+    let params: FreezeVotingMachineParams = env::read();
     let result = params.process();
     env::write(&result);
-    env::commit(&SubmitBallotCommit {
-        old_state: *sha::digest(&params.state),
-        new_state: *sha::digest(&result.state),
-        polls_open: result.state.polls_open,
-        voters: result.state.voters,
-        voter: params.ballot.voter,
-        vote_counted: result.vote_counted,
+    let polls_open = result.state.polls_open;
+    let voter_bitfield = result.state.voter_bitfield;
+    let count = result.state.count;
+    env::commit(&FreezeVotingMachineCommit {
+        old_state: *sha::digest(params.state),
+        new_state: *sha::digest(result.state),
+        polls_open: polls_open,
+        voter_bitfield: voter_bitfield,
+        count: count,
     });
 }
