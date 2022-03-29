@@ -158,14 +158,20 @@ mod tests {
         let close_state = close_msg.verify_and_get_commit();
         let ballot_commit6 = ballot_msg6.verify_and_get_commit();
 
-        log::info!("initial state: {:?}", init_state);
-        log::info!("ballot commit 1: {:?}", ballot_commit1);
-        log::info!("ballot commit 2: {:?}", ballot_commit2);
-        log::info!("ballot commit 3: {:?}", ballot_commit3);
-        log::info!("ballot commit 4: {:?}", ballot_commit4);
-        log::info!("ballot commit 5: {:?}", ballot_commit5);
-        log::info!("close state: {:?}", close_state);
-        log::info!("ballot commit 6: {:?}", ballot_commit6);
-        log::info!("vote count: {:?}", polling_station.state.count);
+        log::info!("initial commit: {:?}", init_state);
+        log::info!("ballot 1: {:?}", ballot1);
+        log::info!("ballot 1 commit: {:?}", ballot_commit1);
+        log::info!("ballot 2: {:?}", ballot2);
+        log::info!("ballot 2 commit: {:?}", ballot_commit2);
+        log::info!("ballot 3: {:?}", ballot3);
+        log::info!("ballot 3 commit: {:?}", ballot_commit3);
+        log::info!("ballot 4: {:?}", ballot4);
+        log::info!("ballot 4 commit: {:?}", ballot_commit4);
+        log::info!("ballot 5: {:?}", ballot5);
+        log::info!("ballot 5 commit: {:?}", ballot_commit5);
+        log::info!("freeze commit: {:?}", close_state);
+        log::info!("ballot 6: {:?}", ballot6);
+        log::info!("ballot 6 commit: {:?}", ballot_commit6);
+        log::info!("Final vote count: {:?}", polling_station.state.count);
     }
 }
