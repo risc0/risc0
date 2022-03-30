@@ -135,6 +135,14 @@ http_archive(
     url = "https://github.com/spietras/rules_conda/releases/download/0.1.0/rules_conda-0.1.0.zip",
 )
 
+http_archive(
+    name = "box2d",
+    build_file = "//bazel/third_party:box2d.BUILD",
+    sha256 = "0cb512dfa5be79ca227cd881b279adee61249c85c8b51caf5aa036b71e943002",
+    strip_prefix = "box2d-2.4.1",
+    url = "https://github.com/erincatto/box2d/archive/refs/tags/v2.4.1.zip",
+)
+
 load("@rules_conda//:defs.bzl", "conda_create", "load_conda", "register_toolchain")
 
 load_conda(

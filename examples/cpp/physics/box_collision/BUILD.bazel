@@ -1,0 +1,35 @@
+load("//bazel/rules/risc0:defs.bzl", "risc0_cc_proof")
+load("//bazel/rules/cc:defs.bzl", "cc_binary", "cc_gtest", "cc_library")
+
+risc0_cc_proof(
+    name = "collision_proof",
+    srcs = ["collision_proof.cpp"],
+    deps = [
+        ":core",
+        "//risc0/r0vm/cpp/device",
+    ],
+)
+
+cc_binary(
+    name = "box_collision",
+    srcs = ["box_collision.cpp"],
+    data = [
+        ":collision_proof",
+        ":collision_proof.id",
+    ],
+    deps = [
+        ":core",
+        "//risc0/r0vm/prove",
+    ],
+)
+
+
+cc_library(
+    name = "core",
+    srcs = ["core.cpp"],
+    hdrs = ["box_collision.h"],
+    deps = select({
+        "//bazel/platform/os:risc0": [],
+        "//conditions:default": ["//risc0/zkp/prove"],
+    }) + ["@box2d"],
+)
