@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "risc0/r0vm/cpp/device/risc0.h"
-#include "risc0/r0vm/platform/memory.h"
 
 using namespace risc0;
 
