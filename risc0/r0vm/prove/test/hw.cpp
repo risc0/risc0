@@ -44,6 +44,8 @@ TEST(Step, HW) {
   run("test_wom_same");
   // Verify writes to WOM with different values fail
   ASSERT_THROW(run("test_wom_diff"), std::runtime_error);
+  // Verify out of bound accesses fail
+  ASSERT_THROW(run("test_invalid_addr"), std::runtime_error);
 }
 
 } // namespace risc0
