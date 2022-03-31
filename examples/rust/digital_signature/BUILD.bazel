@@ -2,10 +2,17 @@ load("@crates//:defs.bzl", "crates_from")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
 
 rust_binary(
-    name = "digital_signature_proof",
-    srcs = ["src/main.rs"],
+    name = "sign",
+    srcs = ["src/sign.rs"],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
     deps = crates_from(":Cargo.toml") + [
         ":lib",
+    ],
+    data = [
+        "//examples/rust/digital_signature/proof:sign",
+        "//examples/rust/digital_signature/proof:sign.id",
     ],
 )
 

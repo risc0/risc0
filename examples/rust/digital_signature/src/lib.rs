@@ -12,37 +12,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use digital_signature_proof::{Message, Passphrase, SignMessageCommit, SigningRequest};
+pub use digital_signature_proof::{Message, Passphrase, SignMessageCommit, SigningRequest};
 use r0vm_host::{Proof, Prover, Result};
 use r0vm_serde::{from_slice, to_vec};
+use sha2::{Digest, Sha256};
 
-pub struct SigningCompleteMessage {
+pub struct SignatureWithReceipt {
     proof: Proof,
 }
 
-impl SigningCompleteMessage {
+impl SignatureWithReceipt {
     pub fn get_commit(&self) -> Result<SignMessageCommit> {
         let msg = self.proof.get_message_vec()?;
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
-    pub fn verify_and_get_commit(&self) -> Result<SignMessageCommit> {
+    pub fn get_identity(&self) -> Result<r0vm_core::Digest> {
+        let commit = self.get_commit().unwrap();
+        Ok(commit.identity)
+    }
+
+    pub fn get_message(&self) -> Result<Message> {
+        let commit = self.get_commit().unwrap();
+        Ok(commit.msg)
+    }
+
+    pub fn verify(&self) -> Result<SignMessageCommit> {
         self.proof
             .verify("examples/rust/digital_signature/proof/sign")?;
         self.get_commit()
     }
 }
 
-pub fn sign(pass: &Passphrase, msg: &Message) -> Result<SigningCompleteMessage> {
+pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<SignatureWithReceipt> {
+    let mut pass_hasher = Sha256::new();
+    pass_hasher.update(pass_str);
+    let mut pass_hash = [0u8; 32];
+    pass_hash.copy_from_slice(&pass_hasher.finalize());
+
+    let mut msg_hasher = Sha256::new();
+    msg_hasher.update(msg_str);
+    let mut msg_hash = [0u8; 32];
+    msg_hash.copy_from_slice(&msg_hasher.finalize());
+
+    let pass = Passphrase { pass: pass_hash };
+    let msg = Message { msg: msg_hash };
+
     let params = SigningRequest {
-        passphrase: pass.clone(),
-        msg: msg.clone(),
+        passphrase: pass,
+        msg: msg,
     };
     let mut prover = Prover::new("examples/rust/digital_signature/proof/sign")?;
     let vec = to_vec(&params).unwrap();
     prover.add_input(vec.as_slice())?;
     let proof = prover.run()?;
-    Ok(SigningCompleteMessage { proof })
+    Ok(SignatureWithReceipt { proof })
 }
 
 #[cfg(test)]
@@ -51,16 +75,19 @@ mod tests {
 
     #[test]
     fn protocol() {
-        let pass = Passphrase {
-            pass: 0x12345678abcd1234,
-        };
-        let msg = Message { msg: 0xc0ffee };
+        let pass_str = "passphr4ase";
+        let msg_str = "This message was signed by me";
+        let signing_receipt = sign(pass_str, msg_str).unwrap();
+        signing_receipt.verify().unwrap();
 
-        let signing_complete_message = sign(&pass, &msg).unwrap();
+        let mut msg_hasher = Sha256::new();
+        msg_hasher.update(msg_str);
+        let mut msg_hash = [0u8; 32];
+        msg_hash.copy_from_slice(&msg_hasher.finalize());
 
-        let signing_commit = signing_complete_message.verify_and_get_commit();
+        assert_eq!(msg_hash, signing_receipt.get_message().unwrap().msg);
 
-        log::info!("msg: {:?}", &msg);
-        log::info!("commit: {:?}", &signing_commit);
+        log::info!("msg: {:?}", &msg_str);
+        log::info!("commit: {:?}", &signing_receipt.get_commit().unwrap());
     }
 }

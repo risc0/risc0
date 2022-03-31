@@ -14,17 +14,36 @@
 
 #![cfg_attr(not(test), no_std)]
 
+use core::fmt::{Debug, Display, Formatter};
 use r0vm_core::Digest;
 use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Message {
-    pub msg: u32,
+    pub msg: [u8; 32],
+}
+
+impl Display for Message {
+    fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
+        for word in self.msg {
+            core::write!(f, "{:02x?}", word)?;
+        }
+        Ok(())
+    }
+}
+
+impl Debug for Message {
+    fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
+        for word in self.msg {
+            core::write!(f, "{:02x?}", word)?;
+        }
+        Ok(())
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Passphrase {
-    pub pass: u64,
+    pub pass: [u8; 32],
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
