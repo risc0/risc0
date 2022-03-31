@@ -1,22 +1,22 @@
-load("//bazel/rules/risc0:defs.bzl", "risc0_cc_proof")
+load("//bazel/rules/risc0:defs.bzl", "risc0_cc_method")
 load("//bazel/rules/cc:defs.bzl", "cc_gtest", "cc_library")
 
 cc_library(
     name = "deck",
     srcs = ["deck.cpp"],
     hdrs = ["deck.h"],
-    deps = ["//risc0/r0vm/cpp/device"],
+    deps = ["//risc0/r0vm/cpp/guest"],
 )
 
-risc0_cc_proof(
-    name = "shuffle_proof",
-    srcs = ["shuffle_proof.cpp"],
+risc0_cc_method(
+    name = "shuffle_method",
+    srcs = ["shuffle_method.cpp"],
     deps = [":deck"],
 )
 
-risc0_cc_proof(
-    name = "card_proof",
-    srcs = ["card_proof.cpp"],
+risc0_cc_method(
+    name = "card_method",
+    srcs = ["card_method.cpp"],
     deps = [":deck"],
 )
 
@@ -25,12 +25,12 @@ cc_library(
     srcs = ["protocol.cpp"],
     hdrs = ["protocol.h"],
     data = [
-        ":card_proof",
-        ":card_proof.id",
-        ":shuffle_proof",
-        ":shuffle_proof.id",
+        ":card_method",
+        ":card_method.id",
+        ":shuffle_method",
+        ":shuffle_method.id",
     ],
-    deps = ["//risc0/r0vm/prove"],
+    deps = ["//risc0/r0vm/cpp/host"],
 )
 
 cc_gtest(

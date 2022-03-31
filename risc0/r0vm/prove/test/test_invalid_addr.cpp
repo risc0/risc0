@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "risc0/r0vm/cpp/device/risc0.h"
+#include "risc0/r0vm/cpp/guest/risc0.h"
 
 using namespace risc0;
 

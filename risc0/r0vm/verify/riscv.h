@@ -16,12 +16,12 @@
 
 #include <memory>
 
-#include "risc0/r0vm/verify/code_id.h"
+#include "risc0/r0vm/verify/method_id.h"
 #include "risc0/zkp/verify/verify.h"
 
 namespace risc0 {
 
 TapSetRef getRiscVTaps();
-std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const CodeID& id);
+std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodID& id);
 
 } // namespace risc0

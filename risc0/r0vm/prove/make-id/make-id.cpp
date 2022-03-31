@@ -14,7 +14,7 @@
 
 #include <iostream>
 
-#include "risc0/r0vm/prove/code_id.h"
+#include "risc0/r0vm/prove/method_id.h"
 
 int main(int argc, char* argv[]) {
   if (argc != 3) {
@@ -22,8 +22,8 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   try {
-    risc0::CodeID id = risc0::makeCodeID(argv[1]);
-    risc0::writeCodeID(argv[2], id);
+    risc0::MethodID id = risc0::makeMethodID(argv[1]);
+    risc0::writeMethodID(argv[2], id);
   } catch (const std::exception& e) {
     std::cerr << "Unable to make code ID: " << e.what() << std::endl;
     return 1;
