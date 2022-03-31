@@ -15,11 +15,11 @@
 #![no_main]
 #![no_std]
 
-use r0vm_device::{env, sha};
+use r0vm_guest::{env, sha};
 
-use digital_signature_proof::{SignMessageCommit, SigningRequest};
+use digital_signature_core::{SignMessageCommit, SigningRequest};
 
-r0vm_device::entry!(main);
+r0vm_guest::entry!(main);
 
 pub fn main() {
     let request: SigningRequest = env::read();
