@@ -98,6 +98,8 @@ crate_universe(
         "//risc0/r0vm/rust/serde:Cargo.toml",
         "//examples/rust/battleship:Cargo.toml",
         "//examples/rust/battleship/proof:Cargo.toml",
+        "//examples/rust/digital_signature:Cargo.toml",
+        "//examples/rust/digital_signature/proof:Cargo.toml",
         "//examples/rust/votingmachine:Cargo.toml",
         "//examples/rust/votingmachine/proof:Cargo.toml",
     ],
