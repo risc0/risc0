@@ -22,8 +22,8 @@ pub use exception::Exception;
 
 pub type Result<T> = std::result::Result<T, Exception>;
 
-pub struct Proof {
-    ptr: *const ffi::RawProof,
+pub struct Receipt {
+    ptr: *const ffi::RawReceipt,
 }
 
 pub struct Prover {
@@ -44,40 +44,40 @@ fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
     Ok(vec)
 }
 
-impl Proof {
+impl Receipt {
     pub fn verify(&self, elf_path: &str) -> Result<()> {
         let mut err = ffi::RawError::default();
         let str = CString::new(elf_path).unwrap();
-        unsafe { ffi::risc0_proof_verify(&mut err, str.as_ptr(), self.ptr) };
+        unsafe { ffi::risc0_receipt_verify(&mut err, str.as_ptr(), self.ptr) };
         ffi::check(err, || ())
     }
 
-    pub fn get_core(&self) -> Result<&[u32]> {
+    pub fn get_seal(&self) -> Result<&[u32]> {
         unsafe {
             let mut err = ffi::RawError::default();
-            let buf = ffi::risc0_proof_get_core_buf(&mut err, self.ptr);
+            let buf = ffi::risc0_receipt_get_seal_buf(&mut err, self.ptr);
             let buf = ffi::check(err, || buf)?;
             let mut err = ffi::RawError::default();
-            let len = ffi::risc0_proof_get_core_len(&mut err, self.ptr);
+            let len = ffi::risc0_receipt_get_seal_len(&mut err, self.ptr);
             let len = ffi::check(err, || len)?;
             Ok(std::slice::from_raw_parts(buf, len))
         }
     }
 
-    pub fn get_message(&self) -> Result<&[u8]> {
+    pub fn get_journal(&self) -> Result<&[u8]> {
         unsafe {
             let mut err = ffi::RawError::default();
-            let buf = ffi::risc0_proof_get_message_buf(&mut err, self.ptr);
+            let buf = ffi::risc0_receipt_get_journal_buf(&mut err, self.ptr);
             let buf = ffi::check(err, || buf)?;
             let mut err = ffi::RawError::default();
-            let len = ffi::risc0_proof_get_message_len(&mut err, self.ptr);
+            let len = ffi::risc0_receipt_get_journal_len(&mut err, self.ptr);
             let len = ffi::check(err, || len)?;
             Ok(std::slice::from_raw_parts(buf, len))
         }
     }
 
-    pub fn get_message_vec(&self) -> Result<Vec<u32>> {
-        into_words(self.get_message()?)
+    pub fn get_journal_vec(&self) -> Result<Vec<u32>> {
+        into_words(self.get_journal()?)
     }
 }
 
@@ -118,17 +118,17 @@ impl Prover {
         into_words(self.get_output()?)
     }
 
-    pub fn run(&self) -> Result<Proof> {
+    pub fn run(&self) -> Result<Receipt> {
         let mut err = ffi::RawError::default();
         let ptr = unsafe { ffi::risc0_prover_run(&mut err, self.ptr) };
-        ffi::check(err, || Proof { ptr })
+        ffi::check(err, || Receipt { ptr })
     }
 }
 
-impl Drop for Proof {
+impl Drop for Receipt {
     fn drop(&mut self) {
         let mut err = ffi::RawError::default();
-        unsafe { ffi::risc0_proof_free(&mut err, self.ptr) };
+        unsafe { ffi::risc0_receipt_free(&mut err, self.ptr) };
         ffi::check(err, || ()).unwrap()
     }
 }

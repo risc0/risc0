@@ -61,7 +61,7 @@ struct MixState {
 
 class RiscVVerifyCircuit : public VerifyCircuit {
 public:
-  RiscVVerifyCircuit(const CodeID& codeID) : codeID_(codeID) {}
+  RiscVVerifyCircuit(const MethodID& codeID) : codeID_(codeID) {}
   TapSetRef getTapSet() const override { return getRiscVTaps(); }
   void execute(ReadIOP& iop) override;
   void accumulate(ReadIOP& iop) override;
@@ -70,7 +70,7 @@ public:
   bool validCode(const ShaDigest& top) const override;
 
 private:
-  CodeID codeID_;
+  MethodID codeID_;
   uint32_t po2_;
   Fp globals_[kGlobalSize];
 };
@@ -136,7 +136,7 @@ Fp4 RiscVVerifyCircuit::computePolynomial(const Fp4* evalU, Fp4 polyMix) const {
   return result.tot;
 }
 
-std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const CodeID& id) {
+std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodID& id) {
   return std::make_unique<RiscVVerifyCircuit>(id);
 }
 

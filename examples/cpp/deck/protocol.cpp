@@ -19,7 +19,7 @@
 using namespace risc0;
 
 template <typename T> ShaDigest shaDigest(const T& t) {
-  // TODO: Fix mismatch between host & device SHA API.
+  // TODO: Fix mismatch between host & guest SHA API.
   std::string str(reinterpret_cast<const char*>(&t), sizeof(T));
   return shaHash(str);
 }
@@ -31,29 +31,29 @@ DealerCommitMessage Dealer::getCommit(uint32_t deckSize) {
   return DealerCommitMessage{shaDigest(dealerKey), deckSize};
 }
 
-ShuffleProofMessage Dealer::shuffle(const PlayerCommitMessage& msg) {
+ShuffleMessage Dealer::shuffle(const PlayerCommitMessage& msg) {
   playerKey = msg.playerKey;
-  Prover prover("examples/cpp/deck/shuffle_proof");
+  Prover prover("examples/cpp/deck/shuffle_method");
   prover.writeInput(deckSize);
-  prover.getKeyStore()["dealer"] = dealerKey;
-  prover.getKeyStore()["player"] = playerKey;
-  Proof proof = prover.run();
+  prover.setKey("dealer", dealerKey);
+  prover.setKey("player", playerKey);
+  Receipt receipt = prover.run();
   cards = prover.getOutput();
-  return ShuffleProofMessage{proof};
+  return ShuffleMessage{receipt};
 }
 
 CardResponseMessage Dealer::revealCard(const CardRequestMessage& msg) {
-  Prover prover("examples/cpp/deck/card_proof");
+  Prover prover("examples/cpp/deck/card_method");
   prover.writeInput(deckSize);
   prover.writeInput(msg.pos);
   prover.writeInput(cards.data(), cards.size());
-  prover.getKeyStore()["dealer"] = dealerKey;
-  prover.getKeyStore()["player"] = playerKey;
-  Proof proof = prover.run();
-  return CardResponseMessage{proof};
+  prover.setKey("dealer", dealerKey);
+  prover.setKey("player", playerKey);
+  Receipt receipt = prover.run();
+  return CardResponseMessage{receipt};
 }
 
-Player::Player() {}
+Player::Player() = default;
 
 PlayerCommitMessage Player::getCommit(const DealerCommitMessage& msg) {
   dealerKeyDigest = msg.dealerKeyDigest;
@@ -61,9 +61,9 @@ PlayerCommitMessage Player::getCommit(const DealerCommitMessage& msg) {
   return PlayerCommitMessage{playerKey};
 }
 
-void Player::verifyShuffleProof(const ShuffleProofMessage& msg) {
-  msg.proof.verify("examples/cpp/deck/shuffle_proof");
-  ShuffleProofContents data = msg.proof.read<ShuffleProofContents>();
+void Player::verifyShuffleMessage(const ShuffleMessage& msg) {
+  msg.receipt.verify("examples/cpp/deck/shuffle_method");
+  ShuffleContent data = msg.receipt.read<ShuffleContent>();
   REQUIRE(data.playerKey == playerKey);
   REQUIRE(data.dealerKeyDigest == dealerKeyDigest);
   deckDigest = data.deckDigest;
@@ -75,9 +75,8 @@ CardRequestMessage Player::makeRequest(uint32_t pos) {
 }
 
 uint32_t Player::verifyResponse(const CardResponseMessage& msg) {
-  msg.proof.verify("examples/cpp/deck/card_proof");
-  REQUIRE(msg.proof.getMessage().size() == sizeof(CardResponseContents));
-  CardResponseContents data = msg.proof.read<CardResponseContents>();
+  msg.receipt.verify("examples/cpp/deck/card_method");
+  CardResponseContent data = msg.receipt.read<CardResponseContent>();
   REQUIRE(data.deckDigest == deckDigest);
   REQUIRE(data.pos == lastRequest);
   return data.card;

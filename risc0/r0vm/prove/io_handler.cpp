@@ -211,7 +211,7 @@ void MemoryState::store(uint32_t addr, uint32_t value) {
   if (it != data.end()) {
     auto txn = history.lower_bound({key, 0, 0, 0});
     if (txn != history.end() && txn->addr == key && it->second != value) {
-      // The device has actually touched this memory, and we are not writing the same value
+      // The guest has actually touched this memory, and we are not writing the same value
       throw std::runtime_error("Host cannot mutate existing memory.");
     }
     it->second = value;

@@ -16,7 +16,7 @@ rust_library(
         "-Coverflow-checks=on",
     ],
     deps = crates_from(":Cargo.toml") + [
-        "//examples/rust/battleship/proof:battleship_proof",
+        "//examples/rust/battleship/core:battleship_core",
         "//risc0/r0vm/rust/core:r0vm-core",
         "//risc0/r0vm/rust/host:r0vm-host",
         "//risc0/r0vm/rust/serde:r0vm-serde",
@@ -27,10 +27,10 @@ rust_test(
     name = "test",
     crate = ":lib",
     data = [
-        "//examples/rust/battleship/proof:init",
-        "//examples/rust/battleship/proof:init.id",
-        "//examples/rust/battleship/proof:turn",
-        "//examples/rust/battleship/proof:turn.id",
+        "//examples/rust/battleship/core:init",
+        "//examples/rust/battleship/core:init.id",
+        "//examples/rust/battleship/core:turn",
+        "//examples/rust/battleship/core:turn.id",
     ],
     rustc_flags = [
         "-Coverflow-checks=on",

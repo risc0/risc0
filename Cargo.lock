@@ -26,7 +26,7 @@ dependencies = [
 name = "battleship"
 version = "0.1.0"
 dependencies = [
- "battleship-proof",
+ "battleship-core",
  "log",
  "r0vm-core",
  "r0vm-host",
@@ -35,11 +35,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "battleship-proof"
+name = "battleship-core"
 version = "0.1.0"
 dependencies = [
  "r0vm-core",
- "r0vm-device",
+ "r0vm-guest",
  "serde",
 ]
 
@@ -151,7 +151,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "r0vm-device"
+name = "r0vm-guest"
 version = "0.1.0"
 dependencies = [
  "r0vm-core",

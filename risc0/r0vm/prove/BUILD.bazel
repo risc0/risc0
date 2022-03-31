@@ -11,30 +11,24 @@ make_circuit(
 cc_library(
     name = "prove",
     srcs = [
-        "c_api.cpp",
-        "code_id.cpp",
         "exec.cpp",
         "io_handler.cpp",
-        "proof.cpp",
+        "method_id.cpp",
         "riscv.cpp",
         "step.cpp",
         "step_context.cpp",
         ":step_inc_gen",
     ],
     hdrs = [
-        "c_api.h",
-        "code_id.h",
         "exec.h",
-        "proof.h",
+        "method_id.h",
         "riscv.h",
         "step.h",
     ],
     linkstatic = True,
     deps = [
-        "//risc0/zkp/prove",
-        "//risc0/r0vm/verify",
         "//risc0/r0vm/circuit:inc",
+        "//risc0/r0vm/verify",
+        "//risc0/zkp/prove",
     ],
 )
-
-

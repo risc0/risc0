@@ -18,7 +18,7 @@ use crate::exception::Exception;
 
 pub(crate) enum RawString {}
 pub(crate) enum RawProver {}
-pub(crate) enum RawProof {}
+pub(crate) enum RawReceipt {}
 
 #[repr(C)]
 pub(crate) struct RawError {
@@ -76,24 +76,34 @@ extern "C" {
 
     pub(crate) fn risc0_prover_get_output_len(err: *mut RawError, prover: *mut RawProver) -> usize;
 
-    pub(crate) fn risc0_prover_run(err: *mut RawError, prover: *mut RawProver) -> *const RawProof;
+    pub(crate) fn risc0_prover_run(err: *mut RawError, prover: *mut RawProver)
+        -> *const RawReceipt;
 
-    pub(crate) fn risc0_proof_verify(
+    pub(crate) fn risc0_receipt_verify(
         err: *mut RawError,
         elf_path: *const i8,
-        proof: *const RawProof,
+        receipt: *const RawReceipt,
     );
 
-    pub(crate) fn risc0_proof_get_core_buf(err: *mut RawError, proof: *const RawProof) -> *mut u32;
-
-    pub(crate) fn risc0_proof_get_core_len(err: *mut RawError, proof: *const RawProof) -> usize;
-
-    pub(crate) fn risc0_proof_get_message_buf(
+    pub(crate) fn risc0_receipt_get_seal_buf(
         err: *mut RawError,
-        proof: *const RawProof,
+        receipt: *const RawReceipt,
+    ) -> *mut u32;
+
+    pub(crate) fn risc0_receipt_get_seal_len(
+        err: *mut RawError,
+        receipt: *const RawReceipt,
+    ) -> usize;
+
+    pub(crate) fn risc0_receipt_get_journal_buf(
+        err: *mut RawError,
+        receipt: *const RawReceipt,
     ) -> *const u8;
 
-    pub(crate) fn risc0_proof_get_message_len(err: *mut RawError, proof: *const RawProof) -> usize;
+    pub(crate) fn risc0_receipt_get_journal_len(
+        err: *mut RawError,
+        receipt: *const RawReceipt,
+    ) -> usize;
 
-    pub(crate) fn risc0_proof_free(err: *mut RawError, proof: *const RawProof);
+    pub(crate) fn risc0_receipt_free(err: *mut RawError, receipt: *const RawReceipt);
 }

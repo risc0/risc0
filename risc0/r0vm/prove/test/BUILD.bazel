@@ -17,18 +17,17 @@ cc_gtest(
 risc0_cc_binary(
     name = "test_invalid_addr",
     srcs = ["test_invalid_addr.cpp"],
-    deps = ["//risc0/r0vm/cpp/device"],
+    deps = ["//risc0/r0vm/cpp/guest"],
 )
 
 risc0_cc_binary(
     name = "test_wom_diff",
     srcs = ["test_wom_diff.cpp"],
-    deps = ["//risc0/r0vm/cpp/device"],
+    deps = ["//risc0/r0vm/cpp/guest"],
 )
 
 risc0_cc_binary(
     name = "test_wom_same",
     srcs = ["test_wom_same.cpp"],
-    deps = ["//risc0/r0vm/cpp/device"],
+    deps = ["//risc0/r0vm/cpp/guest"],
 )
-

@@ -1,21 +1,21 @@
-load("//bazel/rules/risc0:defs.bzl", "risc0_cc_proof")
+load("//bazel/rules/risc0:defs.bzl", "risc0_cc_method")
 load("//bazel/rules/cc:defs.bzl", "cc_binary", "cc_gtest", "cc_library")
 
-risc0_cc_proof(
-    name = "init_proof",
-    srcs = ["init_proof.cpp"],
+risc0_cc_method(
+    name = "init_method",
+    srcs = ["init_method.cpp"],
     deps = [
         ":core",
-        "//risc0/r0vm/cpp/device",
+        "//risc0/r0vm/cpp/guest",
     ],
 )
 
-risc0_cc_proof(
-    name = "round_proof",
-    srcs = ["round_proof.cpp"],
+risc0_cc_method(
+    name = "turn_method",
+    srcs = ["turn_method.cpp"],
     deps = [
         ":core",
-        "//risc0/r0vm/cpp/device",
+        "//risc0/r0vm/cpp/guest",
     ],
 )
 
@@ -40,14 +40,14 @@ cc_library(
     srcs = ["protocol.cpp"],
     hdrs = ["protocol.h"],
     data = [
-        ":init_proof",
-        ":init_proof.id",
-        ":round_proof",
-        ":round_proof.id",
+        ":init_method",
+        ":init_method.id",
+        ":turn_method",
+        ":turn_method.id",
     ],
     deps = [
         ":core",
-        "//risc0/r0vm/prove",
+        "//risc0/r0vm/cpp/host",
     ],
 )
 
@@ -57,6 +57,6 @@ cc_gtest(
     tags = ["exclusive"],
     deps = [
         ":protocol",
-        "//risc0/r0vm/prove",
+        "//risc0/r0vm/cpp/host",
     ],
 )

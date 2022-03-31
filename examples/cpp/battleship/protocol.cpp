@@ -15,30 +15,29 @@
 #include "protocol.h"
 
 #include "risc0/core/log.h"
-#include "risc0/r0vm/prove/proof.h"
 #include "risc0/zkp/core/sha256_cpu.h"
 
 using risc0::hex;
 
 InitMessage::Content InitMessage::decode() const {
-  return proof.read<Content>();
+  return receipt.read<Content>();
 }
 
 RoundMessage::Content RoundMessage::decode() const {
-  return proof.read<Content>();
+  return receipt.read<Content>();
 }
 
 InitMessage Battleship::init() {
-  risc0::Prover prover("examples/cpp/battleship/init_proof");
+  risc0::Prover prover("examples/cpp/battleship/init_method");
   prover.writeInput(state);
-  risc0::Proof proof = prover.run();
-  LOG(1, name << "> InitProof: " << proof.core.size());
-  return InitMessage{proof};
+  risc0::Receipt receipt = prover.run();
+  LOG(1, name << "> InitMethod: " << receipt.seal.size());
+  return InitMessage{receipt};
 }
 
 void Battleship::onInitMsg(const InitMessage& msg) {
   LOG(1, name << "> onInitMsg");
-  msg.proof.verify("examples/cpp/battleship/init_proof");
+  msg.receipt.verify("examples/cpp/battleship/init_method");
   InitMessage::Content content = msg.decode();
   peer_state = content.state;
   LOG(1, name << "> peer_state: " << peer_state);
@@ -53,20 +52,20 @@ TurnMessage Battleship::turn(const Position& shot) {
 RoundMessage Battleship::onTurnMsg(const TurnMessage& msg) {
   LOG(1, name << "> onTurnMsg");
   RoundParams params{state, msg.shot};
-  risc0::Prover prover("examples/cpp/battleship/round_proof");
+  risc0::Prover prover("examples/cpp/battleship/turn_method");
   prover.writeInput(params);
-  risc0::Proof proof = prover.run();
-  LOG(1, name << "> RoundProof: " << proof.core.size());
+  risc0::Receipt receipt = prover.run();
+  LOG(1, name << "> RoundMethod: " << receipt.seal.size());
   const RoundResult& round = prover.readOutput<RoundResult>();
   LOG(1, name << "> RoundResult: " << round);
   state = round.state;
-  return RoundMessage{proof};
+  return RoundMessage{receipt};
 }
 
 void Battleship::onRoundMsg(const RoundMessage& msg) {
   LOG(1, name << "> onRoundMsg");
 
-  msg.proof.verify("examples/cpp/battleship/round_proof");
+  msg.receipt.verify("examples/cpp/battleship/turn_method");
   RoundMessage::Content content = msg.decode();
 
   if (content.old_state != peer_state) {

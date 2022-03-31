@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use battleship_proof::{GameState, HitType, Position, RoundCommit, RoundParams, RoundResult};
+use battleship_core::{GameState, HitType, Position, RoundCommit, RoundParams, RoundResult};
 use r0vm_core::Digest;
-use r0vm_host::{Exception, Proof, Prover, Result};
+use r0vm_host::{Exception, Prover, Receipt, Result};
 use r0vm_serde::{from_slice, to_vec};
 
 pub struct InitMessage {
-    proof: Proof,
+    receipt: Receipt,
 }
 
 #[derive(Debug)]
@@ -27,7 +27,7 @@ pub struct TurnMessage {
 }
 
 pub struct RoundMessage {
-    proof: Proof,
+    receipt: Receipt,
 }
 
 #[derive(Debug)]
@@ -39,14 +39,14 @@ pub struct Battleship {
 
 impl InitMessage {
     pub fn get_state(&self) -> Result<Digest> {
-        let msg = self.proof.get_message_vec()?;
+        let msg = self.receipt.get_journal_vec()?;
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 }
 
 impl RoundMessage {
     pub fn get_commit(&self) -> Result<RoundCommit> {
-        let msg = self.proof.get_message_vec()?;
+        let msg = self.receipt.get_journal_vec()?;
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 }
@@ -61,16 +61,16 @@ impl Battleship {
     }
 
     pub fn init(&self) -> Result<InitMessage> {
-        let mut prover = Prover::new("examples/rust/battleship/proof/init")?;
+        let mut prover = Prover::new("examples/rust/battleship/core/init")?;
         let vec = to_vec(&self.state).unwrap();
         prover.add_input(vec.as_slice())?;
-        let proof = prover.run()?;
-        Ok(InitMessage { proof })
+        let receipt = prover.run()?;
+        Ok(InitMessage { receipt })
     }
 
     pub fn on_init_msg(&mut self, msg: &InitMessage) -> Result<()> {
         log::info!("on_init_msg");
-        msg.proof.verify("examples/rust/battleship/proof/init")?;
+        msg.receipt.verify("examples/rust/battleship/core/init")?;
         self.peer_state = msg.get_state()?;
         log::info!("  peer_state: {:?}", self.peer_state);
         Ok(())
@@ -86,19 +86,19 @@ impl Battleship {
     pub fn on_turn_msg(&mut self, msg: &TurnMessage) -> Result<RoundMessage> {
         log::info!("on_turn_msg: {:?}", msg);
         let params = RoundParams::new(self.state.clone(), msg.shot.x, msg.shot.y);
-        let mut prover = Prover::new("examples/rust/battleship/proof/turn")?;
+        let mut prover = Prover::new("examples/rust/battleship/core/turn")?;
         let vec = to_vec(&params).unwrap();
         prover.add_input(vec.as_slice())?;
-        let proof = prover.run()?;
+        let receipt = prover.run()?;
         let vec = prover.get_output_vec()?;
         let result = from_slice::<RoundResult>(vec.as_slice()).unwrap();
         self.state = result.state.clone();
-        Ok(RoundMessage { proof })
+        Ok(RoundMessage { receipt })
     }
 
     pub fn on_round_msg(&mut self, msg: &RoundMessage) -> Result<HitType> {
         log::info!("on_round_msg");
-        msg.proof.verify("examples/rust/battleship/proof/turn")?;
+        msg.receipt.verify("examples/rust/battleship/core/turn")?;
         let commit = msg.get_commit()?;
         log::info!("  commit: {:?}", commit);
 
@@ -130,7 +130,7 @@ impl Battleship {
 
 #[cfg(test)]
 mod tests {
-    use battleship_proof::{Ship, ShipDirection};
+    use battleship_core::{Ship, ShipDirection};
     use r0vm_serde::to_slice;
 
     use super::*;
