@@ -1,0 +1,43 @@
+load("@crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
+rust_binary(
+    name = "sign",
+    srcs = ["src/sign.rs"],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+    deps = crates_from(":Cargo.toml") + [
+        ":lib",
+    ],
+    data = [
+        "//examples/rust/digital_signature/proof:sign",
+        "//examples/rust/digital_signature/proof:sign.id",
+    ],
+)
+
+rust_library(
+    name = "lib",
+    srcs = ["src/lib.rs"],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+    deps = crates_from(":Cargo.toml") + [
+        "//examples/rust/digital_signature/proof:digital_signature_proof",
+        "//risc0/r0vm/rust/core:r0vm-core",
+        "//risc0/r0vm/rust/host:r0vm-host",
+        "//risc0/r0vm/rust/serde:r0vm-serde",
+    ],
+)
+
+rust_test(
+    name = "test",
+    crate = ":lib",
+    data = [
+        "//examples/rust/digital_signature/proof:sign",
+        "//examples/rust/digital_signature/proof:sign.id",
+    ],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+)
