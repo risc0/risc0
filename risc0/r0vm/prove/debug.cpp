@@ -12,28 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
-
-#include "risc0/r0vm/prove/step.h"
-
-#include <string>
-#include <vector>
+#include "risc0/r0vm/prove/debug.h"
 
 namespace risc0 {
 
-class ExecState {
-public:
-  ExecState(const std::string& elfFile);
-  void run(const size_t maxSteps, MemoryHandler& io);
+void DebugState::start(const size_t maxSteps, MemoryHandler& io) {
+  init(maxSteps, io);
+}
 
-  uint32_t startAddr;
-  std::map<uint32_t, uint32_t> image;
-  StepContext context;
-  std::vector<Fp> code;
-  std::vector<Fp> data;
-
-protected:
-  void init(const size_t maxSteps, MemoryHandler& io);
-};
+void DebugState::step() {
+  // TODO define step interface and event loop
+}
 
 } // namespace risc0

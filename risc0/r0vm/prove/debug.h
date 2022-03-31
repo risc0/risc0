@@ -14,26 +14,13 @@
 
 #pragma once
 
-#include "risc0/r0vm/prove/step.h"
-
-#include <string>
-#include <vector>
+#include "risc0/r0vm/prove/exec.h"
 
 namespace risc0 {
 
-class ExecState {
+class DebugState : public ExecState {
 public:
-  ExecState(const std::string& elfFile);
-  void run(const size_t maxSteps, MemoryHandler& io);
-
-  uint32_t startAddr;
-  std::map<uint32_t, uint32_t> image;
-  StepContext context;
-  std::vector<Fp> code;
-  std::vector<Fp> data;
-
-protected:
-  void init(const size_t maxSteps, MemoryHandler& io);
+  void start(const size_t maxSteps, MemoryHandler& io);
+  void step();
 };
-
 } // namespace risc0

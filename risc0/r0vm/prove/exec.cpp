@@ -20,31 +20,12 @@
 #include "risc0/r0vm/circuit/constants.h"
 
 namespace risc0 {
-
 ExecState::ExecState(const std::string& elfFile) {
   startAddr = loadElf(elfFile, kMemSize, image);
 }
 
-void ExecState::run(size_t maxSteps, MemoryHandler& io) {
-  context.io = &io;
-  context.curStep = 0;
-  context.mem.data[0] = 0;
-  context.numSteps = nearestPo2(image.size() + 3 + kZkCycles);
-  if (context.numSteps > maxSteps) {
-    throw std::runtime_error("Elf too large to fix in maxSteps");
-  }
-
-  LOG(1, "image.size() = " << image.size());
-  LOG(1, "numSteps = " << context.numSteps);
-  io.onInit(context.mem);
-
-  code.resize(kCodeSize * context.numSteps);
-#ifdef CIRCUIT_DEBUG
-  data.resize(kDataSize * context.numSteps, Fp::invalid());
-#else
-  data.resize(kDataSize * context.numSteps);
-#endif
-  setupCode(code.data(), context.numSteps, startAddr, image);
+void ExecState::run(const size_t maxSteps, MemoryHandler& io) {
+  init(maxSteps, io);
   while (context.numSteps <= maxSteps) {
     while (context.curStep < (context.numSteps - 1 - kZkCycles)) {
       if (context.curStep == image.size() + 1) {
@@ -74,7 +55,7 @@ void ExecState::run(size_t maxSteps, MemoryHandler& io) {
       std::vector<Fp> newData(data.size() * 2);
 #endif
       setupCode(newCode.data(), context.numSteps * 2, startAddr, image);
-      for (int j = 0; j < kDataSize; j++) {
+      for (size_t j = 0; j < kDataSize; j++) {
         std::copy(data.begin() + j * context.numSteps,
                   data.begin() + j * context.numSteps + context.curStep,
                   newData.begin() + j * context.numSteps * 2);
@@ -84,6 +65,28 @@ void ExecState::run(size_t maxSteps, MemoryHandler& io) {
     }
     context.numSteps *= 2;
   }
+}
+
+void ExecState::init(size_t maxSteps, MemoryHandler& io) {
+  context.io = &io;
+  context.curStep = 0;
+  context.mem.data[0] = 0;
+  context.numSteps = nearestPo2(image.size() + 3 + kZkCycles);
+  if (context.numSteps > maxSteps) {
+    throw std::runtime_error("Elf too large to fix in maxSteps");
+  }
+
+  LOG(1, "image.size() = " << image.size());
+  LOG(1, "numSteps = " << context.numSteps);
+  io.onInit(context.mem);
+
+  code.resize(kCodeSize * context.numSteps);
+#ifdef CIRCUIT_DEBUG
+  data.resize(kDataSize * context.numSteps, Fp::invalid());
+#else
+  data.resize(kDataSize * context.numSteps);
+#endif
+  setupCode(code.data(), context.numSteps, startAddr, image);
 }
 
 } // namespace risc0

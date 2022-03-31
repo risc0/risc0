@@ -18,12 +18,14 @@ cc_library(
         "step.cpp",
         "step_context.cpp",
         ":step_inc_gen",
+        "debug.cpp",
     ],
     hdrs = [
         "exec.h",
         "method_id.h",
         "riscv.h",
         "step.h",
+        "debug.h",
     ],
     linkstatic = True,
     deps = [
