@@ -121,6 +121,7 @@ void ComputeCycle::set(StepState& state, int highID) {
       Value cycle = state.code.cycle.get();                                                        \
       if (doLoad) {                                                                                \
         state.data.memIO.doRead(cycle, x1.getPart(2, kMemBits));                                   \
+        equate(x1.getPart(2 + kMemBits, 32 - kMemBits - 2), 0);                                    \
       } else {                                                                                     \
         state.data.memIO.doRead(cycle, 0);                                                         \
       }                                                                                            \

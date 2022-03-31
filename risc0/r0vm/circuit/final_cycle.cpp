@@ -28,6 +28,7 @@ void FinalCycle::set(StepState& state) {
   BYZ_IF(resultInfo.doStore.get()) {
     Value isWOM = compute.x1.get(kMemBits + 1);
     Value memAddr = compute.x1.getPart(2, kMemBits);
+    equate(compute.x1.getPart(2 + kMemBits, 32 - kMemBits - 2), 0);
     state.data.memIO.doWrite(cycle, memAddr, result, isWOM);
   }
   BYZ_IF(1 - resultInfo.doStore.get()) { state.data.memIO.doRead(cycle); }

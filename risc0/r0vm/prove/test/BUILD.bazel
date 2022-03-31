@@ -7,10 +7,17 @@ cc_gtest(
         "hw.cpp",
     ],
     data = [
+        ":test_invalid_addr",
         ":test_wom_diff",
         ":test_wom_same",
     ],
     deps = ["//risc0/r0vm/prove"],
+)
+
+risc0_cc_binary(
+    name = "test_invalid_addr",
+    srcs = ["test_invalid_addr.cpp"],
+    deps = ["//risc0/r0vm/cpp/device"],
 )
 
 risc0_cc_binary(
@@ -24,3 +31,4 @@ risc0_cc_binary(
     srcs = ["test_wom_same.cpp"],
     deps = ["//risc0/r0vm/cpp/device"],
 )
+
