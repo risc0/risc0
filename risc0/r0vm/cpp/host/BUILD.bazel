@@ -12,6 +12,7 @@ cc_library(
         "c_api.h",
         "receipt.h",
     ],
+    linkstatic = True,
     deps = [
         "//risc0/r0vm/prove",
         "//risc0/r0vm/verify",

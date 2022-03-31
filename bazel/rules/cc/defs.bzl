@@ -23,10 +23,11 @@ def cc_binary(name, std = DEFAULT_CXX_STD, copts = [], linkopts = [], **kwargs):
         **kwargs
     )
 
-def cc_library(name, std = DEFAULT_CXX_STD, copts = [], **kwargs):
+def cc_library(name, std = DEFAULT_CXX_STD, copts = [], linkopts = [], **kwargs):
     native.cc_library(
         name = name,
         copts = copts + _copts(std),
+        linkopts = linkopts + _linkopts(),
         **kwargs
     )
 

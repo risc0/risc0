@@ -4,7 +4,7 @@ load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary")
 def _impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.name)
     ctx.actions.run(
-        mnemonic = "MethodID",
+        mnemonic = "MakeMethodID",
         executable = ctx.executable._tool,
         arguments = [ctx.file.elf.path, out.path],
         inputs = depset(direct = ctx.files.elf),
