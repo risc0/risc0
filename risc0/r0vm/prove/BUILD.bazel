@@ -20,6 +20,7 @@ cc_library(
         "step.cpp",
         "step_context.cpp",
         ":step_inc_gen",
+        "debug.cpp",
     ],
     hdrs = [
         "c_api.h",
@@ -28,6 +29,7 @@ cc_library(
         "proof.h",
         "riscv.h",
         "step.h",
+        "debug.h",
     ],
     linkstatic = True,
     deps = [
