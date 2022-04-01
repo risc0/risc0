@@ -1,4 +1,4 @@
-# Battleship (C++)
+# Battleship (Rust)
 
 'Battleship' is a 2-player hidden information game implemented.
 
