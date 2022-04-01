@@ -1,4 +1,11 @@
-<img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100">
+<p align="center">
+  <img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100">
+</p>
+
+<p align="center">
+  <a href="https://github.com/risc0/risc0/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache2-blue.svg"></a>
+  <a href="https://github.com/risc0/risc0/actions"><img src="https://github.com/risc0/risc0/workflows/CI/badge.svg?branch=main"></a>
+</p>
 
 > WARNING: This software is still experimental, we do not recommend it for
 > production use (see Security section).
