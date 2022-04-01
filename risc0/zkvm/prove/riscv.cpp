@@ -170,20 +170,20 @@ void RiscVProveCircuit::evalCheck( //
   const Fp* global = exec_.context.globals;
   parallel_for<size_t>(0, domain, [&](size_t idx) {
 #define CHECK_EVAL
-#define do_const(out, cval) auto val##out = Fp(cval);
+#define do_const(out, cval) Fp v##out = Fp(cval);
 #define do_get(out, buf, reg, back, id)                                                            \
-  auto val##out = buf[reg * domain + ((idx - kInvRate * back) & mask)];
-#define do_get_global(out, reg) auto val##out = global[reg];
-#define do_begin(out) auto val##out = MixState{Fp4(0), Fp4(1)};
+  Fp v##out = buf[reg * domain + ((idx - kInvRate * back) & mask)];
+#define do_get_global(out, reg) Fp v##out = global[reg];
+#define do_begin(out) MixState m##out = {Fp4(0), Fp4(1)};
 #define do_assert_zero(out, in, zval, loc)                                                         \
-  auto val##out = MixState{val##in.tot + val##in.mul * val##zval, val##in.mul * polyMix};
+  MixState m##out = {m##in.tot + m##in.mul * v##zval, m##in.mul * polyMix};
 #define do_combine(out, prev, cond, inner, loc)                                                    \
-  auto val##out = MixState{val##prev.tot + val##cond * val##prev.mul * val##inner.tot,             \
-                           val##prev.mul * val##inner.mul};
-#define do_add(out, a, b) auto val##out = val##a + val##b;
-#define do_sub(out, a, b) auto val##out = val##a - val##b;
-#define do_mul(out, a, b) auto val##out = val##a * val##b;
-#define do_result(out) Fp4 ret = val##out.tot;
+  MixState m##out =                                                                                \
+      MixState{m##prev.tot + v##cond * m##prev.mul * m##inner.tot, m##prev.mul * m##inner.mul};
+#define do_add(out, a, b) Fp v##out = v##a + v##b;
+#define do_sub(out, a, b) Fp v##out = v##a - v##b;
+#define do_mul(out, a, b) Fp v##out = v##a * v##b;
+#define do_result(out) Fp4 ret = m##out.tot;
 #include "risc0/zkvm/circuit/step.cpp.inc"
 #undef CHECK_EVAL
 #undef do_const

@@ -298,14 +298,12 @@ struct PolyContext::Impl {
     if (it != opToName.end()) {
       return it->second;
     }
-    std::string opName = std::to_string(opToName.size());
-    /*
+    std::string opName;
     if (op->isConstraint()) {
       opName = std::to_string(totCons++);
     } else {
       opName = std::to_string(totFp4s++);
     }
-    */
     opToName[op] = opName;
     std::string expr = op->output(*this, opName);
     outs << expr << " // deg=" << op->degree() << ", " << opToLoc[op].filename << ":"
@@ -452,6 +450,10 @@ std::string PolyContext::done() {
   uniqCombos[simpleCombo] = 0;
   impl->outs << "do_result(" + finalName + ")\n";
   impl->outs << "#endif  // CHECK_EVAL\n";
+  impl->outs << "#ifdef SIZES\n";
+  impl->outs << "static constexpr size_t kNumStepFp4s = " << impl->totFp4s << ";\n";
+  impl->outs << "static constexpr size_t kNumStepCons= " << impl->totCons << ";\n";
+  impl->outs << "#endif  // SIZES\n";
   impl->outs << "#ifdef TAPS\n";
   impl->outs << R"**(
 #ifndef base_begin
