@@ -1,7 +1,7 @@
 <img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100">
 
-> WARNING: This software is still experimental, we do not recomend it for
-> production use (see Security section)
+> WARNING: This software is still experimental, we do not recommend it for
+> production use (see Security section).
 
 # RISC Zero
 
