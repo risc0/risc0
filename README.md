@@ -8,7 +8,7 @@ zk-STARKs and the RISC-V microarchitecture.
 A zero knowledge proof allows one party (the prover) to convince another party
 (the verifier), the something is true without revealing all the details.  In
 the case of Risc Zero, the prover can show they correctly executed some code
-(known to both parties), while only revealing to the verify the output of the
+(known to both parties), while only revealing to the verifier the output of the
 code, not any of it's inputs or any state during execution.
 
 The code runs in a special virtual machine, called the *ZKVM*.  The Risc Zero
@@ -33,12 +33,12 @@ execution, the guest code can write to a special append only log called the
 *journal* that represents the official output of the computation.
 
 Presuming the method terminated correctly, a *receipt* is produced, which
-provides the proof of correct execution. This reciept consists of 3 parts, the
+provides the proof of correct execution. This reciept consists of 3 parts: the
 method ID of the method run, the journal written during execution, and a blob
-of opaque cryptographic data called the *seal*. 
+of opaque cryptographic data called the *seal*.
 
-The verifier can then verify the receipt, and examine the log.  If any
-tampering was done to the method ID, the journal or the seal, the reciept will
+The verifier can then verify the receipt and examine the log.  If any
+tampering was done to the method ID, the journal, or the seal, the reciept will
 fail to verify.  Additionally, it is cryptographically infeasbile to generate a
 valid reciept unless the output of the journal is the exactly correct output
 for some valid execution of the method whose method ID is in the reciept.
@@ -46,20 +46,20 @@ Basically, the reciept acts as a zero knowledge proof of correct execution.
 
 Additionally, since the protocol is zero knowledge, the verifier cannot infer
 anything about the details of the execution or any data passed between the host
-and the guest, asside from what is implied by the data written to the journal
-and the correct execution of the code.
+and the guest (aside from what is implied by the data written to the journal
+and the correct execution of the code.)
 
 ## Security
 
 This code is based on the well studied Zk-STARK protocol, which has been proven
 secure in the random oracle model, with the only assumption being the security
-of the cryptographic hash used.  Our implementation uses SHA-256 for that hash,
+of the cryptographic hash used.  Our implementation uses SHA-256 for that hash
 and targets a security factor of 100 bits of security.
 
-That said, this code is still under heavy development, and has not been
+That said, this code is still under heavy development and has not been
 audited.  There may be bugs in the Zk-STARK implementation, the arithmatic
 circuit used to instantiate the RISC-V ZKVM, or any other element of the code's
-implementation.  Such bugs may invalidity the security of receipts, leak
+implementation.  Such bugs may impact the security of receipts, leak
 information, or cause any other manor of problems.  Caveat emptor.
 
 ## Examples
