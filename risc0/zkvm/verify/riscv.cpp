@@ -118,14 +118,18 @@ bool RiscVVerifyCircuit::validCode(const ShaDigest& top) const {
 Fp4 RiscVVerifyCircuit::computePolynomial(const Fp4* evalU, Fp4 polyMix) const {
   // Do the big polynomial eval
 #define CHECK_EVAL
-#define do_get(buf, reg, back, id) evalU[id];
-#define do_get_global(reg) globals_[reg]
-#define do_begin() MixState()
-#define do_assert_zero(in, val, loc) in.assert_zero(Fp4(val), polyMix, loc)
-#define do_combine(prev, cond, inner, loc) prev.combine(Fp4(cond), inner, loc)
-#define do_add(a, b) Fp4(a) + Fp4(b)
-#define do_sub(a, b) Fp4(a) - Fp4(b)
-#define do_mul(a, b) Fp4(a) * Fp4(b)
+#define do_const(out, cval) auto val##out = Fp(cval);
+#define do_get(out, buf, reg, back, id) auto val##out = evalU[id];
+#define do_get_global(out, reg) auto val##out = globals_[reg];
+#define do_begin(out) auto val##out = MixState();
+#define do_assert_zero(out, in, zval, loc)                                                         \
+  auto val##out = val##in.assert_zero(Fp4(val##zval), polyMix, loc);
+#define do_combine(out, prev, cond, inner, loc)                                                    \
+  auto val##out = val##prev.combine(Fp4(val##cond), val##inner, loc);
+#define do_add(out, a, b) auto val##out = Fp4(val##a) + Fp4(val##b);
+#define do_sub(out, a, b) auto val##out = Fp4(val##a) - Fp4(val##b);
+#define do_mul(out, a, b) auto val##out = Fp4(val##a) * Fp4(val##b);
+#define do_result(out) auto result = val##out;
 #include "risc0/zkvm/circuit/step.cpp.inc"
 
 #ifdef CIRCUIT_DEBUG

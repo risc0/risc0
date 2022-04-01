@@ -29,16 +29,18 @@ namespace {
 struct PolyOpInterface : public ValueImplBase,
                          public std::enable_shared_from_this<PolyOpInterface> {
   virtual int getTypeID() const = 0;
+  virtual bool isConstraint() const = 0;
   virtual bool lessThan(const PolyOpInterface& rhs) const = 0;
   virtual int degree() const = 0;
   virtual void computeTaps(PolyContext::Impl& impl) = 0;
-  virtual std::string output(PolyContext::Impl& impl) = 0;
+  virtual std::string output(PolyContext::Impl& impl, const std::string& out) = 0;
   virtual void findCriticalPath(PolyContext::Impl& impl) = 0;
 };
 
-template <typename Derived, int TypeID> struct PolyOpBase : PolyOpInterface {
+template <typename Derived, int TypeID, bool isCons> struct PolyOpBase : PolyOpInterface {
   mutable int cachedDegree = -1;
   int getTypeID() const override { return TypeID; }
+  bool isConstraint() const override { return isCons; }
   bool lessThan(const PolyOpInterface& rhs) const override {
     if (rhs.getTypeID() != TypeID) {
       return TypeID < rhs.getTypeID();
@@ -55,17 +57,17 @@ template <typename Derived, int TypeID> struct PolyOpBase : PolyOpInterface {
 
 using PolyOp = std::shared_ptr<PolyOpInterface>;
 
-struct OpConstant : public PolyOpBase<OpConstant, 0> {
+struct OpConstant : public PolyOpBase<OpConstant, 0, 0> {
   Fp value;
   OpConstant(Fp value) : value(value) {}
   int getDegree() const { return 0; }
   Fp key() const { return value; }
   void computeTaps(PolyContext::Impl& impl) override {}
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpGet : public PolyOpBase<OpGet, 1> {
+struct OpGet : public PolyOpBase<OpGet, 1, 0> {
   std::string base;
   size_t offset;
   size_t back;
@@ -76,11 +78,11 @@ struct OpGet : public PolyOpBase<OpGet, 1> {
     return std::make_tuple(base, offset, back);
   }
   void computeTaps(PolyContext::Impl& impl) override;
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpAdd : public PolyOpBase<OpAdd, 2> {
+struct OpAdd : public PolyOpBase<OpAdd, 2, 0> {
   PolyOp lhs;
   PolyOp rhs;
   OpAdd(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
@@ -90,11 +92,11 @@ struct OpAdd : public PolyOpBase<OpAdd, 2> {
     lhs->computeTaps(impl);
     rhs->computeTaps(impl);
   }
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpSub : public PolyOpBase<OpSub, 3> {
+struct OpSub : public PolyOpBase<OpSub, 3, 0> {
   PolyOp lhs;
   PolyOp rhs;
   OpSub(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
@@ -104,11 +106,11 @@ struct OpSub : public PolyOpBase<OpSub, 3> {
     lhs->computeTaps(impl);
     rhs->computeTaps(impl);
   }
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpMul : public PolyOpBase<OpMul, 4> {
+struct OpMul : public PolyOpBase<OpMul, 4, 0> {
   PolyOp lhs;
   PolyOp rhs;
   OpMul(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
@@ -118,19 +120,19 @@ struct OpMul : public PolyOpBase<OpMul, 4> {
     lhs->computeTaps(impl);
     rhs->computeTaps(impl);
   }
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpBegin : public PolyOpBase<OpBegin, 5> {
+struct OpBegin : public PolyOpBase<OpBegin, 5, 1> {
   int getDegree() const { return 0; }
   int key() const { return 0; }
   void computeTaps(PolyContext::Impl& impl) override {}
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpAssertZero : public PolyOpBase<OpAssertZero, 6> {
+struct OpAssertZero : public PolyOpBase<OpAssertZero, 6, 1> {
   PolyOp prev;
   PolyOp zero;
   OpAssertZero(PolyOp prev, PolyOp zero) : prev(prev), zero(zero) {}
@@ -140,11 +142,11 @@ struct OpAssertZero : public PolyOpBase<OpAssertZero, 6> {
     prev->computeTaps(impl);
     zero->computeTaps(impl);
   }
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpCombine : public PolyOpBase<OpCombine, 7> {
+struct OpCombine : public PolyOpBase<OpCombine, 7, 1> {
   PolyOp prev;
   PolyOp mul;
   PolyOp inner;
@@ -156,17 +158,17 @@ struct OpCombine : public PolyOpBase<OpCombine, 7> {
     mul->computeTaps(impl);
     inner->computeTaps(impl);
   }
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpGetGlobal : public PolyOpBase<OpGetGlobal, 8> {
+struct OpGetGlobal : public PolyOpBase<OpGetGlobal, 8, 0> {
   size_t offset;
   OpGetGlobal(size_t offset) : offset(offset) {}
   int getDegree() const { return 0; }
   size_t key() const { return offset; }
   void computeTaps(PolyContext::Impl& impl) override {}
-  std::string output(PolyContext::Impl& impl) override;
+  std::string output(PolyContext::Impl& impl, const std::string& out) override;
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
@@ -190,6 +192,8 @@ struct PolyContext::Impl {
   std::vector<SourceLoc> locStack;
   std::vector<PolyOp> resultStack;
   std::map<PolyOp, SourceLoc> opToLoc;
+  size_t totFp4s = 0;
+  size_t totCons = 0;
   std::map<PolyOp, std::string> opToName;
   std::stringstream outs;
   struct Tap {
@@ -294,11 +298,18 @@ struct PolyContext::Impl {
     if (it != opToName.end()) {
       return it->second;
     }
-    std::string opName = "val" + std::to_string(opToName.size());
+    std::string opName = std::to_string(opToName.size());
+    /*
+    if (op->isConstraint()) {
+      opName = std::to_string(totCons++);
+    } else {
+      opName = std::to_string(totFp4s++);
+    }
+    */
     opToName[op] = opName;
-    std::string expr = op->output(*this);
-    outs << "  auto " << opName << " = " << expr << "; // deg=" << op->degree() << ", "
-         << opToLoc[op].filename << ":" << opToLoc[op].line << "\n";
+    std::string expr = op->output(*this, opName);
+    outs << expr << " // deg=" << op->degree() << ", " << opToLoc[op].filename << ":"
+         << opToLoc[op].line << "\n";
     return opName;
   }
   void onCriticalPath(PolyOp op) {
@@ -308,8 +319,8 @@ struct PolyContext::Impl {
   }
 };
 
-std::string OpConstant::output(PolyContext::Impl& impl) {
-  return "Fp(" + value.str() + ")";
+std::string OpConstant::output(PolyContext::Impl& impl, const std::string& out) {
+  return "do_const(" + out + ", " + value.str() + ")";
 }
 
 void OpConstant::findCriticalPath(PolyContext::Impl& impl) {}
@@ -318,11 +329,11 @@ void OpGet::computeTaps(PolyContext::Impl& impl) {
   impl.taps.emplace(base, offset, back);
 }
 
-std::string OpGet::output(PolyContext::Impl& impl) {
+std::string OpGet::output(PolyContext::Impl& impl, const std::string& out) {
   using Tap = PolyContext::Impl::Tap;
   Tap myTap = {base, offset, back};
   size_t myID = impl.tapToID[myTap];
-  return std::string("do_get(") + base + ", " + std::to_string(offset) + ", " +
+  return "do_get(" + out + ", " + base + ", " + std::to_string(offset) + ", " +
          std::to_string(back) + ", " + std::to_string(myID) + ")";
 }
 
@@ -330,14 +341,14 @@ void OpGet::findCriticalPath(PolyContext::Impl& impl) {
   impl.onCriticalPath(shared_from_this());
 }
 
-std::string OpGetGlobal::output(PolyContext::Impl& impl) {
-  return std::string("do_get_global(") + std::to_string(offset) + ")";
+std::string OpGetGlobal::output(PolyContext::Impl& impl, const std::string& out) {
+  return "do_get_global(" + out + ", " + std::to_string(offset) + ")";
 }
 
 void OpGetGlobal::findCriticalPath(PolyContext::Impl& impl) {}
 
-std::string OpAdd::output(PolyContext::Impl& impl) {
-  return std::string("do_add(") + impl.eval(lhs) + ", " + impl.eval(rhs) + ")";
+std::string OpAdd::output(PolyContext::Impl& impl, const std::string& out) {
+  return "do_add(" + out + ", " + impl.eval(lhs) + ", " + impl.eval(rhs) + ")";
 }
 
 void OpAdd::findCriticalPath(PolyContext::Impl& impl) {
@@ -348,8 +359,8 @@ void OpAdd::findCriticalPath(PolyContext::Impl& impl) {
   }
 }
 
-std::string OpSub::output(PolyContext::Impl& impl) {
-  return std::string("do_sub(") + impl.eval(lhs) + ", " + impl.eval(rhs) + ")";
+std::string OpSub::output(PolyContext::Impl& impl, const std::string& out) {
+  return "do_sub(" + out + ", " + impl.eval(lhs) + ", " + impl.eval(rhs) + ")";
 }
 
 void OpSub::findCriticalPath(PolyContext::Impl& impl) {
@@ -360,8 +371,8 @@ void OpSub::findCriticalPath(PolyContext::Impl& impl) {
   }
 }
 
-std::string OpMul::output(PolyContext::Impl& impl) {
-  return std::string("do_mul(") + impl.eval(lhs) + ", " + impl.eval(rhs) + ")";
+std::string OpMul::output(PolyContext::Impl& impl, const std::string& out) {
+  return "do_mul(" + out + ", " + impl.eval(lhs) + ", " + impl.eval(rhs) + ")";
 }
 
 void OpMul::findCriticalPath(PolyContext::Impl& impl) {
@@ -370,15 +381,15 @@ void OpMul::findCriticalPath(PolyContext::Impl& impl) {
   lhs->findCriticalPath(impl);
 }
 
-std::string OpBegin::output(PolyContext::Impl& impl) {
-  return std::string("do_begin()");
+std::string OpBegin::output(PolyContext::Impl& impl, const std::string& out) {
+  return "do_begin(" + out + ")";
 }
 
 void OpBegin::findCriticalPath(PolyContext::Impl& impl) {}
 
-std::string OpAssertZero::output(PolyContext::Impl& impl) {
+std::string OpAssertZero::output(PolyContext::Impl& impl, const std::string& out) {
   auto opLoc = impl.opToLoc[shared_from_this()];
-  return std::string("do_assert_zero(") + impl.eval(prev) + ", " + impl.eval(zero) + ", \"" +
+  return "do_assert_zero(" + out + ", " + impl.eval(prev) + ", " + impl.eval(zero) + ", \"" +
          opLoc.filename + ":" + std::to_string(opLoc.line) + "\")";
 }
 
@@ -391,9 +402,9 @@ void OpAssertZero::findCriticalPath(PolyContext::Impl& impl) {
   zero->findCriticalPath(impl);
 }
 
-std::string OpCombine::output(PolyContext::Impl& impl) {
+std::string OpCombine::output(PolyContext::Impl& impl, const std::string& out) {
   auto opLoc = impl.opToLoc[shared_from_this()];
-  return std::string("do_combine(") + impl.eval(prev) + ", " + impl.eval(mul) + "," +
+  return "do_combine(" + out + ", " + impl.eval(prev) + ", " + impl.eval(mul) + "," +
          impl.eval(inner) + ", \"" + opLoc.filename + ":" + std::to_string(opLoc.line) + "\")";
 }
 
@@ -439,7 +450,7 @@ std::string PolyContext::done() {
   std::set<size_t> simpleCombo = {0};
   comboById.push_back(simpleCombo);
   uniqCombos[simpleCombo] = 0;
-  impl->outs << "  auto result = " << finalName << ";\n";
+  impl->outs << "do_result(" + finalName + ")\n";
   impl->outs << "#endif  // CHECK_EVAL\n";
   impl->outs << "#ifdef TAPS\n";
   impl->outs << R"**(

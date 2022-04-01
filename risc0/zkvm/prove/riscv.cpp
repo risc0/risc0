@@ -170,26 +170,32 @@ void RiscVProveCircuit::evalCheck( //
   const Fp* global = exec_.context.globals;
   parallel_for<size_t>(0, domain, [&](size_t idx) {
 #define CHECK_EVAL
-#define do_get(buf, reg, back, id) buf[reg * domain + ((idx - kInvRate * back) & mask)]
-#define do_get_global(reg) global[reg]
-#define do_begin()                                                                                 \
-  MixState { Fp4(0), Fp4(1) }
-#define do_assert_zero(in, val, loc)                                                               \
-  MixState { in.tot + in.mul *val, in.mul *polyMix }
-#define do_combine(prev, cond, inner, loc)                                                         \
-  MixState { prev.tot + cond *prev.mul *inner.tot, prev.mul *inner.mul }
-#define do_add(a, b) a + b
-#define do_sub(a, b) a - b
-#define do_mul(a, b) a* b
+#define do_const(out, cval) auto val##out = Fp(cval);
+#define do_get(out, buf, reg, back, id)                                                            \
+  auto val##out = buf[reg * domain + ((idx - kInvRate * back) & mask)];
+#define do_get_global(out, reg) auto val##out = global[reg];
+#define do_begin(out) auto val##out = MixState{Fp4(0), Fp4(1)};
+#define do_assert_zero(out, in, zval, loc)                                                         \
+  auto val##out = MixState{val##in.tot + val##in.mul * val##zval, val##in.mul * polyMix};
+#define do_combine(out, prev, cond, inner, loc)                                                    \
+  auto val##out = MixState{val##prev.tot + val##cond * val##prev.mul * val##inner.tot,             \
+                           val##prev.mul * val##inner.mul};
+#define do_add(out, a, b) auto val##out = val##a + val##b;
+#define do_sub(out, a, b) auto val##out = val##a - val##b;
+#define do_mul(out, a, b) auto val##out = val##a * val##b;
+#define do_result(out) Fp4 ret = val##out.tot;
 #include "risc0/zkvm/circuit/step.cpp.inc"
 #undef CHECK_EVAL
+#undef do_const
 #undef do_get
 #undef do_get_global
 #undef do_begin
+#undef do_assert_zero
+#undef do_combine
 #undef do_add
 #undef do_sub
 #undef do_mul
-    Fp4 ret = result.tot;
+#undef do_result
     Fp x = pow(kRouFwd[po2_ + expPo2], idx);
     ret = ret * inv(pow(Fp(3) * x, (1 << (po2_))) - 1);
     out[0 * domain + idx] = ret.elems[0];
