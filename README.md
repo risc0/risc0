@@ -2,8 +2,70 @@
 
 # RISC Zero
 
-Risc0 is a zero-knowledge verifiable general computing platform based on
+Risc Zero  is a zero-knowledge verifiable general computing platform based on
 zk-STARKs and the RISC-V microarchitecture.
+
+A zero knowledge proof allows one party (the prover) to convince another party
+(the verifier), the something is true without revealing all the details.  In
+the case of Risc Zero, the prover can show they correctly executed some code
+(known to both parties), while only revealing to the verify the output of the
+code, not any of it's inputs or any state during execution.
+
+The code runs in a special virtual machine, called the ZKVM.  The Risc Zero
+ZKVM emulates a small RISC-V computer, allowing it to run arbitrary code in any
+languages, so long as a complier toolchain exists that targets RISC-V.
+Currently we have SDK support for Rust, C, and C++.
+
+## Protocol overview and terminology
+
+First, the code to be proven must be compiled from it's implementation language
+into a `Method`.  A method is represented by a RISC-V ELF file with a special
+entry point that runs the code of the method.  Additionally, one can compute
+for a given method it's 'Method ID' which basically a special type of
+cryptographic hash of the ELF file, and is required for verification.
+
+Next, the prover runs the method inside the ZKVM.  The logical RISC-V machinine
+running inside the ZKVM is called the `Guest` and the prover running the ZKVM
+is called the `Host`.  The guest and the host can communicate with each other
+during the execution of the method, but the host cannot modify the execution of
+the guest in any way, or the proof being generated will be invalid. During
+execution, the guest code can write to a special append only log called the
+`Journal` that represents the official output of the computation.
+
+Presuming the method terminated correctly, a `Receipt` is produced, which
+provides the proof of correct execution. This reciept consists of 3 parts, the
+method ID of the method run, the journal written during execution, and a blob
+of opaque cryptographic data called the `Seal`. 
+
+The verifier can then verify the receipt, and examine the log.  If any
+tampering was done to the method ID, the journal or the seal, the reciept will
+fail to verify.  Additionally, it is cryptographically infeasbile to generate a
+valid reciept unless the output of the journal is the exactly correct output
+for some valid execution of the method whose method ID is in the reciept.
+Basically, the reciept acts as a zero knowledge proof of correct execution.
+
+Additionally, since the protocol is zero knowledge, the verifier cannot infer
+anything about the details of the execution or any data passed between the host
+and the guest, asside from what is implied by the data written to the journal
+and the correct execution of the code.
+
+## Security
+
+This code is based on the well studied Zk-STARK protocol, which has been proven
+secure in the random oracle model, with the only assumption being the security
+of the cryptographic hash used.  Our implementation uses SHA-256 for that hash,
+and targets a security factor of 100 bits of security.
+
+That said, this code is still under heavy development, and has not been
+audited.  There may be bugs in the Zk-STARK implementation, the arithmatic
+circuit used to instantiate the RISC-V ZKVM, or any other element of the code's
+implementation.  Such bugs may invalidity the security of receipts, leak
+information, or cause any other manor of problems.  Caveat emptor.
+
+## Examples
+
+In addition to the Risc Zero proof system, we include a number of small
+examples, each with their own README, in the 'examples' directory.
 
 ## Building RISC Zero
 
@@ -47,24 +109,3 @@ or by running Bazel as an administrator.
 A C++ compiler must be installed. Visual Studio 2019 Build Tools is known to work (as does the Community edition).
 Let us know if you run into any issues.
 
-## Running the 'Battleship' Examples
-
-'Battleship' is a 2-player hidden information game implemented in C++ & Rust.
-
-Players produce proofs of game-state and the result of their actions to enable
-two players to play fairly with no intermediaries.
-
-The best way to understand how the game works currently is to read the code
-and run the tests with debug logging enabled:
-
-### C++
-
-```
-RISC0_LOG=1 bazelisk run //examples/cpp/battleship:test
-```
-
-### Rust
-
-```
-RISC0_LOG=1 bazelisk run //examples/rust/battleship:test
-```
