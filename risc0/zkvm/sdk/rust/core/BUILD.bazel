@@ -1,0 +1,19 @@
+load("@crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "zkvm-core",
+    srcs = [
+        "src/lib.rs",
+    ],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml"),
+)
+
+rust_test(
+    name = "test",
+    crate = ":zkvm-core",
+)

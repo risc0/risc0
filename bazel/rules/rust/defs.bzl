@@ -144,7 +144,7 @@ _rust_binary_attrs = {
     "linker_script": attr.label(
         cfg = "exec",
         allow_single_file = True,
-        default = Label("//risc0/r0vm/platform:risc0.ld"),
+        default = Label("//risc0/zkvm/platform:risc0.ld"),
     ),
     "out_binary": attr.bool(default = False),
     "_grep_includes": attr.label(

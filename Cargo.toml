@@ -6,8 +6,8 @@ members = [
   "examples/rust/digital_signature",
   "examples/rust/digital_signature/core",
   "risc0/core",
-  "risc0/r0vm/rust/core",
-  "risc0/r0vm/rust/guest",
-  "risc0/r0vm/rust/host",
-  "risc0/r0vm/rust/serde",
+  "risc0/zkvm/sdk/rust/core",
+  "risc0/zkvm/sdk/rust/guest",
+  "risc0/zkvm/sdk/rust/host",
+  "risc0/zkvm/sdk/rust/serde",
 ]

@@ -17,9 +17,9 @@ rust_library(
     ],
     deps = crates_from(":Cargo.toml") + [
         "//examples/rust/battleship/core:battleship_core",
-        "//risc0/r0vm/rust/core:r0vm-core",
-        "//risc0/r0vm/rust/host:r0vm-host",
-        "//risc0/r0vm/rust/serde:r0vm-serde",
+        "//risc0/zkvm/sdk/rust/core:zkvm-core",
+        "//risc0/zkvm/sdk/rust/host:zkvm-host",
+        "//risc0/zkvm/sdk/rust/serde:zkvm-serde",
     ],
 )
 

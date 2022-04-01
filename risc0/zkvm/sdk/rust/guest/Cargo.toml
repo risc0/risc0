@@ -1,0 +1,9 @@
+[package]
+name = "zkvm-guest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zkvm-core = { path = "../core" }
+zkvm-serde = { path = "../serde" }
+serde = { version = "1.0", default-features = false, features = ["derive"] }

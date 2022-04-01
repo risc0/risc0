@@ -1,0 +1,51 @@
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
+load("@crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+rust_library(
+    name = "zkvm-guest",
+    srcs = [
+        "src/alloc.rs",
+        "src/env.rs",
+        "src/gpio.rs",
+        "src/lib.rs",
+        "src/sha.rs",
+    ],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        "//risc0/zkvm/sdk/cpp/guest:crt0",
+        "//risc0/zkvm/sdk/rust/core:zkvm-core",
+        "//risc0/zkvm/sdk/rust/serde:zkvm-serde",
+    ],
+)
+
+risc0_rust_method(
+    name = "test_sha",
+    srcs = ["tests/sha.rs"],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        ":zkvm-guest",
+        "//risc0/zkvm/sdk/rust/core:zkvm-core",
+    ],
+)
+
+risc0_rust_method(
+    name = "test_mem",
+    srcs = ["tests/io.rs"],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        ":zkvm-guest",
+    ],
+)
+
+risc0_rust_method(
+    name = "test_fail",
+    srcs = ["tests/fail.rs"],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        ":zkvm-guest",
+    ],
+)
