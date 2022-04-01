@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "risc0/r0vm/cpp/guest/risc0.h"
+#include "risc0/zkvm/sdk/cpp/guest/risc0.h"
 
 #include <vector>
 

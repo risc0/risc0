@@ -5,7 +5,7 @@ cc_library(
     name = "deck",
     srcs = ["deck.cpp"],
     hdrs = ["deck.h"],
-    deps = ["//risc0/r0vm/cpp/guest"],
+    deps = ["//risc0/zkvm/sdk/cpp/guest"],
 )
 
 risc0_cc_method(
@@ -30,7 +30,7 @@ cc_library(
         ":shuffle_method",
         ":shuffle_method.id",
     ],
-    deps = ["//risc0/r0vm/cpp/host"],
+    deps = ["//risc0/zkvm/sdk/cpp/host"],
 )
 
 cc_gtest(

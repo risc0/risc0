@@ -15,11 +15,11 @@
 #![no_main]
 #![no_std]
 
-use r0vm_guest::{env, sha};
+use zkvm_guest::{env, sha};
 
 use battleship_core::GameState;
 
-r0vm_guest::entry!(main);
+zkvm_guest::entry!(main);
 
 pub fn main() {
     let state: GameState = env::read();

@@ -15,11 +15,11 @@
 #include "battleship.h"
 #include "protocol.h"
 #include "risc0/core/log.h"
-#include "risc0/r0vm/platform/io.h"
-#include "risc0/r0vm/platform/memory.h"
 #include "risc0/zkp/accel/accel.h"
 #include "risc0/zkp/prove/prove.h"
 #include "risc0/zkp/verify/verify.h"
+#include "risc0/zkvm/platform/io.h"
+#include "risc0/zkvm/platform/memory.h"
 
 #include <gtest/gtest.h>
 
