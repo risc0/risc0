@@ -5,16 +5,16 @@
 
 # RISC Zero
 
-Risc Zero is a zero-knowledge verifiable general computing platform based on
+RISC Zero is a zero-knowledge verifiable general computing platform based on
 zk-STARKs and the RISC-V microarchitecture.
 
 A zero knowledge proof allows one party (the prover) to convince another party
 (the verifier), the something is true without revealing all the details.  In
-the case of Risc Zero, the prover can show they correctly executed some code
+the case of RISC Zero, the prover can show they correctly executed some code
 (known to both parties), while only revealing to the verifier the output of the
 code, not any of its inputs or any state during execution.
 
-The code runs in a special virtual machine, called the *ZKVM*.  The Risc Zero
+The code runs in a special virtual machine, called the *ZKVM*.  The RISC Zero
 ZKVM emulates a small RISC-V computer, allowing it to run arbitrary code in any
 language, so long as a compiler toolchain exists that targets RISC-V.
 Currently, SDK support exists for Rust, C, and C++.
@@ -67,7 +67,7 @@ information, or cause any other manner of problems.  Caveat emptor.
 
 ## Examples
 
-In addition to the Risc Zero proof system, we include a number of small
+In addition to the RISC Zero proof system, we include a number of small
 examples, each with their own README, in the 'examples' directory.
 
 ## Building RISC Zero
@@ -78,7 +78,7 @@ features and performance.
 We recommend using [Bazelisk](https://github.com/bazelbuild/bazelisk) to make
 bazel version management seamless.
 
-In order to build Risc0 executables you'll need a RISC-V toolchain.
+In order to build RISC Zero executables you'll need a RISC-V toolchain.
 Bazel will automatically fetch and manage the toolchain for the following platforms:
 
 * Linux - Ubuntu 18+ (x86_64)
@@ -101,7 +101,7 @@ Let us know if you run into any issues.
 
 ### macOS
 
-Risc0 development on macOS **requires a full installation of Xcode (not just command line tools)**.
+RISC Zero development on macOS **requires a full installation of Xcode (not just command line tools)**.
 
 ### Windows
 
