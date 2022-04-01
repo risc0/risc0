@@ -1,3 +1,8 @@
 toolchain
 bazelisk
 cpp
+prover
+Risc
+zk-STARKs
+zk-STARK
+ZKVM
