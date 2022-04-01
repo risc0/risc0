@@ -14,8 +14,8 @@
 
 #![cfg_attr(not(test), no_std)]
 
-use r0vm_core::Digest;
 use serde::{Deserialize, Serialize};
+use zkvm_core::Digest;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct VotingMachineState {
@@ -25,10 +25,6 @@ pub struct VotingMachineState {
 }
 
 impl VotingMachineState {
-    pub fn check(&self) -> bool {
-        true
-    }
-
     pub fn vote(&mut self, voter: u32, vote_yes: bool) -> bool {
         let mut vote_counted = false;
         let voter_mask = 1 << voter;
@@ -56,12 +52,6 @@ pub struct Ballot {
     pub vote_yes: bool,
 }
 
-impl Ballot {
-    pub fn check(&self) -> bool {
-        true
-    }
-}
-
 #[derive(Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SubmitBallotCommit {
     pub old_state: Digest,
@@ -69,6 +59,7 @@ pub struct SubmitBallotCommit {
     pub polls_open: bool,
     pub voter_bitfield: u32,
     pub voter: u32,
+    pub vote_yes: bool,
     pub vote_counted: bool,
 }
 
@@ -82,6 +73,7 @@ pub struct SubmitBallotParams {
 pub struct SubmitBallotResult {
     pub state: VotingMachineState,
     pub vote_counted: bool,
+    pub vote_yes: bool,
 }
 
 impl SubmitBallotParams {
@@ -94,11 +86,11 @@ impl SubmitBallotParams {
 
     pub fn process(&self) -> SubmitBallotResult {
         let mut state = self.state.clone();
-        let is_valid = state.check() && self.ballot.check();
-        let vote_counted = is_valid && state.vote(self.ballot.voter, self.ballot.vote_yes);
+        let vote_counted = state.vote(self.ballot.voter, self.ballot.vote_yes);
         SubmitBallotResult {
             state: state,
             vote_counted: vote_counted,
+            vote_yes: self.ballot.vote_yes,
         }
     }
 }

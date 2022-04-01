@@ -15,17 +15,14 @@
 #![no_main]
 #![no_std]
 
-use r0vm_device::{env, sha};
+use zkvm_guest::{env, sha};
 
-use votingmachine_proof::{InitializeVotingMachineCommit, VotingMachineState};
+use votingmachine_core::{InitializeVotingMachineCommit, VotingMachineState};
 
-r0vm_device::entry!(main);
+zkvm_guest::entry!(main);
 
 pub fn main() {
     let state: VotingMachineState = env::read();
-    if !state.check() {
-        panic!("Invalid VotingMachineState");
-    }
     env::commit(&InitializeVotingMachineCommit {
         polls_open: state.polls_open,
         voter_bitfield: state.voter_bitfield,

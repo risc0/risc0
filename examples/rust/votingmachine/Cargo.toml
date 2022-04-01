@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-votingmachine-proof = { path = "proof" }
+votingmachine-core = { path = "core" }
 log = "0.4"
 r0vm-core = { path = "../../../risc0/r0vm/rust/core" }
 r0vm-host = { path = "../../../risc0/r0vm/rust/host" }

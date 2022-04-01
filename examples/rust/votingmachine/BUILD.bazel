@@ -16,10 +16,10 @@ rust_library(
         "-Coverflow-checks=on",
     ],
     deps = crates_from(":Cargo.toml") + [
-        "//examples/rust/votingmachine/proof:votingmachine_proof",
-        "//risc0/r0vm/rust/core:r0vm-core",
-        "//risc0/r0vm/rust/host:r0vm-host",
-        "//risc0/r0vm/rust/serde:r0vm-serde",
+        "//examples/rust/votingmachine/core:votingmachine_core",
+        "//risc0/zkvm/sdk/rust/core:zkvm-core",
+        "//risc0/zkvm/sdk/rust/host:zkvm-host",
+        "//risc0/zkvm/sdk/rust/serde:zkvm-serde",
     ],
 )
 
@@ -27,12 +27,12 @@ rust_test(
     name = "test",
     crate = ":lib",
     data = [
-        "//examples/rust/votingmachine/proof:freeze",
-        "//examples/rust/votingmachine/proof:freeze.id",
-        "//examples/rust/votingmachine/proof:init",
-        "//examples/rust/votingmachine/proof:init.id",
-        "//examples/rust/votingmachine/proof:submit",
-        "//examples/rust/votingmachine/proof:submit.id",
+        "//examples/rust/votingmachine/core:freeze",
+        "//examples/rust/votingmachine/core:freeze.id",
+        "//examples/rust/votingmachine/core:init",
+        "//examples/rust/votingmachine/core:init.id",
+        "//examples/rust/votingmachine/core:submit",
+        "//examples/rust/votingmachine/core:submit.id",
     ],
     rustc_flags = [
         "-Coverflow-checks=on",

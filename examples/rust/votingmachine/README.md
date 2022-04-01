@@ -2,6 +2,8 @@
 
 A simple voting machine built on the Risc0 platform.
 
+**This example is for educational purposes only. Not for use in actual elections.**
+
 ## Overview
 
 A *voting machine* is a state machine with three operations:
@@ -9,6 +11,8 @@ A *voting machine* is a state machine with three operations:
 * *Initialize*, which officials use to configure the machine;
 * *Submit ballot*, which voters use to submit their ballot;
 * *Freeze*, which reveals the current vote count & puts the machine into a state where it no longer accepts ballots.
+
+Every time the voting machine updates its state it prints a "receipt" that commits it to that state. At the end of the election, officials can publish the full list of receipts and voters can check to ensure theirs is included. In this way, voters can confirm that their vote was counted.
 
 ## Running the tests
 

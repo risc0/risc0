@@ -12,61 +12,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use r0vm_host::{Proof, Prover, Result};
-use r0vm_serde::{from_slice, to_vec};
-use votingmachine_proof::{Ballot, SubmitBallotCommit, SubmitBallotParams, SubmitBallotResult};
-use votingmachine_proof::{
+use votingmachine_core::{Ballot, SubmitBallotCommit, SubmitBallotParams, SubmitBallotResult};
+use votingmachine_core::{
     FreezeVotingMachineCommit, FreezeVotingMachineParams, FreezeVotingMachineResult,
 };
-use votingmachine_proof::{InitializeVotingMachineCommit, VotingMachineState};
+use votingmachine_core::{InitializeVotingMachineCommit, VotingMachineState};
+use zkvm_host::{Prover, Receipt, Result};
+use zkvm_serde::{from_slice, to_vec};
 
 pub struct InitMessage {
-    proof: Proof,
+    receipt: Receipt,
 }
 
 impl InitMessage {
     pub fn get_state(&self) -> Result<InitializeVotingMachineCommit> {
-        let msg = self.proof.get_message_vec()?;
+        let msg = self.receipt.get_journal_vec()?;
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
     pub fn verify_and_get_commit(&self) -> Result<InitializeVotingMachineCommit> {
-        self.proof
-            .verify("examples/rust/votingmachine/proof/init")?;
+        self.receipt
+            .verify("examples/rust/votingmachine/core/init")?;
         self.get_state()
     }
 }
 
 pub struct SubmitBallotMessage {
-    proof: Proof,
+    receipt: Receipt,
 }
 
 impl SubmitBallotMessage {
     pub fn get_commit(&self) -> Result<SubmitBallotCommit> {
-        let msg = self.proof.get_message_vec()?;
+        let msg = self.receipt.get_journal_vec()?;
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
     pub fn verify_and_get_commit(&self) -> Result<SubmitBallotCommit> {
-        self.proof
-            .verify("examples/rust/votingmachine/proof/submit")?;
+        self.receipt
+            .verify("examples/rust/votingmachine/core/submit")?;
         self.get_commit()
     }
 }
 
 pub struct FreezeStationMessage {
-    proof: Proof,
+    receipt: Receipt,
 }
 
 impl FreezeStationMessage {
     pub fn get_commit(&self) -> Result<FreezeVotingMachineCommit> {
-        let msg = self.proof.get_message_vec()?;
+        let msg = self.receipt.get_journal_vec()?;
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
     pub fn verify_and_get_commit(&self) -> Result<FreezeVotingMachineCommit> {
-        self.proof
-            .verify("examples/rust/votingmachine/proof/freeze")?;
+        self.receipt
+            .verify("examples/rust/votingmachine/core/freeze")?;
         self.get_commit()
     }
 }
@@ -83,37 +83,37 @@ impl PollingStation {
 
     pub fn init(&self) -> Result<InitMessage> {
         log::info!("init");
-        let mut prover = Prover::new("examples/rust/votingmachine/proof/init")?;
+        let mut prover = Prover::new("examples/rust/votingmachine/core/init")?;
         let vec = to_vec(&self.state).unwrap();
         prover.add_input(vec.as_slice())?;
-        let proof = prover.run()?;
-        Ok(InitMessage { proof })
+        let receipt = prover.run()?;
+        Ok(InitMessage { receipt })
     }
 
     pub fn submit(&mut self, ballot: &Ballot) -> Result<SubmitBallotMessage> {
         log::info!("submit: {:?}", ballot);
         let params = SubmitBallotParams::new(self.state.clone(), ballot.clone());
-        let mut prover = Prover::new("examples/rust/votingmachine/proof/submit")?;
+        let mut prover = Prover::new("examples/rust/votingmachine/core/submit")?;
         let vec = to_vec(&params).unwrap();
         prover.add_input(vec.as_slice())?;
-        let proof = prover.run()?;
+        let receipt = prover.run()?;
         let vec = prover.get_output_vec()?;
         let result = from_slice::<SubmitBallotResult>(vec.as_slice()).unwrap();
         self.state = result.state.clone();
-        Ok(SubmitBallotMessage { proof })
+        Ok(SubmitBallotMessage { receipt })
     }
 
     pub fn freeze(&mut self) -> Result<FreezeStationMessage> {
         log::info!("freeze");
         let params = FreezeVotingMachineParams::new(self.state.clone());
-        let mut prover = Prover::new("examples/rust/votingmachine/proof/freeze")?;
+        let mut prover = Prover::new("examples/rust/votingmachine/core/freeze")?;
         let vec = to_vec(&params).unwrap();
         prover.add_input(vec.as_slice())?;
-        let proof = prover.run()?;
+        let receipt = prover.run()?;
         let vec = prover.get_output_vec()?;
         let result = from_slice::<FreezeVotingMachineResult>(vec.as_slice()).unwrap();
         self.state = result.state.clone();
-        Ok(FreezeStationMessage { proof })
+        Ok(FreezeStationMessage { receipt })
     }
 }
 

@@ -1,8 +1,8 @@
-load("//bazel/rules/risc0:defs.bzl", "risc0_rust_proof")
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
 load("@crates//:defs.bzl", "crates_from")
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 
-risc0_rust_proof(
+risc0_rust_method(
     name = "init",
     srcs = ["src/bin/init.rs"],
     rustc_flags = [
@@ -10,12 +10,12 @@ risc0_rust_proof(
     ],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        "//risc0/r0vm/rust/device:r0vm-device",
-        ":votingmachine_proof",
+        "//risc0/zkvm/sdk/rust/guest:zkvm-guest",
+        ":votingmachine_core",
     ],
 )
 
-risc0_rust_proof(
+risc0_rust_method(
     name = "submit",
     srcs = ["src/bin/submit.rs"],
     rustc_flags = [
@@ -23,12 +23,12 @@ risc0_rust_proof(
     ],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        "//risc0/r0vm/rust/device:r0vm-device",
-        ":votingmachine_proof",
+        "//risc0/zkvm/sdk/rust/guest:zkvm-guest",
+        ":votingmachine_core",
     ],
 )
 
-risc0_rust_proof(
+risc0_rust_method(
     name = "freeze",
     srcs = ["src/bin/freeze.rs"],
     rustc_flags = [
@@ -36,26 +36,26 @@ risc0_rust_proof(
     ],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        "//risc0/r0vm/rust/device:r0vm-device",
-        ":votingmachine_proof",
+        "//risc0/zkvm/sdk/rust/guest:zkvm-guest",
+        ":votingmachine_core",
     ],
 )
 
 rust_library(
-    name = "votingmachine_proof",
+    name = "votingmachine_core",
     srcs = ["src/lib.rs"],
     rustc_flags = [
         "-Coverflow-checks=on",
     ],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        "//risc0/r0vm/rust/core:r0vm-core",
+        "//risc0/zkvm/sdk/rust/core:zkvm-core",
     ],
 )
 
 rust_test(
     name = "test",
-    crate = ":votingmachine_proof",
+    crate = ":votingmachine_core",
     rustc_flags = [
         "-Coverflow-checks=on",
     ],

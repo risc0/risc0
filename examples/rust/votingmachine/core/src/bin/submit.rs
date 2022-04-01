@@ -15,24 +15,28 @@
 #![no_main]
 #![no_std]
 
-use r0vm_device::{env, sha};
+use zkvm_guest::{env, sha};
 
-use votingmachine_proof::{FreezeVotingMachineCommit, FreezeVotingMachineParams};
+use votingmachine_core::{SubmitBallotCommit, SubmitBallotParams};
 
-r0vm_device::entry!(main);
+zkvm_guest::entry!(main);
 
 pub fn main() {
-    let params: FreezeVotingMachineParams = env::read();
+    let params: SubmitBallotParams = env::read();
     let result = params.process();
     env::write(&result);
     let polls_open = result.state.polls_open;
     let voter_bitfield = result.state.voter_bitfield;
-    let count = result.state.count;
-    env::commit(&FreezeVotingMachineCommit {
+    let voter = params.ballot.voter;
+    let vote_yes = params.ballot.vote_yes;
+    let vote_counted = result.vote_counted;
+    env::commit(&SubmitBallotCommit {
         old_state: *sha::digest(params.state),
         new_state: *sha::digest(result.state),
         polls_open: polls_open,
         voter_bitfield: voter_bitfield,
-        count: count,
+        voter: voter,
+        vote_yes: vote_yes,
+        vote_counted: vote_counted,
     });
 }
