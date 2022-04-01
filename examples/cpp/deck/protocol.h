@@ -15,7 +15,7 @@
 #pragma once
 
 #include "risc0/core/key.h"
-#include "risc0/r0vm/prove/proof.h"
+#include "risc0/r0vm/cpp/host/receipt.h"
 #include "risc0/zkp/core/sha256_cpu.h"
 
 // Deck protocol:
@@ -40,7 +40,7 @@ struct PlayerCommitMessage {
   risc0::Key playerKey;
 };
 
-struct ShuffleProofContents {
+struct ShuffleContent {
   risc0::ShaDigest dealerKeyDigest;
   risc0::Key playerKey;
   risc0::ShaDigest deckDigest;
@@ -54,15 +54,15 @@ struct ShuffleProofContents {
   }
 };
 
-struct ShuffleProofMessage {
-  risc0::Proof proof;
+struct ShuffleMessage {
+  risc0::Receipt receipt;
 };
 
 struct CardRequestMessage {
   uint32_t pos;
 };
 
-struct CardResponseContents {
+struct CardResponseContent {
   risc0::ShaDigest deckDigest;
   uint32_t pos;
   uint32_t card;
@@ -75,7 +75,7 @@ struct CardResponseContents {
 };
 
 struct CardResponseMessage {
-  risc0::Proof proof;
+  risc0::Receipt receipt;
 };
 
 class Dealer {
@@ -86,8 +86,8 @@ public:
   // Make a new key and return a commitment to it.
   DealerCommitMessage getCommit(uint32_t deckSize);
 
-  // Make a shuffle proof.
-  ShuffleProofMessage shuffle(const PlayerCommitMessage& msg);
+  // Make a shuffle message.
+  ShuffleMessage shuffle(const PlayerCommitMessage& msg);
 
   // Handle a card request.
   CardResponseMessage revealCard(const CardRequestMessage& msg);
@@ -110,8 +110,8 @@ public:
   // Get commit and send new key.
   PlayerCommitMessage getCommit(const DealerCommitMessage& msg);
 
-  // Verify shuffle proof.
-  void verifyShuffleProof(const ShuffleProofMessage& msg);
+  // Verify a shuffle message.
+  void verifyShuffleMessage(const ShuffleMessage& msg);
 
   // Make a request to reveal a certain card.
   CardRequestMessage makeRequest(uint32_t pos);

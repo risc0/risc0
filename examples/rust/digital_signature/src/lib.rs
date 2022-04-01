@@ -12,18 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use digital_signature_proof::{Message, Passphrase, SignMessageCommit, SigningRequest};
-use r0vm_host::{Proof, Prover, Result};
+pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
+use r0vm_host::{Prover, Receipt, Result};
 use r0vm_serde::{from_slice, to_vec};
 use sha2::{Digest, Sha256};
 
 pub struct SignatureWithReceipt {
-    proof: Proof,
+    receipt: Receipt,
 }
 
 impl SignatureWithReceipt {
     pub fn get_commit(&self) -> Result<SignMessageCommit> {
-        let msg = self.proof.get_message_vec()?;
+        let msg = self.receipt.get_journal_vec()?;
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
@@ -38,8 +38,8 @@ impl SignatureWithReceipt {
     }
 
     pub fn verify(&self) -> Result<SignMessageCommit> {
-        self.proof
-            .verify("examples/rust/digital_signature/proof/sign")?;
+        self.receipt
+            .verify("examples/rust/digital_signature/core/sign")?;
         self.get_commit()
     }
 }
@@ -62,11 +62,11 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
         passphrase: pass,
         msg: msg,
     };
-    let mut prover = Prover::new("examples/rust/digital_signature/proof/sign")?;
+    let mut prover = Prover::new("examples/rust/digital_signature/core/sign")?;
     let vec = to_vec(&params).unwrap();
     prover.add_input(vec.as_slice())?;
-    let proof = prover.run()?;
-    Ok(SignatureWithReceipt { proof })
+    let receipt = prover.run()?;
+    Ok(SignatureWithReceipt { receipt })
 }
 
 #[cfg(test)]

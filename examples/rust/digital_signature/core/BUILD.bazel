@@ -1,0 +1,36 @@
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
+load("@crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+risc0_rust_method(
+    name = "sign",
+    srcs = ["src/bin/sign.rs"],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        "//risc0/r0vm/rust/guest:r0vm-guest",
+        ":digital_signature_core",
+    ],
+)
+
+rust_library(
+    name = "digital_signature_core",
+    srcs = ["src/lib.rs"],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        "//risc0/r0vm/rust/core:r0vm-core",
+    ],
+)
+
+rust_test(
+    name = "test",
+    crate = ":digital_signature_core",
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+)

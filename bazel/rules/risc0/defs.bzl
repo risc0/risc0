@@ -4,7 +4,7 @@ load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary")
 def _impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.name)
     ctx.actions.run(
-        mnemonic = "MakeCodeID",
+        mnemonic = "MakeMethodID",
         executable = ctx.executable._tool,
         arguments = [ctx.file.elf.path, out.path],
         inputs = depset(direct = ctx.files.elf),
@@ -14,7 +14,7 @@ def _impl(ctx):
     runfiles = ctx.runfiles(files = [out])
     return [DefaultInfo(files = depset([out]), runfiles = runfiles)]
 
-risc0_codeid = rule(
+risc0_method_id = rule(
     implementation = _impl,
     attrs = {
         "elf": attr.label(
@@ -30,23 +30,23 @@ risc0_codeid = rule(
     },
 )
 
-def risc0_cc_proof(name, **kwargs):
+def risc0_cc_method(name, **kwargs):
     risc0_cc_binary(
         name = name,
         **kwargs
     )
-    risc0_codeid(
+    risc0_method_id(
         name = name + ".id",
         elf = name,
         visibility = ["//visibility:public"],
     )
 
-def risc0_rust_proof(name, **kwargs):
+def risc0_rust_method(name, **kwargs):
     risc0_rust_binary(
         name = name,
         **kwargs
     )
-    risc0_codeid(
+    risc0_method_id(
         name = name + ".id",
         elf = name,
         visibility = ["//visibility:public"],

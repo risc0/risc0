@@ -16,13 +16,13 @@
 
 #include "battleship.h"
 
-#include "risc0/r0vm/prove/proof.h"
+#include "risc0/r0vm/cpp/host/receipt.h"
 #include "risc0/zkp/core/sha256.h"
 
 #include <vector>
 
 struct InitMessage {
-  risc0::Proof proof;
+  risc0::Receipt receipt;
 
   struct Content {
     risc0::ShaDigest state;
@@ -38,7 +38,7 @@ struct TurnMessage {
 };
 
 struct RoundMessage {
-  risc0::Proof proof;
+  risc0::Receipt receipt;
 
   struct Content {
     risc0::ShaDigest old_state;

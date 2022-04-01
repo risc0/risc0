@@ -93,11 +93,11 @@ crate_universe(
     cargo_toml_files = [
         "//risc0/core:Cargo.toml",
         "//risc0/r0vm/rust/core:Cargo.toml",
-        "//risc0/r0vm/rust/device:Cargo.toml",
+        "//risc0/r0vm/rust/guest:Cargo.toml",
         "//risc0/r0vm/rust/host:Cargo.toml",
         "//risc0/r0vm/rust/serde:Cargo.toml",
         "//examples/rust/battleship:Cargo.toml",
-        "//examples/rust/battleship/proof:Cargo.toml",
+        "//examples/rust/battleship/core:Cargo.toml",
         "//examples/rust/digital_signature:Cargo.toml",
         "//examples/rust/digital_signature/proof:Cargo.toml",
         "//examples/rust/votingmachine:Cargo.toml",
