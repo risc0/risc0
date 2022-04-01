@@ -5,7 +5,7 @@
 <h1 align="center">RISC Zero</h1>
 
 <p align="center">
-  <a href="https://github.com/risc0/risc0/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache2-blue.svg"></a>
+  <a href="https://github.com/risc0/risc0/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2-blue.svg"></a>
   <a href="https://github.com/risc0/risc0/actions"><img src="https://github.com/risc0/risc0/workflows/CI/badge.svg?branch=main"></a>
 </p>
 
