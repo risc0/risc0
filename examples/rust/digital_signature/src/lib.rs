@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
+use sha2::{Digest, Sha256};
+
 use zkvm_host::{Prover, Receipt, Result};
 use zkvm_serde::{from_slice, to_vec};
-use sha2::{Digest, Sha256};
+
+pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
 
 pub struct SignatureWithReceipt {
     receipt: Receipt,
