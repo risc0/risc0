@@ -15,8 +15,10 @@
 #![cfg_attr(not(test), no_std)]
 
 use core::fmt::{Debug, Display, Formatter};
-use r0vm_core::Digest;
+
 use serde::{Deserialize, Serialize};
+
+use zkvm_core::Digest;
 
 #[derive(Clone, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Message {

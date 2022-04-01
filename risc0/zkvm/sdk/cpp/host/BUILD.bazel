@@ -1,0 +1,20 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "host",
+    srcs = [
+        "c_api.cpp",
+        "receipt.cpp",
+    ],
+    hdrs = [
+        "c_api.h",
+        "receipt.h",
+    ],
+    linkstatic = True,
+    deps = [
+        "//risc0/zkvm/prove",
+        "//risc0/zkvm/verify",
+    ],
+)

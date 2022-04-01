@@ -123,7 +123,7 @@ attrs = {
     "data": attr.label_list(allow_files = True),
     "_linker_script": attr.label(
         allow_single_file = True,
-        default = Label("//risc0/r0vm/platform:risc0.ld"),
+        default = Label("//risc0/zkvm/platform:risc0.ld"),
     ),
     "_allowlist_function_transition": attr.label(
         default = "@bazel_tools//tools/allowlists/function_transition_allowlist",

@@ -1,0 +1,22 @@
+load("@crates//:defs.bzl", "crate", "crates_from")
+load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_library")
+
+rust_library(
+    name = "zkvm-host",
+    srcs = [
+        "src/exception.rs",
+        "src/ffi.rs",
+        "src/lib.rs",
+    ],
+    proc_macro_deps = [crate("ctor")],
+    visibility = ["//visibility:public"],
+    deps = crates_from(":Cargo.toml") + [
+        "//risc0/zkvm/sdk/cpp/host",
+        "//risc0/zkvm/sdk/rust/core:zkvm-core",
+    ],
+)
+
+rust_doc(
+    name = "doc",
+    crate = ":zkvm-host",
+)

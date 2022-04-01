@@ -30,7 +30,7 @@ rust_static_library(
 )
 
 cc_library(
-    name = "r0vm",
+    name = "zkvm",
     hdrs = [
         "align.h",
         "archive.h",

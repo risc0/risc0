@@ -1,8 +1,0 @@
-[package]
-name = "r0vm-serde"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-r0vm-core = { path = "../core" }
-serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }

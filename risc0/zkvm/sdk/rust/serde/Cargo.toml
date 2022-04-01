@@ -1,0 +1,8 @@
+[package]
+name = "zkvm-serde"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+zkvm-core = { path = "../core" }
+serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }

@@ -6,7 +6,7 @@ risc0_cc_method(
     srcs = ["init_method.cpp"],
     deps = [
         ":core",
-        "//risc0/r0vm/cpp/guest",
+        "//risc0/zkvm/sdk/cpp/guest",
     ],
 )
 
@@ -15,7 +15,7 @@ risc0_cc_method(
     srcs = ["turn_method.cpp"],
     deps = [
         ":core",
-        "//risc0/r0vm/cpp/guest",
+        "//risc0/zkvm/sdk/cpp/guest",
     ],
 )
 
@@ -47,7 +47,7 @@ cc_library(
     ],
     deps = [
         ":core",
-        "//risc0/r0vm/cpp/host",
+        "//risc0/zkvm/sdk/cpp/host",
     ],
 )
 
@@ -57,6 +57,6 @@ cc_gtest(
     tags = ["exclusive"],
     deps = [
         ":protocol",
-        "//risc0/r0vm/cpp/host",
+        "//risc0/zkvm/sdk/cpp/host",
     ],
 )

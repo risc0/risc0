@@ -2,7 +2,7 @@ load("@rules_python//python:defs.bzl", "py_binary")
 load("//bazel/rules/doxygen:defs.bzl", "doxygen")
 
 SRCS = [
-    "//risc0/r0vm/cpp/guest:docs",
+    "//risc0/zkvm/sdk/cpp/guest:docs",
 ]
 
 doxygen(

@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-r0vm-core = { path = "../../../../risc0/r0vm/rust/core" }
-r0vm-device = { path = "../../../../risc0/r0vm/rust/device" }
+zkvm-core = { path = "../../../../risc0/zkvm/sdk/rust/core" }
+zkvm-device = { path = "../../../../risc0/zkvm/sdk/rust/device" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }

@@ -1,0 +1,9 @@
+load("//bazel/rules/cc:defs.bzl", "cc_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "make-id",
+    srcs = ["make-id.cpp"],
+    deps = ["//risc0/zkvm/prove"],
+)
