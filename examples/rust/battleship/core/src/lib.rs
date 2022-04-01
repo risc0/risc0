@@ -16,7 +16,7 @@
 
 use core::fmt::Display;
 
-use r0vm_core::Digest;
+use zkvm_core::Digest;
 use serde::{Deserialize, Serialize};
 
 pub const NUM_SHIPS: usize = 5;

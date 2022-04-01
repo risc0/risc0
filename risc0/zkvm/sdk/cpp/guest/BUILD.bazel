@@ -1,0 +1,49 @@
+load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+risc0_cc_library(
+    name = "crt0",
+    srcs = ["crt0.s"],
+)
+
+risc0_cc_library(
+    name = "guest",
+    srcs = [
+        "cppstd.cpp",
+        "env.cpp",
+        "fail.cpp",
+        "key.cpp",
+        "memcpy.s",
+        "memset.s",
+        "prng.cpp",
+        "sha.cpp",
+        "stdlib.cpp",
+        "string.cpp",
+    ],
+    hdrs = [
+        "env.h",
+        "fail.h",
+        "key.h",
+        "prng.h",
+        "risc0.h",
+        "sha.h",
+    ],
+    deps = [
+        ":crt0",
+        "//risc0/core:zkvm",
+        "//risc0/zkvm/platform",
+    ],
+)
+
+filegroup(
+    name = "docs",
+    srcs = [
+        "env.h",
+        "fail.h",
+        "key.h",
+        "prng.h",
+        "risc0.h",
+        "sha.h",
+    ],
+)

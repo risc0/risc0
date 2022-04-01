@@ -13,8 +13,8 @@
 // limitations under the License.
 
 pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
-use r0vm_host::{Prover, Receipt, Result};
-use r0vm_serde::{from_slice, to_vec};
+use zkvm_host::{Prover, Receipt, Result};
+use zkvm_serde::{from_slice, to_vec};
 use sha2::{Digest, Sha256};
 
 pub struct SignatureWithReceipt {
@@ -27,7 +27,7 @@ impl SignatureWithReceipt {
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
-    pub fn get_identity(&self) -> Result<r0vm_core::Digest> {
+    pub fn get_identity(&self) -> Result<zkvm_core::Digest> {
         let commit = self.get_commit().unwrap();
         Ok(commit.identity)
     }

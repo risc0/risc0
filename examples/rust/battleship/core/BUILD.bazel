@@ -10,7 +10,7 @@ risc0_rust_method(
     ],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        "//risc0/r0vm/rust/guest:r0vm-guest",
+        "//risc0/zkvm/sdk/rust/guest:zkvm-guest",
         ":battleship_core",
     ],
 )
@@ -23,7 +23,7 @@ risc0_rust_method(
     ],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        "//risc0/r0vm/rust/guest:r0vm-guest",
+        "//risc0/zkvm/sdk/rust/guest:zkvm-guest",
         ":battleship_core",
     ],
 )
@@ -36,7 +36,7 @@ rust_library(
     ],
     visibility = ["//visibility:public"],
     deps = crates_from(":Cargo.toml") + [
-        "//risc0/r0vm/rust/core:r0vm-core",
+        "//risc0/zkvm/sdk/rust/core:zkvm-core",
     ],
 )
 

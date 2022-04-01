@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 battleship-core = { path = "core" }
 log = "0.4"
-r0vm-core = { path = "../../../risc0/r0vm/rust/core" }
-r0vm-host = { path = "../../../risc0/r0vm/rust/host" }
-r0vm-serde = { path = "../../../risc0/r0vm/rust/serde" }
+zkvm-core = { path = "../../../risc0/zkvm/sdk/rust/core" }
+zkvm-host = { path = "../../../risc0/zkvm/sdk/rust/host" }
+zkvm-serde = { path = "../../../risc0/zkvm/sdk/rust/serde" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }

@@ -13,7 +13,7 @@ filegroup(
 
 filegroup(
     name = "linker_files",
-    srcs = glob(["*/**"]) + ["@risc0//risc0/r0vm/platform:risc0.ld"],
+    srcs = glob(["*/**"]) + ["@risc0//risc0/zkvm/platform:risc0.ld"],
 )
 
 gcc_toolchain_config(

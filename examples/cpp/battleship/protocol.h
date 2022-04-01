@@ -16,8 +16,8 @@
 
 #include "battleship.h"
 
-#include "risc0/r0vm/cpp/host/receipt.h"
 #include "risc0/zkp/core/sha256.h"
+#include "risc0/zkvm/sdk/cpp/host/receipt.h"
 
 #include <vector>
 

@@ -1,0 +1,49 @@
+load("//bazel/rules/risc0:defs.bzl", "risc0_cc_method")
+load("//bazel/rules/cc:defs.bzl", "cc_gtest")
+
+risc0_cc_method(
+    name = "test_fail",
+    srcs = ["test_fail.cpp"],
+    deps = ["//risc0/zkvm/sdk/cpp/guest"],
+)
+
+risc0_cc_method(
+    name = "test_mem",
+    srcs = ["test_mem.cpp"],
+    deps = ["//risc0/zkvm/sdk/cpp/guest"],
+)
+
+risc0_cc_method(
+    name = "test_memcpy",
+    srcs = ["test_memcpy.cpp"],
+    deps = ["//risc0/zkvm/sdk/cpp/guest"],
+)
+
+risc0_cc_method(
+    name = "test_sha",
+    srcs = ["test_sha.cpp"],
+    deps = ["//risc0/zkvm/sdk/cpp/guest"],
+)
+
+cc_gtest(
+    name = "test",
+    srcs = ["test.cpp"],
+    data = [
+        ":test_fail",
+        ":test_fail.id",
+        ":test_mem",
+        ":test_mem.id",
+        ":test_memcpy",
+        ":test_memcpy.id",
+        ":test_sha",
+        ":test_sha.id",
+        "//risc0/zkvm/sdk/rust/guest:test_fail",
+        "//risc0/zkvm/sdk/rust/guest:test_fail.id",
+        "//risc0/zkvm/sdk/rust/guest:test_mem",
+        "//risc0/zkvm/sdk/rust/guest:test_mem.id",
+        "//risc0/zkvm/sdk/rust/guest:test_sha",
+        "//risc0/zkvm/sdk/rust/guest:test_sha.id",
+    ],
+    tags = ["exclusive"],
+    deps = ["//risc0/zkvm/sdk/cpp/host"],
+)

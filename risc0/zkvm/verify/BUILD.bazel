@@ -1,0 +1,21 @@
+load("//bazel/rules/cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "verify",
+    srcs = [
+        "method_id.cpp",
+        "riscv.cpp",
+    ],
+    hdrs = [
+        "method_id.h",
+        "riscv.h",
+        "//risc0/zkvm/circuit:step_inc_gen",
+    ],
+    linkstatic = True,
+    deps = [
+        "//risc0/zkp/verify",
+        "//risc0/zkvm/circuit:inc",
+    ],
+)

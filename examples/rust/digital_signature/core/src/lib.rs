@@ -15,7 +15,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use core::fmt::{Debug, Display, Formatter};
-use r0vm_core::Digest;
+use zkvm_core::Digest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Deserialize, Eq, PartialEq, Serialize)]

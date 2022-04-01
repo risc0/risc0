@@ -1,0 +1,12 @@
+[package]
+name = "zkvm-host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+byte-slice-cast = "1.2"
+ctor = "0.1"
+env_logger = "0.8"
+log = "0.4"
+zkvm-core = { path = "../core" }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
