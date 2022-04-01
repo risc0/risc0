@@ -100,6 +100,8 @@ crate_universe(
         "//examples/rust/battleship/core:Cargo.toml",
         "//examples/rust/digital_signature:Cargo.toml",
         "//examples/rust/digital_signature/core:Cargo.toml",
+        "//examples/rust/votingmachine:Cargo.toml",
+        "//examples/rust/votingmachine/core:Cargo.toml",
     ],
     resolver = "@rules_rust_crate_universe_bootstrap//:crate_universe_resolver",
     supported_targets = [
