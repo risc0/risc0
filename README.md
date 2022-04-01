@@ -1,5 +1,8 @@
 <img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100">
 
+> WARNING: This software is still experimental, we do not recomend it for
+> production use (see Security section)
+
 # RISC Zero
 
 Risc Zero is a zero-knowledge verifiable general computing platform based on
