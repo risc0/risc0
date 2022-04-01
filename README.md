@@ -11,7 +11,7 @@ the case of Risc Zero, the prover can show they correctly executed some code
 (known to both parties), while only revealing to the verify the output of the
 code, not any of it's inputs or any state during execution.
 
-The code runs in a special virtual machine, called the ZKVM.  The Risc Zero
+The code runs in a special virtual machine, called the *ZKVM*.  The Risc Zero
 ZKVM emulates a small RISC-V computer, allowing it to run arbitrary code in any
 languages, so long as a complier toolchain exists that targets RISC-V.
 Currently we have SDK support for Rust, C, and C++.
@@ -19,23 +19,23 @@ Currently we have SDK support for Rust, C, and C++.
 ## Protocol overview and terminology
 
 First, the code to be proven must be compiled from it's implementation language
-into a `Method`.  A method is represented by a RISC-V ELF file with a special
+into a *method*.  A method is represented by a RISC-V ELF file with a special
 entry point that runs the code of the method.  Additionally, one can compute
-for a given method it's 'Method ID' which basically a special type of
+for a given method it's *method ID* which basically a special type of
 cryptographic hash of the ELF file, and is required for verification.
 
 Next, the prover runs the method inside the ZKVM.  The logical RISC-V machinine
-running inside the ZKVM is called the `Guest` and the prover running the ZKVM
-is called the `Host`.  The guest and the host can communicate with each other
+running inside the ZKVM is called the *guest* and the prover running the ZKVM
+is called the *host*.  The guest and the host can communicate with each other
 during the execution of the method, but the host cannot modify the execution of
 the guest in any way, or the proof being generated will be invalid. During
 execution, the guest code can write to a special append only log called the
-`Journal` that represents the official output of the computation.
+*journal* that represents the official output of the computation.
 
-Presuming the method terminated correctly, a `Receipt` is produced, which
+Presuming the method terminated correctly, a *receipt* is produced, which
 provides the proof of correct execution. This reciept consists of 3 parts, the
 method ID of the method run, the journal written during execution, and a blob
-of opaque cryptographic data called the `Seal`. 
+of opaque cryptographic data called the *seal*. 
 
 The verifier can then verify the receipt, and examine the log.  If any
 tampering was done to the method ID, the journal or the seal, the reciept will
