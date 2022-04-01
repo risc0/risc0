@@ -1,9 +1,16 @@
-<img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100">
+<p align="center">
+  <a href="https://risc0.com"><img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100"></a>
+</p>
+
+<h1 align="center">RISC Zero</h1>
+
+<p align="center">
+  <a href="https://github.com/risc0/risc0/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-Apache 2-blue.svg"></a>
+  <a href="https://github.com/risc0/risc0/actions"><img src="https://github.com/risc0/risc0/workflows/CI/badge.svg?branch=main"></a>
+</p>
 
 > WARNING: This software is still experimental, we do not recommend it for
 > production use (see Security section).
-
-# RISC Zero
 
 RISC Zero is a zero-knowledge verifiable general computing platform based on
 zk-STARKs and the RISC-V microarchitecture.
