@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100">
+  <a href="https://risc0.com"><img src="docs/assets/images/Risc0-Logo_Horizontal.svg" height="100"></a>
 </p>
 
 <h1 align="center">RISC Zero</h1>
