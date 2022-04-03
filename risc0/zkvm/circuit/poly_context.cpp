@@ -57,7 +57,7 @@ template <typename Derived, int TypeID, bool isCons> struct PolyOpBase : PolyOpI
 
 using PolyOp = std::shared_ptr<PolyOpInterface>;
 
-struct OpConstant : public PolyOpBase<OpConstant, 0, 0> {
+struct OpConstant : public PolyOpBase<OpConstant, 0, false> {
   Fp value;
   OpConstant(Fp value) : value(value) {}
   int getDegree() const { return 0; }
@@ -67,7 +67,7 @@ struct OpConstant : public PolyOpBase<OpConstant, 0, 0> {
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpGet : public PolyOpBase<OpGet, 1, 0> {
+struct OpGet : public PolyOpBase<OpGet, 1, false> {
   std::string base;
   size_t offset;
   size_t back;
@@ -82,7 +82,7 @@ struct OpGet : public PolyOpBase<OpGet, 1, 0> {
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpAdd : public PolyOpBase<OpAdd, 2, 0> {
+struct OpAdd : public PolyOpBase<OpAdd, 2, false> {
   PolyOp lhs;
   PolyOp rhs;
   OpAdd(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
@@ -96,7 +96,7 @@ struct OpAdd : public PolyOpBase<OpAdd, 2, 0> {
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpSub : public PolyOpBase<OpSub, 3, 0> {
+struct OpSub : public PolyOpBase<OpSub, 3, false> {
   PolyOp lhs;
   PolyOp rhs;
   OpSub(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
@@ -110,7 +110,7 @@ struct OpSub : public PolyOpBase<OpSub, 3, 0> {
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpMul : public PolyOpBase<OpMul, 4, 0> {
+struct OpMul : public PolyOpBase<OpMul, 4, false> {
   PolyOp lhs;
   PolyOp rhs;
   OpMul(PolyOp lhs, PolyOp rhs) : lhs(lhs), rhs(rhs) {}
@@ -124,7 +124,7 @@ struct OpMul : public PolyOpBase<OpMul, 4, 0> {
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpBegin : public PolyOpBase<OpBegin, 5, 1> {
+struct OpBegin : public PolyOpBase<OpBegin, 5, true> {
   int getDegree() const { return 0; }
   int key() const { return 0; }
   void computeTaps(PolyContext::Impl& impl) override {}
@@ -132,7 +132,7 @@ struct OpBegin : public PolyOpBase<OpBegin, 5, 1> {
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpAssertZero : public PolyOpBase<OpAssertZero, 6, 1> {
+struct OpAssertZero : public PolyOpBase<OpAssertZero, 6, true> {
   PolyOp prev;
   PolyOp zero;
   OpAssertZero(PolyOp prev, PolyOp zero) : prev(prev), zero(zero) {}
@@ -146,7 +146,7 @@ struct OpAssertZero : public PolyOpBase<OpAssertZero, 6, 1> {
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpCombine : public PolyOpBase<OpCombine, 7, 1> {
+struct OpCombine : public PolyOpBase<OpCombine, 7, true> {
   PolyOp prev;
   PolyOp mul;
   PolyOp inner;
@@ -162,7 +162,7 @@ struct OpCombine : public PolyOpBase<OpCombine, 7, 1> {
   void findCriticalPath(PolyContext::Impl& impl) override;
 };
 
-struct OpGetGlobal : public PolyOpBase<OpGetGlobal, 8, 0> {
+struct OpGetGlobal : public PolyOpBase<OpGetGlobal, 8, false> {
   size_t offset;
   OpGetGlobal(size_t offset) : offset(offset) {}
   int getDegree() const { return 0; }
