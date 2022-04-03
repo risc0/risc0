@@ -22,14 +22,32 @@
 namespace risc0 {
 
 struct ExecState {
+public:
   ExecState(const std::string& elfFile);
+  // A helper function to call init, step*, fini
   void run(size_t maxSteps, MemoryHandler& io);
+
+  // Setup VM and run until 'reset' cycle
+  void init(size_t maxSteps, MemoryHandler& io);
+  // Step a single RISC-V cycle, return false when done
+  bool step();
+  // Finalize VM execution in preperation for prover
+  void fini();
+
+  // Get address of instructioin about to be executed
+  uint32_t getPC();
+  // Get the state of all 32 registers
+  std::vector<uint32_t> getRegisters();
+
+  void expand();
 
   uint32_t startAddr;
   std::map<uint32_t, uint32_t> image;
   StepContext context;
   std::vector<Fp> code;
   std::vector<Fp> data;
+  size_t maxSteps;
+  bool done;
 };
 
 } // namespace risc0
