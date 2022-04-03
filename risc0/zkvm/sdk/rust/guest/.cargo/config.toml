@@ -1,6 +1,0 @@
-[unstable]
-build-std = ["alloc", "core"]
-build-std-features = ["compiler-builtins-mangled-names"]
-
-[build]
-target = "../../bazel/rules/rust/riscv32im-unknown-none-elf.json"

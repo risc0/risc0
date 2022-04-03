@@ -1,6 +1,5 @@
 load("//bazel/rules/cc:defs.bzl", "cc_library")
-load("@rules_rust//rust:defs.bzl", "rust_static_library")
-load("@crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:defs.bzl", "rust_shared_library")
 
 cc_library(
     name = "core",
@@ -23,10 +22,10 @@ cc_library(
     deps = [":lib"],
 )
 
-rust_static_library(
+rust_shared_library(
     name = "lib",
     srcs = ["src/lib.rs"],
-    deps = crates_from(":Cargo.toml"),
+    deps = ["@crates//:rand_core"],
 )
 
 cc_library(
