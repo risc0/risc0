@@ -22,7 +22,6 @@
 namespace risc0 {
 
 struct ExecState {
-public:
   ExecState(const std::string& elfFile);
   // A helper function to call init, step*, fini
   void run(size_t maxSteps, MemoryHandler& io);
