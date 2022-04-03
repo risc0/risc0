@@ -31,6 +31,24 @@ enum {
 };
 } // namespace CodeCycleType
 
+namespace DataCycleType {
+enum {
+  DECODE,
+  COMPUTE_0,
+  COMPUTE_1,
+  COMPUTE_2,
+  COMPUTE_3,
+  MULTIPLY,
+  DIVIDE,
+  FINAL,
+  SHA_SYNC,
+  SHA_CONTROL,
+  SHA_DATA,
+  HALT,
+  NUM_CYCLE_TYPES,
+};
+} // namespace DataCycleType
+
 namespace ShaCycleType {
 enum {
   CONTROL,
