@@ -1,0 +1,40 @@
+load("@crates//:defs.bzl", "crates_from")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
+rust_binary(
+    name = "votingmachine",
+    srcs = ["src/main.rs"],
+    deps = crates_from(":Cargo.toml") + [
+        ":lib",
+    ],
+)
+
+rust_library(
+    name = "lib",
+    srcs = ["src/lib.rs"],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+    deps = crates_from(":Cargo.toml") + [
+        "//examples/rust/votingmachine/core:votingmachine_core",
+        "//risc0/zkvm/sdk/rust/core:zkvm-core",
+        "//risc0/zkvm/sdk/rust/host:zkvm-host",
+        "//risc0/zkvm/sdk/rust/serde:zkvm-serde",
+    ],
+)
+
+rust_test(
+    name = "test",
+    crate = ":lib",
+    data = [
+        "//examples/rust/votingmachine/core:freeze",
+        "//examples/rust/votingmachine/core:freeze.id",
+        "//examples/rust/votingmachine/core:init",
+        "//examples/rust/votingmachine/core:init.id",
+        "//examples/rust/votingmachine/core:submit",
+        "//examples/rust/votingmachine/core:submit.id",
+    ],
+    rustc_flags = [
+        "-Coverflow-checks=on",
+    ],
+)
