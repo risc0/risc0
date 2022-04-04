@@ -96,7 +96,7 @@ load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository")
 
 crates_repository(
     name = "crates_host",
-    lockfile = "//:Cargo.Bazel.lock",
+    lockfile = "//:Cargo-host.Bazel.lock",
     packages = {
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
