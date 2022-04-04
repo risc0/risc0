@@ -71,6 +71,10 @@ load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies")
 
 rules_rust_dependencies()
 
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_deps")
+
+rust_analyzer_deps()
+
 load("//bazel/rules/rust:repositories.bzl", "rust_repositories")
 
 RUST_ISO_DATE = "2022-01-20"

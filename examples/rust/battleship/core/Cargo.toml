@@ -1,9 +1,0 @@
-[package]
-name = "battleship-core"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-zkvm-core = { path = "../../../../risc0/zkvm/sdk/rust/core" }
-zkvm-guest = { path = "../../../../risc0/zkvm/sdk/rust/guest" }
-serde = { version = "1.0", default-features = false, features = ["derive"] }

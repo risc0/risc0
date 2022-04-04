@@ -4,5 +4,6 @@
 .bazelrc.local
 .DS_Store
 bazel-*
+rust-project.json
 target/
 tmp/

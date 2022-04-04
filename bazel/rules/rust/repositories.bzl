@@ -195,7 +195,7 @@ rust_toolchain(
     cargo = "@{workspace_name}//:cargo",
     clippy_driver = "@{workspace_name}//:clippy_driver_bin",
     rustc_lib = "@{workspace_name}//:rustc_lib",
-    rustc_srcs = None,
+    rustc_srcs = "@{workspace_name}//lib/rustlib/src:rustc_srcs",
     binary_ext = "",
     staticlib_ext = ".a",
     dylib_ext = ".so",
