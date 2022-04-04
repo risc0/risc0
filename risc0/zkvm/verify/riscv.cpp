@@ -21,43 +21,89 @@
 namespace risc0 {
 
 namespace {
-struct MixState {
-  Fp4 tot;
-  Fp4 mul;
+
+#define SIZES
+#include "risc0/zkvm/circuit/step.cpp.inc"
+#undef SIZES
+
+enum class OpType {
+  CONST,
+  GET,
+  GET_GLOBAL,
+  BEGIN,
+  ASSERT_ZERO,
+  COMBINE,
+  ADD,
+  SUB,
+  MUL,
+};
+
+struct Op {
+  OpType type;
+  size_t out;
+  size_t a;
+  size_t b;
+  size_t c;
+  Fp val;
+  const char* loc;
+};
+
+static constexpr size_t kNumSteps = kNumStepFp4s + kNumStepCons;
+
+static const Op g_steps[kNumSteps] = {
+#define CHECK_EVAL
+#define do_const(out, cval) {OpType::CONST, out, 0, 0, 0, cval},
+#define do_get(out, buf, reg, back, id) {OpType::GET, out, id, 0, 0, 0},
+#define do_get_global(out, reg) {OpType::GET_GLOBAL, out, reg, 0, 0, 0},
+#define do_begin(out) {OpType::BEGIN, out, 0, 0, 0, 0},
+#define do_assert_zero(out, in, zval, loc) {OpType::ASSERT_ZERO, out, in, zval, 0, 0, loc},
+#define do_combine(out, prev, cond, inner, loc) {OpType::COMBINE, out, prev, cond, inner, 0, loc},
+#define do_add(out, a, b) {OpType::ADD, out, a, b, 0, 0},
+#define do_sub(out, a, b) {OpType::SUB, out, a, b, 0, 0},
+#define do_mul(out, a, b) {OpType::MUL, out, a, b, 0, 0},
+#define do_result(out)                                                                             \
+  }                                                                                                \
+  ;                                                                                                \
+  size_t kResultID = out;
+#include "risc0/zkvm/circuit/step.cpp.inc"
+#undef CHECK_EVAL
+
+    struct MixState{Fp4 tot;
+Fp4 mul;
 #ifdef CIRCUIT_DEBUG
-  std::vector<std::pair<const char*, Fp4>> locs;
+std::vector<std::pair<const char*, Fp4>> locs;
 #endif
 
-  MixState() : tot(Fp4(0)), mul(Fp4(1)) {}
-  MixState(Fp4 tot, Fp4 mul) : tot(tot), mul(mul) {}
-  MixState assert_zero(Fp4 val, Fp4 mix, const char* loc) const {
-    MixState ret(tot + mul * val, mul * mix);
+MixState() : tot(Fp4(0)), mul(Fp4(1)) {}
+MixState(Fp4 tot, Fp4 mul) : tot(tot), mul(mul) {}
+MixState assert_zero(Fp4 val, Fp4 mix, const char* loc) const {
+  MixState ret(tot + mul * val, mul * mix);
 #ifdef CIRCUIT_DEBUG
-    if (locs.empty()) {
-      if (val != Fp4()) {
-        ret.locs.emplace_back(loc, val);
-      }
-    } else {
-      ret.locs = locs;
+  if (locs.empty()) {
+    if (val != Fp4()) {
+      ret.locs.emplace_back(loc, val);
     }
-#endif
-    return ret;
+  } else {
+    ret.locs = locs;
   }
-  MixState combine(Fp4 cond, const MixState& inner, const char* loc) const {
-    MixState ret(tot + cond * mul * inner.tot, mul * inner.mul);
+#endif
+  return ret;
+}
+MixState combine(Fp4 cond, const MixState& inner, const char* loc) const {
+  MixState ret(tot + cond * mul * inner.tot, mul * inner.mul);
 #ifdef CIRCUIT_DEBUG
-    if (locs.empty()) {
-      if (cond != Fp4() && !inner.locs.empty()) {
-        ret.locs = inner.locs;
-        ret.locs.emplace_back(loc, cond);
-      }
-    } else {
-      ret.locs = locs;
+  if (locs.empty()) {
+    if (cond != Fp4() && !inner.locs.empty()) {
+      ret.locs = inner.locs;
+      ret.locs.emplace_back(loc, cond);
     }
-#endif
-    return ret;
+  } else {
+    ret.locs = locs;
   }
-};
+#endif
+  return ret;
+}
+}; // namespace
 
 class RiscVVerifyCircuit : public VerifyCircuit {
 public:
@@ -75,7 +121,7 @@ private:
   Fp globals_[kGlobalSize];
 };
 
-} // namespace
+} // namespace risc0
 
 TapSetRef getRiscVTaps() {
   static TapSet taps;
@@ -117,16 +163,40 @@ bool RiscVVerifyCircuit::validCode(const ShaDigest& top) const {
 
 Fp4 RiscVVerifyCircuit::computePolynomial(const Fp4* evalU, Fp4 polyMix) const {
   // Do the big polynomial eval
-#define CHECK_EVAL
-#define do_get(buf, reg, back, id) evalU[id];
-#define do_get_global(reg) globals_[reg]
-#define do_begin() MixState()
-#define do_assert_zero(in, val, loc) in.assert_zero(Fp4(val), polyMix, loc)
-#define do_combine(prev, cond, inner, loc) prev.combine(Fp4(cond), inner, loc)
-#define do_add(a, b) Fp4(a) + Fp4(b)
-#define do_sub(a, b) Fp4(a) - Fp4(b)
-#define do_mul(a, b) Fp4(a) * Fp4(b)
-#include "risc0/zkvm/circuit/step.cpp.inc"
+  std::vector<Fp4> fp4s(kNumStepFp4s);
+  std::vector<MixState> cons(kNumStepCons);
+  for (size_t i = 0; i < kNumSteps; i++) {
+    const auto& step = g_steps[i];
+    switch (step.type) {
+    case OpType::CONST:
+      fp4s[step.out] = Fp4(step.val);
+      break;
+    case OpType::GET:
+      fp4s[step.out] = evalU[step.a];
+      break;
+    case OpType::GET_GLOBAL:
+      fp4s[step.out] = Fp4(globals_[step.a]);
+      break;
+    case OpType::BEGIN:
+      break;
+    case OpType::ASSERT_ZERO:
+      cons[step.out] = cons[step.a].assert_zero(fp4s[step.b], polyMix, step.loc);
+      break;
+    case OpType::COMBINE:
+      cons[step.out] = cons[step.a].combine(fp4s[step.b], cons[step.c], step.loc);
+      break;
+    case OpType::ADD:
+      fp4s[step.out] = fp4s[step.a] + fp4s[step.b];
+      break;
+    case OpType::SUB:
+      fp4s[step.out] = fp4s[step.a] - fp4s[step.b];
+      break;
+    case OpType::MUL:
+      fp4s[step.out] = fp4s[step.a] * fp4s[step.b];
+      break;
+    }
+  }
+  MixState result = cons[kResultID];
 
 #ifdef CIRCUIT_DEBUG
   for (const auto& loc : result.locs) {
