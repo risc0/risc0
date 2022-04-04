@@ -12,9 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use rand_core::{OsRng, RngCore};
+#include <bcrypt.h>
+#include <cstdint>
+#include <stdexcept>
 
-#[no_mangle]
-pub extern "C" fn rust_rand_u32() -> u32 {
-    OsRng.next_u32()
+uint32_t get_random_u32() {
+  uint32_t tmp;
+  NTSTATUS status = BCryptGenRandom(nullptr, &tmp, sizeof(tmp), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+  if (status != STATUS_SUCCESS) {
+    throw std::runtime_error("Unable to read from RNG device");
+  }
+  return tmp;
 }

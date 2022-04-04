@@ -1,5 +1,4 @@
 load("//bazel/rules/cc:defs.bzl", "cc_library")
-load("@rules_rust//rust:defs.bzl", "rust_shared_library")
 
 cc_library(
     name = "core",
@@ -7,7 +6,14 @@ cc_library(
         "elf.cpp",
         "log.cpp",
         "rng.cpp",
-    ],
+    ] + select(
+        {
+            "@bazel_tools//platforms:linux": ["rng_linux.cpp"],
+            "@bazel_tools//platforms:osx": ["rng_macos.cpp"],
+            "@bazel_tools//platforms:windows": ["rng_win32.cpp"],
+            "//conditions:default": [],
+        },
+    ),
     hdrs = [
         "align.h",
         "archive.h",
@@ -19,13 +25,6 @@ cc_library(
         "util.h",
     ],
     visibility = ["//visibility:public"],
-    deps = [":lib"],
-)
-
-rust_shared_library(
-    name = "lib",
-    srcs = ["src/lib.rs"],
-    deps = ["@crates//:rand_core"],
 )
 
 cc_library(
