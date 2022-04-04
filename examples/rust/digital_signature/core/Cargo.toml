@@ -1,9 +1,0 @@
-[package]
-name = "digital-signature-proof"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-zkvm-core = { path = "../../../../risc0/zkvm/sdk/rust/core" }
-zkvm-device = { path = "../../../../risc0/zkvm/sdk/rust/device" }
-serde = { version = "1.0", default-features = false, features = ["derive"] }

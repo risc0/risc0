@@ -12,31 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "risc0/core/rng.h"
+#include <cstdint>
+#include <stdexcept>
+#include <sys/random.h>
 
-#include "risc0/core/log.h"
-
-extern uint32_t get_random_u32();
-
-namespace risc0 {
-
-PsuedoRng::PsuedoRng() {
-  static uint64_t seed = CryptoRng::shared().generate();
-  static bool logged = false;
-  if (!logged) {
-    LOG(1, "RNG seed = " << seed);
-    logged = true;
+uint32_t get_random_u32() {
+  uint32_t tmp;
+  ssize_t err = getrandom(&tmp, sizeof(tmp), 0);
+  if (err != sizeof(tmp)) {
+    throw std::runtime_error("Unable to read from RNG device");
   }
-  state_ = std::mt19937_64(seed);
+  return tmp;
 }
-
-uint32_t CryptoRng::generate() {
-  return get_random_u32();
-}
-
-CryptoRng& CryptoRng::shared() {
-  static CryptoRng instance;
-  return instance;
-}
-
-} // namespace risc0

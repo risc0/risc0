@@ -1,4 +1,3 @@
-load("@crates//:defs.bzl", "crates_from")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
 
 rust_binary(
@@ -11,8 +10,10 @@ rust_binary(
     rustc_flags = [
         "-Coverflow-checks=on",
     ],
-    deps = crates_from(":Cargo.toml") + [
+    deps = [
         ":lib",
+        "@crates//:clap",
+        "@crates//:log",
     ],
 )
 
@@ -22,11 +23,13 @@ rust_library(
     rustc_flags = [
         "-Coverflow-checks=on",
     ],
-    deps = crates_from(":Cargo.toml") + [
-        "//examples/rust/digital_signature/core:digital_signature_core",
-        "//risc0/zkvm/sdk/rust/core:zkvm-core",
-        "//risc0/zkvm/sdk/rust/host:zkvm-host",
-        "//risc0/zkvm/sdk/rust/serde:zkvm-serde",
+    deps = [
+        "//examples/rust/digital_signature/core",
+        "//risc0/zkvm/sdk/rust/core",
+        "//risc0/zkvm/sdk/rust/host",
+        "//risc0/zkvm/sdk/rust/serde",
+        "@crates//:log",
+        "@crates//:sha2",
     ],
 )
 

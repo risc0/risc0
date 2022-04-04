@@ -89,10 +89,9 @@ def _rust_toolchain_repository_impl(ctx):
     if ctx.attr.version >= "1.45.0" or (ctx.attr.version == "nightly" and ctx.attr.iso_date > "2020-05-22"):
         load_llvm_tools(ctx, ctx.attr.exec_triple)
 
-    for target_triple in [ctx.attr.exec_triple]:
-        build_components.append(load_rust_stdlib(ctx, target_triple))
-        if ctx.attr.dev_components:
-            load_rustc_dev_nightly(ctx, target_triple)
+    build_components.append(load_rust_stdlib(ctx, ctx.attr.exec_triple))
+    if ctx.attr.dev_components:
+        load_rustc_dev_nightly(ctx, ctx.attr.exec_triple)
 
     for target_triple, toolchain in ctx.attr.extra_toolchains.items():
         target_json = toolchain[0]
@@ -141,7 +140,6 @@ def _rust_toolchain_repository_proxy_impl(ctx):
 
 rust_toolchain_repository = repository_rule(
     attrs = {
-        "auth": attr.string_dict(),
         "dev_components": attr.bool(default = False),
         "edition": attr.string(default = rust_common.default_edition),
         "exec_triple": attr.string(mandatory = True),
@@ -175,7 +173,6 @@ def _rust_repository_set(
         edition = None,
         dev_components = False,
         urls = DEFAULT_STATIC_RUST_URL_TEMPLATES,
-        auth = None,
         register_toolchain = True):
     extra_toolchains = {
         "riscv32im-unknown-none-elf": [
@@ -198,7 +195,7 @@ rust_toolchain(
     cargo = "@{workspace_name}//:cargo",
     clippy_driver = "@{workspace_name}//:clippy_driver_bin",
     rustc_lib = "@{workspace_name}//:rustc_lib",
-    rustc_srcs = None,
+    rustc_srcs = "@{workspace_name}//lib/rustlib/src:rustc_srcs",
     binary_ext = "",
     staticlib_ext = ".a",
     dylib_ext = ".so",
@@ -224,7 +221,6 @@ rust_toolchain(
         edition = edition,
         dev_components = dev_components,
         urls = urls,
-        auth = auth,
     )
 
     extra_toolchains = {

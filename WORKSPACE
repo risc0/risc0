@@ -60,14 +60,20 @@ http_archive(
 
 http_archive(
     name = "rules_rust",
-    sha256 = "ab397b26e75597df5cc0c0fa2e0506bdf0c140c79045145a88a0c32745246352",
-    strip_prefix = "rules_rust-5225e23c9f545c2e990691afcdb6744927a49eeb",
-    url = "https://github.com/bazelbuild/rules_rust/archive/5225e23c9f545c2e990691afcdb6744927a49eeb.tar.gz",
+    sha256 = "39655ab175e3c6b979f362f55f58085528f1647957b0e9b3a07f81d8a9c3ea0a",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_rust/releases/download/0.2.0/rules_rust-v0.2.0.tar.gz",
+        "https://github.com/bazelbuild/rules_rust/releases/download/0.2.0/rules_rust-v0.2.0.tar.gz",
+    ],
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies")
 
 rules_rust_dependencies()
+
+load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_deps")
+
+rust_analyzer_deps()
 
 load("//bazel/rules/rust:repositories.bzl", "rust_repositories")
 
@@ -82,41 +88,40 @@ rust_repositories(
     version = RUST_VERSION,
 )
 
-load("@rules_rust//crate_universe:bootstrap.bzl", "crate_universe_bootstrap")
+load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 
-crate_universe_bootstrap()
+crate_universe_dependencies()
 
-load("@rules_rust//crate_universe:defs.bzl", "crate_universe")
+load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository")
 
-crate_universe(
+crates_repository(
     name = "crates",
-    cargo_toml_files = [
-        "//risc0/core:Cargo.toml",
-        "//risc0/zkvm/sdk/rust/core:Cargo.toml",
-        "//risc0/zkvm/sdk/rust/guest:Cargo.toml",
-        "//risc0/zkvm/sdk/rust/host:Cargo.toml",
-        "//risc0/zkvm/sdk/rust/serde:Cargo.toml",
-        "//examples/rust/battleship:Cargo.toml",
-        "//examples/rust/battleship/core:Cargo.toml",
-        "//examples/rust/digital_signature:Cargo.toml",
-        "//examples/rust/digital_signature/core:Cargo.toml",
-        "//examples/rust/votingmachine:Cargo.toml",
-        "//examples/rust/votingmachine/core:Cargo.toml",
-    ],
-    resolver = "@rules_rust_crate_universe_bootstrap//:crate_universe_resolver",
-    supported_targets = [
-        "i686-pc-windows-msvc",
-        "x86_64-pc-windows-msvc",
-        "aarch64-apple-darwin",
-        "x86_64-apple-darwin",
-        "x86_64-unknown-linux-gnu",
-        "riscv32im-unknown-none-elf",
-    ],
+    lockfile = "//:Cargo.Bazel.lock",
+    packages = {
+        "clap": crate.spec(version = "3.1"),
+        "ctor": crate.spec(version = "0.1"),
+        "env_logger": crate.spec(version = "0.8"),
+        "log": crate.spec(version = "0.4"),
+        "rand_core": crate.spec(
+            features = ["getrandom"],
+            version = "0.6",
+        ),
+        "serde": crate.spec(
+            default_features = False,
+            features = [
+                "alloc",
+                "derive",
+            ],
+            version = "1.0",
+        ),
+        "sha2": crate.spec(version = "0.10"),
+    },
+    quiet = False,
 )
 
-load("@crates//:defs.bzl", "pinned_rust_install")
+load("@crates//:defs.bzl", "crate_repositories")
 
-pinned_rust_install()
+crate_repositories()
 
 http_archive(
     name = "oneTBB",

@@ -1,7 +1,0 @@
-[package]
-name = "risc0-core"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-rand_core = {version = "0.6", features = ["getrandom"]}

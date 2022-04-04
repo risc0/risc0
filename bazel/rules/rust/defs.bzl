@@ -70,7 +70,7 @@ def _shortest_src_with_basename(srcs, basename):
 
 def _rust_binary_impl(ctx):
     toolchain = find_toolchain(ctx)
-    crate_name = compute_crate_name(ctx.label, toolchain, ctx.attr.crate_name)
+    crate_name = compute_crate_name(ctx.workspace_name, ctx.label, toolchain, ctx.attr.crate_name)
     _assert_correct_dep_mapping(ctx)
 
     output = ctx.actions.declare_file(ctx.label.name + toolchain.binary_ext)

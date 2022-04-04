@@ -1,5 +1,4 @@
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
-load("@crates//:defs.bzl", "crates_from")
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 
 risc0_rust_method(
@@ -9,9 +8,9 @@ risc0_rust_method(
         "-Coverflow-checks=on",
     ],
     visibility = ["//visibility:public"],
-    deps = crates_from(":Cargo.toml") + [
-        "//risc0/zkvm/sdk/rust/guest:zkvm-guest",
-        ":battleship_core",
+    deps = [
+        ":core",
+        "//risc0/zkvm/sdk/rust/guest",
     ],
 )
 
@@ -22,27 +21,29 @@ risc0_rust_method(
         "-Coverflow-checks=on",
     ],
     visibility = ["//visibility:public"],
-    deps = crates_from(":Cargo.toml") + [
-        "//risc0/zkvm/sdk/rust/guest:zkvm-guest",
-        ":battleship_core",
+    deps = [
+        ":core",
+        "//risc0/zkvm/sdk/rust/guest",
     ],
 )
 
 rust_library(
-    name = "battleship_core",
+    name = "core",
     srcs = ["src/lib.rs"],
+    crate_name = "battleship_core",
     rustc_flags = [
         "-Coverflow-checks=on",
     ],
     visibility = ["//visibility:public"],
-    deps = crates_from(":Cargo.toml") + [
-        "//risc0/zkvm/sdk/rust/core:zkvm-core",
+    deps = [
+        "//risc0/zkvm/sdk/rust/core",
+        "@crates//:serde",
     ],
 )
 
 rust_test(
     name = "test",
-    crate = ":battleship_core",
+    crate = ":core",
     rustc_flags = [
         "-Coverflow-checks=on",
     ],
