@@ -12,13 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <bcrypt.h>
 #include <cstdint>
 #include <stdexcept>
+#include <windows.h>
+
+#include <bcrypt.h>
+#pragma comment(lib, "bcrypt.lib")
+
+#ifndef STATUS_SUCCESS
+#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
+#endif
 
 uint32_t get_random_u32() {
   uint32_t tmp;
-  NTSTATUS status = BCryptGenRandom(nullptr, &tmp, sizeof(tmp), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+  NTSTATUS status = BCryptGenRandom(
+      nullptr, reinterpret_cast<PUCHAR>(&tmp), sizeof(tmp), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
   if (status != STATUS_SUCCESS) {
     throw std::runtime_error("Unable to read from RNG device");
   }
