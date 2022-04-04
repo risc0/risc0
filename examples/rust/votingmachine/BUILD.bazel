@@ -3,23 +3,19 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
 rust_binary(
     name = "votingmachine",
     srcs = ["src/main.rs"],
-    deps = [
-        ":lib",
-    ],
+    deps = [":lib"],
 )
 
 rust_library(
     name = "lib",
     srcs = ["src/lib.rs"],
-    rustc_flags = [
-        "-Coverflow-checks=on",
-    ],
+    rustc_flags = ["-Coverflow-checks=on"],
     deps = [
-        "//examples/rust/votingmachine/core",
-        "//risc0/zkvm/sdk/rust/core",
+        "//examples/rust/votingmachine/core:core_host",
+        "//risc0/zkvm/sdk/rust/core:core_host",
         "//risc0/zkvm/sdk/rust/host",
-        "//risc0/zkvm/sdk/rust/serde",
-        "@crates//:log",
+        "//risc0/zkvm/sdk/rust/serde:serde_host",
+        "@crates_host//:log",
     ],
 )
 
@@ -34,7 +30,5 @@ rust_test(
         "//examples/rust/votingmachine/core:submit",
         "//examples/rust/votingmachine/core:submit.id",
     ],
-    rustc_flags = [
-        "-Coverflow-checks=on",
-    ],
+    rustc_flags = ["-Coverflow-checks=on"],
 )

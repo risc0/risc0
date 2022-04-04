@@ -7,29 +7,25 @@ rust_binary(
         "//examples/rust/digital_signature/core:sign",
         "//examples/rust/digital_signature/core:sign.id",
     ],
-    rustc_flags = [
-        "-Coverflow-checks=on",
-    ],
+    rustc_flags = ["-Coverflow-checks=on"],
     deps = [
         ":lib",
-        "@crates//:clap",
-        "@crates//:log",
+        "@crates_host//:clap",
+        "@crates_host//:log",
     ],
 )
 
 rust_library(
     name = "lib",
     srcs = ["src/lib.rs"],
-    rustc_flags = [
-        "-Coverflow-checks=on",
-    ],
+    rustc_flags = ["-Coverflow-checks=on"],
     deps = [
-        "//examples/rust/digital_signature/core",
-        "//risc0/zkvm/sdk/rust/core",
+        "//examples/rust/digital_signature/core:core_host",
+        "//risc0/zkvm/sdk/rust/core:core_host",
         "//risc0/zkvm/sdk/rust/host",
-        "//risc0/zkvm/sdk/rust/serde",
-        "@crates//:log",
-        "@crates//:sha2",
+        "//risc0/zkvm/sdk/rust/serde:serde_host",
+        "@crates_host//:log",
+        "@crates_host//:sha2",
     ],
 )
 
@@ -40,7 +36,5 @@ rust_test(
         "//examples/rust/digital_signature/core:sign",
         "//examples/rust/digital_signature/core:sign.id",
     ],
-    rustc_flags = [
-        "-Coverflow-checks=on",
-    ],
+    rustc_flags = ["-Coverflow-checks=on"],
 )

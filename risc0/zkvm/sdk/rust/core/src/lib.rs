@@ -1,4 +1,4 @@
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 use core::fmt::{Debug, Display, Formatter};
 
