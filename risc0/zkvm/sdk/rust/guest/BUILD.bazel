@@ -11,15 +11,13 @@ rust_library(
         "src/sha.rs",
     ],
     crate_name = "zkvm_guest",
-    rustc_flags = [
-        "-Coverflow-checks=on",
-    ],
+    rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
     deps = [
         "//risc0/zkvm/sdk/cpp/guest:crt0",
-        "//risc0/zkvm/sdk/rust/core",
-        "//risc0/zkvm/sdk/rust/serde",
-        "@crates//:serde",
+        "//risc0/zkvm/sdk/rust/core:core_guest",
+        "//risc0/zkvm/sdk/rust/serde:serde_guest",
+        "@crates_guest//:serde",
     ],
 )
 
@@ -29,7 +27,7 @@ risc0_rust_method(
     visibility = ["//visibility:public"],
     deps = [
         ":guest",
-        "//risc0/zkvm/sdk/rust/core",
+        "//risc0/zkvm/sdk/rust/core:core_guest",
     ],
 )
 
@@ -37,16 +35,12 @@ risc0_rust_method(
     name = "test_mem",
     srcs = ["tests/io.rs"],
     visibility = ["//visibility:public"],
-    deps = [
-        ":guest",
-    ],
+    deps = [":guest"],
 )
 
 risc0_rust_method(
     name = "test_fail",
     srcs = ["tests/fail.rs"],
     visibility = ["//visibility:public"],
-    deps = [
-        ":guest",
-    ],
+    deps = [":guest"],
 )

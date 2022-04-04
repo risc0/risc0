@@ -95,17 +95,28 @@ crate_universe_dependencies()
 load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository")
 
 crates_repository(
-    name = "crates",
-    lockfile = "//:Cargo.Bazel.lock",
+    name = "crates_host",
+    lockfile = "//:Cargo-host.Bazel.lock",
     packages = {
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
-        "rand_core": crate.spec(
-            features = ["getrandom"],
-            version = "0.6",
-        ),
+        "serde": crate.spec(version = "1.0"),
+        "sha2": crate.spec(version = "0.10"),
+        "yew": crate.spec(version = "0.19"),
+    },
+    quiet = False,
+)
+
+load("@crates_host//:defs.bzl", "crate_repositories")
+
+crate_repositories()
+
+crates_repository(
+    name = "crates_guest",
+    lockfile = "//:Cargo-guest.Bazel.lock",
+    packages = {
         "serde": crate.spec(
             default_features = False,
             features = [
@@ -114,14 +125,13 @@ crates_repository(
             ],
             version = "1.0",
         ),
-        "sha2": crate.spec(version = "0.10"),
     },
     quiet = False,
 )
 
-load("@crates//:defs.bzl", "crate_repositories")
+load("@crates_guest//:defs.bzl", crate_repositories_guest = "crate_repositories")
 
-crate_repositories()
+crate_repositories_guest()
 
 http_archive(
     name = "oneTBB",

@@ -44,3 +44,6 @@ impl serde::de::Error for Error {
         Error::NotSupported
     }
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for Error {}

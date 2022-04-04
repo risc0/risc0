@@ -4,6 +4,6 @@
   },
   "[starlark]": {
     "editor.formatOnSave": true
-  }
+  },
   "files.eol": "\n"
 }

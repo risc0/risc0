@@ -1,6 +1,7 @@
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_test")
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
-rust_library(
+risc0_rust_library_pair(
     name = "serde",
     srcs = [
         "src/deserializer.rs",
@@ -9,17 +10,26 @@ rust_library(
         "src/serializer.rs",
     ],
     crate_name = "zkvm_serde",
-    rustc_flags = [
-        "-Coverflow-checks=on",
+    guest_deps = [
+        "@crates_guest//:serde",
+        "//risc0/zkvm/sdk/rust/core:core_guest",
     ],
+    host_deps = [
+        "@crates_host//:serde",
+        "//risc0/zkvm/sdk/rust/core:core_host",
+    ],
+    host_features = ["std"],
+    rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
-    deps = [
-        "//risc0/zkvm/sdk/rust/core",
-        "@crates//:serde",
-    ],
 )
 
 rust_test(
-    name = "test",
-    crate = ":serde",
+    name = "test_host",
+    crate = ":serde_host",
+    crate_features = ["std"],
+)
+
+rust_test(
+    name = "test_guest",
+    crate = ":serde_guest",
 )

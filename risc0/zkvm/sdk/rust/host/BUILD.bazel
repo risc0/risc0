@@ -8,13 +8,13 @@ rust_library(
         "src/lib.rs",
     ],
     crate_name = "zkvm_host",
-    proc_macro_deps = ["@crates//:ctor"],
+    proc_macro_deps = ["@crates_host//:ctor"],
     visibility = ["//visibility:public"],
     deps = [
         "//risc0/zkvm/sdk/cpp/host",
-        "//risc0/zkvm/sdk/rust/core",
-        "@crates//:env_logger",
-        "@crates//:log",
+        "//risc0/zkvm/sdk/rust/core:core_host",
+        "@crates_host//:env_logger",
+        "@crates_host//:log",
     ],
 )
 

@@ -1,3 +1,4 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
 load("//bazel/rules/rust:defs.bzl", "risc0_rust_binary")
 load("//bazel/toolchain/risc0:defs.bzl", "risc0_cc_binary")
 
@@ -50,4 +51,27 @@ def risc0_rust_method(name, **kwargs):
         name = name + ".id",
         elf = name,
         visibility = ["//visibility:public"],
+    )
+
+def risc0_rust_library_pair(
+        name,
+        deps = [],
+        host_deps = [],
+        guest_deps = [],
+        crate_features = [],
+        host_features = [],
+        guest_features = [],
+        **kwargs):
+    rust_library(
+        name = name + "_host",
+        crate_features = crate_features + host_features,
+        deps = deps + host_deps,
+        **kwargs
+    )
+
+    rust_library(
+        name = name + "_guest",
+        crate_features = crate_features + guest_features,
+        deps = deps + guest_deps,
+        **kwargs
     )
