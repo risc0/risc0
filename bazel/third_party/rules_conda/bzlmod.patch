@@ -1,0 +1,25 @@
+--- /dev/null
++++ b/MODULE.bazel
+@@ -0,0 +1,8 @@
++module(
++    name = "rules_conda",
++    version = "0.1.0",
++    compatibility_level = 1,
++)
++
++install = use_extension(":extensions.bzl", "install")
++use_repo(install, "conda")
+
+--- /dev/null
++++ b/extensions.bzl
+@@ -0,0 +1,10 @@
++load(":defs.bzl", "load_conda")
++
++def _install_impl(module_ctx):
++    load_conda(
++        install_mamba = True,
++        installer = "miniforge",
++        quiet = False,
++    )
++
++install = module_extension(implementation = _install_impl)

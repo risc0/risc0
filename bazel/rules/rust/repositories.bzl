@@ -1,5 +1,4 @@
 # buildifier: disable=module-docstring
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@rules_rust//rust/private:common.bzl", "rust_common")
 load(
     "@rules_rust//rust/private:repository_utils.bzl",
@@ -266,8 +265,7 @@ def rust_repositories(
         dev_components = False,
         urls = DEFAULT_STATIC_RUST_URL_TEMPLATES):
     for exec_triple, name in DEFAULT_TOOLCHAIN_TRIPLES.items():
-        maybe(
-            _rust_repository_set,
+        _rust_repository_set(
             name = name,
             dev_components = dev_components,
             edition = edition,
