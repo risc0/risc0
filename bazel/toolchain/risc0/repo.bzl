@@ -86,7 +86,6 @@ risc0_toolchain_proxy = repository_rule(
 )
 
 def risc0_toolchain(name):
-    toolchain_names = []
     for toolchain in TOOLCHAINS:
         repo_name = "{name}_{suffix}".format(name = name, suffix = toolchain.archive)
         risc0_toolchain_repo(
@@ -96,13 +95,9 @@ def risc0_toolchain(name):
             sha256 = toolchain.sha256,
         )
 
-        proxy_name = repo_name + "_toolchain"
         risc0_toolchain_proxy(
-            name = proxy_name,
+            name = repo_name + "_toolchain",
             host_arch = toolchain.host_arch,
             host_os = toolchain.host_os,
             toolchain = "@{repo_name}//:cc-toolchain".format(repo_name = repo_name),
         )
-
-        toolchain_names.append("@{name}//:toolchain".format(name = proxy_name))
-    native.register_toolchains(*toolchain_names)

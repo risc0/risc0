@@ -1,0 +1,38 @@
+module(
+    name = "risc0",
+    version = "0.1.0",
+    toolchains_to_register = [
+        "@conda_tools//:python_toolchain",
+        "@risc0_toolchain_riscv32im-linux-x86_64_toolchain//:toolchain",
+        "@risc0_toolchain_riscv32im-osx-arm64_toolchain//:toolchain",
+        "@risc0_toolchain_riscv32im-osx-x86_64_toolchain//:toolchain",
+        "@risc0_toolchain_riscv32im-windows-x86_64_toolchain//:toolchain",
+        "//:clang_format_toolchain",
+    ],
+)
+
+bazel_dep(name = "bazel_skylib", version = "1.2.0")
+bazel_dep(name = "googletest", version = "1.11.0", dev_dependency = True)
+bazel_dep(name = "platforms", version = "0.0.4")
+bazel_dep(name = "rules_conda", version = "0.1.0")
+bazel_dep(name = "rules_cc", version = "0.0.1")
+bazel_dep(name = "rules_python", version = "0.4.0")
+
+workspace = use_extension("//bazel:extensions.bzl", "workspace")
+use_repo(workspace, "bazel_clang_tidy")
+use_repo(workspace, "conda_tools")
+use_repo(workspace, "oneTBB")
+use_repo(workspace, "py3_env")
+use_repo(workspace, "risc0_toolchain_riscv32im-linux-x86_64_toolchain")
+use_repo(workspace, "risc0_toolchain_riscv32im-osx-arm64_toolchain")
+use_repo(workspace, "risc0_toolchain_riscv32im-osx-x86_64_toolchain")
+use_repo(workspace, "risc0_toolchain_riscv32im-windows-x86_64_toolchain")
+use_repo(workspace, "riscv_tests")
+
+archive_override(
+    module_name = "rules_conda",
+    integrity = "sha256-l5P4YWLsXPsyofHxP1v3duLAayQ8Tx7jFLnshwFEIg0=",
+    urls = "https://github.com/spietras/rules_conda/releases/download/0.1.0/rules_conda-0.1.0.zip",
+    patches = ["//bazel/third_party/rules_conda:bzlmod.patch"],
+    patch_strip = 1,
+)

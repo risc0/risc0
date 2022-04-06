@@ -15,8 +15,8 @@ doxygen(
         "//conditions:default": [],
     }),
     tool = select({
-        "@bazel_tools//platforms:windows": "@py3_env//:py3_env/Library/bin/doxygen.exe",
-        "//conditions:default": "@py3_env//:py3_env/bin/doxygen",
+        "@bazel_tools//platforms:windows": "@py3_env//:.workspace.py3_env/Library/bin/doxygen.exe",
+        "//conditions:default": "@py3_env//:.workspace.py3_env/bin/doxygen",
     }),
 )
 
