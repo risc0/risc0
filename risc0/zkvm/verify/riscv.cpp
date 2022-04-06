@@ -25,6 +25,8 @@ namespace {
 #define SIZES
 #include "risc0/zkvm/circuit/step.cpp.inc"
 #undef SIZES
+static constexpr size_t kNumStepFp4s = NUM_FP4S;
+static constexpr size_t kNumStepCons = NUM_CONS;
 
 enum class OpType {
   CONST,
