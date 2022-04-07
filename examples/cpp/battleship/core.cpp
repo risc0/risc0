@@ -147,13 +147,13 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 
 std::ostream& operator<<(std::ostream& os, const GameState& state) {
   os << "GameState{";
-  for (int i = 0; i < NUM_SHIPS; i++) {
+  for (unsigned i = 0; i < NUM_SHIPS; i++) {
     const Ship& ship = state.ships[i];
     if (i > 0) {
       os << ", ";
     }
     os << "{" << ship.pos << ", " << ship.dir << ", ";
-    for (int j = 0; j < SHIP_SPANS[i]; j++) {
+    for (unsigned j = 0; j < SHIP_SPANS[i]; j++) {
       if (ship.hit_mask & (1 << j)) {
         os << 'X';
       } else {
