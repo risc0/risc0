@@ -35,7 +35,7 @@ namespace risc0 {
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 #if defined(__clang__)
-#pragma clang diagnostic ignored "-Wunused-but-set-variable"
+#pragma clang diagnostic ignored "-Wunused-variable"
 #endif
 
 #define STEP_INC
