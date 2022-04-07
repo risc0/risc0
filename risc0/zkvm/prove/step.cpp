@@ -32,10 +32,10 @@ namespace risc0 {
 // the optimizer should remove these.
 
 #if defined(__GNUC__)
-# pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 #if defined(__clang__)
-# pragma clang diagnostic ignored "-Wunused-but-set-variable"
+#pragma clang diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
 #define STEP_INC
