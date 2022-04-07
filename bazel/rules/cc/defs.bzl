@@ -6,7 +6,14 @@ def _copts(std):
             "/std:" + std,
             "/Zc:preprocessor",
         ],
-        "//conditions:default": ["-std=" + std],
+        "//conditions:default": [
+            "-std=" + std,
+            "-Werror",
+            # TODO(nils): Clean up type punning violations;
+            # this is easy to do once we get to c++20 because then we
+            # can use std::bit_cast
+            "-Wno-strict-aliasing",
+        ],
     })
 
 def cc_binary(name, std = DEFAULT_CXX_STD, copts = [], **kwargs):
