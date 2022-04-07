@@ -8,7 +8,7 @@ use lazy_static::lazy_static;
 use crate::taps::{Register, RegisterGroup, Taps, Combo};
 
 lazy_static !{
-  static ref RISCV_TAPS : Taps = {Taps{
+  pub static ref RISCV_TAPS : Taps = {Taps{
     registers : vec ![
 #define TAPS
 #define offset_begin(base, off) Register{ group: base(), offset: off, back: vec![
