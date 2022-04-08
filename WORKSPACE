@@ -4,8 +4,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_rust",
-    sha256 = "b58c63a6d8221f408f8852b4f74f81bc8c7aac9273f3899a74e32e6168a2c624",
-    url = "https://github.com/bazelbuild/rules_rust/releases/download/0.2.1/rules_rust-v0.2.1.tar.gz",
+    patch_args = ["-p1"],
+    patches = ["//bazel/third_party/rules_rust:urls.patch"],
+    sha256 = "42248201c518960307ff256e75adc1a7d34d398acbe6118b207905ca4d045706",
+    strip_prefix = "rules_rust-4144ddeb9c5290a15e5ec1cf8df31393744f6005",
+    url = "https://github.com/bazelbuild/rules_rust/archive/4144ddeb9c5290a15e5ec1cf8df31393744f6005.zip",
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies")
@@ -15,6 +18,10 @@ rules_rust_dependencies()
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_deps")
 
 rust_analyzer_deps()
+
+load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories")
+
+rust_wasm_bindgen_repositories()
 
 load("//bazel/rules/rust:repositories.bzl", "rust_repositories")
 

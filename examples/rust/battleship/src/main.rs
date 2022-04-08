@@ -13,5 +13,5 @@
 // limitations under the License.
 
 fn main() {
-    todo!()
+    println!("Hello World!");
 }

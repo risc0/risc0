@@ -5,9 +5,10 @@ load(
     "@rules_rust//rust/private:utils.bzl",
     "compute_crate_name",
     "find_toolchain",
+    "get_import_macro_deps",
     "transform_deps",
 )
-load("//bazel/platform:transitions.bzl", "risc0_transition")
+load("//bazel/platform:transitions.bzl", "risc0_transition", "wasm_transition")
 
 def get_edition(attr, toolchain):
     if getattr(attr, "edition"):
@@ -76,7 +77,7 @@ def _rust_binary_impl(ctx):
     output = ctx.actions.declare_file(ctx.label.name + toolchain.binary_ext)
 
     deps = transform_deps(ctx.attr.deps)
-    proc_macro_deps = transform_deps(ctx.attr.proc_macro_deps)
+    proc_macro_deps = transform_deps(ctx.attr.proc_macro_deps + get_import_macro_deps(ctx))
 
     return rustc_compile_action(
         ctx = ctx,
@@ -171,4 +172,19 @@ risc0_rust_binary = rule(
     ],
     incompatible_use_toolchain_transition = True,
     cfg = risc0_transition,
+)
+
+wasm_rust_binary = rule(
+    implementation = _rust_binary_impl,
+    provides = _common_providers,
+    attrs = dict(_common_attrs.items() + _rust_binary_attrs.items()),
+    executable = True,
+    fragments = ["cpp"],
+    host_fragments = ["cpp"],
+    toolchains = [
+        str(Label("@rules_rust//rust:toolchain")),
+        "@bazel_tools//tools/cpp:toolchain_type",
+    ],
+    incompatible_use_toolchain_transition = True,
+    cfg = wasm_transition,
 )
