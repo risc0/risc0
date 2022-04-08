@@ -143,6 +143,7 @@ rust_toolchain_repository = repository_rule(
         "edition": attr.string(default = rust_common.default_edition),
         "exec_triple": attr.string(mandatory = True),
         "extra_toolchains": attr.string_list_dict(),
+        "include_rustc_srcs": attr.bool(default = True),
         "iso_date": attr.string(),
         "rustfmt_version": attr.string(),
         "sha256s": attr.string_dict(),
