@@ -9,10 +9,7 @@ def _copts(std):
         "//conditions:default": [
             "-std=" + std,
             "-Werror",
-            # TODO(nils): Clean up type punning violations;
-            # this is easy to do once we get to c++20 because then we
-            # can use std::bit_cast
-            "-Wno-strict-aliasing",
+            "-fno-strict-aliasing",
         ],
     })
 

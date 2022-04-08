@@ -147,7 +147,7 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 
 std::ostream& operator<<(std::ostream& os, const GameState& state) {
   os << "GameState{";
-  for (unsigned i = 0; i < NUM_SHIPS; i++) {
+  for (uint32_t i = 0; i < NUM_SHIPS; i++) {
     const Ship& ship = state.ships[i];
     if (i > 0) {
       os << ", ";
