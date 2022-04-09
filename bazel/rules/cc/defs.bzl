@@ -9,7 +9,6 @@ def _copts(std):
         "//conditions:default": [
             "-std=" + std,
             "-Werror",
-            "-fno-strict-aliasing",
         ],
     })
 

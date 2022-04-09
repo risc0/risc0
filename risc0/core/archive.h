@@ -23,14 +23,29 @@
 
 namespace risc0 {
 
-template <typename T> struct Encoder {
+template <typename T, typename = void> struct Encoder {
   template <typename Archive> static void transfer(Archive& ar, const T& value) {
     const_cast<T&>(value).transfer(ar);
   }
 };
 
-template <typename T> struct Decoder {
+template <typename T> struct Encoder<T, typename std::enable_if_t<std::is_enum<T>::value>> {
+  template <typename Archive> static void transfer(Archive& ar, const T& value) {
+    auto uintValue = static_cast<std::underlying_type_t<T>>(value);
+    ar.transfer(uintValue);
+  }
+};
+
+template <typename T, typename = void> struct Decoder {
   template <typename Archive> static void transfer(Archive& ar, T& value) { value.transfer(ar); }
+};
+
+template <typename T> struct Decoder<T, typename std::enable_if_t<std::is_enum<T>::value>> {
+  template <typename Archive> static void transfer(Archive& ar, T& value) {
+    std::underlying_type_t<T> uintValue;
+    ar.transfer(uintValue);
+    value = static_cast<T>(uintValue);
+  }
 };
 
 template <typename Stream> class ArchiveWriter {
