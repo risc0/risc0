@@ -148,7 +148,7 @@ void StepContext::requireDigits(Fp* buf, size_t bits, size_t offset, size_t size
       set(buf, offset + i, Fp(0));
     }
 #endif
-    if (get(buf, offset + i, 0).asUInt32() >= (1 << bits)) {
+    if (get(buf, offset + i, 0).asUInt32() >= (1U << bits)) {
       throw std::runtime_error("Invalid requireDigits\n");
     }
   }

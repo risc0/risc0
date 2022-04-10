@@ -20,13 +20,13 @@
 
 namespace risc0 {
 
-int gLogLevel = 0;
+unsigned gLogLevel = 0;
 
-void setLogLevel(int level) {
+void setLogLevel(unsigned level) {
   gLogLevel = level;
 }
 
-int getLogLevel() {
+unsigned getLogLevel() {
   return gLogLevel;
 }
 

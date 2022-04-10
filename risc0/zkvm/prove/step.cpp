@@ -28,6 +28,14 @@
 
 namespace risc0 {
 
+// Ignore values in generated code that are computed unnecessarily;
+// the optimizer should remove these.
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wunused-variable"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#endif
+
 #define STEP_INC
 #include "risc0/zkvm/circuit/step.cpp.inc"
 

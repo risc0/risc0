@@ -58,7 +58,7 @@ struct Ship {
 
   template <typename Archive> void transfer(Archive& ar) {
     ar.transfer(pos);
-    ar.transfer(reinterpret_cast<uint16_t&>(dir));
+    ar.transfer(dir);
     ar.transfer(hit_mask);
   }
 
@@ -111,7 +111,7 @@ struct RoundResult {
 
   template <typename Archive> void transfer(Archive& ar) {
     ar.transfer(state);
-    ar.transfer(reinterpret_cast<uint32_t&>(hit));
+    ar.transfer(hit);
   }
 
   bool operator==(const RoundResult& rhs) const;
