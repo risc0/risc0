@@ -6,7 +6,10 @@ def _copts(std):
             "/std:" + std,
             "/Zc:preprocessor",
         ],
-        "//conditions:default": ["-std=" + std],
+        "//conditions:default": [
+            "-std=" + std,
+            "-Werror",
+        ],
     })
 
 def cc_binary(name, std = DEFAULT_CXX_STD, copts = [], **kwargs):

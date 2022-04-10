@@ -1,3 +1,5 @@
+common --experimental_enable_bzlmod
+
 startup --windows_enable_symlinks
 
 build -c opt

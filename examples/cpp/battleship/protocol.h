@@ -50,7 +50,7 @@ struct RoundMessage {
       ar.transfer(old_state);
       ar.transfer(new_state);
       ar.transfer(shot);
-      ar.transfer(reinterpret_cast<uint32_t&>(hit));
+      ar.transfer(hit);
     }
   };
 

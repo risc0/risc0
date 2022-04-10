@@ -32,11 +32,11 @@
 namespace risc0 {
 
 /// Set the logging level so that logs of level <= \p level are printed
-void setLogLevel(int level);
+void setLogLevel(unsigned level);
 
 /// Get the currently log level.
 /// Usually used to optionally do extra computation required only for logging.
-int getLogLevel();
+unsigned getLogLevel();
 
 /// Logs a timestamp to cerr (the first part of a log message)
 void logTimestamp();

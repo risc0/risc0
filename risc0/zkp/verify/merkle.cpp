@@ -18,10 +18,10 @@ namespace risc0 {
 
 MerkeTreeParams::MerkeTreeParams(size_t rowSize, size_t colSize, size_t queries)
     : rowSize(rowSize), colSize(colSize), queries(queries), layers(log2Ceil(rowSize)) {
-  REQUIRE(1 << layers == rowSize);
+  REQUIRE(1U << layers == rowSize);
   topLayer = 0;
   for (size_t i = 1; i < layers; i++) {
-    if ((1 << i) > queries) {
+    if ((1U << i) > queries) {
       break;
     }
     topLayer = i;
