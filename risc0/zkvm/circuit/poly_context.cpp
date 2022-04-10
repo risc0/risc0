@@ -439,7 +439,7 @@ std::string PolyContext::done() {
     impl->tapToID[tap] = nextID++;
   }
   std::string finalName = impl->eval(result);
-  if (result->degree() > kMaxDegree) {
+  if ((unsigned)result->degree() > kMaxDegree) {
     result->findCriticalPath(*impl);
     throw std::runtime_error("Degree too large!");
   }

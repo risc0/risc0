@@ -151,7 +151,7 @@ void ExecState::expand() {
     std::vector<Fp> newData(data.size() * 2);
 #endif
     setupCode(newCode.data(), context.numSteps * 2, startAddr, image);
-    for (int j = 0; j < kDataSize; j++) {
+    for (unsigned j = 0; j < kDataSize; j++) {
       std::copy(data.begin() + j * context.numSteps,
                 data.begin() + j * context.numSteps + context.curStep,
                 newData.begin() + j * context.numSteps * 2);
