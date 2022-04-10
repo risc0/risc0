@@ -191,7 +191,7 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
 
   LOG(1, "Size of U = " << coeffU.size());
   iop.write(coeffU.data(), coeffU.size());
-  auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4);
+  auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4, 1, false);
   iop.commit(hashU);
 
   // Set the mix mix value
@@ -264,9 +264,9 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
   batchBitReverse(finalPolyCoeffs, 4);
   LOG(1, "FRI-proof, size = " << finalPolyCoeffs.size() / 4);
   friProve(iop, finalPolyCoeffs, [&](WriteIOP& iop, size_t idx) {
+    accumGroup.getMerkle().prove(iop, idx);
     codeGroup.getMerkle().prove(iop, idx);
     dataGroup.getMerkle().prove(iop, idx);
-    accumGroup.getMerkle().prove(iop, idx);
     checkGroup.getMerkle().prove(iop, idx);
   });
 

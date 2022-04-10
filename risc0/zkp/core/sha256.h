@@ -196,7 +196,9 @@ DEVSPEC inline ShaDigest shaHashInner(const DEVADDR T* data, size_t size, size_t
     words[15] = bitSize & 0xffffffff;
   }
   // Do final compression
-  compress(state, words);
+  if (pad || curWord != 0) {
+    compress(state, words);
+  }
 
   return state;
 }
