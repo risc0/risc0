@@ -31,7 +31,7 @@ public:
   void write(const Fp* data, size_t count) {
     std::vector<uint32_t> no_cast(count);
     for (size_t i = 0; i < count; i++) {
-      no_cast[i] = (data[i].asUInt32());
+      no_cast[i] = data[i].asUInt32();
     }
     write(no_cast.data(), count);
   }

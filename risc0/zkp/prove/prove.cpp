@@ -158,6 +158,11 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
       std::copy(out.data(), out.data() + out.size(), std::back_inserter(evalU));
     }
   };
+  // Now, we evaluate each group at the approriate points (relative to Z).
+  // From here on out, we always process groups in accum, code, data order,
+  // since this is the order used by the codegen system (alphabetical).
+  // Sometimes it's a requirement for matching generated code, but even when
+  // it's not we keep the order for consistency.
   evalGroup(RegisterGroup::ACCUM, accumGroup);
   evalGroup(RegisterGroup::CODE, codeGroup);
   evalGroup(RegisterGroup::DATA, dataGroup);
@@ -196,7 +201,6 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
 
   // Set the mix mix value
   Fp4 mix = Fp4::random(iop);
-  ;
   LOG(1, "Mix = " << mix);
 
   // Do the coefficent mixing
