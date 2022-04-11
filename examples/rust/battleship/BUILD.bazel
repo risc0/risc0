@@ -6,6 +6,18 @@ rust_binary(
     deps = [
         ":lib",
         "@crates_host//:yew",
+        "//examples/rust/battleship/core:core_host",
+        "//risc0/zkvm/sdk/rust/core:core_host",
+        "//risc0/zkvm/sdk/rust/host",
+        "//risc0/zkvm/sdk/rust/serde:serde_host",
+        "@crates_host//:log",
+        "@crates_host//:serde",
+    ],
+    data = [
+        "//examples/rust/battleship/core:init",
+        "//examples/rust/battleship/core:init.id",
+        "//examples/rust/battleship/core:turn",
+        "//examples/rust/battleship/core:turn.id",
     ],
 )
 

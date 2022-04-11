@@ -1,5 +1,5 @@
 {
-  "checksum": "288a9ca1ca00c68f75ae7d5fd33826e1f7739488f2a51076e1987e928b26628b",
+  "checksum": "b779fbe4d35c136fa67f6605697455e08c8ded7577fa9452949b5c5ceccf1270",
   "crates": {
     "direct-cargo-bazel-deps 0.0.1": {
       "name": "direct-cargo-bazel-deps",
@@ -38,13 +38,13 @@
       },
       "license": null
     },
-    "proc-macro2 1.0.36": {
+    "proc-macro2 1.0.37": {
       "name": "proc-macro2",
-      "version": "1.0.36",
+      "version": "1.0.37",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/proc-macro2/1.0.36/download",
-          "sha256": "c7342d5883fbccae1cc37a2353b09c87c9b0f3afd73f5fb9bba687a1f733b029"
+          "url": "https://crates.io/api/v1/crates/proc-macro2/1.0.37/download",
+          "sha256": "ec757218438d5fda206afc041538b2f6d889286160d649a86a24d37e1235afd1"
         }
       },
       "targets": [
@@ -85,7 +85,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.36",
+              "id": "proc-macro2 1.0.37",
               "target": "build_script_build"
             },
             {
@@ -96,7 +96,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.36"
+        "version": "1.0.37"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -105,13 +105,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "quote 1.0.17": {
+    "quote 1.0.18": {
       "name": "quote",
-      "version": "1.0.17",
+      "version": "1.0.18",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/quote/1.0.17/download",
-          "sha256": "632d02bff7f874a36f33ea8bb416cd484b90cc66c1194b1a1110d067a7013f58"
+          "url": "https://crates.io/api/v1/crates/quote/1.0.18/download",
+          "sha256": "a1feb54ed693b93a84e14094943b84b7c4eae204c512b7ccb95ab0c66d278ad1"
         }
       },
       "targets": [
@@ -140,14 +140,14 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.36",
+              "id": "proc-macro2 1.0.37",
               "target": "proc_macro2"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.17"
+        "version": "1.0.18"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -270,11 +270,11 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.36",
+              "id": "proc-macro2 1.0.37",
               "target": "proc_macro2"
             },
             {
-              "id": "quote 1.0.17",
+              "id": "quote 1.0.18",
               "target": "quote"
             },
             {
@@ -282,7 +282,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "syn 1.0.90",
+              "id": "syn 1.0.91",
               "target": "syn"
             }
           ],
@@ -298,13 +298,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "syn 1.0.90": {
+    "syn 1.0.91": {
       "name": "syn",
-      "version": "1.0.90",
+      "version": "1.0.91",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/syn/1.0.90/download",
-          "sha256": "704df27628939572cd88d33f171cd6f896f4eaca85252c6e0a72d8d8287ee86f"
+          "url": "https://crates.io/api/v1/crates/syn/1.0.91/download",
+          "sha256": "b683b2b825c8eef438b77c36a06dc262294da3d5a5813fac20da149241dcd44d"
         }
       },
       "targets": [
@@ -350,15 +350,15 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.36",
+              "id": "proc-macro2 1.0.37",
               "target": "proc_macro2"
             },
             {
-              "id": "quote 1.0.17",
+              "id": "quote 1.0.18",
               "target": "quote"
             },
             {
-              "id": "syn 1.0.90",
+              "id": "syn 1.0.91",
               "target": "build_script_build"
             },
             {
@@ -369,7 +369,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.90"
+        "version": "1.0.91"
       },
       "build_script_attrs": {
         "data_glob": [
