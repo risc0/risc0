@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use battleship_core::*;
-use lib::*;
-use std::{borrow::Borrow, io::*};
+use battleship_core::{GameState, HitType, Ship, ShipDirection};
+use lib::Battleship;
+use std::io::stdin;
 
 struct Players {
     name: String,
@@ -112,15 +112,11 @@ fn main() {
     } else if count_players == 0 {
         run_auto_bot();
     } else {
-        println!("number of players, {}", count_players);
-        let mut player1 = setup_player_1();
-        let mut player2 = setup_player_2();
-
+        let mut player1 = setup_player(1);
+        let mut player2 = setup_player(2);
         let player1_init = player1.battleship.init().unwrap();
         let player2_init = player2.battleship.init().unwrap();
-
         player1.battleship.on_init_msg(&player2_init).unwrap();
-
         player2.battleship.on_init_msg(&player1_init).unwrap();
 
         for n in 1..10 {
@@ -165,56 +161,35 @@ fn main() {
     }
 }
 
-fn setup_player_1() -> Players {
-    println!("What's player's 1 name?");
-    let mut player1_string = String::new();
+fn setup_player(player: i32) -> Players {
+    println!("What's player {} name?", player);
+    let mut player_string = String::new();
     stdin()
-        .read_line(&mut player1_string)
+        .read_line(&mut player_string)
         .expect("Failed to read line");
 
-    let player1_state = GameState {
+    let player_state = GameState {
         ships: [
-            setup_carrier(),
-            setup_battleship(),
-            setup_cruiser(),
-            setup_submarine(),
-            setup_destroyer(),
+            setup_ship("Carrier".to_string()),
+            setup_ship("Battleship".to_string()),
+            setup_ship("Cruiser".to_string()),
+            setup_ship("Submarine".to_string()),
+            setup_ship("Destroyer".to_string()),
         ],
         salt: 0xCAFECAFE,
     };
 
     return Players {
-        name: player1_string,
-        battleship: Battleship::new(player1_state),
+        name: player_string,
+        battleship: Battleship::new(player_state),
     };
 }
 
-fn setup_player_2() -> Players {
-    println!("What's player's 2 name?");
-    let mut player2_string = String::new();
-    stdin()
-        .read_line(&mut player2_string)
-        .expect("Failed to read line");
-
-    let player2_state = GameState {
-        ships: [
-            setup_carrier(),
-            setup_battleship(),
-            setup_cruiser(),
-            setup_submarine(),
-            setup_destroyer(),
-        ],
-        salt: 0xDEADBEEF,
-    };
-
-    return Players {
-        name: player2_string,
-        battleship: Battleship::new(player2_state),
-    };
-}
-
-fn setup_carrier() -> Ship {
-    println!("Where do you want your carrier's coordinates? (i.e.: 0,0)");
+fn setup_ship(ship_name: String) -> Ship {
+    println!(
+        "Where do you want your {}'s coordinates? (i.e.: 0,0)",
+        ship_name
+    );
     let mut carrier = String::new();
     stdin()
         .read_line(&mut carrier)
@@ -222,123 +197,10 @@ fn setup_carrier() -> Ship {
     let carrier_coordinates = carrier.split(",");
     let vec: Vec<&str> = carrier_coordinates.collect();
 
-    println!("What do you want your carrier's direction to be? (vV|hH)");
-    let mut direction = String::new();
-    stdin()
-        .read_line(&mut direction)
-        .expect("Failed to read line");
-
-    let dir: ShipDirection = if direction == "v" || direction == "V" {
-        ShipDirection::Vertical
-    } else if direction == "h" || direction == "H" {
-        ShipDirection::Horizontal
-    } else {
-        ShipDirection::Vertical
-    };
-    return Ship::new(
-        vec[0].trim().parse::<u32>().unwrap(),
-        vec[1].trim().parse::<u32>().unwrap(),
-        dir,
+    println!(
+        "What do you want your {}'s direction to be? (vV|hH)",
+        ship_name
     );
-}
-
-fn setup_battleship() -> Ship {
-    println!("Where do you want your battleship's coordinates? (i.e.: 0,0)");
-    let mut battleship = String::new();
-    stdin()
-        .read_line(&mut battleship)
-        .expect("Failed to read line");
-    let battleship_coordinates = battleship.split(",");
-    let vec: Vec<&str> = battleship_coordinates.collect();
-
-    println!("What do you want your battleship's direction to be? (vV|hH)");
-    let mut direction = String::new();
-    stdin()
-        .read_line(&mut direction)
-        .expect("Failed to read line");
-
-    let dir: ShipDirection = if direction == "v" || direction == "V" {
-        ShipDirection::Vertical
-    } else if direction == "h" || direction == "H" {
-        ShipDirection::Horizontal
-    } else {
-        ShipDirection::Vertical
-    };
-    return Ship::new(
-        vec[0].trim().parse::<u32>().unwrap(),
-        vec[1].trim().parse::<u32>().unwrap(),
-        dir,
-    );
-}
-
-fn setup_cruiser() -> Ship {
-    println!("Where do you want your cruiser's coordinates? (i.e.: 0,0)");
-    let mut cruiser = String::new();
-    stdin()
-        .read_line(&mut cruiser)
-        .expect("Failed to read line");
-    let cruiser_coordinates = cruiser.split(",");
-    let vec: Vec<&str> = cruiser_coordinates.collect();
-
-    println!("What do you want your cruiser's direction to be? (vV|hH)");
-    let mut direction = String::new();
-    stdin()
-        .read_line(&mut direction)
-        .expect("Failed to read line");
-
-    let dir: ShipDirection = if direction == "v" || direction == "V" {
-        ShipDirection::Vertical
-    } else if direction == "h" || direction == "H" {
-        ShipDirection::Horizontal
-    } else {
-        ShipDirection::Vertical
-    };
-    return Ship::new(
-        vec[0].trim().parse::<u32>().unwrap(),
-        vec[1].trim().parse::<u32>().unwrap(),
-        dir,
-    );
-}
-
-fn setup_submarine() -> Ship {
-    println!("Where do you want your submarine's coordinates? (i.e.: 0,0)");
-    let mut submarine = String::new();
-    stdin()
-        .read_line(&mut submarine)
-        .expect("Failed to read line");
-    let submarine_coordinates = submarine.split(",");
-    let vec: Vec<&str> = submarine_coordinates.collect();
-
-    println!("What do you want your submarine's direction to be? (vV|hH)");
-    let mut direction = String::new();
-    stdin()
-        .read_line(&mut direction)
-        .expect("Failed to read line");
-
-    let dir: ShipDirection = if direction == "v" || direction == "V" {
-        ShipDirection::Vertical
-    } else if direction == "h" || direction == "H" {
-        ShipDirection::Horizontal
-    } else {
-        ShipDirection::Vertical
-    };
-    return Ship::new(
-        vec[0].trim().parse::<u32>().unwrap(),
-        vec[1].trim().parse::<u32>().unwrap(),
-        dir,
-    );
-}
-
-fn setup_destroyer() -> Ship {
-    println!("Where do you want your destroyer's coordinates? (i.e.: 0,0)");
-    let mut destroyer = String::new();
-    stdin()
-        .read_line(&mut destroyer)
-        .expect("Failed to read line");
-    let destroyer_coordinates = destroyer.split(",");
-    let vec: Vec<&str> = destroyer_coordinates.collect();
-
-    println!("What do you want your destroyer's direction to be? (vV|hH)");
     let mut direction = String::new();
     stdin()
         .read_line(&mut direction)
