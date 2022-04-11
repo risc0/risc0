@@ -1,6 +1,5 @@
 common --experimental_enable_bzlmod
 
-#startup --output_user_root=C:/tmp
 startup --windows_enable_symlinks
 
 build -c opt
