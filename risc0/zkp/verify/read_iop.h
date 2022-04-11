@@ -33,8 +33,14 @@ public:
     proof += readSize;
     size -= readSize;
   }
-  void read(Fp* data, size_t count) { read(reinterpret_cast<uint32_t*>(data), count); }
-  void read(Fp4* data, size_t count) { read(reinterpret_cast<uint32_t*>(data), count * 4); }
+  void read(Fp* data, size_t count) {
+    std::vector<uint32_t> no_cast(count);
+    read(no_cast.data(), count);
+    for (size_t i = 0; i < count; i++) {
+      data[i] = Fp(no_cast[i]);
+    }
+  }
+  void read(Fp4* data, size_t count) { read(reinterpret_cast<Fp*>(data), count * 4); }
   void read(ShaDigest* data, size_t count) {
     read(reinterpret_cast<uint32_t*>(data), count * sizeof(ShaDigest) / sizeof(uint32_t));
   }
