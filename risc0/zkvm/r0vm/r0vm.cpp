@@ -41,9 +41,9 @@ int main(int argc, char* argv[]) {
     Prover prover(argv[1]);
     prover.writeInput(data.data(), count);
     // Run prover
-    Receipt r = prover.run();
+    Receipt receipt = prover.run();
     // Write private output
-    const auto& out = prover.getOutput();
+    const Buffer& out = prover.getOutput();
     size_t stdoutSize = fwrite(out.data(), 1, out.size(), stdout);
     if (stdoutSize != out.size()) {
       fprintf(stderr, "Failed on writing to stdout");
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
     // Serialize receipt
     VectorStreamWriter writer;
     ArchiveWriter<VectorStreamWriter> archive(writer);
-    archive.transfer(r);
+    archive.transfer(receipt);
     // Write receipt to stderr
     size_t stderrSize = fwrite(writer.vec.data(), 4, writer.vec.size(), stderr);
     if (stderrSize != writer.vec.size()) {
