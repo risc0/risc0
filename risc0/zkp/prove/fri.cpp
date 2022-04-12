@@ -74,7 +74,7 @@ void friProve(WriteIOP& iop, AccelConstSlice<Fp> coeffs, InnerProve inner) {
   {
     AccelReadLock<Fp> finalCpu(final);
     iop.write(finalCpu.data(), finalCpu.size());
-    auto digest = shaHash(finalCpu.data(), finalCpu.size());
+    auto digest = shaHash(finalCpu.data(), finalCpu.size(), 1, false);
     iop.commit(digest);
   }
   // Do queries

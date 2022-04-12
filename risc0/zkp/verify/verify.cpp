@@ -77,7 +77,7 @@ void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize)
   size_t numTaps = tapSet.tapsSize();
   std::vector<Fp4> coeffU(numTaps + 16);
   iop.read(coeffU.data(), coeffU.size());
-  auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4);
+  auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4, 1, false);
   iop.commit(hashU);
 
   // Now, convert to evaluated values
@@ -142,9 +142,9 @@ void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize)
   friVerify(iop, size, [&](ReadIOP& iop, size_t idx) {
     auto x = pow(kRouFwd[log2Ceil(domain)], idx);
     std::vector<std::vector<Fp>> rows(kNumRegisterGroups);
+    rows[static_cast<int>(RegisterGroup::ACCUM)] = accumMerkle.verify(iop, idx);
     rows[static_cast<int>(RegisterGroup::CODE)] = codeMerkle.verify(iop, idx);
     rows[static_cast<int>(RegisterGroup::DATA)] = dataMerkle.verify(iop, idx);
-    rows[static_cast<int>(RegisterGroup::ACCUM)] = accumMerkle.verify(iop, idx);
     auto checkRow = checkMerkle.verify(iop, idx);
     Fp4 cur = Fp4(1);
     std::vector<Fp4> tot(comboCount + 1);

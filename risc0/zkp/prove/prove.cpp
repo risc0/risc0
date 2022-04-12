@@ -158,6 +158,11 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
       std::copy(out.data(), out.data() + out.size(), std::back_inserter(evalU));
     }
   };
+  // Now, we evaluate each group at the approriate points (relative to Z).
+  // From here on out, we always process groups in accum, code, data order,
+  // since this is the order used by the codegen system (alphabetical).
+  // Sometimes it's a requirement for matching generated code, but even when
+  // it's not we keep the order for consistency.
   evalGroup(RegisterGroup::ACCUM, accumGroup);
   evalGroup(RegisterGroup::CODE, codeGroup);
   evalGroup(RegisterGroup::DATA, dataGroup);
@@ -191,12 +196,11 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
 
   LOG(1, "Size of U = " << coeffU.size());
   iop.write(coeffU.data(), coeffU.size());
-  auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4);
+  auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4, 1, false);
   iop.commit(hashU);
 
   // Set the mix mix value
   Fp4 mix = Fp4::random(iop);
-  ;
   LOG(1, "Mix = " << mix);
 
   // Do the coefficent mixing
@@ -264,9 +268,9 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
   batchBitReverse(finalPolyCoeffs, 4);
   LOG(1, "FRI-proof, size = " << finalPolyCoeffs.size() / 4);
   friProve(iop, finalPolyCoeffs, [&](WriteIOP& iop, size_t idx) {
+    accumGroup.getMerkle().prove(iop, idx);
     codeGroup.getMerkle().prove(iop, idx);
     dataGroup.getMerkle().prove(iop, idx);
-    accumGroup.getMerkle().prove(iop, idx);
     checkGroup.getMerkle().prove(iop, idx);
   });
 
