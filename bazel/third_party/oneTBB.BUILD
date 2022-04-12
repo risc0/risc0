@@ -22,6 +22,14 @@ package(
     default_visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "x86_64-gcc",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@bazel_tools//tools/cpp:gcc",
+    ],
+)
+
 cc_library(
     name = "tbb",
     srcs = glob([
@@ -37,7 +45,10 @@ cc_library(
         "include/oneapi/tbb/*.h",
         "include/oneapi/tbb/detail/*.h",
     ]),
-    copts = ["-w"],
+    copts = ["-w"] + select({
+        ":x86_64-gcc": ["-mwaitpkg"],
+        "//conditions:default": [],
+    }),
     defines = select({
         "@platforms//cpu:x86_64": ["__TBB_NO_IMPLICIT_LINKAGE"],
         "//conditions:default": ["USE_PTHREAD"],
