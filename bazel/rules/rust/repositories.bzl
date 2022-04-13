@@ -1,4 +1,5 @@
 # buildifier: disable=module-docstring
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@rules_rust//rust/private:common.bzl", "rust_common")
 load(
     "@rules_rust//rust/private:repository_utils.bzl",
@@ -149,11 +150,8 @@ rust_toolchain_repository = repository_rule(
         "edition": attr.string(default = rust_common.default_edition),
         "exec_triple": attr.string(mandatory = True),
         "extra_toolchains": attr.string_list_dict(),
-<<<<<<< Updated upstream
-=======
         "extra_target_triples": attr.string_list(),
         "include_rustc_srcs": attr.bool(default = True),
->>>>>>> Stashed changes
         "iso_date": attr.string(),
         "rustfmt_version": attr.string(),
         "sha256s": attr.string_dict(),
@@ -281,7 +279,8 @@ def rust_repositories(
         dev_components = False,
         urls = DEFAULT_STATIC_RUST_URL_TEMPLATES):
     for exec_triple, name in DEFAULT_TOOLCHAIN_TRIPLES.items():
-        _rust_repository_set(
+        maybe(
+            _rust_repository_set,
             name = name,
             dev_components = dev_components,
             edition = edition,

@@ -31,7 +31,7 @@ namespace risc0 {
 void cpuInit() {
   static bool done = false;
   if (!done) {
-    LOG(0, "Opening CPU");
+    LOG(1, "Opening CPU");
     done = true;
   }
 }
@@ -130,7 +130,7 @@ void batchEvaluateAny(AccelConstSlice<Fp> coeffs,
     size_t id = reinterpret_cast<const uint32_t*>(which.buf()->buf)[i];
     Fp4 x = reinterpret_cast<const Fp4*>(xs.buf()->buf)[i];
     const Fp* coeffLocal = coeffsPtr + (1 << po2) * id;
-    for (size_t i = 0; i < (1 << po2); i++) {
+    for (size_t i = 0; i < (static_cast<size_t>(1) << po2); i++) {
       tot += cur * coeffLocal[i];
       cur *= x;
     }

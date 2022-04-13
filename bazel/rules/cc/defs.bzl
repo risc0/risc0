@@ -2,11 +2,14 @@ DEFAULT_CXX_STD = "c++17"
 
 def _copts(std):
     return select({
-        "@bazel_tools//platforms:windows": [
+        "@risc0//bazel/rules/cc:msvc-cl": [
             "/std:" + std,
             "/Zc:preprocessor",
         ],
-        "//conditions:default": ["-std=" + std],
+        "//conditions:default": [
+            "-std=" + std,
+            "-Werror",
+        ],
     })
 
 def cc_binary(name, std = DEFAULT_CXX_STD, copts = [], **kwargs):

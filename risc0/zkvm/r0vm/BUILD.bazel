@@ -1,0 +1,8 @@
+load("//bazel/rules/cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "r0vm",
+    srcs = ["r0vm.cpp"],
+    deps = ["//risc0/zkvm/sdk/cpp/host"],
+)
+

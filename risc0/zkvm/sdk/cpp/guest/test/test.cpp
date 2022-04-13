@@ -36,7 +36,8 @@ protected:
     prover.writeInput(str.data(), str.size());
     Receipt receipt = prover.run();
     receipt.verify(GetParam().prefix + "test_sha");
-    return receipt.read<ShaDigest>();
+    ReceiptReader reader(receipt);
+    return reader.read<ShaDigest>();
   }
 
   void testMemIO(const std::vector<std::pair<uint32_t, uint32_t>>& in) {

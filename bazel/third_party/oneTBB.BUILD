@@ -22,6 +22,14 @@ package(
     default_visibility = ["//visibility:public"],
 )
 
+config_setting(
+    name = "linux_x86_64",
+    constraint_values = [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
 cc_library(
     name = "tbb",
     srcs = glob([
@@ -37,7 +45,10 @@ cc_library(
         "include/oneapi/tbb/*.h",
         "include/oneapi/tbb/detail/*.h",
     ]),
-    copts = ["-w"],
+    copts = ["-w"] + select({
+        ":linux_x86_64": ["-mwaitpkg"],
+        "//conditions:default": [],
+    }),
     defines = select({
         "@platforms//cpu:x86_64": ["__TBB_NO_IMPLICIT_LINKAGE"],
         "//conditions:default": ["USE_PTHREAD"],

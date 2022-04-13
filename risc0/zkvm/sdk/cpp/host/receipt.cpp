@@ -26,43 +26,24 @@
 
 namespace risc0 {
 
-struct Receipt::Impl {
-  Impl(const Buffer& buffer_) : buffer(buffer_), stream(buffer), reader(stream) {}
-
-  Buffer buffer;
-  CheckedStreamReader stream;
-  ArchiveReader<CheckedStreamReader> reader;
-};
-
-Receipt::Receipt(const BufferU32& seal, const Buffer& journal)
-    : seal(seal), impl(new Impl(journal)) {}
-
-const Buffer& Receipt::getJournal() const {
-  return impl->buffer;
-}
-
-ArchiveReader<CheckedStreamReader>& Receipt::getReader() const {
-  return impl->reader;
-}
-
 void Receipt::verify(const std::string& filename) const {
   LOG(1, "Reading code id from " << filename + ".id");
   MethodID code = readMethodID(filename + ".id");
   std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(code);
   risc0::verify(*circuit, seal.data(), seal.size());
-  if (impl->buffer.size() != seal[8]) {
+  if (journal.size() != seal[8]) {
     std::stringstream ss;
-    ss << "Receipt::verify> journal size (" << impl->buffer.size()
-       << ") does not match receipt seal (" << seal[8] << ")";
+    ss << "Receipt::verify> journal size (" << journal.size() << ") does not match receipt seal ("
+       << seal[8] << ")";
     throw std::runtime_error(ss.str());
   }
-  if (impl->buffer.size() > 32) {
-    ShaDigest digest = shaHash(impl->buffer.data(), impl->buffer.size());
+  if (journal.size() > 32) {
+    ShaDigest digest = shaHash(journal.data(), journal.size());
     if (memcmp(&digest, seal.data(), sizeof(ShaDigest)) != 0) {
       throw std::runtime_error("Receipt journal/seal root mismatch");
     }
   } else {
-    if (memcmp(impl->buffer.data(), seal.data(), impl->buffer.size()) != 0) {
+    if (memcmp(journal.data(), seal.data(), journal.size()) != 0) {
       throw std::runtime_error("Receipt journal/seal root mismatch");
     }
   }
@@ -210,7 +191,7 @@ Receipt Prover::run() {
   std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfPath.c_str(), handler);
   BufferU32 seal = prove(*circuit);
   // Attach the full version of the output journal + construct receipt object
-  Receipt receipt{seal, getCommit()};
+  Receipt receipt{getCommit(), seal};
   // Verify receipt to make sure it works
   receipt.verify(impl->elfPath);
   return receipt;

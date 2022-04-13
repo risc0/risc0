@@ -68,8 +68,8 @@ def riscv_test_suite():
                     "@riscv_tests//:isa/macros/scalar/test_macros.h",
                 ],
                 copts = [
-                    "-Iexternal/.workspace.riscv_tests",
-                    "-Iexternal/.workspace.riscv_tests/isa/macros/scalar",
+                    "-Iexternal/riscv_tests",
+                    "-Iexternal/riscv_tests/isa/macros/scalar",
                     "-Irisc0/zkvm/circuit/test",
                 ],
             )

@@ -127,7 +127,7 @@ void friVerify(ReadIOP& iop, size_t deg, InnerVerify inner) {
   // Grab the final coeffs + commit
   std::vector<Fp> finalCoeffs(deg * 4);
   iop.read(finalCoeffs.data(), finalCoeffs.size());
-  auto digest = shaHash(finalCoeffs.data(), finalCoeffs.size());
+  auto digest = shaHash(finalCoeffs.data(), finalCoeffs.size(), 1, false);
   iop.commit(digest);
   // Get the generator for the final polynomial evaluations
   Fp gen = kRouFwd[log2Ceil(domain)];

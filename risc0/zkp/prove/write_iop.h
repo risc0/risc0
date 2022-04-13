@@ -29,11 +29,13 @@ public:
   void write(const uint32_t* data, size_t count) { proof.insert(proof.end(), data, data + count); }
   // Versions for various other data types
   void write(const Fp* data, size_t count) {
-    write(reinterpret_cast<const uint32_t*>(data), count);
+    std::vector<uint32_t> no_cast(count);
+    for (size_t i = 0; i < count; i++) {
+      no_cast[i] = data[i].asUInt32();
+    }
+    write(no_cast.data(), count);
   }
-  void write(const Fp4* data, size_t count) {
-    write(reinterpret_cast<const uint32_t*>(data), count * 4);
-  }
+  void write(const Fp4* data, size_t count) { write(reinterpret_cast<const Fp*>(data), count * 4); }
   void write(const ShaDigest* data, size_t count) {
     write(reinterpret_cast<const uint32_t*>(data), count * sizeof(ShaDigest) / sizeof(uint32_t));
   }
