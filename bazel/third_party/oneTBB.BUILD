@@ -23,10 +23,10 @@ package(
 )
 
 config_setting(
-    name = "x86_64-gcc",
+    name = "linux_x86_64",
     constraint_values = [
+        "@platforms//os:linux",
         "@platforms//cpu:x86_64",
-        "@bazel_tools//tools/cpp:gcc",
     ],
 )
 
@@ -46,7 +46,7 @@ cc_library(
         "include/oneapi/tbb/detail/*.h",
     ]),
     copts = ["-w"] + select({
-        ":x86_64-gcc": ["-mwaitpkg"],
+        ":linux_x86_64": ["-mwaitpkg"],
         "//conditions:default": [],
     }),
     defines = select({
