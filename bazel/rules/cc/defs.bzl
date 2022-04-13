@@ -2,7 +2,7 @@ DEFAULT_CXX_STD = "c++17"
 
 def _copts(std):
     return select({
-        "@bazel_tools//tools/cpp:msvc": [
+        "@risc0//bazel/rules/cc:msvc-cl": [
             "/std:" + std,
             "/Zc:preprocessor",
         ],
