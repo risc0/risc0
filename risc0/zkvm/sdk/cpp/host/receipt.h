@@ -25,24 +25,26 @@
 
 namespace risc0 {
 
+// CheckedStreamReader is a stream reader which reads from the given
+// BufferU8 and raises a std::runtime_error if an attempt is made to
+// read past the end of the buffer.
 class CheckedStreamReader {
 public:
-  CheckedStreamReader(const Buffer& buffer);
+  CheckedStreamReader(const BufferU8& buffer);
 
   uint32_t read_word();
   uint64_t read_dword();
   void read_buffer(void* buf, size_t len);
 
 private:
-  uint8_t read_byte();
-
-private:
-  const Buffer& buffer;
+  const BufferU8& buffer;
   size_t cursor;
 };
+static_assert(is_stream_reader<CheckedStreamReader>(),
+              "CheckedStreamReader must conform to the stream reader model");
 
 struct Receipt {
-  Buffer journal;
+  BufferU8 journal;
   BufferU32 seal;
 
   // Verify a receipt against some code, throws if invalid.
@@ -83,9 +85,9 @@ public:
 
   template <typename T> void writeInput(const T& obj) { getInputWriter().transfer(obj); }
 
-  const Buffer& getOutput();
+  const BufferU8& getOutput();
 
-  const Buffer& getCommit();
+  const BufferU8& getCommit();
 
   template <typename T> T readOutput() {
     T obj;

@@ -48,6 +48,41 @@ template <typename T> struct Decoder<T, typename std::enable_if_t<std::is_enum<T
   }
 };
 
+// TODO(nils): Consider converting is_stream_reader and
+// is_stream_writer to a C++20 concept when C++20 is available.
+
+// is_stream_reader<T>() returns true if T conforms to our model of a
+// stream reader by having the following methods:
+//
+//   uint32_t read_word();
+//   uint64_t read_dword();
+//   void read_buffer(void *buf, size_t len);
+//
+// If "len" is not a multiple of sizeof(uint32_t), the "read_buffer" method should ignore
+// any additional bytes up until the next uint32_t boundary.
+template <typename T> static constexpr inline bool is_stream_reader() {
+  return std::is_same<decltype(&T::read_word), uint32_t (T::*)()>::value &&
+         std::is_same<decltype(&T::read_dword), uint64_t (T::*)()>::value &&
+         std::is_same<decltype(&T::read_buffer),
+                      void (T::*)(void* /* buf */, size_t /* len */)>::value;
+}
+
+// is_stream_writer<T>() returns true if T conforms to our model of a
+// stream writer by having the following methods:
+//
+//   void write_word(uint32_t word);
+//   void write_dword(uint64_t dword);
+//   void write_buffer(void *buf, size_t len);
+//
+// If "len is not a multiple of sizeof(uint32_t), the "write_buffer" method should
+// pad with "0" bytes up to the next uint32_t boundary.
+template <typename T> static constexpr inline bool is_stream_writer() {
+  return std::is_same<decltype(&T::write_word), void (T::*)(uint32_t /* word */)>::value &&
+         std::is_same<decltype(&T::write_dword), void (T::*)(uint64_t /* dword */)>::value &&
+         std::is_same<decltype(&T::write_buffer),
+                      void (T::*)(const void* /* buf */, size_t /* len */)>::value;
+}
+
 template <typename Stream> class ArchiveWriter {
 public:
   ArchiveWriter(Stream& stream) : stream(stream) {}
@@ -140,6 +175,13 @@ template <typename CharT> struct Decoder<std::basic_string<CharT>> {
   }
 };
 
+// BufferStreamWriter is a stream writer which writes into memory
+// starting at a given position.
+//
+// WARNING: This class does no bounds checking.
+//
+// Any writes which do not end on a uint32_t boundary are null padded
+// up to the next uint32_t boundary.
 struct BufferStreamWriter {
   BufferStreamWriter(uint32_t* ptr) : ptr(ptr) {}
 
@@ -160,7 +202,16 @@ struct BufferStreamWriter {
 
   uint32_t* ptr;
 };
+static_assert(is_stream_writer<BufferStreamWriter>(),
+              "BufferStreamWriter must conform to the stream writer model");
 
+// BufferStreamReader is a stream reader which reads from memory
+// starting at a given position.
+//
+// WARNING: This class does no bounds checking.
+//
+// If a read is executed that does not end on a uint32_t boundary, any
+// remaining bytes are skipped up to the next uint32_t bondary.
 struct BufferStreamReader {
   BufferStreamReader(uint32_t* ptr) : ptr(ptr) {}
 
@@ -179,7 +230,11 @@ struct BufferStreamReader {
 
   uint32_t* ptr;
 };
+static_assert(is_stream_reader<BufferStreamReader>(),
+              "BufferStreamReader must conform to the stream reader model");
 
+// VectorStreamWriter is a stream writer which accumulates written data into a
+// std::fector<uint32_t>.
 struct VectorStreamWriter {
   void write_word(uint32_t word) { vec.push_back(word); }
 
@@ -200,5 +255,7 @@ struct VectorStreamWriter {
 
   std::vector<uint32_t> vec;
 };
+static_assert(is_stream_writer<VectorStreamWriter>(),
+              "VectorStreamWriter must conform to the stream writer model");
 
 } // namespace risc0
