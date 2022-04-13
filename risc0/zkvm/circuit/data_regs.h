@@ -24,6 +24,7 @@
 #include "risc0/zkvm/circuit/sha_cycle.h"
 
 namespace risc0 {
+namespace circuit {
 
 struct DataRegs {
   static constexpr size_t kMemCheckSize = 16;
@@ -86,4 +87,5 @@ struct DataRegs {
   }
 };
 
+} // namespace circuit
 } // namespace risc0

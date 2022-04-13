@@ -17,6 +17,7 @@
 #include "risc0/zkvm/circuit/cycle.h"
 
 namespace risc0 {
+namespace circuit {
 
 struct ShaCycle {
   ShaCycle(BufAlloc& alloc)
@@ -63,4 +64,5 @@ struct ShaCycle {
   Reg nextCycleType;
 };
 
+} // namespace circuit
 } // namespace risc0

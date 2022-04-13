@@ -19,6 +19,7 @@
 #include "risc0/zkvm/circuit/context.h"
 
 namespace risc0 {
+namespace circuit {
 
 class PolyContext : public Context {
 public:
@@ -73,4 +74,5 @@ private:
   std::unique_ptr<Impl> impl;
 };
 
+} // namespace circuit
 } // namespace risc0

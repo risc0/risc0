@@ -17,6 +17,7 @@
 #include "risc0/zkvm/circuit/step_state.h"
 
 namespace risc0 {
+namespace circuit {
 
 // Helper for matching in nondet sections
 static Value match(int pat, Value x) {
@@ -163,4 +164,5 @@ void DecodeCycle::set(StepState& state) {
 #undef OPD
 }
 
+} // namespace circuit
 } // namespace risc0

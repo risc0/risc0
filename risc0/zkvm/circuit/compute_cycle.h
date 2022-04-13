@@ -17,6 +17,7 @@
 #include "risc0/zkvm/circuit/cycle.h"
 
 namespace risc0 {
+namespace circuit {
 
 struct ComputeCycle {
   ComputeCycle(BufAlloc& alloc)
@@ -55,4 +56,5 @@ struct ComputeCycle {
   MakeBoolRegs nzHigh;
 };
 
+} // namespace circuit
 } // namespace risc0

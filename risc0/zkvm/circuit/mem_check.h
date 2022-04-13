@@ -18,6 +18,7 @@
 #include "risc0/zkvm/circuit/mem_io_regs.h"
 
 namespace risc0 {
+namespace circuit {
 
 struct MemCheck {
   MemIORegs memIO;
@@ -30,4 +31,5 @@ struct MemCheck {
   void set(StepState& state);
 };
 
+} // namespace circuit
 } // namespace risc0

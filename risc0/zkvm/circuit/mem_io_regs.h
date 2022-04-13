@@ -17,6 +17,7 @@
 #include "risc0/zkvm/circuit/types.h"
 
 namespace risc0 {
+namespace circuit {
 
 struct MemIORegs {
   Reg address;  /// The address being accessed
@@ -29,4 +30,5 @@ struct MemIORegs {
   void doWrite(Value cycle, Value address, ValueU32 val, Value isWOM);
 };
 
+} // namespace circuit
 } // namespace risc0

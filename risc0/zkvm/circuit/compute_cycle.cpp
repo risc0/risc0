@@ -17,6 +17,7 @@
 #include "risc0/zkvm/circuit/step_state.h"
 
 namespace risc0 {
+namespace circuit {
 
 // Do the compute cycle.  Turn off max function size since macro inclusion make it too big.
 // NOLINTNEXTLINE(readability-function-size)
@@ -169,4 +170,5 @@ void ComputeCycle::set(StepState& state, int highID) {
   setStatusFlags();
 }
 
+} // namespace circuit
 } // namespace risc0

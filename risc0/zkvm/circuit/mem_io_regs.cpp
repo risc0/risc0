@@ -15,6 +15,7 @@
 #include "risc0/zkvm/circuit/mem_io_regs.h"
 
 namespace risc0 {
+namespace circuit {
 
 void MemIORegs::doRead(Value cycle, Value addr) {
   address.set(addr);
@@ -33,4 +34,5 @@ void MemIORegs::doWrite(Value cycle, Value addr, ValueU32 val, Value isWOM) {
   value.set(val);
 }
 
+} // namespace circuit
 } // namespace risc0

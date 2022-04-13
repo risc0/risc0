@@ -19,6 +19,7 @@
 #include "risc0/zkvm/circuit/context.h"
 
 namespace risc0 {
+namespace circuit {
 
 class GenContext : public Context {
 public:
@@ -81,4 +82,5 @@ private:
   ValPtr newDef();
 };
 
+} // namespace circuit
 } // namespace risc0

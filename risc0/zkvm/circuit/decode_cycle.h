@@ -17,6 +17,7 @@
 #include "risc0/zkvm/circuit/cycle.h"
 
 namespace risc0 {
+namespace circuit {
 
 struct DecodeCycle {
   DecodeCycle(BufAlloc& alloc)
@@ -62,4 +63,5 @@ struct DecodeCycle {
   Reg nextCycleType;
 };
 
+} // namespace circuit
 } // namespace risc0

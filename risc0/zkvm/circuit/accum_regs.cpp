@@ -17,6 +17,7 @@
 #include "risc0/zkvm/circuit/step_state.h"
 
 namespace risc0 {
+namespace circuit {
 
 void AccumRegs::set(StepState& state) {
   // Only verify when code is active
@@ -95,4 +96,5 @@ void AccumRegs::set(StepState& state) {
   } // End if (isAcive)
 }
 
+} // namespace circuit
 } // namespace risc0

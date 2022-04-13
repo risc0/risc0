@@ -18,6 +18,7 @@
 #include "risc0/zkvm/circuit/types.h"
 
 namespace risc0 {
+namespace circuit {
 
 struct ResultInfoRegs {
   RegU32 result;
@@ -28,4 +29,5 @@ struct ResultInfoRegs {
   ResultInfoRegs(BufAlloc& alloc) : result(alloc), setReg(alloc), doStore(alloc), pcRaw(alloc) {}
 };
 
+} // namespace circuit
 } // namespace risc0

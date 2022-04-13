@@ -19,6 +19,7 @@
 #include <array>
 
 namespace risc0 {
+namespace circuit {
 
 static std::array<Value, 32> get(const RegDigits<1, 32>& reg) {
   std::array<Value, 32> ret;
@@ -410,4 +411,5 @@ void ShaCycle::setData(StepState& state) {
   BYZ_IF(state.code.p2.get()) { nextCycleType.set(DataCycleType::SHA_CONTROL); }
 }
 
+} // namespace circuit
 } // namespace risc0
