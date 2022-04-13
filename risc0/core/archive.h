@@ -234,7 +234,7 @@ static_assert(is_stream_reader<BufferStreamReader>(),
               "BufferStreamReader must conform to the stream reader model");
 
 // VectorStreamWriter is a stream writer which accumulates written data into a
-// std::fector<uint32_t>.
+// std::vector<uint32_t>.
 struct VectorStreamWriter {
   void write_word(uint32_t word) { vec.push_back(word); }
 
