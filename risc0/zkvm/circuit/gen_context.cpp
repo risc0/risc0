@@ -14,8 +14,7 @@
 
 #include "risc0/zkvm/circuit/gen_context.h"
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 namespace {
 
@@ -314,5 +313,4 @@ Context::ValPtr GenContext::newDef() {
   return ret;
 }
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit

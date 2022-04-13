@@ -14,8 +14,7 @@
 
 #include "risc0/zkvm/circuit/context.h"
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 namespace {
 Context* gContext;
@@ -29,5 +28,4 @@ Context* getGlobalContext() {
   return gContext;
 }
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit

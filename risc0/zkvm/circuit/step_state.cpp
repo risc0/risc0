@@ -14,8 +14,7 @@
 
 #include "risc0/zkvm/circuit/step_state.h"
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 DataRegs& StepState::getPrev(size_t size) {
   auto it = prev.find(size);
@@ -33,5 +32,4 @@ void StepState::setMemCheck() {
   data.setMemCheck(*this);
 }
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit

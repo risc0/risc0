@@ -22,8 +22,7 @@
 #include <set>
 #include <sstream>
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 namespace {
 
@@ -712,5 +711,4 @@ std::array<Context::ValPtr, 5> PolyContext::memCheck(SourceLoc loc) {
   throw std::runtime_error("Unimplemented");
 }
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit

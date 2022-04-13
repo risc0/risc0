@@ -16,8 +16,7 @@
 
 #include "risc0/zkvm/circuit/cycle.h"
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 struct MultiplyCycle {
   template <size_t Size>
@@ -49,5 +48,4 @@ struct MultiplyCycle {
   RegDigits<1, 2> in1High;
 };
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit

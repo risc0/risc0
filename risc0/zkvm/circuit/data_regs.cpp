@@ -17,8 +17,7 @@
 #include "risc0/zkvm/circuit/mem_check.h"
 #include "risc0/zkvm/circuit/step_state.h"
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 void DataRegs::setExec(StepState& state) {
   Value cycle = state.code.cycle.get();
@@ -195,5 +194,4 @@ void DataRegs::setMemCheck(StepState& state) { // NOLINT
   }
 }
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit

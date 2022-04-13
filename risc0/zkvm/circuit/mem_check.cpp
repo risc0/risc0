@@ -16,8 +16,7 @@
 
 #include "risc0/zkvm/circuit/step_state.h"
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 void MemCheck::set(StepState& state) {
   // Extract the memory op
@@ -50,5 +49,4 @@ void MemCheck::set(StepState& state) {
   }
 }
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit

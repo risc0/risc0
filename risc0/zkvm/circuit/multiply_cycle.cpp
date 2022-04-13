@@ -16,8 +16,7 @@
 
 #include "risc0/zkvm/circuit/step_state.h"
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 void MultiplyCycle::set(StepState& state) {
   Value cycle = state.code.cycle.get();
@@ -101,5 +100,4 @@ void MultiplyCycle::set(StepState& state) {
   resultInfo.pcRaw.set(final.pc + 4);
 }
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit

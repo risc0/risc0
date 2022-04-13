@@ -19,8 +19,7 @@
 #include "risc0/zkvm/circuit/code_regs.h"
 #include "risc0/zkvm/circuit/data_regs.h"
 
-namespace risc0 {
-namespace circuit {
+namespace risc0::circuit {
 
 struct StepState {
   Buffer codeBuf;
@@ -39,5 +38,4 @@ struct StepState {
   void setMemCheck();
 };
 
-} // namespace circuit
-} // namespace risc0
+} // namespace risc0::circuit
