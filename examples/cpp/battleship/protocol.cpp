@@ -20,11 +20,13 @@
 using risc0::hex;
 
 InitMessage::Content InitMessage::decode() const {
-  return receipt.read<Content>();
+  risc0::ReceiptReader reader(receipt);
+  return reader.read<Content>();
 }
 
 RoundMessage::Content RoundMessage::decode() const {
-  return receipt.read<Content>();
+  risc0::ReceiptReader reader(receipt);
+  return reader.read<Content>();
 }
 
 InitMessage Battleship::init() {

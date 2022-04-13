@@ -31,7 +31,7 @@ namespace risc0 {
 void cpuInit() {
   static bool done = false;
   if (!done) {
-    LOG(0, "Opening CPU");
+    LOG(1, "Opening CPU");
     done = true;
   }
 }

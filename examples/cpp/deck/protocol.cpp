@@ -63,7 +63,8 @@ PlayerCommitMessage Player::getCommit(const DealerCommitMessage& msg) {
 
 void Player::verifyShuffleMessage(const ShuffleMessage& msg) {
   msg.receipt.verify("examples/cpp/deck/shuffle_method");
-  ShuffleContent data = msg.receipt.read<ShuffleContent>();
+  ReceiptReader reader(msg.receipt);
+  ShuffleContent data = reader.read<ShuffleContent>();
   REQUIRE(data.playerKey == playerKey);
   REQUIRE(data.dealerKeyDigest == dealerKeyDigest);
   deckDigest = data.deckDigest;
@@ -76,7 +77,8 @@ CardRequestMessage Player::makeRequest(uint32_t pos) {
 
 uint32_t Player::verifyResponse(const CardResponseMessage& msg) {
   msg.receipt.verify("examples/cpp/deck/card_method");
-  CardResponseContent data = msg.receipt.read<CardResponseContent>();
+  ReceiptReader reader(msg.receipt);
+  CardResponseContent data = reader.read<CardResponseContent>();
   REQUIRE(data.deckDigest == deckDigest);
   REQUIRE(data.pos == lastRequest);
   return data.card;

@@ -41,33 +41,32 @@ private:
   size_t cursor;
 };
 
-class Prover;
-
 struct Receipt {
-  friend class Prover;
-
-public:
+  Buffer journal;
   BufferU32 seal;
 
-public:
-  // Verify proof based on elf file
-  void verify(const std::string& filename) const;
+  // Verify a receipt against some code, throws if invalid.
+  void verify(const std::string& elfPath) const;
 
-  template <typename T> T read() const {
-    T obj;
-    getReader().transfer(obj);
-    return obj;
+  template <typename Archive> void transfer(Archive& ar) {
+    ar.transfer(journal);
+    ar.transfer(seal);
+  }
+};
+
+struct ReceiptReader {
+public:
+  ReceiptReader(const Receipt& receipt) : stream(receipt.journal), archive(stream) {}
+
+  template <typename T> T read() {
+    T out;
+    archive.transfer(out);
+    return out;
   }
 
-  const Buffer& getJournal() const;
-
 private:
-  Receipt(const BufferU32& seal, const Buffer& journal);
-  ArchiveReader<CheckedStreamReader>& getReader() const;
-
-private:
-  struct Impl;
-  std::shared_ptr<Impl> impl;
+  CheckedStreamReader stream;
+  ArchiveReader<CheckedStreamReader> archive;
 };
 
 class Prover {

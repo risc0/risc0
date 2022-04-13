@@ -118,11 +118,11 @@ size_t risc0_receipt_get_seal_len(risc0_error* err, const risc0_receipt* ptr) {
 }
 
 const void* risc0_receipt_get_journal_buf(risc0_error* err, const risc0_receipt* ptr) {
-  return ffi_wrap<const void*>(err, nullptr, [&] { return ptr->receipt.getJournal().data(); });
+  return ffi_wrap<const void*>(err, nullptr, [&] { return ptr->receipt.journal.data(); });
 }
 
 size_t risc0_receipt_get_journal_len(risc0_error* err, const risc0_receipt* ptr) {
-  return ffi_wrap(err, 0, [&] { return ptr->receipt.getJournal().size(); });
+  return ffi_wrap(err, 0, [&] { return ptr->receipt.journal.size(); });
 }
 
 void risc0_receipt_free(risc0_error* err, const risc0_receipt* ptr) {
