@@ -1,0 +1,23 @@
+load("//bazel/rules/cc:defs.bzl", "cc_binary")
+load("//bazel/rules/risc0:defs.bzl", "risc0_cc_method")
+
+cc_binary(
+    name = "benchmark",
+    srcs = ["benchmark.cpp"],
+    data = [
+        ":bench_simple_loop",
+        ":bench_simple_loop.id",
+    ],
+    deps = [
+        "//risc0/zkvm/sdk/cpp/host",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
+
+risc0_cc_method(
+    name = "bench_simple_loop",
+    srcs = ["bench_simple_loop.cpp"],
+    deps = [
+        "//risc0/zkvm/sdk/cpp/guest",
+    ],
+)
