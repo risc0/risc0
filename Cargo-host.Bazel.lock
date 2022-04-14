@@ -1,5 +1,5 @@
 {
-  "checksum": "a06e20ad243ecd293c7925184d775302b6f0c8a338568dcabaa3a601723b47b5",
+  "checksum": "94041efb5fcbd2105eefb05e251ac4f6c4ddd2fe1035c570cdd334426dd4a6a1",
   "crates": {
     "aho-corasick 0.7.18": {
       "name": "aho-corasick",
@@ -3038,6 +3038,8 @@
         ],
         "crate_features": [
           "default",
+          "derive",
+          "serde_derive",
           "std"
         ],
         "deps": {
@@ -3045,6 +3047,89 @@
             {
               "id": "serde 1.0.136",
               "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "serde_derive 1.0.136",
+              "target": "serde_derive"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "1.0.136"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "serde_derive 1.0.136": {
+      "name": "serde_derive",
+      "version": "1.0.136",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.136/download",
+          "sha256": "08597e7152fcd306f41838ed3e37be9eaeed2b61c42e2117266a554fab4662f9"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "serde_derive",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "serde_derive",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "default"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "proc-macro2 1.0.37",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.18",
+              "target": "quote"
+            },
+            {
+              "id": "serde_derive 1.0.136",
+              "target": "build_script_build"
+            },
+            {
+              "id": "syn 1.0.91",
+              "target": "syn"
             }
           ],
           "selects": {}
