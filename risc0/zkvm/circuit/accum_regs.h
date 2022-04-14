@@ -17,7 +17,7 @@
 #include "risc0/zkvm/circuit/constants.h"
 #include "risc0/zkvm/circuit/types.h"
 
-namespace risc0 {
+namespace risc0::circuit {
 
 struct AccumRegs {
   Buffer prod1;
@@ -36,4 +36,4 @@ struct AccumRegs {
   void set(StepState& state);
 };
 
-} // namespace risc0
+} // namespace risc0::circuit

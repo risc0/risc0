@@ -16,7 +16,7 @@
 
 #include "risc0/zkvm/circuit/context.h"
 
-namespace risc0 {
+namespace risc0::circuit {
 
 class Value {
 public:
@@ -225,4 +225,4 @@ public:
 #define BYZ_GROUP if (auto groupGuard = GroupGuard())
 #define BYZ_IF(cond) if (auto ifGuard = IfGuard(cond))
 
-} // namespace risc0
+} // namespace risc0::circuit

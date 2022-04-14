@@ -21,7 +21,7 @@
 #include <memory>
 #include <vector>
 
-namespace risc0 {
+namespace risc0::circuit {
 
 struct ValueImplBase {
   virtual ~ValueImplBase() {}
@@ -86,4 +86,4 @@ public:
 void setGlobalContext(Context* context);
 Context* getGlobalContext();
 
-} // namespace risc0
+} // namespace risc0::circuit

@@ -16,7 +16,7 @@
 
 #include "risc0/zkvm/circuit/edsl.h"
 
-namespace risc0 {
+namespace risc0::circuit {
 
 class BufAlloc {
 public:
@@ -247,4 +247,4 @@ struct NegU32Regs {
 
 struct StepState;
 
-} // namespace risc0
+} // namespace risc0::circuit

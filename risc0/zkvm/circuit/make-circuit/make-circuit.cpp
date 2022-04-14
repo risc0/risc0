@@ -21,6 +21,7 @@
 #include <fstream>
 
 using namespace risc0;
+using namespace risc0::circuit;
 
 int main(int argc, char* argv[]) {
   setLogLevel(1);
