@@ -5,5 +5,6 @@ rust_binary(
     srcs = ["src/main.rs"],
     deps = [
         "@crates_host//:axum",
+        "@crates_host//:tokio",
     ],
 )

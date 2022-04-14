@@ -113,6 +113,10 @@ crates_repository(
             version = "1.0",
         ),
         "sha2": crate.spec(version = "0.10"),
+        "tokio": crate.spec(
+            features = ["full"],
+            version = "1.17",
+        ),
     },
     quiet = False,
 )
