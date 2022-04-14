@@ -17,6 +17,15 @@
 
 using namespace risc0;
 
+struct BenchmarkStreamWriter {
+  void write_word(uint32_t word) { tot_written += sizeof(uint32_t); }
+  void write_dword(uint64_t dword) { tot_written += sizeof(uint64_t); }
+  void write_buffer(const void* buf, size_t len) { tot_written += align(len); }
+
+  size_t tot_written = 0;
+};
+static_assert(is_stream_writer<BenchmarkStreamWriter>());
+
 static void BM_Simple_Loop(benchmark::State& state) {
   uint32_t num_iter = state.range(0);
   size_t tot_iter = 0;
@@ -24,9 +33,14 @@ static void BM_Simple_Loop(benchmark::State& state) {
   for (auto _ : state) {
     Prover prover("risc0/zkvm/prove/bench/bench_simple_loop");
     prover.writeInput(num_iter);
-    prover.run();
+    VectorStreamWriter receipt_buf;
+    Receipt receipt = prover.run();
+    BenchmarkStreamWriter writer;
+    ArchiveWriter<BenchmarkStreamWriter> archive(writer);
+    archive.transfer(receipt);
 
     tot_iter += num_iter;
+    state.counters["receipt_size"] = writer.tot_written;
   }
 
   state.SetItemsProcessed(tot_iter);
