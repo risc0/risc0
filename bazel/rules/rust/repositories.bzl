@@ -269,7 +269,6 @@ toolchain(
     # Register toolchains
     if register_toolchain:
         native.register_toolchains(*all_toolchain_names)
-        native.register_toolchains(str(Label("@rules_rust//rust/private/dummy_cc_toolchain:dummy_cc_wasm32_toolchain")))
 
 def rust_repositories(
         version = rust_common.default_version,

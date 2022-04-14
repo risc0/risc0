@@ -4,6 +4,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 register_toolchains(
     "//:clang_format_toolchain",
+    "//bazel/rules/rust:dummy_cc_wasm32_toolchain",
 )
 
 http_archive(
