@@ -1,0 +1,25 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
+rust_binary(
+    name = "web",
+    srcs = ["main.rs"],
+    deps = [
+        "//examples/rust/battleship/core:core_host",
+        "//risc0/zkvm/sdk/rust/core:core_host",
+        "//risc0/zkvm/sdk/rust/host",
+        "//risc0/zkvm/sdk/rust/serde:serde_host",
+        "@crates_host//:axum",
+        "@crates_host//:base64",
+        "@crates_host//:bincode",
+        "@crates_host//:tokio",
+        "@crates_host//:serde",
+        "@crates_host//:serde_json",
+    ],
+    data = [
+        "//examples/rust/battleship/core:init",
+        "//examples/rust/battleship/core:init.id",
+        "//examples/rust/battleship/core:turn",
+        "//examples/rust/battleship/core:turn.id",
+    ],
+)
+
