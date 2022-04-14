@@ -103,22 +103,20 @@ crates_repository(
     name = "crates_host",
     lockfile = "//:Cargo-host.Bazel.lock",
     packages = {
+        "axum": crate.spec(version = "0.5"),
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
         "serde": crate.spec(version = "1.0"),
         "sha2": crate.spec(version = "0.10"),
-        # NOTE: pinned to exact same version used by @rules_rust//wasm_bindgen/raze:wasm_bindgen
-        "wasm-bindgen": crate.spec(version = "=0.2.78"),
-        "yew": crate.spec(version = "0.19"),
     },
     quiet = False,
 )
 
-load("@crates_host//:defs.bzl", "crate_repositories")
+load("@crates_host//:defs.bzl", crate_repositories_host = "crate_repositories")
 
-crate_repositories()
+crate_repositories_host()
 
 crates_repository(
     name = "crates_guest",
@@ -139,6 +137,21 @@ crates_repository(
 load("@crates_guest//:defs.bzl", crate_repositories_guest = "crate_repositories")
 
 crate_repositories_guest()
+
+crates_repository(
+    name = "crates_wasm",
+    lockfile = "//:Cargo-wasm.Bazel.lock",
+    packages = {
+        # NOTE: pinned to exact same version used by @rules_rust//wasm_bindgen/raze:wasm_bindgen
+        "wasm-bindgen": crate.spec(version = "=0.2.78"),
+        "yew": crate.spec(version = "0.19"),
+    },
+    quiet = False,
+)
+
+load("@crates_wasm//:defs.bzl", crate_repositories_wasm = "crate_repositories")
+
+crate_repositories_wasm()
 
 http_archive(
     name = "oneTBB",
