@@ -108,7 +108,10 @@ crates_repository(
         "ctor": crate.spec(version = "0.1"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
-        "serde": crate.spec(version = "1.0"),
+        "serde": crate.spec(
+            features = ["derive"],
+            version = "1.0",
+        ),
         "sha2": crate.spec(version = "0.10"),
     },
     quiet = False,
