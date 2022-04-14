@@ -17,7 +17,7 @@
 
 using namespace risc0;
 
-static void BM_Simple(benchmark::State& state) {
+static void BM_Simple_Loop(benchmark::State& state) {
   uint32_t num_iter = state.max_iterations;
 
   Prover prover("risc0/zkvm/prove/bench/bench_simple_loop");
@@ -35,7 +35,7 @@ static void BM_Simple(benchmark::State& state) {
   }
 }
 
-BENCHMARK(BM_Simple)                //
+BENCHMARK(BM_Simple_Loop)           //
     ->Unit(benchmark::kMicrosecond) // Display output in microseconds per run
     ->MinTime(10.0 /* seconds */)   // Run for at least 10 seconds to amortize setup overhead
     ;
