@@ -48,7 +48,10 @@ static void BM_Simple_Loop(benchmark::State& state) {
 
 BENCHMARK(BM_Simple_Loop)           //
     ->Unit(benchmark::kMillisecond) // Display output in milliseconds per run
-    ->Range(1, 65536)               // Iterations per loop in guest
+    ->Arg(1) // Number of iterations in guest
+    ->Arg(10)
+    ->Arg(100)
+    ->DenseRange(1000, 50000, 1000)
     ;
 
 BENCHMARK_MAIN();
