@@ -16,7 +16,7 @@
 
 #include "risc0/zkvm/circuit/step_state.h"
 
-namespace risc0 {
+namespace risc0::circuit {
 
 void FinalCycle::set(StepState& state) {
   Value cycle = state.code.cycle.get();
@@ -51,4 +51,4 @@ void FinalCycle::set(StepState& state) {
             pc.getPart(2, kMemBits) * 4});
 }
 
-} // namespace risc0
+} // namespace risc0::circuit

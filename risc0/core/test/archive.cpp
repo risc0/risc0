@@ -63,7 +63,7 @@ struct StringPair {
   }
 };
 
-struct Buffer {
+struct ArchiveTestBuffer {
   std::unique_ptr<uint32_t[]> buf;
   size_t size;
 };
@@ -77,11 +77,11 @@ public:
   size_t size = 0;
 };
 
-template <typename T> Buffer serialize(T& obj) {
+template <typename T> ArchiveTestBuffer serialize(T& obj) {
   WordCounter wc;
   ArchiveWriter writer1(wc);
   writer1.transfer(obj);
-  Buffer buf{std::unique_ptr<uint32_t[]>(new uint32_t[wc.size]), wc.size};
+  ArchiveTestBuffer buf{std::unique_ptr<uint32_t[]>(new uint32_t[wc.size]), wc.size};
   BufferStreamWriter stream(buf.buf.get());
   ArchiveWriter writer2(stream);
   writer2.transfer(obj);
@@ -97,7 +97,7 @@ template <typename T> T deserialize(void* ptr) {
 }
 
 template <typename T> T roundtrip(T pre) {
-  Buffer buf = serialize(pre);
+  ArchiveTestBuffer buf = serialize(pre);
   LOG(0, "buf: ");
   for (size_t i = 0; i < buf.size; i++) {
     LOG(0, "  [" << hex(i, 2) << "]: " << hex(buf.buf[i]));

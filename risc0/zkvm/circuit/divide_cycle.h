@@ -16,7 +16,7 @@
 
 #include "risc0/zkvm/circuit/cycle.h"
 
-namespace risc0 {
+namespace risc0::circuit {
 
 struct DivideCycle {
   DivideCycle(BufAlloc& alloc)
@@ -63,4 +63,4 @@ struct DivideCycle {
   RegU32 numer32;
 };
 
-} // namespace risc0
+} // namespace risc0::circuit
