@@ -17,7 +17,7 @@
 #include "risc0/zkvm/circuit/constants.h"
 #include "risc0/zkvm/circuit/types.h"
 
-namespace risc0 {
+namespace risc0::circuit {
 
 struct CodeRegs {
   Reg cycle;
@@ -38,4 +38,4 @@ struct CodeRegs {
       , data2(alloc) {}
 };
 
-} // namespace risc0
+} // namespace risc0::circuit

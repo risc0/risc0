@@ -16,7 +16,7 @@
 
 #include "risc0/zkvm/circuit/cycle.h"
 
-namespace risc0 {
+namespace risc0::circuit {
 
 struct FinalCycle {
   static std::vector<RegU32> allocVec(BufAlloc& alloc) {
@@ -45,4 +45,4 @@ struct FinalCycle {
   std::vector<RegU32> regs;
 };
 
-} // namespace risc0
+} // namespace risc0::circuit

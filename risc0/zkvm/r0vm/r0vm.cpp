@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
     // Run prover
     Receipt receipt = prover.run();
     // Write private output
-    const Buffer& out = prover.getOutput();
+    const BufferU8& out = prover.getOutput();
     size_t stdoutSize = fwrite(out.data(), 1, out.size(), stdout);
     if (stdoutSize != out.size()) {
       fprintf(stderr, "Failed on writing to stdout");

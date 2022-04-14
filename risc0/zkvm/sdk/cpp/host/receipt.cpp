@@ -73,12 +73,12 @@ struct Prover::Impl : public IoHandler {
     }
   }
 
-  void onWrite(const Buffer& buf) override {
+  void onWrite(const BufferU8& buf) override {
     LOG(1, "IoHandler::onWrite> " << buf.size());
     outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
   }
 
-  void onCommit(const Buffer& buf) override {
+  void onCommit(const BufferU8& buf) override {
     LOG(1, "IoHandler::onCommit> " << buf.size());
     commitBuffer.insert(commitBuffer.end(), buf.begin(), buf.end());
   }
@@ -87,8 +87,8 @@ struct Prover::Impl : public IoHandler {
 
   std::string elfPath;
   KeyStore keyStore;
-  Buffer outputBuffer;
-  Buffer commitBuffer;
+  BufferU8 outputBuffer;
+  BufferU8 commitBuffer;
   VectorStreamWriter inputStream;
   CheckedStreamReader outputStream;
   CheckedStreamReader commitStream;
@@ -97,20 +97,16 @@ struct Prover::Impl : public IoHandler {
   ArchiveReader<CheckedStreamReader> commitReader;
 };
 
-CheckedStreamReader::CheckedStreamReader(const Buffer& buffer) : buffer(buffer), cursor(0) {}
-
-uint8_t CheckedStreamReader::read_byte() {
-  if (cursor >= buffer.size()) {
-    throw std::out_of_range("Read out of bounds");
-  }
-  return buffer[cursor++];
-}
+CheckedStreamReader::CheckedStreamReader(const BufferU8& buffer) : buffer(buffer), cursor(0) {}
 
 uint32_t CheckedStreamReader::read_word() {
-  uint32_t b1 = read_byte();
-  uint32_t b2 = read_byte();
-  uint32_t b3 = read_byte();
-  uint32_t b4 = read_byte();
+  if (cursor + sizeof(uint32_t) > buffer.size()) {
+    throw(std::out_of_range("Read out of bounds"));
+  }
+  uint32_t b1 = buffer[cursor++];
+  uint32_t b2 = buffer[cursor++];
+  uint32_t b3 = buffer[cursor++];
+  uint32_t b4 = buffer[cursor++];
   return b1 | b2 << 8 | b3 << 16 | b4 << 24;
 }
 
@@ -121,10 +117,12 @@ uint64_t CheckedStreamReader::read_dword() {
 }
 
 void CheckedStreamReader::read_buffer(void* buf, size_t len) {
-  uint32_t* dst = static_cast<uint32_t*>(buf);
-  for (size_t i = 0; i < len; i++) {
-    *dst++ = read_word();
+  size_t end_cursor = align(cursor + len);
+  if (end_cursor > buffer.size()) {
+    throw(std::out_of_range("Read out of bounds"));
   }
+  memcpy(buf, buffer.data(), len);
+  cursor = end_cursor;
 }
 
 Prover::Prover(const std::string& elfPath) : impl(new Impl(elfPath)) {}
@@ -139,11 +137,11 @@ void Prover::setKey(const std::string& name, const Key& key) {
   impl->getKeyStore()[name] = key;
 }
 
-const Buffer& Prover::getOutput() {
+const BufferU8& Prover::getOutput() {
   return impl->outputBuffer;
 }
 
-const Buffer& Prover::getCommit() {
+const BufferU8& Prover::getCommit() {
   return impl->commitBuffer;
 }
 

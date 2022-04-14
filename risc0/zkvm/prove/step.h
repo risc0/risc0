@@ -24,7 +24,7 @@
 
 namespace risc0 {
 
-using Buffer = std::vector<uint8_t>;
+using BufferU8 = std::vector<uint8_t>;
 using BufferU32 = std::vector<uint32_t>;
 
 struct MemoryEvent {
@@ -60,8 +60,8 @@ struct MemoryState {
 
 struct IoHandler {
   virtual void onInit(MemoryState& mem) {}
-  virtual void onWrite(const Buffer& data) {}
-  virtual void onCommit(const Buffer& data) {}
+  virtual void onWrite(const BufferU8& data) {}
+  virtual void onCommit(const BufferU8& data) {}
   virtual void onFault(const std::string& msg);
   virtual KeyStore& getKeyStore() = 0;
 };
