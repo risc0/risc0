@@ -18,26 +18,23 @@
 using namespace risc0;
 
 static void BM_Simple_Loop(benchmark::State& state) {
-  uint32_t num_iter = state.max_iterations;
+  uint32_t num_iter = state.range(0);
+  size_t tot_iter = 0;
 
-  Prover prover("risc0/zkvm/prove/bench/bench_simple_loop");
-  prover.writeInput(num_iter);
-
-  // Google benchmark really wants to manage the benchmarking loop
-  // itself, which makes it difficult to run the loop inside the
-  // guest.  Work around this by only running the prover on the first
-  // time through.
-  if (state.KeepRunning()) {
+  for (auto _ : state) {
+    Prover prover("risc0/zkvm/prove/bench/bench_simple_loop");
+    prover.writeInput(num_iter);
     prover.run();
 
-    while (state.KeepRunning()) {
-    }
+    tot_iter += num_iter;
   }
+
+  state.SetItemsProcessed(tot_iter);
 }
 
 BENCHMARK(BM_Simple_Loop)           //
-    ->Unit(benchmark::kMicrosecond) // Display output in microseconds per run
-    ->MinTime(10.0 /* seconds */)   // Run for at least 10 seconds to amortize setup overhead
+    ->Unit(benchmark::kMillisecond) // Display output in milliseconds per run
+    ->Range(1, 65536)               // Iterations per loop in guest
     ;
 
 BENCHMARK_MAIN();
