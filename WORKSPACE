@@ -110,7 +110,9 @@ crates_repository(
     name = "crates_host",
     lockfile = "//:Cargo-host.Bazel.lock",
     packages = {
-        "axum": crate.spec(version = "0.5"),
+        "axum": crate.spec(version = "0.5.1"),
+        "base64": crate.spec(version = "0.13.0"),
+        "bincode": crate.spec(version = "1.3.3"),
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
         "env_logger": crate.spec(version = "0.8"),
@@ -119,11 +121,13 @@ crates_repository(
             features = ["derive"],
             version = "1.0",
         ),
+        "serde_json": crate.spec(version = "1.0.79"),
         "sha2": crate.spec(version = "0.10"),
         "tokio": crate.spec(
             features = ["full"],
             version = "1.17",
         ),
+        "yew": crate.spec(version = "0.19"),
     },
     quiet = False,
 )
