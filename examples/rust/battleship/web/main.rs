@@ -1,12 +1,6 @@
-
-use axum::{
-    routing::{post},
-    http::StatusCode,
-    response::IntoResponse,
-    Json, Router,
-};
+use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
+use battleship_core::GameState;
 use serde::{Deserialize, Serialize};
-use battleship_core::{GameState};
 use std::net::SocketAddr;
 use zkvm_host::Prover;
 
@@ -27,12 +21,14 @@ async fn main() {
 
 #[derive(Deserialize, Serialize)]
 pub struct Receipt {
-    journal : Vec<u8>,
+    journal: Vec<u8>,
     seal: Vec<u32>,
 }
 
 fn do_proof<T>(name: &str, input: T) -> Result<String, zkvm_host::Exception>
-    where T : Serialize {
+where
+    T: Serialize,
+{
     let mut prover = Prover::new(name)?;
     let vec = zkvm_serde::to_vec(&input).unwrap();
     prover.add_input(vec.as_slice())?;
@@ -44,19 +40,19 @@ fn do_proof<T>(name: &str, input: T) -> Result<String, zkvm_host::Exception>
     Ok(base64::encode(bincode::serialize(&receipt).unwrap()))
 }
 
-async fn prove_init(
-    Json(payload): Json<GameState>,
-) -> impl IntoResponse {
+async fn prove_init(Json(payload): Json<GameState>) -> impl IntoResponse {
     let out = match do_proof("examples/rust/battleship/core/init", payload) {
         Ok(receipt) => receipt,
-        Err(_e) => return (StatusCode::INTERNAL_SERVER_ERROR, String::from("bad proof load")),
+        Err(_e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                String::from("bad proof load"),
+            )
+        }
     };
     (StatusCode::OK, out)
 }
 
-async fn prove_turn(
-    Json(payload): Json<GameState>,
-) -> impl IntoResponse {
+async fn prove_turn(Json(payload): Json<GameState>) -> impl IntoResponse {
     (StatusCode::OK, Json(payload))
 }
-
