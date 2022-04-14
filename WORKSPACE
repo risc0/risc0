@@ -109,6 +109,8 @@ crates_repository(
         "log": crate.spec(version = "0.4"),
         "serde": crate.spec(version = "1.0"),
         "sha2": crate.spec(version = "0.10"),
+        # NOTE: pinned to exact same version used by @rules_rust//wasm_bindgen/raze:wasm_bindgen
+        "wasm-bindgen": crate.spec(version = "=0.2.78"),
         "yew": crate.spec(version = "0.19"),
     },
     quiet = False,

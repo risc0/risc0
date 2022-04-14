@@ -5,5 +5,6 @@
   "[starlark]": {
     "editor.formatOnSave": true
   },
-  "files.eol": "\n"
+  "files.eol": "\n",
+  "git.ignoreLimitWarning": true
 }

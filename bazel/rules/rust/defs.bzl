@@ -8,7 +8,7 @@ load(
     "get_import_macro_deps",
     "transform_deps",
 )
-load("//bazel/platform:transitions.bzl", "risc0_transition", "wasm_transition")
+load("//bazel/platform:transitions.bzl", "risc0_transition")
 
 def get_edition(attr, toolchain):
     if getattr(attr, "edition"):
@@ -146,6 +146,11 @@ _common_attrs = {
 
 _rust_binary_attrs = {
     "crate_type": attr.string(default = "bin"),
+    "linker_script": attr.label(
+        cfg = "exec",
+        allow_single_file = True,
+        default = Label("//risc0/zkvm/platform:risc0.ld"),
+    ),
     "out_binary": attr.bool(default = False),
     "_grep_includes": attr.label(
         allow_single_file = True,
@@ -161,27 +166,6 @@ _rust_binary_attrs = {
 risc0_rust_binary = rule(
     implementation = _rust_binary_impl,
     provides = _common_providers,
-    attrs = dict(_common_attrs.items() + _rust_binary_attrs.items() + {
-        "linker_script": attr.label(
-            cfg = "exec",
-            allow_single_file = True,
-            default = Label("//risc0/zkvm/platform:risc0.ld"),
-        ),
-    }.items()),
-    executable = True,
-    fragments = ["cpp"],
-    host_fragments = ["cpp"],
-    toolchains = [
-        str(Label("@rules_rust//rust:toolchain")),
-        "@bazel_tools//tools/cpp:toolchain_type",
-    ],
-    incompatible_use_toolchain_transition = True,
-    cfg = risc0_transition,
-)
-
-wasm_rust_binary = rule(
-    implementation = _rust_binary_impl,
-    provides = _common_providers,
     attrs = dict(_common_attrs.items() + _rust_binary_attrs.items()),
     executable = True,
     fragments = ["cpp"],
@@ -191,5 +175,5 @@ wasm_rust_binary = rule(
         "@bazel_tools//tools/cpp:toolchain_type",
     ],
     incompatible_use_toolchain_transition = True,
-    cfg = wasm_transition,
+    cfg = risc0_transition,
 )

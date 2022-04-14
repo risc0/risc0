@@ -1,14 +1,19 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
-load("//bazel/rules/rust:defs.bzl", "wasm_rust_binary")
+load("@rules_rust//wasm_bindgen:wasm_bindgen.bzl", "rust_wasm_bindgen")
 
-wasm_rust_binary(
-    name = "battleship",
+rust_binary(
+    name = "wasm",
     srcs = ["src/main.rs"],
     deps = [
         # ":lib",
-        # "@crates_host//:yew",
-        # "@rules_rust//wasm_bindgen/raze:wasm_bindgen",
+        "@crates_host//:yew",
     ],
+)
+
+rust_wasm_bindgen(
+    name = "battleship",
+    target = "web",
+    wasm_file = ":wasm",
 )
 
 rust_library(
