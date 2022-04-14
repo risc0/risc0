@@ -31,6 +31,13 @@ http_archive(
 )
 
 http_archive(
+    name = "com_google_benchmark",
+    sha256 = "3b156bac7800f67858afe6ec2c280e291da70c9fc55377cb47ac11cc83f3128e",
+    strip_prefix = "benchmark-0d98dba29d66e93259db7daa53a9327df767a415",
+    urls = ["https://github.com/google/benchmark/archive/0d98dba29d66e93259db7daa53a9327df767a415.zip"],
+)
+
+http_archive(
     name = "build_bazel_apple_support",
     sha256 = "76df040ade90836ff5543888d64616e7ba6c3a7b33b916aa3a4b68f342d1b447",
     url = "https://github.com/bazelbuild/apple_support/releases/download/0.11.0/apple_support.0.11.0.tar.gz",
