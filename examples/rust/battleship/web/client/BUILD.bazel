@@ -10,7 +10,8 @@ rust_binary(
 )
 
 rust_wasm_bindgen(
-    name = "battleship",
+    name = "client",
     target = "web",
+    visibility = ["//visibility:public"],
     wasm_file = ":wasm",
 )
