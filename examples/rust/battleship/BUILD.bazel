@@ -5,7 +5,6 @@ rust_binary(
     srcs = ["src/main.rs"],
     deps = [
         ":lib",
-        "@crates_host//:yew",
     ],
 )
 

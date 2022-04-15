@@ -8,6 +8,7 @@ build --incompatible_enable_cc_toolchain_resolution
 #build --toolchain_resolution_debug
 build --flag_alias=accel=//risc0/zkp/accel:flag
 build --//bazel/rules/clang_format:config=//:.clang-format
+build --@rules_rust//:rustfmt.toml=//bazel/rules/rust:rustfmt.toml
 
 build:cpu --accel=cpu
 
@@ -18,7 +19,6 @@ build:clang-tidy --build_tag_filters=-skip_clang_tidy
 
 build:ci --aspects=@rules_rust//rust:defs.bzl%rustfmt_aspect,//bazel/rules/clang_format:defs.bzl%clang_format_aspect
 build:ci --output_groups=+rustfmt_checks,+clang_format_checks
-build:ci --@rules_rust//:rustfmt.toml=//bazel/rules/rust:rustfmt.toml
 
 build:dbg -c dbg
 build:dbg --strategy=ObjcLink=local

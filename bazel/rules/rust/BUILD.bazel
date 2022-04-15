@@ -1,4 +1,31 @@
+load(":dummy_cc_toolchain.bzl", "cc_toolchain_config")
+
+cc_toolchain_config(name = "dummy_cc_toolchain")
+
 exports_files([
     "riscv32im-unknown-none-elf.json",
     "rustfmt.toml",
 ])
+
+filegroup(
+    name = "empty",
+    srcs = [],
+)
+
+cc_toolchain(
+    name = "dummy_cc_wasm32",
+    all_files = ":empty",
+    compiler_files = ":empty",
+    dwp_files = ":empty",
+    linker_files = ":empty",
+    objcopy_files = ":empty",
+    strip_files = ":empty",
+    toolchain_config = ":dummy_cc_toolchain",
+)
+
+toolchain(
+    name = "dummy_cc_wasm32_toolchain",
+    target_compatible_with = ["@rules_rust//rust/platform/cpu:wasm32"],
+    toolchain = ":dummy_cc_wasm32",
+    toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)

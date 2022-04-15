@@ -27,3 +27,8 @@ py_binary(
     name = "clang-format",
     srcs = ["clang-format.py"],
 )
+
+alias(
+    name = "rustfmt",
+    actual = "@rules_rust//:rustfmt",
+)

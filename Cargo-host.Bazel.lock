@@ -1,5 +1,5 @@
 {
-  "checksum": "cc839128cc1bfca37f09c63cde1cd0261024569dc598420f578f0267f4e6bd2e",
+  "checksum": "15827962b1dc14f8b4ccfed9ed10bdf07a244f34b122bccb609a517b97087050",
   "crates": {
     "aho-corasick 0.7.18": {
       "name": "aho-corasick",
@@ -2582,7 +2582,7 @@
               "target": "tower_service"
             },
             {
-              "id": "tracing 0.1.33",
+              "id": "tracing 0.1.34",
               "target": "tracing"
             },
             {
@@ -5440,7 +5440,7 @@
               "target": "tower_service"
             },
             {
-              "id": "tracing 0.1.33",
+              "id": "tracing 0.1.34",
               "target": "tracing"
             }
           ],
@@ -5605,13 +5605,13 @@
       },
       "license": "MIT"
     },
-    "tracing 0.1.33": {
+    "tracing 0.1.34": {
       "name": "tracing",
-      "version": "0.1.33",
+      "version": "0.1.34",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tracing/0.1.33/download",
-          "sha256": "80b9fa4360528139bc96100c160b7ae879f5567f49f1782b0b02035b0358ebf3"
+          "url": "https://crates.io/api/v1/crates/tracing/0.1.34/download",
+          "sha256": "5d0ecdcb44a79f0fe9844f0c4f33a342cbcbb5117de8001e6ba0dc2351327d09"
         }
       },
       "targets": [
@@ -5652,24 +5652,24 @@
               "target": "pin_project_lite"
             },
             {
-              "id": "tracing-core 0.1.25",
+              "id": "tracing-core 0.1.26",
               "target": "tracing_core"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.1.33"
+        "version": "0.1.34"
       },
       "license": "MIT"
     },
-    "tracing-core 0.1.25": {
+    "tracing-core 0.1.26": {
       "name": "tracing-core",
-      "version": "0.1.25",
+      "version": "0.1.26",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tracing-core/0.1.25/download",
-          "sha256": "6dfce9f3241b150f36e8e54bb561a742d5daa1a47b5dd9a5ce369fd4a4db2210"
+          "url": "https://crates.io/api/v1/crates/tracing-core/0.1.26/download",
+          "sha256": "f54c8ca710e81886d498c2fd3331b56c93aa248d49de2222ad2742247c60072f"
         }
       },
       "targets": [
@@ -5705,7 +5705,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.1.25"
+        "version": "0.1.26"
       },
       "license": "MIT"
     },

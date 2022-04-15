@@ -1,0 +1,17 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+load("@rules_rust//wasm_bindgen:wasm_bindgen.bzl", "rust_wasm_bindgen")
+
+rust_binary(
+    name = "wasm",
+    srcs = ["src/main.rs"],
+    deps = [
+        "@crates_wasm//:yew",
+    ],
+)
+
+rust_wasm_bindgen(
+    name = "client",
+    target = "web",
+    visibility = ["//visibility:public"],
+    wasm_file = ":wasm",
+)

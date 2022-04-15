@@ -5,6 +5,7 @@ load(
     "@rules_rust//rust/private:utils.bzl",
     "compute_crate_name",
     "find_toolchain",
+    "get_import_macro_deps",
     "transform_deps",
 )
 load("//bazel/platform:transitions.bzl", "risc0_transition")
@@ -76,7 +77,7 @@ def _rust_binary_impl(ctx):
     output = ctx.actions.declare_file(ctx.label.name + toolchain.binary_ext)
 
     deps = transform_deps(ctx.attr.deps)
-    proc_macro_deps = transform_deps(ctx.attr.proc_macro_deps)
+    proc_macro_deps = transform_deps(ctx.attr.proc_macro_deps + get_import_macro_deps(ctx))
 
     return rustc_compile_action(
         ctx = ctx,
@@ -130,6 +131,10 @@ _common_attrs = {
     "_cc_toolchain": attr.label(default = "@bazel_tools//tools/cpp:current_cc_toolchain"),
     "_error_format": attr.label(default = "@rules_rust//:error_format"),
     "_extra_rustc_flags": attr.label(default = "@rules_rust//:extra_rustc_flags"),
+    "_import_macro_dep": attr.label(
+        default = "@rules_rust//util/import",
+        cfg = "exec",
+    ),
     "_process_wrapper": attr.label(
         default = Label("@rules_rust//util/process_wrapper"),
         executable = True,

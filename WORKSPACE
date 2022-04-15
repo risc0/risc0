@@ -4,6 +4,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 register_toolchains(
     "//:clang_format_toolchain",
+    "//bazel/rules/rust:dummy_cc_wasm32_toolchain",
 )
 
 http_archive(
@@ -67,8 +68,11 @@ http_archive(
 
 http_archive(
     name = "rules_rust",
-    sha256 = "39655ab175e3c6b979f362f55f58085528f1647957b0e9b3a07f81d8a9c3ea0a",
-    url = "https://github.com/bazelbuild/rules_rust/releases/download/0.2.0/rules_rust-v0.2.0.tar.gz",
+    patch_args = ["-p1"],
+    patches = ["//bazel/third_party/rules_rust:urls.patch"],
+    sha256 = "42248201c518960307ff256e75adc1a7d34d398acbe6118b207905ca4d045706",
+    strip_prefix = "rules_rust-4144ddeb9c5290a15e5ec1cf8df31393744f6005",
+    url = "https://github.com/bazelbuild/rules_rust/archive/4144ddeb9c5290a15e5ec1cf8df31393744f6005.zip",
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies")
@@ -78,6 +82,10 @@ rules_rust_dependencies()
 load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_deps")
 
 rust_analyzer_deps()
+
+load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories")
+
+rust_wasm_bindgen_repositories()
 
 load("//bazel/rules/rust:repositories.bzl", "rust_repositories")
 
@@ -108,19 +116,25 @@ crates_repository(
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
         "env_logger": crate.spec(version = "0.8"),
-        "serde_json": crate.spec(version = "1.0.79"),
         "log": crate.spec(version = "0.4"),
-        "serde": crate.spec(version = "1.0"),
+        "serde": crate.spec(
+            features = ["derive"],
+            version = "1.0",
+        ),
+        "serde_json": crate.spec(version = "1.0.79"),
         "sha2": crate.spec(version = "0.10"),
-        "tokio": crate.spec(features = ["full"], version = "1.17.0"),
+        "tokio": crate.spec(
+            features = ["full"],
+            version = "1.17",
+        ),
         "yew": crate.spec(version = "0.19"),
     },
     quiet = False,
 )
 
-load("@crates_host//:defs.bzl", "crate_repositories")
+load("@crates_host//:defs.bzl", crate_repositories_host = "crate_repositories")
 
-crate_repositories()
+crate_repositories_host()
 
 crates_repository(
     name = "crates_guest",
@@ -141,6 +155,21 @@ crates_repository(
 load("@crates_guest//:defs.bzl", crate_repositories_guest = "crate_repositories")
 
 crate_repositories_guest()
+
+crates_repository(
+    name = "crates_wasm",
+    lockfile = "//:Cargo-wasm.Bazel.lock",
+    packages = {
+        # NOTE: pinned to exact same version used by @rules_rust//wasm_bindgen/raze:wasm_bindgen
+        "wasm-bindgen": crate.spec(version = "=0.2.78"),
+        "yew": crate.spec(version = "0.19"),
+    },
+    quiet = False,
+)
+
+load("@crates_wasm//:defs.bzl", crate_repositories_wasm = "crate_repositories")
+
+crate_repositories_wasm()
 
 http_archive(
     name = "oneTBB",
