@@ -23,6 +23,8 @@ enum Msg {
 
 struct App {
     value: i64,
+    player1: String,
+    CPU: String,
 }
 
 impl Component for App {
@@ -58,7 +60,11 @@ impl Component for App {
                 }
             }
         });
-        Self { value: 0 }
+        Self {
+            value: 0,
+            player1: "Rami".to_string(),
+            CPU: "CPU".to_string(),
+         }
     }
 
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -74,15 +80,273 @@ impl Component for App {
     }
 
     fn view(&self, ctx: &Context<Self>) -> Html {
-        let onclick = ctx.link().callback(|_| Msg::AddOne);
+        let onclick = ctx.link().callback(|_: App| Msg::AddOne);
+        let player = self.player1.to_string();
+        let cpu = self.CPU.to_string();
         html! {
-            <div>
-                <h1>{ "Battleship!" }</h1>
-                <div>
-                    <button {onclick}>{ "+1" }</button>
-                    <p>{ self.value }</p>
+            <>
+            <div class="header">
+            <img src="assets/risc0/banner.png" alt="Risc0 Banner" />
+            </div>
+            <br />
+            <div class="gamefield">
+                <div class="playerField">
+                <h3 class="playerName">{player}</h3>
+                <table class="matrix">
+                    <tbody>
+                    <tr>
+                        <td><span class="dot red"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot red"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot red"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+                <hr />
+                <div class="cpuField">
+                <h3 class="playerName">{cpu}</h3>
+                <table class="matrix">
+
+                    <tbody>
+                    <tr>
+                        <td><span class="dot red"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot red"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    <tr>
+                        <td><span class="dot white"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot red"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                        <td><span class="dot"></span></td>
+                    </tr>
+                    </tbody>
+                </table>
                 </div>
             </div>
+            </>
         }
     }
 }
