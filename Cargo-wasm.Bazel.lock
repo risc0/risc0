@@ -1,5 +1,5 @@
 {
-  "checksum": "6f88ff3a9776f2a7d0a5d87fa8ba3ce7308477243599f9426f813a6b478fe525",
+  "checksum": "caad43ac3f4900df5393566888d133f7e443f32f41cbf1df35b6c92bebaff0dd",
   "crates": {
     "autocfg 1.1.0": {
       "name": "autocfg",
@@ -208,8 +208,36 @@
         "deps": {
           "common": [
             {
+              "id": "log 0.4.16",
+              "target": "log"
+            },
+            {
+              "id": "reqwasm 0.5.0",
+              "target": "reqwasm"
+            },
+            {
+              "id": "serde 1.0.136",
+              "target": "serde"
+            },
+            {
+              "id": "serde_json 1.0.79",
+              "target": "serde_json"
+            },
+            {
               "id": "wasm-bindgen 0.2.78",
               "target": "wasm_bindgen"
+            },
+            {
+              "id": "wasm-bindgen-futures 0.4.28",
+              "target": "wasm_bindgen_futures"
+            },
+            {
+              "id": "wasm-logger 0.2.0",
+              "target": "wasm_logger"
+            },
+            {
+              "id": "weblog 0.3.0",
+              "target": "weblog"
             },
             {
               "id": "yew 0.19.3",
@@ -222,6 +250,176 @@
         "version": "0.0.1"
       },
       "license": null
+    },
+    "futures-channel 0.3.21": {
+      "name": "futures-channel",
+      "version": "0.3.21",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/futures-channel/0.3.21/download",
+          "sha256": "c3083ce4b914124575708913bca19bfe887522d6e2e6d0952943f5eac4a74010"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "futures_channel",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "futures_channel",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "alloc",
+          "default",
+          "std"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "futures-channel 0.3.21",
+              "target": "build_script_build"
+            },
+            {
+              "id": "futures-core 0.3.21",
+              "target": "futures_core"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.3.21"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "futures-core 0.3.21": {
+      "name": "futures-core",
+      "version": "0.3.21",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/futures-core/0.3.21/download",
+          "sha256": "0c09fd04b7e4073ac7156a9539b57a484a8ea920f79c7c675d05d289ab6110d3"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "futures_core",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "futures_core",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "alloc",
+          "default",
+          "std"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "futures-core 0.3.21",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.3.21"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "futures-sink 0.3.21": {
+      "name": "futures-sink",
+      "version": "0.3.21",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/futures-sink/0.3.21/download",
+          "sha256": "21163e139fa306126e6eedaf49ecdb4588f939600f0b1e770f4205ee4b7fa868"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "futures_sink",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "futures_sink",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "alloc",
+          "default",
+          "std"
+        ],
+        "edition": "2018",
+        "version": "0.3.21"
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "gloo 0.4.2": {
       "name": "gloo",
@@ -498,6 +696,104 @@
         "version": "0.2.1"
       },
       "license": "MIT/Apache-2.0"
+    },
+    "gloo-net 0.1.0": {
+      "name": "gloo-net",
+      "version": "0.1.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/gloo-net/0.1.0/download",
+          "sha256": "2899cb1a13be9020b010967adc6b2a8a343b6f1428b90238c9d53ca24decc6db"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "gloo_net",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "gloo_net",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "default",
+          "futures-channel",
+          "futures-core",
+          "futures-sink",
+          "http",
+          "json",
+          "pin-project",
+          "serde",
+          "serde_json",
+          "websocket"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "futures-channel 0.3.21",
+              "target": "futures_channel"
+            },
+            {
+              "id": "futures-core 0.3.21",
+              "target": "futures_core"
+            },
+            {
+              "id": "futures-sink 0.3.21",
+              "target": "futures_sink"
+            },
+            {
+              "id": "gloo-utils 0.1.3",
+              "target": "gloo_utils"
+            },
+            {
+              "id": "js-sys 0.3.55",
+              "target": "js_sys"
+            },
+            {
+              "id": "pin-project 1.0.10",
+              "target": "pin_project"
+            },
+            {
+              "id": "serde 1.0.136",
+              "target": "serde"
+            },
+            {
+              "id": "serde_json 1.0.79",
+              "target": "serde_json"
+            },
+            {
+              "id": "thiserror 1.0.30",
+              "target": "thiserror"
+            },
+            {
+              "id": "wasm-bindgen 0.2.78",
+              "target": "wasm_bindgen"
+            },
+            {
+              "id": "wasm-bindgen-futures 0.4.28",
+              "target": "wasm_bindgen_futures"
+            },
+            {
+              "id": "web-sys 0.3.55",
+              "target": "web_sys"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.1.0"
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "gloo-render 0.1.1": {
       "name": "gloo-render",
@@ -969,6 +1265,9 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": [
+          "std"
+        ],
         "deps": {
           "common": [
             {
@@ -991,6 +1290,98 @@
         ]
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "pin-project 1.0.10": {
+      "name": "pin-project",
+      "version": "1.0.10",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/pin-project/1.0.10/download",
+          "sha256": "58ad3879ad3baf4e44784bc6a718a8698867bb991f8ce24d1bcbe2cfb4c3a75e"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "pin_project",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "pin_project",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "pin-project-internal 1.0.10",
+              "target": "pin_project_internal"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "1.0.10"
+      },
+      "license": "Apache-2.0 OR MIT"
+    },
+    "pin-project-internal 1.0.10": {
+      "name": "pin-project-internal",
+      "version": "1.0.10",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/pin-project-internal/1.0.10/download",
+          "sha256": "744b6f092ba29c3650faf274db506afd39944f48420f6c86b17cfe0ee1cb36bb"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "pin_project_internal",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "pin_project_internal",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "proc-macro2 1.0.37",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.18",
+              "target": "quote"
+            },
+            {
+              "id": "syn 1.0.91",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.0.10"
+      },
+      "license": "Apache-2.0 OR MIT"
     },
     "proc-macro-error 1.0.4": {
       "name": "proc-macro-error",
@@ -1272,6 +1663,54 @@
         },
         "edition": "2018",
         "version": "1.0.18"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "reqwasm 0.5.0": {
+      "name": "reqwasm",
+      "version": "0.5.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/reqwasm/0.5.0/download",
+          "sha256": "05b89870d729c501fa7a68c43bf4d938bbb3a8c156d333d90faa0e8b3e3212fb"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "reqwasm",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "reqwasm",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "default",
+          "http",
+          "json",
+          "websocket"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "gloo-net 0.1.0",
+              "target": "gloo_net"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.5.0"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -1651,7 +2090,8 @@
           "printing",
           "proc-macro",
           "quote",
-          "visit"
+          "visit",
+          "visit-mut"
         ],
         "deps": {
           "common": [
@@ -2229,6 +2669,56 @@
       },
       "license": "MIT/Apache-2.0"
     },
+    "wasm-logger 0.2.0": {
+      "name": "wasm-logger",
+      "version": "0.2.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/wasm-logger/0.2.0/download",
+          "sha256": "074649a66bb306c8f2068c9016395fa65d8e08d2affcbf95acf3c24c3ab19718"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "wasm_logger",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "wasm_logger",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "log 0.4.16",
+              "target": "log"
+            },
+            {
+              "id": "wasm-bindgen 0.2.78",
+              "target": "wasm_bindgen"
+            },
+            {
+              "id": "web-sys 0.3.55",
+              "target": "web_sys"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.2.0"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "web-sys 0.3.55": {
       "name": "web-sys",
       "version": "0.3.55",
@@ -2258,11 +2748,14 @@
           "**"
         ],
         "crate_features": [
+          "AbortSignal",
           "AddEventListenerOptions",
           "AnimationEvent",
+          "BinaryType",
           "Blob",
           "BlobPropertyBag",
           "CharacterData",
+          "CloseEvent",
           "Document",
           "DomException",
           "DragEvent",
@@ -2276,6 +2769,8 @@
           "FilePropertyBag",
           "FileReader",
           "FocusEvent",
+          "FormData",
+          "Headers",
           "History",
           "HtmlElement",
           "HtmlHeadElement",
@@ -2288,13 +2783,25 @@
           "MessageEvent",
           "MouseEvent",
           "Node",
+          "ObserverCallback",
           "PointerEvent",
           "ProgressEvent",
+          "ReadableStream",
+          "ReferrerPolicy",
+          "Request",
+          "RequestCache",
+          "RequestCredentials",
+          "RequestInit",
+          "RequestMode",
+          "RequestRedirect",
+          "Response",
+          "ResponseType",
           "Storage",
           "Text",
           "TouchEvent",
           "TransitionEvent",
           "UiEvent",
+          "WebSocket",
           "WheelEvent",
           "Window",
           "Worker",
@@ -2317,6 +2824,118 @@
         "version": "0.3.55"
       },
       "license": "MIT/Apache-2.0"
+    },
+    "weblog 0.3.0": {
+      "name": "weblog",
+      "version": "0.3.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/weblog/0.3.0/download",
+          "sha256": "6eec0958e0181982bc8b4577b1363f21300a670603615c58643f172c92c47357"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "weblog",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "weblog",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "default",
+          "wasm-bindgen",
+          "web-sys",
+          "web_sys",
+          "weblog-proc-macro"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "wasm-bindgen 0.2.78",
+              "target": "wasm_bindgen"
+            },
+            {
+              "id": "web-sys 0.3.55",
+              "target": "web_sys"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "weblog-proc-macro 0.3.0",
+              "target": "weblog_proc_macro"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "0.3.0"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "weblog-proc-macro 0.3.0": {
+      "name": "weblog-proc-macro",
+      "version": "0.3.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/weblog-proc-macro/0.3.0/download",
+          "sha256": "9d9abb8ee84ede5408a346721d72fb216a27f53a539ff3c83ed1bf7625af7104"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "weblog_proc_macro",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "weblog_proc_macro",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "proc-macro2 1.0.37",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.18",
+              "target": "quote"
+            },
+            {
+              "id": "syn 1.0.91",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.3.0"
+      },
+      "license": "MIT OR Apache-2.0"
     },
     "yew 0.19.3": {
       "name": "yew",

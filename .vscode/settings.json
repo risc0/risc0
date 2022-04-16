@@ -5,6 +5,9 @@
   "[starlark]": {
     "editor.formatOnSave": true
   },
+  "emmet.includeLanguages": {
+    "rust": "html"
+  },
   "files.eol": "\n",
   "git.ignoreLimitWarning": true
 }

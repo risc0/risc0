@@ -13,9 +13,13 @@
 // limitations under the License.
 
 use clap::{Arg, Command};
+use log::LevelFilter;
+
 use lib::sign;
 
 fn main() {
+    env_logger::builder().filter_level(LevelFilter::Info).init();
+
     let matches = Command::new("sign")
         .version("0.1.0")
         .author("Risc0, Inc.")

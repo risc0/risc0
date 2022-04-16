@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use log::LevelFilter;
 use std::{ffi::CString, mem};
 
 mod exception;
@@ -143,6 +142,5 @@ impl Drop for Prover {
 
 #[ctor::ctor]
 fn init() {
-    env_logger::builder().filter_level(LevelFilter::Info).init();
     unsafe { ffi::risc0_init() };
 }

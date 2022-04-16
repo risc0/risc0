@@ -11,12 +11,14 @@ rust_binary(
 rust_library(
     name = "lib",
     srcs = ["src/lib.rs"],
+    proc_macro_deps = ["@crates_host//:ctor"],
     rustc_flags = ["-Coverflow-checks=on"],
     deps = [
         "//examples/rust/battleship/core:core_host",
         "//risc0/zkvm/sdk/rust/core:core_host",
         "//risc0/zkvm/sdk/rust/host",
         "//risc0/zkvm/sdk/rust/serde:serde_host",
+        "@crates_host//:env_logger",
         "@crates_host//:log",
         "@crates_host//:serde",
     ],
