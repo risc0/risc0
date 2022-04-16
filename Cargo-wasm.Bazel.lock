@@ -1,5 +1,5 @@
 {
-  "checksum": "caad43ac3f4900df5393566888d133f7e443f32f41cbf1df35b6c92bebaff0dd",
+  "checksum": "853102fe4fa7f753f85e68f74fd9a2435b08fa73c5e889a821bdaa0c91ea43a0",
   "crates": {
     "autocfg 1.1.0": {
       "name": "autocfg",
@@ -208,6 +208,10 @@
         "deps": {
           "common": [
             {
+              "id": "js-sys 0.3.55",
+              "target": "js_sys"
+            },
+            {
               "id": "log 0.4.16",
               "target": "log"
             },
@@ -218,6 +222,10 @@
             {
               "id": "serde 1.0.136",
               "target": "serde"
+            },
+            {
+              "id": "serde-wasm-bindgen 0.4.2",
+              "target": "serde_wasm_bindgen"
             },
             {
               "id": "serde_json 1.0.79",
@@ -250,6 +258,43 @@
         "version": "0.0.1"
       },
       "license": null
+    },
+    "fnv 1.0.7": {
+      "name": "fnv",
+      "version": "1.0.7",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/fnv/1.0.7/download",
+          "sha256": "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "fnv",
+            "crate_root": "lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "fnv",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "default",
+          "std"
+        ],
+        "edition": "2015",
+        "version": "1.0.7"
+      },
+      "license": "Apache-2.0 / MIT"
     },
     "futures-channel 0.3.21": {
       "name": "futures-channel",
@@ -1853,6 +1898,60 @@
         ]
       },
       "license": "MIT OR Apache-2.0"
+    },
+    "serde-wasm-bindgen 0.4.2": {
+      "name": "serde-wasm-bindgen",
+      "version": "0.4.2",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/serde-wasm-bindgen/0.4.2/download",
+          "sha256": "d5d0927d4115e78b52dfd4cabcb3cc79bd56b94a53cf27c074bf8b83af1765d1"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "serde_wasm_bindgen",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "serde_wasm_bindgen",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "fnv 1.0.7",
+              "target": "fnv"
+            },
+            {
+              "id": "js-sys 0.3.55",
+              "target": "js_sys"
+            },
+            {
+              "id": "serde 1.0.136",
+              "target": "serde"
+            },
+            {
+              "id": "wasm-bindgen 0.2.78",
+              "target": "wasm_bindgen"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "0.4.2"
+      },
+      "license": "MIT"
     },
     "serde_derive 1.0.136": {
       "name": "serde_derive",

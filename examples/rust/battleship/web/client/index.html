@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="utf-8" />
@@ -11,106 +11,104 @@
   <script src="https://cdn.jsdelivr.net/npm/near-api-js@0.41.0/dist/near-api-js.min.js"></script>
   <style>
     body {
-  text-align: center;
-  display: table-row;
-}
+      text-align: center;
+      display: table-row;
+    }
 
-.title {
-  text-align: center;
-}
+    .title {
+      text-align: center;
+    }
 
-.gamefield {
-  display: inline-flex;
-}
+    .gamefield {
+      display: inline-flex;
+    }
 
-.playerField {
-  margin-right: 50px;
-}
+    .playerField {
+      margin-right: 50px;
+    }
 
-.cpuField {
-  margin-left: 50px;
-}
+    .cpuField {
+      margin-left: 50px;
+    }
 
-.dot {
-  height: 25px;
-  width: 25px;
-  border-radius: 50%;
-  display: inline-block;
-}
+    .dot {
+      height: 25px;
+      width: 25px;
+      border-radius: 50%;
+      display: inline-block;
+    }
 
-.dot:hover {
-  background-color: lightgreen;
-}
+    .dot:hover {
+      background-color: lightgreen;
+    }
 
-.dot:not(:hover) {
-  background-color: "";
-}
+    .dot:not(:hover) {
+      background-color: "";
+    }
 
-.dot.white {
-  background-color: red;
-}
+    .dot.white {
+      background-color: red;
+    }
 
-.dot.red {
-  background-color: lightgrey;
-}
+    .dot.red {
+      background-color: lightgrey;
+    }
 
-.playerName {
-  border-width: 5px 5px 0px 5px;
-  margin: 0px;
-  padding: 5px 0px 10px 0px;
-  background-color: lightgray;
-  height: 25px;
-  font-weight: bold;
-}
+    .playerName {
+      border-width: 5px 5px 0px 5px;
+      margin: 0px;
+      padding: 5px 0px 10px 0px;
+      background-color: lightgray;
+      height: 25px;
+      font-weight: bold;
+    }
 
-thead {
-  height: 50px;
-  border-bottom: 1px;
-  margin-bottom: 5px;
-  background-color: lightgray;
-}
+    thead {
+      height: 50px;
+      border-bottom: 1px;
+      margin-bottom: 5px;
+      background-color: lightgray;
+    }
 
-.header > img {
-  width: 100%;
-}
+    .header > img {
+      width: 100%;
+    }
 
-footer {
-  text-align: center;
-}
+    footer {
+      text-align: center;
+    }
 
-footer > a > img {
-  max-width: 50px;
-}
+    footer > a > img {
+      max-width: 50px;
+    }
 
 
-.matrix {
-  margin-top: 5px;
-  border-collapse: collapse;
-  background-color: azure;
-}
+    .matrix {
+      margin-top: 5px;
+      border-collapse: collapse;
+      background-color: azure;
+    }
 
-.matrix > tbody > tr > td {
-  min-width: 45px;
-  padding: 0px;
-  height: 45px;
-  max-height: 45px;
-}
+    .matrix > tbody > tr > td {
+      min-width: 45px;
+      padding: 0px;
+      height: 45px;
+      max-height: 45px;
+    }
 
-.matrix > tbody > tr {
-  font-weight: bold;
-  text-align: center;
-  padding: 0px;
-}
+    .matrix > tbody > tr {
+      font-weight: bold;
+      text-align: center;
+      padding: 0px;
+    }
 
-.matrix > tbody > tr > td > img {
-  display: block;
-  height: inherit;
-  width: 45px;
-}
+    .matrix > tbody > tr > td > img {
+      display: block;
+      height: inherit;
+      width: 45px;
+    }
   </style>
 </head>
-</head>
-
 <body>
   <script>
     const networkId = 'testnet';
