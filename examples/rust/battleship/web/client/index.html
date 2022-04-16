@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
   <meta charset="utf-8" />
@@ -8,274 +8,60 @@
   <link rel="preload" href="/client_bg.wasm" as="fetch" type="application/wasm" crossorigin="" />
   <link rel="modulepreload" href="/client.js" />
   <link rel="stylesheet" href="index.css">
-</head>
+  <script src="https://cdn.jsdelivr.net/npm/near-api-js@0.41.0/dist/near-api-js.min.js"></script>
 </head>
 
 <body>
-<div class="header">
-    <img src="assets/risc0/banner.png">
-  </div>
-  <br />
-  <div class="gamefield">
-    <div class="playerField">
-      <h3 class="playerName">{player1}</h3>
-      <table class="matrix">
-        <tbody>
-          <tr>
-            <td><span class="dot red"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vUpperCarrier.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vUpperMiddleCarrier.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Destroyer/hLowerDestroyer.png"></td>
-            <td><img  src="assets/Destroyer/hUpperDestroyer.png"></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vMiddleCarrier.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vLowerMiddleCarrier.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vLowerCarrier.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Battleship/vUpperBattleship.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot red"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Battleship/vUpperMiddleBattleship.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Battleship/vLowerMiddleBattleship.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Battleship/vLowerBattleship.png"></td>
-          </tr>
-          <tr>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot red"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <hr />
-    <div class="cpuField">
-      <h3 class="playerName">CPU</h3>
-      <table class="matrix">
+  <script>
+    const networkId = 'testnet';
+    const appName = 'flaub.testnet';
+    const contractId = 'dev-1649886060949-33800566037764';
+    const gas = "300000000000000";
 
-        <tbody>
-          <tr>
-            <td><span class="dot red"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vUpperCarrier.png"></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vUpperMiddleCarrier.png"></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Destroyer/hLowerDestroyer.png"></td>
-            <td><img  src="assets/Destroyer/hUpperDestroyer.png"></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vMiddleCarrier.png"></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vLowerMiddleCarrier.png"></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><img  src="assets/Carrier/vLowerCarrier.png"></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot red"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-          </tr>
-          <tr>
-            <td><span class="dot white"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot red"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-            <td><span class="dot"></span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <br />
-  <br />
+    function near_connect() {
+      // connect to NEAR
+      const near = new nearApi.Near({
+        networkId,
+        keyStore: new nearApi.keyStores.BrowserLocalStorageKeyStore(),
+        nodeUrl: 'https://rpc.testnet.near.org',
+        walletUrl: 'https://wallet.testnet.near.org'
+      });
+
+      // connect to the NEAR Wallet
+      const wallet = new nearApi.WalletConnection(near, appName);
+
+      if (!wallet.isSignedIn()) {
+        wallet.requestSignIn({
+          contractId,
+          methodNames: ['game_state', 'new_game', 'join_game', 'turn']
+        });
+      }
+
+      // connect to a NEAR smart contract
+      const contract = new nearApi.Contract(wallet.account(), contractId, {
+        viewMethods: ['game_state'],
+        changeMethods: ['new_game', 'join_game', 'turn']
+      });
+
+      return contract;
+    }
+
+    function game_state(contract, name) {
+      return contract.game_state({ name });
+    }
+
+    function new_game(contract, name, receipt_str) {
+      return contract.new_game({ name, receipt_str }, gas);
+    }
+
+    function join_game(contract, name, receipt_str, shot_x, shot_y) {
+      return contract.join_game({ name, receipt_str, shot_x, shot_y }, gas);
+    }
+
+    function turn(contract, name, receipt_str, shot_x, shot_y) {
+      return contract.turn({ name, receipt_str, shot_x, shot_y }, gas);
+    }
+  </script>
   <script type="module">
     import init from '/client.js';
     init('/client_bg.wasm');

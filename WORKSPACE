@@ -174,10 +174,15 @@ crates_repository(
     name = "crates_wasm",
     lockfile = "//:Cargo-wasm.Bazel.lock",
     packages = {
+        "js-sys": crate.spec(version = "0.3"),
         "log": crate.spec(version = "0.4"),
         "reqwasm": crate.spec(version = "0.5"),
-        "serde": crate.spec(version = "1.0"),
+        "serde": crate.spec(
+            features = ["derive"],
+            version = "1.0",
+        ),
         "serde_json": crate.spec(version = "1.0"),
+        "serde-wasm-bindgen": crate.spec(version = "0.4"),
         # NOTE: pinned to exact same version used by @rules_rust//wasm_bindgen/raze:wasm_bindgen
         "wasm-bindgen": crate.spec(version = "=0.2.78"),
         "wasm-bindgen-futures": crate.spec(version = "0.4"),

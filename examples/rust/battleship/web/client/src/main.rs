@@ -13,9 +13,37 @@
 // limitations under the License.
 
 use reqwasm::http;
+use wasm_bindgen::prelude::*;
+use weblog::console_log;
 use yew::prelude::*;
 
 use battleship_core::{GameState, Ship, ShipDirection};
+
+#[wasm_bindgen]
+extern "C" {
+    pub type Contract;
+
+    #[wasm_bindgen]
+    pub fn near_connect() -> Contract;
+
+    #[wasm_bindgen]
+    pub async fn game_state(contract: &Contract, name: &str) -> JsValue;
+
+    #[wasm_bindgen]
+    pub async fn new_game(contract: &Contract, name: &str, receipt: &str);
+
+    #[wasm_bindgen]
+    pub async fn join_game(
+        contract: &Contract,
+        name: &str,
+        receipt: &str,
+        shot_x: u32,
+        shot_y: u32,
+    );
+
+    #[wasm_bindgen]
+    pub async fn turn(contract: &Contract, name: &str, receipt: &str, shot_x: u32, shot_y: u32);
+}
 
 enum Msg {
     AddOne,
@@ -30,7 +58,10 @@ impl Component for App {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        ctx.link().send_future(async {
+        let contract = near_connect();
+        console_log!(&contract);
+
+        ctx.link().send_future(async move {
             let state = GameState {
                 ships: [
                     Ship::new(2, 3, ShipDirection::Vertical),
@@ -43,13 +74,16 @@ impl Component for App {
             };
             let body = serde_json::to_string(&state).unwrap();
             let response = http::Request::post("/prove/init")
-                .body(body)
                 .header("Content-Type", "application/json")
+                .body(body)
                 .send()
                 .await;
             match response {
                 Ok(response) => {
                     log::info!("Response: {:?}", response);
+                    // join_game(&contract, "game", &response.text().await.unwrap(), 5, 5).await;
+                    // new_game(&contract, "game", &response.text().await.unwrap()).await;
+                    console_log!(game_state(&contract, "game").await);
                     Msg::AddOne
                 }
                 Err(err) => {

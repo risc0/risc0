@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use tower_http::{services::ServeDir, trace::TraceLayer};
 use tracing_subscriber::prelude::*;
 
-use battleship_core::GameState;
+use battleship_core::{GameState, RoundParams};
 use zkvm_host::Prover;
 
 #[tokio::main]
@@ -93,6 +93,15 @@ async fn prove_init(Json(payload): Json<GameState>) -> impl IntoResponse {
     (StatusCode::OK, out)
 }
 
-async fn prove_turn(Json(payload): Json<GameState>) -> impl IntoResponse {
-    (StatusCode::OK, Json(payload))
+async fn prove_turn(Json(payload): Json<RoundParams>) -> impl IntoResponse {
+    let out = match do_proof("examples/rust/battleship/core/turn", payload) {
+        Ok(receipt) => receipt,
+        Err(_e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                String::from("bad proof load"),
+            )
+        }
+    };
+    (StatusCode::OK, out)
 }
