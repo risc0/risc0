@@ -1,0 +1,83 @@
+body {
+  text-align: center;
+  display: table-row;
+}
+
+.title {
+  text-align: center;
+}
+
+.gamefield {
+  display: inline-flex;
+}
+
+.playerField {
+  margin-right: 50px;
+}
+
+.cpuField {
+  margin-left: 50px;
+}
+
+.playerName {
+  border-width: 5px 5px 0px 5px;
+  margin: 0px;
+  padding: 5px 0px 10px 0px;
+  background-color: lightgray;
+  height: 25px;
+  font-weight: bold;
+}
+
+thead {
+  height: 50px;
+  border-bottom: 1px;
+  margin-bottom: 5px;
+  background-color: lightgray;
+}
+
+.header > img {
+  width: 100%;
+}
+
+footer {
+  text-align: center;
+}
+
+footer > a > img {
+  max-width: 50px;
+}
+
+
+.matrix {
+  margin-top: 5px;
+  border-collapse: collapse;
+  background-color: azure;
+}
+
+.hImage {
+  transform: rotate(90deg);
+}
+
+.matrix > tbody > tr > td {
+  min-width: 40px;
+  padding: 0px;
+  height: 40px;
+  max-height: 40px;
+}
+
+.matrix > tbody > tr {
+  font-weight: bold;
+  text-align: center;
+  max-height: 40px;
+  padding: 0px;
+}
+
+.matrix > tbody > tr > td > img {
+  max-height: 40px;
+}
+
+.row0 {
+  padding-right: 5px;
+  height: 50px;
+  background-color: lightgray;
+}

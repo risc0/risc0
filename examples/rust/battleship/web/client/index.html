@@ -7,14 +7,283 @@
   <title>Battleship!</title>
   <link rel="preload" href="/client_bg.wasm" as="fetch" type="application/wasm" crossorigin="" />
   <link rel="modulepreload" href="/client.js" />
+  <link rel="stylesheet" href="index.css">
 </head>
 </head>
 
 <body>
+<div class="header">
+    <img src="assets/risc0/banner.png">
+  </div>
+  <br />
+  <div class="gamefield">
+    <div class="playerField">
+      <h3 class="playerName">{player1}</h3>
+      <table class="matrix">
+        <tbody>
+          <tr>
+            <td>0</td>
+            <td><img class="hImage" src="assets/Submarine/lowerSubmarine.png"></td>
+            <td><img class="hImage" src="assets/Submarine/middleSubmarine.png"></td>
+            <td><img class="hImage" src="assets/Submarine/upperSubmarine.png"></td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/upperCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/upperMiddleCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/middleCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/lowerMiddleCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/lowerCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td><img class="hImage" src="assets/Destroyer/lowerDestroyer.png"></td>
+            <td><img class="hImage" src="assets/Destroyer/upperDestroyer.png"></td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <hr />
+    <div class="cpuField">
+      <h3 class="playerName">CPU</h3>
+      <table class="matrix">
+        <tbody>
+          <tr>
+            <td>0</div></td>
+            <td>1</div></td>
+            <td>2</div></td>
+            <td>3</div></td>
+            <td>4</div></td>
+            <td>5</div></td>
+            <td><img src="assets/Carrier/upperCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/upperMiddleCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/middleCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/lowerMiddleCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td><img src="assets/Carrier/lowerCarrier.png"></td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td><img class="hImage" src="assets/Destroyer/lowerDestroyer.png"></td>
+            <td><img class="hImage" src="assets/Destroyer/upperDestroyer.png"></td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+          <tr>
+            <td>0</td>
+            <td>1</td>
+            <td>2</td>
+            <td>3</td>
+            <td>4</td>
+            <td>5</td>
+            <td>6</td>
+            <td>7</td>
+            <td>8</td>
+            <td>9</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <br />
+  <br />
   <script type="module">
     import init from '/client.js';
     init('/client_bg.wasm');
   </script>
 </body>
 
+<footer>
+  <a href="https://risczero.com/">
+    <img src="assets/risc0/logo1.png">
+  </a>  
+</footer>
 </html>
