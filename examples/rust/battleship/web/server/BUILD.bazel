@@ -9,6 +9,7 @@ rust_binary(
         "//examples/rust/battleship/core:turn",
         "//examples/rust/battleship/core:turn.id",
         "//examples/rust/battleship/web/client",
+        "//examples/rust/battleship/web/client:index.html",
     ],
     deps = [
         "//examples/rust/battleship/core:core_host",
@@ -18,8 +19,12 @@ rust_binary(
         "@crates_host//:axum",
         "@crates_host//:base64",
         "@crates_host//:bincode",
+        "@crates_host//:open",
         "@crates_host//:serde",
         "@crates_host//:serde_json",
         "@crates_host//:tokio",
+        "@crates_host//:tower-http",
+        "@crates_host//:tracing",
+        "@crates_host//:tracing-subscriber",
     ],
 )

@@ -130,6 +130,8 @@ impl Battleship {
 
 #[cfg(test)]
 mod tests {
+    use log::LevelFilter;
+
     use battleship_core::{Ship, ShipDirection};
     use zkvm_serde::to_slice;
 
@@ -140,6 +142,11 @@ mod tests {
         player1
             .on_round_msg(&player2.on_turn_msg(&turn).unwrap())
             .unwrap()
+    }
+
+    #[ctor::ctor]
+    fn init() {
+        env_logger::builder().filter_level(LevelFilter::Info).init();
     }
 
     #[test]

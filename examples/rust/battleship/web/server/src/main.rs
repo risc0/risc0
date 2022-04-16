@@ -1,22 +1,62 @@
-use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
-use battleship_core::GameState;
-use serde::{Deserialize, Serialize};
 use std::net::SocketAddr;
+
+use axum::{
+    http::StatusCode,
+    response::IntoResponse,
+    routing::{get_service, post},
+    Json, Router,
+};
+use serde::{Deserialize, Serialize};
+use tower_http::{services::ServeDir, trace::TraceLayer};
+use tracing_subscriber::prelude::*;
+
+use battleship_core::GameState;
 use zkvm_host::Prover;
 
 #[tokio::main]
 async fn main() {
-    let app = Router::new()
-        .route("/prove_init", post(prove_init))
-        .route("/prove_turn", post(prove_turn));
-
-    // run our app with hyper
-    // `axum::Server` is a re-export of `hyper::Server`
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
+    tracing_subscriber::registry()
+        // Filter spans based on the RUST_LOG env var.
+        .with(tracing_subscriber::EnvFilter::new(
+            "server,tower_http=debug",
+        ))
+        // Send a copy of all spans to stdout as JSON.
+        .with(
+            tracing_subscriber::fmt::layer()
+                .with_target(false)
+                .with_level(true)
+                .compact(),
+        )
+        // Install this registry as the global tracing registry.
+        .try_init()
         .unwrap();
+
+    let app = Router::new()
+        .fallback(Router::new().nest(
+            "/",
+            get_service(ServeDir::new("examples/rust/battleship/web/client")).handle_error(
+                |error: std::io::Error| async move {
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        format!("Unhandled internal error: {}", error),
+                    )
+                },
+            ),
+        ))
+        .route("/prove/init", post(prove_init))
+        .route("/prove/turn", post(prove_turn))
+        .layer(TraceLayer::new_for_http());
+
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    tracing::info!("listening on {}", addr);
+    let server = axum::Server::bind(&addr).serve(app.into_make_service());
+
+    let http_addr = format!("http://{}", addr);
+    if let Err(err) = open::that(http_addr) {
+        tracing::error!(error = ?err, "error opening browser");
+    }
+
+    server.await.unwrap();
 }
 
 #[derive(Deserialize, Serialize)]
@@ -32,10 +72,10 @@ where
     let mut prover = Prover::new(name)?;
     let vec = zkvm_serde::to_vec(&input).unwrap();
     prover.add_input(vec.as_slice())?;
-    let c_receipt = prover.run()?;
+    let receipt = prover.run()?;
     let receipt = Receipt {
-        journal: c_receipt.get_journal().unwrap().to_vec(),
-        seal: c_receipt.get_seal().unwrap().to_vec(),
+        journal: receipt.get_journal().unwrap().to_vec(),
+        seal: receipt.get_seal().unwrap().to_vec(),
     };
     Ok(base64::encode(bincode::serialize(&receipt).unwrap()))
 }

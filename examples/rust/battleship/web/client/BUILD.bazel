@@ -1,10 +1,21 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 load("@rules_rust//wasm_bindgen:wasm_bindgen.bzl", "rust_wasm_bindgen")
 
+exports_files([
+    "index.html",
+])
+
 rust_binary(
     name = "wasm",
     srcs = ["src/main.rs"],
     deps = [
+        "//examples/rust/battleship/core:core_wasm",
+        "@crates_wasm//:log",
+        "@crates_wasm//:reqwasm",
+        "@crates_wasm//:serde_json",
+        "@crates_wasm//:wasm-bindgen",
+        "@crates_wasm//:wasm-logger",
+        "@crates_wasm//:weblog",
         "@crates_wasm//:yew",
     ],
 )

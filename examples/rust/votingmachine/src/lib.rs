@@ -119,7 +119,14 @@ impl PollingStation {
 
 #[cfg(test)]
 mod tests {
+    use log::LevelFilter;
+
     use super::*;
+
+    #[ctor::ctor]
+    fn init() {
+        env_logger::builder().filter_level(LevelFilter::Info).init();
+    }
 
     #[test]
     fn protocol() {

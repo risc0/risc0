@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Battleship!</title>
+  <link rel="preload" href="/client_bg.wasm" as="fetch" type="application/wasm" crossorigin="" />
+  <link rel="modulepreload" href="/client.js" />
+</head>
+</head>
+
+<body>
+  <script type="module">
+    import init from '/client.js';
+    init('/client_bg.wasm');
+  </script>
+</body>
+
+</html>

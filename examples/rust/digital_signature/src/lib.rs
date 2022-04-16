@@ -73,7 +73,14 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
 
 #[cfg(test)]
 mod tests {
+    use log::LevelFilter;
+
     use super::*;
+
+    #[ctor::ctor]
+    fn init() {
+        env_logger::builder().filter_level(LevelFilter::Info).init();
+    }
 
     #[test]
     fn protocol() {
