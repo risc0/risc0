@@ -19,6 +19,29 @@ body {
   margin-left: 50px;
 }
 
+.dot {
+  height: 25px;
+  width: 25px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.dot:hover {
+  background-color: lightgreen;
+}
+
+.dot:not(:hover) {
+  background-color: "";
+}
+
+.dot.white {
+  background-color: lightgrey;
+}
+
+.dot.red {
+  background-color: red;
+}
+
 .playerName {
   border-width: 5px 5px 0px 5px;
   margin: 0px;
@@ -54,30 +77,21 @@ footer > a > img {
   background-color: azure;
 }
 
-.hImage {
-  transform: rotate(90deg);
-}
-
 .matrix > tbody > tr > td {
-  min-width: 40px;
+  min-width: 45px;
   padding: 0px;
-  height: 40px;
-  max-height: 40px;
+  height: 45px;
+  max-height: 45px;
 }
 
 .matrix > tbody > tr {
   font-weight: bold;
   text-align: center;
-  max-height: 40px;
   padding: 0px;
 }
 
 .matrix > tbody > tr > td > img {
-  max-height: 40px;
-}
-
-.row0 {
-  padding-right: 5px;
-  height: 50px;
-  background-color: lightgray;
+  display: block;
+  height: inherit;
+  width: 45px;
 }
