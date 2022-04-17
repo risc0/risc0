@@ -40,7 +40,6 @@ async fn main() {
     tracing::info!("listening on {}", addr);
     let server = axum::Server::bind(&addr).serve(app.into_make_service());
 
-
     server.await.unwrap();
 }
 
