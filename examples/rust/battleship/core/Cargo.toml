@@ -1,13 +1,8 @@
 [package]
-name = "battleship_core"
+name = "battleship-core"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["rlib"]
-
 [dependencies]
-serde = "1.0.118"
+serde = "1.0"
 zkvm_core = { path = "../../../../risc0/zkvm/sdk/rust/core" }
-
-

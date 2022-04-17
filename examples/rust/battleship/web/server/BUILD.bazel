@@ -8,8 +8,6 @@ rust_binary(
         "//examples/rust/battleship/core:init.id",
         "//examples/rust/battleship/core:turn",
         "//examples/rust/battleship/core:turn.id",
-        "//examples/rust/battleship/web/client",
-        "//examples/rust/battleship/web/client:index.html",
     ],
     deps = [
         "//examples/rust/battleship/core:core_host",

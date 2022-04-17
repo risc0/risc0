@@ -174,6 +174,11 @@ crates_repository(
     name = "crates_wasm",
     lockfile = "//:Cargo-wasm.Bazel.lock",
     packages = {
+        "async-trait": crate.spec(version = "0.1"),
+        "gloo": crate.spec(
+            features = ["futures"],
+            version = "0.7",
+        ),
         "js-sys": crate.spec(version = "0.3"),
         "log": crate.spec(version = "0.4"),
         "reqwasm": crate.spec(version = "0.5"),

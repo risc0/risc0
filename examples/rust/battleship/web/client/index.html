@@ -5,17 +5,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Battleship!</title>
-  <link rel="preload" href="/client_bg.wasm" as="fetch" type="application/wasm" crossorigin="" />
-  <link rel="modulepreload" href="/client.js" />
 </head>
 
 <body>
   <script src="https://cdn.jsdelivr.net/npm/near-api-js@0.41.0/dist/near-api-js.min.js"></script>
   <script>
     const networkId = 'testnet';
-    const appName = 'flaub.testnet';
+    const appName = 'melvinz.testnet';
     const contractId = 'dev-1649886060949-33800566037764';
-    const gas = "300000000000000";
+    const GAS = "300000000000000";
+    const DEPOSIT = "1000000000000";
 
     function near_connect() {
       // connect to NEAR
@@ -23,7 +22,7 @@
         networkId,
         keyStore: new nearApi.keyStores.BrowserLocalStorageKeyStore(),
         nodeUrl: 'https://rpc.testnet.near.org',
-        walletUrl: 'https://wallet.testnet.near.org'
+        walletUrl: 'https://wallet.testnet.near.org',
       });
 
       // connect to the NEAR Wallet
@@ -32,14 +31,15 @@
       if (!wallet.isSignedIn()) {
         wallet.requestSignIn({
           contractId,
-          methodNames: ['game_state', 'new_game', 'join_game', 'turn']
+          methodNames: ['game_state', 'new_game', 'join_game', 'turn'],
         });
       }
 
       // connect to a NEAR smart contract
       const contract = new nearApi.Contract(wallet.account(), contractId, {
         viewMethods: ['game_state'],
-        changeMethods: ['new_game', 'join_game', 'turn']
+        changeMethods: ['new_game', 'join_game', 'turn'],
+        sender: wallet.account(),
       });
 
       return contract;
@@ -50,21 +50,17 @@
     }
 
     function new_game(contract, name, receipt_str) {
-      return contract.new_game({ name, receipt_str }, gas);
+      return contract.new_game({ name, receipt_str }, GAS, DEPOSIT);
     }
 
     function join_game(contract, name, receipt_str, shot_x, shot_y) {
-      return contract.join_game({ name, receipt_str, shot_x, shot_y }, gas);
+      return contract.join_game({ name, receipt_str, shot_x, shot_y }, GAS, DEPOSIT);
     }
 
     function turn(contract, name, receipt_str, shot_x, shot_y) {
-      return contract.turn({ name, receipt_str, shot_x, shot_y }, gas);
+      return contract.turn({ name, receipt_str, shot_x, shot_y }, GAS, DEPOSIT);
     }
 
-  </script>
-  <script type="module">
-    import init from '/client.js';
-    init('/client_bg.wasm');
   </script>
 </body>
 
