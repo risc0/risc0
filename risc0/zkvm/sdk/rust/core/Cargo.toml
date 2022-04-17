@@ -3,9 +3,5 @@ name = "zkvm_core"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["rlib"]
-
 [dependencies]
-serde = "1.0.118"
-
+serde = { version = "1.0", features = ["derive"] }

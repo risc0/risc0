@@ -32,17 +32,6 @@ async fn main() {
         .unwrap();
 
     let app = Router::new()
-        .fallback(Router::new().nest(
-            "/",
-            get_service(ServeDir::new("examples/rust/battleship/web/client")).handle_error(
-                |error: std::io::Error| async move {
-                    (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        format!("Unhandled internal error: {}", error),
-                    )
-                },
-            ),
-        ))
         .route("/prove/init", post(prove_init))
         .route("/prove/turn", post(prove_turn))
         .layer(TraceLayer::new_for_http());
@@ -50,11 +39,6 @@ async fn main() {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     tracing::info!("listening on {}", addr);
     let server = axum::Server::bind(&addr).serve(app.into_make_service());
-
-    let http_addr = format!("http://{}", addr);
-    if let Err(err) = open::that(http_addr) {
-        tracing::error!(error = ?err, "error opening browser");
-    }
 
     server.await.unwrap();
 }
