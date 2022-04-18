@@ -5,4 +5,5 @@ members = [
   "examples/rust/battleship/web/client",
   # "examples/rust/battleship/web/server",
   "risc0/zkvm/sdk/rust/core",
+  "risc0/zkvm/sdk/rust/serde",
 ]
