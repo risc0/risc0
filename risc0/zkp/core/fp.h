@@ -119,13 +119,12 @@ public:
   /// Generate a uniform random value.
   template <typename Rng> static Fp random(DEVADDR Rng& rng) {
     // We use rejection sampling to make sure the results are truely uniform.  Basically, if we are
-    // in the final uneven remainder of 2^64 / P, we just pull a new random number.  The propability
-    // of such is case is less than 1 in 2^32, so this is a rare event.
-    uint64_t val = uint64_t(rng.generate()) << 32 | rng.generate();
-    while (val + P < val) { // If we wrap after adding P, we are in the final copy of P
-      val = rng.generate(); // Try again.
-    }
-    return val % uint64_t(P);
+    // in the final uneven remainder of 2^32 / P, we just pull a new random number.
+    uint32_t val;
+    do {
+      val = rng.generate();
+    } while (val + P < val); // If we wrap after adding P, we are in the final copy of P
+    return val % P;
   }
 
   // Implement all the various overloads
