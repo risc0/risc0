@@ -118,12 +118,14 @@ public:
   DEVSPEC static constexpr Fp invalid() { return Fp(0xfffffffful, true); }
   /// Generate a uniform random value.
   template <typename Rng> static Fp random(DEVADDR Rng& rng) {
-    // We use rejection sampling to make sure the results are truely uniform.  Basically, if we are
-    // in the final uneven remainder of 2^32 / P, we just pull a new random number.
+    // Reject the last modulo-P region of possible uint32_t values, since it's uneven
+    // and will only return random values less than (2^32 % P).
+    constexpr uint32_t reject_cutoff = (std::numeric_limits<uint32_t>::max() / P) * P;
+
     uint32_t val;
     do {
       val = rng.generate();
-    } while (val + P < val); // If we wrap after adding P, we are in the final copy of P
+    } while (val >= reject_cutoff);
     return val % P;
   }
 
