@@ -2,6 +2,7 @@
 
 .cell {
   border-radius: 50%;
+  padding: 0px !important;
 }
 
 .cell:hover {
@@ -25,6 +26,8 @@
 }
 
 .cell div {
-  height: 34px;
-  border-radius: 50%;
+  width: 53px;
+  height: 53px;
+  background-repeat: no-repeat;
+  background-position: center;
 }

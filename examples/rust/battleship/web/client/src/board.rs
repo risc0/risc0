@@ -19,6 +19,11 @@ use yew::{context::ContextHandle, prelude::*};
 
 use crate::game::{GameContext, Shot, Side};
 
+const BOARD_SIZE: usize = 10;
+
+const SHIP_NAMES: [&str; NUM_SHIPS] =
+    ["carrier", "battleship", "cruiser", "submarine", "destroyer"];
+
 pub enum Msg {
     GameUpdate(GameContext),
 }
@@ -33,7 +38,11 @@ enum Foreground {
 #[derive(Copy, Clone)]
 enum Background {
     Vacant,
-    Occupied,
+    Occupied {
+        ship: &'static str,
+        dir: &'static str,
+        idx: usize,
+    },
 }
 
 #[derive(Copy, Clone)]
@@ -54,10 +63,6 @@ impl Default for Cell {
 impl Into<Classes> for &Cell {
     fn into(self) -> Classes {
         let mut ret = Classes::new();
-        match self.bg {
-            Background::Occupied => ret.push("ship"),
-            Background::Vacant => {}
-        }
         match self.fg {
             Foreground::Blank => {}
             Foreground::Hit => ret.push("hit"),
@@ -67,7 +72,16 @@ impl Into<Classes> for &Cell {
     }
 }
 
-const BOARD_SIZE: usize = 10;
+impl Cell {
+    fn img(&self) -> Option<String> {
+        match &self.bg {
+            Background::Vacant => None,
+            Background::Occupied { ship, dir, idx } => {
+                Some(format!("/assets/ships/{}/{}/{}.png", ship, dir, idx).into())
+            }
+        }
+    }
+}
 
 type Cells = [[Cell; BOARD_SIZE]; BOARD_SIZE];
 
@@ -86,12 +100,20 @@ impl Grid {
             match ship.dir {
                 ShipDirection::Horizontal => {
                     for dx in 0..span {
-                        cells[y][x + dx].bg = Background::Occupied;
+                        cells[y][x + dx].bg = Background::Occupied {
+                            ship: SHIP_NAMES[i].into(),
+                            dir: "h".into(),
+                            idx: dx,
+                        };
                     }
                 }
                 ShipDirection::Vertical => {
                     for dy in 0..span {
-                        cells[y + dy][x].bg = Background::Occupied;
+                        cells[y + dy][x].bg = Background::Occupied {
+                            ship: SHIP_NAMES[i].into(),
+                            dir: "v".into(),
+                            idx: dy,
+                        }
                     }
                 }
             }
@@ -170,7 +192,7 @@ impl Component for Board {
                                         row.iter().map(|cell| {
                                             html! {
                                                 <td class={classes!("cell", cell)}>
-                                                    <div></div>
+                                                    {self.render_cell(cell)}
                                                 </td>
                                             }
                                         }).collect::<Html>()
@@ -185,6 +207,22 @@ impl Component for Board {
                     {"This is a progress message!"}
                 </p>
             </div>
+        }
+    }
+}
+
+impl Board {
+    fn render_cell(&self, cell: &Cell) -> Html {
+        match cell.img() {
+            None => html! {
+                <div></div>
+            },
+            Some(url) => {
+                let style = format!("background-image: url({});", url);
+                html! {
+                    <div {style}></div>
+                }
+            }
         }
     }
 }
