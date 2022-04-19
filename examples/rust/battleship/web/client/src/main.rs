@@ -163,12 +163,12 @@ fn switch(routes: &Route, contract: Rc<NearContract>) -> Html {
     match routes.clone() {
         Route::Lobby => html! { <Lobby {contract} /> },
         Route::NewGame { name } => html! {
-            <GameProvider {name} {contract}>
+            <GameProvider {name} {contract} until={1}>
                 <Layout />
             </GameProvider>
         },
         Route::JoinGame { name } => html! {
-            <GameProvider {name} {contract}>
+            <GameProvider {name} {contract} until={2}>
                 <Layout />
             </GameProvider>
         },

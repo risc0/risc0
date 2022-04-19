@@ -14,10 +14,11 @@
 
 use std::collections::HashSet;
 
-use battleship_core::{GameState, HitType, ShipDirection, NUM_SHIPS, SHIP_SPANS};
+use battleship_core::{GameState, HitType, Position, ShipDirection, NUM_SHIPS, SHIP_SPANS};
 use yew::{context::ContextHandle, prelude::*};
+use yew_agent::{Dispatched, Dispatcher};
 
-use crate::game::{GameContext, Shot, Side};
+use crate::game::{GameAgent, GameMsg, GameSession, Shot, Side};
 
 const BOARD_SIZE: usize = 10;
 
@@ -25,7 +26,8 @@ const SHIP_NAMES: [&str; NUM_SHIPS] =
     ["carrier", "battleship", "cruiser", "submarine", "destroyer"];
 
 pub enum Msg {
-    GameUpdate(GameContext),
+    GameUpdate(GameSession),
+    Shot(Position),
 }
 
 #[derive(Copy, Clone)]
@@ -33,6 +35,7 @@ enum Foreground {
     Blank,
     Miss,
     Hit,
+    Pending,
 }
 
 #[derive(Copy, Clone)]
@@ -67,6 +70,7 @@ impl Into<Classes> for &Cell {
             Foreground::Blank => {}
             Foreground::Hit => ret.push("hit"),
             Foreground::Miss => ret.push("miss"),
+            Foreground::Pending => ret.push("pending"),
         };
         ret
     }
@@ -145,7 +149,8 @@ pub struct Props {
 }
 
 pub struct Board {
-    _game_handle: ContextHandle<GameContext>,
+    game_agent: Dispatcher<GameAgent>,
+    _game_handle: ContextHandle<GameSession>,
     grid: Grid,
 }
 
@@ -164,7 +169,11 @@ impl Component for Board {
             Side::Remote => Grid::render_remote(&game.remote_shots),
         };
 
-        Board { _game_handle, grid }
+        Board {
+            game_agent: GameAgent::dispatcher(),
+            _game_handle,
+            grid,
+        }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
@@ -176,32 +185,23 @@ impl Component for Board {
                 };
                 true
             }
+            Msg::Shot(pos) => match ctx.props().side {
+                Side::Local => false,
+                Side::Remote => {
+                    self.grid.cells[pos.y as usize][pos.x as usize].fg = Foreground::Pending;
+                    // self.game.dispatch(GameAction::Shot(pos));
+                    self.game_agent.send(GameMsg::Shot(pos));
+                    true
+                }
+            },
         }
     }
 
-    fn view(&self, _ctx: &Context<Self>) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
             <div>
                 <table class="table table-bordered">
-                    <tbody>
-                        {
-                            self.grid.cells.iter().map(|row| {
-                                html! {
-                                    <tr>
-                                    {
-                                        row.iter().map(|cell| {
-                                            html! {
-                                                <td class={classes!("cell", cell)}>
-                                                    {self.render_cell(cell)}
-                                                </td>
-                                            }
-                                        }).collect::<Html>()
-                                    }
-                                    </tr>
-                                }
-                            }).collect::<Html>()
-                        }
-                    </tbody>
+                    <tbody>{self.render_table(ctx)}</tbody>
                 </table>
                 <p class="p-2 text-center border">
                     {"This is a progress message!"}
@@ -212,17 +212,47 @@ impl Component for Board {
 }
 
 impl Board {
-    fn render_cell(&self, cell: &Cell) -> Html {
-        match cell.img() {
-            None => html! {
-                <div></div>
-            },
-            Some(url) => {
-                let style = format!("background-image: url({});", url);
-                html! {
-                    <div {style}></div>
+    fn render_table(&self, ctx: &Context<Self>) -> Html {
+        self.grid
+            .cells
+            .iter()
+            .enumerate()
+            .map(|(y, row)| self.render_row(ctx, y, row))
+            .collect::<Html>()
+    }
+
+    fn render_row(&self, ctx: &Context<Self>, y: usize, row: &[Cell]) -> Html {
+        html! {
+            <tr>
+                {row
+                    .iter()
+                    .enumerate()
+                    .map(|(x, cell)| { self.render_cell(ctx, x, y, cell) })
+                    .collect::<Html>()}
+            </tr>
+        }
+    }
+
+    fn render_cell(&self, ctx: &Context<Self>, x: usize, y: usize, cell: &Cell) -> Html {
+        let onclick = ctx
+            .link()
+            .callback(move |_| Msg::Shot(Position::new(x as u32, y as u32)));
+        html! {
+            <td class={classes!("cell", cell)} {onclick}>
+                {
+                    match cell.img() {
+                        None => html! {
+                            <div></div>
+                        },
+                        Some(url) => {
+                            let style = format!("background-image: url({});", url);
+                            html! {
+                                <div {style}></div>
+                            }
+                        }
+                    }
                 }
-            }
+            </td>
         }
     }
 }

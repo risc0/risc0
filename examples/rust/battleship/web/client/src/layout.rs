@@ -16,11 +16,11 @@ use yew::prelude::*;
 
 use crate::{
     board::Board,
-    game::{GameContext, Side},
+    game::{GameSession, Side},
 };
 
 pub enum Msg {
-    Game(GameContext),
+    Game(GameSession),
 }
 
 #[derive(Clone, PartialEq, Properties)]
