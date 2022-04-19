@@ -33,7 +33,7 @@ pub const SHIP_SPANS: [usize; NUM_SHIPS] = [
 
 pub const SUNK_MASKS: [u8; NUM_SHIPS] = [0x1f, 0x0f, 0x07, 0x07, 0x03];
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
 pub struct Position {
     pub x: u32,
     pub y: u32,
@@ -64,7 +64,7 @@ pub struct RoundParams {
     pub shot: Position,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
 pub enum HitType {
     Miss,
     Hit,
