@@ -1,0 +1,33 @@
+// index.scss
+
+.cell {
+  border-radius: 50%;
+  padding: 0px !important;
+}
+
+.cell:hover {
+  background-color: lightgreen;
+}
+
+.cell:not(:hover) {
+  background-color: "";
+}
+
+.cell.miss {
+  background-color: lightgrey;
+}
+
+.cell.hit {
+  background-color: red;
+}
+
+.cell.ship {
+  background-color: black;
+}
+
+.cell div {
+  width: 53px;
+  height: 53px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
