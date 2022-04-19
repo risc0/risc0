@@ -16,7 +16,7 @@ use zkvm_host::Prover;
 #[derive(Deserialize, Serialize)]
 pub struct Receipt {
     journal: Vec<u8>,
-    seal: Vec<u32>
+    seal: Vec<u32>,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -55,8 +55,7 @@ async fn main() {
     server.await.unwrap();
 }
 
-fn do_init_proof(name: &str, input: GameState) -> Result<String, zkvm_host::Exception>
-{
+fn do_init_proof(name: &str, input: GameState) -> Result<String, zkvm_host::Exception> {
     let mut prover = Prover::new(name)?;
     let vec = zkvm_serde::to_vec(&input).unwrap();
     prover.add_input(vec.as_slice())?;
@@ -68,8 +67,7 @@ fn do_init_proof(name: &str, input: GameState) -> Result<String, zkvm_host::Exce
     Ok(base64::encode(bincode::serialize(&receipt).unwrap()))
 }
 
-fn do_turn_proof(name: &str, input: RoundParams) -> Result<TurnResult, zkvm_host::Exception>
-{
+fn do_turn_proof(name: &str, input: RoundParams) -> Result<TurnResult, zkvm_host::Exception> {
     let mut prover = Prover::new(name)?;
     let vec = zkvm_serde::to_vec(&input).unwrap();
     prover.add_input(vec.as_slice())?;
@@ -81,7 +79,10 @@ fn do_turn_proof(name: &str, input: RoundParams) -> Result<TurnResult, zkvm_host
     let receiptStr = base64::encode(bincode::serialize(&receipt).unwrap());
     let vec = prover.get_output_vec()?;
     let result = zkvm_serde::from_slice::<RoundResult>(vec.as_slice()).unwrap();
-    Ok(TurnResult{ state: result, receipt: receiptStr})
+    Ok(TurnResult {
+        state: result,
+        receipt: receiptStr,
+    })
 }
 
 async fn prove_init(Json(payload): Json<GameState>) -> impl IntoResponse {
