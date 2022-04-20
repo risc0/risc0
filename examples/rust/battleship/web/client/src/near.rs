@@ -66,9 +66,7 @@ impl PartialEq for NearContract {
 impl Contract for NearContract {
     async fn get_state(&self, name: &str) -> Result<ContractState, JsValue> {
         let value: JsValue = self.contract.game_state(name).await?;
-        let state = ContractState::from_jsvalue(value);
-        log::info!("{:?}", state);
-        Ok(state)
+        Ok(ContractState::from_jsvalue(value))
     }
 
     async fn list_games(&self) -> Result<Vec<String>, JsValue> {

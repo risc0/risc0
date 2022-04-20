@@ -18,7 +18,7 @@ use yew_agent::{Bridge, Bridged};
 use crate::bus::EventBus;
 
 pub struct Journal {
-    _bridge: Box<dyn Bridge<EventBus>>,
+    _bridge: Box<dyn Bridge<EventBus<String>>>,
     lines: Vec<String>,
 }
 

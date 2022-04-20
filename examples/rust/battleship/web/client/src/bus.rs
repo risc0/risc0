@@ -12,25 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashSet;
+use std::{collections::HashSet, marker::PhantomData};
 
 use yew_agent::{Agent, AgentLink, Context, HandlerId};
 
-pub struct EventBus {
-    link: AgentLink<EventBus>,
+pub struct EventBus<T: Clone + 'static> {
+    link: AgentLink<EventBus<T>>,
     subscribers: HashSet<HandlerId>,
+    _marker: PhantomData<T>,
 }
 
-impl Agent for EventBus {
+impl<T: Clone + 'static> Agent for EventBus<T> {
     type Reach = Context<Self>;
     type Message = ();
-    type Input = String;
-    type Output = String;
+    type Input = T;
+    type Output = T;
 
     fn create(link: AgentLink<Self>) -> Self {
         Self {
             link,
             subscribers: HashSet::new(),
+            _marker: PhantomData,
         }
     }
 

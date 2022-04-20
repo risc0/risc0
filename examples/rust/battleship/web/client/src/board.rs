@@ -14,11 +14,14 @@
 
 use std::collections::HashSet;
 
-use battleship_core::{GameState, HitType, Position, ShipDirection, NUM_SHIPS, SHIP_SPANS};
+use battleship_core::{GameState, Position, ShipDirection, NUM_SHIPS, SHIP_SPANS};
 use yew::{context::ContextHandle, prelude::*};
 use yew_agent::{Dispatched, Dispatcher};
 
-use crate::game::{GameAgent, GameMsg, GameSession, Shot, Side};
+use crate::{
+    bus::EventBus,
+    game::{CoreHitType, GameMsg, GameSession, HitType, Shot, Side},
+};
 
 const BOARD_SIZE: usize = 10;
 
@@ -94,6 +97,13 @@ struct Grid {
 }
 
 impl Grid {
+    pub fn render(game: &GameSession, side: Side) -> Self {
+        match side {
+            Side::Local => Grid::render_local(&game.local_shots, &game.state),
+            Side::Remote => Grid::render_remote(&game.remote_shots),
+        }
+    }
+
     pub fn render_local(shots: &HashSet<Shot>, state: &GameState) -> Self {
         let mut cells = [[Cell::default(); BOARD_SIZE]; BOARD_SIZE];
         for i in 0..NUM_SHIPS {
@@ -133,9 +143,10 @@ impl Grid {
     fn render_shots(cells: &mut Cells, shots: &HashSet<Shot>) -> Self {
         for shot in shots {
             let fg = match shot.hit {
-                HitType::Hit => Foreground::Hit,
-                HitType::Miss => Foreground::Miss,
-                HitType::Sunk(_) => Foreground::Hit,
+                HitType::Core(CoreHitType::Hit) => Foreground::Hit,
+                HitType::Core(CoreHitType::Miss) => Foreground::Miss,
+                HitType::Core(CoreHitType::Sunk(_)) => Foreground::Hit,
+                HitType::Pending => Foreground::Pending,
             };
             cells[shot.pos.y as usize][shot.pos.x as usize].fg = fg;
         }
@@ -149,7 +160,7 @@ pub struct Props {
 }
 
 pub struct Board {
-    game_agent: Dispatcher<GameAgent>,
+    game_agent: Dispatcher<EventBus<GameMsg>>,
     _game_handle: ContextHandle<GameSession>,
     grid: Grid,
 }
@@ -164,25 +175,17 @@ impl Component for Board {
             .context(ctx.link().callback(Msg::GameUpdate))
             .unwrap();
 
-        let grid = match ctx.props().side {
-            Side::Local => Grid::render_local(&game.local_shots, &game.state),
-            Side::Remote => Grid::render_remote(&game.remote_shots),
-        };
-
         Board {
-            game_agent: GameAgent::dispatcher(),
+            game_agent: EventBus::dispatcher(),
             _game_handle,
-            grid,
+            grid: Grid::render(&game, ctx.props().side),
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::GameUpdate(game) => {
-                self.grid = match ctx.props().side {
-                    Side::Local => Grid::render_local(&game.local_shots, &game.state),
-                    Side::Remote => Grid::render_remote(&game.remote_shots),
-                };
+                self.grid = Grid::render(&game, ctx.props().side);
                 true
             }
             Msg::Shot(pos) => match ctx.props().side {
