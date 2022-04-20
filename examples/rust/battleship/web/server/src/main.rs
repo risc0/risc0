@@ -3,11 +3,11 @@ use std::net::SocketAddr;
 use axum::{
     http::StatusCode,
     response::IntoResponse,
-    routing::{get_service, post},
+    routing::post,
     Json, Router,
 };
 use serde::{Deserialize, Serialize};
-use tower_http::{services::ServeDir, trace::TraceLayer};
+use tower_http::trace::TraceLayer;
 use tracing_subscriber::prelude::*;
 
 use battleship_core::{GameState, RoundParams, RoundResult};
@@ -76,12 +76,11 @@ fn do_turn_proof(name: &str, input: RoundParams) -> Result<TurnResult, zkvm_host
         journal: receipt.get_journal().unwrap().to_vec(),
         seal: receipt.get_seal().unwrap().to_vec(),
     };
-    let receiptStr = base64::encode(bincode::serialize(&receipt).unwrap());
     let vec = prover.get_output_vec()?;
     let result = zkvm_serde::from_slice::<RoundResult>(vec.as_slice()).unwrap();
     Ok(TurnResult {
         state: result,
-        receipt: receiptStr,
+        receipt: base64::encode(bincode::serialize(&receipt).unwrap()),
     })
 }
 

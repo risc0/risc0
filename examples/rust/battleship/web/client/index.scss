@@ -14,7 +14,7 @@
 }
 
 .cell.miss {
-  background-color: lightgrey;
+  background-color: grey;
 }
 
 .cell.hit {
@@ -30,4 +30,5 @@
   height: 53px;
   background-repeat: no-repeat;
   background-position: center;
+  background-size: 100% 100%;
 }

@@ -189,7 +189,6 @@ impl Component for Board {
                 Side::Local => false,
                 Side::Remote => {
                     self.grid.cells[pos.y as usize][pos.x as usize].fg = Foreground::Pending;
-                    // self.game.dispatch(GameAction::Shot(pos));
                     self.game_agent.send(GameMsg::Shot(pos));
                     true
                 }
@@ -199,14 +198,9 @@ impl Component for Board {
 
     fn view(&self, ctx: &Context<Self>) -> Html {
         html! {
-            <div>
-                <table class="table table-bordered">
-                    <tbody>{self.render_table(ctx)}</tbody>
-                </table>
-                <p class="p-2 text-center border">
-                    {"This is a progress message!"}
-                </p>
-            </div>
+            <table class="table table-bordered">
+                <tbody>{self.render_table(ctx)}</tbody>
+            </table>
         }
     }
 }

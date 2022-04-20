@@ -13,8 +13,7 @@
 // limitations under the License.
 
 const GAS = "300000000000000";
-const DEPOSIT = "1000000000000";
-const CONTRACT_ID = 'dev-1650382279679-61811806214641';
+const CONTRACT_ID = 'dev-1650384630199-84450568731492';
 const NETWORK_ID = 'testnet';
 
 export class NearWallet {

@@ -16,6 +16,7 @@ use std::{collections::HashSet, rc::Rc};
 
 use gloo::timers::future::TimeoutFuture;
 use reqwasm::http::Request;
+use serde::{Deserialize, Serialize};
 use yew::prelude::*;
 use yew_agent::{Agent, AgentLink, Bridge, Bridged, Dispatched, Dispatcher, HandlerId};
 
@@ -24,7 +25,9 @@ use crate::{
     contract::{Contract, ContractState},
     near::NearContract,
 };
-use battleship_core::{GameState, HitType, Position, RoundParams, Ship, ShipDirection};
+use battleship_core::{
+    GameState, HitType, Position, RoundParams, RoundResult, Ship, ShipDirection,
+};
 
 const WAIT_TURN_INTERVAL: u32 = 5_000;
 
@@ -34,13 +37,20 @@ pub enum Side {
     Remote,
 }
 
+#[derive(Deserialize, Serialize)]
+pub struct TurnResult {
+    state: RoundResult,
+    receipt: String,
+}
+
 #[derive(Clone, PartialEq)]
 pub enum GameMsg {
     Init,
     Shot(Position),
     WaitTurn,
     ProcessTurn(ContractState),
-    UpdateState(String, GameState),
+    UpdateState(String, RoundResult, Position),
+    Error(String),
 }
 
 #[derive(PartialEq, Clone, Eq, Hash)]
@@ -57,7 +67,9 @@ pub struct GameSession {
     pub local_shots: HashSet<Shot>,
     pub remote_shots: HashSet<Shot>,
     pub last_receipt: String,
+    pub last_shot: Option<Position>,
     pub is_first: bool,
+    pub status: String,
 }
 
 pub struct GameAgent {
@@ -132,7 +144,9 @@ impl Component for GameProvider {
             local_shots: HashSet::new(),
             remote_shots: HashSet::new(),
             last_receipt: String::new(),
+            last_shot: None,
             is_first: ctx.props().until == 2,
+            status: format!("Ready!"),
         };
         if ctx.props().until == 1 {
             ctx.link().send_message(GameMsg::Init);
@@ -147,56 +161,98 @@ impl Component for GameProvider {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             GameMsg::Init => {
+                self.game.status = format!("Init");
                 let game = self.game.clone();
                 let body = serde_json::to_string(&game.state).unwrap();
                 ctx.link().send_future(async move {
-                    let response = Request::post("/prove/init")
+                    let response = match Request::post("/prove/init")
                         .header("Content-Type", "application/json")
                         .body(body)
                         .send()
                         .await
-                        .unwrap();
-                    let receipt = response.text().await.unwrap();
-                    game.contract.new_game(&game.name, &receipt).await.unwrap();
-                    GameMsg::WaitTurn
+                    {
+                        Ok(response) => response,
+                        Err(err) => {
+                            return GameMsg::Error(format!("POST /prove/init failed: {}", err));
+                        }
+                    };
+                    let receipt = match response.text().await {
+                        Ok(receipt) => receipt,
+                        Err(err) => {
+                            return GameMsg::Error(format!("receipt: {}", err));
+                        }
+                    };
+                    match game.contract.new_game(&game.name, &receipt).await {
+                        Ok(()) => GameMsg::WaitTurn,
+                        Err(err) => GameMsg::Error(format!("new_game: {:?}", err)),
+                    }
                 });
                 true
             }
             GameMsg::Shot(pos) => {
+                self.game.status = format!("Shot: {}", pos);
                 self.event_bus.send("GameMsg::Shot".into());
+                self.game.last_shot = Some(pos.clone());
                 let game = self.game.clone();
                 let is_first = self.game.is_first;
                 self.game.is_first = false;
                 ctx.link().send_future(async move {
                     if is_first {
                         let body = serde_json::to_string(&game.state).unwrap();
-                        let response = Request::post("/prove/init")
+                        let response = match Request::post("/prove/init")
                             .header("Content-Type", "application/json")
                             .body(body)
                             .send()
                             .await
-                            .unwrap();
-                        let receipt = response.text().await.unwrap();
-                        game.contract
+                        {
+                            Ok(response) => response,
+                            Err(err) => {
+                                return GameMsg::Error(format!("POST /prove/init: {}", err));
+                            }
+                        };
+                        let receipt = match response.text().await {
+                            Ok(receipt) => receipt,
+                            Err(err) => {
+                                return GameMsg::Error(format!("receipt: {}", err));
+                            }
+                        };
+                        match game
+                            .contract
                             .join_game(&game.name, &receipt, pos.x, pos.y)
                             .await
-                            .unwrap();
+                        {
+                            Ok(()) => GameMsg::WaitTurn,
+                            Err(err) => {
+                                return GameMsg::Error(format!("join_game: {:?}", err));
+                            }
+                        }
                     } else {
-                        game.contract
+                        match game
+                            .contract
                             .turn(&game.name, &game.last_receipt, pos.x, pos.y)
                             .await
-                            .unwrap();
+                        {
+                            Ok(()) => GameMsg::WaitTurn,
+                            Err(err) => {
+                                return GameMsg::Error(format!("turn: {:?}", err));
+                            }
+                        }
                     }
-                    GameMsg::WaitTurn
                 });
                 true
             }
             GameMsg::WaitTurn => {
+                self.game.status = format!("Waiting for other player.");
                 self.event_bus.send("GameMsg::WaitTurn".into());
                 let until = ctx.props().until as u32;
                 let game = self.game.clone();
                 ctx.link().send_future(async move {
-                    let contract_state = game.contract.get_state(&game.name).await.unwrap();
+                    let contract_state = match game.contract.get_state(&game.name).await {
+                        Ok(state) => state,
+                        Err(err) => {
+                            return GameMsg::Error(format!("get_state: {:?}", err));
+                        }
+                    };
                     log::info!("contract_state: {:?}", contract_state);
                     if contract_state.next_turn == until {
                         GameMsg::ProcessTurn(contract_state)
@@ -208,36 +264,71 @@ impl Component for GameProvider {
                 true
             }
             GameMsg::ProcessTurn(contract_state) => {
+                self.game.status = format!("ProcessTurn");
                 self.event_bus.send("GameMsg::ProcessTurn".into());
                 let state = self.game.state.clone();
+                if let Some(last_shot) = self.game.last_shot.clone() {
+                    self.game.remote_shots.insert(Shot {
+                        pos: last_shot,
+                        hit: match contract_state.last_hit.unwrap() {
+                            0 => HitType::Miss,
+                            1 => HitType::Hit,
+                            2 => HitType::Sunk(contract_state.sunk_what.unwrap()),
+                            _ => unreachable!(),
+                        },
+                    });
+                }
                 let until = ctx.props().until;
                 ctx.link().send_future(async move {
-                    let player = if until == 1 {
+                    let player = if until == 2 {
                         contract_state.p1
                     } else {
                         contract_state.p2
                     };
+                    log::info!("GameMsg::ProcessTurn: {}, {}", player.shot_x, player.shot_y);
+                    let shot = Position::new(player.shot_x, player.shot_y);
                     let params = RoundParams {
                         state: state.clone(),
-                        shot: Position::new(player.shot_x, player.shot_y),
+                        shot: shot.clone(),
                     };
                     let body = serde_json::to_string(&params).unwrap();
-                    let response = Request::post("/prove/turn")
+                    let response = match Request::post("/prove/turn")
                         .header("Content-Type", "application/json")
                         .body(body)
                         .send()
                         .await
-                        .unwrap();
-                    // TODO: /prove/turn needs to return a RoundResult
-                    let receipt = response.text().await.unwrap();
-                    GameMsg::UpdateState(receipt, state)
+                    {
+                        Ok(response) => response,
+                        Err(err) => {
+                            return GameMsg::Error(format!("POST /prove/turn: {}", err));
+                        }
+                    };
+                    let result = match response.text().await {
+                        Ok(result) => result,
+                        Err(err) => {
+                            return GameMsg::Error(format!("result: {}", err));
+                        }
+                    };
+                    match serde_json::from_str::<TurnResult>(&result) {
+                        Ok(result) => GameMsg::UpdateState(result.receipt, result.state, shot),
+                        Err(err) => GameMsg::Error(format!("json fail: {}", err)),
+                    }
                 });
                 true
             }
-            GameMsg::UpdateState(receipt, state) => {
+            GameMsg::UpdateState(receipt, state, shot) => {
+                self.game.status = format!("Ready!");
                 self.event_bus.send("GameMsg::UpdateState".into());
-                self.game.state = state;
+                self.game.state = state.state;
                 self.game.last_receipt = receipt;
+                self.game.local_shots.insert(Shot {
+                    hit: state.hit,
+                    pos: shot,
+                });
+                true
+            }
+            GameMsg::Error(msg) => {
+                self.game.status = msg;
                 true
             }
         }
