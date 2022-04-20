@@ -21,6 +21,12 @@ pub struct NearWallet {
     wallet: ffi::NearWallet,
 }
 
+impl PartialEq for NearWallet {
+    fn eq(&self, other: &Self) -> bool {
+        self.wallet.cmp(&other.wallet).unwrap()
+    }
+}
+
 impl NearWallet {
     pub fn new() -> Result<Self, JsValue> {
         Ok(NearWallet {
