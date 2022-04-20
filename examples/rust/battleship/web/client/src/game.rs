@@ -18,16 +18,16 @@ use gloo::timers::future::TimeoutFuture;
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
 use yew::prelude::*;
-use yew_agent::{Agent, AgentLink, Bridge, Bridged, Dispatched, Dispatcher, HandlerId};
+use yew_agent::{Bridge, Bridged, Dispatched, Dispatcher};
 
 use crate::{
     bus::EventBus,
     contract::{Contract, ContractState},
     near::NearContract,
 };
-use battleship_core::{
-    GameState, HitType, Position, RoundParams, RoundResult, Ship, ShipDirection,
-};
+use battleship_core::{GameState, Position, RoundParams, RoundResult, Ship, ShipDirection};
+
+pub type CoreHitType = battleship_core::HitType;
 
 const WAIT_TURN_INTERVAL: u32 = 5_000;
 
@@ -59,6 +59,12 @@ pub struct Shot {
     pub hit: HitType,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
+pub enum HitType {
+    Core(CoreHitType),
+    Pending,
+}
+
 #[derive(PartialEq, Clone)]
 pub struct GameSession {
     pub name: String,
@@ -72,41 +78,6 @@ pub struct GameSession {
     pub status: String,
 }
 
-pub struct GameAgent {
-    link: AgentLink<GameAgent>,
-    subscribers: HashSet<HandlerId>,
-}
-
-impl Agent for GameAgent {
-    type Reach = yew_agent::Context<Self>;
-    type Message = ();
-    type Input = GameMsg;
-    type Output = GameMsg;
-
-    fn create(link: AgentLink<Self>) -> Self {
-        GameAgent {
-            link,
-            subscribers: HashSet::new(),
-        }
-    }
-
-    fn update(&mut self, _msg: Self::Message) {}
-
-    fn handle_input(&mut self, msg: Self::Input, _id: HandlerId) {
-        for sub in self.subscribers.iter() {
-            self.link.respond(*sub, msg.clone());
-        }
-    }
-
-    fn connected(&mut self, id: HandlerId) {
-        self.subscribers.insert(id);
-    }
-
-    fn disconnected(&mut self, id: HandlerId) {
-        self.subscribers.remove(&id);
-    }
-}
-
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub name: String,
@@ -117,8 +88,8 @@ pub struct Props {
 }
 
 pub struct GameProvider {
-    _bridge: Box<dyn Bridge<GameAgent>>,
-    event_bus: Dispatcher<EventBus>,
+    _bridge: Box<dyn Bridge<EventBus<GameMsg>>>,
+    journal: Dispatcher<EventBus<String>>,
     game: GameSession,
 }
 
@@ -152,8 +123,8 @@ impl Component for GameProvider {
             ctx.link().send_message(GameMsg::Init);
         }
         GameProvider {
-            _bridge: GameAgent::bridge(ctx.link().callback(|msg| msg)),
-            event_bus: EventBus::dispatcher(),
+            _bridge: EventBus::bridge(ctx.link().callback(|msg| msg)),
+            journal: EventBus::dispatcher(),
             game,
         }
     }
@@ -191,8 +162,12 @@ impl Component for GameProvider {
             }
             GameMsg::Shot(pos) => {
                 self.game.status = format!("Shot: {}", pos);
-                self.event_bus.send("GameMsg::Shot".into());
+                self.journal.send("GameMsg::Shot".into());
                 self.game.last_shot = Some(pos.clone());
+                self.game.remote_shots.insert(Shot {
+                    hit: HitType::Pending,
+                    pos: pos.clone(),
+                });
                 let game = self.game.clone();
                 let is_first = self.game.is_first;
                 self.game.is_first = false;
@@ -243,7 +218,7 @@ impl Component for GameProvider {
             }
             GameMsg::WaitTurn => {
                 self.game.status = format!("Waiting for other player.");
-                self.event_bus.send("GameMsg::WaitTurn".into());
+                self.journal.send("GameMsg::WaitTurn".into());
                 let until = ctx.props().until as u32;
                 let game = self.game.clone();
                 ctx.link().send_future(async move {
@@ -253,7 +228,6 @@ impl Component for GameProvider {
                             return GameMsg::Error(format!("get_state: {:?}", err));
                         }
                     };
-                    log::info!("contract_state: {:?}", contract_state);
                     if contract_state.next_turn == until {
                         GameMsg::ProcessTurn(contract_state)
                     } else {
@@ -265,15 +239,17 @@ impl Component for GameProvider {
             }
             GameMsg::ProcessTurn(contract_state) => {
                 self.game.status = format!("ProcessTurn");
-                self.event_bus.send("GameMsg::ProcessTurn".into());
+                self.journal.send("GameMsg::ProcessTurn".into());
                 let state = self.game.state.clone();
                 if let Some(last_shot) = self.game.last_shot.clone() {
                     self.game.remote_shots.insert(Shot {
                         pos: last_shot,
                         hit: match contract_state.last_hit.unwrap() {
-                            0 => HitType::Miss,
-                            1 => HitType::Hit,
-                            2 => HitType::Sunk(contract_state.sunk_what.unwrap()),
+                            0 => HitType::Core(CoreHitType::Miss),
+                            1 => HitType::Core(CoreHitType::Hit),
+                            2 => {
+                                HitType::Core(CoreHitType::Sunk(contract_state.sunk_what.unwrap()))
+                            }
                             _ => unreachable!(),
                         },
                     });
@@ -285,7 +261,6 @@ impl Component for GameProvider {
                     } else {
                         contract_state.p2
                     };
-                    log::info!("GameMsg::ProcessTurn: {}, {}", player.shot_x, player.shot_y);
                     let shot = Position::new(player.shot_x, player.shot_y);
                     let params = RoundParams {
                         state: state.clone(),
@@ -318,11 +293,11 @@ impl Component for GameProvider {
             }
             GameMsg::UpdateState(receipt, state, shot) => {
                 self.game.status = format!("Ready!");
-                self.event_bus.send("GameMsg::UpdateState".into());
+                self.journal.send("GameMsg::UpdateState".into());
                 self.game.state = state.state;
                 self.game.last_receipt = receipt;
                 self.game.local_shots.insert(Shot {
-                    hit: state.hit,
+                    hit: HitType::Core(state.hit),
                     pos: shot,
                 });
                 true

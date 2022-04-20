@@ -15,7 +15,6 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
-use weblog::console_log;
 
 #[async_trait(?Send)]
 pub trait Contract {
@@ -66,8 +65,6 @@ pub struct ContractState {
 
 impl ContractState {
     pub fn from_jsvalue(value: JsValue) -> Self {
-        log::info!("ContractState::from_jsvalue");
-        console_log!(&value);
         serde_wasm_bindgen::from_value(value).unwrap()
     }
 }

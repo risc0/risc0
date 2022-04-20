@@ -21,12 +21,10 @@ mod journal;
 mod layout;
 mod lobby;
 mod near;
-// mod mock;
 
 use std::rc::Rc;
 
 use bus::EventBus;
-// use mock::Mock;
 use near::{NearContract, NearWallet};
 use yew::prelude::*;
 use yew_agent::{Dispatched, Dispatcher};
@@ -53,8 +51,7 @@ enum Msg {
 }
 
 struct App {
-    // contract: Rc<Mock>,
-    event_bus: Dispatcher<EventBus>,
+    journal: Dispatcher<EventBus<String>>,
     wallet: Rc<NearWallet>,
     contract: Option<Rc<NearContract>>,
 }
@@ -73,7 +70,7 @@ impl Component for App {
         };
 
         Self {
-            event_bus: EventBus::dispatcher(),
+            journal: EventBus::dispatcher(),
             wallet,
             contract,
         }
@@ -82,13 +79,13 @@ impl Component for App {
     fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::SignIn => {
-                self.event_bus.send("App::SignIn".into());
+                self.journal.send("App::SignIn".into());
                 self.wallet.sign_in().unwrap();
                 self.contract = Some(Rc::new(self.wallet.get_contract().unwrap()));
                 true
             }
             Msg::SignOut => {
-                self.event_bus.send("App::SignOut".into());
+                self.journal.send("App::SignOut".into());
                 self.wallet.sign_out().unwrap();
                 true
             }

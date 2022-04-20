@@ -22,7 +22,7 @@ use yew_router::{components::Link, history::History, prelude::RouterScopeExt};
 use crate::{bus::EventBus, contract::Contract, near::NearContract, Route};
 
 pub struct Lobby {
-    event_bus: Dispatcher<EventBus>,
+    journal: Dispatcher<EventBus<String>>,
     contract: Rc<NearContract>,
     games: Vec<String>,
 }
@@ -48,22 +48,21 @@ impl Component for Lobby {
         ctx.link()
             .send_future(async move { Msg::ListGames(contract.list_games().await.unwrap()) });
         Lobby {
-            event_bus: EventBus::dispatcher(),
+            journal: EventBus::dispatcher(),
             contract: ctx.props().contract.clone(),
             games: Vec::new(),
         }
     }
 
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
-        log::info!("Lobby.update");
         match msg {
             Msg::ListGames(games) => {
-                self.event_bus.send("Lobby::ListGames".into());
+                self.journal.send("Lobby::ListGames".into());
                 self.games = games;
                 true
             }
             Msg::ClearGames => {
-                self.event_bus.send("Lobby::ClearGames".into());
+                self.journal.send("Lobby::ClearGames".into());
                 let contract = self.contract.clone();
                 ctx.link().send_future(async move {
                     contract.clear_games().await.unwrap();
@@ -72,7 +71,7 @@ impl Component for Lobby {
                 true
             }
             Msg::NewGame(name) => {
-                self.event_bus.send("Lobby::NewGame".into());
+                self.journal.send("Lobby::NewGame".into());
                 ctx.link().history().unwrap().push(Route::NewGame { name });
                 true
             }
