@@ -44,7 +44,7 @@ pub trait Contract {
     ) -> Result<(), JsValue>;
 }
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct PlayerState {
     pub id: String,
     pub board: [u32; 8],
@@ -52,7 +52,7 @@ pub struct PlayerState {
     pub shot_y: u32,
 }
 
-#[derive(Default, Debug, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct ContractState {
     // 0 means p1 has setup game, and p2 needs to do setup
     // 1 means p1 needs to process p2's shot and make it's own

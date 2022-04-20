@@ -12,24 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use yew::prelude::*;
+use yew::{context::ContextHandle, prelude::*};
 
 use crate::{
     board::Board,
-    game::{GameContext, Side},
+    game::{GameSession, Side},
 };
 
 pub enum Msg {
-    Game(GameContext),
-}
-
-#[derive(Clone, PartialEq, Properties)]
-pub struct Props {
-    pub name: String,
+    Game(GameSession),
 }
 
 pub struct Layout {
     name: String,
+    status: String,
+    _game_handle: ContextHandle<GameSession>,
 }
 
 impl Component for Layout {
@@ -37,9 +34,20 @@ impl Component for Layout {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        let (game, _) = ctx.link().context(ctx.link().callback(Msg::Game)).unwrap();
+        let (game, _game_handle) = ctx.link().context(ctx.link().callback(Msg::Game)).unwrap();
         Layout {
             name: game.name.clone(),
+            status: game.status.clone(),
+            _game_handle,
+        }
+    }
+
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            Msg::Game(game) => {
+                self.status = game.status.clone();
+                true
+            }
         }
     }
 
@@ -58,6 +66,9 @@ impl Component for Layout {
                     <div class="col-5">
                         <Board side={Side::Remote} />
                     </div>
+                    <p class="p-2 text-center border">
+                        {&self.status}
+                    </p>
                 </div>
             </>
         }

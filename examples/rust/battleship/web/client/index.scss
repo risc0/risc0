@@ -14,15 +14,15 @@
 }
 
 .cell.miss {
-  background-color: lightgrey;
+  background-color: grey;
 }
 
 .cell.hit {
   background-color: red;
 }
 
-.cell.ship {
-  background-color: black;
+.cell.pending {
+  background-color: yellow;
 }
 
 .cell div {
@@ -30,4 +30,5 @@
   height: 53px;
   background-repeat: no-repeat;
   background-position: center;
+  background-size: 100% 100%;
 }

@@ -13,8 +13,7 @@
 // limitations under the License.
 
 const GAS = "300000000000000";
-const DEPOSIT = "1000000000000";
-const CONTRACT_ID = 'dev-1650252795578-51994230813767';
+const CONTRACT_ID = 'dev-1650384630199-84450568731492';
 const NETWORK_ID = 'testnet';
 
 export class NearWallet {
@@ -105,10 +104,10 @@ export class NearContract {
   }
 
   join_game(name, receipt_str, shot_x, shot_y) {
-    return this.contract.join_game({ name, receipt_str, shot_x, shot_y }, GAS, DEPOSIT);
+    return this.contract.join_game({ name, receipt_str, shot_x, shot_y }, GAS);
   }
 
   turn(name, receipt_str, shot_x, shot_y) {
-    return this.contract.turn({ name, receipt_str, shot_x, shot_y }, GAS, DEPOSIT);
+    return this.contract.turn({ name, receipt_str, shot_x, shot_y }, GAS);
   }
 }
