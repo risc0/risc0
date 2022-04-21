@@ -21,16 +21,19 @@ mod journal;
 mod layout;
 mod lobby;
 mod near;
+mod wallet;
 
 use std::rc::Rc;
 
 use bus::EventBus;
-use near::{NearContract, NearWallet};
+use near::NearWallet;
 use yew::prelude::*;
 use yew_agent::{Dispatched, Dispatcher};
 use yew_router::prelude::*;
 
-use crate::{game::GameProvider, journal::Journal, layout::Layout, lobby::Lobby};
+use crate::{
+    game::GameProvider, journal::Journal, layout::Layout, lobby::Lobby, wallet::WalletProvider,
+};
 
 #[derive(Debug, Clone, PartialEq, Routable)]
 enum Route {
@@ -53,7 +56,6 @@ enum Msg {
 struct App {
     journal: Dispatcher<EventBus<String>>,
     wallet: Rc<NearWallet>,
-    contract: Option<Rc<NearContract>>,
 }
 
 impl Component for App {
@@ -62,17 +64,9 @@ impl Component for App {
 
     fn create(_ctx: &Context<Self>) -> Self {
         let wallet = Rc::new(NearWallet::new().unwrap());
-        let user = wallet.current_user().unwrap();
-        let contract = if user.is_empty() {
-            None
-        } else {
-            Some(Rc::new(wallet.get_contract().unwrap()))
-        };
-
         Self {
             journal: EventBus::dispatcher(),
             wallet,
-            contract,
         }
     }
 
@@ -81,7 +75,6 @@ impl Component for App {
             Msg::SignIn => {
                 self.journal.send("App::SignIn".into());
                 self.wallet.sign_in().unwrap();
-                self.contract = Some(Rc::new(self.wallet.get_contract().unwrap()));
                 true
             }
             Msg::SignOut => {
@@ -130,10 +123,10 @@ impl Component for App {
                             </div>
                         </div>
                     </nav>
-                    if !has_user {
-                        <p>{"Please Sign In to start."}</p>
+                    if has_user {
+                        {self.view_main(&self.wallet)}
                     } else {
-                        {self.view_main()}
+                        <p>{"Please Sign In to start."}</p>
                     }
                     <hr/>
                     <Journal />
@@ -147,25 +140,26 @@ impl Component for App {
 }
 
 impl App {
-    fn view_main(&self) -> Html {
-        let contract = self.contract.as_ref().unwrap().clone();
-        let render = Switch::render(move |routes| switch(routes, contract.clone()));
+    fn view_main(&self, wallet: &Rc<NearWallet>) -> Html {
+        let render = Switch::render(move |routes| switch(routes));
         html! {
-            <Switch<Route> {render} />
+            <WalletProvider wallet={wallet.clone()}>
+                <Switch<Route> {render} />
+            </WalletProvider>
         }
     }
 }
 
-fn switch(routes: &Route, contract: Rc<NearContract>) -> Html {
+fn switch(routes: &Route) -> Html {
     match routes.clone() {
-        Route::Lobby => html! { <Lobby {contract} /> },
+        Route::Lobby => html! { <Lobby /> },
         Route::NewGame { name } => html! {
-            <GameProvider {name} {contract} until={1}>
+            <GameProvider {name} until={1}>
                 <Layout />
             </GameProvider>
         },
         Route::JoinGame { name } => html! {
-            <GameProvider {name} {contract} until={2}>
+            <GameProvider {name} until={2}>
                 <Layout />
             </GameProvider>
         },

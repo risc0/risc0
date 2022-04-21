@@ -19,7 +19,7 @@ use yew::prelude::*;
 use yew_agent::{Dispatched, Dispatcher};
 use yew_router::{components::Link, history::History, prelude::RouterScopeExt};
 
-use crate::{bus::EventBus, contract::Contract, near::NearContract, Route};
+use crate::{bus::EventBus, contract::Contract, near::NearContract, wallet::WalletContext, Route};
 
 pub struct Lobby {
     journal: Dispatcher<EventBus<String>>,
@@ -34,22 +34,21 @@ pub enum Msg {
     NewGame(String),
 }
 
-#[derive(Clone, PartialEq, Properties)]
-pub struct Props {
-    pub contract: Rc<NearContract>,
-}
-
 impl Component for Lobby {
     type Message = Msg;
-    type Properties = Props;
+    type Properties = ();
 
     fn create(ctx: &yew::Context<Self>) -> Self {
-        let contract = ctx.props().contract.clone();
+        let (wallet, _) = ctx
+            .link()
+            .context::<WalletContext>(Callback::noop())
+            .unwrap();
+        let contract = wallet.contract.clone();
         ctx.link()
             .send_future(async move { Msg::ListGames(contract.list_games().await.unwrap()) });
         Lobby {
             journal: EventBus::dispatcher(),
-            contract: ctx.props().contract.clone(),
+            contract: wallet.contract.clone(),
             games: Vec::new(),
         }
     }

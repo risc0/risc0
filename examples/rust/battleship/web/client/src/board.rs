@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 use battleship_core::{GameState, Position, ShipDirection, NUM_SHIPS, SHIP_SPANS};
 use yew::{context::ContextHandle, prelude::*};
@@ -20,7 +20,7 @@ use yew_agent::{Dispatched, Dispatcher};
 
 use crate::{
     bus::EventBus,
-    game::{CoreHitType, GameMsg, GameSession, HitType, Shot, Side},
+    game::{CoreHitType, GameMsg, GameSession, HitType, Side},
 };
 
 const BOARD_SIZE: usize = 10;
@@ -104,7 +104,7 @@ impl Grid {
         }
     }
 
-    pub fn render_local(shots: &HashSet<Shot>, state: &GameState) -> Self {
+    pub fn render_local(shots: &HashMap<Position, HitType>, state: &GameState) -> Self {
         let mut cells = [[Cell::default(); BOARD_SIZE]; BOARD_SIZE];
         for i in 0..NUM_SHIPS {
             let ship = &state.ships[i];
@@ -135,20 +135,20 @@ impl Grid {
         Grid::render_shots(&mut cells, shots)
     }
 
-    pub fn render_remote(shots: &HashSet<Shot>) -> Self {
+    pub fn render_remote(shots: &HashMap<Position, HitType>) -> Self {
         let mut cells = [[Cell::default(); BOARD_SIZE]; BOARD_SIZE];
         Grid::render_shots(&mut cells, shots)
     }
 
-    fn render_shots(cells: &mut Cells, shots: &HashSet<Shot>) -> Self {
-        for shot in shots {
-            let fg = match shot.hit {
-                HitType::Core(CoreHitType::Hit) => Foreground::Hit,
-                HitType::Core(CoreHitType::Miss) => Foreground::Miss,
-                HitType::Core(CoreHitType::Sunk(_)) => Foreground::Hit,
-                HitType::Pending => Foreground::Pending,
+    fn render_shots(cells: &mut Cells, shots: &HashMap<Position, HitType>) -> Self {
+        for (pos, hit) in shots {
+            let fg = match hit {
+                &HitType::Core(CoreHitType::Hit) => Foreground::Hit,
+                &HitType::Core(CoreHitType::Miss) => Foreground::Miss,
+                &HitType::Core(CoreHitType::Sunk(_)) => Foreground::Hit,
+                &HitType::Pending => Foreground::Pending,
             };
-            cells[shot.pos.y as usize][shot.pos.x as usize].fg = fg;
+            cells[pos.y as usize][pos.x as usize].fg = fg;
         }
         Grid { cells: *cells }
     }
