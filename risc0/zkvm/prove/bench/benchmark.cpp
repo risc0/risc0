@@ -17,14 +17,31 @@
 
 using namespace risc0;
 
-struct BenchmarkStreamWriter {
-  void write_word(uint32_t word) { tot_written += sizeof(uint32_t); }
-  void write_dword(uint64_t dword) { tot_written += sizeof(uint64_t); }
-  void write_buffer(const void* buf, size_t len) { tot_written += align(len); }
+std::string writeReceipts;
 
-  size_t tot_written = 0;
-};
-static_assert(is_stream_writer<BenchmarkStreamWriter>());
+size_t save_receipt(Prover& prover, std::string receipt_file) {
+  VectorStreamWriter receipt_buf;
+  Receipt receipt = prover.run();
+  VectorStreamWriter writer;
+  ArchiveWriter<VectorStreamWriter> archive(writer);
+  archive.transfer(receipt);
+
+  if (!writeReceipts.empty()) {
+    FILE* f = fopen((writeReceipts + "/" + receipt_file).c_str(), "w");
+    if (!f) {
+      perror(receipt_file.c_str());
+      exit(1);
+    }
+
+    size_t nwrote = fwrite(writer.vec.data(), sizeof(uint32_t), writer.vec.size(), f);
+    if (nwrote != writer.vec.size()) {
+      fprintf(stderr, "Short write writing receipt\n");
+      exit(1);
+    }
+    fclose(f);
+  }
+  return writer.vec.size() * sizeof(uint32_t);
+}
 
 static void BM_Simple_Loop(benchmark::State& state) {
   uint32_t num_iter = state.range(0);
@@ -33,14 +50,26 @@ static void BM_Simple_Loop(benchmark::State& state) {
   for (auto _ : state) {
     Prover prover("risc0/zkvm/prove/bench/bench_simple_loop");
     prover.writeInput(num_iter);
-    VectorStreamWriter receipt_buf;
-    Receipt receipt = prover.run();
-    BenchmarkStreamWriter writer;
-    ArchiveWriter<BenchmarkStreamWriter> archive(writer);
-    archive.transfer(receipt);
 
+    state.counters["receipt_size"] =
+        save_receipt(prover, "bench_simple_loop_" + std::to_string(num_iter) + ".receipt");
     tot_iter += num_iter;
-    state.counters["receipt_size"] = writer.tot_written;
+  }
+
+  state.SetItemsProcessed(tot_iter);
+}
+
+static void BM_Sha(benchmark::State& state) {
+  uint32_t num_iter = state.range(0);
+  size_t tot_iter = 0;
+
+  for (auto _ : state) {
+    Prover prover("risc0/zkvm/prove/bench/bench_sha");
+    prover.writeInput(num_iter);
+
+    state.counters["receipt_size"] =
+        save_receipt(prover, "bench_sha_" + std::to_string(num_iter) + ".receipt");
+    tot_iter += num_iter;
   }
 
   state.SetItemsProcessed(tot_iter);
@@ -51,6 +80,21 @@ BENCHMARK(BM_Simple_Loop)           //
     ->Arg(1)                        // Number of iterations in guest
     ->Arg(10)
     ->Arg(100)
-    ->DenseRange(1000, 50000, 1000);
+    ->DenseRange(1000, 10000, 1000);
 
-BENCHMARK_MAIN();
+BENCHMARK(BM_Sha)->Unit(benchmark::kMillisecond)->Arg(1)->Arg(10)->Arg(100);
+
+// Helper macro to create a main routine in a test that runs the benchmarks
+int main(int argc, char** argv) {
+  ::benchmark::Initialize(&argc, argv);
+  if (argc >= 3 && !strcmp(argv[1], "--write-receipts")) {
+    writeReceipts = argv[2];
+    argc -= 2;
+    argv += 2;
+  }
+  if (::benchmark::ReportUnrecognizedArguments(argc, argv))
+    return 1;
+  ::benchmark::RunSpecifiedBenchmarks();
+  ::benchmark::Shutdown();
+  return 0;
+}
