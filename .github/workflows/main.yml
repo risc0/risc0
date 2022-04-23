@@ -37,6 +37,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: uses: actions-rs/toolchain@v1
+      - uses: actions-rs/toolchain@v1
       - run: cargo test
 
