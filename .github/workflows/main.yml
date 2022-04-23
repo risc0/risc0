@@ -37,9 +37,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Build & test
-        env:
-          CONFIG: ${{ matrix.config }}
-        run: cargo test
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo test
 
