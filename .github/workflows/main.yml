@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  bazel:
     runs-on: [self-hosted, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
@@ -27,3 +27,19 @@ jobs:
         env:
           CONFIG: ${{ matrix.config }}
         run: bazelisk test //... $CONFIG --config=cpu
+
+  cargo:
+    runs-on: [self-hosted, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS, Windows]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build & test
+        env:
+          CONFIG: ${{ matrix.config }}
+        run: cargo test
+
