@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  bazel:
+  build:
     runs-on: [self-hosted, "${{ matrix.os }}"]
     strategy:
       fail-fast: false
