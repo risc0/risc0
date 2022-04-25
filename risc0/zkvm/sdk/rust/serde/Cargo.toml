@@ -7,5 +7,5 @@ edition = "2021"
 serde = "1.0"
 
 [features]
+default = ["std"]
 std = []
-

@@ -1084,3 +1084,10 @@ version = "0.1.0"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "zkvm_serde"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
