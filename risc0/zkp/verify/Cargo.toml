@@ -1,0 +1,9 @@
+[package]
+name = "risc0-zkp-verify"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rand = { version = "0.8", default-features = false, features = ["small_rng"] }
+risc0-zkp-core = { version = "0.1", path = "../core"}
+# serde = { version = "1.0", features = ["derive"] }
