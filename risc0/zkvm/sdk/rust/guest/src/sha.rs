@@ -15,7 +15,7 @@
 use _alloc::{boxed::Box, vec::Vec};
 use core::mem;
 
-use zkvm_core::Digest;
+use risc0_zkvm_core::Digest;
 
 use crate::{
     align_up,

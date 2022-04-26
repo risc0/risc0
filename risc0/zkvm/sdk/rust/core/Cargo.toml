@@ -1,5 +1,5 @@
 [package]
-name = "zkvm_core"
+name = "risc0-zkvm-core"
 version = "0.1.0"
 edition = "2021"
 

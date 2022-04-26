@@ -55,8 +55,8 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 name = "battleship-core"
 version = "0.1.0"
 dependencies = [
+ "risc0-zkvm-core",
  "serde",
- "zkvm_core",
 ]
 
 [[package]]
@@ -663,6 +663,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkvm-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "risc0-zkvm-serde"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "risc0-zkvm-verify"
 version = "0.1.0"
 dependencies = [
@@ -1076,18 +1090,4 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "zkvm_core"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "zkvm_serde"
-version = "0.1.0"
-dependencies = [
- "serde",
 ]
