@@ -13,6 +13,7 @@ lazy_static = "1.4"
 risc0-zkp-core = { version = "0.1", path = "../../zkp/core"}
 risc0-zkp-verify = { version = "0.1", path = "../../zkp/verify"}
 serde = { version = "1.0", features = ["derive"] }
+risc0-zkvm-serde = { version = "0.1", path = "../../zkvm/sdk/rust/serde" }
 
 [dev-dependencies]
 env_logger = "0.9"

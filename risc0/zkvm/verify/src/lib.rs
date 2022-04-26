@@ -60,28 +60,37 @@ impl Receipt {
     }
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use std::{fs, io};
+#[cfg(test)]
+mod tests {
+    use super::Receipt;
+    use std::vec::Vec;
+    use core::convert::TryFrom;
+    use std::fs;
+    use std::io;
+    use test_log::test;
 
-//     use arrayref::array_ref;
-//     use log::info;
-//     use test_log::test;
+    #[test]
+    fn test_receipt() -> io::Result<()> {
+        log::set_max_level(log::LevelFilter::Info);
+        let data: Vec<u8> = fs::read("src/simple_receipt.receipt")?;
+        let as_u32: Vec<u32> = data
+            .chunks(4)
+            .map(|bytes| u32::from_le_bytes(<[u8; 4]>::try_from(bytes).unwrap()))
+            .collect();
+        let receipt: Receipt = risc0_zkvm_serde::from_slice(&as_u32).unwrap();
 
-//     use super::verify;
-//     use crate::circuit::Risc0Circuit;
+        std::println!(
+            "Receipt: journal length {} seal length {}",
+            receipt.journal.len(),
+            receipt.seal.len()
+        );
 
-//     #[test]
-//     fn test_verify() -> io::Result<()> {
-//         let data = fs::read("seal.bin")?;
-//         assert!(data.len() % 4 == 0);
-//         let mut proof: Vec<u32> = vec![];
-//         for i in 0..(data.len() / 4) {
-//             proof.push(u32::from_le_bytes(*array_ref![&data, i * 4, 4]));
-//         }
-//         info!("Words: {}", proof.len());
-//         let mut circuit = Risc0Circuit::default();
-//         verify(&mut circuit, &proof);
-//         Ok(())
-//     }
-// }
+        for i in 0..50 {
+            std::print!(" {}", receipt.seal[i]);
+        }
+        std::println!("\n");
+
+        receipt.verify();
+        Ok(())
+    }
+}

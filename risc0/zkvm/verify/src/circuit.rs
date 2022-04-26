@@ -88,6 +88,7 @@ impl Circuit for Risc0Circuit {
     }
 
     fn check_code(&self, _root: &Digest) {
+        #[cfg(not(test))]
         todo!()
     }
 
