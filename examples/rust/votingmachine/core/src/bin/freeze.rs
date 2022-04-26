@@ -15,11 +15,11 @@
 #![no_main]
 #![no_std]
 
-use zkvm_guest::{env, sha};
+use risc0_zkvm_guest::{env, sha};
 
 use votingmachine_core::{FreezeVotingMachineCommit, FreezeVotingMachineParams};
 
-zkvm_guest::entry!(main);
+risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
     let params: FreezeVotingMachineParams = env::read();

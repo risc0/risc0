@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use risc0_zkvm_host::{Prover, Receipt, Result};
+use risc0_zkvm_serde::{from_slice, to_vec};
 use votingmachine_core::{Ballot, SubmitBallotCommit, SubmitBallotParams, SubmitBallotResult};
 use votingmachine_core::{
     FreezeVotingMachineCommit, FreezeVotingMachineParams, FreezeVotingMachineResult,
 };
 use votingmachine_core::{InitializeVotingMachineCommit, VotingMachineState};
-use zkvm_host::{Prover, Receipt, Result};
-use zkvm_serde::{from_slice, to_vec};
 
 pub struct InitMessage {
     receipt: Receipt,

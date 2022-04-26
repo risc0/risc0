@@ -18,7 +18,7 @@ use core::fmt::Display;
 
 use serde::{Deserialize, Serialize};
 
-use zkvm_core::Digest;
+use risc0_zkvm_core::Digest;
 
 pub const NUM_SHIPS: usize = 5;
 pub const BOARD_SIZE: usize = 10;

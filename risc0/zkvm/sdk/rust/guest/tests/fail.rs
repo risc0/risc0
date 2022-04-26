@@ -16,7 +16,7 @@
 #![no_std]
 #![allow(non_snake_case)]
 
-zkvm_guest::entry!(main);
+risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
     panic!("Failure");

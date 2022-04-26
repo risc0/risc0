@@ -13,9 +13,9 @@
 // limitations under the License.
 
 use battleship_core::{GameState, HitType, Position, RoundCommit, RoundParams, RoundResult};
-use zkvm_core::Digest;
-use zkvm_host::{Exception, Prover, Receipt, Result};
-use zkvm_serde::{from_slice, to_vec};
+use risc0_zkvm_core::Digest;
+use risc0_zkvm_host::{Exception, Prover, Receipt, Result};
+use risc0_zkvm_serde::{from_slice, to_vec};
 
 pub struct InitMessage {
     receipt: Receipt,
@@ -133,7 +133,7 @@ mod tests {
     use log::LevelFilter;
 
     use battleship_core::{Ship, ShipDirection};
-    use zkvm_serde::to_slice;
+    use risc0_zkvm_serde::to_slice;
 
     use super::*;
 
@@ -152,13 +152,13 @@ mod tests {
     #[test]
     fn serde() {
         struct Logger;
-        impl zkvm_core::Log for Logger {
+        impl risc0_zkvm_core::Log for Logger {
             fn log(&self, msg: &str) {
                 log::info!("{}", msg);
             }
         }
         static LOGGER: Logger = Logger;
-        zkvm_core::set_logger(&LOGGER);
+        risc0_zkvm_core::set_logger(&LOGGER);
         let commit = RoundCommit {
             old_state: Digest::new([0, 1, 2, 3, 4, 5, 6, 7]),
             new_state: Digest::new([8, 7, 6, 5, 4, 3, 2, 1]),
