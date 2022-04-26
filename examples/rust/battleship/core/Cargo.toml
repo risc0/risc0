@@ -2,7 +2,8 @@
 name = "battleship-core"
 version = "0.1.0"
 edition = "2021"
+autobins = false
 
 [dependencies]
+risc0-zkvm-core = { path = "../../../../risc0/zkvm/sdk/rust/core" }
 serde = "1.0"
-zkvm_core = { path = "../../../../risc0/zkvm/sdk/rust/core" }

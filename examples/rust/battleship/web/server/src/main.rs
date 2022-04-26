@@ -1,17 +1,24 @@
 use std::net::SocketAddr;
 
-use axum::{
-    http::StatusCode,
-    response::IntoResponse,
-    routing::{get_service, post},
-    Json, Router,
-};
+use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
-use tower_http::{services::ServeDir, trace::TraceLayer};
+use tower_http::trace::TraceLayer;
 use tracing_subscriber::prelude::*;
 
-use battleship_core::{GameState, RoundParams};
-use zkvm_host::Prover;
+use battleship_core::{GameState, RoundParams, RoundResult};
+use risc0_zkvm_host::Prover;
+
+#[derive(Deserialize, Serialize)]
+pub struct Receipt {
+    journal: Vec<u8>,
+    seal: Vec<u32>,
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct TurnResult {
+    state: RoundResult,
+    receipt: String,
+}
 
 #[tokio::main]
 async fn main() {
@@ -43,18 +50,9 @@ async fn main() {
     server.await.unwrap();
 }
 
-#[derive(Deserialize, Serialize)]
-pub struct Receipt {
-    journal: Vec<u8>,
-    seal: Vec<u32>,
-}
-
-fn do_proof<T>(name: &str, input: T) -> Result<String, zkvm_host::Exception>
-where
-    T: Serialize,
-{
+fn do_init_proof(name: &str, input: GameState) -> Result<String, risc0_zkvm_host::Exception> {
     let mut prover = Prover::new(name)?;
-    let vec = zkvm_serde::to_vec(&input).unwrap();
+    let vec = risc0_zkvm_serde::to_vec(&input).unwrap();
     prover.add_input(vec.as_slice())?;
     let receipt = prover.run()?;
     let receipt = Receipt {
@@ -64,8 +62,25 @@ where
     Ok(base64::encode(bincode::serialize(&receipt).unwrap()))
 }
 
+fn do_turn_proof(name: &str, input: RoundParams) -> Result<TurnResult, risc0_zkvm_host::Exception> {
+    let mut prover = Prover::new(name)?;
+    let vec = risc0_zkvm_serde::to_vec(&input).unwrap();
+    prover.add_input(vec.as_slice())?;
+    let receipt = prover.run()?;
+    let receipt = Receipt {
+        journal: receipt.get_journal().unwrap().to_vec(),
+        seal: receipt.get_seal().unwrap().to_vec(),
+    };
+    let vec = prover.get_output_vec()?;
+    let result = risc0_zkvm_serde::from_slice::<RoundResult>(vec.as_slice()).unwrap();
+    Ok(TurnResult {
+        state: result,
+        receipt: base64::encode(bincode::serialize(&receipt).unwrap()),
+    })
+}
+
 async fn prove_init(Json(payload): Json<GameState>) -> impl IntoResponse {
-    let out = match do_proof("examples/rust/battleship/core/init", payload) {
+    let out = match do_init_proof("examples/rust/battleship/core/init", payload) {
         Ok(receipt) => receipt,
         Err(_e) => {
             return (
@@ -78,7 +93,7 @@ async fn prove_init(Json(payload): Json<GameState>) -> impl IntoResponse {
 }
 
 async fn prove_turn(Json(payload): Json<RoundParams>) -> impl IntoResponse {
-    let out = match do_proof("examples/rust/battleship/core/turn", payload) {
+    let out = match do_turn_proof("examples/rust/battleship/core/turn", payload) {
         Ok(receipt) => receipt,
         Err(_e) => {
             return (
@@ -87,5 +102,5 @@ async fn prove_turn(Json(payload): Json<RoundParams>) -> impl IntoResponse {
             )
         }
     };
-    (StatusCode::OK, out)
+    (StatusCode::OK, serde_json::to_string(&out).unwrap())
 }

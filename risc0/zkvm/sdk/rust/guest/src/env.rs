@@ -22,7 +22,7 @@ use crate::{
     REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
     REGION_OUTPUT_LEN, REGION_OUTPUT_START, WORD_SIZE,
 };
-use zkvm_serde::{Deserializer, Serializer, Slice};
+use risc0_zkvm_serde::{Deserializer, Serializer, Slice};
 
 struct Env {
     input: Deserializer<'static>,

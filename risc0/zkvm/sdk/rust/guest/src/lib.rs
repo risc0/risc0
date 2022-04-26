@@ -26,7 +26,7 @@ pub mod sha;
 use core::{mem, panic::PanicInfo, ptr};
 
 use gpio::{FaultDescriptor, LogDescriptor, GPIO_DESC_FAULT, GPIO_DESC_LOG, GPIO_FAULT, GPIO_LOG};
-use zkvm_core::{set_logger, Log};
+use risc0_zkvm_core::{set_logger, Log};
 
 const REGION_SIZE_256KB: usize = 256 * 1024;
 // const REGION_SIZE_512KB: usize = 0x0008_0000;
