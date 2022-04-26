@@ -52,14 +52,12 @@ impl Fp {
 
     /// Generate a uniform random value.
     pub fn random<R: Rng>(rng: &mut R) -> Self {
-        // We use rejection sampling to make sure the results are truly
-        // uniform. Basically, if we are in the final uneven remainder
-        // of `2^64 / P`, we just pull a new random number. The probability
-        // of such an event is less than 1 in 2^32, so this is rare indeed.
-        let mut val: u64 = rng.gen();
-        // If we wrap after adding P, we are in the final copy of P.
-        while (val + P_U64) < val {
-            // Try again.
+        // Reject the last modulo-P region of possible uint32_t values, since it's uneven
+        // and will only return random values less than (2^32 % P).
+        const REJECT_CUTOFF: u32 = (u32::MAX / P) * P;
+        let mut val: u32 = rng.gen();
+
+        while val >= REJECT_CUTOFF {
             val = rng.gen();
         }
         Fp::from(val)

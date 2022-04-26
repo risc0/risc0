@@ -62,7 +62,14 @@ struct Fp4 {
 
   /// Generate a random field element uniformly
   template <typename Rng> static Fp4 random(DEVADDR Rng& rng) {
-    return Fp4(Fp::random(rng), Fp::random(rng), Fp::random(rng), Fp::random(rng));
+    // Make sure there is only one Fp::random per statement so we get
+    // deterministic ordering (see
+    // https://en.cppreference.com/w/cpp/language/eval_order).
+    Fp a = Fp::random(rng);
+    Fp b = Fp::random(rng);
+    Fp c = Fp::random(rng);
+    Fp d = Fp::random(rng);
+    return Fp4(a, b, c, d);
   }
 
   // Implement the addition/subtraction overloads

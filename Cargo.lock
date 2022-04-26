@@ -686,6 +686,7 @@ dependencies = [
  "log",
  "risc0-zkp-core",
  "risc0-zkp-verify",
+ "risc0-zkvm-serde",
  "serde",
  "test-log",
 ]
