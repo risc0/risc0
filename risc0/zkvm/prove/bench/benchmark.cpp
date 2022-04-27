@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "benchmark/benchmark.h"
+#include "examples/cpp/battleship/battleship.h"
 #include "risc0/zkvm/sdk/cpp/host/receipt.h"
 
 using namespace risc0;
@@ -46,11 +47,46 @@ static void BM_Simple_Loop(benchmark::State& state) {
   state.SetItemsProcessed(tot_iter);
 }
 
+static void run_battleship(benchmark::State& state, const char* method) {
+  GameState game_state{{
+                           {{2, 3}, Vertical, 0x0000},
+                           {{3, 1}, Horizontal, 0x0000},
+                           {{4, 7}, Vertical, 0x0000},
+                           {{7, 5}, Horizontal, 0x0000},
+                           {{7, 7}, Horizontal, 0x0000},
+                       },
+                       0xDEADBEEF};
+  RoundParams params{game_state, {1, 1}};
+
+  for (auto _ : state) {
+    Prover prover(method);
+    prover.writeInput(params);
+    VectorStreamWriter receipt_buf;
+    Receipt receipt = prover.run();
+    BenchmarkStreamWriter writer;
+    ArchiveWriter<BenchmarkStreamWriter> archive(writer);
+    archive.transfer(receipt);
+
+    state.counters["receipt_size"] = writer.tot_written;
+  }
+}
+
+static void BM_Battleship_Cpp(benchmark::State& state) {
+  run_battleship(state, "examples/cpp/battleship/turn_method");
+}
+static void BM_Battleship_Rust(benchmark::State& state) {
+  run_battleship(state, "examples/rust/battleship/core/turn");
+}
+
 BENCHMARK(BM_Simple_Loop)           //
     ->Unit(benchmark::kMillisecond) // Display output in milliseconds per run
     ->Arg(1)                        // Number of iterations in guest
     ->Arg(10)
     ->Arg(100)
-    ->DenseRange(1000, 50000, 1000);
+    ->Arg(1000)
+    ->Arg(5000);
+
+BENCHMARK(BM_Battleship_Cpp)->Unit(benchmark::kMillisecond);
+BENCHMARK(BM_Battleship_Rust)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();
