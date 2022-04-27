@@ -1,6 +1,8 @@
 load("//bazel/rules/risc0:defs.bzl", "risc0_cc_method")
 load("//bazel/rules/cc:defs.bzl", "cc_binary", "cc_gtest", "cc_library")
 
+package(default_visibility = ["//visibility:public"])
+
 risc0_cc_method(
     name = "init_method",
     srcs = ["init_method.cpp"],
