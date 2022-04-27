@@ -10,3 +10,7 @@ members = [
   "risc0/zkvm/sdk/rust/core",
   "risc0/zkvm/sdk/rust/serde",
 ]
+
+exclude = [
+  "examples/rust/battleship/contract",
+]
