@@ -18,6 +18,7 @@
 /// Defines the core finite field data type, Fp, and some free functions on the type.
 
 #include "risc0/zkp/core/devs.h"
+#include <limits>
 
 // Determine whether to use montgomery representation or direct representation.  Currently
 // montgomry seems faster in most cases, might want to revisit with more testing
