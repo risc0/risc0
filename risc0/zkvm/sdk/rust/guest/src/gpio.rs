@@ -12,15 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub(crate) const GPIO_SHA: *mut *const SHADescriptor = 0x001C_0000 as _;
-pub(crate) const GPIO_WRITE: *mut *const IoDescriptor = 0x001C_0004 as _;
-pub(crate) const GPIO_COMMIT: *mut *const IoDescriptor = 0x001C_0008 as _;
-pub(crate) const GPIO_FAULT: *mut *const FaultDescriptor = 0x001C_000C as _;
-pub(crate) const GPIO_LOG: *mut *const LogDescriptor = 0x001C_0010 as _;
+pub struct GpioPort<T> {
+    pub port: *mut T,
+}
 
-pub(crate) const GPIO_DESC_IO: *mut IoDescriptor = 0x001D_0000 as _;
-pub(crate) const GPIO_DESC_LOG: *mut LogDescriptor = 0x001D_0000 as _;
-pub(crate) const GPIO_DESC_FAULT: *mut FaultDescriptor = 0x001D_0000 as _;
+impl<T> GpioPort<T> {
+    const fn new(addr: usize) -> Self {
+        Self {
+            port: addr as *mut T,
+        }
+    }
+
+    pub fn write(self, val: T) {
+        unsafe { self.port.write_volatile(val) }
+    }
+
+    pub fn ptr(self) -> *const T {
+        self.port.cast()
+    }
+}
 
 #[repr(C)]
 pub(crate) struct IoDescriptor {
@@ -45,3 +55,13 @@ pub(crate) struct SHADescriptor {
     pub source: usize,
     pub digest: usize,
 }
+
+pub(crate) const GPIO_SHA: GpioPort<*const SHADescriptor> = GpioPort::new(0x001C_0000);
+pub(crate) const GPIO_WRITE: GpioPort<*const IoDescriptor> = GpioPort::new(0x001C_0004);
+pub(crate) const GPIO_COMMIT: GpioPort<*const IoDescriptor> = GpioPort::new(0x001C_0008);
+pub(crate) const GPIO_FAULT: GpioPort<*const FaultDescriptor> = GpioPort::new(0x001C_000C);
+pub(crate) const GPIO_LOG: GpioPort<*const LogDescriptor> = GpioPort::new(0x001C_0010);
+
+pub(crate) const GPIO_DESC_IO: GpioPort<IoDescriptor> = GpioPort::new(0x001D_0000);
+pub(crate) const GPIO_DESC_LOG: GpioPort<LogDescriptor> = GpioPort::new(0x001D_0000);
+pub(crate) const GPIO_DESC_FAULT: GpioPort<FaultDescriptor> = GpioPort::new(0x001D_0000);

@@ -60,12 +60,12 @@ extern "C" {
 unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
     let msg = _alloc::format!("{}\0", panic_info);
 
-    GPIO_DESC_FAULT.write_volatile(FaultDescriptor {
+    GPIO_DESC_FAULT.write(FaultDescriptor {
         // addr: "panic\0".as_ptr() as usize,
         addr: msg.as_ptr() as usize,
     });
     // A compliant host should fault when it receives this descriptor.
-    GPIO_FAULT.write_volatile(GPIO_DESC_FAULT);
+    GPIO_FAULT.write(GPIO_DESC_FAULT.ptr());
 
     // As a fallback for uncompliant hosts, force an unaligned write, which causes a
     // fault within the Risc0 VM.
@@ -89,12 +89,10 @@ struct Logger;
 impl Log for Logger {
     fn log(&self, msg: &str) {
         let msg = _alloc::format!("{}\0", msg);
-        unsafe {
-            GPIO_DESC_LOG.write_volatile(LogDescriptor {
-                addr: msg.as_ptr() as usize,
-            });
-            GPIO_LOG.write_volatile(GPIO_DESC_LOG);
-        }
+        GPIO_DESC_LOG.write(LogDescriptor {
+            addr: msg.as_ptr() as usize,
+        });
+        GPIO_LOG.write(GPIO_DESC_LOG.ptr());
     }
 }
 

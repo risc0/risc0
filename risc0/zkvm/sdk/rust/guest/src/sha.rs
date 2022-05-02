@@ -96,7 +96,7 @@ fn finalize_into(len: usize, total: usize, ptr: *mut u8, result: *mut usize) {
     unsafe {
         // Write size in bits as big endian.
         let trailer: *mut usize = ptr.add(total - WORD_SIZE).cast();
-        trailer.write_volatile(bits.to_be());
+        trailer.write(bits.to_be());
 
         // Set up the next descriptor.
         let desc = get_cur_desc();
@@ -108,7 +108,7 @@ fn finalize_into(len: usize, total: usize, ptr: *mut u8, result: *mut usize) {
         });
 
         // Write the descriptor to the oracle for processing.
-        GPIO_SHA.write_volatile(desc);
+        GPIO_SHA.write(desc);
 
         // Jump to the next descriptor.
         CUR_DESC += 1;

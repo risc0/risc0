@@ -104,13 +104,11 @@ impl Env {
     fn write<T: Serialize>(&mut self, data: &T) {
         data.serialize(&mut self.output).unwrap();
         let buf = self.output.release().unwrap();
-        unsafe {
-            GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size: buf.len() * WORD_SIZE,
-                addr: buf.as_ptr() as usize,
-            });
-            GPIO_WRITE.write_volatile(GPIO_DESC_IO);
-        }
+        GPIO_DESC_IO.write(IoDescriptor {
+            size: buf.len() * WORD_SIZE,
+            addr: buf.as_ptr() as usize,
+        });
+        GPIO_WRITE.write(GPIO_DESC_IO.ptr());
     }
 
     fn commit<T: Serialize>(&mut self, data: &T) {
@@ -118,13 +116,11 @@ impl Env {
         let buf = self.commit.release().unwrap();
         self.commit_len += buf.len();
         let len_bytes = buf.len() * WORD_SIZE;
-        unsafe {
-            GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size: len_bytes,
-                addr: buf.as_ptr() as usize,
-            });
-            GPIO_WRITE.write_volatile(GPIO_DESC_IO);
-        }
+        GPIO_DESC_IO.write(IoDescriptor {
+            size: len_bytes,
+            addr: buf.as_ptr() as usize,
+        });
+        GPIO_WRITE.write(GPIO_DESC_IO.ptr());
     }
 
     fn finalize(&mut self, result: *mut usize) {
@@ -135,13 +131,11 @@ impl Env {
         };
 
         // Write the full data out to the host
-        unsafe {
-            GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size: len_bytes,
-                addr: slice.as_ptr() as usize,
-            });
-            GPIO_COMMIT.write_volatile(GPIO_DESC_IO);
-        }
+        GPIO_DESC_IO.write(IoDescriptor {
+            size: len_bytes,
+            addr: slice.as_ptr() as usize,
+        });
+        GPIO_COMMIT.write(GPIO_DESC_IO.ptr());
 
         // If the total proof message is small (<= 32 bytes), return it directly
         // from the proof, otherwise SHA it and return the hash.
