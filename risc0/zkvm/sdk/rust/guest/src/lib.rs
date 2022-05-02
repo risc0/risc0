@@ -15,40 +15,21 @@
 #![no_std]
 #![feature(alloc_error_handler)]
 #![feature(new_uninit)]
+#![allow(dead_code)] // TODO(nils): Remove before submit
 
 extern crate alloc as _alloc;
 
 mod alloc;
 pub mod env;
 mod gpio;
+mod mem_layout;
 pub mod sha;
 
 use core::{mem, panic::PanicInfo, ptr};
 
 use gpio::{FaultDescriptor, LogDescriptor, GPIO_DESC_FAULT, GPIO_DESC_LOG, GPIO_FAULT, GPIO_LOG};
+// use mem_layout::{OutputZone, CommitZone, ShaDescZone};
 use risc0_zkvm_core::{set_logger, Log};
-
-const REGION_SIZE_256KB: usize = 256 * 1024;
-// const REGION_SIZE_512KB: usize = 0x0008_0000;
-const REGION_SIZE_1MB: usize = 1024 * 1024;
-
-const REGION_HEAP_START: usize = 0x0008_0000;
-const REGION_HEAP_LEN: usize = REGION_SIZE_1MB + REGION_SIZE_256KB;
-const REGION_HEAP_END: usize = REGION_HEAP_START + REGION_HEAP_LEN;
-
-const REGION_SHA_START: usize = 0x0030_0000;
-// const REGION_SHA_LEN: usize = REGION_SIZE_256KB;
-// const REGION_SHA_END: usize = REGION_SHA_START + REGION_SHA_LEN;
-
-const REGION_INPUT_START: usize = 0x0018_0000;
-const REGION_INPUT_LEN: usize = REGION_SIZE_256KB;
-// const REGION_INPUT_END: usize = REGION_INPUT_START + REGION_INPUT_LEN;
-
-const REGION_OUTPUT_START: usize = 0x0034_0000;
-const REGION_OUTPUT_LEN: usize = REGION_SIZE_256KB;
-
-const REGION_COMMIT_START: usize = 0x0038_0000;
-const REGION_COMMIT_LEN: usize = REGION_SIZE_256KB;
 
 const WORD_SIZE: usize = mem::size_of::<u32>();
 

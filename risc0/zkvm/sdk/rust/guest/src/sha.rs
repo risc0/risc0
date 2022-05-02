@@ -20,7 +20,8 @@ use risc0_zkvm_core::Digest;
 use crate::{
     align_up,
     gpio::{SHADescriptor, GPIO_SHA},
-    REGION_SHA_START, WORD_SIZE,
+    mem_layout::REGION_SHA_START,
+    WORD_SIZE,
 };
 
 pub struct SHA256 {

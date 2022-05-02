@@ -8,6 +8,7 @@ rust_library(
         "src/env.rs",
         "src/gpio.rs",
         "src/lib.rs",
+        "src/mem_layout.rs",
         "src/sha.rs",
     ],
     crate_name = "risc0_zkvm_guest",

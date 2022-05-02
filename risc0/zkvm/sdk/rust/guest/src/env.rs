@@ -18,9 +18,12 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     gpio::{IoDescriptor, GPIO_COMMIT, GPIO_DESC_IO, GPIO_WRITE},
+    mem_layout::{
+        REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
+        REGION_OUTPUT_LEN, REGION_OUTPUT_START,
+    },
     sha::{self, digest_commit_into},
-    REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
-    REGION_OUTPUT_LEN, REGION_OUTPUT_START, WORD_SIZE,
+    WORD_SIZE,
 };
 use risc0_zkvm_serde::{Deserializer, Serializer, Slice};
 
