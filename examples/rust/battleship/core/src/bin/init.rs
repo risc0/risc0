@@ -26,5 +26,5 @@ pub fn main() {
     if !state.check() {
         panic!("Invalid GameState");
     }
-    env::commit(&sha::digest(state));
+    env::commit(&sha::digest_serialized(&state));
 }

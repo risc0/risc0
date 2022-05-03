@@ -14,22 +14,24 @@
 
 use core::{
     alloc::{GlobalAlloc, Layout},
-    cell::UnsafeCell,
     mem::size_of,
-    ops::Deref,
 };
 
 use crate::mem_layout::{REGION_HEAP_END, REGION_HEAP_START};
-use crate::{_fault, WORD_SIZE};
+use crate::{_fault, align_up, padded_u32_from_u8, WORD_SIZE};
+use crate::mutex::Mutex;
+use crate::sha::ShaBuf;
+use risc0_zkvm_serde::{Result as SerdeResult, StreamWriter};
 
 // Bump pointer allocator for *single* core systems.  Returns items of type T.
 pub struct BumpPointerAlloc<T> {
     name: &'static str,
     start: *mut T,
-    len: UnsafeCell<usize>,
+    len: Mutex<usize>,
     cap: usize,
 }
-// We have to declare this explicitly because the structure contains a raw pointer.
+
+// This contains a raw pointer so we have to explicitly mark it as Sync.
 unsafe impl<T> Sync for BumpPointerAlloc<T> {}
 
 impl<T> BumpPointerAlloc<T> {
@@ -42,13 +44,18 @@ impl<T> BumpPointerAlloc<T> {
         BumpPointerAlloc {
             name,
             start: start_bytes as *mut T,
-            len: UnsafeCell::new(0),
+            len: Mutex::new(0),
             cap: (end_bytes - start_bytes) / size_of::<T>(),
         }
     }
 
+    pub fn ptr(&self) -> *mut T {
+        self.start
+    }
+
     pub unsafe fn alloc(&self, nitems: usize) -> *mut T {
-        let len: &mut usize = &mut *self.len.get();
+        let mut len = self.len.lock().unwrap();
+
         let ptr = self.start.add(*len);
         let new_len = *len + nitems;
 
@@ -65,7 +72,7 @@ impl<T> BumpPointerAlloc<T> {
         if new_nitems <= old_nitems {
             return old_ptr;
         }
-        let len: &mut usize = &mut *self.len.get();
+        let mut len = self.len.lock().unwrap();
         let additional_items = new_nitems - old_nitems;
         if core::ptr::eq(
             self.start.add(*len + new_nitems),
@@ -87,16 +94,111 @@ impl<T> BumpPointerAlloc<T> {
             }
 
             *len = new_len;
+
+            new_ptr.copy_from_nonoverlapping(old_ptr, old_nitems);
             return new_ptr;
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        *self.len.lock().unwrap()
+    }
+
+    pub fn as_slice(&self) -> &[T] {
+        unsafe { &*core::slice::from_raw_parts(self.start, *self.len.lock().unwrap()) }
+    }
+
+    pub fn as_buf<'a>(&'a self) -> BumpBuf<T>
+    where
+        'a: 'static,
+    {
+        BumpBuf::<T>::new(self)
+    }
+}
+
+// Allow ZoneAllocs to be treated as SHA and serde buffers.
+pub struct BumpBuf<T>
+where
+    T: 'static,
+{
+    zone: &'static BumpPointerAlloc<T>,
+    // Original length before we started writing to this buffer.
+    orig_len: usize,
+}
+
+impl<T> BumpBuf<T> {
+    fn new(zone: &'static BumpPointerAlloc<T>) -> Self {
+        Self {
+            zone,
+            orig_len: zone.len(),
         }
     }
 }
 
-// Returns the part of this region written so far.
-impl<T> Deref for BumpPointerAlloc<T> {
-    type Target = [T];
-    fn deref(&self) -> &[T] {
-        unsafe { &*core::slice::from_raw_parts(self.start, *self.len.get()) }
+impl<T> Extend<T> for BumpBuf<T> {
+    fn extend<U>(&mut self, iter: U)
+    where
+        U: IntoIterator<Item = T>,
+    {
+        for val in iter {
+            unsafe { *self.zone.alloc(1) = val };
+        }
+    }
+}
+
+impl ShaBuf for BumpBuf<u32> {
+    fn len(&self) -> usize {
+        self.zone.len()
+    }
+
+    fn push(&mut self, val: u32) {
+        unsafe { *self.zone.alloc(1) = val };
+    }
+
+    fn as_slice(&self) -> &[u32] {
+        self.zone.as_slice()
+    }
+
+    fn extend_from_slice(&mut self, data: &[u32]) {
+        unsafe {
+            self.zone
+                .alloc(data.len())
+                .copy_from_nonoverlapping(data.as_ptr(), data.len());
+        }
+    }
+}
+
+impl StreamWriter for BumpBuf<u32> {
+    // A bump buf's allocation is all static, so we can return the slice that's been written.
+    type Output = &'static [u32];
+
+    fn try_push_word(&mut self, data: u32) -> SerdeResult<()> {
+        self.push(data);
+        SerdeResult::Ok(())
+    }
+
+    fn try_push_dword(&mut self, data: u64) -> SerdeResult<()> {
+        self.extend_from_slice(&[(data & 0xffffffff) as u32, (data >> 32) as u32]);
+        SerdeResult::Ok(())
+    }
+
+    fn try_extend(&mut self, data: &[u8]) -> SerdeResult<()> {
+        unsafe {
+            let ptr = self.zone.alloc(align_up(data.len(), WORD_SIZE));
+            let end_word = data.len() / WORD_SIZE;
+            ptr.copy_from_nonoverlapping(data.as_ptr() as *const u32, end_word);
+            let rem = data.len() % WORD_SIZE;
+            if rem > 0 {
+                *ptr.add(rem) = padded_u32_from_u8(&data[data.len() - rem..])
+            }
+        }
+        SerdeResult::Ok(())
+    }
+
+    fn release(&mut self) -> SerdeResult<Self::Output> {
+        let start = unsafe { self.zone.ptr().add(self.orig_len) };
+        let len = self.zone.len() - self.orig_len;
+        SerdeResult::Ok(unsafe { &*core::slice::from_raw_parts(start, len) })
     }
 }
 
@@ -104,11 +206,6 @@ unsafe impl GlobalAlloc for BumpPointerAlloc<u8> {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let size: usize = layout.align_to(WORD_SIZE).unwrap().pad_to_align().size();
         self.alloc(size)
-    }
-
-    // Uninitialized memory shows up already zeroed, so no need to zero it.
-    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
-        self.alloc(layout.size())
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {

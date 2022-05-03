@@ -12,133 +12,134 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use _alloc::{boxed::Box, vec::Vec};
-use core::mem;
-
-use risc0_zkvm_core::Digest;
+use core::alloc::Layout;
 
 use crate::{
-    align_up,
+    alloc::HEAP_ZONE,
     gpio::{SHADescriptor, GPIO_SHA},
-    mem_layout::REGION_SHA_START,
+    mem_layout::SHA_DESC_ZONE,
     WORD_SIZE,
 };
+use _alloc::vec::Vec;
+use risc0_zkvm_core::DIGEST_WORDS;
+use risc0_zkvm_serde::to_vec;
+use serde::Serialize;
 
-pub struct SHA256 {
-    pub(crate) storage: Vec<u8>,
-}
+pub const END_MARKER: u8 = 0x80;
 
-static mut CUR_DESC: usize = 0;
+// Chunk size for optimized SHA to operate on; all SHA requests must
+// be a multiple of this size.
+const CHUNK_SIZE: usize = 64 / WORD_SIZE;
 
-// Compute the padded size for data of size 'len' which is equal to:
-// len + 1 (terminating byte) + sizeof(uint64_t),
-// rounded up to nearest multiple of 64.
-fn padded_size(size: usize) -> usize {
-    align_up(size + 1 + mem::size_of::<u64>(), 64)
-}
-
-fn get_cur_desc() -> *mut SHADescriptor {
-    unsafe { (REGION_SHA_START as *mut SHADescriptor).add(CUR_DESC) }
-}
-
-impl SHA256 {
-    pub fn new() -> Self {
-        SHA256 {
-            storage: Vec::with_capacity(padded_size(0)),
-        }
-    }
-
-    pub fn with_capacity(capacity: usize) -> Self {
-        SHA256 {
-            storage: Vec::with_capacity(padded_size(capacity)),
-        }
-    }
-
-    pub fn update<T>(&mut self, data: &T) {
-        let ptr: *const T = data;
-        let len_bytes = mem::size_of::<T>();
-        self.storage.reserve(len_bytes);
-        unsafe {
-            let end = self.storage.as_mut_ptr().add(self.storage.len());
-            end.copy_from_nonoverlapping(ptr.cast(), len_bytes);
-            self.storage.set_len(self.storage.len() + len_bytes);
-        }
-    }
-
-    pub fn update_slice<T>(&mut self, data: &[T]) {
-        let ptr = data.as_ptr();
-        let len_bytes = data.len() * mem::size_of::<T>();
-        self.storage.reserve(len_bytes);
-        unsafe {
-            let end = self.storage.as_mut_ptr().add(self.storage.len());
-            end.copy_from_nonoverlapping(ptr.cast(), len_bytes);
-            self.storage.set_len(self.storage.len() + len_bytes);
-        }
-    }
-
-    pub fn finalize(&mut self) -> Box<Digest> {
-        let len = self.storage.len();
-        let total = padded_size(len);
-        self.storage.resize(total, 0);
-        self.storage[len] = 0x80;
-        let mut digest: Box<mem::MaybeUninit<Digest>> = Box::new_uninit();
-        finalize_into(
-            len,
-            total,
-            self.storage.as_mut_ptr(),
-            digest.as_mut_ptr().cast(),
-        );
-        unsafe { digest.assume_init() }
-    }
-}
-
-fn finalize_into(len: usize, total: usize, ptr: *mut u8, result: *mut usize) {
-    let bits = len * 8;
+// Computes a raw digest of the given slice.  The data must already contain the end marker and the trailer.
+pub fn raw_digest(data: &[u32]) -> &'static [u32; DIGEST_WORDS] {
+    assert_eq!(data.len() % CHUNK_SIZE, 0);
+    // Allocate fresh memory that's guaranteed to be uninitialized so the host can write to it:
     unsafe {
-        // Write size in bits as big endian.
-        let trailer: *mut usize = ptr.add(total - WORD_SIZE).cast();
-        trailer.write(bits.to_be());
-
-        // Set up the next descriptor.
-        let desc = get_cur_desc();
-        desc.write_volatile(SHADescriptor {
-            type_count: total / 64,
-            idx: 0,
-            source: ptr as usize,
-            digest: result as usize,
-        });
-
-        // Write the descriptor to the oracle for processing.
-        GPIO_SHA.write(desc);
-
-        // Jump to the next descriptor.
-        CUR_DESC += 1;
+        let digest: *mut [u32; DIGEST_WORDS] =
+            HEAP_ZONE.alloc(Layout::new::<[u32; DIGEST_WORDS]>().size()) as _;
+        raw_digest_to(data, digest);
+        let digest_ref: &'static [u32; DIGEST_WORDS] = &*digest;
+        digest_ref
     }
 }
 
-pub(crate) fn digest_commit_into(len: usize, slice: &mut [u32], result: *mut usize) {
-    let total = padded_size(len);
-    let len_words = len / WORD_SIZE;
-    slice[len_words] = 0x00000080;
-    for i in len_words + 1..total / WORD_SIZE - 1 {
-        slice[i] = 0;
+// Computes a raw digest of the given slice, and stores the digest in the given pointer.  The digest memory must be uninitilaized.
+pub unsafe fn raw_digest_to(data: &[u32], digest: *mut [u32; DIGEST_WORDS]) {
+    assert_eq!(data.len() % CHUNK_SIZE, 0);
+    let type_count = data.len() / CHUNK_SIZE;
+    assert_ne!(type_count, 0);
+
+    let desc_ptr = SHA_DESC_ZONE.alloc(1);
+    desc_ptr.write_volatile(SHADescriptor {
+        type_count,
+        idx: 0,
+        source: data.as_ptr() as usize,
+        digest: digest as usize,
+    });
+
+    GPIO_SHA.write_volatile(desc_ptr);
+}
+
+pub trait ShaBuf: Extend<u32> {
+    fn len(&self) -> usize;
+    fn push(&mut self, val: u32);
+    fn as_slice(&self) -> &[u32];
+    fn extend_from_slice(&mut self, data: &[u32]);
+}
+
+pub fn add_end_marker<T: ShaBuf>(data: &mut T) {
+    data.push((END_MARKER as u32).to_le());
+}
+
+pub fn add_trailer<T: ShaBuf>(data: &mut T, bits: usize) {
+    // The last word needs to be the size, the second to last word needs to be 0,
+    // and the total words needs to be a multiple of CHUNK_SIZE.  Pad the data so there's two
+    // words remaining before a CHUNK_SIZE boundry that we can fill with (0, bits).
+    let padding = CHUNK_SIZE - 1 - ((data.len() + 1) % CHUNK_SIZE);
+    const PADDING: [u32; CHUNK_SIZE] = [0; CHUNK_SIZE];
+    data.extend_from_slice(&PADDING[..padding + 1]);
+    data.push((bits as u32).to_be());
+
+    assert_eq!(0, data.len() % CHUNK_SIZE);
+}
+
+pub fn digest<T: ShaBuf>(mut data: T) -> &'static [u32; DIGEST_WORDS] {
+    let bits = data.len() * WORD_SIZE * 8;
+    add_end_marker(&mut data);
+    add_trailer(&mut data, bits);
+    raw_digest(data.as_slice())
+}
+
+impl ShaBuf for Vec<u32> {
+    fn len(&self) -> usize {
+        self.len()
     }
-    finalize_into(len, total, slice.as_mut_ptr().cast(), result);
+    fn push(&mut self, val: u32) {
+        self.push(val)
+    }
+    fn as_slice(&self) -> &[u32] {
+        self.as_slice()
+    }
+    fn extend_from_slice(&mut self, data: &[u32]) {
+        self.extend_from_slice(data)
+    }
 }
 
-pub fn digest<T>(data: T) -> Box<Digest> {
-    let mut sha = SHA256::with_capacity(mem::size_of::<T>());
-    sha.update(&data);
-    sha.finalize()
+pub fn digest_serialized<T: Serialize>(val: &T) -> &'static [u32; DIGEST_WORDS] {
+    let buf = to_vec(val).unwrap();
+    digest(buf)
 }
 
-pub fn digest_slice<T>(data: &[T]) -> Box<Digest> {
-    let mut sha = SHA256::with_capacity(data.len());
-    sha.update_slice(data);
-    sha.finalize()
+// Make a digest for u8s, which are not aligned on a word boundary.
+pub fn digest_u8_slice(data: &[u8]) -> &'static [u32; DIGEST_WORDS] {
+    digest_u8_vec(data.iter().cloned().collect::<Vec<u8>>())
+}
+
+pub fn digest_u8_vec(mut data: Vec<u8>) -> &'static [u32; DIGEST_WORDS] {
+    let bits = data.len() * 8;
+    data.push(END_MARKER);
+    while data.len() % WORD_SIZE != 0 {
+        data.push(0);
+    }
+    // Unsafe in general, but our allocator always aligns on WORD_SIZE,
+    // and our deallocator does nothing.  This means we can reinterpret
+    // our u8 vec as a u32 vec.
+    let mut data: Vec<u32> = unsafe {
+        let ptr = data.as_mut_ptr() as *mut u32;
+        let len = data.len() / WORD_SIZE;
+        let cap = data.capacity() / WORD_SIZE;
+        Vec::from_raw_parts(ptr, len, cap)
+    };
+
+    add_trailer(&mut data, bits);
+    raw_digest(data.as_slice())
 }
 
 pub(crate) fn finalize() {
-    let ptr = get_cur_desc() as *mut usize;
-    unsafe { ptr.write_volatile(0) };
+    unsafe {
+        let ptr = SHA_DESC_ZONE.alloc(1);
+        let type_field_ptr: *mut usize = core::ptr::addr_of_mut!((*ptr).type_count);
+        type_field_ptr.write_volatile(0);
+    }
 }

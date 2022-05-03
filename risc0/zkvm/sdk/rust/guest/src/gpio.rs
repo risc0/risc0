@@ -23,7 +23,7 @@ impl<T> GpioPort<T> {
         }
     }
 
-    pub fn write(self, val: T) {
+    pub fn write_volatile(self, val: T) {
         unsafe { self.port.write_volatile(val) }
     }
 

@@ -26,6 +26,6 @@ pub fn main() {
     env::commit(&InitializeVotingMachineCommit {
         polls_open: state.polls_open,
         voter_bitfield: state.voter_bitfield,
-        state: *sha::digest(state),
+        state: sha::digest_serialized(&state).into(),
     });
 }

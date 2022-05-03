@@ -24,7 +24,7 @@ risc0_zkvm_guest::entry!(main);
 pub fn main() {
     let request: SigningRequest = env::read();
     env::commit(&SignMessageCommit {
-        identity: *sha::digest(request.passphrase.pass),
+        identity: sha::digest_serialized(&request.passphrase.pass).into(),
         msg: request.msg,
     });
 }
