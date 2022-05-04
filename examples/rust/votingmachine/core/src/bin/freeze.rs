@@ -29,8 +29,8 @@ pub fn main() {
     let voter_bitfield = result.state.voter_bitfield;
     let count = result.state.count;
     env::commit(&FreezeVotingMachineCommit {
-        old_state: sha::digest_serialized(&params.state).into(),
-        new_state: sha::digest_serialized(&result.state).into(),
+        old_state: sha::digest(&params.state).into(),
+        new_state: sha::digest(&result.state).into(),
         polls_open: polls_open,
         voter_bitfield: voter_bitfield,
         count: count,

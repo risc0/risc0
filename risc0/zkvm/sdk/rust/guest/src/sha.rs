@@ -123,8 +123,9 @@ pub(crate) fn add_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
     slice[slice.len() - 1] = (len_bits as u32).to_be();
 }
 
-// Consumes the given buffer since it needs to modify it to add the trailer.
-pub fn digest<T: ShaBuf>(mut data: T) -> &'static [u32; DIGEST_WORDS] {
+// Digests the data in a SHA-ready buffer.  Consumes the given buffer
+// since it needs to modify it to add the trailer.
+fn digest_buf<T: ShaBuf>(mut data: T) -> &'static [u32; DIGEST_WORDS] {
     let len_bytes = data.len() * WORD_SIZE;
     add_trailer(&mut data, len_bytes);
     raw_digest(data.as_slice())
@@ -151,15 +152,16 @@ impl ShaBuf for Vec<u32> {
     }
 }
 
-pub fn digest_serialized<T: Serialize>(val: &T) -> &'static [u32; DIGEST_WORDS] {
+// Computes the SHA256 digest of a serialized object.
+pub fn digest<T: Serialize>(val: &T) -> &'static [u32; DIGEST_WORDS] {
     // If the object to be serialized is a plain old structure in memory, this should
     // be a good guess for the allocation needed.
     let cap = compute_capacity_needed(mem::size_of_val(val));
     let buf = to_vec_with_capacity(val, cap).unwrap();
-    digest(buf)
+    digest_buf(buf)
 }
 
-// Make a digest for u8s.  We have no guarantees on alignment so we
+// Makes a digest for u8s.  We have no guarantees on alignment so we
 // have to copy the whole thing.
 pub fn digest_u8(data: &[u8]) -> &'static [u32; DIGEST_WORDS] {
     let len_bytes = data.len();

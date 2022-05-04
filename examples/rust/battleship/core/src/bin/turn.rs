@@ -26,8 +26,8 @@ pub fn main() {
     let result = params.process();
     env::write(&result);
     env::commit(&RoundCommit {
-        old_state: sha::digest_serialized(&params.state).into(),
-        new_state: sha::digest_serialized(&result.state).into(),
+        old_state: sha::digest(&params.state).into(),
+        new_state: sha::digest(&result.state).into(),
         shot: params.shot,
         hit: result.hit,
     });
