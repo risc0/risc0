@@ -105,14 +105,3 @@ unsafe extern "C" fn __start(result: *mut usize) {
 pub(crate) const fn align_up(addr: usize, align: usize) -> usize {
     (addr + align - 1) & !(align - 1)
 }
-
-pub fn padded_u32_from_u8(val: &[u8]) -> u32 {
-    if val.len() == WORD_SIZE {
-        u32::from_le_bytes(val.try_into().unwrap())
-    } else {
-        assert!(val.len() < WORD_SIZE);
-        let mut padded: [u8; WORD_SIZE] = [0; WORD_SIZE];
-        padded[..val.len()].clone_from_slice(val);
-        u32::from_le_bytes(padded)
-    }
-}
