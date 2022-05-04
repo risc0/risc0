@@ -20,8 +20,9 @@ use crate::{
     WORD_SIZE,
 };
 use _alloc::vec::Vec;
+use core::mem;
 use risc0_zkvm_core::DIGEST_WORDS;
-use risc0_zkvm_serde::to_vec;
+use risc0_zkvm_serde::to_vec_with_capacity;
 use serde::Serialize;
 
 const END_MARKER: u8 = 0x80;
@@ -98,7 +99,7 @@ pub fn add_wom_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
     data.push((len_bits as u32).to_be());
 }
 
-pub fn add_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
+pub(crate) fn add_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
     assert!(len_bytes <= (data.len() * WORD_SIZE));
     //    let padded_size = align_up((bytes + 3 * WORD_SIZE) / WORD_SIZE, CHUNK_SIZE);
     // Allow space at the end for:
@@ -122,6 +123,7 @@ pub fn add_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
     slice[slice.len() - 1] = (len_bits as u32).to_be();
 }
 
+// Consumes the given buffer since it needs to modify it to add the trailer.
 pub fn digest<T: ShaBuf>(mut data: T) -> &'static [u32; DIGEST_WORDS] {
     let len_bytes = data.len() * WORD_SIZE;
     add_trailer(&mut data, len_bytes);
@@ -150,7 +152,10 @@ impl ShaBuf for Vec<u32> {
 }
 
 pub fn digest_serialized<T: Serialize>(val: &T) -> &'static [u32; DIGEST_WORDS] {
-    let buf = to_vec(val).unwrap();
+    // If the object to be serialized is a plain old structure in memory, this should
+    // be a good guess for the allocation needed.
+    let cap = compute_capacity_needed(mem::size_of_val(val));
+    let buf = to_vec_with_capacity(val, cap).unwrap();
     digest(buf)
 }
 

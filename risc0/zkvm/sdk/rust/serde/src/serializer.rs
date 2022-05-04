@@ -22,7 +22,17 @@ pub fn to_vec<'a, T>(value: &'a T) -> Result<alloc::vec::Vec<u32>>
 where
     T: Serialize + ?Sized,
 {
-    let vec = AllocVec::new();
+    let vec = AllocVec::with_capacity(mem::size_of_val(value));
+    let mut serializer = Serializer::new(vec);
+    value.serialize(&mut serializer)?;
+    serializer.stream.release()
+}
+
+pub fn to_vec_with_capacity<'a, T>(value: &'a T, cap: usize) -> Result<alloc::vec::Vec<u32>>
+where
+    T: Serialize + ?Sized,
+{
+    let vec = AllocVec::with_capacity(cap);
     let mut serializer = Serializer::new(vec);
     value.serialize(&mut serializer)?;
     serializer.stream.release()
@@ -435,6 +445,7 @@ impl StreamWriter for AllocVec {
     }
 
     fn try_extend(&mut self, data: &[u8]) -> Result<()> {
+        self.0.reserve(align_up(data.len(), WORD_SIZE));
         let mut chunks = data.chunks_exact(WORD_SIZE);
         for chunk in &mut chunks {
             let word = chunk[0] as u32

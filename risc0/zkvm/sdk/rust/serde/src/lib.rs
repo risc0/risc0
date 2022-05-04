@@ -8,7 +8,9 @@ mod serializer;
 
 pub use deserializer::{from_slice, Deserializer};
 pub use err::Result;
-pub use serializer::{to_slice, to_vec, AllocVec, Serializer, Slice, StreamWriter};
+pub use serializer::{
+    to_slice, to_vec, to_vec_with_capacity, AllocVec, Serializer, Slice, StreamWriter,
+};
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///

@@ -138,7 +138,11 @@ impl<T> BumpPointerAlloc<T> {
     }
 }
 
-// Allow ZoneAllocs to be treated as SHA and serde buffers.
+// Allow BumpPointerAlloc to be treated as SHA and serde buffers.
+//
+// TODO(nils):  This should lock the BumpPointerAlloc length mutex
+// and hold it while the BumpBuf is in scope.  That will let us avoid doing
+// quite so many checks while writing to it.
 pub struct BumpBuf<T>
 where
     T: 'static,
