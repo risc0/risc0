@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::alloc::Layout;
-
 use crate::{
+    align_up,
     alloc::HEAP_ZONE,
     gpio::{SHADescriptor, GPIO_SHA},
     mem_layout::SHA_DESC_ZONE,
@@ -25,10 +24,10 @@ use risc0_zkvm_core::DIGEST_WORDS;
 use risc0_zkvm_serde::to_vec;
 use serde::Serialize;
 
-pub const END_MARKER: u8 = 0x80;
+const END_MARKER: u8 = 0x80;
 
-// Chunk size for optimized SHA to operate on; all SHA requests must
-// be a multiple of this size.
+// Chunk size in words for optimized SHA to operate on; all SHA
+// requests must be a multiple of this size.
 const CHUNK_SIZE: usize = 64 / WORD_SIZE;
 
 // Computes a raw digest of the given slice.  The data must already contain the end marker and the trailer.
@@ -36,8 +35,7 @@ pub fn raw_digest(data: &[u32]) -> &'static [u32; DIGEST_WORDS] {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     // Allocate fresh memory that's guaranteed to be uninitialized so the host can write to it:
     unsafe {
-        let digest: *mut [u32; DIGEST_WORDS] =
-            HEAP_ZONE.alloc(Layout::new::<[u32; DIGEST_WORDS]>().size()) as _;
+        let digest: *mut [u32; DIGEST_WORDS] = HEAP_ZONE.alloc(DIGEST_WORDS * WORD_SIZE) as _;
         raw_digest_to(data, digest);
         let digest_ref: &'static [u32; DIGEST_WORDS] = &*digest;
         digest_ref
@@ -51,6 +49,7 @@ pub unsafe fn raw_digest_to(data: &[u32], digest: *mut [u32; DIGEST_WORDS]) {
     assert_ne!(type_count, 0);
 
     let desc_ptr = SHA_DESC_ZONE.alloc(1);
+
     desc_ptr.write_volatile(SHADescriptor {
         type_count,
         idx: 0,
@@ -65,29 +64,67 @@ pub trait ShaBuf: Extend<u32> {
     fn len(&self) -> usize;
     fn push(&mut self, val: u32);
     fn as_slice(&self) -> &[u32];
+    fn as_mut_slice(&mut self) -> &mut [u32];
     fn extend_from_slice(&mut self, data: &[u32]);
+    fn resize(&mut self, new_size: usize);
 }
 
-pub fn add_end_marker<T: ShaBuf>(data: &mut T) {
+// Calculates the number of words of capacity needed, including end
+// marker and trailer, to take the SHA hash of len_bytes bytes.
+const fn compute_capacity_needed(len_bytes: usize) -> usize {
+    // Add one for end marker
+    let mut len_words = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE;
+    // Add two words for 64-bit size
+    len_words += 2;
+
+    align_up(len_words, CHUNK_SIZE)
+}
+
+// Slower version of add_trailer for use on write-only memory which
+// writes each word exactly once.  LEngth must already be word aligned.
+pub fn add_wom_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
+    assert_eq!(0, len_bytes % WORD_SIZE);
+    let len_words = len_bytes / WORD_SIZE;
     data.push((END_MARKER as u32).to_le());
+
+    // Align to leave 2 words for length at the end.
+    while (data.len() % CHUNK_SIZE) != (CHUNK_SIZE - 2) {
+        data.push(0);
+    }
+
+    // 64-bit size
+    data.push((0 as u32).to_be());
+    let len_bits = len_words * WORD_SIZE * 8;
+    data.push((len_bits as u32).to_be());
 }
 
-pub fn add_trailer<T: ShaBuf>(data: &mut T, bits: usize) {
-    // The last word needs to be the size, the second to last word needs to be 0,
-    // and the total words needs to be a multiple of CHUNK_SIZE.  Pad the data so there's two
-    // words remaining before a CHUNK_SIZE boundry that we can fill with (0, bits).
-    let padding = CHUNK_SIZE - 1 - ((data.len() + 1) % CHUNK_SIZE);
-    const PADDING: [u32; CHUNK_SIZE] = [0; CHUNK_SIZE];
-    data.extend_from_slice(&PADDING[..padding + 1]);
-    data.push((bits as u32).to_be());
+pub fn add_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
+    assert!(len_bytes <= (data.len() * WORD_SIZE));
+    //    let padded_size = align_up((bytes + 3 * WORD_SIZE) / WORD_SIZE, CHUNK_SIZE);
+    // Allow space at the end for:
+    //    * end marker (1 byte)
+    //    * length (uint64_t, 8 bytes)
+    let padded_len = compute_capacity_needed(len_bytes);
+    assert_eq!(0, padded_len % CHUNK_SIZE);
+    data.resize(padded_len);
 
-    assert_eq!(0, data.len() % CHUNK_SIZE);
+    // Add end marker
+    let slice = data.as_mut_slice();
+    unsafe {
+        let ptr = slice.as_mut_ptr();
+        let u8ptr = ptr as *mut u8;
+        assert!(len_bytes < slice.len() * WORD_SIZE);
+        u8ptr.add(len_bytes).write_volatile(END_MARKER);
+    }
+
+    // Last word is size in bits.
+    let len_bits = len_bytes * 8;
+    slice[slice.len() - 1] = (len_bits as u32).to_be();
 }
 
 pub fn digest<T: ShaBuf>(mut data: T) -> &'static [u32; DIGEST_WORDS] {
-    let bits = data.len() * WORD_SIZE * 8;
-    add_end_marker(&mut data);
-    add_trailer(&mut data, bits);
+    let len_bytes = data.len() * WORD_SIZE;
+    add_trailer(&mut data, len_bytes);
     raw_digest(data.as_slice())
 }
 
@@ -101,8 +138,14 @@ impl ShaBuf for Vec<u32> {
     fn as_slice(&self) -> &[u32] {
         self.as_slice()
     }
+    fn as_mut_slice(&mut self) -> &mut [u32] {
+        self.as_mut_slice()
+    }
     fn extend_from_slice(&mut self, data: &[u32]) {
         self.extend_from_slice(data)
+    }
+    fn resize(&mut self, new_size: usize) {
+        self.resize(new_size, 0)
     }
 }
 
@@ -111,29 +154,18 @@ pub fn digest_serialized<T: Serialize>(val: &T) -> &'static [u32; DIGEST_WORDS] 
     digest(buf)
 }
 
-// Make a digest for u8s, which are not aligned on a word boundary.
-pub fn digest_u8_slice(data: &[u8]) -> &'static [u32; DIGEST_WORDS] {
-    digest_u8_vec(data.iter().cloned().collect::<Vec<u8>>())
-}
-
-pub fn digest_u8_vec(mut data: Vec<u8>) -> &'static [u32; DIGEST_WORDS] {
-    let bits = data.len() * 8;
-    data.push(END_MARKER);
-    while data.len() % WORD_SIZE != 0 {
-        data.push(0);
+// Make a digest for u8s.  We have no guarantees on alignment so we
+// have to copy the whole thing.
+pub fn digest_u8(data: &[u8]) -> &'static [u32; DIGEST_WORDS] {
+    let len_bytes = data.len();
+    let cap = compute_capacity_needed(len_bytes);
+    let mut data_u32 = Vec::<u32>::with_capacity(cap);
+    unsafe {
+        (data_u32.as_mut_ptr() as *mut u8).copy_from_nonoverlapping(data.as_ptr(), len_bytes);
+        data_u32.set_len(align_up(len_bytes, WORD_SIZE) / WORD_SIZE);
     }
-    // Unsafe in general, but our allocator always aligns on WORD_SIZE,
-    // and our deallocator does nothing.  This means we can reinterpret
-    // our u8 vec as a u32 vec.
-    let mut data: Vec<u32> = unsafe {
-        let ptr = data.as_mut_ptr() as *mut u32;
-        let len = data.len() / WORD_SIZE;
-        let cap = data.capacity() / WORD_SIZE;
-        Vec::from_raw_parts(ptr, len, cap)
-    };
-
-    add_trailer(&mut data, bits);
-    raw_digest(data.as_slice())
+    add_trailer(&mut data_u32, len_bytes);
+    raw_digest(data_u32.as_slice())
 }
 
 pub(crate) fn finalize() {

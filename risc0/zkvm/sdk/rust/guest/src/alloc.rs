@@ -14,13 +14,14 @@
 
 use core::{
     alloc::{GlobalAlloc, Layout},
+    cmp::max,
     mem::size_of,
 };
 
 use crate::mem_layout::{REGION_HEAP_END, REGION_HEAP_START};
-use crate::{_fault, align_up, padded_u32_from_u8, WORD_SIZE};
 use crate::mutex::Mutex;
 use crate::sha::ShaBuf;
+use crate::{_fault, align_up, WORD_SIZE};
 use risc0_zkvm_serde::{Result as SerdeResult, StreamWriter};
 
 // Bump pointer allocator for *single* core systems.  Returns items of type T.
@@ -108,6 +109,27 @@ impl<T> BumpPointerAlloc<T> {
         unsafe { &*core::slice::from_raw_parts(self.start, *self.len.lock().unwrap()) }
     }
 
+    pub fn as_mut_slice(&self) -> &mut [T] {
+        unsafe { &mut *core::slice::from_raw_parts_mut(self.start, *self.len.lock().unwrap()) }
+    }
+
+    // Returns the slice of new values to be initialized, if any.
+    pub fn resize(&self, new_size: usize) -> &mut [T] {
+        assert!(new_size <= self.cap);
+        let mut len = self.len.lock().unwrap();
+        let init_range_start = *len;
+        let init_range_end = max(*len, new_size);
+        *len = new_size;
+
+        // Return values to be initialized.
+        unsafe {
+            &mut *core::slice::from_raw_parts_mut(
+                self.start.add(init_range_start),
+                init_range_end - init_range_start,
+            )
+        }
+    }
+
     pub fn as_buf<'a>(&'a self) -> BumpBuf<T>
     where
         'a: 'static,
@@ -159,12 +181,21 @@ impl ShaBuf for BumpBuf<u32> {
         self.zone.as_slice()
     }
 
+    fn as_mut_slice(&mut self) -> &mut [u32] {
+        self.zone.as_mut_slice()
+    }
+
     fn extend_from_slice(&mut self, data: &[u32]) {
         unsafe {
             self.zone
                 .alloc(data.len())
                 .copy_from_nonoverlapping(data.as_ptr(), data.len());
         }
+    }
+
+    fn resize(&mut self, new_size: usize) {
+        let new_elems = self.zone.resize(new_size);
+        new_elems.fill(0);
     }
 }
 
@@ -185,12 +216,7 @@ impl StreamWriter for BumpBuf<u32> {
     fn try_extend(&mut self, data: &[u8]) -> SerdeResult<()> {
         unsafe {
             let ptr = self.zone.alloc(align_up(data.len(), WORD_SIZE));
-            let end_word = data.len() / WORD_SIZE;
-            ptr.copy_from_nonoverlapping(data.as_ptr() as *const u32, end_word);
-            let rem = data.len() % WORD_SIZE;
-            if rem > 0 {
-                *ptr.add(rem) = padded_u32_from_u8(&data[data.len() - rem..])
-            }
+            (ptr as *mut u8).copy_from_nonoverlapping(data.as_ptr(), data.len());
         }
         SerdeResult::Ok(())
     }

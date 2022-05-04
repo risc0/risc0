@@ -22,6 +22,6 @@ risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
     let data: &[u8] = env::read();
-    let digest = sha::digest_u8_slice(data);
+    let digest = sha::digest_u8(data);
     env::commit(&digest);
 }

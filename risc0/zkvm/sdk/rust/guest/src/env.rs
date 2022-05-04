@@ -122,8 +122,7 @@ impl Env {
             }
         } else {
             let mut buf = COMMIT_ZONE.as_buf();
-            sha::add_end_marker(&mut buf);
-            sha::add_trailer(&mut buf, len_bytes * 8);
+            sha::add_wom_trailer(&mut buf, len_words * WORD_SIZE);
             unsafe {
                 sha::raw_digest_to(COMMIT_ZONE.as_slice(), result as *mut [u32; DIGEST_WORDS])
             };
