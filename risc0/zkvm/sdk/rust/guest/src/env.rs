@@ -17,6 +17,7 @@ use core::{cell::RefMut, mem::MaybeUninit, slice};
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    alloc::BumpBuf,
     gpio::{IoDescriptor, GPIO_COMMIT, GPIO_DESC_IO, GPIO_WRITE},
     mem_layout::{COMMIT_ZONE, OUTPUT_ZONE, REGION_INPUT_LEN, REGION_INPUT_START},
     mutex::Mutex,
@@ -70,7 +71,7 @@ impl Env {
     }
 
     fn write<T: Serialize>(&mut self, data: &T) {
-        let mut output = Serializer::new(OUTPUT_ZONE.as_buf());
+        let mut output = Serializer::new(BumpBuf::new(&OUTPUT_ZONE));
         data.serialize(&mut output).unwrap();
 
         // Also write a copy to GPIO.
@@ -83,7 +84,7 @@ impl Env {
     }
 
     fn commit<T: Serialize>(&mut self, data: &T) {
-        let mut output = Serializer::new(COMMIT_ZONE.as_buf());
+        let mut output = Serializer::new(BumpBuf::new(&COMMIT_ZONE));
         data.serialize(&mut output).unwrap();
 
         // Also write a copy to GPIO.
@@ -121,8 +122,11 @@ impl Env {
                 unsafe { result.add(i).write_volatile(0) };
             }
         } else {
-            let mut buf = COMMIT_ZONE.as_buf();
-            sha::add_wom_trailer(&mut buf, len_words * WORD_SIZE);
+            {
+                let mut buf = BumpBuf::new(&COMMIT_ZONE);
+                sha::add_wom_trailer(&mut buf, len_words * WORD_SIZE);
+                // Release the BumpBuf before calling as_slice().
+            }
             unsafe {
                 sha::raw_digest_to(COMMIT_ZONE.as_slice(), result as *mut [u32; DIGEST_WORDS])
             };

@@ -47,7 +47,7 @@ pub fn raw_digest(data: &[u32]) -> &'static [u32; DIGEST_WORDS] {
 
 // Computes a raw digest of the given slice, and stores the digest in
 // the given pointer.  The digest memory must be uninitilaized.
-unsafe fn raw_digest_to(data: &[u32], digest: *mut [u32; DIGEST_WORDS]) {
+pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut [u32; DIGEST_WORDS]) {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     let type_count = data.len() / CHUNK_SIZE;
     assert_ne!(type_count, 0);

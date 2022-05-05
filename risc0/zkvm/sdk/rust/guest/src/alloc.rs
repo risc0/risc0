@@ -16,10 +16,11 @@ use core::{
     alloc::{GlobalAlloc, Layout},
     cmp::max,
     mem::size_of,
+    ops::DerefMut,
 };
 
 use crate::mem_layout::{REGION_HEAP_END, REGION_HEAP_START};
-use crate::mutex::Mutex;
+use crate::mutex::{Mutex, MutexGuard};
 use crate::sha::ShaBuf;
 use crate::{_fault, align_up, WORD_SIZE};
 use risc0_zkvm_serde::{Result as SerdeResult, StreamWriter};
@@ -55,8 +56,9 @@ impl<T> BumpPointerAlloc<T> {
     }
 
     pub unsafe fn alloc(&self, nitems: usize) -> *mut T {
-        let mut len = self.len.lock().unwrap();
-
+        self.alloc_unlocked(&mut *self.len.lock().unwrap(), nitems)
+    }
+    pub unsafe fn alloc_unlocked(&self, len: &mut usize, nitems: usize) -> *mut T {
         let ptr = self.start.add(*len);
         let new_len = *len + nitems;
 
@@ -106,17 +108,25 @@ impl<T> BumpPointerAlloc<T> {
     }
 
     pub fn as_slice(&self) -> &[T] {
-        unsafe { &*core::slice::from_raw_parts(self.start, *self.len.lock().unwrap()) }
+        self.as_slice_unlocked(*self.len.lock().unwrap())
+    }
+    pub fn as_slice_unlocked(&self, len: usize) -> &[T] {
+        unsafe { &*core::slice::from_raw_parts(self.start, len) }
     }
 
-    pub fn as_mut_slice(&self) -> &mut [T] {
-        unsafe { &mut *core::slice::from_raw_parts_mut(self.start, *self.len.lock().unwrap()) }
+    // pub fn as_mut_slice(&self) -> &mut [T] {
+    //     self.as_mut_slice_unlocked(*self.len.lock().unwrap())
+    // }
+    pub fn as_mut_slice_unlocked(&self, len: usize) -> &mut [T] {
+        unsafe { &mut *core::slice::from_raw_parts_mut(self.start, len) }
     }
 
     // Returns the slice of new values to be initialized, if any.
-    pub fn resize(&self, new_size: usize) -> &mut [T] {
+    // pub fn resize(&self, new_size: usize) -> &mut [T] {
+    //     self.resize_unlocked(&mut self.len.lock().unwrap(), new_size)
+    // }
+    pub fn resize_unlocked(&self, len: &mut usize, new_size: usize) -> &mut [T] {
         assert!(new_size <= self.cap);
-        let mut len = self.len.lock().unwrap();
         let init_range_start = *len;
         let init_range_end = max(*len, new_size);
         *len = new_size;
@@ -129,13 +139,6 @@ impl<T> BumpPointerAlloc<T> {
             )
         }
     }
-
-    pub fn as_buf<'a>(&'a self) -> BumpBuf<T>
-    where
-        'a: 'static,
-    {
-        BumpBuf::<T>::new(self)
-    }
 }
 
 // Allow BumpPointerAlloc to be treated as SHA and serde buffers.
@@ -143,67 +146,68 @@ impl<T> BumpPointerAlloc<T> {
 // TODO(nils):  This should lock the BumpPointerAlloc length mutex
 // and hold it while the BumpBuf is in scope.  That will let us avoid doing
 // quite so many checks while writing to it.
-pub struct BumpBuf<T>
-where
-    T: 'static,
-{
-    zone: &'static BumpPointerAlloc<T>,
+pub struct BumpBuf<'a> {
+    zone: &'static BumpPointerAlloc<u32>,
+    locked: MutexGuard<'a, usize>,
     // Original length before we started writing using this BumpBuf.
     orig_len: usize,
 }
 
-impl<T> BumpBuf<T> {
-    fn new(zone: &'static BumpPointerAlloc<T>) -> Self {
+impl<'a> BumpBuf<'a> {
+    pub(crate) fn new(zone: &'static BumpPointerAlloc<u32>) -> Self {
+        let locked = zone.len.lock().unwrap();
+        let orig_len = *locked;
         Self {
             zone,
-            orig_len: zone.len(),
+            locked,
+            orig_len,
         }
     }
 }
 
-impl<T> Extend<T> for BumpBuf<T> {
+impl<'a> Extend<u32> for BumpBuf<'a> {
     fn extend<U>(&mut self, iter: U)
     where
-        U: IntoIterator<Item = T>,
+        U: IntoIterator<Item = u32>,
     {
         for val in iter {
-            unsafe { *self.zone.alloc(1) = val };
+            unsafe { *self.zone.alloc_unlocked(self.locked.deref_mut(), 1) = val };
         }
     }
 }
 
-impl ShaBuf for BumpBuf<u32> {
+impl<'a> ShaBuf for BumpBuf<'a> {
     fn len(&self) -> usize {
-        self.zone.len()
+        *self.locked
     }
 
     fn push(&mut self, val: u32) {
-        unsafe { *self.zone.alloc(1) = val };
+        unsafe { *self.zone.alloc_unlocked(self.locked.deref_mut(), 1) = val };
     }
 
     fn as_slice(&self) -> &[u32] {
-        self.zone.as_slice()
+        self.zone.as_slice_unlocked(*self.locked)
     }
 
     fn as_mut_slice(&mut self) -> &mut [u32] {
-        self.zone.as_mut_slice()
+        self.zone.as_mut_slice_unlocked(*self.locked)
     }
 
     fn extend_from_slice(&mut self, data: &[u32]) {
         unsafe {
             self.zone
-                .alloc(data.len())
+                .alloc_unlocked(self.locked.deref_mut(), data.len())
                 .copy_from_nonoverlapping(data.as_ptr(), data.len());
         }
     }
 
     fn resize(&mut self, new_size: usize) {
-        let new_elems = self.zone.resize(new_size);
+        let new_elems = self.zone.resize_unlocked(self.locked.deref_mut(), new_size);
         new_elems.fill(0);
     }
 }
 
-impl StreamWriter for BumpBuf<u32> {
+impl<'a> StreamWriter for BumpBuf<'a> {
     // A bump buf's allocation is all static, so we can return the slice that's been written.
     type Output = &'static [u32];
 
@@ -219,7 +223,9 @@ impl StreamWriter for BumpBuf<u32> {
 
     fn try_extend(&mut self, data: &[u8]) -> SerdeResult<()> {
         unsafe {
-            let ptr = self.zone.alloc(align_up(data.len(), WORD_SIZE));
+            let ptr = self
+                .zone
+                .alloc_unlocked(self.locked.deref_mut(), align_up(data.len(), WORD_SIZE));
             (ptr as *mut u8).copy_from_nonoverlapping(data.as_ptr(), data.len());
         }
         SerdeResult::Ok(())
@@ -227,7 +233,7 @@ impl StreamWriter for BumpBuf<u32> {
 
     fn release(&mut self) -> SerdeResult<Self::Output> {
         let start = unsafe { self.zone.ptr().add(self.orig_len) };
-        let len = self.zone.len() - self.orig_len;
+        let len = *self.locked - self.orig_len;
         SerdeResult::Ok(unsafe { &*core::slice::from_raw_parts(start, len) })
     }
 }
