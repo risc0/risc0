@@ -25,7 +25,7 @@ pub struct Mutex<T>(RefCell<T>);
 
 unsafe impl<T> Sync for Mutex<T> {}
 
-type LockResult<Guard> = Result<Guard, ()>;
+pub type LockResult<Guard> = Result<Guard, ()>;
 
 pub type MutexGuard<'a, T> = RefMut<'a, T>;
 
