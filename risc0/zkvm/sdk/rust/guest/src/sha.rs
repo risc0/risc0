@@ -157,8 +157,8 @@ fn digest_buf<T: ShaBuf>(mut data: T) -> &'static [u32; DIGEST_WORDS] {
 
 // Computes the SHA256 digest of a serialized object.
 pub fn digest<T: Serialize>(val: &T) -> &'static [u32; DIGEST_WORDS] {
-    // If the object to be serialized is a plain old structure in memory, this should
-    // be a good guess for the allocation needed.
+    // If the object to be serialized is a plain old structure in memory, this
+    // should be a good guess for the allocation needed.
     let cap = compute_capacity_needed(mem::size_of_val(val));
     let buf = to_vec_with_capacity(val, cap).unwrap();
     digest_buf(buf)

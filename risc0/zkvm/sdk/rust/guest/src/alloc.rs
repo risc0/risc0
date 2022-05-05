@@ -213,7 +213,8 @@ impl<'a> ShaBuf for BumpBuf<'a> {
 }
 
 impl<'a> StreamWriter for BumpBuf<'a> {
-    // A bump buf's allocation is all static, so we can return the slice that's been written.
+    // A bump buf's allocation is all static, so we can return the slice that's been
+    // written.
     type Output = &'static [u32];
 
     fn try_push_word(&mut self, data: u32) -> SerdeResult<()> {
