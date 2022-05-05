@@ -148,7 +148,7 @@ where
     T: 'static,
 {
     zone: &'static BumpPointerAlloc<T>,
-    // Original length before we started writing to this buffer.
+    // Original length before we started writing using this BumpBuf.
     orig_len: usize,
 }
 

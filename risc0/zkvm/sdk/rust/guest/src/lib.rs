@@ -18,12 +18,13 @@
 
 extern crate alloc as _alloc;
 
-mod alloc;
 pub mod env;
+pub mod sha;
+
+mod alloc;
 mod gpio;
 mod mem_layout;
 mod mutex;
-pub mod sha;
 
 use core::{mem, panic::PanicInfo, ptr};
 
