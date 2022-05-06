@@ -6,7 +6,7 @@ RISC Zero offers a `developer-focused, open-source ZKVM`, and we're excited to s
 
 - The [risc0 README](https://github.com/risc0/risc0#readme) includes instructions for installing the RISC Zero ZKVM on your machine. 
 - The [Battleship README](https://github.com/risc0/risc0/tree/main/examples/rust/battleship#readme) includes instructions for installing RISC Zero Battleship, which operates on the NEAR Network. 
-- This [`docs`](https://github.com/risc0/risc0/tree/main/docs) folder is an open-source documentation repository to accompany the official documentation repository we offer at [www.risczero.com](www.riscero.com).
+- This [`docs`](https://github.com/risc0/risc0/tree/main/docs) folder is an open-source documentation repository to accompany the official documentation we offer at [www.risczero.com](www.riscero.com) and throughout the `risc0` repo.
   
 ## Have questions or want to collaborate? 
 Find us on [Discord](https://discord.gg/risczero).
