@@ -8,8 +8,6 @@ rust_library(
         "src/env.rs",
         "src/gpio.rs",
         "src/lib.rs",
-        "src/mem_layout.rs",
-        "src/mutex.rs",
         "src/sha.rs",
     ],
     crate_name = "risc0_zkvm_guest",
@@ -30,7 +28,6 @@ risc0_rust_method(
     deps = [
         ":guest",
         "//risc0/zkvm/sdk/rust/core:core_guest",
-        "//risc0/zkvm/sdk/rust/serde:serde_guest",
     ],
 )
 

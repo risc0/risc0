@@ -12,49 +12,73 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::{cell::RefMut, mem::MaybeUninit, slice};
+use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    alloc::BumpBuf,
     gpio::{IoDescriptor, GPIO_COMMIT, GPIO_DESC_IO, GPIO_WRITE},
-    mem_layout::{COMMIT_ZONE, OUTPUT_ZONE, REGION_INPUT_LEN, REGION_INPUT_START},
-    mutex::Mutex,
-    sha, WORD_SIZE,
+    sha, REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
+    REGION_OUTPUT_LEN, REGION_OUTPUT_START, WORD_SIZE,
 };
-use risc0_zkvm_core::DIGEST_WORDS;
-use risc0_zkvm_serde::{Deserializer, Serializer};
+use risc0_zkvm_core::Digest;
+use risc0_zkvm_serde::{Deserializer, Serializer, Slice};
 
 struct Env {
     input: Deserializer<'static>,
+    output: Serializer<Slice<'static>>,
+    commit: Serializer<Slice<'static>>,
+    commit_len: usize,
 }
 
-static ENV: Mutex<MaybeUninit<Env>> = Mutex::new(MaybeUninit::uninit());
-
-fn get_env<'a>() -> RefMut<'a, Env> {
-    let borrowed: RefMut<'_, MaybeUninit<Env>> = ENV.lock().unwrap();
-    RefMut::map(borrowed, |x| unsafe { x.assume_init_mut() })
+struct Once<T> {
+    data: UnsafeCell<MaybeUninit<T>>,
 }
+
+unsafe impl<T: Send + Sync> Sync for Once<T> {}
+
+impl<T> Once<T> {
+    const fn new() -> Self {
+        Once {
+            data: UnsafeCell::new(MaybeUninit::uninit()),
+        }
+    }
+
+    fn init(&self, value: T) {
+        unsafe { &mut *(self.data.get()) }.write(value);
+    }
+
+    fn get(&self) -> &mut T {
+        unsafe {
+            self.data
+                .get()
+                .as_mut()
+                .unwrap_unchecked()
+                .assume_init_mut()
+        }
+    }
+}
+
+static ENV: Once<Env> = Once::new();
 
 pub(crate) fn init() {
-    ENV.lock().unwrap().write(Env::new());
+    ENV.init(Env::new());
 }
 
 pub(crate) fn finalize(result: *mut usize) {
-    get_env().finalize(result);
+    ENV.get().finalize(result);
 }
 
 pub fn read<T: Deserialize<'static>>() -> T {
-    get_env().read()
+    ENV.get().read()
 }
 
 pub fn write<T: Serialize>(data: &T) {
-    get_env().write(data);
+    ENV.get().write(data);
 }
 
 pub fn commit<T: Serialize>(data: &T) {
-    get_env().commit(data);
+    ENV.get().commit(data);
 }
 
 impl Env {
@@ -63,6 +87,13 @@ impl Env {
             input: Deserializer::new(unsafe {
                 slice::from_raw_parts(REGION_INPUT_START as _, REGION_INPUT_LEN / WORD_SIZE)
             }),
+            output: Serializer::new(Slice::new(unsafe {
+                slice::from_raw_parts_mut(REGION_OUTPUT_START as _, REGION_OUTPUT_LEN / WORD_SIZE)
+            })),
+            commit: Serializer::new(Slice::new(unsafe {
+                slice::from_raw_parts_mut(REGION_COMMIT_START as _, REGION_COMMIT_LEN / WORD_SIZE)
+            })),
+            commit_len: 0,
         }
     }
 
@@ -71,42 +102,46 @@ impl Env {
     }
 
     fn write<T: Serialize>(&mut self, data: &T) {
-        let mut output = Serializer::new(BumpBuf::new(&OUTPUT_ZONE));
-        data.serialize(&mut output).unwrap();
-
-        // Also write a copy to GPIO.
-        let written = output.release().unwrap();
-        GPIO_DESC_IO.write_volatile(IoDescriptor {
-            size: written.len() * WORD_SIZE,
-            addr: written.as_ptr() as usize,
-        });
-        GPIO_WRITE.write_volatile(GPIO_DESC_IO.ptr());
+        data.serialize(&mut self.output).unwrap();
+        let buf = self.output.release().unwrap();
+        unsafe {
+            GPIO_DESC_IO.write_volatile(IoDescriptor {
+                size: buf.len() * WORD_SIZE,
+                addr: buf.as_ptr() as usize,
+            });
+            GPIO_WRITE.write_volatile(GPIO_DESC_IO);
+        }
     }
 
     fn commit<T: Serialize>(&mut self, data: &T) {
-        let mut output = Serializer::new(BumpBuf::new(&COMMIT_ZONE));
-        data.serialize(&mut output).unwrap();
-
-        // Also write a copy to GPIO.
-        let written = output.release().unwrap();
-        GPIO_DESC_IO.write_volatile(IoDescriptor {
-            size: written.len() * WORD_SIZE,
-            addr: written.as_ptr() as usize,
-        });
-        GPIO_WRITE.write_volatile(GPIO_DESC_IO.ptr());
+        data.serialize(&mut self.commit).unwrap();
+        let buf = self.commit.release().unwrap();
+        self.commit_len += buf.len();
+        let len_bytes = buf.len() * WORD_SIZE;
+        unsafe {
+            GPIO_DESC_IO.write_volatile(IoDescriptor {
+                size: len_bytes,
+                addr: buf.as_ptr() as usize,
+            });
+            GPIO_WRITE.write_volatile(GPIO_DESC_IO);
+        }
     }
 
     fn finalize(&mut self, result: *mut usize) {
-        let len_words = COMMIT_ZONE.len();
+        let len_words = self.commit_len;
         let len_bytes = len_words * WORD_SIZE;
-        let slice = COMMIT_ZONE.as_slice();
+        let slice: &mut [u32] = unsafe {
+            slice::from_raw_parts_mut(REGION_COMMIT_START as _, REGION_COMMIT_LEN / WORD_SIZE)
+        };
 
         // Write the full data out to the host
-        GPIO_DESC_IO.write_volatile(IoDescriptor {
-            size: len_bytes,
-            addr: slice.as_ptr() as usize,
-        });
-        GPIO_COMMIT.write_volatile(GPIO_DESC_IO.ptr());
+        unsafe {
+            GPIO_DESC_IO.write_volatile(IoDescriptor {
+                size: len_bytes,
+                addr: slice.as_ptr() as usize,
+            });
+            GPIO_COMMIT.write_volatile(GPIO_DESC_IO);
+        }
 
         // If the total proof message is small (<= 32 bytes), return it directly
         // from the proof, otherwise SHA it and return the hash.
@@ -122,16 +157,17 @@ impl Env {
                 unsafe { result.add(i).write_volatile(0) };
             }
         } else {
-            {
-                let mut buf = BumpBuf::new(&COMMIT_ZONE);
-                sha::add_wom_trailer(&mut buf, len_words * WORD_SIZE);
-                // Release the BumpBuf before calling as_slice().
-            }
+            let cap = sha::compute_capacity_needed(len_bytes);
+            let mut slice = &mut slice[..cap];
+            sha::add_trailer(&mut slice, len_bytes, sha::MemoryType::WOM);
+
+            let digest = result as *mut Digest;
+            // SAFETY: result is a pointer to the output digest.
             unsafe {
-                sha::raw_digest_to(COMMIT_ZONE.as_slice(), result as *mut [u32; DIGEST_WORDS])
-            };
+                sha::raw_digest_to(&slice, digest);
+            }
         }
-        unsafe { result.add(DIGEST_WORDS).write_volatile(len_bytes) };
+        unsafe { result.add(8).write_volatile(len_bytes) };
         sha::finalize();
     }
 }

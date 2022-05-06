@@ -12,20 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use _alloc::vec::Vec;
-use core::mem;
+use _alloc::{boxed::Box, vec::Vec};
+use core::{cell::UnsafeCell, mem};
 
-use risc0_zkvm_core::DIGEST_WORDS;
+use risc0_zkvm_core::Digest;
 use risc0_zkvm_serde::to_vec_with_capacity;
 use serde::Serialize;
 
 use crate::{
     align_up,
-    alloc::HEAP_ZONE,
     gpio::{SHADescriptor, GPIO_SHA},
-    mem_layout::SHA_DESC_ZONE,
-    WORD_SIZE,
+    REGION_SHA_START, WORD_SIZE,
 };
+
+// Current sha descriptor index.
+struct CurDesc(UnsafeCell<usize>);
+// SAFETY: single threaded environment
+unsafe impl Sync for CurDesc {}
+
+static CUR_DESC: CurDesc = CurDesc(UnsafeCell::new(0));
 
 const END_MARKER: u8 = 0x80;
 
@@ -33,14 +38,25 @@ const END_MARKER: u8 = 0x80;
 // requests must be a multiple of this size.
 const CHUNK_SIZE: usize = 64 / WORD_SIZE;
 
+fn alloc_desc() -> *mut SHADescriptor {
+    // SAFETY: Single threaded and this is the only place we use CUR_DESC.
+    unsafe {
+        let cur_desc = CUR_DESC.0.get();
+        let ptr = (REGION_SHA_START as *mut SHADescriptor).add(*cur_desc);
+        *cur_desc += 1;
+        ptr
+    }
+}
+
 // Computes a raw digest of the given slice.  The data must already
 // contain the end marker and the trailer.
-pub fn raw_digest(data: &[u32]) -> &'static [u32; DIGEST_WORDS] {
+pub fn raw_digest(data: &[u32]) -> &'static Digest {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     // Allocate fresh memory that's guaranteed to be uninitialized so
     // the host can write to it.
     unsafe {
-        let digest: *mut [u32; DIGEST_WORDS] = HEAP_ZONE.alloc(DIGEST_WORDS * WORD_SIZE) as _;
+        let alloced = Box::<mem::MaybeUninit<Digest>>::new(mem::MaybeUninit::<Digest>::uninit());
+        let digest = (*Box::into_raw(alloced)).as_mut_ptr();
         raw_digest_to(data, digest);
         &*digest
     }
@@ -48,12 +64,12 @@ pub fn raw_digest(data: &[u32]) -> &'static [u32; DIGEST_WORDS] {
 
 // Computes a raw digest of the given slice, and stores the digest in
 // the given pointer.  The digest memory must be uninitilaized.
-pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut [u32; DIGEST_WORDS]) {
+pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     let type_count = data.len() / CHUNK_SIZE;
     assert_ne!(type_count, 0);
 
-    let desc_ptr = SHA_DESC_ZONE.alloc(1);
+    let desc_ptr = alloc_desc();
 
     desc_ptr.write_volatile(SHADescriptor {
         type_count,
@@ -65,114 +81,77 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut [u32; DIGEST_WORDS
     GPIO_SHA.write_volatile(desc_ptr);
 }
 
-// ShaBuf represents a buffer we can use to run SHA256 on.  This way
-// we can hash using a dynamically allocated buffer, or using one of
-// the fixed memory regions.
-pub trait ShaBuf: Extend<u32> {
-    fn len(&self) -> usize;
-    fn push(&mut self, val: u32);
-    fn as_slice(&self) -> &[u32];
-    fn as_mut_slice(&mut self) -> &mut [u32];
-    fn extend_from_slice(&mut self, data: &[u32]);
-    fn resize(&mut self, new_size: usize);
-}
-
-impl ShaBuf for Vec<u32> {
-    fn len(&self) -> usize {
-        self.len()
-    }
-    fn push(&mut self, val: u32) {
-        self.push(val)
-    }
-    fn as_slice(&self) -> &[u32] {
-        self.as_slice()
-    }
-    fn as_mut_slice(&mut self) -> &mut [u32] {
-        self.as_mut_slice()
-    }
-    fn extend_from_slice(&mut self, data: &[u32]) {
-        self.extend_from_slice(data)
-    }
-    fn resize(&mut self, new_size: usize) {
-        self.resize(new_size, 0)
-    }
-}
-
 // Calculates the number of words of capacity needed, including end
 // marker and trailer, to take the SHA hash of len_bytes bytes.
-const fn compute_capacity_needed(len_bytes: usize) -> usize {
+pub const fn compute_capacity_needed(len_bytes: usize) -> usize {
     // Add one for end marker, round up, then 2 words for the 64-bit size.
     let len_words = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE + 2;
     align_up(len_words, CHUNK_SIZE)
 }
 
-// Slower version of add_trailer for use on write-only memory which
-// writes each word exactly once.  Length must already be word aligned.
-pub(crate) fn add_wom_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
-    assert_eq!(0, len_bytes % WORD_SIZE);
-    let len_words = len_bytes / WORD_SIZE;
-    data.push((END_MARKER as u32).to_le());
-
-    // Align to leave 2 words for length at the end.
-    while (data.len() % CHUNK_SIZE) != (CHUNK_SIZE - 2) {
-        data.push(0);
-    }
-
-    // 64-bit size
-    data.push((0 as u32).to_be());
-    let len_bits = len_words * WORD_SIZE * 8;
-    data.push((len_bits as u32).to_be());
+pub(crate) enum MemoryType {
+    Normal, // Normal memory that can be written to multiple times.
+    WOM,    // Write-only memory where each word can only be written once.
 }
+// Add the SHA trailer.  The given slice must already be properly
+// sized according to compute_capacity_needed.
+pub(crate) fn add_trailer(data: &mut [u32], len_bytes: usize, memtype: MemoryType) {
+    assert_eq!(compute_capacity_needed(len_bytes), data.len());
+    let marker_word = len_bytes / WORD_SIZE;
+    match memtype {
+        MemoryType::WOM => {
+            // With WOM memory, we require word alignment, and we have to
+            // write each word in the trailer exactly once.
+            assert_eq!(0, len_bytes % WORD_SIZE);
 
-// Adds a trailer onto a ShaBuf and pads it to CHUNK_SIZE words.
-pub(crate) fn add_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
-    assert!(len_bytes <= (data.len() * WORD_SIZE));
-    let padded_len = compute_capacity_needed(len_bytes);
-    assert_eq!(0, padded_len % CHUNK_SIZE);
-    data.resize(padded_len);
-
-    // Add end marker
-    let slice = data.as_mut_slice();
-    unsafe {
-        let ptr = slice.as_mut_ptr();
-        let u8ptr = ptr as *mut u8;
-        assert!(len_bytes < slice.len() * WORD_SIZE);
-        u8ptr.add(len_bytes).write_volatile(END_MARKER);
+            data[marker_word] = (END_MARKER as u32).to_le();
+        }
+        MemoryType::Normal => {
+            // In regular memory, the end may not be word aligned, so the
+            // end marker might go in the middle of a word.
+            //
+            // SAFETY: We've already checked bounds.
+            let u8ptr: *mut u8 = data.as_mut_ptr().cast();
+            unsafe { *u8ptr.add(len_bytes) = END_MARKER }
+        }
     }
+    // Fill in zeros until the lower 32 bits of size.
+    let size_word = data.len() - 1;
+    data[marker_word + 1..size_word].fill(0);
 
-    // Last word is size in bits.
     let len_bits = len_bytes * 8;
-    slice[slice.len() - 1] = (len_bits as u32).to_be();
-}
-
-// Digests the data in a SHA-ready buffer.  Consumes the given buffer
-// since it needs to modify it to add the trailer.
-fn digest_buf<T: ShaBuf>(mut data: T) -> &'static [u32; DIGEST_WORDS] {
-    let len_bytes = data.len() * WORD_SIZE;
-    add_trailer(&mut data, len_bytes);
-    raw_digest(data.as_slice())
+    data[size_word] = (len_bits as u32).to_be();
 }
 
 // Computes the SHA256 digest of a serialized object.
-pub fn digest<T: Serialize>(val: &T) -> &'static [u32; DIGEST_WORDS] {
+pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     // If the object to be serialized is a plain old structure in memory, this
     // should be a good guess for the allocation needed.
     let cap = compute_capacity_needed(mem::size_of_val(val));
-    let buf = to_vec_with_capacity(val, cap).unwrap();
-    digest_buf(buf)
+    let mut buf = to_vec_with_capacity(val, cap).unwrap();
+
+    let len_bytes = buf.len() * WORD_SIZE;
+    buf.resize(compute_capacity_needed(len_bytes), 0);
+    add_trailer(buf.as_mut_slice(), len_bytes, MemoryType::Normal);
+    raw_digest(buf.as_slice())
 }
 
 // Makes a digest for a slice of u8s.  We have no guarantees on
 // alignment so we have to copy the whole thing to a new buffer.
-pub fn digest_u8(data: &[u8]) -> &'static [u32; DIGEST_WORDS] {
+pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     let len_bytes = data.len();
     let cap = compute_capacity_needed(len_bytes);
     let mut data_u32 = Vec::<u32>::with_capacity(cap);
+
+    // SAFETY: Vec says it's explicitly safe to copy into a vector via
+    // the wrap pointer and then set the length, and we've allocated
+    // enough capacity.
     unsafe {
         (data_u32.as_mut_ptr() as *mut u8).copy_from_nonoverlapping(data.as_ptr(), len_bytes);
         data_u32.set_len(align_up(len_bytes, WORD_SIZE) / WORD_SIZE);
     }
-    add_trailer(&mut data_u32, len_bytes);
+    data_u32.resize(cap, 0);
+    add_trailer(data_u32.as_mut_slice(), len_bytes, MemoryType::Normal);
     raw_digest(data_u32.as_slice())
 }
 
@@ -182,7 +161,7 @@ pub fn digest_u8(data: &[u8]) -> &'static [u32; DIGEST_WORDS] {
 // the VM looks for.
 pub(crate) fn finalize() {
     unsafe {
-        let ptr = SHA_DESC_ZONE.alloc(1);
+        let ptr = alloc_desc();
         let type_field_ptr: *mut usize = core::ptr::addr_of_mut!((*ptr).type_count);
         type_field_ptr.write_volatile(0);
     }

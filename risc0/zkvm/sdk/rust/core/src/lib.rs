@@ -20,12 +20,6 @@ impl Digest {
     }
 }
 
-impl From<&[u32; DIGEST_WORDS]> for Digest {
-    fn from(data: &[u32; DIGEST_WORDS]) -> Self {
-        Digest::new(*data)
-    }
-}
-
 impl Display for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
         for word in self.0 {
