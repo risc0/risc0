@@ -177,3 +177,19 @@ risc0_rust_binary = rule(
     incompatible_use_toolchain_transition = True,
     cfg = risc0_transition,
 )
+
+ExtraGuestRustcFlagsInfo = provider(
+    doc = "Pass each value as an additional flag to rustc invocations targeting the ZKVM guest",
+    fields = {"extra_guest_rustc_flags": "List[string] Extra flags to pass to rustc targeting the ZKVM guest"},
+)
+
+def _extra_guest_rustc_flags_impl(ctx):
+    return ExtraGuestRustcFlagsInfo(extra_guest_rustc_flags = ctx.build_setting_value)
+
+extra_guest_rustc_flags = rule(
+    doc = (
+        "Any additional rustc_flags to pass when compiling for the ZKVM guest environment."
+    ),
+    implementation = _extra_guest_rustc_flags_impl,
+    build_setting = config.string_list(flag = True),
+)
