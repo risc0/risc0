@@ -31,8 +31,8 @@ pub fn main() {
     let vote_yes = params.ballot.vote_yes;
     let vote_counted = result.vote_counted;
     env::commit(&SubmitBallotCommit {
-        old_state: *sha::digest(params.state),
-        new_state: *sha::digest(result.state),
+        old_state: *sha::digest(&params.state),
+        new_state: *sha::digest(&result.state),
         polls_open: polls_open,
         voter_bitfield: voter_bitfield,
         voter: voter,

@@ -22,7 +22,19 @@ pub fn to_vec<'a, T>(value: &'a T) -> Result<alloc::vec::Vec<u32>>
 where
     T: Serialize + ?Sized,
 {
-    let vec = AllocVec::new();
+    // Use the in-memory size of the value as a guess for the length
+    // of the serialized value.
+    let vec = AllocVec::with_capacity(mem::size_of_val(value));
+    let mut serializer = Serializer::new(vec);
+    value.serialize(&mut serializer)?;
+    serializer.stream.release()
+}
+
+pub fn to_vec_with_capacity<'a, T>(value: &'a T, cap: usize) -> Result<alloc::vec::Vec<u32>>
+where
+    T: Serialize + ?Sized,
+{
+    let vec = AllocVec::with_capacity(cap);
     let mut serializer = Serializer::new(vec);
     value.serialize(&mut serializer)?;
     serializer.stream.release()
