@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use _alloc::vec::Vec;
+use core::mem;
+
+use risc0_zkvm_core::DIGEST_WORDS;
+use risc0_zkvm_serde::to_vec_with_capacity;
+use serde::Serialize;
+
 use crate::{
     align_up,
     alloc::HEAP_ZONE,
@@ -19,11 +26,6 @@ use crate::{
     mem_layout::SHA_DESC_ZONE,
     WORD_SIZE,
 };
-use _alloc::vec::Vec;
-use core::mem;
-use risc0_zkvm_core::DIGEST_WORDS;
-use risc0_zkvm_serde::to_vec_with_capacity;
-use serde::Serialize;
 
 const END_MARKER: u8 = 0x80;
 
@@ -40,8 +42,7 @@ pub fn raw_digest(data: &[u32]) -> &'static [u32; DIGEST_WORDS] {
     unsafe {
         let digest: *mut [u32; DIGEST_WORDS] = HEAP_ZONE.alloc(DIGEST_WORDS * WORD_SIZE) as _;
         raw_digest_to(data, digest);
-        let digest_ref: &'static [u32; DIGEST_WORDS] = &*digest;
-        digest_ref
+        &*digest
     }
 }
 
@@ -100,16 +101,13 @@ impl ShaBuf for Vec<u32> {
 // Calculates the number of words of capacity needed, including end
 // marker and trailer, to take the SHA hash of len_bytes bytes.
 const fn compute_capacity_needed(len_bytes: usize) -> usize {
-    // Add one for end marker
-    let mut len_words = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE;
-    // Add two words for 64-bit size
-    len_words += 2;
-
+    // Add one for end marker, round up, then 2 words for the 64-bit size.
+    let len_words = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE + 2;
     align_up(len_words, CHUNK_SIZE)
 }
 
 // Slower version of add_trailer for use on write-only memory which
-// writes each word exactly once.  LEngth must already be word aligned.
+// writes each word exactly once.  Length must already be word aligned.
 pub(crate) fn add_wom_trailer<T: ShaBuf>(data: &mut T, len_bytes: usize) {
     assert_eq!(0, len_bytes % WORD_SIZE);
     let len_words = len_bytes / WORD_SIZE;
@@ -178,8 +176,10 @@ pub fn digest_u8(data: &[u8]) -> &'static [u32; DIGEST_WORDS] {
     raw_digest(data_u32.as_slice())
 }
 
-// Do some magic to finialize something relating to the guest environment.
-// TODO(nils): Document this better.
+// Set a marker so that the VM knows when the last SHA descriptor is
+// reached. We need to write to this memory location at least once so
+// that it's not uninitialized, and the value of 0 is the marker that
+// the VM looks for.
 pub(crate) fn finalize() {
     unsafe {
         let ptr = SHA_DESC_ZONE.alloc(1);

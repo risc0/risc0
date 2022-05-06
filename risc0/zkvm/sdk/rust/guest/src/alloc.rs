@@ -118,17 +118,11 @@ impl<T> BumpPointerAlloc<T> {
         unsafe { &*core::slice::from_raw_parts(self.start, len) }
     }
 
-    // pub fn as_mut_slice(&self) -> &mut [T] {
-    //     self.as_mut_slice_unlocked(*&mut *self.lock_len())
-    // }
     pub fn as_mut_slice_unlocked(&self, len: usize) -> &mut [T] {
         unsafe { &mut *core::slice::from_raw_parts_mut(self.start, len) }
     }
 
     // Returns the slice of new values to be initialized, if any.
-    // pub fn resize(&self, new_size: usize) -> &mut [T] {
-    //     self.resize_unlocked(&mut &mut *self.lock_len(), new_size)
-    // }
     pub fn resize_unlocked(&self, len: &mut usize, new_size: usize) -> &mut [T] {
         assert!(new_size <= self.cap);
         let init_range_start = *len;
