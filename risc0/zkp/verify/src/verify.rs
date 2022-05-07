@@ -49,7 +49,7 @@ impl fmt::Display for VerificationError {
 }
 
 pub trait Circuit {
-    fn taps(&self) -> &'static Taps;
+    fn taps(&self) -> &'static Taps<'static>;
     fn execute(&mut self, iop: &mut ReadIOP);
     fn accumulate(&mut self, iop: &mut ReadIOP);
     fn po2(&self) -> u32;
@@ -119,9 +119,9 @@ pub fn verify(circuit: &mut dyn Circuit, proof: &[u32]) -> Result<(), Verificati
     let back_one: Fp = Fp::from(ROU_REV[po2 as usize]);
     let mut cur_pos: usize = 0;
     let mut eval_u: Vec<Fp4> = vec![];
-    for reg in &taps.registers {
+    for reg in taps.registers {
         let blen = reg.back.len();
-        for b in &reg.back {
+        for b in reg.back {
             let x = back_one.pow(*b) * z;
             let fx = poly_eval(&coeff_u[cur_pos..(cur_pos + blen)], x);
             eval_u.push(fx);
@@ -158,7 +158,7 @@ pub fn verify(circuit: &mut dyn Circuit, proof: &[u32]) -> Result<(), Verificati
     }
     let mut cur_mix = Fp4::one();
     cur_pos = 0;
-    for reg in &taps.registers {
+    for reg in taps.registers {
         let blen = reg.back.len();
         for i in 0..blen {
             combo_u[reg.combo_id][i] += cur_mix * coeff_u[cur_pos + i];
@@ -188,7 +188,7 @@ pub fn verify(circuit: &mut dyn Circuit, proof: &[u32]) -> Result<(), Verificati
             let check_row = check_merkle.verify(inner_iop, idx);
             let mut cur = Fp4::one();
             let mut tot = vec![Fp4::zero(); combos_size + 1];
-            for reg in &taps.registers {
+            for reg in taps.registers {
                 tot[reg.combo_id] += cur * rows[reg.group as usize][reg.offset];
                 cur *= mix;
             }
@@ -200,7 +200,7 @@ pub fn verify(circuit: &mut dyn Circuit, proof: &[u32]) -> Result<(), Verificati
             for i in 0..combos_size {
                 let num = tot[i] - poly_eval(&combo_u[i], x);
                 let mut divisor = Fp4::one();
-                for b in &taps.combos[i].back {
+                for b in taps.combos[i].back {
                     divisor *= x - z * back_one.pow(*b);
                 }
                 ret += num * divisor.inv();

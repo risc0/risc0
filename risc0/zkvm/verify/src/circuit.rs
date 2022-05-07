@@ -110,8 +110,8 @@ impl MixState {
 }
 
 impl Circuit for Risc0Circuit {
-    fn taps(&self) -> &'static Taps {
-        return &*RISCV_TAPS;
+    fn taps(&self) -> &'static Taps<'static> {
+        return RISCV_TAPS;
     }
 
     fn execute(&mut self, iop: &mut ReadIOP) {

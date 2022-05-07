@@ -19,18 +19,18 @@ pub enum RegisterGroup {
     Data = 2,
 }
 
-pub struct Register {
+pub struct Register<'a> {
     pub group: RegisterGroup,
     pub offset: usize,
-    pub back: Vec<usize>,
+    pub back: &'a [usize],
     pub combo_id: usize,
 }
 
-pub struct Combo {
-    pub back: Vec<usize>,
+pub struct Combo<'a> {
+    pub back: &'a [usize],
 }
 
-pub struct Taps {
-    pub registers: Vec<Register>,
-    pub combos: Vec<Combo>,
+pub struct Taps<'a> {
+    pub registers: &'a [Register<'a>],
+    pub combos: &'a [Combo<'a>],
 }

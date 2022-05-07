@@ -13,12 +13,9 @@
 // limitations under the License.
 
 mod circuit;
-mod eval;
 mod poly_op;
 mod poly_ops;
 mod taps;
-
-use arrayref::array_ref;
 
 use serde::{Deserialize, Serialize};
 
@@ -45,7 +42,9 @@ impl Receipt {
             let mut vec = self.journal.clone();
             vec.resize(32, 0);
             for i in 0..8 {
-                assert!(self.seal[i] == u32::from_le_bytes(*array_ref![&vec, i * 4, 4]));
+                assert!(
+                    self.seal[i] == u32::from_le_bytes(vec[i * 4..i * 4 + 4].try_into().unwrap())
+                );
             }
         }
     }
@@ -54,7 +53,9 @@ impl Receipt {
         let mut as_words: Vec<u32> = vec![];
         assert!(self.journal.len() % 4 == 0);
         for i in 0..(self.journal.len() / 4) {
-            as_words.push(u32::from_le_bytes(*array_ref![&self.journal, i * 4, 4]));
+            as_words.push(u32::from_le_bytes(
+                self.journal[i * 4..i * 4 + 4].try_into().unwrap(),
+            ));
         }
         as_words
     }
