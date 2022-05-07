@@ -14,7 +14,11 @@
 
 use std::slice;
 
-use risc0_zkp_core::{fp::Fp, fp4::Fp4, sha::Digest};
+use risc0_zkp_core::{
+    fp::Fp,
+    fp4::Fp4,
+    sha::{Digest, DIGEST_WORDS},
+};
 use risc0_zkp_verify::{read_iop::ReadIOP, taps::Taps, verify::Circuit};
 
 use crate::{
@@ -25,17 +29,51 @@ use crate::{
 
 const OUTPUT_REGS: usize = 9;
 const ACCUM_MIX_SIZE: usize = 20;
+const MAX_CYCLES: usize = 1 << 20;
+const MIN_CYCLES: usize = 512;
+
+const fn log2_ceil(val: usize) -> usize {
+    let mut r: usize = 0;
+    while (1 << r) < val {
+        r += 1;
+    }
+    return r;
+}
+
+pub const CODE_DIGEST_COUNT: usize = log2_ceil(MAX_CYCLES / MIN_CYCLES) + 1;
+
+pub struct MethodID {
+    pub digests: [Digest; CODE_DIGEST_COUNT],
+}
+
+impl From<&[u8]> for MethodID {
+    fn from(bytes: &[u8]) -> Self {
+        let u32s: Vec<u32> = bytes
+            .chunks(4)
+            .map(|bytes| u32::from_le_bytes(bytes.try_into().unwrap()))
+            .collect();
+        let digests: Vec<Digest> = u32s
+            .chunks(DIGEST_WORDS)
+            .map(|digest| Digest::new(digest.try_into().unwrap()))
+            .collect();
+        MethodID {
+            digests: digests.try_into().unwrap(),
+        }
+    }
+}
 
 pub struct Risc0Circuit {
     po2: u32,
     globals: Vec<Fp>,
+    code_id: MethodID,
 }
 
-impl Default for Risc0Circuit {
-    fn default() -> Self {
+impl Risc0Circuit {
+    pub fn new(code_id: MethodID) -> Self {
         Risc0Circuit {
             po2: 0,
             globals: vec![],
+            code_id,
         }
     }
 }
@@ -87,9 +125,9 @@ impl Circuit for Risc0Circuit {
         self.po2
     }
 
-    fn check_code(&self, _root: &Digest) {
-        #[cfg(not(test))]
-        todo!()
+    fn check_code(&self, root: &Digest) {
+        let which_code: usize = self.po2 as usize - log2_ceil(MIN_CYCLES as usize);
+        assert_eq!(&self.code_id.digests[which_code], root);
     }
 
     fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4 {
