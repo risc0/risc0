@@ -36,7 +36,7 @@ pub struct Receipt {
 impl Receipt {
     pub fn verify(&self, method_id: MethodID) {
         let mut circuit = Risc0Circuit::new(method_id);
-        verify(&mut circuit, &self.seal);
+        verify(&mut circuit, &self.seal).unwrap();
         assert!(self.journal.len() == (self.seal[8] as usize));
         if self.journal.len() > 32 {
             let digest = Digest::hash_bytes(&self.journal);
@@ -80,7 +80,7 @@ mod tests {
             .collect();
         let receipt: Receipt = risc0_zkvm_serde::from_slice(&as_u32).unwrap();
 
-        let method_id = MethodID::from(fs::read("src/simple_receipt.id")?.as_slice());
+        let method_id = MethodID::try_from(fs::read("src/simple_receipt.id")?.as_slice()).unwrap();
 
         std::println!(
             "Receipt: journal length {} seal length {}",

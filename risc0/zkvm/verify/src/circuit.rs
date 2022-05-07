@@ -19,7 +19,11 @@ use risc0_zkp_core::{
     fp4::Fp4,
     sha::{Digest, DIGEST_WORDS},
 };
-use risc0_zkp_verify::{read_iop::ReadIOP, taps::Taps, verify::Circuit};
+use risc0_zkp_verify::{
+    read_iop::ReadIOP,
+    taps::Taps,
+    verify::{Circuit, VerificationError, VerificationError::*},
+};
 
 use crate::{
     poly_op::PolyOp,
@@ -46,19 +50,24 @@ pub struct MethodID {
     pub digests: [Digest; CODE_DIGEST_COUNT],
 }
 
-impl From<&[u8]> for MethodID {
-    fn from(bytes: &[u8]) -> Self {
-        let u32s: Vec<u32> = bytes
+impl TryFrom<&[u8]> for MethodID {
+    type Error = VerificationError;
+    fn try_from(bytes: &[u8]) -> Result<MethodID, VerificationError> {
+        let u32s: Result<Vec<u32>, VerificationError> = bytes
             .chunks(4)
-            .map(|bytes| u32::from_le_bytes(bytes.try_into().unwrap()))
+            .map(|bytes| {
+                Ok(u32::from_le_bytes(
+                    bytes.try_into().or(Err(ReceiptFormatError))?,
+                ))
+            })
             .collect();
-        let digests: Vec<Digest> = u32s
+        let digests: Result<Vec<Digest>, VerificationError> = u32s?
             .chunks(DIGEST_WORDS)
-            .map(|digest| Digest::new(digest.try_into().unwrap()))
+            .map(|digest| Ok(Digest::new(digest.try_into().or(Err(ReceiptFormatError))?)))
             .collect();
-        MethodID {
-            digests: digests.try_into().unwrap(),
-        }
+        Ok(MethodID {
+            digests: digests?.try_into().or(Err(ReceiptFormatError))?,
+        })
     }
 }
 
@@ -125,9 +134,13 @@ impl Circuit for Risc0Circuit {
         self.po2
     }
 
-    fn check_code(&self, root: &Digest) {
+    fn check_code(&self, root: &Digest) -> Result<(), VerificationError> {
         let which_code: usize = self.po2 as usize - log2_ceil(MIN_CYCLES as usize);
-        assert_eq!(&self.code_id.digests[which_code], root);
+        if &self.code_id.digests[which_code] == root {
+            Ok(())
+        } else {
+            Err(MethodVerificationError)
+        }
     }
 
     fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4 {
