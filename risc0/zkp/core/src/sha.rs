@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::{vec, vec::Vec};
 use core::fmt::{Debug, Display, Formatter};
-use std::slice;
+use core::slice;
 
-use sha2::digest::generic_array::{GenericArray, typenum::U64};
+use sha2::digest::generic_array::{typenum::U64, GenericArray};
 use sha2::{compress256, Digest as ShaDigest, Sha256};
 
 use crate::{fp::Fp, fp4::Fp4};

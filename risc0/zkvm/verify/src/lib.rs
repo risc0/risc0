@@ -12,10 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![no_std]
+
+extern crate alloc;
+
 mod circuit;
 mod poly_op;
 mod poly_ops;
 mod taps;
+
+use alloc::{vec, vec::Vec};
 
 use serde::{Deserialize, Serialize};
 
@@ -63,6 +69,7 @@ impl Receipt {
 
 #[cfg(test)]
 mod tests {
+    extern crate std;
     use super::Receipt;
     use crate::MethodID;
     use core::convert::TryFrom;

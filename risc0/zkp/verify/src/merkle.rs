@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::{vec, vec::Vec};
+
 use risc0_zkp_core::{fp::Fp, sha::Digest, to_po2};
 
 use crate::read_iop::ReadIOP;
@@ -80,7 +82,7 @@ impl MerkleTreeVerifier {
         while idx >= 2 * self.params.top_size {
             let low_bit = idx % 2;
             let mut other = Digest::default();
-            iop.read_digests(std::slice::from_mut(&mut other));
+            iop.read_digests(core::slice::from_mut(&mut other));
             idx /= 2;
             if low_bit == 1 {
                 cur = Digest::hash_pair(&other, &cur);

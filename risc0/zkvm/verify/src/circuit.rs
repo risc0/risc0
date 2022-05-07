@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::slice;
+use alloc::{vec, vec::Vec};
+use core::slice;
 
 use risc0_zkp_core::{
     fp::Fp,
