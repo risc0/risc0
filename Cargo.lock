@@ -18,12 +18,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d301b3b94cb4b2f23d7917810addbbaff90738e0ca2be692bd027e70d7e0330c"
 
 [[package]]
-name = "arrayref"
-version = "0.3.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4c527152e37cf757a3f78aae5a06fbeefdb07ccc535c980a3208ee3060dd544"
-
-[[package]]
 name = "async-trait"
 version = "0.1.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -646,12 +640,9 @@ dependencies = [
 name = "risc0-zkp-core"
 version = "0.1.0"
 dependencies = [
- "arrayref",
- "generic-array",
  "rand",
  "rand_core",
  "sha2",
- "typenum",
 ]
 
 [[package]]
@@ -680,9 +671,7 @@ dependencies = [
 name = "risc0-zkvm-verify"
 version = "0.1.0"
 dependencies = [
- "arrayref",
  "env_logger",
- "lazy_static",
  "log",
  "risc0-zkp-core",
  "risc0-zkp-verify",

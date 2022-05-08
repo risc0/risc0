@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::slice;
+use alloc::{vec, vec::Vec};
+use core::slice;
 
 use risc0_zkp_core::{
     fp::Fp,
@@ -110,8 +111,8 @@ impl MixState {
 }
 
 impl Circuit for Risc0Circuit {
-    fn taps(&self) -> &'static Taps {
-        return &*RISCV_TAPS;
+    fn taps(&self) -> &'static Taps<'static> {
+        return RISCV_TAPS;
     }
 
     fn execute(&mut self, iop: &mut ReadIOP) {

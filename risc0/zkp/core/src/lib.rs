@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![no_std]
+
+extern crate alloc;
+
 pub mod fp;
 pub mod fp4;
 pub mod ntt;

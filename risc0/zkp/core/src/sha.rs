@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::{vec, vec::Vec};
 use core::fmt::{Debug, Display, Formatter};
-use std::slice;
+use core::slice;
 
-use arrayref::array_ref;
-use generic_array::GenericArray;
+use sha2::digest::generic_array::{typenum::U64, GenericArray};
 use sha2::{compress256, Digest as ShaDigest, Sha256};
-use typenum::U64;
 
 use crate::{fp::Fp, fp4::Fp4};
 
@@ -45,12 +44,16 @@ impl Digest {
     pub fn hash_bytes(bytes: &[u8]) -> Self {
         let mut hasher = Sha256::new();
         hasher.update(bytes);
-        let raw_ret = hasher.finalize();
-        let mut ret = [0 as u32; DIGEST_WORDS];
-        for i in 0..DIGEST_WORDS {
-            ret[i] = u32::from_be_bytes(*array_ref![raw_ret, i * 4, 4]);
-        }
-        Digest(ret)
+        Digest(
+            hasher
+                .finalize()
+                .as_slice()
+                .chunks(4)
+                .map(|chunk| u32::from_be_bytes(chunk.try_into().unwrap()))
+                .collect::<Vec<u32>>()
+                .try_into()
+                .unwrap(),
+        )
     }
 
     // Digest FPs a word at a time, without padding (and using le encoding)
