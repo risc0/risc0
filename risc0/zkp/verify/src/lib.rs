@@ -14,10 +14,18 @@
 
 #![no_std]
 
-extern crate alloc;
+#[cfg(feature = "cxx")]
+#[cxx::bridge]
+mod ffi {}
 
-pub mod fri;
-pub mod merkle;
-pub mod read_iop;
-pub mod taps;
-pub mod verify;
+cfg_if::cfg_if! {
+    if #[cfg(feature = "pure")] {
+        extern crate alloc;
+
+        pub mod fri;
+        pub mod merkle;
+        pub mod read_iop;
+        pub mod taps;
+        pub mod verify;
+    }
+}

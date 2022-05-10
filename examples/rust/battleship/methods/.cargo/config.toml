@@ -1,0 +1,5 @@
+[build]
+target = "../../../../bazel/rules/rust/riscv32im-unknown-none-elf.json"
+
+[unstable]
+build-std = ["core", "alloc"]
