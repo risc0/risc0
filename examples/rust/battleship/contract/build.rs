@@ -16,6 +16,7 @@ use std::env;
 use std::fs;
 use std::path::Path;
 
+// TODO: hook this up to the actual `make-id` cargo installed tool.
 fn make_id(name: &str) {
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let dest_path = Path::new(&out_dir).join(name);
