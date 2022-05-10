@@ -23,6 +23,8 @@ fn main() {
 
         cxx_build::bridge("src/lib.rs")
             .file("ntt.cpp")
+            .file("poly.cpp")
+            .file("sha_rng.cpp")
             .flag_if_supported("-std=c++17")
             .compile("risc0-zkp-core");
     }
