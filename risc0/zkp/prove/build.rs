@@ -23,6 +23,7 @@ fn main() {
         .file("poly_group.cpp")
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
+        .warnings(false)
         .compile("risc0-zkp-prove");
 
     println!("cargo:rustc-link-lib=static=risc0-core");
