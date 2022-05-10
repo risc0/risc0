@@ -1,0 +1,12 @@
+[package]
+name = "risc0-zkvm-circuit"
+version = "0.1.0"
+edition = "2021"
+links = "risc0-zkvm-circuit"
+
+[dependencies]
+cxx = "1.0"
+risc0-zkvm-platform = { version = "0.1", path = "../platform"}
+
+[build-dependencies]
+cxx-build = "1.0"

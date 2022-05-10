@@ -1,12 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
-
-rust_binary(
-    name = "battleship",
-    srcs = ["src/main.rs"],
-    deps = [
-        ":lib",
-    ],
-)
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 
 rust_library(
     name = "lib",
@@ -28,10 +20,10 @@ rust_test(
     name = "test",
     crate = ":lib",
     data = [
-        "//examples/rust/battleship/core:init",
-        "//examples/rust/battleship/core:init.id",
-        "//examples/rust/battleship/core:turn",
-        "//examples/rust/battleship/core:turn.id",
+        "//examples/rust/battleship/methods:init",
+        "//examples/rust/battleship/methods:init.id",
+        "//examples/rust/battleship/methods:turn",
+        "//examples/rust/battleship/methods:turn.id",
     ],
     rustc_flags = ["-Coverflow-checks=on"],
 )

@@ -12,6 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use cxx_build::CFG;
+
 fn main() {
-    todo!()
+    CFG.include_prefix = "risc0/core";
+
+    cxx_build::bridge("src/lib.rs")
+        .file("elf.cpp")
+        .file("log.cpp")
+        .flag_if_supported("-std=c++17")
+        .compile("risc0-core");
 }

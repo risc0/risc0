@@ -14,16 +14,24 @@
 
 #![no_std]
 
-extern crate alloc;
+#[cfg(feature = "cxx")]
+#[cxx::bridge]
+mod ffi {}
 
-pub mod fp;
-pub mod fp4;
-pub mod ntt;
-pub mod poly;
-pub mod rou;
-pub mod sha;
-pub mod sha_rng;
+cfg_if::cfg_if! {
+    if #[cfg(feature = "pure")] {
+        extern crate alloc;
 
-pub fn to_po2(x: usize) -> usize {
-    (31 - (x as u32).leading_zeros()) as usize
+        pub mod fp;
+        pub mod fp4;
+        pub mod ntt;
+        pub mod poly;
+        pub mod rou;
+        pub mod sha;
+        pub mod sha_rng;
+
+        pub fn to_po2(x: usize) -> usize {
+            (31 - (x as u32).leading_zeros()) as usize
+        }
+    }
 }

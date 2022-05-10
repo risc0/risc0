@@ -4,10 +4,10 @@ rust_binary(
     name = "server",
     srcs = ["src/main.rs"],
     data = [
-        "//examples/rust/battleship/core:init",
-        "//examples/rust/battleship/core:init.id",
-        "//examples/rust/battleship/core:turn",
-        "//examples/rust/battleship/core:turn.id",
+        "//examples/rust/battleship/methods:init",
+        "//examples/rust/battleship/methods:init.id",
+        "//examples/rust/battleship/methods:turn",
+        "//examples/rust/battleship/methods:turn.id",
     ],
     deps = [
         "//examples/rust/battleship/core:core_host",

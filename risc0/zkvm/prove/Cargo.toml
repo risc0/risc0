@@ -1,0 +1,15 @@
+[package]
+name = "risc0-zkvm-prove"
+version = "0.1.0"
+edition = "2021"
+links = "risc0-zkvm-prove"
+
+[dependencies]
+anyhow = "1.0"
+clap = { version = "3.1", features = ["derive"] }
+cxx = "1.0"
+risc0-zkp-prove = { version = "0.1", path = "../../zkp/prove" }
+risc0-zkvm-verify = { version = "0.2", path = "../verify", features = ["cxx"] }
+
+[build-dependencies]
+cxx-build = "1.0"

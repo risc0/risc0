@@ -1,0 +1,13 @@
+[package]
+name = "risc0-zkp-accel"
+version = "0.1.0"
+edition = "2021"
+links = "risc0-zkp-accel"
+
+[dependencies]
+cxx = "1.0"
+risc0-core = { version = "0.1", path = "../../core" }
+risc0-zkp-core = { version = "0.2", path = "../core", features = ["cxx"] }
+
+[build-dependencies]
+cxx-build = "1.0"
