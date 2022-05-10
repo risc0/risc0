@@ -25,6 +25,7 @@ fn main() {
             .file("ntt.cpp")
             .file("poly.cpp")
             .file("sha_rng.cpp")
+            .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .compile("risc0-zkp-core");
     }

@@ -18,6 +18,7 @@ fn main() {
     CFG.include_prefix = "risc0/zkvm/platform";
 
     cxx_build::bridge("src/lib.rs")
+        .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .compile("risc0-zkp-platform");
 }

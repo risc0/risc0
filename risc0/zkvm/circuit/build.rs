@@ -19,6 +19,7 @@ fn main() {
     CFG.exported_header_links = vec!["risc0-zkvm-platform"];
 
     cxx_build::bridge("src/lib.rs")
+        .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .compile("risc0-zkp-circuit");
 }

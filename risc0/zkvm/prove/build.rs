@@ -20,6 +20,7 @@ fn main() {
     cxx_build::bridge("src/lib.rs")
         .file("method_id.cpp")
         .file("step_context.cpp")
+        .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .compile("prove");
 

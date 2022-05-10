@@ -20,6 +20,10 @@ fn main() {
 
     cxx_build::bridge("src/lib.rs")
         .file("backend/cpu/impl.cpp")
+        .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .compile("risc0-zkp-accel");
+
+    println!("cargo:rustc-link-lib=static=risc0-core");
+    println!("cargo:rustc-link-lib=static=risc0-zkp-core");
 }

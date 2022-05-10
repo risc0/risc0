@@ -22,6 +22,7 @@ fn main() {
 
         cxx_build::bridge("src/lib.rs")
             .file("merkle.cpp")
+            .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .compile("risc0-zkp-verify");
     }
