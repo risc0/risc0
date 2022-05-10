@@ -13,7 +13,7 @@
 // limitations under the License.
 
 const GAS = "300000000000000";
-const CONTRACT_ID = 'dev-1650384630199-84450568731492';
+const CONTRACT_ID = 'dev-1652175912839-88534800521779';
 const NETWORK_ID = 'testnet';
 
 const VIEW_METHODS = [
