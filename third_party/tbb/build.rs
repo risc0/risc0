@@ -53,7 +53,8 @@ fn main() {
 
     CFG.exported_header_dirs = vec![&inc_dir];
 
-    cxx_build::bridge("src/lib.rs")
+    let mut build = cxx_build::bridge("src/lib.rs");
+    build
         .files(srcs)
         .include(inc_dir)
         .define("__TBB_BUILD", None)
@@ -62,6 +63,22 @@ fn main() {
         // GCC/Clang flags
         .flag_if_supported("-w")
         .flag_if_supported("-std=c++17")
-        .warnings(false)
-        .compile("tbb");
+        .warnings(false);
+
+    if cfg!(target_os = "macos") {
+        build.define("_XOPEN_SOURCE", None);
+    }
+
+    if cfg!(target_arch = "x86_64") {
+        build.define("__TBB_NO_IMPLICIT_LINKAGE", None);
+        build.define("__TBB_USE_ITT_NOTIFY", None);
+    } else {
+        build.define("USE_PTHREAD", None);
+    }
+
+    if cfg!(all(target_os = "linux", target_arch = "x86_64")) {
+        build.flag_if_supported("-mwaitpkg");
+    }
+
+    build.compile("tbb");
 }
