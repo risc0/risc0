@@ -91,11 +91,9 @@ impl Cell {
 }
 
 type Cells = [[Cell; BOARD_SIZE]; BOARD_SIZE];
-type Taken = [[bool; BOARD_SIZE]; BOARD_SIZE];
 
-pub struct Grid {
-    pub cells: Cells,
-    pub taken: Taken,
+struct Grid {
+    cells: Cells
 }
 
 impl Grid {
