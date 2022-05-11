@@ -27,6 +27,7 @@ fn main() {
             .file("sha_rng.cpp")
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
+            .warnings(false)
             .compile("risc0-zkp-core");
     }
 }

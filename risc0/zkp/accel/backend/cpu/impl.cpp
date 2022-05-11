@@ -22,19 +22,9 @@
 #include "risc0/zkp/core/ntt.h"
 #include "risc0/zkp/core/sha256.h"
 
-#ifdef USE_TBB
-
 #include "oneapi/tbb/parallel_for.h"
 
 #define PARALLEL_FOR(start_, count_, body_) oneapi::tbb::parallel_for<size_t>(start_, count_, body_)
-
-#else
-
-#define PARALLEL_FOR(start_, count_, body_)                                                        \
-  for (size_t i = start_; i < count_; i++)                                                         \
-  body_(i)
-
-#endif
 
 namespace risc0 {
 

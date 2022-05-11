@@ -25,6 +25,7 @@ fn main() {
             .file("method_id.cpp")
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
+            .warnings(false)
             .compile("verify");
     }
 }
