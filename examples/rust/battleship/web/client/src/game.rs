@@ -96,16 +96,29 @@ impl Component for GameProvider {
             .link()
             .context::<WalletContext>(Callback::noop())
             .unwrap();
+
+        let generate_ship = || {
+            Ship::new(2, 3, ShipDirection::Vertical)
+        };
+
+        let mut randomized_ships_vector: Vec<Ship> = Vec::new();
+        for _n in 1..5 {
+            randomized_ships_vector.push(generate_ship());
+        }
+
+        let randomized_ships : [Ship; 5] = [
+            randomized_ships_vector[0].clone(),
+            randomized_ships_vector[1].clone(),
+            randomized_ships_vector[2].clone(),
+            randomized_ships_vector[3].clone(),
+            randomized_ships_vector[4].clone(),
+        ];
+
         let state = GameState {
-            ships: [
-                Ship::new(2, 3, ShipDirection::Vertical),
-                Ship::new(3, 1, ShipDirection::Horizontal),
-                Ship::new(4, 7, ShipDirection::Vertical),
-                Ship::new(7, 5, ShipDirection::Horizontal),
-                Ship::new(7, 7, ShipDirection::Horizontal),
-            ],
+            ships: randomized_ships,
             salt: 0xDEADBEEF,
         };
+
         let game = GameSession {
             state,
             name: ctx.props().name.clone(),
