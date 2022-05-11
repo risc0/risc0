@@ -33,19 +33,19 @@ pub const SHIP_SPANS: [usize; NUM_SHIPS] = [
 
 pub const SUNK_MASKS: [u8; NUM_SHIPS] = [0x1f, 0x0f, 0x07, 0x07, 0x03];
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Hash, Copy)]
 pub struct Position {
     pub x: u32,
     pub y: u32,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Copy)]
 pub enum ShipDirection {
     Horizontal,
     Vertical,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Copy)]
 pub struct Ship {
     pub pos: Position,
     pub dir: ShipDirection,
@@ -220,6 +220,10 @@ impl Ship {
                 ShipDirection::Horizontal => self.pos.x as usize <= limit,
                 ShipDirection::Vertical => self.pos.y as usize <= limit,
             }
+    }
+
+    pub fn default() -> Ship {
+        Ship::new(0, 0, ShipDirection::Horizontal)
     }
 }
 

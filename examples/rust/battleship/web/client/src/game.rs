@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use rand::{thread_rng, Rng};
 use std::{collections::HashMap, rc::Rc};
 
 use gloo::timers::future::TimeoutFuture;
@@ -21,12 +22,15 @@ use yew::prelude::*;
 use yew_agent::{Bridge, Bridged, Dispatched, Dispatcher};
 
 use crate::{
+    board::Grid,
     bus::EventBus,
     contract::{Contract, ContractState},
     near::NearContract,
     wallet::WalletContext,
 };
-use battleship_core::{GameState, Position, RoundParams, RoundResult, Ship, ShipDirection};
+use battleship_core::{
+    GameState, Position, RoundParams, RoundResult, Ship, ShipDirection, BOARD_SIZE, SHIP_SPANS,
+};
 
 pub type CoreHitType = battleship_core::HitType;
 
@@ -73,10 +77,34 @@ pub struct GameSession {
     pub status: String,
 }
 
+fn create_random_ships() -> [Ship; 5] {
+    // randomly place 5 ships on the board
+
+    // iterate through ship spans
+    for span in 0..SHIP_SPANS.len() {
+        println!("{}", SHIP_SPANS[span]);
+    }
+    let mut rng = thread_rng();
+    let mut ships = [Ship::default(); 5];
+    for ship in ships.iter_mut() {
+        loop {
+            // pick a random starting point on the board
+            let x: usize = rng.gen_range(0..BOARD_SIZE - 1);
+            let y: usize = rng.gen_range(0..BOARD_SIZE - 1);
+        }
+
+        ship.dir = ShipDirection::Horizontal;
+        ship.pos = Position { x: 0, y: 0 };
+    }
+    ships
+}
+
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub name: String,
     pub until: usize,
+    #[prop_or_else(create_random_ships)]
+    pub ships: [Ship; 5],
     #[prop_or_default]
     pub children: Children,
 }
@@ -97,13 +125,7 @@ impl Component for GameProvider {
             .context::<WalletContext>(Callback::noop())
             .unwrap();
         let state = GameState {
-            ships: [
-                Ship::new(2, 3, ShipDirection::Vertical),
-                Ship::new(3, 1, ShipDirection::Horizontal),
-                Ship::new(4, 7, ShipDirection::Vertical),
-                Ship::new(7, 5, ShipDirection::Horizontal),
-                Ship::new(7, 7, ShipDirection::Horizontal),
-            ],
+            ships: ctx.props().ships,
             salt: 0xDEADBEEF,
         };
         let game = GameSession {
