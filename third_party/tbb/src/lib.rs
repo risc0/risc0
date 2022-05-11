@@ -12,8 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cxx::bridge]
-mod ffi {}
-
 #[link(name = "tbb")]
 extern "C" {}

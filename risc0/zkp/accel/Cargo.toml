@@ -8,7 +8,7 @@ links = "risc0-zkp-accel"
 cxx = "1.0"
 risc0-core = { version = "0.1", path = "../../core" }
 risc0-zkp-core = { version = "0.2", path = "../core", features = ["cxx"] }
-tbb = { veresion = "0.1", path = "../../../third_party/tbb" }
+tbb = { version = "0.1", path = "../../../third_party/tbb" }
 
 [build-dependencies]
 cxx-build = "1.0"

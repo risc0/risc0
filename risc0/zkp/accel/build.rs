@@ -18,8 +18,12 @@ fn main() {
     CFG.include_prefix = "risc0/zkp/accel";
     CFG.exported_header_links = vec!["risc0-core", "risc0-zkp-core"];
 
+    let tbb_include = std::env::var_os("DEP_TBB_INCLUDE").unwrap();
+
     cxx_build::bridge("src/lib.rs")
         .file("backend/cpu/impl.cpp")
+        .define("__TBB_NO_IMPLICIT_LINKAGE", None)
+        .include(tbb_include)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)
