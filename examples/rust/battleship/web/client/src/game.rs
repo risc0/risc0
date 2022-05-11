@@ -93,7 +93,15 @@ fn create_random_ships() -> [Ship; 5] {
             let y: usize = rng.gen_range(0..BOARD_SIZE - 1);
         }
 
-        ship.dir = ShipDirection::Horizontal;
+        // pick between 0 and 1 for randomized ship placement
+        let shipDirInt: usize = rng.gen_range(0..1);
+
+        if (shipDirInt == 0) {
+            ship.dir = ShipDirection::Horizontal;
+        } else {
+            ship.dir = ShipDirection::Vertical;
+        }
+
         ship.pos = Position { x: 0, y: 0 };
     }
     ships
