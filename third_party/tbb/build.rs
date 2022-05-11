@@ -5,6 +5,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use cxx_build::CFG;
 use flate2::read::GzDecoder;
 use glob::glob;
 use sha2::{Digest, Sha256};
@@ -50,7 +51,9 @@ fn main() {
         .map(|x| x.unwrap())
         .collect();
 
-    let mut build = cc::Build::new();
+    CFG.exported_header_dirs = vec![&inc_dir];
+
+    let mut build = cxx_build::bridge("src/lib.rs");
     build
         .files(srcs)
         .include(&inc_dir)
@@ -80,6 +83,4 @@ fn main() {
     }
 
     build.compile("tbb");
-
-    println!("cargo:include={}", inc_dir.display());
 }

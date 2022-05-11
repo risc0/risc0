@@ -146,11 +146,12 @@ checksum = "c4872d67bab6358e59559027aa3b9157c53d9358c51423c17554809a8858e0f8"
 
 [[package]]
 name = "cc"
-version = "1.0.73"
+version = "1.0.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fff2a6927b3bb87f9595d67196a70493f627687a71d87a0d692242c33f58c11"
+checksum = "e450b8da92aa6f274e7c6437692f9f2ce6d701fb73bacfcf87897b3f89a4c20e"
 dependencies = [
  "jobserver",
+ "num_cpus",
 ]
 
 [[package]]
@@ -1512,6 +1513,8 @@ version = "0.1.0"
 dependencies = [
  "base16ct",
  "cc",
+ "cxx",
+ "cxx-build",
  "flate2",
  "glob",
  "reqwest",
