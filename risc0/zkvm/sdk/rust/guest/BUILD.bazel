@@ -17,6 +17,7 @@ rust_library(
         "//risc0/zkvm/sdk/cpp/guest:crt0",
         "//risc0/zkvm/sdk/rust/core:core_guest",
         "//risc0/zkvm/sdk/rust/serde:serde_guest",
+        "@crates_guest//:bytemuck",
         "@crates_guest//:serde",
     ],
 )
