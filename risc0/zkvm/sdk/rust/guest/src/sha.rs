@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use _alloc::{boxed::Box, vec::Vec};
+use bytemuck;
 use core::{cell::UnsafeCell, mem};
 
 use risc0_zkvm_core::Digest;
@@ -109,10 +110,8 @@ pub(crate) fn add_trailer(data: &mut [u32], len_bytes: usize, memtype: MemoryTyp
         MemoryType::Normal => {
             // In regular memory, the end may not be word aligned, so the
             // end marker might go in the middle of a word.
-            //
-            // SAFETY: We've already checked bounds.
-            let u8ptr: *mut u8 = data.as_mut_ptr().cast();
-            unsafe { *u8ptr.add(len_bytes) = END_MARKER }
+            let as_u8: &mut [u8] = bytemuck::cast_slice_mut(data);
+            as_u8[len_bytes] = END_MARKER;
         }
     }
     // Fill in zeros until the lower 32 bits of size.
@@ -143,14 +142,25 @@ pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     let cap = compute_capacity_needed(len_bytes);
     let mut data_u32 = Vec::<u32>::with_capacity(cap);
 
-    // SAFETY: Vec says it's explicitly safe to copy into a vector via
-    // the wrap pointer and then set the length, and we've allocated
-    // enough capacity.
-    unsafe {
-        (data_u32.as_mut_ptr() as *mut u8).copy_from_nonoverlapping(data.as_ptr(), len_bytes);
-        data_u32.set_len(align_up(len_bytes, WORD_SIZE) / WORD_SIZE);
-    }
+    let whole_words = len_bytes / WORD_SIZE;
+    // First copy in all the words we can.
+    let words_copied: usize;
+    match bytemuck::try_cast_slice(&data[..whole_words * WORD_SIZE]) as Result<&[u32], _> {
+        Ok(words) => {
+            data_u32.extend_from_slice(words);
+            words_copied = whole_words;
+        }
+        Err(_) => {
+            words_copied = 0;
+        }
+    };
+
     data_u32.resize(cap, 0);
+    // Now copy in any remaining bytes.
+    let remaining_in = &data[words_copied * WORD_SIZE..];
+    let remaining_out: &mut [u8] = bytemuck::cast_slice_mut(&mut data_u32[words_copied..]);
+    remaining_out[..remaining_in.len()].clone_from_slice(remaining_in);
+
     add_trailer(data_u32.as_mut_slice(), len_bytes, MemoryType::Normal);
     raw_digest(data_u32.as_slice())
 }

@@ -1,6 +1,39 @@
 {
-  "checksum": "b779fbe4d35c136fa67f6605697455e08c8ded7577fa9452949b5c5ceccf1270",
+  "checksum": "869075547eceb08ff61e6136f326645d4a48953f549e1d76a6ccbe5da2472bb0",
   "crates": {
+    "bytemuck 1.9.1": {
+      "name": "bytemuck",
+      "version": "1.9.1",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/bytemuck/1.9.1/download",
+          "sha256": "cdead85bdec19c194affaeeb670c0e41fe23de31459efd1c174d049269cf02cc"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "bytemuck",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "bytemuck",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "1.9.1"
+      },
+      "license": "Zlib OR Apache-2.0 OR MIT"
+    },
     "direct-cargo-bazel-deps 0.0.1": {
       "name": "direct-cargo-bazel-deps",
       "version": "0.0.1",
@@ -27,7 +60,11 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.136",
+              "id": "bytemuck 1.9.1",
+              "target": "bytemuck"
+            },
+            {
+              "id": "serde 1.0.137",
               "target": "serde"
             }
           ],
@@ -38,13 +75,13 @@
       },
       "license": null
     },
-    "proc-macro2 1.0.37": {
+    "proc-macro2 1.0.38": {
       "name": "proc-macro2",
-      "version": "1.0.37",
+      "version": "1.0.38",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/proc-macro2/1.0.37/download",
-          "sha256": "ec757218438d5fda206afc041538b2f6d889286160d649a86a24d37e1235afd1"
+          "url": "https://crates.io/api/v1/crates/proc-macro2/1.0.38/download",
+          "sha256": "9027b48e9d4c9175fa2218adf3557f91c1137021739951d4932f5f8268ac48aa"
         }
       },
       "targets": [
@@ -85,18 +122,18 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.37",
+              "id": "proc-macro2 1.0.38",
               "target": "build_script_build"
             },
             {
-              "id": "unicode-xid 0.2.2",
+              "id": "unicode-xid 0.2.3",
               "target": "unicode_xid"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.37"
+        "version": "1.0.38"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -140,7 +177,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.37",
+              "id": "proc-macro2 1.0.38",
               "target": "proc_macro2"
             }
           ],
@@ -151,13 +188,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "serde 1.0.136": {
+    "serde 1.0.137": {
       "name": "serde",
-      "version": "1.0.136",
+      "version": "1.0.137",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde/1.0.136/download",
-          "sha256": "ce31e24b01e1e524df96f1c2fdd054405f8d7376249a5110886fb4b658484789"
+          "url": "https://crates.io/api/v1/crates/serde/1.0.137/download",
+          "sha256": "61ea8d54c77f8315140a05f4c7237403bf38b72704d031543aa1d16abbf517d1"
         }
       },
       "targets": [
@@ -199,7 +236,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.136",
+              "id": "serde 1.0.137",
               "target": "build_script_build"
             }
           ],
@@ -209,13 +246,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "serde_derive 1.0.136",
+              "id": "serde_derive 1.0.137",
               "target": "serde_derive"
             }
           ],
           "selects": {}
         },
-        "version": "1.0.136"
+        "version": "1.0.137"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -224,13 +261,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "serde_derive 1.0.136": {
+    "serde_derive 1.0.137": {
       "name": "serde_derive",
-      "version": "1.0.136",
+      "version": "1.0.137",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.136/download",
-          "sha256": "08597e7152fcd306f41838ed3e37be9eaeed2b61c42e2117266a554fab4662f9"
+          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.137/download",
+          "sha256": "1f26faba0c3959972377d3b2d306ee9f71faee9714294e41bb777f83f88578be"
         }
       },
       "targets": [
@@ -270,7 +307,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.37",
+              "id": "proc-macro2 1.0.38",
               "target": "proc_macro2"
             },
             {
@@ -278,18 +315,18 @@
               "target": "quote"
             },
             {
-              "id": "serde_derive 1.0.136",
+              "id": "serde_derive 1.0.137",
               "target": "build_script_build"
             },
             {
-              "id": "syn 1.0.91",
+              "id": "syn 1.0.93",
               "target": "syn"
             }
           ],
           "selects": {}
         },
         "edition": "2015",
-        "version": "1.0.136"
+        "version": "1.0.137"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -298,13 +335,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "syn 1.0.91": {
+    "syn 1.0.93": {
       "name": "syn",
-      "version": "1.0.91",
+      "version": "1.0.93",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/syn/1.0.91/download",
-          "sha256": "b683b2b825c8eef438b77c36a06dc262294da3d5a5813fac20da149241dcd44d"
+          "url": "https://crates.io/api/v1/crates/syn/1.0.93/download",
+          "sha256": "04066589568b72ec65f42d65a1a52436e954b168773148893c020269563decf2"
         }
       },
       "targets": [
@@ -350,7 +387,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.37",
+              "id": "proc-macro2 1.0.38",
               "target": "proc_macro2"
             },
             {
@@ -358,18 +395,18 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.91",
+              "id": "syn 1.0.93",
               "target": "build_script_build"
             },
             {
-              "id": "unicode-xid 0.2.2",
+              "id": "unicode-xid 0.2.3",
               "target": "unicode_xid"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.91"
+        "version": "1.0.93"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -378,13 +415,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "unicode-xid 0.2.2": {
+    "unicode-xid 0.2.3": {
       "name": "unicode-xid",
-      "version": "0.2.2",
+      "version": "0.2.3",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/unicode-xid/0.2.2/download",
-          "sha256": "8ccb82d61f80a663efe1f787a51b16b5a51e3314d6ac365b08639f52387b33f3"
+          "url": "https://crates.io/api/v1/crates/unicode-xid/0.2.3/download",
+          "sha256": "957e51f3646910546462e67d5f7599b9e4fb8acdd304b087a6494730f9eebf04"
         }
       },
       "targets": [
@@ -410,7 +447,7 @@
           "default"
         ],
         "edition": "2015",
-        "version": "0.2.2"
+        "version": "0.2.3"
       },
       "license": "MIT OR Apache-2.0"
     }
