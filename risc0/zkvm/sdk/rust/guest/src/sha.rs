@@ -110,7 +110,8 @@ pub(crate) fn add_trailer(data: &mut [u32], len_bytes: usize, memtype: MemoryTyp
         MemoryType::Normal => {
             // In regular memory, the end may not be word aligned, so the
             // end marker might go in the middle of a word.
-            bytemuck::cast_slice_mut(data)[len_bytes] = END_MARKER;
+            let as_u8: &mut [u8] = bytemuck::cast_slice_mut(data);
+            as_u8[len_bytes] = END_MARKER;
         }
     }
     // Fill in zeros until the lower 32 bits of size.
@@ -144,7 +145,7 @@ pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     let whole_words = len_bytes / WORD_SIZE;
     // First copy in all the words we can.
     let words_copied: usize;
-    match bytemuck::try_cast_slice(&data[..whole_words * WORD_SIZE]) {
+    match bytemuck::try_cast_slice(&data[..whole_words * WORD_SIZE]) as Result<&[u32], _> {
         Ok(words) => {
             data_u32.extend_from_slice(words);
             words_copied = whole_words;
