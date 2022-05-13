@@ -18,7 +18,7 @@ use core::fmt::{Debug, Display, Formatter};
 
 use serde::{Deserialize, Serialize};
 
-use zkvm_core::Digest;
+use risc0_zkvm_core::Digest;
 
 #[derive(Clone, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Message {

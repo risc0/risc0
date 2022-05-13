@@ -15,17 +15,17 @@
 #![no_main]
 #![no_std]
 
-use zkvm_guest::{env, sha};
+use risc0_zkvm_guest::{env, sha};
 
 use votingmachine_core::{InitializeVotingMachineCommit, VotingMachineState};
 
-zkvm_guest::entry!(main);
+risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
     let state: VotingMachineState = env::read();
     env::commit(&InitializeVotingMachineCommit {
         polls_open: state.polls_open,
         voter_bitfield: state.voter_bitfield,
-        state: *sha::digest(state),
+        state: *sha::digest(&state),
     });
 }

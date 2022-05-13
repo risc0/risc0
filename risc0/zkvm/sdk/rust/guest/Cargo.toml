@@ -1,0 +1,10 @@
+[package]
+name = "risc0-zkvm-guest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytemuck = { version = "1.9.1" }
+risc0-zkvm-core = { version = "0.2", path = "../core", default-features = false }
+risc0-zkvm-serde = { version = "0.2", path = "../serde", default-features = false }
+serde = { version = "1.0", default-features = false }

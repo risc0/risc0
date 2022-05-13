@@ -15,11 +15,11 @@
 #![no_main]
 #![no_std]
 
-use zkvm_guest::{env, sha};
+use risc0_zkvm_guest::{env, sha};
 
 use votingmachine_core::{FreezeVotingMachineCommit, FreezeVotingMachineParams};
 
-zkvm_guest::entry!(main);
+risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
     let params: FreezeVotingMachineParams = env::read();
@@ -29,8 +29,8 @@ pub fn main() {
     let voter_bitfield = result.state.voter_bitfield;
     let count = result.state.count;
     env::commit(&FreezeVotingMachineCommit {
-        old_state: *sha::digest(params.state),
-        new_state: *sha::digest(result.state),
+        old_state: *sha::digest(&params.state),
+        new_state: *sha::digest(&result.state),
         polls_open: polls_open,
         voter_bitfield: voter_bitfield,
         count: count,

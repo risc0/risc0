@@ -12,23 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-#![no_std]
+use cxx_build::CFG;
 
-use zkvm_guest::{env, sha};
+fn main() {
+    CFG.include_prefix = "risc0/zkp/accel";
+    CFG.exported_header_links = vec!["risc0-core", "risc0-zkp-core"];
 
-use battleship_core::{RoundCommit, RoundParams};
+    cxx_build::bridge("src/lib.rs")
+        .file("backend/cpu/impl.cpp")
+        .define("__TBB_NO_IMPLICIT_LINKAGE", None)
+        .flag_if_supported("/std:c++17")
+        .flag_if_supported("-std=c++17")
+        .warnings(false)
+        .compile("risc0-zkp-accel");
 
-zkvm_guest::entry!(main);
-
-pub fn main() {
-    let params: RoundParams = env::read();
-    let result = params.process();
-    env::write(&result);
-    env::commit(&RoundCommit {
-        old_state: *sha::digest(params.state),
-        new_state: *sha::digest(result.state),
-        shot: params.shot,
-        hit: result.hit,
-    });
+    println!("cargo:rustc-link-lib=static=tbb");
+    println!("cargo:rustc-link-lib=static=risc0-core");
+    println!("cargo:rustc-link-lib=static=risc0-zkp-core");
 }

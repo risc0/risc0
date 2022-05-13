@@ -1,4 +1,5 @@
 load(":dummy_cc_toolchain.bzl", "cc_toolchain_config")
+load("defs.bzl", "extra_guest_rustc_flags")
 
 cc_toolchain_config(name = "dummy_cc_toolchain")
 
@@ -28,4 +29,12 @@ toolchain(
     target_compatible_with = ["@rules_rust//rust/platform/cpu:wasm32"],
     toolchain = ":dummy_cc_wasm32",
     toolchain_type = "@bazel_tools//tools/cpp:toolchain_type",
+)
+
+extra_guest_rustc_flags(
+    name = "extra_guest_rustc_flags",
+    build_setting_default = [
+        "-Clto",
+    ],
+    visibility = ["//visibility:public"],
 )

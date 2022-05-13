@@ -16,12 +16,12 @@
 #![no_std]
 #![allow(non_snake_case)]
 
-use zkvm_guest::{env, sha};
+use risc0_zkvm_guest::{env, sha};
 
-zkvm_guest::entry!(main);
+risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
     let data: &[u8] = env::read();
-    let digest = sha::digest_slice(data);
+    let digest = sha::digest_u8_slice(data);
     env::commit(&digest);
 }

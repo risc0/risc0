@@ -4,7 +4,7 @@ load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 risc0_rust_library_pair(
     name = "core",
     srcs = ["src/lib.rs"],
-    crate_name = "zkvm_core",
+    crate_name = "risc0_zkvm_core",
     guest_deps = ["@crates_guest//:serde"],
     host_deps = ["@crates_host//:serde"],
     host_features = ["std"],
@@ -15,7 +15,7 @@ risc0_rust_library_pair(
 rust_library(
     name = "core_wasm",
     srcs = ["src/lib.rs"],
-    crate_name = "zkvm_core",
+    crate_name = "risc0_zkvm_core",
     visibility = ["//visibility:public"],
     deps = ["@crates_wasm//:serde"],
 )

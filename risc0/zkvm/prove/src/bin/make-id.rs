@@ -12,19 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-#![no_std]
+use clap::Parser;
+use risc0_zkvm_prove::MethodID;
 
-use zkvm_guest::{env, sha};
+#[derive(Parser)]
+#[clap(author, version, about)]
+struct Args {
+    /// Input Method ELF path
+    input: String,
 
-use battleship_core::GameState;
+    /// Output MethodID path
+    output: String,
+}
 
-zkvm_guest::entry!(main);
+fn main() {
+    let args = Args::parse();
+    println!("Input: {}", args.input);
+    println!("Output: {}", args.output);
 
-pub fn main() {
-    let state: GameState = env::read();
-    if !state.check() {
-        panic!("Invalid GameState");
-    }
-    env::commit(&sha::digest(state));
+    let method_id = MethodID::new(&args.input).expect("Failure");
+    method_id.write(&args.output).expect("Failure");
 }

@@ -16,6 +16,21 @@ const GAS = "300000000000000";
 const CONTRACT_ID = 'dev-1650384630199-84450568731492';
 const NETWORK_ID = 'testnet';
 
+const VIEW_METHODS = [
+  'game_state',
+  'list_games',
+];
+
+const CHANGE_METHODS = [
+  'new_game',
+  'join_game',
+  'turn',
+  'clear_games',
+  'delete_game',
+];
+
+const ALL_METHODS = VIEW_METHODS.concat(CHANGE_METHODS);
+
 export class NearWallet {
   wallet;
 
@@ -33,18 +48,14 @@ export class NearWallet {
     console.log(this.wallet);
   }
 
+  cmp(other) {
+    return this === other;
+  }
+
   sign_in() {
     this.wallet.requestSignIn({
       contractId: CONTRACT_ID,
-      methodNames: [
-        'list_games',
-        'clear_games',
-        'delete_game',
-        'game_state',
-        'new_game',
-        'join_game',
-        'turn',
-      ],
+      methodNames: ALL_METHODS,
     });
   }
 
@@ -60,16 +71,11 @@ export class NearWallet {
     if (!this.wallet.isSignedIn()) {
       throw "Not signed in";
     }
+
     // connect to a NEAR smart contract
     let contract = new nearApi.Contract(this.wallet.account(), CONTRACT_ID, {
-      viewMethods: ['game_state', 'list_games'],
-      changeMethods: [
-        'new_game',
-        'join_game',
-        'turn',
-        'clear_games',
-        'delete_game',
-      ],
+      viewMethods: VIEW_METHODS,
+      changeMethods: CHANGE_METHODS,
       sender: this.wallet.getAccountId(),
     });
     return new NearContract(contract);

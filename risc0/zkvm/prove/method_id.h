@@ -16,9 +16,26 @@
 
 #include "risc0/zkvm/verify/method_id.h"
 
+#include <memory>
+
 namespace risc0 {
 
 MethodID makeMethodID(const std::string& elfFile);
 void writeMethodID(const std::string& filename, const MethodID& id);
+
+namespace rust {
+
+class MethodID {
+public:
+  MethodID(const std::string& elf_path);
+  void write(const std::string& filename) const;
+
+private:
+  ::risc0::MethodID id;
+};
+
+std::unique_ptr<MethodID> new_method_id(const std::string& elf_path);
+
+} // namespace rust
 
 } // namespace risc0

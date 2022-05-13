@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = "1.0"
-zkvm_core = { path = "../../../../risc0/zkvm/sdk/rust/core" }
+risc0-zkvm-core = { version = "0.2", path = "../../../../risc0/zkvm/sdk/rust/core", default-features = false }
+serde = { version = "1.0", default-features = false }

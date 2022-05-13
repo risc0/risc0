@@ -1,4 +1,4 @@
-use core::slice;
+use bytemuck;
 
 use serde::de::{Deserialize, DeserializeSeed, IntoDeserializer, Visitor};
 
@@ -148,7 +148,7 @@ impl<'de> Deserializer<'de> {
     fn try_take_n_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
         let len_words = align_up(len, 4) / 4;
         let words: &'de [u32] = self.try_take_n(len_words)?;
-        Ok(unsafe { slice::from_raw_parts(words.as_ptr().cast(), len) })
+        Ok(&bytemuck::cast_slice(words)[..len])
     }
 }
 

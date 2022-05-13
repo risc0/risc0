@@ -4,5 +4,21 @@ members = [
   "examples/rust/battleship/core",
   "examples/rust/battleship/web/client",
   # "examples/rust/battleship/web/server",
+  "risc0/core",
+  "risc0/zkp/accel",
+  "risc0/zkp/core",
+  "risc0/zkp/prove",
+  "risc0/zkp/verify",
+  "risc0/zkvm/circuit",
+  "risc0/zkvm/prove",
+  "risc0/zkvm/verify",
   "risc0/zkvm/sdk/rust/core",
+  "risc0/zkvm/sdk/rust/serde",
+  "third_party/tbb",
+]
+
+exclude = [
+  "examples/rust/battleship/contract",
+  "examples/rust/battleship/methods",
+  "risc0/zkvm/sdk/rust/guest",
 ]

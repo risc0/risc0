@@ -1,4 +1,5 @@
-use core::{mem, slice};
+use bytemuck;
+use core::mem;
 
 use serde::Serialize;
 
@@ -22,7 +23,19 @@ pub fn to_vec<'a, T>(value: &'a T) -> Result<alloc::vec::Vec<u32>>
 where
     T: Serialize + ?Sized,
 {
-    let vec = AllocVec::new();
+    // Use the in-memory size of the value as a guess for the length
+    // of the serialized value.
+    let vec = AllocVec::with_capacity(mem::size_of_val(value));
+    let mut serializer = Serializer::new(vec);
+    value.serialize(&mut serializer)?;
+    serializer.stream.release()
+}
+
+pub fn to_vec_with_capacity<'a, T>(value: &'a T, cap: usize) -> Result<alloc::vec::Vec<u32>>
+where
+    T: Serialize + ?Sized,
+{
+    let vec = AllocVec::with_capacity(cap);
     let mut serializer = Serializer::new(vec);
     value.serialize(&mut serializer)?;
     serializer.stream.release()
@@ -383,8 +396,8 @@ impl<'a> StreamWriter for Slice<'a> {
         }
 
         let slice = &mut self.slice[self.idx..self.idx + len_words];
-        let bytes = unsafe { slice::from_raw_parts_mut(slice.as_mut_ptr().cast(), len_bytes) };
-        bytes.copy_from_slice(data);
+        let bytes: &mut [u8] = bytemuck::cast_slice_mut(slice);
+        bytes[..len_bytes].copy_from_slice(data);
 
         self.idx += len_words;
 
@@ -392,16 +405,11 @@ impl<'a> StreamWriter for Slice<'a> {
     }
 
     fn release(&mut self) -> Result<Self::Output> {
-        let mid = self.idx;
-        let len = self.slice.len();
-        assert!(mid <= len);
-        let ptr = self.slice.as_mut_ptr();
-        let (head, tail) = unsafe {
-            (
-                slice::from_raw_parts(ptr, mid),
-                slice::from_raw_parts_mut(ptr.add(mid), len - mid),
-            )
-        };
+        // Remove the slice we're modifying out of self.slice so we
+        // don't run into problems trying to replace it while it's
+        // borrowed.
+        let tmp: &mut [u32] = mem::replace(&mut self.slice, &mut []);
+        let (head, tail) = tmp.split_at_mut(self.idx);
         self.slice = tail;
         self.idx = 0;
         Ok(head)

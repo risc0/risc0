@@ -23,6 +23,11 @@ DEFAULT_TOOLCHAIN_TRIPLES = {
     "x86_64-unknown-linux-gnu": "rust_linux_x86_64",
 }
 
+EXTRA_RUSTC_LIB_FLAGS = [
+    "-Clto",
+    "--codegen=opt-level=3",
+]
+
 def _build_sysroot(ctx, target_triple, target_json):
     target_json = ctx.path(Label(target_json))
     out_dir = "lib/rustlib/{}/lib".format(target_triple)
@@ -40,17 +45,15 @@ def _build_sysroot(ctx, target_triple, target_json):
         "--crate-name=core",
         "--crate-type=lib",
         "--edition=2021",
-        "--codegen=opt-level=3",
         "--target={}".format(target_json),
         "--out-dir={}".format(out_dir),
-    ], quiet = False)
+    ] + EXTRA_RUSTC_LIB_FLAGS, quiet = False)
 
     ctx.execute([
         "bin/rustc",
         "compiler-builtins/src/lib.rs",
         "--crate-name=compiler_builtins",
         "--crate-type=lib",
-        "--codegen=opt-level=3",
         "--cfg",
         "feature=\"compiler-builtins\"",
         "--cfg",
@@ -59,7 +62,7 @@ def _build_sysroot(ctx, target_triple, target_json):
         "feature=\"mem\"",
         "--target={}".format(target_json),
         "--out-dir={}".format(out_dir),
-    ], quiet = False)
+    ] + EXTRA_RUSTC_LIB_FLAGS, quiet = False)
 
     ctx.execute([
         "bin/rustc",
@@ -67,10 +70,9 @@ def _build_sysroot(ctx, target_triple, target_json):
         "--crate-name=alloc",
         "--crate-type=lib",
         "--edition=2021",
-        "--codegen=opt-level=3",
         "--target={}".format(target_json),
         "--out-dir={}".format(out_dir),
-    ], quiet = False)
+    ] + EXTRA_RUSTC_LIB_FLAGS, quiet = False)
 
 def _rust_toolchain_repository_impl(ctx):
     """The implementation of the rust toolchain repository rule."""

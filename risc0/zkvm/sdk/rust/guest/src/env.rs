@@ -18,11 +18,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     gpio::{IoDescriptor, GPIO_COMMIT, GPIO_DESC_IO, GPIO_WRITE},
-    sha::{self, digest_commit_into},
-    REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
+    sha, REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
     REGION_OUTPUT_LEN, REGION_OUTPUT_START, WORD_SIZE,
 };
-use zkvm_serde::{Deserializer, Serializer, Slice};
+use risc0_zkvm_core::Digest;
+use risc0_zkvm_serde::{Deserializer, Serializer, Slice};
 
 struct Env {
     input: Deserializer<'static>,
@@ -157,7 +157,15 @@ impl Env {
                 unsafe { result.add(i).write_volatile(0) };
             }
         } else {
-            digest_commit_into(len_bytes, slice, result);
+            let cap = sha::compute_capacity_needed(len_bytes);
+            let mut slice = &mut slice[..cap];
+            sha::add_trailer(&mut slice, len_bytes, sha::MemoryType::WOM);
+
+            let digest = result as *mut Digest;
+            // SAFETY: result is a pointer to the output digest.
+            unsafe {
+                sha::raw_digest_to(&slice, digest);
+            }
         }
         unsafe { result.add(8).write_volatile(len_bytes) };
         sha::finalize();

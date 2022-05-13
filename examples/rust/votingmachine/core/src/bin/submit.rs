@@ -15,11 +15,11 @@
 #![no_main]
 #![no_std]
 
-use zkvm_guest::{env, sha};
+use risc0_zkvm_guest::{env, sha};
 
 use votingmachine_core::{SubmitBallotCommit, SubmitBallotParams};
 
-zkvm_guest::entry!(main);
+risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
     let params: SubmitBallotParams = env::read();
@@ -31,8 +31,8 @@ pub fn main() {
     let vote_yes = params.ballot.vote_yes;
     let vote_counted = result.vote_counted;
     env::commit(&SubmitBallotCommit {
-        old_state: *sha::digest(params.state),
-        new_state: *sha::digest(result.state),
+        old_state: *sha::digest(&params.state),
+        new_state: *sha::digest(&result.state),
         polls_open: polls_open,
         voter_bitfield: voter_bitfield,
         voter: voter,

@@ -9,12 +9,14 @@ risc0_rust_library_pair(
         "src/lib.rs",
         "src/serializer.rs",
     ],
-    crate_name = "zkvm_serde",
+    crate_name = "risc0_zkvm_serde",
     guest_deps = [
+        "@crates_guest//:bytemuck",
         "@crates_guest//:serde",
         "//risc0/zkvm/sdk/rust/core:core_guest",
     ],
     host_deps = [
+        "@crates_host//:bytemuck",
         "@crates_host//:serde",
         "//risc0/zkvm/sdk/rust/core:core_host",
     ],

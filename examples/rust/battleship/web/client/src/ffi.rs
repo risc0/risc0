@@ -32,6 +32,9 @@ extern "C" {
 
     #[wasm_bindgen(method, catch)]
     pub fn get_contract(this: &NearWallet) -> Result<NearContract, JsValue>;
+
+    #[wasm_bindgen(method, catch)]
+    pub fn cmp(this: &NearWallet, other: &NearWallet) -> Result<bool, JsValue>;
 }
 
 #[wasm_bindgen(module = "/near.js")]

@@ -1,0 +1,13 @@
+[package]
+name = "risc0-zkp-prove"
+version = "0.1.0"
+edition = "2021"
+links = "risc0-zkp-prove"
+
+[dependencies]
+cxx = "1.0"
+risc0-zkp-accel = { version = "0.1", path = "../accel" }
+risc0-zkp-verify = { version = "0.2", path = "../verify", features = ["cxx"] }
+
+[build-dependencies]
+cxx-build = "1.0"

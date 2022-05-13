@@ -26,7 +26,7 @@ pub mod sha;
 use core::{mem, panic::PanicInfo, ptr};
 
 use gpio::{FaultDescriptor, LogDescriptor, GPIO_DESC_FAULT, GPIO_DESC_LOG, GPIO_FAULT, GPIO_LOG};
-use zkvm_core::{set_logger, Log};
+use risc0_zkvm_core::{set_logger, Log};
 
 const REGION_SIZE_256KB: usize = 256 * 1024;
 // const REGION_SIZE_512KB: usize = 0x0008_0000;
@@ -123,6 +123,6 @@ unsafe extern "C" fn __start(result: *mut usize) {
 /// Align the given address `addr` upwards to alignment `align`.
 ///
 /// Requires that `align` is a power of two.
-pub(crate) fn align_up(addr: usize, align: usize) -> usize {
+pub(crate) const fn align_up(addr: usize, align: usize) -> usize {
     (addr + align - 1) & !(align - 1)
 }

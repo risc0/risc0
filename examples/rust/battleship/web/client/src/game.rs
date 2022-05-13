@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashSet, rc::Rc};
+use std::{collections::HashMap, rc::Rc};
 
 use gloo::timers::future::TimeoutFuture;
 use reqwasm::http::Request;
@@ -24,6 +24,7 @@ use crate::{
     bus::EventBus,
     contract::{Contract, ContractState},
     near::NearContract,
+    wallet::WalletContext,
 };
 use battleship_core::{GameState, Position, RoundParams, RoundResult, Ship, ShipDirection};
 
@@ -53,12 +54,6 @@ pub enum GameMsg {
     Error(String),
 }
 
-#[derive(PartialEq, Clone, Eq, Hash)]
-pub struct Shot {
-    pub pos: Position,
-    pub hit: HitType,
-}
-
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Hash)]
 pub enum HitType {
     Core(CoreHitType),
@@ -70,8 +65,8 @@ pub struct GameSession {
     pub name: String,
     pub state: GameState,
     pub contract: Rc<NearContract>,
-    pub local_shots: HashSet<Shot>,
-    pub remote_shots: HashSet<Shot>,
+    pub local_shots: HashMap<Position, HitType>,
+    pub remote_shots: HashMap<Position, HitType>,
     pub last_receipt: String,
     pub last_shot: Option<Position>,
     pub is_first: bool,
@@ -81,7 +76,6 @@ pub struct GameSession {
 #[derive(Properties, PartialEq)]
 pub struct Props {
     pub name: String,
-    pub contract: Rc<NearContract>,
     pub until: usize,
     #[prop_or_default]
     pub children: Children,
@@ -98,6 +92,10 @@ impl Component for GameProvider {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
+        let (wallet, _) = ctx
+            .link()
+            .context::<WalletContext>(Callback::noop())
+            .unwrap();
         let state = GameState {
             ships: [
                 Ship::new(2, 3, ShipDirection::Vertical),
@@ -111,9 +109,9 @@ impl Component for GameProvider {
         let game = GameSession {
             state,
             name: ctx.props().name.clone(),
-            contract: ctx.props().contract.clone(),
-            local_shots: HashSet::new(),
-            remote_shots: HashSet::new(),
+            contract: wallet.contract.clone(),
+            local_shots: HashMap::new(),
+            remote_shots: HashMap::new(),
             last_receipt: String::new(),
             last_shot: None,
             is_first: ctx.props().until == 2,
@@ -164,10 +162,7 @@ impl Component for GameProvider {
                 self.game.status = format!("Shot: {}", pos);
                 self.journal.send("GameMsg::Shot".into());
                 self.game.last_shot = Some(pos.clone());
-                self.game.remote_shots.insert(Shot {
-                    hit: HitType::Pending,
-                    pos: pos.clone(),
-                });
+                self.game.remote_shots.insert(pos.clone(), HitType::Pending);
                 let game = self.game.clone();
                 let is_first = self.game.is_first;
                 self.game.is_first = false;
@@ -242,9 +237,9 @@ impl Component for GameProvider {
                 self.journal.send("GameMsg::ProcessTurn".into());
                 let state = self.game.state.clone();
                 if let Some(last_shot) = self.game.last_shot.clone() {
-                    self.game.remote_shots.insert(Shot {
-                        pos: last_shot,
-                        hit: match contract_state.last_hit.unwrap() {
+                    self.game.remote_shots.insert(
+                        last_shot,
+                        match contract_state.last_hit.unwrap() {
                             0 => HitType::Core(CoreHitType::Miss),
                             1 => HitType::Core(CoreHitType::Hit),
                             2 => {
@@ -252,7 +247,7 @@ impl Component for GameProvider {
                             }
                             _ => unreachable!(),
                         },
-                    });
+                    );
                 }
                 let until = ctx.props().until;
                 ctx.link().send_future(async move {
@@ -296,10 +291,7 @@ impl Component for GameProvider {
                 self.journal.send("GameMsg::UpdateState".into());
                 self.game.state = state.state;
                 self.game.last_receipt = receipt;
-                self.game.local_shots.insert(Shot {
-                    hit: HitType::Core(state.hit),
-                    pos: shot,
-                });
+                self.game.local_shots.insert(shot, HitType::Core(state.hit));
                 true
             }
             GameMsg::Error(msg) => {
