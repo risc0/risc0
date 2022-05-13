@@ -79,21 +79,16 @@ pub struct GameSession {
 type Taken = [[bool; BOARD_SIZE];BOARD_SIZE];
 
 fn check_bounds(x: usize, y: usize, span:usize, dir:usize) -> bool {
-    let bound;
     if dir == 0 {
-        bound = x + span <= BOARD_SIZE - 1
+        x + span <= BOARD_SIZE - 1
     } else {
-        bound = y + span <= BOARD_SIZE - 1
+        y + span <= BOARD_SIZE - 1
     }
-
-    // log::info!("{} {}", "check_bounds", bound);
-
-    bound
 }
 
 fn check_taken(x: usize, y: usize, span:usize, dir:usize, taken:Taken) -> bool {
     let mut is_taken = false;
-    for i in 0..span-1 {
+    for i in 0..span {
         let mut try_again = false;
         if dir == 0 {
             if taken[x + i][y] { try_again = true }
@@ -102,51 +97,32 @@ fn check_taken(x: usize, y: usize, span:usize, dir:usize, taken:Taken) -> bool {
         }
         if try_again { is_taken = true; break }
     }
-    // log::info!("{} {}", "is_taken", is_taken);
     is_taken
 }
 
 fn create_random_ships() -> [Ship; 5] {
     // randomly place 5 ships on the board
-
-    // iterate through ship spans
-    // for span in 0..SHIP_SPANS.len() {
-    //     log::info!("{}", SHIP_SPANS[span]);
-    // }
     let mut rng = thread_rng();
     let mut ships = [Ship::default(); 5];
     let mut taken = [[false; BOARD_SIZE];BOARD_SIZE];
     let mut i = 0;
 
     for ship in ships.iter_mut() {
-        // log::info!("{}", "making randomly places ships");
-
-
         loop {
-            // log::info!("{}", "at beginning of loop");
-
             // pick a random starting point on the board
             let x: usize = rng.gen_range(0..BOARD_SIZE - 1);
             let y: usize = rng.gen_range(0..BOARD_SIZE - 1);
             if taken[x][y] {
-                // log::info!("{}", "already taken");
-                // this spot already contains a ship, try again
                 continue
             }
             // pick between 0 and 1 for randomized ship placement
             let rdir: bool = rng.gen();
-            // log::info!("{} {}", "rdir", rdir);
             let ship_dir_int;
-
             if rdir {
                 ship_dir_int = 0
             } else {
                 ship_dir_int = 1
             }
-            // let ship_dir_int: usize = rng.gen_range(0..1);
-
-            // log::info!("{} {}", "ship_dir_int", ship_dir_int);
-
             if ship_dir_int == 0 {
                 ship.dir = ShipDirection::Horizontal;
             } else {
@@ -156,13 +132,11 @@ fn create_random_ships() -> [Ship; 5] {
             // does it fit on the board
             let span = SHIP_SPANS[i];
             if !check_bounds(x, y, span, ship_dir_int) {
-                //log::info!("{}", "failed check bounds");
                 continue
             }
 
             // does it cross any other ship
             if check_taken(x, y, span, ship_dir_int, taken) {
-                // log::info!("{}", "failed check taken");
                 continue
             } else {
                 // mark the ship as taken
@@ -177,7 +151,6 @@ fn create_random_ships() -> [Ship; 5] {
 
             ship.pos = Position { x: x as u32, y: y as u32 };
             i+=1;
-            // log::info!("{} {}", "positioned ship", i);
             break
         }
     }
