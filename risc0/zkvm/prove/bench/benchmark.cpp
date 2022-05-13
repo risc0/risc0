@@ -18,8 +18,6 @@
 
 using namespace risc0;
 
-std::string writeReceipts;
-
 struct BenchmarkStreamWriter {
   void write_word(uint32_t word) { tot_written += sizeof(uint32_t); }
   void write_dword(uint64_t dword) { tot_written += sizeof(uint64_t); }
