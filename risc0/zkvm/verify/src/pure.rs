@@ -15,7 +15,7 @@ pub struct Receipt {
 }
 
 impl Receipt {
-    pub fn verify(&self, method_id: MethodID) {
+    pub fn verify(&self, method_id: &MethodID) {
         let mut circuit = Risc0Circuit::new(method_id);
         let sha = risc0_zkp_core::sha::default_implementation();
         verify(sha, &mut circuit, &self.seal).unwrap();
@@ -80,7 +80,7 @@ mod tests {
         }
         std::println!("\n");
 
-        receipt.verify(method_id);
+        receipt.verify(&method_id);
         Ok(())
     }
 }

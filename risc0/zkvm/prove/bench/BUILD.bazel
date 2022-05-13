@@ -5,6 +5,8 @@ cc_binary(
     name = "benchmark",
     srcs = ["benchmark.cpp"],
     data = [
+        ":bench_sha",
+        ":bench_sha.id",
         ":bench_simple_loop",
         ":bench_simple_loop.id",
         "//examples/cpp/battleship:turn_method",
@@ -22,6 +24,14 @@ cc_binary(
 risc0_cc_method(
     name = "bench_simple_loop",
     srcs = ["bench_simple_loop.cpp"],
+    deps = [
+        "//risc0/zkvm/sdk/cpp/guest",
+    ],
+)
+
+risc0_cc_method(
+    name = "bench_sha",
+    srcs = ["bench_sha.cpp"],
     deps = [
         "//risc0/zkvm/sdk/cpp/guest",
     ],
