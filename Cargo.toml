@@ -22,3 +22,6 @@ exclude = [
   "examples/rust/battleship/methods",
   "risc0/zkvm/sdk/rust/guest",
 ]
+
+[profile.release]
+lto = true

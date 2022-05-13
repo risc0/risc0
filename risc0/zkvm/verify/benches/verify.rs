@@ -15,11 +15,11 @@ fn receipt(bench: &mut Bencher) {
         .collect();
     let receipt: Receipt = risc0_zkvm_serde::from_slice(&as_u32).unwrap();
 
-    let method_id = &MethodID::try_from(fs::read("src/simple_receipt.id").unwrap().as_slice()).unwrap();
-
+    let method_id =
+        &MethodID::try_from(fs::read("src/simple_receipt.id").unwrap().as_slice()).unwrap();
     bench.iter(|| {
         receipt.verify(method_id);
-    }.clone());
+    })
 }
 
 benchmark_group!(benches, receipt);
