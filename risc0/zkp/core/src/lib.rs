@@ -29,6 +29,7 @@ cfg_if::cfg_if! {
         pub mod rou;
         pub mod sha;
         pub mod sha_rng;
+    pub mod sha_cpu;
 
         pub fn to_po2(x: usize) -> usize {
             (31 - (x as u32).leading_zeros()) as usize

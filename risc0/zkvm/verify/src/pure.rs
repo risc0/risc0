@@ -2,7 +2,7 @@ use alloc::{vec, vec::Vec};
 
 use serde::{Deserialize, Serialize};
 
-use risc0_zkp_core::sha::Digest;
+use risc0_zkp_core::sha::{Digest, ShaImpl};
 use risc0_zkp_verify::verify::verify;
 
 pub use crate::circuit::MethodID;
@@ -17,11 +17,12 @@ pub struct Receipt {
 impl Receipt {
     pub fn verify(&self, method_id: MethodID) {
         let mut circuit = Risc0Circuit::new(method_id);
-        verify(&mut circuit, &self.seal).unwrap();
+        let sha = risc0_zkp_core::sha::default_implementation();
+        verify(sha, &mut circuit, &self.seal).unwrap();
         assert!(self.journal.len() == (self.seal[8] as usize));
         if self.journal.len() > 32 {
-            let digest = Digest::hash_bytes(&self.journal);
-            assert!(digest == Digest::from_u32s(&self.seal[0..8]));
+            let digest = sha.hash_bytes(&self.journal);
+            assert!(*digest == Digest::from_slice(&self.seal[0..8]));
         } else {
             let mut vec = self.journal.clone();
             vec.resize(32, 0);

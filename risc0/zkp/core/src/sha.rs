@@ -12,101 +12,64 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{vec, vec::Vec};
-use core::fmt::{Debug, Display, Formatter};
-use core::slice;
+use alloc::{format, string::String};
+use core::{
+    fmt::{Debug, Display, Formatter},
+    ops::Deref,
+};
 
-use sha2::digest::generic_array::{typenum::U64, GenericArray};
-use sha2::{compress256, Digest as ShaDigest, Sha256};
+use anyhow::Result;
 
-use crate::{fp::Fp, fp4::Fp4};
+use crate::fp::Fp;
+use crate::fp4::Fp4;
 
+// We represent a SHA-256 digest as 8 32-bit words instead of the
+// traditional 32 8-bit bytes.
+//
+// TODO(nils): Remove 'Copy' trait on Digest; these are not small and
+// we don't want to copy them around accidentally.
 pub const DIGEST_WORDS: usize = 8;
-
-#[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialOrd, PartialEq)]
-pub struct Digest(pub [u32; DIGEST_WORDS]);
-
-static INIT_256: [u32; DIGEST_WORDS] = [
-    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
-];
-
-fn set_word(buf: &mut [u8], idx: usize, word: u32) {
-    buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_be_bytes());
-}
+#[repr(transparent)]
+#[derive(Eq, PartialEq, Copy)]
+pub struct Digest([u32; DIGEST_WORDS]);
 
 impl Digest {
-    pub fn from_u32s(words: &[u32]) -> Self {
-        Digest(words.try_into().expect("slice with incorrect length"))
+    pub fn new(data: [u32; DIGEST_WORDS]) -> Digest {
+        Digest(data)
     }
 
-    // Digests a byte array in the bog-standard SHA-256 fashion, but returns
-    // the resulting value as our digest type (8 words) rather than 32 bytes.
-    pub fn hash_bytes(bytes: &[u8]) -> Self {
-        let mut hasher = Sha256::new();
-        hasher.update(bytes);
-        Digest(
-            hasher
-                .finalize()
-                .as_slice()
-                .chunks(4)
-                .map(|chunk| u32::from_be_bytes(chunk.try_into().unwrap()))
-                .collect::<Vec<u32>>()
-                .try_into()
-                .unwrap(),
-        )
+    pub fn try_from_slice(words: &[u32]) -> Result<Self> {
+        Ok(Digest(words.try_into()?))
     }
 
-    // Digest FPs a word at a time, without padding (and using le encoding)
-    pub fn hash_fps(fps: &[Fp]) -> Self {
-        let mut state = INIT_256;
-        let mut block: GenericArray<u8, U64> = GenericArray::default();
-        let mut off = 0;
-        for i in 0..fps.len() {
-            set_word(block.as_mut_slice(), off, u32::from(fps[i]));
-            off += 1;
-            if off == 16 {
-                compress256(&mut state, slice::from_ref(&block));
-                off = 0;
-            }
-        }
-        if off != 0 {
-            block[off * 4..].fill(0);
-            compress256(&mut state, slice::from_ref(&block));
-        }
-        Digest(state)
-    }
-
-    pub fn hash_fp4s(fp4s: &[Fp4]) -> Self {
-        let mut flat: Vec<Fp> = vec![];
-        for i in 0..fp4s.len() {
-            for j in 0..4 {
-                flat.push(fp4s[i].elems()[j]);
-            }
-        }
-        return Self::hash_fps(&flat);
-    }
-
-    // Digest two digest into one
-    pub fn hash_pair(a: &Digest, b: &Digest) -> Self {
-        let mut state = INIT_256;
-        let mut block: GenericArray<u8, U64> = GenericArray::default();
-        for i in 0..8 {
-            set_word(block.as_mut_slice(), i, a.0[i]);
-            set_word(block.as_mut_slice(), 8 + i, b.0[i]);
-        }
-        compress256(&mut state, slice::from_ref(&block));
-        Digest(state)
-    }
-}
-
-impl Digest {
-    /// Constructs a new `Digest` from a byte array.
-    pub fn new(data: [u32; DIGEST_WORDS]) -> Self {
-        Self(data)
+    pub fn from_slice(words: &[u32]) -> Self {
+        Self::try_from_slice(words).unwrap()
     }
 
     pub fn as_slice(&self) -> &[u32] {
         &self.0
+    }
+
+    pub fn as_mut_slice(&mut self) -> &mut [u32] {
+        &mut self.0
+    }
+
+    pub fn get(&self) -> &[u32; DIGEST_WORDS] {
+        &self.0
+    }
+
+    pub fn get_mut(&mut self) -> &mut [u32; DIGEST_WORDS] {
+        &mut self.0
+    }
+
+    pub fn to_hex(&self) -> String {
+        format!("{}", self)
+    }
+}
+
+impl Default for Digest {
+    fn default() -> Digest {
+        Digest([0; DIGEST_WORDS])
     }
 }
 
@@ -125,5 +88,91 @@ impl Debug for Digest {
             core::write!(f, "{:08x?}", word)?;
         }
         Ok(())
+    }
+}
+
+impl Clone for Digest {
+    fn clone(&self) -> Digest {
+        Digest(self.0)
+    }
+}
+
+// An implementation that provides SHA-256 hashing services.
+pub trait ShaImpl: Clone + Debug {
+    // A pointer to the created digest.  This may either be a
+    // Box<Digest> or some other pointer in case the implementation
+    // wants to manage its own memory.
+    type DigestPtr: Deref<Target = Digest> + Debug;
+
+    // Generate SHAs for various data types.
+    fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr;
+    fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
+        self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
+    }
+    fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr;
+    fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr;
+    fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr;
+
+    // Generate a new digest by mixing two digests together via XOR,
+    // and storing into the first digest.
+    fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest);
+}
+
+// Default implementation is CPU-based.
+pub use crate::sha_cpu::Impl as DefaultImplementation;
+pub fn default_implementation() -> &'static DefaultImplementation {
+    static DEFAULT_IMPLEMENTATION: DefaultImplementation = DefaultImplementation {};
+    &DEFAULT_IMPLEMENTATION
+}
+
+// Runs conformance test on a SHA implementation to make sure it properly behaves.
+// TODO(nils): Add hash_words and hash_pair tests.
+#[cfg(test)]
+pub mod tests {
+    use super::{Digest, ShaImpl};
+
+    pub fn test_sha_impl<S: ShaImpl>(sha: &S) {
+        // Standard test vectors
+        assert_eq!(
+            *sha.hash_bytes("abc".as_bytes()),
+            Digest::new([
+                0xba7816bf, 0x8f01cfea, 0x414140de, 0x5dae2223, 0xb00361a3, 0x96177a9c, 0xb410ff61,
+                0xf20015ad
+            ])
+        );
+        assert_eq!(
+            *sha.hash_bytes("".as_bytes()),
+            Digest::new([
+                0xe3b0c442, 0x98fc1c14, 0x9afbf4c8, 0x996fb924, 0x27ae41e4, 0x649b934c, 0xa495991b,
+                0x7852b855
+            ])
+        );
+        assert_eq!(
+            *sha.hash_bytes("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()),
+            Digest::new([
+                0x248d6a61, 0xd20638b8, 0xe5c02693, 0x0c3e6039, 0xa33ce459, 0x64ff2167, 0xf6ecedd4,
+                0x19db06c1
+            ])
+        );
+        assert_eq!(*sha.hash_bytes(
+	"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes()),
+            Digest::new([0xcf5b16a7,
+                       0x78af8380,
+                       0x036ce59e,
+                       0x7b049237,
+                       0x0b249b11,
+                       0xe8f07a51,
+                       0xafac4503,
+                       0x7afee9d1]));
+        // Test also the 'hexDigest' bit.
+        // Python says:
+        // >>> hashlib.sha256("Byzantium").hexdigest()
+        // 'f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a'
+        assert_eq!(
+            sha.hash_bytes(&"Byzantium".as_bytes()).to_hex(),
+            "f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a"
+        );
+
+        crate::sha_rng::tests::test_sha_rng_impl(sha);
     }
 }

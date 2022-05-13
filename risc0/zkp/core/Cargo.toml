@@ -17,6 +17,8 @@ cxx = ["dep:cxx", "dep:risc0-core"]
 pure = ["dep:rand", "dep:rand_core", "dep:sha2"]
 
 [dependencies]
+anyhow = "1.0"
+bytemuck = { version = "1.9.1", features = ["derive"] }
 cfg-if = "1.0"
 cxx = { version = "1.0", optional = true }
 rand = { version = "0.8", default-features = false, features = ["small_rng"], optional = true }
