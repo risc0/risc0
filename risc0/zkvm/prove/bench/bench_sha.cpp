@@ -17,9 +17,7 @@
 using namespace risc0;
 
 uint32_t num_iter;
-uint32_t buf_size;
 Digest initial_digest;
-SHA256 sha;
 
 extern "C" void risc0_main(Env* env) {
   num_iter = env->read<uint32_t>();
