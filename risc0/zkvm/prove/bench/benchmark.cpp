@@ -110,5 +110,4 @@ BENCHMARK(BM_Sha)->Unit(benchmark::kMillisecond)->Arg(1)->Arg(10)->Arg(100);
 BENCHMARK(BM_Battleship_Cpp)->Unit(benchmark::kMillisecond);
 BENCHMARK(BM_Battleship_Rust)->Unit(benchmark::kMillisecond);
 
-// Helper macro to create a main routine in a test that runs the benchmarks
 BENCHMARK_MAIN();
