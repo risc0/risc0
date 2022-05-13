@@ -113,16 +113,4 @@ BENCHMARK(BM_Battleship_Cpp)->Unit(benchmark::kMillisecond);
 BENCHMARK(BM_Battleship_Rust)->Unit(benchmark::kMillisecond);
 
 // Helper macro to create a main routine in a test that runs the benchmarks
-int main(int argc, char** argv) {
-  ::benchmark::Initialize(&argc, argv);
-  if (argc >= 3 && !strcmp(argv[1], "--write-receipts")) {
-    writeReceipts = argv[2];
-    argc -= 2;
-    argv += 2;
-  }
-  if (::benchmark::ReportUnrecognizedArguments(argc, argv))
-    return 1;
-  ::benchmark::RunSpecifiedBenchmarks();
-  ::benchmark::Shutdown();
-  return 0;
-}
+BENCHMARK_MAIN();

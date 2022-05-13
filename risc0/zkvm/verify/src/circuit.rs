@@ -83,7 +83,7 @@ impl<'a> Risc0Circuit<'a> {
         Risc0Circuit {
             po2: 0,
             globals: vec![],
-            code_id: code_id,
+            code_id,
         }
     }
 }
