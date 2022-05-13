@@ -15,7 +15,7 @@ pub struct Receipt {
 }
 
 impl Receipt {
-    pub fn verify(&self, method_id: MethodID) {
+    pub fn verify(&self, method_id: &MethodID) {
         let mut circuit = Risc0Circuit::new(method_id);
         verify(&mut circuit, &self.seal).unwrap();
         assert!(self.journal.len() == (self.seal[8] as usize));
@@ -79,7 +79,7 @@ mod tests {
         }
         std::println!("\n");
 
-        receipt.verify(method_id);
+        receipt.verify(&method_id);
         Ok(())
     }
 }

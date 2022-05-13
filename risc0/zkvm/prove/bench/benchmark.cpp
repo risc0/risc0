@@ -47,6 +47,26 @@ static void BM_Simple_Loop(benchmark::State& state) {
   state.SetItemsProcessed(tot_iter);
 }
 
+static void BM_Sha(benchmark::State& state) {
+  uint32_t num_iter = state.range(0);
+  size_t tot_iter = 0;
+
+  for (auto _ : state) {
+    Prover prover("risc0/zkvm/prove/bench/bench_sha");
+    prover.writeInput(num_iter);
+    VectorStreamWriter receipt_buf;
+    Receipt receipt = prover.run();
+    BenchmarkStreamWriter writer;
+    ArchiveWriter<BenchmarkStreamWriter> archive(writer);
+    archive.transfer(receipt);
+
+    tot_iter += num_iter;
+    state.counters["receipt_size"] = writer.tot_written;
+  }
+
+  state.SetItemsProcessed(tot_iter);
+}
+
 static void run_battleship(benchmark::State& state, const char* method) {
   GameState game_state{{
                            {{2, 3}, Vertical, 0x0000},
@@ -86,6 +106,7 @@ BENCHMARK(BM_Simple_Loop)           //
     ->Arg(1000)
     ->Arg(5000);
 
+BENCHMARK(BM_Sha)->Unit(benchmark::kMillisecond)->Arg(1)->Arg(10)->Arg(100);
 BENCHMARK(BM_Battleship_Cpp)->Unit(benchmark::kMillisecond);
 BENCHMARK(BM_Battleship_Rust)->Unit(benchmark::kMillisecond);
 
