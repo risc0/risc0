@@ -72,18 +72,18 @@ impl TryFrom<&[u8]> for MethodID {
     }
 }
 
-pub struct Risc0Circuit {
+pub struct Risc0Circuit<'a> {
     po2: u32,
     globals: Vec<Fp>,
-    code_id: MethodID,
+    code_id: &'a MethodID,
 }
 
-impl Risc0Circuit {
-    pub fn new(code_id: MethodID) -> Self {
+impl<'a> Risc0Circuit<'a> {
+    pub fn new(code_id: &'a MethodID) -> Self {
         Risc0Circuit {
             po2: 0,
             globals: vec![],
-            code_id,
+            code_id: code_id,
         }
     }
 }
@@ -110,7 +110,7 @@ impl MixState {
     }
 }
 
-impl Circuit for Risc0Circuit {
+impl<'a> Circuit for Risc0Circuit<'a> {
     fn taps(&self) -> &'static Taps<'static> {
         return RISCV_TAPS;
     }
