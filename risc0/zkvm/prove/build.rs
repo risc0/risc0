@@ -25,6 +25,7 @@ fn main() {
         .file("riscv.cpp")
         .file("step_context.cpp")
         .file("step.cpp")
+        .define("__TBB_NO_IMPLICIT_LINKAGE", None)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)
@@ -36,4 +37,5 @@ fn main() {
     println!("cargo:rustc-link-lib=static=risc0-zkp-accel");
     println!("cargo:rustc-link-lib=static=risc0-zkp-prove");
     println!("cargo:rustc-link-lib=static=risc0-zkp-verify");
+    println!("cargo:rustc-link-lib=static=risc0-zkvm-verify");
 }

@@ -29,5 +29,7 @@ fn main() {
             .flag_if_supported("-std=c++17")
             .warnings(false)
             .compile("risc0-zkp-verify");
+
+        println!("cargo:rustc-link-lib=static=risc0-core");
     }
 }

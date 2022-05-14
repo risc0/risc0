@@ -35,6 +35,8 @@ fn main() {
         .file("sha_cycle.cpp")
         .file("step_state.cpp")
         .flag_if_supported("/std:c++17")
+        .flag_if_supported("/Zc:preprocessor")
+        .flag_if_supported("/EHsc")
         .flag_if_supported("-std=c++17")
         .warnings(false)
         .compile("risc0-zkp-circuit");

@@ -11,7 +11,7 @@ cc_library(
     hdrs = [
         "method_id.h",
         "riscv.h",
-        "//risc0/zkvm/circuit:step_inc_gen",
+        "//risc0/zkvm/circuit:step.cpp.inc",
     ],
     linkstatic = True,
     deps = [
