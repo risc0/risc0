@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include <endian.h>
-
 #include "risc0/zkp/core/fp.h"
 
 // A internal implementation of SHA-256 (which is the only one we use).  It's very basic, but I
@@ -153,7 +151,9 @@ DEVSPEC inline void endianEncode(DEVADDR uint32_t* out, const DEVADDR uint8_t* i
 }
 
 DEVSPEC inline uint32_t convertU32(uint32_t in) {
-  return htobe32(in);
+  uint8_t bytes[4];
+  memcpy(bytes, &in, sizeof(in));
+  return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
 }
 
 DEVSPEC inline uint32_t convertU32(Fp in) {
