@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::string::String;
+use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{Debug, Display, Formatter},
     ops::Deref,
@@ -64,13 +64,27 @@ impl Digest {
 
     pub fn to_hex(&self) -> String {
         fn hex(digit: u8) -> char {
-	    char::from_digit(digit as u32, 16).unwrap()
+            char::from_digit(digit as u32, 16).unwrap()
         }
         self.0
             .iter()
             .flat_map(|word| word.to_be_bytes())
             .flat_map(|byte| [hex(byte >> 4), hex(byte & 0xF)])
             .collect()
+    }
+
+    pub fn from_str(s: &str) -> Digest {
+        s.into()
+    }
+}
+
+impl From<&str> for Digest {
+    fn from(s: &str) -> Digest {
+        let words: Vec<u32> = (0..DIGEST_WORDS)
+            .into_iter()
+            .map(|x| u32::from_str_radix(&s[x * 8..(x + 1) * 8], 16).unwrap())
+            .collect();
+        Digest::new(words.try_into().unwrap())
     }
 }
 
@@ -132,13 +146,29 @@ pub fn default_implementation() -> &'static DefaultImplementation {
     &DEFAULT_IMPLEMENTATION
 }
 
-// Runs conformance test on a SHA implementation to make sure it properly behaves.
-// TODO(nils): Add hash_words and hash_pair tests.
 #[cfg(test)]
 pub mod tests {
-    use super::{Digest, Sha};
+    use super::{Digest, Fp, Fp4, Sha};
+    use alloc::vec::Vec;
 
+    #[test]
+    fn test_from_str() {
+        assert_eq!(
+            Digest::from_str("00000077000000AA0000001200000034000000560000007a000000a900000009"),
+            Digest::new([119, 170, 18, 52, 86, 122, 169, 9])
+        );
+    }
+
+    // Runs conformance test on a SHA implementation to make sure it properly behaves.
     pub fn test_sha_impl<S: Sha>(sha: &S) {
+        test_sha_basics(sha);
+        test_fps(sha);
+        test_fp4s(sha);
+        test_hash_pair(sha);
+
+        crate::sha_rng::tests::test_sha_rng_impl(sha);
+    }
+    fn test_sha_basics<S: Sha>(sha: &S) {
         // Standard test vectors
         assert_eq!(
             *sha.hash_bytes("abc".as_bytes()),
@@ -179,7 +209,69 @@ pub mod tests {
             sha.hash_bytes(&"Byzantium".as_bytes()).to_hex(),
             "f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a"
         );
+    }
 
-        crate::sha_rng::tests::test_sha_rng_impl(sha);
+    fn hash_fpvec<S: Sha>(sha: &S, len: usize) -> Digest {
+        let items: Vec<Fp> = (0..len as u32).into_iter().map(|x| Fp::new(x)).collect();
+        *sha.hash_fps(items.as_slice())
+    }
+
+    fn hash_fp4vec<S: Sha>(sha: &S, len: usize) -> Digest {
+        let items: Vec<Fp4> = (0..len as u32)
+            .into_iter()
+            .map(|x| {
+                Fp4::new(
+                    Fp::new(x * 4),
+                    Fp::new(x * 4 + 1),
+                    Fp::new(x * 4 + 2),
+                    Fp::new(x * 4 + 3),
+                )
+            })
+            .collect();
+        *sha.hash_fp4s(items.as_slice())
+    }
+
+    fn test_fps<S: Sha>(sha: &S) {
+        const LENS: &[usize] = &[0, 1, 7, 8, 9];
+        const EXPECTED_STRS: &[&str] = &[
+            "6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19",
+            "da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8",
+            "f5291d65176f19d6c22b9377df2ed418e0f4ea044e9dee9fa2f8dbf863f1c615",
+            "8a5f075fdf7d09b8103c0e88c30a906f13a962e0c4562c09d2c95b928d9cee46",
+            "ab57060d5b4b27718986483158dcf069e87ba7a52f6bf960d49f6d305b733281",
+        ];
+
+        let expected: Vec<Digest> = EXPECTED_STRS.iter().map(|x| Digest::from_str(x)).collect();
+        let actual: Vec<Digest> = LENS.iter().map(|x| hash_fpvec(sha, *x)).collect();
+        assert_eq!(expected, actual);
+    }
+
+    fn test_fp4s<S: Sha>(sha: &S) {
+        const LENS: &[usize] = &[0, 1, 7, 8, 9];
+        const EXPECTED_STRS: &[&str] = &[
+            "6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19",
+            "04fcce36de1b9c057f7d11c89cd35fc7cec7fa8058764d15119ffdfb7c16d54b",
+            "d136c9e9616ef6dcc57dd20cc85a5df366177fe48b14a367a773c888b6382dc4",
+            "2f0b744a280f1700f6fa0ca5c51cbb51054ceb2c11460e1f04cb906b552e1e6d",
+            "08aa99c90d0cb74713d13f7451b0d2c0257a7716d5164b15f4a855fc54573ef1",
+        ];
+
+        let expected: Vec<Digest> = EXPECTED_STRS.iter().map(|x| Digest::from_str(x)).collect();
+        let actual: Vec<Digest> = LENS.iter().map(|x| hash_fp4vec(sha, *x)).collect();
+        assert_eq!(expected, actual);
+    }
+
+    fn test_hash_pair<S: Sha>(sha: &S) {
+        assert_eq!(
+            *sha.hash_pair(
+                &Digest::from_str(
+                    "6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19"
+                ),
+                &Digest::from_str(
+                    "ed375cadc653bb9078cee904acee6f7ff2bf7476c92dc92911bae27c41ebc015"
+                )
+            ),
+            Digest::from_str("3aa2c47c47cd9e5c5259fd1c3428c30b9608201f5e163061deea8d2d7c65f2c3")
+        );
     }
 }
