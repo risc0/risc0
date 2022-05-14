@@ -12,11 +12,5 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cxx::bridge(namespace = "risc0::circuit")]
-pub mod ffi {
-    unsafe extern "C++" {
-        include!("risc0/zkvm/circuit/make_circuit.h");
-
-        pub fn make_circuit(path: &CxxString) -> Result<()>;
-    }
-}
+#[cxx::bridge]
+mod ffi {}

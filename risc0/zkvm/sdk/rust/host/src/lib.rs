@@ -19,6 +19,9 @@ mod ffi;
 
 pub use exception::Exception;
 
+#[cxx::bridge]
+mod bridge {}
+
 pub type Result<T> = std::result::Result<T, Exception>;
 
 pub struct Receipt {

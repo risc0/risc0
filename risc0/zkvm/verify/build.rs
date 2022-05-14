@@ -23,9 +23,10 @@ fn main() {
 
         cxx_build::bridge("src/lib.rs")
             .file("method_id.cpp")
+            .file("riscv.cpp")
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .warnings(false)
-            .compile("verify");
+            .compile("risc0-zkvm-verify");
     }
 }

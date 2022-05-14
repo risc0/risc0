@@ -16,17 +16,19 @@ use cxx_build::CFG;
 
 fn main() {
     CFG.include_prefix = "risc0/zkvm/prove";
+    CFG.exported_header_links = vec!["risc0-zkp-prove"];
 
     cxx_build::bridge("src/lib.rs")
+        .file("exec.cpp")
+        .file("io_handler.cpp")
         .file("method_id.cpp")
+        .file("riscv.cpp")
         .file("step_context.cpp")
+        .file("step.cpp")
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)
-        .compile("prove");
-
-    println!("cargo:rerun-if-changed=src/lib.rs");
-    println!("cargo:rerun-if-changed=method_id.h");
+        .compile("risc0-zkvm-prove");
 
     println!("cargo:rustc-link-lib=static=tbb");
     println!("cargo:rustc-link-lib=static=risc0-core");

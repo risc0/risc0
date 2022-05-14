@@ -10,6 +10,7 @@ clap = { version = "3.1", features = ["derive"] }
 cxx = "1.0"
 risc0-zkp-prove = { version = "0.1", path = "../../zkp/prove" }
 risc0-zkvm-verify = { version = "0.2", path = "../verify", features = ["cxx"] }
+tbb = { version = "0.1", path = "../../../third_party/tbb" }
 
 [build-dependencies]
 cxx-build = "1.0"

@@ -1,0 +1,4 @@
+[alias]
+xcargo = "run --package xcargo --release --"
+xbuild = "run --package xcargo --release -- build"
+xtest = "run --package xcargo --release -- test"
