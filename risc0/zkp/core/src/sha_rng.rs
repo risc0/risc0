@@ -84,8 +84,8 @@ pub mod tests {
         for _ in 0..10 {
             x.next_u32();
         }
-        assert!(x.next_u32() == 3291863086);
+        assert_eq!(x.next_u32(), 1826198275);
         x.mix(&*sha.hash_bytes(b"foo"));
-        assert!(x.next_u32() == 2108321016);
+        assert_eq!(x.next_u32(), 1753965479);
     }
 }
