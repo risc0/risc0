@@ -14,6 +14,7 @@
 
 use core::ops;
 
+use bytemuck::{Pod, Zeroable};
 use rand::Rng;
 
 use crate::fp::{Fp, P};
@@ -31,7 +32,8 @@ pub const EXT_SIZE: usize = 4;
 /// is important. The irreducible polynomial was choosen to be the most simple
 /// possible one, `x^4 - B`, where `11` is the smallest `B` which makes the
 /// polynomial irreducable.
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, PartialOrd, Zeroable, Pod)]
+#[repr(transparent)]
 pub struct Fp4([Fp; EXT_SIZE]);
 
 impl Fp4 {

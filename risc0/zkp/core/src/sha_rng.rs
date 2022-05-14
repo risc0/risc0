@@ -15,46 +15,44 @@
 use rand::{Error, RngCore};
 use rand_core::impls;
 
-use crate::sha::Digest;
+use crate::sha::{Digest, Sha, DIGEST_WORDS};
 
 #[derive(Clone, Debug)]
-pub struct ShaRng {
-    pool0: Digest,
-    pool1: Digest,
+pub struct ShaRng<S: Sha> {
+    sha: S,
+    pool0: S::DigestPtr,
+    pool1: S::DigestPtr,
     pool_used: usize,
 }
 
-impl ShaRng {
-    pub fn mix(&mut self, val: &Digest) {
-        for i in 0..8 {
-            self.pool0.0[i] ^= val.0[i];
+impl<S: Sha> ShaRng<S> {
+    pub fn new(sha: &S) -> ShaRng<S> {
+        ShaRng {
+            sha: sha.clone(),
+            pool0: sha.hash_bytes(b"Hello"),
+            pool1: sha.hash_bytes(b"World"),
+            pool_used: 0,
         }
+    }
+
+    pub fn mix(&mut self, val: &Digest) {
+        self.sha.mix(&mut self.pool0, val);
         self.step();
     }
 
     fn step(&mut self) {
-        self.pool0 = Digest::hash_pair(&self.pool0, &self.pool1);
-        self.pool1 = Digest::hash_pair(&self.pool0, &self.pool1);
+        self.pool0 = self.sha.hash_pair(&self.pool0, &self.pool1);
+        self.pool1 = self.sha.hash_pair(&self.pool0, &self.pool1);
         self.pool_used = 0;
     }
 }
 
-impl Default for ShaRng {
-    fn default() -> Self {
-        ShaRng {
-            pool0: Digest::hash_bytes(b"Hello"),
-            pool1: Digest::hash_bytes(b"World"),
-            pool_used: 0,
-        }
-    }
-}
-
-impl RngCore for ShaRng {
+impl<S: Sha> RngCore for ShaRng<S> {
     fn next_u32(&mut self) -> u32 {
-        if self.pool_used == 8 {
+        if self.pool_used == DIGEST_WORDS {
             self.step();
         }
-        let out = self.pool0.0[self.pool_used];
+        let out = self.pool0.get()[self.pool_used];
         // Mark this word as used.
         self.pool_used += 1;
         out
@@ -74,19 +72,20 @@ impl RngCore for ShaRng {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::Digest;
+pub mod tests {
     use super::ShaRng;
+    use crate::sha::Sha;
     use rand::RngCore;
 
-    #[test]
-    fn match_cpp() {
-        let mut x = ShaRng::default();
+    // Runs conformance test on a SHA implementation to make sure it
+    // properly behaves for generating pseudo-random numbers.
+    pub fn test_sha_rng_impl<S: Sha>(sha: &S) {
+        let mut x = ShaRng::new(sha);
         for _ in 0..10 {
             x.next_u32();
         }
         assert_eq!(x.next_u32(), 1826198275);
-        x.mix(&Digest::hash_bytes(b"foo"));
+        x.mix(&*sha.hash_bytes(b"foo"));
         assert_eq!(x.next_u32(), 1753965479);
     }
 }

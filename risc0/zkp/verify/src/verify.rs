@@ -20,7 +20,7 @@ use risc0_zkp_core::{
     fp4::{Fp4, EXT_SIZE},
     poly::poly_eval,
     rou::{ROU_FWD, ROU_REV},
-    sha::Digest,
+    sha::{Digest, Sha},
     to_po2,
 };
 
@@ -51,16 +51,20 @@ impl fmt::Display for VerificationError {
 
 pub trait Circuit {
     fn taps(&self) -> &'static Taps<'static>;
-    fn execute(&mut self, iop: &mut ReadIOP);
-    fn accumulate(&mut self, iop: &mut ReadIOP);
+    fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
+    fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
     fn po2(&self) -> u32;
     fn check_code(&self, root: &Digest) -> Result<(), VerificationError>;
     fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4;
 }
 
-pub fn verify(circuit: &mut dyn Circuit, proof: &[u32]) -> Result<(), VerificationError> {
+pub fn verify<S: Sha, C: Circuit>(
+    sha: &S,
+    circuit: &mut C,
+    proof: &[u32],
+) -> Result<(), VerificationError> {
     // Make IOP
-    let mut iop = ReadIOP::new(proof);
+    let mut iop = ReadIOP::new(sha, proof);
 
     // Do 'execute' phase and get size
     circuit.execute(&mut iop);
@@ -113,7 +117,7 @@ pub fn verify(circuit: &mut dyn Circuit, proof: &[u32]) -> Result<(), Verificati
     // Read the U coeffs + commit their hash
     let mut coeff_u: Vec<Fp4> = vec![Fp4::default(); num_taps + CHECK_SIZE];
     iop.read_fp4s(&mut coeff_u);
-    let hash_u = Digest::hash_fp4s(&coeff_u);
+    let hash_u = *sha.hash_fp4s(&coeff_u);
     iop.commit(&hash_u);
 
     // Now, convert to evaluated values
@@ -180,7 +184,7 @@ pub fn verify(circuit: &mut dyn Circuit, proof: &[u32]) -> Result<(), Verificati
     fri_verify(
         &mut iop,
         size,
-        |inner_iop: &mut ReadIOP, idx: usize| -> Fp4 {
+        |inner_iop: &mut ReadIOP<S>, idx: usize| -> Fp4 {
             let x = Fp4::from_fp(gen.pow(idx));
             let mut rows: Vec<Vec<Fp>> = vec![];
             rows.push(accum_merkle.verify(inner_iop, idx));

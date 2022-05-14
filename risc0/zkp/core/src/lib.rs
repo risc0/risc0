@@ -28,6 +28,7 @@ cfg_if::cfg_if! {
         pub mod poly;
         pub mod rou;
         pub mod sha;
+        pub mod sha_cpu;
         pub mod sha_rng;
 
         pub fn to_po2(x: usize) -> usize {

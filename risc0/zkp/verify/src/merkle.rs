@@ -14,7 +14,11 @@
 
 use alloc::{vec, vec::Vec};
 
-use risc0_zkp_core::{fp::Fp, sha::Digest, to_po2};
+use risc0_zkp_core::{
+    fp::Fp,
+    sha::{Digest, Sha},
+    to_po2,
+};
 
 use crate::read_iop::ReadIOP;
 
@@ -56,12 +60,18 @@ pub struct MerkleTreeVerifier {
 }
 
 impl MerkleTreeVerifier {
-    pub fn new(iop: &mut ReadIOP, row_size: usize, col_size: usize, queries: usize) -> Self {
+    pub fn new<S: Sha>(
+        iop: &mut ReadIOP<S>,
+        row_size: usize,
+        col_size: usize,
+        queries: usize,
+    ) -> Self {
+        let sha = iop.get_sha().clone();
         let params = MerkeTreeParams::new(row_size, col_size, queries);
         let mut top = vec![Digest::default(); params.top_size * 2];
         iop.read_digests(&mut top[params.top_size..]);
         for i in (1..params.top_size).rev() {
-            top[i] = Digest::hash_pair(&top[2 * i], &top[2 * i + 1]);
+            top[i] = *sha.hash_pair(&top[2 * i], &top[2 * i + 1]);
         }
         iop.commit(&top[1]);
         return MerkleTreeVerifier { params, top };
@@ -71,13 +81,14 @@ impl MerkleTreeVerifier {
         return &self.top[1];
     }
 
-    pub fn verify(&self, iop: &mut ReadIOP, mut idx: usize) -> Vec<Fp> {
+    pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Vec<Fp> {
+        let sha = iop.get_sha().clone();
         let col_size = self.params.col_size;
         let row_size = self.params.row_size;
         assert!(idx < row_size);
         let mut out: Vec<Fp> = vec![Fp::new(0); col_size];
         iop.read_fps(&mut out);
-        let mut cur: Digest = Digest::hash_fps(&out);
+        let mut cur: Digest = *sha.hash_fps(&out);
         idx += row_size;
         while idx >= 2 * self.params.top_size {
             let low_bit = idx % 2;
@@ -85,9 +96,9 @@ impl MerkleTreeVerifier {
             iop.read_digests(core::slice::from_mut(&mut other));
             idx /= 2;
             if low_bit == 1 {
-                cur = Digest::hash_pair(&other, &cur);
+                cur = *sha.hash_pair(&other, &cur);
             } else {
-                cur = Digest::hash_pair(&cur, &other);
+                cur = *sha.hash_pair(&cur, &other);
             }
         }
         assert!(self.top[idx] == cur);

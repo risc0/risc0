@@ -14,6 +14,7 @@
 
 use core::ops;
 
+use bytemuck::{Pod, Zeroable};
 use rand::Rng;
 
 pub const P: u32 = 15 * (1 << 27) + 1;
@@ -38,7 +39,8 @@ pub const P_U64: u64 = P as u64;
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, PartialOrd, Zeroable, Pod)]
+#[repr(transparent)]
 pub struct Fp(u32);
 
 impl Fp {

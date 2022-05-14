@@ -15,24 +15,30 @@
 use risc0_zkp_core::{
     fp::Fp,
     fp4::Fp4,
-    sha::{Digest, DIGEST_WORDS},
+    sha::{Digest, Sha, DIGEST_WORDS},
     sha_rng::ShaRng,
 };
 
 use rand::{Error, RngCore};
 
-#[derive(Clone, Debug)]
-pub struct ReadIOP<'a> {
+#[derive(Debug)]
+pub struct ReadIOP<'a, S: Sha> {
+    sha: S,
     proof: &'a [u32],
-    rng: ShaRng,
+    rng: ShaRng<S>,
 }
 
-impl<'a> ReadIOP<'a> {
-    pub fn new(proof: &'a [u32]) -> Self {
+impl<'a, S: Sha> ReadIOP<'a, S> {
+    pub fn new(sha: &'a S, proof: &'a [u32]) -> Self {
         ReadIOP {
+            sha: sha.clone(),
             proof,
-            rng: ShaRng::default(),
+            rng: ShaRng::new(sha),
         }
+    }
+
+    pub fn get_sha(&self) -> &S {
+        &self.sha
     }
 
     pub fn read_u32s(&mut self, x: &mut [u32]) {
@@ -61,7 +67,7 @@ impl<'a> ReadIOP<'a> {
 
     pub fn read_digests(&mut self, x: &mut [Digest]) {
         for i in 0..x.len() {
-            x[i] = Digest::from_u32s(&self.proof[DIGEST_WORDS * i..DIGEST_WORDS * (i + 1)]);
+            x[i] = Digest::from_slice(&self.proof[DIGEST_WORDS * i..DIGEST_WORDS * (i + 1)]);
         }
         self.proof = &self.proof[DIGEST_WORDS * x.len()..];
     }
@@ -75,7 +81,7 @@ impl<'a> ReadIOP<'a> {
     }
 }
 
-impl<'a> RngCore for ReadIOP<'a> {
+impl<'a, S: Sha> RngCore for ReadIOP<'a, S> {
     fn next_u32(&mut self) -> u32 {
         self.rng.next_u32()
     }
