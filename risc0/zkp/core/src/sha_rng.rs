@@ -15,17 +15,17 @@
 use rand::{Error, RngCore};
 use rand_core::impls;
 
-use crate::sha::{Digest, ShaImpl, DIGEST_WORDS};
+use crate::sha::{Digest, Sha, DIGEST_WORDS};
 
 #[derive(Clone, Debug)]
-pub struct ShaRng<S: ShaImpl> {
+pub struct ShaRng<S: Sha> {
     sha: S,
     pool0: S::DigestPtr,
     pool1: S::DigestPtr,
     pool_used: usize,
 }
 
-impl<S: ShaImpl> ShaRng<S> {
+impl<S: Sha> ShaRng<S> {
     pub fn new(sha: &S) -> ShaRng<S> {
         ShaRng {
             sha: sha.clone(),
@@ -47,7 +47,7 @@ impl<S: ShaImpl> ShaRng<S> {
     }
 }
 
-impl<S: ShaImpl> RngCore for ShaRng<S> {
+impl<S: Sha> RngCore for ShaRng<S> {
     fn next_u32(&mut self) -> u32 {
         if self.pool_used == DIGEST_WORDS {
             self.step();
@@ -74,12 +74,12 @@ impl<S: ShaImpl> RngCore for ShaRng<S> {
 #[cfg(test)]
 pub mod tests {
     use super::ShaRng;
-    use crate::sha::ShaImpl;
+    use crate::sha::Sha;
     use rand::RngCore;
 
     // Runs conformance test on a SHA implementation to make sure it
     // properly behaves for generating pseudo-random numbers.
-    pub fn test_sha_rng_impl<S: ShaImpl>(sha: &S) {
+    pub fn test_sha_rng_impl<S: Sha>(sha: &S) {
         let mut x = ShaRng::new(sha);
         for _ in 0..10 {
             x.next_u32();

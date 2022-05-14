@@ -21,7 +21,7 @@ use sha2::{compress256, Digest as ShaDigest, Sha256};
 use crate::{
     fp::Fp,
     fp4::Fp4,
-    sha::{Digest, ShaImpl, DIGEST_WORDS},
+    sha::{Digest, Sha, DIGEST_WORDS},
 };
 
 static INIT_256: [u32; DIGEST_WORDS] = [
@@ -35,7 +35,7 @@ fn set_word(buf: &mut [u8], idx: usize, word: u32) {
     buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_be_bytes());
 }
 
-impl ShaImpl for Impl {
+impl Sha for Impl {
     type DigestPtr = Box<Digest>;
 
     fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {

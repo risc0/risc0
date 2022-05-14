@@ -20,7 +20,7 @@ use risc0_zkp_core::{
     fp4::{Fp4, EXT_SIZE},
     ntt::{bit_reverse, rev_butterfly},
     rou::{ROU_FWD, ROU_REV},
-    sha::ShaImpl,
+    sha::Sha,
     to_po2,
 };
 
@@ -60,7 +60,7 @@ fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
 }
 
 impl VerifyRoundInfo {
-    pub fn new<S: ShaImpl>(iop: &mut ReadIOP<S>, in_domain: usize) -> Self {
+    pub fn new<S: Sha>(iop: &mut ReadIOP<S>, in_domain: usize) -> Self {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
@@ -69,12 +69,7 @@ impl VerifyRoundInfo {
         }
     }
 
-    pub fn verify_query<S: ShaImpl>(
-        &mut self,
-        iop: &mut ReadIOP<S>,
-        pos: &mut usize,
-        goal: &mut Fp4,
-    ) {
+    pub fn verify_query<S: Sha>(&mut self, iop: &mut ReadIOP<S>, pos: &mut usize, goal: &mut Fp4) {
         let quot: usize = *pos / self.domain;
         let group: usize = *pos % self.domain;
         // Get the column data
@@ -96,7 +91,7 @@ impl VerifyRoundInfo {
     }
 }
 
-pub fn fri_verify<S: ShaImpl, F>(iop: &mut ReadIOP<S>, mut degree: usize, mut f: F)
+pub fn fri_verify<S: Sha, F>(iop: &mut ReadIOP<S>, mut degree: usize, mut f: F)
 where
     F: FnMut(&mut ReadIOP<S>, usize) -> Fp4,
 {

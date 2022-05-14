@@ -20,7 +20,7 @@ use risc0_zkp_core::{
     fp4::{Fp4, EXT_SIZE},
     poly::poly_eval,
     rou::{ROU_FWD, ROU_REV},
-    sha::{Digest, ShaImpl},
+    sha::{Digest, Sha},
     to_po2,
 };
 
@@ -51,14 +51,14 @@ impl fmt::Display for VerificationError {
 
 pub trait Circuit {
     fn taps(&self) -> &'static Taps<'static>;
-    fn execute<S: ShaImpl>(&mut self, iop: &mut ReadIOP<S>);
-    fn accumulate<S: ShaImpl>(&mut self, iop: &mut ReadIOP<S>);
+    fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
+    fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
     fn po2(&self) -> u32;
     fn check_code(&self, root: &Digest) -> Result<(), VerificationError>;
     fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4;
 }
 
-pub fn verify<S: ShaImpl, C: Circuit>(
+pub fn verify<S: Sha, C: Circuit>(
     sha: &S,
     circuit: &mut C,
     proof: &[u32],

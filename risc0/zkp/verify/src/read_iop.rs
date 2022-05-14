@@ -15,20 +15,20 @@
 use risc0_zkp_core::{
     fp::Fp,
     fp4::Fp4,
-    sha::{Digest, ShaImpl, DIGEST_WORDS},
+    sha::{Digest, Sha, DIGEST_WORDS},
     sha_rng::ShaRng,
 };
 
 use rand::{Error, RngCore};
 
 #[derive(Debug)]
-pub struct ReadIOP<'a, S: ShaImpl> {
+pub struct ReadIOP<'a, S: Sha> {
     sha: S,
     proof: &'a [u32],
     rng: ShaRng<S>,
 }
 
-impl<'a, S: ShaImpl> ReadIOP<'a, S> {
+impl<'a, S: Sha> ReadIOP<'a, S> {
     pub fn new(sha: &'a S, proof: &'a [u32]) -> Self {
         ReadIOP {
             sha: sha.clone(),
@@ -81,7 +81,7 @@ impl<'a, S: ShaImpl> ReadIOP<'a, S> {
     }
 }
 
-impl<'a, S: ShaImpl> RngCore for ReadIOP<'a, S> {
+impl<'a, S: Sha> RngCore for ReadIOP<'a, S> {
     fn next_u32(&mut self) -> u32 {
         self.rng.next_u32()
     }

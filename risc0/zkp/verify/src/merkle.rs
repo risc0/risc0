@@ -16,7 +16,7 @@ use alloc::{vec, vec::Vec};
 
 use risc0_zkp_core::{
     fp::Fp,
-    sha::{Digest, ShaImpl},
+    sha::{Digest, Sha},
     to_po2,
 };
 
@@ -60,7 +60,7 @@ pub struct MerkleTreeVerifier {
 }
 
 impl MerkleTreeVerifier {
-    pub fn new<S: ShaImpl>(
+    pub fn new<S: Sha>(
         iop: &mut ReadIOP<S>,
         row_size: usize,
         col_size: usize,
@@ -81,7 +81,7 @@ impl MerkleTreeVerifier {
         return &self.top[1];
     }
 
-    pub fn verify<S: ShaImpl>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Vec<Fp> {
+    pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Vec<Fp> {
         let sha = iop.get_sha().clone();
         let col_size = self.params.col_size;
         let row_size = self.params.row_size;

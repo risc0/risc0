@@ -2,7 +2,7 @@ use alloc::{vec, vec::Vec};
 
 use serde::{Deserialize, Serialize};
 
-use risc0_zkp_core::sha::{Digest, ShaImpl};
+use risc0_zkp_core::sha::{Digest, Sha};
 use risc0_zkp_verify::verify::verify;
 
 pub use crate::circuit::MethodID;

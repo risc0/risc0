@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{format, string::String};
+use alloc::string::String;
 use core::{
     fmt::{Debug, Display, Formatter},
     ops::Deref,
@@ -63,7 +63,14 @@ impl Digest {
     }
 
     pub fn to_hex(&self) -> String {
-        format!("{}", self)
+        fn hex(digit: u8) -> char {
+	    char::from_digit(digit as u32, 16).unwrap()
+        }
+        self.0
+            .iter()
+            .flat_map(|word| word.to_be_bytes())
+            .flat_map(|byte| [hex(byte >> 4), hex(byte & 0xF)])
+            .collect()
     }
 }
 
@@ -98,7 +105,7 @@ impl Clone for Digest {
 }
 
 // An implementation that provides SHA-256 hashing services.
-pub trait ShaImpl: Clone + Debug {
+pub trait Sha: Clone + Debug {
     // A pointer to the created digest.  This may either be a
     // Box<Digest> or some other pointer in case the implementation
     // wants to manage its own memory.
@@ -129,9 +136,9 @@ pub fn default_implementation() -> &'static DefaultImplementation {
 // TODO(nils): Add hash_words and hash_pair tests.
 #[cfg(test)]
 pub mod tests {
-    use super::{Digest, ShaImpl};
+    use super::{Digest, Sha};
 
-    pub fn test_sha_impl<S: ShaImpl>(sha: &S) {
+    pub fn test_sha_impl<S: Sha>(sha: &S) {
         // Standard test vectors
         assert_eq!(
             *sha.hash_bytes("abc".as_bytes()),

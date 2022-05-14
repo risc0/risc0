@@ -18,7 +18,7 @@ use core::slice;
 use risc0_zkp_core::{
     fp::Fp,
     fp4::Fp4,
-    sha::{Digest, ShaImpl, DIGEST_WORDS},
+    sha::{Digest, Sha, DIGEST_WORDS},
 };
 use risc0_zkp_verify::{
     read_iop::ReadIOP,
@@ -115,7 +115,7 @@ impl<'a> Circuit for Risc0Circuit<'a> {
         return RISCV_TAPS;
     }
 
-    fn execute<S: ShaImpl>(&mut self, iop: &mut ReadIOP<S>) {
+    fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {
         for _ in 0..OUTPUT_REGS {
             let mut reg: u32 = 0;
             iop.read_u32s(slice::from_mut(&mut reg));
@@ -125,7 +125,7 @@ impl<'a> Circuit for Risc0Circuit<'a> {
         iop.read_u32s(slice::from_mut(&mut self.po2));
     }
 
-    fn accumulate<S: ShaImpl>(&mut self, iop: &mut ReadIOP<S>) {
+    fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {
         for _ in 0..ACCUM_MIX_SIZE {
             self.globals.push(Fp::random(iop));
         }
