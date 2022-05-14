@@ -14,6 +14,8 @@
 
 #pragma once
 
+#include <endian.h>
+
 #include "risc0/zkp/core/fp.h"
 
 // A internal implementation of SHA-256 (which is the only one we use).  It's very basic, but I
@@ -151,10 +153,11 @@ DEVSPEC inline void endianEncode(DEVADDR uint32_t* out, const DEVADDR uint8_t* i
 }
 
 DEVSPEC inline uint32_t convertU32(uint32_t in) {
-  return in;
+  return htobe32(in);
 }
+
 DEVSPEC inline uint32_t convertU32(Fp in) {
-  return in.asUInt32();
+  return convertU32(in.asUInt32());
 }
 
 // Main entry point for uint32_t sized objects
@@ -220,10 +223,10 @@ DEVSPEC inline ShaDigest shaHashPair(ShaDigest x, ShaDigest y) {
   // Copy both hash states into a single buffer
   uint32_t words[16];
   for (size_t i = 0; i < 8; i++) {
-    words[i] = x.words[i];
+    words[i] = impl::convertU32(x.words[i]);
   }
   for (size_t i = 0; i < 8; i++) {
-    words[8 + i] = y.words[i];
+    words[8 + i] = impl::convertU32(y.words[i]);
   }
 
   // Initialize state + compress

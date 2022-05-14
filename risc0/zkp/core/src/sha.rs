@@ -31,7 +31,7 @@ static INIT_256: [u32; DIGEST_WORDS] = [
 ];
 
 fn set_word(buf: &mut [u8], idx: usize, word: u32) {
-    buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_be_bytes());
+    buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_le_bytes());
 }
 
 impl Digest {

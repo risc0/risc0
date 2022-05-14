@@ -79,12 +79,9 @@ TEST(Sha256, compareFpVsBytes) {
       Fp val = Fp::random(rng);
       // Push to the list
       vals[j] = val;
-      // Encode big-endian onto string
+      // Encode in native byte order onto string.
       uint32_t word = val.asUInt32();
-      for (size_t k = 0; k < 4; k++) {
-        vstr.push_back(char(word >> 24));
-        word <<= 8;
-      }
+      vstr.append(reinterpret_cast<const char*>(&word), sizeof(word));
     }
     ASSERT_EQ(shaHash(vals.data(), vals.size()), shaHash(vstr));
   }
