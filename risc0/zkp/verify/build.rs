@@ -21,10 +21,15 @@ fn main() {
         CFG.include_prefix = "risc0/zkp/verify";
 
         cxx_build::bridge("src/lib.rs")
+            .file("fri.cpp")
             .file("merkle.cpp")
+            .file("taps.cpp")
+            .file("verify.cpp")
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .warnings(false)
             .compile("risc0-zkp-verify");
+
+        println!("cargo:rustc-link-lib=static=risc0-core");
     }
 }

@@ -13,6 +13,7 @@ rust_library(
     deps = [
         "//risc0/zkvm/sdk/cpp/host",
         "//risc0/zkvm/sdk/rust/core:core_host",
+        "@crates_host//:cxx",
         "@crates_host//:log",
     ],
 )

@@ -3,16 +3,19 @@ members = [
   # "examples/rust/battleship",
   "examples/rust/battleship/core",
   "examples/rust/battleship/web/client",
-  # "examples/rust/battleship/web/server",
+  "examples/rust/battleship/web/server",
   "risc0/core",
   "risc0/zkp/accel",
   "risc0/zkp/core",
   "risc0/zkp/prove",
   "risc0/zkp/verify",
   "risc0/zkvm/circuit",
+  "risc0/zkvm/circuit/make-circuit",
   "risc0/zkvm/prove",
   "risc0/zkvm/verify",
+  "risc0/zkvm/sdk/cpp/host",
   "risc0/zkvm/sdk/rust/core",
+  "risc0/zkvm/sdk/rust/host",
   "risc0/zkvm/sdk/rust/serde",
   "third_party/tbb",
 ]
@@ -25,3 +28,6 @@ exclude = [
 
 [profile.release]
 lto = true
+
+[profile.bootstrap]
+inherits = "release"

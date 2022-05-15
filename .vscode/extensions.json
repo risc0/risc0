@@ -4,7 +4,7 @@
     "EditorConfig.EditorConfig",
     "james-yu.latex-workshop",
     "kriegalex.vscode-cudacpp",
-    "matklad.rust-analyzer",
+    "rust-lang.rust-analyzer",
     "ms-vscode.cpptools",
     "stkb.rewrap",
     "twxs.cmake",

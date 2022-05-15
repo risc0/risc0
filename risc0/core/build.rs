@@ -12,14 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{env, panic};
+
 use cxx_build::CFG;
 
 fn main() {
     CFG.include_prefix = "risc0/core";
 
+    let rng_file = match env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
+        "linux" => "rng_linux.cpp",
+        "macos" => "rng_macos.cpp",
+        "windows" => "rng_win32.cpp",
+        os => panic!("Unsupported target_os: {os}"),
+    };
+
     cxx_build::bridge("src/lib.rs")
         .file("elf.cpp")
         .file("log.cpp")
+        .file("rng.cpp")
+        .file(rng_file)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)

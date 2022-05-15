@@ -3,10 +3,13 @@ name = "battleship-methods"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
+[target.riscv32im-unknown-none-elf.dependencies]
 battleship-core = { path = "../core" }
 risc0-zkvm-guest = { version = "0.1", path = "../../../../risc0/zkvm/sdk/rust/guest" }
 
 [profile.release]
 lto = true
 opt-level = "z"
+
+[package.metadata.release]
+release = false

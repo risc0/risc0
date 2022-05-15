@@ -23,3 +23,6 @@ web-sys = { version = "0.3", features = ["HtmlInputElement"] }
 yew = "0.19"
 yew-agent = "0.1"
 yew-router = "0.16"
+
+[package.metadata.release]
+release = false

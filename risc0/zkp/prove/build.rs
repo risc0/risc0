@@ -19,8 +19,10 @@ fn main() {
     CFG.exported_header_links = vec!["risc0-zkp-accel", "risc0-zkp-verify"];
 
     cxx_build::bridge("src/lib.rs")
+        .file("fri.cpp")
         .file("merkle.cpp")
         .file("poly_group.cpp")
+        .file("prove.cpp")
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)

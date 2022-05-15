@@ -21,11 +21,15 @@ fn main() {
         CFG.include_prefix = "risc0/zkvm/verify";
         CFG.exported_header_links = vec!["risc0-core", "risc0-zkp-core", "risc0-zkvm-circuit"];
 
+        let inc_dir = env::var("DEP_RISC0_ZKVM_CIRCUIT_GEN_INC").unwrap();
+
         cxx_build::bridge("src/lib.rs")
             .file("method_id.cpp")
+            .file("riscv.cpp")
+            .include(inc_dir)
             .flag_if_supported("/std:c++17")
             .flag_if_supported("-std=c++17")
             .warnings(false)
-            .compile("verify");
+            .compile("risc0-zkvm-verify");
     }
 }

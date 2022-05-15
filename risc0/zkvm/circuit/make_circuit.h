@@ -12,19 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
-use std::fs;
-use std::path::Path;
+#pragma once
 
-// TODO: hook this up to the actual `make-id` cargo installed tool.
-fn make_id(name: &str) {
-    let out_dir = env::var_os("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join(name);
-    fs::write(&dest_path, "foobar").unwrap();
-}
+#include <string>
 
-fn main() {
-    make_id("init.id");
-    make_id("turn.id");
-    println!("cargo:rerun-if-changed=build.rs");
-}
+namespace risc0::circuit {
+
+void make_circuit(const std::string& path);
+
+} // namespace risc0::circuit

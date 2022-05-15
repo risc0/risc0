@@ -2,6 +2,10 @@
 name = "tbb"
 version = "0.1.0"
 edition = "2021"
+description = "Intel Threading Building Blocks"
+license = "Apache-2.0"
+homepage = "https://oneapi-src.github.io/oneTBB/"
+repository = "https://github.com/oneapi-src/oneTBB"
 links = "tbb"
 
 [dependencies]
