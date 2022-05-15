@@ -11,3 +11,6 @@ links = "risc0-zkvm-circuit-gen"
 [dependencies]
 clap = { version = "3.1", features = ["derive"] }
 risc0-zkvm-circuit = { version = "0.1", path = ".."}
+
+[profile.bootstrap]
+inherits = "release"
