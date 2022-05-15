@@ -15,4 +15,6 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 [features]
 default = ["std"]
 std = []
+
+# The pure feature enables the 'pure' rust implementation of this crate.
 pure = ["dep:risc0-zkp-core"]
