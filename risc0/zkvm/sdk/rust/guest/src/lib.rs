@@ -129,10 +129,10 @@ pub(crate) const fn align_up(addr: usize, align: usize) -> usize {
     (addr + align - 1) & !(align - 1)
 }
 
-// Require that accesses to the given pointer don't get optimized away
-// or reordered after the call to memory_barrier.
+// Require that accesses to behind the given pointer before the memory
+// barrier don't get optimized away or reordered to after the memory
+// barrier.
 pub fn memory_barrier<T>(ptr: *const T) {
-    // Apparently core::sync::atomic::compiler_fence doesn't do much, and
-    // isn't supported on our riscv.
+    // SAFETY: This passes a pointer in, but does nothing with it.
     unsafe { asm!("/* {0} */", in(reg) (ptr)) }
 }
