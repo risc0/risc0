@@ -1,5 +1,5 @@
 {
-  "checksum": "ed113c22a2625f1bd76fae6b6f39a089175aadf91c480df50bdcec0bef639701",
+  "checksum": "5049273350ccfc0145eaf1fc385428d3665f9d21003030c8e955ec8b8b160d27",
   "crates": {
     "aho-corasick 0.7.18": {
       "name": "aho-corasick",
@@ -755,6 +755,51 @@
       },
       "license": "MIT"
     },
+    "cc 1.0.73": {
+      "name": "cc",
+      "version": "1.0.73",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/cc/1.0.73/download",
+          "sha256": "2fff2a6927b3bb87f9595d67196a70493f627687a71d87a0d692242c33f58c11"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "cc",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "Binary": {
+            "crate_name": "gcc-shim",
+            "crate_root": "src/bin/gcc-shim.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "cc",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "1.0.73"
+      },
+      "license": "MIT/Apache-2.0"
+    },
     "cfg-if 1.0.0": {
       "name": "cfg-if",
       "version": "1.0.0",
@@ -1068,6 +1113,183 @@
       },
       "license": "Apache-2.0 OR MIT"
     },
+    "cxx 1.0.68": {
+      "name": "cxx",
+      "version": "1.0.68",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/cxx/1.0.68/download",
+          "sha256": "7e599641dff337570f6aa9c304ecca92341d30bf72e1c50287869ed6a36615a6"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "cxx",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "cxx",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "alloc",
+          "default",
+          "std"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cxx 1.0.68",
+              "target": "build_script_build"
+            },
+            {
+              "id": "link-cplusplus 1.0.6",
+              "target": "link_cplusplus"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "cxxbridge-macro 1.0.68",
+              "target": "cxxbridge_macro"
+            }
+          ],
+          "selects": {}
+        },
+        "version": "1.0.68"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cc 1.0.73",
+              "target": "cc"
+            },
+            {
+              "id": "cxxbridge-flags 1.0.68",
+              "target": "cxxbridge_flags"
+            }
+          ],
+          "selects": {}
+        },
+        "links": "cxxbridge1"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "cxxbridge-flags 1.0.68": {
+      "name": "cxxbridge-flags",
+      "version": "1.0.68",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/cxxbridge-flags/1.0.68/download",
+          "sha256": "3894ad0c6d517cb5a4ce8ec20b37cd0ea31b480fe582a104c5db67ae21270853"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "cxxbridge_flags",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "cxxbridge_flags",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "default"
+        ],
+        "edition": "2018",
+        "version": "1.0.68"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "cxxbridge-macro 1.0.68": {
+      "name": "cxxbridge-macro",
+      "version": "1.0.68",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/cxxbridge-macro/1.0.68/download",
+          "sha256": "34fa7e395dc1c001083c7eed28c8f0f0b5a225610f3b6284675f444af6fab86b"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "cxxbridge_macro",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "cxxbridge_macro",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "proc-macro2 1.0.38",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.18",
+              "target": "quote"
+            },
+            {
+              "id": "syn 1.0.94",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.0.68"
+      },
+      "license": "MIT OR Apache-2.0"
+    },
     "digest 0.10.3": {
       "name": "digest",
       "version": "0.10.3",
@@ -1173,6 +1395,10 @@
             {
               "id": "clap 3.1.18",
               "target": "clap"
+            },
+            {
+              "id": "cxx 1.0.68",
+              "target": "cxx"
             },
             {
               "id": "env_logger 0.8.4",
@@ -2484,6 +2710,78 @@
         "data_glob": [
           "**"
         ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "link-cplusplus 1.0.6": {
+      "name": "link-cplusplus",
+      "version": "1.0.6",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/link-cplusplus/1.0.6/download",
+          "sha256": "f8cae2cd7ba2f3f63938b9c724475dfb7b9861b545a90324476324ed21dbc8c8"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "link_cplusplus",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "BuildScript": {
+            "crate_name": "build_script_build",
+            "crate_root": "build.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "link_cplusplus",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "crate_features": [
+          "default"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "link-cplusplus 1.0.6",
+              "target": "build_script_build"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.0.6"
+      },
+      "build_script_attrs": {
+        "data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "cc 1.0.73",
+              "target": "cc"
+            }
+          ],
+          "selects": {}
+        },
+        "links": "cplusplus"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -6956,6 +7254,7 @@
     }
   },
   "binary_crates": [
+    "cc 1.0.73",
     "clap 3.1.18",
     "open 2.1.2"
   ],

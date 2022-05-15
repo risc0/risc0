@@ -16,11 +16,30 @@ use cxx_build::CFG;
 
 fn main() {
     CFG.include_prefix = "risc0/zkvm/circuit";
-    CFG.exported_header_links = vec!["risc0-zkvm-platform"];
+    CFG.exported_header_links = vec!["risc0-zkp-core", "risc0-zkvm-platform"];
 
     cxx_build::bridge("src/lib.rs")
+        .file("accum_regs.cpp")
+        .file("compute_cycle.cpp")
+        .file("context.cpp")
+        .file("data_regs.cpp")
+        .file("decode_cycle.cpp")
+        .file("divide_cycle.cpp")
+        .file("final_cycle.cpp")
+        .file("gen_context.cpp")
+        .file("make_circuit.cpp")
+        .file("mem_check.cpp")
+        .file("mem_io_regs.cpp")
+        .file("multiply_cycle.cpp")
+        .file("poly_context.cpp")
+        .file("sha_cycle.cpp")
+        .file("step_state.cpp")
         .flag_if_supported("/std:c++17")
+        .flag_if_supported("/Zc:preprocessor")
+        .flag_if_supported("/EHsc")
         .flag_if_supported("-std=c++17")
         .warnings(false)
         .compile("risc0-zkp-circuit");
+
+    println!("cargo:rustc-link-lib=static=risc0-core");
 }

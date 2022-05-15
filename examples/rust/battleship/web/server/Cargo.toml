@@ -1,0 +1,22 @@
+[package]
+name = "battleship-web-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.5"
+base64 = "0.13"
+bincode = "1.3"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.17", features = ["full"] }
+tower-http = { version = "0.2", features = ["trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+battleship-core = { path = "../../core" }
+risc0-zkvm-host = { version = "0.1", path = "../../../../../risc0/zkvm/sdk/rust/host" }
+risc0-zkvm-serde = { version = "0.2", path = "../../../../../risc0/zkvm/sdk/rust/serde" }
+
+[package.metadata.release]
+release = false

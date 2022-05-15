@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::net::SocketAddr;
+use std::net::{Ipv4Addr, SocketAddr};
 
 use axum::{http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use serde::{Deserialize, Serialize};
@@ -39,7 +39,7 @@ async fn main() {
     tracing_subscriber::registry()
         // Filter spans based on the RUST_LOG env var.
         .with(tracing_subscriber::EnvFilter::new(
-            "server,tower_http=debug",
+            "info,server,tower_http=debug",
         ))
         // Send a copy of all spans to stdout as JSON.
         .with(
@@ -57,7 +57,7 @@ async fn main() {
         .route("/prove/turn", post(prove_turn))
         .layer(TraceLayer::new_for_http());
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    let addr = SocketAddr::from((Ipv4Addr::LOCALHOST, 3000));
     tracing::info!("listening on {}", addr);
     let server = axum::Server::bind(&addr).serve(app.into_make_service());
 

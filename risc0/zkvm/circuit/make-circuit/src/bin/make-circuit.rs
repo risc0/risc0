@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use cxx::let_cxx_string;
+use clap::Parser;
 
-#[cxx::bridge(namespace = "risc0::circuit")]
-mod ffi {
-    unsafe extern "C++" {
-        include!("risc0/zkvm/circuit/make_circuit.h");
+use risc0_zkvm_circuit::make_circuit;
 
-        fn make_circuit(path: &CxxString) -> Result<()>;
-    }
+#[derive(Parser)]
+#[clap(author, version, about)]
+struct Args {
+    output: String,
 }
 
-pub fn make_circuit(path: &str) -> Result<()> {
-    let_cxx_string!(path = path);
-    Ok(ffi::make_circuit(&path)?)
+fn main() {
+    let args = Args::parse();
+    make_circuit(&args.output).unwrap_or_else(|err| {
+        eprintln!("{}", err);
+        std::process::exit(-1);
+    });
 }
