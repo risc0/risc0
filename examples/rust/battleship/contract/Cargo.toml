@@ -25,3 +25,6 @@ lto = true
 debug = false
 panic = "abort"
 overflow-checks = true
+
+[package.metadata.release]
+release = false

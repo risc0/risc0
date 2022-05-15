@@ -10,3 +10,6 @@ risc0-zkvm-guest = { version = "0.1", path = "../../../../risc0/zkvm/sdk/rust/gu
 [profile.release]
 lto = true
 opt-level = "z"
+
+[package.metadata.release]
+release = false
