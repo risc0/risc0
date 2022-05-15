@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 risc0-zkvm-core = { version = "0.2", path = "../../../../risc0/zkvm/sdk/rust/core", default-features = false }
 serde = { version = "1.0", default-features = false }
+
+[package.metadata.release]
+release = false
