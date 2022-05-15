@@ -200,6 +200,12 @@ TEST(CoreTests, Memset) {
   doMemsetTest(17, 173);
 }
 
+TEST(CoreTests, SHAAccel) {
+  Prover prover("risc0/zkvm/sdk/rust/guest/test_sha_accel");
+  Receipt receipt = prover.run();
+  receipt.verify("risc0/zkvm/sdk/rust/guest/test_sha_accel");
+}
+
 INSTANTIATE_TEST_SUITE_P(All,
                          CoreTests,
                          testing::Values(TestParam{"cpp", "risc0/zkvm/sdk/cpp/guest/test/"},

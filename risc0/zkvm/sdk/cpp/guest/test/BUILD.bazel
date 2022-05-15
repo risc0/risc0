@@ -43,6 +43,8 @@ cc_gtest(
         "//risc0/zkvm/sdk/rust/guest:test_mem.id",
         "//risc0/zkvm/sdk/rust/guest:test_sha",
         "//risc0/zkvm/sdk/rust/guest:test_sha.id",
+        "//risc0/zkvm/sdk/rust/guest:test_sha_accel",
+        "//risc0/zkvm/sdk/rust/guest:test_sha_accel.id",
     ],
     tags = ["exclusive"],
     deps = ["//risc0/zkvm/sdk/cpp/host"],

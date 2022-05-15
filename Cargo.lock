@@ -1270,6 +1270,7 @@ dependencies = [
  "rand",
  "rand_core",
  "risc0-core",
+ "serde",
  "sha2",
 ]
 
@@ -1307,6 +1308,8 @@ dependencies = [
 name = "risc0-zkvm-core"
 version = "0.2.0"
 dependencies = [
+ "cfg-if",
+ "risc0-zkp-core",
  "serde",
 ]
 

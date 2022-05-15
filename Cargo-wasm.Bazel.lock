@@ -1,5 +1,5 @@
 {
-  "checksum": "6bcbae9d2b99a057e23c6f4ab1e77796302c1dc6f9e14ff0151571c054d7d47f",
+  "checksum": "60842e089782a9c3d2e8a1c39713a2aed247833f5cffe8683dc06c545e1d8f66",
   "crates": {
     "anymap2 0.13.0": {
       "name": "anymap2",
@@ -89,7 +89,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             }
           ],
@@ -389,6 +389,10 @@
             {
               "id": "bytemuck 1.9.1",
               "target": "bytemuck"
+            },
+            {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
             },
             {
               "id": "gloo 0.7.0",
@@ -2079,7 +2083,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             }
           ],
@@ -2150,7 +2154,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             }
           ],
@@ -2723,7 +2727,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             }
           ],
@@ -2905,13 +2909,13 @@
       },
       "license": "MIT"
     },
-    "syn 1.0.93": {
+    "syn 1.0.94": {
       "name": "syn",
-      "version": "1.0.93",
+      "version": "1.0.94",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/syn/1.0.93/download",
-          "sha256": "04066589568b72ec65f42d65a1a52436e954b168773148893c020269563decf2"
+          "url": "https://crates.io/api/v1/crates/syn/1.0.94/download",
+          "sha256": "a07e33e919ebcd69113d5be0e4d70c5707004ff45188910106854f38b960df4a"
         }
       },
       "targets": [
@@ -2969,7 +2973,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "build_script_build"
             },
             {
@@ -2980,7 +2984,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.93"
+        "version": "1.0.94"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -3070,7 +3074,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             }
           ],
@@ -3292,7 +3296,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             },
             {
@@ -3455,7 +3459,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             },
             {
@@ -3795,7 +3799,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             }
           ],
@@ -3944,7 +3948,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.93",
+              "id": "syn 1.0.94",
               "target": "syn"
             }
           ],

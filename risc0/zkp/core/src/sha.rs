@@ -18,7 +18,9 @@ use core::{
     ops::Deref,
 };
 
-use anyhow::Result;
+use anyhow::{Error, Result};
+use bytemuck::{Pod, Zeroable};
+use serde::{Deserialize, Serialize};
 
 use crate::fp::Fp;
 use crate::fp4::Fp4;
@@ -29,8 +31,8 @@ use crate::fp4::Fp4;
 // TODO(nils): Remove 'Copy' trait on Digest; these are not small and
 // we don't want to copy them around accidentally.
 pub const DIGEST_WORDS: usize = 8;
+#[derive(Eq, PartialEq, Copy, Zeroable, Pod, Serialize, Deserialize)]
 #[repr(transparent)]
-#[derive(Eq, PartialEq, Copy)]
 pub struct Digest([u32; DIGEST_WORDS]);
 
 impl Digest {
@@ -39,7 +41,7 @@ impl Digest {
     }
 
     pub fn try_from_slice(words: &[u32]) -> Result<Self> {
-        Ok(Digest(words.try_into()?))
+        Ok(Digest(words.try_into().map_err(Error::msg)?))
     }
 
     pub fn from_slice(words: &[u32]) -> Self {
@@ -147,9 +149,8 @@ pub fn default_implementation() -> &'static DefaultImplementation {
 }
 
 #[cfg(test)]
-pub mod tests {
-    use super::{Digest, Fp, Fp4, Sha};
-    use alloc::vec::Vec;
+mod tests {
+    use super::Digest;
 
     #[test]
     fn test_from_str() {
@@ -158,15 +159,21 @@ pub mod tests {
             Digest::new([119, 170, 18, 52, 86, 122, 169, 9])
         );
     }
+}
 
-    // Runs conformance test on a SHA implementation to make sure it properly behaves.
+pub mod testutil {
+    use super::{Digest, Fp, Fp4, Sha};
+    use alloc::vec::Vec;
+
+    // Runs conformance test on a SHA implementation to make sure it properly
+    // behaves.
     pub fn test_sha_impl<S: Sha>(sha: &S) {
+        test_hash_pair(sha);
         test_sha_basics(sha);
         test_fps(sha);
         test_fp4s(sha);
-        test_hash_pair(sha);
 
-        crate::sha_rng::tests::test_sha_rng_impl(sha);
+        crate::sha_rng::testutil::test_sha_rng_impl(sha);
     }
     fn test_sha_basics<S: Sha>(sha: &S) {
         // Standard test vectors

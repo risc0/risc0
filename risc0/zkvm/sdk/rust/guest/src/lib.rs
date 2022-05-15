@@ -23,7 +23,7 @@ pub mod env;
 mod gpio;
 pub mod sha;
 
-use core::{mem, panic::PanicInfo, ptr};
+use core::{arch::asm, mem, panic::PanicInfo, ptr};
 
 use gpio::{FaultDescriptor, LogDescriptor, GPIO_DESC_FAULT, GPIO_DESC_LOG, GPIO_FAULT, GPIO_LOG};
 use risc0_zkvm_core::{set_logger, Log};
@@ -60,9 +60,11 @@ extern "C" {
 unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
     let msg = _alloc::format!("{}\0", panic_info);
 
+    let ptr = msg.as_ptr();
+    crate::memory_barrier(ptr);
     GPIO_DESC_FAULT.write_volatile(FaultDescriptor {
         // addr: "panic\0".as_ptr() as usize,
-        addr: msg.as_ptr() as usize,
+        addr: ptr as usize,
     });
     // A compliant host should fault when it receives this descriptor.
     GPIO_FAULT.write_volatile(GPIO_DESC_FAULT);
@@ -90,9 +92,9 @@ impl Log for Logger {
     fn log(&self, msg: &str) {
         let msg = _alloc::format!("{}\0", msg);
         unsafe {
-            GPIO_DESC_LOG.write_volatile(LogDescriptor {
-                addr: msg.as_ptr() as usize,
-            });
+            let ptr = msg.as_ptr();
+            crate::memory_barrier(ptr);
+            GPIO_DESC_LOG.write_volatile(LogDescriptor { addr: ptr as usize });
             GPIO_LOG.write_volatile(GPIO_DESC_LOG);
         }
     }
@@ -125,4 +127,12 @@ unsafe extern "C" fn __start(result: *mut usize) {
 /// Requires that `align` is a power of two.
 pub(crate) const fn align_up(addr: usize, align: usize) -> usize {
     (addr + align - 1) & !(align - 1)
+}
+
+// Require that accesses to the given pointer don't get optimized away
+// or reordered after the call to memory_barrier.
+pub fn memory_barrier<T>(ptr: *const T) {
+    // Apparently core::sync::atomic::compiler_fence doesn't do much, and
+    // isn't supported on our riscv.
+    unsafe { asm!("/* {0} */", in(reg) (ptr)) }
 }
