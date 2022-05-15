@@ -10,6 +10,7 @@ members = [
   "risc0/zkp/prove",
   "risc0/zkp/verify",
   "risc0/zkvm/circuit",
+  "risc0/zkvm/circuit/make-circuit",
   "risc0/zkvm/prove",
   "risc0/zkvm/verify",
   "risc0/zkvm/sdk/cpp/host",
@@ -17,7 +18,6 @@ members = [
   "risc0/zkvm/sdk/rust/host",
   "risc0/zkvm/sdk/rust/serde",
   "third_party/tbb",
-  "xcargo",
 ]
 
 exclude = [
@@ -28,3 +28,6 @@ exclude = [
 
 [profile.release]
 lto = true
+
+[profile.bootstrap]
+inherits = "release"

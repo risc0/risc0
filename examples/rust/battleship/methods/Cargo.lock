@@ -19,6 +19,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "bytemuck"
+version = "1.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cdead85bdec19c194affaeeb670c0e41fe23de31459efd1c174d049269cf02cc"
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.38"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -47,6 +53,7 @@ dependencies = [
 name = "risc0-zkvm-guest"
 version = "0.1.0"
 dependencies = [
+ "bytemuck",
  "risc0-zkvm-core",
  "risc0-zkvm-serde",
  "serde",
@@ -56,6 +63,7 @@ dependencies = [
 name = "risc0-zkvm-serde"
 version = "0.2.0"
 dependencies = [
+ "bytemuck",
  "serde",
 ]
 

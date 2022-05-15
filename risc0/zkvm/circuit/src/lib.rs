@@ -12,11 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use anyhow::Result;
+use cxx::let_cxx_string;
+
 #[cxx::bridge(namespace = "risc0::circuit")]
-pub mod ffi {
+mod ffi {
     unsafe extern "C++" {
         include!("risc0/zkvm/circuit/make_circuit.h");
 
-        pub fn make_circuit(path: &CxxString) -> Result<()>;
+        fn make_circuit(path: &CxxString) -> Result<()>;
     }
+}
+
+pub fn make_circuit(path: &str) -> Result<()> {
+    let_cxx_string!(path = path);
+    Ok(ffi::make_circuit(&path)?)
 }

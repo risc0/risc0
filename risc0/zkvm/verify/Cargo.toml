@@ -13,7 +13,13 @@ links = "risc0-zkvm-verify"
 # Only one of `cxx` or `pure` must be selected.
 [features]
 default = ["pure", "std"]
-cxx = ["dep:cxx", "dep:risc0-core", "dep:risc0-zkvm-circuit", "risc0-zkp-core/cxx"]
+cxx = [
+  "dep:cxx",
+  "dep:risc0-core",
+  "dep:risc0-zkvm-circuit",
+  "dep:risc0-zkvm-circuit-gen",
+  "risc0-zkp-core/cxx",
+]
 pure = ["dep:risc0-zkp-verify", "dep:risc0-zkvm-serde", "dep:serde"]
 serde = ["serde/std"]
 std = ["serde"]
@@ -25,6 +31,7 @@ risc0-core = { version = "0.1", path = "../../core", optional = true }
 risc0-zkp-core = { version = "0.2", path = "../../zkp/core" }
 risc0-zkp-verify = { version = "0.2", path = "../../zkp/verify", optional = true }
 risc0-zkvm-circuit = { version = "0.1", path = "../circuit", optional = true }
+risc0-zkvm-circuit-gen = { version = "0.1", path = "../circuit/make-circuit", optional = true }
 risc0-zkvm-serde = { version = "0.2", path = "../../zkvm/sdk/rust/serde", optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 

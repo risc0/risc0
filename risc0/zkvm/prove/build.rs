@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::env;
+
 use cxx_build::CFG;
 
 fn main() {
     CFG.include_prefix = "risc0/zkvm/prove";
     CFG.exported_header_links = vec!["risc0-zkp-prove"];
+
+    let inc_dir = env::var("DEP_RISC0_ZKVM_CIRCUIT_GEN_INC").unwrap();
 
     cxx_build::bridge("src/lib.rs")
         .file("exec.cpp")
@@ -25,10 +29,12 @@ fn main() {
         .file("riscv.cpp")
         .file("step_context.cpp")
         .file("step.cpp")
+        .include(inc_dir)
         .define("__TBB_NO_IMPLICIT_LINKAGE", None)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)
+        .opt_level(2)
         .compile("risc0-zkvm-prove");
 
     println!("cargo:rustc-link-lib=static=tbb");

@@ -5,10 +5,6 @@ fn build() {
     let args = vec![
         "build",
         "--release",
-        "-C",
-        "lto",
-        "-C",
-        "opt-level=z",
         "--target",
         "../../../../bazel/rules/rust/riscv32im-unknown-none-elf.json",
         "-Z",
@@ -16,7 +12,10 @@ fn build() {
         "--target-dir",
         &out_dir,
     ];
-    Command::new("cargo").args(args).status().unwrap();
+    let status = Command::new(env!("CARGO")).args(args).status().unwrap();
+    if !status.success() {
+        std::process::exit(status.code().unwrap());
+    }
 }
 
 fn generate_module(methods: &[&str]) {
@@ -32,10 +31,13 @@ fn generate_module(methods: &[&str]) {
         let mut id_path = Path::new(&out_dir).join(method);
         id_path.set_extension("id");
 
-        Command::new("make-id")
+        let status = Command::new("make-id")
             .args([&elf_path, &id_path])
             .status()
             .unwrap();
+        if !status.success() {
+            std::process::exit(status.code().unwrap());
+        }
 
         let elf_path = elf_path.display();
         let id_path = id_path.display();

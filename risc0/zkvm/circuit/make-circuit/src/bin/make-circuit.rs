@@ -13,9 +13,8 @@
 // limitations under the License.
 
 use clap::Parser;
-use cxx::let_cxx_string;
 
-use risc0_zkvm_circuit::ffi::make_circuit;
+use risc0_zkvm_circuit::make_circuit;
 
 #[derive(Parser)]
 #[clap(author, version, about)]
@@ -25,8 +24,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let_cxx_string!(path = args.output);
-    make_circuit(&path).unwrap_or_else(|err| {
+    make_circuit(&args.output).unwrap_or_else(|err| {
         eprintln!("{}", err);
         std::process::exit(-1);
     });

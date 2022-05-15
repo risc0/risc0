@@ -16,7 +16,7 @@ use cxx_build::CFG;
 
 fn main() {
     CFG.include_prefix = "risc0/zkvm/circuit";
-    CFG.exported_header_links = vec!["risc0-zkvm-platform"];
+    CFG.exported_header_links = vec!["risc0-zkp-core", "risc0-zkvm-platform"];
 
     cxx_build::bridge("src/lib.rs")
         .file("accum_regs.cpp")

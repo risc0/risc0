@@ -5,9 +5,9 @@ edition = "2021"
 links = "risc0-zkvm-circuit"
 
 [dependencies]
+anyhow = "1.0"
 cxx = "1.0"
-clap = { version = "3.1", features = ["derive"] }
-risc0-zkp-core = { version = "0.2", path = "../../zkp/core" }
+risc0-zkp-core = { version = "0.2", path = "../../zkp/core", features = ["cxx"] }
 risc0-zkvm-platform = { version = "0.1", path = "../platform"}
 
 [build-dependencies]
