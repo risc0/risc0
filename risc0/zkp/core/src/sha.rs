@@ -22,8 +22,7 @@ use anyhow::{Error, Result};
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
-use crate::fp::Fp;
-use crate::fp4::Fp4;
+use crate::{fp::Fp, fp4::Fp4};
 
 // We represent a SHA-256 digest as 8 32-bit words instead of the
 // traditional 32 8-bit bytes.
@@ -129,11 +128,15 @@ pub trait Sha: Clone + Debug {
 
     // Generate SHAs for various data types.
     fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr;
+
     fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
+
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr;
+
     fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr;
+
     fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr;
 
     // Generate a new digest by mixing two digests together via XOR,
@@ -143,6 +146,7 @@ pub trait Sha: Clone + Debug {
 
 // Default implementation is CPU-based.
 pub use crate::sha_cpu::Impl as DefaultImplementation;
+
 pub fn default_implementation() -> &'static DefaultImplementation {
     static DEFAULT_IMPLEMENTATION: DefaultImplementation = DefaultImplementation {};
     &DEFAULT_IMPLEMENTATION
@@ -175,6 +179,7 @@ pub mod testutil {
 
         crate::sha_rng::testutil::test_sha_rng_impl(sha);
     }
+
     fn test_sha_basics<S: Sha>(sha: &S) {
         // Standard test vectors
         assert_eq!(
@@ -199,7 +204,7 @@ pub mod testutil {
             ])
         );
         assert_eq!(*sha.hash_bytes(
-	"abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes()),
+            "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes()),
             Digest::new([0xcf5b16a7,
                        0x78af8380,
                        0x036ce59e,

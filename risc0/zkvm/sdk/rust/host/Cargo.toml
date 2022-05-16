@@ -11,7 +11,7 @@ repository = "https://github.com/risc0/risc0/"
 ctor = "0.1"
 cxx = "1.0"
 log = "0.4"
-risc0-zkvm-host-sys = { version = "0.1", path = "../../cpp/host" }
+risc0-zkvm-sys = { version = "0.1", path = "../../.." }
 
 [build-dependencies]
 cxx-build = "1.0"

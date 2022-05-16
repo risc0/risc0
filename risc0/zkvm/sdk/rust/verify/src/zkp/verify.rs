@@ -24,7 +24,7 @@ use risc0_zkp_core::{
     to_po2,
 };
 
-use crate::{
+use crate::zkp::{
     fri::{fri_verify, INV_RATE, QUERIES},
     merkle::MerkleTreeVerifier,
     read_iop::ReadIOP,

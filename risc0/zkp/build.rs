@@ -12,27 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env, panic};
-
 use cxx_build::CFG;
 
 fn main() {
-    CFG.include_prefix = "risc0/core";
+    CFG.include_prefix = "risc0/zkp";
+    CFG.exported_header_links = vec!["risc0-core-sys"];
 
-    let rng_file = match env::var("CARGO_CFG_TARGET_OS").unwrap().as_str() {
-        "linux" => "rng_linux.cpp",
-        "macos" => "rng_macos.cpp",
-        "windows" => "rng_win32.cpp",
-        os => panic!("Unsupported target_os: {os}"),
-    };
-
-    cxx_build::bridge("src/lib.rs")
-        .file("elf.cpp")
-        .file("log.cpp")
-        .file("rng.cpp")
-        .file(rng_file)
+    cxx_build::bridge("lib.rs")
+        .file("accel/backend/cpu/impl.cpp")
+        .file("core/ntt.cpp")
+        .file("core/poly.cpp")
+        .file("core/sha_rng.cpp")
+        .file("prove/fri.cpp")
+        .file("prove/merkle.cpp")
+        .file("prove/poly_group.cpp")
+        .file("prove/prove.cpp")
+        .file("verify/fri.cpp")
+        .file("verify/merkle.cpp")
+        .file("verify/taps.cpp")
+        .file("verify/verify.cpp")
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)
-        .compile("risc0-core-sys");
+        .compile("risc0-zkp-sys");
+
+    println!("cargo:rustc-link-lib=static=tbb");
+    println!("cargo:rustc-link-lib=static=risc0-core-sys");
 }

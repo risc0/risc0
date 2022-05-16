@@ -15,18 +15,18 @@
 use alloc::{vec, vec::Vec};
 use core::slice;
 
+use crate::zkp::{
+    read_iop::ReadIOP,
+    taps::Taps,
+    verify::{Circuit, VerificationError, VerificationError::*},
+};
 use risc0_zkp_core::{
     fp::Fp,
     fp4::Fp4,
     sha::{Digest, Sha, DIGEST_WORDS},
 };
-use risc0_zkp_verify::{
-    read_iop::ReadIOP,
-    taps::Taps,
-    verify::{Circuit, VerificationError, VerificationError::*},
-};
 
-use crate::{
+use crate::zkvm::{
     poly_op::PolyOp,
     poly_ops::{RISC0_CONS, RISC0_FP4S, RISC0_POLY_OPS},
     taps::RISCV_TAPS,

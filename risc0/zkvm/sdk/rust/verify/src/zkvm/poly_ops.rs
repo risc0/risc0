@@ -14,7 +14,7 @@
 
 use risc0_zkp_core::fp::Fp;
 
-use crate::poly_op::PolyOp;
+use crate::zkvm::poly_op::PolyOp;
 
 pub const RISC0_FP4S: usize = 6868;
 pub const RISC0_CONS: usize = 1523;

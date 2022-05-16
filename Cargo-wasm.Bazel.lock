@@ -1,5 +1,5 @@
 {
-  "checksum": "ab6a6e49f13a36f6e179e00dc9f80093859303afa6d1a5b3c1ba71f36e5eca47",
+  "checksum": "83845bf15a967e53fd09c700117659753148d44f6c9c02b0b6d1bc4975d8b88a",
   "crates": {
     "anymap2 0.13.0": {
       "name": "anymap2",
@@ -1762,13 +1762,13 @@
       },
       "license": "Apache-2.0/MIT"
     },
-    "itoa 1.0.1": {
+    "itoa 1.0.2": {
       "name": "itoa",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/itoa/1.0.1/download",
-          "sha256": "1aab8fc367588b89dcee83ab0fd66b72b50b72fa1904d7095045ace2b0c81c35"
+          "url": "https://crates.io/api/v1/crates/itoa/1.0.2/download",
+          "sha256": "112c678d4050afce233f4f2852bb2eb519230b3cf12f33585275537d7e41578d"
         }
       },
       "targets": [
@@ -1791,7 +1791,7 @@
           "**"
         ],
         "edition": "2018",
-        "version": "1.0.1"
+        "version": "1.0.2"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -2425,13 +2425,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "ryu 1.0.9": {
+    "ryu 1.0.10": {
       "name": "ryu",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/ryu/1.0.9/download",
-          "sha256": "73b4b750c782965c211b42f022f59af1fbceabdd026623714f104152f1ec149f"
+          "url": "https://crates.io/api/v1/crates/ryu/1.0.10/download",
+          "sha256": "f3f6f92acf49d1b98f7a81226834412ada05458b7364277387724a237f062695"
         }
       },
       "targets": [
@@ -2454,7 +2454,7 @@
           "**"
         ],
         "edition": "2018",
-        "version": "1.0.9"
+        "version": "1.0.10"
       },
       "license": "Apache-2.0 OR BSL-1.0"
     },
@@ -2790,11 +2790,11 @@
         "deps": {
           "common": [
             {
-              "id": "itoa 1.0.1",
+              "id": "itoa 1.0.2",
               "target": "itoa"
             },
             {
-              "id": "ryu 1.0.9",
+              "id": "ryu 1.0.10",
               "target": "ryu"
             },
             {
@@ -2853,11 +2853,11 @@
               "target": "form_urlencoded"
             },
             {
-              "id": "itoa 1.0.1",
+              "id": "itoa 1.0.2",
               "target": "itoa"
             },
             {
-              "id": "ryu 1.0.9",
+              "id": "ryu 1.0.10",
               "target": "ryu"
             },
             {

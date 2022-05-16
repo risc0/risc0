@@ -20,7 +20,7 @@ use risc0_zkp_core::{
     to_po2,
 };
 
-use crate::read_iop::ReadIOP;
+use crate::zkp::read_iop::ReadIOP;
 
 pub struct MerkeTreeParams {
     pub row_size: usize,
