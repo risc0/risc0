@@ -38,4 +38,8 @@ fn main() {
         .flag_if_supported("-std=c++17")
         .warnings(false)
         .compile("risc0-zkvm-sys");
+
+    println!("cargo:rustc-link-lib=static=tbb");
+    println!("cargo:rustc-link-lib=static=risc0-core-sys");
+    println!("cargo:rustc-link-lib=static=risc0-zkp-sys");
 }

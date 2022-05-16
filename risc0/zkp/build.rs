@@ -31,6 +31,7 @@ fn main() {
         .file("verify/merkle.cpp")
         .file("verify/taps.cpp")
         .file("verify/verify.cpp")
+        .define("__TBB_NO_IMPLICIT_LINKAGE", None)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)
