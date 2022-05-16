@@ -54,8 +54,8 @@ impl Fp {
 
     /// Generate a uniform random value.
     pub fn random<R: Rng>(rng: &mut R) -> Self {
-        // Reject the last modulo-P region of possible uint32_t values, since it's uneven
-        // and will only return random values less than (2^32 % P).
+        // Reject the last modulo-P region of possible uint32_t values, since it's
+        // uneven and will only return random values less than (2^32 % P).
         const REJECT_CUTOFF: u32 = (u32::MAX / P) * P;
         let mut val: u32 = rng.gen();
 

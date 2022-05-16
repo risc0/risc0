@@ -115,12 +115,20 @@ crates_repository(
         "base64": crate.spec(version = "0.13"),
         "bincode": crate.spec(version = "1.3"),
         "bytemuck": crate.spec(version = "1.9"),
+        "cfg-if": crate.spec(version = "1.0"),
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
         "cxx": crate.spec(version = "1.0"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
         "open": crate.spec(version = "2"),
+        "rand": crate.spec(
+            version = "0.8",
+            features = ["small_rng"],
+        ),
+        "rand_core": crate.spec(
+            version = "0.6",
+        ),
         "serde": crate.spec(
             features = ["derive"],
             version = "1.0",
@@ -156,7 +164,29 @@ crates_repository(
     name = "crates_guest",
     lockfile = "//:Cargo-guest.Bazel.lock",
     packages = {
-        "bytemuck": crate.spec(version = "1.9"),
+        "anyhow": crate.spec(
+            version = "1.0",
+            default_features = False,
+        ),
+        "bytemuck": crate.spec(
+            version = "1.9",
+            features = ["derive"],
+        ),
+        "cfg-if": crate.spec(version = "1.0"),
+        "sha2": crate.spec(
+            version = "0.10",
+            features = ["compress"],
+            default_features = False,
+        ),
+        "rand": crate.spec(
+            version = "0.8",
+            default_features = False,
+            features = ["small_rng"],
+        ),
+        "rand_core": crate.spec(
+            version = "0.6",
+            default_features = False,
+        ),
         "serde": crate.spec(
             default_features = False,
             features = [
@@ -179,6 +209,7 @@ crates_repository(
     packages = {
         "async-trait": crate.spec(version = "0.1"),
         "bytemuck": crate.spec(version = "1.9"),
+        "cfg-if": crate.spec(version = "1.0"),
         "gloo": crate.spec(
             features = ["futures"],
             version = "0.7",

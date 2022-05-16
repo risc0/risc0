@@ -14,6 +14,7 @@
 
 #![no_main]
 #![no_std]
+#![allow(non_snake_case)]
 
 use risc0_zkvm_guest::{env, sha};
 
@@ -23,4 +24,6 @@ pub fn main() {
     let data: &[u8] = env::read();
     let digest = sha::digest_u8_slice(data);
     env::commit(&digest);
+
+    risc0_zkp_core::sha::testutil::test_sha_impl(&risc0_zkvm_guest::sha::Impl {})
 }

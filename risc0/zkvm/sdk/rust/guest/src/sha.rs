@@ -16,7 +16,8 @@ use _alloc::{boxed::Box, vec::Vec};
 use bytemuck;
 use core::{cell::UnsafeCell, mem};
 
-use risc0_zkvm_core::Digest;
+use risc0_zkp_core::{fp::Fp, fp4::Fp4};
+use risc0_zkvm_core::{Digest, DIGEST_WORDS};
 use risc0_zkvm_serde::to_vec_with_capacity;
 use serde::Serialize;
 
@@ -68,14 +69,15 @@ pub fn raw_digest(data: &[u32]) -> &'static Digest {
 pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     let type_count = data.len() / CHUNK_SIZE;
-    assert_ne!(type_count, 0);
 
     let desc_ptr = alloc_desc();
 
+    let ptr = data.as_ptr();
+    crate::memory_barrier(ptr);
     desc_ptr.write_volatile(SHADescriptor {
         type_count,
         idx: 0,
-        source: data.as_ptr() as usize,
+        source: ptr as usize,
         digest: digest as usize,
     });
 
@@ -174,5 +176,47 @@ pub(crate) fn finalize() {
         let ptr = alloc_desc();
         let type_field_ptr: *mut usize = core::ptr::addr_of_mut!((*ptr).type_count);
         type_field_ptr.write_volatile(0);
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Impl {}
+
+impl risc0_zkp_core::sha::Sha for Impl {
+    type DigestPtr = &'static Digest;
+
+    fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
+        digest_u8_slice(bytes)
+    }
+    fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
+        raw_digest(bytemuck::cast_slice(&[*a, *b]))
+    }
+    fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
+        // Fps do not not include standard sha header.
+        if fps.len() % CHUNK_SIZE == 0 {
+            raw_digest(bytemuck::cast_slice(fps))
+        } else {
+            let size = align_up(fps.len(), CHUNK_SIZE);
+            let mut buf: Vec<u32> = Vec::with_capacity(size);
+            buf.extend(bytemuck::cast_slice(fps));
+            buf.resize(size, 0);
+            raw_digest(&buf)
+        }
+    }
+    fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr {
+        self.hash_fps(bytemuck::cast_slice(fp4s))
+    }
+
+    // Generate a new digest by mixing two digests together via XOR,
+    // and storing into the first digest.
+    fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest) {
+        let mut digest = Box::<Digest>::new(Digest::default());
+        for i in 0..DIGEST_WORDS {
+            digest.get_mut()[i] = pool.get()[i] ^ val.get()[i];
+        }
+        unsafe {
+            let ptr: *const Digest = &*digest;
+            *pool = &*ptr
+        }
     }
 }

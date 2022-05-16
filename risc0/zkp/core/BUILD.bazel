@@ -1,4 +1,5 @@
 load("//bazel/rules/cc:defs.bzl", "cc_library")
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
 cc_library(
     name = "core",
@@ -23,4 +24,42 @@ cc_library(
     deps = [
         "//risc0/core",
     ],
+)
+
+risc0_rust_library_pair(
+    name = "core",
+    srcs = [
+        "src/fp.rs",
+        "src/fp4.rs",
+        "src/lib.rs",
+        "src/ntt.rs",
+        "src/poly.rs",
+        "src/rou.rs",
+        "src/sha.rs",
+        "src/sha_cpu.rs",
+        "src/sha_rng.rs",
+    ],
+    crate_name = "risc0_zkp_core",
+    guest_deps = [
+        "@crates_guest//:anyhow",
+        "@crates_guest//:bytemuck",
+        "@crates_guest//:cfg-if",
+        "@crates_guest//:rand",
+        "@crates_guest//:rand_core",
+        "@crates_guest//:serde",
+        "@crates_guest//:sha2",
+    ],
+    host_deps = [
+        "@crates_host//:anyhow",
+        "@crates_host//:bytemuck",
+        "@crates_host//:cfg-if",
+        "@crates_host//:rand",
+        "@crates_host//:rand_core",
+        "@crates_host//:serde",
+        "@crates_host//:sha2",
+    ],
+    guest_features = ["pure"],
+    host_features = ["std"],
+    rustc_flags = ["-Coverflow-checks=on"],
+    visibility = ["//visibility:public"],
 )

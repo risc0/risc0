@@ -14,6 +14,7 @@ rust_library(
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
     deps = [
+        "//risc0/zkp/core:core_guest",
         "//risc0/zkvm/sdk/cpp/guest:crt0",
         "//risc0/zkvm/sdk/rust/core:core_guest",
         "//risc0/zkvm/sdk/rust/serde:serde_guest",
@@ -28,7 +29,17 @@ risc0_rust_method(
     visibility = ["//visibility:public"],
     deps = [
         ":guest",
-        "//risc0/zkvm/sdk/rust/core:core_guest",
+        "//risc0/zkp/core:core_guest",
+    ],
+)
+
+risc0_rust_method(
+    name = "test_sha_accel",
+    srcs = ["tests/sha_accel.rs"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":guest",
+        "//risc0/zkp/core:core_guest",
     ],
 )
 

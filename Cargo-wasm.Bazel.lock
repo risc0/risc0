@@ -1,5 +1,5 @@
 {
-  "checksum": "b0870731e922d4a721eb0b4a6036100eca47d9e20bff6b0e82ac432ce4bf22e3",
+  "checksum": "ab6a6e49f13a36f6e179e00dc9f80093859303afa6d1a5b3c1ba71f36e5eca47",
   "crates": {
     "anymap2 0.13.0": {
       "name": "anymap2",
@@ -389,6 +389,10 @@
             {
               "id": "bytemuck 1.9.1",
               "target": "bytemuck"
+            },
+            {
+              "id": "cfg-if 1.0.0",
+              "target": "cfg_if"
             },
             {
               "id": "gloo 0.7.0",

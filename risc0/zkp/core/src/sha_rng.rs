@@ -71,8 +71,7 @@ impl<S: Sha> RngCore for ShaRng<S> {
     }
 }
 
-#[cfg(test)]
-pub mod tests {
+pub mod testutil {
     use super::ShaRng;
     use crate::sha::Sha;
     use rand::RngCore;

@@ -14,7 +14,7 @@ links = "risc0-zkp-core"
 [features]
 default = ["pure"]
 cxx = ["dep:cxx", "dep:risc0-core"]
-pure = ["dep:rand", "dep:rand_core", "dep:sha2"]
+pure = ["dep:rand", "dep:rand_core", "dep:sha2", "dep:serde"]
 
 [dependencies]
 anyhow = "1.0"
@@ -25,6 +25,7 @@ rand = { version = "0.8", default-features = false, features = ["small_rng"], op
 rand_core = {version = "0.6", optional = true }
 risc0-core = { version = "0.1", path = "../../core", optional = true }
 sha2 = { version = "0.10", features = ["compress"], optional = true }
+serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
 
 [build-dependencies]
 cxx-build = "1.0"

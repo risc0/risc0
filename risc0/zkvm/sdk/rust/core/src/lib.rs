@@ -1,40 +1,47 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use core::fmt::{Debug, Display, Formatter};
+#[cfg(feature = "pure")]
+pub use risc0_zkp_core::sha::{Digest, DIGEST_WORDS};
 
-use serde::{Deserialize, Serialize};
+cfg_if::cfg_if! {
+    if #[cfg(not(feature = "pure"))] {
+    use core::fmt::{Debug, Display, Formatter};
 
-pub const DIGEST_WORDS: usize = 8;
+    use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Default, Deserialize, Eq, Hash, Ord, PartialOrd, PartialEq, Serialize)]
-pub struct Digest([u32; DIGEST_WORDS]);
+    pub const DIGEST_WORDS: usize = 8;
 
-impl Digest {
-    /// Constructs a new `Digest` from a byte array.
-    pub fn new(data: [u32; DIGEST_WORDS]) -> Self {
+    #[derive(Clone, Copy, Default, Deserialize, Eq, Hash, Ord, PartialOrd, PartialEq, Serialize)]
+    pub struct Digest([u32; DIGEST_WORDS]);
+
+    impl Digest {
+            /// Constructs a new `Digest` from a byte array.
+            pub fn new(data: [u32; DIGEST_WORDS]) -> Self {
         Self(data)
-    }
+            }
 
-    pub fn as_slice(&self) -> &[u32] {
+            pub fn as_slice(&self) -> &[u32] {
         &self.0
+            }
     }
-}
 
-impl Display for Digest {
-    fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
+    impl Display for Digest {
+            fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
         for word in self.0 {
             core::write!(f, "{:08x?}", word)?;
         }
         Ok(())
+            }
     }
-}
 
-impl Debug for Digest {
-    fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
+    impl Debug for Digest {
+            fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
         for word in self.0 {
             core::write!(f, "{:08x?}", word)?;
         }
         Ok(())
+            }
+    }
     }
 }
 

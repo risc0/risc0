@@ -105,9 +105,11 @@ impl Env {
         data.serialize(&mut self.output).unwrap();
         let buf = self.output.release().unwrap();
         unsafe {
+            let ptr = buf.as_ptr();
+            crate::memory_barrier(ptr);
             GPIO_DESC_IO.write_volatile(IoDescriptor {
                 size: buf.len() * WORD_SIZE,
-                addr: buf.as_ptr() as usize,
+                addr: ptr as usize,
             });
             GPIO_WRITE.write_volatile(GPIO_DESC_IO);
         }
@@ -119,9 +121,11 @@ impl Env {
         self.commit_len += buf.len();
         let len_bytes = buf.len() * WORD_SIZE;
         unsafe {
+            let ptr = buf.as_ptr();
+            crate::memory_barrier(ptr);
             GPIO_DESC_IO.write_volatile(IoDescriptor {
                 size: len_bytes,
-                addr: buf.as_ptr() as usize,
+                addr: ptr as usize,
             });
             GPIO_WRITE.write_volatile(GPIO_DESC_IO);
         }
@@ -136,9 +140,11 @@ impl Env {
 
         // Write the full data out to the host
         unsafe {
+            let ptr = slice.as_ptr();
+            crate::memory_barrier(ptr);
             GPIO_DESC_IO.write_volatile(IoDescriptor {
                 size: len_bytes,
-                addr: slice.as_ptr() as usize,
+                addr: ptr as usize,
             });
             GPIO_COMMIT.write_volatile(GPIO_DESC_IO);
         }
@@ -167,7 +173,10 @@ impl Env {
                 sha::raw_digest_to(&slice, digest);
             }
         }
-        unsafe { result.add(8).write_volatile(len_bytes) };
+        unsafe {
+            result.add(8).write_volatile(len_bytes);
+            crate::memory_barrier(result);
+        };
         sha::finalize();
     }
 }

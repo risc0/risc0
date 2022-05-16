@@ -120,6 +120,6 @@ mod tests {
 
     #[test]
     fn test_impl() {
-        crate::sha::tests::test_sha_impl(&Impl {})
+        crate::sha::testutil::test_sha_impl(&Impl {})
     }
 }
