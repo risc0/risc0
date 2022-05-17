@@ -782,7 +782,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-core"
-version = "0.2.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -822,7 +822,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-core"
-version = "0.6.1"
+version = "0.7.0-dev.1"
 dependencies = [
  "cfg-if",
  "risc0-zkp-core",
@@ -852,7 +852,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform-sys"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "cxx",
  "cxx-build",
