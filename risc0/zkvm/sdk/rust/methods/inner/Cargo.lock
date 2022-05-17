@@ -831,7 +831,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-guest"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "bytemuck",
  "risc0-build",

@@ -6,7 +6,7 @@ version = "0.1.0"
 edition = "2021"
 
 [target.riscv32im-unknown-none-elf.dependencies]
-risc0-zkp-core = { path = "../../../../../zkp/core" }
+risc0-zkp-core = { path = "../../../../../zkp/rust/core" }
 risc0-zkvm-guest = { path = "../../guest" }
 
 [profile.release]

@@ -15,7 +15,7 @@ risc0_rust_method(
     srcs = ["inner/src/bin/sha_accel.rs"],
     visibility = ["//visibility:public"],
     deps = [
-        "//risc0/zkp/core:core_guest",
+        "//risc0/zkp/rust/core:core_guest",
         "//risc0/zkvm/sdk/rust/guest",
     ],
 )

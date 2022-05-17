@@ -7,7 +7,7 @@ members = [
   "risc0/build",
   "risc0/core",
   "risc0/zkp",
-  "risc0/zkp/core",
+  "risc0/zkp/rust/core",
   "risc0/zkvm",
   "risc0/zkvm/circuit",
   "risc0/zkvm/circuit/make-circuit",

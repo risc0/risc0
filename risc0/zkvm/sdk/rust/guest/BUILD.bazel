@@ -15,7 +15,7 @@ rust_library(
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
     deps = [
-        "//risc0/zkp/core:core_guest",
+        "//risc0/zkp/rust/core:core_guest",
         "//risc0/zkvm/sdk/cpp/guest:crt0",
         "//risc0/zkvm/sdk/rust/core:core_guest",
         "//risc0/zkvm/sdk/rust/serde:serde_guest",

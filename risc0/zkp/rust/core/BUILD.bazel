@@ -1,24 +1,20 @@
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
 risc0_rust_library_pair(
-    name = "verify",
+    name = "core",
     srcs = [
+        "src/fp.rs",
+        "src/fp4.rs",
         "src/lib.rs",
-        "src/zkp/fri.rs",
-        "src/zkp/merkle.rs",
-        "src/zkp/mod.rs",
-        "src/zkp/read_iop.rs",
-        "src/zkp/taps.rs",
-        "src/zkp/verify.rs",
-        "src/zkvm/circuit.rs",
-        "src/zkvm/mod.rs",
-        "src/zkvm/poly_op.rs",
-        "src/zkvm/poly_ops.rs",
-        "src/zkvm/taps.rs",
+        "src/ntt.rs",
+        "src/poly.rs",
+        "src/rou.rs",
+        "src/sha.rs",
+        "src/sha_cpu.rs",
+        "src/sha_rng.rs",
     ],
-    crate_name = "risc0_zkvm_verify",
+    crate_name = "risc0_zkp_core",
     guest_deps = [
-        "//risc0/zkp/rust/core:core_guest",
         "@crates_guest//:anyhow",
         "@crates_guest//:bytemuck",
         "@crates_guest//:rand",
@@ -27,7 +23,6 @@ risc0_rust_library_pair(
         "@crates_guest//:sha2",
     ],
     host_deps = [
-        "//risc0/zkp/rust/core:core_host",
         "@crates_host//:anyhow",
         "@crates_host//:bytemuck",
         "@crates_host//:rand",
