@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-core"
-version = "0.6.1"
+version = "0.7.0-dev.1"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM core crate"
 license = "Apache-2.0"
@@ -9,7 +9,7 @@ repository = "https://github.com/risc0/risc0/"
 
 [dependencies]
 cfg-if = "1.0"
-risc0-zkp-core = { version = "0.7", path = "../../../../zkp/core", default-features = false, optional = true }
+risc0-zkp-core = { version = "0.7.0-dev.1", path = "../../../../zkp/core", default-features = false, optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
 [features]
