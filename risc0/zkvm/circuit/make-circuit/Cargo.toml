@@ -9,4 +9,4 @@ repository = "https://github.com/risc0/risc0/"
 links = "risc0-zkvm-circuit-gen"
 
 [build-dependencies]
-risc0-zkvm-circuit-sys = { version = "0.1", path = ".."}
+risc0-zkvm-circuit-sys = { version = "0.7.0-dev.1", path = ".."}
