@@ -9,5 +9,5 @@ repository = "https://github.com/risc0/risc0/"
 
 [dependencies]
 risc0-zkvm-platform-sys = { version = "0.7.0-dev.1", path = "../zkvm/platform" }
-risc0-zkvm-sys = { version = "0.1", path = "../zkvm" }
+risc0-zkvm-sys = { version = "0.7.0-dev.1", path = "../zkvm" }
 tempfile = "3.3"
