@@ -123,17 +123,19 @@ private:
 
 } // namespace risc0
 
-TapSetRef getRiscVTaps() {
-  static TapSet taps;
-  if (!taps.finalized()) {
-    RegisterGroup accum = RegisterGroup::ACCUM;
-    RegisterGroup code = RegisterGroup::CODE;
-    RegisterGroup data = RegisterGroup::DATA;
-#define tap(base, offset, back) taps.addTap(base, offset, back);
+static TapSet buildTapSet() {
+  All all;
+  RegisterGroup accum = RegisterGroup::ACCUM;
+  RegisterGroup code = RegisterGroup::CODE;
+  RegisterGroup data = RegisterGroup::DATA;
+#define tap(base, offset, back) all[base][offset].insert(back);
 #define TAPS
 #include "risc0/zkvm/circuit/step.cpp.inc"
-    taps.finalize();
-  }
+  return TapSet(all);
+}
+
+TapSetRef getRiscVTaps() {
+  static TapSet taps = buildTapSet();
   return taps.getRef();
 }
 
@@ -158,6 +160,7 @@ void RiscVVerifyCircuit::accumulate(ReadIOP& iop) {
 
 bool RiscVVerifyCircuit::validCode(const ShaDigest& top) const {
   size_t whichCode = po2_ - log2Ceil(kMinCycles);
+  LOG(1, "whichCode: " << whichCode);
   return codeID_[whichCode] == top;
 }
 

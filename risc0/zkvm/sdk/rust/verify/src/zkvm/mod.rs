@@ -70,10 +70,7 @@ mod tests {
     extern crate std;
     use super::Receipt;
     use crate::zkvm::MethodID;
-    use core::convert::TryFrom;
-    use std::fs;
-    use std::io;
-    use std::vec::Vec;
+    use std::{convert::TryFrom, fs, io, vec::Vec};
     use test_log::test;
 
     #[test]

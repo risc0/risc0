@@ -1,0 +1,20 @@
+[workspace]
+
+[package]
+name = "risc0-zkvm-methods"
+version = "0.1.0"
+edition = "2021"
+
+[target.riscv32im-unknown-none-elf.dependencies]
+risc0-zkp-core = { path = "../../../../../zkp/core" }
+risc0-zkvm-guest = { path = "../../guest" }
+
+[profile.release]
+lto = true
+opt-level = "z"
+
+[build-dependencies]
+risc0-build = { path = "../../../../../build" }
+
+[package.metadata.release]
+release = false

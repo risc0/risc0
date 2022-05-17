@@ -65,7 +65,8 @@ async fn main() {
 }
 
 fn do_init_proof(name: &str, input: GameState) -> Result<String, risc0_zkvm_host::Exception> {
-    let mut prover = Prover::new(name)?;
+    let id_path = name.to_string() + ".id";
+    let mut prover = Prover::new(name, &id_path)?;
     let vec = risc0_zkvm_serde::to_vec(&input).unwrap();
     prover.add_input(vec.as_slice())?;
     let receipt = prover.run()?;
@@ -77,7 +78,8 @@ fn do_init_proof(name: &str, input: GameState) -> Result<String, risc0_zkvm_host
 }
 
 fn do_turn_proof(name: &str, input: RoundParams) -> Result<TurnResult, risc0_zkvm_host::Exception> {
-    let mut prover = Prover::new(name)?;
+    let id_path = name.to_string() + ".id";
+    let mut prover = Prover::new(name, &id_path)?;
     let vec = risc0_zkvm_serde::to_vec(&input).unwrap();
     prover.add_input(vec.as_slice())?;
     let receipt = prover.run()?;

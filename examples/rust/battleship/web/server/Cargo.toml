@@ -15,8 +15,8 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 battleship-core = { path = "../../core" }
-risc0-zkvm-host = { version = "0.1", path = "../../../../../risc0/zkvm/sdk/rust/host" }
-risc0-zkvm-serde = { version = "0.2", path = "../../../../../risc0/zkvm/sdk/rust/serde" }
+risc0-zkvm-host = { path = "../../../../../risc0/zkvm/sdk/rust/host" }
+risc0-zkvm-serde = { path = "../../../../../risc0/zkvm/sdk/rust/serde" }
 
 [package.metadata.release]
 release = false

@@ -77,9 +77,10 @@ void risc0_string_free(risc0_string* str) {
   ffi_wrap_void(&err, [&] { delete str; });
 }
 
-risc0_prover* risc0_prover_new(risc0_error* err, const char* elf_path) {
-  return ffi_wrap<risc0_prover*>(
-      err, nullptr, [&] { return new risc0_prover{std::make_unique<risc0::Prover>(elf_path)}; });
+risc0_prover* risc0_prover_new(risc0_error* err, const char* elf_path, const char* method_id_path) {
+  return ffi_wrap<risc0_prover*>(err, nullptr, [&] {
+    return new risc0_prover{std::make_unique<risc0::Prover>(elf_path, method_id_path)};
+  });
 }
 
 void risc0_prover_free(risc0_error* err, risc0_prover* ptr) {

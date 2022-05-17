@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use _alloc::{boxed::Box, vec::Vec};
-use bytemuck;
 use core::{cell::UnsafeCell, mem};
 
 use risc0_zkp_core::{fp::Fp, fp4::Fp4};
@@ -21,7 +20,7 @@ use risc0_zkvm_core::{Digest, DIGEST_WORDS};
 use risc0_zkvm_serde::to_vec_with_capacity;
 use serde::Serialize;
 
-use crate::{
+use crate::riscv::{
     align_up,
     gpio::{SHADescriptor, GPIO_SHA},
     REGION_SHA_START, WORD_SIZE,
@@ -73,7 +72,7 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
     let desc_ptr = alloc_desc();
 
     let ptr = data.as_ptr();
-    crate::memory_barrier(ptr);
+    crate::riscv::memory_barrier(ptr);
     desc_ptr.write_volatile(SHADescriptor {
         type_count,
         idx: 0,

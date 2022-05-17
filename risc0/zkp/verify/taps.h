@@ -239,30 +239,19 @@ public:
   ComboRef getCombo(size_t id) { return ComboRef(&data_->combos, id); }
 };
 
+using Reg = std::set<size_t>;
+using Group = std::map<size_t, Reg>;
+using All = std::map<RegisterGroup, Group>;
+
 class TapSet {
 private:
-  // Stuff used only while building
-  bool finalized_;
-  using Reg = std::set<size_t>;
-  using Group = std::map<size_t, Reg>;
-  using All = std::map<RegisterGroup, Group>;
-  All all_;
-
-  // Stuff that exists post finalization
   std::vector<detail::TapData> taps_;
   std::vector<uint16_t> comboTaps_;
   std::vector<uint16_t> comboBegin_;
   detail::TapSetData data_;
 
 public:
-  // Make an empty tap set
-  TapSet();
-  // Add a tap
-  void addTap(RegisterGroup group, size_t offset, size_t back);
-  // Called when all done
-  void finalize();
-  // Check if taps are finalized
-  bool finalized() const { return finalized_; }
+  TapSet(const All& all);
 
   // Convert to TapSetRef for use (must be finalized)
   TapSetRef getRef() const;

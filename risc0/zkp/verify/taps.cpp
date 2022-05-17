@@ -18,18 +18,11 @@
 
 namespace risc0 {
 
-TapSet::TapSet() : finalized_(false) {}
-
-void TapSet::addTap(RegisterGroup group, size_t offset, size_t back) {
-  all_[group][offset].insert(back);
-}
-
 TapSetRef TapSet::getRef() const {
-  REQUIRE(finalized_);
   return TapSetRef(&data_);
 }
 
-void TapSet::finalize() {
+TapSet::TapSet(const All& all) {
   std::vector<Reg> combos;
   std::map<Reg, size_t> combosToID;
   // Pre-insert the 'only self' combo
@@ -40,18 +33,18 @@ void TapSet::finalize() {
   for (size_t groupID = 0; groupID < kNumRegisterGroups; groupID++) {
     RegisterGroup group = static_cast<RegisterGroup>(groupID);
     // Make sure there is always at least one tap per group
-    REQUIRE(all_.count(group));
+    REQUIRE(all.count(group));
     // Set the group offset
     data_.groupBegin[groupID] = taps_.size();
     // Look at this group
-    Group& regs = all_[group];
+    const Group& regs = all.at(group);
     // Get the count of registers (max + 1)
     size_t regCount = regs.rbegin()->first + 1;
     for (size_t reg = 0; reg < regCount; reg++) {
       // Make sure all registers have at least one tap
       REQUIRE(regs.count(reg));
       // Get the taps for the register
-      Reg combo = regs[reg];
+      Reg combo = regs.at(reg);
       REQUIRE(combo.size() > 0);
       // If this is a new combo, add it
       if (!combosToID.count(combo)) {
@@ -90,9 +83,6 @@ void TapSet::finalize() {
   data_.combos.taps = comboTaps_.data();
   data_.combos.offsets = comboBegin_.data();
   data_.combos.count = combos.size();
-  // Set finalize and clear temp data
-  finalized_ = true;
-  all_.clear();
 }
 
 } // namespace risc0

@@ -1,0 +1,35 @@
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
+
+risc0_rust_method(
+    name = "test_sha",
+    srcs = ["inner/src/bin/sha.rs"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//risc0/zkvm/sdk/rust/core:core_guest",
+        "//risc0/zkvm/sdk/rust/guest",
+    ],
+)
+
+risc0_rust_method(
+    name = "test_sha_accel",
+    srcs = ["inner/src/bin/sha_accel.rs"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//risc0/zkp/core:core_guest",
+        "//risc0/zkvm/sdk/rust/guest",
+    ],
+)
+
+risc0_rust_method(
+    name = "test_mem",
+    srcs = ["inner/src/bin/io.rs"],
+    visibility = ["//visibility:public"],
+    deps = ["//risc0/zkvm/sdk/rust/guest"],
+)
+
+risc0_rust_method(
+    name = "test_fail",
+    srcs = ["inner/src/bin/fail.rs"],
+    visibility = ["//visibility:public"],
+    deps = ["//risc0/zkvm/sdk/rust/guest"],
+)

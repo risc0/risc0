@@ -15,3 +15,10 @@ risc0-zkvm-sys = { version = "0.1", path = "../../.." }
 
 [build-dependencies]
 cxx-build = "1.0"
+
+[dev-dependencies]
+anyhow = "1.0"
+risc0-zkvm-core = { path = "../core" }
+risc0-zkvm-methods = { path = "../methods" }
+risc0-zkvm-serde = { path = "../serde" }
+tempfile = "3.3"

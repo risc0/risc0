@@ -13,3 +13,10 @@ risc0-zkp-core = { version = "0.2", path = "../../../../zkp/core" }
 risc0-zkvm-core = { version = "0.2", path = "../core", default-features = false, features = ["pure"] }
 risc0-zkvm-serde = { version = "0.2", path = "../serde", default-features = false }
 serde = { version = "1.0", default-features = false }
+
+[build-dependencies]
+# risc0-zkvm-platform-sys = { version = "0.1", path = "../../../platform" }
+risc0-build = { version = "0.1", path = "../../../../build" }
+
+[features]
+bazel = []

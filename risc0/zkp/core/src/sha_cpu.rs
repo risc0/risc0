@@ -15,8 +15,11 @@
 use alloc::{boxed::Box, vec, vec::Vec};
 use core::slice;
 
-use sha2::digest::generic_array::{typenum::U64, GenericArray};
-use sha2::{compress256, Digest as ShaDigest, Sha256};
+use sha2::{
+    compress256,
+    digest::generic_array::{typenum::U64, GenericArray},
+    Digest as ShaDigest, Sha256,
+};
 
 use crate::{
     fp::Fp,
