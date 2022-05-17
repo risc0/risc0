@@ -16,7 +16,7 @@ anyhow = "1.0"
 cxx = "1.0"
 risc0-core-sys = { version = "0.7.0-dev.1", path = "../core" }
 risc0-zkp-sys = { version = "0.7.0-dev.1", path = "../zkp" }
-risc0-zkvm-circuit-gen = { version = "0.1", path = "circuit/make-circuit" }
+risc0-zkvm-circuit-gen = { version = "0.7.0-dev.1", path = "circuit/make-circuit" }
 tbb = { version = "0.7.0-dev.1", path = "../../third_party/tbb" }
 
 [build-dependencies]

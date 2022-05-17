@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-circuit-gen"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 edition = "2021"
 description = "RISC-V circuit (generated)"
 license = "Apache-2.0"
