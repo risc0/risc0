@@ -11,7 +11,7 @@ links = "risc0-zkvm-circuit-sys"
 [dependencies]
 anyhow = "1.0"
 cxx = "1.0"
-risc0-zkp-sys = { version = "0.1", path = "../../zkp" }
+risc0-zkp-sys = { version = "0.7.0-dev.1", path = "../../zkp" }
 risc0-zkvm-platform-sys = { version = "0.7.0-dev.1", path = "../platform"}
 
 [build-dependencies]
