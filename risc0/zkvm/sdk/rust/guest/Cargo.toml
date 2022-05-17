@@ -15,7 +15,7 @@ risc0-zkvm-serde = { version = "0.2", path = "../serde", default-features = fals
 serde = { version = "1.0", default-features = false }
 
 [build-dependencies]
-risc0-build = { version = "0.6", path = "../../../../build" }
+risc0-build = { version = "0.7.0-dev.1", path = "../../../../build" }
 
 [features]
 bazel = []
