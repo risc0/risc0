@@ -21,7 +21,7 @@ use near_sdk::{
 use serde::{Deserialize, Serialize};
 
 use risc0_zkvm_core::Digest;
-use risc0_zkvm_verify::{MethodID, Receipt};
+use risc0_zkvm_verify::zkvm::{MethodID, Receipt};
 
 use battleship_core::{HitType, RoundCommit};
 use battleship_methods::methods::{INIT_ID, TURN_ID};

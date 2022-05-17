@@ -24,7 +24,7 @@ use risc0_zkp_core::{
     to_po2,
 };
 
-use crate::{merkle::MerkleTreeVerifier, read_iop::ReadIOP};
+use crate::zkp::{merkle::MerkleTreeVerifier, read_iop::ReadIOP};
 
 pub const QUERIES: usize = 50;
 pub const INV_RATE: usize = 4;

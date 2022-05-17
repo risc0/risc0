@@ -114,7 +114,10 @@ crates_repository(
         "axum": crate.spec(version = "0.5"),
         "base64": crate.spec(version = "0.13"),
         "bincode": crate.spec(version = "1.3"),
-        "bytemuck": crate.spec(version = "1.9"),
+        "bytemuck": crate.spec(
+            features = ["derive"],
+            version = "1.9",
+        ),
         "cfg-if": crate.spec(version = "1.0"),
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
@@ -123,8 +126,8 @@ crates_repository(
         "log": crate.spec(version = "0.4"),
         "open": crate.spec(version = "2"),
         "rand": crate.spec(
-            version = "0.8",
             features = ["small_rng"],
+            version = "0.8",
         ),
         "rand_core": crate.spec(
             version = "0.6",
@@ -134,7 +137,11 @@ crates_repository(
             version = "1.0",
         ),
         "serde_json": crate.spec(version = "1.0"),
-        "sha2": crate.spec(version = "0.10"),
+        "sha2": crate.spec(
+            default_features = False,
+            features = ["compress"],
+            version = "0.10",
+        ),
         "thiserror": crate.spec(version = "1.0"),
         "tokio": crate.spec(
             features = ["full"],
@@ -165,27 +172,27 @@ crates_repository(
     lockfile = "//:Cargo-guest.Bazel.lock",
     packages = {
         "anyhow": crate.spec(
-            version = "1.0",
             default_features = False,
+            version = "1.0",
         ),
         "bytemuck": crate.spec(
-            version = "1.9",
             features = ["derive"],
+            version = "1.9",
         ),
         "cfg-if": crate.spec(version = "1.0"),
         "sha2": crate.spec(
-            version = "0.10",
-            features = ["compress"],
             default_features = False,
+            features = ["compress"],
+            version = "0.10",
         ),
         "rand": crate.spec(
-            version = "0.8",
             default_features = False,
             features = ["small_rng"],
+            version = "0.8",
         ),
         "rand_core": crate.spec(
-            version = "0.6",
             default_features = False,
+            version = "0.6",
         ),
         "serde": crate.spec(
             default_features = False,

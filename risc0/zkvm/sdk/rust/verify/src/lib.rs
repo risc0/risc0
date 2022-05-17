@@ -12,22 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
+#![no_std]
 
-use cxx_build::CFG;
+extern crate alloc;
 
-fn main() {
-    if env::var_os("CARGO_FEATURE_CXX").is_some() {
-        CFG.include_prefix = "risc0/zkp/core";
-        CFG.exported_header_links = vec!["risc0-core"];
-
-        cxx_build::bridge("src/lib.rs")
-            .file("ntt.cpp")
-            .file("poly.cpp")
-            .file("sha_rng.cpp")
-            .flag_if_supported("/std:c++17")
-            .flag_if_supported("-std=c++17")
-            .warnings(false)
-            .compile("risc0-zkp-core");
-    }
-}
+pub mod zkp;
+pub mod zkvm;

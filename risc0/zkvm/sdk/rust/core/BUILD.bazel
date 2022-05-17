@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
 risc0_rust_library_pair(
@@ -29,15 +29,4 @@ rust_library(
         "@crates_wasm//:cfg-if",
         "@crates_wasm//:serde",
     ],
-)
-
-rust_test(
-    name = "test_host",
-    crate = ":core_host",
-    crate_features = ["std"],
-)
-
-rust_test(
-    name = "test_guest",
-    crate = ":core_guest",
 )

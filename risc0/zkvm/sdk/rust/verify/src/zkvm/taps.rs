@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp_verify::taps::{Combo, Register, RegisterGroup, Taps};
+use crate::zkp::taps::{Combo, Register, RegisterGroup, Taps};
 
 pub const RISCV_TAPS: &'static Taps = &Taps {
     registers: &[

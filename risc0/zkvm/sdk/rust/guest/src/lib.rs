@@ -26,7 +26,6 @@ pub mod sha;
 use core::{arch::asm, mem, panic::PanicInfo, ptr};
 
 use gpio::{FaultDescriptor, LogDescriptor, GPIO_DESC_FAULT, GPIO_DESC_LOG, GPIO_FAULT, GPIO_LOG};
-use risc0_zkvm_core::{set_logger, Log};
 
 const REGION_SIZE_256KB: usize = 256 * 1024;
 // const REGION_SIZE_512KB: usize = 0x0008_0000;
@@ -86,22 +85,6 @@ macro_rules! entry {
     };
 }
 
-struct Logger;
-
-impl Log for Logger {
-    fn log(&self, msg: &str) {
-        let msg = _alloc::format!("{}\0", msg);
-        unsafe {
-            let ptr = msg.as_ptr();
-            crate::memory_barrier(ptr);
-            GPIO_DESC_LOG.write_volatile(LogDescriptor { addr: ptr as usize });
-            GPIO_LOG.write_volatile(GPIO_DESC_LOG);
-        }
-    }
-}
-
-static LOGGER: Logger = Logger;
-
 #[no_mangle]
 unsafe extern "C" fn __start(result: *mut usize) {
     extern "C" {
@@ -109,8 +92,6 @@ unsafe extern "C" fn __start(result: *mut usize) {
         static mut __bss_size: usize;
     }
     ptr::write_bytes(&mut __bss_begin as *mut u8, 0, __bss_size);
-
-    set_logger(&LOGGER);
 
     env::init();
 

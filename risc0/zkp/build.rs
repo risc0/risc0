@@ -15,18 +15,28 @@
 use cxx_build::CFG;
 
 fn main() {
-    CFG.include_prefix = "risc0/zkp/accel";
-    CFG.exported_header_links = vec!["risc0-core", "risc0-zkp-core"];
+    CFG.include_prefix = "risc0/zkp";
+    CFG.exported_header_links = vec!["risc0-core-sys"];
 
-    cxx_build::bridge("src/lib.rs")
-        .file("backend/cpu/impl.cpp")
+    cxx_build::bridge("lib.rs")
+        .file("accel/backend/cpu/impl.cpp")
+        .file("core/ntt.cpp")
+        .file("core/poly.cpp")
+        .file("core/sha_rng.cpp")
+        .file("prove/fri.cpp")
+        .file("prove/merkle.cpp")
+        .file("prove/poly_group.cpp")
+        .file("prove/prove.cpp")
+        .file("verify/fri.cpp")
+        .file("verify/merkle.cpp")
+        .file("verify/taps.cpp")
+        .file("verify/verify.cpp")
         .define("__TBB_NO_IMPLICIT_LINKAGE", None)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)
-        .compile("risc0-zkp-accel");
+        .compile("risc0-zkp-sys");
 
     println!("cargo:rustc-link-lib=static=tbb");
-    println!("cargo:rustc-link-lib=static=risc0-core");
-    println!("cargo:rustc-link-lib=static=risc0-zkp-core");
+    println!("cargo:rustc-link-lib=static=risc0-core-sys");
 }

@@ -191,12 +191,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "14c189c53d098945499cdfa7ecc63567cf3886b3332b312a5b4585d8d3a6a610"
 
 [[package]]
-name = "cc"
-version = "1.0.73"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2fff2a6927b3bb87f9595d67196a70493f627687a71d87a0d692242c33f58c11"
-
-[[package]]
 name = "cfg-if"
 version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -207,16 +201,6 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
-
-[[package]]
-name = "codespan-reporting"
-version = "0.11.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3538270d33cc669650c4b093848450d380def10c331d38c768e34cac80576e6e"
-dependencies = [
- "termcolor",
- "unicode-width",
-]
 
 [[package]]
 name = "convert_case"
@@ -241,21 +225,6 @@ checksum = "57952ca27b5e3606ff4dd79b0020231aaf9d6aa76dc05fd30137538c50bd3ce8"
 dependencies = [
  "generic-array",
  "typenum",
-]
-
-[[package]]
-name = "cxx-build"
-version = "1.0.41"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0381fd62cd81a77f5b8dba405b4614d6d6f8f4e967bb73864bb5c494d58524f0"
-dependencies = [
- "cc",
- "codespan-reporting",
- "lazy_static",
- "proc-macro2",
- "quote",
- "scratch",
- "syn",
 ]
 
 [[package]]
@@ -607,27 +576,18 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "bytemuck",
- "cfg-if 1.0.0",
- "cxx-build",
  "rand",
  "rand_core",
+ "serde",
  "sha2 0.10.2",
-]
-
-[[package]]
-name = "risc0-zkp-verify"
-version = "0.2.0"
-dependencies = [
- "cfg-if 1.0.0",
- "cxx-build",
- "rand",
- "risc0-zkp-core",
 ]
 
 [[package]]
 name = "risc0-zkvm-core"
 version = "0.2.0"
 dependencies = [
+ "cfg-if 1.0.0",
+ "risc0-zkp-core",
  "serde",
 ]
 
@@ -636,6 +596,7 @@ name = "risc0-zkvm-guest"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
+ "risc0-zkp-core",
  "risc0-zkvm-core",
  "risc0-zkvm-serde",
  "serde",
@@ -653,12 +614,14 @@ dependencies = [
 name = "risc0-zkvm-verify"
 version = "0.2.0"
 dependencies = [
- "cfg-if 1.0.0",
- "cxx-build",
+ "anyhow",
+ "bytemuck",
+ "rand",
+ "rand_core",
  "risc0-zkp-core",
- "risc0-zkp-verify",
  "risc0-zkvm-serde",
  "serde",
+ "sha2 0.10.2",
 ]
 
 [[package]]
@@ -675,12 +638,6 @@ name = "ryu"
 version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73b4b750c782965c211b42f022f59af1fbceabdd026623714f104152f1ec149f"
-
-[[package]]
-name = "scratch"
-version = "1.0.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96311ef4a16462c757bb6a39152c40f58f31cd2602a40fceb937e2bc34e6cbab"
 
 [[package]]
 name = "semver"
@@ -768,15 +725,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "termcolor"
-version = "1.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bab24d30b911b2376f3a13cc2cd443142f0c81dda04c118693e35b3835757755"
-dependencies = [
- "winapi-util",
-]
-
-[[package]]
 name = "toml"
 version = "0.5.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -790,12 +738,6 @@ name = "typenum"
 version = "1.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dcf81ac59edc17cc8697ff311e8f5ef2d99fcbd9817b34cec66f90b6c3dfd987"
-
-[[package]]
-name = "unicode-width"
-version = "0.1.9"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ed742d4ea2bd1176e236172c8429aaf54486e7ac098db29ffe6529e0ce50973"
 
 [[package]]
 name = "unicode-xid"
@@ -836,15 +778,6 @@ name = "winapi-i686-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6"
-
-[[package]]
-name = "winapi-util"
-version = "0.1.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70ec6ce85bb158151cae5e5c87f95a8e97d2c0c4b001223f33a334e3ce5de178"
-dependencies = [
- "winapi",
-]
 
 [[package]]
 name = "winapi-x86_64-pc-windows-gnu"

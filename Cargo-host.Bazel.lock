@@ -1,5 +1,5 @@
 {
-  "checksum": "5049273350ccfc0145eaf1fc385428d3665f9d21003030c8e955ec8b8b160d27",
+  "checksum": "1a1dd6d98cbf58fc0fddcca7f417b25736b9a4c52165c9e964f92db3d541eade",
   "crates": {
     "aho-corasick 0.7.18": {
       "name": "aho-corasick",
@@ -314,13 +314,13 @@
       },
       "license": "Apache-2.0 OR MIT"
     },
-    "axum 0.5.5": {
+    "axum 0.5.6": {
       "name": "axum",
-      "version": "0.5.5",
+      "version": "0.5.6",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/axum/0.5.5/download",
-          "sha256": "00f1e8a972137fad81e2a1a60b86ff17ce0338f8017264e45a9723d0083c39a1"
+          "url": "https://crates.io/api/v1/crates/axum/0.5.6/download",
+          "sha256": "ab2504b827a8bef941ba3dd64bdffe9cf56ca182908a147edd6189c95fbcae7d"
         }
       },
       "targets": [
@@ -385,7 +385,7 @@
               "target": "hyper"
             },
             {
-              "id": "itoa 1.0.1",
+              "id": "itoa 1.0.2",
               "target": "itoa"
             },
             {
@@ -457,7 +457,7 @@
           ],
           "selects": {}
         },
-        "version": "0.5.5"
+        "version": "0.5.6"
       },
       "license": "MIT"
     },
@@ -713,8 +713,71 @@
         "compile_data_glob": [
           "**"
         ],
+        "crate_features": [
+          "bytemuck_derive",
+          "derive"
+        ],
         "edition": "2018",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "bytemuck_derive 1.1.0",
+              "target": "bytemuck_derive"
+            }
+          ],
+          "selects": {}
+        },
         "version": "1.9.1"
+      },
+      "license": "Zlib OR Apache-2.0 OR MIT"
+    },
+    "bytemuck_derive 1.1.0": {
+      "name": "bytemuck_derive",
+      "version": "1.1.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/bytemuck_derive/1.1.0/download",
+          "sha256": "562e382481975bc61d11275ac5e62a19abd00b0547d99516a415336f183dcd0e"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "bytemuck_derive",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "bytemuck_derive",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "proc-macro2 1.0.38",
+              "target": "proc_macro2"
+            },
+            {
+              "id": "quote 1.0.18",
+              "target": "quote"
+            },
+            {
+              "id": "syn 1.0.94",
+              "target": "syn"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2018",
+        "version": "1.1.0"
       },
       "license": "Zlib OR Apache-2.0 OR MIT"
     },
@@ -1046,9 +1109,6 @@
         "compile_data_glob": [
           "**"
         ],
-        "crate_features": [
-          "std"
-        ],
         "deps": {
           "common": [
             {
@@ -1319,11 +1379,9 @@
           "**"
         ],
         "crate_features": [
-          "alloc",
           "block-buffer",
           "core-api",
-          "default",
-          "std"
+          "default"
         ],
         "deps": {
           "common": [
@@ -1373,7 +1431,7 @@
               "target": "anyhow"
             },
             {
-              "id": "axum 0.5.5",
+              "id": "axum 0.5.6",
               "target": "axum"
             },
             {
@@ -2180,7 +2238,7 @@
               "target": "fnv"
             },
             {
-              "id": "itoa 1.0.1",
+              "id": "itoa 1.0.2",
               "target": "itoa"
             }
           ],
@@ -2474,7 +2532,7 @@
               "target": "httpdate"
             },
             {
-              "id": "itoa 1.0.1",
+              "id": "itoa 1.0.2",
               "target": "itoa"
             },
             {
@@ -2584,13 +2642,13 @@
       },
       "license": "Apache-2.0/MIT"
     },
-    "itoa 1.0.1": {
+    "itoa 1.0.2": {
       "name": "itoa",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/itoa/1.0.1/download",
-          "sha256": "1aab8fc367588b89dcee83ab0fd66b72b50b72fa1904d7095045ace2b0c81c35"
+          "url": "https://crates.io/api/v1/crates/itoa/1.0.2/download",
+          "sha256": "112c678d4050afce233f4f2852bb2eb519230b3cf12f33585275537d7e41578d"
         }
       },
       "targets": [
@@ -2613,7 +2671,7 @@
           "**"
         ],
         "edition": "2018",
-        "version": "1.0.1"
+        "version": "1.0.2"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -4325,13 +4383,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "ryu 1.0.9": {
+    "ryu 1.0.10": {
       "name": "ryu",
-      "version": "1.0.9",
+      "version": "1.0.10",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/ryu/1.0.9/download",
-          "sha256": "73b4b750c782965c211b42f022f59af1fbceabdd026623714f104152f1ec149f"
+          "url": "https://crates.io/api/v1/crates/ryu/1.0.10/download",
+          "sha256": "f3f6f92acf49d1b98f7a81226834412ada05458b7364277387724a237f062695"
         }
       },
       "targets": [
@@ -4354,7 +4412,7 @@
           "**"
         ],
         "edition": "2018",
-        "version": "1.0.9"
+        "version": "1.0.10"
       },
       "license": "Apache-2.0 OR BSL-1.0"
     },
@@ -4587,11 +4645,11 @@
         "deps": {
           "common": [
             {
-              "id": "itoa 1.0.1",
+              "id": "itoa 1.0.2",
               "target": "itoa"
             },
             {
-              "id": "ryu 1.0.9",
+              "id": "ryu 1.0.10",
               "target": "ryu"
             },
             {
@@ -4650,11 +4708,11 @@
               "target": "form_urlencoded"
             },
             {
-              "id": "itoa 1.0.1",
+              "id": "itoa 1.0.2",
               "target": "itoa"
             },
             {
-              "id": "ryu 1.0.9",
+              "id": "ryu 1.0.10",
               "target": "ryu"
             },
             {
@@ -4698,8 +4756,7 @@
           "**"
         ],
         "crate_features": [
-          "default",
-          "std"
+          "compress"
         ],
         "deps": {
           "common": [
@@ -5429,13 +5486,13 @@
       },
       "license": "MIT"
     },
-    "tokio-util 0.7.1": {
+    "tokio-util 0.7.2": {
       "name": "tokio-util",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tokio-util/0.7.1/download",
-          "sha256": "0edfdeb067411dba2044da6d1cb2df793dd35add7888d73c16e3381ded401764"
+          "url": "https://crates.io/api/v1/crates/tokio-util/0.7.2/download",
+          "sha256": "f988a1a1adc2fb21f9c12aa96441da33a1728193ae0b95d2be22dbd17fcb4e5c"
         }
       },
       "targets": [
@@ -5486,7 +5543,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.7.1"
+        "version": "0.7.2"
       },
       "license": "MIT"
     },
@@ -5556,7 +5613,7 @@
               "target": "tokio"
             },
             {
-              "id": "tokio-util 0.7.1",
+              "id": "tokio-util 0.7.2",
               "target": "tokio_util"
             },
             {
@@ -5674,7 +5731,7 @@
               "target": "tokio"
             },
             {
-              "id": "tokio-util 0.7.1",
+              "id": "tokio-util 0.7.2",
               "target": "tokio_util"
             },
             {

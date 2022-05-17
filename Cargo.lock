@@ -68,9 +68,9 @@ checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
 name = "axum"
-version = "0.5.5"
+version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00f1e8a972137fad81e2a1a60b86ff17ce0338f8017264e45a9723d0083c39a1"
+checksum = "ab2504b827a8bef941ba3dd64bdffe9cf56ca182908a147edd6189c95fbcae7d"
 dependencies = [
  "async-trait",
  "axum-core",
@@ -144,7 +144,7 @@ dependencies = [
  "rand",
  "reqwasm",
  "serde",
- "serde-wasm-bindgen 0.4.2",
+ "serde-wasm-bindgen 0.4.3",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-futures",
@@ -257,45 +257,6 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
-
-[[package]]
-name = "clap"
-version = "3.1.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47582c09be7c8b32c0ab3a6181825ababb713fde6fff20fc573a3870dd45c6a0"
-dependencies = [
- "atty",
- "bitflags",
- "clap_derive",
- "clap_lex",
- "indexmap",
- "lazy_static",
- "strsim",
- "termcolor",
- "textwrap",
-]
-
-[[package]]
-name = "clap_derive"
-version = "3.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3aab4734e083b809aaf5794e14e756d1c798d2c69c7f7de7a09a2f5214993c1"
-dependencies = [
- "heck",
- "proc-macro-error",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "clap_lex"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a37c35f1112dad5e6e0b1adaff798507497a18fceeb30cceb3bae7d1427b9213"
-dependencies = [
- "os_str_bytes",
-]
 
 [[package]]
 name = "codespan-reporting"
@@ -815,12 +776,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ab5ef0d4909ef3724cc8cce6ccc8572c5c817592e9285f5464f8e86f8bd3726e"
 
 [[package]]
-name = "heck"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2540771e65fc8cb83cd6e8a237f70c319bd5c29f78ed1084ba5d50eeac86f7f9"
-
-[[package]]
 name = "hermit-abi"
 version = "0.1.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1146,12 +1101,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "os_str_bytes"
-version = "6.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e22443d1643a904602595ba1cd8f7d896afe56d26712531c5ff73a15b2fbf64"
-
-[[package]]
 name = "parking_lot"
 version = "0.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1386,22 +1335,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-core"
+name = "risc0-core-sys"
 version = "0.1.0"
 dependencies = [
  "cxx",
  "cxx-build",
-]
-
-[[package]]
-name = "risc0-zkp-accel"
-version = "0.1.0"
-dependencies = [
- "cxx",
- "cxx-build",
- "risc0-core",
- "risc0-zkp-core",
- "tbb",
 ]
 
 [[package]]
@@ -1410,54 +1348,38 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "bytemuck",
- "cfg-if",
- "cxx",
- "cxx-build",
  "rand",
  "rand_core",
- "risc0-core",
  "serde",
  "sha2",
 ]
 
 [[package]]
-name = "risc0-zkp-prove"
+name = "risc0-zkp-sys"
 version = "0.1.0"
 dependencies = [
  "cxx",
  "cxx-build",
- "risc0-zkp-accel",
- "risc0-zkp-verify",
-]
-
-[[package]]
-name = "risc0-zkp-verify"
-version = "0.2.0"
-dependencies = [
- "cfg-if",
- "cxx",
- "cxx-build",
- "rand",
- "risc0-zkp-core",
-]
-
-[[package]]
-name = "risc0-zkvm-circuit"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "cxx",
- "cxx-build",
- "risc0-zkp-core",
- "risc0-zkvm-platform",
+ "risc0-core-sys",
+ "tbb",
 ]
 
 [[package]]
 name = "risc0-zkvm-circuit-gen"
 version = "0.1.0"
 dependencies = [
- "clap",
- "risc0-zkvm-circuit",
+ "risc0-zkvm-circuit-sys",
+]
+
+[[package]]
+name = "risc0-zkvm-circuit-sys"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cxx",
+ "cxx-build",
+ "risc0-zkp-sys",
+ "risc0-zkvm-platform-sys",
 ]
 
 [[package]]
@@ -1477,39 +1399,15 @@ dependencies = [
  "cxx",
  "cxx-build",
  "log",
- "risc0-zkvm-host-sys",
+ "risc0-zkvm-sys",
 ]
 
 [[package]]
-name = "risc0-zkvm-host-sys"
+name = "risc0-zkvm-platform-sys"
 version = "0.1.0"
 dependencies = [
  "cxx",
  "cxx-build",
- "risc0-zkvm-prove",
- "risc0-zkvm-verify",
-]
-
-[[package]]
-name = "risc0-zkvm-platform"
-version = "0.1.0"
-dependencies = [
- "cxx",
- "cxx-build",
-]
-
-[[package]]
-name = "risc0-zkvm-prove"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "clap",
- "cxx",
- "cxx-build",
- "risc0-zkp-prove",
- "risc0-zkvm-circuit-gen",
- "risc0-zkvm-verify",
- "tbb",
 ]
 
 [[package]]
@@ -1521,22 +1419,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkvm-sys"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "cxx",
+ "cxx-build",
+ "risc0-core-sys",
+ "risc0-zkp-sys",
+ "risc0-zkvm-circuit-gen",
+ "tbb",
+]
+
+[[package]]
 name = "risc0-zkvm-verify"
 version = "0.2.0"
 dependencies = [
+ "anyhow",
  "bencher",
- "cfg-if",
- "cxx",
- "cxx-build",
+ "bytemuck",
  "env_logger",
  "log",
- "risc0-core",
+ "rand",
+ "rand_core",
  "risc0-zkp-core",
- "risc0-zkp-verify",
- "risc0-zkvm-circuit",
- "risc0-zkvm-circuit-gen",
  "risc0-zkvm-serde",
  "serde",
+ "sha2",
  "test-log",
 ]
 
@@ -1626,11 +1535,10 @@ dependencies = [
 
 [[package]]
 name = "serde-wasm-bindgen"
-version = "0.4.2"
+version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5d0927d4115e78b52dfd4cabcb3cc79bd56b94a53cf27c074bf8b83af1765d1"
+checksum = "1cfc62771e7b829b517cb213419236475f434fb480eddd76112ae182d274434a"
 dependencies = [
- "fnv",
  "js-sys",
  "serde",
  "wasm-bindgen",
@@ -1722,12 +1630,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "strsim"
-version = "0.10.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "73473c0e59e6d5812c5dfe2a064a6444949f089e20eec9a2e5506596494e4623"
-
-[[package]]
 name = "syn"
 version = "1.0.91"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1806,25 +1708,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "textwrap"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b1141d4d61095b28419e22cb0bbf02755f5e54e0526f97f1e3d1d160e60885fb"
-
-[[package]]
 name = "thiserror"
-version = "1.0.30"
+version = "1.0.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "854babe52e4df1653706b98fcfc05843010039b406875930a70e4d9644e5c417"
+checksum = "bd829fe32373d27f76265620b5309d0340cb8550f523c1dda251d6298069069a"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.30"
+version = "1.0.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa32fd3f627f367fe16f893e2597ae3c05020f8bba2666a4e6ea73d377e5714b"
+checksum = "0396bc89e626244658bef819e22d0cc459e795a5ebe878e6ec336d1674a8d79a"
 dependencies = [
  "proc-macro2",
  "quote",

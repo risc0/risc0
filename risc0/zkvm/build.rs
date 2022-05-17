@@ -12,25 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::env;
+
 use cxx_build::CFG;
 
 fn main() {
-    CFG.include_prefix = "risc0/zkp/prove";
-    CFG.exported_header_links = vec!["risc0-zkp-accel", "risc0-zkp-verify"];
+    CFG.include_prefix = "risc0/zkvm";
 
-    cxx_build::bridge("src/lib.rs")
-        .file("fri.cpp")
-        .file("merkle.cpp")
-        .file("poly_group.cpp")
-        .file("prove.cpp")
+    let inc_dir = env::var("DEP_RISC0_ZKVM_CIRCUIT_GEN_INC").unwrap();
+
+    cxx_build::bridge("lib.rs")
+        .file("prove/exec.cpp")
+        .file("prove/io_handler.cpp")
+        .file("prove/method_id.cpp")
+        .file("prove/riscv.cpp")
+        .file("prove/step_context.cpp")
+        .file("prove/step.cpp")
+        .file("verify/method_id.cpp")
+        .file("verify/riscv.cpp")
+        .file("sdk/cpp/host/c_api.cpp")
+        .file("sdk/cpp/host/receipt.cpp")
+        .include(inc_dir)
+        .define("__TBB_NO_IMPLICIT_LINKAGE", None)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false)
-        .compile("risc0-zkp-prove");
+        .compile("risc0-zkvm-sys");
 
     println!("cargo:rustc-link-lib=static=tbb");
-    println!("cargo:rustc-link-lib=static=risc0-core");
-    println!("cargo:rustc-link-lib=static=risc0-zkp-core");
-    println!("cargo:rustc-link-lib=static=risc0-zkp-accel");
-    println!("cargo:rustc-link-lib=static=risc0-zkp-verify");
+    println!("cargo:rustc-link-lib=static=risc0-core-sys");
+    println!("cargo:rustc-link-lib=static=risc0-zkp-sys");
 }
