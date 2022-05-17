@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-verify"
-version = "0.2.0"
+version = "0.7.0-dev.1"
 edition = "2021"
 description = "RISC Zero zero-knowledge proof system core crate"
 license = "Apache-2.0"
