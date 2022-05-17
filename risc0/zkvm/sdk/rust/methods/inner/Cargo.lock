@@ -765,7 +765,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.6.1"
+version = "0.7.0-dev.1"
 dependencies = [
  "risc0-zkvm-platform-sys",
  "risc0-zkvm-sys",
@@ -774,7 +774,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core-sys"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -794,7 +794,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-sys"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -804,14 +804,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit-gen"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "risc0-zkvm-circuit-sys",
 ]
 
 [[package]]
 name = "risc0-zkvm-circuit-sys"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "anyhow",
  "cxx",
@@ -860,7 +860,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-serde"
-version = "0.2.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "bytemuck",
  "serde",
@@ -868,7 +868,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-sys"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "anyhow",
  "cxx",
@@ -1018,7 +1018,7 @@ dependencies = [
 
 [[package]]
 name = "tbb"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 dependencies = [
  "base16ct",
  "cc",

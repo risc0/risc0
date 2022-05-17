@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-host"
-version = "0.6.0"
+version = "0.7.0-dev.1"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM host crate"
 license = "Apache-2.0"
