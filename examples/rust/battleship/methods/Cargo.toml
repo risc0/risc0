@@ -8,6 +8,7 @@ lto = true
 opt-level = "z"
 
 [package.metadata.release]
+publish = false
 release = false
 
 [build-dependencies]
