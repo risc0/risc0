@@ -103,7 +103,7 @@ fn check_taken(x: usize, y: usize, span:usize, dir:usize, taken:Taken) -> bool {
 fn create_random_ships() -> [Ship; 5] {
     // randomly place 5 ships on the board
     let mut rng = thread_rng();
-    let mut ships = [Ship::default(); 5];
+    let mut ships : [Ship; 5] = array_init::array_init(|_| Ship::default());
     let mut taken = [[false; BOARD_SIZE];BOARD_SIZE];
     let mut i = 0;
 
@@ -183,7 +183,7 @@ impl Component for GameProvider {
             .context::<WalletContext>(Callback::noop())
             .unwrap();
         let state = GameState {
-            ships: ctx.props().ships,
+            ships: ctx.props().ships.clone(),
             salt: 0xDEADBEEF,
         };
         let game = GameSession {
