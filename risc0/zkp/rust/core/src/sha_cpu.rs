@@ -14,7 +14,6 @@
 
 //! Simple SHA-256 wrappers.
 
-
 use alloc::{boxed::Box, vec, vec::Vec};
 use core::slice;
 

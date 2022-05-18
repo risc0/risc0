@@ -20,9 +20,9 @@ use bytemuck::{Pod, Zeroable};
 use rand::Rng;
 
 /// The modulus of the field.
-pub const P: u32 = 15 * (1 << 27) + 1;  
+pub const P: u32 = 15 * (1 << 27) + 1;
 /// The modulus of the field as a u64.
-pub const P_U64: u64 = P as u64; 
+pub const P_U64: u64 = P as u64;
 
 /// The Fp class is an element of the finite field F_p, where P is the prime
 /// number 15*2^27 + 1. Put another way, Fp is basically integer arithmetic
