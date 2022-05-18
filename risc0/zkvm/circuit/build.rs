@@ -18,7 +18,7 @@ fn main() {
     CFG.include_prefix = "risc0/zkvm/circuit";
     CFG.exported_header_links = vec!["risc0-zkp-sys", "risc0-zkvm-platform-sys"];
 
-    cxx_build::bridge("src/lib.rs")
+    cxx_build::bridge("lib.rs")
         .file("accum_regs.cpp")
         .file("compute_cycle.cpp")
         .file("context.cpp")

@@ -14,6 +14,8 @@
 
 #![no_std]
 
+#![doc = include_str!("../README.md")]
+
 extern crate alloc;
 
 pub mod fp;
@@ -25,6 +27,7 @@ pub mod sha;
 pub mod sha_cpu;
 pub mod sha_rng;
 
+/// For x = (1 << po2), given x, find po2.
 pub fn to_po2(x: usize) -> usize {
     (31 - (x as u32).leading_zeros()) as usize
 }
