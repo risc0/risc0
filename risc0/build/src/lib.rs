@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![doc = include_str!("../README.md")]
+
 use std::{
     env,
     fs::{self, File},
@@ -80,11 +82,16 @@ pub const {upper}_ID: &[u8] = include_bytes!(r#"{id_path}"#);
     }
 }
 
+/// Build a crate for the guest, and packages up the methods in it for use by the host.
+///
+/// * `path` - The root of the crate holding the code to be compiled for the guest.
+/// * `names` - The names of the methods to build, each method should be associated with a 'bin'.
 pub fn methods(path: &str, names: &[&str]) {
     build(path);
     generate_module(names);
 }
 
+/// Called inside the guest crate's build.rs to do special linking for the ZKVM
 pub fn link() {
     if env::var("CARGO_CFG_TARGET_ARCH").unwrap() == "riscv32" {
         let out_dir = env::var_os("OUT_DIR").unwrap();
