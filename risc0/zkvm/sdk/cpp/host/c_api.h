@@ -59,7 +59,7 @@ void risc0_init();
 // Prover
 //
 
-risc0_prover* risc0_prover_new(risc0_error* err, const char* elf_path);
+risc0_prover* risc0_prover_new(risc0_error* err, const char* elf_path, const char* method_id_path);
 
 void risc0_prover_free(risc0_error* err, risc0_prover* ptr);
 

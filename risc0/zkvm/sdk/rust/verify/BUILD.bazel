@@ -18,7 +18,7 @@ risc0_rust_library_pair(
     ],
     crate_name = "risc0_zkvm_verify",
     guest_deps = [
-        "//risc0/zkp/core:core_guest",
+        "//risc0/zkp/rust/core:core_guest",
         "@crates_guest//:anyhow",
         "@crates_guest//:bytemuck",
         "@crates_guest//:rand",
@@ -27,7 +27,7 @@ risc0_rust_library_pair(
         "@crates_guest//:sha2",
     ],
     host_deps = [
-        "//risc0/zkp/core:core_host",
+        "//risc0/zkp/rust/core:core_host",
         "@crates_host//:anyhow",
         "@crates_host//:bytemuck",
         "@crates_host//:rand",

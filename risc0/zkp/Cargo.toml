@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkp-sys"
-version = "0.1.0"
+version = "0.7.0-dev.1"
 edition = "2021"
 description = "RISC Zero zero-knowledge proof system crate"
 license = "Apache-2.0"
@@ -13,8 +13,8 @@ path = "lib.rs"
 
 [dependencies]
 cxx = "1.0"
-risc0-core-sys = { version = "0.1", path = "../core" }
-tbb = { version = "0.1", path = "../../third_party/tbb" }
+risc0-core-sys = { version = "0.7.0-dev.1", path = "../core" }
+tbb = { version = "0.7.0-dev.1", path = "../../third_party/tbb" }
 
 [build-dependencies]
 cxx-build = "1.0"

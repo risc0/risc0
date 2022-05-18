@@ -1,0 +1,11 @@
+[package]
+name = "risc0-zkvm-methods"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+risc0-build = { path = "../../../../build" }
+
+[package.metadata.release]
+release = false
+

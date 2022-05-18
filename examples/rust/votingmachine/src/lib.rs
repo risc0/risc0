@@ -32,7 +32,7 @@ impl InitMessage {
 
     pub fn verify_and_get_commit(&self) -> Result<InitializeVotingMachineCommit> {
         self.receipt
-            .verify("examples/rust/votingmachine/core/init")?;
+            .verify("examples/rust/votingmachine/core/init.id")?;
         self.get_state()
     }
 }
@@ -49,7 +49,7 @@ impl SubmitBallotMessage {
 
     pub fn verify_and_get_commit(&self) -> Result<SubmitBallotCommit> {
         self.receipt
-            .verify("examples/rust/votingmachine/core/submit")?;
+            .verify("examples/rust/votingmachine/core/submit.id")?;
         self.get_commit()
     }
 }
@@ -66,7 +66,7 @@ impl FreezeStationMessage {
 
     pub fn verify_and_get_commit(&self) -> Result<FreezeVotingMachineCommit> {
         self.receipt
-            .verify("examples/rust/votingmachine/core/freeze")?;
+            .verify("examples/rust/votingmachine/core/freeze.id")?;
         self.get_commit()
     }
 }
@@ -83,7 +83,10 @@ impl PollingStation {
 
     pub fn init(&self) -> Result<InitMessage> {
         log::info!("init");
-        let mut prover = Prover::new("examples/rust/votingmachine/core/init")?;
+        let mut prover = Prover::new(
+            "examples/rust/votingmachine/core/init",
+            "examples/rust/votingmachine/core/init.id",
+        )?;
         let vec = to_vec(&self.state).unwrap();
         prover.add_input(vec.as_slice())?;
         let receipt = prover.run()?;
@@ -93,7 +96,10 @@ impl PollingStation {
     pub fn submit(&mut self, ballot: &Ballot) -> Result<SubmitBallotMessage> {
         log::info!("submit: {:?}", ballot);
         let params = SubmitBallotParams::new(self.state.clone(), ballot.clone());
-        let mut prover = Prover::new("examples/rust/votingmachine/core/submit")?;
+        let mut prover = Prover::new(
+            "examples/rust/votingmachine/core/submit",
+            "examples/rust/votingmachine/core/submit.id",
+        )?;
         let vec = to_vec(&params).unwrap();
         prover.add_input(vec.as_slice())?;
         let receipt = prover.run()?;
@@ -106,7 +112,10 @@ impl PollingStation {
     pub fn freeze(&mut self) -> Result<FreezeStationMessage> {
         log::info!("freeze");
         let params = FreezeVotingMachineParams::new(self.state.clone());
-        let mut prover = Prover::new("examples/rust/votingmachine/core/freeze")?;
+        let mut prover = Prover::new(
+            "examples/rust/votingmachine/core/freeze",
+            "examples/rust/votingmachine/core/freeze.id",
+        )?;
         let vec = to_vec(&params).unwrap();
         prover.add_input(vec.as_slice())?;
         let receipt = prover.run()?;

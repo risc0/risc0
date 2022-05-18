@@ -12,5 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cxx::bridge]
-mod ffi {}
+#![no_std]
+
+#[cfg(not(target_arch = "riscv32"))]
+pub mod methods {
+    include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+}

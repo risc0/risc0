@@ -8,7 +8,7 @@ risc0_rust_library_pair(
     guest_deps = [
         "@crates_guest//:cfg-if",
         "@crates_guest//:serde",
-        "//risc0/zkp/core:core_guest",
+        "//risc0/zkp/rust/core:core_guest",
     ],
     guest_features = ["pure"],
     host_deps = [

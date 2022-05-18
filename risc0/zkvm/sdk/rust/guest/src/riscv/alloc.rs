@@ -17,7 +17,7 @@ use core::{
     cell::UnsafeCell,
 };
 
-use crate::{_fault, align_up, REGION_HEAP_END, REGION_HEAP_START, WORD_SIZE};
+use crate::riscv::{_fault, align_up, REGION_HEAP_END, REGION_HEAP_START, WORD_SIZE};
 
 // Bump pointer allocator for *single* core systems
 struct BumpPointerAlloc {

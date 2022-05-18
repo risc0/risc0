@@ -32,7 +32,8 @@ static void BM_Simple_Loop(benchmark::State& state) {
   size_t tot_iter = 0;
 
   for (auto _ : state) {
-    Prover prover("risc0/zkvm/prove/bench/bench_simple_loop");
+    Prover prover("risc0/zkvm/prove/bench/bench_simple_loop",
+                  "risc0/zkvm/prove/bench/bench_simple_loop.id");
     prover.writeInput(num_iter);
     VectorStreamWriter receipt_buf;
     Receipt receipt = prover.run();
@@ -52,7 +53,7 @@ static void BM_Sha(benchmark::State& state) {
   size_t tot_iter = 0;
 
   for (auto _ : state) {
-    Prover prover("risc0/zkvm/prove/bench/bench_sha");
+    Prover prover("risc0/zkvm/prove/bench/bench_sha", "risc0/zkvm/prove/bench/bench_sha.id");
     prover.writeInput(num_iter);
     VectorStreamWriter receipt_buf;
     Receipt receipt = prover.run();
@@ -67,7 +68,7 @@ static void BM_Sha(benchmark::State& state) {
   state.SetItemsProcessed(tot_iter);
 }
 
-static void run_battleship(benchmark::State& state, const char* method) {
+static void run_battleship(benchmark::State& state, const std::string& method) {
   GameState game_state{{
                            {{2, 3}, Vertical, 0x0000},
                            {{3, 1}, Horizontal, 0x0000},
@@ -79,7 +80,7 @@ static void run_battleship(benchmark::State& state, const char* method) {
   RoundParams params{game_state, {1, 1}};
 
   for (auto _ : state) {
-    Prover prover(method);
+    Prover prover(method, method + ".id");
     prover.writeInput(params);
     VectorStreamWriter receipt_buf;
     Receipt receipt = prover.run();

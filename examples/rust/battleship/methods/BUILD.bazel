@@ -2,7 +2,7 @@ load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
 
 risc0_rust_method(
     name = "init",
-    srcs = ["src/bin/init.rs"],
+    srcs = ["inner/src/bin/init.rs"],
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
     deps = [
@@ -13,7 +13,7 @@ risc0_rust_method(
 
 risc0_rust_method(
     name = "turn",
-    srcs = ["src/bin/turn.rs"],
+    srcs = ["inner/src/bin/turn.rs"],
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
     deps = [

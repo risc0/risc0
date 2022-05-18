@@ -14,3 +14,5 @@
 
 #[cxx::bridge]
 mod ffi {}
+
+pub const LINKER_SCRIPT: &[u8] = include_bytes!("../risc0.ld");

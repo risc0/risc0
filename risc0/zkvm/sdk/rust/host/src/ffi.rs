@@ -58,7 +58,11 @@ extern "C" {
 
     pub(crate) fn risc0_string_free(str: *const RawString);
 
-    pub(crate) fn risc0_prover_new(err: *mut RawError, elf_path: *const i8) -> *mut RawProver;
+    pub(crate) fn risc0_prover_new(
+        err: *mut RawError,
+        elf_path: *const i8,
+        id_path: *const i8,
+    ) -> *mut RawProver;
 
     pub(crate) fn risc0_prover_free(err: *mut RawError, prover: *mut RawProver);
 
@@ -81,7 +85,7 @@ extern "C" {
 
     pub(crate) fn risc0_receipt_verify(
         err: *mut RawError,
-        elf_path: *const i8,
+        id_path: *const i8,
         receipt: *const RawReceipt,
     );
 
