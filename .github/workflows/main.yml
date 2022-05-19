@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+      - uses: suyash/actions-bazelisk@v1
       - name: Build & test
         env:
           CONFIG: ${{ matrix.config }}
