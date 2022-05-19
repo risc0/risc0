@@ -33,7 +33,7 @@ pub enum Msg {
     Shot(Position),
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 enum Foreground {
     Blank,
     Miss,
@@ -41,7 +41,7 @@ enum Foreground {
     Pending,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 enum Background {
     Vacant,
     Occupied {
@@ -51,7 +51,7 @@ enum Background {
     },
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 struct Cell {
     fg: Foreground,
     bg: Background,
@@ -137,6 +137,7 @@ impl Grid {
 
     pub fn render_remote(shots: &HashMap<Position, HitType>) -> Self {
         let mut cells = [[Cell::default(); BOARD_SIZE]; BOARD_SIZE];
+        log::info!("rendering remote shots {:?}" ,shots);
         Grid::render_shots(&mut cells, shots)
     }
 
@@ -185,13 +186,14 @@ impl Component for Board {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::GameUpdate(game) => {
+                // log::info!("Game update: {:?}", ctx.props().side);
                 self.grid = Grid::render(&game, ctx.props().side);
                 true
             }
             Msg::Shot(pos) => match ctx.props().side {
                 Side::Local => false,
                 Side::Remote => {
-                    self.grid.cells[pos.y as usize][pos.x as usize].fg = Foreground::Pending;
+                    // self.grid.cells[pos.y as usize][pos.x as usize].fg = Foreground::Pending;
                     self.game_agent.send(GameMsg::Shot(pos));
                     true
                 }
@@ -231,6 +233,7 @@ impl Board {
     }
 
     fn render_cell(&self, ctx: &Context<Self>, x: usize, y: usize, cell: &Cell) -> Html {
+        // log::info!("{:?}", cell);
         let onclick = ctx
             .link()
             .callback(move |_| Msg::Shot(Position::new(x as u32, y as u32)));
