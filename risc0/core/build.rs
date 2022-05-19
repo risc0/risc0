@@ -26,7 +26,7 @@ fn main() {
         os => panic!("Unsupported target_os: {os}"),
     };
 
-    cxx_build::bridge("src/lib.rs")
+    cxx_build::bridge("lib.rs")
         .file("elf.cpp")
         .file("log.cpp")
         .file("rng.cpp")

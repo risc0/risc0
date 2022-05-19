@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Very basic utilites to help implement NTT, used only in the verifier.
+
 use crate::{fp4::Fp4, rou::ROU_REV};
 
 fn bit_rev_32(mut x: u32) -> u32 {
@@ -22,6 +24,7 @@ fn bit_rev_32(mut x: u32) -> u32 {
     (x >> 16) | (x << 16)
 }
 
+/// Bit reverse an array of (1 << n) numbers.
 pub fn bit_reverse(io: &mut [Fp4], n: usize) {
     let size: usize = 1 << n;
     for i in 0..size {
@@ -36,6 +39,7 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
     }
 }
 
+/// Perform a reverse butterly transform of a buffer of (1 << n) numbers.
 pub fn rev_butterfly(io: &mut [Fp4], n: usize) {
     assert!(io.len() == (1 << n));
     if n == 0 {

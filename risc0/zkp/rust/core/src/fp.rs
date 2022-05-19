@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Support for the base finite field modulo 15*2^27 + 1
+
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
 use rand::Rng;
 
+/// The modulus of the field.
 pub const P: u32 = 15 * (1 << 27) + 1;
+/// The modulus of the field as a u64.
 pub const P_U64: u64 = P as u64;
 
 /// The Fp class is an element of the finite field F_p, where P is the prime

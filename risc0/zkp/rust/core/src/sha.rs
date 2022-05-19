@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Simple SHA-256 wrappers.
+
 use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{Debug, Display, Formatter},

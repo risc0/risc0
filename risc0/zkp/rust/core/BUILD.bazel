@@ -13,6 +13,7 @@ risc0_rust_library_pair(
         "src/sha_cpu.rs",
         "src/sha_rng.rs",
     ],
+    data = ["README.md"],
     crate_name = "risc0_zkp_core",
     guest_deps = [
         "@crates_guest//:anyhow",

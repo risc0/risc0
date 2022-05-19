@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![doc = include_str!("README.md")]
+
 use anyhow::Result;
 use cxx::let_cxx_string;
 
@@ -24,6 +26,7 @@ mod ffi {
     }
 }
 
+/// Produces a machine generated .h file that implements the RISC-V circuit and writes it to a file.
 pub fn make_circuit(path: &str) -> Result<()> {
     let_cxx_string!(path = path);
     Ok(ffi::make_circuit(&path)?)

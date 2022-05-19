@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Support for the rank 4 extension field of the base field.
+
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
@@ -22,6 +24,7 @@ use crate::fp::{Fp, P};
 const BETA: Fp = Fp::new(11);
 const NBETA: Fp = Fp::new(P - 11);
 
+/// The size of the extension field in elements, 4 in this case.
 pub const EXT_SIZE: usize = 4;
 
 /// Instances of `Fp4` are elements of a finite field `F_p^4`. They are

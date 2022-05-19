@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Simple SHA-256 wrappers.
+
 use alloc::{boxed::Box, vec, vec::Vec};
 use core::slice;
 
