@@ -11,5 +11,8 @@ opt-level = "z"
 publish = false
 release = false
 
+[package.metadata.risc0]
+methods = ["inner"]
+
 [build-dependencies]
 risc0-build = { path = "../../../../risc0/build" }

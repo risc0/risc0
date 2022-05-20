@@ -1,7 +1,7 @@
 [workspace]
 
 [package]
-name = "risc0-zkvm-methods"
+name = "risc0-zkvm-methods-inner"
 version = "0.1.0"
 edition = "2021"
 
