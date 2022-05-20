@@ -1,4 +1,3 @@
-
 # risc0-zkp-sys
 
 Contains core C++ classes for actual ZK-Stark system, including proving and
