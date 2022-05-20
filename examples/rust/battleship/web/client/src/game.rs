@@ -214,18 +214,11 @@ impl Component for GameProvider {
             salt: 0xDEADBEEF,
         };
         let res: Result<GameSession, _> = LocalStorage::get(ctx.props().name.clone());
-        let game_exists = match res {
-            Ok(_) => true,
-            Err(_) => false,
-        };
-        let game;
-        if game_exists {
-            game = LocalStorage::get(ctx.props().name.clone()).unwrap();
-            ctx.link().send_message(GameMsg::CheckTurn);
-        } else {
-            game = GameSession {
+        let (game_exists, game) = match res {
+            Ok(game) => (true,game),
+            Err(_) => (false, GameSession {
                 name: ctx.props().name.clone(),
-                state,
+                state: state,
                 local_shots: HashMap::new(),
                 remote_shots: HashMap::new(),
                 last_receipt: String::new(),
@@ -233,8 +226,12 @@ impl Component for GameProvider {
                 is_first: ctx.props().until == 2,
                 status: format!("Ready!"),
                 og_until: ctx.props().until,
-            };
+            })
+        };
 
+        if game_exists {
+            ctx.link().send_message(GameMsg::CheckTurn);
+        } else {
             if ctx.props().until == 1 {
                 ctx.link().send_message(GameMsg::Init);
             }
