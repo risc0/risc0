@@ -63,6 +63,8 @@ pub enum GameMsg {
     Init,
     Shot(Position),
     WaitTurn,
+    CheckTurn,
+    Resume,
     ProcessTurn(ContractState),
     UpdateState(String, RoundResult, Position),
     Error(String),
@@ -219,7 +221,7 @@ impl Component for GameProvider {
         let game;
         if game_exists {
             game = LocalStorage::get(ctx.props().name.clone()).unwrap();
-            ctx.link().send_message(GameMsg::WaitTurn);
+            ctx.link().send_message(GameMsg::CheckTurn);
         } else {
             log::info!("No local storage exists for this game until? {}", ctx.props().until);
             game = GameSession {
@@ -237,9 +239,9 @@ impl Component for GameProvider {
             if ctx.props().until == 1 {
                 ctx.link().send_message(GameMsg::Init);
             }
+            LocalStorage::set(game.name.clone(), game.clone()).unwrap();
         }
 
-        LocalStorage::set(game.name.clone(), game.clone()).unwrap();
         let contract = wallet.contract.clone();
 
         GameProvider {
@@ -336,6 +338,28 @@ impl Component for GameProvider {
                     false
                 }
             }
+            GameMsg::CheckTurn => {
+                let until = self.game.og_until as u32; //ctx.props().until as u32;
+                let game = self.game.clone();
+                let contract = self.contract.clone();
+                ctx.link().send_future(async move {
+                    let contract_state = match contract.get_state(&game.name).await {
+                        Ok(state) => state,
+                        Err(err) => {
+                            return GameMsg::Error(format!("get_state: {:?}", err));
+                        }
+                    };
+
+                    if contract_state.next_turn == until {
+                        log::info!("CheckTurn contract_state: {:?}", contract_state.next_turn);
+                        GameMsg::Resume
+                    } else {
+                        TimeoutFuture::new(WAIT_TURN_INTERVAL).await;
+                        GameMsg::WaitTurn
+                    }
+                });
+                true
+            }
             GameMsg::WaitTurn => {
                 self.game.status = format!("Waiting for other player.");
                 self.journal.send("GameMsg::WaitTurn".into());
@@ -350,7 +374,9 @@ impl Component for GameProvider {
                             return GameMsg::Error(format!("get_state: {:?}", err));
                         }
                     };
+
                     if contract_state.next_turn == until {
+                        log::info!("WaitTurn contract_state: {:?}", contract_state.next_turn);
                         GameMsg::ProcessTurn(contract_state)
                     } else {
                         TimeoutFuture::new(WAIT_TURN_INTERVAL).await;
@@ -428,6 +454,11 @@ impl Component for GameProvider {
                 if let Err(err) = res {
                     log::error!("There was an error setting local storage {:?}", err);
                 }
+                true
+            }
+            GameMsg::Resume => {
+                self.game.status = format!("Ready!");
+                LocalStorage::set(self.game.name.clone(), self.game.clone()).unwrap();
                 true
             }
             GameMsg::Error(msg) => {
