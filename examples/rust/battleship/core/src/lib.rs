@@ -15,13 +15,6 @@
 #![cfg_attr(not(test), no_std)]
 
 use core::fmt::Display;
-
-// use serde_with::serde_as;
-// use pwasm_abi::types::{Vec};
-// extern crate serde_derive;
-// extern crate serde_hex;
-// use serde_hex::{SerHex,StrictPfx};
-
 use serde::{Deserialize, Serialize};
 
 use risc0_zkvm_core::Digest;
@@ -56,9 +49,6 @@ pub enum ShipDirection {
 pub struct Ship {
     pub pos: Position,
     pub dir: ShipDirection,
-    // #[serde_as(as = "serde_with::hex::Hex")]
-    // #[serde(with = "hex")]
-    // #[serde(with = "SerHex::<StrictPfx>")]
     pub hit_mask: u8,
 }
 

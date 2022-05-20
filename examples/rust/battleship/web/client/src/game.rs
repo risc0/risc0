@@ -223,7 +223,6 @@ impl Component for GameProvider {
             game = LocalStorage::get(ctx.props().name.clone()).unwrap();
             ctx.link().send_message(GameMsg::CheckTurn);
         } else {
-            log::info!("No local storage exists for this game until? {}", ctx.props().until);
             game = GameSession {
                 name: ctx.props().name.clone(),
                 state,
@@ -376,7 +375,6 @@ impl Component for GameProvider {
                     };
 
                     if contract_state.next_turn == until {
-                        log::info!("WaitTurn contract_state: {:?}", contract_state.next_turn);
                         GameMsg::ProcessTurn(contract_state)
                     } else {
                         TimeoutFuture::new(WAIT_TURN_INTERVAL).await;
@@ -449,7 +447,6 @@ impl Component for GameProvider {
                 self.game.state = state.state;
                 self.game.last_receipt = receipt;
                 self.game.local_shots.insert(shot, HitType::Core(state.hit));
-                log::info!("GameMsg::UpdateState {:?}", self.game.name.clone());
                 let res = LocalStorage::set(self.game.name.clone(), self.game.clone());
                 if let Err(err) = res {
                     log::error!("There was an error setting local storage {:?}", err);

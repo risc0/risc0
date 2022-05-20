@@ -137,7 +137,6 @@ impl Grid {
 
     pub fn render_remote(shots: &HashMap<Position, HitType>) -> Self {
         let mut cells = [[Cell::default(); BOARD_SIZE]; BOARD_SIZE];
-        log::info!("rendering remote shots {:?}" ,shots);
         Grid::render_shots(&mut cells, shots)
     }
 
@@ -233,7 +232,6 @@ impl Board {
     }
 
     fn render_cell(&self, ctx: &Context<Self>, x: usize, y: usize, cell: &Cell) -> Html {
-        // log::info!("{:?}", cell);
         let onclick = ctx
             .link()
             .callback(move |_| Msg::Shot(Position::new(x as u32, y as u32)));
