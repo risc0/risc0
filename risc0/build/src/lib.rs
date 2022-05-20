@@ -46,7 +46,7 @@ pub fn build_all() {
                     .unwrap()
                     .join(method)
                     .join("Cargo.toml");
-                println!(
+                eprintln!(
                     "Building methods for {} in {}",
                     pkg.name,
                     manifest_path.display()
@@ -97,7 +97,6 @@ pub fn build(manifest_path: &Path, target_dir: &Path) {
 pub fn embed_methods() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let manifest_path = Path::new(&manifest_dir).join("Cargo.toml");
-    println!("manifest_path: {}", manifest_path.to_str().unwrap());
     let metadata = MetadataCommand::new()
         .manifest_path(manifest_path)
         .no_deps()
@@ -138,7 +137,6 @@ pub fn embed_methods() {
 
         for target in &pkg.targets {
             if target.kind.contains(&"bin".to_string()) {
-                println!("bin: {}", target.name);
                 let method = target.name.clone();
                 let elf_path = metadata
                     .target_directory
@@ -150,6 +148,17 @@ pub fn embed_methods() {
                 id_path.set_extension("id");
 
                 eprintln!("Creating MethodID for {method}");
+                if !elf_path.exists() {
+                    eprintln!(
+                        "RISC-V method was not found at: {}",
+                        elf_path.to_str().unwrap()
+                    );
+                    eprintln!(
+                        "Please run the RISC Zero method compiler before running this command."
+                    );
+                    eprintln!("Try: `cargo run --bin risc0`");
+                    std::process::exit(-1);
+                }
                 let method_id = MethodID::new(&elf_path.to_str().unwrap()).unwrap();
                 method_id.write(&id_path.to_str().unwrap()).unwrap();
 
