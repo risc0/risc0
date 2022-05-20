@@ -18,6 +18,7 @@ extern crate alloc;
 
 mod deserializer;
 mod err;
+mod round_trip;
 mod serializer;
 
 pub use deserializer::{from_slice, Deserializer};

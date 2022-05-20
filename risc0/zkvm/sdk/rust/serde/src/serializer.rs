@@ -216,8 +216,14 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
         value.serialize(self)
     }
 
-    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq> {
-        Ok(self)
+    fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
+        match len {
+            Some(val) => {
+                self.stream.try_push_word(val.try_into().unwrap())?;
+                Ok(self)
+            }
+            None => Err(Error::NotSupported),
+        }
     }
 
     fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple> {
@@ -242,8 +248,14 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
         Ok(self)
     }
 
-    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
-        Ok(self)
+    fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
+        match len {
+            Some(val) => {
+                self.stream.try_push_word(val.try_into().unwrap())?;
+                Ok(self)
+            }
+            None => Err(Error::NotSupported),
+        }
     }
 
     fn serialize_struct(self, _name: &'static str, _len: usize) -> Result<Self::SerializeStruct> {

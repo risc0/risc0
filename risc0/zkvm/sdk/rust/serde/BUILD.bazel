@@ -7,6 +7,7 @@ risc0_rust_library_pair(
         "src/deserializer.rs",
         "src/err.rs",
         "src/lib.rs",
+        "src/round_trip.rs",
         "src/serializer.rs",
     ],
     crate_name = "risc0_zkvm_serde",
@@ -31,7 +32,3 @@ rust_test(
     crate_features = ["std"],
 )
 
-rust_test(
-    name = "test_guest",
-    crate = ":serde_guest",
-)
