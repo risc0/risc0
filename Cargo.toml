@@ -32,3 +32,6 @@ lto = true
 
 [profile.bootstrap]
 inherits = "release"
+
+[workspace.metadata.workspaces]
+allow_branch = "main"

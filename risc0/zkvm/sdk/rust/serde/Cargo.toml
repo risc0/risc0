@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-serde"
-version = "0.7.0-dev.1"
+version = "0.7.0-dev.2"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM serde crate"
 license = "Apache-2.0"
