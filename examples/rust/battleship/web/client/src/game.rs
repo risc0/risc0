@@ -62,7 +62,6 @@ pub struct TurnResult {
 pub enum GameMsg {
     Init,
     Shot(Position),
-    ClearShot(Position),
     WaitTurn,
     ProcessTurn(ContractState),
     UpdateState(String, RoundResult, Position),
@@ -204,7 +203,6 @@ impl Component for GameProvider {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        log::info!("CREATE");
         let (wallet, _) = ctx
             .link()
             .context::<WalletContext>(Callback::noop())
@@ -218,8 +216,6 @@ impl Component for GameProvider {
             Ok(_) => true,
             Err(_) => false,
         };
-        log::info!("game_exists? {}", game_exists);
-        log::info!("until? {}", ctx.props().until);
         let game;
         if game_exists {
             game = LocalStorage::get(ctx.props().name.clone()).unwrap();
@@ -242,32 +238,7 @@ impl Component for GameProvider {
                 ctx.link().send_message(GameMsg::Init);
             }
         }
-        // let game = match res {
-        //     Ok(game) => game,
-        //     Err(_) => GameSession {
-        //         name: ctx.props().name.clone(),
-        //         state,
-        //         local_shots: HashMap::new(),
-        //         remote_shots: HashMap::new(),
-        //         last_receipt: String::new(),
-        //         last_shot: None,
-        //         is_first: true,
-        //         status: String::new(),
-        //     },
-        // };
 
-        // let game = LocalStorage::get(ctx.props().name.clone()).unwrap_or(GameSession {
-        //     state,
-        //     name: ctx.props().name.clone(),
-        //     local_shots: HashMap::new(),
-        //     remote_shots: HashMap::new(),
-        //     last_receipt: String::new(),
-        //     last_shot: None,
-        //     is_first: ctx.props().until == 2,
-        //     status: format!("Ready!"),
-        // });
-
-        log::info!("Save the game to local storage {:?}", game.name);
         LocalStorage::set(game.name.clone(), game.clone()).unwrap();
         let contract = wallet.contract.clone();
 
@@ -312,20 +283,14 @@ impl Component for GameProvider {
                 true
             }
             GameMsg::Shot(pos) => {
-                self.game.remote_shots.insert(pos.clone(), HitType::Pending);
                 if self.game.status == "Ready!" {
-                    log::info!(
-                        "Only happens if game.status is Ready GameMsg::Shot {:?}",
-                        pos
-                    );
                     self.game.status = format!("Shot: {}", pos);
                     self.journal.send("GameMsg::Shot".into());
                     self.game.last_shot = Some(pos.clone());
+                    self.game.remote_shots.insert(pos.clone(), HitType::Pending);
                     let game = self.game.clone();
                     let is_first = self.game.is_first;
-                    log::info!("GameMsg::Shot is_first {}", is_first);
                     self.game.is_first = false;
-                    log::info!("GameMsg::Shot self.game.is_first will be set to false");
                     let contract = self.contract.clone();
                     ctx.link().send_future(async move {
                         if is_first {
@@ -367,15 +332,9 @@ impl Component for GameProvider {
                     });
                     true
                 } else {
-                    alert("Game is not ready!");
-                    ctx.link().send_message(GameMsg::ClearShot(pos));
+                    alert("Waiting for other player. Game is not ready!");
                     false
                 }
-            }
-            GameMsg::ClearShot(pos) => {
-                log::info!("GameMsg::ClearShot {:?}", pos);
-                self.game.remote_shots.remove(&pos);
-                true
             }
             GameMsg::WaitTurn => {
                 self.game.status = format!("Waiting for other player.");

@@ -21,6 +21,8 @@ use yew_router::{components::Link, history::History, prelude::RouterScopeExt};
 
 use crate::{bus::EventBus, contract::Contract, near::NearContract, wallet::WalletContext, Route};
 
+use gloo::storage::{LocalStorage, Storage};
+
 pub struct Lobby {
     journal: Dispatcher<EventBus<String>>,
     contract: Rc<NearContract>,
@@ -64,6 +66,10 @@ impl Component for Lobby {
                 self.journal.send("Lobby::ClearGames".into());
                 let contract = self.contract.clone();
                 ctx.link().send_future(async move {
+                    let games_to_clear = contract.list_games().await.unwrap();
+                    for game in games_to_clear {
+                        LocalStorage::delete(game);
+                    }
                     contract.clear_games().await.unwrap();
                     Msg::ListGames(contract.list_games().await.unwrap())
                 });
