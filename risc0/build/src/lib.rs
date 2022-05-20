@@ -156,7 +156,7 @@ pub fn embed_methods() {
                     eprintln!(
                         "Please run the RISC Zero method compiler before running this command."
                     );
-                    eprintln!("Try: `cargo run --bin risc0`");
+                    eprintln!("Try: `cargo run --bin risc0-build-methods`");
                     std::process::exit(-1);
                 }
                 let method_id = MethodID::new(&elf_path.to_str().unwrap()).unwrap();
