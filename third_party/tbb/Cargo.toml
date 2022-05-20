@@ -1,6 +1,6 @@
 [package]
 name = "tbb"
-version = "0.7.0-dev.1"
+version = "0.7.0-dev.2"
 edition = "2021"
 description = "Intel Threading Building Blocks"
 license = "Apache-2.0"
