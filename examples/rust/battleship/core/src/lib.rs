@@ -142,14 +142,14 @@ impl RoundParams {
             let y = ship.pos.y;
             let hit_shift = match ship.dir {
                 ShipDirection::Horizontal => {
-                    if shot.y == y && shot.x >= x && shot.x <= x + span {
+                    if shot.y == y && shot.x >= x && shot.x < x + span {
                         HitShift::Hit(shot.x - x)
                     } else {
                         HitShift::Miss
                     }
                 }
                 ShipDirection::Vertical => {
-                    if shot.x == x && shot.y >= y && shot.y <= y + span {
+                    if shot.x == x && shot.y >= y && shot.y < y + span {
                         HitShift::Hit(shot.y - y)
                     } else {
                         HitShift::Miss
