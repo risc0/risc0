@@ -152,9 +152,8 @@ impl Component for GameProvider {
             ships: ctx.props().ships.clone(),
             salt: 0xDEADBEEF,
         };
-        let name = ctx.props().name.clone();
         let game = GameSession {
-            name: name.clone(),
+            name: ctx.props().name.clone(),
             state,
             contract: wallet.contract.clone(),
             local_shots: HashMap::new(),
