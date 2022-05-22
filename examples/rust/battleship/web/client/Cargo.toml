@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+array-init = "2.0"
 async-trait = "0.1"
 battleship-core = { path = "../../core" }
 getrandom = { version = "0.2", features = ["js"] }

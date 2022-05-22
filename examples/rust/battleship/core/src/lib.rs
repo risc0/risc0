@@ -85,34 +85,69 @@ pub struct RoundCommit {
     pub hit: HitType,
 }
 
+pub struct GameCheck {
+    board: [[bool; BOARD_SIZE]; BOARD_SIZE],
+}
+
+impl GameCheck {
+    pub fn new() -> Self {
+        let board: [[bool; BOARD_SIZE]; BOARD_SIZE] = [[false; BOARD_SIZE]; BOARD_SIZE];
+        GameCheck { board }
+    }
+
+    pub fn check(&mut self, ship: &Ship, span: usize, commit: bool) -> bool {
+        let x = ship.pos.x as usize;
+        let y = ship.pos.y as usize;
+        for i in 0..span {
+            match ship.dir {
+                ShipDirection::Horizontal => {
+                    if self.board[y][x + i] {
+                        return false;
+                    }
+                    if commit {
+                        self.board[y][x + i] = true;
+                    }
+                }
+                ShipDirection::Vertical => {
+                    if self.board[y + i][x] {
+                        return false;
+                    }
+                    if commit {
+                        self.board[y + i][x] = true;
+                    }
+                }
+            }
+        }
+        true
+    }
+
+    pub fn commit(&mut self, ship: &Ship, span: usize) {
+        let x = ship.pos.x as usize;
+        let y = ship.pos.y as usize;
+        for i in 0..span {
+            match ship.dir {
+                ShipDirection::Horizontal => {
+                    self.board[y][x + i] = true;
+                }
+                ShipDirection::Vertical => {
+                    self.board[y + i][x] = true;
+                }
+            }
+        }
+    }
+}
+
 impl GameState {
     pub fn check(&self) -> bool {
-        let mut board: [[bool; BOARD_SIZE]; BOARD_SIZE] = [[false; BOARD_SIZE]; BOARD_SIZE];
+        let mut game_check = GameCheck::new();
         for i in 0..NUM_SHIPS {
             let ship = &self.ships[i];
             let span = SHIP_SPANS[i];
             if !ship.check(span) {
                 return false;
             }
-            let x = ship.pos.x as usize;
-            let y = ship.pos.y as usize;
-            match ship.dir {
-                ShipDirection::Horizontal => {
-                    for dx in 0..span {
-                        if board[y][x + dx] {
-                            return false;
-                        }
-                        board[y][x + dx] = true;
-                    }
-                }
-                ShipDirection::Vertical => {
-                    for dy in 0..span {
-                        if board[y + dy][x] {
-                            return false;
-                        }
-                        board[y + dy][x] = true;
-                    }
-                }
+            if !game_check.check(&ship, span, true) {
+                return false;
             }
         }
         true
@@ -142,14 +177,14 @@ impl RoundParams {
             let y = ship.pos.y;
             let hit_shift = match ship.dir {
                 ShipDirection::Horizontal => {
-                    if shot.y == y && shot.x >= x && shot.x <= x + span {
+                    if shot.y == y && shot.x >= x && shot.x < x + span {
                         HitShift::Hit(shot.x - x)
                     } else {
                         HitShift::Miss
                     }
                 }
                 ShipDirection::Vertical => {
-                    if shot.x == x && shot.y >= y && shot.y <= y + span {
+                    if shot.x == x && shot.y >= y && shot.y < y + span {
                         HitShift::Hit(shot.y - y)
                     } else {
                         HitShift::Miss
