@@ -18,7 +18,6 @@ members = [
   "risc0/zkvm/sdk/rust/methods",
   "risc0/zkvm/sdk/rust/serde",
   "risc0/zkvm/sdk/rust/verify",
-  "third_party/tbb",
 ]
 
 exclude = [
