@@ -29,7 +29,8 @@ use crate::{
     wallet::WalletContext,
 };
 use battleship_core::{
-    GameState, Position, RoundParams, RoundResult, Ship, ShipDirection, BOARD_SIZE, SHIP_SPANS,
+    GameCheck, GameState, Position, RoundParams, RoundResult, Ship, ShipDirection, BOARD_SIZE,
+    SHIP_SPANS,
 };
 
 pub type CoreHitType = battleship_core::HitType;
@@ -82,46 +83,16 @@ pub struct GameSession {
     pub status: String,
 }
 
-type Taken = [[bool; BOARD_SIZE]; BOARD_SIZE];
-
-fn check_bounds(x: usize, y: usize, span: usize, dir: &ShipDirection) -> bool {
-    match dir {
-        ShipDirection::Horizontal => x + span <= BOARD_SIZE - 1,
-        ShipDirection::Vertical => y + span <= BOARD_SIZE - 1,
-    }
-}
-
-fn check_taken(x: usize, y: usize, span: usize, dir: &ShipDirection, taken: Taken) -> bool {
-    for i in 0..span {
-        match dir {
-            ShipDirection::Horizontal => {
-                if taken[x + i][y] {
-                    return true;
-                }
-            }
-            ShipDirection::Vertical => {
-                if taken[x][y + i] {
-                    return true;
-                }
-            }
-        }
-    }
-    false
-}
-
 fn create_random_ships() -> [Ship; 5] {
     // randomly place 5 ships on the board
     let mut rng = thread_rng();
-    let mut taken = [[false; BOARD_SIZE]; BOARD_SIZE];
+    let mut game_check = GameCheck::new();
 
     let ships: [Ship; 5] = array_init::array_init(|i| {
         loop {
             // pick a random starting point on the board
-            let x: usize = rng.gen_range(0..BOARD_SIZE - 1);
-            let y: usize = rng.gen_range(0..BOARD_SIZE - 1);
-            if taken[x][y] {
-                continue;
-            }
+            let x = rng.gen_range(0..BOARD_SIZE - 1);
+            let y = rng.gen_range(0..BOARD_SIZE - 1);
 
             // pick between 0 and 1 for randomized ship placement
             let dir = if rng.gen::<bool>() {
@@ -130,30 +101,23 @@ fn create_random_ships() -> [Ship; 5] {
                 ShipDirection::Vertical
             };
 
+            let ship = Ship::new(x as u32, y as u32, dir);
+
             // does it fit on the board
             let span = SHIP_SPANS[i];
-            if !check_bounds(x, y, span, &dir) {
+            if !ship.check(span) {
                 continue;
             }
 
             // does it cross any other ship
-            if check_taken(x, y, span, &dir, taken) {
+            if !game_check.check(&ship, span, false) {
                 continue;
-            } else {
-                // mark the ship as taken
-                for i in 0..span {
-                    match dir {
-                        ShipDirection::Horizontal => {
-                            taken[x + i][y] = true;
-                        }
-                        ShipDirection::Vertical => {
-                            taken[x][y + i] = true;
-                        }
-                    }
-                }
             }
 
-            return Ship::new(x as u32, y as u32, dir);
+            // mark the ship as taken
+            game_check.commit(&ship, span);
+
+            return ship;
         }
     });
     ships
