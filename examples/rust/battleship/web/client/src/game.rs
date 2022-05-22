@@ -19,7 +19,6 @@ use rand::{thread_rng, Rng};
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
-use weblog::console_log;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged, Dispatched, Dispatcher};
 
@@ -181,7 +180,6 @@ impl Component for GameProvider {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
-        console_log!("GameProvider::create");
         let (wallet, _) = ctx
             .link()
             .context::<WalletContext>(Callback::noop())
@@ -193,7 +191,7 @@ impl Component for GameProvider {
         let name = ctx.props().name.clone();
         let game = GameSession {
             name: name.clone(),
-            state: state,
+            state,
             contract: wallet.contract.clone(),
             local_shots: HashMap::new(),
             remote_shots: HashMap::new(),
@@ -202,11 +200,9 @@ impl Component for GameProvider {
             is_first: ctx.props().until == 2,
             status: format!("Ready!"),
         };
-
         if ctx.props().until == 1 {
             ctx.link().send_message(GameMsg::Init);
         }
-
         GameProvider {
             _bridge: EventBus::bridge(ctx.link().callback(|msg| msg)),
             journal: EventBus::dispatcher(),
@@ -310,7 +306,6 @@ impl Component for GameProvider {
                             return GameMsg::Error(format!("get_state: {:?}", err));
                         }
                     };
-
                     if contract_state.next_turn == until {
                         GameMsg::ProcessTurn(contract_state)
                     } else {
@@ -338,7 +333,7 @@ impl Component for GameProvider {
                         },
                     );
                 }
-                let until = ctx.props().until as u32;
+                let until = ctx.props().until;
                 ctx.link().send_future(async move {
                     let player = if until == 2 {
                         contract_state.p1

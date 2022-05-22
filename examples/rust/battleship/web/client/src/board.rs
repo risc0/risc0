@@ -33,7 +33,7 @@ pub enum Msg {
     Shot(Position),
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 enum Foreground {
     Blank,
     Miss,
@@ -41,7 +41,7 @@ enum Foreground {
     Pending,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 enum Background {
     Vacant,
     Occupied {
@@ -51,7 +51,7 @@ enum Background {
     },
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone)]
 struct Cell {
     fg: Foreground,
     bg: Background,
@@ -93,7 +93,7 @@ impl Cell {
 type Cells = [[Cell; BOARD_SIZE]; BOARD_SIZE];
 
 struct Grid {
-    cells: Cells,
+    pub cells: Cells,
 }
 
 impl Grid {
@@ -191,7 +191,7 @@ impl Component for Board {
             Msg::Shot(pos) => match ctx.props().side {
                 Side::Local => false,
                 Side::Remote => {
-                    // self.grid.cells[pos.y as usize][pos.x as usize].fg = Foreground::Pending;
+                    self.grid.cells[pos.y as usize][pos.x as usize].fg = Foreground::Pending;
                     self.game_agent.send(GameMsg::Shot(pos));
                     true
                 }
