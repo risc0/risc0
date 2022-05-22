@@ -12,23 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate wasm_bindgen;
-use gloo::storage::{LocalStorage, Storage};
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-use serde_with::serde_as;
-
-use rand::{thread_rng, Rng};
 use std::{collections::HashMap, rc::Rc};
 
 use gloo::timers::future::TimeoutFuture;
+use rand::{thread_rng, Rng};
 use reqwasm::http::Request;
 use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
+use weblog::console_log;
 use yew::prelude::*;
 use yew_agent::{Bridge, Bridged, Dispatched, Dispatcher};
 
@@ -45,6 +36,11 @@ use battleship_core::{
 pub type CoreHitType = battleship_core::HitType;
 
 const WAIT_TURN_INTERVAL: u32 = 5_000;
+
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+}
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Side {
@@ -63,8 +59,6 @@ pub enum GameMsg {
     Init,
     Shot(Position),
     WaitTurn,
-    CheckTurn,
-    Resume,
     ProcessTurn(ContractState),
     UpdateState(String, RoundResult, Position),
     Error(String),
@@ -76,20 +70,17 @@ pub enum HitType {
     Pending,
 }
 
-#[serde_as]
-#[derive(PartialEq, Clone, Serialize, Deserialize)]
+#[derive(PartialEq, Clone)]
 pub struct GameSession {
     pub name: String,
     pub state: GameState,
-    #[serde_as(as = "Vec<(_, _)>")]
+    pub contract: Rc<NearContract>,
     pub local_shots: HashMap<Position, HitType>,
-    #[serde_as(as = "Vec<(_, _)>")]
     pub remote_shots: HashMap<Position, HitType>,
     pub last_receipt: String,
     pub last_shot: Option<Position>,
     pub is_first: bool,
     pub status: String,
-    pub until: u32,
 }
 
 type Taken = [[bool; BOARD_SIZE]; BOARD_SIZE];
@@ -142,7 +133,7 @@ fn create_random_ships() -> [Ship; 5] {
 
             // does it fit on the board
             let span = SHIP_SPANS[i];
-            if !check_bounds(x, y, span, dir) {
+            if !check_bounds(x, y, span, &dir) {
                 continue;
             }
 
@@ -183,7 +174,6 @@ pub struct GameProvider {
     _bridge: Box<dyn Bridge<EventBus<GameMsg>>>,
     journal: Dispatcher<EventBus<String>>,
     game: GameSession,
-    contract: Rc<NearContract>,
 }
 
 impl Component for GameProvider {
@@ -191,6 +181,7 @@ impl Component for GameProvider {
     type Properties = Props;
 
     fn create(ctx: &Context<Self>) -> Self {
+        console_log!("GameProvider::create");
         let (wallet, _) = ctx
             .link()
             .context::<WalletContext>(Callback::noop())
@@ -199,41 +190,27 @@ impl Component for GameProvider {
             ships: ctx.props().ships.clone(),
             salt: 0xDEADBEEF,
         };
-        let res: Result<GameSession, _> = LocalStorage::get(ctx.props().name.clone());
-        let (game_exists, game) = match res {
-            Ok(game) => (true, game),
-            Err(_) => (
-                false,
-                GameSession {
-                    name: ctx.props().name.clone(),
-                    state: state,
-                    local_shots: HashMap::new(),
-                    remote_shots: HashMap::new(),
-                    last_receipt: String::new(),
-                    last_shot: None,
-                    is_first: ctx.props().until == 2,
-                    status: format!("Ready!"),
-                    until: ctx.props().until as u32,
-                },
-            ),
+        let name = ctx.props().name.clone();
+        let game = GameSession {
+            name: name.clone(),
+            state: state,
+            contract: wallet.contract.clone(),
+            local_shots: HashMap::new(),
+            remote_shots: HashMap::new(),
+            last_receipt: String::new(),
+            last_shot: None,
+            is_first: ctx.props().until == 2,
+            status: format!("Ready!"),
         };
 
-        if game_exists {
-            ctx.link().send_message(GameMsg::CheckTurn);
-        } else {
-            if ctx.props().until == 1 {
-                ctx.link().send_message(GameMsg::Init);
-            }
-            LocalStorage::set(game.name.clone(), game.clone()).unwrap();
+        if ctx.props().until == 1 {
+            ctx.link().send_message(GameMsg::Init);
         }
-
-        let contract = wallet.contract.clone();
 
         GameProvider {
             _bridge: EventBus::bridge(ctx.link().callback(|msg| msg)),
             journal: EventBus::dispatcher(),
-            game: game,
-            contract: contract,
+            game,
         }
     }
 
@@ -242,7 +219,6 @@ impl Component for GameProvider {
             GameMsg::Init => {
                 self.game.status = format!("Init");
                 let game = self.game.clone();
-                let contract = self.contract.clone();
                 let body = serde_json::to_string(&game.state).unwrap();
                 ctx.link().send_future(async move {
                     let response = match Request::post("/prove/init")
@@ -262,7 +238,7 @@ impl Component for GameProvider {
                             return GameMsg::Error(format!("receipt: {}", err));
                         }
                     };
-                    match contract.new_game(&game.name, &receipt).await {
+                    match game.contract.new_game(&game.name, &receipt).await {
                         Ok(()) => GameMsg::WaitTurn,
                         Err(err) => GameMsg::Error(format!("new_game: {:?}", err)),
                     }
@@ -270,77 +246,54 @@ impl Component for GameProvider {
                 true
             }
             GameMsg::Shot(pos) => {
-                if self.game.status == "Ready!" {
-                    self.game.status = format!("Shot: {}", pos);
-                    self.journal.send("GameMsg::Shot".into());
-                    self.game.last_shot = Some(pos.clone());
-                    self.game.remote_shots.insert(pos.clone(), HitType::Pending);
-                    let game = self.game.clone();
-                    let is_first = self.game.is_first;
-                    self.game.is_first = false;
-                    let contract = self.contract.clone();
-                    ctx.link().send_future(async move {
-                        if is_first {
-                            let body = serde_json::to_string(&game.state).unwrap();
-                            let response = match Request::post("/prove/init")
-                                .header("Content-Type", "application/json")
-                                .body(body)
-                                .send()
-                                .await
-                            {
-                                Ok(response) => response,
-                                Err(err) => {
-                                    return GameMsg::Error(format!("POST /prove/init: {}", err));
-                                }
-                            };
-                            let receipt = match response.text().await {
-                                Ok(receipt) => receipt,
-                                Err(err) => {
-                                    return GameMsg::Error(format!("receipt: {}", err));
-                                }
-                            };
-                            match contract.join_game(&game.name, &receipt, pos.x, pos.y).await {
-                                Ok(()) => GameMsg::WaitTurn,
-                                Err(err) => {
-                                    return GameMsg::Error(format!("join_game: {:?}", err));
-                                }
-                            }
-                        } else {
-                            match contract
-                                .turn(&game.name, &game.last_receipt, pos.x, pos.y)
-                                .await
-                            {
-                                Ok(()) => GameMsg::WaitTurn,
-                                Err(err) => {
-                                    return GameMsg::Error(format!("turn: {:?}", err));
-                                }
-                            }
-                        }
-                    });
-                    true
-                } else {
-                    alert("Waiting for other player. Game is not ready!");
-                    false
-                }
-            }
-            GameMsg::CheckTurn => {
-                let until = self.game.until;
+                self.game.status = format!("Shot: {}", pos);
+                self.journal.send("GameMsg::Shot".into());
+                self.game.last_shot = Some(pos.clone());
+                self.game.remote_shots.insert(pos.clone(), HitType::Pending);
                 let game = self.game.clone();
-                let contract = self.contract.clone();
+                let is_first = self.game.is_first;
+                self.game.is_first = false;
                 ctx.link().send_future(async move {
-                    let contract_state = match contract.get_state(&game.name).await {
-                        Ok(state) => state,
-                        Err(err) => {
-                            return GameMsg::Error(format!("get_state: {:?}", err));
+                    if is_first {
+                        let body = serde_json::to_string(&game.state).unwrap();
+                        let response = match Request::post("/prove/init")
+                            .header("Content-Type", "application/json")
+                            .body(body)
+                            .send()
+                            .await
+                        {
+                            Ok(response) => response,
+                            Err(err) => {
+                                return GameMsg::Error(format!("POST /prove/init: {}", err));
+                            }
+                        };
+                        let receipt = match response.text().await {
+                            Ok(receipt) => receipt,
+                            Err(err) => {
+                                return GameMsg::Error(format!("receipt: {}", err));
+                            }
+                        };
+                        match game
+                            .contract
+                            .join_game(&game.name, &receipt, pos.x, pos.y)
+                            .await
+                        {
+                            Ok(()) => GameMsg::WaitTurn,
+                            Err(err) => {
+                                return GameMsg::Error(format!("join_game: {:?}", err));
+                            }
                         }
-                    };
-
-                    if contract_state.next_turn == until {
-                        log::info!("CheckTurn contract_state: {:?}", contract_state.next_turn);
-                        GameMsg::Resume
                     } else {
-                        TimeoutFuture::new(WAIT_TURN_INTERVAL).await;
-                        GameMsg::WaitTurn
+                        match game
+                            .contract
+                            .turn(&game.name, &game.last_receipt, pos.x, pos.y)
+                            .await
+                        {
+                            Ok(()) => GameMsg::WaitTurn,
+                            Err(err) => {
+                                return GameMsg::Error(format!("turn: {:?}", err));
+                            }
+                        }
                     }
                 });
                 true
@@ -348,12 +301,10 @@ impl Component for GameProvider {
             GameMsg::WaitTurn => {
                 self.game.status = format!("Waiting for other player.");
                 self.journal.send("GameMsg::WaitTurn".into());
-                let until = self.game.until;
+                let until = ctx.props().until as u32;
                 let game = self.game.clone();
-                let contract = self.contract.clone();
-                LocalStorage::set(self.game.name.clone(), self.game.clone()).unwrap();
                 ctx.link().send_future(async move {
-                    let contract_state = match contract.get_state(&game.name).await {
+                    let contract_state = match game.contract.get_state(&game.name).await {
                         Ok(state) => state,
                         Err(err) => {
                             return GameMsg::Error(format!("get_state: {:?}", err));
@@ -378,10 +329,7 @@ impl Component for GameProvider {
                         last_shot,
                         match contract_state.last_hit.unwrap() {
                             0 => HitType::Core(CoreHitType::Miss),
-                            1 => {
-                                alert("You scored a hit!");
-                                HitType::Core(CoreHitType::Hit)
-                            }
+                            1 => HitType::Core(CoreHitType::Hit),
                             2 => {
                                 alert("You sunk an opponent's ship!");
                                 HitType::Core(CoreHitType::Sunk(contract_state.sunk_what.unwrap()))
@@ -390,7 +338,7 @@ impl Component for GameProvider {
                         },
                     );
                 }
-                let until = self.game.until;
+                let until = ctx.props().until as u32;
                 ctx.link().send_future(async move {
                     let player = if until == 2 {
                         contract_state.p1
@@ -433,15 +381,6 @@ impl Component for GameProvider {
                 self.game.state = state.state;
                 self.game.last_receipt = receipt;
                 self.game.local_shots.insert(shot, HitType::Core(state.hit));
-                let res = LocalStorage::set(self.game.name.clone(), self.game.clone());
-                if let Err(err) = res {
-                    log::error!("There was an error setting local storage {:?}", err);
-                }
-                true
-            }
-            GameMsg::Resume => {
-                self.game.status = format!("Ready!");
-                LocalStorage::set(self.game.name.clone(), self.game.clone()).unwrap();
                 true
             }
             GameMsg::Error(msg) => {

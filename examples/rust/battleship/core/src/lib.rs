@@ -15,6 +15,7 @@
 #![cfg_attr(not(test), no_std)]
 
 use core::fmt::Display;
+
 use serde::{Deserialize, Serialize};
 
 use risc0_zkvm_core::Digest;
