@@ -114,17 +114,34 @@ crates_repository(
         "axum": crate.spec(version = "0.5"),
         "base64": crate.spec(version = "0.13"),
         "bincode": crate.spec(version = "1.3"),
+        "bytemuck": crate.spec(
+            features = ["derive"],
+            version = "1.9",
+        ),
+        "cfg-if": crate.spec(version = "1.0"),
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
+        "cxx": crate.spec(version = "1.0"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
         "open": crate.spec(version = "2"),
+        "rand": crate.spec(
+            features = ["small_rng"],
+            version = "0.8",
+        ),
+        "rand_core": crate.spec(
+            version = "0.6",
+        ),
         "serde": crate.spec(
             features = ["derive"],
             version = "1.0",
         ),
         "serde_json": crate.spec(version = "1.0"),
-        "sha2": crate.spec(version = "0.10"),
+        "sha2": crate.spec(
+            default_features = False,
+            features = ["compress"],
+            version = "0.10",
+        ),
         "thiserror": crate.spec(version = "1.0"),
         "tokio": crate.spec(
             features = ["full"],
@@ -154,6 +171,29 @@ crates_repository(
     name = "crates_guest",
     lockfile = "//:Cargo-guest.Bazel.lock",
     packages = {
+        "anyhow": crate.spec(
+            default_features = False,
+            version = "1.0",
+        ),
+        "bytemuck": crate.spec(
+            features = ["derive"],
+            version = "1.9",
+        ),
+        "cfg-if": crate.spec(version = "1.0"),
+        "sha2": crate.spec(
+            default_features = False,
+            features = ["compress"],
+            version = "0.10",
+        ),
+        "rand": crate.spec(
+            default_features = False,
+            features = ["small_rng"],
+            version = "0.8",
+        ),
+        "rand_core": crate.spec(
+            default_features = False,
+            version = "0.6",
+        ),
         "serde": crate.spec(
             default_features = False,
             features = [
@@ -175,6 +215,8 @@ crates_repository(
     lockfile = "//:Cargo-wasm.Bazel.lock",
     packages = {
         "async-trait": crate.spec(version = "0.1"),
+        "bytemuck": crate.spec(version = "1.9"),
+        "cfg-if": crate.spec(version = "1.0"),
         "gloo": crate.spec(
             features = ["futures"],
             version = "0.7",

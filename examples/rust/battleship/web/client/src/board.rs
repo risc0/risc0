@@ -93,7 +93,7 @@ impl Cell {
 type Cells = [[Cell; BOARD_SIZE]; BOARD_SIZE];
 
 struct Grid {
-    cells: Cells
+    cells: Cells,
 }
 
 impl Grid {
@@ -185,7 +185,6 @@ impl Component for Board {
     fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             Msg::GameUpdate(game) => {
-                // log::info!("Game update: {:?}", ctx.props().side);
                 self.grid = Grid::render(&game, ctx.props().side);
                 true
             }

@@ -1,0 +1,23 @@
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
+
+risc0_rust_method(
+    name = "init",
+    srcs = ["inner/src/bin/init.rs"],
+    rustc_flags = ["-Coverflow-checks=on"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//examples/rust/battleship/core:core_guest",
+        "//risc0/zkvm/sdk/rust/guest",
+    ],
+)
+
+risc0_rust_method(
+    name = "turn",
+    srcs = ["inner/src/bin/turn.rs"],
+    rustc_flags = ["-Coverflow-checks=on"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//examples/rust/battleship/core:core_guest",
+        "//risc0/zkvm/sdk/rust/guest",
+    ],
+)

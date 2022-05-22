@@ -31,24 +31,24 @@ struct TestParam {
 class CoreTests : public testing::TestWithParam<TestParam> {
 protected:
   ShaDigest testSHA(const std::string& str) {
-    Prover prover(GetParam().prefix + "test_sha");
+    Prover prover(GetParam().prefix + "test_sha", GetParam().prefix + "test_sha.id");
     prover.writeInput(static_cast<uint32_t>(str.size()));
     prover.writeInput(str.data(), str.size());
     Receipt receipt = prover.run();
-    receipt.verify(GetParam().prefix + "test_sha");
+    receipt.verify(GetParam().prefix + "test_sha.id");
     ReceiptReader reader(receipt);
     return reader.read<ShaDigest>();
   }
 
   void testMemIO(const std::vector<std::pair<uint32_t, uint32_t>>& in) {
-    Prover prover(GetParam().prefix + "test_mem");
+    Prover prover(GetParam().prefix + "test_mem", GetParam().prefix + "test_mem.id");
     prover.writeInput(static_cast<uint32_t>(in.size()));
     for (auto pair : in) {
       prover.writeInput(pair.first);
       prover.writeInput(pair.second);
     }
     Receipt receipt = prover.run();
-    receipt.verify(GetParam().prefix + "test_mem");
+    receipt.verify(GetParam().prefix + "test_mem.id");
   }
 };
 
@@ -135,7 +135,7 @@ TEST_P(CoreTests, Fail) {
   std::string elfPath = GetParam().prefix + "test_fail";
 
   // Check that a compliant host will fault.
-  Prover prover(elfPath);
+  Prover prover(elfPath, elfPath + ".id");
   EXPECT_THROW(prover.run(), std::runtime_error);
 
   // Check that a host that does not implement onFault will still fault.
@@ -159,14 +159,15 @@ void doMemcpyTest(uint32_t srcOffset, uint32_t destOffset, uint32_t size) {
     }
   }
   // Make an prover and have it do a memcpy
-  Prover prover("risc0/zkvm/sdk/cpp/guest/test/test_memcpy");
+  Prover prover("risc0/zkvm/sdk/cpp/guest/test/test_memcpy",
+                "risc0/zkvm/sdk/cpp/guest/test/test_memcpy.id");
   prover.writeInput(srcBuf.data(), 1024);
   prover.writeInput(destBuf.data(), 1024);
   prover.writeInput(srcOffset);
   prover.writeInput(destOffset);
   prover.writeInput(size);
   Receipt receipt = prover.run();
-  receipt.verify("risc0/zkvm/sdk/cpp/guest/test/test_memcpy");
+  receipt.verify("risc0/zkvm/sdk/cpp/guest/test/test_memcpy.id");
   // Do the memcpy/memset on the host
   if (srcOffset == 1024) {
     memset(destBuf.data() + destOffset, 0xff, size);
@@ -200,10 +201,17 @@ TEST(CoreTests, Memset) {
   doMemsetTest(17, 173);
 }
 
+TEST(CoreTests, SHAAccel) {
+  Prover prover("risc0/zkvm/sdk/rust/methods/test_sha_accel",
+                "risc0/zkvm/sdk/rust/methods/test_sha_accel.id");
+  Receipt receipt = prover.run();
+  receipt.verify("risc0/zkvm/sdk/rust/methods/test_sha_accel.id");
+}
+
 INSTANTIATE_TEST_SUITE_P(All,
                          CoreTests,
                          testing::Values(TestParam{"cpp", "risc0/zkvm/sdk/cpp/guest/test/"},
-                                         TestParam{"rust", "risc0/zkvm/sdk/rust/guest/"}),
+                                         TestParam{"rust", "risc0/zkvm/sdk/rust/methods/"}),
                          [](const testing::TestParamInfo<TestParam>& info) {
                            return info.param.lang;
                          });

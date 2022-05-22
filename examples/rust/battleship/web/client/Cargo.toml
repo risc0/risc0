@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+array-init = "2.0"
 async-trait = "0.1"
 battleship-core = { path = "../../core" }
 getrandom = { version = "0.2", features = ["js"] }
 gloo = { version = "0.7", features = ["futures"] }
 js-sys = "0.3"
 log = "0.4"
-array-init = "2.0.0"
 # near-sdk = "3.1"
 rand = { version = "0.8", features = ["small_rng"] }
 reqwasm = "0.5"
@@ -26,3 +26,6 @@ web-sys = { version = "0.3", features = ["HtmlInputElement"] }
 yew = "0.19"
 yew-agent = "0.1"
 yew-router = "0.16"
+
+[package.metadata.release]
+release = false

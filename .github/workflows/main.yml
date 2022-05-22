@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+      - uses: suyash/actions-bazelisk@v1
       - name: Build & test
         env:
           CONFIG: ${{ matrix.config }}
@@ -40,5 +40,6 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - run: cargo test
-
+      - run: cargo run --bin risc0-build-methods
+      - run: cargo test --release
+      - run: cargo build --release --manifest-path examples/rust/battleship/contract/Cargo.toml

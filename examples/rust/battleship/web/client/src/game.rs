@@ -89,48 +89,42 @@ pub struct GameSession {
     pub last_shot: Option<Position>,
     pub is_first: bool,
     pub status: String,
-    pub og_until: usize,
+    pub until: u32,
 }
 
 type Taken = [[bool; BOARD_SIZE]; BOARD_SIZE];
 
-fn check_bounds(x: usize, y: usize, span: usize, dir: usize) -> bool {
-    if dir == 0 {
-        x + span <= BOARD_SIZE - 1
-    } else {
-        y + span <= BOARD_SIZE - 1
+fn check_bounds(x: usize, y: usize, span: usize, dir: ShipDirection) -> bool {
+    match dir {
+        ShipDirection::Horizontal => x + span <= BOARD_SIZE - 1,
+        ShipDirection::Vertical => y + span <= BOARD_SIZE - 1,
     }
 }
 
-fn check_taken(x: usize, y: usize, span: usize, dir: usize, taken: Taken) -> bool {
-    let mut is_taken = false;
+fn check_taken(x: usize, y: usize, span: usize, dir: ShipDirection, taken: Taken) -> bool {
     for i in 0..span {
-        let mut try_again = false;
-        if dir == 0 {
-            if taken[x + i][y] {
-                try_again = true
+        match dir {
+            ShipDirection::Horizontal => {
+                if taken[x + i][y] {
+                    return true;
+                }
             }
-        } else {
-            if taken[x][y + i] {
-                try_again = true
+            ShipDirection::Vertical => {
+                if taken[x][y + i] {
+                    return true;
+                }
             }
-        }
-        if try_again {
-            is_taken = true;
-            break;
         }
     }
-    is_taken
+    false
 }
 
 fn create_random_ships() -> [Ship; 5] {
     // randomly place 5 ships on the board
     let mut rng = thread_rng();
-    let mut ships: [Ship; 5] = array_init::array_init(|_| Ship::default());
     let mut taken = [[false; BOARD_SIZE]; BOARD_SIZE];
-    let mut i = 0;
 
-    for ship in ships.iter_mut() {
+    let ships: [Ship; 5] = array_init::array_init(|i| {
         loop {
             // pick a random starting point on the board
             let x: usize = rng.gen_range(0..BOARD_SIZE - 1);
@@ -138,48 +132,40 @@ fn create_random_ships() -> [Ship; 5] {
             if taken[x][y] {
                 continue;
             }
+
             // pick between 0 and 1 for randomized ship placement
-            let rdir: bool = rng.gen();
-            let ship_dir_int;
-            if rdir {
-                ship_dir_int = 0
+            let dir = if rng.gen::<bool>() {
+                ShipDirection::Horizontal
             } else {
-                ship_dir_int = 1
-            }
-            if ship_dir_int == 0 {
-                ship.dir = ShipDirection::Horizontal;
-            } else {
-                ship.dir = ShipDirection::Vertical;
-            }
+                ShipDirection::Vertical
+            };
 
             // does it fit on the board
             let span = SHIP_SPANS[i];
-            if !check_bounds(x, y, span, ship_dir_int) {
+            if !check_bounds(x, y, span, dir) {
                 continue;
             }
 
             // does it cross any other ship
-            if check_taken(x, y, span, ship_dir_int, taken) {
+            if check_taken(x, y, span, dir, taken) {
                 continue;
             } else {
                 // mark the ship as taken
                 for i in 0..span {
-                    if ship_dir_int == 0 {
-                        taken[x + i][y] = true;
-                    } else {
-                        taken[x][y + i] = true;
+                    match dir {
+                        ShipDirection::Horizontal => {
+                            taken[x + i][y] = true;
+                        }
+                        ShipDirection::Vertical => {
+                            taken[x][y + i] = true;
+                        }
                     }
                 }
             }
 
-            ship.pos = Position {
-                x: x as u32,
-                y: y as u32,
-            };
-            i += 1;
-            break;
+            return Ship::new(x as u32, y as u32, dir);
         }
-    }
+    });
     ships
 }
 
@@ -215,18 +201,21 @@ impl Component for GameProvider {
         };
         let res: Result<GameSession, _> = LocalStorage::get(ctx.props().name.clone());
         let (game_exists, game) = match res {
-            Ok(game) => (true,game),
-            Err(_) => (false, GameSession {
-                name: ctx.props().name.clone(),
-                state: state,
-                local_shots: HashMap::new(),
-                remote_shots: HashMap::new(),
-                last_receipt: String::new(),
-                last_shot: None,
-                is_first: ctx.props().until == 2,
-                status: format!("Ready!"),
-                og_until: ctx.props().until,
-            })
+            Ok(game) => (true, game),
+            Err(_) => (
+                false,
+                GameSession {
+                    name: ctx.props().name.clone(),
+                    state: state,
+                    local_shots: HashMap::new(),
+                    remote_shots: HashMap::new(),
+                    last_receipt: String::new(),
+                    last_shot: None,
+                    is_first: ctx.props().until == 2,
+                    status: format!("Ready!"),
+                    until: ctx.props().until as u32,
+                },
+            ),
         };
 
         if game_exists {
@@ -335,7 +324,7 @@ impl Component for GameProvider {
                 }
             }
             GameMsg::CheckTurn => {
-                let until = self.game.og_until as u32; //ctx.props().until as u32;
+                let until = self.game.until;
                 let game = self.game.clone();
                 let contract = self.contract.clone();
                 ctx.link().send_future(async move {
@@ -359,7 +348,7 @@ impl Component for GameProvider {
             GameMsg::WaitTurn => {
                 self.game.status = format!("Waiting for other player.");
                 self.journal.send("GameMsg::WaitTurn".into());
-                let until = self.game.og_until as u32; //ctx.props().until as u32;
+                let until = self.game.until;
                 let game = self.game.clone();
                 let contract = self.contract.clone();
                 LocalStorage::set(self.game.name.clone(), self.game.clone()).unwrap();
@@ -401,7 +390,7 @@ impl Component for GameProvider {
                         },
                     );
                 }
-                let until = self.game.og_until; //ctx.props().until;
+                let until = self.game.until;
                 ctx.link().send_future(async move {
                     let player = if until == 2 {
                         contract_state.p1

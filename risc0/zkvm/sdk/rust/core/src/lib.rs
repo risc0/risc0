@@ -1,40 +1,61 @@
+// Copyright 2022 Risc0, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use core::fmt::{Debug, Display, Formatter};
+#[cfg(feature = "pure")]
+pub use risc0_zkp_core::sha::{Digest, DIGEST_WORDS};
 
-use serde::{Deserialize, Serialize};
+cfg_if::cfg_if! {
+    if #[cfg(not(feature = "pure"))] {
+        use core::fmt::{Debug, Display, Formatter};
 
-pub const DIGEST_WORDS: usize = 8;
+        use serde::{Deserialize, Serialize};
 
-#[derive(Clone, Copy, Default, Deserialize, Eq, Hash, Ord, PartialOrd, PartialEq, Serialize)]
-pub struct Digest([u32; DIGEST_WORDS]);
+        pub const DIGEST_WORDS: usize = 8;
 
-impl Digest {
-    /// Constructs a new `Digest` from a byte array.
-    pub fn new(data: [u32; DIGEST_WORDS]) -> Self {
-        Self(data)
-    }
+        #[derive(Clone, Copy, Default, Deserialize, Eq, Hash, Ord, PartialOrd, PartialEq, Serialize)]
+        pub struct Digest([u32; DIGEST_WORDS]);
 
-    pub fn as_slice(&self) -> &[u32] {
-        &self.0
-    }
-}
+        impl Digest {
+            /// Constructs a new `Digest` from a byte array.
+            pub fn new(data: [u32; DIGEST_WORDS]) -> Self {
+                Self(data)
+            }
 
-impl Display for Digest {
-    fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        for word in self.0 {
-            core::write!(f, "{:08x?}", word)?;
+            pub fn as_slice(&self) -> &[u32] {
+                &self.0
+            }
         }
-        Ok(())
-    }
-}
 
-impl Debug for Digest {
-    fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        for word in self.0 {
-            core::write!(f, "{:08x?}", word)?;
+        impl Display for Digest {
+            fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
+                for word in self.0 {
+                    core::write!(f, "{:08x?}", word)?;
+                }
+                Ok(())
+            }
         }
-        Ok(())
+
+        impl Debug for Digest {
+            fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
+                for word in self.0 {
+                    core::write!(f, "{:08x?}", word)?;
+                }
+                Ok(())
+            }
+        }
     }
 }
 

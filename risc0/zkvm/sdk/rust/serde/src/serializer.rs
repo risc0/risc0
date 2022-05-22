@@ -1,4 +1,18 @@
-use core::{mem, slice};
+// Copyright 2022 Risc0, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use core::mem;
 
 use serde::Serialize;
 
@@ -202,8 +216,14 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
         value.serialize(self)
     }
 
-    fn serialize_seq(self, _len: Option<usize>) -> Result<Self::SerializeSeq> {
-        Ok(self)
+    fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
+        match len {
+            Some(val) => {
+                self.stream.try_push_word(val.try_into().unwrap())?;
+                Ok(self)
+            }
+            None => Err(Error::NotSupported),
+        }
     }
 
     fn serialize_tuple(self, _len: usize) -> Result<Self::SerializeTuple> {
@@ -228,8 +248,14 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
         Ok(self)
     }
 
-    fn serialize_map(self, _len: Option<usize>) -> Result<Self::SerializeMap> {
-        Ok(self)
+    fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
+        match len {
+            Some(val) => {
+                self.stream.try_push_word(val.try_into().unwrap())?;
+                Ok(self)
+            }
+            None => Err(Error::NotSupported),
+        }
     }
 
     fn serialize_struct(self, _name: &'static str, _len: usize) -> Result<Self::SerializeStruct> {
@@ -395,8 +421,8 @@ impl<'a> StreamWriter for Slice<'a> {
         }
 
         let slice = &mut self.slice[self.idx..self.idx + len_words];
-        let bytes = unsafe { slice::from_raw_parts_mut(slice.as_mut_ptr().cast(), len_bytes) };
-        bytes.copy_from_slice(data);
+        let bytes: &mut [u8] = bytemuck::cast_slice_mut(slice);
+        bytes[..len_bytes].copy_from_slice(data);
 
         self.idx += len_words;
 
@@ -404,16 +430,11 @@ impl<'a> StreamWriter for Slice<'a> {
     }
 
     fn release(&mut self) -> Result<Self::Output> {
-        let mid = self.idx;
-        let len = self.slice.len();
-        assert!(mid <= len);
-        let ptr = self.slice.as_mut_ptr();
-        let (head, tail) = unsafe {
-            (
-                slice::from_raw_parts(ptr, mid),
-                slice::from_raw_parts_mut(ptr.add(mid), len - mid),
-            )
-        };
+        // Remove the slice we're modifying out of self.slice so we
+        // don't run into problems trying to replace it while it's
+        // borrowed.
+        let tmp: &mut [u32] = mem::replace(&mut self.slice, &mut []);
+        let (head, tail) = tmp.split_at_mut(self.idx);
         self.slice = tail;
         self.idx = 0;
         Ok(head)

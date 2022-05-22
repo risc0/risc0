@@ -11,10 +11,11 @@ arrayref = "0.3"
 base64 = "0.13"
 bincode = "1.3"
 battleship-core = { path = "../core" }
+battleship-methods = { path = "../methods" }
 near-sdk = "3.1"
-risc0-zkvm-verify = { path = "../../../../risc0/zkvm/verify" }
-risc0-zkvm-core= { path = "../../../../risc0/zkvm/sdk/rust/core" }
+risc0-zkvm-core = { path = "../../../../risc0/zkvm/sdk/rust/core" }
 risc0-zkvm-serde = { path = "../../../../risc0/zkvm/sdk/rust/serde" }
+risc0-zkvm-verify = { path = "../../../../risc0/zkvm/sdk/rust/verify" }
 serde = "1.0"
 
 [profile.release]
@@ -24,3 +25,6 @@ lto = true
 debug = false
 panic = "abort"
 overflow-checks = true
+
+[package.metadata.release]
+release = false

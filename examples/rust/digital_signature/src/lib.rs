@@ -41,7 +41,7 @@ impl SignatureWithReceipt {
 
     pub fn verify(&self) -> Result<SignMessageCommit> {
         self.receipt
-            .verify("examples/rust/digital_signature/core/sign")?;
+            .verify("examples/rust/digital_signature/core/sign.id")?;
         self.get_commit()
     }
 }
@@ -64,7 +64,10 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
         passphrase: pass,
         msg: msg,
     };
-    let mut prover = Prover::new("examples/rust/digital_signature/core/sign")?;
+    let mut prover = Prover::new(
+        "examples/rust/digital_signature/core/sign",
+        "examples/rust/digital_signature/core/sign.id",
+    )?;
     let vec = to_vec(&params).unwrap();
     prover.add_input(vec.as_slice())?;
     let receipt = prover.run()?;

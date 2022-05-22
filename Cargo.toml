@@ -1,16 +1,37 @@
 [workspace]
 members = [
-  # "examples/rust/battleship",
   "examples/rust/battleship/core",
+  "examples/rust/battleship/methods",
   "examples/rust/battleship/web/client",
-  # "examples/rust/battleship/web/server",
-  "risc0/zkp/core",
-  "risc0/zkp/verify",
-  "risc0/zkvm/verify",
+  "examples/rust/battleship/web/server",
+  "risc0/build",
+  "risc0/core",
+  "risc0/zkp",
+  "risc0/zkp/rust/core",
+  "risc0/zkvm",
+  "risc0/zkvm/circuit",
+  "risc0/zkvm/circuit/make-circuit",
+  "risc0/zkvm/platform",
   "risc0/zkvm/sdk/rust/core",
+  "risc0/zkvm/sdk/rust/guest",
+  "risc0/zkvm/sdk/rust/host",
+  "risc0/zkvm/sdk/rust/methods",
   "risc0/zkvm/sdk/rust/serde",
+  "risc0/zkvm/sdk/rust/verify",
+  "third_party/tbb",
 ]
 
 exclude = [
   "examples/rust/battleship/contract",
+  "examples/rust/battleship/methods/inner",
+  "risc0/zkvm/sdk/rust/methods/inner",
 ]
+
+[profile.release]
+lto = true
+
+[profile.bootstrap]
+inherits = "release"
+
+[workspace.metadata.workspaces]
+allow_branch = "main"

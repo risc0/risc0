@@ -1,12 +1,20 @@
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
 risc0_rust_library_pair(
     name = "core",
     srcs = ["src/lib.rs"],
     crate_name = "risc0_zkvm_core",
-    guest_deps = ["@crates_guest//:serde"],
-    host_deps = ["@crates_host//:serde"],
+    guest_deps = [
+        "@crates_guest//:cfg-if",
+        "@crates_guest//:serde",
+        "//risc0/zkp/rust/core:core_guest",
+    ],
+    guest_features = ["pure"],
+    host_deps = [
+        "@crates_host//:cfg-if",
+        "@crates_host//:serde",
+    ],
     host_features = ["std"],
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
@@ -17,16 +25,8 @@ rust_library(
     srcs = ["src/lib.rs"],
     crate_name = "risc0_zkvm_core",
     visibility = ["//visibility:public"],
-    deps = ["@crates_wasm//:serde"],
-)
-
-rust_test(
-    name = "test_host",
-    crate = ":core_host",
-    crate_features = ["std"],
-)
-
-rust_test(
-    name = "test_guest",
-    crate = ":core_guest",
+    deps = [
+        "@crates_wasm//:cfg-if",
+        "@crates_wasm//:serde",
+    ],
 )

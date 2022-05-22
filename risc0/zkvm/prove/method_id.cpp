@@ -66,4 +66,18 @@ void writeMethodID(const std::string& filename, const MethodID& id) {
   }
 }
 
+namespace rust {
+
+MethodID::MethodID(const std::string& elf_path) : id(makeMethodID(elf_path)) {}
+
+std::unique_ptr<MethodID> new_method_id(const std::string& elf_path) {
+  return std::make_unique<MethodID>(elf_path);
+}
+
+void MethodID::write(const std::string& filename) const {
+  writeMethodID(filename, id);
+}
+
+} // namespace rust
+
 } // namespace risc0

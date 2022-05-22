@@ -1,46 +1,25 @@
-load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 rust_library(
     name = "guest",
     srcs = [
-        "src/alloc.rs",
-        "src/env.rs",
-        "src/gpio.rs",
         "src/lib.rs",
-        "src/sha.rs",
+        "src/riscv/alloc.rs",
+        "src/riscv/env.rs",
+        "src/riscv/gpio.rs",
+        "src/riscv/mod.rs",
+        "src/riscv/sha.rs",
     ],
+    crate_features = ["bazel"],
     crate_name = "risc0_zkvm_guest",
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
     deps = [
+        "//risc0/zkp/rust/core:core_guest",
         "//risc0/zkvm/sdk/cpp/guest:crt0",
         "//risc0/zkvm/sdk/rust/core:core_guest",
         "//risc0/zkvm/sdk/rust/serde:serde_guest",
+        "@crates_guest//:bytemuck",
         "@crates_guest//:serde",
     ],
-)
-
-risc0_rust_method(
-    name = "test_sha",
-    srcs = ["tests/sha.rs"],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":guest",
-        "//risc0/zkvm/sdk/rust/core:core_guest",
-    ],
-)
-
-risc0_rust_method(
-    name = "test_mem",
-    srcs = ["tests/io.rs"],
-    visibility = ["//visibility:public"],
-    deps = [":guest"],
-)
-
-risc0_rust_method(
-    name = "test_fail",
-    srcs = ["tests/fail.rs"],
-    visibility = ["//visibility:public"],
-    deps = [":guest"],
 )

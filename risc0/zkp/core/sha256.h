@@ -151,10 +151,13 @@ DEVSPEC inline void endianEncode(DEVADDR uint32_t* out, const DEVADDR uint8_t* i
 }
 
 DEVSPEC inline uint32_t convertU32(uint32_t in) {
-  return in;
+  uint8_t bytes[4];
+  memcpy(bytes, &in, sizeof(in));
+  return (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
 }
+
 DEVSPEC inline uint32_t convertU32(Fp in) {
-  return in.asUInt32();
+  return convertU32(in.asUInt32());
 }
 
 // Main entry point for uint32_t sized objects
@@ -220,10 +223,10 @@ DEVSPEC inline ShaDigest shaHashPair(ShaDigest x, ShaDigest y) {
   // Copy both hash states into a single buffer
   uint32_t words[16];
   for (size_t i = 0; i < 8; i++) {
-    words[i] = x.words[i];
+    words[i] = impl::convertU32(x.words[i]);
   }
   for (size_t i = 0; i < 8; i++) {
-    words[8 + i] = y.words[i];
+    words[8 + i] = impl::convertU32(y.words[i]);
   }
 
   // Initialize state + compress

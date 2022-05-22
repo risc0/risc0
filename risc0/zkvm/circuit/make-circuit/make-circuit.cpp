@@ -13,78 +13,16 @@
 // limitations under the License.
 
 #include "risc0/core/log.h"
-#include "risc0/zkvm/circuit/accum_regs.h"
-#include "risc0/zkvm/circuit/gen_context.h"
-#include "risc0/zkvm/circuit/poly_context.h"
-#include "risc0/zkvm/circuit/step_state.h"
-
-#include <fstream>
-
-using namespace risc0;
-using namespace risc0::circuit;
+#include "risc0/zkvm/circuit/make_circuit.h"
 
 int main(int argc, char* argv[]) {
-  setLogLevel(1);
+  risc0::setLogLevel(1);
 
   if (argc < 2) {
     LOG(1, "usage: make-circuit <output_path>");
     return 1;
   }
 
-  std::ofstream fout(argv[1]);
-
-  fout << "#ifdef STEP_INC\n";
-  {
-    GenContext genContext("dataStepExec");
-    setGlobalContext(&genContext);
-    Buffer code = genContext.addParam("code", kCodeSize, true);
-    Buffer data = genContext.addParam("data", kDataSize, false);
-    genContext.paramsDone();
-    StepState step(code, data);
-    step.setExec();
-    setGlobalContext(nullptr);
-    fout << genContext.funcDone();
-  }
-  {
-    GenContext genContext("dataStepCheck");
-    setGlobalContext(&genContext);
-    Buffer code = genContext.addParam("code", kCodeSize, true);
-    Buffer data = genContext.addParam("data", kDataSize, false);
-    genContext.paramsDone();
-    StepState step(code, data);
-    step.setMemCheck();
-    setGlobalContext(nullptr);
-    fout << genContext.funcDone();
-  }
-  {
-    GenContext genContext("accumStep");
-    setGlobalContext(&genContext);
-    Buffer code = genContext.addParam("code", kCodeSize, true);
-    Buffer data = genContext.addParam("data", kDataSize, true);
-    Buffer accum = genContext.addParam("accum", kAccumSize, false);
-    genContext.paramsDone();
-    StepState step(code, data);
-    AccumRegs accumRegs(accum);
-    accumRegs.set(step);
-    setGlobalContext(nullptr);
-    fout << genContext.funcDone();
-  }
-  fout << "#endif // STEP_INC\n";
-  {
-    PolyContext polyContext;
-    setGlobalContext(&polyContext);
-    Buffer code = polyContext.addParam("code", kCodeSize);
-    Buffer data = polyContext.addParam("data", kDataSize);
-    Buffer accum = polyContext.addParam("accum", kAccumSize);
-    StepState step(code, data);
-    // equate(step.code.cycleType[CodeCycleType::MEM_WRITE], 1);
-    step.setExec();
-    step.setMemCheck();
-    AccumRegs accumRegs(accum);
-    accumRegs.set(step);
-    setGlobalContext(nullptr);
-    fout << polyContext.done();
-  }
-
+  risc0::circuit::make_circuit(argv[1]);
   return 0;
 }

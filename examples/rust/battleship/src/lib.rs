@@ -61,7 +61,10 @@ impl Battleship {
     }
 
     pub fn init(&self) -> Result<InitMessage> {
-        let mut prover = Prover::new("examples/rust/battleship/core/init")?;
+        let mut prover = Prover::new(
+            "examples/rust/battleship/methods/init",
+            "examples/rust/battleship/methods/init.id",
+        )?;
         let vec = to_vec(&self.state).unwrap();
         prover.add_input(vec.as_slice())?;
         let receipt = prover.run()?;
@@ -70,7 +73,8 @@ impl Battleship {
 
     pub fn on_init_msg(&mut self, msg: &InitMessage) -> Result<()> {
         log::info!("on_init_msg");
-        msg.receipt.verify("examples/rust/battleship/core/init")?;
+        msg.receipt
+            .verify("examples/rust/battleship/methods/init.id")?;
         self.peer_state = msg.get_state()?;
         log::info!("  peer_state: {:?}", self.peer_state);
         Ok(())
@@ -86,7 +90,10 @@ impl Battleship {
     pub fn on_turn_msg(&mut self, msg: &TurnMessage) -> Result<RoundMessage> {
         log::info!("on_turn_msg: {:?}", msg);
         let params = RoundParams::new(self.state.clone(), msg.shot.x, msg.shot.y);
-        let mut prover = Prover::new("examples/rust/battleship/core/turn")?;
+        let mut prover = Prover::new(
+            "examples/rust/battleship/methods/turn",
+            "examples/rust/battleship/methods/turn.id",
+        )?;
         let vec = to_vec(&params).unwrap();
         prover.add_input(vec.as_slice())?;
         let receipt = prover.run()?;
@@ -98,7 +105,8 @@ impl Battleship {
 
     pub fn on_round_msg(&mut self, msg: &RoundMessage) -> Result<HitType> {
         log::info!("on_round_msg");
-        msg.receipt.verify("examples/rust/battleship/core/turn")?;
+        msg.receipt
+            .verify("examples/rust/battleship/methods/turn.id")?;
         let commit = msg.get_commit()?;
         log::info!("  commit: {:?}", commit);
 

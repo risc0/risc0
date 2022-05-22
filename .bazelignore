@@ -1,1 +1,5 @@
+examples/rust/battleship/contract/target/
+examples/rust/battleship/methods/inner/target/
+risc0/zkvm/sdk/rust/guest/target/
+risc0/zkvm/sdk/rust/methods/inner/target/
 target/

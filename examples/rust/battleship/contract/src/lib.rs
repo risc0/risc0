@@ -1,3 +1,17 @@
+// Copyright 2022 Risc0, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use arrayref::array_ref;
 use near_sdk::{
     borsh::{self, BorshDeserialize, BorshSerialize},
@@ -7,9 +21,10 @@ use near_sdk::{
 use serde::{Deserialize, Serialize};
 
 use risc0_zkvm_core::Digest;
-use risc0_zkvm_verify::Receipt;
+use risc0_zkvm_verify::zkvm::{MethodID, Receipt};
 
 use battleship_core::{HitType, RoundCommit};
+use battleship_methods::methods::{INIT_ID, TURN_ID};
 
 #[derive(Default, Deserialize, Serialize, BorshDeserialize, BorshSerialize)]
 pub struct PlayerState {
@@ -45,10 +60,10 @@ impl Default for BattleshipContract {
     }
 }
 
-pub fn verify_receipt(str: &String) -> Vec<u32> {
+pub fn verify_receipt(str: &String, method_id: &MethodID) -> Vec<u32> {
     let as_bytes = base64::decode(str).unwrap();
     let receipt = bincode::deserialize::<Receipt>(&as_bytes).unwrap();
-    receipt.verify();
+    receipt.verify(&method_id);
     receipt.get_journal_u32()
 }
 
@@ -75,7 +90,8 @@ impl BattleshipContract {
     pub fn new_game(&mut self, name: String, receipt_str: String) -> GameState {
         // Game must not exist
         assert!(self.games.get(&name).is_none());
-        let journal = verify_receipt(&receipt_str);
+        let method_id = MethodID::try_from(INIT_ID).unwrap();
+        let journal = verify_receipt(&receipt_str, &method_id);
         let digest = risc0_zkvm_serde::from_slice::<Digest>(&journal).unwrap();
         let state = GameState {
             next_turn: 0,
@@ -108,7 +124,8 @@ impl BattleshipContract {
         // Set turn to 1
         state.next_turn = 1;
         // Verify the player has a valid initial state
-        let journal = verify_receipt(&receipt_str);
+        let method_id = MethodID::try_from(INIT_ID).unwrap();
+        let journal = verify_receipt(&receipt_str, &method_id);
         let digest = risc0_zkvm_serde::from_slice::<Digest>(&journal).unwrap();
         // Update player 2 starting state + set shot
         state.p2 = PlayerState {
@@ -143,7 +160,8 @@ impl BattleshipContract {
         // Verify the right user is playing
         assert!(cur_player.id == env::signer_account_id());
         // Verify the proof and extract as a RoundCommit
-        let journal = verify_receipt(&receipt_str);
+        let method_id = MethodID::try_from(TURN_ID).unwrap();
+        let journal = verify_receipt(&receipt_str, &method_id);
         let commit = risc0_zkvm_serde::from_slice::<RoundCommit>(&journal).unwrap();
         // Make sure the prior state matches the current state
         assert!(cur_player.board.as_slice() == commit.old_state.as_slice());

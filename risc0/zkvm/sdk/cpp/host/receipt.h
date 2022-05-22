@@ -73,7 +73,7 @@ private:
 
 class Prover {
 public:
-  Prover(const std::string& elfPath);
+  Prover(const std::string& elfPath, const std::string& idPath);
   ~Prover();
 
   // Allows access to key store to get/set keys

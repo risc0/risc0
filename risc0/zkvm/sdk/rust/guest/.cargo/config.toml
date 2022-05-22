@@ -1,0 +1,2 @@
+[alias]
+xpublish = "publish --target ../../../../build/riscv32im-unknown-none-elf.json -Z build-std=alloc,core"

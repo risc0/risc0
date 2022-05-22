@@ -24,7 +24,7 @@
 
 #include "oneapi/tbb/parallel_for.h"
 
-using oneapi::tbb::parallel_for;
+#define PARALLEL_FOR(start_, count_, body_) oneapi::tbb::parallel_for<size_t>(start_, count_, body_)
 
 namespace risc0 {
 
@@ -80,15 +80,14 @@ void batchEvaluateNTT(AccelSlice<Fp> io, size_t count, size_t expandBits) {
   size_t rowSize = io.size() / count;
   REQUIRE(rowSize * count == io.size());
   Fp* ioPtr = reinterpret_cast<Fp*>(io.buf()->buf);
-  parallel_for<size_t>(
-      0, count, [&](size_t i) { evaluateNTT(ioPtr + i * rowSize, rowSize, expandBits); });
+  PARALLEL_FOR(0, count, [&](size_t i) { evaluateNTT(ioPtr + i * rowSize, rowSize, expandBits); });
 }
 
 void batchInterpolateNTT(AccelSlice<Fp> io, size_t count) {
   size_t rowSize = io.size() / count;
   REQUIRE(rowSize * count == io.size());
   Fp* ioPtr = reinterpret_cast<Fp*>(io.buf()->buf);
-  parallel_for<size_t>(0, count, [&](size_t i) { interpolateNTT(ioPtr + i * rowSize, rowSize); });
+  PARALLEL_FOR(0, count, [&](size_t i) { interpolateNTT(ioPtr + i * rowSize, rowSize); });
 }
 
 void batchExpand(AccelSlice<Fp> out, AccelConstSlice<Fp> in, size_t count) {
@@ -100,7 +99,7 @@ void batchExpand(AccelSlice<Fp> out, AccelConstSlice<Fp> in, size_t count) {
   REQUIRE(inSize * count == in.size());
   Fp* outPtr = reinterpret_cast<Fp*>(out.buf()->buf);
   Fp* inPtr = reinterpret_cast<Fp*>(in.buf()->buf);
-  parallel_for<size_t>(0, count, [&](size_t i) {
+  PARALLEL_FOR(0, count, [&](size_t i) {
     expand(outPtr + i * outSize, inPtr + i * inSize, inSize, expandBits);
   });
 }
@@ -109,7 +108,7 @@ void batchBitReverse(AccelSlice<Fp> io, size_t count) {
   size_t rowSize = io.size() / count;
   REQUIRE(rowSize * count == io.size());
   Fp* ioPtr = reinterpret_cast<Fp*>(io.buf()->buf);
-  parallel_for<size_t>(0, count, [&](size_t i) { bitReverse(ioPtr + i * rowSize, rowSize); });
+  PARALLEL_FOR(0, count, [&](size_t i) { bitReverse(ioPtr + i * rowSize, rowSize); });
 }
 
 void batchEvaluateAny(AccelConstSlice<Fp> coeffs,
@@ -124,7 +123,7 @@ void batchEvaluateAny(AccelConstSlice<Fp> coeffs,
   REQUIRE(out.size() == evalCount);
   const Fp* coeffsPtr = reinterpret_cast<const Fp*>(coeffs.buf()->buf);
   Fp4* outPtr = reinterpret_cast<Fp4*>(out.buf()->buf);
-  parallel_for<size_t>(0, evalCount, [&](size_t i) {
+  PARALLEL_FOR(0, evalCount, [&](size_t i) {
     Fp4 tot;
     Fp4 cur(1, 0, 0, 0);
     size_t id = reinterpret_cast<const uint32_t*>(which.buf()->buf)[i];
@@ -169,7 +168,7 @@ void batchEvaluateAny(AccelConstSlice<Fp> coeffs,
     cpuInit();                                                                                     \
     PP_APPLY_LST(PRE_MAP, lst) {                                                                   \
       PP_APPLY_LST(POST_MAP, lst)                                                                  \
-      parallel_for<size_t>(0, count, [&](size_t idx) impl);                                        \
+      PARALLEL_FOR(0, count, [&](size_t idx) impl);                                                \
     }                                                                                              \
   }
 

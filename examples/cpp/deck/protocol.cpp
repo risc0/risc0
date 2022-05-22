@@ -33,7 +33,7 @@ DealerCommitMessage Dealer::getCommit(uint32_t deckSize) {
 
 ShuffleMessage Dealer::shuffle(const PlayerCommitMessage& msg) {
   playerKey = msg.playerKey;
-  Prover prover("examples/cpp/deck/shuffle_method");
+  Prover prover("examples/cpp/deck/shuffle_method", "examples/cpp/deck/shuffle_method.id");
   prover.writeInput(deckSize);
   prover.setKey("dealer", dealerKey);
   prover.setKey("player", playerKey);
@@ -43,7 +43,7 @@ ShuffleMessage Dealer::shuffle(const PlayerCommitMessage& msg) {
 }
 
 CardResponseMessage Dealer::revealCard(const CardRequestMessage& msg) {
-  Prover prover("examples/cpp/deck/card_method");
+  Prover prover("examples/cpp/deck/card_method", "examples/cpp/deck/card_method.id");
   prover.writeInput(deckSize);
   prover.writeInput(msg.pos);
   prover.writeInput(cards.data(), cards.size());
@@ -62,7 +62,7 @@ PlayerCommitMessage Player::getCommit(const DealerCommitMessage& msg) {
 }
 
 void Player::verifyShuffleMessage(const ShuffleMessage& msg) {
-  msg.receipt.verify("examples/cpp/deck/shuffle_method");
+  msg.receipt.verify("examples/cpp/deck/shuffle_method.id");
   ReceiptReader reader(msg.receipt);
   ShuffleContent data = reader.read<ShuffleContent>();
   REQUIRE(data.playerKey == playerKey);
@@ -76,7 +76,7 @@ CardRequestMessage Player::makeRequest(uint32_t pos) {
 }
 
 uint32_t Player::verifyResponse(const CardResponseMessage& msg) {
-  msg.receipt.verify("examples/cpp/deck/card_method");
+  msg.receipt.verify("examples/cpp/deck/card_method.id");
   ReceiptReader reader(msg.receipt);
   CardResponseContent data = reader.read<CardResponseContent>();
   REQUIRE(data.deckDigest == deckDigest);
