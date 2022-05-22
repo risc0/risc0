@@ -38,13 +38,12 @@ pub struct Position {
     pub y: u32,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, Copy)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum ShipDirection {
     Horizontal,
     Vertical,
 }
 
-// #[serde_as]
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Ship {
     pub pos: Position,
@@ -220,10 +219,6 @@ impl Ship {
                 ShipDirection::Horizontal => self.pos.x as usize <= limit,
                 ShipDirection::Vertical => self.pos.y as usize <= limit,
             }
-    }
-
-    pub fn default() -> Ship {
-        Ship::new(0, 0, ShipDirection::Horizontal).clone()
     }
 }
 

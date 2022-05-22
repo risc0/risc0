@@ -94,14 +94,14 @@ pub struct GameSession {
 
 type Taken = [[bool; BOARD_SIZE]; BOARD_SIZE];
 
-fn check_bounds(x: usize, y: usize, span: usize, dir: ShipDirection) -> bool {
+fn check_bounds(x: usize, y: usize, span: usize, dir: &ShipDirection) -> bool {
     match dir {
         ShipDirection::Horizontal => x + span <= BOARD_SIZE - 1,
         ShipDirection::Vertical => y + span <= BOARD_SIZE - 1,
     }
 }
 
-fn check_taken(x: usize, y: usize, span: usize, dir: ShipDirection, taken: Taken) -> bool {
+fn check_taken(x: usize, y: usize, span: usize, dir: &ShipDirection, taken: Taken) -> bool {
     for i in 0..span {
         match dir {
             ShipDirection::Horizontal => {
@@ -147,7 +147,7 @@ fn create_random_ships() -> [Ship; 5] {
             }
 
             // does it cross any other ship
-            if check_taken(x, y, span, dir, taken) {
+            if check_taken(x, y, span, &dir, taken) {
                 continue;
             } else {
                 // mark the ship as taken

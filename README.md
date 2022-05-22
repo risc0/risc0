@@ -13,8 +13,6 @@
 > WARNING: This software is still experimental, we do not recommend it for
 > production use (see Security section).
 
-> WARNING: This branch contains at least one security bug which was intentionally introduced to allow the battleship demo to work around a build issue.
-
 RISC Zero is a zero-knowledge verifiable general computing platform based on
 zk-STARKs and the RISC-V microarchitecture.
 
