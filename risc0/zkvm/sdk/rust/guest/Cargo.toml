@@ -19,3 +19,7 @@ risc0-build = { version = "0.7.0-dev.1", path = "../../../../build" }
 
 [features]
 bazel = []
+
+[package.metadata.docs.rs]
+default-target = "riscv32im-unknown-none-elf"
+cargo-args = ["-Z", "build-std=alloc,core"]
