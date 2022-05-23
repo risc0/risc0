@@ -1,6 +1,6 @@
 [package]
 name = "risc0-build"
-version = "0.7.0-dev.2"
+version = "0.7.0-rc.1"
 edition = "2021"
 description = "RISC Zero build helper"
 license = "Apache-2.0"
