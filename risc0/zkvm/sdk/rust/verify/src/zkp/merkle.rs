@@ -22,7 +22,7 @@ use risc0_zkp_core::{
 
 use crate::zkp::read_iop::ReadIOP;
 
-pub struct MerkeTreeParams {
+pub struct MerkleTreeParams {
     pub row_size: usize,
     pub col_size: usize,
     pub queries: usize,
@@ -31,7 +31,7 @@ pub struct MerkeTreeParams {
     pub top_size: usize,
 }
 
-impl MerkeTreeParams {
+impl MerkleTreeParams {
     pub fn new(row_size: usize, col_size: usize, queries: usize) -> Self {
         let layers: usize = to_po2(row_size);
         assert!(1 << layers == row_size);
@@ -43,7 +43,7 @@ impl MerkeTreeParams {
             top_layer = i;
         }
         let top_size = 1 << top_layer;
-        MerkeTreeParams {
+        MerkleTreeParams {
             row_size,
             col_size,
             queries,
@@ -55,7 +55,7 @@ impl MerkeTreeParams {
 }
 
 pub struct MerkleTreeVerifier {
-    params: MerkeTreeParams,
+    params: MerkleTreeParams,
     top: Vec<Digest>,
 }
 
@@ -67,7 +67,7 @@ impl MerkleTreeVerifier {
         queries: usize,
     ) -> Self {
         let sha = iop.get_sha().clone();
-        let params = MerkeTreeParams::new(row_size, col_size, queries);
+        let params = MerkleTreeParams::new(row_size, col_size, queries);
         let mut top = vec![Digest::default(); params.top_size * 2];
         iop.read_digests(&mut top[params.top_size..]);
         for i in (1..params.top_size).rev() {

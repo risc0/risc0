@@ -38,9 +38,9 @@ namespace risc0 {
 
 // We begin with a base class the computes the relevant parameters (mostly the top layer + size)
 // from the specified inputs (rowSize, colSize, queries) to reduce code duplication.
-class MerkeTreeParams {
+class MerkleTreeParams {
 public:
-  MerkeTreeParams(size_t rowSize, size_t colSize, size_t queries);
+  MerkleTreeParams(size_t rowSize, size_t colSize, size_t queries);
 
 protected:
   // The size of a row (i.e. the number of columns)
@@ -59,7 +59,7 @@ protected:
   size_t topSize;
 };
 
-class MerkleTreeVerifier : public MerkeTreeParams {
+class MerkleTreeVerifier : public MerkleTreeParams {
 public:
   // Construct a merkle tree verifier, reading the top from the IOP, commit to root.
   MerkleTreeVerifier(ReadIOP& iop, size_t rowSize, size_t colSize, size_t queries);
