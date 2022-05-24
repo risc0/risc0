@@ -86,6 +86,7 @@ macro_rules! entry {
     };
 }
 
+#[cfg(target_arch = "riscv32")]
 #[no_mangle]
 unsafe extern "C" fn __start(result: *mut usize) {
     extern "C" {
