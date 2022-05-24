@@ -16,7 +16,7 @@
 
 namespace risc0 {
 
-MerkeTreeParams::MerkeTreeParams(size_t rowSize, size_t colSize, size_t queries)
+MerkleTreeParams::MerkleTreeParams(size_t rowSize, size_t colSize, size_t queries)
     : rowSize(rowSize), colSize(colSize), queries(queries), layers(log2Ceil(rowSize)) {
   REQUIRE(1U << layers == rowSize);
   topLayer = 0;
@@ -30,7 +30,7 @@ MerkeTreeParams::MerkeTreeParams(size_t rowSize, size_t colSize, size_t queries)
 }
 
 MerkleTreeVerifier::MerkleTreeVerifier(ReadIOP& iop, size_t rowSize, size_t colSize, size_t queries)
-    : MerkeTreeParams(rowSize, colSize, queries), top(topSize * 2) {
+    : MerkleTreeParams(rowSize, colSize, queries), top(topSize * 2) {
   iop.read(&top[topSize], topSize);
   for (size_t i = topSize; i-- > 1;) {
     top[i] = shaHashPair(top[i * 2], top[i * 2 + 1]);

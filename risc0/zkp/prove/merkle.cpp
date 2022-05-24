@@ -22,7 +22,7 @@ MerkleTreeProver::MerkleTreeProver(AccelConstSlice<Fp> matrix,
                                    size_t rowSize,
                                    size_t colSize,
                                    size_t queries)
-    : MerkeTreeParams(rowSize, colSize, queries), matrix(matrix) {
+    : MerkleTreeParams(rowSize, colSize, queries), matrix(matrix) {
   REQUIRE(matrix.size() == rowSize * colSize);
   // Allocate nodes
   nodes = AccelSlice<ShaDigest>::allocate(rowSize * 2);

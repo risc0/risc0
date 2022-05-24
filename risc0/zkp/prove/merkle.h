@@ -22,7 +22,7 @@
 
 namespace risc0 {
 
-class MerkleTreeProver : public MerkeTreeParams {
+class MerkleTreeProver : public MerkleTreeParams {
 public:
   // Gernerate a merkle tree from a matrix of values.  The proofs will prove a single 'column' of
   // values in the tree at a certain row.  Layout is presumed to be packed row-major.  The number of
