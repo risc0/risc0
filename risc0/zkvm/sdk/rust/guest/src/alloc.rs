@@ -17,15 +17,18 @@ use core::{
     cell::UnsafeCell,
 };
 
-use crate::riscv::{_fault, align_up, REGION_HEAP_END, REGION_HEAP_START, WORD_SIZE};
+use crate::{_fault, align_up, REGION_HEAP_END, REGION_HEAP_START, WORD_SIZE};
 
 // Bump pointer allocator for *single* core systems
 struct BumpPointerAlloc {
     head: UnsafeCell<usize>,
     end: usize,
 }
+
+// SAFETY: single threaded environment
 unsafe impl Sync for BumpPointerAlloc {}
 
+#[cfg(target_arch = "riscv32")]
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
         let head = self.head.get();
@@ -46,12 +49,14 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
     }
 }
 
+#[cfg(target_arch = "riscv32")]
 #[global_allocator]
 static HEAP: BumpPointerAlloc = BumpPointerAlloc {
     head: UnsafeCell::new(REGION_HEAP_START),
     end: REGION_HEAP_END,
 };
 
+#[cfg(target_arch = "riscv32")]
 #[alloc_error_handler]
 unsafe fn alloc_fault(_layout: Layout) -> ! {
     _fault()
