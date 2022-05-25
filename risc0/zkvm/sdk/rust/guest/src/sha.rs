@@ -20,7 +20,7 @@ use risc0_zkvm_core::{Digest, DIGEST_WORDS};
 use risc0_zkvm_serde::to_vec_with_capacity;
 use serde::Serialize;
 
-use crate::riscv::{
+use crate::{
     align_up,
     gpio::{SHADescriptor, GPIO_SHA},
     REGION_SHA_START, WORD_SIZE,
@@ -28,6 +28,7 @@ use crate::riscv::{
 
 // Current sha descriptor index.
 struct CurDesc(UnsafeCell<usize>);
+
 // SAFETY: single threaded environment
 unsafe impl Sync for CurDesc {}
 
@@ -72,7 +73,7 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
     let desc_ptr = alloc_desc();
 
     let ptr = data.as_ptr();
-    crate::riscv::memory_barrier(ptr);
+    crate::memory_barrier(ptr);
     desc_ptr.write_volatile(SHADescriptor {
         type_count,
         idx: 0,
@@ -95,6 +96,7 @@ pub(crate) enum MemoryType {
     Normal, // Normal memory that can be written to multiple times.
     WOM,    // Write-only memory where each word can only be written once.
 }
+
 // Add the SHA trailer.  The given slice must already be properly
 // sized according to compute_capacity_needed.
 pub(crate) fn add_trailer(data: &mut [u32], len_bytes: usize, memtype: MemoryType) {
@@ -187,9 +189,11 @@ impl risc0_zkp_core::sha::Sha for Impl {
     fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
         digest_u8_slice(bytes)
     }
+
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
         raw_digest(bytemuck::cast_slice(&[*a, *b]))
     }
+
     fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
         // Fps do not not include standard sha header.
         if fps.len() % CHUNK_SIZE == 0 {
@@ -202,6 +206,7 @@ impl risc0_zkp_core::sha::Sha for Impl {
             raw_digest(&buf)
         }
     }
+
     fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr {
         self.hash_fps(bytemuck::cast_slice(fp4s))
     }

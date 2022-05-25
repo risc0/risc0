@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-guest"
-version = "0.7.0-rc.1"
+version = "0.7.0-rc.3"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM guest crate"
 license = "Apache-2.0"
@@ -19,7 +19,3 @@ risc0-build = { version = "0.7.0-dev.1", path = "../../../../build" }
 
 [features]
 bazel = []
-
-[package.metadata.docs.rs]
-default-target = "riscv32im-unknown-none-elf"
-cargo-args = ["-Z", "build-std=alloc,core"]
