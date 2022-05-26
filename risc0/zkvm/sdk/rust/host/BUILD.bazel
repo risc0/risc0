@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 rust_library(
     name = "host",
@@ -8,6 +8,7 @@ rust_library(
         "src/lib.rs",
     ],
     crate_name = "risc0_zkvm_host",
+    data = ["README.md"],
     proc_macro_deps = ["@crates_host//:ctor"],
     visibility = ["//visibility:public"],
     deps = [
@@ -16,9 +17,4 @@ rust_library(
         "@crates_host//:cxx",
         "@crates_host//:log",
     ],
-)
-
-rust_doc(
-    name = "doc",
-    crate = ":host",
 )
