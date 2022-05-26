@@ -14,11 +14,19 @@
 
 #pragma once
 
-#include "risc0/zkvm/verify/method_id.h"
-
 #include <memory>
+#include <array>
+
+#include "risc0/core/util.h"
+#include "risc0/zkp/core/sha256.h"
+#include "risc0/zkvm/circuit/constants.h"
 
 namespace risc0 {
+
+constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
+using MethodID = std::array<ShaDigest, kCodeDigestCount>;
+
+MethodID readMethodID(const std::string& filename);
 
 MethodID makeMethodID(const std::string& elfFile);
 void writeMethodID(const std::string& filename, const MethodID& id);

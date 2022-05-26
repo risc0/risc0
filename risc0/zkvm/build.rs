@@ -25,11 +25,9 @@ fn main() {
     build
         .file("prove/exec.cpp")
         .file("prove/io_handler.cpp")
-        .file("prove/method_id.cpp")
         .file("prove/riscv.cpp")
         .file("prove/step_context.cpp")
         .file("prove/step.cpp")
-        .file("verify/method_id.cpp")
         .file("verify/riscv.cpp")
         .file("sdk/cpp/host/c_api.cpp")
         .file("sdk/cpp/host/receipt.cpp")

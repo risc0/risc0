@@ -66,6 +66,20 @@ void writeMethodID(const std::string& filename, const MethodID& id) {
   }
 }
 
+MethodID readMethodID(const std::string& filename) {
+  std::ifstream file(filename, std::ios::in | std::ios::binary);
+  if (!file) {
+    throw std::runtime_error("Unable to open file: " + filename);
+  }
+  MethodID id;
+  file.read(reinterpret_cast<char*>(&id), sizeof(MethodID));
+  file.close();
+  if (!file.good()) {
+    throw std::runtime_error("Error reading MethodID file: " + filename);
+  }
+  return id;
+}
+
 namespace rust {
 
 MethodID::MethodID(const std::string& elf_path) : id(makeMethodID(elf_path)) {}

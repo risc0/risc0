@@ -18,7 +18,7 @@
 #include "risc0/core/key.h"
 #include "risc0/zkp/core/sha256.h"
 #include "risc0/zkvm/prove/step.h"
-#include "risc0/zkvm/verify/method_id.h"
+#include "risc0/zkvm/prove/method_id.h"
 
 #include <memory>
 #include <vector>

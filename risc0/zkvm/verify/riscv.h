@@ -15,11 +15,17 @@
 #pragma once
 
 #include <memory>
+#include <array>
 
+#include "risc0/core/util.h"
+#include "risc0/zkvm/circuit/constants.h"
 #include "risc0/zkp/verify/verify.h"
-#include "risc0/zkvm/verify/method_id.h"
 
 namespace risc0 {
+
+// Redundant with alias in prove/method_id.h
+constexpr size_t kDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
+using MethodID = std::array<ShaDigest, kDigestCount>;
 
 TapSetRef getRiscVTaps();
 std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodID& id);
