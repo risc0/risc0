@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_doc", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 rust_library(
     name = "host",
@@ -17,9 +17,4 @@ rust_library(
         "@crates_host//:cxx",
         "@crates_host//:log",
     ],
-)
-
-rust_doc(
-    name = "doc",
-    crate = ":host",
 )
