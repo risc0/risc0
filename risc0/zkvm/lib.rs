@@ -22,24 +22,6 @@ mod ffi {
 
         type MethodID;
 
-        fn new_method_id(elf_path: &CxxString) -> Result<UniquePtr<MethodID>>;
-        fn write(&self, filename: &CxxString) -> Result<()>;
-    }
-}
-
-pub struct MethodID {
-    raw: UniquePtr<ffi::MethodID>,
-}
-
-impl MethodID {
-    pub fn new(elf_path: &str) -> Result<Self> {
-        let_cxx_string!(elf_path = elf_path);
-        let raw = ffi::new_method_id(&elf_path)?;
-        Ok(MethodID { raw })
-    }
-
-    pub fn write(&self, filename: &str) -> Result<()> {
-        let_cxx_string!(filename = filename);
-        Ok(self.raw.write(&filename)?)
+        fn make_method_id(elf_path: &CxxString) -> Result<UniquePtr<MethodID>>;
     }
 }

@@ -14,12 +14,12 @@
 
 #pragma once
 
-#include <memory>
 #include <array>
+#include <memory>
 
 #include "risc0/core/util.h"
-#include "risc0/zkvm/circuit/constants.h"
 #include "risc0/zkp/verify/verify.h"
+#include "risc0/zkvm/circuit/constants.h"
 
 namespace risc0 {
 

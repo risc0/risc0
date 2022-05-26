@@ -54,18 +54,6 @@ MethodID makeMethodID(const std::string& elfFile) {
   return ret;
 }
 
-void writeMethodID(const std::string& filename, const MethodID& id) {
-  std::ofstream file(filename, std::ios::out | std::ios::binary);
-  if (!file) {
-    throw std::runtime_error("Unable to open file: " + filename);
-  }
-  file.write(reinterpret_cast<const char*>(&id), sizeof(MethodID));
-  file.close();
-  if (!file.good()) {
-    throw std::runtime_error("Error writing code id file: " + filename);
-  }
-}
-
 MethodID readMethodID(const std::string& filename) {
   std::ifstream file(filename, std::ios::in | std::ios::binary);
   if (!file) {
@@ -82,14 +70,8 @@ MethodID readMethodID(const std::string& filename) {
 
 namespace rust {
 
-MethodID::MethodID(const std::string& elf_path) : id(makeMethodID(elf_path)) {}
-
-std::unique_ptr<MethodID> new_method_id(const std::string& elf_path) {
-  return std::make_unique<MethodID>(elf_path);
-}
-
-void MethodID::write(const std::string& filename) const {
-  writeMethodID(filename, id);
+std::unique_ptr<MethodID> make_method_id(const std::string& elf_path) {
+  return std::make_unique<MethodID>(readMethodID(elf_path));
 }
 
 } // namespace rust
