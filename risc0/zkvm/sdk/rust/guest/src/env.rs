@@ -69,14 +69,17 @@ pub(crate) fn finalize(result: *mut usize) {
     ENV.get().finalize(result);
 }
 
+/// Read private data from the host.
 pub fn read<T: Deserialize<'static>>() -> T {
     ENV.get().read()
 }
 
+/// Write private data to the host.
 pub fn write<T: Serialize>(data: &T) {
     ENV.get().write(data);
 }
 
+/// Commit public data to the journal.
 pub fn commit<T: Serialize>(data: &T) {
     ENV.get().commit(data);
 }
