@@ -14,14 +14,21 @@
 
 #![no_std]
 #![allow(unused)]
+#![deny(missing_docs)]
+#![doc = include_str!("../README.md")]
 #![cfg_attr(target_arch = "riscv32", feature(alloc_error_handler))]
 #![cfg_attr(target_arch = "riscv32", feature(new_uninit))]
 
 extern crate alloc as _alloc;
 
 mod alloc;
+
+/// Functions for interacting with the host environment.
 pub mod env;
+
 mod gpio;
+
+/// Functions for computing SHA-256 hashes.
 pub mod sha;
 
 use core::{arch::asm, mem, panic::PanicInfo, ptr};
@@ -74,6 +81,15 @@ unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
     _fault()
 }
 
+/// Used for defining a main entrypoint.
+///
+/// # Example
+///
+/// ```
+/// risc0_zkvm_guest::entry!(main);
+///
+/// pub fn main() { }
+/// ```
 #[macro_export]
 macro_rules! entry {
     ($path:path) => {
@@ -143,9 +159,9 @@ _fault:
 "#
 );
 
-// Require that accesses to behind the given pointer before the memory
-// barrier don't get optimized away or reordered to after the memory
-// barrier.
+/// Require that accesses to behind the given pointer before the memory
+/// barrier don't get optimized away or reordered to after the memory
+/// barrier.
 pub fn memory_barrier<T>(ptr: *const T) {
     // SAFETY: This passes a pointer in, but does nothing with it.
     unsafe { asm!("/* {0} */", in(reg) (ptr)) }

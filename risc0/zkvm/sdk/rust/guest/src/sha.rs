@@ -52,7 +52,7 @@ fn alloc_desc() -> *mut SHADescriptor {
 
 // Computes a raw digest of the given slice.  The data must already
 // contain the end marker and the trailer.
-pub fn raw_digest(data: &[u32]) -> &'static Digest {
+fn raw_digest(data: &[u32]) -> &'static Digest {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     // Allocate fresh memory that's guaranteed to be uninitialized so
     // the host can write to it.
@@ -86,7 +86,7 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
 
 // Calculates the number of words of capacity needed, including end
 // marker and trailer, to take the SHA hash of len_bytes bytes.
-pub const fn compute_capacity_needed(len_bytes: usize) -> usize {
+pub(crate) const fn compute_capacity_needed(len_bytes: usize) -> usize {
     // Add one for end marker, round up, then 2 words for the 64-bit size.
     let len_words = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE + 2;
     align_up(len_words, CHUNK_SIZE)
@@ -125,7 +125,7 @@ pub(crate) fn add_trailer(data: &mut [u32], len_bytes: usize, memtype: MemoryTyp
     data[size_word] = (len_bits as u32).to_be();
 }
 
-// Computes the SHA256 digest of a serialized object.
+/// Computes the SHA256 digest of a serialized object.
 pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     // If the object to be serialized is a plain old structure in memory, this
     // should be a good guess for the allocation needed.
@@ -138,8 +138,9 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     raw_digest(buf.as_slice())
 }
 
-// Makes a digest for a slice of u8s.  We have no guarantees on
-// alignment so we have to copy the whole thing to a new buffer.
+/// Makes a digest for a slice of bytes.
+///
+/// Since there are no guarantees on alignment, an internal copy is made.
 pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     let len_bytes = data.len();
     let cap = compute_capacity_needed(len_bytes);
@@ -180,6 +181,9 @@ pub(crate) fn finalize() {
     }
 }
 
+/// A guest-side [Sha] implementation.
+///
+/// [Sha]: risc0_zkp_core::sha::Sha
 #[derive(Debug, Clone)]
 pub struct Impl {}
 
