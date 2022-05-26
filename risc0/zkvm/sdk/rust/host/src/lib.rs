@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![deny(missing_docs)]
+#![doc = include_str!("../README.md")]
+
 use std::{ffi::CString, mem};
 
 mod exception;
@@ -22,12 +25,19 @@ pub use exception::Exception;
 #[cxx::bridge]
 mod bridge {}
 
+/// A Result specialized for [Exception].
 pub type Result<T> = std::result::Result<T, Exception>;
 
+/// A record attesting to the correct execution of a 'method'.
+///
+/// Consists of:
+/// * journal: all data the method wants to publicly output and commit to.
+/// * seal: the cryptographic blob which proves that the receipt is valid.
 pub struct Receipt {
     ptr: *const ffi::RawReceipt,
 }
 
+/// The prover generates a [Receipt] by executing a given method in a ZKVM.
 pub struct Prover {
     ptr: *mut ffi::RawProver,
 }
@@ -47,6 +57,8 @@ fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
 }
 
 impl Receipt {
+    /// Verify that the current [Receipt] is a valid result of executing the
+    /// method associated with the given method ID in a ZKVM.
     pub fn verify(&self, id_path: &str) -> Result<()> {
         let mut err = ffi::RawError::default();
         let id_path = CString::new(id_path).unwrap();
@@ -54,6 +66,7 @@ impl Receipt {
         ffi::check(err, || ())
     }
 
+    /// Provides access to the `seal` of a [Receipt].
     pub fn get_seal(&self) -> Result<&[u32]> {
         unsafe {
             let mut err = ffi::RawError::default();
@@ -66,6 +79,7 @@ impl Receipt {
         }
     }
 
+    /// Provides access to the `journal` of a [Receipt].
     pub fn get_journal(&self) -> Result<&[u8]> {
         unsafe {
             let mut err = ffi::RawError::default();
@@ -78,12 +92,15 @@ impl Receipt {
         }
     }
 
+    /// Provides access to the `journal` of a [Receipt] as a [`Vec<u32>`].
     pub fn get_journal_vec(&self) -> Result<Vec<u32>> {
         into_words(self.get_journal()?)
     }
 }
 
 impl Prover {
+    /// Create a new [Prover] with the given method (specified via `elf_path`)
+    /// and an associated method ID (specified via `id_path`).
     pub fn new(elf_path: &str, id_path: &str) -> Result<Self> {
         let mut err = ffi::RawError::default();
         let elf_path = CString::new(elf_path).unwrap();
@@ -92,6 +109,8 @@ impl Prover {
         ffi::check(err, || Prover { ptr })
     }
 
+    /// Provide private input data that is availble to guest-side method code
+    /// to 'read'.
     pub fn add_input(&mut self, slice: &[u32]) -> Result<()> {
         let mut err = ffi::RawError::default();
         unsafe {
@@ -105,6 +124,7 @@ impl Prover {
         ffi::check(err, || ())
     }
 
+    /// Provide access to private output data written by guest-side method code.
     pub fn get_output(&self) -> Result<&[u8]> {
         unsafe {
             let mut err = ffi::RawError::default();
@@ -117,10 +137,14 @@ impl Prover {
         }
     }
 
+    /// Provide access to private output data written to by guest-side method code.
+    ///
+    /// This returns the data as a [`Vec<u32>`].
     pub fn get_output_vec(&self) -> Result<Vec<u32>> {
         into_words(self.get_output()?)
     }
 
+    /// Execute the ZKVM to produce a [Receipt].
     pub fn run(&self) -> Result<Receipt> {
         let mut err = ffi::RawError::default();
         let ptr = unsafe { ffi::risc0_prover_run(&mut err, self.ptr) };

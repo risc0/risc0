@@ -14,6 +14,7 @@
 
 use std::fmt::{self, Display};
 
+/// A standard exception type used for relaying underlying C++ exceptions.
 #[derive(Debug)]
 pub struct Exception {
     pub(crate) what: String,
@@ -28,12 +29,14 @@ impl Display for Exception {
 impl std::error::Error for Exception {}
 
 impl Exception {
+    /// Create a new [Exception] given a string description.
     pub fn new(what: &str) -> Self {
         Exception {
             what: what.to_string(),
         }
     }
 
+    /// Access the underlying string description.
     pub fn what(&self) -> &str {
         &self.what
     }
