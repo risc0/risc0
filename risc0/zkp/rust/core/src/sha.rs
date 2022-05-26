@@ -27,7 +27,6 @@ use serde::{Deserialize, Serialize};
 use crate::{fp::Fp, fp4::Fp4};
 
 /// The number of words represented by a [Digest].
-///
 // We represent a SHA-256 digest as 8 32-bit words instead of the
 // traditional 32 8-bit bytes.
 //
