@@ -44,15 +44,23 @@ impl Fp4 {
     pub fn new(x0: Fp, x1: Fp, x2: Fp, x3: Fp) -> Self {
         Self([x0, x1, x2, x3])
     }
+
+    /// Create a [Fp4] from a [Fp].
     pub fn from_fp(x: Fp) -> Self {
         Self([x, Fp::new(0), Fp::new(0), Fp::new(0)])
     }
+
+    /// Create a [Fp4] from a raw integer.
     pub fn from_u32(x0: u32) -> Self {
         Self([Fp::new(x0), Fp::new(0), Fp::new(0), Fp::new(0)])
     }
+
+    /// Returns the value zero.
     pub fn zero() -> Self {
         Self::from_u32(0)
     }
+
+    /// Returns the value one.
     pub fn one() -> Self {
         Self::from_u32(1)
     }
@@ -67,15 +75,17 @@ impl Fp4 {
         ])
     }
 
+    /// Returns the constant portion of a [Fp].
     pub fn const_part(self) -> Fp {
         self.0[0]
     }
 
+    /// Returns the elements of a [Fp].
     pub fn elems(&self) -> &[Fp] {
         &self.0
     }
 
-    /// Raise an `Fp4` to a power of `n`.
+    /// Raise a [Fp4] to a power of `n`.
     pub fn pow(self, n: usize) -> Self {
         let mut n = n;
         let mut tot = Fp4::from(1);

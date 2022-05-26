@@ -26,45 +26,61 @@ use serde::{Deserialize, Serialize};
 
 use crate::{fp::Fp, fp4::Fp4};
 
+/// The number of words represented by a [Digest].
+///
 // We represent a SHA-256 digest as 8 32-bit words instead of the
 // traditional 32 8-bit bytes.
 //
 // TODO(nils): Remove 'Copy' trait on Digest; these are not small and
 // we don't want to copy them around accidentally.
 pub const DIGEST_WORDS: usize = 8;
+
+/// The result of a SHA-256 hashing function.
 #[derive(Eq, PartialEq, Copy, Zeroable, Pod, Serialize, Deserialize)]
 #[repr(transparent)]
 pub struct Digest([u32; DIGEST_WORDS]);
 
 impl Digest {
+    /// Create a new [Digest] from an existing array of words.
     pub fn new(data: [u32; DIGEST_WORDS]) -> Digest {
         Digest(data)
     }
 
+    /// Try to create a [Digest] from a slice of words.
     pub fn try_from_slice(words: &[u32]) -> Result<Self> {
         Ok(Digest(words.try_into().map_err(Error::msg)?))
     }
 
+    /// Create a [Digest] from a slice of words.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the number of words is not exactly [DIGEST_WORDS].
     pub fn from_slice(words: &[u32]) -> Self {
         Self::try_from_slice(words).unwrap()
     }
 
+    /// Returns a slice of words.
     pub fn as_slice(&self) -> &[u32] {
         &self.0
     }
 
+    /// Returns a mutable slice of words.
     pub fn as_mut_slice(&mut self) -> &mut [u32] {
         &mut self.0
     }
 
+    /// Returns a slice of words.
     pub fn get(&self) -> &[u32; DIGEST_WORDS] {
         &self.0
     }
 
+    /// Returns a mutable slice of words.
     pub fn get_mut(&mut self) -> &mut [u32; DIGEST_WORDS] {
         &mut self.0
     }
 
+    /// Returns a hexadecimal string representation of the [Digest].
     pub fn to_hex(&self) -> String {
         fn hex(digit: u8) -> char {
             char::from_digit(digit as u32, 16).unwrap()
@@ -76,6 +92,7 @@ impl Digest {
             .collect()
     }
 
+    /// Converts a hexadecimal string into a [Digest].
     pub fn from_str(s: &str) -> Digest {
         s.into()
     }
@@ -121,34 +138,40 @@ impl Clone for Digest {
     }
 }
 
-// An implementation that provides SHA-256 hashing services.
+/// An implementation that provides SHA-256 hashing services.
 pub trait Sha: Clone + Debug {
-    // A pointer to the created digest.  This may either be a
-    // Box<Digest> or some other pointer in case the implementation
-    // wants to manage its own memory.
+    /// A pointer to the created digest.
+    ///
+    /// This may either be a Box<Digest> or some other pointer in case the
+    /// implementation wants to manage its own memory.
     type DigestPtr: Deref<Target = Digest> + Debug;
 
-    // Generate SHAs for various data types.
+    /// Generate a SHA from a slice of bytes.
     fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr;
 
+    /// Generate a SHA from a slice of words.
     fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
+    /// Generate a SHA from a pair of [Digests](Digest).
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr;
 
+    /// Generate a SHA from a slice of [Fps](Fp).
     fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr;
 
+    /// Generate a SHA from a slice of [Fp4s](Fp4).
     fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr;
 
-    // Generate a new digest by mixing two digests together via XOR,
-    // and storing into the first digest.
+    /// Generate a new digest by mixing two digests together via XOR,
+    /// and storing into the first digest.
     fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest);
 }
 
 // Default implementation is CPU-based.
 pub use crate::sha_cpu::Impl as DefaultImplementation;
 
+/// Return the default implementation of a [Sha].
 pub fn default_implementation() -> &'static DefaultImplementation {
     static DEFAULT_IMPLEMENTATION: DefaultImplementation = DefaultImplementation {};
     &DEFAULT_IMPLEMENTATION
@@ -167,6 +190,7 @@ mod tests {
     }
 }
 
+#[allow(missing_docs)]
 pub mod testutil {
     use super::{Digest, Fp, Fp4, Sha};
     use alloc::vec::Vec;
