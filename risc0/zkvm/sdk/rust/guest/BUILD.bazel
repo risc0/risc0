@@ -11,6 +11,7 @@ rust_library(
     ],
     crate_features = ["bazel"],
     crate_name = "risc0_zkvm_guest",
+    data = ["README.md"],
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
     deps = [
