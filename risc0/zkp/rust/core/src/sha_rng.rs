@@ -18,6 +18,7 @@ use rand_core::impls;
 
 use crate::sha::{Digest, Sha, DIGEST_WORDS};
 
+/// A random number generator driven by a [Sha].
 #[derive(Clone, Debug)]
 pub struct ShaRng<S: Sha> {
     sha: S,
@@ -27,6 +28,7 @@ pub struct ShaRng<S: Sha> {
 }
 
 impl<S: Sha> ShaRng<S> {
+    /// Create a new [ShaRng] from a given [Sha].
     pub fn new(sha: &S) -> ShaRng<S> {
         ShaRng {
             sha: sha.clone(),
@@ -36,6 +38,7 @@ impl<S: Sha> ShaRng<S> {
         }
     }
 
+    /// Mix the pool with a specified [Digest].
     pub fn mix(&mut self, val: &Digest) {
         self.sha.mix(&mut self.pool0, val);
         self.step();
@@ -72,6 +75,7 @@ impl<S: Sha> RngCore for ShaRng<S> {
     }
 }
 
+#[allow(missing_docs)]
 pub mod testutil {
     use super::ShaRng;
     use crate::sha::Sha;
