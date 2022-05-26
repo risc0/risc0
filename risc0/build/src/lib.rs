@@ -159,15 +159,17 @@ pub fn embed_methods() {
                     eprintln!("Try: `cargo run --bin risc0-build-methods`");
                     std::process::exit(-1);
                 }
-                let method_id = make_method_id(&elf_path.to_str().unwrap());
-                let method_id_buf = from_raw_parts(method_id as *const u8, size_of::<MethodID>());
+                let method_id: &[u8];
+                unsafe {
+                    method_id = MethodID::new(&elf_path.to_str().unwrap()).unwrap().to_bytes().unwrap();
+                }
 
                 let elf_path = elf_path.display();
                 let method_name = method.to_uppercase();
                 let content = format!(
                     r##"
-    pub const {method_name}_PATH: &str = r#"{elf_path_display}"#;
-    pub const {method_name}_ID: &[u8] = format_bytes!(r#"{method_id_buf}"#);
+    pub const {method_name}_PATH: &str = r#"{elf_path}"#;
+    pub const {method_name}_ID: &[u8] = format_bytes!(r#"{method_id}");
             "##
                 );
                 file.write_all(content.as_bytes()).unwrap();

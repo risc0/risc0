@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{Error, Result};
 use cxx::{let_cxx_string, UniquePtr};
+use std::{slice, mem};
+
 
 #[cxx::bridge(namespace = "risc0::rust")]
 mod ffi {
@@ -23,5 +25,26 @@ mod ffi {
         type MethodID;
 
         fn make_method_id(elf_path: &CxxString) -> Result<UniquePtr<MethodID>>;
+    }
+}
+
+// Can we remove this?
+pub struct MethodID {
+    raw: UniquePtr<ffi::MethodID>,
+}
+
+impl MethodID {
+    pub fn new(elf_path: &str) -> Result<Self> {
+        let_cxx_string!(elf_path = elf_path);
+        let raw = ffi::make_method_id(&elf_path)?;
+        Ok(MethodID { raw })
+    }
+
+    pub unsafe fn to_bytes(&self) -> Result<&[u8]> {
+        match self.raw.as_ref() {
+            Some(method) => Ok(slice::from_raw_parts((method as *const ffi::MethodID) as *const u8, mem::size_of::<ffi::MethodID>())),
+            None => Ok(&[]) // TODO: Fix
+        }
+
     }
 }

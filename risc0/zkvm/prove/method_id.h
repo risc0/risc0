@@ -31,6 +31,7 @@ MethodID makeMethodID(const std::string& elfPath);
 
 namespace rust {
 
+using MethodID = ::risc0::MethodID;
 std::unique_ptr<MethodID> make_method_id(const std::string& elf_path);
 
 } // namespace rust
