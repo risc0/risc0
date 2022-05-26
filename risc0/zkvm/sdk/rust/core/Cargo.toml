@@ -9,7 +9,7 @@ repository = "https://github.com/risc0/risc0/"
 
 [dependencies]
 cfg-if = "1.0"
-risc0-zkp-core = { version = "0.7.0-dev.1", path = "../../../../zkp/rust/core", default-features = false, optional = true }
+risc0-zkp-core = { version = "0.7", path = "../../../../zkp/rust/core", default-features = false, optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
 [features]

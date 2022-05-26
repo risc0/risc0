@@ -13,7 +13,7 @@ path = "lib.rs"
 
 [dependencies]
 cxx = "1.0"
-risc0-core-sys = { version = "0.7.0-dev.1", path = "../core" }
+risc0-core-sys = { version = "0.7", path = "../core" }
 tbb-sys = { version = "1.0" }
 
 [build-dependencies]
