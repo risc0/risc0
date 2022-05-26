@@ -137,7 +137,8 @@ impl Prover {
         }
     }
 
-    /// Provide access to private output data written to by guest-side method code.
+    /// Provide access to private output data written to by guest-side method
+    /// code.
     ///
     /// This returns the data as a [`Vec<u32>`].
     pub fn get_output_vec(&self) -> Result<Vec<u32>> {
