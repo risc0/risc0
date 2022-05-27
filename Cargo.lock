@@ -105,9 +105,6 @@ name = "cc"
 version = "1.0.73"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2fff2a6927b3bb87f9595d67196a70493f627687a71d87a0d692242c33f58c11"
-dependencies = [
- "jobserver",
-]
 
 [[package]]
 name = "cfg-if"
@@ -277,15 +274,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "112c678d4050afce233f4f2852bb2eb519230b3cf12f33585275537d7e41578d"
 
 [[package]]
-name = "jobserver"
-version = "0.1.24"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af25a77299a7f711a01975c35a6a424eb6862092cc2d6c72c4ed6cbc56dfc1fa"
-dependencies = [
- "libc",
-]
-
-[[package]]
 name = "libc"
 version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -317,9 +305,9 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "once_cell"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b10983b38c53aebdf33f542c6275b0f58a238129d00c4ae0e6fb59738d783ca"
+checksum = "7709cef83f0c1f58f666e746a08b21e0085f7440fa6a29cc194d68aac97a4225"
 
 [[package]]
 name = "proc-macro2"
@@ -616,11 +604,10 @@ dependencies = [
 
 [[package]]
 name = "tbb-sys"
-version = "1.0.0+2021.5.0"
+version = "1.0.2+2021.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "beeab21f005320d0c0654165ddd75eeb75fabed9341b3863e06488f35a2f10b3"
+checksum = "28fe1d08a48486eef7671e6826a9015f065f2c9f46a58fc8a7c7bfaf6cb40d9f"
 dependencies = [
- "cc",
  "cxx",
  "cxx-build",
  "glob",
