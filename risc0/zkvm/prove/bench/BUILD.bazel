@@ -11,8 +11,6 @@ cc_binary(
         ":bench_simple_loop.id",
         "//examples/cpp/battleship:turn_method",
         "//examples/cpp/battleship:turn_method.id",
-        "//examples/rust/battleship/methods:turn",
-        "//examples/rust/battleship/methods:turn.id",
     ],
     deps = [
         "//examples/cpp/battleship:core",

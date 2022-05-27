@@ -1,4 +1,3 @@
-load("@rules_rust//rust:defs.bzl", "rust_library")
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
 risc0_rust_library_pair(
@@ -18,15 +17,4 @@ risc0_rust_library_pair(
     host_features = ["std"],
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
-)
-
-rust_library(
-    name = "core_wasm",
-    srcs = ["src/lib.rs"],
-    crate_name = "risc0_zkvm_core",
-    visibility = ["//visibility:public"],
-    deps = [
-        "@crates_wasm//:cfg-if",
-        "@crates_wasm//:serde",
-    ],
 )

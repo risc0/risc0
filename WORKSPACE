@@ -111,9 +111,6 @@ crates_repository(
     lockfile = "//:Cargo-host.Bazel.lock",
     packages = {
         "anyhow": crate.spec(version = "1.0"),
-        "axum": crate.spec(version = "0.5"),
-        "base64": crate.spec(version = "0.13"),
-        "bincode": crate.spec(version = "1.3"),
         "bytemuck": crate.spec(
             features = ["derive"],
             version = "1.9",
@@ -124,7 +121,6 @@ crates_repository(
         "cxx": crate.spec(version = "1.0"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
-        "open": crate.spec(version = "2"),
         "rand": crate.spec(
             features = ["small_rng"],
             version = "0.8",
@@ -143,22 +139,6 @@ crates_repository(
             version = "0.10",
         ),
         "thiserror": crate.spec(version = "1.0"),
-        "tokio": crate.spec(
-            features = ["full"],
-            version = "1.17",
-        ),
-        "tower-http": crate.spec(
-            features = [
-                "fs",
-                "trace",
-            ],
-            version = "0.2",
-        ),
-        "tracing": crate.spec(version = "0.1"),
-        "tracing-subscriber": crate.spec(
-            features = ["env-filter"],
-            version = "0.3",
-        ),
     },
     quiet = False,
 )
@@ -209,40 +189,6 @@ crates_repository(
 load("@crates_guest//:defs.bzl", crate_repositories_guest = "crate_repositories")
 
 crate_repositories_guest()
-
-crates_repository(
-    name = "crates_wasm",
-    lockfile = "//:Cargo-wasm.Bazel.lock",
-    packages = {
-        "async-trait": crate.spec(version = "0.1"),
-        "bytemuck": crate.spec(version = "1.9"),
-        "cfg-if": crate.spec(version = "1.0"),
-        "gloo": crate.spec(
-            features = ["futures"],
-            version = "0.7",
-        ),
-        "js-sys": crate.spec(version = "0.3"),
-        "log": crate.spec(version = "0.4"),
-        "reqwasm": crate.spec(version = "0.5"),
-        "serde": crate.spec(
-            features = ["derive"],
-            version = "1.0",
-        ),
-        "serde_json": crate.spec(version = "1.0"),
-        "serde-wasm-bindgen": crate.spec(version = "0.4"),
-        # NOTE: pinned to exact same version used by @rules_rust//wasm_bindgen/raze:wasm_bindgen
-        "wasm-bindgen": crate.spec(version = "=0.2.78"),
-        "wasm-bindgen-futures": crate.spec(version = "0.4"),
-        "wasm-logger": crate.spec(version = "0.2"),
-        "weblog": crate.spec(version = "0.3"),
-        "yew": crate.spec(version = "0.19"),
-    },
-    quiet = False,
-)
-
-load("@crates_wasm//:defs.bzl", crate_repositories_wasm = "crate_repositories")
-
-crate_repositories_wasm()
 
 http_archive(
     name = "oneTBB",
