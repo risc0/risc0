@@ -18,7 +18,7 @@ risc0-core-sys = { version = "0.7", path = "../core" }
 risc0-zkp-sys = { version = "0.7", path = "../zkp" }
 risc0-zkvm-circuit-gen = { version = "0.7", path = "circuit/make-circuit" }
 risc0-zkvm-circuit-sys = { version = "0.7", path = "circuit" }
-tbb-sys = { version = "1.0" }
+tbb-sys = "1.1"
 
 [build-dependencies]
 cxx-build = "1.0"

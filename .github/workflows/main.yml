@@ -42,4 +42,3 @@ jobs:
           toolchain: stable
       - run: cargo run --bin risc0-build-methods
       - run: cargo test --release
-      - run: cargo build --release --manifest-path examples/rust/battleship/contract/Cargo.toml

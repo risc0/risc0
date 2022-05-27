@@ -1,3 +1,0 @@
-[[proxy]]
-rewrite = "/prove/"
-backend = "http://localhost:3000/prove/"
