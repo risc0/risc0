@@ -28,6 +28,3 @@ inherits = "release"
 
 [workspace.metadata.workspaces]
 allow_branch = "main"
-
-[patch.crates-io]
-tbb-sys = { path = "../tbb-sys" }

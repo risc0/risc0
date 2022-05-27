@@ -617,6 +617,8 @@ dependencies = [
 [[package]]
 name = "tbb-sys"
 version = "1.1.0+2021.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be3fe1690d40f14fcc2bf483f3615e89b9c39d342aeb4a1bd94058aef0a2d8ee"
 dependencies = [
  "cc",
  "glob",

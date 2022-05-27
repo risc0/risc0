@@ -18,6 +18,3 @@ risc0-build = { path = "../../../../../build" }
 
 [package.metadata.release]
 release = false
-
-[patch.crates-io]
-tbb-sys = { path = "../../../../../../../tbb-sys" }
