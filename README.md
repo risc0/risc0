@@ -73,6 +73,24 @@ circuit used to instantiate the RISC-V ZKVM, or any other element of the code's
 implementation.  Such bugs may impact the security of receipts, leak
 information, or cause any other manner of problems.  Caveat emptor.
 
+## Rust Crates
+
+| name                    | crates.io                                                                                                         | docs.rs                                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| risc0-build             | [![x](https://img.shields.io/crates/v/risc0-build)](https://crates.io/crates/risc0-build)                         | [![](https://img.shields.io/docsrs/risc0-build)](https://docs.rs/risc0-build)                         |
+| risc0-core-sys          | [![x](https://img.shields.io/crates/v/risc0-core-sys)](https://crates.io/crates/risc0-core-sys)                   | [![](https://img.shields.io/docsrs/risc0-core-sys)](https://docs.rs/risc0-core-sys)                   |
+| risc0-zkp-core          | [![x](https://img.shields.io/crates/v/risc0-zkp-core)](https://crates.io/crates/risc0-zkp-core)                   | [![](https://img.shields.io/docsrs/risc0-zkp-core)](https://docs.rs/risc0-zkp-core)                   |
+| risc0-zkp-sys           | [![x](https://img.shields.io/crates/v/risc0-zkp-sys)](https://crates.io/crates/risc0-zkp-sys)                     | [![](https://img.shields.io/docsrs/risc0-zkp-sys)](https://docs.rs/risc0-zkp-sys)                     |
+| risc0-zkvm-circuit-gen  | [![x](https://img.shields.io/crates/v/risc0-zkvm-circuit-gen)](https://crates.io/crates/risc0-zkvm-circuit-gen)   | [![](https://img.shields.io/docsrs/risc0-zkvm-circuit-gen)](https://docs.rs/risc0-zkvm-circuit-gen)   |
+| risc0-zkvm-circuit-sys  | [![x](https://img.shields.io/crates/v/risc0-zkvm-circuit-sys)](https://crates.io/crates/risc0-zkvm-circuit-sys)   | [![](https://img.shields.io/docsrs/risc0-zkvm-circuit-sys)](https://docs.rs/risc0-zkvm-circuit-sys)   |
+| risc0-zkvm-core         | [![x](https://img.shields.io/crates/v/risc0-zkvm-core)](https://crates.io/crates/risc0-zkvm-core)                 | [![](https://img.shields.io/docsrs/risc0-zkvm-core)](https://docs.rs/risc0-zkvm-core)                 |
+| risc0-zkvm-guest        | [![x](https://img.shields.io/crates/v/risc0-zkvm-guest)](https://crates.io/crates/risc0-zkvm-guest)               | [![](https://img.shields.io/docsrs/risc0-zkvm-guest)](https://docs.rs/risc0-zkvm-guest)               |
+| risc0-zkvm-host         | [![x](https://img.shields.io/crates/v/risc0-zkvm-host)](https://crates.io/crates/risc0-zkvm-host)                 | [![](https://img.shields.io/docsrs/risc0-zkvm-host)](https://docs.rs/risc0-zkvm-host)                 |
+| risc0-zkvm-platform-sys | [![x](https://img.shields.io/crates/v/risc0-zkvm-platform-sys)](https://crates.io/crates/risc0-zkvm-platform-sys) | [![](https://img.shields.io/docsrs/risc0-zkvm-platform-sys)](https://docs.rs/risc0-zkvm-platform-sys) |
+| risc0-zkvm-serde        | [![x](https://img.shields.io/crates/v/risc0-zkvm-serde)](https://crates.io/crates/risc0-zkvm-serde)               | [![](https://img.shields.io/docsrs/risc0-zkvm-serde)](https://docs.rs/risc0-zkvm-serde)               |
+| risc0-zkvm-sys          | [![x](https://img.shields.io/crates/v/risc0-zkvm-sys)](https://crates.io/crates/risc0-zkvm-sys)                   | [![](https://img.shields.io/docsrs/risc0-zkvm-sys)](https://docs.rs/risc0-zkvm-sys)                   |
+| risc0-zkvm-verify       | [![x](https://img.shields.io/crates/v/risc0-zkvm-verify)](https://crates.io/crates/risc0-zkvm-verify)             | [![](https://img.shields.io/docsrs/risc0-zkvm-verify)](https://docs.rs/risc0-zkvm-verify)             |
+
 ## Examples
 
 In addition to the RISC Zero proof system, we include a number of small
