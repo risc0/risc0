@@ -25,9 +25,9 @@ namespace risc0 {
 
 // Redundant with alias in prove/method_id.h
 constexpr size_t kDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
-using MethodID = std::array<ShaDigest, kDigestCount>;
+using MethodDigests = std::array<ShaDigest, kDigestCount>;
 
 TapSetRef getRiscVTaps();
-std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodID& id);
+std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodDigests& id);
 
 } // namespace risc0

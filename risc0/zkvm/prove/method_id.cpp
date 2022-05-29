@@ -23,20 +23,22 @@
 
 namespace risc0 {
 
-MethodID makeMethodID(const std::string& elfFile) {
+MethodID::MethodID(const MethodDigests& digests) : _digests(digests) {}
+
+MethodID MethodID::fromElf(const std::string& path) {
   // Load the ELF file into an image
   std::map<uint32_t, uint32_t> image;
-  uint32_t startAddr = loadElf(elfFile, kMemSize, image);
+  uint32_t startAddr = loadElf(path, kMemSize, image);
 
   // Start with an empty return value
-  MethodID ret;
+  MethodDigests digests;
 
   // Make the digest for each level
   for (size_t i = 0; i < kCodeDigestCount; i++) {
     size_t cycles = kMinCycles * (1 << i);
     if (cycles < image.size() + 3 + kZkCycles) {
       // Can't even fit the program in this cycle size, just set to zero
-      ret[i] = ShaDigest::zero();
+      digests[i] = ShaDigest::zero();
       continue;
     }
     // Make a vector + set it up with the elf data
@@ -49,31 +51,34 @@ MethodID makeMethodID(const std::string& elfFile) {
     zkShiftAccel(coeffs, kCodeSize);
     // Make the poly-group + extract the root
     PolyGroup codeGroup(coeffs, kCodeSize, cycles);
-    ret[i] = codeGroup.getMerkle().getRoot();
+    digests[i] = codeGroup.getMerkle().getRoot();
   }
-  return ret;
+  return MethodID(digests);
 }
 
-MethodID readMethodID(const std::string& filename) {
-  std::ifstream file(filename, std::ios::in | std::ios::binary);
-  if (!file) {
-    throw std::runtime_error("Unable to open file: " + filename);
-  }
-  MethodID id;
-  file.read(reinterpret_cast<char*>(&id), sizeof(MethodID));
-  file.close();
-  if (!file.good()) {
-    throw std::runtime_error("Error reading MethodID file: " + filename);
-  }
-  return id;
+MethodID MethodID::fromBytes(const std::array<std::uint8_t, digestBytes>& bytes) {
+  MethodDigests digests;
+  std::memcpy(&digests, &bytes, digestBytes);
+  return MethodID(digests);
 }
 
-namespace rust {
-
-std::unique_ptr<MethodID> make_method_id(const std::string& elf_path) {
-  return std::make_unique<MethodID>(readMethodID(elf_path));
+MethodID MethodID::fromBytes(const uint8_t* bytes) {
+  std::array<std::uint8_t, digestBytes> sized;
+  std::memcpy(&sized, &bytes, digestBytes);
+  return MethodID::fromBytes(sized);
 }
 
-} // namespace rust
+std::array<uint8_t, digestBytes> MethodID::toBytes() const {
+  std::array<std::uint8_t, digestBytes> bytes;
+  std::memcpy(&bytes, &_digests, digestBytes);
+  return bytes;
+}
+
+std::unique_ptr<MethodID> method_id_from_elf(const std::string& path) {
+  return std::make_unique<MethodID>(MethodID::fromElf(path));
+}
+std::unique_ptr<MethodID> method_id_from_bytes(const std::array<uint8_t, digestBytes>& bytes) {
+  return std::make_unique<MethodID>(MethodID::fromBytes(bytes));
+}
 
 } // namespace risc0

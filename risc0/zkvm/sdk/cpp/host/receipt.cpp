@@ -22,14 +22,20 @@
 #include "risc0/zkvm/prove/riscv.h"
 #include "risc0/zkvm/verify/riscv.h"
 
+#include <fstream>
 #include <sstream>
 
 namespace risc0 {
 
 void Receipt::verify(const std::string& filename) const {
   LOG(1, "Reading code id from " << filename);
-  MethodID code = readMethodID(filename);
-  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(code);
+  MethodDigests digests;
+  std::ifstream file(filename, std::ios::in | std::ios::binary);
+  if (!file) {
+    throw std::runtime_error("Unable to open file: " + filename);
+  }
+  file.read(reinterpret_cast<char*>(&digests), sizeof(MethodDigests));
+  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(digests);
   risc0::verify(*circuit, seal.data(), seal.size());
   if (journal.size() != seal[8]) {
     std::stringstream ss;

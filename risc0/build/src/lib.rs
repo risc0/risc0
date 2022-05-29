@@ -22,6 +22,7 @@ use std::{
     process::Command,
 };
 
+use anyhow;
 use cargo_metadata::MetadataCommand;
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
 use risc0_zkvm_sys::MethodID;
@@ -93,7 +94,6 @@ pub fn build(manifest_path: &Path, target_dir: &Path) {
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
-///
 pub fn embed_methods() {
     let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
     let manifest_path = Path::new(&manifest_dir).join("Cargo.toml");
@@ -144,37 +144,25 @@ pub fn embed_methods() {
                     .join("riscv32im-unknown-none-elf")
                     .join("release")
                     .join(&method);
-                let mut id_path = Path::new(&out_dir).join(&method);
-                id_path.set_extension("id");
-
-                eprintln!("Creating MethodID for {method}");
-                if !elf_path.exists() {
-                    eprintln!(
-                        "RISC-V method was not found at: {}",
-                        elf_path.to_str().unwrap()
-                    );
-                    eprintln!(
-                        "Please run the RISC Zero method compiler before running this command."
-                    );
+                if !elf_path.exists(){
+                    eprintln!("RISC-V method file not found at: {}", elf_path.display());
+                    eprintln!("Run method compiler before running this command.");
                     eprintln!("Try: `cargo run --bin risc0-build-methods`");
                     std::process::exit(-1);
                 }
-                let method_id: &[u8];
-                unsafe {
-                    method_id = MethodID::new(&elf_path.to_str().unwrap()).unwrap().to_bytes().unwrap();
-                }
-
-                let elf_path = elf_path.display();
-                let method_name = method.to_uppercase();
-                let content = format!(
-                    r##"
-    pub const {method_name}_PATH: &str = r#"{elf_path}"#;
-    pub const {method_name}_ID: &[u8] = format_bytes!(r#"{method_id}");
-            "##
-                );
-                file.write_all(content.as_bytes()).unwrap();
-
-                println!("cargo:rerun-if-changed={elf_path}");
+                let method_id = &elf_path
+                    .to_str()
+                    .ok_or(anyhow::Error::msg("empty elf path!"))
+                    .and_then(MethodID::from_elf)
+                    .and_then(|m| m.to_bytes())
+                    .expect("Failed building MethodID!");
+                file.write_all(&[
+                    format!("pub const {}_PATH: &str = \"{}\";\n", method.to_uppercase(), elf_path.display()).as_bytes(),
+                    format!("pub const {}_ID: &'static [u8; {}] = &", method.to_uppercase(), method_id.len()).as_bytes(),
+                    format!("{:?}", method_id).as_bytes(),
+                    format!(";\n").as_bytes(),
+                ].concat()).expect("Failed writing methods file!");
+                println!("cargo:rerun-if-changed={}", elf_path.display());
             }
         }
     }
@@ -186,7 +174,6 @@ pub fn link() {
         let out_dir = env::var_os("OUT_DIR").unwrap();
         let linker_script = Path::new(&out_dir).join("risc0.ld");
         fs::write(&linker_script, LINKER_SCRIPT).unwrap();
-        let linker_script = linker_script.to_str().unwrap();
-        println!("cargo:rustc-link-arg=-T{linker_script}");
+        println!("cargo:rustc-link-arg=-T{}", linker_script.to_str().unwrap());
     }
 }

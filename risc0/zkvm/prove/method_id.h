@@ -23,17 +23,24 @@
 
 namespace risc0 {
 
-constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
-using MethodID = std::array<ShaDigest, kCodeDigestCount>;
+static constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
+using MethodDigests = std::array<ShaDigest, kCodeDigestCount>;
+static constexpr size_t digestBytes = sizeof(MethodDigests);
 
-MethodID readMethodID(const std::string& methodIdPath);
-MethodID makeMethodID(const std::string& elfPath);
+class MethodID {
+public:
+  MethodID(const MethodDigests& methodDigests);
+  static MethodID fromElf(const std::string& elfPath);
+  static MethodID fromBytes(const std::array<uint8_t, 384>& bytes);
+  static MethodID fromBytes(const uint8_t* bytes);
+  std::array<uint8_t, digestBytes> toBytes() const;
 
-namespace rust {
+private:
+  const MethodDigests _digests;
+};
 
-using MethodID = ::risc0::MethodID;
-std::unique_ptr<MethodID> make_method_id(const std::string& elf_path);
-
-} // namespace rust
+// cxx doesn't support constructors or static methods...https://github.com/dtolnay/cxx/issues/280
+std::unique_ptr<MethodID> method_id_from_elf(const std::string& path);
+std::unique_ptr<MethodID> method_id_from_bytes(const std::array<uint8_t, digestBytes>& bytes);
 
 } // namespace risc0

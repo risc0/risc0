@@ -35,7 +35,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   try {
-    risc0::MethodID id = risc0::makeMethodID(argv[1]);
+    risc0::MethodID id = risc0::MethodID::fromElf(argv[1]);
     writeMethodID(argv[2], id);
   } catch (const std::exception& e) {
     std::cerr << "Unable to make code ID: " << e.what() << std::endl;
