@@ -111,6 +111,7 @@ crates_repository(
     lockfile = "//:Cargo-host.Bazel.lock",
     packages = {
         "anyhow": crate.spec(version = "1.0"),
+        "array-init": crate.spec(version = "2.0"),
         "bytemuck": crate.spec(
             features = ["derive"],
             version = "1.9",
@@ -155,6 +156,7 @@ crates_repository(
             default_features = False,
             version = "1.0",
         ),
+        "array-init": crate.spec(version = "2.0"),
         "bytemuck": crate.spec(
             features = ["derive"],
             version = "1.9",

@@ -150,6 +150,12 @@ impl From<Fp> for u32 {
     }
 }
 
+impl From<&Fp> for u32 {
+    fn from(x: &Fp) -> Self {
+        x.0
+    }
+}
+
 impl From<Fp> for u64 {
     fn from(x: Fp) -> Self {
         x.0.into()

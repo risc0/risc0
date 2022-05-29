@@ -24,13 +24,23 @@ use risc0_zkp_core::{
     to_po2,
 };
 
-use crate::zkp::{merkle::MerkleTreeVerifier, read_iop::ReadIOP};
+use crate::zkp::{
+    hal::{BoxedSlice, Slice},
+    merkle::{MerkleTreeProver, MerkleTreeVerifier},
+    read_iop::ReadIOP,
+    write_iop::WriteIOP,
+    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
+};
 
-pub const QUERIES: usize = 50;
-pub const INV_RATE: usize = 4;
-pub const FRI_FOLD_PO2: usize = 4;
-pub const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
-pub const FRI_MIN_DEGREE: usize = 256;
+use super::{hal, log2_ceil};
+
+struct ProveRoundInfo {
+    size: usize,
+    domain: usize,
+    evaluated: BoxedSlice<Fp>,
+    coeffs: BoxedSlice<Fp>,
+    merkle: MerkleTreeProver,
+}
 
 struct VerifyRoundInfo {
     domain: usize,
@@ -57,6 +67,40 @@ fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
         mix_pow *= mix;
     }
     tot
+}
+
+impl ProveRoundInfo {
+    pub fn new<S: Sha>(iop: &mut WriteIOP<S>, coeffs: &dyn Slice<Fp>) -> Self {
+        // LOG(1, "Doing FRI folding");
+        let size = coeffs.size() / EXT_SIZE;
+        let domain = size * INV_RATE;
+        let mut evaluated = hal::alloc(domain * EXT_SIZE);
+        hal::batch_expand(&mut *evaluated, coeffs, EXT_SIZE);
+        hal::batch_evaluate_ntt(&*evaluated, EXT_SIZE, log2_ceil(INV_RATE));
+        let merkle =
+            MerkleTreeProver::new(&evaluated, domain / FRI_FOLD, FRI_FOLD * EXT_SIZE, QUERIES);
+        merkle.commit(iop);
+        let fold_mix = Fp4::random(&mut iop.rng);
+        let out_coeffs = hal::alloc(size / FRI_FOLD * EXT_SIZE);
+        hal::fri_fold(&*out_coeffs, coeffs, &*hal::copy_from(&[fold_mix; 1]));
+        ProveRoundInfo {
+            size,
+            domain,
+            evaluated,
+            coeffs: out_coeffs,
+            merkle,
+        }
+    }
+
+    // void proveQuery(WriteIOP& iop, size_t* pos) const
+    pub fn prove_query<S: Sha>(&mut self, iop: &mut WriteIOP<S>, pos: &mut usize) {
+        // Compute which group we are in
+        let group = *pos % (self.domain / FRI_FOLD);
+        // Generate the proof
+        self.merkle.prove(iop, group);
+        // Update pos
+        *pos = group;
+    }
 }
 
 impl VerifyRoundInfo {
@@ -89,6 +133,51 @@ impl VerifyRoundInfo {
         *goal = fold_eval(&mut data4, self.mix, self.domain, group);
         *pos = group;
     }
+}
+
+// void friProve(WriteIOP& iop, AccelConstSlice<Fp> coeffs, InnerProve inner);
+pub fn fri_prove<S: Sha, F>(iop: &mut WriteIOP<S>, coeffs: &dyn Slice<Fp>, mut f: F)
+where
+    F: FnMut(&mut WriteIOP<S>, usize),
+{
+    let orig_domain = coeffs.size() / EXT_SIZE * INV_RATE;
+    let mut rounds = Vec::new();
+    while coeffs.size() / EXT_SIZE > FRI_MIN_DEGREE {
+        let round = ProveRoundInfo::new(iop, coeffs);
+        // coeffs = &*round.coeffs;
+        rounds.push(round);
+    }
+    // size_t origDomain = coeffs.size() / 4 * kInvRate;
+    // std::vector<ProveRoundInfo> rounds;
+    // while (coeffs.size() / 4 > kFriMinDegree) {
+    //   rounds.emplace_back(iop, coeffs);
+    //   coeffs = rounds.back().outCoeffs;
+    // }
+    // // Put the final coefficients into natural order
+    // auto final = AccelSlice<Fp>::allocate(coeffs.size());
+    // eltwiseCopyFpAccel(final, coeffs);
+    // batchBitReverse(final, 4);
+    // // Dump final polynomial + commit
+    // {
+    //   AccelReadLock<Fp> finalCpu(final);
+    //   iop.write(finalCpu.data(), finalCpu.size());
+    //   auto digest = shaHash(finalCpu.data(), finalCpu.size(), 1, false);
+    //   iop.commit(digest);
+    // }
+    // // Do queries
+    // LOG(1, "Doing Queries");
+    // for (size_t q = 0; q < kQueries; q++) {
+    //   // Get a 'random' index.
+    //   uint32_t rng = iop.generate();
+    //   size_t pos = rng % origDomain;
+    //   // Do the 'inner' proof for this index
+    //   inner(iop, pos);
+    //   // Write the per-round proofs
+    //   for (auto& round : rounds) {
+    //     round.proveQuery(iop, &pos);
+    //   }
+    // }
+    todo!()
 }
 
 pub fn fri_verify<S: Sha, F>(iop: &mut ReadIOP<S>, mut degree: usize, mut f: F)

@@ -15,55 +15,13 @@
 mod circuit;
 mod poly_op;
 mod poly_ops;
+mod prover;
+mod receipt;
 mod taps;
 
-use alloc::{vec, vec::Vec};
-
-use serde::{Deserialize, Serialize};
-
-use crate::zkp::verify::verify;
-use risc0_zkp_core::sha::{Digest, Sha};
-
-pub use crate::zkvm::circuit::MethodID;
-use crate::zkvm::circuit::Risc0Circuit;
-
-#[derive(Deserialize, Serialize)]
-pub struct Receipt {
-    journal: Vec<u8>,
-    seal: Vec<u32>,
-}
-
-impl Receipt {
-    pub fn verify(&self, method_id: &MethodID) {
-        let mut circuit = Risc0Circuit::new(method_id);
-        let sha = risc0_zkp_core::sha::default_implementation();
-        verify(sha, &mut circuit, &self.seal).unwrap();
-        assert!(self.journal.len() == (self.seal[8] as usize));
-        if self.journal.len() > 32 {
-            let digest = sha.hash_bytes(&self.journal);
-            assert!(*digest == Digest::from_slice(&self.seal[0..8]));
-        } else {
-            let mut vec = self.journal.clone();
-            vec.resize(32, 0);
-            for i in 0..8 {
-                assert!(
-                    self.seal[i] == u32::from_le_bytes(vec[i * 4..i * 4 + 4].try_into().unwrap())
-                );
-            }
-        }
-    }
-
-    pub fn get_journal_u32(&self) -> Vec<u32> {
-        let mut as_words: Vec<u32> = vec![];
-        assert!(self.journal.len() % 4 == 0);
-        for i in 0..(self.journal.len() / 4) {
-            as_words.push(u32::from_le_bytes(
-                self.journal[i * 4..i * 4 + 4].try_into().unwrap(),
-            ));
-        }
-        as_words
-    }
-}
+pub use circuit::MethodID;
+pub use prover::Prover;
+pub use receipt::Receipt;
 
 #[cfg(test)]
 mod tests {

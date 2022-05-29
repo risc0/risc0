@@ -1,5 +1,5 @@
 {
-  "checksum": "e64a86a3da91e9629b91a9b5be9bf9ca39f6aaa5d3ea747e23af7e690700d5b4",
+  "checksum": "6c969c5cd18ec0122a53b9f27850d9c40901cd5f11ed45aa9bb8af958da70afc",
   "crates": {
     "aho-corasick 0.7.18": {
       "name": "aho-corasick",
@@ -107,6 +107,39 @@
         "data_glob": [
           "**"
         ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "array-init 2.0.0": {
+      "name": "array-init",
+      "version": "2.0.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/array-init/2.0.0/download",
+          "sha256": "6945cc5422176fc5e602e590c2878d2c2acd9a4fe20a4baa7c28022521698ec6"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "array_init",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "array_init",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "2.0.0"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -515,7 +548,7 @@
               "target": "clap_lex"
             },
             {
-              "id": "indexmap 1.8.1",
+              "id": "indexmap 1.8.2",
               "target": "indexmap"
             },
             {
@@ -986,6 +1019,10 @@
               "target": "anyhow"
             },
             {
+              "id": "array-init 2.0.0",
+              "target": "array_init"
+            },
+            {
               "id": "bytemuck 1.9.1",
               "target": "bytemuck"
             },
@@ -1362,13 +1399,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "indexmap 1.8.1": {
+    "indexmap 1.8.2": {
       "name": "indexmap",
-      "version": "1.8.1",
+      "version": "1.8.2",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/indexmap/1.8.1/download",
-          "sha256": "0f647032dfaa1f8b6dc29bd3edb7bbef4861b8b8007ebb118d6db284fd59f6ee"
+          "url": "https://crates.io/api/v1/crates/indexmap/1.8.2/download",
+          "sha256": "e6012d540c5baa3589337a98ce73408de9b5a25ec9fc2c6fd6be8f0d39e0ca5a"
         }
       },
       "targets": [
@@ -1412,14 +1449,14 @@
               "target": "hashbrown"
             },
             {
-              "id": "indexmap 1.8.1",
+              "id": "indexmap 1.8.2",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.8.1"
+        "version": "1.8.2"
       },
       "build_script_attrs": {
         "data_glob": [

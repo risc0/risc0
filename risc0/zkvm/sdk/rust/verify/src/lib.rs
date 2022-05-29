@@ -16,5 +16,5 @@
 
 extern crate alloc;
 
-pub mod zkp;
+mod zkp;
 pub mod zkvm;
