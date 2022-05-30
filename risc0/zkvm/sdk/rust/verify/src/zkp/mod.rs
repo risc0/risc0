@@ -16,7 +16,7 @@ mod fri;
 mod hal;
 mod merkle;
 mod poly_group;
-mod prove;
+pub(crate) mod prove;
 pub(crate) mod read_iop;
 pub(crate) mod taps;
 pub(crate) mod verify;

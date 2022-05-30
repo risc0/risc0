@@ -1,7 +1,21 @@
+// Copyright 2022 Risc0, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 use risc0_zkp_core::fp::Fp;
 
 use crate::zkp::{
-    hal::{self, BoxedSlice},
+    hal::{self, Buffer},
     log2_ceil,
     merkle::MerkleTreeProver,
     INV_RATE, QUERIES,
@@ -34,26 +48,26 @@ use crate::zkp::{
 /// datapoints (i.e. is zero knowledge) so long as the number of queries is less than the randomized
 /// padding.
 pub struct PolyGroup {
-    pub coeffs: BoxedSlice<Fp>,
+    pub coeffs: Buffer<Fp>,
     pub count: usize,
     size: usize,
     domain: usize,
-    pub evaluated: BoxedSlice<Fp>,
+    pub evaluated: Buffer<Fp>,
     pub merkle: MerkleTreeProver,
 }
 
 impl PolyGroup {
-    pub fn new(coeffs: BoxedSlice<Fp>, count: usize, size: usize) -> Self {
+    pub fn new(coeffs: &Buffer<Fp>, count: usize, size: usize) -> Self {
         assert_eq!(coeffs.size(), count * size);
         let domain = size * INV_RATE;
-        let mut evaluated = hal::alloc(count * domain);
-        hal::batch_expand(&mut *evaluated, &*coeffs, count);
-        hal::batch_evaluate_ntt(&*evaluated, count, log2_ceil(INV_RATE));
-        hal::batch_bit_reverse(&*coeffs, count);
+        let evaluated = Buffer::new(count * domain);
+        hal::batch_expand(&evaluated, &coeffs, count);
+        hal::batch_evaluate_ntt(&evaluated, count, log2_ceil(INV_RATE));
+        hal::batch_bit_reverse(&coeffs, count);
         let merkle = MerkleTreeProver::new(&evaluated, domain, count, QUERIES);
         let size = coeffs.size() / count;
         PolyGroup {
-            coeffs,
+            coeffs: coeffs.clone(),
             count,
             size,
             domain,

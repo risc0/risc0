@@ -15,21 +15,23 @@
 use alloc::{vec, vec::Vec};
 use core::slice;
 
-use crate::zkp::{
-    read_iop::ReadIOP,
-    taps::Taps,
-    verify::{Circuit, VerificationError, VerificationError::*},
-};
 use risc0_zkp_core::{
     fp::Fp,
     fp4::Fp4,
     sha::{Digest, Sha, DIGEST_WORDS},
 };
 
-use crate::zkvm::{
-    poly_op::PolyOp,
-    poly_ops::{RISC0_CONS, RISC0_FP4S, RISC0_POLY_OPS},
-    taps::RISCV_TAPS,
+use crate::{
+    zkp::{
+        read_iop::ReadIOP,
+        taps::Taps,
+        verify::{Circuit, VerificationError, VerificationError::*},
+    },
+    zkvm::{
+        poly_op::PolyOp,
+        poly_ops::{RISC0_CONS, RISC0_FP4S, RISC0_POLY_OPS},
+        taps::RISCV_TAPS,
+    },
 };
 
 const OUTPUT_REGS: usize = 9;
@@ -53,6 +55,7 @@ pub struct MethodID {
 
 impl TryFrom<&[u8]> for MethodID {
     type Error = VerificationError;
+
     fn try_from(bytes: &[u8]) -> Result<MethodID, VerificationError> {
         let u32s: Result<Vec<u32>, VerificationError> = bytes
             .chunks(4)

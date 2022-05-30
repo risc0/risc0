@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::{vec, vec::Vec};
+use core::cmp;
 
 use risc0_zkp_core::{
     fp::Fp,
@@ -20,7 +21,11 @@ use risc0_zkp_core::{
     to_po2,
 };
 
-use crate::zkp::{hal::BoxedSlice, read_iop::ReadIOP, write_iop::WriteIOP};
+use crate::zkp::{
+    hal::{self, Buffer},
+    read_iop::ReadIOP,
+    write_iop::WriteIOP,
+};
 
 pub struct MerkleTreeParams {
     pub row_size: usize,
@@ -34,16 +39,16 @@ pub struct MerkleTreeParams {
 pub struct MerkleTreeProver {
     params: MerkleTreeParams,
     // The retained matrix of values
-    matrix: BoxedSlice<Fp>,
+    matrix: Buffer<Fp>,
     // A heap style array where node N has children 2*N and 2*N+1.  The size of
     // this buffer is (1 << (layers + 1)) and begins at offset 1 (zero is unused
     // to make indexing nicer).
-    nodes: BoxedSlice<Digest>,
+    nodes: Buffer<Digest>,
     // The root value
     root: Digest,
     // Buffers to copy proofs though to limit GPU/CPU transfers
-    tmp_col: BoxedSlice<Fp>,
-    tmp_proof: BoxedSlice<Digest>,
+    tmp_col: Buffer<Fp>,
+    tmp_proof: Buffer<Digest>,
 }
 
 pub struct MerkleTreeVerifier {
@@ -82,37 +87,45 @@ impl MerkleTreeProver {
     /// The number of queries represents the expected # of queries and determines the size of the 'top' layer.
     /// It is important that the verifier is constructed with identical size parameters, including # of
     /// queries, or verification may fail.
-    pub fn new(matrix: &BoxedSlice<Fp>, rows: usize, cols: usize, queries: usize) -> Self {
+    pub fn new(matrix: &Buffer<Fp>, rows: usize, cols: usize, queries: usize) -> Self {
         assert_eq!(matrix.size(), rows * cols);
+        let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
-        // nodes = AccelSlice<ShaDigest>::allocate(rowSize * 2);
-        // colTmp = AccelSlice<Fp>::allocate(colSize);
-        // proofTmp = AccelSlice<ShaDigest>::allocate(std::max(topSize, layers - topLayer));
-        // // Sha each column
-        // shaRowsAccel(nodes.slice(rowSize, rowSize), matrix);
-        // // For each layer, sha up the layer below
-        // for (size_t i = layers; i-- > 0;) {
-        //   size_t layerSize = (1 << i);
-        //   shaFoldAccel(nodes.slice(layerSize, layerSize), nodes.slice(2 * layerSize, 2 * layerSize));
-        // }
-        // // Copy root into the proofTmp top and move back to CPU
-        // eltwiseCopyShaDigestAccel(proofTmp.slice(0, 1), nodes.slice(1, 1));
-        // {
-        //   AccelReadLock readProof(proofTmp.slice(0, 1));
-        //   root = readProof[0];
-        // }
-        todo!()
+        let nodes = Buffer::new(rows * 2);
+        let tmp_col = Buffer::new(cols);
+        let tmp_proof = Buffer::new(cmp::max(params.top_size, params.layers - params.top_layer));
+        // Sha each column
+        hal::sha_rows(&nodes.slice(rows, rows), matrix);
+        // For each layer, sha up the layer below
+        for i in (0..params.layers).rev() {
+            let layer_size = 1 << i;
+            hal::sha_fold(
+                &nodes.slice(layer_size, layer_size),
+                &nodes.slice(layer_size * 2, layer_size * 2),
+            );
+        }
+        // Copy root into the proofTmp top and move back to CPU
+        hal::eltwise_copy_digest(&tmp_proof.slice(0, 1), &nodes.slice(1, 1));
+        let view = tmp_proof.slice(0, 1).view();
+        let root = view.as_slice()[0];
+        MerkleTreeProver {
+            params,
+            matrix: matrix.clone(),
+            nodes,
+            root,
+            tmp_col,
+            tmp_proof,
+        }
     }
 
     /// Write the 'top' of the merkle tree and commit to the root.
-    pub fn commit<S: Sha>(&self, iop: &WriteIOP<S>) {
-        todo!()
-        // eltwiseCopyShaDigestAccel(proofTmp.slice(0, topSize), nodes.slice(topSize, topSize));
-        // {
-        //   AccelReadLock readProof(proofTmp.slice(0, topSize));
-        //   iop.write(readProof.data(), topSize);
-        // }
-        // iop.commit(getRoot());
+    pub fn commit<S: Sha>(&self, iop: &mut WriteIOP<S>) {
+        let top_size = self.params.top_size;
+        let proof_slice = self.tmp_proof.slice(0, top_size);
+        hal::eltwise_copy_digest(&proof_slice, &self.nodes.slice(top_size, top_size));
+        let view = proof_slice.view();
+        iop.write_digest_slice(view.as_slice());
+        iop.commit(self.root());
     }
 
     /// Get the root digest of the tree.
@@ -128,24 +141,23 @@ impl MerkleTreeProver {
     ///
     /// It is presumed the verifier is given the index of the row from other parts of the protocol,
     /// and verification will of course fail if the wrong row is specified.
-    pub fn prove<S: Sha>(&self, iop: &WriteIOP<S>, idx: usize) -> Vec<Fp> {
-        todo!()
-        // REQUIRE(idx < rowSize);
-        // AccelReadLock<Fp> matrixCpu(matrix);
-        // AccelReadLock<ShaDigest> nodesCpu(nodes);
-        // std::vector<Fp> out(colSize);
-        // for (size_t i = 0; i < colSize; i++) {
-        //   out[i] = matrixCpu[idx + i * rowSize];
-        // }
-        // iop.write(out.data(), colSize);
-        // idx += rowSize;
-        // while (idx >= 2 * topSize) {
-        //   size_t lowBit = idx % 2;
-        //   idx /= 2;
-        //   size_t otherIdx = 2 * idx + (1 - lowBit);
-        //   iop.write(&nodesCpu[otherIdx], 1);
-        // }
-        // return out;
+    pub fn prove<S: Sha>(&self, iop: &mut WriteIOP<S>, idx: usize) -> Vec<Fp> {
+        assert!(idx < self.params.row_size);
+        let matrix = self.matrix.view();
+        let nodes = self.nodes.view();
+        let mut out = Vec::with_capacity(self.params.col_size);
+        for i in 0..self.params.col_size {
+            out.push(matrix.as_slice()[idx + i * self.params.row_size]);
+        }
+        iop.write_fp_slice(out.as_slice());
+        let mut idx = idx + self.params.row_size;
+        while idx >= 2 * self.params.top_size {
+            let low_bit = idx % 2;
+            idx /= 2;
+            let other_idx = 2 * idx + (1 - low_bit);
+            iop.write_digest_slice(&[nodes.as_slice()[other_idx]]);
+        }
+        out
     }
 }
 
