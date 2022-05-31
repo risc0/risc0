@@ -19,6 +19,8 @@ use core::ops;
 use bytemuck::{Pod, Zeroable};
 use rand::Rng;
 
+use crate::Random;
+
 /// The modulus of the field.
 pub const P: u32 = 15 * (1 << 27) + 1;
 /// The modulus of the field as a u64.
@@ -58,19 +60,6 @@ impl Fp {
         Self(P - 1)
     }
 
-    /// Generate a uniform random value.
-    pub fn random<R: Rng>(rng: &mut R) -> Self {
-        // Reject the last modulo-P region of possible uint32_t values, since it's
-        // uneven and will only return random values less than (2^32 % P).
-        const REJECT_CUTOFF: u32 = (u32::MAX / P) * P;
-        let mut val: u32 = rng.gen();
-
-        while val >= REJECT_CUTOFF {
-            val = rng.gen();
-        }
-        Fp::from(val)
-    }
-
     /// Raise an `Fp` value to the power of `n`.
     pub fn pow(self, n: usize) -> Self {
         let mut n = n;
@@ -95,6 +84,20 @@ impl Fp {
     /// leave it.
     pub fn inv(self) -> Self {
         self.pow((P - 2) as usize)
+    }
+}
+
+impl Random for Fp {
+    fn random<R: Rng>(rng: &mut R) -> Self {
+        // Reject the last modulo-P region of possible uint32_t values, since it's
+        // uneven and will only return random values less than (2^32 % P).
+        const REJECT_CUTOFF: u32 = (u32::MAX / P) * P;
+        let mut val: u32 = rng.gen();
+
+        while val >= REJECT_CUTOFF {
+            val = rng.gen();
+        }
+        Fp::from(val)
     }
 }
 
@@ -191,6 +194,7 @@ fn mul(lhs: u32, rhs: u32) -> u32 {
 #[cfg(test)]
 mod tests {
     use super::{Fp, P, P_U64};
+    use crate::Random;
     use rand::SeedableRng;
 
     #[test]

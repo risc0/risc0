@@ -13,33 +13,22 @@
 // limitations under the License.
 
 use alloc::{vec, vec::Vec};
-use rand::RngCore;
 
+use rand::RngCore;
 use risc0_zkp_core::{
     fp::Fp,
     fp4::{Fp4, EXT_SIZE},
     ntt::{bit_reverse, rev_butterfly},
     rou::{ROU_FWD, ROU_REV},
     sha::Sha,
-    to_po2,
+    to_po2, Random,
 };
 
 use crate::zkp::{
-    hal::{self, Buffer},
     log2_ceil,
-    merkle::{MerkleTreeProver, MerkleTreeVerifier},
-    read_iop::ReadIOP,
-    write_iop::WriteIOP,
+    verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
-
-struct ProveRoundInfo {
-    size: usize,
-    domain: usize,
-    evaluated: Buffer<Fp>,
-    coeffs: Buffer<Fp>,
-    merkle: MerkleTreeProver,
-}
 
 struct VerifyRoundInfo {
     domain: usize,
@@ -66,78 +55,6 @@ fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
         mix_pow *= mix;
     }
     tot
-}
-
-impl ProveRoundInfo {
-    pub fn new<S: Sha>(iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>) -> Self {
-        // LOG(1, "Doing FRI folding");
-        let size = coeffs.size() / EXT_SIZE;
-        let domain = size * INV_RATE;
-        let evaluated = Buffer::new(domain * EXT_SIZE);
-        hal::batch_expand(&evaluated, coeffs, EXT_SIZE);
-        hal::batch_evaluate_ntt(&evaluated, EXT_SIZE, log2_ceil(INV_RATE));
-        let merkle =
-            MerkleTreeProver::new(&evaluated, domain / FRI_FOLD, FRI_FOLD * EXT_SIZE, QUERIES);
-        merkle.commit(iop);
-        let fold_mix = Fp4::random(&mut iop.rng);
-        let out_coeffs = Buffer::new(size / FRI_FOLD * EXT_SIZE);
-        let mix = Buffer::from([fold_mix].as_slice());
-        hal::fri_fold(&out_coeffs, coeffs, &mix);
-        ProveRoundInfo {
-            size,
-            domain,
-            evaluated,
-            coeffs: out_coeffs,
-            merkle,
-        }
-    }
-
-    pub fn prove_query<S: Sha>(&mut self, iop: &mut WriteIOP<S>, pos: &mut usize) {
-        // Compute which group we are in
-        let group = *pos % (self.domain / FRI_FOLD);
-        // Generate the proof
-        self.merkle.prove(iop, group);
-        // Update pos
-        *pos = group;
-    }
-}
-
-pub fn fri_prove<S: Sha, F>(iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>, mut f: F)
-where
-    F: FnMut(&mut WriteIOP<S>, usize),
-{
-    let orig_domain = coeffs.size() / EXT_SIZE * INV_RATE;
-    let mut rounds = Vec::new();
-    let mut coeffs = coeffs.clone();
-    while coeffs.size() / EXT_SIZE > FRI_MIN_DEGREE {
-        let round = ProveRoundInfo::new(iop, &coeffs);
-        coeffs = round.coeffs.clone();
-        rounds.push(round);
-    }
-    // Put the final coefficients into natural order
-    let final_coeffs = Buffer::new(coeffs.size());
-    hal::eltwise_copy_fp(&final_coeffs, &coeffs);
-    hal::batch_bit_reverse(&final_coeffs, EXT_SIZE);
-    // Dump final polynomial + commit
-    {
-        let view = final_coeffs.view();
-        iop.write_fp_slice(view.as_slice());
-        let digest = iop.get_sha().hash_fps(view.as_slice());
-        iop.commit(&digest);
-    }
-    // Do queries
-    // LOG(1, "Doing Queries");
-    for q in 0..QUERIES {
-        // Get a 'random' index.
-        let rng = iop.rng.next_u32() as usize;
-        let mut pos = rng & orig_domain;
-        // Do the 'inner' proof for this index
-        f(iop, pos);
-        // Write the per-round proofs
-        for round in rounds.iter_mut() {
-            round.prove_query(iop, &mut pos);
-        }
-    }
 }
 
 impl VerifyRoundInfo {

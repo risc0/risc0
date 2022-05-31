@@ -13,13 +13,9 @@
 // limitations under the License.
 
 use risc0_zkp_core::fp::Fp;
+use risc0_zkp_hal::{Buffer, Hal};
 
-use crate::zkp::{
-    hal::{self, Buffer},
-    log2_ceil,
-    merkle::MerkleTreeProver,
-    INV_RATE, QUERIES,
-};
+use crate::zkp::{log2_ceil, prove::merkle::MerkleTreeProver, INV_RATE, QUERIES};
 
 /// A PolyGroup represents a group of polynomials, all of the same maximum degree, as well as the
 /// evaluation of those polynomials over some domain that is larger than that degree by some invRate.
@@ -57,14 +53,14 @@ pub struct PolyGroup {
 }
 
 impl PolyGroup {
-    pub fn new(coeffs: &Buffer<Fp>, count: usize, size: usize) -> Self {
+    pub fn new<H: Hal>(hal: &H, coeffs: &Buffer<Fp>, count: usize, size: usize) -> Self {
         assert_eq!(coeffs.size(), count * size);
         let domain = size * INV_RATE;
-        let evaluated = Buffer::new(count * domain);
-        hal::batch_expand(&evaluated, &coeffs, count);
-        hal::batch_evaluate_ntt(&evaluated, count, log2_ceil(INV_RATE));
-        hal::batch_bit_reverse(&coeffs, count);
-        let merkle = MerkleTreeProver::new(&evaluated, domain, count, QUERIES);
+        let evaluated = hal.alloc(count * domain);
+        hal.batch_expand(&evaluated, &coeffs, count);
+        hal.batch_evaluate_ntt(&evaluated, count, log2_ceil(INV_RATE));
+        hal.batch_bit_reverse(&coeffs, count);
+        let merkle = MerkleTreeProver::new(hal, &evaluated, domain, count, QUERIES);
         let size = coeffs.size() / count;
         PolyGroup {
             coeffs: coeffs.clone(),

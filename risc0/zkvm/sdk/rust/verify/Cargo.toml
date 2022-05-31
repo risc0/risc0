@@ -27,3 +27,8 @@ test-log = "0.2"
 [[bench]]
 name = "verify"
 harness = false
+
+[features]
+default = ["verify"]
+verify = []
+prove = []

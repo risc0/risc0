@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod fri;
-mod hal;
 mod merkle;
-mod poly_group;
-pub(crate) mod prove;
-pub(crate) mod read_iop;
+#[cfg(feature = "prove")]
+mod prove;
 pub(crate) mod taps;
+#[cfg(feature = "verify")]
 pub(crate) mod verify;
-mod write_iop;
 
 use risc0_zkp_core::fp4::EXT_SIZE;
 

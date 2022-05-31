@@ -19,13 +19,13 @@ use risc0_zkp_core::{
     fp::Fp,
     fp4::Fp4,
     sha::{Digest, Sha, DIGEST_WORDS},
+    Random,
 };
 
 use crate::{
     zkp::{
-        read_iop::ReadIOP,
         taps::Taps,
-        verify::{Circuit, VerificationError, VerificationError::*},
+        verify::{read_iop::ReadIOP, Circuit, VerificationError},
     },
     zkvm::{
         poly_op::PolyOp,
@@ -61,16 +61,26 @@ impl TryFrom<&[u8]> for MethodID {
             .chunks(4)
             .map(|bytes| {
                 Ok(u32::from_le_bytes(
-                    bytes.try_into().or(Err(ReceiptFormatError))?,
+                    bytes
+                        .try_into()
+                        .or(Err(VerificationError::ReceiptFormatError))?,
                 ))
             })
             .collect();
         let digests: Result<Vec<Digest>, VerificationError> = u32s?
             .chunks(DIGEST_WORDS)
-            .map(|digest| Ok(Digest::new(digest.try_into().or(Err(ReceiptFormatError))?)))
+            .map(|digest| {
+                Ok(Digest::new(
+                    digest
+                        .try_into()
+                        .or(Err(VerificationError::ReceiptFormatError))?,
+                ))
+            })
             .collect();
         Ok(MethodID {
-            digests: digests?.try_into().or(Err(ReceiptFormatError))?,
+            digests: digests?
+                .try_into()
+                .or(Err(VerificationError::ReceiptFormatError))?,
         })
     }
 }
@@ -143,7 +153,7 @@ impl<'a> Circuit for Risc0Circuit<'a> {
         if &self.code_id.digests[which_code] == root {
             Ok(())
         } else {
-            Err(MethodVerificationError)
+            Err(VerificationError::MethodVerificationError)
         }
     }
 

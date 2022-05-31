@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod fri;
+mod merkle;
+pub(crate) mod read_iop;
+
 use alloc::{vec, vec::Vec};
 use core::fmt;
 
@@ -21,14 +25,12 @@ use risc0_zkp_core::{
     poly::poly_eval,
     rou::{ROU_FWD, ROU_REV},
     sha::{Digest, Sha},
-    to_po2,
+    to_po2, Random,
 };
 
 use crate::zkp::{
-    fri::fri_verify,
-    merkle::MerkleTreeVerifier,
-    read_iop::ReadIOP,
     taps::{RegisterGroup, Taps},
+    verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 

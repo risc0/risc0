@@ -120,6 +120,7 @@ crates_repository(
         "clap": crate.spec(version = "3.1"),
         "ctor": crate.spec(version = "0.1"),
         "cxx": crate.spec(version = "1.0"),
+        "downcast-rs": crate.spec(version = "1.2"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
         "rand": crate.spec(
@@ -129,6 +130,7 @@ crates_repository(
         "rand_core": crate.spec(
             version = "0.6",
         ),
+        "rayon": crate.spec(version = "1.5"),
         "serde": crate.spec(
             features = ["derive"],
             version = "1.0",

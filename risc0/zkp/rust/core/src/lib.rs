@@ -18,6 +18,8 @@
 
 extern crate alloc;
 
+use rand::Rng;
+
 pub mod fp;
 pub mod fp4;
 pub mod ntt;
@@ -30,4 +32,16 @@ pub mod sha_rng;
 /// For x = (1 << po2), given x, find po2.
 pub fn to_po2(x: usize) -> usize {
     (31 - (x as u32).leading_zeros()) as usize
+}
+
+/// Generic trait for generating random values.
+pub trait Random {
+    /// Generate a uniform random value.
+    fn random<R: Rng>(rng: &mut R) -> Self;
+}
+
+impl Random for u32 {
+    fn random<R: Rng>(rng: &mut R) -> Self {
+        rng.next_u32()
+    }
 }

@@ -1,0 +1,10 @@
+[package]
+name = "risc0-hal"
+version = "0.7.2"
+edition = "2021"
+
+[dependencies]
+downcast-rs = "1.2"
+rand = "0.8"
+rayon = "1.5"
+risc0-zkp-core = { version = "0.7", path = "../../../../zkp/rust/core" }

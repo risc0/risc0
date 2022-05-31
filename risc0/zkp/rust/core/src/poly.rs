@@ -14,7 +14,7 @@
 
 //! Polynomial utilites (currently only evaluation).
 
-use alloc::{vec, vec::Vec};
+use alloc::vec;
 
 use crate::fp4::Fp4;
 
