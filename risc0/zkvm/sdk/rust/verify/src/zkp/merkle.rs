@@ -41,7 +41,7 @@ pub struct MerkleTreeParams {
 impl MerkleTreeParams {
     /// Returns the parameters of the Merkle tree, given the row and column size and the number of queries to be made.
     pub fn new(row_size: usize, col_size: usize, queries: usize) -> Self {
-        // The number of layers is the logarithm base 2 of the row_size
+        // The number of layers is the logarithm base 2 of the row_size.
         let layers: usize = to_po2(row_size);
         assert!(1 << layers == row_size);
         // The "top" layer is a layer above which we verify all Merkle data only once at the beginning.
@@ -68,14 +68,14 @@ impl MerkleTreeParams {
 }
 
 /// A struct against which we verify merkle branches, consisting of the parameters of the Merkle tree
-/// top - the vector of hash values in the top row of the tree, above which we verify only once
+/// top - the vector of hash values in the top row of the tree, above which we verify only once.
 pub struct MerkleTreeVerifier {
     params: MerkleTreeParams,
     top: Vec<Digest>,
 }
 
 impl MerkleTreeVerifier {
-    /// Constructs a new MerkleTreeVerifier by making the params, and then computing the root hashes from the top level hashes
+    /// Constructs a new MerkleTreeVerifier by making the params, and then computing the root hashes from the top level hashes.
     pub fn new<S: Sha>(
         iop: &mut ReadIOP<S>,
         row_size: usize,
@@ -103,24 +103,24 @@ impl MerkleTreeVerifier {
         return &self.top[1];
     }
 
-    /// Verifies a branch provided by an IOP
+    /// Verifies a branch provided by an IOP.
     pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Vec<Fp> {
         let sha = iop.get_sha().clone();
         let col_size = self.params.col_size;
         let row_size = self.params.row_size;
         assert!(idx < row_size);
-        // Initialize a vector to hold field elements
+        // Initialize a vector to hold field elements.
         let mut out: Vec<Fp> = vec![Fp::new(0); col_size];
-        // Read out field elements from IOP
+        // Read out field elements from IOP.
         iop.read_fps(&mut out);
-        // Get the hash at the leaf of the tree by hashing these field elements
+        // Get the hash at the leaf of the tree by hashing these field elements.
         let mut cur: Digest = *sha.hash_fps(&out);
         // Shift idx to start of the row
         idx += row_size;
         while idx >= 2 * self.params.top_size {
-            // low_bit determines whether hash cur at idx is the left (0) or right (1) child
+            // low_bit determines whether hash cur at idx is the left (0) or right (1) child.
             let low_bit = idx % 2;
-            // Retrieve the other parent from the IOP
+            // Retrieve the other parent from the IOP.
             let mut other = Digest::default();
             iop.read_digests(core::slice::from_mut(&mut other));
             // Now ascend to the parent index, and compute the hash there.
