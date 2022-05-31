@@ -39,15 +39,17 @@ pub struct MerkleTreeParams {
 }
 
 impl MerkleTreeParams {
-    /// Returns the parameters of the Merkle tree, given the row and column size and the number of queries to be made.
+    /// Returns the parameters of the Merkle tree, given the row and column size
+    /// and the number of queries to be made.
     pub fn new(row_size: usize, col_size: usize, queries: usize) -> Self {
         // The number of layers is the logarithm base 2 of the row_size.
         let layers: usize = to_po2(row_size);
         assert!(1 << layers == row_size);
-        // The "top" layer is a layer above which we verify all Merkle data only once at the beginning.
-        // Later, we only verify merkle branches from the leaf up to this top layer.
-        // This allows us to avoid checking hashes in this part of the tree multiple times.
-        // We choose the top layer to be the one with size at most equal to queries.
+        // The "top" layer is a layer above which we verify all Merkle data only once at
+        // the beginning. Later, we only verify merkle branches from the leaf up
+        // to this top layer. This allows us to avoid checking hashes in this
+        // part of the tree multiple times. We choose the top layer to be the
+        // one with size at most equal to queries.
         let mut top_layer = 0;
         for i in 1..layers {
             if (1 << i) > queries {
@@ -67,15 +69,17 @@ impl MerkleTreeParams {
     }
 }
 
-/// A struct against which we verify merkle branches, consisting of the parameters of the Merkle tree
-/// top - the vector of hash values in the top row of the tree, above which we verify only once.
+/// A struct against which we verify merkle branches, consisting of the
+/// parameters of the Merkle tree and top - the vector of hash values in the top
+/// row of the tree, above which we verify only once.
 pub struct MerkleTreeVerifier {
     params: MerkleTreeParams,
     top: Vec<Digest>,
 }
 
 impl MerkleTreeVerifier {
-    /// Constructs a new MerkleTreeVerifier by making the params, and then computing the root hashes from the top level hashes.
+    /// Constructs a new MerkleTreeVerifier by making the params, and then
+    /// computing the root hashes from the top level hashes.
     pub fn new<S: Sha>(
         iop: &mut ReadIOP<S>,
         row_size: usize,
@@ -85,7 +89,8 @@ impl MerkleTreeVerifier {
         let sha = iop.get_sha().clone();
         let params = MerkleTreeParams::new(row_size, col_size, queries);
         // Initialize a vector to hold the digests.
-        // Vector is twice as long as the "top" row - the children of the entry at index i are stored at 2*i and 2*i+1.
+        // Vector is twice as long as the "top" row - the children of the entry at index
+        // i are stored at 2*i and 2*i+1.
         let mut top = vec![Digest::default(); params.top_size * 2];
         // Fill top vector with digests from IOP.
         iop.read_digests(&mut top[params.top_size..]);
@@ -118,7 +123,8 @@ impl MerkleTreeVerifier {
         // Shift idx to start of the row
         idx += row_size;
         while idx >= 2 * self.params.top_size {
-            // low_bit determines whether hash cur at idx is the left (0) or right (1) child.
+            // low_bit determines whether hash cur at idx is the left (0) or right (1)
+            // child.
             let low_bit = idx % 2;
             // Retrieve the other parent from the IOP.
             let mut other = Digest::default();
@@ -131,7 +137,8 @@ impl MerkleTreeVerifier {
                 cur = *sha.hash_pair(&cur, &other);
             }
         }
-        // Once we reduce to an index for which we have the hash, check that it's correct.
+        // Once we reduce to an index for which we have the hash, check that it's
+        // correct.
         assert!(self.top[idx] == cur);
         out
     }
