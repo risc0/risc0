@@ -23,8 +23,8 @@ use risc0_zkp_core::{
 use crate::zkp::read_iop::ReadIOP;
 
 /// The parameters of a merkle tree of prime field elements, including:
-/// row_size - the number of leaves in the tree.
-/// col_size - the number of field elements associated with each leaf.
+/// row_size - the number of leaves in the tree
+/// col_size - the number of field elements associated with each leaf
 /// queries - the number of queries that will be made to this merkle tree
 /// layers - the number of levels on the merkle tree
 /// top_layer - the index of the layer above which we check hashes only once
@@ -75,7 +75,7 @@ pub struct MerkleTreeVerifier {
 }
 
 impl MerkleTreeVerifier {
-    /// Construct a new MerkleTreeVerifier by making the params, and then computing the root hashes from the top level hashes
+    /// Constructs a new MerkleTreeVerifier by making the params, and then computing the root hashes from the top level hashes
     pub fn new<S: Sha>(
         iop: &mut ReadIOP<S>,
         row_size: usize,
@@ -84,26 +84,26 @@ impl MerkleTreeVerifier {
     ) -> Self {
         let sha = iop.get_sha().clone();
         let params = MerkleTreeParams::new(row_size, col_size, queries);
-        // Initialize a vector to hold the digests
-        // Vector is twice as long as the "top" row - the children of the entry at index i are stored at 2*i and 2*i+1
+        // Initialize a vector to hold the digests.
+        // Vector is twice as long as the "top" row - the children of the entry at index i are stored at 2*i and 2*i+1.
         let mut top = vec![Digest::default(); params.top_size * 2];
         // Fill top vector with digests from IOP.
         iop.read_digests(&mut top[params.top_size..]);
-        // Populate hashes up to the root of the tree
+        // Populate hashes up to the root of the tree.
         for i in (1..params.top_size).rev() {
             top[i] = *sha.hash_pair(&top[2 * i], &top[2 * i + 1]);
         }
-        // Commit to root (index 1)
+        // Commit to root (index 1).
         iop.commit(&top[1]);
         return MerkleTreeVerifier { params, top };
     }
 
-    /// Returns the root hash of the tree
+    /// Returns the root hash of the tree.
     pub fn root(&self) -> &Digest {
         return &self.top[1];
     }
 
-    /// Verify a branch provided by an IOP
+    /// Verifies a branch provided by an IOP
     pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Vec<Fp> {
         let sha = iop.get_sha().clone();
         let col_size = self.params.col_size;
