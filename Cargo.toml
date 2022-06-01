@@ -1,9 +1,5 @@
 [workspace]
 members = [
-  "examples/rust/battleship/core",
-  "examples/rust/battleship/methods",
-  "examples/rust/battleship/web/client",
-  "examples/rust/battleship/web/server",
   "risc0/build",
   "risc0/core",
   "risc0/zkp",
@@ -21,8 +17,6 @@ members = [
 ]
 
 exclude = [
-  "examples/rust/battleship/contract",
-  "examples/rust/battleship/methods/inner",
   "risc0/zkvm/sdk/rust/methods/inner",
 ]
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #![no_std]
+#![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
 extern crate alloc;

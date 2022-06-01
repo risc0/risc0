@@ -18,7 +18,7 @@ use risc0_zkvm_core::Digest;
 use risc0_zkvm_serde::{Deserializer, Serializer, Slice};
 use serde::{Deserialize, Serialize};
 
-use crate::riscv::{
+use crate::{
     gpio::{IoDescriptor, GPIO_COMMIT, GPIO_DESC_IO, GPIO_WRITE},
     sha, REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
     REGION_OUTPUT_LEN, REGION_OUTPUT_START, WORD_SIZE,
@@ -69,14 +69,17 @@ pub(crate) fn finalize(result: *mut usize) {
     ENV.get().finalize(result);
 }
 
+/// Read private data from the host.
 pub fn read<T: Deserialize<'static>>() -> T {
     ENV.get().read()
 }
 
+/// Write private data to the host.
 pub fn write<T: Serialize>(data: &T) {
     ENV.get().write(data);
 }
 
+/// Commit public data to the journal.
 pub fn commit<T: Serialize>(data: &T) {
     ENV.get().commit(data);
 }
@@ -106,7 +109,7 @@ impl Env {
         let buf = self.output.release().unwrap();
         unsafe {
             let ptr = buf.as_ptr();
-            crate::riscv::memory_barrier(ptr);
+            crate::memory_barrier(ptr);
             GPIO_DESC_IO.write_volatile(IoDescriptor {
                 size: buf.len() * WORD_SIZE,
                 addr: ptr as usize,
@@ -122,7 +125,7 @@ impl Env {
         let len_bytes = buf.len() * WORD_SIZE;
         unsafe {
             let ptr = buf.as_ptr();
-            crate::riscv::memory_barrier(ptr);
+            crate::memory_barrier(ptr);
             GPIO_DESC_IO.write_volatile(IoDescriptor {
                 size: len_bytes,
                 addr: ptr as usize,
@@ -141,7 +144,7 @@ impl Env {
         // Write the full data out to the host
         unsafe {
             let ptr = slice.as_ptr();
-            crate::riscv::memory_barrier(ptr);
+            crate::memory_barrier(ptr);
             GPIO_DESC_IO.write_volatile(IoDescriptor {
                 size: len_bytes,
                 addr: ptr as usize,
@@ -175,7 +178,7 @@ impl Env {
         }
         unsafe {
             result.add(8).write_volatile(len_bytes);
-            crate::riscv::memory_barrier(result);
+            crate::memory_barrier(result);
         };
         sha::finalize();
     }

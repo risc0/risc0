@@ -3,15 +3,15 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 rust_library(
     name = "guest",
     srcs = [
+        "src/alloc.rs",
+        "src/env.rs",
+        "src/gpio.rs",
         "src/lib.rs",
-        "src/riscv/alloc.rs",
-        "src/riscv/env.rs",
-        "src/riscv/gpio.rs",
-        "src/riscv/mod.rs",
-        "src/riscv/sha.rs",
+        "src/sha.rs",
     ],
     crate_features = ["bazel"],
     crate_name = "risc0_zkvm_guest",
+    data = ["README.md"],
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
     deps = [

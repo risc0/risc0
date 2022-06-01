@@ -19,9 +19,10 @@ use cxx_build::CFG;
 fn main() {
     CFG.include_prefix = "risc0/zkvm";
 
-    let inc_dir = env::var("DEP_RISC0_ZKVM_CIRCUIT_GEN_INC").unwrap();
+    let inc_dir = env::var_os("DEP_RISC0_ZKVM_CIRCUIT_GEN_INC").unwrap();
 
-    cxx_build::bridge("lib.rs")
+    let mut build = cxx_build::bridge("lib.rs");
+    build
         .file("prove/exec.cpp")
         .file("prove/io_handler.cpp")
         .file("prove/method_id.cpp")
@@ -36,8 +37,13 @@ fn main() {
         .define("__TBB_NO_IMPLICIT_LINKAGE", None)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
-        .warnings(false)
-        .compile("risc0-zkvm-sys");
+        .warnings(false);
+
+    if let Some(tbb_inc_dir) = env::var_os("DEP_TBB_INCLUDE") {
+        build.include(tbb_inc_dir);
+    }
+
+    build.compile("risc0-zkvm-sys");
 
     println!("cargo:rustc-link-lib=static=tbb");
     println!("cargo:rustc-link-lib=static=risc0-core-sys");

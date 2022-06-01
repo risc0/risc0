@@ -20,7 +20,7 @@ use risc0_zkvm_core::{Digest, DIGEST_WORDS};
 use risc0_zkvm_serde::to_vec_with_capacity;
 use serde::Serialize;
 
-use crate::riscv::{
+use crate::{
     align_up,
     gpio::{SHADescriptor, GPIO_SHA},
     REGION_SHA_START, WORD_SIZE,
@@ -28,6 +28,7 @@ use crate::riscv::{
 
 // Current sha descriptor index.
 struct CurDesc(UnsafeCell<usize>);
+
 // SAFETY: single threaded environment
 unsafe impl Sync for CurDesc {}
 
@@ -51,7 +52,7 @@ fn alloc_desc() -> *mut SHADescriptor {
 
 // Computes a raw digest of the given slice.  The data must already
 // contain the end marker and the trailer.
-pub fn raw_digest(data: &[u32]) -> &'static Digest {
+fn raw_digest(data: &[u32]) -> &'static Digest {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     // Allocate fresh memory that's guaranteed to be uninitialized so
     // the host can write to it.
@@ -72,7 +73,7 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
     let desc_ptr = alloc_desc();
 
     let ptr = data.as_ptr();
-    crate::riscv::memory_barrier(ptr);
+    crate::memory_barrier(ptr);
     desc_ptr.write_volatile(SHADescriptor {
         type_count,
         idx: 0,
@@ -85,7 +86,7 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
 
 // Calculates the number of words of capacity needed, including end
 // marker and trailer, to take the SHA hash of len_bytes bytes.
-pub const fn compute_capacity_needed(len_bytes: usize) -> usize {
+pub(crate) const fn compute_capacity_needed(len_bytes: usize) -> usize {
     // Add one for end marker, round up, then 2 words for the 64-bit size.
     let len_words = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE + 2;
     align_up(len_words, CHUNK_SIZE)
@@ -95,6 +96,7 @@ pub(crate) enum MemoryType {
     Normal, // Normal memory that can be written to multiple times.
     WOM,    // Write-only memory where each word can only be written once.
 }
+
 // Add the SHA trailer.  The given slice must already be properly
 // sized according to compute_capacity_needed.
 pub(crate) fn add_trailer(data: &mut [u32], len_bytes: usize, memtype: MemoryType) {
@@ -123,7 +125,7 @@ pub(crate) fn add_trailer(data: &mut [u32], len_bytes: usize, memtype: MemoryTyp
     data[size_word] = (len_bits as u32).to_be();
 }
 
-// Computes the SHA256 digest of a serialized object.
+/// Computes the SHA256 digest of a serialized object.
 pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     // If the object to be serialized is a plain old structure in memory, this
     // should be a good guess for the allocation needed.
@@ -136,8 +138,9 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     raw_digest(buf.as_slice())
 }
 
-// Makes a digest for a slice of u8s.  We have no guarantees on
-// alignment so we have to copy the whole thing to a new buffer.
+/// Makes a digest for a slice of bytes.
+///
+/// Since there are no guarantees on alignment, an internal copy is made.
 pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     let len_bytes = data.len();
     let cap = compute_capacity_needed(len_bytes);
@@ -178,6 +181,9 @@ pub(crate) fn finalize() {
     }
 }
 
+/// A guest-side [Sha] implementation.
+///
+/// [Sha]: risc0_zkp_core::sha::Sha
 #[derive(Debug, Clone)]
 pub struct Impl {}
 
@@ -187,9 +193,11 @@ impl risc0_zkp_core::sha::Sha for Impl {
     fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
         digest_u8_slice(bytes)
     }
+
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
         raw_digest(bytemuck::cast_slice(&[*a, *b]))
     }
+
     fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
         // Fps do not not include standard sha header.
         if fps.len() % CHUNK_SIZE == 0 {
@@ -202,6 +210,7 @@ impl risc0_zkp_core::sha::Sha for Impl {
             raw_digest(&buf)
         }
     }
+
     fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr {
         self.hash_fps(bytemuck::cast_slice(fp4s))
     }

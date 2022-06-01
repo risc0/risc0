@@ -1,6 +1,6 @@
 [package]
 name = "risc0-build"
-version = "0.7.0-rc.1"
+version = "0.7.2"
 edition = "2021"
 description = "RISC Zero build helper"
 license = "Apache-2.0"
@@ -9,7 +9,7 @@ repository = "https://github.com/risc0/risc0/"
 
 [dependencies]
 cargo_metadata = "0.14"
-risc0-zkvm-platform-sys = { version = "0.7.0-dev.1", path = "../zkvm/platform" }
-risc0-zkvm-sys = { version = "0.7.0-dev.1", path = "../zkvm" }
+risc0-zkvm-platform-sys = { version = "0.7", path = "../zkvm/platform" }
+risc0-zkvm-sys = { version = "0.7", path = "../zkvm" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"

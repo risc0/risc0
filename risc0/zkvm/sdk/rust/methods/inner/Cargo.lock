@@ -199,9 +199,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.125"
+version = "0.2.126"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5916d2ae698f6de9bfb891ad7a8d65c09d232dc58cc4ac433c7da3b2fd84bc2b"
+checksum = "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
 
 [[package]]
 name = "link-cplusplus"
@@ -214,9 +214,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.10.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87f3e037eac156d1775da914196f0f37741a274155e34a0b7e427c35d2a2ecb9"
+checksum = "7709cef83f0c1f58f666e746a08b21e0085f7440fa6a29cc194d68aac97a4225"
 
 [[package]]
 name = "proc-macro2"
@@ -253,7 +253,7 @@ checksum = "d34f1408f55294453790c48b2f1ebbb1c5b4b7563eb1f418bcfcfdbb06ebb4e7"
 
 [[package]]
 name = "risc0-build"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "cargo_metadata",
  "risc0-zkvm-platform-sys",
@@ -264,7 +264,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core-sys"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -272,7 +272,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-core"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -284,7 +284,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-sys"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -294,14 +294,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit-gen"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "risc0-zkvm-circuit-sys",
 ]
 
 [[package]]
 name = "risc0-zkvm-circuit-sys"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "cxx",
@@ -312,7 +312,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-core"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "cfg-if",
  "risc0-zkp-core",
@@ -321,7 +321,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-guest"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "bytemuck",
  "risc0-build",
@@ -342,7 +342,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform-sys"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -350,7 +350,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-serde"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "bytemuck",
  "serde",
@@ -358,7 +358,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-sys"
-version = "0.7.0-dev.2"
+version = "0.7.1"
 dependencies = [
  "anyhow",
  "cxx",
@@ -446,13 +446,11 @@ dependencies = [
 
 [[package]]
 name = "tbb-sys"
-version = "1.0.0+2021.5.0"
+version = "1.1.0+2021.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "beeab21f005320d0c0654165ddd75eeb75fabed9341b3863e06488f35a2f10b3"
+checksum = "be3fe1690d40f14fcc2bf483f3615e89b9c39d342aeb4a1bd94058aef0a2d8ee"
 dependencies = [
  "cc",
- "cxx",
- "cxx-build",
  "glob",
 ]
 

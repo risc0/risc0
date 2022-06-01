@@ -48,10 +48,12 @@ pub const P_U64: u64 = P as u64;
 pub struct Fp(u32);
 
 impl Fp {
+    /// Create a new [Fp] from a raw integer.
     pub const fn new(x: u32) -> Self {
         Self(x)
     }
 
+    /// Return the maximum value that an [Fp] can take.
     pub fn max() -> Self {
         Self(P - 1)
     }
