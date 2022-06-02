@@ -32,7 +32,8 @@ pub fn poly_eval(coeffs: &[Fp4], x: Fp4) -> Fp4 {
 
 /// General purpose polynomial interpolation.
 ///
-/// Given the goal value f(x) at a set of evalation points x, compute coefficients.
+/// Given the goal value f(x) at a set of evalation points x, compute
+/// coefficients.
 pub fn poly_interpolate(out: &mut [Fp4], x: &[Fp4], fx: &[Fp4], size: usize) {
     // Special case the very easy ones
     if size == 1 {
@@ -75,7 +76,8 @@ pub fn poly_interpolate(out: &mut [Fp4], x: &[Fp4], fx: &[Fp4], size: usize) {
 
 /// In-place polynomial division.
 ///
-/// Take the coefficients in P, and divide by (X - z) for some z, return the remainder.
+/// Take the coefficients in P, and divide by (X - z) for some z, return the
+/// remainder.
 pub fn poly_divide(p: &mut [Fp4], z: Fp4) -> Fp4 {
     let mut cur = Fp4::default();
     for i in (0..p.len()).rev() {

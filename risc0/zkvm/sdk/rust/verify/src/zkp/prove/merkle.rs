@@ -42,10 +42,11 @@ pub struct MerkleTreeProver {
 impl MerkleTreeProver {
     /// Gernerate a merkle tree from a matrix of values.
     ///
-    /// The proofs will prove a single 'column' of values in the tree at a certain row.
-    /// Layout is presumed to be packed row-major.
-    /// The number of queries represents the expected # of queries and determines the size of the 'top' layer.
-    /// It is important that the verifier is constructed with identical size parameters, including # of
+    /// The proofs will prove a single 'column' of values in the tree at a
+    /// certain row. Layout is presumed to be packed row-major.
+    /// The number of queries represents the expected # of queries and
+    /// determines the size of the 'top' layer. It is important that the
+    /// verifier is constructed with identical size parameters, including # of
     /// queries, or verification may fail.
     pub fn new<H: Hal>(
         hal: &H,
@@ -108,8 +109,9 @@ impl MerkleTreeProver {
     /// 1) The column itself
     /// 2) The 'other' digests up to the top.
     ///
-    /// It is presumed the verifier is given the index of the row from other parts of the protocol,
-    /// and verification will of course fail if the wrong row is specified.
+    /// It is presumed the verifier is given the index of the row from other
+    /// parts of the protocol, and verification will of course fail if the
+    /// wrong row is specified.
     pub fn prove<S: Sha>(&self, iop: &mut WriteIOP<S>, idx: usize) -> Vec<Fp> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);

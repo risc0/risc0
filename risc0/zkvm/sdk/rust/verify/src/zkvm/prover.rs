@@ -41,10 +41,11 @@ impl Prover {
         // // Set the memory handlers to call back to the impl
         // MemoryHandler handler(impl.get());
         // // Make the circuit
-        // std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfPath.c_str(), handler);
+        // std::unique_ptr<ProveCircuit> circuit =
+        // getRiscVProveCircuit(impl->elfPath.c_str(), handler);
         // BufferU32 seal = prove(*circuit);
-        // // Attach the full version of the output journal + construct receipt object
-        // Receipt receipt{getCommit(), seal};
+        // // Attach the full version of the output journal + construct receipt
+        // object Receipt receipt{getCommit(), seal};
         // // Verify receipt to make sure it works
         // receipt.verify(impl->idPath);
         // return receipt;

@@ -137,21 +137,23 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     //   }
     // #endif
 
-    // Convert to coefficients.  Some tricky bizness here with the fact that checkPoly is really
-    // an Fp4 polynomial.  Nicely for us, since all the roots of unity (which are the only thing that
-    // and values get multiplied by) are in Fp, Fp4 values act like simple vectors of Fp for the
+    // Convert to coefficients.  Some tricky bizness here with the fact that
+    // checkPoly is really an Fp4 polynomial.  Nicely for us, since all the
+    // roots of unity (which are the only thing that and values get multiplied
+    // by) are in Fp, Fp4 values act like simple vectors of Fp for the
     // purposes of interpolate/evaluate.
     hal.batch_interpolate_ntt(&check_poly, EXT_SIZE);
 
-    // The next step is to convert the degree 4*n check polynomial into 4 degreen n polynomials
-    // so that f(x) = g0(x^4) + g1(x^4) x + g2(x^4) x^2 + g3(x^4) x^3.  To do this, we normally
-    // would grab all the coeffients of f(x) = sum_i c_i x^i where i % 4 == 0 and put them into
-    // a new polynomial g0(x) = sum_i d0_i*x^i, where d0_i = c_(i*4).
+    // The next step is to convert the degree 4*n check polynomial into 4 degreen n
+    // polynomials so that f(x) = g0(x^4) + g1(x^4) x + g2(x^4) x^2 + g3(x^4)
+    // x^3.  To do this, we normally would grab all the coeffients of f(x) =
+    // sum_i c_i x^i where i % 4 == 0 and put them into a new polynomial g0(x) =
+    // sum_i d0_i*x^i, where d0_i = c_(i*4).
     //
-    // Amazingingly, since the coefficients are bit reversed, the coefficients of g0 are all
-    // aleady next to each other and in bit-reversed for for g0, as are the coeffients of g1, etc.
-    // So really, we can just reinterpret 4 polys of invRate*size to 16 polys of size, without
-    // actually doing anything.
+    // Amazingingly, since the coefficients are bit reversed, the coefficients of g0
+    // are all aleady next to each other and in bit-reversed for for g0, as are
+    // the coeffients of g1, etc. So really, we can just reinterpret 4 polys of
+    // invRate*size to 16 polys of size, without actually doing anything.
 
     // Make the PolyGroup + add it to the IOP;
     let check_group = PolyGroup::new(hal, &check_poly, CHECK_SIZE, size);
@@ -312,8 +314,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
         );
     });
 
-    // Sum the combos up into one final polynomial + make then make it into 4 Fp polys
-    // Additionally, it needs to be bit reversed to make everyone happy
+    // Sum the combos up into one final polynomial + make then make it into 4 Fp
+    // polys Additionally, it needs to be bit reversed to make everyone happy
     let final_poly_coeffs = hal.alloc(size * EXT_SIZE);
     hal.eltwise_sum_fp4(&final_poly_coeffs, &combos);
 

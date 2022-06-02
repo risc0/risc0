@@ -71,7 +71,8 @@ impl<S: Sha> WriteIOP<S> {
         }
     }
 
-    /// Called by the prover to commit to some hash (usually data written earlier or a Merkle root).
+    /// Called by the prover to commit to some hash (usually data written
+    /// earlier or a Merkle root).
     pub fn commit(&mut self, message: &Digest) {
         self.rng.mix(message);
     }
