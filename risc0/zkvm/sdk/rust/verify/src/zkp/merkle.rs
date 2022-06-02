@@ -14,6 +14,13 @@
 
 use risc0_zkp_core::to_po2;
 
+/// The parameters of a merkle tree of prime field elements, including:
+/// row_size - the number of leaves in the tree
+/// col_size - the number of field elements associated with each leaf
+/// queries - the number of queries that will be made to this merkle tree
+/// layers - the number of levels on the merkle tree
+/// top_layer - the index of the layer above which we check hashes only once
+/// top_size - the number of hashes in the top layer
 pub struct MerkleTreeParams {
     pub row_size: usize,
     pub col_size: usize,
@@ -24,9 +31,17 @@ pub struct MerkleTreeParams {
 }
 
 impl MerkleTreeParams {
+    /// Returns the parameters of the Merkle tree, given the row and column size
+    /// and the number of queries to be made.
     pub fn new(row_size: usize, col_size: usize, queries: usize) -> Self {
+        // The number of layers is the logarithm base 2 of the row_size.
         let layers: usize = to_po2(row_size);
         assert!(1 << layers == row_size);
+        // The "top" layer is a layer above which we verify all Merkle data only once at
+        // the beginning. Later, we only verify merkle branches from the leaf up
+        // to this top layer. This allows us to avoid checking hashes in this
+        // part of the tree multiple times. We choose the top layer to be the
+        // one with size at most equal to queries.
         let mut top_layer = 0;
         for i in 1..layers {
             if (1 << i) > queries {
