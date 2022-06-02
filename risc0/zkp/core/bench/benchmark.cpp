@@ -12,25 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod merkle;
-#[cfg(feature = "prove")]
-mod prove;
-pub(crate) mod taps;
-#[cfg(feature = "verify")]
-pub(crate) mod verify;
+#include "benchmark/benchmark.h"
 
-use risc0_zkp_core::fp4::EXT_SIZE;
+#include "risc0/core/rng.h"
+#include "risc0/zkp/core/ntt.h"
 
-const MAX_CYCLES_PO2: usize = 20;
-const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2;
+using namespace risc0;
 
-/// ~100 bits of conjectured security
-pub const QUERIES: usize = 50;
+static void BM_Interpolate_NTT(benchmark::State& state) {
+  size_t n = state.range(0);
+  size_t size = 1 << n;
 
-const INV_RATE: usize = 4;
-const MAX_DEGREE: usize = INV_RATE + 1;
-const FRI_FOLD_PO2: usize = 4;
-const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
-const FRI_MIN_DEGREE: usize = 256;
+  std::vector<Fp> buf(size);
+  PsuedoRng rng(2);
+  for (size_t i = 0; i < size; i++) {
+    buf[i] = Fp::random(rng);
+  }
 
-const CHECK_SIZE: usize = INV_RATE * EXT_SIZE;
+  for (auto _ : state) {
+    interpolateNTT(buf.data(), size);
+  }
+}
+
+BENCHMARK(BM_Interpolate_NTT)->Unit(benchmark::kMillisecond)->Arg(10)->Arg(15)->Arg(20);
+
+BENCHMARK_MAIN();

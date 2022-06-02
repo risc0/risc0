@@ -20,7 +20,7 @@ use bytemuck::{Pod, Zeroable};
 use rand::Rng;
 
 use crate::{
-    fp::{Fp, P},
+    fp::{Fp, FpMul, P},
     Random,
 };
 
@@ -126,6 +126,12 @@ impl Fp4 {
             -a[0] * b2 + a[2] * b0,
             a[1] * b2 - a[3] * b0,
         ])
+    }
+}
+
+impl FpMul for Fp4 {
+    fn fp_mul(self, x: Fp) -> Self {
+        self * x
     }
 }
 

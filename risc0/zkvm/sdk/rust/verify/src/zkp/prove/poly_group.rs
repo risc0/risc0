@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp_core::fp::Fp;
+use risc0_zkp_core::{fp::Fp, log2_ceil};
 use risc0_zkp_hal::{Buffer, Hal};
 
-use crate::zkp::{log2_ceil, prove::merkle::MerkleTreeProver, INV_RATE, QUERIES};
+use crate::zkp::{prove::merkle::MerkleTreeProver, INV_RATE, QUERIES};
 
 /// A PolyGroup represents a group of polynomials, all of the same maximum degree, as well as the
 /// evaluation of those polynomials over some domain that is larger than that degree by some invRate.

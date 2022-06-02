@@ -18,13 +18,13 @@ use rand::RngCore;
 use risc0_zkp_core::{
     fp::Fp,
     fp4::{Fp4, EXT_SIZE},
+    log2_ceil,
     sha::Sha,
     to_po2, Random,
 };
 use risc0_zkp_hal::{Buffer, Hal};
 
 use crate::zkp::{
-    log2_ceil,
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };

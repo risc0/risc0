@@ -40,8 +40,8 @@ impl<T: 'static> BufferTrait<T> for CpuBuffer<T> {
         buf.len()
     }
 
-    fn slice(&self, offset: usize, size: usize) -> Buffer<T> {
-        let buf = self.buf.borrow();
+    fn slice(&self, _offset: usize, _size: usize) -> Buffer<T> {
+        // let buf = self.buf.borrow();
         todo!()
     }
 
@@ -62,50 +62,50 @@ impl Hal for CpuHal {
         Rc::new(buf)
     }
 
-    fn copy_from<T>(&self, slice: &[T]) -> Buffer<T> {
+    fn copy_from<T>(&self, _slice: &[T]) -> Buffer<T> {
         todo!()
     }
 
-    fn batch_expand(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, count: usize) {
+    fn batch_expand(&self, _output: &Buffer<Fp>, _input: &Buffer<Fp>, _count: usize) {
         todo!()
     }
 
-    fn batch_evaluate_ntt(&self, io: &Buffer<Fp>, count: usize, expand_bits: usize) {
+    fn batch_evaluate_ntt(&self, _io: &Buffer<Fp>, _count: usize, _expand_bits: usize) {
         todo!()
     }
 
-    fn batch_interpolate_ntt(&self, io: &Buffer<Fp>, count: usize) {
+    fn batch_interpolate_ntt(&self, _io: &Buffer<Fp>, _count: usize) {
         todo!()
     }
 
-    fn batch_bit_reverse(&self, io: &Buffer<Fp>, count: usize) {
+    fn batch_bit_reverse(&self, _io: &Buffer<Fp>, _count: usize) {
         todo!()
     }
 
     fn batch_evaluate_any(
         &self,
-        coeffs: &Buffer<Fp>,
-        poly_count: usize,
-        which: &Buffer<u32>,
-        xs: &Buffer<Fp4>,
-        out: &Buffer<Fp4>,
+        _coeffs: &Buffer<Fp>,
+        _poly_count: usize,
+        _which: &Buffer<u32>,
+        _xs: &Buffer<Fp4>,
+        _out: &Buffer<Fp4>,
     ) {
         todo!()
     }
 
-    fn zk_shift(&self, io: &Buffer<Fp>, count: usize) {
+    fn zk_shift(&self, _io: &Buffer<Fp>, _count: usize) {
         todo!()
     }
 
     fn mix_poly_coeffs(
         &self,
-        out: &Buffer<Fp4>,
-        mix_start: &Buffer<Fp4>,
-        mix: &Buffer<Fp4>,
-        input: &Buffer<Fp>,
-        combos: &Buffer<u32>,
-        input_size: usize,
-        count: usize,
+        _out: &Buffer<Fp4>,
+        _mix_start: &Buffer<Fp4>,
+        _mix: &Buffer<Fp4>,
+        _input: &Buffer<Fp>,
+        _combos: &Buffer<u32>,
+        _input_size: usize,
+        _count: usize,
     ) {
         todo!()
     }
@@ -126,27 +126,27 @@ impl Hal for CpuHal {
             });
     }
 
-    fn eltwise_sum_fp4(&self, output: &Buffer<Fp>, input: &Buffer<Fp4>) {
+    fn eltwise_sum_fp4(&self, _output: &Buffer<Fp>, _input: &Buffer<Fp4>) {
         todo!()
     }
 
-    fn eltwise_copy_fp(&self, output: &Buffer<Fp>, input: &Buffer<Fp>) {
+    fn eltwise_copy_fp(&self, _output: &Buffer<Fp>, _input: &Buffer<Fp>) {
         todo!()
     }
 
-    fn eltwise_copy_digest(&self, output: &Buffer<Digest>, input: &Buffer<Digest>) {
+    fn eltwise_copy_digest(&self, _output: &Buffer<Digest>, _input: &Buffer<Digest>) {
         todo!()
     }
 
-    fn fri_fold(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, mix: &Buffer<Fp4>) {
+    fn fri_fold(&self, _output: &Buffer<Fp>, _input: &Buffer<Fp>, _mix: &Buffer<Fp4>) {
         todo!()
     }
 
-    fn sha_rows(&self, output: &Buffer<Digest>, matrix: &Buffer<Fp>) {
+    fn sha_rows(&self, _output: &Buffer<Digest>, _matrix: &Buffer<Fp>) {
         todo!()
     }
 
-    fn sha_fold(&self, output: &Buffer<Digest>, input: &Buffer<Digest>) {
+    fn sha_fold(&self, _output: &Buffer<Digest>, _input: &Buffer<Digest>) {
         todo!()
     }
 }

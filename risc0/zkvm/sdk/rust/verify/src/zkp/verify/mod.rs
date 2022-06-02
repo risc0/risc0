@@ -29,7 +29,7 @@ use risc0_zkp_core::{
 };
 
 use crate::zkp::{
-    taps::{RegisterGroup, Taps},
+    taps::Taps,
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };

@@ -2,7 +2,7 @@ use alloc::vec::Vec;
 
 use anyhow::Result;
 
-use crate::zkvm::{circuit::Risc0Circuit, Receipt};
+use crate::zkvm::Receipt;
 
 pub struct Prover {}
 

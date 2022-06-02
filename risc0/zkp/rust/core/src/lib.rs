@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #![no_std]
-#![deny(missing_docs)]
+// #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
 extern crate alloc;
@@ -32,6 +32,18 @@ pub mod sha_rng;
 /// For x = (1 << po2), given x, find po2.
 pub fn to_po2(x: usize) -> usize {
     (31 - (x as u32).leading_zeros()) as usize
+}
+
+/// Compute `ceil(log_2(value))`
+///
+/// Find the smallest value `result` such that `2^result >= value`.
+#[inline]
+pub const fn log2_ceil(value: usize) -> usize {
+    let mut result = 0;
+    while (1 << result) < value {
+        result += 1;
+    }
+    result
 }
 
 /// Generic trait for generating random values.

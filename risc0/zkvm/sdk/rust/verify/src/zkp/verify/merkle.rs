@@ -17,7 +17,6 @@ use alloc::{vec, vec::Vec};
 use risc0_zkp_core::{
     fp::Fp,
     sha::{Digest, Sha},
-    to_po2,
 };
 
 use crate::zkp::{merkle::MerkleTreeParams, verify::read_iop::ReadIOP};

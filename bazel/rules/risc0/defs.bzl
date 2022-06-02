@@ -56,16 +56,20 @@ def risc0_rust_method(name, **kwargs):
 def risc0_rust_library_pair(
         name,
         deps = [],
+        crate_features = [],
+        proc_macro_deps = [],
         host_deps = [],
         guest_deps = [],
-        crate_features = [],
         host_features = [],
         guest_features = [],
+        host_proc_macro_deps = [],
+        guest_proc_macro_deps = [],
         **kwargs):
     rust_library(
         name = name + "_host",
         crate_features = crate_features + host_features,
         deps = deps + host_deps,
+        proc_macro_deps = proc_macro_deps + host_proc_macro_deps,
         **kwargs
     )
 
@@ -73,5 +77,6 @@ def risc0_rust_library_pair(
         name = name + "_guest",
         crate_features = crate_features + guest_features,
         deps = deps + guest_deps,
+        proc_macro_deps = proc_macro_deps + guest_proc_macro_deps,
         **kwargs
     )

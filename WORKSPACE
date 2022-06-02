@@ -118,11 +118,13 @@ crates_repository(
         ),
         "cfg-if": crate.spec(version = "1.0"),
         "clap": crate.spec(version = "3.1"),
+        "criterion": crate.spec(version = "0.3"),
         "ctor": crate.spec(version = "0.1"),
         "cxx": crate.spec(version = "1.0"),
         "downcast-rs": crate.spec(version = "1.2"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
+        "paste": crate.spec(version = "1.0"),
         "rand": crate.spec(
             features = ["small_rng"],
             version = "0.8",
@@ -164,6 +166,7 @@ crates_repository(
             version = "1.9",
         ),
         "cfg-if": crate.spec(version = "1.0"),
+        "paste": crate.spec(version = "1.0"),
         "sha2": crate.spec(
             default_features = False,
             features = ["compress"],

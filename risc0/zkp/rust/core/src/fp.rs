@@ -87,6 +87,16 @@ impl Fp {
     }
 }
 
+pub trait FpMul {
+    fn fp_mul(self, x: Fp) -> Self;
+}
+
+impl FpMul for Fp {
+    fn fp_mul(self, x: Fp) -> Self {
+        self * x
+    }
+}
+
 impl Random for Fp {
     fn random<R: Rng>(rng: &mut R) -> Self {
         // Reject the last modulo-P region of possible uint32_t values, since it's
