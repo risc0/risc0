@@ -78,11 +78,11 @@ information, or cause any other manner of problems.  Caveat emptor.
 To get started building applications using the zkVM in Rust, we provide
 a small 'Hello World' repo here:
 
-[https://github.com/risc0/risc0-rust-starter](risc0-rust-starter)
+[risc0-rust-starter](https://github.com/risc0/risc0-rust-starter)
 
 Additionally, we have a more complex battleship example here:
 
-[https://github.com/risc0/battleship-example[(battleship)
+[battleship-example](https://github.com/risc0/battleship-example)
 
 Finally we include a number of small examples, each with their own README, in
 the 'examples' directory, most of which will eventually be moved out-of-tree.
