@@ -109,7 +109,7 @@ the 'examples' directory, most of which will eventually be moved out-of-tree.
 
 Generally only potential contributors or people looking to use the RISC Zero's
 experimental support for C++ based guest code should need to clone and build
-this repo.  We suggest rust users stick to released crates.
+this repo.  We suggest Rust users stick to released crates.
 
 We use [Bazel](https://bazel.build) for its strong multi-language multi-platform
 features and performance.
