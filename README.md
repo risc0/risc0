@@ -73,6 +73,20 @@ circuit used to instantiate the RISC-V ZKVM, or any other element of the code's
 implementation.  Such bugs may impact the security of receipts, leak
 information, or cause any other manner of problems.  Caveat emptor.
 
+## Getting Started
+
+To get started building applications using the zkVM in Rust, we provide
+a small 'Hello World' repo here:
+
+[https://github.com/risc0/risc0-rust-starter](risc0-rust-starter)
+
+Additionally, we have a more complex battleship example here:
+
+[https://github.com/risc0/battleship-example[(battleship)
+
+Finally we include a number of small examples, each with their own README, in
+the 'examples' directory, most of which will eventually be moved out-of-tree.
+
 ## Rust Crates
 
 | name                    | crates.io                                                                                                         | docs.rs                                                                                               |
@@ -91,12 +105,11 @@ information, or cause any other manner of problems.  Caveat emptor.
 | risc0-zkvm-sys          | [![x](https://img.shields.io/crates/v/risc0-zkvm-sys)](https://crates.io/crates/risc0-zkvm-sys)                   | [![](https://img.shields.io/docsrs/risc0-zkvm-sys)](https://docs.rs/risc0-zkvm-sys)                   |
 | risc0-zkvm-verify       | [![x](https://img.shields.io/crates/v/risc0-zkvm-verify)](https://crates.io/crates/risc0-zkvm-verify)             | [![](https://img.shields.io/docsrs/risc0-zkvm-verify)](https://docs.rs/risc0-zkvm-verify)             |
 
-## Examples
-
-In addition to the RISC Zero proof system, we include a number of small
-examples, each with their own README, in the 'examples' directory.
-
 ## Building RISC Zero
+
+Generally only potential contributors or people looking to use the RISC Zero's
+experimental support for C++ based guest code should need to clone and build
+this repo.  We suggest rust users stick to released crates.
 
 We use [Bazel](https://bazel.build) for its strong multi-language multi-platform
 features and performance.
