@@ -393,6 +393,7 @@ dependencies = [
 name = "risc0-build"
 version = "0.7.2"
 dependencies = [
+ "anyhow",
  "cargo_metadata",
  "risc0-zkvm-platform-sys",
  "risc0-zkvm-sys",
