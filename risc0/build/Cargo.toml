@@ -13,3 +13,4 @@ risc0-zkvm-platform-sys = { version = "0.7", path = "../zkvm/platform" }
 risc0-zkvm-sys = { version = "0.7", path = "../zkvm" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+sha2 = { version = "0.10", default-features = false, features = ["compress"] }

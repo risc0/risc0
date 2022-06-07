@@ -13,5 +13,5 @@
 // limitations under the License.
 
 fn main() {
-    risc0_build::build_all();
+    eprintln!("WARNING: risc0-build-methods is deprecated.  Instead, 'cargo build' builds methods automatically.");
 }
