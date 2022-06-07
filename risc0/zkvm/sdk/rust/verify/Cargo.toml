@@ -11,11 +11,13 @@ repository = "https://github.com/risc0/risc0/"
 anyhow = "1.0"
 array-init = "2.0"
 bytemuck = { version = "1.9", features = ["derive"] }
+paste = "1.0"
 rand = { version = "0.8", default-features = false, features = ["small_rng"] }
 rand_core = "0.6"
 sha2 = { version = "0.10", features = ["compress"] }
 serde = { version = "1.0", features = ["derive"] }
 risc0-zkp-core = { version = "0.7", path = "../../../../zkp/rust/core" }
+risc0-zkp-hal = { version = "0.7", path = "../hal", optional = true }
 risc0-zkvm-serde = { version = "0.7", path = "../serde" }
 
 [dev-dependencies]
@@ -29,6 +31,6 @@ name = "verify"
 harness = false
 
 [features]
-default = ["verify"]
+default = ["prove", "verify"]
 verify = []
-prove = []
+prove = ["dep:risc0-zkp-hal"]

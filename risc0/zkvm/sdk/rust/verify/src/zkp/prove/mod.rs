@@ -15,7 +15,7 @@
 mod fri;
 mod merkle;
 mod poly_group;
-mod write_iop;
+pub(crate) mod write_iop;
 
 use alloc::{vec, vec::Vec};
 

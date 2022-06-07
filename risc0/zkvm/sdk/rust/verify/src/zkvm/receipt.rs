@@ -5,7 +5,7 @@ use risc0_zkp_core::sha::{Digest, Sha};
 use serde::{Deserialize, Serialize};
 
 use crate::zkp::verify::verify;
-use crate::zkvm::circuit::{MethodID, Risc0Circuit};
+use crate::zkvm::verify::circuit::{MethodID, RV32Circuit};
 
 #[derive(Deserialize, Serialize)]
 pub struct Receipt {
@@ -15,7 +15,7 @@ pub struct Receipt {
 
 impl Receipt {
     pub fn verify(&self, method_id: &MethodID) {
-        let mut circuit = Risc0Circuit::new(method_id);
+        let mut circuit = RV32Circuit::new(method_id);
         let sha = risc0_zkp_core::sha::default_implementation();
         verify(sha, &mut circuit, &self.seal).unwrap();
         assert!(self.journal.len() == (self.seal[8] as usize));

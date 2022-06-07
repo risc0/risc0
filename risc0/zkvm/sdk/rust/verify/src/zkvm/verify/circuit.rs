@@ -24,8 +24,9 @@ use risc0_zkp_core::{
 
 use crate::{
     zkp::{
+        self,
         taps::Taps,
-        verify::{read_iop::ReadIOP, Circuit, VerificationError},
+        verify::{read_iop::ReadIOP, VerificationError},
     },
     zkvm::{
         poly_op::PolyOp,
@@ -85,15 +86,15 @@ impl TryFrom<&[u8]> for MethodID {
     }
 }
 
-pub struct Risc0Circuit<'a> {
+pub struct RV32Circuit<'a> {
     po2: u32,
     globals: Vec<Fp>,
     code_id: &'a MethodID,
 }
 
-impl<'a> Risc0Circuit<'a> {
+impl<'a> RV32Circuit<'a> {
     pub fn new(code_id: &'a MethodID) -> Self {
-        Risc0Circuit {
+        RV32Circuit {
             po2: 0,
             globals: vec![],
             code_id,
@@ -123,9 +124,9 @@ impl MixState {
     }
 }
 
-impl<'a> Circuit for Risc0Circuit<'a> {
+impl<'a> zkp::verify::Circuit for RV32Circuit<'a> {
     fn taps(&self) -> &'static Taps<'static> {
-        return RISCV_TAPS;
+        RISCV_TAPS
     }
 
     fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {

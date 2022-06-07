@@ -14,7 +14,7 @@
 
 mod merkle;
 #[cfg(feature = "prove")]
-mod prove;
+pub(crate) mod prove;
 pub(crate) mod taps;
 #[cfg(feature = "verify")]
 pub(crate) mod verify;
@@ -27,7 +27,7 @@ const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2;
 /// ~100 bits of conjectured security
 pub const QUERIES: usize = 50;
 
-const INV_RATE: usize = 4;
+pub const INV_RATE: usize = 4;
 const MAX_DEGREE: usize = INV_RATE + 1;
 const FRI_FOLD_PO2: usize = 4;
 const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;

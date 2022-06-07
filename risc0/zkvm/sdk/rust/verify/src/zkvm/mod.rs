@@ -12,22 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod circuit;
 mod poly_op;
 mod poly_ops;
-mod prover;
+#[cfg(feature = "prove")]
+mod prove;
 mod receipt;
 mod taps;
+#[cfg(feature = "verify")]
+mod verify;
 
-pub use circuit::MethodID;
-pub use prover::Prover;
+#[cfg(feature = "prove")]
+pub use prove::prover::Prover;
 pub use receipt::Receipt;
+pub use verify::circuit::MethodID;
 
 #[cfg(test)]
 mod tests {
     extern crate std;
-    use super::Receipt;
-    use crate::zkvm::MethodID;
+    use super::{MethodID, Receipt};
     use std::{convert::TryFrom, fs, io, vec::Vec};
     use test_log::test;
 

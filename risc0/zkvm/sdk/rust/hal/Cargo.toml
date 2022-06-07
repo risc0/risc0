@@ -1,5 +1,5 @@
 [package]
-name = "risc0-hal"
+name = "risc0-zkp-hal"
 version = "0.7.2"
 edition = "2021"
 

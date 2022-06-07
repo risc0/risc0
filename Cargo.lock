@@ -740,16 +740,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-hal"
-version = "0.7.2"
-dependencies = [
- "downcast-rs",
- "rand",
- "rayon",
- "risc0-zkp-core",
-]
-
-[[package]]
 name = "risc0-zkp-core"
 version = "0.7.2"
 dependencies = [
@@ -761,6 +751,16 @@ dependencies = [
  "rand_core",
  "serde",
  "sha2",
+]
+
+[[package]]
+name = "risc0-zkp-hal"
+version = "0.7.2"
+dependencies = [
+ "downcast-rs",
+ "rand",
+ "rayon",
+ "risc0-zkp-core",
 ]
 
 [[package]]
@@ -875,9 +875,11 @@ dependencies = [
  "bytemuck",
  "env_logger",
  "log",
+ "paste",
  "rand",
  "rand_core",
  "risc0-zkp-core",
+ "risc0-zkp-hal",
  "risc0-zkvm-serde",
  "serde",
  "sha2",

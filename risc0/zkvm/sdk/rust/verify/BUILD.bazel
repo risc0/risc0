@@ -1,5 +1,7 @@
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
+# "src/zkvm/prove/check_eval.rs",
+
 risc0_rust_library_pair(
     name = "verify",
     srcs = [
@@ -16,15 +18,23 @@ risc0_rust_library_pair(
         "src/zkp/verify/merkle.rs",
         "src/zkp/verify/mod.rs",
         "src/zkp/verify/read_iop.rs",
-        "src/zkvm/circuit.rs",
         "src/zkvm/mod.rs",
         "src/zkvm/poly_op.rs",
         "src/zkvm/poly_ops.rs",
-        "src/zkvm/prover.rs",
+        "src/zkvm/prove/circuit.rs",
+        "src/zkvm/prove/exec.rs",
+        "src/zkvm/prove/io.rs",
+        "src/zkvm/prove/mod.rs",
+        "src/zkvm/prove/prover.rs",
+        "src/zkvm/prove/step.rs",
+        "src/zkvm/prove/step_context.rs",
         "src/zkvm/receipt.rs",
         "src/zkvm/taps.rs",
+        "src/zkvm/verify/circuit.rs",
+        "src/zkvm/verify/mod.rs",
     ],
     crate_name = "risc0_zkvm_verify",
+    data = ["src/zkvm/prove/check_eval.rs"],
     guest_deps = [
         "//risc0/zkp/rust/core:core_guest",
         "@crates_guest//:anyhow",
@@ -50,6 +60,9 @@ risc0_rust_library_pair(
     host_features = [
         "prove",
         "verify",
+    ],
+    host_proc_macro_deps = [
+        "@crates_host//:paste",
     ],
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
