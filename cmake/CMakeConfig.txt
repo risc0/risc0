@@ -1,0 +1,29 @@
+if(ENABLE_TESTS)
+	include(FetchContent)
+	FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip)
+	# For Windows: Prevent overriding the parent project's compiler/linker settings
+	set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+	FetchContent_MakeAvailable(googletest)
+	include(GoogleTest)
+	set (GTEST_LIBS gtest gtest_main)
+	set (GTEST_OUTPUT ${CMAKE_BINARY_DIR}/tests)
+else()
+        message (WARNING,"Google testing is disabled.")
+endif()
+
+if(BUILD_RISCVCROSS)
+        message("Building riscv-gnu-toolchain cross code")
+	include (cmake/riscv.appdefs.cmake)
+else()
+        message (WARNING,"Builds for riscv-gnu-toolchain are disabled")
+	include (cmake/native.appdefs.cmake)
+endif()
+
+if(BUILD_RISCVM)
+        message("Building risc VM")
+        find_package(TBB REQUIRED)
+else()
+        message (WARNING,"Builds for risc VM are disabled.")
+endif()
+
+
