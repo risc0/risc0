@@ -20,7 +20,7 @@ if(ENABLE_TESTS AND BUILD_RISCVM)
 	set_target_properties(deck_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${DECK_OUTPUTDIR} ) 
 	gtest_discover_tests(deck_test)
 
-	risc0_make_id ("card_method.id" ${BATTLESHIP_OUTPUTDIR}/examples/cpp/deck/card_method)
-	risc0_make_id ("shuffle_method.id" ${BATTLESHIP_OUTPUTDIR}/examples/cpp/deck/shuffle_method)
+	risc0_make_id ("card_method.id" ${DECK_OUTPUTDIR}/examples/cpp/deck/card_method)
+	risc0_make_id ("shuffle_method.id" ${DECK_OUTPUTDIR}/examples/cpp/deck/shuffle_method)
 endif()
 
