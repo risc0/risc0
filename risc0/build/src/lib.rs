@@ -29,8 +29,6 @@ use risc0_zkvm_sys::MethodID;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
-const TARGET_JSON: &[u8] = include_bytes!("../riscv32im-unknown-none-elf.json");
-
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
     methods: Vec<String>,
@@ -185,15 +183,13 @@ where
     P: AsRef<Path>,
 {
     fs::create_dir_all(target_dir.as_ref()).unwrap();
-    let target_path = target_dir.as_ref().join("riscv32im-unknown-none-elf.json");
-    fs::write(&target_path, TARGET_JSON).unwrap();
 
     let cargo = env::var("CARGO").unwrap();
     let args = vec![
         "build",
         "--release",
         "--target",
-        target_path.to_str().unwrap(),
+	"riscv32im-unknown-none-elf",
         "-Z",
         "build-std=alloc,core",
         "--manifest-path",
@@ -228,7 +224,6 @@ where
 /// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
 pub fn embed_methods() {
     let pkg = current_package();
-    println!("cargo:rerun-if-changed=Cargo.toml");
 
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
@@ -237,16 +232,11 @@ pub fn embed_methods() {
     let guest_packages = guest_packages(&pkg);
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
+
     for guest_pkg in guest_packages {
         println!(
             "Building guest package {} (parent={})",
             guest_pkg.name, pkg.name
-        );
-
-        // Try to rebuild guest packages if anything changes in the guest package directory.
-        println!(
-            "cargo:rerun-if-changed={}",
-            guest_pkg.manifest_path.parent().unwrap()
         );
 
         build_guest_package(&guest_pkg, &guest_target_dir);
@@ -260,6 +250,14 @@ pub fn embed_methods() {
                 .unwrap();
         }
     }
+
+    // HACK: It's not particularly practical to figure out all the
+    // files that all the guest crates transtively depend on.  So, we
+    // want to run the guest "cargo build" command each time we build.
+    //
+    // Since we generate methods.rs each time we run, it will always
+    // be changed.
+    println!("cargo:rerun-if-changed={}", methods_path.display());
 }
 
 /// Called inside the guest crate's build.rs to do special linking for the ZKVM
