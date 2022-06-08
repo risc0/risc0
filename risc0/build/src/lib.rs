@@ -208,7 +208,7 @@ where
 ///
 /// This method should be called from a package with a
 /// [package.metadata.risc0] section including a "methods" property
-/// listing the subdirectories that contain riscv guest method
+/// listing the relative paths that contain riscv guest method
 /// packages.
 ///
 /// To access the generated method IDs and ELF filenames, include the
