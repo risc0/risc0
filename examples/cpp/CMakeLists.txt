@@ -1,2 +1,2 @@
 add_subdirectory(battleship)
-add_subdirectory(tools)
+add_subdirectory(deck)

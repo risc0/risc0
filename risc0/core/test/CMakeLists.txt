@@ -1,10 +1,9 @@
 if(ENABLE_TESTS)
-	add_executable(
-		archive 
-		archive.cpp
-	)
+        #FILE( GLOB local_tests *.cpp )
+	set (local_tests "archive.cpp")
+        FOREACH( testsource ${local_tests} )
+                GET_FILENAME_COMPONENT( filename ${testsource} NAME_WE )
+                Add_risc0_test( "risc0-core" ${filename} "zkvm-prove core zkp-core zkp-accel-backend-cpu zkp-accel-kernels" )
+        ENDFOREACH()
 
-	target_link_libraries(archive  core ${GTEST_LIBS} )
-        set_target_properties(archive PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${GTEST_OUTPUT})
-	gtest_discover_tests(archive)
 endif()
