@@ -10,5 +10,4 @@ risc0-build = { path = "../../../../build" }
 release = false
 
 [package.metadata.risc0]
-
 methods = ["inner"]
