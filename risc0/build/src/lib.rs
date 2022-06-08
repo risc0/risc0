@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
 use std::{
@@ -26,7 +27,7 @@ use cargo_metadata::{MetadataCommand, Package};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
 use risc0_zkvm_sys::MethodID;
 use serde::Deserialize;
-use sha2::Digest;
+use sha2::{Digest, Sha256};
 
 const TARGET_JSON: &[u8] = include_bytes!("../riscv32im-unknown-none-elf.json");
 
@@ -41,6 +42,7 @@ impl Risc0Metadata {
         serde_json::from_value(obj.clone()).unwrap()
     }
 }
+
 #[derive(Debug)]
 struct Risc0Method {
     name: String,
@@ -60,32 +62,29 @@ impl Risc0Method {
             std::process::exit(-1);
         }
 
-        // Method ID calculation is expensive, so only recalculate it
-        // if we actually get a different ELF file.
+        // Method ID calculation is slow, so only recalculate it if we
+        // actually get a different ELF file.
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
-        let mut hasher = sha2::Sha256::new();
-        hasher.update(elf_contents);
-        let elf_sha_result = hasher.finalize();
-        let elf_sha = elf_sha_result.as_slice();
-        let elf_sha_display: String = elf_sha_result
+        let elf_sha = Sha256::new().chain_update(elf_contents).finalize();
+        let elf_sha_hex: String = elf_sha
+            .as_slice()
             .iter()
             .map(|x| format!("{:02x}", x))
             .collect();
 
         let cached_elf_sha_path = method_id_path.as_ref().with_extension("elf_sha");
-        if let Ok(cached_sha) = std::fs::read(&cached_elf_sha_path) {
-            if cached_sha == elf_sha {
-                println!(
-                    "Method id for {} ({}) up to date",
-                    self.name, elf_sha_display
-                );
-                return;
+        if method_id_path.as_ref().exists() {
+            if let Ok(cached_sha) = std::fs::read(&cached_elf_sha_path) {
+                if cached_sha == elf_sha.as_slice() {
+                    println!("Method id for {} ({}) up to date", self.name, elf_sha_hex);
+                    return;
+                }
             }
         }
 
         println!(
             "Calculating method id for {} ({:})!",
-            self.name, elf_sha_display
+            self.name, elf_sha_hex
         );
 
         let method_id = MethodID::new(&self.elf_path.to_str().unwrap()).unwrap();
@@ -162,7 +161,7 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
 }
 
 /// Returns all methods associated with the given riscv guest package.
-fn guest_methods<P>(pkg: &Package, out_dir: P) -> Vec<Risc0Method>
+fn guest_methods<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
 where
     P: AsRef<Path>,
 {
@@ -171,7 +170,7 @@ where
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| Risc0Method {
             name: target.name.clone(),
-            elf_path: out_dir
+            elf_path: target_dir
                 .as_ref()
                 .join("riscv32im-unknown-none-elf")
                 .join("release")
@@ -180,19 +179,18 @@ where
         .collect()
 }
 
-fn build_guest_package<P>(pkg: &Package, out_dir: P)
+// Builds a package that targets the riscv guest into the specified target directory.
+fn build_guest_package<P>(pkg: &Package, target_dir: P)
 where
     P: AsRef<Path>,
 {
-    fs::create_dir_all(out_dir.as_ref()).unwrap();
-    let target_path = out_dir.as_ref().join("riscv32im-unknown-none-elf.json");
+    fs::create_dir_all(target_dir.as_ref()).unwrap();
+    let target_path = target_dir.as_ref().join("riscv32im-unknown-none-elf.json");
     fs::write(&target_path, TARGET_JSON).unwrap();
 
+    let cargo = env::var("CARGO").unwrap();
     let args = vec![
         "build",
-        "-vv",
-        "-j",
-        "1",
         "--release",
         "--target",
         target_path.to_str().unwrap(),
@@ -201,12 +199,10 @@ where
         "--manifest-path",
         pkg.manifest_path.as_str(),
         "--target-dir",
-        out_dir.as_ref().to_str().unwrap(),
+        target_dir.as_ref().to_str().unwrap(),
     ];
-    let status = Command::new(env::var("CARGO").unwrap())
-        .args(args)
-        .status()
-        .unwrap();
+    println!("Building guest package: {cargo} {}", args.join(" "));
+    let status = Command::new(cargo).args(args).status().unwrap();
     if !status.success() {
         std::process::exit(status.code().unwrap());
     }
@@ -214,16 +210,27 @@ where
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 ///
-/// This method should be called from a package with a [package.metadata.risc0]
-/// section including a "methods" property listing the subdirectories
-/// that contain riscv guest method packages.
+/// This method should be called from a package with a
+/// [package.metadata.risc0] section including a "methods" property
+/// listing the subdirectories that contain riscv guest method
+/// packages.
+///
+/// To access the generated method IDs and ELF filenames, include the
+/// generated methods.rs:
+///
+///       include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+///
+/// To conform to rust's naming conventions, the constants are mapped
+/// to uppercase.  For instance, if you have a method named
+/// "my_method", the method ID and elf filename will be defined as
+/// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
 pub fn embed_methods() {
     let pkg = current_package();
     println!("cargo:rerun-if-changed=Cargo.toml");
 
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
-    let guest_out_dir = out_dir.join("riscv-guest");
+    let guest_target_dir = out_dir.join("riscv-guest");
 
     let guest_packages = guest_packages(&pkg);
     let methods_path = out_dir.join("methods.rs");
@@ -240,9 +247,9 @@ pub fn embed_methods() {
             guest_pkg.manifest_path.parent().unwrap()
         );
 
-        build_guest_package(&guest_pkg, &guest_out_dir);
+        build_guest_package(&guest_pkg, &guest_target_dir);
 
-        let methods = guest_methods(&guest_pkg, &guest_out_dir);
+        let methods = guest_methods(&guest_pkg, &guest_target_dir);
         for method in methods {
             let method_id_path = out_dir.join(format!("{}.id", method.name));
             method.make_method_id(&method_id_path);
