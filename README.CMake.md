@@ -1,17 +1,31 @@
+CMake build process.
+--------------------
+
+CMake is used to build tools test and risc ELF from the VM.  
+CMake will assume that the RISC toolset is installed and available in PATH
+It is also possible to configure a tree only for the risc code or only for VM
 
 
-cmake ../risc0 -DCMAKE_TOOLCHAIN_FILE=../risc0/cmake/riscv.cmake
+To compile methods using a compiler available in PATH variable:
+	cmake ../risc0 -DCMAKE_TOOLCHAIN_FILE=../risc0/cmake/riscv.cmake
 
-1. Compilation options:
+General settings
+----------------
+	ENABLE_TESTS     - will install Gtest and compile tests
+	BUILD_RISCVM     - will build native set
+	BUILD_CROSS_RISC - will also compile methods via cross as a part of the single tree
 
-	ENABLE_TESTS - will install Gtest and compile tests
-	
-1. OSX  RISC-V toolchain
+RISC-V toolchain
+----------------
 
-Binary installation:
-	brew tap riscv-software-src/riscv
+git clone https://github.com/riscv/riscv-gnu-toolchain -b 2022.02.25
+cd riscv-gnu-toolchain
+# needed for Apple Silicon support
+sed -i .bak 's/.*=host-darwin.o$//' riscv-gcc/gcc/config.host
+sed -i .bak 's/.* x-darwin.$//' riscv-gcc/gcc/config.host
+./configure \
+  --prefix=/tmp/riscv32im-darwin-arm64 \
+  --with-arch=rv32im \
+  --with-abi=ilp32 \
+  --with-cmodel=medany
 
-
-To compile RISV toolchain following tools have to be installed
-	brew install python3 gawk gnu-sed gmp mpfr libmpc isl zlib expat
-	

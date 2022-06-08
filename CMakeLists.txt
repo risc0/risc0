@@ -6,8 +6,9 @@ include(ExternalProject)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set (ENABLE_TESTS OFF)
+set (ENABLE_TESTS ON)
 set (BUILD_RISCVM ON)
+set (BUILD_CROSS_RISC ON)  #Will disable an embedded risc compilation
 
 
 if(CMAKE_C_COMPILER MATCHES "risc")
@@ -16,17 +17,19 @@ if(CMAKE_C_COMPILER MATCHES "risc")
 	set (ENABLE_TESTS OFF)
 	set (BUILD_RISCVM OFF)
 else()
-	set (BUILD_RISCVCROSS OFF)
-	ExternalProject_Add (
-		risc0_cross_riscv
-		URL  ""
-		PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_cross
-		SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-		CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/riscv.cmake
-		INSTALL_COMMAND cmake -E echo "Skipping install step."
-		BUILD_COMMAND make
-		ALWAYS TRUE
-	)
+	if (BUILD_CROSS_RISC)
+		set (BUILD_RISCVCROSS OFF)
+		ExternalProject_Add (
+			risc0_cross_riscv
+			URL  ""
+			PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_cross
+			SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+			CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/riscv.cmake
+			INSTALL_COMMAND cmake -E echo "Skipping install step."
+			BUILD_COMMAND make
+			ALWAYS TRUE
+		)
+	endif()
 endif()
 
 include (cmake/CMakeConfig.txt)
