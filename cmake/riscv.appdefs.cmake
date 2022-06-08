@@ -20,8 +20,8 @@ add_compile_options(
 	-fno-rtti 
 	-fno-threadsafe-statics 
 	-fno-use-cxa-atexit 
-	-MD 
-	-MF 
+	#-MD 
+	#-MF 
 )
 	
 

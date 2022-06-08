@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 project(risc0  LANGUAGES C CXX ASM )
  
+include(ExternalProject)
+
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-set (ENABLE_TESTS ON)
+set (ENABLE_TESTS OFF)
 set (BUILD_RISCVM ON)
 
 
@@ -15,6 +17,16 @@ if(CMAKE_C_COMPILER MATCHES "risc")
 	set (BUILD_RISCVM OFF)
 else()
 	set (BUILD_RISCVCROSS OFF)
+	ExternalProject_Add (
+		risc0_cross_riscv
+		URL  ""
+		PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_cross
+		SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+		CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/riscv.cmake
+		INSTALL_COMMAND cmake -E echo "Skipping install step."
+		BUILD_COMMAND make
+		ALWAYS TRUE
+	)
 endif()
 
 include (cmake/CMakeConfig.txt)
