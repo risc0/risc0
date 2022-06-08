@@ -1,6 +1,6 @@
 # Merkle Branch Engineering Optimization
 
-Given that we're doing lots of queries from the same Merkle Tree, these queries are expected to have quite a bit of overlap close to the root. To minimize computation, rather than checking all the way to the root, we choose a cut-off point called `top_layer`.
+This document describes the Merkle branch checks as implemented in [merkle.rs](https://github.com/risc0/risc0/blob/a34f51e621e03a3975bfa0cf311f45e040b79300/risc0/zkvm/sdk/rust/verify/src/zkp/merkle.rs#L80). Given that we're doing lots of queries from the same Merkle Tree, these queries are expected to have quite a bit of overlap close to the root. To minimize computation, rather than checking all the way to the root, we choose a cut-off point called `top_layer`.
 
 ## Storing the Top of the Tree
 We store that entire layer, and for each query, we check our Merkle branches from leaf to `top_layer`. The paths from `top_layer` to the Merkle root only need to be checked once.
