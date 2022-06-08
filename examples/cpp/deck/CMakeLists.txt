@@ -5,6 +5,9 @@ if(BUILD_RISCVCROSS)
 	target_link_libraries(card_method zkvm-sdk-cpp-guest zkvm-sdk-cpp-guest-crt0)
 	add_executable(shuffle_method deck.cpp shuffle_method.cpp)
 	target_link_libraries(shuffle_method zkvm-sdk-cpp-guest zkvm-sdk-cpp-guest-crt0)
+        
+	set_target_properties(card_method PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${DECK_OUTPUTDIR}/examples/cpp/deck/)
+        set_target_properties(shuffle_method PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${DECK_OUTPUTDIR}/examples/cpp/deck/)
 endif ()
 
 if(ENABLE_TESTS AND BUILD_RISCVM)
