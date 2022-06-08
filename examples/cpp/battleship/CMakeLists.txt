@@ -16,6 +16,10 @@ if(BUILD_RISCVM)
 
 	target_link_libraries(battleship  battleship-core TBB::tbb  ${HOST_LIBS} )
 	set_target_properties(battleship PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BATTLESHIP_OUTPUTDIR})
+
+
+	risc0_make_id ("init_method.id" ${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/init_method)
+	risc0_make_id ("turn_method.id" ${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/turn_method)
 endif()
 
 if(BUILD_RISCVCROSS)
