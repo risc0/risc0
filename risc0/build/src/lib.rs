@@ -218,7 +218,9 @@ where
 /// To access the generated method IDs and ELF filenames, include the
 /// generated methods.rs:
 ///
-///       include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+/// ```text
+///     include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+/// ```
 ///
 /// To conform to rust's naming conventions, the constants are mapped
 /// to uppercase.  For instance, if you have a method named
