@@ -189,7 +189,7 @@ where
         "build",
         "--release",
         "--target",
-	"riscv32im-unknown-none-elf",
+        "riscv32im-unknown-none-elf",
         "-Z",
         "build-std=alloc,core",
         "--manifest-path",
