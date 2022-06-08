@@ -25,7 +25,7 @@ use std::{
 use anyhow;
 use cargo_metadata::MetadataCommand;
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
-use risc0_zkvm_sys::MethodID;
+use risc0_zkvm_sys::make_method_id_from_elf;
 use serde::Deserialize;
 
 const TARGET_JSON: &[u8] = include_bytes!("../riscv32im-unknown-none-elf.json");
@@ -153,8 +153,7 @@ pub fn embed_methods() {
                 let method_id = &elf_path
                     .to_str()
                     .ok_or(anyhow::Error::msg("empty elf path!"))
-                    .and_then(MethodID::from_elf)
-                    .and_then(|m| m.to_bytes())
+                    .and_then(make_method_id_from_elf)
                     .expect("Failed building MethodID!");
                 file.write_all(&[
                     format!("pub const {}_PATH: &str = \"{}\";\n", method.to_uppercase(), elf_path.display()).as_bytes(),

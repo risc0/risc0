@@ -20,8 +20,8 @@
 #include "risc0/zkvm/prove/method_id.h"
 #include "risc0/zkvm/prove/step.h"
 
-#include <memory>
 #include <array>
+#include <memory>
 #include <vector>
 
 namespace risc0 {

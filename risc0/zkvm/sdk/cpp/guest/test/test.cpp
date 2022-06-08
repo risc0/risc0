@@ -161,7 +161,7 @@ void doMemcpyTest(uint32_t srcOffset, uint32_t destOffset, uint32_t size) {
     }
   }
   // Make an prover and have it do a memcpy
-  MethodId methodId = makeMethodId("risc0/zkvm/sdk/cpp/guest/test/test_memcpy.id");
+  MethodId methodId = makeMethodId("risc0/zkvm/sdk/cpp/guest/test/test_memcpy");
   Prover prover("risc0/zkvm/sdk/cpp/guest/test/test_memcpy", methodId);
   prover.writeInput(srcBuf.data(), 1024);
   prover.writeInput(destBuf.data(), 1024);
@@ -204,7 +204,7 @@ TEST(CoreTests, Memset) {
 }
 
 TEST(CoreTests, SHAAccel) {
-  MethodId methodId = makeMethodId("risc0/zkvm/sdk/rust/methods/test_sha_accel.id");
+  MethodId methodId = makeMethodId("risc0/zkvm/sdk/rust/methods/test_sha_accel");
   Prover prover("risc0/zkvm/sdk/rust/methods/test_sha_accel", methodId);
   Receipt receipt = prover.run();
   receipt.verify(methodId);

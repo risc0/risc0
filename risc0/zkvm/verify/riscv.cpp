@@ -160,7 +160,6 @@ void RiscVVerifyCircuit::accumulate(ReadIOP& iop) {
 
 bool RiscVVerifyCircuit::validCode(const ShaDigest& top) const {
   size_t whichCode = po2_ - log2Ceil(kMinCycles);
-  LOG(1, "whichCode: " << whichCode);
   return digest_[whichCode] == top;
 }
 

@@ -15,6 +15,7 @@
 #include "risc0/zkvm/prove/method_id.h"
 
 #include <fstream>
+#include <iostream>
 #include <map>
 
 #include "risc0/core/elf.h"
@@ -22,7 +23,6 @@
 #include "risc0/zkvm/prove/step.h"
 
 namespace risc0 {
-
 
 MethodId makeMethodId(const MethodDigest& digest) {
   MethodId id;
@@ -35,7 +35,7 @@ MethodId makeMethodId(const uint8_t* bytes, const size_t len) {
     throw std::length_error("Got buffer of invalid size!");
   }
   MethodId id;
-  std::memcpy(&id, &bytes, sizeof(MethodId));
+  std::memcpy(&id, bytes, sizeof(MethodId));
   return id;
 }
 

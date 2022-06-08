@@ -38,5 +38,4 @@ MethodId makeMethodId(const MethodDigest& digest);
 MethodDigest makeMethodDigest(const std::string& elfPath);
 MethodDigest makeMethodDigest(const MethodId& id);
 
-
 } // namespace risc0
