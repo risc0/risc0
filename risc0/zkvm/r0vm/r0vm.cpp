@@ -22,8 +22,8 @@ constexpr size_t kMaxStdin = 64 * 1024;
 
 int main(int argc, char* argv[]) {
   // Check args
-  if (argc != 3) {
-    fprintf(stderr, "Usage: r0vm <elf_path> <id_path>\n");
+  if (argc != 2) {
+    fprintf(stderr, "Usage: r0vm <elf_path>\n");
     return 1;
   }
   // Consume stdin fully
@@ -38,7 +38,8 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   try {
-    Prover prover(argv[1], argv[2]);
+    MethodId methodId = makeMethodId(argv[1]);
+    Prover prover(argv[1], methodId);
     prover.writeInput(data.data(), count);
     // Run prover
     Receipt receipt = prover.run();

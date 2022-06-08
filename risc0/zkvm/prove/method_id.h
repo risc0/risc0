@@ -23,24 +23,20 @@
 
 namespace risc0 {
 
-static constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
-using MethodDigests = std::array<ShaDigest, kCodeDigestCount>;
-static constexpr size_t digestBytes = sizeof(MethodDigests);
+static constexpr size_t numMethodDigests = log2Ceil(kMaxCycles / kMinCycles) + 1;
 
-class MethodID {
-public:
-  MethodID(const MethodDigests& methodDigests);
-  static MethodID fromElf(const std::string& elfPath);
-  static MethodID fromBytes(const std::array<uint8_t, 384>& bytes);
-  static MethodID fromBytes(const uint8_t* bytes);
-  std::array<uint8_t, digestBytes> toBytes() const;
+// These types are likely to change relatively soon. But, for now:
+// A MethodDigest is intended for internal use in verification
+// A MethodId is an intentionally opaque version of a MethodDigest for use in APIs
+using MethodDigest = std::array<ShaDigest, numMethodDigests>;
+using MethodId = std::array<uint8_t, sizeof(MethodDigest)>;
 
-private:
-  const MethodDigests _digests;
-};
+MethodId makeMethodId(const std::string& elfPath);
+MethodId makeMethodId(const uint8_t* bytes, const size_t len);
+MethodId makeMethodId(const MethodDigest& digest);
 
-// cxx doesn't support constructors or static methods...https://github.com/dtolnay/cxx/issues/280
-std::unique_ptr<MethodID> method_id_from_elf(const std::string& path);
-std::unique_ptr<MethodID> method_id_from_bytes(const std::array<uint8_t, digestBytes>& bytes);
+MethodDigest makeMethodDigest(const std::string& elfPath);
+MethodDigest makeMethodDigest(const MethodId& id);
+
 
 } // namespace risc0

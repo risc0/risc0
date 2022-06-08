@@ -59,10 +59,9 @@ fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
 impl Receipt {
     /// Verify that the current [Receipt] is a valid result of executing the
     /// method associated with the given method ID in a ZKVM.
-    pub fn verify(&self, id_path: &str) -> Result<()> {
+    pub fn verify(&self, method_id: &[u8]) -> Result<()> {
         let mut err = ffi::RawError::default();
-        let id_path = CString::new(id_path).unwrap();
-        unsafe { ffi::risc0_receipt_verify(&mut err, id_path.as_ptr(), self.ptr) };
+        unsafe { ffi::risc0_receipt_verify(&mut err, self.ptr, method_id.as_ptr(), method_id.len()) };
         ffi::check(err, || ())
     }
 
@@ -100,12 +99,18 @@ impl Receipt {
 
 impl Prover {
     /// Create a new [Prover] with the given method (specified via `elf_path`)
-    /// and an associated method ID (specified via `id_path`).
-    pub fn new(elf_path: &str, id_path: &str) -> Result<Self> {
+    /// and an associated method ID (specified via `method_id`).
+    pub fn new(elf_path: &str, method_id: &[u8]) -> Result<Self> {
         let mut err = ffi::RawError::default();
         let elf_path = CString::new(elf_path).unwrap();
-        let id_path = CString::new(id_path).unwrap();
-        let ptr = unsafe { ffi::risc0_prover_new(&mut err, elf_path.as_ptr(), id_path.as_ptr()) };
+        let ptr = unsafe {
+            ffi::risc0_prover_new(
+                &mut err,
+                elf_path.as_ptr(),
+                method_id.as_ptr(),
+                method_id.len(),
+            )
+        };
         ffi::check(err, || Prover { ptr })
     }
 

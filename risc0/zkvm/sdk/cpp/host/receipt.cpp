@@ -27,15 +27,8 @@
 
 namespace risc0 {
 
-void Receipt::verify(const std::string& filename) const {
-  LOG(1, "Reading code id from " << filename);
-  MethodDigests digests;
-  std::ifstream file(filename, std::ios::in | std::ios::binary);
-  if (!file) {
-    throw std::runtime_error("Unable to open file: " + filename);
-  }
-  file.read(reinterpret_cast<char*>(&digests), sizeof(MethodDigests));
-  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(digests);
+void Receipt::verify(const MethodId& methodId) const {
+  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(makeMethodDigest(methodId));
   risc0::verify(*circuit, seal.data(), seal.size());
   if (journal.size() != seal[8]) {
     std::stringstream ss;
@@ -56,9 +49,9 @@ void Receipt::verify(const std::string& filename) const {
 }
 
 struct Prover::Impl : public IoHandler {
-  Impl(const std::string& elfPath, const std::string& idPath)
+  Impl(const std::string& elfPath, const MethodId& methodId)
       : elfPath(elfPath)
-      , idPath(idPath)
+      , methodId(methodId)
       , outputStream(outputBuffer)
       , commitStream(commitBuffer)
       , inputWriter(inputStream)
@@ -93,7 +86,7 @@ struct Prover::Impl : public IoHandler {
   KeyStore& getKeyStore() override { return keyStore; }
 
   std::string elfPath;
-  std::string idPath;
+  MethodId methodId;
   KeyStore keyStore;
   BufferU8 outputBuffer;
   BufferU8 commitBuffer;
@@ -133,8 +126,8 @@ void CheckedStreamReader::read_buffer(void* buf, size_t len) {
   cursor = end_cursor;
 }
 
-Prover::Prover(const std::string& elfPath, const std::string& idPath)
-    : impl(new Impl(elfPath, idPath)) {}
+Prover::Prover(const std::string& elfPath, const MethodId& methodId)
+    : impl(new Impl(elfPath, methodId)) {}
 
 Prover::~Prover() = default;
 
@@ -200,7 +193,7 @@ Receipt Prover::run() {
   // Attach the full version of the output journal + construct receipt object
   Receipt receipt{getCommit(), seal};
   // Verify receipt to make sure it works
-  receipt.verify(impl->idPath);
+  receipt.verify(impl->methodId);
   return receipt;
 }
 

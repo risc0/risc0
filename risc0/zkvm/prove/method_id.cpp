@@ -23,22 +23,39 @@
 
 namespace risc0 {
 
-MethodID::MethodID(const MethodDigests& digests) : _digests(digests) {}
 
-MethodID MethodID::fromElf(const std::string& path) {
-  // Load the ELF file into an image
+MethodId makeMethodId(const MethodDigest& digest) {
+  MethodId id;
+  std::memcpy(&id, &digest, sizeof(MethodId));
+  return id;
+}
+
+MethodId makeMethodId(const uint8_t* bytes, const size_t len) {
+  if (len != sizeof(MethodId)) {
+    throw std::length_error("Got buffer of invalid size!");
+  }
+  MethodId id;
+  std::memcpy(&id, &bytes, sizeof(MethodId));
+  return id;
+}
+
+MethodId makeMethodId(const std::string& elfPath) {
+  return makeMethodId(makeMethodDigest(elfPath));
+}
+
+MethodDigest makeMethodDigest(const std::string& elfPath) {
   std::map<uint32_t, uint32_t> image;
-  uint32_t startAddr = loadElf(path, kMemSize, image);
+  uint32_t startAddr = loadElf(elfPath, kMemSize, image);
 
   // Start with an empty return value
-  MethodDigests digests;
+  MethodDigest digest;
 
   // Make the digest for each level
-  for (size_t i = 0; i < kCodeDigestCount; i++) {
+  for (size_t i = 0; i < numMethodDigests; i++) {
     size_t cycles = kMinCycles * (1 << i);
     if (cycles < image.size() + 3 + kZkCycles) {
       // Can't even fit the program in this cycle size, just set to zero
-      digests[i] = ShaDigest::zero();
+      digest[i] = ShaDigest::zero();
       continue;
     }
     // Make a vector + set it up with the elf data
@@ -51,34 +68,15 @@ MethodID MethodID::fromElf(const std::string& path) {
     zkShiftAccel(coeffs, kCodeSize);
     // Make the poly-group + extract the root
     PolyGroup codeGroup(coeffs, kCodeSize, cycles);
-    digests[i] = codeGroup.getMerkle().getRoot();
+    digest[i] = codeGroup.getMerkle().getRoot();
   }
-  return MethodID(digests);
+  return digest;
 }
 
-MethodID MethodID::fromBytes(const std::array<std::uint8_t, digestBytes>& bytes) {
-  MethodDigests digests;
-  std::memcpy(&digests, &bytes, digestBytes);
-  return MethodID(digests);
-}
-
-MethodID MethodID::fromBytes(const uint8_t* bytes) {
-  std::array<std::uint8_t, digestBytes> sized;
-  std::memcpy(&sized, &bytes, digestBytes);
-  return MethodID::fromBytes(sized);
-}
-
-std::array<uint8_t, digestBytes> MethodID::toBytes() const {
-  std::array<std::uint8_t, digestBytes> bytes;
-  std::memcpy(&bytes, &_digests, digestBytes);
-  return bytes;
-}
-
-std::unique_ptr<MethodID> method_id_from_elf(const std::string& path) {
-  return std::make_unique<MethodID>(MethodID::fromElf(path));
-}
-std::unique_ptr<MethodID> method_id_from_bytes(const std::array<uint8_t, digestBytes>& bytes) {
-  return std::make_unique<MethodID>(MethodID::fromBytes(bytes));
+MethodDigest makeMethodDigest(const MethodId& id) {
+  MethodDigest digest;
+  std::memcpy(&digest, &id, sizeof(MethodId));
+  return digest;
 }
 
 } // namespace risc0
