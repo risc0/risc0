@@ -25,7 +25,7 @@ use std::{
 
 use cargo_metadata::{MetadataCommand, Package};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
-use risc0_zkvm_sys::make_method_id_from_elf;
+use risc0_zkvm_sys::{make_method_id_from_elf, MethodId, METHOD_ID_BYTES};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
@@ -49,7 +49,7 @@ struct Risc0Method {
 }
 
 impl Risc0Method {
-    fn make_method_id(&self) -> [u8; 384] {
+    fn make_method_id(&self) -> MethodId {
         if !self.elf_path.exists() {
             eprintln!(
                 "RISC-V method was not found at: {:?}",
@@ -69,7 +69,7 @@ impl Risc0Method {
 
         let cached_method_id = Ok(&method_id_cache_path)
             .and_then(std::fs::read)
-            .map(|vec| <[u8; 384]>::try_from(vec).unwrap());
+            .map(|vec| <MethodId>::try_from(vec).unwrap());
 
         match cached_method_id {
             Ok(method_id) => method_id,
@@ -88,8 +88,8 @@ impl Risc0Method {
         let method_id = self.make_method_id();
         format!(
             r##"
-pub const {upper}_PATH: &'static str = "{elf_path}";
-pub const {upper}_ID: &'static [u8; 384] = &{method_id:?};
+pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
+pub const {upper}_ID: &'static [u8; {METHOD_ID_BYTES}] = &{method_id:?};
             "##
         )
     }

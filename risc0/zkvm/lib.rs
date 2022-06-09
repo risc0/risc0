@@ -27,7 +27,7 @@ pub mod ffi {
     }
 }
 
-const METHOD_ID_BYTES: usize = 384; // https://github.com/dtolnay/cxx/issues/1051
+pub const METHOD_ID_BYTES: usize = 384; // https://github.com/dtolnay/cxx/issues/1051
 pub type MethodId = [u8; METHOD_ID_BYTES];
 
 pub fn make_method_id_from_elf(path: &str) -> Result<MethodId> {
