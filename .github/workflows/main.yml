@@ -40,5 +40,4 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-      - run: cargo run --bin risc0-build-methods
       - run: cargo test --release
