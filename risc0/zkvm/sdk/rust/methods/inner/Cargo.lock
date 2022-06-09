@@ -255,6 +255,7 @@ checksum = "d34f1408f55294453790c48b2f1ebbb1c5b4b7563eb1f418bcfcfdbb06ebb4e7"
 name = "risc0-build"
 version = "0.7.2"
 dependencies = [
+ "anyhow",
  "cargo_metadata",
  "risc0-zkvm-platform-sys",
  "risc0-zkvm-sys",

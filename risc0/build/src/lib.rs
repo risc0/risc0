@@ -25,7 +25,7 @@ use std::{
 
 use cargo_metadata::{MetadataCommand, Package};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
-use risc0_zkvm_sys::MethodID;
+use risc0_zkvm_sys::{make_method_id_from_elf, MethodId, METHOD_ID_LEN};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
@@ -45,13 +45,11 @@ impl Risc0Metadata {
 struct Risc0Method {
     name: String,
     elf_path: PathBuf,
+    cache_dir: PathBuf, // It's a bit questionable if this belongs here
 }
 
 impl Risc0Method {
-    fn make_method_id<P>(&self, method_id_path: P)
-    where
-        P: AsRef<Path>,
-    {
+    fn make_method_id(&self) -> MethodId {
         if !self.elf_path.exists() {
             eprintln!(
                 "RISC-V method was not found at: {:?}",
@@ -62,44 +60,38 @@ impl Risc0Method {
 
         // Method ID calculation is slow, so only recalculate it if we
         // actually get a different ELF file.
-        let elf_contents = std::fs::read(&self.elf_path).unwrap();
-        let elf_sha = Sha256::new().chain_update(elf_contents).finalize();
-        let elf_sha_hex: String = elf_sha
-            .as_slice()
-            .iter()
-            .map(|x| format!("{:02x}", x))
-            .collect();
+        let method_id_cache_path = std::fs::read(&self.elf_path)
+            .map(|content| Sha256::new().chain_update(content).finalize())
+            .map(|vec| vec.iter().map(|byte| format!("{:02x}", byte)).collect())
+            .map(|hash: String| self.cache_dir.join(hash))
+            .map(|path| path.with_extension("cache"))
+            .unwrap();
 
-        let cached_elf_sha_path = method_id_path.as_ref().with_extension("elf_sha");
-        if method_id_path.as_ref().exists() {
-            if let Ok(cached_sha) = std::fs::read(&cached_elf_sha_path) {
-                if cached_sha == elf_sha.as_slice() {
-                    println!("Method id for {} ({}) up to date", self.name, elf_sha_hex);
-                    return;
-                }
+        println!("hash iis {}", method_id_cache_path.display());
+
+        let cached_method_id = Ok(&method_id_cache_path)
+            .and_then(std::fs::read)
+            .map(|vec| <MethodId>::try_from(vec).unwrap());
+
+        match cached_method_id {
+            Ok(method_id) => method_id,
+            Err(_) => {
+                println!("Computing method_id for {}", self.name);
+                let method_id = make_method_id_from_elf(&self.elf_path.to_str().unwrap()).unwrap();
+                std::fs::write(method_id_cache_path, method_id).unwrap();
+                method_id
             }
         }
-
-        println!(
-            "Calculating method id for {} ({:})!",
-            self.name, elf_sha_hex
-        );
-
-        let method_id = MethodID::new(&self.elf_path.to_str().unwrap()).unwrap();
-        method_id
-            .write(&method_id_path.as_ref().to_str().unwrap())
-            .unwrap();
-        std::fs::write(cached_elf_sha_path, elf_sha).unwrap();
     }
 
-    fn rust_def(&self, method_id_path: &Path) -> String {
+    fn rust_def(&self) -> String {
         let elf_path = self.elf_path.display();
-        let id_path = method_id_path.display();
         let upper = self.name.to_uppercase();
+        let method_id = self.make_method_id();
         format!(
             r##"
-    pub const {upper}_PATH: &str = r#"{elf_path}"#;
-    pub const {upper}_ID: &[u8] = include_bytes!(r#"{id_path}"#);
+pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
+pub const {upper}_ID: &'static [u8; {METHOD_ID_LEN}] = &{method_id:?};
             "##
         )
     }
@@ -159,17 +151,18 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
 }
 
 /// Returns all methods associated with the given riscv guest package.
-fn guest_methods<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
+fn guest_methods<P>(pkg: &Package, out_dir: P) -> Vec<Risc0Method>
 where
     P: AsRef<Path>,
 {
+    let target_dir = out_dir.as_ref().join("riscv-guest");
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| Risc0Method {
             name: target.name.clone(),
+            cache_dir: out_dir.as_ref().to_path_buf(),
             elf_path: target_dir
-                .as_ref()
                 .join("riscv32im-unknown-none-elf")
                 .join("release")
                 .join(&target.name),
@@ -227,27 +220,18 @@ pub fn embed_methods() {
 
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
-    let guest_target_dir = out_dir.join("riscv-guest");
 
     let guest_packages = guest_packages(&pkg);
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
     for guest_pkg in guest_packages {
-        println!(
-            "Building guest package {} (parent={})",
-            guest_pkg.name, pkg.name
-        );
-
-        build_guest_package(&guest_pkg, &guest_target_dir);
-
-        let methods = guest_methods(&guest_pkg, &guest_target_dir);
-        for method in methods {
-            let method_id_path = out_dir.join(format!("{}.id", method.name));
-            method.make_method_id(&method_id_path);
-            methods_file
-                .write_all(method.rust_def(&method_id_path).as_bytes())
-                .unwrap();
+        println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
+        
+        build_guest_package(&guest_pkg, &out_dir.join("riscv-guest"));
+        
+        for method in guest_methods(&guest_pkg, &out_dir) {
+            methods_file.write_all(method.rust_def().as_bytes()).unwrap();
         }
     }
 
@@ -266,7 +250,6 @@ pub fn link() {
         let out_dir = env::var_os("OUT_DIR").unwrap();
         let linker_script = Path::new(&out_dir).join("risc0.ld");
         fs::write(&linker_script, LINKER_SCRIPT).unwrap();
-        let linker_script = linker_script.to_str().unwrap();
-        println!("cargo:rustc-link-arg=-T{linker_script}");
+        println!("cargo:rustc-link-arg=-T{}", linker_script.to_str().unwrap());
     }
 }

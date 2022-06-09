@@ -107,7 +107,7 @@ MixState combine(Fp4 cond, const MixState& inner, const char* loc) const {
 
 class RiscVVerifyCircuit : public VerifyCircuit {
 public:
-  RiscVVerifyCircuit(const MethodID& codeID) : codeID_(codeID) {}
+  RiscVVerifyCircuit(const MethodDigest& digest) : digest_(digest) {}
   TapSetRef getTapSet() const override { return getRiscVTaps(); }
   void execute(ReadIOP& iop) override;
   void accumulate(ReadIOP& iop) override;
@@ -116,7 +116,7 @@ public:
   bool validCode(const ShaDigest& top) const override;
 
 private:
-  MethodID codeID_;
+  MethodDigest digest_;
   uint32_t po2_;
   Fp globals_[kGlobalSize];
 };
@@ -160,8 +160,7 @@ void RiscVVerifyCircuit::accumulate(ReadIOP& iop) {
 
 bool RiscVVerifyCircuit::validCode(const ShaDigest& top) const {
   size_t whichCode = po2_ - log2Ceil(kMinCycles);
-  LOG(1, "whichCode: " << whichCode);
-  return codeID_[whichCode] == top;
+  return digest_[whichCode] == top;
 }
 
 Fp4 RiscVVerifyCircuit::computePolynomial(const Fp4* evalU, Fp4 polyMix) const {
@@ -209,8 +208,8 @@ Fp4 RiscVVerifyCircuit::computePolynomial(const Fp4* evalU, Fp4 polyMix) const {
   return result.tot;
 }
 
-std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodID& id) {
-  return std::make_unique<RiscVVerifyCircuit>(id);
+std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodDigest& digest) {
+  return std::make_unique<RiscVVerifyCircuit>(digest);
 }
 
 } // namespace risc0

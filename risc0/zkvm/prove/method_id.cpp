@@ -15,6 +15,7 @@
 #include "risc0/zkvm/prove/method_id.h"
 
 #include <fstream>
+#include <iostream>
 #include <map>
 
 #include "risc0/core/elf.h"
@@ -23,20 +24,38 @@
 
 namespace risc0 {
 
-MethodID makeMethodID(const std::string& elfFile) {
-  // Load the ELF file into an image
+MethodId makeMethodId(const MethodDigest& digest) {
+  MethodId id;
+  std::memcpy(&id, &digest, sizeof(MethodId));
+  return id;
+}
+
+MethodId makeMethodId(const uint8_t* bytes, const size_t len) {
+  if (len != sizeof(MethodId)) {
+    throw std::length_error("Got buffer of invalid size!");
+  }
+  MethodId id;
+  std::memcpy(&id, bytes, sizeof(MethodId));
+  return id;
+}
+
+MethodId makeMethodId(const std::string& elfPath) {
+  return makeMethodId(makeMethodDigest(elfPath));
+}
+
+MethodDigest makeMethodDigest(const std::string& elfPath) {
   std::map<uint32_t, uint32_t> image;
-  uint32_t startAddr = loadElf(elfFile, kMemSize, image);
+  uint32_t startAddr = loadElf(elfPath, kMemSize, image);
 
   // Start with an empty return value
-  MethodID ret;
+  MethodDigest digest;
 
   // Make the digest for each level
   for (size_t i = 0; i < kCodeDigestCount; i++) {
     size_t cycles = kMinCycles * (1 << i);
     if (cycles < image.size() + 3 + kZkCycles) {
       // Can't even fit the program in this cycle size, just set to zero
-      ret[i] = ShaDigest::zero();
+      digest[i] = ShaDigest::zero();
       continue;
     }
     // Make a vector + set it up with the elf data
@@ -49,35 +68,15 @@ MethodID makeMethodID(const std::string& elfFile) {
     zkShiftAccel(coeffs, kCodeSize);
     // Make the poly-group + extract the root
     PolyGroup codeGroup(coeffs, kCodeSize, cycles);
-    ret[i] = codeGroup.getMerkle().getRoot();
+    digest[i] = codeGroup.getMerkle().getRoot();
   }
-  return ret;
+  return digest;
 }
 
-void writeMethodID(const std::string& filename, const MethodID& id) {
-  std::ofstream file(filename, std::ios::out | std::ios::binary);
-  if (!file) {
-    throw std::runtime_error("Unable to open file: " + filename);
-  }
-  file.write(reinterpret_cast<const char*>(&id), sizeof(MethodID));
-  file.close();
-  if (!file.good()) {
-    throw std::runtime_error("Error writing code id file: " + filename);
-  }
+MethodDigest makeMethodDigest(const MethodId& id) {
+  MethodDigest digest;
+  std::memcpy(&digest, &id, sizeof(MethodId));
+  return digest;
 }
-
-namespace rust {
-
-MethodID::MethodID(const std::string& elf_path) : id(makeMethodID(elf_path)) {}
-
-std::unique_ptr<MethodID> new_method_id(const std::string& elf_path) {
-  return std::make_unique<MethodID>(elf_path);
-}
-
-void MethodID::write(const std::string& filename) const {
-  writeMethodID(filename, id);
-}
-
-} // namespace rust
 
 } // namespace risc0

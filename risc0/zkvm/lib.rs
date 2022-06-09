@@ -12,34 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use cxx::{let_cxx_string, UniquePtr};
+use anyhow::{Error, Result};
+use cxx::let_cxx_string;
 
-#[cxx::bridge(namespace = "risc0::rust")]
-mod ffi {
+pub const METHOD_ID_LEN: usize = 384; // https://github.com/dtolnay/cxx/issues/1051
+pub type MethodId = [u8; METHOD_ID_LEN];
+
+#[cxx::bridge(namespace = "risc0")]
+pub mod ffi {
     unsafe extern "C++" {
         include!("risc0/zkvm/prove/method_id.h");
 
-        type MethodID;
-
-        fn new_method_id(elf_path: &CxxString) -> Result<UniquePtr<MethodID>>;
-        fn write(&self, filename: &CxxString) -> Result<()>;
+        #[cxx_name = "makeMethodId"]
+        fn make_method_id_from_elf(path: &CxxString) -> Result<[u8; 384]>;
     }
 }
 
-pub struct MethodID {
-    raw: UniquePtr<ffi::MethodID>,
-}
-
-impl MethodID {
-    pub fn new(elf_path: &str) -> Result<Self> {
-        let_cxx_string!(elf_path = elf_path);
-        let raw = ffi::new_method_id(&elf_path)?;
-        Ok(MethodID { raw })
-    }
-
-    pub fn write(&self, filename: &str) -> Result<()> {
-        let_cxx_string!(filename = filename);
-        Ok(self.raw.write(&filename)?)
-    }
+pub fn make_method_id_from_elf(path: &str) -> Result<MethodId> {
+    let_cxx_string!(cxx_path = path);
+    ffi::make_method_id_from_elf(&cxx_path)
+        .map_err(|err| Error::msg(format!("{}", err.what())))
 }
