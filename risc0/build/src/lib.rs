@@ -78,7 +78,7 @@ impl Risc0Method {
                 let method_id = make_method_id_from_elf(&self.elf_path.to_str().unwrap()).unwrap();
                 std::fs::write(method_id_cache_path, method_id).unwrap();
                 method_id
-            w
+            }
         }
     }
 
