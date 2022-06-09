@@ -11,9 +11,10 @@ To compile methods using a compiler available in PATH variable:
 
 General settings
 ----------------
-	ENABLE_TESTS     - will install Gtest and compile tests
-	BUILD_RISCVM     - will build native set
-	BUILD_CROSS_RISC - will also compile methods via cross as a part of the single tree
+	ENABLE_TESTS         - will install Gtest and compile tests
+	BUILD_RISCVM         - will build native set
+	BUILD_CROSS_RISC     - will also compile methods via cross 
+	BUILD_EMBEDDED_RISC  - will compile methods as a part of the single tree
 
 RISC-V toolchain
 ----------------

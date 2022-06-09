@@ -20,16 +20,24 @@ if(BUILD_RISCVM)
 
 
 	#Fetch methods build by an external project and render id file for both methods
-	risc0_fetch_cross_artifact (init_method
-		${PROJECT_BINARY_DIR}/risc0_cross/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/init_method
-		${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/init_method
-	)
-	risc0_make_id ("init_method.id" ${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/init_method)
+	if (BUILD_EMBEDDED_RISC)
+		message ("Fetch from risc0_cross_riscv enabled.")
+		risc0_fetch_cross_artifact (init_method
+			${PROJECT_BINARY_DIR}/risc0_cross/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/init_method
+			${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/init_method
+		)
+		add_dependencies(init_method risc0_cross_riscv )
+        
+		risc0_fetch_cross_artifact (turn_method
+			${PROJECT_BINARY_DIR}/risc0_cross/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/turn_method
+			${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/turn_method
+		)
+		add_dependencies(turn_method risc0_cross_riscv )
+	else()
+		message ("Cross build for the methods is disabled memthods need to be provided manually.")
+	endif()
 
-	risc0_fetch_cross_artifact (turn_method
-		${PROJECT_BINARY_DIR}/risc0_cross/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/turn_method
-		${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/turn_method
-	)
+	risc0_make_id ("init_method.id" ${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/init_method)
 	risc0_make_id ("turn_method.id" ${BATTLESHIP_OUTPUTDIR}/examples/cpp/battleship/turn_method)
 endif()
 

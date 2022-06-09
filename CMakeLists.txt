@@ -8,17 +8,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set (ENABLE_TESTS ON)
 set (BUILD_RISCVM ON)
-set (BUILD_CROSS_RISC ON)  #Will disable an embedded risc compilation
-
+set (BUILD_RISCVCROSS ON) 
+set (BUILD_EMBEDDED_RISC ON) #Will disable an embedded risc compilation
 
 if(CMAKE_C_COMPILER MATCHES "risc")
 	message ("Using a risc cross compile. Forcing risc only components.")
 	set (BUILD_RISCVCROSS ON)
 	set (ENABLE_TESTS OFF)
 	set (BUILD_RISCVM OFF)
+	set (BUILD_EMBEDDED_RISC OFF)
 else()
-	if (BUILD_CROSS_RISC)
-		set (BUILD_RISCVCROSS OFF)
+	set (BUILD_RISCVCROSS OFF)
+	if (BUILD_EMBEDDED_RISC)
 		ExternalProject_Add (
 			risc0_cross_riscv
 			URL  ""
