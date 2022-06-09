@@ -61,7 +61,9 @@ impl Receipt {
     /// method associated with the given method ID in a ZKVM.
     pub fn verify(&self, method_id: &[u8]) -> Result<()> {
         let mut err = ffi::RawError::default();
-        unsafe { ffi::risc0_receipt_verify(&mut err, self.ptr, method_id.as_ptr(), method_id.len()) };
+        unsafe {
+            ffi::risc0_receipt_verify(&mut err, self.ptr, method_id.as_ptr(), method_id.len())
+        };
         ffi::check(err, || ())
     }
 
