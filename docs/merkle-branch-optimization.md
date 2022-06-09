@@ -5,7 +5,7 @@ This document describes the Merkle branch checks as implemented in [merkle.rs](h
 ## Storing the Top of the Tree
 We store that entire layer, and for each query, we check our Merkle branches from leaf to `top_layer`. The paths from `top_layer` to the Merkle root only need to be checked once.
 
-More concretely, we initialize a vector `top` that will hold the top of the Merkle Tree. We initialize a vector `top` of size 2*`top_size`. We populate the second half of this vector with digests from `iop.read_digests`.
+More concretely, we initialize a vector `top` that will hold the top of the Merkle Tree. We initialize a vector `top` of size `2 * top_size`. We populate the second half of this vector with digests from `iop.read_digests`.
 
 Then, for `i` in `(1..top_size)`, in reverse order, we compute `top[i] = hash(top[2*i], top[2*i +1])`. We end with the top of the Merkle tree stored in `top`, with the `top[0]` untouched and the Merkle Root in `top[1]`.
 
