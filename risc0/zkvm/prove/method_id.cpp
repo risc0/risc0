@@ -51,7 +51,7 @@ MethodDigest makeMethodDigest(const std::string& elfPath) {
   MethodDigest digest;
 
   // Make the digest for each level
-  for (size_t i = 0; i < numMethodDigests; i++) {
+  for (size_t i = 0; i < kCodeDigestCount; i++) {
     size_t cycles = kMinCycles * (1 << i);
     if (cycles < image.size() + 3 + kZkCycles) {
       // Can't even fit the program in this cycle size, just set to zero

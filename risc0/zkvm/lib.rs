@@ -1,4 +1,3 @@
-#![feature(extern_types)]
 // Copyright 2022 Risc0, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +15,8 @@
 use anyhow::{Error, Result};
 use cxx::let_cxx_string;
 
+pub const METHOD_ID_LEN: usize = 384; // https://github.com/dtolnay/cxx/issues/1051
+pub type MethodId = [u8; METHOD_ID_LEN];
 
 #[cxx::bridge(namespace = "risc0")]
 pub mod ffi {
@@ -26,9 +27,6 @@ pub mod ffi {
         fn make_method_id_from_elf(path: &CxxString) -> Result<[u8; 384]>;
     }
 }
-
-pub const METHOD_ID_BYTES: usize = 384; // https://github.com/dtolnay/cxx/issues/1051
-pub type MethodId = [u8; METHOD_ID_BYTES];
 
 pub fn make_method_id_from_elf(path: &str) -> Result<MethodId> {
     let_cxx_string!(cxx_path = path);

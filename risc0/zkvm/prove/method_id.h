@@ -23,12 +23,12 @@
 
 namespace risc0 {
 
-static constexpr size_t numMethodDigests = log2Ceil(kMaxCycles / kMinCycles) + 1;
+static constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
 
 // These types are likely to change relatively soon. But, for now:
 // A MethodDigest is intended for internal use in verification
 // A MethodId is an intentionally opaque version of a MethodDigest for use in APIs
-using MethodDigest = std::array<ShaDigest, numMethodDigests>;
+using MethodDigest = std::array<ShaDigest, kCodeDigestCount>;
 using MethodId = std::array<uint8_t, sizeof(MethodDigest)>;
 
 MethodId makeMethodId(const std::string& elfPath);

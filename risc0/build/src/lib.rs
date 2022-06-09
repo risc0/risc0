@@ -25,7 +25,7 @@ use std::{
 
 use cargo_metadata::{MetadataCommand, Package};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
-use risc0_zkvm_sys::{make_method_id_from_elf, MethodId, METHOD_ID_BYTES};
+use risc0_zkvm_sys::{make_method_id_from_elf, MethodId, METHOD_ID_LEN};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
@@ -62,10 +62,12 @@ impl Risc0Method {
         // actually get a different ELF file.
         let method_id_cache_path = std::fs::read(&self.elf_path)
             .map(|content| Sha256::new().chain_update(content).finalize())
-            .map(|digest| format!("{:x}", digest))
-            .map(|hash| self.cache_dir.join(hash))
+            .map(|vec| vec.iter().map(|byte| format!("{:02x}", byte)).collect())
+            .map(|hash: String| self.cache_dir.join(hash))
             .map(|path| path.with_extension("cache"))
             .unwrap();
+
+        println!("hash iis {}", method_id_cache_path.display());
 
         let cached_method_id = Ok(&method_id_cache_path)
             .and_then(std::fs::read)
@@ -89,7 +91,7 @@ impl Risc0Method {
         format!(
             r##"
 pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
-pub const {upper}_ID: &'static [u8; {METHOD_ID_BYTES}] = &{method_id:?};
+pub const {upper}_ID: &'static [u8; {METHOD_ID_LEN}] = &{method_id:?};
             "##
         )
     }
@@ -216,8 +218,8 @@ where
 pub fn embed_methods() {
     let pkg = current_package();
 
-    let out_path = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_path);
+    let out_dir_env = env::var_os("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir_env);
 
     let guest_packages = guest_packages(&pkg);
     let methods_path = out_dir.join("methods.rs");
