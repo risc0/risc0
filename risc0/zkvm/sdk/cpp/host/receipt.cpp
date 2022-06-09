@@ -28,9 +28,6 @@ namespace risc0 {
 
 void Receipt::verify(const std::string& filename) const {
   LOG(1, "Reading code id from " << filename);
-  std::cout<<filename<<std::endl;
-  std::cout<<"SEAL size:"<<seal.size()<<std::endl;
-  std::cout<<"JOURNAL size:"<<journal.size()<<std::endl;
   MethodID code = readMethodID(filename);
   std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(code);
   risc0::verify(*circuit, seal.data(), seal.size());
