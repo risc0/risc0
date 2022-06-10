@@ -41,3 +41,5 @@ jobs:
         with:
           toolchain: stable
       - run: cargo test --release
+      - run: cargo fmt --all -- --check
+
