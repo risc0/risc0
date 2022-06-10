@@ -6,9 +6,9 @@ if (APPLE)
 	set (PLATFORM_RNG rng_macos.cpp)
 endif (APPLE)
 
-if (LINUX)
-	set (PLATFORM_RNG rng_macos.cpp)
-endif (LINUX)
+if (UNIX)
+	set (PLATFORM_RNG rng_linux.cpp)
+endif (UNIX)
 
 add_library(core 
 	log.cpp  

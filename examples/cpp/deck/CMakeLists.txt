@@ -11,7 +11,7 @@ if(BUILD_RISCVCROSS)
 endif ()
 
 if(ENABLE_TESTS AND BUILD_RISCVM)
-	set (HOST_LIBS core zkp-prove zkp-accel-backend-cpu zkp-accel-kernels zkp-prove zkp-verify  zkvm-verify zkvm-prove zkvm-circuit zkp-core zkvm-r0vm zkvm-sdk-cpp-host )
+	set (HOST_LIBS zkvm-circuit zkvm-sdk-cpp-host zkvm-prove zkvm-verify zkp-verify zkp-accel-backend-cpu zkp-prove zkp-core core )
         
 	add_executable(
 		deck_test
