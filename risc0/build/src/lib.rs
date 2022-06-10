@@ -227,11 +227,13 @@ pub fn embed_methods() {
 
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
-        
+
         build_guest_package(&guest_pkg, &out_dir.join("riscv-guest"));
-        
+
         for method in guest_methods(&guest_pkg, &out_dir) {
-            methods_file.write_all(method.rust_def().as_bytes()).unwrap();
+            methods_file
+                .write_all(method.rust_def().as_bytes())
+                .unwrap();
         }
     }
 

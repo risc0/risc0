@@ -30,6 +30,5 @@ pub mod ffi {
 
 pub fn make_method_id_from_elf(path: &str) -> Result<MethodId> {
     let_cxx_string!(cxx_path = path);
-    ffi::make_method_id_from_elf(&cxx_path)
-        .map_err(|err| Error::msg(format!("{}", err.what())))
+    ffi::make_method_id_from_elf(&cxx_path).map_err(|err| Error::msg(format!("{}", err.what())))
 }
