@@ -30,3 +30,7 @@ sed -i .bak 's/.* x-darwin.$//' riscv-gcc/gcc/config.host
   --with-abi=ilp32 \
   --with-cmodel=medany
 
+Linux Docker
+----------------
+A sample docker file that executes an enire build process under linux is provided 
+in the cmake folder.
