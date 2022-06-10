@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{Error, Result};
+use anyhow::Result;
 use cxx::let_cxx_string;
 
 pub const METHOD_ID_LEN: usize = 384; // https://github.com/dtolnay/cxx/issues/1051
@@ -30,5 +30,5 @@ pub mod ffi {
 
 pub fn make_method_id_from_elf(path: &str) -> Result<MethodId> {
     let_cxx_string!(cxx_path = path);
-    ffi::make_method_id_from_elf(&cxx_path).map_err(|err| Error::msg(format!("{}", err.what())))
+    Ok(ffi::make_method_id_from_elf(&cxx_path)?)
 }

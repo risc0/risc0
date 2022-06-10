@@ -45,7 +45,6 @@ impl Risc0Metadata {
 struct Risc0Method {
     name: String,
     elf_path: PathBuf,
-    cache_dir: PathBuf, // It's a bit questionable if this belongs here
 }
 
 impl Risc0Method {
@@ -60,28 +59,31 @@ impl Risc0Method {
 
         // Method ID calculation is slow, so only recalculate it if we
         // actually get a different ELF file.
-        let method_id_cache_path = std::fs::read(&self.elf_path)
-            .map(|content| Sha256::new().chain_update(content).finalize())
-            .map(|vec| vec.iter().map(|byte| format!("{:02x}", byte)).collect())
-            .map(|hash: String| self.cache_dir.join(hash))
-            .map(|path| path.with_extension("cache"))
+        let method_id_path = self.elf_path.with_extension("id");
+        let elf_sha_path = self.elf_path.with_extension("sha");
+        let elf_sha = std::fs::read(&self.elf_path)
+            .map(|x| Sha256::new().chain_update(x).finalize())
             .unwrap();
-
-        println!("hash iis {}", method_id_cache_path.display());
-
-        let cached_method_id = Ok(&method_id_cache_path)
-            .and_then(std::fs::read)
-            .map(|vec| <MethodId>::try_from(vec).unwrap());
-
-        match cached_method_id {
-            Ok(method_id) => method_id,
-            Err(_) => {
-                println!("Computing method_id for {}", self.name);
-                let method_id = make_method_id_from_elf(&self.elf_path.to_str().unwrap()).unwrap();
-                std::fs::write(method_id_cache_path, method_id).unwrap();
-                method_id
+        let elf_sha_hex: String = elf_sha
+            .as_slice()
+            .iter()
+            .map(|x| format!("{:02x}", x))
+            .collect();
+        if method_id_path.exists() {
+            if let Ok(cached_sha) = std::fs::read(&elf_sha_path) {
+                if cached_sha == elf_sha.as_slice() {
+                    println!("MethodID for {} ({}) up to date", self.name, elf_sha_hex);
+                    return MethodId::try_from(std::fs::read(&method_id_path).unwrap().as_slice())
+                        .unwrap();
+                }
             }
         }
+
+        println!("Computing MethodID for {} ({:})!", self.name, elf_sha_hex);
+        let method_id = make_method_id_from_elf(&self.elf_path.to_str().unwrap()).unwrap();
+        std::fs::write(method_id_path, method_id).unwrap();
+        std::fs::write(elf_sha_path, elf_sha).unwrap();
+        method_id
     }
 
     fn rust_def(&self) -> String {
@@ -161,7 +163,6 @@ where
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| Risc0Method {
             name: target.name.clone(),
-            cache_dir: out_dir.as_ref().to_path_buf(),
             elf_path: target_dir
                 .join("riscv32im-unknown-none-elf")
                 .join("release")
