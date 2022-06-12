@@ -76,7 +76,7 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
   accumGroup.getMerkle().commit(iop);
   LOG(1, "accumGroup: " << accumGroup.getMerkle().getRoot());
 
-  // Fiat-Shamir Constraint Mixing Parameter
+  // Choose Fiat-Shamir constraint mixing paramater
   Fp4 polyMix = Fp4::random(iop);
 
   // Make the High Degree Validity Polynomial
@@ -200,7 +200,7 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
   auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4, 1, false);
   iop.commit(hashU);
 
-  // Fiat Shamir parameter for mixing DEEP polynomials
+  // Set the Fiat Shamir parameter for mixing DEEP polynomials
   Fp4 mix = Fp4::random(iop);
   LOG(1, "Mix = " << mix);
 
