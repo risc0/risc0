@@ -59,7 +59,7 @@ void verify(VerifyCircuit& circuit, const uint32_t* proofData, size_t proofSize)
   MerkleTreeVerifier accumMerkle(iop, domain, accumSize, kQueries);
   LOG(1, "accumRoot = " << accumMerkle.getRoot());
 
-  // Set the Fiat-Shamir parameter for mixing DEEP polynomials
+  // Set the Fiat-Shamir parameter for mixing constraint polynomials
   Fp4 polyMix = Fp4::random(iop);
 
   MerkleTreeVerifier checkMerkle(iop, domain, kCheckSize, kQueries);
