@@ -69,7 +69,7 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
 
   circuit.accumulate(iop);
 
-  // Make PLONK group and commit a Merkle root
+  // Make PLONK accum group and commit a Merkle root
   LOG(1, "size = " << size << ", accumSize = " << accumSize);
   LOG(1, "getAccum.size() = " << circuit.getAccum().size());
   PolyGroup accumGroup(makeCoeffs(circuit.getAccum(), accumSize), accumSize, size);
