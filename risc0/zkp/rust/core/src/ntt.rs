@@ -26,7 +26,10 @@ fn bit_rev_32(mut x: u32) -> u32 {
     (x >> 16) | (x << 16)
 }
 
-/// Bit reverse an array of (1 << n) numbers.
+/// Bit reverses the indices in an array of (1 << n) numbers.
+/// This permutes the values in the array so that a value which is previously
+/// in index i, will now go in the index i' given by reversing the bits of i.
+/// For example, with n=4, the value at index 3=0011 will go to index 12=1100.
 pub fn bit_reverse(io: &mut [Fp4], n: usize) {
     let size: usize = 1 << n;
     for i in 0..size {
