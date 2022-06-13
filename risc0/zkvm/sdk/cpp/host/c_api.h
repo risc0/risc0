@@ -59,7 +59,10 @@ void risc0_init();
 // Prover
 //
 
-risc0_prover* risc0_prover_new(risc0_error* err, const char* elf_path, const char* method_id_path);
+risc0_prover* risc0_prover_new(risc0_error* err,
+                               const char* elf_path,
+                               const uint8_t* method_id_buf,
+                               const size_t method_id_len);
 
 void risc0_prover_free(risc0_error* err, risc0_prover* ptr);
 
@@ -75,7 +78,10 @@ risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr);
 // Proof
 //
 
-void risc0_receipt_verify(risc0_error* err, const char* method_id_path, const risc0_receipt* ptr);
+void risc0_receipt_verify(risc0_error* err,
+                          const risc0_receipt* ptr,
+                          const uint8_t* method_id_buf,
+                          const size_t method_id_len);
 
 const uint32_t* risc0_receipt_get_seal_buf(risc0_error* err, const risc0_receipt* ptr);
 

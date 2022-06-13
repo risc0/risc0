@@ -12,81 +12,187 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
 use std::{
     env,
     fs::{self, File},
     io::Write,
-    path::Path,
+    path::{Path, PathBuf},
     process::Command,
 };
 
-use cargo_metadata::MetadataCommand;
+use cargo_metadata::{MetadataCommand, Package};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
-use risc0_zkvm_sys::MethodID;
+use risc0_zkvm_sys::{make_method_id_from_elf, MethodId, METHOD_ID_LEN};
 use serde::Deserialize;
-
-const TARGET_JSON: &[u8] = include_bytes!("../riscv32im-unknown-none-elf.json");
+use sha2::{Digest, Sha256};
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
     methods: Vec<String>,
 }
 
-/// Build all RISC-V ELF binaries specified by risc0 `methods` metadata.
-pub fn build_all() {
-    let metadata = MetadataCommand::new().no_deps().exec().unwrap();
-    for pkg in metadata.packages {
-        if let Some(obj) = pkg.metadata.get("risc0") {
-            let info: Risc0Metadata = serde_json::from_value(obj.clone()).unwrap();
-            for method in info.methods {
-                let manifest_path = Path::new(&pkg.manifest_path)
-                    .parent()
-                    .unwrap()
-                    .join(method)
-                    .join("Cargo.toml");
-                eprintln!(
-                    "Building methods for {} in {}",
-                    pkg.name,
-                    manifest_path.display()
-                );
-                let inner_metadata = MetadataCommand::new()
-                    .manifest_path(&manifest_path)
-                    .no_deps()
-                    .exec()
-                    .unwrap();
-                build(
-                    &manifest_path,
-                    &inner_metadata.target_directory.as_std_path(),
-                );
-            }
-        }
+impl Risc0Metadata {
+    fn from_package(pkg: &Package) -> Option<Risc0Metadata> {
+        let obj = pkg.metadata.get("risc0").unwrap();
+        serde_json::from_value(obj.clone()).unwrap()
     }
 }
 
-/// Builds a crate for the RISC-V guest target.
-///
-/// * `manifest_path` - The manifest path of the crate containing binaries to be compiled for the RISC-V guest target.
-/// * `target_dir` - The target directory where the resulting ELF binaries should be placed.
-pub fn build(manifest_path: &Path, target_dir: &Path) {
-    let target_path = target_dir.join("riscv32im-unknown-none-elf.json");
-    fs::create_dir_all(target_dir).unwrap();
-    fs::write(&target_path, TARGET_JSON).unwrap();
+#[derive(Debug)]
+struct Risc0Method {
+    name: String,
+    elf_path: PathBuf,
+}
 
+impl Risc0Method {
+    fn make_method_id(&self) -> MethodId {
+        if !self.elf_path.exists() {
+            eprintln!(
+                "RISC-V method was not found at: {:?}",
+                self.elf_path.to_str().unwrap()
+            );
+            std::process::exit(-1);
+        }
+
+        // Method ID calculation is slow, so only recalculate it if we
+        // actually get a different ELF file.
+        let method_id_path = self.elf_path.with_extension("id");
+        let elf_sha_path = self.elf_path.with_extension("sha");
+        let elf_sha = std::fs::read(&self.elf_path)
+            .map(|x| Sha256::new().chain_update(x).finalize())
+            .unwrap();
+        let elf_sha_hex: String = elf_sha
+            .as_slice()
+            .iter()
+            .map(|x| format!("{:02x}", x))
+            .collect();
+        if method_id_path.exists() {
+            if let Ok(cached_sha) = std::fs::read(&elf_sha_path) {
+                if cached_sha == elf_sha.as_slice() {
+                    println!("MethodID for {} ({}) up to date", self.name, elf_sha_hex);
+                    return MethodId::try_from(std::fs::read(&method_id_path).unwrap().as_slice())
+                        .unwrap();
+                }
+            }
+        }
+
+        println!("Computing MethodID for {} ({:})!", self.name, elf_sha_hex);
+        let method_id = make_method_id_from_elf(&self.elf_path.to_str().unwrap()).unwrap();
+        std::fs::write(method_id_path, method_id).unwrap();
+        std::fs::write(elf_sha_path, elf_sha).unwrap();
+        method_id
+    }
+
+    fn rust_def(&self) -> String {
+        let elf_path = self.elf_path.display();
+        let upper = self.name.to_uppercase();
+        let method_id = self.make_method_id();
+        format!(
+            r##"
+pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
+pub const {upper}_ID: &'static [u8; {METHOD_ID_LEN}] = &{method_id:?};
+            "##
+        )
+    }
+}
+
+/// Returns the given cargo Package from the metadata.
+fn get_package<P>(manifest_dir: P) -> Package
+where
+    P: AsRef<Path>,
+{
+    let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
+    let manifest_meta = MetadataCommand::new()
+        .manifest_path(&manifest_path)
+        .no_deps()
+        .exec()
+        .unwrap();
+    let mut matching: Vec<&Package> = manifest_meta
+        .packages
+        .iter()
+        .filter(|pkg| {
+            let std_path: &Path = pkg.manifest_path.as_ref();
+            std_path == &manifest_path
+        })
+        .collect();
+    if matching.len() == 0 {
+        eprintln!(
+            "ERROR: No package found in {}",
+            manifest_dir.as_ref().display()
+        );
+        std::process::exit(-1);
+    }
+    if matching.len() > 1 {
+        eprintln!(
+            "ERROR: Multiple packages found in {}",
+            manifest_dir.as_ref().display()
+        );
+        std::process::exit(-1);
+    }
+    matching.pop().unwrap().clone()
+}
+
+/// When called from a build.rs, returns the current package being built.
+fn current_package() -> Package {
+    get_package(env::var("CARGO_MANIFEST_DIR").unwrap())
+}
+
+/// Returns all inner packages specified the "methods" list inside
+/// "package.metadata.risc0".
+fn guest_packages(pkg: &Package) -> Vec<Package> {
+    let manifest_dir = pkg.manifest_path.parent().unwrap();
+    Risc0Metadata::from_package(pkg)
+        .unwrap()
+        .methods
+        .iter()
+        .map(|inner| get_package(manifest_dir.join(inner)))
+        .collect()
+}
+
+/// Returns all methods associated with the given riscv guest package.
+fn guest_methods<P>(pkg: &Package, out_dir: P) -> Vec<Risc0Method>
+where
+    P: AsRef<Path>,
+{
+    let target_dir = out_dir.as_ref().join("riscv-guest");
+    pkg.targets
+        .iter()
+        .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
+        .map(|target| Risc0Method {
+            name: target.name.clone(),
+            elf_path: target_dir
+                .join("riscv32im-unknown-none-elf")
+                .join("release")
+                .join(&target.name),
+        })
+        .collect()
+}
+
+// Builds a package that targets the riscv guest into the specified target directory.
+fn build_guest_package<P>(pkg: &Package, target_dir: P)
+where
+    P: AsRef<Path>,
+{
+    fs::create_dir_all(target_dir.as_ref()).unwrap();
+
+    let cargo = env::var("CARGO").unwrap();
     let args = vec![
         "build",
         "--release",
         "--target",
-        target_path.to_str().unwrap(),
+        "riscv32im-unknown-none-elf",
         "-Z",
         "build-std=alloc,core",
         "--manifest-path",
-        manifest_path.to_str().unwrap(),
+        pkg.manifest_path.as_str(),
         "--target-dir",
-        target_dir.to_str().unwrap(),
+        target_dir.as_ref().to_str().unwrap(),
     ];
-    let status = Command::new(env!("CARGO")).args(args).status().unwrap();
+    println!("Building guest package: {cargo} {}", args.join(" "));
+    let status = Command::new(cargo).args(args).status().unwrap();
     if !status.success() {
         std::process::exit(status.code().unwrap());
     }
@@ -94,89 +200,51 @@ pub fn build(manifest_path: &Path, target_dir: &Path) {
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 ///
+/// This method should be called from a package with a
+/// [package.metadata.risc0] section including a "methods" property
+/// listing the relative paths that contain riscv guest method
+/// packages.
+///
+/// To access the generated method IDs and ELF filenames, include the
+/// generated methods.rs:
+///
+/// ```text
+///     include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+/// ```
+///
+/// To conform to rust's naming conventions, the constants are mapped
+/// to uppercase.  For instance, if you have a method named
+/// "my_method", the method ID and elf filename will be defined as
+/// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
 pub fn embed_methods() {
-    let manifest_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let manifest_path = Path::new(&manifest_dir).join("Cargo.toml");
-    let metadata = MetadataCommand::new()
-        .manifest_path(manifest_path)
-        .no_deps()
-        .exec()
-        .unwrap();
-    let pkg_name = env::var("CARGO_PKG_NAME").unwrap();
-    let pkg = metadata
-        .packages
-        .iter()
-        .find(|x| x.name == pkg_name)
-        .unwrap();
+    let pkg = current_package();
 
-    let obj = pkg.metadata.get("risc0").unwrap();
-    let info: Risc0Metadata = serde_json::from_value(obj.clone()).unwrap();
+    let out_dir_env = env::var_os("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir_env);
 
-    let out_dir = env::var_os("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("methods.rs");
-    let mut file = File::create(&dest_path).unwrap();
+    let guest_packages = guest_packages(&pkg);
+    let methods_path = out_dir.join("methods.rs");
+    let mut methods_file = File::create(&methods_path).unwrap();
 
-    for rel_path in info.methods {
-        let manifest_path = Path::new(&pkg.manifest_path)
-            .parent()
-            .unwrap()
-            .join(rel_path)
-            .join("Cargo.toml");
+    for guest_pkg in guest_packages {
+        println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        let metadata = MetadataCommand::new()
-            .manifest_path(&manifest_path)
-            .no_deps()
-            .exec()
-            .unwrap();
+        build_guest_package(&guest_pkg, &out_dir.join("riscv-guest"));
 
-        let pkg = metadata
-            .packages
-            .iter()
-            .find(|x| x.manifest_path.as_std_path() == &manifest_path)
-            .unwrap();
-
-        for target in &pkg.targets {
-            if target.kind.contains(&"bin".to_string()) {
-                let method = target.name.clone();
-                let elf_path = metadata
-                    .target_directory
-                    .as_std_path()
-                    .join("riscv32im-unknown-none-elf")
-                    .join("release")
-                    .join(&method);
-                let mut id_path = Path::new(&out_dir).join(&method);
-                id_path.set_extension("id");
-
-                eprintln!("Creating MethodID for {method}");
-                if !elf_path.exists() {
-                    eprintln!(
-                        "RISC-V method was not found at: {}",
-                        elf_path.to_str().unwrap()
-                    );
-                    eprintln!(
-                        "Please run the RISC Zero method compiler before running this command."
-                    );
-                    eprintln!("Try: `cargo run --bin risc0-build-methods`");
-                    std::process::exit(-1);
-                }
-                let method_id = MethodID::new(&elf_path.to_str().unwrap()).unwrap();
-                method_id.write(&id_path.to_str().unwrap()).unwrap();
-
-                let elf_path = elf_path.display();
-                let id_path = id_path.display();
-                let upper = method.to_uppercase();
-                let content = format!(
-                    r##"
-    pub const {upper}_PATH: &str = r#"{elf_path}"#;
-    pub const {upper}_ID: &[u8] = include_bytes!(r#"{id_path}"#);
-            "##
-                );
-                file.write_all(content.as_bytes()).unwrap();
-
-                println!("cargo:rerun-if-changed={elf_path}");
-            }
+        for method in guest_methods(&guest_pkg, &out_dir) {
+            methods_file
+                .write_all(method.rust_def().as_bytes())
+                .unwrap();
         }
     }
+
+    // HACK: It's not particularly practical to figure out all the
+    // files that all the guest crates transtively depend on.  So, we
+    // want to run the guest "cargo build" command each time we build.
+    //
+    // Since we generate methods.rs each time we run, it will always
+    // be changed.
+    println!("cargo:rerun-if-changed={}", methods_path.display());
 }
 
 /// Called inside the guest crate's build.rs to do special linking for the ZKVM
@@ -185,7 +253,6 @@ pub fn link() {
         let out_dir = env::var_os("OUT_DIR").unwrap();
         let linker_script = Path::new(&out_dir).join("risc0.ld");
         fs::write(&linker_script, LINKER_SCRIPT).unwrap();
-        let linker_script = linker_script.to_str().unwrap();
-        println!("cargo:rustc-link-arg=-T{linker_script}");
+        println!("cargo:rustc-link-arg=-T{}", linker_script.to_str().unwrap());
     }
 }

@@ -8,3 +8,4 @@ rust-project.json
 target/
 tmp/
 dist/
+.idea/
