@@ -73,7 +73,6 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 ///    a0-a4-a2*w^2+a6*w^2+a1*w^3-a5*w^3+a3*w^5-a7*w^5,
 ///    a0-a4-a2*w^2+a6*w^2-a1*w^3+a5*w^3-a3*w^5+a7*w^5]
 /// Rewriting this, we get
-/// And after the second round of recursive calls, we have
 ///   [sum_k ak w^0,
 ///    sum_k ak w^4k,
 ///    sum_k ak w^2k,
