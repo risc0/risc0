@@ -39,7 +39,7 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
     }
 }
 
-/// Perform a reverse butterly transform of a buffer of (1 << n) numbers.
+/// Perform a reverse butterfly transform of a buffer of (1 << n) numbers.
 pub fn rev_butterfly(io: &mut [Fp4], n: usize) {
     assert!(io.len() == (1 << n));
     if n == 0 {
