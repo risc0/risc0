@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Very basic utilites to help implement NTT, used only in the verifier.
+//! Very basic utilities to help implement NTT, used only in the verifier.
 
 use crate::{fp4::Fp4, rou::ROU_REV};
 
