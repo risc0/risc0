@@ -81,7 +81,7 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 ///    sum_k ak w^7k]
 /// The exponent multiplicands in the sum arise from reversing the indices as
 /// three-bit numbers. For example, 3 is 011 in binary, which reversed is 110,
-/// which is 6. So k in the exponent of the index-3 value is 6.
+/// which is 6. So i' in the exponent of the index-3 value is 6.
 pub fn rev_butterfly(io: &mut [Fp4], n: usize) {
     assert!(io.len() == (1 << n));
     if n == 0 {
