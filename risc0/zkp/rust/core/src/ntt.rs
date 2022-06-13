@@ -42,14 +42,15 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 }
 
 /// Perform a reverse butterfly transform of a buffer of (1 << n) numbers.
-/// The result of this computation is a discrete Fourier transform, but with changed indices.
-/// This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms)
-/// The output of rev_butterfly(io, n) at index i is the sum over k from 0 to 2^n-1 of io[k] * ROU_REV[n]^(k*i'),
-/// where i' is i bit-reversed as an n-bit number.
+/// The result of this computation is a discrete Fourier transform, but with
+/// changed indices. This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms)
+/// The output of rev_butterfly(io, n) at index i is the sum over k from 0 to
+/// 2^n-1 of io[k] * ROU_REV[n]^(k*i'), where i' is i bit-reversed as an n-bit
+/// number.
 ///
-/// As an example, we'll work through a trace of the rev_butterfly algorithm with n = 3 on a list of length 8.
-/// Let w = ROU_REV[3] be the eighth root of unity.
-/// We start with
+/// As an example, we'll work through a trace of the rev_butterfly algorithm
+/// with n = 3 on a list of length 8. Let w = ROU_REV[3] be the eighth root of
+/// unity. We start with
 ///   [a0, a1, a2, a3, a4, a5, a6, a7]
 /// After the loop, before the first round of recursive calls, we have
 ///   [a0+a4, a1+a5,     a2+a6,         a3+a7,
@@ -78,8 +79,9 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 ///    sum_k ak w^5k,
 ///    sum_k ak w^3k,
 ///    sum_k ak w^7k]
-/// The exponent multiplicands in the sum arise from reversing the indices as three-bit numbers.
-/// For example, 3 is 011 in binary, which reversed is 110, which is 6. So k in the exponent of the index-3 value is 6.
+/// The exponent multiplicands in the sum arise from reversing the indices as
+/// three-bit numbers. For example, 3 is 011 in binary, which reversed is 110,
+/// which is 6. So k in the exponent of the index-3 value is 6.
 pub fn rev_butterfly(io: &mut [Fp4], n: usize) {
     assert!(io.len() == (1 << n));
     if n == 0 {
