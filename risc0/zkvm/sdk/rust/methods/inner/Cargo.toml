@@ -18,3 +18,7 @@ risc0-build = { path = "../../../../../build" }
 
 [package.metadata.release]
 release = false
+
+[features]
+default = ["std"]
+std = []
