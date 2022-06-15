@@ -110,7 +110,7 @@ const RUST_LIB_ID: &str = "c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1";
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry{
 	zip_url: "https://github.com/risc0/rust/archive/c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.zip",
-	src_prefix: "rust-c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1",
+	src_prefix: "rust-c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1/library",
 	dst_prefix: "library"},
     ZipMapEntry{
 	zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
@@ -249,7 +249,6 @@ where
     for zm in zip_map.iter() {
         let src_prefix = Path::new(&zm.src_prefix);
         let dst_prefix = tmp_dest_base.join(&zm.dst_prefix);
-        let mut contents_buf: Vec<u8> = Vec::new();
         println!(
             "Downloading {}, mapping {} to {}",
             zm.zip_url,
@@ -259,9 +258,13 @@ where
 
         fs::create_dir_all(&dst_prefix).unwrap();
 
-        let body = reqwest::blocking::get(zm.zip_url).unwrap().bytes().unwrap();
-        let mut zip = ZipArchive::new(Cursor::new(body.as_ref())).unwrap();
+        let mut response = reqwest::blocking::get(zm.zip_url).unwrap();
+        let mut zip_buf: Vec<u8> = Vec::new();
+        response.read_to_end(&mut zip_buf).unwrap();
+        let mut zip = ZipArchive::new(Cursor::new(&zip_buf)).unwrap();
+        println!("Got zip with {} files", zip.len());
 
+        let mut nwrote: u32 = 0;
         for i in 0..zip.len() {
             let mut f = zip.by_index(i).unwrap();
             let name = f.enclosed_name().unwrap();
@@ -274,11 +277,12 @@ where
                 if !f.is_file() {
                     continue;
                 }
-                contents_buf.clear();
-                f.read_to_end(&mut contents_buf).unwrap();
-                fs::write(dest_name, &contents_buf).unwrap();
+                std::io::copy(&mut f, &mut File::create(&dest_name).unwrap()).unwrap();
+                println!("Writing {}", dest_name.display());
+                nwrote += 1;
             }
         }
+        println!("Wrote {} files", nwrote);
     }
     fs::rename(&tmp_dest_base, dest_base.as_ref()).unwrap();
 }

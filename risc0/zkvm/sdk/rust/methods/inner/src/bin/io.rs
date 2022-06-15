@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #![no_main]
-#![no_std]
 #![allow(non_snake_case)]
 
 use risc0_zkvm_guest::env;
