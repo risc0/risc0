@@ -106,7 +106,7 @@ struct ZipMapEntry {
 /// ID of rust library source version.  This is an arbitrary string,
 /// but must change if we need to download a new library version.  So
 /// let's just use the GIT commit ID.
-const RUST_LIB_ID: &str = "c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1";
+const RUST_LIB_ID: &str = "c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.";
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry{
 	zip_url: "https://github.com/risc0/rust/archive/c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.zip",
