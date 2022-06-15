@@ -1000,7 +1000,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -1015,7 +1015,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1023,7 +1023,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-core"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1035,7 +1035,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1045,14 +1045,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit-gen"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "risc0-zkvm-circuit-sys",
 ]
 
 [[package]]
 name = "risc0-zkvm-circuit-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "cxx",
@@ -1063,7 +1063,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-core"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "cfg-if",
  "risc0-zkp-core",
@@ -1072,7 +1072,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-guest"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "bytemuck",
  "risc0-build",
@@ -1084,7 +1084,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-host"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "ctor",
@@ -1107,7 +1107,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1115,7 +1115,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-serde"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "bytemuck",
  "serde",
@@ -1123,7 +1123,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "cxx",
@@ -1137,7 +1137,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-verify"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "bencher",

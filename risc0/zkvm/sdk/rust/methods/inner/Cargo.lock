@@ -928,7 +928,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -943,7 +943,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -951,7 +951,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-core"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -963,7 +963,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -973,14 +973,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit-gen"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "risc0-zkvm-circuit-sys",
 ]
 
 [[package]]
 name = "risc0-zkvm-circuit-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "cxx",
@@ -991,7 +991,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-core"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "cfg-if",
  "risc0-zkp-core",
@@ -1000,7 +1000,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-guest"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "bytemuck",
  "risc0-build",
@@ -1021,7 +1021,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1029,7 +1029,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-serde"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "bytemuck",
  "serde",
@@ -1037,7 +1037,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-sys"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "anyhow",
  "cxx",
@@ -1127,9 +1127,9 @@ dependencies = [
 
 [[package]]
 name = "semver"
-version = "1.0.9"
+version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8cb243bdfdb5936c8dc3c45762a19d12ab4550cdc753bc247637d4ec35a040fd"
+checksum = "a41d061efea015927ac527063765e73601444cdc344ba855bc7bd44578b25e1c"
 dependencies = [
  "serde",
 ]
@@ -1229,9 +1229,9 @@ checksum = "6bdef32e8150c2a081110b42772ffe7d7c9032b606bc226c8260fd97e0976601"
 
 [[package]]
 name = "syn"
-version = "1.0.95"
+version = "1.0.96"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fbaf6116ab8924f39d52792136fb74fd60a80194cf1b1c6ffa6453eef1c3f942"
+checksum = "0748dd251e24453cb8717f0354206b91557e4ec8703673a4b30208f2abaf1ebf"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1402,9 +1402,9 @@ checksum = "099b7128301d285f79ddd55b9a83d5e6b9e97c92e0ea0daebee7263e932de992"
 
 [[package]]
 name = "unicode-ident"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d22af068fba1eb5edcb4aea19d382b2a3deb4c8f9d475c589b6ada9e0fd493ee"
+checksum = "5bd2fe26506023ed7b5e1e315add59d6f584c621d037f9368fea9cfb988f368c"
 
 [[package]]
 name = "unicode-normalization"

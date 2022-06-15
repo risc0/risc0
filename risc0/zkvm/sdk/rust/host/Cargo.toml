@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-host"
-version = "0.8.0"
+version = "0.9.0"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM host crate"
 license = "Apache-2.0"
@@ -11,7 +11,7 @@ repository = "https://github.com/risc0/risc0/"
 ctor = "0.1"
 cxx = "1.0"
 log = "0.4"
-risc0-zkvm-sys = { version = "0.8", path = "../../.." }
+risc0-zkvm-sys = { version = "0.9", path = "../../.." }
 
 [build-dependencies]
 cxx-build = "1.0"
