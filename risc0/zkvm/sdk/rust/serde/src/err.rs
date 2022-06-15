@@ -59,5 +59,5 @@ impl serde::de::Error for Error {
     }
 }
 
-#[cfg(feature = "std")]
-impl std::error::Error for Error {}
+// This is an alias for either std::Error, or serde's no_std error replacement.
+impl serde::ser::StdError for Error {}

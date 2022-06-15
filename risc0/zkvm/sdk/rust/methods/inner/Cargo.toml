@@ -5,7 +5,7 @@ name = "risc0-zkvm-methods-inner"
 version = "0.1.0"
 edition = "2021"
 
-[target.riscv32im-unknown-none-elf.dependencies]
+[target.riscv32im-risc0-zkvm-elf.dependencies]
 risc0-zkp-core = { path = "../../../../../zkp/rust/core" }
 risc0-zkvm-guest = { path = "../../guest" }
 
