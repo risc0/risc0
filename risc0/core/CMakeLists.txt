@@ -5,11 +5,11 @@ endif(WIN32)
 
 if (UNIX AND APPLE)
   set (PLATFORM_RNG rng_macos.cpp)
-endif (APPLE)
+endif ()
 
 if (UNIX AND NOT APPLE)
   set (PLATFORM_RNG rng_linux.cpp)
-endif (UNIX)
+endif ()
 
 add_library(core
   log.cpp
