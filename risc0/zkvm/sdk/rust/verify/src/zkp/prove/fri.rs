@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{vec, vec::Vec};
+use alloc::vec::Vec;
 
 use rand::RngCore;
 use risc0_zkp_core::{
@@ -20,13 +20,13 @@ use risc0_zkp_core::{
     fp4::{Fp4, EXT_SIZE},
     log2_ceil,
     sha::Sha,
-    to_po2, Random,
+    Random,
 };
 use risc0_zkp_hal::{Buffer, Hal};
 
 use crate::zkp::{
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
-    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
+    FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
 
 struct ProveRoundInfo {
@@ -100,7 +100,7 @@ where
     });
     // Do queries
     // LOG(1, "Doing Queries");
-    for q in 0..QUERIES {
+    for _ in 0..QUERIES {
         // Get a 'random' index.
         let rng = iop.rng.next_u32() as usize;
         let mut pos = rng & orig_domain;

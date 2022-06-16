@@ -1,7 +1,5 @@
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
-# "src/zkvm/prove/check_eval.rs",
-
 risc0_rust_library_pair(
     name = "verify",
     srcs = [
@@ -34,7 +32,6 @@ risc0_rust_library_pair(
         "src/zkvm/verify/mod.rs",
     ],
     crate_name = "risc0_zkvm_verify",
-    data = ["src/zkvm/prove/check_eval.rs"],
     guest_deps = [
         "//risc0/zkp/rust/core:core_guest",
         "@crates_guest//:anyhow",

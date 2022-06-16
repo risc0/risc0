@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{vec, vec::Vec};
+use alloc::vec::Vec;
 use core::cmp;
 
 use risc0_zkp_core::{
     fp::Fp,
     sha::{Digest, Sha},
-    to_po2,
 };
 use risc0_zkp_hal::{Buffer, Hal};
 

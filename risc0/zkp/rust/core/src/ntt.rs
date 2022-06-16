@@ -260,7 +260,8 @@ where
     }
 }
 
-/// Expand the `input` into `output` to support polynomial evaluation on `expand_bits` points.
+/// Expand the `input` into `output` to support polynomial evaluation on
+/// `input.len() * (1 << expand_bits)` points.
 pub fn expand<T>(output: &mut [T], input: &[T], expand_bits: usize)
 where
     T: Copy,
