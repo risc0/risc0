@@ -218,6 +218,7 @@ where
     }
 }
 
+/// Perform a forward butterfly transform of a buffer of (1 << n) numbers.
 pub fn evaluate_ntt<T>(io: &mut [T], expand_bits: usize)
 where
     T: Copy + FpMul + Add<Output = T> + Sub<Output = T>,
@@ -259,9 +260,10 @@ where
     }
 }
 
+/// Expand the `input` into `output` to support polynomial evaluation on `expand_bits` points.
 pub fn expand<T>(output: &mut [T], input: &[T], expand_bits: usize)
 where
-    T: Copy + FpMul + Add<Output = T> + Sub<Output = T>,
+    T: Copy,
 {
     let size_out = input.len() * (1 << expand_bits);
     for i in 0..size_out {

@@ -87,7 +87,9 @@ impl Fp {
     }
 }
 
+/// Provides support for multiplying by a factor with an `Fp` type.
 pub trait FpMul {
+    /// Multiply `self` by a factor of `Fp` type.
     fn fp_mul(self, x: Fp) -> Self;
 }
 

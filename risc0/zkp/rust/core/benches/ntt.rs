@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-
 use rand::thread_rng;
 use risc0_zkp_core::{fp::Fp, ntt::interpolate_ntt, Random};
 
