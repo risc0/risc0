@@ -29,8 +29,8 @@ use crate::zkvm::circuit::Risc0Circuit;
 
 #[derive(Deserialize, Serialize)]
 pub struct Receipt {
-    journal: Vec<u8>,
-    seal: Vec<u32>,
+    pub journal: Vec<u8>,
+    pub seal: Vec<u32>,
 }
 
 impl Receipt {
