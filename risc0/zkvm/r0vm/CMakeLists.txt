@@ -1,3 +1,3 @@
 add_library(zkvm-r0vm
-	r0vm.cpp
+  r0vm.cpp
 )

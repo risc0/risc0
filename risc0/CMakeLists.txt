@@ -1,5 +1,5 @@
 if (NOT BUILD_RISCVCROSS)
-	add_subdirectory(core)
+  add_subdirectory(core)
 endif()
 add_subdirectory(zkp)
 add_subdirectory(zkvm)
