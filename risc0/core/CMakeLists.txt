@@ -2,13 +2,14 @@ if (WIN32)
   set(PLATFORM_RNG rng_win32.cpp)
 endif(WIN32)
 
-if (APPLE)
-  set(PLATFORM_RNG rng_macos.cpp)
-endif(APPLE)
 
-if (UNIX)
-  set(PLATFORM_RNG rng_linux.cpp)
-endif(UNIX)
+if (UNIX AND APPLE)
+  set (PLATFORM_RNG rng_macos.cpp)
+endif (APPLE)
+
+if (UNIX AND NOT APPLE)
+  set (PLATFORM_RNG rng_linux.cpp)
+endif (UNIX)
 
 add_library(core
   log.cpp
