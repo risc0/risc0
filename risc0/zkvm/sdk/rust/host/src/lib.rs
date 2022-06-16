@@ -59,10 +59,11 @@ fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
 impl Receipt {
     /// Verify that the current [Receipt] is a valid result of executing the
     /// method associated with the given method ID in a ZKVM.
-    pub fn verify(&self, id_path: &str) -> Result<()> {
+    pub fn verify(&self, method_id: &[u8]) -> Result<()> {
         let mut err = ffi::RawError::default();
-        let id_path = CString::new(id_path).unwrap();
-        unsafe { ffi::risc0_receipt_verify(&mut err, id_path.as_ptr(), self.ptr) };
+        unsafe {
+            ffi::risc0_receipt_verify(&mut err, self.ptr, method_id.as_ptr(), method_id.len())
+        };
         ffi::check(err, || ())
     }
 
@@ -100,12 +101,18 @@ impl Receipt {
 
 impl Prover {
     /// Create a new [Prover] with the given method (specified via `elf_path`)
-    /// and an associated method ID (specified via `id_path`).
-    pub fn new(elf_path: &str, id_path: &str) -> Result<Self> {
+    /// and an associated method ID (specified via `method_id`).
+    pub fn new(elf_path: &str, method_id: &[u8]) -> Result<Self> {
         let mut err = ffi::RawError::default();
         let elf_path = CString::new(elf_path).unwrap();
-        let id_path = CString::new(id_path).unwrap();
-        let ptr = unsafe { ffi::risc0_prover_new(&mut err, elf_path.as_ptr(), id_path.as_ptr()) };
+        let ptr = unsafe {
+            ffi::risc0_prover_new(
+                &mut err,
+                elf_path.as_ptr(),
+                method_id.as_ptr(),
+                method_id.len(),
+            )
+        };
         ffi::check(err, || Prover { ptr })
     }
 
@@ -176,14 +183,11 @@ fn init() {
 
 #[cfg(test)]
 mod test {
-    use std::fs;
-
     use super::Prover;
     use anyhow::Result;
     use risc0_zkvm_core::Digest;
     use risc0_zkvm_methods::methods::{FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SHA_ID, SHA_PATH};
     use risc0_zkvm_serde::{from_slice, to_vec};
-    use tempfile::tempdir;
 
     #[test]
     fn sha() {
@@ -218,11 +222,7 @@ mod test {
     }
 
     fn run_sha(msg: &str) -> Digest {
-        let temp_dir = tempdir().unwrap();
-        let id_path = temp_dir.path().join("sha.id").to_str().unwrap().to_string();
-        fs::write(&id_path, SHA_ID).unwrap();
-
-        let mut prover = Prover::new(SHA_PATH, &id_path).unwrap();
+        let mut prover = Prover::new(SHA_PATH, SHA_ID).unwrap();
         let vec = to_vec(&msg).unwrap();
         prover.add_input(vec.as_slice()).unwrap();
         let receipt = prover.run().unwrap();
@@ -258,37 +258,23 @@ mod test {
     }
 
     fn run_memio(pairs: &[(u32, u32)]) -> Result<()> {
-        let temp_dir = tempdir().unwrap();
-        let id_path = temp_dir.path().join("io.id").to_str().unwrap().to_string();
-        fs::write(&id_path, IO_ID).unwrap();
-
         let mut vec = Vec::new();
         vec.push(pairs.len() as u32);
         for (first, second) in pairs {
             vec.push(*first);
             vec.push(*second);
         }
-
-        let mut prover = Prover::new(IO_PATH, &id_path).unwrap();
+        let mut prover = Prover::new(IO_PATH, IO_ID).unwrap();
         prover.add_input(vec.as_slice()).unwrap();
         let receipt = prover.run()?;
-        receipt.verify(&id_path).unwrap();
+        receipt.verify(IO_ID).unwrap();
         Ok(())
     }
 
     #[test]
     fn fail() {
-        let temp_dir = tempdir().unwrap();
-        let id_path = temp_dir
-            .path()
-            .join("fail.id")
-            .to_str()
-            .unwrap()
-            .to_string();
-        fs::write(&id_path, FAIL_ID).unwrap();
-
         // Check that a compliant host will fault.
-        let prover = Prover::new(FAIL_PATH, &id_path).unwrap();
+        let prover = Prover::new(FAIL_PATH, FAIL_ID).unwrap();
         assert!(prover.run().is_err());
     }
 }

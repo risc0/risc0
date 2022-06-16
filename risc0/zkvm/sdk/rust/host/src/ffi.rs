@@ -61,7 +61,8 @@ extern "C" {
     pub(crate) fn risc0_prover_new(
         err: *mut RawError,
         elf_path: *const i8,
-        id_path: *const i8,
+        method_id: *const u8,
+        method_id_len: usize,
     ) -> *mut RawProver;
 
     pub(crate) fn risc0_prover_free(err: *mut RawError, prover: *mut RawProver);
@@ -85,8 +86,9 @@ extern "C" {
 
     pub(crate) fn risc0_receipt_verify(
         err: *mut RawError,
-        id_path: *const i8,
         receipt: *const RawReceipt,
+        method_id: *const u8,
+        method_id_len: usize,
     );
 
     pub(crate) fn risc0_receipt_get_seal_buf(

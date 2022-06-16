@@ -17,9 +17,10 @@
 #include "risc0/core/archive.h"
 #include "risc0/core/key.h"
 #include "risc0/zkp/core/sha256.h"
+#include "risc0/zkvm/prove/method_id.h"
 #include "risc0/zkvm/prove/step.h"
-#include "risc0/zkvm/verify/method_id.h"
 
+#include <array>
 #include <memory>
 #include <vector>
 
@@ -48,7 +49,7 @@ struct Receipt {
   BufferU32 seal;
 
   // Verify a receipt against some code, throws if invalid.
-  void verify(const std::string& elfPath) const;
+  void verify(const MethodId& methodId) const;
 
   template <typename Archive> void transfer(Archive& ar) {
     ar.transfer(journal);
@@ -73,7 +74,7 @@ private:
 
 class Prover {
 public:
-  Prover(const std::string& elfPath, const std::string& idPath);
+  Prover(const std::string& elfPath, const MethodId& methodId);
   ~Prover();
 
   // Allows access to key store to get/set keys

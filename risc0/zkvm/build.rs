@@ -29,7 +29,6 @@ fn main() {
         .file("prove/riscv.cpp")
         .file("prove/step_context.cpp")
         .file("prove/step.cpp")
-        .file("verify/method_id.cpp")
         .file("verify/riscv.cpp")
         .file("sdk/cpp/host/c_api.cpp")
         .file("sdk/cpp/host/receipt.cpp")

@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-verify"
-version = "0.7.2"
+version = "0.9.0"
 edition = "2021"
 description = "RISC Zero zero-knowledge proof system core crate"
 license = "Apache-2.0"
@@ -14,8 +14,8 @@ rand = { version = "0.8", default-features = false, features = ["small_rng"] }
 rand_core = "0.6"
 sha2 = { version = "0.10", features = ["compress"] }
 serde = { version = "1.0", features = ["derive"] }
-risc0-zkp-core = { version = "0.7", path = "../../../../zkp/rust/core" }
-risc0-zkvm-serde = { version = "0.7", path = "../serde" }
+risc0-zkp-core = { version = "0.9", path = "../../../../zkp/rust/core" }
+risc0-zkvm-serde = { version = "0.9", path = "../serde" }
 
 [dev-dependencies]
 bencher = "0.1.5"

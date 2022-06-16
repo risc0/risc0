@@ -14,28 +14,28 @@
 
 #pragma once
 
-#include "risc0/zkvm/verify/method_id.h"
-
+#include <array>
 #include <memory>
+
+#include "risc0/core/util.h"
+#include "risc0/zkp/core/sha256.h"
+#include "risc0/zkvm/circuit/constants.h"
 
 namespace risc0 {
 
-MethodID makeMethodID(const std::string& elfFile);
-void writeMethodID(const std::string& filename, const MethodID& id);
+static constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
 
-namespace rust {
+// These types are likely to change relatively soon. But, for now:
+// A MethodDigest is intended for internal use in verification
+// A MethodId is an intentionally opaque version of a MethodDigest for use in APIs
+using MethodDigest = std::array<ShaDigest, kCodeDigestCount>;
+using MethodId = std::array<uint8_t, sizeof(MethodDigest)>;
 
-class MethodID {
-public:
-  MethodID(const std::string& elf_path);
-  void write(const std::string& filename) const;
+MethodId makeMethodId(const std::string& elfPath);
+MethodId makeMethodId(const uint8_t* bytes, const size_t len);
+MethodId makeMethodId(const MethodDigest& digest);
 
-private:
-  ::risc0::MethodID id;
-};
-
-std::unique_ptr<MethodID> new_method_id(const std::string& elf_path);
-
-} // namespace rust
+MethodDigest makeMethodDigest(const std::string& elfPath);
+MethodDigest makeMethodDigest(const MethodId& id);
 
 } // namespace risc0
