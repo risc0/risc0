@@ -76,9 +76,9 @@ impl zkp::prove::Circuit for RV32Circuit {
         //   // Write final low register state
         //   for (size_t i = 0; i < kOutputRegs; i++) {
         //     const Fp* globals = exec_.context.globals;
-        //     uint32_t regVal = globals[2 * i].asUInt32() | (globals[2 * i + 1].asUInt32() << 16);
-        //     LOG(2, "x" << i + 1 << " = " << hex(regVal));
-        //     iop.write(&regVal, 1);
+        //     uint32_t regVal = globals[2 * i].asUInt32() | (globals[2 * i +
+        // 1].asUInt32() << 16);     LOG(2, "x" << i + 1 << " = " <<
+        // hex(regVal));     iop.write(&regVal, 1);
         //   }
 
         //   // Write the po2 for size

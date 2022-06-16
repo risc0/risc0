@@ -32,5 +32,5 @@ harness = false
 
 [features]
 default = ["prove", "verify"]
+prove = ["dep:risc0-zkp-hal", "std"]
 verify = []
-prove = ["dep:risc0-zkp-hal"]

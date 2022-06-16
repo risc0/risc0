@@ -14,10 +14,14 @@
 
 // TODO: WIP
 
+use risc0_zkp_core::fp::Fp;
+
+use super::{io::MemoryState, GLOBAL_SIZE};
+
 struct StepContext {
     // MemoryHandler* io;
-    // MemoryState mem;
-    // uint32_t curStep;
-    // uint32_t numSteps;
-    // Fp globals[kGlobalSize];
+    mem: MemoryState,
+    cur_step: u32,
+    num_steps: u32,
+    globals: [Fp; GLOBAL_SIZE],
 }
