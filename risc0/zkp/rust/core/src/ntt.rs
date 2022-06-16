@@ -24,6 +24,8 @@ use crate::{
     rou::{ROU_FWD, ROU_REV},
 };
 
+/// Reverses the bits in a 32 bit number
+/// For example 1011...0100 becomes 0010...1101
 fn bit_rev_32(mut x: u32) -> u32 {
     x = ((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1);
     x = ((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2);
@@ -32,7 +34,10 @@ fn bit_rev_32(mut x: u32) -> u32 {
     (x >> 16) | (x << 16)
 }
 
-/// Bit reverse an array of (1 << n) numbers.
+/// Bit reverses the indices in an array of (1 << n) numbers.
+/// This permutes the values in the array so that a value which is previously
+/// in index i, will now go in the index i' given by reversing the bits of i.
+/// For example, with n=4, the value at index 3=0011 will go to index 12=1100.
 pub fn bit_reverse<T: Copy>(io: &mut [T]) {
     let n = log2_ceil(io.len());
     assert_eq!(1 << n, io.len());
@@ -129,6 +134,46 @@ butterfly!(3, 2);
 butterfly!(2, 1);
 butterfly!(1, 0);
 
+/// Perform a reverse butterfly transform of a buffer of (1 << n) numbers.
+/// The result of this computation is a discrete Fourier transform, but with
+/// changed indices. This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms)
+/// The output of rev_butterfly(io, n) at index i is the sum over k from 0 to
+/// 2^n-1 of io[k] * ROU_REV[n]^(k*i'), where i' is i bit-reversed as an n-bit
+/// number.
+///
+/// As an example, we'll work through a trace of the rev_butterfly algorithm
+/// with n = 3 on a list of length 8. Let w = ROU_REV[3] be the eighth root of
+/// unity. We start with
+///   [a0, a1, a2, a3, a4, a5, a6, a7]
+/// After the loop, before the first round of recursive calls, we have
+///   [a0+a4, a1+a5,     a2+a6,         a3+a7,
+///    a0-a4, a1*w-a5*w, a2*w^2-a6*w^2, a3*w^3-a7*w^3]
+/// After first round of recursive calls, we have
+///   [a0+a4+a2+a6,         a1+a5+a3+a7,
+///    a0+a4-a2-a6,         a1*w^2+a5*w^2-a3*w^2-a7*w^2,
+///    a0-a4+a2*w^2-a6*w^2, a1*w-a5*w+a3*w^3-a7*w^3,
+///    a0-a4-a2*w^2+a6*w^2, a1*w^3-a5*w^3-a3*w^5+a7*w^5]
+/// And after the second round of recursive calls, we have
+///   [a0+a4+a2+a6+a1+a5+a3+a7,
+///    a0+a4+a2+a6-a1-a5-a3-a7,
+///    a0+a4-a2-a6+a1*w^2+a5*w^2-a3*w^2-a7*w^2,
+///    a0+a4-a2-a6-a1*w^2-a5*w^2+a3*w^2+a7*w^2,
+///    a0-a4+a2*w^2-a6*w^2+a1*w-a5*w+a3*w^3-a7*w^3,
+///    a0-a4+a2*w^2-a6*w^2-a1*w+a5*w-a3*w^3+a7*w^3,
+///    a0-a4-a2*w^2+a6*w^2+a1*w^3-a5*w^3+a3*w^5-a7*w^5,
+///    a0-a4-a2*w^2+a6*w^2-a1*w^3+a5*w^3-a3*w^5+a7*w^5]
+/// Rewriting this, we get
+///   [sum_k ak w^0,
+///    sum_k ak w^4k,
+///    sum_k ak w^2k,
+///    sum_k ak w^6k,
+///    sum_k ak w^1k,
+///    sum_k ak w^5k,
+///    sum_k ak w^3k,
+///    sum_k ak w^7k]
+/// The exponent multiplicands in the sum arise from reversing the indices as
+/// three-bit numbers. For example, 3 is 011 in binary, which reversed is 110,
+/// which is 6. So i' in the exponent of the index-3 value is 6.
 pub fn interpolate_ntt<T>(io: &mut [T])
 where
     T: Copy + FpMul + Add<Output = T> + Sub<Output = T>,

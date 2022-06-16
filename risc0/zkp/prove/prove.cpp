@@ -58,7 +58,7 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
   size_t accumSize = tapSet.groupSize(RegisterGroup::ACCUM);
   size_t comboCount = tapSet.combosSize();
 
-  // Make code + data PolyGroups + commit them
+  // Make code + data PolyGroups + commit a Merkle root for each
   PolyGroup codeGroup(makeCoeffs(circuit.getCode(), codeSize), codeSize, size);
   PolyGroup dataGroup(makeCoeffs(circuit.getData(), dataSize), dataSize, size);
   codeGroup.getMerkle().commit(iop);
@@ -69,17 +69,17 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
 
   circuit.accumulate(iop);
 
-  // Make the accum group + commit
+  // Make PLONK accum group and commit a Merkle root
   LOG(1, "size = " << size << ", accumSize = " << accumSize);
   LOG(1, "getAccum.size() = " << circuit.getAccum().size());
   PolyGroup accumGroup(makeCoeffs(circuit.getAccum(), accumSize), accumSize, size);
   accumGroup.getMerkle().commit(iop);
   LOG(1, "accumGroup: " << accumGroup.getMerkle().getRoot());
 
-  // Set the poly mix value
+  // Choose Fiat-Shamir constraint mixing paramater
   Fp4 polyMix = Fp4::random(iop);
 
-  // Now generate the check polynomial
+  // Make the High Degree Validity Polynomial
   size_t domain = size * kInvRate;
   auto checkPoly = AccelSlice<Fp>::allocate(4 * domain);
   circuit.evalCheck(checkPoly,
@@ -108,7 +108,7 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
   // purposes of interpolate/evaluate.
   batchInterpolateNTT(checkPoly, 4);
 
-  // The next step is to convert the degree 4*n check polynomial into 4 degreen n polynomials
+  // Now split the High Degree Validity Polynomial into 4 Low Degree Validity Polynomials
   // so that f(x) = g0(x^4) + g1(x^4) x + g2(x^4) x^2 + g3(x^4) x^3.  To do this, we normally
   // would grab all the coeffients of f(x) = sum_i c_i x^i where i % 4 == 0 and put them into
   // a new polynomial g0(x) = sum_i d0_i*x^i, where d0_i = c_(i*4).
@@ -118,12 +118,12 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
   // So really, we can just reinterpret 4 polys of invRate*size to 16 polys of size, without
   // actually doing anything.
 
-  // Make the PolyGroup + add it to the IOP;
+  // Make the Low Degree Validity Polynomials + commit a Merkle root
   PolyGroup checkGroup(checkPoly, kCheckSize, size);
   checkGroup.getMerkle().commit(iop);
   LOG(1, "checkGroup: " << checkGroup.getMerkle().getRoot());
 
-  // Now pick a value for Z
+  // Now choose the DEEP test point Z
   Fp4 Z = Fp4::random(iop);
 #ifdef CIRCUIT_DEBUG
   if (badZ != Fp4(0)) {
@@ -195,11 +195,12 @@ std::vector<uint32_t> prove(ProveCircuit& circuit) {
   }
 
   LOG(1, "Size of U = " << coeffU.size());
+  // Write coefficients of DEEP polynomials publicly
   iop.write(coeffU.data(), coeffU.size());
   auto hashU = shaHash(reinterpret_cast<const Fp*>(coeffU.data()), coeffU.size() * 4, 1, false);
   iop.commit(hashU);
 
-  // Set the mix mix value
+  // Set the Fiat Shamir parameter for mixing DEEP polynomials
   Fp4 mix = Fp4::random(iop);
   LOG(1, "Mix = " << mix);
 

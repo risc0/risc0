@@ -9,8 +9,8 @@ use crate::zkvm::verify::circuit::{MethodID, RV32Circuit};
 
 #[derive(Deserialize, Serialize)]
 pub struct Receipt {
-    pub(crate) journal: Vec<u8>,
-    pub(crate) seal: Vec<u32>,
+    pub journal: Vec<u8>,
+    pub seal: Vec<u32>,
 }
 
 impl Receipt {
@@ -31,14 +31,6 @@ impl Receipt {
                 );
             }
         }
-    }
-
-    pub fn get_seal(&self) -> Result<&[u32]> {
-        todo!()
-    }
-
-    pub fn get_journal(&self) -> Result<&[u8]> {
-        todo!()
     }
 
     pub fn get_journal_u32(&self) -> Vec<u32> {

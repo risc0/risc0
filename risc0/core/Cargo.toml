@@ -1,6 +1,6 @@
 [package]
 name = "risc0-core-sys"
-version = "0.7.2"
+version = "0.9.0"
 edition = "2021"
 description = "RISC Zero core crate"
 license = "Apache-2.0"

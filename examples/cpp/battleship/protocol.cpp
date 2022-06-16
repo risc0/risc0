@@ -30,8 +30,8 @@ RoundMessage::Content RoundMessage::decode() const {
 }
 
 InitMessage Battleship::init() {
-  risc0::Prover prover("examples/cpp/battleship/init_method",
-                       "examples/cpp/battleship/init_method.id");
+  risc0::MethodId methodId = risc0::makeMethodId("examples/cpp/battleship/init_method");
+  risc0::Prover prover("examples/cpp/battleship/init_method", methodId);
   prover.writeInput(state);
   risc0::Receipt receipt = prover.run();
   LOG(1, name << "> InitMethod: " << receipt.seal.size());
@@ -40,7 +40,8 @@ InitMessage Battleship::init() {
 
 void Battleship::onInitMsg(const InitMessage& msg) {
   LOG(1, name << "> onInitMsg");
-  msg.receipt.verify("examples/cpp/battleship/init_method.id");
+  risc0::MethodId methodId = risc0::makeMethodId("examples/cpp/battleship/init_method");
+  msg.receipt.verify(methodId);
   InitMessage::Content content = msg.decode();
   peer_state = content.state;
   LOG(1, name << "> peer_state: " << peer_state);
@@ -55,8 +56,8 @@ TurnMessage Battleship::turn(const Position& shot) {
 RoundMessage Battleship::onTurnMsg(const TurnMessage& msg) {
   LOG(1, name << "> onTurnMsg");
   RoundParams params{state, msg.shot};
-  risc0::Prover prover("examples/cpp/battleship/turn_method",
-                       "examples/cpp/battleship/turn_method.id");
+  risc0::MethodId methodId = risc0::makeMethodId("examples/cpp/battleship/turn_method");
+  risc0::Prover prover("examples/cpp/battleship/turn_method", methodId);
   prover.writeInput(params);
   risc0::Receipt receipt = prover.run();
   LOG(1, name << "> RoundMethod: " << receipt.seal.size());
@@ -68,8 +69,8 @@ RoundMessage Battleship::onTurnMsg(const TurnMessage& msg) {
 
 void Battleship::onRoundMsg(const RoundMessage& msg) {
   LOG(1, name << "> onRoundMsg");
-
-  msg.receipt.verify("examples/cpp/battleship/turn_method.id");
+  risc0::MethodId methodId = risc0::makeMethodId("examples/cpp/battleship/turn_method");
+  msg.receipt.verify(methodId);
   RoundMessage::Content content = msg.decode();
 
   if (content.old_state != peer_state) {

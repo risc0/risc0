@@ -29,6 +29,9 @@ use crate::zkp::{
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
 
+/// VerifyRoundInfo contains the data against which the queries for a particular
+/// round are checked. This includes the Merkle tree top row data, as well as
+/// the size of the domain of the polynomial, and the mixing parameter.
 struct VerifyRoundInfo {
     domain: usize,
     merkle: MerkleTreeVerifier,
