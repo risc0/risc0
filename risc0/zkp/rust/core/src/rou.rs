@@ -21,6 +21,8 @@
 pub const MAX_ROU_PO2: usize = 27;
 
 /// For each power of 2, what is the 'forward' root of unity for the po2.
+/// That is, this list satisfies ROU_FWD[i+1] ^ 2 = ROU_FWD[i] in the prime
+/// field F_2013265921, which implies ROU_FWD[i] ^ (2 ^ i) = 1.
 pub const ROU_FWD: [u32; MAX_ROU_PO2 + 1] = [
     1, 2013265920, 284861408, 1801542727, 567209306, 740045640, 918899846, 1881002012, 1453957774,
     65325759, 1538055801, 515192888, 483885487, 157393079, 1695124103, 2005211659, 1540072241,
@@ -29,6 +31,8 @@ pub const ROU_FWD: [u32; MAX_ROU_PO2 + 1] = [
 ];
 
 /// For each power of 2, what is the 'reverse' root of unity for the po2.
+/// This list satisfies ROU_FWD[i] * ROU_REV[i] = 1 in the prime field
+/// F_2013265921.
 pub const ROU_REV: [u32; MAX_ROU_PO2 + 1] = [
     1, 2013265920, 1728404513, 1592366214, 196396260, 1253260071, 72041623, 1091445674, 145223211,
     1446820157, 1030796471, 2010749425, 1827366325, 1239938613, 246299276, 596347512, 1893145354,

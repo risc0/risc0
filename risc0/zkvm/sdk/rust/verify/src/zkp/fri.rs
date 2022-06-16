@@ -32,6 +32,9 @@ pub const FRI_FOLD_PO2: usize = 4;
 pub const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
 pub const FRI_MIN_DEGREE: usize = 256;
 
+/// VerifyRoundInfo contains the data against which the queries for a particular
+/// round are checked. This includes the Merkle tree top row data, as well as
+/// the size of the domain of the polynomial, and the mixing parameter.
 struct VerifyRoundInfo {
     domain: usize,
     merkle: MerkleTreeVerifier,
