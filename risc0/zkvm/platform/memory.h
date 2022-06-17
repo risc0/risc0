@@ -24,25 +24,23 @@ namespace risc0 {
   constexpr size_t kMem##name##End = start + len;                                                  \
   constexpr size_t kMem##name##Len = len;
 
-constexpr size_t kMemBits = 20;
+constexpr size_t kMemBits = 24;
 constexpr size_t kMemSize = (1 << kMemBits) * 4;
 
-constexpr size_t k256KB = 0x00040000;
-constexpr size_t k512KB = 0x00080000;
 constexpr size_t k1MB = 0x00100000;
 
 // Must match riscv.ld
 // clang-format off
-MEM_REGION(Stack,  0x00000000, k256KB)
-MEM_REGION(Data,   0x00040000, k256KB)
-MEM_REGION(Heap,   0x00080000, k1MB)
-MEM_REGION(Input,  0x00180000, k256KB)
-MEM_REGION(GPIO,   0x001C0000, k256KB)
-MEM_REGION(Prog,   0x00200000, k1MB)
-MEM_REGION(SHA,    0x00300000, k256KB)
-MEM_REGION(WOM,    0x00340000, k256KB * 2)
-MEM_REGION(Output, 0x00340000, k256KB)
-MEM_REGION(Commit, 0x00380000, k256KB)
+MEM_REGION(Stack,  0x00000000, 9 * k1MB)
+MEM_REGION(Data,   0x00900000, k1MB)
+MEM_REGION(Heap,   0x00a00000, 20 * k1MB)
+MEM_REGION(Input,  0x01e00000, k1MB)
+MEM_REGION(GPIO,   0x01f00000, k1MB)
+MEM_REGION(Prog,   0x02000000, 10 * k1MB)
+MEM_REGION(SHA,    0x02a00000, k1MB)
+MEM_REGION(WOM,    0x02b00000, 21 * k1MB)
+MEM_REGION(Output, 0x02b00000, 20 * k1MB)
+MEM_REGION(Commit, 0x03f00000, k1MB)
 // clang-format on
 
 #define PTR_TO(type, name) reinterpret_cast<type*>(kMem##name##Start);

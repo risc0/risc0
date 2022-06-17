@@ -26,7 +26,7 @@
 namespace risc0::circuit {
 
 struct DataRegs {
-  static constexpr size_t kMemCheckSize = 16;
+  static constexpr size_t kMemCheckSize = 18;
   static constexpr size_t kCycleRegs = 128;
   static constexpr size_t kNormalDigits = 100;
   static constexpr size_t kFinalDigits = 32;

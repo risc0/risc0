@@ -21,14 +21,14 @@ EXTERN(__start)
 
 /* Must match risc0/zkvm/platform/memory.h */
 MEMORY {
-  stack        : ORIGIN = 0x00000000, LENGTH =  256K
-  data    (RW) : ORIGIN = 0x00040000, LENGTH =  256K
-  heap         : ORIGIN = 0x00080000, LENGTH =    1M
-  input        : ORIGIN = 0x00180000, LENGTH =  256K
-  gpio         : ORIGIN = 0x001C0000, LENGTH =  256K
-  prog    (X)  : ORIGIN = 0x00200000, LENGTH =    1M
-  sha          : ORIGIN = 0x00300000, LENGTH =  256K
-  wom          : ORIGIN = 0x00340000, LENGTH =  768K
+  stack        : ORIGIN = 0x00000000, LENGTH =   9M
+  data    (RW) : ORIGIN = 0x00900000, LENGTH =   1M
+  heap         : ORIGIN = 0x00a00000, LENGTH =  20M
+  input        : ORIGIN = 0x01e00000, LENGTH =   1M
+  gpio         : ORIGIN = 0x01f00000, LENGTH =   1M
+  prog    (X)  : ORIGIN = 0x02000000, LENGTH =  10M
+  sha          : ORIGIN = 0x02a00000, LENGTH =   1M
+  wom          : ORIGIN = 0x02b00000, LENGTH =  21M
 }
 
 SECTIONS {
