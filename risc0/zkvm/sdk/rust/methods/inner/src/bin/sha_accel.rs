@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #![no_main]
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 use risc0_zkvm_guest::{env, sha};
 
