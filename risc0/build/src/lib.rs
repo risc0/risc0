@@ -24,8 +24,8 @@ use std::{
 };
 
 use cargo_metadata::{MetadataCommand, Package};
+use risc0_zkvm_host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
-use risc0_zkvm_sys::{make_method_id_from_elf, MethodId, METHOD_ID_LEN};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 
@@ -48,7 +48,7 @@ struct Risc0Method {
 }
 
 impl Risc0Method {
-    fn make_method_id(&self) -> MethodId {
+    fn make_method_id(&self) -> Vec<u8> {
         if !self.elf_path.exists() {
             eprintln!(
                 "RISC-V method was not found at: {:?}",
@@ -73,17 +73,19 @@ impl Risc0Method {
             if let Ok(cached_sha) = std::fs::read(&elf_sha_path) {
                 if cached_sha == elf_sha.as_slice() {
                     println!("MethodID for {} ({}) up to date", self.name, elf_sha_hex);
-                    return MethodId::try_from(std::fs::read(&method_id_path).unwrap().as_slice())
-                        .unwrap();
+                    return std::fs::read(&method_id_path).unwrap();
                 }
             }
         }
 
         println!("Computing MethodID for {} ({:})!", self.name, elf_sha_hex);
-        let method_id = make_method_id_from_elf(&self.elf_path.to_str().unwrap()).unwrap();
-        std::fs::write(method_id_path, method_id).unwrap();
+        // TODO: allow limit to be dynamic/configurable.
+        let method_id =
+            MethodId::new(&self.elf_path.to_str().unwrap(), DEFAULT_METHOD_ID_LIMIT).unwrap();
+        let slice = method_id.as_slice();
+        std::fs::write(method_id_path, slice).unwrap();
         std::fs::write(elf_sha_path, elf_sha).unwrap();
-        method_id
+        Vec::from(slice)
     }
 
     fn rust_def(&self) -> String {
@@ -93,7 +95,7 @@ impl Risc0Method {
         format!(
             r##"
 pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
-pub const {upper}_ID: &'static [u8; {METHOD_ID_LEN}] = &{method_id:?};
+pub const {upper}_ID: &'static [u8] = &{method_id:?};
             "##
         )
     }

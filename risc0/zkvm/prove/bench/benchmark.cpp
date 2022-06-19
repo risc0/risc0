@@ -32,7 +32,7 @@ static void BM_Simple_Loop(benchmark::State& state) {
   size_t tot_iter = 0;
 
   for (auto _ : state) {
-    MethodId methodId = makeMethodId("examples/cpp/deck/shuffle_method");
+    MethodId methodId = loadMethodId("examples/cpp/deck/shuffle_method.id");
     Prover prover("risc0/zkvm/prove/bench/shuffle_method", methodId);
     prover.writeInput(num_iter);
     VectorStreamWriter receipt_buf;
@@ -53,7 +53,7 @@ static void BM_Sha(benchmark::State& state) {
   size_t tot_iter = 0;
 
   for (auto _ : state) {
-    MethodId methodId = makeMethodId("examples/cpp/deck/bench_sha");
+    MethodId methodId = loadMethodId("examples/cpp/deck/bench_sha.id");
     Prover prover("risc0/zkvm/prove/bench/bench_sha", methodId);
     prover.writeInput(num_iter);
     VectorStreamWriter receipt_buf;
@@ -81,7 +81,7 @@ static void run_battleship(benchmark::State& state, const std::string& method) {
   RoundParams params{game_state, {1, 1}};
 
   for (auto _ : state) {
-    MethodId methodId = makeMethodId("examples/cpp/deck/bench_sha");
+    MethodId methodId = loadMethodId("examples/cpp/deck/bench_sha.id");
     Prover prover(method, methodId);
     prover.writeInput(params);
     VectorStreamWriter receipt_buf;

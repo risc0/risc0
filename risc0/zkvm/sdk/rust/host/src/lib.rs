@@ -25,6 +25,9 @@ pub use exception::Exception;
 #[cxx::bridge]
 mod bridge {}
 
+/// The default digest count when generating a MethodId.
+pub const DEFAULT_METHOD_ID_LIMIT: u32 = 12;
+
 /// A Result specialized for [Exception].
 pub type Result<T> = std::result::Result<T, Exception>;
 
@@ -42,6 +45,11 @@ pub struct Prover {
     ptr: *mut ffi::RawProver,
 }
 
+/// A MethodId represents a unique identifier associated with a particular ELF binary.
+pub struct MethodId {
+    ptr: *const ffi::RawMethodId,
+}
+
 fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
     let mut vec = Vec::new();
     let chunks = slice.chunks_exact(4);
@@ -54,6 +62,34 @@ fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
         vec.push(word);
     }
     Ok(vec)
+}
+
+impl MethodId {
+    /// Compute the MethodId associated with an existing ELF binary.
+    pub fn new(elf_path: &str, limit: u32) -> Result<Self> {
+        let mut err = ffi::RawError::default();
+        let elf_path = CString::new(elf_path).unwrap();
+        let ptr = unsafe { ffi::risc0_method_id_new(&mut err, elf_path.as_ptr(), limit) };
+        ffi::check(err, || MethodId { ptr })
+    }
+
+    /// Access the raw slice of a MethodId.
+    pub fn as_slice(&self) -> Result<&[u8]> {
+        let mut err = ffi::RawError::default();
+        let mut len: u32 = 0;
+        let ptr = unsafe { ffi::risc0_method_id_get_buf(&mut err, self.ptr, &mut len) };
+        ffi::check(err, || unsafe {
+            std::slice::from_raw_parts(ptr, len as usize)
+        })
+    }
+}
+
+impl Drop for MethodId {
+    fn drop(&mut self) {
+        let mut err = ffi::RawError::default();
+        unsafe { ffi::risc0_method_id_free(&mut err, self.ptr) };
+        ffi::check(err, || ()).unwrap()
+    }
 }
 
 impl Receipt {

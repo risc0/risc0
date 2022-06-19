@@ -18,7 +18,6 @@
 #include "risc0/zkp/core/sha256_cpu.h"
 #include "risc0/zkp/prove/prove.h"
 #include "risc0/zkp/verify/verify.h"
-#include "risc0/zkvm/prove/method_id.h"
 #include "risc0/zkvm/prove/riscv.h"
 #include "risc0/zkvm/verify/riscv.h"
 
@@ -28,7 +27,7 @@
 namespace risc0 {
 
 void Receipt::verify(const MethodId& methodId) const {
-  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(makeMethodDigest(methodId));
+  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(methodId);
   risc0::verify(*circuit, seal.data(), seal.size());
   if (journal.size() != seal[8]) {
     std::stringstream ss;

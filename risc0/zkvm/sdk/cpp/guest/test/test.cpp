@@ -31,7 +31,7 @@ struct TestParam {
 class CoreTests : public testing::TestWithParam<TestParam> {
 protected:
   ShaDigest testSHA(const std::string& str) {
-    MethodId methodId = makeMethodId(GetParam().prefix + "test_sha");
+    MethodId methodId = loadMethodId(GetParam().prefix + "test_sha.id");
     Prover prover(GetParam().prefix + "test_sha", methodId);
     prover.writeInput(static_cast<uint32_t>(str.size()));
     prover.writeInput(str.data(), str.size());
@@ -42,7 +42,7 @@ protected:
   }
 
   void testMemIO(const std::vector<std::pair<uint32_t, uint32_t>>& in) {
-    MethodId methodId = makeMethodId(GetParam().prefix + "test_mem");
+    MethodId methodId = loadMethodId(GetParam().prefix + "test_mem.id");
     Prover prover(GetParam().prefix + "test_mem", methodId);
     prover.writeInput(static_cast<uint32_t>(in.size()));
     for (auto pair : in) {
@@ -137,7 +137,7 @@ TEST_P(CoreTests, Fail) {
   std::string elfPath = GetParam().prefix + "test_fail";
 
   // Check that a compliant host will fault.
-  Prover prover(elfPath, makeMethodId(elfPath));
+  Prover prover(elfPath, loadMethodId(elfPath + ".id"));
   EXPECT_THROW(prover.run(), std::runtime_error);
 
   // Check that a host that does not implement onFault will still fault.
@@ -161,7 +161,7 @@ void doMemcpyTest(uint32_t srcOffset, uint32_t destOffset, uint32_t size) {
     }
   }
   // Make an prover and have it do a memcpy
-  MethodId methodId = makeMethodId("risc0/zkvm/sdk/cpp/guest/test/test_memcpy");
+  MethodId methodId = loadMethodId("risc0/zkvm/sdk/cpp/guest/test/test_memcpy.id");
   Prover prover("risc0/zkvm/sdk/cpp/guest/test/test_memcpy", methodId);
   prover.writeInput(srcBuf.data(), 1024);
   prover.writeInput(destBuf.data(), 1024);
@@ -204,7 +204,7 @@ TEST(CoreTests, Memset) {
 }
 
 TEST(CoreTests, SHAAccel) {
-  MethodId methodId = makeMethodId("risc0/zkvm/sdk/rust/methods/test_sha_accel");
+  MethodId methodId = loadMethodId("risc0/zkvm/sdk/rust/methods/test_sha_accel.id");
   Prover prover("risc0/zkvm/sdk/rust/methods/test_sha_accel", methodId);
   Receipt receipt = prover.run();
   receipt.verify(methodId);

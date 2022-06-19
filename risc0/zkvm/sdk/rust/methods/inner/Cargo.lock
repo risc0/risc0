@@ -113,6 +113,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ctor"
+version = "0.1.22"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f877be4f7c9f246b183111634f75baa039715e3f46ce860677d3b19a69fb229c"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "cxx"
 version = "1.0.68"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -213,6 +223,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "log"
+version = "0.4.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
+dependencies = [
+ "cfg-if",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -257,8 +276,8 @@ version = "0.9.0"
 dependencies = [
  "anyhow",
  "cargo_metadata",
+ "risc0-zkvm-host",
  "risc0-zkvm-platform-sys",
- "risc0-zkvm-sys",
  "serde",
  "serde_json",
  "sha2",
@@ -334,6 +353,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-zkvm-host"
+version = "0.9.0"
+dependencies = [
+ "ctor",
+ "cxx",
+ "cxx-build",
+ "log",
+ "risc0-zkvm-sys",
+]
+
+[[package]]
 name = "risc0-zkvm-methods-inner"
 version = "0.1.0"
 dependencies = [
@@ -362,7 +392,6 @@ dependencies = [
 name = "risc0-zkvm-sys"
 version = "0.9.0"
 dependencies = [
- "anyhow",
  "cxx",
  "cxx-build",
  "risc0-core-sys",

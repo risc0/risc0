@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "risc0/core/util.h"
 #include "risc0/zkp/core/constants.h"
 #include "risc0/zkvm/platform/memory.h"
 
@@ -73,5 +74,7 @@ CONSTSCALAR size_t kAccumMixGlobalSize = 20;
 CONSTSCALAR size_t kGlobalSize = kAccumMixGlobalOffset + kAccumMixGlobalSize;
 
 CONSTSCALAR size_t kComboCount = 5;
+
+CONSTSCALAR size_t kMaxCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
 
 } // namespace risc0
