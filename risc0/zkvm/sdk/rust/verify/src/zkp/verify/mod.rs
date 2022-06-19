@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod fri;
+mod merkle;
+pub(crate) mod read_iop;
+
 use alloc::{vec, vec::Vec};
 use core::fmt;
 
@@ -21,17 +25,15 @@ use risc0_zkp_core::{
     poly::poly_eval,
     rou::{ROU_FWD, ROU_REV},
     sha::{Digest, Sha},
-    to_po2,
+    to_po2, Random,
 };
 
 use crate::zkp::{
-    fri::{fri_verify, INV_RATE, QUERIES},
-    merkle::MerkleTreeVerifier,
-    read_iop::ReadIOP,
-    taps::{RegisterGroup, Taps},
+    taps::Taps,
+    verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
+    INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
-const MAX_CYCLES_PO2: usize = 20;
 const CHECK_SIZE: usize = INV_RATE * EXT_SIZE;
 
 #[derive(Debug)]
@@ -75,29 +77,11 @@ pub fn verify<S: Sha, C: Circuit>(
 
     // Get taps and compute sizes
     let taps = circuit.taps();
-    // TODO: This is a very silly way to do this
-    let mut accum_size = 0;
-    let mut code_size = 0;
-    let mut data_size = 0;
-    let mut num_taps = 0;
-    for reg in taps.registers.iter() {
-        match reg.group {
-            RegisterGroup::Accum => {
-                accum_size += 1;
-            }
-            RegisterGroup::Code => {
-                code_size += 1;
-            }
-            RegisterGroup::Data => {
-                data_size += 1;
-            }
-        }
-        num_taps += reg.back.len();
-    }
+    let taps_info = taps.get_info();
 
     // Get code and data merkle roots
-    let code_merkle = MerkleTreeVerifier::new(&mut iop, domain, code_size, QUERIES);
-    let data_merkle = MerkleTreeVerifier::new(&mut iop, domain, data_size, QUERIES);
+    let code_merkle = MerkleTreeVerifier::new(&mut iop, domain, taps_info.code_size, QUERIES);
+    let data_merkle = MerkleTreeVerifier::new(&mut iop, domain, taps_info.data_size, QUERIES);
 
     // Verify code is valid
     circuit.check_code(code_merkle.root())?;
@@ -105,7 +89,7 @@ pub fn verify<S: Sha, C: Circuit>(
     // Prep accumulation
     circuit.accumulate(&mut iop);
 
-    let accum_merkle = MerkleTreeVerifier::new(&mut iop, domain, accum_size, QUERIES);
+    let accum_merkle = MerkleTreeVerifier::new(&mut iop, domain, taps_info.accum_size, QUERIES);
 
     // Set the poly mix value
     let poly_mix = Fp4::random(&mut iop);
@@ -115,7 +99,7 @@ pub fn verify<S: Sha, C: Circuit>(
     let z = Fp4::random(&mut iop);
 
     // Read the U coeffs + commit their hash
-    let mut coeff_u: Vec<Fp4> = vec![Fp4::default(); num_taps + CHECK_SIZE];
+    let mut coeff_u: Vec<Fp4> = vec![Fp4::default(); taps_info.num_taps + CHECK_SIZE];
     iop.read_fp4s(&mut coeff_u);
     let hash_u = *sha.hash_fp4s(&coeff_u);
     iop.commit(&hash_u);
@@ -144,10 +128,10 @@ pub fn verify<S: Sha, C: Circuit>(
     let fp1 = Fp::from(1 as u32);
     for i in 0..4 {
         let rmi = remap[i];
-        check += coeff_u[num_taps + rmi + 0] * z.pow(i) * Fp4::new(fp1, fp0, fp0, fp0);
-        check += coeff_u[num_taps + rmi + 4] * z.pow(i) * Fp4::new(fp0, fp1, fp0, fp0);
-        check += coeff_u[num_taps + rmi + 8] * z.pow(i) * Fp4::new(fp0, fp0, fp1, fp0);
-        check += coeff_u[num_taps + rmi + 12] * z.pow(i) * Fp4::new(fp0, fp0, fp0, fp1);
+        check += coeff_u[taps_info.num_taps + rmi + 0] * z.pow(i) * Fp4::new(fp1, fp0, fp0, fp0);
+        check += coeff_u[taps_info.num_taps + rmi + 4] * z.pow(i) * Fp4::new(fp0, fp1, fp0, fp0);
+        check += coeff_u[taps_info.num_taps + rmi + 8] * z.pow(i) * Fp4::new(fp0, fp0, fp1, fp0);
+        check += coeff_u[taps_info.num_taps + rmi + 12] * z.pow(i) * Fp4::new(fp0, fp0, fp0, fp1);
     }
     check *= (Fp4::from(3 as u32) * z).pow(size) - Fp4::one();
     assert!(check == result);

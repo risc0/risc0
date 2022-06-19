@@ -1,3 +1,4 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_test")
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
 risc0_rust_library_pair(
@@ -13,8 +14,8 @@ risc0_rust_library_pair(
         "src/sha_cpu.rs",
         "src/sha_rng.rs",
     ],
-    data = ["README.md"],
     crate_name = "risc0_zkp_core",
+    data = ["README.md"],
     guest_deps = [
         "@crates_guest//:anyhow",
         "@crates_guest//:bytemuck",
@@ -22,6 +23,9 @@ risc0_rust_library_pair(
         "@crates_guest//:rand_core",
         "@crates_guest//:serde",
         "@crates_guest//:sha2",
+    ],
+    guest_proc_macro_deps = [
+        "@crates_guest//:paste",
     ],
     host_deps = [
         "@crates_host//:anyhow",
@@ -31,6 +35,25 @@ risc0_rust_library_pair(
         "@crates_host//:serde",
         "@crates_host//:sha2",
     ],
+    host_proc_macro_deps = [
+        "@crates_host//:paste",
+    ],
     rustc_flags = ["-Coverflow-checks=on"],
     visibility = ["//visibility:public"],
+)
+
+rust_test(
+    name = "test",
+    crate = ":core_host",
+    data = ["README.md"],
+)
+
+rust_binary(
+    name = "bench",
+    srcs = ["benches/ntt.rs"],
+    deps = [
+        ":core_host",
+        "@crates_host//:criterion",
+        "@crates_host//:rand",
+    ],
 )

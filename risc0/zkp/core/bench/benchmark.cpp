@@ -12,12 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
-// TODO: WIP porting pure rust prover impl.
-#![allow(unused)]
-#![allow(dead_code)]
+#include "benchmark/benchmark.h"
 
-extern crate alloc;
+#include "risc0/core/rng.h"
+#include "risc0/zkp/core/ntt.h"
 
-mod zkp;
-pub mod zkvm;
+using namespace risc0;
+
+static void BM_Interpolate_NTT(benchmark::State& state) {
+  size_t n = state.range(0);
+  size_t size = 1 << n;
+
+  std::vector<Fp> buf(size);
+  PsuedoRng rng(2);
+  for (size_t i = 0; i < size; i++) {
+    buf[i] = Fp::random(rng);
+  }
+
+  for (auto _ : state) {
+    interpolateNTT(buf.data(), size);
+  }
+}
+
+BENCHMARK(BM_Interpolate_NTT)->Unit(benchmark::kMillisecond)->Arg(10)->Arg(15)->Arg(20);
+
+BENCHMARK_MAIN();

@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
-// TODO: WIP porting pure rust prover impl.
-#![allow(unused)]
-#![allow(dead_code)]
+mod circuit;
+pub(crate) mod exec;
+mod io;
+pub mod prover;
+mod step;
+mod step_context;
 
-extern crate alloc;
-
-mod zkp;
-pub mod zkvm;
+const OUTPUT_REGS: usize = 9;
+const REGISTERS_GLOBAL_SIZE: usize = OUTPUT_REGS * 2;
+const ACCUM_MIX_GLOBAL_SIZE: usize = 20;
+const ACCUM_MIX_GLOBAL_OFFSET: usize = REGISTERS_GLOBAL_SIZE;
+const GLOBAL_SIZE: usize = ACCUM_MIX_GLOBAL_OFFSET + ACCUM_MIX_GLOBAL_SIZE;

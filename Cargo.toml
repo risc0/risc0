@@ -11,6 +11,7 @@ members = [
   "risc0/zkvm/platform",
   "risc0/zkvm/sdk/rust/core",
   "risc0/zkvm/sdk/rust/guest",
+  "risc0/zkvm/sdk/rust/hal",
   "risc0/zkvm/sdk/rust/host",
   "risc0/zkvm/sdk/rust/methods",
   "risc0/zkvm/sdk/rust/serde",

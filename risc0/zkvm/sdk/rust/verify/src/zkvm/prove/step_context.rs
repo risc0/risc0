@@ -12,12 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
-// TODO: WIP porting pure rust prover impl.
-#![allow(unused)]
-#![allow(dead_code)]
-
-extern crate alloc;
-
-mod zkp;
-pub mod zkvm;
+// TODO: WIP

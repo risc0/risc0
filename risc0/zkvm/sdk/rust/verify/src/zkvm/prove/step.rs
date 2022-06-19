@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
-// TODO: WIP porting pure rust prover impl.
-#![allow(unused)]
-#![allow(dead_code)]
+// TODO: WIP
 
-extern crate alloc;
+use risc0_zkp_core::fp::Fp;
 
-mod zkp;
-pub mod zkvm;
+use super::{io::MemoryState, GLOBAL_SIZE};
+
+struct StepContext {
+    // MemoryHandler* io;
+    mem: MemoryState,
+    cur_step: u32,
+    num_steps: u32,
+    globals: [Fp; GLOBAL_SIZE],
+}
