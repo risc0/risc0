@@ -116,7 +116,10 @@ crates_repository(
             version = "1.9",
         ),
         "cfg-if": crate.spec(version = "1.0"),
-        "clap": crate.spec(version = "3.1"),
+        "clap": crate.spec(
+            features = ["derive"],
+            version = "3.2",
+        ),
         "ctor": crate.spec(version = "0.1"),
         "cxx": crate.spec(version = "1.0"),
         "env_logger": crate.spec(version = "0.8"),

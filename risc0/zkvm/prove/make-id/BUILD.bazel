@@ -1,4 +1,5 @@
 load("//bazel/rules/cc:defs.bzl", "cc_binary")
+load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -6,4 +7,12 @@ cc_binary(
     name = "make-id",
     srcs = ["make-id.cpp"],
     deps = ["//risc0/zkvm/prove"],
+)
+
+rust_binary(
+    name = "risc0-make-id",
+    srcs = ["src/main.rs"],
+    deps = [
+        "@crates_host//:clap",
+    ],
 )

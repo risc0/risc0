@@ -1,5 +1,5 @@
 {
-  "checksum": "3f0d93bcc071094aa836e62391ce8e38eb76b083a8b83e5eba24e05b25e74ad0",
+  "checksum": "8e2ced9c8a321975a605b7f63cbc7642fa42b348088a3ccd85ec81a755c376a4",
   "crates": {
     "anyhow 1.0.57": {
       "name": "anyhow",
@@ -187,7 +187,7 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.95",
+              "id": "syn 1.0.96",
               "target": "syn"
             }
           ],
@@ -634,7 +634,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "unicode-ident 1.0.0",
+              "id": "unicode-ident 1.0.1",
               "target": "unicode_ident"
             }
           ],
@@ -905,7 +905,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "syn 1.0.95",
+              "id": "syn 1.0.96",
               "target": "syn"
             }
           ],
@@ -977,13 +977,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "syn 1.0.95": {
+    "syn 1.0.96": {
       "name": "syn",
-      "version": "1.0.95",
+      "version": "1.0.96",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/syn/1.0.95/download",
-          "sha256": "fbaf6116ab8924f39d52792136fb74fd60a80194cf1b1c6ffa6453eef1c3f942"
+          "url": "https://crates.io/api/v1/crates/syn/1.0.96/download",
+          "sha256": "0748dd251e24453cb8717f0354206b91557e4ec8703673a4b30208f2abaf1ebf"
         }
       },
       "targets": [
@@ -1037,18 +1037,18 @@
               "target": "quote"
             },
             {
-              "id": "syn 1.0.95",
+              "id": "syn 1.0.96",
               "target": "build_script_build"
             },
             {
-              "id": "unicode-ident 1.0.0",
+              "id": "unicode-ident 1.0.1",
               "target": "unicode_ident"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.95"
+        "version": "1.0.96"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -1116,13 +1116,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "unicode-ident 1.0.0": {
+    "unicode-ident 1.0.1": {
       "name": "unicode-ident",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/unicode-ident/1.0.0/download",
-          "sha256": "d22af068fba1eb5edcb4aea19d382b2a3deb4c8f9d475c589b6ada9e0fd493ee"
+          "url": "https://crates.io/api/v1/crates/unicode-ident/1.0.1/download",
+          "sha256": "5bd2fe26506023ed7b5e1e315add59d6f584c621d037f9368fea9cfb988f368c"
         }
       },
       "targets": [
@@ -1145,7 +1145,7 @@
           "**"
         ],
         "edition": "2018",
-        "version": "1.0.0"
+        "version": "1.0.1"
       },
       "license": "MIT OR Apache-2.0"
     },
