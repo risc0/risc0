@@ -3,9 +3,10 @@
 *.swo
 .bazelrc.local
 .DS_Store
+.idea/
 bazel-*
+Cargo.lock
+dist/
 rust-project.json
 target/
 tmp/
-dist/
-.idea/
