@@ -18,7 +18,7 @@
 use std::{
     env,
     fs::{self, File},
-    io::Write,
+    io::{Cursor, Read, Write},
     path::{Path, PathBuf},
     process::Command,
 };
@@ -28,6 +28,9 @@ use risc0_zkvm_platform_sys::LINKER_SCRIPT;
 use risc0_zkvm_sys::{make_method_id_from_elf, MethodId, METHOD_ID_LEN};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
+use zip::ZipArchive;
+
+const TARGET_JSON: &[u8] = include_bytes!("../riscv32im-risc0-zkvm-elf.json");
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -61,14 +64,8 @@ impl Risc0Method {
         // actually get a different ELF file.
         let method_id_path = self.elf_path.with_extension("id");
         let elf_sha_path = self.elf_path.with_extension("sha");
-        let elf_sha = std::fs::read(&self.elf_path)
-            .map(|x| Sha256::new().chain_update(x).finalize())
-            .unwrap();
-        let elf_sha_hex: String = elf_sha
-            .as_slice()
-            .iter()
-            .map(|x| format!("{:02x}", x))
-            .collect();
+        let elf_contents = std::fs::read(&self.elf_path).unwrap();
+        let (elf_sha, elf_sha_hex) = sha_digest_with_hex(&elf_contents);
         if method_id_path.exists() {
             if let Ok(cached_sha) = std::fs::read(&elf_sha_path) {
                 if cached_sha == elf_sha.as_slice() {
@@ -97,6 +94,44 @@ pub const {upper}_ID: &'static [u8; {METHOD_ID_LEN}] = &{method_id:?};
             "##
         )
     }
+}
+
+#[derive(Debug)]
+struct ZipMapEntry {
+    zip_url: &'static str,
+    src_prefix: &'static str,
+    dst_prefix: &'static str,
+}
+
+/// ID of rust library source version.  This is an arbitrary string,
+/// but must change if we need to download a new library version.  So
+/// let's just use the GIT commit ID.
+const RUST_LIB_ID: &str = "c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.";
+const RUST_LIB_MAP : &[ZipMapEntry] = &[
+    ZipMapEntry{
+	zip_url: "https://github.com/risc0/rust/archive/c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.zip",
+	src_prefix: "rust-c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1/library",
+	dst_prefix: "library"},
+    ZipMapEntry{
+	zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
+	src_prefix:"stdarch-28335054b1f417175ab5005cf1d9cf7937737930",
+	dst_prefix: "library/stdarch"},
+    ZipMapEntry{
+	zip_url: "https://github.com/rust-lang/backtrace-rs/archive/4e5a3f72929f152752d5659e95bb15c8f6b41eff.zip",
+	src_prefix:"backtrace-rs-4e5a3f72929f152752d5659e95bb15c8f6b41eff",
+	dst_prefix: "library/backtrace"},
+];
+
+fn sha_digest_with_hex(data: &[u8]) -> (Vec<u8>, String) {
+    let bin_sha = Sha256::new().chain_update(data).finalize();
+    (
+        bin_sha.to_vec(),
+        bin_sha
+            .as_slice()
+            .iter()
+            .map(|x| format!("{:02x}", x))
+            .collect(),
+    )
 }
 
 /// Returns the given cargo Package from the metadata.
@@ -164,35 +199,126 @@ where
         .map(|target| Risc0Method {
             name: target.name.clone(),
             elf_path: target_dir
-                .join("riscv32im-unknown-none-elf")
+                .join("riscv32im-risc0-zkvm-elf")
                 .join("release")
                 .join(&target.name),
         })
         .collect()
 }
 
+#[derive(Debug)]
+struct GuestBuildEnv {
+    target_spec: PathBuf,
+    rust_lib_src: PathBuf,
+}
+
+fn setup_guest_build_env<P>(out_dir: P) -> GuestBuildEnv
+where
+    P: AsRef<Path>,
+{
+    // RISCV target specification
+    let target_spec_path = out_dir.as_ref().join("riscv32im-risc0-zkvm-elf.json");
+    fs::write(&target_spec_path, TARGET_JSON).unwrap();
+
+    // Rust standard library
+    let (_, src_id_hash) = sha_digest_with_hex(RUST_LIB_ID.as_bytes());
+    let rust_lib_path = out_dir.as_ref().join(format!("rust-std_{}", src_id_hash));
+    if !rust_lib_path.exists() {
+        println!(
+            "Standard library {} does not exist; downloading",
+            rust_lib_path.display()
+        );
+
+        download_zip_map(RUST_LIB_MAP, &rust_lib_path);
+    }
+
+    GuestBuildEnv {
+        target_spec: target_spec_path.to_owned(),
+        rust_lib_src: rust_lib_path,
+    }
+}
+
+fn download_zip_map<P>(zip_map: &[ZipMapEntry], dest_base: P)
+where
+    P: AsRef<Path>,
+{
+    let tmp_dest_base = dest_base.as_ref().with_extension("downloadtmp");
+    if tmp_dest_base.exists() {
+        fs::remove_dir_all(&tmp_dest_base).unwrap();
+    }
+    for zm in zip_map.iter() {
+        let src_prefix = Path::new(&zm.src_prefix);
+        let dst_prefix = tmp_dest_base.join(&zm.dst_prefix);
+        println!(
+            "Downloading {}, mapping {} to {}",
+            zm.zip_url,
+            zm.src_prefix,
+            dst_prefix.display()
+        );
+
+        fs::create_dir_all(&dst_prefix).unwrap();
+
+        let mut response = reqwest::blocking::get(zm.zip_url).unwrap();
+        let mut zip_buf: Vec<u8> = Vec::new();
+        response.read_to_end(&mut zip_buf).unwrap();
+        let mut zip = ZipArchive::new(Cursor::new(&zip_buf)).unwrap();
+        println!("Got zip with {} files", zip.len());
+
+        let mut nwrote: u32 = 0;
+        for i in 0..zip.len() {
+            let mut f = zip.by_index(i).unwrap();
+            let name = f.enclosed_name().unwrap();
+            if let Ok(relative_src) = name.strip_prefix(src_prefix) {
+                let dest_name = dst_prefix.join(relative_src);
+                if f.is_dir() {
+                    fs::create_dir_all(dest_name).unwrap();
+                    continue;
+                }
+                if !f.is_file() {
+                    continue;
+                }
+                std::io::copy(&mut f, &mut File::create(&dest_name).unwrap()).unwrap();
+                println!("Writing {}", dest_name.display());
+                nwrote += 1;
+            }
+        }
+        println!("Wrote {} files", nwrote);
+    }
+    fs::rename(&tmp_dest_base, dest_base.as_ref()).unwrap();
+}
+
 // Builds a package that targets the riscv guest into the specified target directory.
-fn build_guest_package<P>(pkg: &Package, target_dir: P)
+fn build_guest_package<P>(pkg: &Package, target_dir: P, guest_build_env: &GuestBuildEnv)
 where
     P: AsRef<Path>,
 {
     fs::create_dir_all(target_dir.as_ref()).unwrap();
-
     let cargo = env::var("CARGO").unwrap();
     let args = vec![
         "build",
+        "-vv",
         "--release",
         "--target",
-        "riscv32im-unknown-none-elf",
+        guest_build_env.target_spec.to_str().unwrap(),
         "-Z",
-        "build-std=alloc,core",
+        "build-std",
+        "-Z",
+        "build-std-features=compiler-builtins-mem",
         "--manifest-path",
         pkg.manifest_path.as_str(),
         "--target-dir",
         target_dir.as_ref().to_str().unwrap(),
     ];
     println!("Building guest package: {cargo} {}", args.join(" "));
-    let status = Command::new(cargo).args(args).status().unwrap();
+    let status = Command::new(cargo)
+        .env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic")
+        .env(
+            "__CARGO_TESTS_ONLY_SRC_ROOT",
+            guest_build_env.rust_lib_src.to_str().unwrap(),
+        )
+        .args(args)
+        .status()
+        .unwrap();
     if !status.success() {
         std::process::exit(status.code().unwrap());
     }
@@ -217,19 +343,20 @@ where
 /// "my_method", the method ID and elf filename will be defined as
 /// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
 pub fn embed_methods() {
-    let pkg = current_package();
-
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
 
+    let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
+    let guest_build_env = setup_guest_build_env(&out_dir);
+
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        build_guest_package(&guest_pkg, &out_dir.join("riscv-guest"));
+        build_guest_package(&guest_pkg, &out_dir.join("riscv-guest"), &guest_build_env);
 
         for method in guest_methods(&guest_pkg, &out_dir) {
             methods_file
