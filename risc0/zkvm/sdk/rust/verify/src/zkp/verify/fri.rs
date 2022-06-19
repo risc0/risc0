@@ -13,24 +13,21 @@
 // limitations under the License.
 
 use alloc::{vec, vec::Vec};
-use rand::RngCore;
 
+use rand::RngCore;
 use risc0_zkp_core::{
     fp::Fp,
     fp4::{Fp4, EXT_SIZE},
-    ntt::{bit_reverse, rev_butterfly},
+    ntt::{bit_reverse, interpolate_ntt},
     rou::{ROU_FWD, ROU_REV},
     sha::Sha,
-    to_po2,
+    to_po2, Random,
 };
 
-use crate::zkp::{merkle::MerkleTreeVerifier, read_iop::ReadIOP};
-
-pub const QUERIES: usize = 50;
-pub const INV_RATE: usize = 4;
-pub const FRI_FOLD_PO2: usize = 4;
-pub const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
-pub const FRI_MIN_DEGREE: usize = 256;
+use crate::zkp::{
+    verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
+    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
+};
 
 /// VerifyRoundInfo contains the data against which the queries for a particular
 /// round are checked. This includes the Merkle tree top row data, as well as
@@ -42,12 +39,8 @@ struct VerifyRoundInfo {
 }
 
 fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
-    rev_butterfly(values, FRI_FOLD_PO2);
-    let norm = Fp::new(FRI_FOLD as u32).inv();
-    for i in 0..FRI_FOLD {
-        values[i] *= norm;
-    }
-    bit_reverse(values, FRI_FOLD_PO2);
+    interpolate_ntt(values);
+    bit_reverse(values);
     let s_po2 = to_po2(s);
     let root_po2 = FRI_FOLD_PO2 + s_po2;
     let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);

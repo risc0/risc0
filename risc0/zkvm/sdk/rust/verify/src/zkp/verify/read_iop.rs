@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use rand::{Error, RngCore};
 use risc0_zkp_core::{
     fp::Fp,
     fp4::Fp4,
     sha::{Digest, Sha, DIGEST_WORDS},
     sha_rng::ShaRng,
 };
-
-use rand::{Error, RngCore};
 
 #[derive(Debug)]
 pub struct ReadIOP<'a, S: Sha> {

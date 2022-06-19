@@ -12,12 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
-// TODO: WIP porting pure rust prover impl.
-#![allow(unused)]
-#![allow(dead_code)]
+// TODO: WIP
 
-extern crate alloc;
+use alloc::collections::{BTreeMap, BTreeSet};
 
-mod zkp;
-pub mod zkvm;
+struct IoHandler {}
+
+struct MemoryHandler {
+    //   IoHandler* io;
+}
+
+pub(crate) struct MemoryState {
+    data: BTreeMap<u32, u32>,
+    history: BTreeSet<MemoryEvent>,
+}
+
+struct MemoryEvent {
+    addr: u32,
+    cycle: u32,
+    is_write: bool,
+    data: u32,
+}

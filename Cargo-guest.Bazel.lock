@@ -1,5 +1,5 @@
 {
-  "checksum": "3f0d93bcc071094aa836e62391ce8e38eb76b083a8b83e5eba24e05b25e74ad0",
+  "checksum": "ba3819c188aa4adbec852b81ab63985672ebcbb3cb1a5111b84c0fb0cfb538d1",
   "crates": {
     "anyhow 1.0.57": {
       "name": "anyhow",
@@ -57,6 +57,39 @@
         "data_glob": [
           "**"
         ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "array-init 2.0.0": {
+      "name": "array-init",
+      "version": "2.0.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/array-init/2.0.0/download",
+          "sha256": "6945cc5422176fc5e602e590c2878d2c2acd9a4fe20a4baa7c28022521698ec6"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "array_init",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "array_init",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "2.0.0"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -414,6 +447,10 @@
               "target": "anyhow"
             },
             {
+              "id": "array-init 2.0.0",
+              "target": "array_init"
+            },
+            {
               "id": "bytemuck 1.9.1",
               "target": "bytemuck"
             },
@@ -441,6 +478,15 @@
           "selects": {}
         },
         "edition": "2018",
+        "proc_macro_deps": {
+          "common": [
+            {
+              "id": "paste 1.0.7",
+              "target": "paste"
+            }
+          ],
+          "selects": {}
+        },
         "version": "0.0.1"
       },
       "license": null
@@ -580,6 +626,39 @@
         "data_glob": [
           "**"
         ]
+      },
+      "license": "MIT OR Apache-2.0"
+    },
+    "paste 1.0.7": {
+      "name": "paste",
+      "version": "1.0.7",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/paste/1.0.7/download",
+          "sha256": "0c520e05135d6e763148b6426a837e239041653ba7becd2e538c076c738025fc"
+        }
+      },
+      "targets": [
+        {
+          "ProcMacro": {
+            "crate_name": "paste",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "paste",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2018",
+        "version": "1.0.7"
       },
       "license": "MIT OR Apache-2.0"
     },

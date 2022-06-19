@@ -1,0 +1,10 @@
+load("//bazel/rules/cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "bench",
+    srcs = ["benchmark.cpp"],
+    deps = [
+        "//risc0/zkp/core",
+        "@com_google_benchmark//:benchmark",
+    ],
+)
