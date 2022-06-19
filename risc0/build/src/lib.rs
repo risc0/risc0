@@ -82,7 +82,7 @@ impl Risc0Method {
         // TODO: allow limit to be dynamic/configurable.
         let method_id =
             MethodId::new(&self.elf_path.to_str().unwrap(), DEFAULT_METHOD_ID_LIMIT).unwrap();
-        let slice = method_id.as_slice();
+        let slice = method_id.as_slice().unwrap();
         std::fs::write(method_id_path, slice).unwrap();
         std::fs::write(elf_sha_path, elf_sha).unwrap();
         Vec::from(slice)
