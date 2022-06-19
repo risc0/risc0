@@ -45,7 +45,8 @@ pub struct Prover {
     ptr: *mut ffi::RawProver,
 }
 
-/// A MethodId represents a unique identifier associated with a particular ELF binary.
+/// A MethodId represents a unique identifier associated with a particular ELF
+/// binary.
 pub struct MethodId {
     ptr: *const ffi::RawMethodId,
 }
