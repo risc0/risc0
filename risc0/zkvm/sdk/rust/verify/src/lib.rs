@@ -21,3 +21,6 @@ extern crate alloc;
 
 mod zkp;
 pub mod zkvm;
+
+const OUTPUT_REGS: usize = 9;
+const ACCUM_MIX_GLOBAL_SIZE: usize = 20;

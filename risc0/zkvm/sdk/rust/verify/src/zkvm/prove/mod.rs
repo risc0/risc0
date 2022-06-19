@@ -19,8 +19,8 @@ pub mod prover;
 mod step;
 mod step_context;
 
-const OUTPUT_REGS: usize = 9;
+use crate::{ACCUM_MIX_GLOBAL_SIZE, OUTPUT_REGS};
+
 const REGISTERS_GLOBAL_SIZE: usize = OUTPUT_REGS * 2;
-const ACCUM_MIX_GLOBAL_SIZE: usize = 20;
 const ACCUM_MIX_GLOBAL_OFFSET: usize = REGISTERS_GLOBAL_SIZE;
 const GLOBAL_SIZE: usize = ACCUM_MIX_GLOBAL_OFFSET + ACCUM_MIX_GLOBAL_SIZE;

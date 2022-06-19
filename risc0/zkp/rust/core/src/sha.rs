@@ -17,6 +17,7 @@
 use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{Debug, Display, Formatter},
+    mem,
     ops::Deref,
 };
 
@@ -29,12 +30,14 @@ use crate::{fp::Fp, fp4::Fp4};
 /// The number of words represented by a [Digest].
 // We represent a SHA-256 digest as 8 32-bit words instead of the
 // traditional 32 8-bit bytes.
-//
-// TODO(nils): Remove 'Copy' trait on Digest; these are not small and
-// we don't want to copy them around accidentally.
 pub const DIGEST_WORDS: usize = 8;
 
+/// The size of a word within a [Digest] (32-bits = 4 bytes).
+pub const DIGEST_WORD_SIZE: usize = mem::size_of::<u32>();
+
 /// The result of a SHA-256 hashing function.
+// TODO(nils): Remove 'Copy' trait on Digest; these are not small and
+// we don't want to copy them around accidentally.
 #[derive(Eq, PartialEq, Copy, Zeroable, Pod, Serialize, Deserialize)]
 #[repr(transparent)]
 pub struct Digest([u32; DIGEST_WORDS]);

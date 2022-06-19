@@ -30,21 +30,22 @@ pub use verify::circuit::MethodID;
 mod tests {
     extern crate std;
     use super::{MethodID, Receipt};
+    use risc0_zkp_core::sha::DIGEST_WORD_SIZE;
     use std::{convert::TryFrom, fs, io, vec::Vec};
     use test_log::test;
 
     #[test]
-    fn test_receipt() -> io::Result<()> {
+    fn test_receipt() {
         log::set_max_level(log::LevelFilter::Info);
-        let data: Vec<u8> = fs::read("src/zkvm/simple_receipt.receipt")?;
+        let data = fs::read("src/zkvm/simple_receipt.receipt").unwrap();
         let as_u32: Vec<u32> = data
-            .chunks(4)
-            .map(|bytes| u32::from_le_bytes(<[u8; 4]>::try_from(bytes).unwrap()))
+            .chunks(DIGEST_WORD_SIZE)
+            .map(|bytes| u32::from_le_bytes(<[u8; DIGEST_WORD_SIZE]>::try_from(bytes).unwrap()))
             .collect();
         let receipt: Receipt = risc0_zkvm_serde::from_slice(&as_u32).unwrap();
 
         let method_id =
-            MethodID::try_from(fs::read("src/zkvm/simple_receipt.id")?.as_slice()).unwrap();
+            MethodID::try_from(fs::read("src/zkvm/simple_receipt.id").unwrap().as_slice()).unwrap();
 
         std::println!(
             "Receipt: journal length {} seal length {}",
@@ -57,7 +58,6 @@ mod tests {
         }
         std::println!("\n");
 
-        receipt.verify(&method_id);
-        Ok(())
+        assert!(receipt.verify(&method_id).unwrap());
     }
 }
