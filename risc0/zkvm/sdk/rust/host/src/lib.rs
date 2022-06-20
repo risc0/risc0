@@ -15,7 +15,7 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use std::{ffi::CString, mem};
+use std::mem;
 
 mod exception;
 mod ffi;
@@ -67,10 +67,11 @@ fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
 
 impl MethodId {
     /// Compute the MethodId associated with an existing ELF binary.
-    pub fn new(elf_path: &str, limit: u32) -> Result<Self> {
+    pub fn compute(elf_contents: &[u8], limit: u32) -> Result<Self> {
         let mut err = ffi::RawError::default();
-        let elf_path = CString::new(elf_path).unwrap();
-        let ptr = unsafe { ffi::risc0_method_id_new(&mut err, elf_path.as_ptr(), limit) };
+        let ptr = unsafe {
+            ffi::risc0_method_id_compute(&mut err, elf_contents.as_ptr(), elf_contents.len(), limit)
+        };
         ffi::check(err, || MethodId { ptr })
     }
 
@@ -137,15 +138,16 @@ impl Receipt {
 }
 
 impl Prover {
-    /// Create a new [Prover] with the given method (specified via `elf_path`)
-    /// and an associated method ID (specified via `method_id`).
-    pub fn new(elf_path: &str, method_id: &[u8]) -> Result<Self> {
+    /// Create a new [Prover] with the given method (specified via
+    /// `elf_contents`) and an associated method ID (specified via
+    /// `method_id`).
+    pub fn new(elf_contents: &[u8], method_id: &[u8]) -> Result<Self> {
         let mut err = ffi::RawError::default();
-        let elf_path = CString::new(elf_path).unwrap();
         let ptr = unsafe {
             ffi::risc0_prover_new(
                 &mut err,
-                elf_path.as_ptr(),
+                elf_contents.as_ptr(),
+                elf_contents.len(),
                 method_id.as_ptr(),
                 method_id.len(),
             )
@@ -259,7 +261,7 @@ mod test {
     }
 
     fn run_sha(msg: &str) -> Digest {
-        let mut prover = Prover::new(SHA_PATH, SHA_ID).unwrap();
+        let mut prover = Prover::new(&std::fs::read(SHA_PATH).unwrap(), SHA_ID).unwrap();
         let vec = to_vec(&msg).unwrap();
         prover.add_input(vec.as_slice()).unwrap();
         let receipt = prover.run().unwrap();
@@ -301,7 +303,7 @@ mod test {
             vec.push(*first);
             vec.push(*second);
         }
-        let mut prover = Prover::new(IO_PATH, IO_ID).unwrap();
+        let mut prover = Prover::new(&std::fs::read(IO_PATH).unwrap(), IO_ID).unwrap();
         prover.add_input(vec.as_slice()).unwrap();
         let receipt = prover.run()?;
         receipt.verify(IO_ID).unwrap();
@@ -311,7 +313,7 @@ mod test {
     #[test]
     fn fail() {
         // Check that a compliant host will fault.
-        let prover = Prover::new(FAIL_PATH, FAIL_ID).unwrap();
+        let prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
         assert!(prover.run().is_err());
     }
 }

@@ -82,9 +82,12 @@ void risc0_string_free(risc0_string* str) {
   ffi_wrap_void(&err, [&] { delete str; });
 }
 
-risc0_method_id* risc0_method_id_new(risc0_error* err, const char* elf_path, uint32_t limit) {
-  return ffi_wrap<risc0_method_id*>(
-      err, nullptr, [&] { return new risc0_method_id{risc0::makeMethodId(elf_path, limit)}; });
+risc0_method_id*
+risc0_method_id_compute(risc0_error* err, const uint8_t* bytes, size_t len, uint32_t limit) {
+  return ffi_wrap<risc0_method_id*>(err, nullptr, [&] {
+    std::vector<uint8_t> elfContents(bytes, bytes + len);
+    return new risc0_method_id{risc0::computeMethodId(elfContents, limit)};
+  });
 }
 
 const void* risc0_method_id_get_buf(risc0_error* err, risc0_method_id* ptr, uint32_t* len) {
@@ -99,12 +102,13 @@ void risc0_method_id_free(risc0_error* err, const risc0_method_id* ptr) {
 }
 
 risc0_prover* risc0_prover_new(risc0_error* err,
-                               const char* elf_path,
+                               const uint8_t* elf_bytes,
+                               const size_t elf_len,
                                const uint8_t* method_id_buf,
                                const size_t method_id_len) {
   return ffi_wrap<risc0_prover*>(err, nullptr, [&] {
-    risc0::MethodId methodId = risc0::makeMethodId(method_id_buf, method_id_len);
-    return new risc0_prover{std::make_unique<risc0::Prover>(elf_path, methodId)};
+    risc0::MethodId methodId = risc0::loadMethodId(method_id_buf, method_id_len);
+    return new risc0_prover{std::make_unique<risc0::Prover>(elf_bytes, elf_len, methodId)};
   });
 }
 
@@ -116,7 +120,7 @@ void risc0_prover_add_input(risc0_error* err, risc0_prover* ptr, const uint8_t* 
   ffi_wrap_void(err, [&] { ptr->prover->writeInput(buf, len); });
 }
 
-const void* risc0_prover_get_output_buf(risc0_error* err, risc0_prover* ptr) {
+const void* risc0_prover_get_output_buf(risc0_error* err, const risc0_prover* ptr) {
   return ffi_wrap<const void*>(err, nullptr, [&] { return ptr->prover->getOutput().data(); });
 }
 
@@ -136,7 +140,7 @@ void risc0_receipt_verify(risc0_error* err,
                           const uint8_t* method_id_buf,
                           const size_t method_id_len) {
   ffi_wrap_void(err,
-                [&] { ptr->receipt.verify(risc0::makeMethodId(method_id_buf, method_id_len)); });
+                [&] { ptr->receipt.verify(risc0::loadMethodId(method_id_buf, method_id_len)); });
 }
 
 const uint32_t* risc0_receipt_get_seal_buf(risc0_error* err, const risc0_receipt* ptr) {

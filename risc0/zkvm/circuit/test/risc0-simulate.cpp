@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
   }
   LOG(1, "File = " << argv[1]);
   try {
-    ExecState state(argv[1]);
+    ExecState state(loadFile(argv[1]));
     MemoryHandler io;
     state.run(1 << 20, io);
   } catch (const std::runtime_error& err) {

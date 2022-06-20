@@ -18,14 +18,20 @@
 #include <cstdint>
 #include <string>
 
+#include "risc0/core/archive.h"
 #include "risc0/zkvm/circuit/constants.h"
 #include "risc0/zkvm/verify/riscv.h"
 
 namespace risc0 {
 
-MethodId makeMethodId(const std::string& elfPath, size_t limit = kDefaultCodeDigestCount);
-MethodId makeMethodId(const uint8_t* bytes, size_t len);
+// Computes a method ID based on an ELF file.  The ELF file can either be
+// supplied by a file or by an in-memory buffer.
+MethodId computeMethodId(const std::string& elfPath, size_t limit = kDefaultCodeDigestCount);
+MethodId computeMethodId(const std::vector<uint8_t>& elfBytes,
+                         size_t limit = kDefaultCodeDigestCount);
 
+// Loads an already-computed method ID from an in-memory buffer or a file.
 MethodId loadMethodId(const std::string& path);
+MethodId loadMethodId(const uint8_t* bytes, size_t len);
 
 } // namespace risc0
