@@ -1,6 +1,8 @@
 #![cfg(feature = "risc_cc")]
 
 use std::path::Path;
+use std::ffi::{OsStr};
+
 
 use cc::Error;
 #[derive(Debug)]
@@ -164,5 +166,313 @@ impl Build {
     pub fn cudart(&mut self, cudart: &str) -> &mut Self {
         self.inner.cudart(cudart);
         self
+    }
+
+    /// Set warnings into errors flag.
+    ///
+    /// Disabled by default.
+    ///
+    /// Warning: turning warnings into errors only make sense
+    /// if you are a developer of the crate using cc-rs.
+    /// Some warnings only appear on some architecture or
+    /// specific version of the compiler. Any user of this crate,
+    /// or any other crate depending on it, could fail during
+        /// compile time.
+    pub fn warnings_into_errors(&mut self, warnings_into_errors: bool) -> &mut Self {
+        self.inner.warnings_into_errors(warnings_into_errors);
+        self
+    }
+
+    /// Set warnings flags.
+    ///
+    /// Adds some flags:
+    /// - "-Wall" for MSVC.
+    /// - "-Wall", "-Wextra" for GNU and Clang.
+    ///
+    /// Enabled by default.
+    pub fn warnings(&mut self, warnings: bool) -> &mut Self {
+        self.inner.warnings(warnings);
+        self
+    }
+
+    /// Set extra warnings flags.
+    ///
+    /// Adds some flags:
+    /// - nothing for MSVC.
+    /// - "-Wextra" for GNU and Clang.
+    ///
+    /// Enabled by default.
+    pub fn extra_warnings(&mut self, warnings: bool) -> &mut Self {
+        self.inner.extra_warnings(warnings);
+        self
+    }
+
+    /// Set the standard library to link against when compiling with C++
+    /// support.
+    ///
+    /// See [`get_cpp_link_stdlib`](cc::Build::get_cpp_link_stdlib) documentation
+    /// for the default value.
+    /// If the `CXXSTDLIB` environment variable is set, its value will
+    /// override the default value, but not the value explicitly set by calling
+    /// this function.
+    ///
+    /// A value of `None` indicates that no automatic linking should happen,
+    /// otherwise cargo will link against the specified library.
+    ///
+    /// The given library name must not contain the `lib` prefix.
+    ///
+    /// Common values:
+    /// - `stdc++` for GNU
+    /// - `c++` for Clang
+    /// - `c++_shared` or `c++_static` for Android
+    pub fn cpp_link_stdlib<'a, V: Into<Option<&'a str>>>(
+        &mut self,
+        cpp_link_stdlib: V,
+    ) -> &mut Self {
+        self.inner.cpp_link_stdlib(cpp_link_stdlib);
+        self
+    }
+
+    /// Force the C++ compiler to use the specified standard library.
+    ///
+    /// Setting this option will automatically set `cpp_link_stdlib` to the same
+    /// value.
+    ///
+    /// The default value of this option is always `None`.
+    ///
+    /// This option has no effect when compiling for a Visual Studio based
+    /// target.
+    ///
+    /// This option sets the `-stdlib` flag, which is only supported by some
+    /// compilers (clang, icc) but not by others (gcc). The library will not
+    /// detect which compiler is used, as such it is the responsibility of the
+    /// caller to ensure that this option is only used in conjunction with a
+    /// compiler which supports the `-stdlib` flag.
+    ///
+    /// A value of `None` indicates that no specific C++ standard library should
+    /// be used, otherwise `-stdlib` is added to the compile invocation.
+    ///
+    /// The given library name must not contain the `lib` prefix.
+    ///
+    /// Common values:
+    /// - `stdc++` for GNU
+    /// - `c++` for Clang
+    pub fn cpp_set_stdlib<'a, V: Into<Option<&'a str>>>(
+        &mut self,
+        cpp_set_stdlib: V,
+    ) -> &mut Self {
+        self.inner.cpp_set_stdlib(cpp_set_stdlib);
+        self
+    }
+
+    /// Configures the target this configuration will be compiling for.
+    ///
+    /// This option is automatically scraped from the `TARGET` environment
+    /// variable by build scripts, so it's not required to call this function.
+    pub fn target(&mut self, target: &str) -> &mut Self {
+        self.inner.target(target);
+        self
+    }
+
+    /// Configures the host assumed by this configuration.
+    ///
+    /// This option is automatically scraped from the `HOST` environment
+    /// variable by build scripts, so it's not required to call this function.
+    pub fn host(&mut self, host: &str) -> &mut Self {
+        self.inner.host(host);
+        self
+    }
+
+    /// Configures the optimization level of the generated object files.
+    ///
+    /// This option is automatically scraped from the `OPT_LEVEL` environment
+    /// variable by build scripts, so it's not required to call this function.
+    pub fn opt_level(&mut self, opt_level: u32) -> &mut Self {
+        self.inner.opt_level(opt_level);
+        self
+    }
+
+    /// Configures the optimization level of the generated object files.
+    ///
+    /// This option is automatically scraped from the `OPT_LEVEL` environment
+    /// variable by build scripts, so it's not required to call this function.
+    pub fn opt_level_str(&mut self, opt_level: &str) -> &mut Self {
+        self.inner.opt_level_str(opt_level);
+        self
+    }
+
+    /// Configures whether the compiler will emit debug information when
+    /// generating object files.
+    ///
+    /// This option is automatically scraped from the `DEBUG` environment
+    /// variable by build scripts, so it's not required to call this function.
+    pub fn debug(&mut self, debug: bool) -> &mut Self {
+        self.inner.debug(debug);
+        self
+    }
+
+    /// Configures whether the compiler will emit instructions to store
+    /// frame pointers during codegen.
+    ///
+    /// This option is automatically enabled when debug information is emitted.
+    /// Otherwise the target platform compiler's default will be used.
+    /// You can use this option to force a specific setting.
+    pub fn force_frame_pointer(&mut self, force: bool) -> &mut Self {
+        self.inner.force_frame_pointer(force);
+        self
+    }
+
+    /// Configures the output directory where all object files and static
+    /// libraries will be located.
+    ///
+    /// This option is automatically scraped from the `OUT_DIR` environment
+    /// variable by build scripts, so it's not required to call this function.
+    pub fn out_dir<P: AsRef<Path>>(&mut self, out_dir: P) -> &mut Self {
+        self.inner.out_dir(out_dir);
+        self
+    }
+
+
+    /// Configures the compiler to be used to produce output.
+    ///
+    /// This option is automatically determined from the target platform or a
+    /// number of environment variables, so it's not required to call this
+    /// function.
+    pub fn compiler<P: AsRef<Path>>(&mut self, compiler: P) -> &mut Self {
+        self.inner.compiler(compiler);
+        self
+    }
+
+
+    /// Configures the tool used to assemble archives.
+    ///
+    /// This option is automatically determined from the target platform or a
+    /// number of environment variables, so it's not required to call this
+    /// function.
+    pub fn archiver<P: AsRef<Path>>(&mut self, archiver: P) -> &mut Self {
+        self.inner.archiver(archiver);
+        self
+    }
+
+    /// Define whether metadata should be emitted for cargo allowing it to
+    /// automatically link the binary. Defaults to `true`.
+    ///
+    /// The emitted metadata is:
+    ///
+    ///  - `rustc-link-lib=static=`*compiled lib*
+    ///  - `rustc-link-search=native=`*target folder*
+    ///  - When target is MSVC, the ATL-MFC libs are added via `rustc-link-search=native=`
+    ///  - When C++ is enabled, the C++ stdlib is added via `rustc-link-lib`
+    ///
+    pub fn cargo_metadata(&mut self, cargo_metadata: bool) -> &mut Self {
+        self.inner.cargo_metadata(cargo_metadata);
+        self
+    }
+
+    /// Configures whether the compiler will emit position independent code.
+    ///
+    /// This option defaults to `false` for `windows-gnu` and bare metal targets and
+    /// to `true` for all other targets.
+    pub fn pic(&mut self, pic: bool) -> &mut Self {
+        self.inner.pic(pic);
+        self
+    }
+
+    /// Configures whether the Procedure Linkage Table is used for indirect
+    /// calls into shared libraries.
+    ///
+    /// The PLT is used to provide features like lazy binding, but introduces
+    /// a small performance loss due to extra pointer indirection. Setting
+    /// `use_plt` to `false` can provide a small performance increase.
+    ///
+    /// Note that skipping the PLT requires a recent version of GCC/Clang.
+    ///
+    /// This only applies to ELF targets. It has no effect on other platforms.
+    pub fn use_plt(&mut self, use_plt: bool) -> &mut Self {
+        self.inner.use_plt(use_plt);
+        self
+    }
+
+
+    /// Configures whether the /MT flag or the /MD flag will be passed to msvc build tools.
+    ///
+    /// This option defaults to `false`, and affect only msvc targets.
+    pub fn static_crt(&mut self, static_crt: bool) -> &mut Self {
+        self.inner.static_crt(static_crt);
+        self
+    }
+
+    #[doc(hidden)]
+    pub fn __set_env<A, B>(&mut self, a: A, b: B) -> &mut Self
+    where
+        A: AsRef<OsStr>,
+        B: AsRef<OsStr>,
+    {
+        self.inner.__set_env(a, b);
+        self
+    }
+
+    /// Run the compiler, generating the file `output`
+    ///
+    /// This will return a result instead of panicing; see compile() for the complete description.
+    pub fn try_compile(&mut self, output: &str) -> Result<(), Error> {
+        if self.riscv_default_features {
+                return self.target("riscv32im-unknown-none-elf")
+                    .flag("-O3")
+                    .flag("--target=riscv32-unknown-none-elf")
+                    .flag("-mabi=ilp32")
+                    .flag("-mcmodel=medany")
+                    .flag("-Os")
+                    .flag("-fdata-sections")
+                    .flag("-ffunction-sections")
+                    .flag("-dead_strip")
+                    .flag("-flto")
+                    .flag("-march=rv32im")
+                    .flag("-march=riscv32im")
+                    .inner
+                    .try_compile(output);
+        }
+        self.inner.try_compile(output)
+    }
+
+    /// Run the compiler, generating the file `output`
+    ///
+    /// # Library name
+    ///
+    /// The `output` string argument determines the file name for the compiled
+    /// library. The Rust compiler will create an assembly named "lib"+output+".a".
+    /// MSVC will create a file named output+".lib".
+    ///
+    /// The choice of `output` is close to arbitrary, but:
+    ///
+    /// - must be nonempty,
+    /// - must not contain a path separator (`/`),
+    /// - must be unique across all `compile` invocations made by the same build
+    ///   script.
+    ///
+    /// If your build script compiles a single source file, the base name of
+    /// that source file would usually be reasonable:
+    ///
+    /// ```no_run
+    /// cc::Build::new().file("blobstore.c").compile("blobstore");
+    /// ```
+    ///
+    /// Compiling multiple source files, some people use their crate's name, or
+    /// their crate's name + "-cc".
+    ///
+    /// Otherwise, please use your imagination.
+    ///
+    /// For backwards compatibility, if `output` starts with "lib" *and* ends
+    /// with ".a", a second "lib" prefix and ".a" suffix do not get added on,
+    /// but this usage is deprecated; please omit `lib` and `.a` in the argument
+    /// that you pass.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `output` is not formatted correctly or if one of the underlying
+    /// compiler commands fails. It can also panic if it fails reading file names
+    /// or creating directories.
+    pub fn compile(&self, output: &str) {
+        self.inner.compile(output);
     }
 }
