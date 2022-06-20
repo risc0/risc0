@@ -18,11 +18,10 @@
 #include <cstdint>
 #include <string>
 
+#include "risc0/zkvm/circuit/constants.h"
 #include "risc0/zkvm/verify/riscv.h"
 
 namespace risc0 {
-
-constexpr size_t kDefaultCodeDigestCount = 12;
 
 MethodId makeMethodId(const std::string& elfPath, size_t limit = kDefaultCodeDigestCount);
 MethodId makeMethodId(const uint8_t* bytes, size_t len);

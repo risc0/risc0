@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
+        os: [Linux, macOS, Windows]
         include:
           - os: Linux
             config: --config=ci
