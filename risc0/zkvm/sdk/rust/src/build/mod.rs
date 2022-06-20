@@ -43,7 +43,6 @@
 ///         .flag("-dead_strip")
 ///         .flag("-flto")
 ///         .flag("-march=rv32im")
-///         .flag("-march=riscv32im")
 ///         .file("src/foo.c")
 ///         .compile("foo");
 /// }

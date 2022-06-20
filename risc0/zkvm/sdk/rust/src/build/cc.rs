@@ -428,7 +428,6 @@ impl Build {
                     .flag("-dead_strip")
                     .flag("-flto")
                     .flag("-march=rv32im")
-                    .flag("-march=riscv32im")
                     .inner
                     .try_compile(output);
         }
