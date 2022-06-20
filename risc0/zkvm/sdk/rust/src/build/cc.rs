@@ -4,8 +4,8 @@ use std::path::Path;
 
 use cc::Error;
 #[derive(Debug)]
-/// A convenient wrapper around cc::Build with sensible defaults for building
-/// to riscv32im targets.
+/// A convenient wrapper around `cc::Build` with sensible defaults for building
+/// to `riscv32im` targets.
 pub struct Build {
     inner: cc::Build,
     riscv_default_features: bool,
@@ -21,8 +21,11 @@ impl Default for Build {
 }
 
 impl Build {
-    /// Construct a new instance with a default configuration for riscv32im.
-    /// This builder is finished with the compile function
+    /// Construct a new instance of a blank set of configuration.
+    ///
+    /// This builder is finished with the [`compile`] function.
+    ///
+    /// [`compile`]: struct.Build.html#method.compile
     pub fn new() -> Self {
         Self::default()
     }
@@ -69,13 +72,13 @@ impl Build {
 
     /// Run the compiler to test if it accepts the given flag.
     ///
-    /// For a convenience method for setting flags conditionally, see flag_if_supported().
+    /// For a convenience method for setting flags conditionally, `see flag_if_supported()`.
     ///
     /// It may return error if it’s unable to run the compiler with a test file
-    /// (e.g. the compiler is missing or a write to the out_dir failed).
+    /// (e.g. the compiler is missing or a write to the `out_dir` failed).
     ///
-    /// Note: Once computed, the result of this call is stored in the known_flag_support field.
-    /// If is_flag_supported(flag) is called again, the result will be read from the hash table.
+    /// Note: Once computed, the result of this call is stored in the `known_flag_support` field.
+    /// If `is_flag_supported(flag)` is called again, the result will be read from the hash table.
     pub fn is_flag_supported(&self, flag: &str) -> Result<bool, Error> {
         self.inner.is_flag_supported(flag)
     }
@@ -147,7 +150,7 @@ impl Build {
     ///
     /// Enabling CUDA will pass the detected C/C++ toolchain as an argument to the CUDA compiler, NVCC.
     /// NVCC itself accepts some limited GNU-like args; any other arguments for the C/C++ toolchain
-    /// will be redirected using “-Xcompiler” flags.
+    /// will be redirected using "-Xcompiler" flags.
     pub fn cuda(&mut self, cuda: bool) -> &mut Self {
         self.inner.cuda(cuda);
         self
