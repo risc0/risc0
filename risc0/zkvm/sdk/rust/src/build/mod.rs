@@ -15,6 +15,42 @@
 #![deny(missing_docs)]
 #![doc = include_str!("README.md")]
 
+/// A wrapper for the `cc` crate that compiles to `riscv32im` with no boilerplate and
+/// reasonable defaults.
+///
+/// ```no_run
+/// fn main() {
+///     risc0_build::cc::Build::new()
+///         .file("src/foo.c")
+///         .compile("foo");
+/// }
+/// ```
+///
+/// is equivalent to...
+///
+/// /// ```no_run
+/// fn main() {
+///     cc::Build::new() // The normal `cc` crate
+///         .target("riscv32im-unknown-none-elf")
+///         .no_default_flags(true)
+///         .flag("-O3")
+///         .flag("--target=riscv32-unknown-none-elf")
+///         .flag("-mabi=ilp32")
+///         .flag("-mcmodel=medany")
+///         .flag("-Os")
+///         .flag("-fdata-sections")
+///         .flag("-ffunction-sections")
+///         .flag("-dead_strip")
+///         .flag("-flto")
+///         .flag("-march=rv32im")
+///         .flag("-march=riscv32im")
+///         .file("src/foo.c")
+///         .compile("foo");
+/// }
+/// ```
+///
+pub mod cc;
+
 use std::{
     env,
     fs::{self, File},
