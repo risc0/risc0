@@ -14,11 +14,13 @@
 
 use alloc::{vec, vec::Vec};
 
-use risc0_zkp_core::sha::{Digest, Sha};
+use risc0_zkp_core::sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE};
 use serde::{Deserialize, Serialize};
 
-use crate::zkp::verify::verify;
+use crate::zkp::verify::{verify, VerificationError};
 use crate::zkvm::verify::circuit::{MethodID, RV32Circuit};
+
+const DIGEST_SIZE_BYTES: usize = DIGEST_WORDS * DIGEST_WORD_SIZE;
 
 #[derive(Deserialize, Serialize)]
 pub struct Receipt {
@@ -27,31 +29,44 @@ pub struct Receipt {
 }
 
 impl Receipt {
-    pub fn verify(&self, method_id: &MethodID) {
+    pub fn verify(&self, method_id: &MethodID) -> Result<bool, VerificationError> {
         let mut circuit = RV32Circuit::new(method_id);
         let sha = risc0_zkp_core::sha::default_implementation();
-        verify(sha, &mut circuit, &self.seal).unwrap();
-        assert!(self.journal.len() == (self.seal[8] as usize));
-        if self.journal.len() > 32 {
+        verify(sha, &mut circuit, &self.seal)?;
+        if self.journal.len() != (self.seal[8] as usize) {
+            return Ok(false);
+        }
+        if self.journal.len() > DIGEST_SIZE_BYTES {
             let digest = sha.hash_bytes(&self.journal);
-            assert!(*digest == Digest::from_slice(&self.seal[0..8]));
+            if (*digest != Digest::from_slice(&self.seal[0..8])) {
+                return Ok(false);
+            }
         } else {
             let mut vec = self.journal.clone();
-            vec.resize(32, 0);
+            vec.resize(DIGEST_SIZE_BYTES, 0);
             for i in 0..8 {
-                assert!(
-                    self.seal[i] == u32::from_le_bytes(vec[i * 4..i * 4 + 4].try_into().unwrap())
-                );
+                if (self.seal[i]
+                    != u32::from_le_bytes(
+                        vec[i * DIGEST_WORD_SIZE..i * DIGEST_WORD_SIZE + DIGEST_WORD_SIZE]
+                            .try_into()
+                            .or(Err(VerificationError::ReceiptFormatError))?,
+                    ))
+                {
+                    return Ok(false);
+                }
             }
         }
+        Ok(true)
     }
 
     pub fn get_journal_u32(&self) -> Vec<u32> {
         let mut as_words: Vec<u32> = vec![];
-        assert!(self.journal.len() % 4 == 0);
-        for i in 0..(self.journal.len() / 4) {
+        assert!(self.journal.len() % DIGEST_WORD_SIZE == 0);
+        for i in 0..(self.journal.len() / DIGEST_WORD_SIZE) {
             as_words.push(u32::from_le_bytes(
-                self.journal[i * 4..i * 4 + 4].try_into().unwrap(),
+                self.journal[i * DIGEST_WORD_SIZE..i * DIGEST_WORD_SIZE + DIGEST_WORD_SIZE]
+                    .try_into()
+                    .unwrap(),
             ));
         }
         as_words
