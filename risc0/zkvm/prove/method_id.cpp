@@ -15,7 +15,7 @@
 #include "risc0/zkvm/prove/method_id.h"
 
 #include <fstream>
-#include <iostream>
+#include <iterator>
 #include <map>
 
 #include "risc0/core/elf.h"
@@ -24,38 +24,44 @@
 
 namespace risc0 {
 
-MethodId makeMethodId(const MethodDigest& digest) {
-  MethodId id;
-  std::memcpy(&id, &digest, sizeof(MethodId));
-  return id;
+MethodId loadMethodId(const std::string& path) {
+  std::ifstream file(path, std::ios::binary);
+  file.exceptions(std::ios_base::badbit);
+  std::istreambuf_iterator<char> it(file);
+  std::vector<uint8_t> bytes(it, std::istreambuf_iterator<char>());
+  return makeMethodId(bytes.data(), bytes.size());
 }
 
-MethodId makeMethodId(const uint8_t* bytes, const size_t len) {
-  if (len != sizeof(MethodId)) {
-    throw std::length_error("Got buffer of invalid size!");
+MethodId makeMethodId(const uint8_t* bytes, size_t len) {
+  MethodId ret;
+  if (len % sizeof(ShaDigest)) {
+    throw std::length_error("Invalid MethodId size");
   }
-  MethodId id;
-  std::memcpy(&id, bytes, sizeof(MethodId));
-  return id;
+
+  size_t count = len / sizeof(ShaDigest);
+  for (size_t i = 0; i < count; i++, bytes += sizeof(ShaDigest)) {
+    ShaDigest digest;
+    std::memcpy(digest.words, bytes, sizeof(ShaDigest));
+    ret.push_back(digest);
+  }
+
+  return ret;
 }
 
-MethodId makeMethodId(const std::string& elfPath) {
-  return makeMethodId(makeMethodDigest(elfPath));
-}
-
-MethodDigest makeMethodDigest(const std::string& elfPath) {
+MethodId makeMethodId(const std::string& elfPath, size_t limit) {
   std::map<uint32_t, uint32_t> image;
   uint32_t startAddr = loadElf(elfPath, kMemSize, image);
 
   // Start with an empty return value
-  MethodDigest digest;
+  MethodId ret;
 
   // Make the digest for each level
-  for (size_t i = 0; i < kCodeDigestCount; i++) {
+  size_t count = std::min(limit, kMaxCodeDigestCount);
+  for (size_t i = 0; i < count; i++) {
     size_t cycles = kMinCycles * (1 << i);
     if (cycles < image.size() + 3 + kZkCycles) {
       // Can't even fit the program in this cycle size, just set to zero
-      digest[i] = ShaDigest::zero();
+      ret.push_back(ShaDigest::zero());
       continue;
     }
     // Make a vector + set it up with the elf data
@@ -68,15 +74,9 @@ MethodDigest makeMethodDigest(const std::string& elfPath) {
     zkShiftAccel(coeffs, kCodeSize);
     // Make the poly-group + extract the root
     PolyGroup codeGroup(coeffs, kCodeSize, cycles);
-    digest[i] = codeGroup.getMerkle().getRoot();
+    ret.push_back(codeGroup.getMerkle().getRoot());
   }
-  return digest;
-}
-
-MethodDigest makeMethodDigest(const MethodId& id) {
-  MethodDigest digest;
-  std::memcpy(&digest, &id, sizeof(MethodId));
-  return digest;
+  return ret;
 }
 
 } // namespace risc0

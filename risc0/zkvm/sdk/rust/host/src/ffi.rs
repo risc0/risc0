@@ -19,6 +19,7 @@ use crate::exception::Exception;
 pub(crate) enum RawString {}
 pub(crate) enum RawProver {}
 pub(crate) enum RawReceipt {}
+pub(crate) enum RawMethodId {}
 
 #[repr(C)]
 pub(crate) struct RawError {
@@ -57,6 +58,20 @@ extern "C" {
     pub(crate) fn risc0_string_ptr(str: *const RawString) -> *const c_char;
 
     pub(crate) fn risc0_string_free(str: *const RawString);
+
+    pub(crate) fn risc0_method_id_new(
+        err: *mut RawError,
+        elf_path: *const i8,
+        limit: u32,
+    ) -> *const RawMethodId;
+
+    pub(crate) fn risc0_method_id_get_buf(
+        err: *mut RawError,
+        ptr: *const RawMethodId,
+        len: *mut u32,
+    ) -> *const u8;
+
+    pub(crate) fn risc0_method_id_free(err: *mut RawError, ptr: *const RawMethodId);
 
     pub(crate) fn risc0_prover_new(
         err: *mut RawError,
