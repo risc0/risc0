@@ -14,20 +14,18 @@
 
 #pragma once
 
-#include <array>
 #include <memory>
+#include <vector>
 
-#include "risc0/core/util.h"
+#include "risc0/zkp/core/sha256.h"
 #include "risc0/zkp/verify/verify.h"
-#include "risc0/zkvm/circuit/constants.h"
 
 namespace risc0 {
 
-// Redundant with alias in prove/method_id.h
-constexpr size_t kDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
-using MethodDigest = std::array<ShaDigest, kDigestCount>;
+using MethodId = std::vector<ShaDigest>;
 
 TapSetRef getRiscVTaps();
-std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodDigest& digest);
+
+std::unique_ptr<VerifyCircuit> getRiscVVerifyCircuit(const MethodId& methodId);
 
 } // namespace risc0

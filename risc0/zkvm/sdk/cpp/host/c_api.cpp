@@ -55,6 +55,10 @@ template <typename T, typename F> T ffi_wrap(risc0_error* err, T val, F fn) {
 
 extern "C" {
 
+struct risc0_method_id {
+  risc0::MethodId raw;
+};
+
 struct risc0_prover {
   std::unique_ptr<risc0::Prover> prover;
 };
@@ -76,6 +80,22 @@ const char* risc0_string_ptr(risc0_string* str) {
 void risc0_string_free(risc0_string* str) {
   risc0_error err;
   ffi_wrap_void(&err, [&] { delete str; });
+}
+
+risc0_method_id* risc0_method_id_new(risc0_error* err, const char* elf_path, uint32_t limit) {
+  return ffi_wrap<risc0_method_id*>(
+      err, nullptr, [&] { return new risc0_method_id{risc0::makeMethodId(elf_path, limit)}; });
+}
+
+const void* risc0_method_id_get_buf(risc0_error* err, risc0_method_id* ptr, uint32_t* len) {
+  return ffi_wrap<const void*>(err, nullptr, [&] {
+    *len = ptr->raw.size() * sizeof(risc0::ShaDigest);
+    return ptr->raw.data();
+  });
+}
+
+void risc0_method_id_free(risc0_error* err, const risc0_method_id* ptr) {
+  ffi_wrap_void(err, [&] { delete ptr; });
 }
 
 risc0_prover* risc0_prover_new(risc0_error* err,

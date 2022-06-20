@@ -4,24 +4,28 @@ load("//bazel/rules/cc:defs.bzl", "cc_gtest")
 risc0_cc_method(
     name = "test_fail",
     srcs = ["test_fail.cpp"],
+    limit = 5,
     deps = ["//risc0/zkvm/sdk/cpp/guest"],
 )
 
 risc0_cc_method(
     name = "test_mem",
     srcs = ["test_mem.cpp"],
+    limit = 5,
     deps = ["//risc0/zkvm/sdk/cpp/guest"],
 )
 
 risc0_cc_method(
     name = "test_memcpy",
     srcs = ["test_memcpy.cpp"],
+    limit = 5,
     deps = ["//risc0/zkvm/sdk/cpp/guest"],
 )
 
 risc0_cc_method(
     name = "test_sha",
     srcs = ["test_sha.cpp"],
+    limit = 5,
     deps = ["//risc0/zkvm/sdk/cpp/guest"],
 )
 

@@ -30,7 +30,7 @@ RoundMessage::Content RoundMessage::decode() const {
 }
 
 InitMessage Battleship::init() {
-  risc0::MethodId methodId = risc0::makeMethodId("examples/cpp/battleship/init_method");
+  risc0::MethodId methodId = risc0::loadMethodId("examples/cpp/battleship/init_method.id");
   risc0::Prover prover("examples/cpp/battleship/init_method", methodId);
   prover.writeInput(state);
   risc0::Receipt receipt = prover.run();
@@ -40,7 +40,7 @@ InitMessage Battleship::init() {
 
 void Battleship::onInitMsg(const InitMessage& msg) {
   LOG(1, name << "> onInitMsg");
-  risc0::MethodId methodId = risc0::makeMethodId("examples/cpp/battleship/init_method");
+  risc0::MethodId methodId = risc0::loadMethodId("examples/cpp/battleship/init_method.id");
   msg.receipt.verify(methodId);
   InitMessage::Content content = msg.decode();
   peer_state = content.state;
@@ -56,7 +56,7 @@ TurnMessage Battleship::turn(const Position& shot) {
 RoundMessage Battleship::onTurnMsg(const TurnMessage& msg) {
   LOG(1, name << "> onTurnMsg");
   RoundParams params{state, msg.shot};
-  risc0::MethodId methodId = risc0::makeMethodId("examples/cpp/battleship/turn_method");
+  risc0::MethodId methodId = risc0::loadMethodId("examples/cpp/battleship/turn_method.id");
   risc0::Prover prover("examples/cpp/battleship/turn_method", methodId);
   prover.writeInput(params);
   risc0::Receipt receipt = prover.run();
@@ -69,7 +69,7 @@ RoundMessage Battleship::onTurnMsg(const TurnMessage& msg) {
 
 void Battleship::onRoundMsg(const RoundMessage& msg) {
   LOG(1, name << "> onRoundMsg");
-  risc0::MethodId methodId = risc0::makeMethodId("examples/cpp/battleship/turn_method");
+  risc0::MethodId methodId = risc0::loadMethodId("examples/cpp/battleship/turn_method.id");
   msg.receipt.verify(methodId);
   RoundMessage::Content content = msg.decode();
 

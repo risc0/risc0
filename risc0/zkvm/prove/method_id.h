@@ -14,28 +14,18 @@
 
 #pragma once
 
-#include <array>
-#include <memory>
+#include <cstddef>
+#include <cstdint>
+#include <string>
 
-#include "risc0/core/util.h"
-#include "risc0/zkp/core/sha256.h"
 #include "risc0/zkvm/circuit/constants.h"
+#include "risc0/zkvm/verify/riscv.h"
 
 namespace risc0 {
 
-static constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
+MethodId makeMethodId(const std::string& elfPath, size_t limit = kDefaultCodeDigestCount);
+MethodId makeMethodId(const uint8_t* bytes, size_t len);
 
-// These types are likely to change relatively soon. But, for now:
-// A MethodDigest is intended for internal use in verification
-// A MethodId is an intentionally opaque version of a MethodDigest for use in APIs
-using MethodDigest = std::array<ShaDigest, kCodeDigestCount>;
-using MethodId = std::array<uint8_t, sizeof(MethodDigest)>;
-
-MethodId makeMethodId(const std::string& elfPath);
-MethodId makeMethodId(const uint8_t* bytes, const size_t len);
-MethodId makeMethodId(const MethodDigest& digest);
-
-MethodDigest makeMethodDigest(const std::string& elfPath);
-MethodDigest makeMethodDigest(const MethodId& id);
+MethodId loadMethodId(const std::string& path);
 
 } // namespace risc0
