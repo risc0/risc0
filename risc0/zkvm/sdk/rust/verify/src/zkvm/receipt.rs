@@ -31,8 +31,8 @@ pub struct Receipt {
 impl Receipt {
     pub fn new(journal: Vec<u8>, seal: Vec<u32>) -> Self {
         Receipt {
-            journal: journal,
-            seal: seal,
+            journal,
+            seal,
         }
     }
 
