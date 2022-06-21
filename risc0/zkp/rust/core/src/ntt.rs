@@ -54,16 +54,23 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 /// As an example, we'll work through a trace of the rev_butterfly algorithm
 /// with n = 3 on a list of length 8. Let w = ROU_REV[3] be the eighth root of
 /// unity. We start with
+///
 ///   [a0, a1, a2, a3, a4, a5, a6, a7]
+///
 /// After the loop, before the first round of recursive calls, we have
+///
 ///   [a0+a4, a1+a5,     a2+a6,         a3+a7,
 ///    a0-a4, a1*w-a5*w, a2*w^2-a6*w^2, a3*w^3-a7*w^3]
+///
 /// After first round of recursive calls, we have
+///
 ///   [a0+a4+a2+a6,         a1+a5+a3+a7,
 ///    a0+a4-a2-a6,         a1*w^2+a5*w^2-a3*w^2-a7*w^2,
 ///    a0-a4+a2*w^2-a6*w^2, a1*w-a5*w+a3*w^3-a7*w^3,
 ///    a0-a4-a2*w^2+a6*w^2, a1*w^3-a5*w^3-a3*w^5+a7*w^5]
+///
 /// And after the second round of recursive calls, we have
+///
 ///   [a0+a4+a2+a6+a1+a5+a3+a7,
 ///    a0+a4+a2+a6-a1-a5-a3-a7,
 ///    a0+a4-a2-a6+a1*w^2+a5*w^2-a3*w^2-a7*w^2,
@@ -72,7 +79,9 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 ///    a0-a4+a2*w^2-a6*w^2-a1*w+a5*w-a3*w^3+a7*w^3,
 ///    a0-a4-a2*w^2+a6*w^2+a1*w^3-a5*w^3+a3*w^5-a7*w^5,
 ///    a0-a4-a2*w^2+a6*w^2-a1*w^3+a5*w^3-a3*w^5+a7*w^5]
+///
 /// Rewriting this, we get
+///
 ///   [sum_k ak w^0,
 ///    sum_k ak w^4k,
 ///    sum_k ak w^2k,
@@ -81,6 +90,7 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 ///    sum_k ak w^5k,
 ///    sum_k ak w^3k,
 ///    sum_k ak w^7k]
+///
 /// The exponent multiplicands in the sum arise from reversing the indices as
 /// three-bit numbers. For example, 3 is 011 in binary, which reversed is 110,
 /// which is 6. So i' in the exponent of the index-3 value is 6.
