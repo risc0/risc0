@@ -30,10 +30,7 @@ pub struct Receipt {
 
 impl Receipt {
     pub fn new(journal: Vec<u8>, seal: Vec<u32>) -> Self {
-        Receipt {
-            journal,
-            seal,
-        }
+        Receipt { journal, seal }
     }
 
     pub fn verify(&self, method_id: &MethodID) -> Result<bool, VerificationError> {
