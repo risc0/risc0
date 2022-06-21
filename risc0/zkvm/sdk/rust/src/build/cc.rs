@@ -10,14 +10,16 @@ use cc::Error;
 /// to `riscv32im` targets.
 pub struct Build {
     inner: cc::Build,
-    riscv_default_features: bool,
+    no_risc0_default_flags: bool,
+    compiler_default_flags: bool,
 }
 
 impl Default for Build {
     fn default() -> Self {
         Self {
             inner: cc::Build::new(),
-            riscv_default_features: true,
+            no_risc0_default_flags: false,
+            compiler_default_flags: false
         }
     }
 }
@@ -112,15 +114,21 @@ impl Build {
     /// If this option is not set, this crate disables `cc`'s default flags
     /// because they can cause issues when cross compiling.
     ///
-    /// Setting the `CRATE_CC_DEFAULTS` environment variable has the same effect as setting this to `true`.
-    /// The presence of the environment variable and this value will be OR’d together.
-    pub fn cc_default_flags(&mut self, default_flags: bool) -> &mut Self {
-        let default_flags_from_env = match option_env!("CRATE_CC_DEFAULTS") {
-            Some(str) => str.to_lowercase() == "true",
-            None => false,
-        };
-        let flags = default_flags || default_flags_from_env;
-        self.inner.no_default_flags(!flags);
+    /// Setting the `CRATE_COMPILER_DEFAULTS` environment variable has the same
+    /// effect as setting this to `true`. The presence of the environment variable
+    /// and this value will be OR’d together.
+    pub fn compiler_default_flags(&mut self, compiler_default_flags: bool) -> &mut Self {
+        self.compiler_default_flags = compiler_default_flags;
+        self
+    }
+
+    /// Disables the generation of default risc0 flags.
+    ///
+    /// Setting the `CRATE_NO_RISC0_DEFAULTS` environment variable has the same
+    /// effect as setting this to `true`. The presence of the environment variable
+    /// and this value will be OR’d together.
+    pub fn no_risc0_default_flags(&mut self, no_risc0_default_flags: bool) -> &mut Self {
+        self.no_risc0_default_flags = !no_risc0_default_flags;
         self
     }
 
@@ -416,21 +424,7 @@ impl Build {
     ///
     /// This will return a result instead of panicing; see compile() for the complete description.
     pub fn try_compile(&mut self, output: &str) -> Result<(), Error> {
-        if self.riscv_default_features {
-                return self.target("riscv32im-unknown-none-elf")
-                    .flag("-O3")
-                    .flag("--target=riscv32-unknown-none-elf")
-                    .flag("-mabi=ilp32")
-                    .flag("-mcmodel=medany")
-                    .flag("-Os")
-                    .flag("-fdata-sections")
-                    .flag("-ffunction-sections")
-                    .flag("-dead_strip")
-                    .flag("-flto")
-                    .flag("-march=rv32im")
-                    .inner
-                    .try_compile(output);
-        }
+        self.check_and_add_flags_if_necessary();
         self.inner.try_compile(output)
     }
 
@@ -471,7 +465,43 @@ impl Build {
     /// Panics if `output` is not formatted correctly or if one of the underlying
     /// compiler commands fails. It can also panic if it fails reading file names
     /// or creating directories.
-    pub fn compile(&self, output: &str) {
+    pub fn compile(&mut self, output: &str) {
+        self.check_and_add_flags_if_necessary();
         self.inner.compile(output);
+    }
+
+    fn check_and_add_flags_if_necessary(&mut self) {
+
+        // Check and add compiler default flags if necessary
+        let compiler_default_flags_from_env = match option_env!("CRATE_COMPILER_DEFAULTS") {
+            Some(str) => str.to_lowercase() == "true",
+            None => false,
+        };
+        let compiler_default_flags = self.compiler_default_flags || compiler_default_flags_from_env;
+        self.inner.no_default_flags(!compiler_default_flags);
+
+        // Check and add no risc0 default flags  if necessary
+        let no_risc0_default_flags_from_env = match option_env!("CRATE_NO_RISC0_DEFAULTS") {
+            Some(str) => str.to_lowercase() == "true",
+            None => false,
+        };
+        self.no_risc0_default_flags = self.no_risc0_default_flags || no_risc0_default_flags_from_env;
+
+        if self.no_risc0_default_flags {
+            return
+        }
+
+        self.inner
+            .target("riscv32im-unknown-none-elf")
+            .flag("-O3")
+            .flag("--target=riscv32-unknown-none-elf")
+            .flag("-mabi=ilp32")
+            .flag("-mcmodel=medany")
+            .flag("-Os")
+            .flag("-fdata-sections")
+            .flag("-ffunction-sections")
+            .flag("-dead_strip")
+            .flag("-flto")
+            .flag("-march=rv32im");
     }
 }
