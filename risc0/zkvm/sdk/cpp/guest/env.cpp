@@ -56,15 +56,23 @@ Env::~Env() {
   finalizeSHA256();
 }
 
-void* Env::read(size_t size) {
-  void* buf = read_ptr;
-  read_ptr += align(size) / sizeof(uint32_t);
-  return buf;
+std::pair<void* /* address */, size_t /* length */>
+Env::sendRecv(uint32_t channel, const void* addr, size_t len) {
+  // Send
+  *GPIO_SendRecvChannel() = channel;
+  *GPIO_SendRecvSize() = len;
+  *GPIO_SendRecvAddr() = addr;
+
+  // Receive
+  uint32_t response_len = *read_ptr;
+  ++read_ptr;
+  void* response_addr = reinterpret_cast<void*>(read_ptr);
+  read_ptr += align(response_len) / sizeof(uint32_t);
+  return std::make_pair(response_addr, response_len);
 }
 
 void Env::write(const void* data, size_t size) {
-  volatile IoDescriptor io{size, reinterpret_cast<uint32_t>(data)};
-  *GPIO_Write() = &io;
+  sendRecv(kSendRecvChannel_Stdout, data, size);
 }
 
 void Env::commit(const void* data, size_t size) {
@@ -83,8 +91,29 @@ KeyPtr Env::getKey(const char* name, KeyMode mode) {
 }
 
 void Env::print(const char* msg) {
-  volatile LogDescriptor io{reinterpret_cast<uint32_t>(msg)};
-  *GPIO_Log() = &io;
+  *GPIO_Log() = msg;
+}
+
+void Env::fetchInitialInput() {
+  if (initial_input) {
+    // Already fetched.
+    return;
+  }
+  const uint32_t* addr =
+      reinterpret_cast<const uint32_t*>(sendRecv(kSendRecvChannel_InitialInput, 0, 0).first);
+  initial_input = new Reader(addr);
+}
+
+const void* Env::read(size_t size) {
+  fetchInitialInput();
+
+  return initial_input->read(size);
+}
+
+const void* Reader::read(size_t size) {
+  const void* start = read_ptr;
+  read_ptr += align(size) / sizeof(uint32_t);
+  return start;
 }
 
 } // namespace risc0

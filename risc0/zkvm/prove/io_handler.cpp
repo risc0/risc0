@@ -14,6 +14,7 @@
 
 #include <sstream>
 
+#include "risc0/core/align.h"
 #include "risc0/core/log.h"
 #include "risc0/zkp/core/sha256.h"
 #include "risc0/zkvm/platform/io.h"
@@ -49,9 +50,9 @@ void IoHandler::onFault(const std::string& msg) {
   throw std::runtime_error(msg);
 }
 
-MemoryHandler::MemoryHandler() : io(nullptr) {}
+MemoryHandler::MemoryHandler() : MemoryHandler(nullptr) {}
 
-MemoryHandler::MemoryHandler(IoHandler* io) : io(io) {}
+MemoryHandler::MemoryHandler(IoHandler* io) : io(io), cur_host_to_guest_offset(kMemInputStart) {}
 
 void MemoryHandler::onInit(MemoryState& mem) {
   if (io) {
@@ -68,16 +69,6 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
     mem.loadRegion(value, &desc, sizeof(desc));
     processSHA(mem, desc);
   } break;
-  case kGPIO_Write: {
-    LOG(1, "MemoryHandler::onWrite> GPIO_Write");
-    IoDescriptor desc;
-    mem.loadRegion(value, &desc, sizeof(desc));
-    if (io) {
-      std::vector<uint8_t> buf(desc.size);
-      mem.loadRegion(desc.addr, buf.data(), desc.size);
-      io->onWrite(buf);
-    }
-  } break;
   case kGPIO_Commit: {
     LOG(1, "MemoryHandler::onWrite> GPIO_Commit");
     IoDescriptor desc;
@@ -90,23 +81,19 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
   } break;
   case kGPIO_Fault: {
     LOG(1, "MemoryHandler::onWrite> GPIO_Fault");
-    FaultDescriptor desc;
-    mem.loadRegion(value, &desc, sizeof(desc));
     if (io) {
-      size_t len = mem.strlen(desc.addr);
+      size_t len = mem.strlen(value);
       std::vector<char> buf(len);
-      mem.loadRegion(desc.addr, buf.data(), len);
+      mem.loadRegion(value, buf.data(), len);
       std::string str(buf.data(), buf.size());
       io->onFault(str);
     }
   } break;
   case kGPIO_Log: {
     LOG(2, "MemoryHandler::onWrite> GPIO_Log");
-    LogDescriptor desc;
-    mem.loadRegion(value, &desc, sizeof(desc));
-    size_t len = mem.strlen(desc.addr);
+    size_t len = mem.strlen(value);
     std::vector<char> buf(len);
-    mem.loadRegion(desc.addr, buf.data(), len);
+    mem.loadRegion(value, buf.data(), len);
     std::string str(buf.data(), buf.size());
     LOG(0, "R0VM[C" << cycle << "]> " << str);
   } break;
@@ -133,6 +120,32 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
     }
     const Key& key = store[str];
     mem.store(desc.addr, reinterpret_cast<const uint8_t*>(&key), sizeof(Key));
+  } break;
+  case kGPIO_SendRecvAddr: {
+    if (io) {
+      uint32_t channel = mem.load(kGPIO_SendRecvChannel);
+      std::vector<uint8_t> buf(mem.load(kGPIO_SendRecvSize));
+      LOG(1,
+          "MemoryHandler::onWrite> GPIO_SendReceive, channel " << channel
+                                                               << " size=" << buf.size());
+      mem.loadRegion(value, buf.data(), buf.size());
+      BufferU8 result = io->onSendRecv(channel, buf);
+      LOG(1,
+          "MemoryHandler::onWrite> GPIO_SendReceive, host replied with " << result.size()
+                                                                         << " bytes");
+      size_t aligned_len = align(result.size());
+      if ((cur_host_to_guest_offset + sizeof(uint32_t) + aligned_len) >= kMemInputEnd) {
+        throw(std::runtime_error("Read buffer overrun"));
+      }
+      mem.store(cur_host_to_guest_offset, result.size());
+      cur_host_to_guest_offset += sizeof(uint32_t);
+      for (size_t i = 0; i < result.size(); ++i) {
+        mem.storeByte(cur_host_to_guest_offset + i, result[i]);
+      }
+      cur_host_to_guest_offset += aligned_len;
+    } else {
+      throw std::runtime_error("SendRecv called with no IO handler set");
+    }
   } break;
   }
 }

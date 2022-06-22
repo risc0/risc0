@@ -206,6 +206,7 @@ TEST(CoreTests, Memset) {
 TEST(CoreTests, SHAAccel) {
   MethodId methodId = loadMethodId("risc0/zkvm/sdk/rust/methods/test_sha_accel.id");
   Prover prover("risc0/zkvm/sdk/rust/methods/test_sha_accel", methodId);
+  prover.writeInput(0); // Compute an empty digest
   Receipt receipt = prover.run();
   receipt.verify(methodId);
 }

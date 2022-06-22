@@ -19,6 +19,7 @@
 #include "risc0/zkp/core/sha256_cpu.h"
 #include "risc0/zkp/prove/prove.h"
 #include "risc0/zkp/verify/verify.h"
+#include "risc0/zkvm/platform/io.h"
 #include "risc0/zkvm/prove/riscv.h"
 #include "risc0/zkvm/verify/riscv.h"
 
@@ -61,22 +62,22 @@ struct Prover::Impl : public IoHandler {
 
   virtual ~Impl() {}
 
-  void onInit(MemoryState& mem) override {
-    LOG(1, "Prover::onInit>");
-    uint32_t addr = kMemInputStart;
-    for (uint32_t word : inputStream.vec) {
-      if (addr > kMemInputEnd) {
-        throw std::runtime_error("Out of memory: inputs");
-      }
-      LOG(1, "  " << hex(addr) << ": " << hex(word));
-      mem.store(addr, word);
-      addr += sizeof(uint32_t);
-    }
-  }
+  void onInit(MemoryState& mem) override { LOG(1, "Prover::onInit>"); }
 
-  void onWrite(const BufferU8& buf) override {
-    LOG(1, "IoHandler::onWrite> " << buf.size());
-    outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
+  BufferU8 onSendRecv(uint32_t channel, const BufferU8& buf) override {
+    switch (channel) {
+    case kSendRecvChannel_Stdout:
+      LOG(1, "IoHandler::Stdout> " << buf.size());
+      outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
+      return BufferU8();
+    case kSendRecvChannel_InitialInput: {
+      const uint8_t* byte_ptr = reinterpret_cast<const uint8_t*>(inputStream.vec.data());
+      BufferU8 input(byte_ptr, byte_ptr + inputStream.vec.size() * sizeof(uint32_t));
+      LOG(1, "IoHandler::InitialInput, " << input.size() << " bytes");
+      return input;
+    }
+    }
+    throw(std::runtime_error("Unknown channel " + std::to_string(channel)));
   }
 
   void onCommit(const BufferU8& buf) override {

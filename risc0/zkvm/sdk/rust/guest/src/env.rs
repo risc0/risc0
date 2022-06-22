@@ -19,16 +19,20 @@ use risc0_zkvm_serde::{Deserializer, Serializer, Slice};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    gpio::{IoDescriptor, GPIO_COMMIT, GPIO_DESC_IO, GPIO_WRITE},
-    sha, REGION_COMMIT_LEN, REGION_COMMIT_START, REGION_INPUT_LEN, REGION_INPUT_START,
-    REGION_OUTPUT_LEN, REGION_OUTPUT_START, WORD_SIZE,
+    align_up,
+    gpio::{
+        IoDescriptor, GPIO_COMMIT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE,
+        SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT,
+    },
+    mem_layout, sha, WORD_SIZE,
 };
 
 struct Env {
-    input: Deserializer<'static>,
     output: Serializer<Slice<'static>>,
     commit: Serializer<Slice<'static>>,
     commit_len: usize,
+    read_ptr: usize,
+    initial_input_reader: Option<Reader>,
 }
 
 struct Once<T> {
@@ -36,6 +40,16 @@ struct Once<T> {
 }
 
 unsafe impl<T: Send + Sync> Sync for Once<T> {}
+
+/// Reads and deserializes objects from a section of memory.
+pub struct Reader(Deserializer<'static>);
+
+impl Reader {
+    /// Read private data from the host.
+    pub fn read<T: Deserialize<'static>>(&mut self) -> T {
+        T::deserialize(&mut self.0).unwrap()
+    }
+}
 
 impl<T> Once<T> {
     const fn new() -> Self {
@@ -69,6 +83,18 @@ pub(crate) fn finalize(result: *mut usize) {
     ENV.get().finalize(result);
 }
 
+/// Exchanges data with the host, returning the data from the host
+/// as a slice of bytes.
+pub fn send_recv(channel: u32, buf: &[u8]) -> &'static [u8] {
+    ENV.get().send_recv(channel, buf)
+}
+
+/// Exchanges data with the host, returning the data from the host as
+/// a slice of words and the length in bytes.
+pub fn send_recv_as_u32(channel: u32, buf: &[u8]) -> (&'static [u32], usize) {
+    ENV.get().send_recv_as_u32(channel, buf)
+}
+
 /// Read private data from the host.
 pub fn read<T: Deserialize<'static>>() -> T {
     ENV.get().read()
@@ -87,69 +113,95 @@ pub fn commit<T: Serialize>(data: &T) {
 impl Env {
     fn new() -> Self {
         Env {
-            input: Deserializer::new(unsafe {
-                slice::from_raw_parts(REGION_INPUT_START as _, REGION_INPUT_LEN / WORD_SIZE)
-            }),
-            output: Serializer::new(Slice::new(unsafe {
-                slice::from_raw_parts_mut(REGION_OUTPUT_START as _, REGION_OUTPUT_LEN / WORD_SIZE)
-            })),
             commit: Serializer::new(Slice::new(unsafe {
-                slice::from_raw_parts_mut(REGION_COMMIT_START as _, REGION_COMMIT_LEN / WORD_SIZE)
+                slice::from_raw_parts_mut(
+                    mem_layout::COMMIT.start() as _,
+                    mem_layout::COMMIT.len_words(),
+                )
             })),
+            output: Serializer::new(Slice::new(unsafe {
+                slice::from_raw_parts_mut(
+                    mem_layout::OUTPUT.start() as _,
+                    mem_layout::OUTPUT.len_words(),
+                )
+            })),
+
             commit_len: 0,
+            read_ptr: 0,
+            initial_input_reader: None,
         }
     }
 
-    fn read<T: Deserialize<'static>>(&mut self) -> T {
-        T::deserialize(&mut self.input).unwrap()
+    pub fn send_recv_as_u32(&mut self, channel: u32, buf: &[u8]) -> (&'static [u32], usize) {
+        unsafe {
+            // Send
+            GPIO_SENDRECV_CHANNEL.write_volatile(channel);
+            GPIO_SENDRECV_SIZE.write_volatile(buf.len());
+            GPIO_SENDRECV_ADDR.write_volatile(buf.as_ptr());
+
+            // Receive
+            let read_start: *const u32 = mem_layout::INPUT.start() as _;
+            let response_nbytes = read_start.add(self.read_ptr).read_volatile() as usize;
+            self.read_ptr += 1;
+            let response_nwords = align_up(response_nbytes, WORD_SIZE) / WORD_SIZE;
+            let response_data =
+                slice::from_raw_parts(read_start.add(self.read_ptr), response_nwords);
+            self.read_ptr += response_nwords;
+
+            (response_data, response_nbytes)
+        }
+    }
+
+    pub fn send_recv(&mut self, channel: u32, buf: &[u8]) -> &'static [u8] {
+        let (data, bytes) = self.send_recv_as_u32(channel, buf);
+        &bytemuck::cast_slice(data)[..bytes]
+    }
+
+    fn initial_input(&mut self) -> &mut Reader {
+        if !self.initial_input_reader.is_some() {
+            let (words, _) = self.send_recv_as_u32(SENDRECV_CHANNEL_INITIAL_INPUT, &[]);
+            self.initial_input_reader = Some(Reader(Deserializer::new(words)))
+        }
+        self.initial_input_reader.as_mut().unwrap()
+    }
+
+    pub fn read<T: Deserialize<'static>>(&mut self) -> T {
+        self.initial_input().read()
     }
 
     fn write<T: Serialize>(&mut self, data: &T) {
         data.serialize(&mut self.output).unwrap();
         let buf = self.output.release().unwrap();
-        unsafe {
-            let ptr = buf.as_ptr();
-            crate::memory_barrier(ptr);
-            GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size: buf.len() * WORD_SIZE,
-                addr: ptr as usize,
-            });
-            GPIO_WRITE.write_volatile(GPIO_DESC_IO);
-        }
+        self.send_recv(SENDRECV_CHANNEL_STDOUT, bytemuck::cast_slice(buf));
     }
 
     fn commit<T: Serialize>(&mut self, data: &T) {
         data.serialize(&mut self.commit).unwrap();
         let buf = self.commit.release().unwrap();
         self.commit_len += buf.len();
-        let len_bytes = buf.len() * WORD_SIZE;
-        unsafe {
-            let ptr = buf.as_ptr();
-            crate::memory_barrier(ptr);
-            GPIO_DESC_IO.write_volatile(IoDescriptor {
-                size: len_bytes,
-                addr: ptr as usize,
-            });
-            GPIO_WRITE.write_volatile(GPIO_DESC_IO);
-        }
+        // Copy to stdout
+        self.send_recv(SENDRECV_CHANNEL_STDOUT, bytemuck::cast_slice(buf));
     }
 
     fn finalize(&mut self, result: *mut usize) {
         let len_words = self.commit_len;
         let len_bytes = len_words * WORD_SIZE;
         let slice: &mut [u32] = unsafe {
-            slice::from_raw_parts_mut(REGION_COMMIT_START as _, REGION_COMMIT_LEN / WORD_SIZE)
+            slice::from_raw_parts_mut(
+                mem_layout::COMMIT.start() as _,
+                mem_layout::COMMIT.len_words(),
+            )
         };
 
         // Write the full data out to the host
         unsafe {
-            let ptr = slice.as_ptr();
-            crate::memory_barrier(ptr);
-            GPIO_DESC_IO.write_volatile(IoDescriptor {
+            let desc = IoDescriptor {
                 size: len_bytes,
-                addr: ptr as usize,
-            });
-            GPIO_COMMIT.write_volatile(GPIO_DESC_IO);
+                addr: slice.as_ptr() as usize,
+            };
+            let ptr: *const IoDescriptor = &desc;
+            crate::memory_barrier(ptr);
+            GPIO_COMMIT.write_volatile(&desc);
         }
 
         // If the total proof message is small (<= 32 bytes), return it directly

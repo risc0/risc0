@@ -25,7 +25,7 @@ extern "C" void risc0_main(Env* env) {
   REQUIRE(deckSize <= 256);
   REQUIRE(pos < deckSize);
   // Read the deck as cards
-  const uint8_t* cards = static_cast<uint8_t*>(env->read(deckSize));
+  const uint8_t* cards = static_cast<const uint8_t*>(env->read(deckSize));
   // Get the card the user wants
   uint32_t card = cards[pos];
   // Get the dealer shuffle key

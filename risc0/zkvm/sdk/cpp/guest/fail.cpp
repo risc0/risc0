@@ -19,9 +19,8 @@
 namespace risc0 {
 
 [[noreturn]] void fail(const char* msg) {
-  volatile FaultDescriptor desc{reinterpret_cast<uint32_t>(msg)};
   // A compliant host should fault when it receives this descriptor.
-  *GPIO_Fault() = &desc;
+  *GPIO_Fault() = msg;
   // As a fallback for uncompliant hosts, force an unaligned write, which causes a fault within the
   // Risc0 VM.
   asm("sw x0, 1(x0)");
