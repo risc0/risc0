@@ -12,5 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+<<<<<<< HEAD
 #[cxx::bridge]
 mod ffi {}
+=======
+use anyhow::Result;
+use cxx::let_cxx_string;
+
+pub const METHOD_ID_LEN: usize = 512; // https://github.com/dtolnay/cxx/issues/1051
+pub type MethodId = [u8; METHOD_ID_LEN];
+
+#[cxx::bridge(namespace = "risc0")]
+pub mod ffi {
+    unsafe extern "C++" {
+        include!("risc0/zkvm/prove/method_id.h");
+
+        #[cxx_name = "makeMethodId"]
+        fn make_method_id_from_elf(path: &CxxString) -> Result<[u8; 512]>;
+    }
+}
+
+pub fn make_method_id_from_elf(path: &str) -> Result<MethodId> {
+    let_cxx_string!(cxx_path = path);
+    Ok(ffi::make_method_id_from_elf(&cxx_path)?)
+}
+>>>>>>> c217803 (Correct method id len)
