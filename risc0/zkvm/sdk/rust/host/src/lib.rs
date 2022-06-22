@@ -94,6 +94,21 @@ impl Drop for MethodId {
 }
 
 impl Receipt {
+    /// Construct a new [Receipt] from individual journal and seal parts.
+    pub fn new(journal: &[u8], seal: &[u32]) -> Result<Self> {
+        let mut err = ffi::RawError::default();
+        let ptr = unsafe {
+            ffi::risc0_receipt_new(
+                &mut err,
+                journal.as_ptr(),
+                journal.len(),
+                seal.as_ptr(),
+                seal.len(),
+            )
+        };
+        ffi::check(err, || Receipt { ptr })
+    }
+
     /// Verify that the current [Receipt] is a valid result of executing the
     /// method associated with the given method ID in a ZKVM.
     pub fn verify(&self, method_id: &[u8]) -> Result<()> {
