@@ -12,6 +12,7 @@ pub struct Build {
     inner: cc::Build,
     no_risc0_default_flags: bool,
     compiler_default_flags: bool,
+    is_release_version: bool,
 }
 
 impl Default for Build {
@@ -19,7 +20,8 @@ impl Default for Build {
         Self {
             inner: cc::Build::new(),
             no_risc0_default_flags: false,
-            compiler_default_flags: false
+            compiler_default_flags: false,
+            is_release_version: false,
         }
     }
 }
@@ -424,7 +426,7 @@ impl Build {
     ///
     /// This will return a result instead of panicing; see compile() for the complete description.
     pub fn try_compile(&mut self, output: &str) -> Result<(), Error> {
-        self.check_and_add_flags_if_necessary();
+        self.add_flags();
         self.inner.try_compile(output)
     }
 
@@ -466,11 +468,11 @@ impl Build {
     /// compiler commands fails. It can also panic if it fails reading file names
     /// or creating directories.
     pub fn compile(&mut self, output: &str) {
-        self.check_and_add_flags_if_necessary();
+        self.add_flags();
         self.inner.compile(output);
     }
 
-    fn check_and_add_flags_if_necessary(&mut self) {
+    fn add_flags(&mut self) {
 
         // Check and add compiler default flags if necessary
         let compiler_default_flags_from_env = match option_env!("CRATE_COMPILER_DEFAULTS") {
@@ -502,6 +504,16 @@ impl Build {
             .flag("-ffunction-sections")
             .flag("-dead_strip")
             .flag("-flto")
-            .flag("-march=rv32im");
+            .flag("-march=rv32im")
+            .flag("-static");
+
+        if !self.is_release_version {
+            return
+        }
+
+        self.inner
+            .flag("-feliminate-unused-debug-symbols")
+            .flag("-feliminate-unused-debug-types")
+            .flag("-fvirtual-function-elimination");
     }
 }
