@@ -29,6 +29,10 @@ pub struct Receipt {
 }
 
 impl Receipt {
+    pub fn new(journal: Vec<u8>, seal: Vec<u32>) -> Self {
+        Receipt { journal, seal }
+    }
+
     pub fn verify(&self, method_id: &MethodID) -> Result<bool, VerificationError> {
         let mut circuit = RV32Circuit::new(method_id);
         let sha = risc0_zkp_core::sha::default_implementation();
