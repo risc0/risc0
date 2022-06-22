@@ -99,6 +99,14 @@ extern "C" {
     pub(crate) fn risc0_prover_run(err: *mut RawError, prover: *mut RawProver)
         -> *const RawReceipt;
 
+    pub(crate) fn risc0_receipt_new(
+        err: *mut RawError,
+        journal: *const u8,
+        journal_len: usize,
+        seal: *const u32,
+        seal_len: usize,
+    ) -> *const RawReceipt;
+
     pub(crate) fn risc0_receipt_verify(
         err: *mut RawError,
         receipt: *const RawReceipt,

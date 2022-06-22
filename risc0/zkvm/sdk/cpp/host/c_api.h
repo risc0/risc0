@@ -86,8 +86,14 @@ const void* risc0_prover_get_output(risc0_error* err, risc0_prover* ptr, size_t 
 risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr);
 
 //
-// Proof
+// Receipt
 //
+
+risc0_receipt* risc0_receipt_new(risc0_error* err,
+                                 const uint8_t* journal,
+                                 const size_t journal_len,
+                                 const uint32_t* seal,
+                                 const size_t seal_len);
 
 void risc0_receipt_verify(risc0_error* err,
                           const risc0_receipt* ptr,
