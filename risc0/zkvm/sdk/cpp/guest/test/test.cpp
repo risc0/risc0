@@ -142,7 +142,7 @@ TEST_P(CoreTests, Fail) {
 
   // Check that a host that does not implement onFault will still fault.
   MemoryHandler handler;
-  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(elfPath, handler);
+  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(loadFile(elfPath), handler);
   EXPECT_THROW(prove(*circuit), std::runtime_error);
 }
 

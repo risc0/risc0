@@ -38,7 +38,7 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   try {
-    MethodId methodId = makeMethodId(argv[1]);
+    MethodId methodId = computeMethodId(argv[1]);
     Prover prover(argv[1], methodId);
     prover.writeInput(data.data(), count);
     // Run prover

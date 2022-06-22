@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use clap::Parser;
+use std::fs;
 
 use risc0_zkvm_host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 
@@ -33,6 +34,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let method_id = MethodId::new(&args.elf, args.limit).unwrap();
+    let elf_contents = fs::read(args.elf).unwrap();
+    let method_id = MethodId::compute(&elf_contents, args.limit).unwrap();
     std::fs::write(args.out, method_id.as_slice().unwrap()).unwrap();
 }

@@ -60,7 +60,8 @@ void risc0_init();
 // MethodId
 //
 
-risc0_method_id* risc0_method_id_new(risc0_error* err, const char* elf_path, uint32_t limit);
+risc0_method_id*
+risc0_method_id_compute(risc0_error* err, const uint8_t* bytes, size_t len, uint32_t limit);
 
 const void* risc0_method_id_get_buf(risc0_error* err, risc0_method_id* ptr, uint32_t* len);
 
@@ -71,7 +72,8 @@ void risc0_method_id_free(risc0_error* err, const risc0_method_id* ptr);
 //
 
 risc0_prover* risc0_prover_new(risc0_error* err,
-                               const char* elf_path,
+                               const uint8_t* elf_bytes,
+                               const size_t elf_len,
                                const uint8_t* method_id_buf,
                                const size_t method_id_len);
 
@@ -81,7 +83,9 @@ void risc0_prover_add_input(risc0_error* err, risc0_prover* ptr, const uint8_t* 
 
 size_t risc0_prover_get_num_outputs(risc0_error* err, risc0_prover* ptr);
 
-const void* risc0_prover_get_output(risc0_error* err, risc0_prover* ptr, size_t idx, size_t len);
+const void* risc0_prover_get_output_buf(risc0_error* err, const risc0_prover* ptr);
+
+size_t risc0_prover_get_output_len(risc0_error* err, const risc0_prover* ptr);
 
 risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr);
 

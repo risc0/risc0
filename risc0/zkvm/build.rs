@@ -34,6 +34,7 @@ fn main() {
         .file("sdk/cpp/host/receipt.cpp")
         .include(inc_dir)
         .define("__TBB_NO_IMPLICIT_LINKAGE", None)
+        .flag_if_supported("-Werror=missing-declarations")
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")
         .warnings(false);

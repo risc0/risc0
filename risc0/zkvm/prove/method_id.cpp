@@ -25,14 +25,11 @@
 namespace risc0 {
 
 MethodId loadMethodId(const std::string& path) {
-  std::ifstream file(path, std::ios::binary);
-  file.exceptions(std::ios_base::badbit);
-  std::istreambuf_iterator<char> it(file);
-  std::vector<uint8_t> bytes(it, std::istreambuf_iterator<char>());
-  return makeMethodId(bytes.data(), bytes.size());
+  std::vector<uint8_t> bytes = loadFile(path);
+  return loadMethodId(bytes.data(), bytes.size());
 }
 
-MethodId makeMethodId(const uint8_t* bytes, size_t len) {
+MethodId loadMethodId(const uint8_t* bytes, size_t len) {
   MethodId ret;
   if (len % sizeof(ShaDigest)) {
     throw std::length_error("Invalid MethodId size");
@@ -48,9 +45,13 @@ MethodId makeMethodId(const uint8_t* bytes, size_t len) {
   return ret;
 }
 
-MethodId makeMethodId(const std::string& elfPath, size_t limit) {
+MethodId computeMethodId(const std::string& elfPath, size_t limit) {
+  return computeMethodId(loadFile(elfPath), limit);
+}
+
+MethodId computeMethodId(const std::vector<uint8_t>& elfBytes, size_t limit) {
   std::map<uint32_t, uint32_t> image;
-  uint32_t startAddr = loadElf(elfPath, kMemSize, image);
+  uint32_t startAddr = loadElf(elfBytes, kMemSize, image);
 
   // Start with an empty return value
   MethodId ret;

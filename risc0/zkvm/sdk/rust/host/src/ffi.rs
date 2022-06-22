@@ -59,9 +59,10 @@ extern "C" {
 
     pub(crate) fn risc0_string_free(str: *const RawString);
 
-    pub(crate) fn risc0_method_id_new(
+    pub(crate) fn risc0_method_id_compute(
         err: *mut RawError,
-        elf_path: *const i8,
+        elf_contents: *const u8,
+        elf_len: usize,
         limit: u32,
     ) -> *const RawMethodId;
 
@@ -75,7 +76,8 @@ extern "C" {
 
     pub(crate) fn risc0_prover_new(
         err: *mut RawError,
-        elf_path: *const i8,
+        elf_bytes: *const u8,
+        elf_len: usize,
         method_id: *const u8,
         method_id_len: usize,
     ) -> *mut RawProver;

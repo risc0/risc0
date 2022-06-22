@@ -77,8 +77,8 @@ impl Risc0Method {
 
         println!("Computing MethodID for {} ({:})!", self.name, elf_sha_hex);
         // TODO: allow limit to be dynamic/configurable.
-        let method_id =
-            MethodId::new(&self.elf_path.to_str().unwrap(), DEFAULT_METHOD_ID_LIMIT).unwrap();
+        let elf_contents = std::fs::read(&self.elf_path).unwrap();
+        let method_id = MethodId::compute(&elf_contents, DEFAULT_METHOD_ID_LIMIT).unwrap();
         let slice = method_id.as_slice().unwrap();
         std::fs::write(method_id_path, slice).unwrap();
         std::fs::write(elf_sha_path, elf_sha).unwrap();

@@ -28,7 +28,7 @@ namespace {
 
 class RiscVProveCircuit : public ProveCircuit {
 public:
-  RiscVProveCircuit(const std::string& elfFile, MemoryHandler& io);
+  RiscVProveCircuit(const std::vector<uint8_t>& elfBytes, MemoryHandler& io);
   TapSetRef getTaps() const override { return getRiscVTaps(); }
   void execute(WriteIOP& iop) override;
   void accumulate(WriteIOP& iop) override;
@@ -55,8 +55,8 @@ private:
 
 } // namespace
 
-RiscVProveCircuit::RiscVProveCircuit(const std::string& elfFile, MemoryHandler& io)
-    : exec_(elfFile), io_(io) {}
+RiscVProveCircuit::RiscVProveCircuit(const std::vector<uint8_t>& elfBytes, MemoryHandler& io)
+    : exec_(elfBytes), io_(io) {}
 
 void RiscVProveCircuit::execute(WriteIOP& iop) {
   // Run actual RISC-V execution
@@ -207,8 +207,9 @@ void RiscVProveCircuit::evalCheck( //
 
 using oneapi::tbb::parallel_for;
 
-std::unique_ptr<ProveCircuit> getRiscVProveCircuit(const std::string& elfFile, MemoryHandler& io) {
-  return std::make_unique<RiscVProveCircuit>(elfFile, io);
+std::unique_ptr<ProveCircuit> getRiscVProveCircuit(const std::vector<uint8_t>& elfBytes,
+                                                   MemoryHandler& io) {
+  return std::make_unique<RiscVProveCircuit>(elfBytes, io);
 }
 
 } // namespace risc0
