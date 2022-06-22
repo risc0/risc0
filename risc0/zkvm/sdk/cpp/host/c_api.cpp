@@ -135,6 +135,18 @@ risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr) {
   });
 }
 
+risc0_receipt* risc0_receipt_new(risc0_error* err,
+                                 const uint8_t* journal,
+                                 const size_t journal_len,
+                                 const uint32_t* seal,
+                                 const size_t seal_len) {
+  return ffi_wrap<risc0_receipt*>(err, nullptr, [&] {
+    risc0::Receipt receipt{risc0::BufferU8{journal, journal + journal_len},
+                           risc0::BufferU32{seal, seal + seal_len}};
+    return new risc0_receipt{receipt};
+  });
+}
+
 void risc0_receipt_verify(risc0_error* err,
                           const risc0_receipt* ptr,
                           const uint8_t* method_id_buf,
