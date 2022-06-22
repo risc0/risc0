@@ -8,32 +8,28 @@ use cc::Error;
 #[derive(Debug)]
 /// A convenient wrapper around `cc::Build` with sensible defaults for building
 /// to `riscv32im` targets.
-pub struct Build {
+pub struct Build<'b> {
     inner: cc::Build,
+    rv_cc_install_path: &'b str,
     no_risc0_default_flags: bool,
     compiler_default_flags: bool,
     is_release_version: bool,
 }
 
-impl Default for Build {
-    fn default() -> Self {
-        Self {
-            inner: cc::Build::new(),
-            no_risc0_default_flags: false,
-            compiler_default_flags: false,
-            is_release_version: false,
-        }
-    }
-}
-
-impl Build {
+impl<'b> Build<'b> {
     /// Construct a new instance of a blank set of configuration.
     ///
     /// This builder is finished with the [`compile`] function.
     ///
     /// [`compile`]: struct.Build.html#method.compile
-    pub fn new() -> Self {
-        Self::default()
+    pub fn new(rv_cc_install_path: &'b str) -> Self {
+        Self {
+            inner: cc::Build::new(),
+            rv_cc_install_path,
+            no_risc0_default_flags: false,
+            compiler_default_flags: false,
+            is_release_version: false,
+        }
     }
 
     /// Add a directory to the `-I` or include path for headers
@@ -505,7 +501,9 @@ impl Build {
             .flag("-dead_strip")
             .flag("-flto")
             .flag("-march=rv32im")
-            .flag("-static");
+            .flag("-static")
+            .flag(&format!("--sysroot={}/riscv32-unknown-elf", self.rv_cc_install_path))
+            .flag(&format!("--gcc-toolchain={}", self.rv_cc_install_path));
 
         if !self.is_release_version {
             return
