@@ -19,6 +19,7 @@ use crate::exception::Exception;
 pub(crate) enum RawString {}
 pub(crate) enum RawProver {}
 pub(crate) enum RawReceipt {}
+pub(crate) enum RawMethodId {}
 
 #[repr(C)]
 pub(crate) struct RawError {
@@ -58,9 +59,25 @@ extern "C" {
 
     pub(crate) fn risc0_string_free(str: *const RawString);
 
+    pub(crate) fn risc0_method_id_compute(
+        err: *mut RawError,
+        elf_contents: *const u8,
+        elf_len: usize,
+        limit: u32,
+    ) -> *const RawMethodId;
+
+    pub(crate) fn risc0_method_id_get_buf(
+        err: *mut RawError,
+        ptr: *const RawMethodId,
+        len: *mut u32,
+    ) -> *const u8;
+
+    pub(crate) fn risc0_method_id_free(err: *mut RawError, ptr: *const RawMethodId);
+
     pub(crate) fn risc0_prover_new(
         err: *mut RawError,
-        elf_path: *const i8,
+        elf_bytes: *const u8,
+        elf_len: usize,
         method_id: *const u8,
         method_id_len: usize,
     ) -> *mut RawProver;
@@ -83,6 +100,14 @@ extern "C" {
 
     pub(crate) fn risc0_prover_run(err: *mut RawError, prover: *mut RawProver)
         -> *const RawReceipt;
+
+    pub(crate) fn risc0_receipt_new(
+        err: *mut RawError,
+        journal: *const u8,
+        journal_len: usize,
+        seal: *const u32,
+        seal_len: usize,
+    ) -> *const RawReceipt;
 
     pub(crate) fn risc0_receipt_verify(
         err: *mut RawError,

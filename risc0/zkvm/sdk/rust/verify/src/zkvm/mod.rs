@@ -12,79 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod circuit;
 mod poly_op;
 mod poly_ops;
+#[cfg(feature = "prove")]
+mod prove;
+mod receipt;
 mod taps;
+#[cfg(feature = "verify")]
+mod verify;
 
-use alloc::{vec, vec::Vec};
-
-use serde::{Deserialize, Serialize};
-
-use crate::zkp::verify::verify;
-use risc0_zkp_core::sha::{Digest, Sha};
-
-pub use crate::zkvm::circuit::MethodID;
-use crate::zkvm::circuit::Risc0Circuit;
-
-#[derive(Deserialize, Serialize)]
-pub struct Receipt {
-    pub journal: Vec<u8>,
-    pub seal: Vec<u32>,
-}
-
-impl Receipt {
-    pub fn verify(&self, method_id: &MethodID) {
-        let mut circuit = Risc0Circuit::new(method_id);
-        let sha = risc0_zkp_core::sha::default_implementation();
-        verify(sha, &mut circuit, &self.seal).unwrap();
-        assert!(self.journal.len() == (self.seal[8] as usize));
-        if self.journal.len() > 32 {
-            let digest = sha.hash_bytes(&self.journal);
-            assert!(*digest == Digest::from_slice(&self.seal[0..8]));
-        } else {
-            let mut vec = self.journal.clone();
-            vec.resize(32, 0);
-            for i in 0..8 {
-                assert!(
-                    self.seal[i] == u32::from_le_bytes(vec[i * 4..i * 4 + 4].try_into().unwrap())
-                );
-            }
-        }
-    }
-
-    pub fn get_journal_u32(&self) -> Vec<u32> {
-        let mut as_words: Vec<u32> = vec![];
-        assert!(self.journal.len() % 4 == 0);
-        for i in 0..(self.journal.len() / 4) {
-            as_words.push(u32::from_le_bytes(
-                self.journal[i * 4..i * 4 + 4].try_into().unwrap(),
-            ));
-        }
-        as_words
-    }
-}
+#[cfg(feature = "prove")]
+pub use prove::prover::Prover;
+pub use receipt::Receipt;
+pub use verify::circuit::MethodID;
 
 #[cfg(test)]
 mod tests {
     extern crate std;
-    use super::Receipt;
-    use crate::zkvm::MethodID;
+    use super::{MethodID, Receipt};
+    use risc0_zkp_core::sha::DIGEST_WORD_SIZE;
     use std::{convert::TryFrom, fs, io, vec::Vec};
     use test_log::test;
 
     #[test]
-    fn test_receipt() -> io::Result<()> {
+    fn test_receipt() {
         log::set_max_level(log::LevelFilter::Info);
-        let data: Vec<u8> = fs::read("src/zkvm/simple_receipt.receipt")?;
+        let data = fs::read("src/zkvm/simple_receipt.receipt").unwrap();
         let as_u32: Vec<u32> = data
-            .chunks(4)
-            .map(|bytes| u32::from_le_bytes(<[u8; 4]>::try_from(bytes).unwrap()))
+            .chunks(DIGEST_WORD_SIZE)
+            .map(|bytes| u32::from_le_bytes(<[u8; DIGEST_WORD_SIZE]>::try_from(bytes).unwrap()))
             .collect();
         let receipt: Receipt = risc0_zkvm_serde::from_slice(&as_u32).unwrap();
 
         let method_id =
-            MethodID::try_from(fs::read("src/zkvm/simple_receipt.id")?.as_slice()).unwrap();
+            MethodID::try_from(fs::read("src/zkvm/simple_receipt.id").unwrap().as_slice()).unwrap();
 
         std::println!(
             "Receipt: journal length {} seal length {}",
@@ -97,7 +58,6 @@ mod tests {
         }
         std::println!("\n");
 
-        receipt.verify(&method_id);
-        Ok(())
+        assert!(receipt.verify(&method_id).unwrap());
     }
 }

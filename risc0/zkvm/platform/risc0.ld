@@ -19,7 +19,8 @@ OUTPUT_ARCH(riscv)
 ENTRY(_start)
 EXTERN(__start)
 
-/* Must match risc0/zkvm/platform/memory.h */
+/* Must match risc0/zkvm/platform/memory.h and zkvm/sdk/guest/src/mem_layout.rs */
+/* Write-only section must match the range hardcoded in the circuit. */
 MEMORY {
   stack        : ORIGIN = 0x00000000, LENGTH =  256K
   data    (RW) : ORIGIN = 0x00040000, LENGTH =  256K

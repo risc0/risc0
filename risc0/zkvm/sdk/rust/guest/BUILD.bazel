@@ -6,6 +6,7 @@ rust_library(
         "src/alloc.rs",
         "src/env.rs",
         "src/gpio.rs",
+        "src/mem_layout.rs",
         "src/lib.rs",
         "src/sha.rs",
     ],

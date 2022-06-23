@@ -14,28 +14,24 @@
 
 #pragma once
 
-#include <array>
-#include <memory>
+#include <cstddef>
+#include <cstdint>
+#include <string>
 
-#include "risc0/core/util.h"
-#include "risc0/zkp/core/sha256.h"
+#include "risc0/core/archive.h"
 #include "risc0/zkvm/circuit/constants.h"
+#include "risc0/zkvm/verify/riscv.h"
 
 namespace risc0 {
 
-static constexpr size_t kCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
+// Computes a method ID based on an ELF file.  The ELF file can either be
+// supplied by a file or by an in-memory buffer.
+MethodId computeMethodId(const std::string& elfPath, size_t limit = kDefaultCodeDigestCount);
+MethodId computeMethodId(const std::vector<uint8_t>& elfBytes,
+                         size_t limit = kDefaultCodeDigestCount);
 
-// These types are likely to change relatively soon. But, for now:
-// A MethodDigest is intended for internal use in verification
-// A MethodId is an intentionally opaque version of a MethodDigest for use in APIs
-using MethodDigest = std::array<ShaDigest, kCodeDigestCount>;
-using MethodId = std::array<uint8_t, sizeof(MethodDigest)>;
-
-MethodId makeMethodId(const std::string& elfPath);
-MethodId makeMethodId(const uint8_t* bytes, const size_t len);
-MethodId makeMethodId(const MethodDigest& digest);
-
-MethodDigest makeMethodDigest(const std::string& elfPath);
-MethodDigest makeMethodDigest(const MethodId& id);
+// Loads an already-computed method ID from an in-memory buffer or a file.
+MethodId loadMethodId(const std::string& path);
+MethodId loadMethodId(const uint8_t* bytes, size_t len);
 
 } // namespace risc0

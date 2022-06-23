@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <vector>
 
 namespace risc0 {
 
@@ -25,6 +26,8 @@ namespace risc0 {
 // std::runtime_error on any errors (file, type, misalignment, addr >= maxMem, etc).  Returns
 // the entry point address.
 
-uint32_t loadElf(const std::string& name, uint32_t maxMem, std::map<uint32_t, uint32_t>& memOut);
+uint32_t loadElf(const std::vector<uint8_t>& elfBytes,
+                 uint32_t maxMem,
+                 std::map<uint32_t, uint32_t>& memOut);
 
 } // namespace risc0

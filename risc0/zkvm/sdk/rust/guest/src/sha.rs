@@ -23,7 +23,7 @@ use serde::Serialize;
 use crate::{
     align_up,
     gpio::{SHADescriptor, GPIO_SHA},
-    REGION_SHA_START, WORD_SIZE,
+    mem_layout, WORD_SIZE,
 };
 
 // Current sha descriptor index.
@@ -44,7 +44,7 @@ fn alloc_desc() -> *mut SHADescriptor {
     // SAFETY: Single threaded and this is the only place we use CUR_DESC.
     unsafe {
         let cur_desc = CUR_DESC.0.get();
-        let ptr = (REGION_SHA_START as *mut SHADescriptor).add(*cur_desc);
+        let ptr = (mem_layout::SHA.start() as *mut SHADescriptor).add(*cur_desc);
         *cur_desc += 1;
         ptr
     }

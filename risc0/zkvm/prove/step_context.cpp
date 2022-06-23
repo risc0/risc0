@@ -97,13 +97,22 @@ void StepContext::setMux(Fp* buf, size_t offset, size_t size, Fp val) {
   }
 }
 
-void StepContext::memWrite(Fp cycle, Fp addr, Fp low, Fp high) {
+void StepContext::memWrite(Fp cycle, Fp addrp, Fp low, Fp high) {
+  uint32_t addr = addrp.asUInt32();
   uint32_t data = low.asUInt32() | (high.asUInt32() << 16);
-  bool doWrite = addr.asUInt32() < (1 << (kMemBits - 1));
-  MemoryEvent evt = {addr.asUInt32(), cycle.asUInt32(), doWrite, data};
+  bool doWrite = addr < (1 << (kMemBits - 1));
+  MemoryEvent evt = {addr, cycle.asUInt32(), doWrite, data};
   mem.history.emplace(evt);
-  mem.data[addr.asUInt32()] = data;
-  io->onWrite(mem, cycle.asUInt32(), addr.asUInt32() * 4, data);
+  auto it = mem.data.find(addr);
+  if (it == mem.data.end()) {
+    mem.data.insert({addr, data});
+  } else {
+    if (it->second != data && !doWrite) {
+      throw(std::runtime_error("Double wrote write-once memory at " + hex(addr * 4, 8)));
+    }
+    it->second = data;
+  }
+  io->onWrite(mem, cycle.asUInt32(), addr * 4, data);
 }
 
 std::array<Fp, 2> StepContext::memRead(Fp cycle, Fp addr) {
