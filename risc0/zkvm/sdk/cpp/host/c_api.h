@@ -63,6 +63,8 @@ void risc0_init();
 risc0_method_id*
 risc0_method_id_compute(risc0_error* err, const uint8_t* bytes, size_t len, uint32_t limit);
 
+risc0_method_id* risc0_method_id_load(risc0_error* err, const uint8_t* bytes, size_t len);
+
 const void* risc0_method_id_get_buf(risc0_error* err, risc0_method_id* ptr, uint32_t* len);
 
 void risc0_method_id_free(risc0_error* err, const risc0_method_id* ptr);
