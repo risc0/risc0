@@ -43,9 +43,9 @@ void MemCheck::set(StepState& state) {
         equate(memIO.value.low(), prev.memIO.value.low());
         equate(memIO.value.high(), prev.memIO.value.high());
       }
-      memDiff.setPartExact(cycle.get() - prev.cycle.get() - 1, 0, 20);
+      memDiff.setPartExact(cycle.get() - prev.cycle.get() - 1, 0, kMaxCyclesPo2);
     }
-    BYZ_IF(1 - sameAddr.get()) { memDiff.setPartExact(addr - prevAddr - 1, 0, 20); }
+    BYZ_IF(1 - sameAddr.get()) { memDiff.setPartExact(addr - prevAddr - 1, 0, kMaxCyclesPo2); }
   }
 }
 

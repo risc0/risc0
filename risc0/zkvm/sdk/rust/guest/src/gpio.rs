@@ -14,15 +14,15 @@
 
 // These must match the values in zkvm/platform/io.h.  See this file
 // for documentation on these GPIO ports.
-pub(crate) const GPIO_SHA: *mut *const SHADescriptor = 0x001C_0000 as _;
-pub(crate) const GPIO_COMMIT: *mut *const IoDescriptor = 0x001C_0004 as _;
-pub(crate) const GPIO_FAULT: *mut *const u8 = 0x001C_0008 as _;
-pub(crate) const GPIO_LOG: *mut *const u8 = 0x001C_000C as _;
-pub(crate) const GPIO_GETKEY: *mut *const GetKeyDescriptor = 0x001C_0010 as _;
+pub(crate) const GPIO_SHA: *mut *const SHADescriptor = 0x01F0_0000 as _;
+pub(crate) const GPIO_COMMIT: *mut *const IoDescriptor = 0x01F0_0004 as _;
+pub(crate) const GPIO_FAULT: *mut *const u8 = 0x01F0_0008 as _;
+pub(crate) const GPIO_LOG: *mut *const u8 = 0x01F0_000C as _;
+pub(crate) const GPIO_GETKEY: *mut *const GetKeyDescriptor = 0x01F0_0010 as _;
 
-pub(crate) const GPIO_SENDRECV_CHANNEL: *mut u32 = 0x001C_0014 as _;
-pub(crate) const GPIO_SENDRECV_SIZE: *mut usize = 0x001C_0018 as _;
-pub(crate) const GPIO_SENDRECV_ADDR: *mut *const u8 = 0x001C_001C as _;
+pub(crate) const GPIO_SENDRECV_CHANNEL: *mut u32 = 0x01F0_0014 as _;
+pub(crate) const GPIO_SENDRECV_SIZE: *mut usize = 0x01F0_0018 as _;
+pub(crate) const GPIO_SENDRECV_ADDR: *mut *const u8 = 0x01F0_001C as _;
 
 #[repr(C)]
 pub(crate) struct IoDescriptor {
