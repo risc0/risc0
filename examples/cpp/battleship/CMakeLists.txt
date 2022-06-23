@@ -1,7 +1,8 @@
 set(BATTLESHIP_OUTPUTDIR ${PROJECT_BINARY_DIR}/battleship)
 
 if(BUILD_RISCVM)
-  set(HOST_LIBS
+  set(BATTLESHIP_LIBS
+    battleship-core
     zkvm-circuit
     zkvm-sdk-cpp-host
     zkvm-prove
@@ -22,7 +23,7 @@ if(BUILD_RISCVM)
     battleship.cpp
   )
 
-  target_link_libraries(battleship battleship-core TBB::tbb ${HOST_LIBS})
+  target_link_libraries(battleship TBB::tbb ${BATTLESHIP_LIBS})
   set_target_properties(battleship PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BATTLESHIP_OUTPUTDIR})
 
   # Fetch methods built by an external project and render id file for both methods
@@ -57,13 +58,6 @@ if(BUILD_RISCVCROSS)
 endif ()
 
 if(ENABLE_TESTS AND BUILD_RISCVM)
-  add_executable(
-    battleship_test
-    test.cpp
-  )
-
-  target_link_libraries(battleship_test core battleship-core ${GTEST_LIBS} ${HOST_LIBS})
-  set_target_properties(battleship_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${BATTLESHIP_OUTPUTDIR})
-  gtest_discover_tests(battleship_test)
+  add_risc0_test_with_customdir (battleship test "${BATTLESHIP_LIBS}" ${BATTLESHIP_OUTPUTDIR})
 endif()
 

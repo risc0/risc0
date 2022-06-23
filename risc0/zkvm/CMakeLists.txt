@@ -5,7 +5,9 @@ if(NOT BUILD_RISCVCROSS)
   add_subdirectory(circuit)
 endif()
 
+  
+add_subdirectory(prove)
+
 if(BUILD_RISCVM)
-  add_subdirectory(prove)
   add_subdirectory(r0vm)
 endif()

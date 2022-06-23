@@ -11,7 +11,8 @@ if(BUILD_RISCVCROSS)
 endif()
 
 if(ENABLE_TESTS AND BUILD_RISCVM)
-  set(HOST_LIBS
+  set(DECK_LIBS
+    deck-core
     zkvm-circuit
     zkvm-sdk-cpp-host
     zkvm-prove
@@ -23,15 +24,12 @@ if(ENABLE_TESTS AND BUILD_RISCVM)
     core
   )
 
-  add_executable(
-    deck_test
-    test.cpp
+  add_library(deck-core
+    deck.cpp
     protocol.cpp
   )
 
-  target_link_libraries(deck_test core ${GTEST_LIBS} ${HOST_LIBS})
-  set_target_properties(deck_test PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${DECK_OUTPUTDIR})
-  gtest_discover_tests(deck_test)
+  add_risc0_test_with_customdir (deck test "${DECK_LIBS}" ${DECK_OUTPUTDIR})
 
   #Fetch methods build by an external project and render id file for both methods
   if(BUILD_EMBEDDED_RISC)
