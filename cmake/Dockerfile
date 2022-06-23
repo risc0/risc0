@@ -32,5 +32,5 @@ RUN mkdir buid
 WORKDIR /src/build
 RUN cmake ../risc0
 RUN make -j 4
-WORKDIR /src/build/battleship
-CMD  ["./battleship_test"]
+WORKDIR /src/build
+CMD  ["make test"]
