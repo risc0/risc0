@@ -31,7 +31,12 @@ constexpr size_t k256KB = 0x00040000;
 constexpr size_t k512KB = 0x00080000;
 constexpr size_t k1MB = 0x00100000;
 
-// Must match riscv.ld
+// Must match risc0.ld and zkvm/sdk/guest/src/mem_layout.rs.
+//
+// The circuit treats sections where the high bit (1 << (kMemBits -
+// 1)) is set as write-once memory, so read-write sections must not be
+// in the upper half of the memory space.
+//
 // clang-format off
 MEM_REGION(Stack,  0x00000000, k256KB)
 MEM_REGION(Data,   0x00040000, k256KB)
@@ -46,13 +51,6 @@ MEM_REGION(Commit, 0x00380000, k256KB)
 // clang-format on
 
 #define PTR_TO(type, name) reinterpret_cast<type*>(kMem##name##Start);
-
-struct ShaDescriptor {
-  uint32_t typeAndCount;
-  uint32_t idx;
-  uint32_t source;
-  uint32_t digest;
-};
 
 inline uint32_t* GPIO_InputBase() {
   return reinterpret_cast<uint32_t*>(kMemInputStart);

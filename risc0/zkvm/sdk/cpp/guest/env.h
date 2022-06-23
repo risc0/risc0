@@ -26,6 +26,43 @@
 
 namespace risc0 {
 
+/// @brief Deserializes objects from a serialized buffer.
+class Reader {
+public:
+  /// @brief Reads data from a buffer, advancing the read pointer.
+  ///
+  /// Returns a pointer to the resulting buffer.
+  /// The resulting buffer is word aligned and at least @c size bytes.
+  ///
+  /// @param size The size of the buffer to read, in bytes.
+  /// @return A pointer to the resulting buffer.
+  const void* read(size_t size);
+
+  /// @brief Reads data from the host.
+  ///
+  /// @tparam T The type to deserialize data from the host as.
+  /// @return An object with type @c T.
+  template <typename T> T read() {
+    BufferStreamReader stream(read_ptr);
+    ArchiveReader reader(stream);
+    T obj;
+    reader.transfer(obj);
+    read_ptr = stream.ptr;
+    return obj;
+  }
+
+  /// @brief Constructs a new reader
+  ///
+  /// @param ptr The start of the buffer to deserialize from
+  Reader(const uint32_t* ptr) : read_ptr(ptr) {}
+
+  // Don't accidentally copy this.
+  Reader(const Reader&) = delete;
+
+private:
+  const uint32_t* read_ptr;
+};
+
 /// @brief The Environment provides access to host I/O.
 /// @headerfile "risc0/zkvm/sdk/cpp/guest/env.h"
 ///
@@ -40,19 +77,16 @@ public:
   ///
   /// @param size The size of the buffer to read, in bytes.
   /// @return A pointer to the resulting buffer.
-  void* read(size_t size);
+  const void* read(size_t size);
 
   /// @brief Reads data from the host.
   ///
   /// @tparam T The type to deserialize data from the host as.
   /// @return An object with type @c T.
   template <typename T> T read() {
-    BufferStreamReader stream(read_ptr);
-    ArchiveReader reader(stream);
-    T obj;
-    reader.transfer(obj);
-    read_ptr = stream.ptr;
-    return obj;
+    fetchInitialInput();
+
+    return initial_input->read<T>();
   }
 
   /// @brief Writes data to the host.
@@ -118,6 +152,12 @@ public:
   /// @param msg The message to print.
   void print(const char* msg);
 
+  /// @brief Exchange data with host.
+  ///
+  /// Sends a request to the host on the given channel and returns the reply.
+  std::pair<void* /* address */, size_t /* length */>
+  sendRecv(uint32_t channel, const void* addr, size_t len);
+
 private:
   friend void _risc0_main(uint32_t* result);
 
@@ -125,11 +165,14 @@ private:
   ~Env();
 
 private:
+  void fetchInitialInput();
+
   SHA256 message;
   uint32_t* result;
   uint32_t* read_ptr;
   uint32_t* write_ptr;
   uint32_t* commit_ptr;
+  Reader* initial_input = nullptr;
 };
 
 /// @private

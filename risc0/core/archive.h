@@ -213,7 +213,7 @@ static_assert(is_stream_writer<BufferStreamWriter>(),
 // If a read is executed that does not end on a uint32_t boundary, any
 // remaining bytes are skipped up to the next uint32_t bondary.
 struct BufferStreamReader {
-  BufferStreamReader(uint32_t* ptr) : ptr(ptr) {}
+  BufferStreamReader(const uint32_t* ptr) : ptr(ptr) {}
 
   uint32_t read_word() { return *ptr++; }
 
@@ -228,7 +228,7 @@ struct BufferStreamReader {
     ptr += align(len) / sizeof(uint32_t);
   }
 
-  uint32_t* ptr;
+  const uint32_t* ptr;
 };
 static_assert(is_stream_reader<BufferStreamReader>(),
               "BufferStreamReader must conform to the stream reader model");

@@ -17,8 +17,8 @@
 using namespace risc0;
 
 extern "C" void risc0_main(Env* env) {
-  uint8_t* src = static_cast<uint8_t*>(env->read(1024));
-  uint8_t* dest = static_cast<uint8_t*>(env->read(1024));
+  const uint8_t* src = static_cast<const uint8_t*>(env->read(1024));
+  uint8_t* dest = const_cast<uint8_t*>(static_cast<const uint8_t*>(env->read(1024)));
   uint32_t srcOffset = env->read<uint32_t>();
   uint32_t destOffset = env->read<uint32_t>();
   uint32_t size = env->read<uint32_t>();

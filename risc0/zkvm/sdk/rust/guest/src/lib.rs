@@ -27,34 +27,13 @@ mod alloc;
 pub mod env;
 
 mod gpio;
+mod mem_layout;
 
 /// Functions for computing SHA-256 hashes.
 pub mod sha;
 
 use core::{arch::asm, mem, panic::PanicInfo, ptr};
-use gpio::{FaultDescriptor, GPIO_DESC_FAULT, GPIO_FAULT};
-
-const REGION_SIZE_256KB: usize = 256 * 1024;
-// const REGION_SIZE_512KB: usize = 0x0008_0000;
-const REGION_SIZE_1MB: usize = 1024 * 1024;
-
-const REGION_HEAP_START: usize = 0x0008_0000;
-const REGION_HEAP_LEN: usize = REGION_SIZE_1MB + REGION_SIZE_256KB;
-const REGION_HEAP_END: usize = REGION_HEAP_START + REGION_HEAP_LEN;
-
-const REGION_SHA_START: usize = 0x0030_0000;
-// const REGION_SHA_LEN: usize = REGION_SIZE_256KB;
-// const REGION_SHA_END: usize = REGION_SHA_START + REGION_SHA_LEN;
-
-const REGION_INPUT_START: usize = 0x0018_0000;
-const REGION_INPUT_LEN: usize = REGION_SIZE_256KB;
-// const REGION_INPUT_END: usize = REGION_INPUT_START + REGION_INPUT_LEN;
-
-const REGION_OUTPUT_START: usize = 0x0034_0000;
-const REGION_OUTPUT_LEN: usize = REGION_SIZE_256KB;
-
-const REGION_COMMIT_START: usize = 0x0038_0000;
-const REGION_COMMIT_LEN: usize = REGION_SIZE_256KB;
+use gpio::GPIO_FAULT;
 
 const WORD_SIZE: usize = mem::size_of::<u32>();
 
@@ -66,15 +45,10 @@ extern "C" {
 #[panic_handler]
 unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
     let msg = _alloc::format!("{}\0", panic_info);
-
     let ptr = msg.as_ptr();
     crate::memory_barrier(ptr);
-    GPIO_DESC_FAULT.write_volatile(FaultDescriptor {
-        // addr: "panic\0".as_ptr() as usize,
-        addr: ptr as usize,
-    });
     // A compliant host should fault when it receives this descriptor.
-    GPIO_FAULT.write_volatile(GPIO_DESC_FAULT);
+    GPIO_FAULT.write_volatile(ptr);
 
     // As a fallback for uncompliant hosts, force an unaligned write, which causes a
     // fault within the Risc0 VM.

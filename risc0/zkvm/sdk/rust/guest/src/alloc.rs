@@ -17,7 +17,7 @@ use core::{
     cell::UnsafeCell,
 };
 
-use crate::{_fault, align_up, REGION_HEAP_END, REGION_HEAP_START, WORD_SIZE};
+use crate::{_fault, align_up, mem_layout, WORD_SIZE};
 
 // Bump pointer allocator for *single* core systems
 struct BumpPointerAlloc {
@@ -52,8 +52,8 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
 #[cfg(target_arch = "riscv32")]
 #[global_allocator]
 static HEAP: BumpPointerAlloc = BumpPointerAlloc {
-    head: UnsafeCell::new(REGION_HEAP_START),
-    end: REGION_HEAP_END,
+    head: UnsafeCell::new(mem_layout::HEAP.start()),
+    end: mem_layout::HEAP.end(),
 };
 
 #[cfg(target_arch = "riscv32")]
