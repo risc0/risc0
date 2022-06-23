@@ -13,7 +13,7 @@ pub struct Build {
     rv_cc_install_path: String,
     no_risc0_default_flags: bool,
     compiler_default_flags: bool,
-    is_release_version: bool,
+    release_version: bool,
 }
 
 impl Build {
@@ -28,7 +28,7 @@ impl Build {
             rv_cc_install_path: rv_cc_install_path.to_string(),
             no_risc0_default_flags: false,
             compiler_default_flags: false,
-            is_release_version: false,
+            release_version: false,
         }
     }
 
@@ -418,6 +418,11 @@ impl Build {
         self
     }
 
+    pub fn release_version(&mut self, release_version: bool) -> &mut Self {
+        self.release_version = release_version;
+        self
+    }
+
     /// Run the compiler, generating the file `output`
     ///
     /// This will return a result instead of panicing; see compile() for the complete description.
@@ -505,7 +510,7 @@ impl Build {
             .flag(&format!("--sysroot={}/riscv32-unknown-elf", self.rv_cc_install_path))
             .flag(&format!("--gcc-toolchain={}", self.rv_cc_install_path));
 
-        if !self.is_release_version {
+        if !self.release_version {
             return
         }
 
