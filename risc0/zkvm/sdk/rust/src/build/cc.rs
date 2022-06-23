@@ -8,24 +8,24 @@ use cc::Error;
 #[derive(Debug)]
 /// A convenient wrapper around `cc::Build` with sensible defaults for building
 /// to `riscv32im` targets.
-pub struct Build<'b> {
+pub struct Build {
     inner: cc::Build,
-    rv_cc_install_path: &'b str,
+    rv_cc_install_path: String,
     no_risc0_default_flags: bool,
     compiler_default_flags: bool,
     is_release_version: bool,
 }
 
-impl<'b> Build<'b> {
+impl Build {
     /// Construct a new instance of a blank set of configuration.
     ///
     /// This builder is finished with the [`compile`] function.
     ///
     /// [`compile`]: struct.Build.html#method.compile
-    pub fn new(rv_cc_install_path: &'b str) -> Self {
+    pub fn new(rv_cc_install_path: &str) -> Self {
         Self {
             inner: cc::Build::new(),
-            rv_cc_install_path,
+            rv_cc_install_path: rv_cc_install_path.to_string(),
             no_risc0_default_flags: false,
             compiler_default_flags: false,
             is_release_version: false,
