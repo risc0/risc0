@@ -15,10 +15,12 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use std::mem;
-
 mod exception;
 mod ffi;
+
+use std::mem;
+
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 pub use exception::Exception;
 
@@ -72,6 +74,13 @@ impl MethodId {
         let ptr = unsafe {
             ffi::risc0_method_id_compute(&mut err, elf_contents.as_ptr(), elf_contents.len(), limit)
         };
+        ffi::check(err, || MethodId { ptr })
+    }
+
+    /// Load an existing MethodId from a buffer.
+    pub fn from_slice(slice: &[u8]) -> Result<Self> {
+        let mut err = ffi::RawError::default();
+        let ptr = unsafe { ffi::risc0_method_id_load(&mut err, slice.as_ptr(), slice.len()) };
         ffi::check(err, || MethodId { ptr })
     }
 
@@ -149,6 +158,36 @@ impl Receipt {
     /// Provides access to the `journal` of a [Receipt] as a [`Vec<u32>`].
     pub fn get_journal_vec(&self) -> Result<Vec<u32>> {
         into_words(self.get_journal()?)
+    }
+}
+
+// TODO(nils): Lift "Receipt" from the pure-rust verify implementation so we
+// don't have to proxy through this structure.
+#[derive(Serialize, Deserialize)]
+struct ReceiptData {
+    journal: Vec<u8>,
+    seal: Vec<u32>,
+}
+
+impl Serialize for Receipt {
+    /// Generate a serialized version of the whole receipt.
+    fn serialize<S: Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
+        let data: ReceiptData = ReceiptData {
+            journal: self.get_journal().unwrap().into(),
+            seal: self.get_seal().unwrap().into(),
+        };
+        data.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for Receipt {
+    /// Deserialize a receipt.
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let data = ReceiptData::deserialize(deserializer)?;
+        Ok(Receipt::new(&data.journal, &data.seal).unwrap())
     }
 }
 
@@ -237,7 +276,7 @@ fn init() {
 
 #[cfg(test)]
 mod test {
-    use super::Prover;
+    use super::{Prover, Receipt};
     use anyhow::Result;
     use risc0_zkvm_core::Digest;
     use risc0_zkvm_methods::methods::{FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SHA_ID, SHA_PATH};
@@ -286,6 +325,8 @@ mod test {
 
     #[test]
     fn memory_io() {
+        // TODO(nils): Move these constants into something both the guest and host can
+        // depend on
         const HEAP_START: u32 = 0x0008_0000;
         const COMMIT_START: u32 = 0x0038_0000;
 
@@ -311,7 +352,7 @@ mod test {
         assert!(run_memio(&[(HEAP_START + 1, 0)]).is_err());
     }
 
-    fn run_memio(pairs: &[(u32, u32)]) -> Result<()> {
+    fn run_memio(pairs: &[(u32, u32)]) -> Result<Receipt> {
         let mut vec = Vec::new();
         vec.push(pairs.len() as u32);
         for (first, second) in pairs {
@@ -322,7 +363,21 @@ mod test {
         prover.add_input(vec.as_slice()).unwrap();
         let receipt = prover.run()?;
         receipt.verify(IO_ID).unwrap();
-        Ok(())
+        Ok(receipt)
+    }
+
+    #[test]
+    fn receipt_serde() {
+        // TODO(nils): Move this constant into something both the guest and host can
+        // depend on
+        const HEAP_START: u32 = 0x0008_0000;
+
+        let receipt: Receipt = run_memio(&[(HEAP_START, 0)]).unwrap();
+        let ser: Vec<u32> = risc0_zkvm_serde::to_vec(&receipt).unwrap();
+        let de: Receipt = risc0_zkvm_serde::from_slice(&ser).unwrap();
+        assert_eq!(de.get_journal().unwrap(), receipt.get_journal().unwrap());
+        assert_eq!(de.get_seal().unwrap(), receipt.get_seal().unwrap());
+        de.verify(IO_ID).unwrap();
     }
 
     #[test]

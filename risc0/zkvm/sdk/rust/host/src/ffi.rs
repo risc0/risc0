@@ -66,6 +66,12 @@ extern "C" {
         limit: u32,
     ) -> *const RawMethodId;
 
+    pub(crate) fn risc0_method_id_load(
+        err: *mut RawError,
+        bytes: *const u8,
+        len: usize,
+    ) -> *const RawMethodId;
+
     pub(crate) fn risc0_method_id_get_buf(
         err: *mut RawError,
         ptr: *const RawMethodId,
