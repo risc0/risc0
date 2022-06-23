@@ -40,9 +40,9 @@ impl Build {
 
     /// Add multiple directories to the `-I` include path.
     pub fn includes<P>(&mut self, dirs: P) -> &mut Self
-    where
-        P: IntoIterator,
-        P::Item: AsRef<Path>,
+        where
+            P: IntoIterator,
+            P::Item: AsRef<Path>,
     {
         self.inner.includes(dirs);
         self
@@ -138,9 +138,9 @@ impl Build {
 
     /// Add files which will be compiled
     pub fn files<P>(&mut self, p: P) -> &mut Self
-    where
-        P: IntoIterator,
-        P::Item: AsRef<Path>,
+        where
+            P: IntoIterator,
+            P::Item: AsRef<Path>,
     {
         self.inner.files(p);
         self
@@ -183,7 +183,7 @@ impl Build {
     /// Some warnings only appear on some architecture or
     /// specific version of the compiler. Any user of this crate,
     /// or any other crate depending on it, could fail during
-        /// compile time.
+    /// compile time.
     pub fn warnings_into_errors(&mut self, warnings_into_errors: bool) -> &mut Self {
         self.inner.warnings_into_errors(warnings_into_errors);
         self
@@ -410,9 +410,9 @@ impl Build {
 
     #[doc(hidden)]
     pub fn __set_env<A, B>(&mut self, a: A, b: B) -> &mut Self
-    where
-        A: AsRef<OsStr>,
-        B: AsRef<OsStr>,
+        where
+            A: AsRef<OsStr>,
+            B: AsRef<OsStr>,
     {
         self.inner.__set_env(a, b);
         self
@@ -519,5 +519,50 @@ impl Build {
             .flag("-feliminate-unused-debug-symbols")
             .flag("-feliminate-unused-debug-types")
             .flag("-fvirtual-function-elimination");
+    }
+
+    /// This will return a result instead of panicing; see expand() for the complete description.
+    pub fn try_expand(&self) -> Result<Vec<u8>, Error> {
+        self.inner.try_expand()
+    }
+
+    /// Run the compiler, returning the macro-expanded version of the input files.
+    ///
+    /// This is only relevant for C and C++ files.
+    ///
+    /// # Panics
+    /// Panics if more than one file is present in the config, or if compiler
+    /// path has an invalid file name.
+    pub fn expand(&self) -> Vec<u8> {
+        self.inner.expand()
+    }
+
+    /// Get the compiler that's in use for this configuration.
+    ///
+    /// This function will return a `Tool` which represents the culmination
+    /// of this configuration at a snapshot in time. The returned compiler can
+    /// be inspected (e.g. the path, arguments, environment) to forward along to
+    /// other tools, or the `to_command` method can be used to invoke the
+    /// compiler itself.
+    ///
+    /// This method will take into account all configuration such as debug
+    /// information, optimization level, include directories, defines, etc.
+    /// Additionally, the compiler binary in use follows the standard
+    /// conventions for this path, e.g. looking at the explicitly set compiler,
+    /// environment variables (a number of which are inspected here), and then
+    /// falling back to the default configuration.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an error occurred while determining the architecture.
+    pub fn get_compiler(&self) -> cc::Build::Tool {
+        self.inner.get_compiler()
+    }
+
+    /// Get the compiler that's in use for this configuration.
+    ///
+    /// This will return a result instead of panicing; see get_compiler() for the complete description.
+    pub fn try_get_compiler(&self) -> Result<cc::Build::Tool, Error> {
+        self.inner.try_get_compiler()
     }
 }
