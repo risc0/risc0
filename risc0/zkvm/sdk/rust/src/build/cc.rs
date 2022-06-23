@@ -418,6 +418,7 @@ impl Build {
         self
     }
 
+    /// Configures whether to add flags that remove debugging information to improve performance.
     pub fn release_version(&mut self, release_version: bool) -> &mut Self {
         self.release_version = release_version;
         self
