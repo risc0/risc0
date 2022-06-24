@@ -21,8 +21,6 @@ jobs:
             config: --config=ci
 
     steps:
-      - name: install and run cargo-sort
-        run:  cargo install cargo-sort && cargo-sort -w
       - uses: actions/checkout@v2
       - uses: suyash/actions-bazelisk@v1
       - name: Build & test
@@ -44,4 +42,6 @@ jobs:
           toolchain: stable
       - run: cargo test --release
       - run: cargo fmt --all -- --check
+      - name: Install and run cargo-sort
+        run:  cargo install cargo-sort && cargo-sort -w
 
