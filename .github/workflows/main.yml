@@ -42,6 +42,11 @@ jobs:
           toolchain: stable
       - run: cargo test --release
       - run: cargo fmt --all -- --check
-      - name: Install and run cargo-sort
-        run:  cargo install cargo-sort && cargo-sort -w
+      - name: Install cargo-sort
+        uses: baptiste0928/cargo-install@v1
+        with:
+          crate: cargo-sort
+          version: "1.0"
+      - name: Run cargo-sort
+        run:  cargo-sort -w
 
