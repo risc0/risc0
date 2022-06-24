@@ -45,7 +45,7 @@ risc0_rust_library_pair(
     guest_features = ["verify"],
     host_deps = [
         "//risc0/zkp/rust/core:core_host",
-        "//risc0/zkvm/sdk/rust/hal",
+        "//risc0/zkp/rust/hal",
         "@crates_host//:anyhow",
         "@crates_host//:array-init",
         "@crates_host//:bytemuck",

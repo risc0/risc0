@@ -12,7 +12,7 @@ bytemuck = "1.9"
 ctor = "0.1"
 cxx = "1.0"
 log = "0.4"
-risc0-zkvm-serde = { path = "../serde" }
+risc0-zkvm-serde = { version = "0.9", path = "../serde" }
 risc0-zkvm-sys = { version = "0.9", path = "../../.." }
 serde = { version = "1.0", features = ["derive"] }
 
