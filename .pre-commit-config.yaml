@@ -1,4 +1,8 @@
 repos:
+- repo: https://github.com/DevinR528/cargo-sort
+  rev: v1.0.4
+  hooks:
+  - id: cargo-sort
 - repo: local
   hooks:
     - id: clang-format
