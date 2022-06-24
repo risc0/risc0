@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-circuit-gen"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2021"
 description = "RISC-V circuit (generated)"
 license = "Apache-2.0"
@@ -12,4 +12,4 @@ links = "risc0-zkvm-circuit-gen"
 path = "lib.rs"
 
 [build-dependencies]
-risc0-zkvm-circuit-sys = { version = "0.9", path = ".." }
+risc0-zkvm-circuit-sys = { version = "0.10", path = ".." }
