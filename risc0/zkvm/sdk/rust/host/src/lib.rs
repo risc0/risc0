@@ -327,8 +327,8 @@ mod test {
     fn memory_io() {
         // TODO(nils): Move these constants into something both the guest and host can
         // depend on
-        const HEAP_START: u32 = 0x0008_0000;
-        const COMMIT_START: u32 = 0x0038_0000;
+        const HEAP_START: u32 = 0x00A0_0000;
+        const COMMIT_START: u32 = 0x03F0_0000;
 
         // Double write to WOM are fine
         assert!(run_memio(&[(COMMIT_START, 1), (COMMIT_START, 1)]).is_ok());
@@ -370,7 +370,7 @@ mod test {
     fn receipt_serde() {
         // TODO(nils): Move this constant into something both the guest and host can
         // depend on
-        const HEAP_START: u32 = 0x0008_0000;
+        const HEAP_START: u32 = 0x00A0_0000;
 
         let receipt: Receipt = run_memio(&[(HEAP_START, 0)]).unwrap();
         let ser: Vec<u32> = risc0_zkvm_serde::to_vec(&receipt).unwrap();
