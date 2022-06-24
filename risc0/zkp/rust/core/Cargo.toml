@@ -17,8 +17,8 @@ bytemuck = { version = "1.9", features = ["derive"] }
 paste = "1.0"
 rand = { version = "0.8", default-features = false, features = ["small_rng"] }
 rand_core = "0.6"
-sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
+sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 
 [dev-dependencies]
 criterion = "0.3"

@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: suyash/actions-bazelisk@v1
+      - uses: risc0/actions-bazelisk@v1
       - name: Build & test
         env:
           CONFIG: ${{ matrix.config }}
@@ -37,10 +37,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: risc0/actions-rs-toolchain@v1
         with:
           toolchain: stable
+      - name: Install cargo-sort
+        uses: risc0/cargo-install@v1
+        with:
+          crate: cargo-sort
+          version: "1.0"
       - run: cargo test --release
       - run: cargo fmt --all -- --check
-      - run: cargo install cargo-sort && cargo-sort -c
-
+      - run: cargo sort --workspace --check

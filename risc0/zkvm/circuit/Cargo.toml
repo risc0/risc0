@@ -14,8 +14,9 @@ path = "lib.rs"
 [dependencies]
 anyhow = "1.0"
 cxx = "1.0"
+
 risc0-zkp-sys = { version = "0.9", path = "../../zkp" }
-risc0-zkvm-platform-sys = { version = "0.9", path = "../platform"}
+risc0-zkvm-platform-sys = { version = "0.9", path = "../platform" }
 
 [build-dependencies]
 cxx-build = "1.0"
