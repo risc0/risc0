@@ -1,5 +1,6 @@
 add_executable(make-id make-id.cpp)
-target_link_libraries(make-id
+target_link_libraries(
+  make-id
   zkvm-circuit
   zkvm-prove
   zkvm-verify
@@ -9,5 +10,4 @@ target_link_libraries(make-id
   zkp-prove
   zkp-core
   core
-  TBB::tbb
-)
+  TBB::tbb)

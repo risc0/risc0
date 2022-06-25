@@ -33,3 +33,14 @@ sed -i .bak 's/.* x-darwin.$//' riscv-gcc/gcc/config.host
 Linux Docker
 ----------------
 A sample docker file that executes an entire build process under linux is provided in the cmake folder.
+
+Formatting
+---------------
+cmake-format -i CMakeLists.txt  
+https://github.com/cheshirekow/cmake_format
+
+Testing
+---------------
+make test
+make test-<testname>
+

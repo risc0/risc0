@@ -12,6 +12,7 @@ if (UNIX AND NOT APPLE)
 endif ()
 
 add_library(core
+  util.cpp
   log.cpp
   elf.cpp
   rng.cpp

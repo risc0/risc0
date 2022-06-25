@@ -25,7 +25,8 @@ RUN make -j 4
 RUN make install
 WORKDIR /src
 RUN git clone https://github.com/risc0/risc0.git
-WORKDIR /src/risc0		#Remove this once merged
+WORKDIR /src/risc0
+RUN ls
 RUN git checkout cmakenative	#Remove this once merged
 WORKDIR /src			#Remove this once merged
 RUN mkdir buid
@@ -33,4 +34,4 @@ WORKDIR /src/build
 RUN cmake ../risc0
 RUN make -j 4
 WORKDIR /src/build
-CMD  ["make test"]
+CMD  ["make", "test"]

@@ -20,10 +20,8 @@ add_compile_options(
   -fno-rtti
   -fno-threadsafe-statics
   -fno-use-cxa-atexit
-  #-MD
-  #-MF
+  # -MD -MF
 )
-
 
 add_link_options(
   -DRISCV=1
@@ -37,5 +35,4 @@ add_link_options(
   ${CMAKE_SOURCE_DIR}/risc0/zkvm/platform/risc0.ld
   -lc
   -lgcc
-  -lsemihost
-)
+  -lsemihost)
