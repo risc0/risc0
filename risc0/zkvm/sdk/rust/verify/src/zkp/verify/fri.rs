@@ -65,7 +65,6 @@ impl VerifyRoundInfo {
         }
     }
 
-    /// Verifies a VerifyRoundInfo against an IOP.
     pub fn verify_query<S: Sha>(&mut self, iop: &mut ReadIOP<S>, pos: &mut usize, goal: &mut Fp4) {
         let quot: usize = *pos / self.domain;
         let group: usize = *pos % self.domain;
