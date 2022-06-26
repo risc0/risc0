@@ -15,7 +15,7 @@
 use clap::Parser;
 use std::{fs, io::Write};
 
-use risc0_zkvm_host::{MethodId, Prover, Receipt, DEFAULT_METHOD_ID_LIMIT};
+use risc0_zkvm::host::{MethodId, Prover, Receipt, DEFAULT_METHOD_ID_LIMIT};
 
 /// Generates a MethodID for a given RISC-V ELF binary.
 #[derive(Parser)]
@@ -119,7 +119,7 @@ fn main() {
     }
 
     if let Some(receipt_file) = args.receipt {
-        let receipt_data = risc0_zkvm_serde::to_vec(&receipt).unwrap();
+        let receipt_data = risc0_zkvm::serde::to_vec(&receipt).unwrap();
         fs::write(&receipt_file, bytemuck::cast_slice(&receipt_data)).unwrap();
         if args.verbose > 0 {
             eprintln!(

@@ -29,7 +29,7 @@ constexpr size_t kMemSize = (1 << kMemBits) * 4;
 
 constexpr size_t k1MB = 0x00100000;
 
-// Must match risc0.ld and zkvm/sdk/guest/src/mem_layout.rs.
+// Must match risc0.ld and zkvm/sdk/rust/platform/src/memory.rs.
 //
 // The circuit treats sections where the high bit (1 << (kMemBits -
 // 1)) is set as write-once memory, so read-write sections must not be

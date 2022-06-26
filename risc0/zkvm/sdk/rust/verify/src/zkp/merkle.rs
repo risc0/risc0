@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp_core::to_po2;
+use risc0_zkp::core::to_po2;
 
 /// The parameters of a merkle tree of prime field elements, including:
 /// row_size - the number of leaves in the tree

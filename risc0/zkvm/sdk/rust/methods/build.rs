@@ -1,3 +1,3 @@
 fn main() {
-    risc0_build::embed_methods();
+    risc0_zkvm::build::embed_methods();
 }

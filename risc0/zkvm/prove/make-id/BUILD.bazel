@@ -6,7 +6,7 @@ rust_binary(
     name = "make-id",
     srcs = ["src/main.rs"],
     deps = [
-        "//risc0/zkvm/sdk/rust/host",
+        "//risc0/zkvm/sdk/rust:zkvm_host",
         "@crates_host//:clap",
     ],
 )

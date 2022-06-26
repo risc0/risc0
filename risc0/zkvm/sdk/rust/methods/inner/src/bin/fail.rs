@@ -16,7 +16,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(non_snake_case)]
 
-risc0_zkvm_guest::entry!(main);
+risc0_zkvm::entry!(main);
 
 pub fn main() {
     panic!("Failure");

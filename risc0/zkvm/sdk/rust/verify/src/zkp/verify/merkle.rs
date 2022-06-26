@@ -14,7 +14,7 @@
 
 use alloc::{vec, vec::Vec};
 
-use risc0_zkp_core::{
+use risc0_zkp::core::{
     fp::Fp,
     sha::{Digest, Sha},
 };
