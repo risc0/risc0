@@ -46,38 +46,49 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 
 /// Perform a reverse butterfly transform of a buffer of (1 << n) numbers.
 /// The result of this computation is a discrete Fourier transform, but with
-/// changed indices. This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms)
+/// changed indices. This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms).
 /// The output of rev_butterfly(io, n) at index i is the sum over k from 0 to
-/// 2^n-1 of io[k] ROU_REV[n]^(k i'), where i' is i bit-reversed as an n-bit
+/// 2^n-1 of io\[k\] ROU_REV\[n\]^(k i'), where i' is i bit-reversed as an n-bit
 /// number.
 ///
 /// As an example, we'll work through a trace of the rev_butterfly algorithm
-/// with n = 3 on a list of length 8. Let w = ROU_REV[3] be the eighth root of
+/// with n = 3 on a list of length 8. Let w = ROU_REV\[3\] be the eighth root of
 /// unity. We start with
 ///
-///   [a0, a1, a2, a3, a4, a5, a6, a7]
+///   \[a0, a1, a2, a3, a4, a5, a6, a7\]
 ///
 /// After the loop, before the first round of recursive calls, we have
 ///
 ///   [a0+a4, a1+a5,     a2+a6,         a3+a7,
+///
 ///    a0-a4, a1w-a5w, a2w^2-a6w^2, a3w^3-a7w^3]
 ///
 /// After first round of recursive calls, we have
 ///
 ///   [a0+a4+a2+a6,         a1+a5+a3+a7,
+///
 ///    a0+a4-a2-a6,         a1w^2+a5w^2-a3w^2-a7w^2,
+///
 ///    a0-a4+a2w^2-a6w^2, a1w-a5w+a3w^3-a7w^3,
+///
 ///    a0-a4-a2w^2+a6w^2, a1w^3-a5w^3-a3w^5+a7w^5]
 ///
 /// And after the second round of recursive calls, we have
 ///
 ///   [a0+a4+a2+a6+a1+a5+a3+a7,
+///
 ///    a0+a4+a2+a6-a1-a5-a3-a7,
+///
 ///    a0+a4-a2-a6+a1w^2+a5w^2-a3w^2-a7w^2,
+///
 ///    a0+a4-a2-a6-a1w^2-a5w^2+a3w^2+a7w^2,
+///
 ///    a0-a4+a2w^2-a6w^2+a1w-a5w+a3w^3-a7w^3,
+///
 ///    a0-a4+a2w^2-a6w^2-a1w+a5w-a3w^3+a7w^3,
+///
 ///    a0-a4-a2w^2+a6w^2+a1w^3-a5w^3+a3w^5-a7w^5,
+///
 ///    a0-a4-a2w^2+a6w^2-a1w^3+a5w^3-a3w^5+a7w^5]
 ///
 /// Rewriting this, we get
