@@ -42,6 +42,8 @@ struct VerifyRoundInfo {
 }
 
 fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
+    // rev_butterfly computes a NTT in-place, and then bit_reverse permutes the
+    // array so that the values are in the correct indices.
     rev_butterfly(values, FRI_FOLD_PO2);
     let norm = Fp::new(FRI_FOLD as u32).inv();
     for i in 0..FRI_FOLD {
@@ -72,6 +74,7 @@ impl VerifyRoundInfo {
         }
     }
 
+    /// Verifies a VerifyRoundInfo against an IOP.
     pub fn verify_query<S: Sha>(&mut self, iop: &mut ReadIOP<S>, pos: &mut usize, goal: &mut Fp4) {
         let quot: usize = *pos / self.domain;
         let group: usize = *pos % self.domain;
