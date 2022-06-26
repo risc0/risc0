@@ -15,7 +15,7 @@
 use clap::Parser;
 use std::fs;
 
-use risc0_zkvm_host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
+use risc0_zkvm::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 
 /// Generates a MethodID for a given RISC-V ELF binary.
 #[derive(Parser)]

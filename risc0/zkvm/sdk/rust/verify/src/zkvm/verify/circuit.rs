@@ -15,7 +15,7 @@
 use alloc::{vec, vec::Vec};
 use core::slice;
 
-use risc0_zkp_core::{
+use risc0_zkp::core::{
     fp::Fp,
     fp4::Fp4,
     log2_ceil,

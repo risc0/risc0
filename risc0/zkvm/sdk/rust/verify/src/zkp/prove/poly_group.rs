@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp_core::{fp::Fp, log2_ceil};
-use risc0_zkp_hal::{Buffer, Hal};
+use risc0_zkp::core::{fp::Fp, log2_ceil};
+use risc0_zkp::hal::{Buffer, Hal};
 
 use crate::zkp::{prove::merkle::MerkleTreeProver, INV_RATE, QUERIES};
 

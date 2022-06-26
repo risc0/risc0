@@ -15,14 +15,14 @@
 use alloc::vec::Vec;
 
 use rand::RngCore;
-use risc0_zkp_core::{
+use risc0_zkp::core::{
     fp::Fp,
     fp4::{Fp4, EXT_SIZE},
     log2_ceil,
     sha::Sha,
     Random,
 };
-use risc0_zkp_hal::{Buffer, Hal};
+use risc0_zkp::hal::{Buffer, Hal};
 
 use crate::zkp::{
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},

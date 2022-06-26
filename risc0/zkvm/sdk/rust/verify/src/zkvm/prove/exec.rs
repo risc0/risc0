@@ -16,7 +16,7 @@
 
 use alloc::vec::Vec;
 
-use risc0_zkp_core::fp::Fp;
+use risc0_zkp::core::fp::Fp;
 
 pub struct ExecState {
     start_addr: u32,

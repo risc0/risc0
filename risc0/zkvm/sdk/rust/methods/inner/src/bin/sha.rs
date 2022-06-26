@@ -15,9 +15,9 @@
 #![no_main]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use risc0_zkvm_guest::{env, sha};
+use risc0_zkvm::guest::{env, sha};
 
-risc0_zkvm_guest::entry!(main);
+risc0_zkvm::entry!(main);
 
 pub fn main() {
     let data: &[u8] = env::read();

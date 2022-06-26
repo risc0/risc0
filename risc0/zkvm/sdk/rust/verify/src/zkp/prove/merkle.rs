@@ -15,11 +15,11 @@
 use alloc::vec::Vec;
 use core::cmp;
 
-use risc0_zkp_core::{
+use risc0_zkp::core::{
     fp::Fp,
     sha::{Digest, Sha},
 };
-use risc0_zkp_hal::{Buffer, Hal};
+use risc0_zkp::hal::{Buffer, Hal};
 
 use crate::zkp::{merkle::MerkleTreeParams, prove::write_iop::WriteIOP};
 

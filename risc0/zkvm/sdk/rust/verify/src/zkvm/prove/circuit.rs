@@ -17,8 +17,8 @@
 use alloc::vec::Vec;
 
 use paste::paste;
-use risc0_zkp_core::{fp::Fp, fp4::Fp4, sha::Sha};
-use risc0_zkp_hal::Buffer;
+use risc0_zkp::core::{fp::Fp, fp4::Fp4, sha::Sha};
+use risc0_zkp::hal::Buffer;
 
 use crate::{
     zkp::{self, prove::write_iop::WriteIOP, INV_RATE},

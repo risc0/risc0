@@ -4,7 +4,7 @@ extern crate bencher;
 use bencher::Bencher;
 
 use core::convert::TryFrom;
-use risc0_zkvm_verify::zkvm::{MethodID, Receipt};
+use risc0_zkvm::verify::zkvm::{MethodID, Receipt};
 use std::{fs, vec::Vec};
 
 fn receipt(bench: &mut Bencher) {
@@ -13,7 +13,7 @@ fn receipt(bench: &mut Bencher) {
         .chunks(4)
         .map(|bytes| u32::from_le_bytes(<[u8; 4]>::try_from(bytes).unwrap()))
         .collect();
-    let receipt: Receipt = risc0_zkvm_serde::from_slice(&as_u32).unwrap();
+    let receipt: Receipt = risc0_zkvm::serde::from_slice(&as_u32).unwrap();
 
     let method_id =
         &MethodID::try_from(fs::read("src/zkvm/simple_receipt.id").unwrap().as_slice()).unwrap();

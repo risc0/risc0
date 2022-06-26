@@ -19,7 +19,7 @@ pub(crate) mod taps;
 #[cfg(feature = "verify")]
 pub(crate) mod verify;
 
-use risc0_zkp_core::fp4::EXT_SIZE;
+use risc0_zkp::core::fp4::EXT_SIZE;
 
 const MAX_CYCLES_PO2: usize = 20;
 pub const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2;
