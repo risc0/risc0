@@ -93,14 +93,14 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 ///
 /// Rewriting this, we get
 ///
-///   [sum_k ak w^0,
+///   \[sum_k ak w^0,
 ///    sum_k ak w^4k,
 ///    sum_k ak w^2k,
 ///    sum_k ak w^6k,
 ///    sum_k ak w^1k,
 ///    sum_k ak w^5k,
 ///    sum_k ak w^3k,
-///    sum_k ak w^7k]
+///    sum_k ak w^7k\]
 ///
 /// The exponent multiplicands in the sum arise from reversing the indices as
 /// three-bit numbers. For example, 3 is 011 in binary, which reversed is 110,
