@@ -13,8 +13,14 @@
 // limitations under the License.
 
 #![no_std]
+// TODO: WIP porting pure rust prover impl.
+#![allow(unused)]
+#![allow(dead_code)]
 
 extern crate alloc;
 
-pub mod zkp;
+mod zkp;
 pub mod zkvm;
+
+const OUTPUT_REGS: usize = 9;
+const ACCUM_MIX_GLOBAL_SIZE: usize = 20;

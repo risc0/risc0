@@ -17,6 +17,7 @@
 #include "risc0/core/key.h"
 #include "risc0/zkp/core/fp.h"
 #include "risc0/zkvm/circuit/constants.h"
+#include "risc0/zkvm/platform/io.h"
 
 #include <map>
 #include <set>
@@ -60,7 +61,7 @@ struct MemoryState {
 
 struct IoHandler {
   virtual void onInit(MemoryState& mem) {}
-  virtual void onWrite(const BufferU8& data) {}
+  virtual BufferU8 onSendRecv(uint32_t channelId, const BufferU8& data) { return BufferU8(); }
   virtual void onCommit(const BufferU8& data) {}
   virtual void onFault(const std::string& msg);
   virtual KeyStore& getKeyStore() = 0;
@@ -91,6 +92,10 @@ public:
 
 private:
   IoHandler* io;
+
+  // Memory address of current host->guest transmission.  The host can only
+  // write to each memory location once, so this advances after each write.
+  uint32_t cur_host_to_guest_offset;
 };
 
 struct StepContext {

@@ -19,6 +19,7 @@
 
 #include <cstddef>
 #include <stdexcept>
+#include <vector>
 
 #define REQUIRE(x)                                                                                 \
   do {                                                                                             \
@@ -81,5 +82,8 @@ inline size_t constexpr log2Ceil(size_t in) {
 inline bool constexpr isPo2(size_t in) {
   return (size_t(1) << log2Ceil(in)) == in;
 }
+
+// Reads an entire file into a buffer.
+std::vector<uint8_t> loadFile(const std::string& path);
 
 } // namespace risc0

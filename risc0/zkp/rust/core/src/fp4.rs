@@ -19,7 +19,10 @@ use core::ops;
 use bytemuck::{Pod, Zeroable};
 use rand::Rng;
 
-use crate::fp::{Fp, P};
+use crate::{
+    fp::{Fp, FpMul, P},
+    Random,
+};
 
 const BETA: Fp = Fp::new(11);
 const NBETA: Fp = Fp::new(P - 11);
@@ -63,16 +66,6 @@ impl Fp4 {
     /// Returns the value one.
     pub fn one() -> Self {
         Self::from_u32(1)
-    }
-
-    /// Generate a random field element uniformly.
-    pub fn random<R: Rng>(rng: &mut R) -> Self {
-        Self([
-            Fp::random(rng),
-            Fp::random(rng),
-            Fp::random(rng),
-            Fp::random(rng),
-        ])
     }
 
     /// Returns the constant portion of a [Fp].
@@ -132,6 +125,24 @@ impl Fp4 {
             -a[1] * b0 + NBETA * a[3] * b2,
             -a[0] * b2 + a[2] * b0,
             a[1] * b2 - a[3] * b0,
+        ])
+    }
+}
+
+impl FpMul for Fp4 {
+    fn fp_mul(self, x: Fp) -> Self {
+        self * x
+    }
+}
+
+impl Random for Fp4 {
+    /// Generate a random field element uniformly.
+    fn random<R: Rng>(rng: &mut R) -> Self {
+        Self([
+            Fp::random(rng),
+            Fp::random(rng),
+            Fp::random(rng),
+            Fp::random(rng),
         ])
     }
 }
@@ -245,6 +256,7 @@ impl From<Fp> for Fp4 {
 #[cfg(test)]
 mod tests {
     use super::Fp4;
+    use crate::Random;
     use rand::SeedableRng;
 
     #[test]

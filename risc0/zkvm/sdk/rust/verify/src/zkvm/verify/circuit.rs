@@ -15,72 +15,72 @@
 use alloc::{vec, vec::Vec};
 use core::slice;
 
-use crate::zkp::{
-    read_iop::ReadIOP,
-    taps::Taps,
-    verify::{Circuit, VerificationError, VerificationError::*},
-};
 use risc0_zkp_core::{
     fp::Fp,
     fp4::Fp4,
-    sha::{Digest, Sha, DIGEST_WORDS},
+    log2_ceil,
+    sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE},
+    Random,
 };
 
-use crate::zkvm::{
-    poly_op::PolyOp,
-    poly_ops::{RISC0_CONS, RISC0_FP4S, RISC0_POLY_OPS},
-    taps::RISCV_TAPS,
+use crate::{
+    zkp::{
+        self,
+        taps::Taps,
+        verify::{read_iop::ReadIOP, VerificationError},
+        MAX_CYCLES,
+    },
+    zkvm::{
+        poly_op::PolyOp,
+        poly_ops::{RISC0_CONS, RISC0_FP4S, RISC0_POLY_OPS},
+        taps::RISCV_TAPS,
+    },
+    ACCUM_MIX_GLOBAL_SIZE, OUTPUT_REGS,
 };
 
-const OUTPUT_REGS: usize = 9;
-const ACCUM_MIX_SIZE: usize = 20;
-const MAX_CYCLES: usize = 1 << 20;
 const MIN_CYCLES: usize = 512;
 
-const fn log2_ceil(val: usize) -> usize {
-    let mut r: usize = 0;
-    while (1 << r) < val {
-        r += 1;
-    }
-    return r;
-}
-
-pub const CODE_DIGEST_COUNT: usize = log2_ceil(MAX_CYCLES / MIN_CYCLES) + 1;
-
 pub struct MethodID {
-    pub digests: [Digest; CODE_DIGEST_COUNT],
+    pub digests: Vec<Digest>,
 }
 
 impl TryFrom<&[u8]> for MethodID {
     type Error = VerificationError;
+
     fn try_from(bytes: &[u8]) -> Result<MethodID, VerificationError> {
-        let u32s: Result<Vec<u32>, VerificationError> = bytes
-            .chunks(4)
+        let words: Result<Vec<u32>, VerificationError> = bytes
+            .chunks(DIGEST_WORD_SIZE)
             .map(|bytes| {
                 Ok(u32::from_le_bytes(
-                    bytes.try_into().or(Err(ReceiptFormatError))?,
+                    bytes
+                        .try_into()
+                        .or(Err(VerificationError::ReceiptFormatError))?,
                 ))
             })
             .collect();
-        let digests: Result<Vec<Digest>, VerificationError> = u32s?
+        let digests: Result<Vec<Digest>, VerificationError> = words?
             .chunks(DIGEST_WORDS)
-            .map(|digest| Ok(Digest::new(digest.try_into().or(Err(ReceiptFormatError))?)))
+            .map(|digest| {
+                Ok(Digest::new(
+                    digest
+                        .try_into()
+                        .or(Err(VerificationError::ReceiptFormatError))?,
+                ))
+            })
             .collect();
-        Ok(MethodID {
-            digests: digests?.try_into().or(Err(ReceiptFormatError))?,
-        })
+        Ok(MethodID { digests: digests? })
     }
 }
 
-pub struct Risc0Circuit<'a> {
+pub struct RV32Circuit<'a> {
     po2: u32,
     globals: Vec<Fp>,
     code_id: &'a MethodID,
 }
 
-impl<'a> Risc0Circuit<'a> {
+impl<'a> RV32Circuit<'a> {
     pub fn new(code_id: &'a MethodID) -> Self {
-        Risc0Circuit {
+        RV32Circuit {
             po2: 0,
             globals: vec![],
             code_id,
@@ -110,9 +110,9 @@ impl MixState {
     }
 }
 
-impl<'a> Circuit for Risc0Circuit<'a> {
+impl<'a> zkp::verify::Circuit for RV32Circuit<'a> {
     fn taps(&self) -> &'static Taps<'static> {
-        return RISCV_TAPS;
+        RISCV_TAPS
     }
 
     fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {
@@ -126,7 +126,7 @@ impl<'a> Circuit for Risc0Circuit<'a> {
     }
 
     fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {
-        for _ in 0..ACCUM_MIX_SIZE {
+        for _ in 0..ACCUM_MIX_GLOBAL_SIZE {
             self.globals.push(Fp::random(iop));
         }
     }
@@ -140,7 +140,7 @@ impl<'a> Circuit for Risc0Circuit<'a> {
         if &self.code_id.digests[which_code] == root {
             Ok(())
         } else {
-            Err(MethodVerificationError)
+            Err(VerificationError::MethodVerificationError)
         }
     }
 

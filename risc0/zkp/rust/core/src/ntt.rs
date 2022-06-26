@@ -46,16 +46,16 @@ pub fn bit_reverse(io: &mut [Fp4], n: usize) {
 
 /// Perform a reverse butterfly transform of a buffer of (1 << n) numbers.
 /// The result of this computation is a discrete Fourier transform, but with
-/// changed indices. This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms).
+/// changed indices. This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms)
 /// The output of rev_butterfly(io, n) at index i is the sum over k from 0 to
 /// 2^n-1 of io\[k\] ROU_REV\[n\]^(k i'), where i' is i bit-reversed as an n-bit
 /// number.
 ///
 /// As an example, we'll work through a trace of the rev_butterfly algorithm
-/// with n = 3 on a list of length 8. Let w = ROU_REV\[3\] be the eighth root of
+/// with n = 3 on a list of length 8. Let w = ROU_REV[3] be the eighth root of
 /// unity. We start with
 ///
-///   \[a0, a1, a2, a3, a4, a5, a6, a7\]
+///   [a0, a1, a2, a3, a4, a5, a6, a7]
 ///
 /// After the loop, before the first round of recursive calls, we have
 ///

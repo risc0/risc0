@@ -74,7 +74,9 @@ private:
 
 class Prover {
 public:
-  Prover(const std::string& elfPath, const MethodId& methodId);
+  Prover(const uint8_t* bytes, size_t len, const MethodId& methodId);
+  Prover(std::vector<uint8_t> elfContents, const MethodId& methodId);
+  Prover(const std::string& elfFile, const MethodId& method_id);
   ~Prover();
 
   // Allows access to key store to get/set keys
@@ -105,6 +107,8 @@ public:
   Receipt run();
 
 private:
+  Prover() = default;
+
   ArchiveWriter<VectorStreamWriter>& getInputWriter();
   ArchiveReader<CheckedStreamReader>& getOutputReader();
   ArchiveReader<CheckedStreamReader>& getCommitReader();

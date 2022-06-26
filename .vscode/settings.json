@@ -9,5 +9,24 @@
     "rust": "html"
   },
   "files.eol": "\n",
-  "git.ignoreLimitWarning": true
+  "git.ignoreLimitWarning": true,
+  "files.associations": {
+    "*.sh": "shellscript",
+    "*.py": "python",
+    "*.cl": "c",
+    "*.rs": "rust",
+    "*.BUILD": "starlark",
+    "meson.build": "meson",
+    "*.mlir": "mlir",
+    "*.pbtxt": "prototxt",
+    "*.cfg": "python",
+    "*.scr": "tcl",
+    "cstddef": "cpp",
+    "*.bazel": "starlark",
+    "fstream": "cpp",
+    "ios": "cpp",
+    "iosfwd": "cpp",
+    "vector": "cpp",
+    "charconv": "cpp"
+  }
 }

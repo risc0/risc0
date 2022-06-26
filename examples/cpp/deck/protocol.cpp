@@ -33,7 +33,7 @@ DealerCommitMessage Dealer::getCommit(uint32_t deckSize) {
 
 ShuffleMessage Dealer::shuffle(const PlayerCommitMessage& msg) {
   playerKey = msg.playerKey;
-  MethodId methodId = risc0::makeMethodId("examples/cpp/deck/shuffle_method");
+  MethodId methodId = risc0::loadMethodId("examples/cpp/deck/shuffle_method.id");
   Prover prover("examples/cpp/deck/shuffle_method", methodId);
   prover.writeInput(deckSize);
   prover.setKey("dealer", dealerKey);
@@ -44,7 +44,7 @@ ShuffleMessage Dealer::shuffle(const PlayerCommitMessage& msg) {
 }
 
 CardResponseMessage Dealer::revealCard(const CardRequestMessage& msg) {
-  MethodId methodId = risc0::makeMethodId("examples/cpp/deck/card_method");
+  MethodId methodId = risc0::loadMethodId("examples/cpp/deck/card_method.id");
   Prover prover("examples/cpp/deck/card_method", methodId);
   prover.writeInput(deckSize);
   prover.writeInput(msg.pos);
@@ -64,7 +64,7 @@ PlayerCommitMessage Player::getCommit(const DealerCommitMessage& msg) {
 }
 
 void Player::verifyShuffleMessage(const ShuffleMessage& msg) {
-  MethodId methodId = risc0::makeMethodId("examples/cpp/deck/shuffle_method");
+  MethodId methodId = risc0::loadMethodId("examples/cpp/deck/shuffle_method.id");
   msg.receipt.verify(methodId);
   ReceiptReader reader(msg.receipt);
   ShuffleContent data = reader.read<ShuffleContent>();
@@ -79,7 +79,7 @@ CardRequestMessage Player::makeRequest(uint32_t pos) {
 }
 
 uint32_t Player::verifyResponse(const CardResponseMessage& msg) {
-  MethodId methodId = risc0::makeMethodId("examples/cpp/deck/card_method");
+  MethodId methodId = risc0::loadMethodId("examples/cpp/deck/card_method.id");
   msg.receipt.verify(methodId);
   ReceiptReader reader(msg.receipt);
   CardResponseContent data = reader.read<CardResponseContent>();

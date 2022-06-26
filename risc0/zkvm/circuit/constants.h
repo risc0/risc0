@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "risc0/core/util.h"
 #include "risc0/zkp/core/constants.h"
 #include "risc0/zkvm/platform/memory.h"
 
@@ -59,7 +60,7 @@ enum {
 } // namespace ShaCycleType
 
 CONSTSCALAR size_t kCodeSize = 16;
-CONSTSCALAR size_t kDataSize = 160;
+CONSTSCALAR size_t kDataSize = 162;
 CONSTSCALAR size_t kAccumSize = 10;
 
 CONSTSCALAR size_t kOutputRegs = 9;
@@ -73,5 +74,13 @@ CONSTSCALAR size_t kAccumMixGlobalSize = 20;
 CONSTSCALAR size_t kGlobalSize = kAccumMixGlobalOffset + kAccumMixGlobalSize;
 
 CONSTSCALAR size_t kComboCount = 5;
+
+/// The maximum number of entries that a MethodId table can have. This is based on the maximum
+/// number of cycles that the zkVM is allowed to execute.
+CONSTSCALAR size_t kMaxCodeDigestCount = log2Ceil(kMaxCycles / kMinCycles) + 1;
+
+/// The default number of digest entries in a MethodId. This is set to something less than the
+/// `kMaxCodeDigestCount` so that computation of MethodId doesn't take too long.
+CONSTSCALAR size_t kDefaultCodeDigestCount = 12;
 
 } // namespace risc0

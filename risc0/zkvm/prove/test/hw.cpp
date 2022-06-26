@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "risc0/core/elf.h"
 #include "risc0/core/log.h"
 #include "risc0/zkvm/prove/exec.h"
 
@@ -22,7 +23,7 @@ namespace risc0 {
 static std::vector<uint32_t> run(const std::string& name) {
   std::vector<uint32_t> regs;
   MemoryHandler io;
-  ExecState exec(("risc0/zkvm/prove/test/" + name).c_str());
+  ExecState exec(loadFile("risc0/zkvm/prove/test/" + name));
   exec.run(1 << 20, io);
   size_t size = exec.context.numSteps;
   // Extract registers

@@ -21,6 +21,7 @@
 
 namespace risc0 {
 
-std::unique_ptr<ProveCircuit> getRiscVProveCircuit(const std::string& elfFile, MemoryHandler& io);
+std::unique_ptr<ProveCircuit> getRiscVProveCircuit(const std::vector<uint8_t>& elfBytes,
+                                                   MemoryHandler& io);
 
 } // namespace risc0

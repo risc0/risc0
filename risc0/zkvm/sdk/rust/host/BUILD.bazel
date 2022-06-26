@@ -14,7 +14,10 @@ rust_library(
     deps = [
         "//risc0/zkvm/sdk/cpp/host",
         "//risc0/zkvm/sdk/rust/core:core_host",
+        "//risc0/zkvm/sdk/rust/serde:serde_host",
+        "@crates_host//:bytemuck",
         "@crates_host//:cxx",
         "@crates_host//:log",
+        "@crates_host//:serde",
     ],
 )

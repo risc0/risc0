@@ -14,7 +14,7 @@
 
 #include "risc0/core/elf.h"
 
-#include <fstream>
+#include <iostream>
 #include <set>
 #include <sstream>
 #include <vector>
@@ -57,15 +57,14 @@ struct ProgHeader {
 
 } // namespace
 
-uint32_t loadElf(const std::string& name, uint32_t maxMem, std::map<uint32_t, uint32_t>& memOut) {
+uint32_t loadElf(const std::vector<uint8_t>& elfBytes,
+                 uint32_t maxMem,
+                 std::map<uint32_t, uint32_t>& memOut) {
   using namespace std;
-  ifstream is;
-  is.open(name, ios::binary);
-  if (is.fail() || is.bad()) {
-    std::stringstream ss;
-    ss << "Could not load ELF: " << name;
-    throw std::runtime_error(ss.str());
-  }
+  // TODO(nils): Avoid this extra copy here.  Perhaps using basic_spanbuf once we support C++23?
+  std::string contents(reinterpret_cast<const char*>(elfBytes.data()),
+                       reinterpret_cast<const char*>(elfBytes.data() + elfBytes.size()));
+  std::istringstream is(contents);
   ElfHeader elfHeader;
   vector<ProgHeader> progHeaders;
   // Load the main ELF header

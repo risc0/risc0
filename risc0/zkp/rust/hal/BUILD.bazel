@@ -1,0 +1,22 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "hal",
+    srcs = [
+        "src/cpu.rs",
+        "src/lib.rs",
+    ],
+    crate_name = "risc0_zkp_hal",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//risc0/zkp/rust/core:core_host",
+        "@crates_host//:downcast-rs",
+        "@crates_host//:rand",
+        "@crates_host//:rayon",
+    ],
+)
+
+rust_test(
+    name = "test",
+    crate = ":hal",
+)

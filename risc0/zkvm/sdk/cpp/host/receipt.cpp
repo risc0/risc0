@@ -14,21 +14,23 @@
 
 #include "risc0/zkvm/sdk/cpp/host/receipt.h"
 
+#include "risc0/core/elf.h"
 #include "risc0/core/log.h"
 #include "risc0/zkp/core/sha256_cpu.h"
 #include "risc0/zkp/prove/prove.h"
 #include "risc0/zkp/verify/verify.h"
-#include "risc0/zkvm/prove/method_id.h"
+#include "risc0/zkvm/platform/io.h"
 #include "risc0/zkvm/prove/riscv.h"
 #include "risc0/zkvm/verify/riscv.h"
 
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 namespace risc0 {
 
 void Receipt::verify(const MethodId& methodId) const {
-  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(makeMethodDigest(methodId));
+  std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(methodId);
   risc0::verify(*circuit, seal.data(), seal.size());
   if (journal.size() != seal[8]) {
     std::stringstream ss;
@@ -49,8 +51,8 @@ void Receipt::verify(const MethodId& methodId) const {
 }
 
 struct Prover::Impl : public IoHandler {
-  Impl(const std::string& elfPath, const MethodId& methodId)
-      : elfPath(elfPath)
+  Impl(std::vector<uint8_t> elfContents, const MethodId& methodId)
+      : elfContents(elfContents)
       , methodId(methodId)
       , outputStream(outputBuffer)
       , commitStream(commitBuffer)
@@ -60,22 +62,22 @@ struct Prover::Impl : public IoHandler {
 
   virtual ~Impl() {}
 
-  void onInit(MemoryState& mem) override {
-    LOG(1, "Prover::onInit>");
-    uint32_t addr = kMemInputStart;
-    for (uint32_t word : inputStream.vec) {
-      if (addr > kMemInputEnd) {
-        throw std::runtime_error("Out of memory: inputs");
-      }
-      LOG(1, "  " << hex(addr) << ": " << hex(word));
-      mem.store(addr, word);
-      addr += sizeof(uint32_t);
-    }
-  }
+  void onInit(MemoryState& mem) override { LOG(1, "Prover::onInit>"); }
 
-  void onWrite(const BufferU8& buf) override {
-    LOG(1, "IoHandler::onWrite> " << buf.size());
-    outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
+  BufferU8 onSendRecv(uint32_t channel, const BufferU8& buf) override {
+    switch (channel) {
+    case kSendRecvChannel_Stdout:
+      LOG(1, "IoHandler::Stdout> " << buf.size());
+      outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
+      return BufferU8();
+    case kSendRecvChannel_InitialInput: {
+      const uint8_t* byte_ptr = reinterpret_cast<const uint8_t*>(inputStream.vec.data());
+      BufferU8 input(byte_ptr, byte_ptr + inputStream.vec.size() * sizeof(uint32_t));
+      LOG(1, "IoHandler::InitialInput, " << input.size() << " bytes");
+      return input;
+    }
+    }
+    throw(std::runtime_error("Unknown channel " + std::to_string(channel)));
   }
 
   void onCommit(const BufferU8& buf) override {
@@ -85,7 +87,7 @@ struct Prover::Impl : public IoHandler {
 
   KeyStore& getKeyStore() override { return keyStore; }
 
-  std::string elfPath;
+  std::vector<uint8_t> elfContents;
   MethodId methodId;
   KeyStore keyStore;
   BufferU8 outputBuffer;
@@ -126,8 +128,14 @@ void CheckedStreamReader::read_buffer(void* buf, size_t len) {
   cursor = end_cursor;
 }
 
+Prover::Prover(const uint8_t* bytes, size_t len, const MethodId& methodId)
+    : Prover(std::vector<uint8_t>(bytes, bytes + len), methodId) {}
+
+Prover::Prover(std::vector<uint8_t> elfContents, const MethodId& methodId)
+    : impl(new Impl(std::move(elfContents), methodId)) {}
+
 Prover::Prover(const std::string& elfPath, const MethodId& methodId)
-    : impl(new Impl(elfPath, methodId)) {}
+    : Prover(loadFile(elfPath), methodId) {}
 
 Prover::~Prover() = default;
 
@@ -188,7 +196,7 @@ Receipt Prover::run() {
   // Set the memory handlers to call back to the impl
   MemoryHandler handler(impl.get());
   // Make the circuit
-  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfPath.c_str(), handler);
+  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfContents, handler);
   BufferU32 seal = prove(*circuit);
   // Attach the full version of the output journal + construct receipt object
   Receipt receipt{getCommit(), seal};

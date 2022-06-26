@@ -15,15 +15,20 @@
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
 
-use std::{ffi::CString, mem};
-
 mod exception;
 mod ffi;
+
+use std::mem;
+
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 pub use exception::Exception;
 
 #[cxx::bridge]
 mod bridge {}
+
+/// The default digest count when generating a MethodId.
+pub const DEFAULT_METHOD_ID_LIMIT: u32 = 12;
 
 /// A Result specialized for [Exception].
 pub type Result<T> = std::result::Result<T, Exception>;
@@ -42,6 +47,12 @@ pub struct Prover {
     ptr: *mut ffi::RawProver,
 }
 
+/// A MethodId represents a unique identifier associated with a particular ELF
+/// binary.
+pub struct MethodId {
+    ptr: *const ffi::RawMethodId,
+}
+
 fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
     let mut vec = Vec::new();
     let chunks = slice.chunks_exact(4);
@@ -56,7 +67,58 @@ fn into_words(slice: &[u8]) -> Result<Vec<u32>> {
     Ok(vec)
 }
 
+impl MethodId {
+    /// Compute the MethodId associated with an existing ELF binary.
+    pub fn compute(elf_contents: &[u8], limit: u32) -> Result<Self> {
+        let mut err = ffi::RawError::default();
+        let ptr = unsafe {
+            ffi::risc0_method_id_compute(&mut err, elf_contents.as_ptr(), elf_contents.len(), limit)
+        };
+        ffi::check(err, || MethodId { ptr })
+    }
+
+    /// Load an existing MethodId from a buffer.
+    pub fn from_slice(slice: &[u8]) -> Result<Self> {
+        let mut err = ffi::RawError::default();
+        let ptr = unsafe { ffi::risc0_method_id_load(&mut err, slice.as_ptr(), slice.len()) };
+        ffi::check(err, || MethodId { ptr })
+    }
+
+    /// Access the raw slice of a MethodId.
+    pub fn as_slice(&self) -> Result<&[u8]> {
+        let mut err = ffi::RawError::default();
+        let mut len: u32 = 0;
+        let ptr = unsafe { ffi::risc0_method_id_get_buf(&mut err, self.ptr, &mut len) };
+        ffi::check(err, || unsafe {
+            std::slice::from_raw_parts(ptr, len as usize)
+        })
+    }
+}
+
+impl Drop for MethodId {
+    fn drop(&mut self) {
+        let mut err = ffi::RawError::default();
+        unsafe { ffi::risc0_method_id_free(&mut err, self.ptr) };
+        ffi::check(err, || ()).unwrap()
+    }
+}
+
 impl Receipt {
+    /// Construct a new [Receipt] from individual journal and seal parts.
+    pub fn new(journal: &[u8], seal: &[u32]) -> Result<Self> {
+        let mut err = ffi::RawError::default();
+        let ptr = unsafe {
+            ffi::risc0_receipt_new(
+                &mut err,
+                journal.as_ptr(),
+                journal.len(),
+                seal.as_ptr(),
+                seal.len(),
+            )
+        };
+        ffi::check(err, || Receipt { ptr })
+    }
+
     /// Verify that the current [Receipt] is a valid result of executing the
     /// method associated with the given method ID in a ZKVM.
     pub fn verify(&self, method_id: &[u8]) -> Result<()> {
@@ -99,16 +161,47 @@ impl Receipt {
     }
 }
 
+// TODO(nils): Lift "Receipt" from the pure-rust verify implementation so we
+// don't have to proxy through this structure.
+#[derive(Serialize, Deserialize)]
+struct ReceiptData {
+    journal: Vec<u8>,
+    seal: Vec<u32>,
+}
+
+impl Serialize for Receipt {
+    /// Generate a serialized version of the whole receipt.
+    fn serialize<S: Serializer>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> {
+        let data: ReceiptData = ReceiptData {
+            journal: self.get_journal().unwrap().into(),
+            seal: self.get_seal().unwrap().into(),
+        };
+        data.serialize(serializer)
+    }
+}
+
+impl<'de> Deserialize<'de> for Receipt {
+    /// Deserialize a receipt.
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let data = ReceiptData::deserialize(deserializer)?;
+        Ok(Receipt::new(&data.journal, &data.seal).unwrap())
+    }
+}
+
 impl Prover {
-    /// Create a new [Prover] with the given method (specified via `elf_path`)
-    /// and an associated method ID (specified via `method_id`).
-    pub fn new(elf_path: &str, method_id: &[u8]) -> Result<Self> {
+    /// Create a new [Prover] with the given method (specified via
+    /// `elf_contents`) and an associated method ID (specified via
+    /// `method_id`).
+    pub fn new(elf_contents: &[u8], method_id: &[u8]) -> Result<Self> {
         let mut err = ffi::RawError::default();
-        let elf_path = CString::new(elf_path).unwrap();
         let ptr = unsafe {
             ffi::risc0_prover_new(
                 &mut err,
-                elf_path.as_ptr(),
+                elf_contents.as_ptr(),
+                elf_contents.len(),
                 method_id.as_ptr(),
                 method_id.len(),
             )
@@ -183,7 +276,7 @@ fn init() {
 
 #[cfg(test)]
 mod test {
-    use super::Prover;
+    use super::{Prover, Receipt};
     use anyhow::Result;
     use risc0_zkvm_core::Digest;
     use risc0_zkvm_methods::methods::{FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SHA_ID, SHA_PATH};
@@ -222,7 +315,7 @@ mod test {
     }
 
     fn run_sha(msg: &str) -> Digest {
-        let mut prover = Prover::new(SHA_PATH, SHA_ID).unwrap();
+        let mut prover = Prover::new(&std::fs::read(SHA_PATH).unwrap(), SHA_ID).unwrap();
         let vec = to_vec(&msg).unwrap();
         prover.add_input(vec.as_slice()).unwrap();
         let receipt = prover.run().unwrap();
@@ -232,8 +325,10 @@ mod test {
 
     #[test]
     fn memory_io() {
-        const HEAP_START: u32 = 0x0008_0000;
-        const COMMIT_START: u32 = 0x0038_0000;
+        // TODO(nils): Move these constants into something both the guest and host can
+        // depend on
+        const HEAP_START: u32 = 0x00A0_0000;
+        const COMMIT_START: u32 = 0x03F0_0000;
 
         // Double write to WOM are fine
         assert!(run_memio(&[(COMMIT_START, 1), (COMMIT_START, 1)]).is_ok());
@@ -257,24 +352,38 @@ mod test {
         assert!(run_memio(&[(HEAP_START + 1, 0)]).is_err());
     }
 
-    fn run_memio(pairs: &[(u32, u32)]) -> Result<()> {
+    fn run_memio(pairs: &[(u32, u32)]) -> Result<Receipt> {
         let mut vec = Vec::new();
         vec.push(pairs.len() as u32);
         for (first, second) in pairs {
             vec.push(*first);
             vec.push(*second);
         }
-        let mut prover = Prover::new(IO_PATH, IO_ID).unwrap();
+        let mut prover = Prover::new(&std::fs::read(IO_PATH).unwrap(), IO_ID).unwrap();
         prover.add_input(vec.as_slice()).unwrap();
         let receipt = prover.run()?;
         receipt.verify(IO_ID).unwrap();
-        Ok(())
+        Ok(receipt)
+    }
+
+    #[test]
+    fn receipt_serde() {
+        // TODO(nils): Move this constant into something both the guest and host can
+        // depend on
+        const HEAP_START: u32 = 0x00A0_0000;
+
+        let receipt: Receipt = run_memio(&[(HEAP_START, 0)]).unwrap();
+        let ser: Vec<u32> = risc0_zkvm_serde::to_vec(&receipt).unwrap();
+        let de: Receipt = risc0_zkvm_serde::from_slice(&ser).unwrap();
+        assert_eq!(de.get_journal().unwrap(), receipt.get_journal().unwrap());
+        assert_eq!(de.get_seal().unwrap(), receipt.get_seal().unwrap());
+        de.verify(IO_ID).unwrap();
     }
 
     #[test]
     fn fail() {
         // Check that a compliant host will fault.
-        let prover = Prover::new(FAIL_PATH, FAIL_ID).unwrap();
+        let prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
         assert!(prover.run().is_err());
     }
 }

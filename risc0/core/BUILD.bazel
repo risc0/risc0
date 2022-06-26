@@ -6,6 +6,7 @@ cc_library(
         "elf.cpp",
         "log.cpp",
         "rng.cpp",
+        "util.cpp",
     ] + select(
         {
             "@bazel_tools//platforms:linux": ["rng_linux.cpp"],
