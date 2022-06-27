@@ -17,13 +17,6 @@ RUN ./configure --prefix=/usr/local/riscv32 --with-arch=rv32im --with-abi=ilp32 
 RUN make -j 4
 ENV PATH="/usr/local/riscv32/bin:${PATH}"
 WORKDIR /src
-RUN git clone https://github.com/oneapi-src/oneTBB.git
-RUN mkdir /src/oneTBB_build
-WORKDIR /src/oneTBB_build
-RUN cmake ../oneTBB
-RUN make -j 4
-RUN make install
-WORKDIR /src
 RUN git clone https://github.com/risc0/risc0.git
 WORKDIR /src/risc0
 RUN ls

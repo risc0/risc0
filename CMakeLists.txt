@@ -35,6 +35,7 @@ else()
   FetchContent_Declare(oneTBB
     GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
   )
+  set(TBB_TEST OFF CACHE BOOL "Switch off TBB Test build")
   FetchContent_MakeAvailable(oneTBB)
 
 
