@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.16.3)
 project(risc0 LANGUAGES C CXX ASM)
 
 include(ExternalProject)
+include(FetchContent)
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
@@ -31,6 +32,12 @@ else()
       ALWAYS TRUE
     )
   endif()
+  FetchContent_Declare(oneTBB
+    GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
+  )
+  FetchContent_MakeAvailable(oneTBB)
+
+
 endif()
 
 include(cmake/CMakeConfig.txt)

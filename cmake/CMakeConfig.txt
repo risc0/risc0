@@ -52,7 +52,6 @@ endif()
 
 if(BUILD_RISCVM)
   message("Building risc VM")
-  find_package(TBB REQUIRED)
 else()
   message(WARNING,"Builds for risc VM are disabled.")
 endif()
