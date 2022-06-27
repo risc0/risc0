@@ -1,25 +1,19 @@
 [workspace]
 members = [
-  "risc0/build",
   "risc0/core",
   "risc0/zkp",
-  "risc0/zkp/rust/core",
-  "risc0/zkp/rust/hal",
+  "risc0/zkp/rust",
   "risc0/zkvm",
   "risc0/zkvm/circuit",
   "risc0/zkvm/circuit/make-circuit",
   "risc0/zkvm/platform",
   "risc0/zkvm/prove/make-id",
-  "risc0/zkvm/sdk/rust/core",
-  "risc0/zkvm/sdk/rust/guest",
-  "risc0/zkvm/sdk/rust/host",
-  "risc0/zkvm/sdk/rust/methods",
-  "risc0/zkvm/sdk/rust/serde",
+  "risc0/zkvm/sdk/rust",
   "risc0/zkvm/sdk/rust/verify",
 ]
 
 exclude = [
-  "risc0/zkvm/sdk/rust/methods/inner",
+  "risc0/zkvm/sdk/rust/methods",
 ]
 
 [profile.release]

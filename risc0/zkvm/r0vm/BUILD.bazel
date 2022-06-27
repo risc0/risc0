@@ -4,8 +4,7 @@ rust_binary(
     name = "r0vm",
     srcs = ["src/main.rs"],
     deps = [
-        "//risc0/zkvm/sdk/rust/host",
-        "//risc0/zkvm/sdk/rust/serde:serde_host",
+        "//risc0/zkvm/sdk/rust:zkvm_host",
         "@crates_host//:bytemuck",
         "@crates_host//:clap",
     ],

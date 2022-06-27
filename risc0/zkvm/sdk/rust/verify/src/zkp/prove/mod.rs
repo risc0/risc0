@@ -20,7 +20,7 @@ pub(crate) mod write_iop;
 use alloc::{vec, vec::Vec};
 
 use array_init::array_init;
-use risc0_zkp_core::{
+use risc0_zkp::core::{
     fp::Fp,
     fp4::{Fp4, EXT_SIZE},
     poly::{poly_divide, poly_interpolate},
@@ -28,7 +28,7 @@ use risc0_zkp_core::{
     sha::Sha,
     Random,
 };
-use risc0_zkp_hal::{Buffer, Hal};
+use risc0_zkp::hal::{Buffer, Hal};
 
 use crate::zkp::{
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},

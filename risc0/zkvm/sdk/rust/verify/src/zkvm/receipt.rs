@@ -14,7 +14,7 @@
 
 use alloc::{vec, vec::Vec};
 
-use risc0_zkp_core::sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE};
+use risc0_zkp::core::sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE};
 use serde::{Deserialize, Serialize};
 
 use crate::zkp::verify::{verify, VerificationError};
@@ -35,7 +35,7 @@ impl Receipt {
 
     pub fn verify(&self, method_id: &MethodID) -> Result<bool, VerificationError> {
         let mut circuit = RV32Circuit::new(method_id);
-        let sha = risc0_zkp_core::sha::default_implementation();
+        let sha = risc0_zkp::core::sha::default_implementation();
         verify(sha, &mut circuit, &self.seal)?;
         if self.journal.len() != (self.seal[8] as usize) {
             return Ok(false);

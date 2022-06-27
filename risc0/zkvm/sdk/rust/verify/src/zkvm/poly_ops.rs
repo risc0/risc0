@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp_core::fp::Fp;
+use risc0_zkp::core::fp::Fp;
 
 use crate::zkvm::poly_op::PolyOp;
 

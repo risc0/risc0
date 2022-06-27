@@ -33,7 +33,7 @@ risc0_rust_library_pair(
     ],
     crate_name = "risc0_zkvm_verify",
     guest_deps = [
-        "//risc0/zkp/rust/core:core_guest",
+        "//risc0/zkp/rust:zkp_guest",
         "@crates_guest//:anyhow",
         "@crates_guest//:array-init",
         "@crates_guest//:bytemuck",
@@ -44,8 +44,8 @@ risc0_rust_library_pair(
     ],
     guest_features = ["verify"],
     host_deps = [
-        "//risc0/zkp/rust/core:core_host",
-        "//risc0/zkp/rust/hal",
+        "//risc0/zkp/rust:zkp_host",
+        "//risc0/zkvm/sdk/rust:zkvm_host",
         "@crates_host//:anyhow",
         "@crates_host//:array-init",
         "@crates_host//:bytemuck",

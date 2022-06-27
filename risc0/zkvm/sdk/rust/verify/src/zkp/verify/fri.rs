@@ -15,7 +15,7 @@
 use alloc::{vec, vec::Vec};
 
 use rand::RngCore;
-use risc0_zkp_core::{
+use risc0_zkp::core::{
     fp::Fp,
     fp4::{Fp4, EXT_SIZE},
     ntt::{bit_reverse, interpolate_ntt},

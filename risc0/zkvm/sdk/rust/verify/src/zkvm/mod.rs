@@ -30,7 +30,7 @@ pub use verify::circuit::MethodID;
 mod tests {
     extern crate std;
     use super::{MethodID, Receipt};
-    use risc0_zkp_core::sha::DIGEST_WORD_SIZE;
+    use risc0_zkp::core::sha::DIGEST_WORD_SIZE;
     use std::{convert::TryFrom, fs, io, vec::Vec};
     use test_log::test;
 
@@ -42,7 +42,7 @@ mod tests {
             .chunks(DIGEST_WORD_SIZE)
             .map(|bytes| u32::from_le_bytes(<[u8; DIGEST_WORD_SIZE]>::try_from(bytes).unwrap()))
             .collect();
-        let receipt: Receipt = risc0_zkvm_serde::from_slice(&as_u32).unwrap();
+        let receipt: Receipt = risc0_zkvm::serde::from_slice(&as_u32).unwrap();
 
         let method_id =
             MethodID::try_from(fs::read("src/zkvm/simple_receipt.id").unwrap().as_slice()).unwrap();

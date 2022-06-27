@@ -1,13 +1,23 @@
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
 
+filegroup(
+    name = "methods",
+    srcs = [
+        "test_fail",
+        "test_mem",
+        "test_sha",
+        "test_sha_accel",
+    ],
+    visibility = ["//visibility:public"],
+)
+
 risc0_rust_method(
     name = "test_sha",
     srcs = ["inner/src/bin/sha.rs"],
     limit = 5,
     visibility = ["//visibility:public"],
     deps = [
-        "//risc0/zkvm/sdk/rust/core:core_guest",
-        "//risc0/zkvm/sdk/rust/guest",
+        "//risc0/zkvm/sdk/rust:zkvm_guest",
     ],
 )
 
@@ -17,8 +27,8 @@ risc0_rust_method(
     limit = 10,
     visibility = ["//visibility:public"],
     deps = [
-        "//risc0/zkp/rust/core:core_guest",
-        "//risc0/zkvm/sdk/rust/guest",
+        "//risc0/zkp/rust:zkp_guest",
+        "//risc0/zkvm/sdk/rust:zkvm_guest",
     ],
 )
 
@@ -27,7 +37,7 @@ risc0_rust_method(
     srcs = ["inner/src/bin/io.rs"],
     limit = 5,
     visibility = ["//visibility:public"],
-    deps = ["//risc0/zkvm/sdk/rust/guest"],
+    deps = ["//risc0/zkvm/sdk/rust:zkvm_guest"],
 )
 
 risc0_rust_method(
@@ -35,5 +45,5 @@ risc0_rust_method(
     srcs = ["inner/src/bin/fail.rs"],
     limit = 5,
     visibility = ["//visibility:public"],
-    deps = ["//risc0/zkvm/sdk/rust/guest"],
+    deps = ["//risc0/zkvm/sdk/rust:zkvm_guest"],
 )

@@ -19,7 +19,7 @@ pub(crate) mod read_iop;
 use alloc::{vec, vec::Vec};
 use core::fmt;
 
-use risc0_zkp_core::{
+use risc0_zkp::core::{
     fp::Fp,
     fp4::{Fp4, EXT_SIZE},
     poly::poly_eval,

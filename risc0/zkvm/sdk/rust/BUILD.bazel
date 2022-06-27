@@ -1,0 +1,40 @@
+package(default_visibility = ["//visibility:public"])
+
+load("@rules_rust//rust:defs.bzl", "rust_test")
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
+
+risc0_rust_library_pair(
+    name = "zkvm",
+    srcs = glob(["src/**/*.rs"]),
+    crate_name = "risc0_zkvm",
+    data = [
+        "src/build/riscv32im-risc0-zkvm-elf.json",
+    ] + glob([
+        "**/README.md",
+    ]),
+    guest_deps = [
+        "//risc0/zkp/rust:zkp_guest",
+        "//risc0/zkvm/sdk/cpp/guest:crt0",
+        "@crates_guest//:bytemuck",
+        "@crates_guest//:cfg-if",
+        "@crates_guest//:serde",
+    ],
+    guest_features = ["bazel"],
+    host_deps = [
+        "@crates_host//:bytemuck",
+        "@crates_host//:cfg-if",
+        "@crates_host//:cxx",
+        "//risc0/zkp/rust:zkp_host",
+        "//risc0/zkvm/sdk/cpp/host",
+        "@crates_host//:log",
+        "@crates_host//:rand",
+        "@crates_host//:serde",
+    ],
+    host_features = [
+        "std",
+        "bazel",
+    ],
+    host_proc_macro_deps = ["@crates_host//:ctor"],
+    rustc_flags = ["-Coverflow_checks=on"],
+    visibility = ["//visibility:public"],
+)

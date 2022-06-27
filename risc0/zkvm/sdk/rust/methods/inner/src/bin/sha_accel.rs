@@ -15,14 +15,14 @@
 #![no_main]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use risc0_zkvm_guest::{env, sha};
+use risc0_zkvm::guest::{env, sha};
 
-risc0_zkvm_guest::entry!(main);
+risc0_zkvm::entry!(main);
 
 pub fn main() {
     let data: &[u8] = env::read();
     let digest = sha::digest_u8_slice(data);
     env::commit(&digest);
 
-    risc0_zkp_core::sha::testutil::test_sha_impl(&risc0_zkvm_guest::sha::Impl {})
+    risc0_zkp::core::sha::testutil::test_sha_impl(&risc0_zkvm::guest::sha::Impl {})
 }
