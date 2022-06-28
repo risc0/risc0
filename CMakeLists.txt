@@ -21,15 +21,31 @@ if(CMAKE_C_COMPILER MATCHES "risc")
 else()
   set(BUILD_RISCVCROSS OFF)
   if(BUILD_EMBEDDED_RISC)
+    if (CMAKE_GENERATOR STREQUAL "Ninja")
+      message ("Forcing a Ninja generator")
+      set (GEN_FLAG "-G Ninja")
+      set (GEN_BUILD "ninja")
+    else()
+      set (GEN_FLAG "")
+      set (GEN_BUILD "make")
+    endif()
     ExternalProject_Add(
       risc0_cross_riscv
       URL ""
       PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_cross
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-      CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/riscv.cmake
+      CMAKE_ARGS ${GEN_FLAG} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/riscv.cmake
       INSTALL_COMMAND cmake -E echo "Skipping install step."
-      BUILD_COMMAND make
+      BUILD_COMMAND ${GEN_BUILD}
       ALWAYS TRUE
+      #To specify outputs is only Ninja specific deficiency
+      BUILD_BYPRODUCTS risc0_cross/src/risc0_cross_riscv-build/bin/test_invalid_addr
+                       risc0_cross/src/risc0_cross_riscv-build/bin/test_wom_same
+                       risc0_cross/src/risc0_cross_riscv-build/bin/test_wom_diff
+                       risc0_cross/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/init_method
+                       risc0_cross/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/turn_method
+                       risc0_cross/src/risc0_cross_riscv-build/deck/examples/cpp/deck/card_method
+                       risc0_cross/src/risc0_cross_riscv-build/deck/examples/cpp/deck/shuffle_method
     )
   endif()
   FetchContent_Declare(oneTBB
