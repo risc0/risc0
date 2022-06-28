@@ -26,7 +26,7 @@ use super::{
 
 /// Reverses the bits in a 32 bit number
 /// For example 1011...0100 becomes 0010...1101
-fn bit_rev_32(mut x: u32) -> u32 {
+pub fn bit_rev_32(mut x: u32) -> u32 {
     x = ((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1);
     x = ((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2);
     x = ((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4);

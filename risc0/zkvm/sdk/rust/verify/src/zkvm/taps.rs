@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::taps::{Combo, Register, RegisterGroup, Taps};
+use risc0_zkp::taps::{
+    legacy::{Combo, Register, Taps},
+    RegisterGroup,
+};
 
 pub const RISCV_TAPS: &'static Taps = &Taps {
     registers: &[

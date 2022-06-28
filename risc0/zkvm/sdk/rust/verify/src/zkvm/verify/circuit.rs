@@ -23,7 +23,7 @@ use risc0_zkp::{
         sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE},
         Random,
     },
-    taps::Taps,
+    taps::legacy::Taps,
     verify::{self, read_iop::ReadIOP, VerificationError},
     MAX_CYCLES,
 };

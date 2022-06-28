@@ -52,7 +52,12 @@ pub struct Fp(u32);
 impl Fp {
     /// Create a new [Fp] from a raw integer.
     pub const fn new(x: u32) -> Self {
-        Self(x)
+        Self(x % P)
+    }
+
+    /// Create a new [Fp] with an 'invalid' value.
+    pub const fn invalid() -> Self {
+        Self(0xffffffff)
     }
 
     /// Return the maximum value that an [Fp] can take.

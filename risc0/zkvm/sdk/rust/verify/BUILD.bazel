@@ -7,7 +7,6 @@ risc0_rust_library_pair(
         "src/zkvm/mod.rs",
         "src/zkvm/poly_op.rs",
         "src/zkvm/poly_ops.rs",
-        "src/zkvm/prove/circuit.rs",
         "src/zkvm/prove/exec.rs",
         "src/zkvm/prove/io.rs",
         "src/zkvm/prove/mod.rs",

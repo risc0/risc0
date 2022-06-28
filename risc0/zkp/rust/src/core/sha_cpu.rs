@@ -41,6 +41,38 @@ fn set_word(buf: &mut [u8], idx: usize, word: u32) {
     buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_le_bytes());
 }
 
+impl Impl {
+    /// Compute the hash of an array of [Fp]s using the specified stride.
+    pub fn hash_fps_stride(
+        &self,
+        fps: &[Fp],
+        offset: usize,
+        size: usize,
+        stride: usize,
+    ) -> Box<Digest> {
+        let mut state = INIT_256;
+        let mut block: GenericArray<u8, U64> = GenericArray::default();
+        let mut off = 0;
+        for i in 0..size {
+            set_word(
+                block.as_mut_slice(),
+                off,
+                u32::from(fps[offset + i * stride]),
+            );
+            off += 1;
+            if off == 16 {
+                compress256(&mut state, slice::from_ref(&block));
+                off = 0;
+            }
+        }
+        if off != 0 {
+            block[off * 4..].fill(0);
+            compress256(&mut state, slice::from_ref(&block));
+        }
+        Box::new(Digest::new(state))
+    }
+}
+
 impl Sha for Impl {
     type DigestPtr = Box<Digest>;
 
@@ -64,22 +96,7 @@ impl Sha for Impl {
     }
 
     fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
-        let mut state = INIT_256;
-        let mut block: GenericArray<u8, U64> = GenericArray::default();
-        let mut off = 0;
-        for i in 0..fps.len() {
-            set_word(block.as_mut_slice(), off, u32::from(fps[i]));
-            off += 1;
-            if off == 16 {
-                compress256(&mut state, slice::from_ref(&block));
-                off = 0;
-            }
-        }
-        if off != 0 {
-            block[off * 4..].fill(0);
-            compress256(&mut state, slice::from_ref(&block));
-        }
-        Box::new(Digest::new(state))
+        self.hash_fps_stride(fps, 0, fps.len(), 1)
     }
 
     fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr {
