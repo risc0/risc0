@@ -54,8 +54,8 @@ impl Tap {
     }
 }
 
-/// This class is an implementation detail and carefully built to be efficient on
-/// RISC-V for use in recursion.
+/// This class is an implementation detail and carefully built to be efficient
+/// on RISC-V for use in recursion.
 #[derive(Debug)]
 pub struct TapData {
     // The offset in register group (reg #)
