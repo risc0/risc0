@@ -14,12 +14,14 @@
 
 use alloc::{vec, vec::Vec};
 
-use risc0_zkp::core::{
-    fp::Fp,
-    sha::{Digest, Sha},
+use crate::{
+    core::{
+        fp::Fp,
+        sha::{Digest, Sha},
+    },
+    merkle::MerkleTreeParams,
+    verify::read_iop::ReadIOP,
 };
-
-use crate::zkp::{merkle::MerkleTreeParams, verify::read_iop::ReadIOP};
 
 /// A struct against which we verify merkle branches, consisting of the
 /// parameters of the Merkle tree and top - the vector of hash values in the top

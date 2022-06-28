@@ -15,13 +15,15 @@
 use alloc::vec::Vec;
 use core::cmp;
 
-use risc0_zkp::core::{
-    fp::Fp,
-    sha::{Digest, Sha},
+use crate::{
+    core::{
+        fp::Fp,
+        sha::{Digest, Sha},
+    },
+    hal::{Buffer, Hal},
+    merkle::MerkleTreeParams,
+    prove::write_iop::WriteIOP,
 };
-use risc0_zkp::hal::{Buffer, Hal};
-
-use crate::zkp::{merkle::MerkleTreeParams, prove::write_iop::WriteIOP};
 
 pub struct MerkleTreeProver {
     params: MerkleTreeParams,

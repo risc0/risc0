@@ -19,7 +19,6 @@
 
 extern crate alloc;
 
-mod zkp;
 pub mod zkvm;
 
 const OUTPUT_REGS: usize = 9;

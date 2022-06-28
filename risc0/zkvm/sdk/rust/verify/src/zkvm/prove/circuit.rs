@@ -17,13 +17,15 @@
 use alloc::vec::Vec;
 
 use paste::paste;
-use risc0_zkp::core::{fp::Fp, fp4::Fp4, sha::Sha};
-use risc0_zkp::hal::Buffer;
-
-use crate::{
-    zkp::{self, prove::write_iop::WriteIOP, INV_RATE},
-    zkvm::{prove::exec::ExecState, taps::RISCV_TAPS},
+use risc0_zkp::{
+    core::{fp::Fp, fp4::Fp4, sha::Sha},
+    hal::Buffer,
+    prove::{write_iop::WriteIOP, Circuit},
+    taps::Taps,
+    INV_RATE,
 };
+
+use crate::zkvm::{prove::exec::ExecState, taps::RISCV_TAPS};
 
 pub struct RV32Circuit {
     exec: ExecState,
@@ -59,8 +61,8 @@ macro_rules! do_get {
     }};
 }
 
-impl zkp::prove::Circuit for RV32Circuit {
-    fn taps(&self) -> &'static zkp::taps::Taps<'static> {
+impl Circuit for RV32Circuit {
+    fn taps(&self) -> &'static Taps<'static> {
         RISCV_TAPS
     }
 

@@ -15,16 +15,16 @@
 use alloc::{vec, vec::Vec};
 
 use rand::RngCore;
-use risc0_zkp::core::{
-    fp::Fp,
-    fp4::{Fp4, EXT_SIZE},
-    ntt::{bit_reverse, interpolate_ntt},
-    rou::{ROU_FWD, ROU_REV},
-    sha::Sha,
-    to_po2, Random,
-};
 
-use crate::zkp::{
+use crate::{
+    core::{
+        fp::Fp,
+        fp4::{Fp4, EXT_SIZE},
+        ntt::{bit_reverse, interpolate_ntt},
+        rou::{ROU_FWD, ROU_REV},
+        sha::Sha,
+        to_po2, Random,
+    },
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };

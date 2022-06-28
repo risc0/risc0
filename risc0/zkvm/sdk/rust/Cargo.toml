@@ -12,7 +12,7 @@ anyhow = "1.0"
 bytemuck = "1.9"
 cargo_metadata = "0.14"
 cfg-if = "1.0"
-risc0-zkp = { version = "0.10", path = "../../../zkp/rust" }
+risc0-zkp = { version = "0.10", path = "../../../zkp/rust", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
@@ -41,14 +41,16 @@ risc0-zkvm-methods = { version = "0.1", path = "methods" }
 cxx-build = "1.0"
 
 [features]
-default = ["std"]
-std = ["serde/std"]
 bazel = []
+default = ["prove", "std", "verify"]
 doc = ["std"]
-
+prove = ["risc0-zkp/prove"]
 # The pure feature enables the 'pure' rust implementation of this
 # crate without any of the FFI interfaces exposed for e.g. the prover.
 pure = []
+std = ["risc0-zkp/std", "serde/std"]
+verify = ["risc0-zkp/verify"]
+
 
 [package.metadata.release]
 release = false

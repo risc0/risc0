@@ -13,6 +13,7 @@ harness = false
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
+array-init = { version = "2.0", optional = true }
 bytemuck = { version = "1.9", features = ["derive"] }
 downcast-rs = { version = "1.2", optional = true }
 paste = "1.0"
@@ -27,6 +28,8 @@ criterion = "0.3"
 rand = { version = "0.8", features = ["small_rng"] }
 
 [features]
-default = ["std"]
-std = []
+default = ["prove", "std", "verify"]
 hal = ["dep:downcast-rs", "dep:rayon"]
+prove = ["dep:array-init", "hal"]
+std = []
+verify = []

@@ -14,11 +14,13 @@ risc0_rust_library_pair(
         "@crates_guest//:serde",
         "@crates_guest//:sha2",
     ],
+    guest_features = ["verify"],
     guest_proc_macro_deps = [
         "@crates_guest//:paste",
     ],
     host_deps = [
         "@crates_host//:anyhow",
+        "@crates_host//:array-init",
         "@crates_host//:bytemuck",
         "@crates_host//:rand",
         "@crates_host//:rayon",
@@ -28,8 +30,10 @@ risc0_rust_library_pair(
         "@crates_host//:sha2",
     ],
     host_features = [
-        "std",
         "hal",
+        "prove",
+        "std",
+        "verify",
     ],
     host_proc_macro_deps = [
         "@crates_host//:paste",
