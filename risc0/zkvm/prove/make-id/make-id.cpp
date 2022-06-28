@@ -22,7 +22,10 @@ void writeMethodID(const std::string& filename, const risc0::MethodId& id) {
   if (!file) {
     throw std::runtime_error("Unable to open file: " + filename);
   }
-  file.write(reinterpret_cast<const char*>(&id), sizeof(risc0::MethodId));
+  if (id.size()==0) {
+    throw std::runtime_error("Unexpected MethodId size");
+  }
+  file.write(reinterpret_cast<const char*>(&id[0]), id.size()*sizeof (risc0::ShaDigest));
   file.close();
   if (!file.good()) {
     throw std::runtime_error("Error writing code id file: " + filename);
@@ -36,6 +39,7 @@ int main(int argc, char* argv[]) {
   }
   try {
     risc0::MethodId id = risc0::computeMethodId(argv[1]);
+    std::cout <<"SIZE IS:"<<id.size()<<std::endl;
     writeMethodID(argv[2], id);
   } catch (const std::exception& e) {
     std::cerr << "Unable to make code ID: " << e.what() << std::endl;
