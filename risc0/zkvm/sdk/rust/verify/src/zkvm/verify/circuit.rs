@@ -15,21 +15,20 @@
 use alloc::{vec, vec::Vec};
 use core::slice;
 
-use risc0_zkp::core::{
-    fp::Fp,
-    fp4::Fp4,
-    log2_ceil,
-    sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE},
-    Random,
+use risc0_zkp::{
+    core::{
+        fp::Fp,
+        fp4::Fp4,
+        log2_ceil,
+        sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE},
+        Random,
+    },
+    taps::Taps,
+    verify::{self, read_iop::ReadIOP, VerificationError},
+    MAX_CYCLES,
 };
 
 use crate::{
-    zkp::{
-        self,
-        taps::Taps,
-        verify::{read_iop::ReadIOP, VerificationError},
-        MAX_CYCLES,
-    },
     zkvm::{
         poly_op::PolyOp,
         poly_ops::{RISC0_CONS, RISC0_FP4S, RISC0_POLY_OPS},
@@ -110,7 +109,7 @@ impl MixState {
     }
 }
 
-impl<'a> zkp::verify::Circuit for RV32Circuit<'a> {
+impl<'a> verify::Circuit for RV32Circuit<'a> {
     fn taps(&self) -> &'static Taps<'static> {
         RISCV_TAPS
     }

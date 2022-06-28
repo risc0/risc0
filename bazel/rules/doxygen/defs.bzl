@@ -40,7 +40,7 @@ doxygen = rule(
             mandatory = True,
             executable = True,
             allow_files = True,
-            cfg = "host",
+            cfg = "exec",
         ),
     },
 )

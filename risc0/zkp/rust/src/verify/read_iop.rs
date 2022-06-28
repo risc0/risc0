@@ -13,7 +13,8 @@
 // limitations under the License.
 
 use rand::{Error, RngCore};
-use risc0_zkp::core::{
+
+use crate::core::{
     fp::Fp,
     fp4::Fp4,
     sha::{Digest, Sha, DIGEST_WORDS},

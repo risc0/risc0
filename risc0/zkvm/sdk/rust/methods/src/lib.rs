@@ -14,9 +14,4 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(not(target_arch = "riscv32"))]
-mod methods {
-    include!(concat!(env!("OUT_DIR"), "/methods.rs"));
-}
-
-pub use methods::*;
+include!(concat!(env!("OUT_DIR"), "/methods.rs"));

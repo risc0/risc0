@@ -15,16 +15,16 @@
 use alloc::vec::Vec;
 
 use rand::RngCore;
-use risc0_zkp::core::{
-    fp::Fp,
-    fp4::{Fp4, EXT_SIZE},
-    log2_ceil,
-    sha::Sha,
-    Random,
-};
-use risc0_zkp::hal::{Buffer, Hal};
 
-use crate::zkp::{
+use crate::{
+    core::{
+        fp::Fp,
+        fp4::{Fp4, EXT_SIZE},
+        log2_ceil,
+        sha::Sha,
+        Random,
+    },
+    hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };

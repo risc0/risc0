@@ -15,22 +15,22 @@
 mod fri;
 mod merkle;
 mod poly_group;
-pub(crate) mod write_iop;
+pub mod write_iop;
 
 use alloc::{vec, vec::Vec};
 
 use array_init::array_init;
-use risc0_zkp::core::{
-    fp::Fp,
-    fp4::{Fp4, EXT_SIZE},
-    poly::{poly_divide, poly_interpolate},
-    rou::ROU_REV,
-    sha::Sha,
-    Random,
-};
-use risc0_zkp::hal::{Buffer, Hal};
 
-use crate::zkp::{
+use crate::{
+    core::{
+        fp::Fp,
+        fp4::{Fp4, EXT_SIZE},
+        poly::{poly_divide, poly_interpolate},
+        rou::ROU_REV,
+        sha::Sha,
+        Random,
+    },
+    hal::{Buffer, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::{RegisterGroup, Taps},
     CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2,
