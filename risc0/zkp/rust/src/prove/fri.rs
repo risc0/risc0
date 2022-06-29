@@ -38,9 +38,11 @@ struct ProveRoundInfo {
 }
 
 impl ProveRoundInfo {
-    /// Computes a round of the folding protocol. Takes in the coefficients of the current polynomial,
-    /// and interacts with the IOP verifier to produce the evaluations of the polynomial, the merkle tree
-    /// committing to the evaluation, and the coefficients of the folded polynomial.
+    /// Computes a round of the folding protocol. Takes in the coefficients of
+    /// the current polynomial, and interacts with the IOP verifier to
+    /// produce the evaluations of the polynomial, the merkle tree
+    /// committing to the evaluation, and the coefficients of the folded
+    /// polynomial.
     pub fn new<H: Hal, S: Sha>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>) -> Self {
         // LOG(1, "Doing FRI folding");
         // Get the number of coefficients of the polynomial over the extension field.
@@ -49,10 +51,11 @@ impl ProveRoundInfo {
         let domain = size * INV_RATE;
         // Allocate space in which to put the interpolated values.
         let evaluated = hal.alloc(domain * EXT_SIZE);
-        // Put in the coefficients, padding out with zeros so that we are left with the same polynomial
-        // represented by a larger coefficient list
+        // Put in the coefficients, padding out with zeros so that we are left with the
+        // same polynomial represented by a larger coefficient list
         hal.batch_expand(&evaluated, coeffs, EXT_SIZE);
-        // Evaluate the NTT in-place, filling the buffer with the evaluations of the polynomial.
+        // Evaluate the NTT in-place, filling the buffer with the evaluations of the
+        // polynomial.
         hal.batch_evaluate_ntt(&evaluated, EXT_SIZE, log2_ceil(INV_RATE));
         // Compute a Merkle tree committing to the polynomial evaluations.
         let merkle = MerkleTreeProver::new(
