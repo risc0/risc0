@@ -36,7 +36,7 @@ impl_downcast!(BufferTrait<T>);
 pub trait Hal {
     fn alloc<T: 'static + Default + Clone>(&self, size: usize) -> Buffer<T>;
 
-    fn copy_from<T>(&self, slice: &[T]) -> Buffer<T>;
+    fn copy_from<T: 'static + Clone>(&self, slice: &[T]) -> Buffer<T>;
 
     fn batch_expand(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, count: usize);
 
@@ -60,8 +60,8 @@ pub trait Hal {
     fn mix_poly_coeffs(
         &self,
         out: &Buffer<Fp4>,
-        mix_start: &Buffer<Fp4>,
-        mix: &Buffer<Fp4>,
+        mix_start: &Fp4,
+        mix: &Fp4,
         input: &Buffer<Fp>,
         combos: &Buffer<u32>,
         input_size: usize,

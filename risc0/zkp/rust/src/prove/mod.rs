@@ -32,12 +32,12 @@ use crate::{
     },
     hal::{Buffer, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
-    taps::{RegisterGroup, Taps},
+    taps::{RegisterGroup, TapSet},
     CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2,
 };
 
 pub trait Circuit {
-    fn taps(&self) -> &'static Taps<'static>;
+    fn get_taps(&self) -> &TapSet;
 
     /// Perform initial 'execution' setting code + data.
     /// Additionally, write any 'results' as needed.
@@ -66,8 +66,10 @@ pub trait Circuit {
 }
 
 pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> Vec<u32> {
-    let taps = circuit.taps();
-    let taps_info = taps.get_info();
+    let taps = circuit.get_taps().clone();
+    let code_size = taps.group_size(RegisterGroup::Code);
+    let data_size = taps.group_size(RegisterGroup::Data);
+    let accum_size = taps.group_size(RegisterGroup::Accum);
     let mut iop = WriteIOP::new(sha);
 
     circuit.execute(&mut iop);
@@ -79,8 +81,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     // Make code + data PolyGroups + commit them
     let code_group = PolyGroup::new(
         hal,
-        &make_coeffs(hal, circuit.get_code(), taps_info.code_size),
-        taps_info.code_size,
+        &make_coeffs(hal, circuit.get_code(), code_size),
+        code_size,
         size,
     );
     code_group.merkle.commit(hal, &mut iop);
@@ -88,8 +90,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     let data_group = PolyGroup::new(
         hal,
-        &make_coeffs(hal, circuit.get_data(), taps_info.data_size),
-        taps_info.data_size,
+        &make_coeffs(hal, circuit.get_data(), data_size),
+        data_size,
         size,
     );
     data_group.merkle.commit(hal, &mut iop);
@@ -102,8 +104,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     //   LOG(1, "getAccum.size() = " << circuit.getAccum().size());
     let accum_group = PolyGroup::new(
         hal,
-        &make_coeffs(hal, circuit.get_accum(), taps_info.accum_size),
-        taps_info.accum_size,
+        &make_coeffs(hal, circuit.get_accum(), accum_size),
+        accum_size,
         size,
     );
     accum_group.merkle.commit(hal, &mut iop);
@@ -179,13 +181,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     let mut eval_group = |id: RegisterGroup, pg: &PolyGroup| {
         let mut which = Vec::new();
         let mut xs = Vec::new();
-        for reg in taps.registers.iter().take_while(|x| x.group == id) {
-            for tap in reg.back {
-                which.push(reg.offset as u32);
-                let x = back_one.pow(*tap) * z;
-                xs.push(x);
-                all_xs.push(x);
-            }
+        for tap in taps.group_taps(id) {
+            which.push(tap.offset() as u32);
+            let x = back_one.pow(tap.back()) * z;
+            xs.push(x);
+            all_xs.push(x);
         }
         let which = hal.copy_from(which.as_slice());
         let xs = hal.copy_from(xs.as_slice());
@@ -208,10 +208,14 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     // Now, convert the values to coefficients via interpolation
     let mut pos = 0;
     let mut coeff_u = vec![Fp4::default(); eval_u.len()];
-    for reg in taps.registers {
-        let size = reg.back.len();
-        poly_interpolate(&mut coeff_u[pos..], &all_xs[pos..], &eval_u[pos..], size);
-        pos += size;
+    for reg in taps.regs() {
+        poly_interpolate(
+            &mut coeff_u[pos..],
+            &all_xs[pos..],
+            &eval_u[pos..],
+            reg.size(),
+        );
+        pos += reg.size();
     }
 
     // Add in the coeffs of the check polynomials.
@@ -237,23 +241,21 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Do the coefficent mixing
     // Begin by making a zeroed output buffer
-    let combo_count = taps.combos.len();
-    let combos = vec![Fp4::default(); combo_count + 1];
+    let combo_count = taps.combos_size();
+    let combos = vec![Fp4::default(); size * (combo_count + 1)];
     let combos = hal.copy_from(combos.as_slice());
     let mut cur_mix = Fp4::one();
 
     let mut mix_group = |id: RegisterGroup, pg: &PolyGroup| {
         let mut which = Vec::new();
-        for reg in taps.registers.iter().take_while(|x| x.group == id) {
-            which.push(reg.combo_id as u32);
+        for reg in taps.group_regs(id) {
+            which.push(reg.combo_id() as u32);
         }
         let which_buf = hal.copy_from(which.as_slice());
-        let cur_mix_buf = hal.copy_from([cur_mix].as_slice());
-        let mix_buf = hal.copy_from([mix].as_slice());
         hal.mix_poly_coeffs(
             &combos,
-            &cur_mix_buf,
-            &mix_buf,
+            &cur_mix,
+            &mix,
             &pg.coeffs,
             &which_buf,
             which.len(),
@@ -268,12 +270,10 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     let which = [combo_count as u32; CHECK_SIZE];
     let which_buf = hal.copy_from(which.as_slice());
-    let cur_mix_buf = hal.copy_from([cur_mix].as_slice());
-    let mix_buf = hal.copy_from([mix].as_slice());
     hal.mix_poly_coeffs(
         &combos,
-        &cur_mix_buf,
-        &mix_buf,
+        &cur_mix,
+        &mix,
         &check_group.coeffs,
         &which_buf,
         CHECK_SIZE,
@@ -285,37 +285,43 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
         // Subtract the U coeffs from the combos
         let mut cur_pos = 0;
         let mut cur = Fp4::one();
-        for reg in taps.registers {
-            for i in 0..reg.back.len() {
-                combos[size * reg.combo_id + i] -= cur * coeff_u[cur_pos + i];
+        for reg in taps.regs() {
+            for i in 0..reg.size() {
+                combos[size * reg.combo_id() + i] -= cur * coeff_u[cur_pos + i];
             }
             cur *= mix;
-            cur_pos += reg.back.len();
+            cur_pos += reg.size();
         }
         // Subtract the final 'check' coefficents
-        for i in 0..CHECK_SIZE {
+        for _ in 0..CHECK_SIZE {
             combos[size * combo_count] -= cur * coeff_u[cur_pos];
             cur_pos += 1;
             cur *= mix;
         }
         // Divide each element by (x - Z * back1^back) for each back
-        for combo in 0..taps.combos.len() {
-            for back in taps.combos[combo].back {
+        for combo in 0..combo_count {
+            for back in taps.get_combo(combo).slice() {
                 assert_eq!(
-                    poly_divide(&mut combos[combo * size..size], z * back_one.pow(*back)),
+                    poly_divide(
+                        &mut combos[combo * size..combo * size + size],
+                        z * back_one.pow((*back).into())
+                    ),
                     Fp4::zero()
                 );
             }
         }
         // Divide check polys by Z4
         assert_eq!(
-            poly_divide(&mut combos[combo_count * size..size], z4),
+            poly_divide(
+                &mut combos[combo_count * size..combo_count * size + size],
+                z4
+            ),
             Fp4::zero()
         );
     });
 
-    // Sum the combos up into one final polynomial + make then make it into 4 Fp
-    // polys Additionally, it needs to be bit reversed to make everyone happy
+    // Sum the combos up into one final polynomial + make it into 4 Fp polys.
+    // Additionally, it needs to be bit reversed to make everyone happy
     let final_poly_coeffs = hal.alloc(size * EXT_SIZE);
     hal.eltwise_sum_fp4(&final_poly_coeffs, &combos);
 

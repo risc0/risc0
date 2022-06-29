@@ -28,7 +28,7 @@ use crate::{
         sha::{Digest, Sha},
         to_po2, Random,
     },
-    taps::Taps,
+    taps::legacy::Taps,
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
