@@ -20,6 +20,7 @@ pub mod write_iop;
 use alloc::{vec, vec::Vec};
 
 use array_init::array_init;
+use log::debug;
 
 use crate::{
     core::{
@@ -78,36 +79,27 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     assert!(po2 as usize <= MAX_CYCLES_PO2);
     let size = 1 << po2;
 
-    // Make code + data PolyGroups + commit them
-    let code_group = PolyGroup::new(
-        hal,
-        &make_coeffs(hal, circuit.get_code(), code_size),
-        code_size,
-        size,
-    );
-    code_group.merkle.commit(hal, &mut iop);
-    //   LOG(1, "codeGroup: " << codeGroup.getMerkle().getRoot());
+    debug!("code: {:?}", circuit.get_code());
+    debug!("data: {:?}", circuit.get_data());
 
-    let data_group = PolyGroup::new(
-        hal,
-        &make_coeffs(hal, circuit.get_data(), data_size),
-        data_size,
-        size,
-    );
+    // Make code + data PolyGroups + commit them
+    let code_coeffs = make_coeffs(hal, circuit.get_code(), code_size);
+    let code_group = PolyGroup::new(hal, &code_coeffs, code_size, size);
+    code_group.merkle.commit(hal, &mut iop);
+    debug!("codeGroup: {}", code_group.merkle.root());
+
+    let data_coeffs = make_coeffs(hal, circuit.get_data(), data_size);
+    let data_group = PolyGroup::new(hal, &data_coeffs, data_size, size);
     data_group.merkle.commit(hal, &mut iop);
-    //   LOG(1, "dataGroup: " << dataGroup.getMerkle().getRoot());
+    debug!("dataGroup: {}", data_group.merkle.root());
 
     circuit.accumulate(&mut iop);
 
     // Make the accum group + commit
-    //   LOG(1, "size = " << size << ", accumSize = " << accumSize);
-    //   LOG(1, "getAccum.size() = " << circuit.getAccum().size());
-    let accum_group = PolyGroup::new(
-        hal,
-        &make_coeffs(hal, circuit.get_accum(), accum_size),
-        accum_size,
-        size,
-    );
+    debug!("size = {size}, accumSize = {accum_size}");
+    debug!("getAccum.size() = {}", circuit.get_accum().len());
+    let accum_coeffs = make_coeffs(hal, circuit.get_accum(), accum_size);
+    let accum_group = PolyGroup::new(hal, &accum_coeffs, accum_size, size);
     accum_group.merkle.commit(hal, &mut iop);
     //   LOG(1, "accumGroup: " << accumGroup.getMerkle().getRoot());
 
@@ -344,11 +336,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
 fn make_coeffs<H: Hal>(hal: &H, input: &[Fp], count: usize) -> Buffer<Fp> {
     // Copy into accel buffer
-    let slice = hal.copy_from(input);
+    let buf = hal.copy_from(input);
     // Do interpolate
-    hal.batch_interpolate_ntt(&slice, count);
+    hal.batch_interpolate_ntt(&buf, count);
     // Convert f(x) -> f(3x), which effective multiplies cofficent c_i by 3^i.
     #[cfg(not(circuit_debug))]
-    hal.zk_shift(&slice, count);
-    slice
+    hal.zk_shift(&buf, count);
+    buf
 }

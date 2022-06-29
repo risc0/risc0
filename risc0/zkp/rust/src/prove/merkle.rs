@@ -14,6 +14,7 @@
 
 use alloc::vec::Vec;
 use core::cmp;
+use log::debug;
 
 use crate::{
     core::{
@@ -32,7 +33,7 @@ pub struct MerkleTreeProver {
     // A heap style array where node N has children 2*N and 2*N+1.  The size of
     // this buffer is (1 << (layers + 1)) and begins at offset 1 (zero is unused
     // to make indexing nicer).
-    nodes: Buffer<Digest>,
+    nodes: Vec<Buffer<Digest>>,
     // The root value
     root: Digest,
     // Buffers to copy proofs though to limit GPU/CPU transfers
@@ -59,23 +60,32 @@ impl MerkleTreeProver {
         assert_eq!(matrix.size(), rows * cols);
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
-        let nodes = hal.alloc(rows * 2);
+        let nodes = Vec::new();
+        for i in 0..params.layers {
+            let layer_size = 1 << i;
+            nodes.push(hal.alloc(layer_size));
+        }
+
+        // let nodes = hal.alloc(rows * 2);
         let tmp_col = hal.alloc(cols);
         let tmp_proof = hal.alloc(cmp::max(params.top_size, params.layers - params.top_layer));
         // Sha each column
-        hal.sha_rows(&nodes.slice(rows, rows), matrix);
+        debug!("rows: {rows}, cols: {cols}, matrix: {}", matrix.size());
+        hal.sha_rows(nodes.last().unwrap(), matrix);
         // For each layer, sha up the layer below
         for i in (0..params.layers).rev() {
             let layer_size = 1 << i;
-            hal.sha_fold(
-                &nodes.slice(layer_size, layer_size),
-                &nodes.slice(layer_size * 2, layer_size * 2),
-            );
+            debug!("i: {i}, layer_size: {layer_size}");
+            // hal.sha_fold(
+            //     &nodes.slice(layer_size, layer_size),
+            //     &nodes.slice(layer_size * 2, layer_size * 2),
+            // );
         }
         // Copy root into the tmp_proof top and move back to CPU
-        hal.eltwise_copy_digest(&tmp_proof.slice(0, 1), &nodes.slice(1, 1));
+        hal.eltwise_copy_digest(&mut tmp_proof.slice(0, 1), &nodes.slice(1, 1));
         let mut root = None;
         tmp_proof.slice(0, 1).view(&mut |view| {
+            debug!("view: {view:?}");
             root = Some(view[0]);
         });
         MerkleTreeProver {
@@ -91,8 +101,8 @@ impl MerkleTreeProver {
     /// Write the 'top' of the merkle tree and commit to the root.
     pub fn commit<H: Hal, S: Sha>(&self, hal: &H, iop: &mut WriteIOP<S>) {
         let top_size = self.params.top_size;
-        let proof_slice = self.tmp_proof.slice(0, top_size);
-        hal.eltwise_copy_digest(&proof_slice, &self.nodes.slice(top_size, top_size));
+        let mut proof_slice = self.tmp_proof.slice(0, top_size);
+        hal.eltwise_copy_digest(&mut proof_slice, &self.nodes.slice(top_size, top_size));
         proof_slice.view(&mut |view| {
             iop.write_digest_slice(view);
         });

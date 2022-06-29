@@ -13,6 +13,7 @@ path = "lib.rs"
 
 [dependencies]
 cxx = "1.0"
+log = "0.4"
 risc0-core-sys = { version = "0.10", path = "../core" }
 tbb-sys = "1.1"
 
