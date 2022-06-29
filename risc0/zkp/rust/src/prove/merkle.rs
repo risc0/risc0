@@ -33,7 +33,7 @@ pub struct MerkleTreeProver {
     // A heap style array where node N has children 2*N and 2*N+1.  The size of
     // this buffer is (1 << (layers + 1)) and begins at offset 1 (zero is unused
     // to make indexing nicer).
-    nodes: Vec<Buffer<Digest>>,
+    nodes: Buffer<Digest>,
     // The root value
     root: Digest,
     // Buffers to copy proofs though to limit GPU/CPU transfers
@@ -60,26 +60,20 @@ impl MerkleTreeProver {
         assert_eq!(matrix.size(), rows * cols);
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
-        let nodes = Vec::new();
-        for i in 0..params.layers {
-            let layer_size = 1 << i;
-            nodes.push(hal.alloc(layer_size));
-        }
-
-        // let nodes = hal.alloc(rows * 2);
+        let nodes = hal.alloc(rows * 2);
         let tmp_col = hal.alloc(cols);
         let tmp_proof = hal.alloc(cmp::max(params.top_size, params.layers - params.top_layer));
         // Sha each column
         debug!("rows: {rows}, cols: {cols}, matrix: {}", matrix.size());
-        hal.sha_rows(nodes.last().unwrap(), matrix);
+        hal.sha_rows(&nodes.slice(rows, rows), matrix);
         // For each layer, sha up the layer below
         for i in (0..params.layers).rev() {
             let layer_size = 1 << i;
             debug!("i: {i}, layer_size: {layer_size}");
-            // hal.sha_fold(
-            //     &nodes.slice(layer_size, layer_size),
-            //     &nodes.slice(layer_size * 2, layer_size * 2),
-            // );
+            hal.sha_fold(
+                &nodes.slice(layer_size, layer_size),
+                &nodes.slice(layer_size * 2, layer_size * 2),
+            );
         }
         // Copy root into the tmp_proof top and move back to CPU
         hal.eltwise_copy_digest(&mut tmp_proof.slice(0, 1), &nodes.slice(1, 1));
