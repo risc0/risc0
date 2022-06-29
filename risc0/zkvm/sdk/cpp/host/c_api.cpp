@@ -16,6 +16,7 @@
 
 #include <memory>
 
+#include "risc0/core/archive.h"
 #include "risc0/core/log.h"
 #include "risc0/zkp/verify/verify.h"
 #include "risc0/zkvm/prove/method_id.h"
@@ -88,6 +89,11 @@ risc0_method_id_compute(risc0_error* err, const uint8_t* bytes, size_t len, uint
     std::vector<uint8_t> elfContents(bytes, bytes + len);
     return new risc0_method_id{risc0::computeMethodId(elfContents, limit)};
   });
+}
+
+risc0_method_id* risc0_method_id_load(risc0_error* err, const uint8_t* bytes, size_t len) {
+  return ffi_wrap<risc0_method_id*>(
+      err, nullptr, [&] { return new risc0_method_id{risc0::loadMethodId(bytes, len)}; });
 }
 
 const void* risc0_method_id_get_buf(risc0_error* err, risc0_method_id* ptr, uint32_t* len) {

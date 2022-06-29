@@ -14,7 +14,7 @@
 
 // TODO: WIP
 
-use risc0_zkp_core::fp::Fp;
+use risc0_zkp::core::fp::Fp;
 
 use super::{io::MemoryState, GLOBAL_SIZE};
 

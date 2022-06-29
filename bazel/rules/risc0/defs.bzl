@@ -29,7 +29,7 @@ risc0_method_id = rule(
             default = "//risc0/zkvm/prove/make-id",
             executable = True,
             allow_single_file = True,
-            cfg = "host",
+            cfg = "exec",
         ),
     },
 )

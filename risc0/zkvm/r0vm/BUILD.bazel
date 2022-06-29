@@ -1,8 +1,11 @@
-load("//bazel/rules/cc:defs.bzl", "cc_binary")
+load("@rules_rust//rust:defs.bzl", "rust_binary")
 
-cc_binary(
+rust_binary(
     name = "r0vm",
-    srcs = ["r0vm.cpp"],
-    deps = ["//risc0/zkvm/sdk/cpp/host"],
+    srcs = ["src/main.rs"],
+    deps = [
+        "//risc0/zkvm/sdk/rust:zkvm_host",
+        "@crates_host//:bytemuck",
+        "@crates_host//:clap",
+    ],
 )
-
