@@ -66,6 +66,7 @@ endif()
                        risc0_cross/src/risc0_cross_riscv-build/deck/examples/cpp/deck/card_method
                        risc0_cross/src/risc0_cross_riscv-build/deck/examples/cpp/deck/shuffle_method
     )
+    add_dependencies (risc0_cross_riscv risc0_toolchain)
   endif()
   FetchContent_Declare(oneTBB
     GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git
