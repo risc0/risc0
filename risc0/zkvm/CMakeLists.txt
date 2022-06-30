@@ -7,7 +7,3 @@ endif()
 
   
 add_subdirectory(prove)
-
-if(BUILD_RISCVM)
-  add_subdirectory(r0vm)
-endif()
