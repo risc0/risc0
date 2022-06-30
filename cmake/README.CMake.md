@@ -1,12 +1,24 @@
 CMake build process.
 --------------------
 
-CMake is used to build tools test and risc ELF from the VM.
-CMake will install riscv toolchain as part of build process.
-It is also possible to configure a tree only for the risc code or only for VM
+CMake is used to build a full set of c++ code.
+CMake will install riscv toolchain as part of build process, if run by default.
+It is also possible to configure a tree only for the riscv code.
 
-To compile methods guest only:
-cmake -G Ninja -S . -B cmake-build -DCMAKE_TOOLCHAIN_FILE=cmake/riscv.cmake
+Full compilation
+-----------------
+Default compilation has no dependencies and will compile entire set, ie:
+cmake  -S . -B cmake-build
+
+To compile methods guest only
+-------------------------------
+This mode requires riscv toolchain to be installed in the path.
+cmake -S . -B cmake-build -DCMAKE_TOOLCHAIN_FILE=cmake/riscv.cmake
+
+
+Generators
+---------------
+Tested and supported are the make and Ninja generators.
 
 General settings
 ----------------

@@ -18,9 +18,13 @@ if(CMAKE_C_COMPILER MATCHES "risc")
   set(ENABLE_TESTS OFF)
   set(BUILD_RISCVM OFF)
   set(BUILD_EMBEDDED_RISC OFF)
-message ("CMAKE_HOST_SYSTEM_NAME" ${CMAKE_HOST_SYSTEM_NAME})
+
+else()
+  set(BUILD_RISCVCROSS OFF)
+  if(BUILD_EMBEDDED_RISC)
+
 if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL  Darwin AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL arm64)
-  set(APPLE_M1_MONKEY 
+  set(APPLE_M1_MONKEY
     sed -i .bak "s/.*=host-darwin.o$//" riscv-gcc/gcc/config.host && sed -i .bak "s/.* x-darwin.$//" riscv-gcc/gcc/config.host && )
 else()
   set(APPLE_M1_MONKEY )
@@ -29,16 +33,13 @@ endif()
       risc0_toolchain
       GIT_REPOSITORY "https://github.com/riscv/riscv-gnu-toolchain"
       UPDATE_COMMAND ""
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_toolchain	
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_toolchain
       CONFIGURE_COMMAND ${APPLE_M1_MONKEY} ./configure  --with-arch=rv32im --with-abi=ilp32 --with-cmodel=medany --prefix=${CMAKE_CURRENT_BINARY_DIR}/riscv32-toolchain-bin
       BUILD_IN_SOURCE 1
       BUILD_COMMAND make -j 4
       INSTALL_COMMAND make install
     )
 
-else()
-  set(BUILD_RISCVCROSS OFF)
-  if(BUILD_EMBEDDED_RISC)
     if (CMAKE_GENERATOR STREQUAL "Ninja")
       message ("Forcing a Ninja generator")
       set (GEN_FLAG "-G Ninja")
