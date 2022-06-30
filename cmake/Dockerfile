@@ -13,6 +13,6 @@ RUN echo "git clone https://github.com/risc0/risc0.git" > runner.sh
 RUN echo "cd risc0" >> runner.sh
 RUN echo "git checkout cmakenative" >> runner.sh 
 RUN echo "cmake . -B cmake-build" >> runner.sh
-RUN echo "cd cmake-build && make -j 4"
-RUN echo "cd cmake-build && make test"
+RUN echo "cd cmake-build && make -j 4" >> runner.sh
+RUN echo "cd cmake-build && make test" >> runner.sh
 CMD ["sh","/runner.sh"]
