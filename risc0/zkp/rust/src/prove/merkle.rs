@@ -14,6 +14,8 @@
 
 use alloc::vec::Vec;
 use core::cmp;
+#[allow(unused_imports)]
+use log::debug;
 
 use crate::{
     core::{
@@ -67,13 +69,10 @@ impl MerkleTreeProver {
         // For each layer, sha up the layer below
         for i in (0..params.layers).rev() {
             let layer_size = 1 << i;
-            hal.sha_fold(
-                &nodes.slice(layer_size, layer_size),
-                &nodes.slice(layer_size * 2, layer_size * 2),
-            );
+            hal.sha_fold(&nodes, layer_size * 2, layer_size);
         }
         // Copy root into the tmp_proof top and move back to CPU
-        hal.eltwise_copy_digest(&tmp_proof.slice(0, 1), &nodes.slice(1, 1));
+        hal.eltwise_copy_digest(&mut tmp_proof.slice(0, 1), &nodes.slice(1, 1));
         let mut root = None;
         tmp_proof.slice(0, 1).view(&mut |view| {
             root = Some(view[0]);
@@ -91,8 +90,8 @@ impl MerkleTreeProver {
     /// Write the 'top' of the merkle tree and commit to the root.
     pub fn commit<H: Hal, S: Sha>(&self, hal: &H, iop: &mut WriteIOP<S>) {
         let top_size = self.params.top_size;
-        let proof_slice = self.tmp_proof.slice(0, top_size);
-        hal.eltwise_copy_digest(&proof_slice, &self.nodes.slice(top_size, top_size));
+        let mut proof_slice = self.tmp_proof.slice(0, top_size);
+        hal.eltwise_copy_digest(&mut proof_slice, &self.nodes.slice(top_size, top_size));
         proof_slice.view(&mut |view| {
             iop.write_digest_slice(view);
         });

@@ -14,6 +14,7 @@
 
 use alloc::vec::Vec;
 
+use log::debug;
 use rand::RngCore;
 
 use crate::{
@@ -44,7 +45,7 @@ impl ProveRoundInfo {
     /// committing to the evaluation, and the coefficients of the folded
     /// polynomial.
     pub fn new<H: Hal, S: Sha>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>) -> Self {
-        // LOG(1, "Doing FRI folding");
+        debug!("Doing FRI folding");
         // Get the number of coefficients of the polynomial over the extension field.
         let size = coeffs.size() / EXT_SIZE;
         // Get a larger domain to interpolate over.
@@ -116,11 +117,11 @@ where
         iop.commit(&digest);
     });
     // Do queries
-    // LOG(1, "Doing Queries");
+    debug!("Doing Queries");
     for _ in 0..QUERIES {
         // Get a 'random' index.
         let rng = iop.rng.next_u32() as usize;
-        let mut pos = rng & orig_domain;
+        let mut pos = rng % orig_domain;
         // Do the 'inner' proof for this index
         f(iop, pos);
         // Write the per-round proofs

@@ -20,6 +20,7 @@ pub mod write_iop;
 use alloc::{vec, vec::Vec};
 
 use array_init::array_init;
+use log::debug;
 
 use crate::{
     core::{
@@ -79,37 +80,25 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     let size = 1 << po2;
 
     // Make code + data PolyGroups + commit them
-    let code_group = PolyGroup::new(
-        hal,
-        &make_coeffs(hal, circuit.get_code(), code_size),
-        code_size,
-        size,
-    );
+    let code_coeffs = make_coeffs(hal, circuit.get_code(), code_size);
+    let code_group = PolyGroup::new(hal, &code_coeffs, code_size, size);
     code_group.merkle.commit(hal, &mut iop);
-    //   LOG(1, "codeGroup: " << codeGroup.getMerkle().getRoot());
+    debug!("codeGroup: {}", code_group.merkle.root());
 
-    let data_group = PolyGroup::new(
-        hal,
-        &make_coeffs(hal, circuit.get_data(), data_size),
-        data_size,
-        size,
-    );
+    let data_coeffs = make_coeffs(hal, circuit.get_data(), data_size);
+    let data_group = PolyGroup::new(hal, &data_coeffs, data_size, size);
     data_group.merkle.commit(hal, &mut iop);
-    //   LOG(1, "dataGroup: " << dataGroup.getMerkle().getRoot());
+    debug!("dataGroup: {}", data_group.merkle.root());
 
     circuit.accumulate(&mut iop);
 
     // Make the accum group + commit
-    //   LOG(1, "size = " << size << ", accumSize = " << accumSize);
-    //   LOG(1, "getAccum.size() = " << circuit.getAccum().size());
-    let accum_group = PolyGroup::new(
-        hal,
-        &make_coeffs(hal, circuit.get_accum(), accum_size),
-        accum_size,
-        size,
-    );
+    debug!("size = {size}, accumSize = {accum_size}");
+    debug!("getAccum.size() = {}", circuit.get_accum().len());
+    let accum_coeffs = make_coeffs(hal, circuit.get_accum(), accum_size);
+    let accum_group = PolyGroup::new(hal, &accum_coeffs, accum_size, size);
     accum_group.merkle.commit(hal, &mut iop);
-    //   LOG(1, "accumGroup: " << accumGroup.getMerkle().getRoot());
+    debug!("accumGroup: {}", accum_group.merkle.root());
 
     // Set the poly mix value
     let poly_mix = Fp4::random(&mut iop.rng);
@@ -160,7 +149,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     // Make the PolyGroup + add it to the IOP;
     let check_group = PolyGroup::new(hal, &check_poly, CHECK_SIZE, size);
     check_group.merkle.commit(hal, &mut iop);
-    //   LOG(1, "checkGroup: " << checkGroup.getMerkle().getRoot());
+    debug!("checkGroup: {}", check_group.merkle.root());
 
     // Now pick a value for Z
     let z = Fp4::random(&mut iop.rng);
@@ -230,14 +219,14 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
         coeff_u.extend(view);
     });
 
-    //   LOG(1, "Size of U = " << coeffU.size());
+    debug!("Size of U = {}", coeff_u.len());
     iop.write_fp4_slice(&coeff_u);
     let hash_u = sha.hash_fp4s(&coeff_u);
     iop.commit(&hash_u);
 
     // Set the mix mix value
     let mix = Fp4::random(&mut iop.rng);
-    //   LOG(1, "Mix = " << mix);
+    debug!("Mix = {mix:?}");
 
     // Do the coefficent mixing
     // Begin by making a zeroed output buffer
@@ -252,16 +241,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
             which.push(reg.combo_id() as u32);
         }
         let which_buf = hal.copy_from(which.as_slice());
+        let group_size = taps.group_size(id);
         hal.mix_poly_coeffs(
-            &combos,
-            &cur_mix,
-            &mix,
-            &pg.coeffs,
-            &which_buf,
-            which.len(),
-            size,
+            &combos, &cur_mix, &mix, &pg.coeffs, &which_buf, group_size, size,
         );
-        cur_mix *= mix.pow(which.len());
+        cur_mix *= mix.pow(group_size);
     };
 
     mix_group(RegisterGroup::Accum, &accum_group);
@@ -327,7 +311,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Finally do the FRI protocol to prove the degree of the polynomial
     hal.batch_bit_reverse(&final_poly_coeffs, EXT_SIZE);
-    //   LOG(1, "FRI-proof, size = " << finalPolyCoeffs.size() / 4);
+    debug!("FRI-proof, size = {}", final_poly_coeffs.size() / EXT_SIZE);
 
     fri_prove(hal, &mut iop, &final_poly_coeffs, |iop, idx| {
         accum_group.merkle.prove(iop, idx);
@@ -338,17 +322,17 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Return final proof
     let proof = iop.proof;
-    //   LOG(1, "Proof size = " << ret.size());
+    debug!("Proof size = {}", proof.len());
     proof
 }
 
 fn make_coeffs<H: Hal>(hal: &H, input: &[Fp], count: usize) -> Buffer<Fp> {
     // Copy into accel buffer
-    let slice = hal.copy_from(input);
+    let buf = hal.copy_from(input);
     // Do interpolate
-    hal.batch_interpolate_ntt(&slice, count);
+    hal.batch_interpolate_ntt(&buf, count);
     // Convert f(x) -> f(3x), which effective multiplies cofficent c_i by 3^i.
     #[cfg(not(circuit_debug))]
-    hal.zk_shift(&slice, count);
-    slice
+    hal.zk_shift(&buf, count);
+    buf
 }
