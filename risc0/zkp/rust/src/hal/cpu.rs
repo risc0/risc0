@@ -15,6 +15,7 @@
 use core::{
     cell::{Ref, RefMut},
     ops::Range,
+    slice::{from_raw_parts, from_raw_parts_mut},
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -26,7 +27,9 @@ use crate::core::{
     sha::{Digest, Sha},
     sha_cpu,
 };
+#[allow(unused_imports)]
 use log::debug;
+use ndarray::{ArrayView, ArrayViewMut, Axis};
 use rayon::prelude::*;
 
 use super::{Buffer, BufferTrait, Hal};
@@ -97,7 +100,6 @@ impl<T: 'static + Clone> BufferTrait<T> for CpuBuffer<T> {
     fn slice(&self, offset: usize, size: usize) -> Buffer<T> {
         assert!(offset + size <= self.size());
         let region = Region(self.region.offset() + offset, size);
-        debug!("region: {region:?}");
         Rc::new(CpuBuffer {
             buf: Rc::clone(&self.buf),
             region,
@@ -241,18 +243,14 @@ impl Hal for CpuHal {
             .as_slice_mut();
         let input = input.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
         let combos = combos.downcast_ref::<CpuBuffer<u32>>().unwrap().as_slice();
-        let mut cur = *mix_start;
-        for i in 0..input_size {
-            let combo = combos[i] as usize;
-            let out_slice = &mut output[count * combo..count * (combo + 1)];
-            let in_slice = &input[count * i..count * (i + 1)];
-            out_slice
-                .par_iter_mut()
-                .zip(in_slice.par_iter())
-                .for_each(|(output, input)| {
-                    *output += Fp4::from_fp(*input);
-                });
-            cur *= *mix;
+        // TODO: parallelize
+        for idx in 0..count {
+            let mut cur = *mix_start;
+            for i in 0..input_size {
+                let id = combos[i] as usize;
+                output[count * id + idx] += cur * input[count * i + idx];
+                cur *= *mix;
+            }
         }
     }
 
@@ -272,12 +270,44 @@ impl Hal for CpuHal {
             });
     }
 
-    fn eltwise_sum_fp4(&self, _output: &Buffer<Fp>, _input: &Buffer<Fp4>) {
-        todo!()
+    fn eltwise_sum_fp4(&self, output: &Buffer<Fp>, input: &Buffer<Fp4>) {
+        let count = output.size() / 4;
+        let to_add = input.size() / count;
+        assert_eq!(output.size(), count * 4);
+        assert_eq!(input.size(), count * to_add);
+        let mut output = output
+            .downcast_ref::<CpuBuffer<Fp>>()
+            .unwrap()
+            .as_slice_mut();
+        let mut output = ArrayViewMut::from_shape((count, 4), &mut output).unwrap();
+        let output = output.axis_iter_mut(Axis(0)).into_par_iter();
+        let input = input.downcast_ref::<CpuBuffer<Fp4>>().unwrap().as_slice();
+        let input = ArrayView::from_shape((count, to_add), &input).unwrap();
+        let input = input.axis_iter(Axis(0)).into_par_iter();
+        output.zip(input).for_each(|(mut output, input)| {
+            let mut sum = Fp4::zero();
+            for i in input {
+                sum += *i;
+            }
+            for i in 0..4 {
+                output[i] = sum.elems()[i];
+            }
+        });
     }
 
-    fn eltwise_copy_fp(&self, _output: &Buffer<Fp>, _input: &Buffer<Fp>) {
-        todo!()
+    fn eltwise_copy_fp(&self, output: &Buffer<Fp>, input: &Buffer<Fp>) {
+        let count = output.size();
+        assert_eq!(count, input.size());
+        let mut output = output
+            .downcast_ref::<CpuBuffer<Fp>>()
+            .unwrap()
+            .as_slice_mut();
+        let input = input.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
+        (&mut output[..], &input[..])
+            .into_par_iter()
+            .for_each(|(output, input)| {
+                *output = *input;
+            });
     }
 
     fn eltwise_copy_digest(&self, output: &Buffer<Digest>, input: &Buffer<Digest>) {
@@ -294,7 +324,6 @@ impl Hal for CpuHal {
         (&mut output[..], &input[..])
             .into_par_iter()
             .for_each(|(output, input)| {
-                // debug!("input: {:?}", input);
                 *output = *input;
             });
     }
@@ -320,26 +349,26 @@ impl Hal for CpuHal {
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
             *output = *sha.hash_fps_stride(&matrix, idx, col_size, count);
         });
-        debug!("output: {matrix:?}");
     }
 
-    fn sha_fold(&self, output: &Buffer<Digest>, input: &Buffer<Digest>) {
-        assert_eq!(input.size(), 2 * output.size());
-        let mut output = output
+    fn sha_fold(&self, io: &Buffer<Digest>, input_size: usize, output_size: usize) {
+        assert_eq!(input_size, 2 * output_size);
+        let mut io = io
             .downcast_ref::<CpuBuffer<Digest>>()
             .unwrap()
             .as_slice_mut();
-        let input = input
-            .downcast_ref::<CpuBuffer<Digest>>()
-            .unwrap()
-            .as_slice();
-        debug!("input_size: {}, input: {input:?}", input.len());
         let sha = sha_cpu::Impl {};
-        (&mut output[..], input.par_chunks_exact(2))
-            .into_par_iter()
+        let (output, input) = unsafe {
+            (
+                from_raw_parts_mut(io.as_mut_ptr().add(output_size), output_size),
+                from_raw_parts(io.as_ptr().add(input_size), input_size),
+            )
+        };
+        output
+            .par_iter_mut()
+            .zip(input.par_chunks_exact(2))
             .for_each(|(output, input)| {
                 *output = *sha.hash_pair(&input[0], &input[1]);
-                // debug!("output: {:?}", output);
             });
     }
 }

@@ -79,9 +79,6 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     assert!(po2 as usize <= MAX_CYCLES_PO2);
     let size = 1 << po2;
 
-    debug!("code: {:?}", circuit.get_code());
-    debug!("data: {:?}", circuit.get_data());
-
     // Make code + data PolyGroups + commit them
     let code_coeffs = make_coeffs(hal, circuit.get_code(), code_size);
     let code_group = PolyGroup::new(hal, &code_coeffs, code_size, size);
@@ -101,7 +98,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     let accum_coeffs = make_coeffs(hal, circuit.get_accum(), accum_size);
     let accum_group = PolyGroup::new(hal, &accum_coeffs, accum_size, size);
     accum_group.merkle.commit(hal, &mut iop);
-    //   LOG(1, "accumGroup: " << accumGroup.getMerkle().getRoot());
+    debug!("accumGroup: {}", accum_group.merkle.root());
 
     // Set the poly mix value
     let poly_mix = Fp4::random(&mut iop.rng);
@@ -152,7 +149,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     // Make the PolyGroup + add it to the IOP;
     let check_group = PolyGroup::new(hal, &check_poly, CHECK_SIZE, size);
     check_group.merkle.commit(hal, &mut iop);
-    //   LOG(1, "checkGroup: " << checkGroup.getMerkle().getRoot());
+    debug!("checkGroup: {}", check_group.merkle.root());
 
     // Now pick a value for Z
     let z = Fp4::random(&mut iop.rng);
@@ -222,14 +219,14 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
         coeff_u.extend(view);
     });
 
-    //   LOG(1, "Size of U = " << coeffU.size());
+    debug!("Size of U = {}", coeff_u.len());
     iop.write_fp4_slice(&coeff_u);
     let hash_u = sha.hash_fp4s(&coeff_u);
     iop.commit(&hash_u);
 
     // Set the mix mix value
     let mix = Fp4::random(&mut iop.rng);
-    //   LOG(1, "Mix = " << mix);
+    debug!("Mix = {mix:?}");
 
     // Do the coefficent mixing
     // Begin by making a zeroed output buffer
@@ -244,16 +241,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
             which.push(reg.combo_id() as u32);
         }
         let which_buf = hal.copy_from(which.as_slice());
+        let group_size = taps.group_size(id);
         hal.mix_poly_coeffs(
-            &combos,
-            &cur_mix,
-            &mix,
-            &pg.coeffs,
-            &which_buf,
-            which.len(),
-            size,
+            &combos, &cur_mix, &mix, &pg.coeffs, &which_buf, group_size, size,
         );
-        cur_mix *= mix.pow(which.len());
+        cur_mix *= mix.pow(group_size);
     };
 
     mix_group(RegisterGroup::Accum, &accum_group);
@@ -319,7 +311,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Finally do the FRI protocol to prove the degree of the polynomial
     hal.batch_bit_reverse(&final_poly_coeffs, EXT_SIZE);
-    //   LOG(1, "FRI-proof, size = " << finalPolyCoeffs.size() / 4);
+    debug!("FRI-proof, size = {}", final_poly_coeffs.size() / EXT_SIZE);
 
     fri_prove(hal, &mut iop, &final_poly_coeffs, |iop, idx| {
         accum_group.merkle.prove(iop, idx);
@@ -330,7 +322,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Return final proof
     let proof = iop.proof;
-    //   LOG(1, "Proof size = " << ret.size());
+    debug!("Proof size = {}", proof.len());
     proof
 }
 

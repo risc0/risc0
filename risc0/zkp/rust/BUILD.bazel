@@ -24,6 +24,7 @@ risc0_rust_library_pair(
         "@crates_host//:bytemuck",
         "@crates_host//:downcast-rs",
         "@crates_host//:log",
+        "@crates_host//:ndarray",
         "@crates_host//:rand",
         "@crates_host//:rand_core",
         "@crates_host//:rayon",

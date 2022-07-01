@@ -14,6 +14,7 @@
 
 use alloc::vec::Vec;
 use core::cmp;
+#[allow(unused_imports)]
 use log::debug;
 
 use crate::{
@@ -64,22 +65,16 @@ impl MerkleTreeProver {
         let tmp_col = hal.alloc(cols);
         let tmp_proof = hal.alloc(cmp::max(params.top_size, params.layers - params.top_layer));
         // Sha each column
-        debug!("rows: {rows}, cols: {cols}, matrix: {}", matrix.size());
         hal.sha_rows(&nodes.slice(rows, rows), matrix);
         // For each layer, sha up the layer below
         for i in (0..params.layers).rev() {
             let layer_size = 1 << i;
-            debug!("i: {i}, layer_size: {layer_size}");
-            hal.sha_fold(
-                &nodes.slice(layer_size, layer_size),
-                &nodes.slice(layer_size * 2, layer_size * 2),
-            );
+            hal.sha_fold(&nodes, layer_size * 2, layer_size);
         }
         // Copy root into the tmp_proof top and move back to CPU
         hal.eltwise_copy_digest(&mut tmp_proof.slice(0, 1), &nodes.slice(1, 1));
         let mut root = None;
         tmp_proof.slice(0, 1).view(&mut |view| {
-            debug!("view: {view:?}");
             root = Some(view[0]);
         });
         MerkleTreeProver {

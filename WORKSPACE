@@ -127,6 +127,10 @@ crates_repository(
         "downcast-rs": crate.spec(version = "1.2"),
         "env_logger": crate.spec(version = "0.8"),
         "log": crate.spec(version = "0.4"),
+        "ndarray": crate.spec(
+            features = ["rayon"],
+            version = "0.15",
+        ),
         "paste": crate.spec(version = "1.0"),
         "rand": crate.spec(
             features = ["small_rng"],
