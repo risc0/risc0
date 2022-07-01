@@ -432,8 +432,34 @@ impl<'de, 'a> serde::Deserializer<'de> for &'a mut Deserializer<'de> {
 #[cfg(test)]
 mod test {
     use alloc::string::String;
+    use serde::{Deserialize, Serialize};
 
     use super::*;
+
+    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+    pub struct SomeStruct {}
+
+    #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+    pub enum MyEnum {
+        MyUnaryConstructor(Vec<u8>),
+        MyBinaryConstructor(Vec<u8>, SomeStruct),
+    }
+
+    #[test]
+    fn test_enum_unary() {
+        let a = MyEnum::MyUnaryConstructor(vec![1, 2, 3, 4, 5]);
+        let encoded = crate::serde::to_vec(&a).unwrap();
+        let decoded: MyEnum = from_slice(&encoded).unwrap();
+        assert_eq!(a, decoded);
+    }
+
+    #[test]
+    fn test_enum_binary() {
+        let a = MyEnum::MyBinaryConstructor(vec![1, 2, 3, 4, 5], SomeStruct {});
+        let encoded = crate::serde::to_vec(&a).unwrap();
+        let decoded: MyEnum = from_slice(&encoded).unwrap();
+        assert_eq!(a, decoded);
+    }
 
     #[test]
     fn test_struct() {

@@ -241,10 +241,11 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
     fn serialize_tuple_variant(
         self,
         _name: &'static str,
-        _variant_index: u32,
+        variant_index: u32,
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeTupleVariant> {
+        self.stream.try_push_word(variant_index)?;
         Ok(self)
     }
 
