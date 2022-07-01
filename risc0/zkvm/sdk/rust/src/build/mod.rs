@@ -37,7 +37,6 @@
 ///         .flag("--target=riscv32-unknown-none-elf")
 ///         .flag("-mabi=ilp32")
 ///         .flag("-mcmodel=medany")
-///         .flag("-Os")
 ///         .flag("-fdata-sections")
 ///         .flag("-ffunction-sections")
 ///         .flag("-dead_strip")
