@@ -44,10 +44,9 @@ cxx-build = "1.0"
 
 [features]
 bazel = []
-default = ["prove", "std", "verify"]
+default = ["prove", "std", "verify", "risc_cc"]
 doc = ["std"]
 prove = ["risc0-zkp/prove"]
-default = ["risc_cc"]
 risc_cc = ["dep:cc"]
 # The pure feature enables the 'pure' rust implementation of this
 # crate without any of the FFI interfaces exposed for e.g. the prover.

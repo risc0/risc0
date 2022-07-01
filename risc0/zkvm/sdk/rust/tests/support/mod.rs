@@ -12,7 +12,7 @@ use std::io;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
-use risc0_build::cc;
+use risc0_zkvm::build::cc;
 
 use tempfile::{Builder, TempDir};
 

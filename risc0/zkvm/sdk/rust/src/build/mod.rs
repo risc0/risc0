@@ -20,7 +20,7 @@
 ///
 /// ```no_run
 /// fn main() {
-///     risc0_build::cc::Build::new("/opt/riscv")
+///     risc0_zkvm::build::cc::Build::new("/opt/riscv")
 ///         .file("src/foo.c")
 ///         .compile("foo");
 /// }
