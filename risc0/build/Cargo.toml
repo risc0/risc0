@@ -17,6 +17,10 @@ serde_json = "1.0"
 sha2 = "0.10"
 cc = { version = "1.0.73", optional = true }
 
+[dev-dependencies]
+serial_test = "0.8.0"
+tempfile = "3"
+
 [features]
 default = ["risc_cc"]
 risc_cc = ["dep:cc"]

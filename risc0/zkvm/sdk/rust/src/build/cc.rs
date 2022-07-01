@@ -126,7 +126,7 @@ impl Build {
     /// effect as setting this to `true`. The presence of the environment variable
     /// and this value will be OR’d together.
     pub fn no_risc0_default_flags(&mut self, no_risc0_default_flags: bool) -> &mut Self {
-        self.no_risc0_default_flags = !no_risc0_default_flags;
+        self.no_risc0_default_flags = no_risc0_default_flags;
         self
     }
 
@@ -477,7 +477,7 @@ impl Build {
     fn add_flags(&mut self) {
 
         // Check and add compiler default flags if necessary
-        let compiler_default_flags_from_env = match option_env!("CRATE_COMPILER_DEFAULTS") {
+        let compiler_default_flags_from_env = match std::env::var("CRATE_COMPILER_DEFAULTS").ok() {
             Some(str) => str.to_lowercase() == "true",
             None => false,
         };
@@ -485,7 +485,7 @@ impl Build {
         self.inner.no_default_flags(!compiler_default_flags);
 
         // Check and add no risc0 default flags  if necessary
-        let no_risc0_default_flags_from_env = match option_env!("CRATE_NO_RISC0_DEFAULTS") {
+        let no_risc0_default_flags_from_env = match std::env::var("CRATE_NO_RISC0_DEFAULTS").ok() {
             Some(str) => str.to_lowercase() == "true",
             None => false,
         };
@@ -501,7 +501,6 @@ impl Build {
             .flag("--target=riscv32-unknown-none-elf")
             .flag("-mabi=ilp32")
             .flag("-mcmodel=medany")
-            .flag("-Os")
             .flag("-fdata-sections")
             .flag("-ffunction-sections")
             .flag("-dead_strip")

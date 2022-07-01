@@ -14,9 +14,11 @@ cargo_metadata = "0.14"
 cfg-if = "1.0"
 risc0-zkp = { version = "0.10", path = "../../../zkp/rust", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
+cc = { version = "1.0.73", optional = true }
 
 [dev-dependencies]
 tempfile = "3.3"
+serial_test = "0.8.0"
 
 # TODO(nils): Change these arch checks to vendor checks when we have a
 # real target triple.
@@ -45,6 +47,8 @@ bazel = []
 default = ["prove", "std", "verify"]
 doc = ["std"]
 prove = ["risc0-zkp/prove"]
+default = ["risc_cc"]
+risc_cc = ["dep:cc"]
 # The pure feature enables the 'pure' rust implementation of this
 # crate without any of the FFI interfaces exposed for e.g. the prover.
 pure = []
