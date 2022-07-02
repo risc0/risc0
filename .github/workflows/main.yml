@@ -22,7 +22,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: risc0/actions-bazelisk@v1
+      - uses: risc0/actions-bazelisk@6c0030d04c5269c111620b552fe2b7f619849944
       - name: Build & test
         env:
           CONFIG: ${{ matrix.config }}
