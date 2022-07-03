@@ -19,4 +19,5 @@ add_library(core
   ${PLATFORM_RNG}
 )
 
+add_dependencies (core riscv_toolchain) #Required for the parallel builds
 add_subdirectory(test)
