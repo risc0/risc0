@@ -15,5 +15,4 @@ if(BUILD_RISCVCROSS)
   add_library(zkvm-sdk-cpp-guest-crt0
     crt0.s
   )
-  add_dependency (zkvm-sdk-cpp-guest risc0_toolchain)
 endif()

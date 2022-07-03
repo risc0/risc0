@@ -12,33 +12,33 @@ set(BUILD_RISCVM ON)
 set(BUILD_RISCVCROSS ON)
 set(BUILD_EMBEDDED_RISC ON) #Will disable an embedded risc compilation
 
+
+#Detect is the toolchain is in the path and if not enable it's fetch and build(takes a long time)
+find_file(RISCV_BINARY_SRCH "riscv32-unknown-elf-gcc" PATHS ENV INCLUDE)
+message ("RISCV_BINARY_SRCH:" ${RISCV_BINARY_SRCH})
+if (RISCV_BINARY_SRCH STREQUAL "RISCV_BINARY_SRCH-NOTFOUND")
+  set(BUILD_RISCVTOOLCHAIN ON)
+else()
+  set(BUILD_RISCVTOOLCHAIN OFF)
+endif()
+message ("RISCV TOOLCHAIN BUILD:" ${BUILD_RISCVTOOLCHAIN})
+
+
 if(CMAKE_C_COMPILER MATCHES "risc")
   message ("Using a risc cross compile. Forcing risc only components.")
   set(BUILD_RISCVCROSS ON)
   set(ENABLE_TESTS OFF)
   set(BUILD_RISCVM OFF)
   set(BUILD_EMBEDDED_RISC OFF)
-
 else()
   set(BUILD_RISCVCROSS OFF)
   if(BUILD_EMBEDDED_RISC)
-
-if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL  Darwin AND ${CMAKE_HOST_SYSTEM_PROCESSOR} STREQUAL arm64)
-  set(APPLE_M1_MONKEY
-    sed -i .bak "s/.*=host-darwin.o$//" riscv-gcc/gcc/config.host && sed -i .bak "s/.* x-darwin.$//" riscv-gcc/gcc/config.host && )
-else()
-  set(APPLE_M1_MONKEY )
-endif()
-    ExternalProject_Add(
-      risc0_toolchain
-      GIT_REPOSITORY "https://github.com/riscv/riscv-gnu-toolchain"
-      UPDATE_COMMAND ""
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_toolchain
-      CONFIGURE_COMMAND ${APPLE_M1_MONKEY} ./configure  --with-arch=rv32im --with-abi=ilp32 --with-cmodel=medany --prefix=${CMAKE_CURRENT_BINARY_DIR}/riscv32-toolchain-bin
-      BUILD_IN_SOURCE 1
-      BUILD_COMMAND make -j 4
-      INSTALL_COMMAND make install
-    )
+    
+    if (BUILD_RISCVTOOLCHAIN)
+      set (RISCV_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/riscv-toolchain-bin)
+    else()
+      set (RISCV_BINARY_DIR "")
+    endif()
 
     if (CMAKE_GENERATOR STREQUAL "Ninja")
       message ("Forcing a Ninja generator")
@@ -51,22 +51,23 @@ endif()
     ExternalProject_Add(
       risc0_cross_riscv
       URL ""
-      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_cross
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/risc0_cross_riscv
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-      CMAKE_ARGS ${GEN_FLAG} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/riscv.cmake
+      CMAKE_ARGS ${GEN_FLAG} -DRISCV_BINARY_DIR=${RISCV_BINARY_DIR} -DCMAKE_TOOLCHAIN_FILE=${CMAKE_CURRENT_SOURCE_DIR}/cmake/riscv.cmake
       INSTALL_COMMAND cmake -E echo "Skipping install step."
       BUILD_COMMAND ${GEN_BUILD}
       ALWAYS TRUE
       #To specify outputs is only Ninja specific deficiency
-      BUILD_BYPRODUCTS risc0_cross/src/risc0_cross_riscv-build/bin/test_invalid_addr
-                       risc0_cross/src/risc0_cross_riscv-build/bin/test_wom_same
-                       risc0_cross/src/risc0_cross_riscv-build/bin/test_wom_diff
-                       risc0_cross/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/init_method
-                       risc0_cross/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/turn_method
-                       risc0_cross/src/risc0_cross_riscv-build/deck/examples/cpp/deck/card_method
-                       risc0_cross/src/risc0_cross_riscv-build/deck/examples/cpp/deck/shuffle_method
+      BUILD_BYPRODUCTS risc0_cross_riscv/src/risc0_cross_riscv-build/bin/test_invalid_addr
+                       risc0_cross_riscv/src/risc0_cross_riscv-build/bin/test_wom_same
+                       risc0_cross_riscv/src/risc0_cross_riscv-build/bin/test_wom_diff
+                       risc0_cross_riscv/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/init_method
+                       risc0_cross_riscv/src/risc0_cross_riscv-build/battleship/examples/cpp/battleship/turn_method
+                       risc0_cross_riscv/src/risc0_cross_riscv-build/deck/examples/cpp/deck/card_method
+                       risc0_cross_riscv/src/risc0_cross_riscv-build/deck/examples/cpp/deck/shuffle_method
     )
-    add_dependencies (risc0_cross_riscv risc0_toolchain)
+    include (cmake/riscv.toolchain.cmake)
+    ExternalProject_Add_StepDependencies(risc0_cross_riscv configure riscv_toolchain)
   endif()
   FetchContent_Declare(oneTBB
     GIT_REPOSITORY https://github.com/oneapi-src/oneTBB.git

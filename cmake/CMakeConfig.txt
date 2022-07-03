@@ -85,4 +85,7 @@ macro(risc0_fetch_cross_artifact name input_file output_file)
     VERBATIM
     DEPENDS ${input_file})
   add_custom_target(${name} ALL DEPENDS ${output_file})
+  add_dependencies(${name} riscv_toolchain risc0_cross_riscv)
+  message (${name} "DEPENDS ON riscv_toolchain")
+  add_dependencies (${name} riscv_toolchain)
 endmacro(risc0_fetch_cross_artifact)

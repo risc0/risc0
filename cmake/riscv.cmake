@@ -1,5 +1,14 @@
-set(CROSS_COMPILE ${CMAKE_CURRENT_BINARY_DIR}/riscv32-toolchain-bin/riscv32-unknown-elf-)
+
+if (RISCV_BINARY_DIR STREQUAL "")
+  find_file(RISCV_BINARY "riscv32-unknown-elf-gcc" PATHS ENV INCLUDE)
+  message ("Searching result for RISCV in PATH:" ${RISCV_BINARY})
+  string(REGEX REPLACE "\-gcc" "-" CROSS_COMPILE ${RISCV_BINARY})
+else ()
+  set(CROSS_COMPILE ${RISCV_BINARY_DIR}/bin/riscv32-unknown-elf-)
+endif()
+
 message ("USING toolchain from:" ${CROSS_COMPILE})
+
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_SYSTEM_PROCESSOR rv32im)
 set(CMAKE_EXECUTABLE_SUFFIX ".elf")

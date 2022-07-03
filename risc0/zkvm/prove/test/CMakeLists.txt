@@ -11,19 +11,19 @@ if(ENABLE_TESTS)
 
   if(BUILD_EMBEDDED_RISC)
     risc0_fetch_cross_artifact(test_invalid_addr
-      ${PROJECT_BINARY_DIR}/risc0_cross/src/risc0_cross_riscv-build/bin/test_invalid_addr
+      ${PROJECT_BINARY_DIR}/risc0_cross_riscv/src/risc0_cross_riscv-build/bin/test_invalid_addr
       ${PROJECT_BINARY_DIR}/tests/risc0/zkvm/prove/test/test_invalid_addr
     )
     add_dependencies(test_invalid_addr risc0_cross_riscv)
 
     risc0_fetch_cross_artifact(test_wom_same
-      ${PROJECT_BINARY_DIR}/risc0_cross/src/risc0_cross_riscv-build/bin/test_wom_same
+      ${PROJECT_BINARY_DIR}/risc0_cross_riscv/src/risc0_cross_riscv-build/bin/test_wom_same
       ${PROJECT_BINARY_DIR}/tests/risc0/zkvm/prove/test/test_wom_same
     )
     add_dependencies(test_wom_same risc0_cross_riscv)
 
     risc0_fetch_cross_artifact(test_wom_diff
-      ${PROJECT_BINARY_DIR}/risc0_cross/src/risc0_cross_riscv-build/bin/test_wom_diff
+      ${PROJECT_BINARY_DIR}/risc0_cross_riscv/src/risc0_cross_riscv-build/bin/test_wom_diff
       ${PROJECT_BINARY_DIR}/tests/risc0/zkvm/prove/test/test_wom_diff
     )
     add_dependencies(test_wom_diff risc0_cross_riscv)
