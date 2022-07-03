@@ -42,7 +42,9 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
     }
 
     pub fn read_u32s(&mut self, x: &mut [u32]) {
-        x.clone_from_slice(&self.proof[0..x.len()]);
+        for i in 0..x.len() {
+            x[i] = self.proof[i];
+        }
         self.proof = &self.proof[x.len()..];
     }
 
@@ -77,7 +79,7 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
     }
 
     pub fn verify_complete(&self) {
-        assert!(self.proof.len() == 0);
+        assert_eq!(self.proof.len(), 0);
     }
 }
 

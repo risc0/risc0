@@ -28,6 +28,7 @@
 /// \endcode
 
 #include <iostream>
+#include <vector>
 
 namespace risc0 {
 
@@ -74,6 +75,10 @@ std::ostream& stringify_collection(std::ostream& os, Iterator it, Iterator itEnd
 
 template <typename T> inline std::ostream& operator<<(std::ostream& os, ArrayRef<T> x) {
   return stringify_collection(os, x.ptr, x.ptr + x.size);
+}
+
+template <typename T> inline std::ostream& operator<<(std::ostream& os, const std::vector<T>& x) {
+  return stringify_collection(os, x.begin(), x.end());
 }
 
 } // End namespace risc0

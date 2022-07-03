@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{vec, vec::Vec};
+use alloc::vec;
 
 use rand::RngCore;
 
@@ -20,13 +20,14 @@ use crate::{
     core::{
         fp::Fp,
         fp4::{Fp4, EXT_SIZE},
+        log2_ceil,
         ntt::{bit_reverse, interpolate_ntt},
         rou::{ROU_FWD, ROU_REV},
         sha::Sha,
-        to_po2, Random,
+        Random,
     },
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
-    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
+    FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
 
 /// VerifyRoundInfo contains the data against which the queries for a particular
@@ -41,8 +42,7 @@ struct VerifyRoundInfo {
 fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
     interpolate_ntt(values);
     bit_reverse(values);
-    let s_po2 = to_po2(s);
-    let root_po2 = FRI_FOLD_PO2 + s_po2;
+    let root_po2 = log2_ceil(FRI_FOLD * s);
     let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);
     let mut mul = Fp::new(1);
     let mut tot = Fp4::zero();
@@ -66,11 +66,11 @@ impl VerifyRoundInfo {
     }
 
     pub fn verify_query<S: Sha>(&mut self, iop: &mut ReadIOP<S>, pos: &mut usize, goal: &mut Fp4) {
-        let quot: usize = *pos / self.domain;
-        let group: usize = *pos % self.domain;
+        let quot = *pos / self.domain;
+        let group = *pos % self.domain;
         // Get the column data
         let data = self.merkle.verify(iop, group);
-        let mut data4: Vec<Fp4> = vec![];
+        let mut data4 = vec![];
         for i in 0..FRI_FOLD {
             data4.push(Fp4::new(
                 data[0 * FRI_FOLD + i],
@@ -80,41 +80,39 @@ impl VerifyRoundInfo {
             ));
         }
         // Check the existing goal
-        assert!(data4[quot] == *goal);
+        assert_eq!(data4[quot], *goal);
         // Compute the new goal + pos
         *goal = fold_eval(&mut data4, self.mix, self.domain, group);
         *pos = group;
     }
 }
 
-pub fn fri_verify<S: Sha, F>(iop: &mut ReadIOP<S>, mut degree: usize, mut f: F)
+pub fn fri_verify<S: Sha, F>(iop: &mut ReadIOP<S>, mut degree: usize, mut inner: F)
 where
     F: FnMut(&mut ReadIOP<S>, usize) -> Fp4,
 {
-    let sha = iop.get_sha().clone();
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
     // Prep the folding verfiers
-    let mut rounds: Vec<VerifyRoundInfo> = vec![];
+    let mut rounds = vec![];
     while degree > FRI_MIN_DEGREE {
         rounds.push(VerifyRoundInfo::new(iop, domain));
         domain /= FRI_FOLD;
         degree /= FRI_FOLD;
     }
     // Grab the final coeffs + commit
-    let mut final_coeffs: Vec<Fp> = vec![Fp::new(0); EXT_SIZE * degree];
+    let mut final_coeffs = vec![Fp::default(); EXT_SIZE * degree];
     iop.read_fps(&mut final_coeffs);
-    let final_digest = sha.hash_fps(&final_coeffs);
+    let final_digest = iop.get_sha().hash_fps(&final_coeffs); // padding?
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
-    let domain_po2 = to_po2(domain);
-    let gen: Fp = Fp::new(ROU_FWD[domain_po2]);
+    let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
     // Do queries
     for _ in 0..QUERIES {
         let rng = iop.next_u32();
-        let mut pos: usize = (rng % (orig_domain as u32)) as usize;
+        let mut pos = rng as usize % orig_domain;
         // Do the 'inner' verification for this index
-        let mut goal: Fp4 = f(iop, pos);
+        let mut goal = inner(iop, pos);
         // Verify the per-round proofs
         for round in &mut rounds {
             round.verify_query(iop, &mut pos, &mut goal);
@@ -133,6 +131,6 @@ where
             fx += cur * coeff;
             cur *= x;
         }
-        assert!(fx == goal)
+        assert_eq!(fx, goal)
     }
 }

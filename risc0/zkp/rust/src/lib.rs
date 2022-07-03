@@ -19,7 +19,6 @@ pub const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2;
 pub const QUERIES: usize = 50;
 
 pub const INV_RATE: usize = 4;
-const MAX_DEGREE: usize = INV_RATE + 1;
 const FRI_FOLD_PO2: usize = 4;
 const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
 const FRI_MIN_DEGREE: usize = 256;
