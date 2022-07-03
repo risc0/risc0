@@ -1,3 +1,5 @@
+# This file sets a default compiler flags for the cross builds 
+
 add_compile_options(
   -DRISCV=1
   -mabi=ilp32

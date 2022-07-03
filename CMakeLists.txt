@@ -33,7 +33,8 @@ if(CMAKE_C_COMPILER MATCHES "risc")
 else()
   set(BUILD_RISCVCROSS OFF)
   if(BUILD_EMBEDDED_RISC)
-    
+    # This will pull in the same source tree for the cross compilation and will setup the 
+    # toolchain dependency on it
     if (BUILD_RISCVTOOLCHAIN)
       set (RISCV_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/riscv-toolchain-bin)
     else()
@@ -78,7 +79,22 @@ else()
 
 endif()
 
-include(cmake/CMakeConfig.txt)
+if(BUILD_RISCVCROSS)
+  message("Building riscv-gnu-toolchain cross code")
+  include(cmake/riscv.appdefs.cmake)
+else()
+  message(WARNING,"Builds for riscv-gnu-toolchain are disabled")
+  include(cmake/native.appdefs.cmake)
+endif()
+
+if(BUILD_RISCVM)
+  message("Building risc VM")
+else()
+  message(WARNING,"Builds for risc VM are disabled.")
+endif()
+
+include(cmake/testing.cmake)
+include(cmake/macros.cmake)
 
 set(CMAKE_CXX_STANDARD 17)
 include_directories(${risc0_SOURCE_DIR} ${CMAKE_BINARY_DIR})

@@ -1,3 +1,6 @@
+# This file will control target generation for the riscv toolchain, it will ether fetch and build riscv toolchain
+# or create a dummy riscv_toolchain target, assuming that the toolchain is in the path
+
 
 if (BUILD_RISCVTOOLCHAIN)
   message ("Building risv toolchain internally.")

@@ -1,4 +1,9 @@
+# Cross tooling definition file for the riscv targetted builds, it will use toolchain from the 
+# RISCV_BINARY_DIR variable passed in, or if it is empty attempt to search toolchain in path.
 
+if(NOT DEFINED RISCV_BINARY_DIR)
+  set (RISCV_BINARY_DIR "")
+endif()
 if (RISCV_BINARY_DIR STREQUAL "")
   find_file(RISCV_BINARY "riscv32-unknown-elf-gcc" PATHS ENV INCLUDE)
   message ("Searching result for RISCV in PATH:" ${RISCV_BINARY})
