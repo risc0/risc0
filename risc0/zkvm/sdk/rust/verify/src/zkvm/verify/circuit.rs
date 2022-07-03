@@ -23,7 +23,7 @@ use risc0_zkp::{
         sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE},
         Random,
     },
-    taps::legacy::Taps,
+    taps::{legacy::Taps, TapSet},
     verify::{self, read_iop::ReadIOP, VerificationError},
     MAX_CYCLES,
 };
@@ -110,8 +110,8 @@ impl MixState {
 }
 
 impl<'a> verify::Circuit for RV32Circuit<'a> {
-    fn taps(&self) -> &'static Taps<'static> {
-        RISCV_TAPS
+    fn taps(&self) -> &TapSet {
+        todo!()
     }
 
     fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {

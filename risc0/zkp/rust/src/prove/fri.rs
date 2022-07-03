@@ -31,9 +31,7 @@ use crate::{
 };
 
 struct ProveRoundInfo {
-    size: usize,
     domain: usize,
-    evaluated: Buffer<Fp>,
     coeffs: Buffer<Fp>,
     merkle: MerkleTreeProver,
 }
@@ -76,9 +74,7 @@ impl ProveRoundInfo {
         // Compute the folded polynomial
         hal.fri_fold(&out_coeffs, coeffs, &mix);
         ProveRoundInfo {
-            size,
             domain,
-            evaluated,
             coeffs: out_coeffs,
             merkle,
         }

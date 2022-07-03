@@ -173,6 +173,7 @@ crates_repository(
             version = "1.9",
         ),
         "cfg-if": crate.spec(version = "1.0"),
+        "log": crate.spec(version = "0.4"),
         "paste": crate.spec(version = "1.0"),
         "sha2": crate.spec(
             default_features = False,

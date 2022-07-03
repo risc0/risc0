@@ -279,11 +279,11 @@ impl Hal for CpuHal {
             .downcast_ref::<CpuBuffer<Fp>>()
             .unwrap()
             .as_slice_mut();
-        let mut output = ArrayViewMut::from_shape((count, 4), &mut output).unwrap();
-        let output = output.axis_iter_mut(Axis(0)).into_par_iter();
+        let mut output = ArrayViewMut::from_shape((4, count), &mut output).unwrap();
+        let output = output.axis_iter_mut(Axis(1)).into_par_iter();
         let input = input.downcast_ref::<CpuBuffer<Fp4>>().unwrap().as_slice();
-        let input = ArrayView::from_shape((count, to_add), &input).unwrap();
-        let input = input.axis_iter(Axis(0)).into_par_iter();
+        let input = ArrayView::from_shape((to_add, count), &input).unwrap();
+        let input = input.axis_iter(Axis(1)).into_par_iter();
         output.zip(input).for_each(|(mut output, input)| {
             let mut sum = Fp4::zero();
             for i in input {
