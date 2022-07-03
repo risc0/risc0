@@ -30,6 +30,7 @@ fn main() {
         .file("elf.cpp")
         .file("log.cpp")
         .file("rng.cpp")
+        .file("util.cpp")
         .file(rng_file)
         .flag_if_supported("/std:c++17")
         .flag_if_supported("-std=c++17")

@@ -95,6 +95,18 @@ impl MethodId {
     }
 }
 
+impl Clone for MethodId {
+    fn clone(&self) -> Self {
+        MethodId::from_slice(self.as_slice().unwrap()).unwrap()
+    }
+}
+
+impl PartialEq for MethodId {
+    fn eq(&self, other: &Self) -> bool {
+        self.as_slice().unwrap() == other.as_slice().unwrap()
+    }
+}
+
 impl Drop for MethodId {
     fn drop(&mut self) {
         let mut err = ffi::RawError::default();
@@ -276,7 +288,7 @@ fn init() {
 
 #[cfg(test)]
 mod test {
-    use super::{Prover, Receipt};
+    use super::{MethodId, Prover, Receipt};
     use crate::core::Digest;
     use crate::platform::memory::{COMMIT, HEAP};
     use crate::serde::{from_slice, to_vec};
@@ -377,5 +389,12 @@ mod test {
         // Check that a compliant host will fault.
         let prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
         assert!(prover.run().is_err());
+    }
+
+    #[test]
+    fn clone_method_id() {
+        let method_id = MethodId::from_slice(FAIL_ID).unwrap();
+        let clone = method_id.clone();
+        assert!(method_id == clone);
     }
 }

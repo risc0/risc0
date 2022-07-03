@@ -49,17 +49,15 @@ use crate::{
 /// which means that the normal NTT evaluation domain does not reveal anything
 /// about the original datapoints (i.e. is zero knowledge) so long as the number
 /// of queries is less than the randomized padding.
-pub struct PolyGroup {
-    pub coeffs: Buffer<Fp>,
+pub struct PolyGroup<'a> {
+    pub coeffs: &'a Buffer<Fp>,
     pub count: usize,
-    size: usize,
-    domain: usize,
     pub evaluated: Buffer<Fp>,
     pub merkle: MerkleTreeProver,
 }
 
-impl PolyGroup {
-    pub fn new<H: Hal>(hal: &H, coeffs: &Buffer<Fp>, count: usize, size: usize) -> Self {
+impl<'a> PolyGroup<'a> {
+    pub fn new<H: Hal>(hal: &H, coeffs: &'a Buffer<Fp>, count: usize, size: usize) -> Self {
         assert_eq!(coeffs.size(), count * size);
         let domain = size * INV_RATE;
         let evaluated = hal.alloc(count * domain);
@@ -67,12 +65,9 @@ impl PolyGroup {
         hal.batch_evaluate_ntt(&evaluated, count, log2_ceil(INV_RATE));
         hal.batch_bit_reverse(&coeffs, count);
         let merkle = MerkleTreeProver::new(hal, &evaluated, domain, count, QUERIES);
-        let size = coeffs.size() / count;
         PolyGroup {
-            coeffs: coeffs.clone(),
+            coeffs,
             count,
-            size,
-            domain,
             evaluated,
             merkle,
         }
