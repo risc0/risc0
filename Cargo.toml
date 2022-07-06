@@ -12,6 +12,7 @@ members = [
 ]
 
 exclude = [
+  "risc0/zkvm/sdk/rust/cargo-risc0",
   "risc0/zkvm/sdk/rust/methods",
 ]
 
