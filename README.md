@@ -44,18 +44,17 @@ execution, the guest code can write to a special append only log called the
 *journal* that represents the official output of the computation.
 
 Presuming the method terminated correctly, a *receipt* is produced, which
-provides the proof of correct execution. This receipt consists of 3 parts: the
-method ID of the method run, the journal written during execution, and a blob
+provides the proof of correct execution. This receipt consists of 2 parts the journal written during execution and a blob
 of opaque cryptographic data called the *seal*.
 
 The verifier can then verify the receipt and examine the log.  If any
-tampering was done to the method ID, the journal, or the seal, the receipt will
+tampering was done to the journal or the seal, the receipt will
 fail to verify.  Additionally, it is cryptographically infeasible to generate a
 valid receipt unless the output of the journal is the exactly correct output
-for some valid execution of the method whose method ID is in the receipt.
+for some valid execution of the method whose method ID matches the receipt.
 In summary, the receipt acts as a zero knowledge proof of correct execution.
 
-Additionally, since the protocol is zero knowledge, the verifier cannot infer
+Because the protocol is zero knowledge, the verifier cannot infer
 anything about the details of the execution or any data passed between the host
 and the guest (aside from what is implied by the data written to the journal
 and the correct execution of the code).
@@ -150,4 +149,3 @@ or by running Bazel as an administrator.
 
 A C++ compiler must be installed. Visual Studio 2019 Build Tools is known to work (as does the Community edition).
 Let us know if you run into any issues.
-
