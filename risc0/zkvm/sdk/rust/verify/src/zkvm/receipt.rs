@@ -25,17 +25,21 @@ use crate::zkvm::verify::circuit::{MethodID, RV32Circuit};
 const DIGEST_SIZE_BYTES: usize = DIGEST_WORDS * DIGEST_WORD_SIZE;
 
 #[derive(Deserialize, Serialize)]
+/// A [Receipt] consists of a journal and a seal.
 pub struct Receipt {
     pub journal: Vec<u8>,
     pub seal: Vec<u32>,
 }
 
 impl Receipt {
+    /// (Re)construct a receipt from a journal and a seal.
     pub fn new(journal: Vec<u8>, seal: Vec<u32>) -> Self {
         Receipt { journal, seal }
     }
 
     #[cfg(feature = "verify")]
+    /// For the method associated with the given method ID, verify that the
+    /// current [Receipt] is a valid result of executing the method in a zkVM.
     pub fn verify(&self, method_id: &MethodID) -> Result<bool, VerificationError> {
         let mut circuit = RV32Circuit::new(method_id);
         let sha = risc0_zkp::core::sha::default_implementation();
@@ -45,6 +49,7 @@ impl Receipt {
         }
         if self.journal.len() > DIGEST_SIZE_BYTES {
             let digest = sha.hash_bytes(&self.journal);
+            // The digest stored in the seal should match the journal digest
             if (*digest != Digest::from_slice(&self.seal[0..8])) {
                 return Ok(false);
             }
@@ -65,7 +70,7 @@ impl Receipt {
         }
         Ok(true)
     }
-
+    /// Access the journal of a [Receipt] as a [`Vec<u32>`].
     pub fn get_journal_u32(&self) -> Vec<u32> {
         let mut as_words: Vec<u32> = vec![];
         assert!(self.journal.len() % DIGEST_WORD_SIZE == 0);
