@@ -80,5 +80,5 @@ pub trait Hal {
 
     fn sha_rows(&self, output: &Buffer<Digest>, matrix: &Buffer<Fp>);
 
-    fn sha_fold(&self, output: &Buffer<Digest>, input: &Buffer<Digest>);
+    fn sha_fold(&self, io: &Buffer<Digest>, input_size: usize, output_size: usize);
 }

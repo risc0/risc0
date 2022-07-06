@@ -28,6 +28,7 @@
 /// \endcode
 
 #include <iostream>
+#include <vector>
 
 namespace risc0 {
 
@@ -51,5 +52,33 @@ void logTimestamp();
 
 std::string hex(uint32_t value, int digits);
 std::string hex(uint32_t value);
+
+template <typename T> struct ArrayRef {
+  const T* ptr;
+  size_t size;
+
+  ArrayRef(const T* ptr, size_t size) : ptr(ptr), size(size) {}
+};
+
+template <typename Iterator>
+std::ostream& stringify_collection(std::ostream& os, Iterator it, Iterator itEnd) {
+  os << '[';
+  if (it != itEnd) {
+    os << *it++;
+  }
+  for (; it != itEnd; ++it) {
+    os << ", " << *it;
+  }
+  os << ']';
+  return os;
+}
+
+template <typename T> inline std::ostream& operator<<(std::ostream& os, ArrayRef<T> x) {
+  return stringify_collection(os, x.ptr, x.ptr + x.size);
+}
+
+template <typename T> inline std::ostream& operator<<(std::ostream& os, const std::vector<T>& x) {
+  return stringify_collection(os, x.begin(), x.end());
+}
 
 } // End namespace risc0

@@ -16,19 +16,21 @@ mod fri;
 mod merkle;
 pub mod read_iop;
 
-use alloc::{vec, vec::Vec};
+use alloc::vec;
 use core::fmt;
+// use log::debug;
 
 use crate::{
     core::{
         fp::Fp,
         fp4::{Fp4, EXT_SIZE},
+        log2_ceil,
         poly::poly_eval,
         rou::{ROU_FWD, ROU_REV},
         sha::{Digest, Sha},
-        to_po2, Random,
+        Random,
     },
-    taps::legacy::Taps,
+    taps::{RegisterGroup, TapSet},
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
@@ -51,7 +53,7 @@ impl fmt::Display for VerificationError {
 }
 
 pub trait Circuit {
-    fn taps(&self) -> &'static Taps<'static>;
+    fn taps(&self) -> &TapSet;
     fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
     fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
     fn po2(&self) -> u32;
@@ -59,28 +61,37 @@ pub trait Circuit {
     fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4;
 }
 
-pub fn verify<S: Sha, C: Circuit>(
-    sha: &S,
-    circuit: &mut C,
-    proof: &[u32],
-) -> Result<(), VerificationError> {
-    // Make IOP
-    let mut iop = ReadIOP::new(sha, proof);
+pub fn verify<S, C>(sha: &S, circuit: &mut C, seal: &[u32]) -> Result<(), VerificationError>
+where
+    S: Sha,
+    C: Circuit,
+{
+    let taps = circuit.taps().clone();
 
-    // Do 'execute' phase and get size
+    // Make IOP
+    let mut iop = ReadIOP::new(sha, seal);
+
+    // Read any execution state
     circuit.execute(&mut iop);
+
+    // Get the size
     let po2 = circuit.po2();
     assert!(po2 as usize <= MAX_CYCLES_PO2);
     let size = 1 << po2;
     let domain = INV_RATE * size;
+    // debug!("size = {size}, po2 = {po2}");
 
     // Get taps and compute sizes
-    let taps = circuit.taps();
-    let taps_info = taps.get_info();
+    let code_size = taps.group_size(RegisterGroup::Code);
+    let data_size = taps.group_size(RegisterGroup::Data);
+    let accum_size = taps.group_size(RegisterGroup::Accum);
+    let combo_count = taps.combos_size();
 
     // Get code and data merkle roots
-    let code_merkle = MerkleTreeVerifier::new(&mut iop, domain, taps_info.code_size, QUERIES);
-    let data_merkle = MerkleTreeVerifier::new(&mut iop, domain, taps_info.data_size, QUERIES);
+    let code_merkle = MerkleTreeVerifier::new(&mut iop, domain, code_size, QUERIES);
+    // debug!("codeRoot = {}", code_merkle.root());
+    let data_merkle = MerkleTreeVerifier::new(&mut iop, domain, data_size, QUERIES);
+    // debug!("dataRoot = {}", data_merkle.root());
 
     // Verify code is valid
     circuit.check_code(code_merkle.root())?;
@@ -88,117 +99,119 @@ pub fn verify<S: Sha, C: Circuit>(
     // Prep accumulation
     circuit.accumulate(&mut iop);
 
-    let accum_merkle = MerkleTreeVerifier::new(&mut iop, domain, taps_info.accum_size, QUERIES);
+    let accum_merkle = MerkleTreeVerifier::new(&mut iop, domain, accum_size, QUERIES);
+    // debug!("accumRoot = {}", accum_merkle.root());
 
     // Set the poly mix value
     let poly_mix = Fp4::random(&mut iop);
 
     let check_merkle = MerkleTreeVerifier::new(&mut iop, domain, CHECK_SIZE, QUERIES);
+    // debug!("checkRoot = {}", check_merkle.root());
 
     let z = Fp4::random(&mut iop);
+    // debug!("Z = {z:?}");
+    let back_one = Fp::from(ROU_REV[po2 as usize]);
 
     // Read the U coeffs + commit their hash
-    let mut coeff_u: Vec<Fp4> = vec![Fp4::default(); taps_info.num_taps + CHECK_SIZE];
+    let num_taps = taps.tap_size();
+    let mut coeff_u = vec![Fp4::default(); num_taps + CHECK_SIZE];
     iop.read_fp4s(&mut coeff_u);
     let hash_u = *sha.hash_fp4s(&coeff_u);
     iop.commit(&hash_u);
 
     // Now, convert to evaluated values
-    let back_one: Fp = Fp::from(ROU_REV[po2 as usize]);
-    let mut cur_pos: usize = 0;
-    let mut eval_u: Vec<Fp4> = vec![];
-    for reg in taps.registers {
-        let blen = reg.back.len();
-        for b in reg.back {
-            let x = back_one.pow(*b) * z;
-            let fx = poly_eval(&coeff_u[cur_pos..(cur_pos + blen)], x);
+    let mut cur_pos = 0;
+    let mut eval_u = vec![];
+    for reg in taps.regs() {
+        for i in 0..reg.size() {
+            let x = back_one.pow(reg.back(i)) * z;
+            let fx = poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x);
             eval_u.push(fx);
         }
-        cur_pos += blen;
+        cur_pos += reg.size();
     }
 
     // Compute the core polynomial
     let result = circuit.compute_polynomial(&eval_u, poly_mix);
+    // debug!("Result = {result:?}");
 
     // Now generate the check polynomial
     let mut check = Fp4::zero();
-    let remap: [usize; 4] = [0, 2, 1, 3];
+    let remap = [0, 2, 1, 3];
     let fp0 = Fp::from(0 as u32);
     let fp1 = Fp::from(1 as u32);
     for i in 0..4 {
         let rmi = remap[i];
-        check += coeff_u[taps_info.num_taps + rmi + 0] * z.pow(i) * Fp4::new(fp1, fp0, fp0, fp0);
-        check += coeff_u[taps_info.num_taps + rmi + 4] * z.pow(i) * Fp4::new(fp0, fp1, fp0, fp0);
-        check += coeff_u[taps_info.num_taps + rmi + 8] * z.pow(i) * Fp4::new(fp0, fp0, fp1, fp0);
-        check += coeff_u[taps_info.num_taps + rmi + 12] * z.pow(i) * Fp4::new(fp0, fp0, fp0, fp1);
+        check += coeff_u[num_taps + rmi + 0] * z.pow(i) * Fp4::new(fp1, fp0, fp0, fp0);
+        check += coeff_u[num_taps + rmi + 4] * z.pow(i) * Fp4::new(fp0, fp1, fp0, fp0);
+        check += coeff_u[num_taps + rmi + 8] * z.pow(i) * Fp4::new(fp0, fp0, fp1, fp0);
+        check += coeff_u[num_taps + rmi + 12] * z.pow(i) * Fp4::new(fp0, fp0, fp0, fp1);
     }
-    check *= (Fp4::from(3 as u32) * z).pow(size) - Fp4::one();
-    assert!(check == result);
+    check *= (Fp4::from_u32(3) * z).pow(size) - Fp4::one();
+    // debug!("Check = {check:?}");
+    assert_eq!(check, result);
 
     // Set the mix mix value
     let mix = Fp4::random(&mut iop);
+    // debug!("mix = {mix:?}");
 
     // Make the mixed U polynomials
-    let combos_size = taps.combos.len();
-    let mut combo_u: Vec<Vec<Fp4>> = vec![];
-    for i in 0..combos_size {
-        combo_u.push(vec![Fp4::zero(); taps.combos[i].back.len()]);
+    let mut combo_u = vec![];
+    for i in 0..combo_count {
+        combo_u.push(vec![Fp4::zero(); taps.get_combo(i).size()]);
     }
     let mut cur_mix = Fp4::one();
     cur_pos = 0;
-    for reg in taps.registers {
-        let blen = reg.back.len();
-        for i in 0..blen {
-            combo_u[reg.combo_id][i] += cur_mix * coeff_u[cur_pos + i];
+    for reg in taps.regs() {
+        for i in 0..reg.size() {
+            combo_u[reg.combo_id()][i] += cur_mix * coeff_u[cur_pos + i];
         }
         cur_mix *= mix;
-        cur_pos += blen;
+        cur_pos += reg.size();
     }
+    // debug!("cur_mix: {cur_mix:?}, cur_pos: {cur_pos}");
     // Handle check group
     combo_u.push(vec![Fp4::zero()]);
     for _ in 0..CHECK_SIZE {
-        combo_u[combos_size][0] += cur_mix * coeff_u[cur_pos];
+        combo_u[combo_count][0] += cur_mix * coeff_u[cur_pos];
         cur_pos += 1;
         cur_mix *= mix;
     }
+    // debug!("cur_mix: {cur_mix:?}");
 
-    let domain_po2 = to_po2(domain);
-    let gen: Fp = Fp::new(ROU_FWD[domain_po2]);
-    fri_verify(
-        &mut iop,
-        size,
-        |inner_iop: &mut ReadIOP<S>, idx: usize| -> Fp4 {
-            let x = Fp4::from_fp(gen.pow(idx));
-            let mut rows: Vec<Vec<Fp>> = vec![];
-            rows.push(accum_merkle.verify(inner_iop, idx));
-            rows.push(code_merkle.verify(inner_iop, idx));
-            rows.push(data_merkle.verify(inner_iop, idx));
-            let check_row = check_merkle.verify(inner_iop, idx);
-            let mut cur = Fp4::one();
-            let mut tot = vec![Fp4::zero(); combos_size + 1];
-            for reg in taps.registers {
-                tot[reg.combo_id] += cur * rows[reg.group as usize][reg.offset];
-                cur *= mix;
+    let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
+    // debug!("FRI-verify, size = {size}");
+    fri_verify(&mut iop, size, |iop: &mut ReadIOP<S>, idx: usize| -> Fp4 {
+        let x = Fp4::from_fp(gen.pow(idx));
+        let mut rows = vec![];
+        rows.push(accum_merkle.verify(iop, idx));
+        rows.push(code_merkle.verify(iop, idx));
+        rows.push(data_merkle.verify(iop, idx));
+        let check_row = check_merkle.verify(iop, idx);
+        let mut cur = Fp4::one();
+        let mut tot = vec![Fp4::zero(); combo_count + 1];
+        for reg in taps.regs() {
+            tot[reg.combo_id()] += cur * rows[reg.group() as usize][reg.offset()];
+            cur *= mix;
+        }
+        for i in 0..CHECK_SIZE {
+            tot[combo_count] += cur * check_row[i];
+            cur *= mix;
+        }
+        let mut ret = Fp4::zero();
+        for i in 0..combo_count {
+            let num = tot[i] - poly_eval(&combo_u[i], x);
+            let mut divisor = Fp4::one();
+            for back in taps.get_combo(i).slice() {
+                divisor *= x - z * back_one.pow(*back as usize);
             }
-            for i in 0..CHECK_SIZE {
-                tot[combos_size] += cur * check_row[i];
-                cur *= mix;
-            }
-            let mut ret = Fp4::zero();
-            for i in 0..combos_size {
-                let num = tot[i] - poly_eval(&combo_u[i], x);
-                let mut divisor = Fp4::one();
-                for b in taps.combos[i].back {
-                    divisor *= x - z * back_one.pow(*b);
-                }
-                ret += num * divisor.inv();
-            }
-            let check_num = tot[combos_size] - combo_u[combos_size][0];
-            let check_div = x - z.pow(INV_RATE);
-            ret += check_num * check_div.inv();
-            return ret;
-        },
-    );
+            ret += num * divisor.inv();
+        }
+        let check_num = tot[combo_count] - combo_u[combo_count][0];
+        let check_div = x - z.pow(INV_RATE);
+        ret += check_num * check_div.inv();
+        ret
+    });
     iop.verify_complete();
     Ok(())
 }

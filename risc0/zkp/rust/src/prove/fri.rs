@@ -14,6 +14,7 @@
 
 use alloc::vec::Vec;
 
+use log::debug;
 use rand::RngCore;
 
 use crate::{
@@ -30,21 +31,32 @@ use crate::{
 };
 
 struct ProveRoundInfo {
-    size: usize,
     domain: usize,
-    evaluated: Buffer<Fp>,
     coeffs: Buffer<Fp>,
     merkle: MerkleTreeProver,
 }
 
 impl ProveRoundInfo {
+    /// Computes a round of the folding protocol. Takes in the coefficients of
+    /// the current polynomial, and interacts with the IOP verifier to
+    /// produce the evaluations of the polynomial, the merkle tree
+    /// committing to the evaluation, and the coefficients of the folded
+    /// polynomial.
     pub fn new<H: Hal, S: Sha>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>) -> Self {
-        // LOG(1, "Doing FRI folding");
+        debug!("Doing FRI folding");
+        // Get the number of coefficients of the polynomial over the extension field.
         let size = coeffs.size() / EXT_SIZE;
+        // Get a larger domain to interpolate over.
         let domain = size * INV_RATE;
+        // Allocate space in which to put the interpolated values.
         let evaluated = hal.alloc(domain * EXT_SIZE);
+        // Put in the coefficients, padding out with zeros so that we are left with the
+        // same polynomial represented by a larger coefficient list
         hal.batch_expand(&evaluated, coeffs, EXT_SIZE);
+        // Evaluate the NTT in-place, filling the buffer with the evaluations of the
+        // polynomial.
         hal.batch_evaluate_ntt(&evaluated, EXT_SIZE, log2_ceil(INV_RATE));
+        // Compute a Merkle tree committing to the polynomial evaluations.
         let merkle = MerkleTreeProver::new(
             hal,
             &evaluated,
@@ -52,15 +64,17 @@ impl ProveRoundInfo {
             FRI_FOLD * EXT_SIZE,
             QUERIES,
         );
+        // Send the merkle tree (as a commitment) to the virtual IOP verifier
         merkle.commit(hal, iop);
+        // Retrieve from the IOP verifier a random value to mix the polynomial slices.
         let fold_mix = Fp4::random(&mut iop.rng);
+        // Create a buffer to hold the mixture of slices.
         let out_coeffs = hal.alloc(size / FRI_FOLD * EXT_SIZE);
         let mix = hal.copy_from([fold_mix].as_slice());
+        // Compute the folded polynomial
         hal.fri_fold(&out_coeffs, coeffs, &mix);
         ProveRoundInfo {
-            size,
             domain,
-            evaluated,
             coeffs: out_coeffs,
             merkle,
         }
@@ -99,11 +113,11 @@ where
         iop.commit(&digest);
     });
     // Do queries
-    // LOG(1, "Doing Queries");
+    debug!("Doing Queries");
     for _ in 0..QUERIES {
         // Get a 'random' index.
         let rng = iop.rng.next_u32() as usize;
-        let mut pos = rng & orig_domain;
+        let mut pos = rng % orig_domain;
         // Do the 'inner' proof for this index
         f(iop, pos);
         // Write the per-round proofs

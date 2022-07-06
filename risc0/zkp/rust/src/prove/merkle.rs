@@ -14,6 +14,8 @@
 
 use alloc::vec::Vec;
 use core::cmp;
+#[allow(unused_imports)]
+use log::debug;
 
 use crate::{
     core::{
@@ -36,7 +38,6 @@ pub struct MerkleTreeProver {
     // The root value
     root: Digest,
     // Buffers to copy proofs though to limit GPU/CPU transfers
-    tmp_col: Buffer<Fp>,
     tmp_proof: Buffer<Digest>,
 }
 
@@ -60,20 +61,16 @@ impl MerkleTreeProver {
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
         let nodes = hal.alloc(rows * 2);
-        let tmp_col = hal.alloc(cols);
         let tmp_proof = hal.alloc(cmp::max(params.top_size, params.layers - params.top_layer));
         // Sha each column
         hal.sha_rows(&nodes.slice(rows, rows), matrix);
         // For each layer, sha up the layer below
         for i in (0..params.layers).rev() {
             let layer_size = 1 << i;
-            hal.sha_fold(
-                &nodes.slice(layer_size, layer_size),
-                &nodes.slice(layer_size * 2, layer_size * 2),
-            );
+            hal.sha_fold(&nodes, layer_size * 2, layer_size);
         }
         // Copy root into the tmp_proof top and move back to CPU
-        hal.eltwise_copy_digest(&tmp_proof.slice(0, 1), &nodes.slice(1, 1));
+        hal.eltwise_copy_digest(&mut tmp_proof.slice(0, 1), &nodes.slice(1, 1));
         let mut root = None;
         tmp_proof.slice(0, 1).view(&mut |view| {
             root = Some(view[0]);
@@ -83,7 +80,6 @@ impl MerkleTreeProver {
             matrix: matrix.clone(),
             nodes,
             root: root.unwrap(),
-            tmp_col,
             tmp_proof,
         }
     }
@@ -91,8 +87,8 @@ impl MerkleTreeProver {
     /// Write the 'top' of the merkle tree and commit to the root.
     pub fn commit<H: Hal, S: Sha>(&self, hal: &H, iop: &mut WriteIOP<S>) {
         let top_size = self.params.top_size;
-        let proof_slice = self.tmp_proof.slice(0, top_size);
-        hal.eltwise_copy_digest(&proof_slice, &self.nodes.slice(top_size, top_size));
+        let mut proof_slice = self.tmp_proof.slice(0, top_size);
+        hal.eltwise_copy_digest(&mut proof_slice, &self.nodes.slice(top_size, top_size));
         proof_slice.view(&mut |view| {
             iop.write_digest_slice(view);
         });
