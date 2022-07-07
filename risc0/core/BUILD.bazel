@@ -1,5 +1,7 @@
 load("//bazel/rules/cc:defs.bzl", "cc_library")
 
+exports_files(["Cargo.toml"])
+
 cc_library(
     name = "core",
     srcs = [

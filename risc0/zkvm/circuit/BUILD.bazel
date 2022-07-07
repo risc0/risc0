@@ -3,6 +3,8 @@ load("//risc0/zkvm/circuit/make-circuit:defs.bzl", "make_circuit")
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(["Cargo.toml"])
+
 cc_library(
     name = "circuit",
     srcs = [

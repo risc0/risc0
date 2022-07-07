@@ -1,7 +1,8 @@
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
+
 package(default_visibility = ["//visibility:public"])
 
-load("@rules_rust//rust:defs.bzl", "rust_test")
-load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
+exports_files(["Cargo.toml"])
 
 risc0_rust_library_pair(
     name = "zkvm",
