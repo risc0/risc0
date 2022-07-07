@@ -40,14 +40,15 @@ running inside the ZKVM is called the *guest* and the prover running the ZKVM
 is called the *host*.  The guest and the host can communicate with each other
 during the execution of the method, but the host cannot modify the execution of
 the guest in any way, or the proof being generated will be invalid. During
-execution, the guest code can write to a special append only log called the
+execution, the guest code can write to a special append-only log called the
 *journal* that represents the official output of the computation.
 
 Presuming the method terminated correctly, a *receipt* is produced, which
-provides the proof of correct execution. This receipt consists of 2 parts the journal written during execution and a blob
-of opaque cryptographic data called the *seal*.
+provides the proof of correct execution. This receipt consists of 2 parts:
+the journal written during execution and a blob of opaque cryptographic
+data called the *seal*.
 
-The verifier can then verify the receipt and examine the log.  If any
+The verifier can then verify the receipt and examine the log. If any
 tampering was done to the journal or the seal, the receipt will
 fail to verify.  Additionally, it is cryptographically infeasible to generate a
 valid receipt unless the output of the journal is the exactly correct output
