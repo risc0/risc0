@@ -2,7 +2,10 @@ load("//bazel/rules/clang_format:defs.bzl", "clang_format_toolchain")
 
 package(default_visibility = ["//visibility:public"])
 
-exports_files([".clang-format"])
+exports_files([
+    ".clang-format",
+    "Cargo.toml",
+])
 
 filegroup(
     name = "clang_tidy_config",

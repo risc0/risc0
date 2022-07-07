@@ -18,15 +18,24 @@
 
 extern crate alloc;
 
-pub mod core;
-pub mod platform;
-pub mod serde;
-
-#[cfg(target_arch = "riscv32")]
-pub mod guest;
-
-#[cfg(all(not(target_arch = "riscv32"), feature = "std"))]
-pub mod host;
-
 #[cfg(not(any(target_arch = "riscv32", feature = "bazel")))]
 pub mod build;
+pub mod core;
+#[cfg(feature = "prove")]
+pub mod elf;
+#[cfg(target_arch = "riscv32")]
+pub mod guest;
+#[cfg(all(not(target_arch = "riscv32"), feature = "std"))]
+pub mod host;
+pub mod method_id;
+pub mod platform;
+#[cfg(feature = "prove")]
+pub mod prove;
+pub mod receipt;
+pub mod serde;
+#[cfg(feature = "verify")]
+pub mod verify;
+
+const CODE_SIZE: usize = 16;
+const DATA_SIZE: usize = 162;
+const ACCUM_SIZE: usize = 10;

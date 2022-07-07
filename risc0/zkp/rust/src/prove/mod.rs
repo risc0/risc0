@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod adapter;
+pub mod executor;
 mod fri;
 mod merkle;
-mod poly_group;
+pub mod poly_group;
 pub mod write_iop;
 
 use alloc::{vec, vec::Vec};

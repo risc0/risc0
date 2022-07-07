@@ -108,50 +108,20 @@ load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository")
 
 crates_repository(
     name = "crates_host",
+    cargo_config = "//:.cargo/config.toml",
     lockfile = "//:Cargo-host.Bazel.lock",
-    packages = {
-        "anyhow": crate.spec(version = "1.0"),
-        "array-init": crate.spec(version = "2.0"),
-        "bytemuck": crate.spec(
-            features = ["derive"],
-            version = "1.9",
-        ),
-        "cfg-if": crate.spec(version = "1.0"),
-        "clap": crate.spec(
-            features = ["derive"],
-            version = "3.2",
-        ),
-        "criterion": crate.spec(version = "0.3"),
-        "ctor": crate.spec(version = "0.1"),
-        "cxx": crate.spec(version = "1.0"),
-        "downcast-rs": crate.spec(version = "1.2"),
-        "env_logger": crate.spec(version = "0.8"),
-        "log": crate.spec(version = "0.4"),
-        "ndarray": crate.spec(
-            features = ["rayon"],
-            version = "0.15",
-        ),
-        "paste": crate.spec(version = "1.0"),
-        "rand": crate.spec(
-            features = ["small_rng"],
-            version = "0.8",
-        ),
-        "rand_core": crate.spec(
-            version = "0.6",
-        ),
-        "rayon": crate.spec(version = "1.5"),
-        "serde": crate.spec(
-            features = ["derive"],
-            version = "1.0",
-        ),
-        "serde_json": crate.spec(version = "1.0"),
-        "sha2": crate.spec(
-            default_features = False,
-            features = ["compress"],
-            version = "0.10",
-        ),
-        "thiserror": crate.spec(version = "1.0"),
-    },
+    manifests = [
+        "//:Cargo.toml",
+        "//risc0/core:Cargo.toml",
+        "//risc0/zkp/rust:Cargo.toml",
+        "//risc0/zkvm/circuit/make-circuit:Cargo.toml",
+        "//risc0/zkvm/circuit:Cargo.toml",
+        "//risc0/zkvm/platform:Cargo.toml",
+        "//risc0/zkvm/prove/make-id:Cargo.toml",
+        "//risc0/zkvm/sdk/rust:Cargo.toml",
+        "//risc0/zkp:Cargo.toml",
+        "//risc0/zkvm:Cargo.toml",
+    ],
     quiet = False,
 )
 

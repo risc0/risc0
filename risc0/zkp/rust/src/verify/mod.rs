@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod adapter;
 mod fri;
 mod merkle;
 pub mod read_iop;
