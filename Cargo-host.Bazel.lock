@@ -1,5 +1,5 @@
 {
-  "checksum": "6839eb29f54715b068d16c8d539e54302337dca043c72afab64b1d6591d14228",
+  "checksum": "515e77c2ed4df472d10c271dc2ea7426ebbf86950386cf65c5d638e78670f867",
   "crates": {
     "adler 1.0.2": {
       "name": "adler",
@@ -8245,6 +8245,10 @@
                 "target": "sha2"
               },
               {
+                "id": "xmas-elf 0.8.0",
+                "target": "xmas_elf"
+              },
+              {
                 "id": "zip 0.6.2",
                 "target": "zip"
               }
@@ -12640,6 +12644,93 @@
       },
       "license": "MIT"
     },
+    "xmas-elf 0.8.0": {
+      "name": "xmas-elf",
+      "version": "0.8.0",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/xmas-elf/0.8.0/download",
+          "sha256": "8d29b4d8e7beaceb4e77447ba941a7600d23d0319ab52da0461abea214832d5a"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "xmas_elf",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        },
+        {
+          "Binary": {
+            "crate_name": "xmas_elf",
+            "crate_root": "src/bin/main.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "xmas_elf",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "deps": {
+          "common": [
+            {
+              "id": "zero 0.1.2",
+              "target": "zero"
+            }
+          ],
+          "selects": {}
+        },
+        "edition": "2015",
+        "version": "0.8.0"
+      },
+      "license": "Apache-2.0 OR MIT"
+    },
+    "zero 0.1.2": {
+      "name": "zero",
+      "version": "0.1.2",
+      "repository": {
+        "Http": {
+          "url": "https://crates.io/api/v1/crates/zero/0.1.2/download",
+          "sha256": "5f1bc8a6b2005884962297587045002d8cfb8dcec9db332f4ca216ddc5de82c5"
+        }
+      },
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "zero",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "zero",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2015",
+        "version": "0.1.2"
+      },
+      "license": "Apache-2.0/MIT"
+    },
     "zip 0.6.2": {
       "name": "zip",
       "version": "0.6.2",
@@ -12943,7 +13034,8 @@
   "binary_crates": [
     "cc 1.0.73",
     "clap 3.2.8",
-    "webpki-roots 0.22.3"
+    "webpki-roots 0.22.3",
+    "xmas-elf 0.8.0"
   ],
   "workspace_members": {
     "direct-cargo-bazel-deps 0.0.1": "",
