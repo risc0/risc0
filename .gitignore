@@ -2,6 +2,7 @@
 *.swp
 *.swo
 .bazelrc.local
+.cargo/config.toml
 .DS_Store
 .idea/
 bazel-*

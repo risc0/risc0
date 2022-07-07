@@ -2,6 +2,8 @@ load("//bazel/rules/cc:defs.bzl", "cc_binary")
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(["Cargo.toml"])
+
 cc_binary(
     name = "make-circuit",
     srcs = ["make-circuit.cpp"],
