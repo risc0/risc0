@@ -21,6 +21,7 @@ use std::{
     io::{Cursor, Read, Write},
     path::{Path, PathBuf},
     process::Command,
+    collections::HashMap
 };
 
 use crate::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
@@ -291,13 +292,16 @@ where
 
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(pkg: &Package, target_dir: P, guest_build_env: &GuestBuildEnv)
+fn build_guest_package<P>(pkg: &Package,
+                          target_dir: P,
+                          guest_build_env: &GuestBuildEnv,
+                          features: Vec<String>)
 where
     P: AsRef<Path>,
 {
     fs::create_dir_all(target_dir.as_ref()).unwrap();
     let cargo = env::var("CARGO").unwrap();
-    let args = vec![
+    let mut args = vec![
         "build",
         "-vv",
         "--release",
@@ -312,6 +316,11 @@ where
         "--target-dir",
         target_dir.as_ref().to_str().unwrap(),
     ];
+    let features_str = features.join(",");
+    if !features.is_empty() {
+        args.push("--features");
+        args.push(&features_str);
+    }
     println!("Building guest package: {cargo} {}", args.join(" "));
     println!(
         "Using std src root: {}",
@@ -329,6 +338,12 @@ where
     if !status.success() {
         std::process::exit(status.code().unwrap());
     }
+}
+
+/// Equivalent to [`embed_methods_with_features()`] but passes no features
+/// for cargo to build the guest packages with.
+pub fn embed_methods() {
+    embed_methods_with_features(HashMap::new());
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
@@ -349,7 +364,7 @@ where
 /// to uppercase.  For instance, if you have a method named
 /// "my_method", the method ID and elf filename will be defined as
 /// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
-pub fn embed_methods() {
+pub fn embed_methods_with_features(mut method_features: HashMap<String, Vec<String>>) {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
 
@@ -363,7 +378,15 @@ pub fn embed_methods() {
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        build_guest_package(&guest_pkg, &out_dir.join("riscv-guest"), &guest_build_env);
+        let guest_features = match method_features.remove(&guest_pkg.name.to_string()) {
+            Some(features) => features,
+            None => vec![]
+        };
+
+        build_guest_package(&guest_pkg,
+                            &out_dir.join("riscv-guest"),
+                            &guest_build_env,
+                            guest_features);
 
         for method in guest_methods(&guest_pkg, &out_dir) {
             methods_file

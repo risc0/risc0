@@ -22,3 +22,5 @@ release = false
 [features]
 default = ["std"]
 std = []
+test_feature1 = []
+test_feature2 = []
