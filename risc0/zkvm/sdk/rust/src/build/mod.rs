@@ -16,12 +16,12 @@
 #![doc = include_str!("README.md")]
 
 use std::{
+    collections::HashMap,
     env,
     fs::{self, File},
     io::{Cursor, Read, Write},
     path::{Path, PathBuf},
     process::Command,
-    collections::HashMap
 };
 
 use crate::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
@@ -292,11 +292,12 @@ where
 
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(pkg: &Package,
-                          target_dir: P,
-                          guest_build_env: &GuestBuildEnv,
-                          features: Vec<String>)
-where
+fn build_guest_package<P>(
+    pkg: &Package,
+    target_dir: P,
+    guest_build_env: &GuestBuildEnv,
+    features: Vec<String>,
+) where
     P: AsRef<Path>,
 {
     fs::create_dir_all(target_dir.as_ref()).unwrap();
@@ -380,13 +381,15 @@ pub fn embed_methods_with_features(mut method_features: HashMap<String, Vec<Stri
 
         let guest_features = match method_features.remove(&guest_pkg.name.to_string()) {
             Some(features) => features,
-            None => vec![]
+            None => vec![],
         };
 
-        build_guest_package(&guest_pkg,
-                            &out_dir.join("riscv-guest"),
-                            &guest_build_env,
-                            guest_features);
+        build_guest_package(
+            &guest_pkg,
+            &out_dir.join("riscv-guest"),
+            &guest_build_env,
+            guest_features,
+        );
 
         for method in guest_methods(&guest_pkg, &out_dir) {
             methods_file
