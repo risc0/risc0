@@ -1,18 +1,13 @@
+use risc0_zkvm::build::{embed_methods_with_options, MethodOptions};
 use std::collections::HashMap;
-use risc0_zkvm::build::{
-    EmbedMethodsOptions,
-    embed_methods_with_options
-};
 
 fn main() {
-
-    let options = EmbedMethodsOptions{
-       code_limit: 10,
-        method_features: HashMap::from([(
-            "risc0-zkvm-methods-inner".to_string(),
-            vec!["test_feature1".to_string(), "test_feature2".to_string()],
-        )])
+    let inner_method_options = MethodOptions {
+        code_limit: 10,
+        features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
     };
 
-    risc0_zkvm::build::embed_methods_with_options(options);
+    let map = HashMap::from([("risc0-zkvm-methods-inner", inner_method_options)]);
+
+    embed_methods_with_options(map);
 }

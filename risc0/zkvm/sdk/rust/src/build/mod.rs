@@ -17,6 +17,7 @@
 
 use std::{
     collections::HashMap,
+    default::Default,
     env,
     fs::{self, File},
     io::{Cursor, Read, Write},
@@ -29,6 +30,7 @@ use cargo_metadata::{MetadataCommand, Package};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
+// use xmas_elf::symbol_table::Visibility::Default;
 use zip::ZipArchive;
 
 const TARGET_JSON: &[u8] = include_bytes!("riscv32im-risc0-zkvm-elf.json");
@@ -340,30 +342,28 @@ fn build_guest_package<P>(
     }
 }
 
-/// Options to specify how the methods are built.
-///
-/// Use `code_limit` to specify the number of po2 entries to generate in the
-/// MethodID.
-///
-/// Use `method_features` to specify features for cargo to build the methods with.
-pub struct EmbedMethodsOptions {
-    code_limit: u32,
-    method_features: HashMap<String, Vec<String>>
+/// Options defining how to run a method in [`embed_methods_with_options`].
+pub struct MethodOptions {
+    /// The number of po2 entries to generate in the MethodID.
+    pub code_limit: u32,
+
+    /// Features for cargo to build the method with.
+    pub features: Vec<String>,
 }
 
-impl Default for EmbedMethodsOptions {
+impl Default for MethodOptions {
     fn default() -> Self {
-        EmbedMethodsOptions {
+        MethodOptions {
             code_limit: DEFAULT_METHOD_ID_LIMIT,
-            method_features: HashMap::new(),
+            features: vec![],
         }
     }
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
-/// Specify custom options using [EmbedMethodsOptions].
+/// Specify custom options for a method by defining its [MethodOptions].
 /// See [embed_methods].
-pub fn embed_methods_with_options(options: EmbedMethodsOptions) {
+pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, MethodOptions>) {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
 
@@ -377,21 +377,20 @@ pub fn embed_methods_with_options(options: EmbedMethodsOptions) {
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        let guest_features = match options.method_features.remove(&guest_pkg.name.to_string()) {
-            Some(features) => features,
-            None => vec![],
-        };
+        let method_options = method_name_to_options
+            .remove(guest_pkg.name.as_str())
+            .unwrap_or_default();
 
         build_guest_package(
             &guest_pkg,
             &out_dir.join("riscv-guest"),
             &guest_build_env,
-            guest_features,
+            method_options.features,
         );
 
         for method in guest_methods(&guest_pkg, &out_dir) {
             methods_file
-                .write_all(method.rust_def(options.code_limit).as_bytes())
+                .write_all(method.rust_def(method_options.code_limit).as_bytes())
                 .unwrap();
         }
     }
@@ -424,7 +423,7 @@ pub fn embed_methods_with_options(options: EmbedMethodsOptions) {
 /// "my_method", the method ID and elf filename will be defined as
 /// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
 pub fn embed_methods() {
-    embed_methods_with_options(Default::default())
+    embed_methods_with_options(HashMap::new())
 }
 
 /// Called inside the guest crate's build.rs to do special linking for the ZKVM
