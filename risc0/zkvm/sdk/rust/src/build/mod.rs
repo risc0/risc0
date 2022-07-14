@@ -332,8 +332,8 @@ where
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 ///
-/// Use `code_limit` to specify the number of po2 entries to generate in the MethodID.
-/// See [embed_methods].
+/// Use `code_limit` to specify the number of po2 entries to generate in the
+/// MethodID. See [embed_methods].
 pub fn embed_methods_with_limit(code_limit: u32) {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
