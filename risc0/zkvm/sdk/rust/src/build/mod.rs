@@ -30,7 +30,6 @@ use cargo_metadata::{MetadataCommand, Package};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
-// use xmas_elf::symbol_table::Visibility::Default;
 use zip::ZipArchive;
 
 const TARGET_JSON: &[u8] = include_bytes!("riscv32im-risc0-zkvm-elf.json");
