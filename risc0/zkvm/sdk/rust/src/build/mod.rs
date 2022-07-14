@@ -51,7 +51,7 @@ struct Risc0Method {
 }
 
 impl Risc0Method {
-    fn make_method_id(&self) -> Vec<u8> {
+    fn make_method_id(&self, code_limit: u32) -> Vec<u8> {
         if !self.elf_path.exists() {
             eprintln!(
                 "RISC-V method was not found at: {:?}",
@@ -76,19 +76,18 @@ impl Risc0Method {
         }
 
         println!("Computing MethodID for {} ({:})!", self.name, elf_sha_hex);
-        // TODO: allow limit to be dynamic/configurable.
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
-        let method_id = MethodId::compute(&elf_contents, DEFAULT_METHOD_ID_LIMIT).unwrap();
+        let method_id = MethodId::compute(&elf_contents, code_limit).unwrap();
         let slice = method_id.as_slice().unwrap();
         std::fs::write(method_id_path, slice).unwrap();
         std::fs::write(elf_sha_path, elf_sha).unwrap();
         Vec::from(slice)
     }
 
-    fn rust_def(&self) -> String {
+    fn rust_def(&self, code_limit: u32) -> String {
         let elf_path = self.elf_path.display();
         let upper = self.name.to_uppercase();
-        let method_id = self.make_method_id();
+        let method_id = self.make_method_id(code_limit);
         format!(
             r##"
 pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
@@ -333,23 +332,9 @@ where
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
 ///
-/// This method should be called from a package with a
-/// [package.metadata.risc0] section including a "methods" property
-/// listing the relative paths that contain riscv guest method
-/// packages.
-///
-/// To access the generated method IDs and ELF filenames, include the
-/// generated methods.rs:
-///
-/// ```text
-///     include!(concat!(env!("OUT_DIR"), "/methods.rs"));
-/// ```
-///
-/// To conform to rust's naming conventions, the constants are mapped
-/// to uppercase.  For instance, if you have a method named
-/// "my_method", the method ID and elf filename will be defined as
-/// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
-pub fn embed_methods() {
+/// Use `code_limit` to specify the number of po2 entries to generate in the
+/// MethodID. See [embed_methods].
+pub fn embed_methods_with_limit(code_limit: u32) {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
 
@@ -367,7 +352,7 @@ pub fn embed_methods() {
 
         for method in guest_methods(&guest_pkg, &out_dir) {
             methods_file
-                .write_all(method.rust_def().as_bytes())
+                .write_all(method.rust_def(code_limit).as_bytes())
                 .unwrap();
         }
     }
@@ -379,6 +364,28 @@ pub fn embed_methods() {
     // Since we generate methods.rs each time we run, it will always
     // be changed.
     println!("cargo:rerun-if-changed={}", methods_path.display());
+}
+
+/// Embeds methods built for RISC-V for use by host-side dependencies.
+///
+/// This method should be called from a package with a
+/// [package.metadata.risc0] section including a "methods" property
+/// listing the relative paths that contain riscv guest method
+/// packages.
+///
+/// To access the generated method IDs and ELF filenames, include the
+/// generated methods.rs:
+///
+/// ```text
+///     include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+/// ```
+///
+/// To conform to rust's naming conventions, the constants are mapped
+/// to uppercase.  For instance, if you have a method named
+/// "my_method", the method ID and elf filename will be defined as
+/// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
+pub fn embed_methods() {
+    embed_methods_with_limit(DEFAULT_METHOD_ID_LIMIT)
 }
 
 /// Called inside the guest crate's build.rs to do special linking for the ZKVM
