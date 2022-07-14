@@ -341,18 +341,18 @@ fn build_guest_package<P>(
     }
 }
 
-/// Options defining how to run a method in [`embed_methods_with_options`].
-pub struct MethodOptions {
+/// Options defining how to embed a guest package in [`embed_methods_with_options`].
+pub struct GuestOptions {
     /// The number of po2 entries to generate in the MethodID.
     pub code_limit: u32,
 
-    /// Features for cargo to build the method with.
+    /// Features for cargo to build the guest with.
     pub features: Vec<String>,
 }
 
-impl Default for MethodOptions {
+impl Default for GuestOptions {
     fn default() -> Self {
-        MethodOptions {
+        GuestOptions {
             code_limit: DEFAULT_METHOD_ID_LIMIT,
             features: vec![],
         }
@@ -360,9 +360,9 @@ impl Default for MethodOptions {
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
-/// Specify custom options for a method by defining its [MethodOptions].
+/// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
-pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, MethodOptions>) {
+pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
 
@@ -376,7 +376,7 @@ pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, Meth
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        let method_options = method_name_to_options
+        let guest_options = guest_pkg_to_options
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
 
@@ -384,12 +384,12 @@ pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, Meth
             &guest_pkg,
             &out_dir.join("riscv-guest"),
             &guest_build_env,
-            method_options.features,
+            guest_options.features,
         );
 
         for method in guest_methods(&guest_pkg, &out_dir) {
             methods_file
-                .write_all(method.rust_def(method_options.code_limit).as_bytes())
+                .write_all(method.rust_def(guest_options.code_limit).as_bytes())
                 .unwrap();
         }
     }
