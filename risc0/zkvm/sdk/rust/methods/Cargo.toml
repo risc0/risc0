@@ -12,3 +12,6 @@ release = false
 [package.metadata.risc0]
 methods = ["inner"]
 
+[features]
+risc_cc = []
+

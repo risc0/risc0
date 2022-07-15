@@ -15,6 +15,44 @@
 #![deny(missing_docs)]
 #![doc = include_str!("README.md")]
 
+/// A wrapper for the `cc` crate that compiles to `riscv32im` with no boilerplate and
+/// reasonable defaults.
+///
+/// ```no_run
+/// fn main() {
+///     risc0_zkvm::build::rcc::Build::new()
+///         .file("src/foo.c")
+///         .compile("foo");
+/// }
+/// ```
+///
+/// is equivalent to...
+///
+/// ```no_run
+/// fn main() {
+///     cc::Build::new() // The normal `cc` crate
+///         .target("riscv32im-unknown-none-elf")
+///         .no_default_flags(true)
+///         .flag("-O3")
+///         .flag("--target=riscv32-unknown-none-elf")
+///         .flag("-mabi=ilp32")
+///         .flag("-mcmodel=medany")
+///         .flag("-fdata-sections")
+///         .flag("-ffunction-sections")
+///         .flag("-dead_strip")
+///         .flag("-flto")
+///         .flag("-march=rv32im")
+///         .file("src/foo.c")
+///         .flag("-static")
+///         .flag("--sysroot=/opt/riscv/riscv32-unknown-elf")
+///         .flag("--gcc-toolchain=/opt/riscv")
+///         .compile("foo");
+/// }
+/// ```
+///
+#[cfg(feature = "risc_cc")]
+pub mod rcc;
+
 use std::{
     collections::HashMap,
     default::Default,
@@ -191,7 +229,7 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
 }
 
 /// Returns all methods associated with the given riscv guest package.
-fn guest_methods<P>(pkg: &Package, out_dir: P) -> Vec<Risc0Method>
+fn guest_methods<P>(pkg: &Package, out_dir: P, features: &Vec<String>) -> Vec<Risc0Method>
 where
     P: AsRef<Path>,
 {
@@ -199,6 +237,12 @@ where
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
+        .filter(|target| {
+            target
+                .required_features
+                .iter()
+                .all(|rf| features.contains(rf))
+        })
         .map(|target| Risc0Method {
             name: target.name.clone(),
             elf_path: target_dir
@@ -296,7 +340,7 @@ fn build_guest_package<P>(
     pkg: &Package,
     target_dir: P,
     guest_build_env: &GuestBuildEnv,
-    features: Vec<String>,
+    features: &Vec<String>,
 ) where
     P: AsRef<Path>,
 {
@@ -384,10 +428,10 @@ pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, Meth
             &guest_pkg,
             &out_dir.join("riscv-guest"),
             &guest_build_env,
-            method_options.features,
+            &method_options.features,
         );
 
-        for method in guest_methods(&guest_pkg, &out_dir) {
+        for method in guest_methods(&guest_pkg, &out_dir, &method_options.features) {
             methods_file
                 .write_all(method.rust_def(method_options.code_limit).as_bytes())
                 .unwrap();
