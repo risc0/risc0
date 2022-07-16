@@ -82,7 +82,7 @@ rust_analyzer_deps()
 
 load("//bazel/rules/rust:repositories.bzl", "rust_repositories")
 
-RUST_ISO_DATE = "2022-01-20"
+RUST_ISO_DATE = "2022-06-13"
 
 RUST_VERSION = "nightly"
 
@@ -101,8 +101,9 @@ load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository")
 
 crates_repository(
     name = "crates_host",
-    cargo_lockfile = "//:Cargo-host.Bazel.lock",
+    cargo_lockfile = "//:Cargo-host.lock",
     isolated = True,
+    lockfile = "//:cargo-bazel-lock-host.json",
     manifests = [
         "//:Cargo.toml",
         "//risc0/core:Cargo.toml",
@@ -124,8 +125,9 @@ crate_repositories_host()
 
 crates_repository(
     name = "crates_guest",
-    cargo_lockfile = "//:Cargo-guest.Bazel.lock",
+    cargo_lockfile = "//:Cargo-guest.lock",
     isolated = True,
+    lockfile = "//:cargo-bazel-lock-guest.json",
     packages = {
         "anyhow": crate.spec(
             default_features = False,
