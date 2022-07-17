@@ -108,7 +108,6 @@ load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository")
 
 crates_repository(
     name = "crates_host",
-    cargo_config = "//:.cargo/config.toml",
     lockfile = "//:Cargo-host.Bazel.lock",
     manifests = [
         "//:Cargo.toml",

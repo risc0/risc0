@@ -1,0 +1,5 @@
+# Force stable channel here in case a parent directory requests the
+# "risc0" toolchain which might not be present if this crate is
+# responsible for installing it.
+[toolchain]
+channel = "stable"

@@ -16,6 +16,8 @@
 #![doc = include_str!("README.md")]
 
 use std::{
+    collections::HashMap,
+    default::Default,
     env,
     fs::{self, File},
     io::{Cursor, Read, Write},
@@ -51,7 +53,7 @@ struct Risc0Method {
 }
 
 impl Risc0Method {
-    fn make_method_id(&self) -> Vec<u8> {
+    fn make_method_id(&self, code_limit: u32) -> Vec<u8> {
         if !self.elf_path.exists() {
             eprintln!(
                 "RISC-V method was not found at: {:?}",
@@ -76,19 +78,18 @@ impl Risc0Method {
         }
 
         println!("Computing MethodID for {} ({:})!", self.name, elf_sha_hex);
-        // TODO: allow limit to be dynamic/configurable.
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
-        let method_id = MethodId::compute(&elf_contents, DEFAULT_METHOD_ID_LIMIT).unwrap();
+        let method_id = MethodId::compute(&elf_contents, code_limit).unwrap();
         let slice = method_id.as_slice().unwrap();
         std::fs::write(method_id_path, slice).unwrap();
         std::fs::write(elf_sha_path, elf_sha).unwrap();
         Vec::from(slice)
     }
 
-    fn rust_def(&self) -> String {
+    fn rust_def(&self, code_limit: u32) -> String {
         let elf_path = self.elf_path.display();
         let upper = self.name.to_uppercase();
-        let method_id = self.make_method_id();
+        let method_id = self.make_method_id(code_limit);
         format!(
             r##"
 pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
@@ -291,13 +292,17 @@ where
 
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(pkg: &Package, target_dir: P, guest_build_env: &GuestBuildEnv)
-where
+fn build_guest_package<P>(
+    pkg: &Package,
+    target_dir: P,
+    guest_build_env: &GuestBuildEnv,
+    features: Vec<String>,
+) where
     P: AsRef<Path>,
 {
     fs::create_dir_all(target_dir.as_ref()).unwrap();
     let cargo = env::var("CARGO").unwrap();
-    let args = vec![
+    let mut args = vec![
         "build",
         "-vv",
         "--release",
@@ -312,6 +317,11 @@ where
         "--target-dir",
         target_dir.as_ref().to_str().unwrap(),
     ];
+    let features_str = features.join(",");
+    if !features.is_empty() {
+        args.push("--features");
+        args.push(&features_str);
+    }
     println!("Building guest package: {cargo} {}", args.join(" "));
     println!(
         "Using std src root: {}",
@@ -329,6 +339,68 @@ where
     if !status.success() {
         std::process::exit(status.code().unwrap());
     }
+}
+
+/// Options defining how to run a method in [`embed_methods_with_options`].
+pub struct MethodOptions {
+    /// The number of po2 entries to generate in the MethodID.
+    pub code_limit: u32,
+
+    /// Features for cargo to build the method with.
+    pub features: Vec<String>,
+}
+
+impl Default for MethodOptions {
+    fn default() -> Self {
+        MethodOptions {
+            code_limit: DEFAULT_METHOD_ID_LIMIT,
+            features: vec![],
+        }
+    }
+}
+
+/// Embeds methods built for RISC-V for use by host-side dependencies.
+/// Specify custom options for a method by defining its [MethodOptions].
+/// See [embed_methods].
+pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, MethodOptions>) {
+    let out_dir_env = env::var_os("OUT_DIR").unwrap();
+    let out_dir = Path::new(&out_dir_env);
+
+    let pkg = current_package();
+    let guest_packages = guest_packages(&pkg);
+    let methods_path = out_dir.join("methods.rs");
+    let mut methods_file = File::create(&methods_path).unwrap();
+
+    let guest_build_env = setup_guest_build_env(&out_dir);
+
+    for guest_pkg in guest_packages {
+        println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
+
+        let method_options = method_name_to_options
+            .remove(guest_pkg.name.as_str())
+            .unwrap_or_default();
+
+        build_guest_package(
+            &guest_pkg,
+            &out_dir.join("riscv-guest"),
+            &guest_build_env,
+            method_options.features,
+        );
+
+        for method in guest_methods(&guest_pkg, &out_dir) {
+            methods_file
+                .write_all(method.rust_def(method_options.code_limit).as_bytes())
+                .unwrap();
+        }
+    }
+
+    // HACK: It's not particularly practical to figure out all the
+    // files that all the guest crates transtively depend on.  So, we
+    // want to run the guest "cargo build" command each time we build.
+    //
+    // Since we generate methods.rs each time we run, it will always
+    // be changed.
+    println!("cargo:rerun-if-changed={}", methods_path.display());
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
@@ -350,35 +422,7 @@ where
 /// "my_method", the method ID and elf filename will be defined as
 /// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
 pub fn embed_methods() {
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env);
-
-    let pkg = current_package();
-    let guest_packages = guest_packages(&pkg);
-    let methods_path = out_dir.join("methods.rs");
-    let mut methods_file = File::create(&methods_path).unwrap();
-
-    let guest_build_env = setup_guest_build_env(&out_dir);
-
-    for guest_pkg in guest_packages {
-        println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
-
-        build_guest_package(&guest_pkg, &out_dir.join("riscv-guest"), &guest_build_env);
-
-        for method in guest_methods(&guest_pkg, &out_dir) {
-            methods_file
-                .write_all(method.rust_def().as_bytes())
-                .unwrap();
-        }
-    }
-
-    // HACK: It's not particularly practical to figure out all the
-    // files that all the guest crates transtively depend on.  So, we
-    // want to run the guest "cargo build" command each time we build.
-    //
-    // Since we generate methods.rs each time we run, it will always
-    // be changed.
-    println!("cargo:rerun-if-changed={}", methods_path.display());
+    embed_methods_with_options(HashMap::new())
 }
 
 /// Called inside the guest crate's build.rs to do special linking for the ZKVM
