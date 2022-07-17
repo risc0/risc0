@@ -1,5 +1,5 @@
 {
-  "checksum": "0f3005c92ede486d2e7cca1e4aca678feb3f76f421a5a1434c82cf090db54a6f",
+  "checksum": "925e251f1481867aa17a2151382d60b039fd5b9a16dbdfc7a67cecf2129a5939",
   "crates": {
     "anyhow 1.0.58": {
       "name": "anyhow",
@@ -320,13 +320,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "crypto-common 0.1.4": {
+    "crypto-common 0.1.5": {
       "name": "crypto-common",
-      "version": "0.1.4",
+      "version": "0.1.5",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/crypto-common/0.1.4/download",
-          "sha256": "5999502d32b9c48d492abe66392408144895020ec4709e549e840799f3bb74c0"
+          "url": "https://crates.io/api/v1/crates/crypto-common/0.1.5/download",
+          "sha256": "2ccfd8c0ee4cce11e45b3fd6f9d5e69e0cc62912aa6a0cb1bf4617b0eba5a12f"
         }
       },
       "targets": [
@@ -362,7 +362,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.1.4"
+        "version": "0.1.5"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -406,7 +406,7 @@
               "target": "block_buffer"
             },
             {
-              "id": "crypto-common 0.1.4",
+              "id": "crypto-common 0.1.5",
               "target": "crypto_common"
             }
           ],
@@ -471,7 +471,7 @@
               "target": "rand_core"
             },
             {
-              "id": "serde 1.0.138",
+              "id": "serde 1.0.139",
               "target": "serde"
             },
             {
@@ -780,7 +780,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "unicode-ident 1.0.1",
+              "id": "unicode-ident 1.0.2",
               "target": "unicode_ident"
             }
           ],
@@ -941,13 +941,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "serde 1.0.138": {
+    "serde 1.0.139": {
       "name": "serde",
-      "version": "1.0.138",
+      "version": "1.0.139",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde/1.0.138/download",
-          "sha256": "1578c6245786b9d168c5447eeacfb96856573ca56c9d68fdcf394be134882a47"
+          "url": "https://crates.io/api/v1/crates/serde/1.0.139/download",
+          "sha256": "0171ebb889e45aa68b44aee0859b3eede84c6f5f5c228e6f140c0b2a0a46cad6"
         }
       },
       "targets": [
@@ -989,7 +989,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.138",
+              "id": "serde 1.0.139",
               "target": "build_script_build"
             }
           ],
@@ -999,13 +999,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "serde_derive 1.0.138",
+              "id": "serde_derive 1.0.139",
               "target": "serde_derive"
             }
           ],
           "selects": {}
         },
-        "version": "1.0.138"
+        "version": "1.0.139"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -1014,13 +1014,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "serde_derive 1.0.138": {
+    "serde_derive 1.0.139": {
       "name": "serde_derive",
-      "version": "1.0.138",
+      "version": "1.0.139",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.138/download",
-          "sha256": "023e9b1467aef8a10fb88f25611870ada9800ef7e22afce356bb0d2387b6f27c"
+          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.139/download",
+          "sha256": "dc1d3230c1de7932af58ad8ffbe1d784bd55efd5a9d84ac24f69c72d83543dfb"
         }
       },
       "targets": [
@@ -1068,7 +1068,7 @@
               "target": "quote"
             },
             {
-              "id": "serde_derive 1.0.138",
+              "id": "serde_derive 1.0.139",
               "target": "build_script_build"
             },
             {
@@ -1079,7 +1079,7 @@
           "selects": {}
         },
         "edition": "2015",
-        "version": "1.0.138"
+        "version": "1.0.139"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -1208,7 +1208,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "unicode-ident 1.0.1",
+              "id": "unicode-ident 1.0.2",
               "target": "unicode_ident"
             }
           ],
@@ -1283,13 +1283,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "unicode-ident 1.0.1": {
+    "unicode-ident 1.0.2": {
       "name": "unicode-ident",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/unicode-ident/1.0.1/download",
-          "sha256": "5bd2fe26506023ed7b5e1e315add59d6f584c621d037f9368fea9cfb988f368c"
+          "url": "https://crates.io/api/v1/crates/unicode-ident/1.0.2/download",
+          "sha256": "15c61ba63f9235225a22310255a29b806b907c9b8c964bcbd0a2c70f3f2deea7"
         }
       },
       "targets": [
@@ -1312,9 +1312,9 @@
           "**"
         ],
         "edition": "2018",
-        "version": "1.0.1"
+        "version": "1.0.2"
       },
-      "license": "MIT OR Apache-2.0"
+      "license": "(MIT OR Apache-2.0) AND Unicode-DFS-2016"
     },
     "version_check 0.9.4": {
       "name": "version_check",
@@ -1367,6 +1367,7 @@
     "cfg(any(target_arch = \"aarch64\", target_arch = \"x86_64\", target_arch = \"x86\"))": [
       "aarch64-apple-darwin",
       "aarch64-apple-ios",
+      "aarch64-apple-ios-sim",
       "aarch64-linux-android",
       "aarch64-unknown-linux-gnu",
       "i686-apple-darwin",
