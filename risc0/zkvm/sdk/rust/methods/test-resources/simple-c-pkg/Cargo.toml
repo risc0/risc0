@@ -6,4 +6,4 @@ build = "build.rs"
 
 
 [build-dependencies]
-risc0-zkvm = { path = "../../.." , default-features = false, features = ["std"]}
+risc0-zkvm = { path = "../../.." , default-features = false, features = ["std", "risc_cc"]}
