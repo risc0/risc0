@@ -341,7 +341,8 @@ fn build_guest_package<P>(
     }
 }
 
-/// Options defining how to embed a guest package in [`embed_methods_with_options`].
+/// Options defining how to embed a guest package in
+/// [`embed_methods_with_options`].
 pub struct GuestOptions {
     /// The number of po2 entries to generate in the MethodID.
     pub code_limit: u32,
