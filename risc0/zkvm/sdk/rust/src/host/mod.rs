@@ -289,10 +289,12 @@ fn init() {
 #[cfg(test)]
 mod test {
     use super::{MethodId, Prover, Receipt};
-    use crate::core::Digest;
-    use crate::platform::memory::{COMMIT, HEAP};
-    use crate::serde::{from_slice, to_vec};
+    use crate::{
+        platform::memory::{COMMIT, HEAP},
+        serde::{from_slice, to_vec},
+    };
     use anyhow::Result;
+    use risc0_zkp::core::sha::Digest;
     use risc0_zkvm_methods::{FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SHA_ID, SHA_PATH};
 
     #[test]

@@ -25,7 +25,7 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
     }
     let elf_contents = std::fs::read(IO_PATH).unwrap();
     let method_id = MethodId::load(IO_ID).unwrap();
-    let mut prover = Prover::new(&elf_contents, &method_id);
+    let mut prover = Prover::new(&elf_contents, &method_id)?;
     prover.add_input(vec.as_slice());
     prover.run()
 }

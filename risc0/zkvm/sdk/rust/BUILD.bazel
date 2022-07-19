@@ -32,8 +32,10 @@ risc0_rust_library_pair(
         "@crates_host//:serde",
     ],
     host_features = [
-        "std",
         "bazel",
+        "prove",
+        "std",
+        "verify",
     ],
     host_proc_macro_deps = ["@crates_host//:ctor"],
     rustc_flags = ["-Coverflow_checks=on"],

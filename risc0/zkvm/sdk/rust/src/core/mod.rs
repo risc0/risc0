@@ -12,51 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(any(feature = "pure", target_arch = "riscv32"))]
-pub use risc0_zkp::core::sha::{Digest, DIGEST_WORDS};
-
-cfg_if::cfg_if! {
-    if #[cfg(not(any(feature = "pure", target_arch="riscv32")))] {
-        use core::fmt::{Debug, Display, Formatter};
-
-        use serde::{Deserialize, Serialize};
-
-        pub const DIGEST_WORDS: usize = 8;
-
-        #[derive(Clone, Copy, Default, Deserialize, Eq, Hash, Ord, PartialOrd, PartialEq, Serialize)]
-        pub struct Digest([u32; DIGEST_WORDS]);
-
-        impl Digest {
-            /// Constructs a new `Digest` from a byte array.
-            pub fn new(data: [u32; DIGEST_WORDS]) -> Self {
-                Self(data)
-            }
-
-            pub fn as_slice(&self) -> &[u32] {
-                &self.0
-            }
-        }
-
-        impl Display for Digest {
-            fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-                for word in self.0 {
-                    core::write!(f, "{:08x?}", word)?;
-                }
-                Ok(())
-            }
-        }
-
-        impl Debug for Digest {
-            fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-                for word in self.0 {
-                    core::write!(f, "{:08x?}", word)?;
-                }
-                Ok(())
-            }
-        }
-    }
-}
-
 pub trait Log {
     fn log(&self, msg: &str);
 }

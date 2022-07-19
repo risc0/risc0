@@ -15,10 +15,14 @@
 use alloc::{boxed::Box, vec::Vec};
 use core::{cell::UnsafeCell, mem};
 
-use crate::core::{Digest, DIGEST_WORDS};
-use crate::serde::to_vec_with_capacity;
-use risc0_zkp::core::{fp::Fp, fp4::Fp4};
+use risc0_zkp::core::{
+    fp::Fp,
+    fp4::Fp4,
+    sha::{Digest, DIGEST_WORDS},
+};
 use serde::Serialize;
+
+use crate::serde::to_vec_with_capacity;
 
 use super::{
     align_up,

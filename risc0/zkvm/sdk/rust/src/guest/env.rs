@@ -14,6 +14,7 @@
 
 use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 
+use risc0_zkp::core::sha::Digest;
 use serde::{Deserialize, Serialize};
 
 use super::{
@@ -24,10 +25,7 @@ use super::{
     },
     mem_layout, memory_barrier, sha, WORD_SIZE,
 };
-use crate::{
-    core::Digest,
-    serde::{Deserializer, Serializer, Slice},
-};
+use crate::serde::{Deserializer, Serializer, Slice};
 
 struct Env {
     output: Serializer<Slice<'static>>,

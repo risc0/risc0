@@ -21,7 +21,7 @@ use risc0_zkp::{
     MAX_CYCLES_PO2, MIN_PO2,
 };
 
-use crate::{method_id::MethodId, receipt::Receipt};
+use crate::{elf::Program, method_id::MethodId, platform::memory::MEM_SIZE, receipt::Receipt};
 
 use self::exec::MachineState;
 
@@ -29,7 +29,7 @@ use self::exec::MachineState;
 pub mod exec;
 
 pub struct Prover {
-    elf: Vec<u8>,
+    elf: Program,
     method_id: MethodId,
     inputs: Vec<u32>,
     outputs: Vec<u32>,
@@ -37,18 +37,19 @@ pub struct Prover {
 }
 
 impl Prover {
-    pub fn new(elf: &[u8], method_id: &MethodId) -> Self {
-        Prover {
-            elf: Vec::from(elf),
+    pub fn new(elf: &[u8], method_id: &MethodId) -> Result<Self> {
+        let elf = Program::load_elf(&elf, MEM_SIZE as u32)?;
+        Ok(Prover {
+            elf,
             method_id: method_id.clone(),
             inputs: Vec::new(),
             outputs: Vec::new(),
             commit: Vec::new(),
-        }
+        })
     }
 
     pub fn add_input(&mut self, slice: &[u32]) {
-        self.inputs.clone_from_slice(slice);
+        self.inputs.extend_from_slice(slice);
     }
 
     pub fn get_output(&self) -> &[u32] {
@@ -62,7 +63,7 @@ impl Prover {
         let circuit = CircuitImpl::new();
         let machine = MachineState::new();
         let mut executor = Executor::new(circuit, machine, MIN_PO2, MAX_CYCLES_PO2);
-        // executor.step(code)
+        // executor.step(code);
 
         let mut prover = ProveAdapter::new(&mut executor);
         let hal = CpuHal {};

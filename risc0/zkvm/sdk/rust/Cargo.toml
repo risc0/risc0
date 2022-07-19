@@ -49,9 +49,6 @@ circuit = ["dep:risc0-circuit-rv32im-legacy"]
 default = ["prove", "std", "verify"]
 doc = ["std"]
 prove = ["circuit", "risc0-zkp/prove"]
-# The pure feature enables the 'pure' rust implementation of this
-# crate without any of the FFI interfaces exposed for e.g. the prover.
-pure = []
 std = ["risc0-zkp/std", "serde/std"]
 verify = ["circuit", "risc0-zkp/verify"]
 
