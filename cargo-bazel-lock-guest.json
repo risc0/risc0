@@ -1,5 +1,5 @@
 {
-  "checksum": "925e251f1481867aa17a2151382d60b039fd5b9a16dbdfc7a67cecf2129a5939",
+  "checksum": "8297fa8ae9a79038673c8b0dc170eb56327dc12f78382f54905584777352e668",
   "crates": {
     "anyhow 1.0.58": {
       "name": "anyhow",
@@ -320,13 +320,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "crypto-common 0.1.5": {
+    "crypto-common 0.1.6": {
       "name": "crypto-common",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/crypto-common/0.1.5/download",
-          "sha256": "2ccfd8c0ee4cce11e45b3fd6f9d5e69e0cc62912aa6a0cb1bf4617b0eba5a12f"
+          "url": "https://crates.io/api/v1/crates/crypto-common/0.1.6/download",
+          "sha256": "1bfb12502f3fc46cca1bb51ac28df9d618d813cdc3d2f25b9fe775a34af26bb3"
         }
       },
       "targets": [
@@ -362,7 +362,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.1.5"
+        "version": "0.1.6"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -406,7 +406,7 @@
               "target": "block_buffer"
             },
             {
-              "id": "crypto-common 0.1.5",
+              "id": "crypto-common 0.1.6",
               "target": "crypto_common"
             }
           ],

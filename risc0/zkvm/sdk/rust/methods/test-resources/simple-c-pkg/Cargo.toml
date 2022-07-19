@@ -1,0 +1,9 @@
+[package]
+name = "simple-c-pkg"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+
+[build-dependencies]
+risc0-zkvm = { path = "../../.." , default-features = false, features = ["std", "risc_cc"]}
