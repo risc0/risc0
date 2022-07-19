@@ -6,6 +6,7 @@
 .DS_Store
 .idea/
 bazel-*
+cmake-build/
 Cargo.lock
 dist/
 rust-project.json
