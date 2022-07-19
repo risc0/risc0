@@ -15,8 +15,8 @@
 #![deny(missing_docs)]
 #![doc = include_str!("README.md")]
 
-/// A wrapper for the `cc` crate that compiles to `riscv32im` with no boilerplate and
-/// reasonable defaults.
+/// A wrapper for the `cc` crate that compiles to `riscv32im` with no
+/// boilerplate and reasonable defaults.
 ///
 /// ```no_run
 /// fn main() {
@@ -49,7 +49,6 @@
 ///         .compile("foo");
 /// }
 /// ```
-///
 #[cfg(feature = "risc_cc")]
 pub mod rcc;
 

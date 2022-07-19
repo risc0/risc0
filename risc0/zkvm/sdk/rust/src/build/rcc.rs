@@ -79,18 +79,21 @@ impl Build {
 
     /// Run the compiler to test if it accepts the given flag.
     ///
-    /// For a convenience method for setting flags conditionally, `see flag_if_supported()`.
+    /// For a convenience method for setting flags conditionally, `see
+    /// flag_if_supported()`.
     ///
     /// It may return error if it’s unable to run the compiler with a test file
     /// (e.g. the compiler is missing or a write to the `out_dir` failed).
     ///
-    /// Note: Once computed, the result of this call is stored in the `known_flag_support` field.
-    /// If `is_flag_supported(flag)` is called again, the result will be read from the hash table.
+    /// Note: Once computed, the result of this call is stored in the
+    /// `known_flag_support` field. If `is_flag_supported(flag)` is called
+    /// again, the result will be read from the hash table.
     pub fn is_flag_supported(&self, flag: &str) -> Result<bool, Error> {
         self.inner.is_flag_supported(flag)
     }
 
-    /// Add an arbitrary flag to the invocation of the compiler if it supports it
+    /// Add an arbitrary flag to the invocation of the compiler if it supports
+    /// it
     pub fn flag_if_supported(&mut self, flag: &str) -> &mut Self {
         self.inner.flag_if_supported(flag);
         self
@@ -107,19 +110,20 @@ impl Build {
 
     /// Set the `-static` flag.
     ///
-    /// When enabled on systems that support dynamic linking, this prevents linking with the shared libraries.
+    /// When enabled on systems that support dynamic linking, this prevents
+    /// linking with the shared libraries.
     pub fn static_flag(&mut self, static_flag: bool) -> &mut Self {
         self.inner.static_flag(static_flag);
         self
     }
 
-    /// Enables the generation of default compiler flags by the inner `cc::Build`.
-    /// If this option is not set, this crate disables `cc`'s default flags
-    /// because they can cause issues when cross compiling.
+    /// Enables the generation of default compiler flags by the inner
+    /// `cc::Build`. If this option is not set, this crate disables `cc`'s
+    /// default flags because they can cause issues when cross compiling.
     ///
     /// Setting the `CRATE_COMPILER_DEFAULTS` environment variable has the same
-    /// effect as setting this to `true`. The presence of the environment variable
-    /// and this value will be OR’d together.
+    /// effect as setting this to `true`. The presence of the environment
+    /// variable and this value will be OR’d together.
     pub fn compiler_default_flags(&mut self, compiler_default_flags: bool) -> &mut Self {
         self.compiler_default_flags = compiler_default_flags;
         self
@@ -128,8 +132,8 @@ impl Build {
     /// Disables the generation of default risc0 flags.
     ///
     /// Setting the `CRATE_NO_RISC0_DEFAULTS` environment variable has the same
-    /// effect as setting this to `true`. The presence of the environment variable
-    /// and this value will be OR’d together.
+    /// effect as setting this to `true`. The presence of the environment
+    /// variable and this value will be OR’d together.
     pub fn no_risc0_default_flags(&mut self, no_risc0_default_flags: bool) -> &mut Self {
         self.no_risc0_default_flags = no_risc0_default_flags;
         self
@@ -153,7 +157,8 @@ impl Build {
 
     /// Set C++ support.
     ///
-    /// The other `cpp_*` options will only become active if this is set to `true`.
+    /// The other `cpp_*` options will only become active if this is set to
+    /// `true`.
     pub fn cpp(&mut self, cpp: bool) -> &mut Self {
         self.inner.cpp(cpp);
         self
@@ -161,9 +166,10 @@ impl Build {
 
     /// Set CUDA C++ support.
     ///
-    /// Enabling CUDA will pass the detected C/C++ toolchain as an argument to the CUDA compiler, NVCC.
-    /// NVCC itself accepts some limited GNU-like args; any other arguments for the C/C++ toolchain
-    /// will be redirected using "-Xcompiler" flags.
+    /// Enabling CUDA will pass the detected C/C++ toolchain as an argument to
+    /// the CUDA compiler, NVCC. NVCC itself accepts some limited GNU-like
+    /// args; any other arguments for the C/C++ toolchain will be redirected
+    /// using "-Xcompiler" flags.
     pub fn cuda(&mut self, cuda: bool) -> &mut Self {
         self.inner.cuda(cuda);
         self
@@ -171,8 +177,9 @@ impl Build {
 
     /// Link CUDA run-time.
     ///
-    /// This option mimics the `--cudart NVCC` command-line option. Just like the original it
-    /// accepts `{none|shared|static}`, with default being `static`. The method has to be invoked after `.cuda(true)`,
+    /// This option mimics the `--cudart NVCC` command-line option. Just like
+    /// the original it accepts `{none|shared|static}`, with default being
+    /// `static`. The method has to be invoked after `.cuda(true)`,
     ///  or not at all, if the default is right for the project.
     pub fn cudart(&mut self, cudart: &str) -> &mut Self {
         self.inner.cudart(cudart);
@@ -221,8 +228,8 @@ impl Build {
     /// Set the standard library to link against when compiling with C++
     /// support.
     ///
-    /// See [`get_cpp_link_stdlib`](cc::Build::get_cpp_link_stdlib) documentation
-    /// for the default value.
+    /// See [`get_cpp_link_stdlib`](cc::Build::get_cpp_link_stdlib)
+    /// documentation for the default value.
     /// If the `CXXSTDLIB` environment variable is set, its value will
     /// override the default value, but not the value explicitly set by calling
     /// this function.
@@ -342,11 +349,12 @@ impl Build {
 
     /// Configures the compiler to be used to produce output.
     ///
-    /// Setting the `RCC_COMPILER` makes this method call redundant. The presence of the
-    /// environment variable supersedes this value.
+    /// Setting the `RCC_COMPILER` makes this method call redundant. The
+    /// presence of the environment variable supersedes this value.
     ///
-    /// If not set via this call or the env variable above, this option is automatically
-    /// determined from the target platform or a number of environment variables.
+    /// If not set via this call or the env variable above, this option is
+    /// automatically determined from the target platform or a number of
+    /// environment variables.
     pub fn compiler<P: AsRef<Path>>(&mut self, compiler: P) -> &mut Self {
         self.inner.compiler(compiler);
         self
@@ -369,9 +377,9 @@ impl Build {
     ///
     ///  - `rustc-link-lib=static=`*compiled lib*
     ///  - `rustc-link-search=native=`*target folder*
-    ///  - When target is MSVC, the ATL-MFC libs are added via `rustc-link-search=native=`
+    ///  - When target is MSVC, the ATL-MFC libs are added via
+    ///    `rustc-link-search=native=`
     ///  - When C++ is enabled, the C++ stdlib is added via `rustc-link-lib`
-    ///
     pub fn cargo_metadata(&mut self, cargo_metadata: bool) -> &mut Self {
         self.inner.cargo_metadata(cargo_metadata);
         self
@@ -379,8 +387,8 @@ impl Build {
 
     /// Configures whether the compiler will emit position independent code.
     ///
-    /// This option defaults to `false` for `windows-gnu` and bare metal targets and
-    /// to `true` for all other targets.
+    /// This option defaults to `false` for `windows-gnu` and bare metal targets
+    /// and to `true` for all other targets.
     pub fn pic(&mut self, pic: bool) -> &mut Self {
         self.inner.pic(pic);
         self
@@ -401,7 +409,8 @@ impl Build {
         self
     }
 
-    /// Configures whether the /MT flag or the /MD flag will be passed to msvc build tools.
+    /// Configures whether the /MT flag or the /MD flag will be passed to msvc
+    /// build tools.
     ///
     /// This option defaults to `false`, and affect only msvc targets.
     pub fn static_crt(&mut self, static_crt: bool) -> &mut Self {
@@ -419,18 +428,20 @@ impl Build {
         self
     }
 
-    /// Configures the riscv32 cross-compiler install path. The default value is "/opt/riscv"
+    /// Configures the riscv32 cross-compiler install path. The default value is
+    /// "/opt/riscv"
     ///
-    /// Setting the `RV_CC_INSTALL_PATH` makes this method call redundant. The presence of the
-    /// environment variable supersedes this or the default value.
+    /// Setting the `RV_CC_INSTALL_PATH` makes this method call redundant. The
+    /// presence of the environment variable supersedes this or the default
+    /// value.
     pub fn rv_cc_install_path(&mut self, rv_cc_install_path: &str) -> &mut Self {
         self.rv_cc_install_path = rv_cc_install_path.to_string();
         self
     }
 
-    /// If enabled, removes debug information from the compiled binary. This improves performance and
-    /// reduces binary size. This option is equivalent to:
-    /// ```no_run
+    /// If enabled, removes debug information from the compiled binary. This
+    /// improves performance and reduces binary size. This option is
+    /// equivalent to: ```no_run
     ///  cc::Build::new()
     ///             .flag("-feliminate-unused-debug-symbols")
     ///             .flag("-feliminate-unused-debug-types")
@@ -443,7 +454,8 @@ impl Build {
 
     /// Run the compiler, generating the file `output`
     ///
-    /// This will return a result instead of panicing; see compile() for the complete description.
+    /// This will return a result instead of panicing; see compile() for the
+    /// complete description.
     pub fn try_compile(&mut self, output: &str) -> Result<(), Error> {
         self.add_flags();
         self.inner.try_compile(output)
@@ -454,8 +466,8 @@ impl Build {
     /// # Library name
     ///
     /// The `output` string argument determines the file name for the compiled
-    /// library. The Rust compiler will create an assembly named "lib"+output+".a".
-    /// MSVC will create a file named output+".lib".
+    /// library. The Rust compiler will create an assembly named
+    /// "lib"+output+".a". MSVC will create a file named output+".lib".
     ///
     /// The choice of `output` is close to arbitrary, but:
     ///
@@ -483,9 +495,9 @@ impl Build {
     ///
     /// # Panics
     ///
-    /// Panics if `output` is not formatted correctly or if one of the underlying
-    /// compiler commands fails. It can also panic if it fails reading file names
-    /// or creating directories.
+    /// Panics if `output` is not formatted correctly or if one of the
+    /// underlying compiler commands fails. It can also panic if it fails
+    /// reading file names or creating directories.
     pub fn compile(&mut self, output: &str) {
         self.add_flags();
         self.inner.compile(output);
@@ -552,12 +564,14 @@ impl Build {
             .flag("-fvirtual-function-elimination");
     }
 
-    /// This will return a result instead of panicing; see expand() for the complete description.
+    /// This will return a result instead of panicing; see expand() for the
+    /// complete description.
     pub fn try_expand(&self) -> Result<Vec<u8>, Error> {
         self.inner.try_expand()
     }
 
-    /// Run the compiler, returning the macro-expanded version of the input files.
+    /// Run the compiler, returning the macro-expanded version of the input
+    /// files.
     ///
     /// This is only relevant for C and C++ files.
     ///
@@ -592,7 +606,8 @@ impl Build {
 
     /// Get the compiler that's in use for this configuration.
     ///
-    /// This will return a result instead of panicing; see get_compiler() for the complete description.
+    /// This will return a result instead of panicing; see get_compiler() for
+    /// the complete description.
     pub fn try_get_compiler(&self) -> Result<cc::Tool, Error> {
         self.inner.try_get_compiler()
     }

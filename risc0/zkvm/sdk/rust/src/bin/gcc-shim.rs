@@ -1,9 +1,7 @@
 #![cfg_attr(test, allow(dead_code))]
 
-/*
-TESTING UTIL TAKEN FROM:
-https://github.com/rust-lang/cc-rs/blob/f2e1b1c9ff92ad063957382ec445bc54e9570c71/src/bin/gcc-shim.rs
-*/
+// TESTING UTIL TAKEN FROM:
+// https://github.com/rust-lang/cc-rs/blob/f2e1b1c9ff92ad063957382ec445bc54e9570c71/src/bin/gcc-shim.rs
 
 use std::env;
 use std::fs::File;
@@ -18,7 +16,8 @@ fn main() {
         env::var_os("GCCTEST_OUT_DIR").expect(&format!("{}: GCCTEST_OUT_DIR not found", program)),
     );
 
-    // Find the first nonexistent candidate file to which the program's args can be written.
+    // Find the first nonexistent candidate file to which the program's args can be
+    // written.
     for i in 0.. {
         let candidate = &out_dir.join(format!("out{}", i));
 
