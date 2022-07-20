@@ -26,13 +26,11 @@ cxx = "1.0"
 log = "0.4"
 rand = "0.8"
 risc0-zkvm-sys = { version = "0.10", path = "../.." }
-serde_json = "1.0"
 sha2 = "0.10"
 xmas-elf = "0.8"
 
 [target.'cfg(not(target_arch = "riscv32"))'.dev-dependencies]
 risc0-zkvm-methods = { version = "0.1", path = "methods" }
-
 
 [features]
 default = ["prove", "std", "verify"]
