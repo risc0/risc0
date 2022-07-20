@@ -12,19 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{boxed::Box, vec::Vec};
+use _alloc::{boxed::Box, vec::Vec};
 use core::{cell::UnsafeCell, mem};
 
-use crate::core::{Digest, DIGEST_WORDS};
-use crate::serde::to_vec_with_capacity;
-use risc0_zkp::core::{fp::Fp, fp4::Fp4};
+use risc0_zkp::core::{
+    fp::Fp,
+    fp4::Fp4,
+    sha::{Digest, DIGEST_WORDS},
+};
+use risc0_zkvm::{
+    platform::{
+        io::{SHADescriptor, GPIO_SHA},
+        memory, WORD_SIZE,
+    },
+    serde::to_vec_with_capacity,
+};
 use serde::Serialize;
 
-use super::{
-    align_up,
-    gpio::{SHADescriptor, GPIO_SHA},
-    mem_layout, WORD_SIZE,
-};
+use crate::align_up;
 
 // Current sha descriptor index.
 struct CurDesc(UnsafeCell<usize>);
@@ -44,7 +49,7 @@ fn alloc_desc() -> *mut SHADescriptor {
     // SAFETY: Single threaded and this is the only place we use CUR_DESC.
     unsafe {
         let cur_desc = CUR_DESC.0.get();
-        let ptr = (mem_layout::SHA.start() as *mut SHADescriptor).add(*cur_desc);
+        let ptr = (memory::SHA.start() as *mut SHADescriptor).add(*cur_desc);
         *cur_desc += 1;
         ptr
     }

@@ -9,6 +9,7 @@ members = [
   "risc0/zkvm/platform",
   "risc0/zkvm/prove/make-id",
   "risc0/zkvm/sdk/rust",
+  "risc0/zkvm/sdk/rust/build",
 ]
 
 exclude = [

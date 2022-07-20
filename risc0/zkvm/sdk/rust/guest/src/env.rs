@@ -16,18 +16,19 @@ use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 
 use serde::{Deserialize, Serialize};
 
-use super::{
-    align_up,
-    gpio::{
-        IoDescriptor, GPIO_COMMIT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE,
-        SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT,
+use risc0_zkp::core::sha::Digest;
+use risc0_zkvm::{
+    platform::{
+        io::{
+            IoDescriptor, GPIO_COMMIT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL,
+            GPIO_SENDRECV_SIZE, SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT,
+        },
+        memory, WORD_SIZE,
     },
-    mem_layout, memory_barrier, sha, WORD_SIZE,
-};
-use crate::{
-    core::Digest,
     serde::{Deserializer, Serializer, Slice},
 };
+
+use crate::{align_up, memory_barrier, sha};
 
 struct Env {
     output: Serializer<Slice<'static>>,
@@ -116,16 +117,10 @@ impl Env {
     fn new() -> Self {
         Env {
             commit: Serializer::new(Slice::new(unsafe {
-                slice::from_raw_parts_mut(
-                    mem_layout::COMMIT.start() as _,
-                    mem_layout::COMMIT.len_words(),
-                )
+                slice::from_raw_parts_mut(memory::COMMIT.start() as _, memory::COMMIT.len_words())
             })),
             output: Serializer::new(Slice::new(unsafe {
-                slice::from_raw_parts_mut(
-                    mem_layout::OUTPUT.start() as _,
-                    mem_layout::OUTPUT.len_words(),
-                )
+                slice::from_raw_parts_mut(memory::OUTPUT.start() as _, memory::OUTPUT.len_words())
             })),
 
             commit_len: 0,
@@ -142,7 +137,7 @@ impl Env {
             GPIO_SENDRECV_ADDR.write_volatile(buf.as_ptr());
 
             // Receive
-            let read_start: *const u32 = mem_layout::INPUT.start() as _;
+            let read_start: *const u32 = memory::INPUT.start() as _;
             let response_nbytes = read_start.add(self.read_ptr).read_volatile() as usize;
             self.read_ptr += 1;
             let response_nwords = align_up(response_nbytes, WORD_SIZE) / WORD_SIZE;
@@ -189,10 +184,7 @@ impl Env {
         let len_words = self.commit_len;
         let len_bytes = len_words * WORD_SIZE;
         let slice: &mut [u32] = unsafe {
-            slice::from_raw_parts_mut(
-                mem_layout::COMMIT.start() as _,
-                mem_layout::COMMIT.len_words(),
-            )
+            slice::from_raw_parts_mut(memory::COMMIT.start() as _, memory::COMMIT.len_words())
         };
 
         // Write the full data out to the host
