@@ -14,10 +14,5 @@ rust_library(
         "//risc0/zkvm/sdk/rust:zkvm_guest",
         "@crates_guest//:bytemuck",
         "@crates_guest//:serde",
-        # "//risc0/zkvm/sdk/cpp/host",
-        # "@crates_host//:cfg-if",
-        # "@crates_host//:cxx",
-        # "@crates_host//:log",
-        # "@crates_host//:rand",
     ],
 )
