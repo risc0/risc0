@@ -113,6 +113,7 @@ crates_repository(
         "//risc0/zkvm/platform:Cargo.toml",
         "//risc0/zkvm/prove/make-id:Cargo.toml",
         "//risc0/zkvm/sdk/rust:Cargo.toml",
+        "//risc0/zkvm/sdk/rust/build:Cargo.toml",
         "//risc0/zkp:Cargo.toml",
         "//risc0/zkvm:Cargo.toml",
     ],

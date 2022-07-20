@@ -1,0 +1,23 @@
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+exports_files(["Cargo.toml"])
+
+rust_library(
+    name = "guest",
+    srcs = glob(["src/**/*.rs"]),
+    crate_name = "risc0_zkvm_guest",
+    data = ["README.md"],
+    deps = [
+        "//risc0/zkp/rust:zkp_guest",
+        "//risc0/zkvm/sdk/rust:zkvm_guest",
+        "@crates_guest//:bytemuck",
+        "@crates_guest//:serde",
+        # "//risc0/zkvm/sdk/cpp/host",
+        # "@crates_host//:cfg-if",
+        # "@crates_host//:cxx",
+        # "@crates_host//:log",
+        # "@crates_host//:rand",
+    ],
+)

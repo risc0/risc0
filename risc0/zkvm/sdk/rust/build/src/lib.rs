@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #![deny(missing_docs)]
-#![doc = include_str!("README.md")]
+#![doc = include_str!("../README.md")]
 
 use std::{
     collections::HashMap,
@@ -25,14 +25,14 @@ use std::{
     process::Command,
 };
 
-use crate::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 use cargo_metadata::{MetadataCommand, Package};
+use risc0_zkvm::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use zip::ZipArchive;
 
-const TARGET_JSON: &[u8] = include_bytes!("riscv32im-risc0-zkvm-elf.json");
+const TARGET_JSON: &[u8] = include_bytes!("../riscv32im-risc0-zkvm-elf.json");
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {

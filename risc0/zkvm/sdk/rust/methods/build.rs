@@ -1,4 +1,4 @@
-use risc0_zkvm::build::{embed_methods_with_options, GuestOptions};
+use risc0_build::{embed_methods_with_options, GuestOptions};
 use std::collections::HashMap;
 
 fn main() {
