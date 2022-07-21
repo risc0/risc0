@@ -451,8 +451,8 @@ std::string PolyContext::done() {
   impl->outs << "do_result(" + finalName + ")\n";
   impl->outs << "#endif  // CHECK_EVAL\n";
   impl->outs << "#ifdef SIZES\n";
-  impl->outs << "static constexpr size_t kNumStepFp4s = " << impl->totFp4s << ";\n";
-  impl->outs << "static constexpr size_t kNumStepCons= " << impl->totCons << ";\n";
+  impl->outs << "#define NUM_FP4S " << impl->totFp4s << "\n";
+  impl->outs << "#define NUM_CONS " << impl->totCons << "\n";
   impl->outs << "#endif  // SIZES\n";
   impl->outs << "#ifdef TAPS\n";
   impl->outs << R"**(
@@ -524,6 +524,31 @@ std::string PolyContext::done() {
     LOG(0, "Required " << comboById.size() << " combos");
   }
   REQUIRE(kComboCount == comboById.size());
+  impl->outs << "#ifdef COMBOS";
+  impl->outs << R"**(
+#ifndef combo_begin
+#define combo_begin(id) /**/
+#endif
+#ifndef combo_end
+#define combo_end(id) /**/
+#endif
+#ifndef tap
+#define tap(back) /**/
+#endif
+)**";
+  for (size_t i = 0; i < comboById.size(); i++) {
+    impl->outs << "combo_begin(" << i << ")\n";
+    for (size_t back : comboById[i]) {
+      impl->outs << "tap(" << back << ")\n";
+    }
+    impl->outs << "combo_end(" << i << ")\n";
+  }
+  impl->outs << R"**(
+#undef combo_begin
+#undef combo_end
+#undef tap
+)**";
+  impl->outs << "#endif  // COMBOS\n";
 
   return impl->outs.str();
 }
