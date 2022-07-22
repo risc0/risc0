@@ -1,8 +1,8 @@
-load("//bazel/rules/cc:defs.bzl", "cc_binary")
+load("//bazel/rules/cc:defs.bzl", "cc_test")
 load("//bazel/rules/risc0:defs.bzl", "risc0_cc_method")
 
-cc_binary(
-    name = "benchmark",
+cc_test(
+    name = "bench",
     srcs = ["benchmark.cpp"],
     data = [
         ":bench_sha",
