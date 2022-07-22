@@ -142,7 +142,7 @@ butterfly!(1, 0);
 /// number.
 ///
 /// As an example, we'll work through a trace of the rev_butterfly algorithm
-/// with n = 3 on a list of length 8. Let w = ROU_REV[3] be the eighth root of
+/// with n = 3 on a list of length 8. Let w = ROU_REV\[3\] be the eighth root of
 /// unity. We start with
 ///
 ///   \[a0, a1, a2, a3, a4, a5, a6, a7\]
