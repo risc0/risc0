@@ -32,8 +32,8 @@ static void BM_Simple_Loop(benchmark::State& state) {
   size_t tot_iter = 0;
 
   for (auto _ : state) {
-    MethodId methodId = loadMethodId("examples/cpp/deck/shuffle_method.id");
-    Prover prover("risc0/zkvm/prove/bench/shuffle_method", methodId);
+    MethodId methodId = loadMethodId("risc0/zkvm/prove/bench/bench_simple_loop.id");
+    Prover prover("risc0/zkvm/prove/bench/bench_simple_loop", methodId);
     prover.writeInput(num_iter);
     VectorStreamWriter receipt_buf;
     Receipt receipt = prover.run();
@@ -53,7 +53,7 @@ static void BM_Sha(benchmark::State& state) {
   size_t tot_iter = 0;
 
   for (auto _ : state) {
-    MethodId methodId = loadMethodId("examples/cpp/deck/bench_sha.id");
+    MethodId methodId = loadMethodId("risc0/zkvm/prove/bench/bench_sha.id");
     Prover prover("risc0/zkvm/prove/bench/bench_sha", methodId);
     prover.writeInput(num_iter);
     VectorStreamWriter receipt_buf;
@@ -81,7 +81,7 @@ static void run_battleship(benchmark::State& state, const std::string& method) {
   RoundParams params{game_state, {1, 1}};
 
   for (auto _ : state) {
-    MethodId methodId = loadMethodId("examples/cpp/deck/bench_sha.id");
+    MethodId methodId = loadMethodId("examples/cpp/battleship/turn_method.id");
     Prover prover(method, methodId);
     prover.writeInput(params);
     VectorStreamWriter receipt_buf;
@@ -97,9 +97,6 @@ static void run_battleship(benchmark::State& state, const std::string& method) {
 static void BM_Battleship_Cpp(benchmark::State& state) {
   run_battleship(state, "examples/cpp/battleship/turn_method");
 }
-static void BM_Battleship_Rust(benchmark::State& state) {
-  run_battleship(state, "examples/rust/battleship/core/turn");
-}
 
 BENCHMARK(BM_Simple_Loop)           //
     ->Unit(benchmark::kMillisecond) // Display output in milliseconds per run
@@ -111,6 +108,5 @@ BENCHMARK(BM_Simple_Loop)           //
 
 BENCHMARK(BM_Sha)->Unit(benchmark::kMillisecond)->Arg(1)->Arg(10)->Arg(100);
 BENCHMARK(BM_Battleship_Cpp)->Unit(benchmark::kMillisecond);
-BENCHMARK(BM_Battleship_Rust)->Unit(benchmark::kMillisecond);
 
 BENCHMARK_MAIN();
