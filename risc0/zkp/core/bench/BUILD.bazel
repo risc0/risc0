@@ -1,6 +1,6 @@
-load("//bazel/rules/cc:defs.bzl", "cc_binary")
+load("//bazel/rules/cc:defs.bzl", "cc_test")
 
-cc_binary(
+cc_test(
     name = "bench",
     srcs = ["benchmark.cpp"],
     deps = [

@@ -1,4 +1,4 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_test")
 load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair")
 
 exports_files(["Cargo.toml"])
@@ -52,7 +52,7 @@ rust_test(
     data = glob(["**/README.md"]),
 )
 
-rust_binary(
+rust_test(
     name = "bench",
     srcs = ["benches/ntt.rs"],
     deps = [
