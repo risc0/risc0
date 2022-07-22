@@ -42,4 +42,9 @@ Since you are again using `risc0-build` as a build script, remember to include i
 risc0-build = "0.10"
 ```
 
-Don't forget to include your guest code as well! (If you're following the [starter repository](https://github.com/risc0/risc0-rust-starter) example, it's in `src/build`.)
+Don't forget to write your guest code as well!
+
+This process will generate a method ID (`*_ID`) and a path to an ELF file (`*_PATH`). The names will be derived from the name of the file containing the guest method, which will be converted to ALL_CAPS to comply with rust naming conventions. Thus, in the [starter example](https://github.com/risc0/risc0-rust-starter), where the guest method is in [`multiply.rs`](https://github.com/risc0/risc0-rust-starter/blob/main/methods/guest/src/bin/multiply.rs), the method ID is named `methods::MULTIPLY_ID` and the path to the ELF file is named `methods::MULTIPLY_PATH`. These are included at the beginning of the [host code](https://github.com/risc0/risc0-rust-starter/blob/main/starter/src/main.rs):
+```
+use methods::{MULTIPLY_ID, MULTIPLY_PATH};
+```
