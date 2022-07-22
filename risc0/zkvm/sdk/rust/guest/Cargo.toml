@@ -24,3 +24,5 @@ std = ["risc0-zkp/std", "serde/std"]
 
 [package.metadata.release]
 release = false
+
+[workspace]
