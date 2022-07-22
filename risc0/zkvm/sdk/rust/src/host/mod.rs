@@ -263,6 +263,16 @@ impl Prover {
         let ptr = unsafe { ffi::risc0_prover_run(&mut err, self.ptr) };
         ffi::check(err, || Receipt { ptr })
     }
+
+    /// Execute the ZKVM, but don't produce a [Receipt].  This runs
+    /// much faster and is useful for testing purposes.
+    pub fn run_without_proof(&self) -> Result<()> {
+        let mut err = ffi::RawError::default();
+        unsafe {
+            ffi::risc0_prover_run_without_proof(&mut err, self.ptr);
+        }
+        ffi::check(err, || ())
+    }
 }
 
 impl Drop for Receipt {

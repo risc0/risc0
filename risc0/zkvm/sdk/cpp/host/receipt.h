@@ -104,7 +104,14 @@ public:
     return obj;
   }
 
+  // Run the method and generate a zero-knowledge proof that the
+  // method was run correctly.
   Receipt run();
+
+  // Run the method without generating a proof.  This is significantly
+  // faster than run(), but does not provide any of the cryptographic
+  // guarantees so should only be used for testing.
+  void runWithoutProof();
 
 private:
   Prover() = default;

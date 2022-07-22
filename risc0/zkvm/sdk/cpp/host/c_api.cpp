@@ -141,6 +141,10 @@ risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr) {
   });
 }
 
+void risc0_prover_run_without_proof(risc0_error* err, risc0_prover* ptr) {
+  return ffi_wrap_void(err, [&] { ptr->prover->runWithoutProof(); });
+}
+
 risc0_receipt* risc0_receipt_new(risc0_error* err,
                                  const uint8_t* journal,
                                  const size_t journal_len,

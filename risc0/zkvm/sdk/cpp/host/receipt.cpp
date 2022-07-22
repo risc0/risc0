@@ -205,4 +205,12 @@ Receipt Prover::run() {
   return receipt;
 }
 
+void Prover::runWithoutProof() {
+  // Set the memory handlers to call back to the impl
+  MemoryHandler handler(impl.get());
+  // Make the circuit
+  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfContents, handler);
+  risc0::runWithoutProof(*circuit);
+}
+
 } // namespace risc0

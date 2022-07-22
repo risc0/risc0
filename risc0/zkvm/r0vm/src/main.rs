@@ -88,8 +88,12 @@ fn main() {
         );
     }
 
-    let method_id: MethodId = read_method_id(args.verbose, &args.elf, &args.method_id)
-        .unwrap_or_else(|| {
+    let method_id: MethodId = if args.receipt.is_none() {
+        // No need to generate a method ID since we don't need to
+        // generate an actual proof.
+        MethodId::from_slice(&[]).unwrap()
+    } else {
+        read_method_id(args.verbose, &args.elf, &args.method_id).unwrap_or_else(|| {
             if args.verbose > 0 {
                 eprintln!("Computing method id");
             }
@@ -101,7 +105,8 @@ fn main() {
                 }
             }
             computed
-        });
+        })
+    };
 
     let mut prover = Prover::new(&elf_contents, method_id.as_slice().unwrap()).unwrap();
     if let Some(input) = args.initial_input {
@@ -113,13 +118,15 @@ fn main() {
             .add_input(bytemuck::cast_slice(input_bytes.as_slice()))
             .unwrap();
     }
-    let receipt: Receipt = prover.run().unwrap();
-    if args.verbose > 0 {
-        eprintln!("Verifying that we executed correctly.");
-    }
 
     if let Some(receipt_file) = args.receipt {
-        let receipt_data = risc0_zkvm::serde::to_vec(&receipt).unwrap();
+        let receipt: Receipt = prover.run().unwrap();
+        if args.verbose > 0 {
+            eprintln!("Verifying that we executed correctly.");
+        }
+        receipt.verify(method_id.as_slice().unwrap()).unwrap();
+
+        let receipt_data = risc0_zkvm_serde::to_vec(&receipt).unwrap();
         fs::write(&receipt_file, bytemuck::cast_slice(&receipt_data)).unwrap();
         if args.verbose > 0 {
             eprintln!(
@@ -128,6 +135,8 @@ fn main() {
                 receipt_file
             );
         }
+    } else {
+        prover.run_without_proof().unwrap();
     }
     let output = prover.get_output().unwrap();
     if args.verbose > 0 {
