@@ -2,7 +2,7 @@
 
 Build RISC Zero zkVM guest code and provide handles to the host side
 
-In order for the host to execute guest code in the [RISC Zero zkVM](risc0_zkvm), the host must be provided an ELF file with RISC-V source code and the corresponding [MethodID](risc0_zkvm::host::MethodId). This crate contains the functions needed to take zkVM guest code written in rust, build a corresponding ELF file and MethodID, and make the MethodID and a path to the ELF file available for the host to use.
+In order for the host to execute guest code in the [RISC Zero zkVM](risc0_zkvm), the host must be provided a compiled RISC-V ELF file and the corresponding [MethodID](risc0_zkvm::host::MethodId). This crate contains the functions needed to take zkVM guest code, build a corresponding ELF file and MethodID, and make the MethodID and a path to the ELF file available for the host to use.
 
 ## Using risc0-build to build guest methods
 
