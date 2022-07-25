@@ -40,5 +40,5 @@ pub mod core;
 pub mod elf;
 #[cfg(all(not(target_arch = "riscv32"), feature = "std"))]
 pub mod host;
-pub mod platform;
 pub mod serde;
+pub use risc0_zkvm_platform as platform;

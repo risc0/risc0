@@ -13,6 +13,7 @@ risc0_rust_library_pair(
     ]),
     guest_deps = [
         "//risc0/zkp/rust:zkp_guest",
+        "//risc0/zkvm/sdk/rust/platform:platform_guest",
         "//risc0/zkvm/sdk/cpp/guest:crt0",
         "@crates_guest//:bytemuck",
         "@crates_guest//:cfg-if",
@@ -22,6 +23,7 @@ risc0_rust_library_pair(
     host_deps = [
         "//risc0/zkp/rust:zkp_host",
         "//risc0/zkvm/sdk/cpp/host",
+        "//risc0/zkvm/sdk/rust/platform:platform_host",
         "@crates_host//:bytemuck",
         "@crates_host//:cxx",
         "@crates_host//:log",

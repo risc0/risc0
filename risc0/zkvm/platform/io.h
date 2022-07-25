@@ -16,7 +16,7 @@
 
 namespace risc0 {
 
-// These must match the values in zkvm/sdk/rust/platform/src/gpio.rs
+// These must match the values in zkvm/sdk/rust/platform/src/io.rs
 constexpr size_t kGPIO_SHA = 0x01F00000;
 constexpr size_t kGPIO_Commit = 0x01F00004;
 constexpr size_t kGPIO_Fault = 0x01F00008;
@@ -27,7 +27,7 @@ constexpr size_t kGPIO_SendRecvChannel = 0x01F00014;
 constexpr size_t kGPIO_SendRecvSize = 0x01F00018;
 constexpr size_t kGPIO_SendRecvAddr = 0x01F0001C;
 
-// Standard ZKVM channels; must match zkvm/sdk/rust/platform/src/gpio.rs.
+// Standard ZKVM channels; must match zkvm/sdk/rust/platform/src/io.rs.
 
 // Request the initial input to the guest.
 constexpr uint32_t kSendRecvChannel_InitialInput = 0;
