@@ -20,7 +20,7 @@ use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::{
     platform::{
         io::{
-            IoDescriptor, GPIO_COMMIT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL,
+            host_sendrecv, IoDescriptor, GPIO_COMMIT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL,
             GPIO_SENDRECV_SIZE, SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT,
         },
         memory, WORD_SIZE,
@@ -34,7 +34,6 @@ struct Env {
     output: Serializer<Slice<'static>>,
     commit: Serializer<Slice<'static>>,
     commit_len: usize,
-    read_ptr: usize,
     initial_input_reader: Option<Reader>,
 }
 
@@ -124,29 +123,12 @@ impl Env {
             })),
 
             commit_len: 0,
-            read_ptr: 0,
             initial_input_reader: None,
         }
     }
 
     pub fn send_recv_as_u32(&mut self, channel: u32, buf: &[u8]) -> (&'static [u32], usize) {
-        unsafe {
-            // Send
-            GPIO_SENDRECV_CHANNEL.write_volatile(channel);
-            GPIO_SENDRECV_SIZE.write_volatile(buf.len());
-            GPIO_SENDRECV_ADDR.write_volatile(buf.as_ptr());
-
-            // Receive
-            let read_start: *const u32 = memory::INPUT.start() as _;
-            let response_nbytes = read_start.add(self.read_ptr).read_volatile() as usize;
-            self.read_ptr += 1;
-            let response_nwords = align_up(response_nbytes, WORD_SIZE) / WORD_SIZE;
-            let response_data =
-                slice::from_raw_parts(read_start.add(self.read_ptr), response_nwords);
-            self.read_ptr += response_nwords;
-
-            (response_data, response_nbytes)
-        }
+        host_sendrecv(channel, buf)
     }
 
     pub fn send_recv(&mut self, channel: u32, buf: &[u8]) -> &'static [u8] {

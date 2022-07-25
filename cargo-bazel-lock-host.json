@@ -1,5 +1,5 @@
 {
-  "checksum": "aac5ca6a08140425c44bf21613c72cd1140f25826f51f1757a09877fd3990918",
+  "checksum": "e413c1d55a3a11943f5656301ba43a096c86626be1ce964cad131dc3987e453b",
   "crates": {
     "adler 1.0.2": {
       "name": "adler",
@@ -477,7 +477,7 @@
               "target": "regex_automata"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             }
           ],
@@ -524,13 +524,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "bytemuck 1.10.0": {
+    "bytemuck 1.11.0": {
       "name": "bytemuck",
-      "version": "1.10.0",
+      "version": "1.11.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/bytemuck/1.10.0/download",
-          "sha256": "c53dfa917ec274df8ed3c572698f381a24eef2efba9492d797301b72b6db408a"
+          "url": "https://crates.io/api/v1/crates/bytemuck/1.11.0/download",
+          "sha256": "a5377c8865e74a160d21f29c2d40669f53286db6eab59b88540cbb12ffc8b835"
         }
       },
       "targets": [
@@ -566,7 +566,7 @@
           ],
           "selects": {}
         },
-        "version": "1.10.0"
+        "version": "1.11.0"
       },
       "license": "Zlib OR Apache-2.0 OR MIT"
     },
@@ -601,7 +601,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -868,7 +868,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             }
           ],
@@ -915,7 +915,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             }
           ],
@@ -972,7 +972,7 @@
               "target": "semver"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             },
             {
@@ -1203,13 +1203,13 @@
       },
       "license": "MIT"
     },
-    "clap 3.2.13": {
+    "clap 3.2.14": {
       "name": "clap",
-      "version": "3.2.13",
+      "version": "3.2.14",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/clap/3.2.13/download",
-          "sha256": "ac2bd7a1eb07da9ac757c923f69373deb7bc2ba5efc951b873bcb5e693992dca"
+          "url": "https://crates.io/api/v1/crates/clap/3.2.14/download",
+          "sha256": "54635806b078b7925d6e36810b1755f2a4b5b4d57560432c1ecf60bcbe10602b"
         }
       },
       "targets": [
@@ -1302,7 +1302,7 @@
           ],
           "selects": {}
         },
-        "version": "3.2.13"
+        "version": "3.2.14"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -1348,7 +1348,7 @@
               "target": "proc_macro_error"
             },
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -1799,7 +1799,7 @@
               "target": "regex"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             },
             {
@@ -1825,7 +1825,7 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "serde_derive 1.0.139",
+              "id": "serde_derive 1.0.140",
               "target": "serde_derive"
             }
           ],
@@ -1881,13 +1881,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "crossbeam-channel 0.5.5": {
+    "crossbeam-channel 0.5.6": {
       "name": "crossbeam-channel",
-      "version": "0.5.5",
+      "version": "0.5.6",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/crossbeam-channel/0.5.5/download",
-          "sha256": "4c02a4d71819009c192cf4872265391563fd6a84c81ff2c0f2a7026ca4c1d85c"
+          "url": "https://crates.io/api/v1/crates/crossbeam-channel/0.5.6/download",
+          "sha256": "c2dd04ddaf88237dc3b8d8f9a3c1004b506b54b3313403944054d23c0870c521"
         }
       },
       "targets": [
@@ -1921,24 +1921,24 @@
               "target": "cfg_if"
             },
             {
-              "id": "crossbeam-utils 0.8.10",
+              "id": "crossbeam-utils 0.8.11",
               "target": "crossbeam_utils"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.5.5"
+        "version": "0.5.6"
       },
       "license": "MIT OR Apache-2.0"
     },
-    "crossbeam-deque 0.8.1": {
+    "crossbeam-deque 0.8.2": {
       "name": "crossbeam-deque",
-      "version": "0.8.1",
+      "version": "0.8.2",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/crossbeam-deque/0.8.1/download",
-          "sha256": "6455c0ca19f0d2fbf751b908d5c55c1f5cbc65e03c4225427254b46890bdde1e"
+          "url": "https://crates.io/api/v1/crates/crossbeam-deque/0.8.2/download",
+          "sha256": "715e8152b692bba2d374b53d4875445368fdf21a94751410af607a5ac677d1fc"
         }
       },
       "targets": [
@@ -1973,28 +1973,28 @@
               "target": "cfg_if"
             },
             {
-              "id": "crossbeam-epoch 0.9.9",
+              "id": "crossbeam-epoch 0.9.10",
               "target": "crossbeam_epoch"
             },
             {
-              "id": "crossbeam-utils 0.8.10",
+              "id": "crossbeam-utils 0.8.11",
               "target": "crossbeam_utils"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.8.1"
+        "version": "0.8.2"
       },
       "license": "MIT OR Apache-2.0"
     },
-    "crossbeam-epoch 0.9.9": {
+    "crossbeam-epoch 0.9.10": {
       "name": "crossbeam-epoch",
-      "version": "0.9.9",
+      "version": "0.9.10",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/crossbeam-epoch/0.9.9/download",
-          "sha256": "07db9d94cbd326813772c968ccd25999e5f8ae22f4f8d1b11effa37ef6ce281d"
+          "url": "https://crates.io/api/v1/crates/crossbeam-epoch/0.9.10/download",
+          "sha256": "045ebe27666471bb549370b4b0b3e51b07f56325befa4284db65fc89c02511b1"
         }
       },
       "targets": [
@@ -2040,11 +2040,11 @@
               "target": "cfg_if"
             },
             {
-              "id": "crossbeam-epoch 0.9.9",
+              "id": "crossbeam-epoch 0.9.10",
               "target": "build_script_build"
             },
             {
-              "id": "crossbeam-utils 0.8.10",
+              "id": "crossbeam-utils 0.8.11",
               "target": "crossbeam_utils"
             },
             {
@@ -2063,7 +2063,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.9.9"
+        "version": "0.9.10"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -2081,13 +2081,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "crossbeam-utils 0.8.10": {
+    "crossbeam-utils 0.8.11": {
       "name": "crossbeam-utils",
-      "version": "0.8.10",
+      "version": "0.8.11",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/crossbeam-utils/0.8.10/download",
-          "sha256": "7d82ee10ce34d7bc12c2122495e7593a9c41347ecdd64185af4ecf72cb1a7f83"
+          "url": "https://crates.io/api/v1/crates/crossbeam-utils/0.8.11/download",
+          "sha256": "51887d4adc7b564537b15adcfb307936f8075dfcd5f00dde9a9f1d29383682bc"
         }
       },
       "targets": [
@@ -2133,7 +2133,7 @@
               "target": "cfg_if"
             },
             {
-              "id": "crossbeam-utils 0.8.10",
+              "id": "crossbeam-utils 0.8.11",
               "target": "build_script_build"
             },
             {
@@ -2144,7 +2144,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.8.10"
+        "version": "0.8.11"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -2249,7 +2249,7 @@
               "target": "ryu"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             }
           ],
@@ -2485,7 +2485,7 @@
               "target": "once_cell"
             },
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -2575,7 +2575,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -2818,13 +2818,13 @@
       },
       "license": "(Apache-2.0 OR MIT) AND BSD-3-Clause"
     },
-    "fastrand 1.7.0": {
+    "fastrand 1.8.0": {
       "name": "fastrand",
-      "version": "1.7.0",
+      "version": "1.8.0",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/fastrand/1.7.0/download",
-          "sha256": "c3fcf0cee53519c866c09b5de1f6c56ff9d647101f81c1964fa632e148896cdf"
+          "url": "https://crates.io/api/v1/crates/fastrand/1.8.0/download",
+          "sha256": "a7a407cfaa3385c4ae6b23e84623d48c2798d06e3e6a1878f7f59f17b3f86499"
         }
       },
       "targets": [
@@ -2858,7 +2858,7 @@
           }
         },
         "edition": "2018",
-        "version": "1.7.0"
+        "version": "1.8.0"
       },
       "license": "Apache-2.0 OR MIT"
     },
@@ -3670,7 +3670,7 @@
               "target": "slab"
             },
             {
-              "id": "tokio 1.20.0",
+              "id": "tokio 1.20.1",
               "target": "tokio"
             },
             {
@@ -4168,7 +4168,7 @@
               "target": "socket2"
             },
             {
-              "id": "tokio 1.20.0",
+              "id": "tokio 1.20.1",
               "target": "tokio"
             },
             {
@@ -4234,7 +4234,7 @@
               "target": "rustls"
             },
             {
-              "id": "tokio 1.20.0",
+              "id": "tokio 1.20.1",
               "target": "tokio"
             },
             {
@@ -4292,7 +4292,7 @@
               "target": "native_tls"
             },
             {
-              "id": "tokio 1.20.0",
+              "id": "tokio 1.20.1",
               "target": "tokio"
             },
             {
@@ -4671,13 +4671,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "js-sys 0.3.58": {
+    "js-sys 0.3.59": {
       "name": "js-sys",
-      "version": "0.3.58",
+      "version": "0.3.59",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/js-sys/0.3.58/download",
-          "sha256": "c3fac17f7123a73ca62df411b1bf727ccc805daa070338fda671c86dac1bdc27"
+          "url": "https://crates.io/api/v1/crates/js-sys/0.3.59/download",
+          "sha256": "258451ab10b34f8af53416d1fdab72c22e805f0c92a1136d59470ec0b11138b2"
         }
       },
       "targets": [
@@ -4702,14 +4702,14 @@
         "deps": {
           "common": [
             {
-              "id": "wasm-bindgen 0.2.81",
+              "id": "wasm-bindgen 0.2.82",
               "target": "wasm_bindgen"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.3.58"
+        "version": "0.3.59"
       },
       "license": "MIT/Apache-2.0"
     },
@@ -5998,7 +5998,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -6505,11 +6505,11 @@
           "selects": {
             "cfg(all(target_arch = \"wasm32\", not(target_os = \"wasi\")))": [
               {
-                "id": "wasm-bindgen 0.2.81",
+                "id": "wasm-bindgen 0.2.82",
                 "target": "wasm_bindgen"
               },
               {
-                "id": "web-sys 0.3.58",
+                "id": "web-sys 0.3.59",
                 "target": "web_sys"
               }
             ]
@@ -6684,7 +6684,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -6773,7 +6773,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -6802,13 +6802,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "proc-macro2 1.0.40": {
+    "proc-macro2 1.0.41": {
       "name": "proc-macro2",
-      "version": "1.0.40",
+      "version": "1.0.41",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/proc-macro2/1.0.40/download",
-          "sha256": "dd96a1e8ed2596c337f8eae5f24924ec83f5ad5ab21ea8e455d3566c69fbcaf7"
+          "url": "https://crates.io/api/v1/crates/proc-macro2/1.0.41/download",
+          "sha256": "cdcc2916cde080c1876ff40292a396541241fe0072ef928cd76582e9ea5d60d2"
         }
       },
       "targets": [
@@ -6850,7 +6850,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "build_script_build"
             },
             {
@@ -6861,7 +6861,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.40"
+        "version": "1.0.41"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -6917,7 +6917,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -7172,7 +7172,7 @@
         "deps": {
           "common": [
             {
-              "id": "crossbeam-deque 0.8.1",
+              "id": "crossbeam-deque 0.8.2",
               "target": "crossbeam_deque"
             },
             {
@@ -7252,15 +7252,15 @@
         "deps": {
           "common": [
             {
-              "id": "crossbeam-channel 0.5.5",
+              "id": "crossbeam-channel 0.5.6",
               "target": "crossbeam_channel"
             },
             {
-              "id": "crossbeam-deque 0.8.1",
+              "id": "crossbeam-deque 0.8.2",
               "target": "crossbeam_deque"
             },
             {
-              "id": "crossbeam-utils 0.8.10",
+              "id": "crossbeam-utils 0.8.11",
               "target": "crossbeam_utils"
             },
             {
@@ -7285,13 +7285,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "redox_syscall 0.2.13": {
+    "redox_syscall 0.2.15": {
       "name": "redox_syscall",
-      "version": "0.2.13",
+      "version": "0.2.15",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/redox_syscall/0.2.13/download",
-          "sha256": "62f25bc4c7e55e0b0b7a1d43fb893f4fa1361d0abe38b9ce4f323c2adfe6ef42"
+          "url": "https://crates.io/api/v1/crates/redox_syscall/0.2.15/download",
+          "sha256": "534cfe58d6a18cc17120fbf4635d53d14691c1fe4d951064df9bd326178d7d5a"
         }
       },
       "targets": [
@@ -7323,7 +7323,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.2.13"
+        "version": "0.2.15"
       },
       "license": "MIT"
     },
@@ -7542,7 +7542,7 @@
               "target": "http"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             },
             {
@@ -7630,7 +7630,7 @@
                 "target": "rustls_pemfile"
               },
               {
-                "id": "tokio 1.20.0",
+                "id": "tokio 1.20.1",
                 "target": "tokio"
               },
               {
@@ -7648,7 +7648,7 @@
             ],
             "cfg(target_arch = \"wasm32\")": [
               {
-                "id": "js-sys 0.3.58",
+                "id": "js-sys 0.3.59",
                 "target": "js_sys"
               },
               {
@@ -7656,15 +7656,15 @@
                 "target": "serde_json"
               },
               {
-                "id": "wasm-bindgen 0.2.81",
+                "id": "wasm-bindgen 0.2.82",
                 "target": "wasm_bindgen"
               },
               {
-                "id": "wasm-bindgen-futures 0.4.31",
+                "id": "wasm-bindgen-futures 0.4.32",
                 "target": "wasm_bindgen_futures"
               },
               {
-                "id": "web-sys 0.3.58",
+                "id": "web-sys 0.3.59",
                 "target": "web_sys"
               }
             ],
@@ -7741,7 +7741,7 @@
           "selects": {
             "cfg(all(target_arch = \"wasm32\", target_vendor = \"unknown\", target_os = \"unknown\", target_env = \"\"))": [
               {
-                "id": "web-sys 0.3.58",
+                "id": "web-sys 0.3.59",
                 "target": "web_sys"
               }
             ],
@@ -7829,7 +7829,7 @@
               "target": "reqwest"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             },
             {
@@ -7946,7 +7946,7 @@
         "deps": {
           "common": [
             {
-              "id": "clap 3.2.13",
+              "id": "clap 3.2.14",
               "target": "clap"
             }
           ],
@@ -7998,7 +7998,7 @@
               "target": "array_init"
             },
             {
-              "id": "bytemuck 1.10.0",
+              "id": "bytemuck 1.11.0",
               "target": "bytemuck"
             },
             {
@@ -8026,7 +8026,7 @@
               "target": "rayon"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             },
             {
@@ -8179,7 +8179,7 @@
         "deps": {
           "common": [
             {
-              "id": "bytemuck 1.10.0",
+              "id": "bytemuck 1.11.0",
               "target": "bytemuck"
             },
             {
@@ -8187,7 +8187,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             }
           ],
@@ -8430,6 +8430,34 @@
         ]
       },
       "license": null
+    },
+    "risc0-zkvm-platform 0.10.0": {
+      "name": "risc0-zkvm-platform",
+      "version": "0.10.0",
+      "repository": null,
+      "targets": [
+        {
+          "Library": {
+            "crate_name": "risc0_zkvm_platform",
+            "crate_root": "src/lib.rs",
+            "srcs": {
+              "include": [
+                "**/*.rs"
+              ],
+              "exclude": []
+            }
+          }
+        }
+      ],
+      "library_target_name": "risc0_zkvm_platform",
+      "common_attrs": {
+        "compile_data_glob": [
+          "**"
+        ],
+        "edition": "2021",
+        "version": "0.10.0"
+      },
+      "license": "Apache-2.0"
     },
     "risc0-zkvm-platform-sys 0.10.0": {
       "name": "risc0-zkvm-platform-sys",
@@ -9120,7 +9148,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             }
           ],
@@ -9136,13 +9164,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "serde 1.0.139": {
+    "serde 1.0.140": {
       "name": "serde",
-      "version": "1.0.139",
+      "version": "1.0.140",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde/1.0.139/download",
-          "sha256": "0171ebb889e45aa68b44aee0859b3eede84c6f5f5c228e6f140c0b2a0a46cad6"
+          "url": "https://crates.io/api/v1/crates/serde/1.0.140/download",
+          "sha256": "fc855a42c7967b7c369eb5860f7164ef1f6f81c20c7cc1141f2a604e18723b03"
         }
       },
       "targets": [
@@ -9185,7 +9213,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "build_script_build"
             }
           ],
@@ -9195,13 +9223,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "serde_derive 1.0.139",
+              "id": "serde_derive 1.0.140",
               "target": "serde_derive"
             }
           ],
           "selects": {}
         },
-        "version": "1.0.139"
+        "version": "1.0.140"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9249,7 +9277,7 @@
               "target": "half"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             }
           ],
@@ -9260,13 +9288,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "serde_derive 1.0.139": {
+    "serde_derive 1.0.140": {
       "name": "serde_derive",
-      "version": "1.0.139",
+      "version": "1.0.140",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.139/download",
-          "sha256": "dc1d3230c1de7932af58ad8ffbe1d784bd55efd5a9d84ac24f69c72d83543dfb"
+          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.140/download",
+          "sha256": "6f2122636b9fe3b81f1cb25099fcf2d3f542cdb1d45940d56c713158884a05da"
         }
       },
       "targets": [
@@ -9306,7 +9334,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -9314,7 +9342,7 @@
               "target": "quote"
             },
             {
-              "id": "serde_derive 1.0.139",
+              "id": "serde_derive 1.0.140",
               "target": "build_script_build"
             },
             {
@@ -9325,7 +9353,7 @@
           "selects": {}
         },
         "edition": "2015",
-        "version": "1.0.139"
+        "version": "1.0.140"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9390,7 +9418,7 @@
               "target": "ryu"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             },
             {
@@ -9453,7 +9481,7 @@
               "target": "ryu"
             },
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             }
           ],
@@ -9857,7 +9885,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -9993,7 +10021,7 @@
               "target": "cfg_if"
             },
             {
-              "id": "fastrand 1.7.0",
+              "id": "fastrand 1.8.0",
               "target": "fastrand"
             },
             {
@@ -10010,7 +10038,7 @@
             ],
             "cfg(target_os = \"redox\")": [
               {
-                "id": "redox_syscall 0.2.13",
+                "id": "redox_syscall 0.2.15",
                 "target": "syscall"
               }
             ],
@@ -10281,7 +10309,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.139",
+              "id": "serde 1.0.140",
               "target": "serde"
             },
             {
@@ -10376,13 +10404,13 @@
       },
       "license": "MIT OR Apache-2.0 OR Zlib"
     },
-    "tokio 1.20.0": {
+    "tokio 1.20.1": {
       "name": "tokio",
-      "version": "1.20.0",
+      "version": "1.20.1",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/tokio/1.20.0/download",
-          "sha256": "57aec3cfa4c296db7255446efb4928a6be304b431a806216105542a67b6ca82e"
+          "url": "https://crates.io/api/v1/crates/tokio/1.20.1/download",
+          "sha256": "7a8325f63a7d4774dd041e363b2409ed1c5cbbd0f867795e661df066b2b0a581"
         }
       },
       "targets": [
@@ -10464,7 +10492,7 @@
               "target": "socket2"
             },
             {
-              "id": "tokio 1.20.0",
+              "id": "tokio 1.20.1",
               "target": "build_script_build"
             }
           ],
@@ -10484,7 +10512,7 @@
           }
         },
         "edition": "2018",
-        "version": "1.20.0"
+        "version": "1.20.1"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -10537,7 +10565,7 @@
               "target": "native_tls"
             },
             {
-              "id": "tokio 1.20.0",
+              "id": "tokio 1.20.1",
               "target": "tokio"
             }
           ],
@@ -10588,7 +10616,7 @@
               "target": "rustls"
             },
             {
-              "id": "tokio 1.20.0",
+              "id": "tokio 1.20.1",
               "target": "tokio"
             },
             {
@@ -10655,7 +10683,7 @@
               "target": "pin_project_lite"
             },
             {
-              "id": "tokio 1.20.0",
+              "id": "tokio 1.20.1",
               "target": "tokio"
             },
             {
@@ -11336,13 +11364,13 @@
       },
       "license": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT"
     },
-    "wasm-bindgen 0.2.81": {
+    "wasm-bindgen 0.2.82": {
       "name": "wasm-bindgen",
-      "version": "0.2.81",
+      "version": "0.2.82",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/wasm-bindgen/0.2.81/download",
-          "sha256": "7c53b543413a17a202f4be280a7e5c62a1c69345f5de525ee64f8cfdbc954994"
+          "url": "https://crates.io/api/v1/crates/wasm-bindgen/0.2.82/download",
+          "sha256": "fc7652e3f6c4706c8d9cd54832c4a4ccb9b5336e2c3bd154d5cccfbf1c1f5f7d"
         }
       },
       "targets": [
@@ -11388,7 +11416,7 @@
               "target": "cfg_if"
             },
             {
-              "id": "wasm-bindgen 0.2.81",
+              "id": "wasm-bindgen 0.2.82",
               "target": "build_script_build"
             }
           ],
@@ -11398,13 +11426,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "wasm-bindgen-macro 0.2.81",
+              "id": "wasm-bindgen-macro 0.2.82",
               "target": "wasm_bindgen_macro"
             }
           ],
           "selects": {}
         },
-        "version": "0.2.81"
+        "version": "0.2.82"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -11413,13 +11441,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "wasm-bindgen-backend 0.2.81": {
+    "wasm-bindgen-backend 0.2.82": {
       "name": "wasm-bindgen-backend",
-      "version": "0.2.81",
+      "version": "0.2.82",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/wasm-bindgen-backend/0.2.81/download",
-          "sha256": "5491a68ab4500fa6b4d726bd67408630c3dbe9c4fe7bda16d5c82a1fd8c7340a"
+          "url": "https://crates.io/api/v1/crates/wasm-bindgen-backend/0.2.82/download",
+          "sha256": "662cd44805586bd52971b9586b1df85cdbbd9112e4ef4d8f41559c334dc6ac3f"
         }
       },
       "targets": [
@@ -11451,15 +11479,15 @@
               "target": "bumpalo"
             },
             {
-              "id": "lazy_static 1.4.0",
-              "target": "lazy_static"
-            },
-            {
               "id": "log 0.4.17",
               "target": "log"
             },
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "once_cell 1.13.0",
+              "target": "once_cell"
+            },
+            {
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -11471,24 +11499,24 @@
               "target": "syn"
             },
             {
-              "id": "wasm-bindgen-shared 0.2.81",
+              "id": "wasm-bindgen-shared 0.2.82",
               "target": "wasm_bindgen_shared"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.2.81"
+        "version": "0.2.82"
       },
       "license": "MIT/Apache-2.0"
     },
-    "wasm-bindgen-futures 0.4.31": {
+    "wasm-bindgen-futures 0.4.32": {
       "name": "wasm-bindgen-futures",
-      "version": "0.4.31",
+      "version": "0.4.32",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/wasm-bindgen-futures/0.4.31/download",
-          "sha256": "de9a9cec1733468a8c657e57fa2413d2ae2c0129b95e87c5b72b8ace4d13f31f"
+          "url": "https://crates.io/api/v1/crates/wasm-bindgen-futures/0.4.32/download",
+          "sha256": "fa76fb221a1f8acddf5b54ace85912606980ad661ac7a503b4570ffd3a624dad"
         }
       },
       "targets": [
@@ -11517,35 +11545,35 @@
               "target": "cfg_if"
             },
             {
-              "id": "js-sys 0.3.58",
+              "id": "js-sys 0.3.59",
               "target": "js_sys"
             },
             {
-              "id": "wasm-bindgen 0.2.81",
+              "id": "wasm-bindgen 0.2.82",
               "target": "wasm_bindgen"
             }
           ],
           "selects": {
             "cfg(target_feature = \"atomics\")": [
               {
-                "id": "web-sys 0.3.58",
+                "id": "web-sys 0.3.59",
                 "target": "web_sys"
               }
             ]
           }
         },
         "edition": "2018",
-        "version": "0.4.31"
+        "version": "0.4.32"
       },
       "license": "MIT/Apache-2.0"
     },
-    "wasm-bindgen-macro 0.2.81": {
+    "wasm-bindgen-macro 0.2.82": {
       "name": "wasm-bindgen-macro",
-      "version": "0.2.81",
+      "version": "0.2.82",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/wasm-bindgen-macro/0.2.81/download",
-          "sha256": "c441e177922bc58f1e12c022624b6216378e5febc2f0533e41ba443d505b80aa"
+          "url": "https://crates.io/api/v1/crates/wasm-bindgen-macro/0.2.82/download",
+          "sha256": "b260f13d3012071dfb1512849c033b1925038373aea48ced3012c09df952c602"
         }
       },
       "targets": [
@@ -11577,24 +11605,24 @@
               "target": "quote"
             },
             {
-              "id": "wasm-bindgen-macro-support 0.2.81",
+              "id": "wasm-bindgen-macro-support 0.2.82",
               "target": "wasm_bindgen_macro_support"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.2.81"
+        "version": "0.2.82"
       },
       "license": "MIT/Apache-2.0"
     },
-    "wasm-bindgen-macro-support 0.2.81": {
+    "wasm-bindgen-macro-support 0.2.82": {
       "name": "wasm-bindgen-macro-support",
-      "version": "0.2.81",
+      "version": "0.2.82",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/wasm-bindgen-macro-support/0.2.81/download",
-          "sha256": "7d94ac45fcf608c1f45ef53e748d35660f168490c10b23704c7779ab8f5c3048"
+          "url": "https://crates.io/api/v1/crates/wasm-bindgen-macro-support/0.2.82/download",
+          "sha256": "5be8e654bdd9b79216c2929ab90721aa82faf65c48cdf08bdc4e7f51357b80da"
         }
       },
       "targets": [
@@ -11622,7 +11650,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.40",
+              "id": "proc-macro2 1.0.41",
               "target": "proc_macro2"
             },
             {
@@ -11634,28 +11662,28 @@
               "target": "syn"
             },
             {
-              "id": "wasm-bindgen-backend 0.2.81",
+              "id": "wasm-bindgen-backend 0.2.82",
               "target": "wasm_bindgen_backend"
             },
             {
-              "id": "wasm-bindgen-shared 0.2.81",
+              "id": "wasm-bindgen-shared 0.2.82",
               "target": "wasm_bindgen_shared"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.2.81"
+        "version": "0.2.82"
       },
       "license": "MIT/Apache-2.0"
     },
-    "wasm-bindgen-shared 0.2.81": {
+    "wasm-bindgen-shared 0.2.82": {
       "name": "wasm-bindgen-shared",
-      "version": "0.2.81",
+      "version": "0.2.82",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/wasm-bindgen-shared/0.2.81/download",
-          "sha256": "6a89911bd99e5f3659ec4acf9c4d93b0a90fe4a2a11f15328472058edc5261be"
+          "url": "https://crates.io/api/v1/crates/wasm-bindgen-shared/0.2.82/download",
+          "sha256": "6598dd0bd3c7d51095ff6531a5b23e02acdc81804e30d8f07afb77b7215a140a"
         }
       },
       "targets": [
@@ -11692,14 +11720,14 @@
         "deps": {
           "common": [
             {
-              "id": "wasm-bindgen-shared 0.2.81",
+              "id": "wasm-bindgen-shared 0.2.82",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.2.81"
+        "version": "0.2.82"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -11709,13 +11737,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "web-sys 0.3.58": {
+    "web-sys 0.3.59": {
       "name": "web-sys",
-      "version": "0.3.58",
+      "version": "0.3.59",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/web-sys/0.3.58/download",
-          "sha256": "2fed94beee57daf8dd7d51f2b15dc2bcde92d7a72304cdf662a4371008b71b90"
+          "url": "https://crates.io/api/v1/crates/web-sys/0.3.59/download",
+          "sha256": "ed055ab27f941423197eb86b2035720b1a3ce40504df082cac2ecc6ed73335a1"
         }
       },
       "targets": [
@@ -11768,18 +11796,18 @@
         "deps": {
           "common": [
             {
-              "id": "js-sys 0.3.58",
+              "id": "js-sys 0.3.59",
               "target": "js_sys"
             },
             {
-              "id": "wasm-bindgen 0.2.81",
+              "id": "wasm-bindgen 0.2.82",
               "target": "wasm_bindgen"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "0.3.58"
+        "version": "0.3.59"
       },
       "license": "MIT/Apache-2.0"
     },
@@ -12798,7 +12826,7 @@
           "selects": {
             "cfg(any(all(target_arch = \"arm\", target_pointer_width = \"32\"), target_arch = \"mips\", target_arch = \"powerpc\"))": [
               {
-                "id": "crossbeam-utils 0.8.10",
+                "id": "crossbeam-utils 0.8.11",
                 "target": "crossbeam_utils"
               }
             ]
@@ -13008,7 +13036,7 @@
   },
   "binary_crates": [
     "cc 1.0.73",
-    "clap 3.2.13",
+    "clap 3.2.14",
     "webpki-roots 0.22.4",
     "xmas-elf 0.8.0"
   ],
@@ -13023,6 +13051,7 @@
     "risc0-zkvm-circuit-gen 0.10.0": "risc0/zkvm/circuit/make-circuit",
     "risc0-zkvm-circuit-sys 0.10.0": "risc0/zkvm/circuit",
     "risc0-zkvm-methods 0.1.0": "risc0/zkvm/sdk/rust/methods",
+    "risc0-zkvm-platform 0.10.0": "risc0/zkvm/sdk/rust/platform",
     "risc0-zkvm-platform-sys 0.10.0": "risc0/zkvm/platform",
     "risc0-zkvm-sys 0.10.0": "risc0/zkvm"
   },
