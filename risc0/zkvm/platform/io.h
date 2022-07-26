@@ -33,6 +33,8 @@ constexpr size_t kGPIO_SendRecvAddr = 0x01F0001C;
 constexpr uint32_t kSendRecvChannel_InitialInput = 0;
 // Write bytes to standard output
 constexpr uint32_t kSendRecvChannel_Stdout = 1;
+// Write bytes to standard error
+constexpr uint32_t kSendRecvChannel_Stderr = 2;
 
 // To invoke accelerated SHA, the guest writes ShaDescriptor structs
 // in sequence to the "SHA" memory region.  Once the ShaDescriptor has

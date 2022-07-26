@@ -8,6 +8,7 @@ members = [
   "risc0/zkvm/circuit/make-circuit",
   "risc0/zkvm/platform",
   "risc0/zkvm/prove/make-id",
+  "risc0/zkvm/r0vm",
   "risc0/zkvm/sdk/rust",
   "risc0/zkvm/sdk/rust/build",
 ]

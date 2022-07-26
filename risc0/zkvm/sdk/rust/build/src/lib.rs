@@ -109,11 +109,11 @@ struct ZipMapEntry {
 /// ID of rust library source version.  This is an arbitrary string,
 /// but must change if we need to download a new library version.  So
 /// let's just use the GIT commit ID.
-const RUST_LIB_ID: &str = "c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.";
+const RUST_LIB_ID: &str = "13dd9c85310093d42bed1528c07aec397cb76716";
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry{
-	zip_url: "https://github.com/risc0/rust/archive/c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.zip",
-	src_prefix: "rust-c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1/library",
+	zip_url: "https://github.com/risc0/rust/archive/13dd9c85310093d42bed1528c07aec397cb76716.zip",
+	src_prefix: "rust-13dd9c85310093d42bed1528c07aec397cb76716/library",
 	dst_prefix: "library"},
     ZipMapEntry{
 	zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
@@ -281,7 +281,6 @@ where
                     continue;
                 }
                 std::io::copy(&mut f, &mut File::create(&dest_name).unwrap()).unwrap();
-                println!("Writing {}", dest_name.display());
                 nwrote += 1;
             }
         }
@@ -304,12 +303,11 @@ fn build_guest_package<P>(
     let cargo = env::var("CARGO").unwrap();
     let mut args = vec![
         "build",
-        "-vv",
         "--release",
         "--target",
         guest_build_env.target_spec.to_str().unwrap(),
         "-Z",
-        "build-std",
+        "build-std=core,alloc,std,proc_macro,panic_abort",
         "-Z",
         "build-std-features=compiler-builtins-mem",
         "--manifest-path",
@@ -323,16 +321,20 @@ fn build_guest_package<P>(
         args.push(&features_str);
     }
     println!("Building guest package: {cargo} {}", args.join(" "));
-    println!(
-        "Using std src root: {}",
-        guest_build_env.rust_lib_src.to_str().unwrap()
-    );
+    // The RISC0_STANDARD_LIB variable can be set for testing purposes
+    // to override the downloaded standard library.  It should point
+    // to the root of the rust repository.
+    let risc0_standard_lib: String = if let Ok(path) = env::var("RISC0_STANDARD_LIB") {
+        path
+    } else {
+        guest_build_env.rust_lib_src.to_str().unwrap().into()
+    };
+
+    println!("Using rust standard library root: {}", risc0_standard_lib);
+
     let status = Command::new(cargo)
         .env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic")
-        .env(
-            "__CARGO_TESTS_ONLY_SRC_ROOT",
-            guest_build_env.rust_lib_src.to_str().unwrap(),
-        )
+        .env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib)
         .args(args)
         .status()
         .unwrap();

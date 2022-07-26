@@ -1,8 +1,10 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
+exports_files(["Cargo.toml"])
+
 rust_binary(
     name = "r0vm",
-    srcs = ["src/main.rs"],
+    srcs = ["src/bin/r0vm.rs"],
     deps = [
         "//risc0/zkvm/sdk/rust:zkvm_host",
         "@crates_host//:bytemuck",

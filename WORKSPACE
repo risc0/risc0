@@ -117,6 +117,7 @@ crates_repository(
         "//risc0/zkvm/sdk/rust/platform:Cargo.toml",
         "//risc0/zkp:Cargo.toml",
         "//risc0/zkvm:Cargo.toml",
+        "//risc0/zkvm/r0vm:Cargo.toml",
     ],
     quiet = False,
 )

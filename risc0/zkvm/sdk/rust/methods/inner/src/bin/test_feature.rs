@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #![no_main]
+
+#[allow(unused_imports)]
 use std::compile_error;
 
 risc0_zkvm_guest::entry!(main);

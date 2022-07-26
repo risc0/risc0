@@ -1,5 +1,5 @@
 {
-  "checksum": "2ae6b389628cc0713af774bb32469840082863fbab7edec91c5a1725341c1dca",
+  "checksum": "880e11fde32be721c7e0780b690d47ba64ebe71e1dcf3dcd606e9db75bba664b",
   "crates": {
     "anyhow 1.0.58": {
       "name": "anyhow",
@@ -212,7 +212,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.41",
+              "id": "proc-macro2 1.0.42",
               "target": "proc_macro2"
             },
             {
@@ -729,13 +729,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "proc-macro2 1.0.41": {
+    "proc-macro2 1.0.42": {
       "name": "proc-macro2",
-      "version": "1.0.41",
+      "version": "1.0.42",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/proc-macro2/1.0.41/download",
-          "sha256": "cdcc2916cde080c1876ff40292a396541241fe0072ef928cd76582e9ea5d60d2"
+          "url": "https://crates.io/api/v1/crates/proc-macro2/1.0.42/download",
+          "sha256": "c278e965f1d8cf32d6e0e96de3d3e79712178ae67986d9cf9151f51e95aac89b"
         }
       },
       "targets": [
@@ -776,7 +776,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.41",
+              "id": "proc-macro2 1.0.42",
               "target": "build_script_build"
             },
             {
@@ -787,7 +787,7 @@
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.41"
+        "version": "1.0.42"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -843,7 +843,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.41",
+              "id": "proc-macro2 1.0.42",
               "target": "proc_macro2"
             },
             {
@@ -1060,7 +1060,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.41",
+              "id": "proc-macro2 1.0.42",
               "target": "proc_macro2"
             },
             {
@@ -1196,7 +1196,7 @@
         "deps": {
           "common": [
             {
-              "id": "proc-macro2 1.0.41",
+              "id": "proc-macro2 1.0.42",
               "target": "proc_macro2"
             },
             {
