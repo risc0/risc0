@@ -22,6 +22,7 @@
 
 extern crate alloc as _alloc;
 
+#[cfg(not(feature = "std"))]
 mod alloc;
 
 /// Functions for interacting with the host environment.
@@ -36,7 +37,7 @@ extern "C" {
     fn _fault() -> !;
 }
 
-#[cfg(target_arch = "riscv32")]
+#[cfg(all(target_arch = "riscv32", not(feature = "std")))]
 #[panic_handler]
 unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
     use risc0_zkvm::platform::io::GPIO_FAULT;

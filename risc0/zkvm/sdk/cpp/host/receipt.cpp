@@ -70,6 +70,10 @@ struct Prover::Impl : public IoHandler {
       LOG(1, "IoHandler::Stdout> " << buf.size());
       outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
       return BufferU8();
+    case kSendRecvChannel_Stderr:
+      LOG(1, "IoHandler::Stderr> " << buf.size());
+      fwrite(buf.data(), buf.size(), 1, stderr);
+      return BufferU8();
     case kSendRecvChannel_InitialInput: {
       const uint8_t* byte_ptr = reinterpret_cast<const uint8_t*>(inputStream.vec.data());
       BufferU8 input(byte_ptr, byte_ptr + inputStream.vec.size() * sizeof(uint32_t));
