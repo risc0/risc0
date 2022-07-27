@@ -93,7 +93,7 @@ def _rust_toolchain_repository_impl(ctx):
         load_llvm_tools(ctx, ctx.attr.exec_triple)
 
     for target_triple in [ctx.attr.exec_triple] + ctx.attr.extra_target_triples:
-        build_components.append(load_rust_stdlib(ctx, target_triple))
+        build_components.append(load_rust_stdlib(ctx, target_triple, include_llvm_tools = False))
 
         # extra_target_triples contains targets such as wasm, which don't have rustc_dev components
         if ctx.attr.dev_components and target_triple not in ctx.attr.extra_target_triples:
@@ -149,7 +149,7 @@ def _rust_toolchain_repository_proxy_impl(ctx):
 rust_toolchain_repository = repository_rule(
     attrs = {
         "dev_components": attr.bool(default = False),
-        "edition": attr.string(default = rust_common.default_edition),
+        "edition": attr.string(),
         "exec_triple": attr.string(mandatory = True),
         "extra_toolchains": attr.string_list_dict(),
         "extra_target_triples": attr.string_list(),

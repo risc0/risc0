@@ -8,13 +8,12 @@ risc0_rust_library_pair(
     name = "zkvm",
     srcs = glob(["src/**/*.rs"]),
     crate_name = "risc0_zkvm",
-    data = [
-        "src/build/riscv32im-risc0-zkvm-elf.json",
-    ] + glob([
+    data = glob([
         "**/README.md",
     ]),
     guest_deps = [
         "//risc0/zkp/rust:zkp_guest",
+        "//risc0/zkvm/sdk/rust/platform:platform_guest",
         "//risc0/zkvm/sdk/cpp/guest:crt0",
         "@crates_guest//:bytemuck",
         "@crates_guest//:cfg-if",
@@ -22,11 +21,11 @@ risc0_rust_library_pair(
     ],
     guest_features = ["bazel"],
     host_deps = [
-        "@crates_host//:bytemuck",
-        "@crates_host//:cfg-if",
-        "@crates_host//:cxx",
         "//risc0/zkp/rust:zkp_host",
         "//risc0/zkvm/sdk/cpp/host",
+        "//risc0/zkvm/sdk/rust/platform:platform_host",
+        "@crates_host//:bytemuck",
+        "@crates_host//:cxx",
         "@crates_host//:log",
         "@crates_host//:rand",
         "@crates_host//:serde",

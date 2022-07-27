@@ -1,8 +1,14 @@
-use clap::Parser;
+use clap::{ArgGroup, Parser};
+use lazy_static::lazy_static;
+use regex::Regex;
 use std::path::PathBuf;
 use std::process::Command;
 
-const DIST_SERVER: &str = "https://storage.googleapis.com/risc0-rust-dist";
+const DIST_SERVER: &str = "https://rustup.risczero.com";
+
+lazy_static! {
+    static ref DATE_RE: Regex = Regex::new("^risc0-(?P<date>[0-9]{4}-[0-9]{2}-[0-9]{2})$").unwrap();
+}
 
 #[derive(Parser)]
 #[clap(name = "cargo")]
@@ -22,15 +28,37 @@ struct Risc0 {
 }
 
 #[derive(Debug, Parser)]
+struct Install {
+    #[clap(value_name = "risc0-YYYY-MM-DD")]
+    toolchain: String,
+}
+
+#[derive(Debug, Parser)]
+#[clap(arg_required_else_help = true,
+           group(ArgGroup::new("toolchainselection")
+                 .required(true)
+                 .args(&["all", "toolchain"])))]
+struct Uninstall {
+    /// Uninstall all risc0 toolchains.
+    #[clap(long, action)]
+    all: bool,
+
+    // Uninstall the given risc0 toolchain.
+    #[clap(value_name = "risc0-YYYY-MM-DD")]
+    toolchain: String,
+}
+
+#[derive(Debug, Parser)]
 enum Subcommand {
     /// Install the risc0 toolchain for riscv32im-risc0-zkvm-elf.
-    Install,
+    #[clap(arg_required_else_help = true)]
+    Install(Install),
 
-    /// Update the risc0 toolchain for riscv32im-risc0-zkvm-elf to the latest version.
-    Update,
+    // List currently installed risc0 toolchains
+    List,
 
-    /// Uninstall the risc0 toolchain.
-    Uninstall,
+    // Uninstall risc0 toolchain(s)
+    Uninstall(Uninstall),
 }
 
 fn rustup_exe() -> PathBuf {
@@ -40,6 +68,7 @@ fn rustup_exe() -> PathBuf {
         .join("rustup")
         .into()
 }
+
 fn risc0_root() -> PathBuf {
     home::home_dir().unwrap().join(".risc0").into()
 }

@@ -68,11 +68,8 @@ http_archive(
 
 http_archive(
     name = "rules_rust",
-    patch_args = ["-p1"],
-    patches = ["//bazel/third_party/rules_rust:urls.patch"],
-    sha256 = "42248201c518960307ff256e75adc1a7d34d398acbe6118b207905ca4d045706",
-    strip_prefix = "rules_rust-4144ddeb9c5290a15e5ec1cf8df31393744f6005",
-    url = "https://github.com/bazelbuild/rules_rust/archive/4144ddeb9c5290a15e5ec1cf8df31393744f6005.zip",
+    sha256 = "7fb9b4fe1a6fb4341bdf7c623e619460ecc0f52d5061cc56abc750111fba8a87",
+    url = "https://github.com/bazelbuild/rules_rust/releases/download/0.7.0/rules_rust-v0.7.0.tar.gz",
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies")
@@ -83,13 +80,9 @@ load("@rules_rust//tools/rust_analyzer:deps.bzl", "rust_analyzer_deps")
 
 rust_analyzer_deps()
 
-load("@rules_rust//wasm_bindgen:repositories.bzl", "rust_wasm_bindgen_repositories")
-
-rust_wasm_bindgen_repositories()
-
 load("//bazel/rules/rust:repositories.bzl", "rust_repositories")
 
-RUST_ISO_DATE = "2022-01-20"
+RUST_ISO_DATE = "2022-06-13"
 
 RUST_VERSION = "nightly"
 
@@ -108,7 +101,9 @@ load("@rules_rust//crate_universe:defs.bzl", "crate", "crates_repository")
 
 crates_repository(
     name = "crates_host",
-    lockfile = "//:Cargo-host.Bazel.lock",
+    cargo_lockfile = "//:Cargo-host.lock",
+    isolated = True,
+    lockfile = "//:cargo-bazel-lock-host.json",
     manifests = [
         "//:Cargo.toml",
         "//risc0/core:Cargo.toml",
@@ -118,8 +113,11 @@ crates_repository(
         "//risc0/zkvm/platform:Cargo.toml",
         "//risc0/zkvm/prove/make-id:Cargo.toml",
         "//risc0/zkvm/sdk/rust:Cargo.toml",
+        "//risc0/zkvm/sdk/rust/build:Cargo.toml",
+        "//risc0/zkvm/sdk/rust/platform:Cargo.toml",
         "//risc0/zkp:Cargo.toml",
         "//risc0/zkvm:Cargo.toml",
+        "//risc0/zkvm/r0vm:Cargo.toml",
     ],
     quiet = False,
 )
@@ -130,7 +128,9 @@ crate_repositories_host()
 
 crates_repository(
     name = "crates_guest",
-    lockfile = "//:Cargo-guest.Bazel.lock",
+    cargo_lockfile = "//:Cargo-guest.lock",
+    isolated = True,
+    lockfile = "//:cargo-bazel-lock-guest.json",
     packages = {
         "anyhow": crate.spec(
             default_features = False,
@@ -191,6 +191,8 @@ http_archive(
 
 http_archive(
     name = "rules_conda",
+    patch_args = ["-p1"],
+    patches = ["//bazel/third_party/rules_conda:prefix.patch"],
     sha256 = "9793f86162ec5cfb32a1f1f13f5bf776e2c06b243c4f1ee314b9ec870144220d",
     url = "https://github.com/spietras/rules_conda/releases/download/0.1.0/rules_conda-0.1.0.zip",
 )

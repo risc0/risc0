@@ -16,9 +16,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(non_snake_case)]
 
-use risc0_zkvm::guest::env;
+use risc0_zkvm_guest::env;
 
-risc0_zkvm::entry!(main);
+risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
     let count: u32 = env::read();

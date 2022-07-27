@@ -17,7 +17,7 @@ risc0_rust_method(
     limit = 5,
     visibility = ["//visibility:public"],
     deps = [
-        "//risc0/zkvm/sdk/rust:zkvm_guest",
+        "//risc0/zkvm/sdk/rust/guest",
     ],
 )
 
@@ -28,7 +28,7 @@ risc0_rust_method(
     visibility = ["//visibility:public"],
     deps = [
         "//risc0/zkp/rust:zkp_guest",
-        "//risc0/zkvm/sdk/rust:zkvm_guest",
+        "//risc0/zkvm/sdk/rust/guest",
     ],
 )
 
@@ -37,7 +37,7 @@ risc0_rust_method(
     srcs = ["inner/src/bin/io.rs"],
     limit = 5,
     visibility = ["//visibility:public"],
-    deps = ["//risc0/zkvm/sdk/rust:zkvm_guest"],
+    deps = ["//risc0/zkvm/sdk/rust/guest"],
 )
 
 risc0_rust_method(
@@ -45,5 +45,5 @@ risc0_rust_method(
     srcs = ["inner/src/bin/fail.rs"],
     limit = 5,
     visibility = ["//visibility:public"],
-    deps = ["//risc0/zkvm/sdk/rust:zkvm_guest"],
+    deps = ["//risc0/zkvm/sdk/rust/guest"],
 )

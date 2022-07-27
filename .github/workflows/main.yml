@@ -46,5 +46,6 @@ jobs:
           crate: cargo-sort
           version: "1.0"
       - run: cargo test --release
+      - run: cargo bench
       - run: cargo fmt --all -- --check
       - run: cargo sort --workspace --check

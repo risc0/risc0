@@ -4,11 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-risc0-zkvm = { version = "0.10", path = ".." }
+risc0-build = { version = "0.10", path = "../build" }
 
 [package.metadata.release]
 release = false
 
 [package.metadata.risc0]
 methods = ["inner"]
-

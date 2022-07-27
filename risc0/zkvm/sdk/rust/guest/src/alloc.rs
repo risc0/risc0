@@ -17,7 +17,9 @@ use core::{
     cell::UnsafeCell,
 };
 
-use super::{_fault, align_up, mem_layout, WORD_SIZE};
+use risc0_zkvm::platform::{memory, WORD_SIZE};
+
+use crate::{_fault, align_up};
 
 // Bump pointer allocator for *single* core systems
 struct BumpPointerAlloc {
@@ -52,8 +54,8 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
 #[cfg(target_arch = "riscv32")]
 #[global_allocator]
 static HEAP: BumpPointerAlloc = BumpPointerAlloc {
-    head: UnsafeCell::new(mem_layout::HEAP.start()),
-    end: mem_layout::HEAP.end(),
+    head: UnsafeCell::new(memory::HEAP.start()),
+    end: memory::HEAP.end(),
 };
 
 #[cfg(target_arch = "riscv32")]

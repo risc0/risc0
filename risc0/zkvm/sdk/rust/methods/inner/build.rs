@@ -1,3 +1,3 @@
 fn main() {
-    risc0_zkvm::build::link();
+    risc0_build::link();
 }

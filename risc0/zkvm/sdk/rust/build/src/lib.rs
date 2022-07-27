@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #![deny(missing_docs)]
-#![doc = include_str!("README.md")]
+#![doc = include_str!("../README.md")]
 
 use std::{
     collections::HashMap,
@@ -25,14 +25,14 @@ use std::{
     process::Command,
 };
 
-use crate::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 use cargo_metadata::{MetadataCommand, Package};
+use risc0_zkvm::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use zip::ZipArchive;
 
-const TARGET_JSON: &[u8] = include_bytes!("riscv32im-risc0-zkvm-elf.json");
+const TARGET_JSON: &[u8] = include_bytes!("../riscv32im-risc0-zkvm-elf.json");
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -109,11 +109,11 @@ struct ZipMapEntry {
 /// ID of rust library source version.  This is an arbitrary string,
 /// but must change if we need to download a new library version.  So
 /// let's just use the GIT commit ID.
-const RUST_LIB_ID: &str = "c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.";
+const RUST_LIB_ID: &str = "13dd9c85310093d42bed1528c07aec397cb76716";
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry{
-	zip_url: "https://github.com/risc0/rust/archive/c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1.zip",
-	src_prefix: "rust-c341bdc05f9debb34a3cf9dff4ee490a3f1b5ec1/library",
+	zip_url: "https://github.com/risc0/rust/archive/13dd9c85310093d42bed1528c07aec397cb76716.zip",
+	src_prefix: "rust-13dd9c85310093d42bed1528c07aec397cb76716/library",
 	dst_prefix: "library"},
     ZipMapEntry{
 	zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
@@ -281,7 +281,6 @@ where
                     continue;
                 }
                 std::io::copy(&mut f, &mut File::create(&dest_name).unwrap()).unwrap();
-                println!("Writing {}", dest_name.display());
                 nwrote += 1;
             }
         }
@@ -304,12 +303,11 @@ fn build_guest_package<P>(
     let cargo = env::var("CARGO").unwrap();
     let mut args = vec![
         "build",
-        "-vv",
         "--release",
         "--target",
         guest_build_env.target_spec.to_str().unwrap(),
         "-Z",
-        "build-std",
+        "build-std=core,alloc,std,proc_macro,panic_abort",
         "-Z",
         "build-std-features=compiler-builtins-mem",
         "--manifest-path",
@@ -323,16 +321,20 @@ fn build_guest_package<P>(
         args.push(&features_str);
     }
     println!("Building guest package: {cargo} {}", args.join(" "));
-    println!(
-        "Using std src root: {}",
-        guest_build_env.rust_lib_src.to_str().unwrap()
-    );
+    // The RISC0_STANDARD_LIB variable can be set for testing purposes
+    // to override the downloaded standard library.  It should point
+    // to the root of the rust repository.
+    let risc0_standard_lib: String = if let Ok(path) = env::var("RISC0_STANDARD_LIB") {
+        path
+    } else {
+        guest_build_env.rust_lib_src.to_str().unwrap().into()
+    };
+
+    println!("Using rust standard library root: {}", risc0_standard_lib);
+
     let status = Command::new(cargo)
         .env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic")
-        .env(
-            "__CARGO_TESTS_ONLY_SRC_ROOT",
-            guest_build_env.rust_lib_src.to_str().unwrap(),
-        )
+        .env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib)
         .args(args)
         .status()
         .unwrap();
@@ -341,18 +343,19 @@ fn build_guest_package<P>(
     }
 }
 
-/// Options defining how to run a method in [`embed_methods_with_options`].
-pub struct MethodOptions {
+/// Options defining how to embed a guest package in
+/// [`embed_methods_with_options`].
+pub struct GuestOptions {
     /// The number of po2 entries to generate in the MethodID.
     pub code_limit: u32,
 
-    /// Features for cargo to build the method with.
+    /// Features for cargo to build the guest with.
     pub features: Vec<String>,
 }
 
-impl Default for MethodOptions {
+impl Default for GuestOptions {
     fn default() -> Self {
-        MethodOptions {
+        GuestOptions {
             code_limit: DEFAULT_METHOD_ID_LIMIT,
             features: vec![],
         }
@@ -360,9 +363,9 @@ impl Default for MethodOptions {
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
-/// Specify custom options for a method by defining its [MethodOptions].
+/// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
-pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, MethodOptions>) {
+pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
 
@@ -376,7 +379,7 @@ pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, Meth
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
 
-        let method_options = method_name_to_options
+        let guest_options = guest_pkg_to_options
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
 
@@ -384,12 +387,12 @@ pub fn embed_methods_with_options(mut method_name_to_options: HashMap<&str, Meth
             &guest_pkg,
             &out_dir.join("riscv-guest"),
             &guest_build_env,
-            method_options.features,
+            guest_options.features,
         );
 
         for method in guest_methods(&guest_pkg, &out_dir) {
             methods_file
-                .write_all(method.rust_def(method_options.code_limit).as_bytes())
+                .write_all(method.rust_def(guest_options.code_limit).as_bytes())
                 .unwrap();
         }
     }
