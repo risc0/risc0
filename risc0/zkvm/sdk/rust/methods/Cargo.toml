@@ -11,3 +11,6 @@ release = false
 
 [package.metadata.risc0]
 methods = ["inner"]
+
+[dependencies]
+serde = { version = "1.0", default-features = false, features = ["derive"] }
