@@ -41,7 +41,7 @@ mod integration {
     }
 
     #[test]
-    // #[ignore]
+    #[ignore]
     fn memory_io() {
         init();
 
