@@ -13,9 +13,10 @@
 // limitations under the License.
 
 use clap::Parser;
+use std::default::Default;
 use std::{fs, io::Write};
 
-use risc0_zkvm::host::{MethodId, Prover, Receipt, DEFAULT_METHOD_ID_LIMIT};
+use risc0_zkvm::host::{MethodId, Prover, ProverOpts, Receipt, DEFAULT_METHOD_ID_LIMIT};
 
 /// Generates a MethodID for a given RISC-V ELF binary.
 #[derive(Parser)]
@@ -25,13 +26,19 @@ struct Args {
     #[clap(long)]
     elf: String,
 
-    /// MethodID file; created if it doesn't exist.
+    /// MethodID file; created if needed and it doesn't exist.
     #[clap(long)]
     method_id: Option<String>,
 
     /// Receipt output file.
     #[clap(long)]
     receipt: Option<String>,
+
+    /// Skip generating the seal in receipt.  This should only be used
+    /// for testing.  In this case, performace will be much better but
+    /// we will not be able to cryptographically verify the execution.
+    #[clap(long)]
+    skip_seal: bool,
 
     /// File to read initial input from.
     #[clap(long)]
@@ -88,8 +95,12 @@ fn main() {
         );
     }
 
-    let method_id: MethodId = read_method_id(args.verbose, &args.elf, &args.method_id)
-        .unwrap_or_else(|| {
+    let method_id: MethodId = if args.receipt.is_none() || args.skip_seal {
+        // No need to generate a method ID since we don't need to
+        // generate an actual proof.
+        MethodId::from_slice(&[]).unwrap()
+    } else {
+        read_method_id(args.verbose, &args.elf, &args.method_id).unwrap_or_else(|| {
             if args.verbose > 0 {
                 eprintln!("Computing method id");
             }
@@ -101,9 +112,14 @@ fn main() {
                 }
             }
             computed
-        });
+        })
+    };
 
-    let mut prover = Prover::new(&elf_contents, method_id.as_slice().unwrap()).unwrap();
+    let mut opts: ProverOpts = Default::default();
+    opts.skip_seal = args.skip_seal || args.receipt.is_none();
+
+    let mut prover =
+        Prover::new_with_opts(&elf_contents, method_id.as_slice().unwrap(), opts).unwrap();
     if let Some(input) = args.initial_input {
         let input_bytes = fs::read(input).unwrap();
         if args.verbose > 0 {
@@ -113,13 +129,21 @@ fn main() {
             .add_input(bytemuck::cast_slice(input_bytes.as_slice()))
             .unwrap();
     }
-    let receipt: Receipt = prover.run().unwrap();
-    if args.verbose > 0 {
-        eprintln!("Verifying that we executed correctly.");
-    }
 
+    let receipt: Receipt = prover.run().unwrap();
+    let receipt_data = risc0_zkvm::serde::to_vec(&receipt).unwrap();
+
+    if args.skip_seal || args.receipt.is_none() {
+        if args.verbose > 0 {
+            eprintln!("Skipping seal generation.");
+        }
+    } else {
+        if args.verbose > 0 {
+            eprintln!("Verifying that we executed correctly.");
+            receipt.verify(method_id.as_slice().unwrap()).unwrap();
+        }
+    }
     if let Some(receipt_file) = args.receipt {
-        let receipt_data = risc0_zkvm::serde::to_vec(&receipt).unwrap();
         fs::write(&receipt_file, bytemuck::cast_slice(&receipt_data)).unwrap();
         if args.verbose > 0 {
             eprintln!(

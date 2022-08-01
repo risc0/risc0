@@ -45,6 +45,17 @@ pub struct Receipt {
 /// The prover generates a [Receipt] by executing a given method in a ZKVM.
 pub struct Prover {
     ptr: *mut ffi::RawProver,
+    opts: ProverOpts,
+}
+
+/// Options available to modify the prover's behavior.
+#[non_exhaustive]
+#[derive(Default, Debug, Clone, Copy)]
+pub struct ProverOpts {
+    /// Skip generating the seal in receipt.  This should only be used
+    /// for testing.  In this case, performace will be much better but
+    /// we will not be able to cryptographically verify the execution.
+    pub skip_seal: bool,
 }
 
 /// A MethodId represents a unique identifier associated with a particular ELF
@@ -208,6 +219,13 @@ impl Prover {
     /// `elf_contents`) and an associated method ID (specified via
     /// `method_id`).
     pub fn new(elf_contents: &[u8], method_id: &[u8]) -> Result<Self> {
+        Self::new_with_opts(elf_contents, method_id, ProverOpts::default())
+    }
+
+    /// Create a new [Prover] with the given method (specified via
+    /// `elf_contents`) and an associated method ID (specified via
+    /// `method_id`) and additional options.
+    pub fn new_with_opts(elf_contents: &[u8], method_id: &[u8], opts: ProverOpts) -> Result<Self> {
         let mut err = ffi::RawError::default();
         let ptr = unsafe {
             ffi::risc0_prover_new(
@@ -218,7 +236,7 @@ impl Prover {
                 method_id.len(),
             )
         };
-        ffi::check(err, || Prover { ptr })
+        ffi::check(err, || Prover { ptr, opts })
     }
 
     /// Provide private input data that is availble to guest-side method code
@@ -260,7 +278,14 @@ impl Prover {
     /// Execute the ZKVM to produce a [Receipt].
     pub fn run(&self) -> Result<Receipt> {
         let mut err = ffi::RawError::default();
-        let ptr = unsafe { ffi::risc0_prover_run(&mut err, self.ptr) };
+
+        let ptr = unsafe {
+            if self.opts.skip_seal {
+                ffi::risc0_prover_run_without_seal(&mut err, self.ptr)
+            } else {
+                ffi::risc0_prover_run(&mut err, self.ptr)
+            }
+        };
         ffi::check(err, || Receipt { ptr })
     }
 }
@@ -288,7 +313,7 @@ fn init() {
 
 #[cfg(test)]
 mod test {
-    use super::{MethodId, Prover, Receipt};
+    use super::{MethodId, Prover, ProverOpts, Receipt};
     use crate::platform::memory::{COMMIT, HEAP};
     use crate::serde::{from_slice, to_vec};
     use anyhow::Result;
@@ -361,16 +386,23 @@ mod test {
     }
 
     fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
+        run_memio_with_opts(pairs, ProverOpts::default())
+    }
+
+    fn run_memio_with_opts(pairs: &[(usize, usize)], opts: ProverOpts) -> Result<Receipt> {
         let mut vec = Vec::new();
         vec.push(pairs.len() as u32);
         for (first, second) in pairs {
             vec.push(*first as u32);
             vec.push(*second as u32);
         }
-        let mut prover = Prover::new(&std::fs::read(IO_PATH).unwrap(), IO_ID).unwrap();
+        let mut prover =
+            Prover::new_with_opts(&std::fs::read(IO_PATH).unwrap(), IO_ID, opts).unwrap();
         prover.add_input(vec.as_slice()).unwrap();
         let receipt = prover.run()?;
-        receipt.verify(IO_ID).unwrap();
+        if !opts.skip_seal {
+            receipt.verify(IO_ID).unwrap();
+        }
         Ok(receipt)
     }
 
@@ -382,6 +414,17 @@ mod test {
         assert_eq!(de.get_journal().unwrap(), receipt.get_journal().unwrap());
         assert_eq!(de.get_seal().unwrap(), receipt.get_seal().unwrap());
         de.verify(IO_ID).unwrap();
+    }
+
+    #[test]
+    fn receipt_serde_no_seal() {
+        let receipt: Receipt =
+            run_memio_with_opts(&[(HEAP.start(), 0)], ProverOpts { skip_seal: true }).unwrap();
+        let ser: Vec<u32> = crate::serde::to_vec(&receipt).unwrap();
+        let de: Receipt = crate::serde::from_slice(&ser).unwrap();
+        assert_eq!(de.get_journal().unwrap(), receipt.get_journal().unwrap());
+        assert_eq!(de.get_seal().unwrap(), receipt.get_seal().unwrap());
+        assert!(de.verify(IO_ID).is_err());
     }
 
     #[test]

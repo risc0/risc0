@@ -30,6 +30,12 @@
 namespace risc0 {
 
 void Receipt::verify(const MethodId& methodId) const {
+  if (methodId.empty()) {
+    throw std::runtime_error("Missing method ID");
+  }
+  if (seal.empty()) {
+    throw std::runtime_error("Seal missing or too small");
+  }
   std::unique_ptr<VerifyCircuit> circuit = getRiscVVerifyCircuit(methodId);
   risc0::verify(*circuit, seal.data(), seal.size());
   if (journal.size() != seal[8]) {
@@ -206,6 +212,16 @@ Receipt Prover::run() {
   Receipt receipt{getCommit(), seal};
   // Verify receipt to make sure it works
   receipt.verify(impl->methodId);
+  return receipt;
+}
+
+Receipt Prover::runWithoutSeal() {
+  // Set the memory handlers to call back to the impl
+  MemoryHandler handler(impl.get());
+  // Make the circuit
+  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfContents, handler);
+  risc0::runWithoutSeal(*circuit);
+  Receipt receipt{getCommit(), {} /* no seal */};
   return receipt;
 }
 
