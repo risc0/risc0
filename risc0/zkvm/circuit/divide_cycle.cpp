@@ -51,9 +51,7 @@ void DivideCycle::set(StepState& state) {
       denom.set(negDenom.get() * negDenomVal + (1 - negDenom.get()) * denomExpr);
     } else if (signType == 2) {
       // Sign type 2, 'not' the numerator
-      BYZ_NONDET {
-        negNumer.set((numerExpr.high & 0x8000) / 0x8000);
-      }
+      BYZ_NONDET { negNumer.set((numerExpr.high & 0x8000) / 0x8000); }
       negDenom.set(0);
       numer32.set(
           {negNumer.get() * (0xffff - numerExpr.low) + (1 - negNumer.get()) * numerExpr.low,
@@ -152,9 +150,7 @@ void DivideCycle::set(StepState& state) {
 #define OPC(...) /**/
 #define OPM(...) /**/
 #define OPD(id, mnem, opc, f3, f7, immFmt, numerExpr, denomExpr, signType, resultRem)              \
-  BYZ_IF(decode.opID1.is((id)&7)) {                                                                \
-    doDivide(numerExpr, denomExpr, signType, resultRem);                                           \
-  }
+  BYZ_IF(decode.opID1.is((id)&7)) { doDivide(numerExpr, denomExpr, signType, resultRem); }
 #include "risc0/zkvm/circuit/riscv32im.inl"
 #undef OPC
 #undef OPM

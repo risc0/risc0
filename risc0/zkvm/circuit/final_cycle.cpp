@@ -31,9 +31,7 @@ void FinalCycle::set(StepState& state) {
     equate(compute.x1.getPart(2 + kMemBits, 32 - kMemBits - 2), 0);
     state.data.memIO.doWrite(cycle, memAddr, result, isWOM);
   }
-  BYZ_IF(1 - resultInfo.doStore.get()) {
-    state.data.memIO.doRead(cycle);
-  }
+  BYZ_IF(1 - resultInfo.doStore.get()) { state.data.memIO.doRead(cycle); }
   // Set the registers
   rdLow.set(resultInfo.setReg.get() * decode.inst.getPart(7, 3));
   rdHigh.set(resultInfo.setReg.get() * decode.inst.getPart(10, 2));
