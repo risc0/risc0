@@ -12,25 +12,69 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::{BTreeMap, HashMap};
+use alloc::collections::BinaryHeap;
+use core::{
+    cmp::{Ordering, Reverse},
+    ops::{Index, IndexMut},
+};
+use std::collections::{btree_map::Entry, BTreeMap};
 
-use log::debug;
-use risc0_circuit_rv32im_legacy::CircuitImpl;
+use anyhow::Result;
+use log::{debug, trace};
 use risc0_zkp::{
     adapter::{CircuitDef, CustomStep},
-    core::{fp::Fp, sha::DIGEST_WORDS},
-    ZK_CYCLES,
+    core::{fp::Fp, log2_ceil, sha::DIGEST_WORDS},
+    prove::executor::Executor,
+    MAX_CYCLES_PO2, ZK_CYCLES,
+};
+use risc0_zkvm_circuit::CircuitImpl;
+use risc0_zkvm_platform::io::addr::{
+    GPIO_COMMIT, GPIO_FAULT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE,
 };
 
-use crate::platform::memory::MEM_BITS;
+use crate::{elf::Program, platform::memory::MEM_BITS, CODE_SIZE};
 
-pub struct MachineState {
-    memory: HashMap<u32, u32>,
+pub trait IoHandler {
+    fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Vec<u8>;
 }
 
-impl CircuitDef<MachineState> for CircuitImpl {}
+#[derive(Debug, PartialEq, Eq)]
+struct MemoryEvent {
+    pub cycle: u32,
+    pub addr: u32,
+    pub data: u32,
+    pub is_write: bool,
+}
 
-impl CustomStep for MachineState {
+struct MemoryState {
+    pub memory: BTreeMap<u32, u32>,
+    pub history: BinaryHeap<Reverse<MemoryEvent>>,
+}
+
+pub struct MachineContext<'a, H: IoHandler> {
+    memory: MemoryState,
+    io: &'a mut H,
+}
+
+impl PartialOrd for MemoryEvent {
+    fn partial_cmp(&self, rhs: &Self) -> Option<Ordering> {
+        Some(self.cmp(rhs))
+    }
+}
+
+impl Ord for MemoryEvent {
+    fn cmp(&self, rhs: &Self) -> Ordering {
+        match self.addr.cmp(&rhs.addr) {
+            std::cmp::Ordering::Equal => {}
+            ord => return ord,
+        }
+        self.cycle.cmp(&rhs.cycle)
+    }
+}
+
+impl<'a, H: IoHandler> CircuitDef<MachineContext<'a, H>> for CircuitImpl {}
+
+impl<'a, H: IoHandler> CustomStep for MachineContext<'a, H> {
     fn call(&mut self, name: &str, extra: &str, args: &[Fp]) -> Vec<Fp> {
         match name {
             "divide32" => {
@@ -58,91 +102,152 @@ impl CustomStep for MachineState {
     }
 }
 
-impl MachineState {
-    pub fn new() -> Self {
-        MachineState {
-            memory: HashMap::new(),
+impl MemoryState {
+    fn new() -> Self {
+        Self {
+            memory: BTreeMap::new(),
+            history: BinaryHeap::new(),
+        }
+    }
+}
+
+impl MemoryState {}
+
+fn split_word(value: u32) -> (Fp, Fp) {
+    (Fp::new(value & 0xffff), Fp::new(value >> 16))
+}
+
+fn merge_word((low, high): (Fp, Fp)) -> u32 {
+    let low: u32 = low.into();
+    let high: u32 = high.into();
+    low | high << 16
+}
+
+impl<'a, H: IoHandler> MachineContext<'a, H> {
+    pub fn new(io: &'a mut H) -> Self {
+        MachineContext {
+            memory: MemoryState::new(),
+            io,
         }
     }
 
-    fn split_word(&self, value: u32) -> (Fp, Fp) {
-        (Fp::new(value & 0xffff), Fp::new(value >> 16))
-    }
-
-    fn merge_word(&self, (low, high): (Fp, Fp)) -> u32 {
-        let low: u32 = low.into();
-        let high: u32 = high.into();
-        low | high << 16
-    }
-
     fn divide32(&self, numer: (Fp, Fp), denom: (Fp, Fp)) -> ((Fp, Fp), (Fp, Fp)) {
-        let numer = self.merge_word(numer);
-        let denom = self.merge_word(denom);
+        let numer = merge_word(numer);
+        let denom = merge_word(denom);
         let (quot, rem) = if denom == 0 {
             (0xffffffff, numer)
         } else {
             (numer / denom, numer % denom)
         };
-        (self.split_word(quot), self.split_word(rem))
+        (split_word(quot), split_word(rem))
     }
 
-    fn log(&self, msg: &str, _args: &[Fp]) {
-        debug!("{}", msg);
+    fn log(&self, msg: &str, args: &[Fp]) {
+        let args: Vec<String> = args
+            .iter()
+            .map(|x| format!("0x{:0X}", u32::from(x)))
+            .collect();
+        let str = args.join(", ");
+        trace!("{}: {}", msg, str);
     }
 
-    fn mem_check(&self) -> (Fp, Fp, Fp, Fp, Fp) {
-        todo!()
+    fn mem_check(&mut self) -> (Fp, Fp, Fp, Fp, Fp) {
+        let event = self
+            .memory
+            .history
+            .pop()
+            .expect("mem_check called on empty history");
+        let parts = split_word(event.0.data);
+        debug!("mem_check: {event:?}");
+        (
+            event.0.cycle.into(),
+            event.0.addr.into(),
+            event.0.is_write.into(),
+            parts.0,
+            parts.1,
+        )
     }
 
-    fn mem_read(&self, cycle: Fp, addr: Fp) -> (Fp, Fp) {
-        debug!("[{}] R: 0x{:08X}", u32::from(cycle), u32::from(addr));
-        let value = self.memory[&addr.into()];
-        self.split_word(value)
+    fn mem_read(&mut self, cycle: Fp, addr: Fp) -> (Fp, Fp) {
+        let cycle: u32 = cycle.into();
+        let addr: u32 = addr.into();
+        // debug!("[{}] R: 0x{:08X}", cycle, addr);
+        let data = *self.memory.memory.entry(addr).or_insert(0);
+        // debug!("data: 0x{data:08X}");
+        self.memory.history.push(Reverse(MemoryEvent {
+            cycle,
+            addr,
+            data,
+            is_write: false,
+        }));
+        split_word(data)
     }
 
     fn mem_write(&mut self, cycle: Fp, addr: Fp, value: (Fp, Fp)) {
-        let word = self.merge_word(value);
-        debug!(
-            "[{}] W: 0x{:08X} <= 0x{:08X}",
-            u32::from(cycle),
-            u32::from(addr),
-            word
-        );
-        self.memory.insert(addr.into(), word);
+        let cycle: u32 = cycle.into();
+        let addr: u32 = addr.into();
+        let data = merge_word(value);
+        let is_write = addr < (1 << (MEM_BITS - 1));
+        // debug!("[{}] W: 0x{:08X} <= 0x{:08X}", cycle, addr, data);
+        self.memory.history.push(Reverse(MemoryEvent {
+            cycle,
+            addr,
+            data,
+            is_write,
+        }));
+        match self.memory.memory.entry(addr) {
+            Entry::Occupied(mut entry) => {
+                assert!(*entry.get() == data || is_write);
+                *entry.get_mut() = data;
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(data);
+            }
+        };
+        self.on_write(cycle, addr * 4, data);
     }
-}
 
-enum CodeCycleKind {
-    Normal,
-    Final,
-    Init,
-    MemWrite,
-    Reset,
-    Fini,
-    NumKinds,
-}
+    fn on_write(&mut self, _cycle: u32, addr: u32, value: u32) {
+        use risc0_zkvm_platform::io::addr::GPIO_LOG;
 
-enum DataCycleKind {
-    Decode,
-    Compute0,
-    Compute1,
-    Compute2,
-    Compute3,
-    Multiply,
-    Divide,
-    Final,
-    ShaSync,
-    ShaControl,
-    ShaData,
-    Halt,
-    NumKinds,
-}
-
-enum ShaCycleKind {
-    Control,
-    Load,
-    Mix,
-    NumKinds,
+        // debug!("on_write: 0x{:08X}: 0x{:08X}", addr, value);
+        match addr {
+            GPIO_COMMIT => {
+                debug!("on_write> GPIO_COMMIT");
+                // IoDescriptor desc;
+                // mem.loadRegion(value, &desc, sizeof(desc));
+                // if (io) {
+                //   std::vector<uint8_t> buf(desc.size);
+                //   mem.loadRegion(desc.addr, buf.data(), desc.size);
+                //   io->onCommit(buf);
+                // }
+            }
+            GPIO_FAULT => {
+                debug!("on_write> GPIO_FAULT");
+                // size_t len = mem.strlen(value);
+                // std::vector<char> buf(len);
+                // mem.loadRegion(value, buf.data(), len);
+                // std::string str(buf.data(), buf.size());
+                // io->onFault(str);
+            }
+            GPIO_LOG => {
+                debug!("on_write> GPIO_LOG");
+                // size_t len = mem.strlen(value);
+                // std::vector<char> buf(len);
+                // mem.loadRegion(value, buf.data(), len);
+                // std::string str(buf.data(), buf.size());
+                // LOG(0, "R0VM[C" << cycle << "]> " << str);
+            }
+            GPIO_SENDRECV_ADDR => {
+                debug!("on_write> GPIO_SENDRECV_ADDR");
+                // let channel = self.memory.load(GPIO_SENDRECV_CHANNEL);
+                // let size = self.memory.load(GPIO_SENDRECV_SIZE);
+                // let region = self.memory.load_region(value, size);
+                // self.io.on_txrx(channel, region);
+            }
+            _ => {}
+        };
+    }
 }
 
 const SHA_INIT: [u32; DIGEST_WORDS] = [
@@ -164,127 +269,213 @@ fn cond(expr: bool) -> Fp {
     Fp::new(if expr { 1 } else { 0 })
 }
 
-pub fn setup_code(code: &mut [Fp], steps: usize, start_addr: u32, image: &BTreeMap<u32, u32>) {
-    const CYCLE_POS: usize = 0;
-    const TYPE_POS: usize = CYCLE_POS + 1;
-    const SHA_POS: usize = TYPE_POS + CodeCycleKind::NumKinds as usize;
-    const P1_POS: usize = SHA_POS + ShaCycleKind::NumKinds as usize;
-    const P2_POS: usize = P1_POS + 1;
-    const DATA_POS: usize = P2_POS + 1;
-    const DATA2_POS: usize = DATA_POS + 2;
-    const PROLOG_SIZE: usize = 3; // INIT + RESET + FINI
-    const ONE: Fp = Fp::new(1);
-
-    if image.len() + PROLOG_SIZE + ZK_CYCLES > steps {
-        panic!(); //TODO
-    }
-
-    for i in 0..steps {
-        code[i] = Fp::new(i as u32);
-    }
-
-    code[(TYPE_POS + CodeCycleKind::Init as usize) * steps] = ONE;
-    for (cycle, (addr, word)) in image.iter().enumerate() {
-        let cycle = cycle + 1;
-        code[(TYPE_POS + CodeCycleKind::MemWrite as usize) * steps + cycle] = ONE;
-        code[P1_POS * steps + cycle] = Fp::new(addr / 4);
-        code[P2_POS * steps + cycle] = cond(addr / 4 >= (1 << (MEM_BITS - 1)));
-        code[(DATA_POS + 0) * steps + cycle] = Fp::new(word & 0xffff);
-        code[(DATA_POS + 1) * steps + cycle] = Fp::new(word >> 16);
-    }
-
-    let mut cycle = image.len() + 1;
-    code[(TYPE_POS + CodeCycleKind::Reset as usize) * steps + cycle] = ONE;
-    code[P1_POS * steps + cycle] = Fp::new(start_addr);
-    cycle += 1;
-    let base_cycle = cycle;
-    while cycle + 1 + ZK_CYCLES < steps {
-        let inst_phase = (cycle - base_cycle) % 3;
-        let sha_phase = (cycle - base_cycle) % 72;
-        if inst_phase == 2 {
-            code[(TYPE_POS + CodeCycleKind::Final as usize) * steps + cycle] = ONE;
-        } else {
-            code[(TYPE_POS + CodeCycleKind::Normal as usize) * steps + cycle] = ONE;
-        }
-        if sha_phase < 4 {
-            code[(SHA_POS + ShaCycleKind::Control as usize) * steps + cycle] = ONE;
-            code[P1_POS * steps + cycle] = Fp::new(sha_phase as u32);
-            code[P2_POS * steps + cycle] = cond(sha_phase == 0);
-            let init1 = SHA_INIT[3 - sha_phase];
-            code[(DATA_POS + 0) * steps + cycle] = Fp::new(init1 & 0xffff);
-            code[(DATA_POS + 1) * steps + cycle] = Fp::new(init1 >> 16);
-            let init2 = SHA_INIT[7 - sha_phase];
-            code[(DATA2_POS + 0) * steps + cycle] = Fp::new(init2 & 0xffff);
-            code[(DATA2_POS + 1) * steps + cycle] = Fp::new(init2 >> 16);
-        } else if sha_phase < 20 {
-            code[(SHA_POS + ShaCycleKind::Load as usize) * steps + cycle] = ONE;
-            let round = SHA_ROUND[sha_phase - 4];
-            code[(DATA_POS + 0) * steps + cycle] = Fp::new(round & 0xffff);
-            code[(DATA_POS + 1) * steps + cycle] = Fp::new(round >> 16);
-        } else if sha_phase < 68 {
-            code[(SHA_POS + ShaCycleKind::Mix as usize) * steps + cycle] = ONE;
-            code[P1_POS * steps + cycle] = cond(sha_phase >= 64);
-            code[P2_POS * steps + cycle] = cond(sha_phase == 67);
-            let round = SHA_ROUND[sha_phase - 4];
-            code[(DATA_POS + 0) * steps + cycle] = Fp::new(round & 0xffff);
-            code[(DATA_POS + 1) * steps + cycle] = Fp::new(round >> 16);
-        } else {
-            code[(SHA_POS + ShaCycleKind::Control as usize) * steps + cycle] = ONE;
-            code[P1_POS * steps + cycle] = Fp::new((sha_phase - 64 + 4) as u32);
-        }
-        cycle += 1;
-    }
-    code[(TYPE_POS + CodeCycleKind::Fini as usize) * steps + cycle] = ONE;
+enum CodeIndex {
+    Cycle,
+    TypeNormal,
+    TypeFinal,
+    TypeInit,
+    TypeLoad,
+    TypeReset,
+    TypeFini,
+    ShaCtrl,
+    ShaLoad,
+    ShaMix,
+    P1,
+    P2,
+    Data1Low,
+    Data1High,
+    Data2Low,
+    Data2High,
 }
 
-#[cfg(test)]
-mod tests {
-    use std::collections::BTreeMap;
+const ZERO: Fp = Fp::new(0);
+const ONE: Fp = Fp::new(1);
 
-    use log::debug;
-    use risc0_circuit_rv32im_legacy::CircuitImpl;
-    use risc0_zkp::{
-        adapter::{CircuitInfo, CircuitStepContext, CircuitStepExec},
-        core::fp::Fp,
-    };
+struct CodeRegisters([Fp; CODE_SIZE]);
 
-    use crate::{CODE_SIZE, DATA_SIZE};
-
-    use super::{setup_code, MachineState};
-
-    fn init() {
-        let _ = env_logger::builder().is_test(true).try_init();
+impl CodeRegisters {
+    fn new() -> Self {
+        Self([ZERO; CODE_SIZE])
     }
 
-    const PROGRAM_START: u32 = 0x0200_0000;
+    fn reset(&mut self) {
+        self.0.fill(ZERO);
+    }
+}
 
-    #[test]
-    fn execute() {
-        init();
+impl Index<CodeIndex> for CodeRegisters {
+    type Output = Fp;
 
-        let steps = 256;
-        let circuit = CircuitImpl::new();
-        let mut machine = MachineState::new();
-        machine.memory.insert(0, 0);
+    fn index(&self, index: CodeIndex) -> &Self::Output {
+        &self.0[index as usize]
+    }
+}
 
-        let mut output = vec![Fp::new(0); circuit.output_size()];
-        let mut code = vec![Fp::new(0); CODE_SIZE * steps];
-        let mut data = vec![Fp::new(0); DATA_SIZE * steps];
+impl IndexMut<CodeIndex> for CodeRegisters {
+    fn index_mut(&mut self, index: CodeIndex) -> &mut Self::Output {
+        &mut self.0[index as usize]
+    }
+}
 
-        // Make an elf with a single ecall instruction
-        let mut elf = BTreeMap::new();
-        elf.insert(PROGRAM_START, 0x00000073);
-        setup_code(&mut code, steps, PROGRAM_START, &elf);
+struct CodeLoader<F>
+where
+    F: FnMut(&[Fp], usize) -> Result<bool>,
+{
+    cycle: usize,
+    code: CodeRegisters,
+    step: F,
+}
 
-        let args: &mut [&mut [Fp]] = &mut [&mut code, &mut output, &mut data, &mut [], &mut []];
-
-        for cycle in 0..10 {
-            debug!("cycle: {cycle}");
-            circuit.step_exec(
-                &CircuitStepContext { size: steps, cycle },
-                &mut machine,
-                args,
-            );
+impl<F> CodeLoader<F>
+where
+    F: FnMut(&[Fp], usize) -> Result<bool>,
+{
+    pub fn new(step: F) -> Self {
+        Self {
+            cycle: 0,
+            code: CodeRegisters::new(),
+            step,
         }
+    }
+
+    pub fn init(&mut self) -> Result<bool> {
+        debug!("INIT");
+        self.start();
+        self.code[CodeIndex::TypeInit] = ONE;
+        self.next()
+    }
+
+    pub fn load(&mut self, addr: u32, data: u32) -> Result<bool> {
+        // debug!("LOAD: 0x{:08X} <= 0x{:08X}", addr, data);
+        let (low, high) = split_word(data);
+        self.start();
+        self.code[CodeIndex::TypeLoad] = ONE;
+        self.code[CodeIndex::P1] = Fp::new(addr / 4);
+        self.code[CodeIndex::P2] = cond((addr / 4) >= (1 << (MEM_BITS - 1)));
+        self.code[CodeIndex::Data1Low] = low;
+        self.code[CodeIndex::Data1High] = high;
+        self.next()
+    }
+
+    pub fn reset(&mut self, start_addr: u32) -> Result<bool> {
+        debug!("RESET");
+        self.start();
+        self.code[CodeIndex::TypeReset] = ONE;
+        self.code[CodeIndex::P1] = Fp::new(start_addr);
+        self.next()
+    }
+
+    pub fn fini(&mut self) -> Result<bool> {
+        debug!("FINI");
+        self.start();
+        self.code[CodeIndex::TypeFini] = ONE;
+        self.next()
+    }
+
+    pub fn body(&mut self) -> Result<()> {
+        let base_cycle = self.cycle;
+        loop {
+            // debug!("body: {}", self.cycle);
+
+            self.start();
+
+            let inst_phase = (self.cycle - base_cycle) % 3;
+            if inst_phase == 2 {
+                self.code[CodeIndex::TypeFinal] = ONE;
+            } else {
+                self.code[CodeIndex::TypeNormal] = ONE;
+            }
+
+            let sha_phase = (self.cycle - base_cycle) % 72;
+            if sha_phase < 4 {
+                let init1 = split_word(SHA_INIT[3 - sha_phase]);
+                let init2 = split_word(SHA_INIT[7 - sha_phase]);
+                self.code[CodeIndex::ShaCtrl] = ONE;
+                self.code[CodeIndex::P1] = Fp::new(sha_phase as u32);
+                self.code[CodeIndex::P2] = cond(sha_phase == 0);
+                self.code[CodeIndex::Data1Low] = init1.0;
+                self.code[CodeIndex::Data1High] = init1.1;
+                self.code[CodeIndex::Data2Low] = init2.0;
+                self.code[CodeIndex::Data2High] = init2.1;
+            } else if sha_phase < 20 {
+                let round = split_word(SHA_ROUND[sha_phase - 4]);
+                self.code[CodeIndex::ShaLoad] = ONE;
+                self.code[CodeIndex::Data1Low] = round.0;
+                self.code[CodeIndex::Data1High] = round.1;
+            } else if sha_phase < 68 {
+                let round = split_word(SHA_ROUND[sha_phase - 4]);
+                self.code[CodeIndex::ShaMix] = ONE;
+                self.code[CodeIndex::P1] = cond(sha_phase >= 64);
+                self.code[CodeIndex::P2] = cond(sha_phase == 67);
+                self.code[CodeIndex::Data1Low] = round.0;
+                self.code[CodeIndex::Data1High] = round.1;
+            } else {
+                self.code[CodeIndex::ShaCtrl] = ONE;
+                self.code[CodeIndex::P1] = Fp::new((sha_phase - 64 + 4) as u32);
+            }
+
+            if !self.next_fini(1)? {
+                break;
+            }
+        }
+
+        Ok(())
+    }
+
+    fn start(&mut self) {
+        self.code.reset();
+        self.code[CodeIndex::Cycle] = Fp::new(self.cycle as u32);
+    }
+
+    fn next(&mut self) -> Result<bool> {
+        self.cycle += 1;
+        let keep_going = (self.step)(&self.code.0, 0)?;
+        assert!(keep_going);
+        Ok(keep_going)
+    }
+
+    fn next_fini(&mut self, fini: usize) -> Result<bool> {
+        self.cycle += 1;
+        (self.step)(&self.code.0, fini)
+    }
+}
+
+pub fn load_code<F>(start_addr: u32, image: &BTreeMap<u32, u32>, step: F) -> Result<()>
+where
+    F: FnMut(&[Fp], usize) -> Result<bool>,
+{
+    let mut loader = CodeLoader::new(step);
+    loader.init()?;
+    for (addr, data) in image.iter() {
+        loader.load(*addr, *data)?;
+    }
+    loader.reset(start_addr)?;
+    loader.body()?;
+    loader.fini()?;
+    Ok(())
+}
+
+pub struct RV32Executor<'a, H: IoHandler> {
+    elf: &'a Program,
+    pub executor: Executor<CircuitImpl, MachineContext<'a, H>>,
+}
+
+impl<'a, H: IoHandler> RV32Executor<'a, H> {
+    pub fn new(elf: &'a Program, io: &'a mut H) -> Self {
+        debug!("image.size(): {}", elf.image.len());
+
+        let circuit = CircuitImpl::new();
+        let machine = MachineContext::new(io);
+        let min_po2 = log2_ceil(elf.image.len() + 3 + ZK_CYCLES);
+        let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2);
+        Self { elf, executor }
+    }
+
+    pub fn run(&mut self) -> Result<()> {
+        load_code(self.elf.entry, &self.elf.image, |chunk, fini| {
+            self.executor.step(chunk, fini)
+        })?;
+        self.executor.finalize();
+        Ok(())
     }
 }

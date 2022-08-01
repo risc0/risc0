@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use log::debug;
+use alloc::vec::Vec;
 
 use crate::{
     adapter::{CircuitInfo, PolyExt, PolyExtContext, TapsProvider},
@@ -78,7 +78,6 @@ impl<'a, C: CircuitInfo + PolyExt + TapsProvider> Circuit for VerifyAdapter<'a, 
     }
 
     fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4) -> Fp4 {
-        debug!("out: {:?}", self.out);
         let ctx = PolyExtContext { mix: poly_mix };
         let result = self.circuit.poly_ext(&ctx, u, &self.out, &self.mix);
         result.tot

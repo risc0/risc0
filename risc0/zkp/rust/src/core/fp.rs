@@ -182,6 +182,16 @@ impl From<Fp> for u64 {
     }
 }
 
+impl From<bool> for Fp {
+    fn from(value: bool) -> Self {
+        if value {
+            Fp(1)
+        } else {
+            Fp(0)
+        }
+    }
+}
+
 impl From<u32> for Fp {
     fn from(x: u32) -> Self {
         Fp(x % P)

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::vec::Vec;
+
 use crate::{
     core::{fp::Fp, fp4::Fp4},
     taps::TapSet,
@@ -38,57 +40,68 @@ impl CircuitStepContext {
         self.size - 1
     }
 
-    pub fn _const(&self, value: u32) -> Fp {
+    pub fn _const(&self, value: u32, _loc: &str) -> Fp {
         Fp::from(value)
     }
 
-    pub fn _get(&self, base: &[Fp], offset: usize, back: usize) -> Fp {
-        base[offset * self.size + (self.size + (self.cycle - back) & self.mask()) % self.size]
+    pub fn _get(&self, base: &[Fp], offset: usize, back: usize, _loc: &str) -> Fp {
+        let ret =
+            base[offset * self.size + (self.size + (self.cycle - back) & self.mask()) % self.size];
+        // assert_ne!(ret, Fp::invalid());
+        ret
     }
 
-    pub fn _set(&self, base: &mut [Fp], value: Fp, offset: usize) {
-        base[offset * self.size + self.cycle] = value;
+    pub fn _set(&self, base: &mut [Fp], value: Fp, offset: usize, _loc: &str) {
+        let reg = &mut base[offset * self.size + self.cycle];
+        assert!(*reg == Fp::invalid() || *reg == Fp::new(0) || *reg == value);
+        *reg = value;
     }
 
-    pub fn _get_global(&self, base: &[Fp], offset: usize) -> Fp {
+    pub fn _get_global(&self, base: &[Fp], offset: usize, _loc: &str) -> Fp {
         base[offset]
     }
 
-    pub fn _set_global(&self, base: &mut [Fp], value: Fp, offset: usize) {
+    pub fn _set_global(&self, base: &mut [Fp], value: Fp, offset: usize, _loc: &str) {
         base[offset] = value;
     }
 
-    pub fn as_bool(&self, x: &Fp) -> bool {
+    pub fn as_bool(&self, x: &Fp, _loc: &str) -> bool {
         *x != Fp::new(0)
     }
 
-    pub fn _add(&self, a: Fp, b: Fp) -> Fp {
+    pub fn _add(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         a + b
     }
 
-    pub fn _sub(&self, a: Fp, b: Fp) -> Fp {
+    pub fn _sub(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         a - b
     }
 
-    pub fn _mul(&self, a: Fp, b: Fp) -> Fp {
+    pub fn _mul(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         a * b
     }
 
-    pub fn _bitAnd(&self, a: Fp, b: Fp) -> Fp {
+    pub fn _bitAnd(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         let a: u32 = a.into();
         let b: u32 = b.into();
         Fp::new(a & b)
     }
 
-    pub fn _eqz(&self, a: Fp) {
-        assert_eq!(a, Fp::new(0));
+    pub fn _eqz(&self, a: Fp, loc: &str) {
+        assert_eq!(
+            a,
+            Fp::new(0),
+            "0x{:08X} is not zero at: {}",
+            u32::from(a),
+            loc
+        );
     }
 
-    pub fn _inv(&self, a: Fp) -> Fp {
+    pub fn _inv(&self, a: Fp, _loc: &str) -> Fp {
         a.inv()
     }
 
-    pub fn _isz(&self, a: Fp) -> Fp {
+    pub fn _isz(&self, a: Fp, _loc: &str) -> Fp {
         if a == Fp::new(0) {
             Fp::new(1)
         } else {
@@ -120,47 +133,47 @@ impl PolyFpContext {
         self.size - 1
     }
 
-    pub fn _const(&self, value: u32) -> Fp {
+    pub fn _const(&self, value: u32, _loc: &str) -> Fp {
         Fp::from(value)
     }
 
-    pub fn _get(&self, base: &[Fp], offset: usize, back: usize, _tap: usize) -> Fp {
+    pub fn _get(&self, base: &[Fp], offset: usize, back: usize, _tap: usize, _loc: &str) -> Fp {
         // Cycle here is over the expanded domain
         let cycle = self.cycle.wrapping_sub(INV_RATE * back);
         base[offset * self.size + (cycle & self.mask())]
     }
 
-    pub fn _get_global(&self, base: &[Fp], offset: usize) -> Fp {
+    pub fn _get_global(&self, base: &[Fp], offset: usize, _loc: &str) -> Fp {
         base[offset]
     }
 
-    pub fn _add(&self, a: Fp, b: Fp) -> Fp {
+    pub fn _add(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         a + b
     }
 
-    pub fn _sub(&self, a: Fp, b: Fp) -> Fp {
+    pub fn _sub(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         a - b
     }
 
-    pub fn _mul(&self, a: Fp, b: Fp) -> Fp {
+    pub fn _mul(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         a * b
     }
 
-    pub fn _true(&self) -> MixState {
+    pub fn _true(&self, _loc: &str) -> MixState {
         MixState {
             tot: Fp4::from_u32(0),
             mul: Fp4::from_u32(1),
         }
     }
 
-    pub fn _and_eqz(&self, x: MixState, val: Fp) -> MixState {
+    pub fn _and_eqz(&self, x: MixState, val: Fp, _loc: &str) -> MixState {
         MixState {
             tot: x.tot + x.mul * val,
             mul: x.mul * self.mix,
         }
     }
 
-    pub fn _and_cond(&self, x: MixState, cond: Fp, inner: MixState) -> MixState {
+    pub fn _and_cond(&self, x: MixState, cond: Fp, inner: MixState, _loc: &str) -> MixState {
         MixState {
             tot: x.tot + cond * inner.tot * x.mul,
             mul: x.mul * inner.mul,
@@ -185,45 +198,45 @@ pub struct PolyExtContext {
 }
 
 impl PolyExtContext {
-    pub fn _const(&self, value: u32) -> Fp4 {
+    pub fn _const(&self, value: u32, _loc: &str) -> Fp4 {
         Fp4::from_u32(value)
     }
 
-    pub fn _get(&self, u: &[Fp4], tap: usize) -> Fp4 {
+    pub fn _get(&self, u: &[Fp4], tap: usize, _loc: &str) -> Fp4 {
         u[tap]
     }
 
-    pub fn _get_global(&self, base: &[Fp], offset: usize) -> Fp4 {
+    pub fn _get_global(&self, base: &[Fp], offset: usize, _loc: &str) -> Fp4 {
         Fp4::from_fp(base[offset])
     }
 
-    pub fn _add(&self, a: Fp4, b: Fp4) -> Fp4 {
+    pub fn _add(&self, a: Fp4, b: Fp4, _loc: &str) -> Fp4 {
         a + b
     }
 
-    pub fn _sub(&self, a: Fp4, b: Fp4) -> Fp4 {
+    pub fn _sub(&self, a: Fp4, b: Fp4, _loc: &str) -> Fp4 {
         a - b
     }
 
-    pub fn _mul(&self, a: Fp4, b: Fp4) -> Fp4 {
+    pub fn _mul(&self, a: Fp4, b: Fp4, _loc: &str) -> Fp4 {
         a * b
     }
 
-    pub fn _true(&self) -> MixState {
+    pub fn _true(&self, _loc: &str) -> MixState {
         MixState {
             tot: Fp4::from_u32(0),
             mul: Fp4::from_u32(1),
         }
     }
 
-    pub fn _and_eqz(&self, x: MixState, val: Fp4) -> MixState {
+    pub fn _and_eqz(&self, x: MixState, val: Fp4, _loc: &str) -> MixState {
         MixState {
             tot: x.tot + x.mul * val,
             mul: x.mul * self.mix,
         }
     }
 
-    pub fn _and_cond(&self, x: MixState, cond: Fp4, inner: MixState) -> MixState {
+    pub fn _and_cond(&self, x: MixState, cond: Fp4, inner: MixState, _loc: &str) -> MixState {
         MixState {
             tot: x.tot + cond * inner.tot * x.mul,
             mul: x.mul * inner.mul,
@@ -265,21 +278,21 @@ pub struct CircuitStepDef {
 }
 
 pub enum CircuitStep {
-    Const(u32),
-    Get(Arg, usize, usize),
-    Set(Arg, Var, usize),
-    GetGlobal(Arg, usize),
-    SetGlobal(Arg, Var, usize),
-    If(Var, &'static [CircuitStep]),
-    Add(Var, Var),
-    Sub(Var, Var),
-    Mul(Var, Var),
-    BitAnd(Var, Var),
-    EqZero(Var),
-    Inv(Var),
-    IsZero(Var),
-    Extern(&'static str, &'static str, &'static [Var]),
-    Nondet(&'static [CircuitStep]),
+    Const(u32, &'static str),
+    Get(Arg, usize, usize, &'static str),
+    Set(Arg, Var, usize, &'static str),
+    GetGlobal(Arg, usize, &'static str),
+    SetGlobal(Arg, Var, usize, &'static str),
+    If(Var, &'static [CircuitStep], &'static str),
+    Add(Var, Var, &'static str),
+    Sub(Var, Var, &'static str),
+    Mul(Var, Var, &'static str),
+    BitAnd(Var, Var, &'static str),
+    EqZero(Var, &'static str),
+    Inv(Var, &'static str),
+    IsZero(Var, &'static str),
+    Extern(&'static str, &'static str, &'static [Var], &'static str),
+    Nondet(&'static [CircuitStep], &'static str),
 }
 
 impl CircuitStep {
@@ -291,25 +304,28 @@ impl CircuitStep {
         args: &mut [&mut [Fp]],
     ) {
         match self {
-            CircuitStep::Const(value) => {
+            CircuitStep::Const(value, _loc) => {
                 stack.push(Fp::new(*value));
             }
-            CircuitStep::Get(base, offset, back) => {
-                stack.push(
-                    args[*base][offset * ctx.size
-                        + (ctx.size + (ctx.cycle - back) & ctx.mask()) % ctx.size],
-                );
+            CircuitStep::Get(base, offset, back, _loc) => {
+                let value = args[*base]
+                    [offset * ctx.size + (ctx.size + (ctx.cycle - back) & ctx.mask()) % ctx.size];
+                // assert_ne!(value, Fp::invalid());
+                stack.push(value);
             }
-            CircuitStep::Set(base, value, offset) => {
-                args[*base][offset * ctx.size + ctx.cycle] = stack[*value];
+            CircuitStep::Set(base, value, offset, _loc) => {
+                let value = stack[*value];
+                let reg = &mut args[*base][offset * ctx.size + ctx.cycle];
+                assert!(*reg == Fp::invalid() || *reg == Fp::new(0) || *reg == value);
+                *reg = value;
             }
-            CircuitStep::GetGlobal(base, offset) => {
+            CircuitStep::GetGlobal(base, offset, _loc) => {
                 stack.push(args[*base][*offset]);
             }
-            CircuitStep::SetGlobal(base, value, offset) => {
+            CircuitStep::SetGlobal(base, value, offset, _loc) => {
                 args[*base][*offset] = stack[*value];
             }
-            CircuitStep::If(cond, block) => {
+            CircuitStep::If(cond, block, _loc) => {
                 if stack[*cond] != Fp::new(0) {
                     let mut stack = stack.clone();
                     for op in block.iter() {
@@ -317,38 +333,45 @@ impl CircuitStep {
                     }
                 }
             }
-            CircuitStep::Add(x1, x2) => {
+            CircuitStep::Add(x1, x2, _loc) => {
                 stack.push(stack[*x1] + stack[*x2]);
             }
-            CircuitStep::Sub(x1, x2) => {
+            CircuitStep::Sub(x1, x2, _loc) => {
                 stack.push(stack[*x1] - stack[*x2]);
             }
-            CircuitStep::Mul(x1, x2) => {
+            CircuitStep::Mul(x1, x2, _loc) => {
                 stack.push(stack[*x1] * stack[*x2]);
             }
-            CircuitStep::BitAnd(x1, x2) => {
+            CircuitStep::BitAnd(x1, x2, _loc) => {
                 let x1: u32 = stack[*x1].into();
                 let x2: u32 = stack[*x2].into();
                 stack.push(Fp::new(x1 & x2));
             }
-            CircuitStep::EqZero(x) => {
-                assert_eq!(stack[*x], Fp::new(0));
+            CircuitStep::EqZero(x, loc) => {
+                let value = stack[*x];
+                assert_eq!(
+                    value,
+                    Fp::new(0),
+                    "{x}: 0x{:08X} is not zero at: {}",
+                    u32::from(value),
+                    loc
+                );
             }
-            CircuitStep::Inv(x) => {
+            CircuitStep::Inv(x, _loc) => {
                 stack.push(stack[*x].inv());
             }
-            CircuitStep::IsZero(x) => {
+            CircuitStep::IsZero(x, _loc) => {
                 stack.push(if stack[*x] == Fp::new(0) {
                     Fp::new(1)
                 } else {
                     Fp::new(0)
                 });
             }
-            CircuitStep::Extern(name, extra, args) => {
+            CircuitStep::Extern(name, extra, args, _loc) => {
                 let args: Vec<Fp> = args.iter().map(|x| stack[*x]).collect();
                 stack.extend(custom.call(name, extra, &args));
             }
-            CircuitStep::Nondet(block) => {
+            CircuitStep::Nondet(block, _loc) => {
                 let mut stack = stack.clone();
                 for op in block.iter() {
                     op.step(&mut stack, ctx, custom, args);

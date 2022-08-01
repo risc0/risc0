@@ -33,6 +33,7 @@ struct FinalCycle {
       , rdHigh(alloc)
       , carryLow(alloc)
       , carryHigh(alloc)
+      , reserved(alloc)
       , regs(allocVec(alloc)) {}
 
   void set(StepState& state);
@@ -42,6 +43,7 @@ struct FinalCycle {
   RegMux<4> rdHigh;
   RegBin carryLow;
   RegBin carryHigh;
+  RegDigits<2, 4> reserved;
   std::vector<RegU32> regs;
 };
 

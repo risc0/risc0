@@ -24,8 +24,9 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
         vec.push(*second as u32);
     }
     let elf_contents = std::fs::read(IO_PATH).unwrap();
-    let method_id = MethodId::load(IO_ID).unwrap();
-    let mut prover = Prover::new(&elf_contents, &method_id)?;
+    // let method_id = MethodId::load(IO_ID).unwrap();
+    log::debug!("io_path: {IO_PATH}");
+    let mut prover = Prover::new(&elf_contents)?;
     prover.add_input(vec.as_slice());
     prover.run()
 }
@@ -35,9 +36,15 @@ mod integration {
 
     use crate::run_memio;
 
+    fn init() {
+        let _ = env_logger::builder().is_test(true).try_init();
+    }
+
     #[test]
-    #[ignore]
+    // #[ignore]
     fn memory_io() {
+        init();
+
         // Double write to WOM are fine
         assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start(), 1)]).is_ok());
     }

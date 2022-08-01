@@ -154,8 +154,12 @@ void ShaCycle::doInit0(StepState& state) {
   // otherwise keep going
   MakeBoolRegs isCountNonzero(ealloc);
   isCountNonzero.set(count.get());
-  BYZ_IF(isCountNonzero.get()) { nextCycleType.set(DataCycleType::SHA_CONTROL); }
-  BYZ_IF(1 - isCountNonzero.get()) { nextCycleType.set(DataCycleType::HALT); }
+  BYZ_IF(isCountNonzero.get()) {
+    nextCycleType.set(DataCycleType::SHA_CONTROL);
+  }
+  BYZ_IF(1 - isCountNonzero.get()) {
+    nextCycleType.set(DataCycleType::HALT);
+  }
   // Check if we should continue old values or clear to new ones
   contHash.set((1 - isMerkle.get()) * isOldCountNonzero.get());
 }
@@ -406,8 +410,12 @@ void ShaCycle::setData(StepState& state) {
             e.getPart(0, 16),
             w.getPart(16, 16),
             w.getPart(0, 16)});
-  BYZ_IF(1 - state.code.p2.get()) { nextCycleType.set(DataCycleType::SHA_DATA); }
-  BYZ_IF(state.code.p2.get()) { nextCycleType.set(DataCycleType::SHA_CONTROL); }
+  BYZ_IF(1 - state.code.p2.get()) {
+    nextCycleType.set(DataCycleType::SHA_DATA);
+  }
+  BYZ_IF(state.code.p2.get()) {
+    nextCycleType.set(DataCycleType::SHA_CONTROL);
+  }
 }
 
 } // namespace risc0::circuit

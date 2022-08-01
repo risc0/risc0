@@ -35,12 +35,14 @@ void MultiplyCycle::set(StepState& state) {
       in1High.setPartExact(in1.getPart(30, 2), 0, 2);
       sub0 = in1High.get(1);
     } else {
+      in1High.setPartExact(0, 0, 2);
       sub0 = 0;
     }
     if (i0Signed) {
       in0High.setPartExact(in0.getPart(30, 2), 0, 2);
       sub1 = in0High.get(1);
     } else {
+      in0High.setPartExact(0, 0, 2);
       sub1 = 0;
     }
     for (int muli = 0; muli < 5; muli++) {

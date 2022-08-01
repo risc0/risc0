@@ -26,6 +26,7 @@ ctor = "0.1"
 cxx = "1.0"
 log = "0.4"
 rand = "0.8"
+risc0-zkvm-circuit = { version = "0.10.0", path = "circuit", optional = true }
 risc0-zkvm-sys = { version = "0.10", path = "../.." }
 sha2 = "0.10"
 xmas-elf = "0.8"
@@ -35,8 +36,10 @@ env_logger = "0.9"
 risc0-zkvm-methods = { path = "methods" }
 
 [features]
-default = ["prove", "std", "verify"]
+circuit = ["dep:risc0-zkvm-circuit"]
+default = ["host", "prove", "std", "verify"]
 doc = ["std"]
-prove = ["risc0-zkp/prove"]
+host = []
+prove = ["circuit", "risc0-zkp/prove"]
 std = ["risc0-zkp/std", "serde/std"]
-verify = ["risc0-zkp/verify"]
+verify = ["circuit", "risc0-zkp/verify"]

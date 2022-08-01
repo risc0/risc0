@@ -25,14 +25,14 @@ void DataRegs::setExec(StepState& state) {
   BYZ_IF(codeType[CodeCycleType::INIT]) {
     risc0Log("C%u: Init", {cycle});
     memIO.doRead(cycle);
-    getCycleType().set(DataCycleType::HALT);
+    getCycleType().set(DataCycleType::FINAL);
   }
   BYZ_IF(codeType[CodeCycleType::MEM_WRITE]) {
     risc0Log("C%u: MemWrite: M[0x%x] = 0x%04x%04x",
              {cycle, state.code.p1.get() * 4, state.code.data.high(), state.code.data.low()});
     memIO.doWrite(
         state.code.cycle.get(), state.code.p1.get(), state.code.data.get(), state.code.p2.get());
-    getCycleType().set(DataCycleType::HALT);
+    getCycleType().set(DataCycleType::FINAL);
   }
   BYZ_IF(codeType[CodeCycleType::RESET]) {
     auto alloc = finalAlloc();
@@ -42,10 +42,14 @@ void DataRegs::setExec(StepState& state) {
     getCycleType().set(DataCycleType::FINAL);
     final.rdLow.set(0);
     final.rdHigh.set(0);
-    final.pc.setPartExact(state.code.p1.get(), 0, kMemBits + 2);
-    for (size_t i = 0; i < 32; i++) {
-      final.regs[i].setLow(0);
-      final.regs[i].setHigh(0);
+    // The PC/start address is a 32-bit value
+    final.pc.setPartExact(state.code.p1.get(), 0, 32);
+    final.carryLow.set(0);
+    final.carryHigh.set(0);
+    final.reserved.setPartExact(0, 0, 4);
+    for (auto& reg : final.regs) {
+      reg.setLow(0);
+      reg.setHigh(0);
     }
   }
   BYZ_IF(codeType[CodeCycleType::FINI]) {
@@ -62,7 +66,9 @@ void DataRegs::setExec(StepState& state) {
     auto cycleType = getCycleType();
 
     // Set cycle type
-    BYZ_IF(prevCycleType.is(DataCycleType::FINAL)) { cycleType.set(DataCycleType::DECODE); }
+    BYZ_IF(prevCycleType.is(DataCycleType::FINAL)) {
+      cycleType.set(DataCycleType::DECODE);
+    }
     BYZ_IF(prevCycleType.is(DataCycleType::DECODE)) {
       cycleType.set(state.getPrev(1).asDecode().nextCycleType.get());
       BYZ_IF(cycleType.is(DataCycleType::SHA_SYNC)) {
@@ -74,14 +80,20 @@ void DataRegs::setExec(StepState& state) {
       }
     }
     BYZ_IF(prevCycleType.is(DataCycleType::SHA_SYNC)) {
-      BYZ_IF(isShaInit0) { cycleType.set(DataCycleType::SHA_CONTROL); }
-      BYZ_IF(1 - isShaInit0) { cycleType.set(DataCycleType::SHA_SYNC); }
+      BYZ_IF(isShaInit0) {
+        cycleType.set(DataCycleType::SHA_CONTROL);
+      }
+      BYZ_IF(1 - isShaInit0) {
+        cycleType.set(DataCycleType::SHA_SYNC);
+      }
     }
     BYZ_IF(prevCycleType.is(DataCycleType::SHA_CONTROL) +
            prevCycleType.is(DataCycleType::SHA_DATA)) {
       cycleType.set(state.getPrev(1).asSha().nextCycleType.get());
     }
-    BYZ_IF(prevCycleType.is(DataCycleType::HALT)) { cycleType.set(DataCycleType::HALT); }
+    BYZ_IF(prevCycleType.is(DataCycleType::HALT)) {
+      cycleType.set(DataCycleType::HALT);
+    }
 
     // Apply cycle type
     BYZ_IF(cycleType.is(DataCycleType::DECODE)) {
@@ -134,7 +146,9 @@ void DataRegs::setExec(StepState& state) {
       ShaCycle sha(alloc);
       sha.setData(state);
     }
-    BYZ_IF(cycleType.is(DataCycleType::HALT)) { memIO.doRead(state.code.cycle.get()); }
+    BYZ_IF(cycleType.is(DataCycleType::HALT)) {
+      memIO.doRead(state.code.cycle.get());
+    }
   }
   BYZ_IF(codeType[CodeCycleType::FINAL]) {
     auto alloc = finalAlloc();
@@ -147,14 +161,20 @@ void DataRegs::setExec(StepState& state) {
       cycleType.set(DataCycleType::FINAL);
     }
     BYZ_IF(prevCycleType.is(DataCycleType::SHA_SYNC)) {
-      BYZ_IF(isShaInit0) { cycleType.set(DataCycleType::SHA_CONTROL); }
-      BYZ_IF(1 - isShaInit0) { cycleType.set(DataCycleType::SHA_SYNC); }
+      BYZ_IF(isShaInit0) {
+        cycleType.set(DataCycleType::SHA_CONTROL);
+      }
+      BYZ_IF(1 - isShaInit0) {
+        cycleType.set(DataCycleType::SHA_SYNC);
+      }
     }
     BYZ_IF(prevCycleType.is(DataCycleType::SHA_CONTROL) +
            prevCycleType.is(DataCycleType::SHA_DATA)) {
       cycleType.set(state.getPrev(1).asSha().nextCycleType.get());
     }
-    BYZ_IF(prevCycleType.is(DataCycleType::HALT)) { cycleType.set(DataCycleType::HALT); }
+    BYZ_IF(prevCycleType.is(DataCycleType::HALT)) {
+      cycleType.set(DataCycleType::HALT);
+    }
 
     // Apply cycle type
     BYZ_IF(cycleType.is(DataCycleType::FINAL)) {
@@ -177,7 +197,9 @@ void DataRegs::setExec(StepState& state) {
       ShaCycle sha(alloc);
       sha.setData(state);
     }
-    BYZ_IF(cycleType.is(DataCycleType::HALT)) { memIO.doRead(state.code.cycle.get()); }
+    BYZ_IF(cycleType.is(DataCycleType::HALT)) {
+      memIO.doRead(state.code.cycle.get());
+    }
   }
 }
 

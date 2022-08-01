@@ -12,73 +12,78 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub mod exec;
+
 use anyhow::Result;
-use risc0_circuit_rv32im_legacy::CircuitImpl;
 use risc0_zkp::{
-    core::sha::default_implementation,
-    hal::cpu::CpuHal,
-    prove::{adapter::ProveAdapter, executor::Executor},
-    MAX_CYCLES_PO2, MIN_PO2,
+    core::sha::default_implementation, hal::cpu::CpuHal, prove::adapter::ProveAdapter,
 };
 
-use crate::{elf::Program, method_id::MethodId, platform::memory::MEM_SIZE, receipt::Receipt};
+use crate::{elf::Program, platform::memory::MEM_SIZE, receipt::Receipt};
 
-use self::exec::MachineState;
-
-#[cfg(feature = "circuit")]
-pub mod exec;
+use self::exec::{IoHandler, RV32Executor};
 
 pub struct Prover {
     elf: Program,
-    method_id: MethodId,
-    inputs: Vec<u32>,
-    outputs: Vec<u32>,
-    commit: Vec<u32>,
+    inner: ProverImpl,
 }
 
 impl Prover {
-    pub fn new(elf: &[u8], method_id: &MethodId) -> Result<Self> {
-        let elf = Program::load_elf(&elf, MEM_SIZE as u32)?;
+    pub fn new(elf: &[u8]) -> Result<Self> {
         Ok(Prover {
-            elf,
-            method_id: method_id.clone(),
-            inputs: Vec::new(),
-            outputs: Vec::new(),
-            commit: Vec::new(),
+            elf: Program::load_elf(&elf, MEM_SIZE as u32)?,
+            inner: ProverImpl::new(),
         })
     }
 
     pub fn add_input(&mut self, slice: &[u32]) {
-        self.inputs.extend_from_slice(slice);
+        self.inner.inputs.extend_from_slice(slice);
     }
 
     pub fn get_output(&self) -> &[u32] {
-        &self.outputs
+        &self.inner.outputs
     }
 
-    pub fn run(self) -> Result<Receipt> {
-        // Set the memory handlers to call back to the impl
-        // MemoryHandler handler(impl.get());
-        // Make the circuit
-        let circuit = CircuitImpl::new();
-        let machine = MachineState::new();
-        let mut executor = Executor::new(circuit, machine, MIN_PO2, MAX_CYCLES_PO2);
-        // executor.step(code);
+    pub fn run(mut self) -> Result<Receipt> {
+        let mut executor = RV32Executor::new(&self.elf, &mut self.inner);
+        executor.run()?;
 
-        let mut prover = ProveAdapter::new(&mut executor);
+        let mut prover = ProveAdapter::new(&mut executor.executor);
         let hal = CpuHal {};
         let sha = default_implementation();
         let seal = risc0_zkp::prove::prove(&hal, sha, &mut prover);
 
         // Attach the full version of the output journal & construct receipt object
         let receipt = Receipt {
-            journal: self.commit,
+            journal: self.inner.commit,
             seal,
         };
 
         // Verify receipt to make sure it works
-        receipt.verify(&self.method_id)?;
+        // receipt.verify(&self.method_id)?;
 
         Ok(receipt)
+    }
+}
+
+struct ProverImpl {
+    pub inputs: Vec<u32>,
+    pub outputs: Vec<u32>,
+    pub commit: Vec<u32>,
+}
+
+impl ProverImpl {
+    fn new() -> Self {
+        Self {
+            inputs: Vec::new(),
+            outputs: Vec::new(),
+            commit: Vec::new(),
+        }
+    }
+}
+
+impl IoHandler for ProverImpl {
+    fn on_txrx(&mut self, _channel: u32, _buf: &[u8]) -> Vec<u8> {
+        todo!()
     }
 }

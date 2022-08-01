@@ -31,7 +31,9 @@ void FinalCycle::set(StepState& state) {
     equate(compute.x1.getPart(2 + kMemBits, 32 - kMemBits - 2), 0);
     state.data.memIO.doWrite(cycle, memAddr, result, isWOM);
   }
-  BYZ_IF(1 - resultInfo.doStore.get()) { state.data.memIO.doRead(cycle); }
+  BYZ_IF(1 - resultInfo.doStore.get()) {
+    state.data.memIO.doRead(cycle);
+  }
   // Set the registers
   rdLow.set(resultInfo.setReg.get() * decode.inst.getPart(7, 3));
   rdHigh.set(resultInfo.setReg.get() * decode.inst.getPart(10, 2));
@@ -39,6 +41,7 @@ void FinalCycle::set(StepState& state) {
     Value sel = rdLow.is(i % 8) * rdHigh.is(i / 8);
     regs[i].set((1 - sel) * prevFinal.regs[i].get() + sel * result);
   }
+  reserved.setPartExact(0, 0, 4);
   // Set the new PC
   carryLow.set(pc.setPart(resultInfo.pcRaw.low(), 0, 16));
   carryHigh.set(pc.setPart(resultInfo.pcRaw.high() + carryLow.get(), 16, 16));

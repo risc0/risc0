@@ -15,6 +15,7 @@
 use std::cmp::max;
 
 use anyhow::{bail, Result};
+use log::debug;
 use rand::thread_rng;
 
 use crate::{
@@ -46,13 +47,14 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
         let data_size = circuit.get_taps().group_size(RegisterGroup::Data);
         let steps = 1 << po2;
         let output_size = circuit.output_size();
+        debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");
         Executor {
             circuit,
             custom,
             // Initialize trace to min_po2 size
             code: vec![Fp::default(); steps * code_size],
             code_size,
-            data: vec![Fp::invalid(); steps * data_size],
+            data: vec![Fp::default(); steps * data_size],
             data_size,
             output: vec![Fp::invalid(); output_size],
             po2,
@@ -63,9 +65,15 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
         }
     }
 
-    pub fn step(&mut self, code: &[Fp]) -> Result<bool> {
-        if self.cycle + ZK_CYCLES >= self.steps {
+    pub fn step(&mut self, code: &[Fp], needed_fini: usize) -> Result<bool> {
+        // debug!("code: {:?}", code);
+        if self.cycle + needed_fini + ZK_CYCLES >= self.steps {
+            debug!(
+                "cycle: {} + needed_fini: {} + ZK_CYCLES: {} >= steps: {}",
+                self.cycle, needed_fini, ZK_CYCLES, self.steps
+            );
             if self.halted {
+                debug!("halted");
                 return Ok(false);
             }
             self.expand()?;
@@ -85,17 +93,19 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
             &mut [],
         ];
         let result = self.circuit.step_exec(&ctx, &mut self.custom, args);
+        // debug!("result: {:?}", result);
         self.halted = self.halted || result == Fp::new(0);
         self.cycle += 1;
         Ok(true)
     }
 
     pub fn expand(&mut self) -> Result<()> {
+        debug!("expand");
         if self.steps >= (1 << self.max_po2) {
             bail!("Cannot expand, max po2 of {} reached.", self.max_po2);
         }
         let mut new_code = vec![Fp::default(); self.code.len() * 2];
-        let mut new_data = vec![Fp::invalid(); self.data.len() * 2];
+        let mut new_data = vec![Fp::default(); self.data.len() * 2];
         for i in 0..self.code_size {
             let idx = i * self.steps;
             let src = &self.code[idx..idx + self.cycle];
@@ -116,6 +126,7 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
     }
 
     pub fn finalize(&mut self) {
+        debug!("finalize");
         assert!(self.halted);
         assert_eq!(self.cycle, self.steps - ZK_CYCLES);
         let mut rng = thread_rng();

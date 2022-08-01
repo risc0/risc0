@@ -208,7 +208,8 @@ struct MakeBoolRegs {
   RegBin isNonzero;
   Reg maybeInv;
 
-  MakeBoolRegs(BufAlloc& alloc) : isNonzero(alloc), maybeInv(alloc) {}
+  MakeBoolRegs(BufAlloc& alloc, SourceLoc loc = SourceLoc::current())
+      : isNonzero(alloc, loc), maybeInv(alloc) {}
 
   Value get() const { return isNonzero.get(); }
   void set(Value num) {
@@ -228,7 +229,8 @@ struct NegU32Regs {
   MakeBoolRegs highSafe;
   RegU32 store;
 
-  NegU32Regs(BufAlloc& alloc) : lowSafe(alloc), highSafe(alloc), store(alloc) {}
+  NegU32Regs(BufAlloc& alloc, SourceLoc loc = SourceLoc::current())
+      : lowSafe(alloc, loc), highSafe(alloc, loc), store(alloc) {}
 
   // Set the input number, gets the output.
   ValueU32 set(ValueU32 val) {

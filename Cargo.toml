@@ -11,6 +11,7 @@ members = [
   "risc0/zkvm/r0vm",
   "risc0/zkvm/sdk/rust",
   "risc0/zkvm/sdk/rust/build",
+  "risc0/zkvm/sdk/rust/circuit",
 ]
 
 exclude = [

@@ -86,7 +86,7 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
         digest: digest as usize,
     });
 
-    GPIO_SHA.write_volatile(desc_ptr);
+    GPIO_SHA.as_ptr().write_volatile(desc_ptr);
 }
 
 // Calculates the number of words of capacity needed, including end

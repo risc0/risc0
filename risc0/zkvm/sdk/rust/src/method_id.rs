@@ -19,7 +19,7 @@ use risc0_zkp::{
         log2_ceil,
         sha::{Digest, DIGEST_WORDS, DIGEST_WORD_SIZE},
     },
-    MAX_CYCLES, MIN_CYCLES,
+    MAX_CYCLES, MIN_CYCLES, ZK_CYCLES,
 };
 
 const MAX_CODE_DIGEST_COUNT: usize = log2_ceil(MAX_CYCLES / MIN_CYCLES) + 1;
@@ -56,11 +56,10 @@ impl MethodId {
 
     #[cfg(feature = "prove")]
     pub fn compute_with_limit(elf_contents: &[u8], limit: usize) -> Result<Self> {
-        use crate::{elf::Program, platform::memory::MEM_SIZE, prove::exec::setup_code, CODE_SIZE};
+        use crate::{elf::Program, platform::memory::MEM_SIZE, CODE_SIZE};
         use risc0_zkp::{
             hal::{cpu::CpuHal, Hal},
             prove::poly_group::PolyGroup,
-            ZK_CYCLES,
         };
 
         let hal = CpuHal {};
@@ -78,9 +77,11 @@ impl MethodId {
                 table.push(Digest::default());
                 continue;
             }
+
             // Make a vector & set it up with the elf data
             let mut code = vec![Fp::default(); cycles * CODE_SIZE];
-            setup_code(&mut code, cycles, program.entry, &program.image);
+            load_code(&mut code, &program, cycles)?;
+
             // Copy into accel buffer
             let coeffs = hal.copy_from(&code);
             // Do interpolate & shift
@@ -93,4 +94,22 @@ impl MethodId {
 
         Ok(MethodId { table })
     }
+}
+
+#[cfg(feature = "prove")]
+fn load_code(code: &mut [Fp], elf: &crate::elf::Program, cycles: usize) -> Result<()> {
+    use crate::{prove::exec, CODE_SIZE};
+
+    let mut cycle = 0;
+    exec::load_code(elf.entry, &elf.image, |chunk, fini| {
+        for i in 0..CODE_SIZE {
+            code[cycles * i + cycle] = chunk[i];
+        }
+        if cycle + fini + ZK_CYCLES < cycles {
+            cycle += 1;
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    })
 }
