@@ -141,6 +141,13 @@ risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr) {
   });
 }
 
+risc0_receipt* risc0_prover_run_without_seal(risc0_error* err, risc0_prover* ptr) {
+  return ffi_wrap<risc0_receipt*>(err, nullptr, [&] {
+    risc0::Receipt receipt = ptr->prover->runWithoutSeal();
+    return new risc0_receipt{receipt};
+  });
+}
+
 risc0_receipt* risc0_receipt_new(risc0_error* err,
                                  const uint8_t* journal,
                                  const size_t journal_len,

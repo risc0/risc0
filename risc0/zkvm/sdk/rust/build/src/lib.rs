@@ -20,9 +20,9 @@ use std::{
     default::Default,
     env,
     fs::{self, File},
-    io::{Cursor, Read, Write},
+    io::{BufRead, BufReader, Cursor, Read, Write},
     path::{Path, PathBuf},
-    process::Command,
+    process::{Command, Stdio},
 };
 
 use cargo_metadata::{MetadataCommand, Package};
@@ -332,12 +332,44 @@ fn build_guest_package<P>(
 
     println!("Using rust standard library root: {}", risc0_standard_lib);
 
-    let status = Command::new(cargo)
+    let mut cmd = Command::new(cargo);
+    let mut child = cmd
         .env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic")
         .env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib)
         .args(args)
-        .status()
+        .stderr(Stdio::piped())
+        .spawn()
         .unwrap();
+    let stderr = child.stderr.take().unwrap();
+
+    // HACK: Attempt to bypass the parent cargo output capture and
+    // send directly to the tty, if available.  This way we get
+    // progress messages from the inner cargo so the user doesn't
+    // think it's just hanging.
+    let mut tty = fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open("/dev/tty")
+        .ok();
+
+    if let Some(tty) = &mut tty {
+        write!(
+            tty,
+            "{}: Starting build for riscv32im-risc0-zkvm-elf   \n",
+            pkg.name
+        )
+        .unwrap();
+    }
+
+    for line in BufReader::new(stderr).lines() {
+        match &mut tty {
+            Some(tty) => write!(tty, "{}: {}   \n", pkg.name, line.unwrap()).unwrap(),
+            None => eprintln!("{}", line.unwrap()),
+        }
+    }
+
+    let status = cmd.status().unwrap();
+
     if !status.success() {
         std::process::exit(status.code().unwrap());
     }

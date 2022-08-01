@@ -91,6 +91,8 @@ size_t risc0_prover_get_output_len(risc0_error* err, const risc0_prover* ptr);
 
 risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr);
 
+risc0_receipt* risc0_prover_run_without_seal(risc0_error* err, risc0_prover* ptr);
+
 //
 // Receipt
 //

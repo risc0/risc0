@@ -11,4 +11,5 @@ risc0-zkvm = { version = "0.10", path = "../sdk/rust" }
 [dev-dependencies]
 anyhow = "1.0"
 assert_cmd = "2.0"
+assert_fs = "1.0"
 risc0-zkvm-methods = { path = "../sdk/rust/methods" }
