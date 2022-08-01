@@ -107,6 +107,11 @@ extern "C" {
     pub(crate) fn risc0_prover_run(err: *mut RawError, prover: *mut RawProver)
         -> *const RawReceipt;
 
+    pub(crate) fn risc0_prover_run_without_seal(
+        err: *mut RawError,
+        prover: *mut RawProver,
+    ) -> *const RawReceipt;
+
     pub(crate) fn risc0_receipt_new(
         err: *mut RawError,
         journal: *const u8,

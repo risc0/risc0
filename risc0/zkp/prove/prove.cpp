@@ -39,6 +39,11 @@ static AccelSlice<Fp> makeCoeffs(const std::vector<Fp>& vec, size_t count) {
   return ret;
 }
 
+void runWithoutSeal(ProveCircuit& circuit) {
+  WriteIOP iop;
+  circuit.execute(iop);
+}
+
 // NOLINTNEXTLINE(readability-function-size)
 std::vector<uint32_t> prove(ProveCircuit& circuit) {
   // Get taps

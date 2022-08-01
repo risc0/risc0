@@ -56,4 +56,6 @@ public:
 
 std::vector<uint32_t> prove(ProveCircuit& circuit);
 
+void runWithoutSeal(ProveCircuit& circuit);
+
 } // namespace risc0
