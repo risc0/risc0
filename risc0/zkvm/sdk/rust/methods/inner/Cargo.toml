@@ -8,6 +8,8 @@ edition = "2021"
 [dependencies]
 risc0-zkp = { version = "0.10", path = "../../../../../zkp/rust", default-features = false }
 risc0-zkvm-guest = { version = "0.10", path = "../../guest", default-features = false, features = ["std"] }
+risc0-zkvm-methods = { version = "0.1", path = "..", default-features = false }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
 
 [profile.release]
 lto = true
