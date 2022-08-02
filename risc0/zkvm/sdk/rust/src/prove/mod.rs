@@ -14,6 +14,8 @@
 
 pub mod exec;
 
+use std::io::Write;
+
 use anyhow::Result;
 use risc0_zkp::{
     core::sha::default_implementation, hal::cpu::CpuHal, prove::adapter::ProveAdapter,
@@ -36,12 +38,18 @@ impl Prover {
         })
     }
 
-    pub fn add_input(&mut self, slice: &[u32]) {
-        self.inner.inputs.extend_from_slice(slice);
+    pub fn add_input_u8_slice(&mut self, slice: &[u8]) {
+        self.inner.input.extend_from_slice(slice);
     }
 
-    pub fn get_output(&self) -> &[u32] {
-        &self.inner.outputs
+    pub fn add_input_u32_slice(&mut self, slice: &[u32]) {
+        self.inner
+            .input
+            .extend_from_slice(bytemuck::cast_slice(slice));
+    }
+
+    pub fn get_output(&self) -> &[u8] {
+        &self.inner.output
     }
 
     pub fn run(mut self) -> Result<Receipt> {
@@ -67,23 +75,38 @@ impl Prover {
 }
 
 struct ProverImpl {
-    pub inputs: Vec<u32>,
-    pub outputs: Vec<u32>,
+    pub input: Vec<u8>,
+    pub output: Vec<u8>,
     pub commit: Vec<u32>,
 }
 
 impl ProverImpl {
     fn new() -> Self {
         Self {
-            inputs: Vec::new(),
-            outputs: Vec::new(),
+            input: Vec::new(),
+            output: Vec::new(),
             commit: Vec::new(),
         }
     }
 }
 
 impl IoHandler for ProverImpl {
-    fn on_txrx(&mut self, _channel: u32, _buf: &[u8]) -> Vec<u8> {
-        todo!()
+    fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Vec<u8> {
+        match channel {
+            SENDRECV_CHANNEL_INPUT => {
+                log::debug!("SENDRECV_CHANNEL_INPUT: {}", buf.len());
+                self.input.clone()
+            }
+            SENDRECV_CHANNEL_STDOUT => {
+                log::debug!("SENDRECV_CHANNEL_STDOUT: {}", buf.len());
+                Vec::new()
+            }
+            SENDRECV_CHANNEL_STDERR => {
+                log::debug!("SENDRECV_CHANNEL_STDERR: {}", buf.len());
+                std::io::stderr().lock().write_all(buf);
+                Vec::new()
+            }
+            _ => panic!("Unknown channel: {channel}"),
+        }
     }
 }

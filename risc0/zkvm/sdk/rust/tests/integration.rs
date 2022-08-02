@@ -27,7 +27,7 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
     // let method_id = MethodId::load(IO_ID).unwrap();
     log::debug!("io_path: {IO_PATH}");
     let mut prover = Prover::new(&elf_contents)?;
-    prover.add_input(vec.as_slice());
+    prover.add_input_u32_slice(vec.as_slice());
     prover.run()
 }
 
