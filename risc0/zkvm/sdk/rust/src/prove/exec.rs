@@ -12,12 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::BinaryHeap;
 use core::{
     cmp::{Ordering, Reverse},
     ops::{Index, IndexMut},
 };
-use std::collections::{btree_map::Entry, BTreeMap};
+use std::collections::{btree_map::Entry, BTreeMap, BTreeSet};
 
 use anyhow::Result;
 use log::{debug, trace};
@@ -28,17 +27,30 @@ use risc0_zkp::{
     MAX_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_circuit::CircuitImpl;
-use risc0_zkvm_platform::io::addr::{
-    GPIO_COMMIT, GPIO_FAULT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE,
+use risc0_zkvm_platform::{
+    io::addr::{
+        GPIO_COMMIT, GPIO_FAULT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE,
+    },
+    memory::INPUT,
+    WORD_SIZE,
 };
 
 use crate::{elf::Program, platform::memory::MEM_BITS, CODE_SIZE};
+
+/// Request the initial input to the guest.
+const SENDRECV_CHANNEL_INPUT: u32 = 0;
+
+/// Write bytes to standard output
+const SENDRECV_CHANNEL_STDOUT: u32 = 1;
+
+/// Write bytes to standard error
+const SENDRECV_CHANNEL_STDERR: u32 = 2;
 
 pub trait IoHandler {
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Vec<u8>;
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq)]
 struct MemoryEvent {
     pub cycle: u32,
     pub addr: u32,
@@ -46,14 +58,139 @@ struct MemoryEvent {
     pub is_write: bool,
 }
 
+impl std::fmt::Debug for MemoryEvent {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fmt.debug_struct("MemoryEvent")
+            .field("cycle", &self.cycle)
+            .field("addr", &format_args!("0x{:08X}", self.addr * 4))
+            .field("data", &format_args!("0x{:08X}", self.data))
+            .field("is_write", &self.is_write)
+            .finish()
+    }
+}
+
 struct MemoryState {
     pub memory: BTreeMap<u32, u32>,
-    pub history: BinaryHeap<Reverse<MemoryEvent>>,
+    pub history: BTreeSet<MemoryEvent>,
+}
+
+/// Align the given address `addr` upwards to alignment `align`.
+///
+/// Requires that `align` is a power of two.
+const fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
+}
+
+impl MemoryState {
+    fn load_u8(&self, addr: u32) -> u8 {
+        // debug!("load_u8: 0x{addr:08X}");
+        // align to the nearest word
+        let aligned = addr & !(WORD_SIZE as u32 - 1);
+        let offset = addr & WORD_SIZE as u32;
+        let word = self.load_u32(aligned);
+        ((word >> (offset * 8)) & 0xff) as u8
+    }
+
+    fn load_u32(&self, addr: u32) -> u32 {
+        // debug!("load_u32: 0x{addr:08X}");
+        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
+        let key = addr / 4;
+        match self.memory.get(&key) {
+            Some(word) => *word,
+            None => panic!("addr out of range: 0x{addr:08X}"),
+        }
+    }
+
+    fn load_be_u32(&self, addr: u32) -> u32 {
+        self.load_u32(addr).to_be()
+    }
+
+    fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
+        let mut region = Vec::new();
+        for addr in addr..addr + size {
+            region.push(self.load_u8(addr));
+        }
+        region
+    }
+
+    fn store_u8(&mut self, addr: u32, value: u8) {
+        // debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
+        // align to the nearest word
+        let aligned = addr & !(WORD_SIZE as u32 - 1);
+        let offset = addr & WORD_SIZE as u32;
+        let key = aligned / 4;
+        let mut word = self.memory.get(&key).unwrap_or(&0) & !(0xff << (offset * 8));
+        word |= (value as u32) << (offset * 8);
+        self.store_u32(aligned, word);
+    }
+
+    fn store_u32(&mut self, addr: u32, value: u32) {
+        // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
+        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
+        let key = addr / 4;
+        match self.memory.entry(key) {
+            Entry::Occupied(mut entry) => {
+                let min = MemoryEvent {
+                    cycle: 0,
+                    addr: key,
+                    data: 0,
+                    is_write: false,
+                };
+                let max = MemoryEvent {
+                    cycle: 0,
+                    addr: key + 1,
+                    data: 0,
+                    is_write: false,
+                };
+                if let Some(txn) = self.history.range(min..max).next() {
+                    let last_value = *entry.get();
+                    if txn.addr == key && last_value != value {
+                        debug!("addr: 0x{key:08X}, value: 0x{value:08X}, txn: {txn:?}");
+                        // The guest has actually touched this memory, and we are not writing the same value
+                        panic!("Host cannot mutate existing memory");
+                    }
+                }
+                entry.insert(value);
+            }
+            Entry::Vacant(entry) => {
+                entry.insert(value);
+            }
+        }
+    }
+
+    fn store_region(&mut self, addr: u32, slice: &[u8]) {
+        // debug!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
+        for i in 0..slice.len() {
+            self.store_u8(addr + i as u32, slice[i]);
+        }
+    }
+
+    fn strlen(&self, addr: u32) -> usize {
+        let mut addr = addr;
+        let mut len = 0;
+        while self.load_u8(addr) != 0 {
+            addr += 1;
+            len += 1;
+        }
+        len
+    }
+
+    fn pop_history(&mut self) -> MemoryEvent {
+        let event = self
+            .history
+            .iter()
+            .next()
+            .expect("mem_check called on empty history")
+            .clone();
+        self.history.remove(&event);
+        event
+    }
 }
 
 pub struct MachineContext<'a, H: IoHandler> {
     memory: MemoryState,
     io: &'a mut H,
+    cur_host_to_guest_offset: usize,
 }
 
 impl PartialOrd for MemoryEvent {
@@ -106,7 +243,7 @@ impl MemoryState {
     fn new() -> Self {
         Self {
             memory: BTreeMap::new(),
-            history: BinaryHeap::new(),
+            history: BTreeSet::new(),
         }
     }
 }
@@ -128,6 +265,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         MachineContext {
             memory: MemoryState::new(),
             io,
+            cur_host_to_guest_offset: INPUT.start(),
         }
     }
 
@@ -152,17 +290,13 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
     }
 
     fn mem_check(&mut self) -> (Fp, Fp, Fp, Fp, Fp) {
-        let event = self
-            .memory
-            .history
-            .pop()
-            .expect("mem_check called on empty history");
-        let parts = split_word(event.0.data);
-        debug!("mem_check: {event:?}");
+        let event = self.memory.pop_history();
+        let parts = split_word(event.data);
+        // debug!("mem_check: {event:?}");
         (
-            event.0.cycle.into(),
-            event.0.addr.into(),
-            event.0.is_write.into(),
+            event.cycle.into(),
+            event.addr.into(),
+            event.is_write.into(),
             parts.0,
             parts.1,
         )
@@ -174,12 +308,12 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         // debug!("[{}] R: 0x{:08X}", cycle, addr);
         let data = *self.memory.memory.entry(addr).or_insert(0);
         // debug!("data: 0x{data:08X}");
-        self.memory.history.push(Reverse(MemoryEvent {
+        self.memory.history.insert(MemoryEvent {
             cycle,
             addr,
             data,
             is_write: false,
-        }));
+        });
         split_word(data)
     }
 
@@ -189,12 +323,12 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         let data = merge_word(value);
         let is_write = addr < (1 << (MEM_BITS - 1));
         // debug!("[{}] W: 0x{:08X} <= 0x{:08X}", cycle, addr, data);
-        self.memory.history.push(Reverse(MemoryEvent {
+        self.memory.history.insert(MemoryEvent {
             cycle,
             addr,
             data,
             is_write,
-        }));
+        });
         match self.memory.memory.entry(addr) {
             Entry::Occupied(mut entry) => {
                 assert!(*entry.get() == data || is_write);
@@ -240,10 +374,21 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
             GPIO_SENDRECV_ADDR => {
                 debug!("on_write> GPIO_SENDRECV_ADDR");
-                // let channel = self.memory.load(GPIO_SENDRECV_CHANNEL);
-                // let size = self.memory.load(GPIO_SENDRECV_SIZE);
-                // let region = self.memory.load_region(value, size);
-                // self.io.on_txrx(channel, region);
+                let channel = self.memory.load_u32(GPIO_SENDRECV_CHANNEL);
+                let size = self.memory.load_u32(GPIO_SENDRECV_SIZE);
+                let region = self.memory.load_region(value, size);
+                let result = self.io.on_txrx(channel, &region);
+                let aligned_len = align_up(result.len(), WORD_SIZE);
+                assert!(
+                    self.cur_host_to_guest_offset + WORD_SIZE + aligned_len < INPUT.end(),
+                    "Read buffer overrun"
+                );
+                self.memory
+                    .store_u32(self.cur_host_to_guest_offset as u32, result.len() as u32);
+                self.cur_host_to_guest_offset += WORD_SIZE;
+                self.memory
+                    .store_region(self.cur_host_to_guest_offset as u32, &result);
+                self.cur_host_to_guest_offset += aligned_len;
             }
             _ => {}
         };
