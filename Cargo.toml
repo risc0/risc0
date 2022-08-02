@@ -25,5 +25,8 @@ lto = true
 [profile.bootstrap]
 inherits = "release"
 
+[profile.dev.package.risc0-zkvm-circuit]
+debug = false
+
 [workspace.metadata.workspaces]
 allow_branch = "main"
