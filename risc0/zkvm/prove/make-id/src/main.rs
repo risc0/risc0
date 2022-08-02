@@ -49,6 +49,6 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let elf_contents = fs::read(args.elf).unwrap();
-    let method_id = MethodId::compute(&elf_contents, args.limit).unwrap();
+    let method_id = MethodId::compute_with_limit(&elf_contents, args.limit).unwrap();
     std::fs::write(args.out, method_id.as_slice().unwrap()).unwrap();
 }

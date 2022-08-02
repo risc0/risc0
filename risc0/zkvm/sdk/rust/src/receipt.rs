@@ -12,18 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-
 use crate::method_id::MethodId;
 
+use anyhow::Result;
+use serde::{Deserialize, Serialize};
+
+#[derive(Deserialize, Serialize)]
 pub struct Receipt {
     pub journal: Vec<u32>,
     pub seal: Vec<u32>,
 }
 
+// FIXME: Remove this temporary trait to convert method IDs once our API is the
+// same between FFI and rust-based provers.
+pub trait IntoMethodId {}
+impl IntoMethodId for &MethodId {}
+impl IntoMethodId for &[u8] {}
+
 impl Receipt {
     #[cfg(feature = "verify")]
-    pub fn verify(&self, method_id: &MethodId) -> Result<()> {
+    pub fn verify<M>(&self, _method_id: M) -> Result<()>
+    where
+        M: IntoMethodId,
+    {
         todo!()
+    }
+
+    // Compatible API with FFI-based prover.
+    pub fn get_journal_vec(&self) -> Result<Vec<u32>> {
+        Ok(self.journal.clone())
+    }
+
+    // Compatible API with FFI-based prover.
+    pub fn get_journal(&self) -> Result<&[u8]> {
+        Ok(bytemuck::cast_slice(self.journal.as_slice()))
+    }
+
+    // Compatible API with FFI-based prover.
+    // FIXME: Change API to avoid copy.
+    pub fn get_seal(&self) -> Result<&[u32]> {
+        Ok(self.seal.as_slice())
     }
 }

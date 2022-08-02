@@ -104,7 +104,7 @@ fn main() {
             if args.verbose > 0 {
                 eprintln!("Computing method id");
             }
-            let computed = MethodId::compute(&elf_contents, args.limit).unwrap();
+            let computed = MethodId::compute_with_limit(&elf_contents, args.limit).unwrap();
             if let Some(method_id_file) = args.method_id {
                 std::fs::write(&method_id_file, computed.as_slice().unwrap()).unwrap();
                 if args.verbose > 0 {
@@ -125,9 +125,7 @@ fn main() {
         if args.verbose > 0 {
             eprintln!("Supplying {} bytes of initial input", input_bytes.len());
         }
-        prover
-            .add_input(bytemuck::cast_slice(input_bytes.as_slice()))
-            .unwrap();
+        prover.add_input_u8_slice(&input_bytes);
     }
 
     let receipt: Receipt = prover.run().unwrap();
