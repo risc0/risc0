@@ -39,6 +39,7 @@ void FinalCycle::set(StepState& state) {
     Value sel = rdLow.is(i % 8) * rdHigh.is(i / 8);
     regs[i].set((1 - sel) * prevFinal.regs[i].get() + sel * result);
   }
+  reserved.setPartExact(0, 0, 4);
   // Set the new PC
   carryLow.set(pc.setPart(resultInfo.pcRaw.low(), 0, 16));
   carryHigh.set(pc.setPart(resultInfo.pcRaw.high() + carryLow.get(), 16, 16));

@@ -11,6 +11,7 @@ members = [
   "risc0/zkvm/r0vm",
   "risc0/zkvm/sdk/rust",
   "risc0/zkvm/sdk/rust/build",
+  "risc0/zkvm/sdk/rust/circuit",
 ]
 
 exclude = [
@@ -23,6 +24,9 @@ lto = true
 
 [profile.bootstrap]
 inherits = "release"
+
+[profile.dev.package.risc0-zkvm-circuit]
+debug = false
 
 [workspace.metadata.workspaces]
 allow_branch = "main"

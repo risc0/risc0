@@ -15,15 +15,49 @@
 // These must match the values in zkvm/platform/io.h.  See this file
 // for documentation on these GPIO ports.
 
-pub const GPIO_SHA: *mut *const SHADescriptor = 0x01F0_0000 as _;
-pub const GPIO_COMMIT: *mut *const IoDescriptor = 0x01F0_0004 as _;
-pub const GPIO_FAULT: *mut *const u8 = 0x01F0_0008 as _;
-pub const GPIO_LOG: *mut *const u8 = 0x01F0_000C as _;
-pub const GPIO_GETKEY: *mut *const GetKeyDescriptor = 0x01F0_0010 as _;
+pub struct Gpio<T> {
+    addr: u32,
+    _marker: PhantomData<T>,
+}
 
-pub const GPIO_SENDRECV_CHANNEL: *mut u32 = 0x01F0_0014 as _;
-pub const GPIO_SENDRECV_SIZE: *mut usize = 0x01F0_0018 as _;
-pub const GPIO_SENDRECV_ADDR: *mut *const u8 = 0x01F0_001C as _;
+impl<T> Gpio<T> {
+    pub const fn new(addr: u32) -> Self {
+        Self {
+            addr,
+            _marker: PhantomData,
+        }
+    }
+
+    pub const fn as_ptr(&self) -> *mut T {
+        self.addr as _
+    }
+
+    pub const fn addr(&self) -> u32 {
+        self.addr
+    }
+}
+
+pub const GPIO_SHA: Gpio<*const SHADescriptor> = Gpio::new(0x01F0_0000);
+pub const GPIO_COMMIT: Gpio<*const IoDescriptor> = Gpio::new(0x01F0_0004);
+pub const GPIO_FAULT: Gpio<*const u8> = Gpio::new(0x01F0_0008);
+pub const GPIO_LOG: Gpio<*const u8> = Gpio::new(0x01F0_000C);
+pub const GPIO_GETKEY: Gpio<*const GetKeyDescriptor> = Gpio::new(0x01F0_0010);
+
+pub const GPIO_SENDRECV_CHANNEL: Gpio<u32> = Gpio::new(0x01F0_0014);
+pub const GPIO_SENDRECV_SIZE: Gpio<usize> = Gpio::new(0x01F0_0018);
+pub const GPIO_SENDRECV_ADDR: Gpio<*const u8> = Gpio::new(0x01F0_001C);
+
+pub mod addr {
+    pub const GPIO_SHA: u32 = super::GPIO_SHA.addr();
+    pub const GPIO_COMMIT: u32 = super::GPIO_COMMIT.addr();
+    pub const GPIO_FAULT: u32 = super::GPIO_FAULT.addr();
+    pub const GPIO_LOG: u32 = super::GPIO_LOG.addr();
+    pub const GPIO_GETKEY: u32 = super::GPIO_GETKEY.addr();
+
+    pub const GPIO_SENDRECV_CHANNEL: u32 = super::GPIO_SENDRECV_CHANNEL.addr();
+    pub const GPIO_SENDRECV_SIZE: u32 = super::GPIO_SENDRECV_SIZE.addr();
+    pub const GPIO_SENDRECV_ADDR: u32 = super::GPIO_SENDRECV_ADDR.addr();
+}
 
 #[repr(C)]
 pub struct IoDescriptor {
@@ -73,9 +107,13 @@ mod guest {
 
         // Tell the host to execute the sendrecv.
         unsafe {
-            super::GPIO_SENDRECV_CHANNEL.write_volatile(channel);
-            super::GPIO_SENDRECV_SIZE.write_volatile(buf.len());
-            super::GPIO_SENDRECV_ADDR.write_volatile(buf.as_ptr());
+            super::GPIO_SENDRECV_CHANNEL
+                .as_ptr()
+                .write_volatile(channel);
+            super::GPIO_SENDRECV_SIZE.as_ptr().write_volatile(buf.len());
+            super::GPIO_SENDRECV_ADDR
+                .as_ptr()
+                .write_volatile(buf.as_ptr());
         }
 
         // Receive
@@ -100,5 +138,7 @@ mod guest {
         unimplemented!()
     }
 }
+
+use core::marker::PhantomData;
 
 pub use guest::*;

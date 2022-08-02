@@ -46,7 +46,7 @@ unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
     let ptr = msg.as_ptr();
     memory_barrier(ptr);
     // A compliant host should fault when it receives this descriptor.
-    GPIO_FAULT.write_volatile(ptr);
+    GPIO_FAULT.as_ptr().write_volatile(ptr);
 
     // As a fallback for uncompliant hosts, force an unaligned write, which causes a
     // fault within the Risc0 VM.

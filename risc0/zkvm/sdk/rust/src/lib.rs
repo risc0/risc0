@@ -38,7 +38,20 @@ extern crate alloc;
 pub mod core;
 #[cfg(feature = "prove")]
 pub mod elf;
-#[cfg(all(not(target_arch = "riscv32"), feature = "std"))]
+#[cfg(feature = "host")]
 pub mod host;
+#[cfg(feature = "host")]
+pub mod method_id;
+#[cfg(feature = "prove")]
+pub mod prove;
+#[cfg(feature = "host")]
+pub mod receipt;
 pub mod serde;
+#[cfg(feature = "verify")]
+pub mod verify;
+
 pub use risc0_zkvm_platform as platform;
+
+const CODE_SIZE: usize = 16;
+const DATA_SIZE: usize = 162;
+const ACCUM_SIZE: usize = 10;

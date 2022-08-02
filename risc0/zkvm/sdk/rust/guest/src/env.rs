@@ -14,19 +14,18 @@
 
 use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 
-use serde::{Deserialize, Serialize};
-
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::{
     platform::{
         io::{
-            host_sendrecv, IoDescriptor, GPIO_COMMIT, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL,
-            GPIO_SENDRECV_SIZE, SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT,
+            host_sendrecv, IoDescriptor, GPIO_COMMIT, SENDRECV_CHANNEL_INITIAL_INPUT,
+            SENDRECV_CHANNEL_STDOUT,
         },
         memory, WORD_SIZE,
     },
     serde::{Deserializer, Serializer, Slice},
 };
+use serde::{Deserialize, Serialize};
 
 use crate::{align_up, memory_barrier, sha};
 
@@ -177,7 +176,7 @@ impl Env {
             };
             let ptr: *const IoDescriptor = &desc;
             memory_barrier(ptr);
-            GPIO_COMMIT.write_volatile(&desc);
+            GPIO_COMMIT.as_ptr().write_volatile(&desc);
         }
 
         // If the total proof message is small (<= 32 bytes), return it directly

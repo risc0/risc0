@@ -25,14 +25,14 @@ void DataRegs::setExec(StepState& state) {
   BYZ_IF(codeType[CodeCycleType::INIT]) {
     risc0Log("C%u: Init", {cycle});
     memIO.doRead(cycle);
-    getCycleType().set(DataCycleType::HALT);
+    getCycleType().set(DataCycleType::FINAL);
   }
   BYZ_IF(codeType[CodeCycleType::MEM_WRITE]) {
     risc0Log("C%u: MemWrite: M[0x%x] = 0x%04x%04x",
              {cycle, state.code.p1.get() * 4, state.code.data.high(), state.code.data.low()});
     memIO.doWrite(
         state.code.cycle.get(), state.code.p1.get(), state.code.data.get(), state.code.p2.get());
-    getCycleType().set(DataCycleType::HALT);
+    getCycleType().set(DataCycleType::FINAL);
   }
   BYZ_IF(codeType[CodeCycleType::RESET]) {
     auto alloc = finalAlloc();
@@ -42,10 +42,14 @@ void DataRegs::setExec(StepState& state) {
     getCycleType().set(DataCycleType::FINAL);
     final.rdLow.set(0);
     final.rdHigh.set(0);
-    final.pc.setPartExact(state.code.p1.get(), 0, kMemBits + 2);
-    for (size_t i = 0; i < 32; i++) {
-      final.regs[i].setLow(0);
-      final.regs[i].setHigh(0);
+    // The PC/start address is a 32-bit value
+    final.pc.setPartExact(state.code.p1.get(), 0, 32);
+    final.carryLow.set(0);
+    final.carryHigh.set(0);
+    final.reserved.setPartExact(0, 0, 4);
+    for (auto& reg : final.regs) {
+      reg.setLow(0);
+      reg.setHigh(0);
     }
   }
   BYZ_IF(codeType[CodeCycleType::FINI]) {

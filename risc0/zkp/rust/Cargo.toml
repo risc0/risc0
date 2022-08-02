@@ -32,6 +32,6 @@ rand = { version = "0.8", features = ["small_rng"] }
 [features]
 default = ["prove", "std", "verify"]
 hal = ["dep:downcast-rs", "dep:ndarray", "dep:rayon"]
-prove = ["dep:array-init", "hal"]
+prove = ["dep:array-init", "hal", "rand/std", "rand/std_rng"]
 std = []
 verify = []

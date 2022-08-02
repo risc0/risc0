@@ -37,6 +37,8 @@ void DivideCycle::set(StepState& state) {
       denom.set(denomExpr);
       negNumer.set(0);
       negDenom.set(0);
+      negNumerImpl.set(ValueU32::fromConst(0));
+      negDenomImpl.set(ValueU32::fromConst(0));
     } else if (signType == 1) {
       // Sign type 1, do full complicated negation
       BYZ_NONDET {
@@ -55,6 +57,8 @@ void DivideCycle::set(StepState& state) {
           {negNumer.get() * (0xffff - numerExpr.low) + (1 - negNumer.get()) * numerExpr.low,
            negNumer.get() * (0xffff - numerExpr.high) + (1 - negNumer.get()) * numerExpr.high});
       denom.set(denomExpr);
+      negNumerImpl.set(ValueU32::fromConst(0));
+      negDenomImpl.set(ValueU32::fromConst(0));
     }
     auto denomVal = denom.get();
     // Now guess the quotient + remainder
@@ -79,7 +83,7 @@ void DivideCycle::set(StepState& state) {
     quot.set(quot32.get());
     rem.set(rem32.get());
     // Verify the remainder is < the denominator (if not divide by zero)
-    BYZ_IF(denomNonzero.isNonzero.get()) {
+    BYZ_IF(denomNonzero.get()) {
       carryDMR.set(
           denomMinusRem.setPart(0x10000 + denom.getPart(0, 16) - rem.getPart(0, 16) - 1, 0, 16));
       Value final = denomMinusRem.setPart(
@@ -122,7 +126,7 @@ void DivideCycle::set(StepState& state) {
             // But if things are zero, we want negOut to be zero.  Since denom was 0, the xor in
             // this case will be just the numerator, so we can subtract that.  All of this is to
             // lower the degree by one vs just multiplying by isNonzero
-            - (negNumer.get() * (1 - denomNonzero.isNonzero.get()));
+            - (negNumer.get() * (1 - denomNonzero.get()));
       } else {
         negOut = 0;
       }
@@ -136,8 +140,10 @@ void DivideCycle::set(StepState& state) {
       resultInfo.result.set(
           {negResult.get() * (0xffff - out.low) + (1 - negResult.get()) * out.low,
            negResult.get() * (0xffff - out.high) + (1 - negResult.get()) * out.high});
+      negResultImpl.set(ValueU32::fromConst(0));
     } else {
       resultInfo.result.set(out);
+      negResultImpl.set(ValueU32::fromConst(0));
     }
   };
   // Since we are only doing divide ops, we can ignore the high bits of the ID
