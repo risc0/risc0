@@ -146,7 +146,8 @@ impl MemoryState {
                     let last_value = *entry.get();
                     if txn.addr == key && last_value != value {
                         debug!("addr: 0x{key:08X}, value: 0x{value:08X}, txn: {txn:?}");
-                        // The guest has actually touched this memory, and we are not writing the same value
+                        // The guest has actually touched this memory, and we are not writing the
+                        // same value
                         panic!("Host cannot mutate existing memory");
                     }
                 }
