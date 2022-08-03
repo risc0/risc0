@@ -1,5 +1,5 @@
 {
-  "checksum": "4ca4400230584e582280cd157c199a0b777d8f293a735abf979bd69d92d627bc",
+  "checksum": "091879eaf5f84755caa0037a4c985802cba8af368ce3b8cf417a00d9c94e4a6a",
   "crates": {
     "adler 1.0.2": {
       "name": "adler",
@@ -9019,6 +9019,10 @@
         "deps_dev": {
           "common": [
             {
+              "id": "criterion 0.3.6",
+              "target": "criterion"
+            },
+            {
               "id": "tempfile 3.3.0",
               "target": "tempfile"
             }
@@ -9266,6 +9270,10 @@
             {
               "id": "risc0-zkvm-methods 0.1.0",
               "target": "build_script_build"
+            },
+            {
+              "id": "serde 1.0.141",
+              "target": "serde"
             }
           ],
           "selects": {}
