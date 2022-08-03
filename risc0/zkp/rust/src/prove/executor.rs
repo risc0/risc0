@@ -67,10 +67,11 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
 
     pub fn step(&mut self, code: &[Fp], needed_fini: usize) -> Result<bool> {
         // debug!("code: {:?}", code);
-        if self.cycle + needed_fini + ZK_CYCLES >= self.steps {
+        let next_cycles = self.cycle + needed_fini + ZK_CYCLES;
+        if next_cycles >= self.steps {
             debug!(
-                "cycle: {} + needed_fini: {} + ZK_CYCLES: {} >= steps: {}",
-                self.cycle, needed_fini, ZK_CYCLES, self.steps
+                "cycle:{} + needed_fini:{} + ZK_CYCLES:{} = {} >= steps: {}",
+                self.cycle, needed_fini, ZK_CYCLES, next_cycles, self.steps
             );
             if self.halted {
                 debug!("halted");

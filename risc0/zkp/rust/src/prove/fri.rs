@@ -70,9 +70,8 @@ impl ProveRoundInfo {
         let fold_mix = Fp4::random(&mut iop.rng);
         // Create a buffer to hold the mixture of slices.
         let out_coeffs = hal.alloc(size / FRI_FOLD * EXT_SIZE);
-        let mix = hal.copy_from([fold_mix].as_slice());
         // Compute the folded polynomial
-        hal.fri_fold(&out_coeffs, coeffs, &mix);
+        hal.fri_fold(&out_coeffs, coeffs, &fold_mix);
         ProveRoundInfo {
             domain,
             coeffs: out_coeffs,
