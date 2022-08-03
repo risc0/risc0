@@ -1594,6 +1594,7 @@ version = "0.10.0"
 dependencies = [
  "anyhow",
  "bytemuck",
+ "criterion",
  "ctor",
  "cxx",
  "env_logger",
@@ -1642,6 +1643,7 @@ name = "risc0-zkvm-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
+ "serde",
 ]
 
 [[package]]

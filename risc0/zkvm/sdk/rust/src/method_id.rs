@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+extern crate alloc;
+
+use alloc::vec::Vec;
 use anyhow::Result;
 use risc0_zkp::{
     core::{
@@ -22,15 +25,22 @@ use risc0_zkp::{
     MAX_CYCLES, MIN_CYCLES, ZK_CYCLES,
 };
 
-const MAX_CODE_DIGEST_COUNT: usize = log2_ceil(MAX_CYCLES / MIN_CYCLES) + 1;
+/// The default digest count when generating a MethodId.
+pub const DEFAULT_METHOD_ID_LIMIT: u32 = 12;
 
-#[derive(Clone)]
+const MAX_CODE_DIGEST_COUNT: u32 = (log2_ceil(MAX_CYCLES / MIN_CYCLES) + 1) as _;
+
+#[derive(Clone, Eq, PartialEq)]
 pub struct MethodId {
     pub table: Vec<Digest>,
 }
 
 impl MethodId {
-    pub fn load(bytes: &[u8]) -> Result<Self> {
+    pub fn as_slice(&self) -> Result<&[u8]> {
+        Ok(bytemuck::cast_slice(self.table.as_slice()))
+    }
+
+    pub fn from_slice(bytes: &[u8]) -> Result<Self> {
         let mut table = Vec::new();
         for digest in bytes.chunks_exact(DIGEST_WORDS * DIGEST_WORD_SIZE) {
             let words: Vec<u32> = digest
@@ -50,12 +60,11 @@ impl MethodId {
 
     #[cfg(feature = "prove")]
     pub fn compute(elf_contents: &[u8]) -> Result<Self> {
-        use crate::host::DEFAULT_METHOD_ID_LIMIT;
-        MethodId::compute_with_limit(elf_contents, DEFAULT_METHOD_ID_LIMIT as usize)
+        MethodId::compute_with_limit(elf_contents, DEFAULT_METHOD_ID_LIMIT)
     }
 
     #[cfg(feature = "prove")]
-    pub fn compute_with_limit(elf_contents: &[u8], limit: usize) -> Result<Self> {
+    pub fn compute_with_limit(elf_contents: &[u8], limit: u32) -> Result<Self> {
         use crate::{elf::Program, platform::memory::MEM_SIZE, CODE_SIZE};
         use risc0_zkp::{
             hal::{cpu::CpuHal, Hal},

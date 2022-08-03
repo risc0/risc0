@@ -55,9 +55,10 @@ fn alloc_desc() -> *mut SHADescriptor {
     }
 }
 
-// Computes a raw digest of the given slice.  The data must already
-// contain the end marker and the trailer.
-fn raw_digest(data: &[u32]) -> &'static Digest {
+/// Computes a raw digest of the given slice.  For compatibility with
+/// the SHA specification, the data must already contain the end
+/// marker and the trailer
+pub fn raw_digest(data: &[u32]) -> &'static Digest {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     // Allocate fresh memory that's guaranteed to be uninitialized so
     // the host can write to it.
