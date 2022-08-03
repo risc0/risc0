@@ -21,7 +21,15 @@ use risc0_zkp::{
     core::sha::default_implementation, hal::cpu::CpuHal, prove::adapter::ProveAdapter,
 };
 
-use crate::{elf::Program, method_id::MethodId, platform::memory::MEM_SIZE, receipt::Receipt};
+use crate::{
+    elf::Program,
+    method_id::MethodId,
+    platform::{
+        io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT},
+        memory::MEM_SIZE,
+    },
+    receipt::Receipt,
+};
 
 use self::exec::{IoHandler, RV32Executor};
 
@@ -76,6 +84,7 @@ impl Prover {
         };
 
         // Verify receipt to make sure it works
+        // TODO
         // receipt.verify(&self.method_id)?;
 
         Ok(receipt)
@@ -101,12 +110,13 @@ impl ProverImpl {
 impl IoHandler for ProverImpl {
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Vec<u8> {
         match channel {
-            SENDRECV_CHANNEL_INPUT => {
-                log::debug!("SENDRECV_CHANNEL_INPUT: {}", buf.len());
+            SENDRECV_CHANNEL_INITIAL_INPUT => {
+                log::debug!("SENDRECV_CHANNEL_INITIAL_INPUT: {}", buf.len());
                 self.input.clone()
             }
             SENDRECV_CHANNEL_STDOUT => {
                 log::debug!("SENDRECV_CHANNEL_STDOUT: {}", buf.len());
+                // TODO
                 Vec::new()
             }
             SENDRECV_CHANNEL_STDERR => {
@@ -116,6 +126,14 @@ impl IoHandler for ProverImpl {
             }
             _ => panic!("Unknown channel: {channel}"),
         }
+    }
+
+    fn on_commit(&mut self, buf: &[u32]) {
+        self.commit.extend_from_slice(buf);
+    }
+
+    fn on_fault(&mut self, msg: &str) {
+        panic!("{}", msg);
     }
 }
 

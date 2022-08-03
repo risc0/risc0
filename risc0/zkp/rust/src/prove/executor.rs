@@ -67,10 +67,11 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
 
     pub fn step(&mut self, code: &[Fp], needed_fini: usize) -> Result<bool> {
         // debug!("code: {:?}", code);
-        if self.cycle + needed_fini + ZK_CYCLES >= self.steps {
+        let next_cycles = self.cycle + needed_fini + ZK_CYCLES;
+        if next_cycles >= self.steps {
             debug!(
-                "cycle: {} + needed_fini: {} + ZK_CYCLES: {} >= steps: {}",
-                self.cycle, needed_fini, ZK_CYCLES, self.steps
+                "cycle:{} + needed_fini:{} + ZK_CYCLES:{} = {} >= steps: {}",
+                self.cycle, needed_fini, ZK_CYCLES, next_cycles, self.steps
             );
             if self.halted {
                 debug!("halted");
@@ -92,7 +93,7 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
             &mut [],
             &mut [],
         ];
-        let result = self.circuit.step_exec(&ctx, &mut self.custom, args);
+        let result = self.circuit.step_exec(&ctx, &mut self.custom, args)?;
         // debug!("result: {:?}", result);
         self.halted = self.halted || result == Fp::new(0);
         self.cycle += 1;
@@ -152,7 +153,9 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
                 cycle: i,
                 size: self.steps,
             };
-            self.circuit.step_verify(&ctx, &mut self.custom, args);
+            self.circuit
+                .step_verify(&ctx, &mut self.custom, args)
+                .unwrap();
         }
         // Zero out 'invalid' entries in data
         for value in self.data.iter_mut() {

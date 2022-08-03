@@ -76,7 +76,7 @@ pub trait Hal {
 
     fn eltwise_copy_digest(&self, output: &Buffer<Digest>, input: &Buffer<Digest>);
 
-    fn fri_fold(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, mix: &Buffer<Fp4>);
+    fn fri_fold(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, mix: &Fp4);
 
     fn sha_rows(&self, output: &Buffer<Digest>, matrix: &Buffer<Fp>);
 

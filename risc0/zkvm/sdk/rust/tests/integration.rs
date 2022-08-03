@@ -32,7 +32,7 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
 }
 
 mod integration {
-    use risc0_zkvm::platform::memory::COMMIT;
+    use risc0_zkvm::platform::memory::{COMMIT, HEAP};
 
     use crate::run_memio;
 
@@ -41,11 +41,28 @@ mod integration {
     }
 
     #[test]
-    #[ignore]
     fn memory_io() {
         init();
 
         // Double write to WOM are fine
         assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start(), 1)]).is_ok());
+
+        // Double write to WOM with different values throw
+        assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start(), 2)]).is_err());
+
+        // But they are OK at different addresses
+        assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start() + 4, 2)]).is_ok());
+
+        // Aligned write is fine
+        assert!(run_memio(&[(HEAP.start(), 1)]).is_ok());
+
+        // Unaligned write is bad
+        assert!(run_memio(&[(HEAP.start() + 1, 1)]).is_err());
+
+        // Aligned read is fine
+        assert!(run_memio(&[(HEAP.start(), 0)]).is_ok());
+
+        // Unaligned read is bad
+        assert!(run_memio(&[(HEAP.start() + 1, 0)]).is_err());
     }
 }

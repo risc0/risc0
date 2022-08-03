@@ -1,5 +1,6 @@
 // This code is automatically generated
 
+use anyhow::Result;
 use risc0_zkp::{
     adapter::{CircuitStep, CircuitStepAccum, CircuitStepContext, CircuitStepDef, CustomStep},
     core::fp::Fp,
@@ -53,13 +54,13 @@ const DEF: CircuitStepDef = CircuitStepDef {
             0,
             2,
             0,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:153",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:143",
         ),
-        CircuitStep::Add(9, 10, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210"),
-        CircuitStep::Add(11, 5, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210"),
-        CircuitStep::Add(12, 6, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210"),
-        CircuitStep::Add(13, 7, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210"),
-        CircuitStep::Add(14, 8, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210"),
+        CircuitStep::Add(9, 10, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
+        CircuitStep::Add(11, 5, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
+        CircuitStep::Add(12, 6, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
+        CircuitStep::Add(13, 7, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
+        CircuitStep::Add(14, 8, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
         CircuitStep::If(
             15,
             &[
@@ -841,7 +842,12 @@ const DEF: CircuitStepDef = CircuitStepDef {
 
 impl<S: CustomStep> CircuitStepAccum<S> for CircuitImpl {
     #[allow(unused)]
-    fn step_accum(&self, ctx: &CircuitStepContext, custom: &mut S, args: &mut [&mut [Fp]]) -> Fp {
+    fn step_accum(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp> {
         DEF.step(ctx, custom, args)
     }
 }

@@ -19,13 +19,16 @@ use core::{
 };
 use std::{cell::RefCell, rc::Rc};
 
-use crate::core::{
-    fp::{Fp, FpMul},
-    fp4::Fp4,
-    log2_ceil,
-    ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
-    sha::{Digest, Sha},
-    sha_cpu,
+use crate::{
+    core::{
+        fp::{Fp, FpMul},
+        fp4::{Fp4, EXT_SIZE},
+        log2_ceil,
+        ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
+        sha::{Digest, Sha},
+        sha_cpu,
+    },
+    FRI_FOLD,
 };
 #[allow(unused_imports)]
 use log::debug;
@@ -271,15 +274,15 @@ impl Hal for CpuHal {
     }
 
     fn eltwise_sum_fp4(&self, output: &Buffer<Fp>, input: &Buffer<Fp4>) {
-        let count = output.size() / 4;
+        let count = output.size() / EXT_SIZE;
         let to_add = input.size() / count;
-        assert_eq!(output.size(), count * 4);
+        assert_eq!(output.size(), count * EXT_SIZE);
         assert_eq!(input.size(), count * to_add);
         let mut output = output
             .downcast_ref::<CpuBuffer<Fp>>()
             .unwrap()
             .as_slice_mut();
-        let mut output = ArrayViewMut::from_shape((4, count), &mut output).unwrap();
+        let mut output = ArrayViewMut::from_shape((EXT_SIZE, count), &mut output).unwrap();
         let output = output.axis_iter_mut(Axis(1)).into_par_iter();
         let input = input.downcast_ref::<CpuBuffer<Fp4>>().unwrap().as_slice();
         let input = ArrayView::from_shape((to_add, count), &input).unwrap();
@@ -289,7 +292,7 @@ impl Hal for CpuHal {
             for i in input {
                 sum += *i;
             }
-            for i in 0..4 {
+            for i in 0..EXT_SIZE {
                 output[i] = sum.elems()[i];
             }
         });
@@ -328,8 +331,36 @@ impl Hal for CpuHal {
             });
     }
 
-    fn fri_fold(&self, _output: &Buffer<Fp>, _input: &Buffer<Fp>, _mix: &Buffer<Fp4>) {
-        todo!()
+    fn fri_fold(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, mix: &Fp4) {
+        let count = output.size() / EXT_SIZE;
+        assert_eq!(output.size(), count * EXT_SIZE);
+        assert_eq!(input.size(), output.size() * FRI_FOLD);
+        let mut output = output
+            .downcast_ref::<CpuBuffer<Fp>>()
+            .unwrap()
+            .as_slice_mut();
+        let input = input.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
+
+        let mut tot = Fp4::default();
+        let mut cur_mix = Fp4::from_u32(1);
+        // TODO: parallelize
+        for idx in 0..count {
+            for i in 0..FRI_FOLD {
+                let rev_i = bit_rev_32(i as u32) >> (32 - log2_ceil(FRI_FOLD));
+                let rev_idx = rev_i as usize * count + idx;
+                let factor = Fp4::new(
+                    input[0 * count * FRI_FOLD + rev_idx],
+                    input[1 * count * FRI_FOLD + rev_idx],
+                    input[2 * count * FRI_FOLD + rev_idx],
+                    input[3 * count * FRI_FOLD + rev_idx],
+                );
+                tot += cur_mix * factor;
+                cur_mix *= *mix;
+            }
+            for i in 0..EXT_SIZE {
+                output[count * i + idx] = tot.elems()[i];
+            }
+        }
     }
 
     fn sha_rows(&self, output: &Buffer<Digest>, matrix: &Buffer<Fp>) {
