@@ -24,9 +24,9 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
         vec.push(*second as u32);
     }
     let elf_contents = std::fs::read(IO_PATH).unwrap();
-    // let method_id = MethodId::load(IO_ID).unwrap();
+    let method_id = MethodId::from_slice(IO_ID).unwrap();
     log::debug!("io_path: {IO_PATH}");
-    let mut prover = Prover::new(&elf_contents)?;
+    let mut prover = Prover::new(&elf_contents, method_id.as_slice()?)?;
     prover.add_input_u32_slice(vec.as_slice());
     prover.run()
 }

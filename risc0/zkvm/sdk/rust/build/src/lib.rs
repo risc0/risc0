@@ -79,7 +79,7 @@ impl Risc0Method {
 
         println!("Computing MethodID for {} ({:})!", self.name, elf_sha_hex);
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
-        let method_id = MethodId::compute(&elf_contents, code_limit).unwrap();
+        let method_id = MethodId::compute_with_limit(&elf_contents, code_limit).unwrap();
         let slice = method_id.as_slice().unwrap();
         std::fs::write(method_id_path, slice).unwrap();
         std::fs::write(elf_sha_path, elf_sha).unwrap();
