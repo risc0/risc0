@@ -47,9 +47,8 @@ mod integration {
         // Double write to WOM are fine
         assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start(), 1)]).is_ok());
 
-        // FIXME
         // Double write to WOM with different values throw
-        // assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start(), 2)]).is_err());
+        assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start(), 2)]).is_err());
 
         // But they are OK at different addresses
         assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start() + 4, 2)]).is_ok());
@@ -57,15 +56,13 @@ mod integration {
         // Aligned write is fine
         assert!(run_memio(&[(HEAP.start(), 1)]).is_ok());
 
-        // FIXME
         // Unaligned write is bad
-        // assert!(run_memio(&[(HEAP.start() + 1, 1)]).is_err());
+        assert!(run_memio(&[(HEAP.start() + 1, 1)]).is_err());
 
         // Aligned read is fine
         assert!(run_memio(&[(HEAP.start(), 0)]).is_ok());
 
-        // FIXME
         // Unaligned read is bad
-        // assert!(run_memio(&[(HEAP.start() + 1, 0)]).is_err());
+        assert!(run_memio(&[(HEAP.start() + 1, 0)]).is_err());
     }
 }

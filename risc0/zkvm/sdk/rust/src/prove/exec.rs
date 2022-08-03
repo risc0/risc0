@@ -18,7 +18,7 @@ use core::{
 };
 use std::collections::{btree_map::Entry, BTreeMap, BTreeSet};
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use log::{debug, trace};
 use risc0_zkp::{
     adapter::{CircuitDef, CustomStep},
@@ -80,7 +80,7 @@ impl MemoryState {
         // debug!("load_u8: 0x{addr:08X}");
         // align to the nearest word
         let aligned = addr & !(WORD_SIZE as u32 - 1);
-        let offset = addr & WORD_SIZE as u32;
+        let offset = addr % WORD_SIZE as u32;
         let word = self.load_u32(aligned);
         ((word >> (offset * 8)) & 0xff) as u8
     }
@@ -111,7 +111,7 @@ impl MemoryState {
         // debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
         // align to the nearest word
         let aligned = addr & !(WORD_SIZE as u32 - 1);
-        let offset = addr & WORD_SIZE as u32;
+        let offset = addr % WORD_SIZE as u32;
         let key = aligned / 4;
         let mut word = self.memory.get(&key).unwrap_or(&0) & !(0xff << (offset * 8));
         word |= (value as u32) << (offset * 8);
@@ -207,27 +207,27 @@ impl Ord for MemoryEvent {
 impl<'a, H: IoHandler> CircuitDef<MachineContext<'a, H>> for CircuitImpl {}
 
 impl<'a, H: IoHandler> CustomStep for MachineContext<'a, H> {
-    fn call(&mut self, name: &str, extra: &str, args: &[Fp]) -> Vec<Fp> {
+    fn call(&mut self, name: &str, extra: &str, args: &[Fp]) -> Result<Vec<Fp>> {
         match name {
             "divide32" => {
                 let ((x0, x1), (x2, x3)) = self.divide32((args[0], args[1]), (args[2], args[3]));
-                vec![x0, x1, x2, x3]
+                Ok(vec![x0, x1, x2, x3])
             }
             "log" => {
                 self.log(extra, args);
-                vec![]
+                Ok(vec![])
             }
             "memCheck" => {
                 let (x0, x1, x2, x3, x4) = self.mem_check();
-                vec![x0, x1, x2, x3, x4]
+                Ok(vec![x0, x1, x2, x3, x4])
             }
             "memRead" => {
                 let (x0, x1) = self.mem_read(args[0], args[1]);
-                vec![x0, x1]
+                Ok(vec![x0, x1])
             }
             "memWrite" => {
-                self.mem_write(args[0], args[1], (args[2], args[3]));
-                vec![]
+                self.mem_write(args[0], args[1], (args[2], args[3]))?;
+                Ok(vec![])
             }
             _ => unreachable!(),
         }
@@ -312,7 +312,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         split_word(data)
     }
 
-    fn mem_write(&mut self, cycle: Fp, addr: Fp, value: (Fp, Fp)) {
+    fn mem_write(&mut self, cycle: Fp, addr: Fp, value: (Fp, Fp)) -> Result<()> {
         let cycle: u32 = cycle.into();
         let addr: u32 = addr.into();
         let data = merge_word(value);
@@ -326,11 +326,14 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         });
         match self.memory.memory.entry(addr) {
             Entry::Occupied(mut entry) => {
-                assert!(
-                    *entry.get() == data || is_write,
-                    "Double wrote write-once memory at 0x{:08X}",
-                    addr * 4
-                );
+                if *entry.get() != data && !is_write {
+                    bail!(
+                        "Double wrote write-once memory at 0x{:08X}. old: 0x{:08X}, new: 0x{:08X}",
+                        addr * 4,
+                        *entry.get(),
+                        data
+                    );
+                }
                 *entry.get_mut() = data;
             }
             Entry::Vacant(entry) => {
@@ -338,6 +341,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
         };
         self.on_write(cycle, addr * 4, data);
+        Ok(())
     }
 
     fn on_write(&mut self, cycle: u32, addr: u32, value: u32) {

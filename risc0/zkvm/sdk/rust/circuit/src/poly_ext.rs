@@ -122,11 +122,11 @@ impl PolyExt for CircuitImpl {
         let x63 = ctx._const(131070, "external/risc0/risc0/zkvm/circuit/edsl.h:123");
         let x64 = ctx._const(
             2013264001,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:97",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:95",
         );
         let x65 = ctx._const(
             2005401601,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x66 = ctx._const(
             11010048,
@@ -2493,283 +2493,283 @@ impl PolyExt for CircuitImpl {
             x701,
             "external/risc0/risc0/zkvm/circuit/data_regs.cpp:69",
         );
-        let x703 = ctx._get(u, 703, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:72");
-        let x704 = ctx._get(u, 682, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:73");
+        let x703 = ctx._get(u, 703, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:70");
+        let x704 = ctx._get(u, 682, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:71");
         let x705 = ctx._sub(x108, x704, "circuits/rv32im-legacy/port.cpp:211");
         let x706 = ctx._and_eqz(x71, x705, "circuits/rv32im-legacy/port.cpp:211");
-        let x707 = ctx._get(u, 240, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
-        let x708 = ctx._get_global(out, 0, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x707 = ctx._get(u, 240, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
+        let x708 = ctx._get_global(out, 0, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x709 = ctx._sub(
             x708,
             x707,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x710 = ctx._and_eqz(
             x71,
             x709,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x711 = ctx._get(u, 246, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
-        let x712 = ctx._get_global(out, 1, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x711 = ctx._get(u, 246, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
+        let x712 = ctx._get_global(out, 1, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x713 = ctx._sub(
             x712,
             x711,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x714 = ctx._and_eqz(
             x710,
             x713,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
-        let x715 = ctx._get(u, 252, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
-        let x716 = ctx._get_global(out, 2, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x715 = ctx._get(u, 252, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
+        let x716 = ctx._get_global(out, 2, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x717 = ctx._sub(
             x716,
             x715,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x718 = ctx._and_eqz(
             x714,
             x717,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x719 = ctx._get(u, 258, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
-        let x720 = ctx._get_global(out, 3, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x719 = ctx._get(u, 258, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
+        let x720 = ctx._get_global(out, 3, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x721 = ctx._sub(
             x720,
             x719,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x722 = ctx._and_eqz(
             x718,
             x721,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
-        let x723 = ctx._get(u, 264, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
-        let x724 = ctx._get_global(out, 4, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x723 = ctx._get(u, 264, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
+        let x724 = ctx._get_global(out, 4, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x725 = ctx._sub(
             x724,
             x723,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x726 = ctx._and_eqz(
             x722,
             x725,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x727 = ctx._get(u, 270, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
-        let x728 = ctx._get_global(out, 5, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x727 = ctx._get(u, 270, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
+        let x728 = ctx._get_global(out, 5, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x729 = ctx._sub(
             x728,
             x727,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x730 = ctx._and_eqz(
             x726,
             x729,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
-        let x731 = ctx._get(u, 276, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
-        let x732 = ctx._get_global(out, 6, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x731 = ctx._get(u, 276, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
+        let x732 = ctx._get_global(out, 6, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x733 = ctx._sub(
             x732,
             x731,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x734 = ctx._and_eqz(
             x730,
             x733,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x735 = ctx._get(u, 282, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
-        let x736 = ctx._get_global(out, 7, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x735 = ctx._get(u, 282, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
+        let x736 = ctx._get_global(out, 7, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x737 = ctx._sub(
             x736,
             x735,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x738 = ctx._and_eqz(
             x734,
             x737,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
-        let x739 = ctx._get(u, 288, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
-        let x740 = ctx._get_global(out, 8, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x739 = ctx._get(u, 288, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
+        let x740 = ctx._get_global(out, 8, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x741 = ctx._sub(
             x740,
             x739,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x742 = ctx._and_eqz(
             x738,
             x741,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x743 = ctx._get(u, 294, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
-        let x744 = ctx._get_global(out, 9, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x743 = ctx._get(u, 294, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
+        let x744 = ctx._get_global(out, 9, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x745 = ctx._sub(
             x744,
             x743,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x746 = ctx._and_eqz(
             x742,
             x745,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
-        let x747 = ctx._get(u, 300, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x747 = ctx._get(u, 300, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x748 = ctx._get_global(
             out,
             10,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x749 = ctx._sub(
             x748,
             x747,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x750 = ctx._and_eqz(
             x746,
             x749,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x751 = ctx._get(u, 306, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x751 = ctx._get(u, 306, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x752 = ctx._get_global(
             out,
             11,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x753 = ctx._sub(
             x752,
             x751,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x754 = ctx._and_eqz(
             x750,
             x753,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
-        let x755 = ctx._get(u, 312, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x755 = ctx._get(u, 312, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x756 = ctx._get_global(
             out,
             12,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x757 = ctx._sub(
             x756,
             x755,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x758 = ctx._and_eqz(
             x754,
             x757,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x759 = ctx._get(u, 318, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x759 = ctx._get(u, 318, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x760 = ctx._get_global(
             out,
             13,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x761 = ctx._sub(
             x760,
             x759,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x762 = ctx._and_eqz(
             x758,
             x761,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
-        let x763 = ctx._get(u, 324, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x763 = ctx._get(u, 324, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x764 = ctx._get_global(
             out,
             14,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x765 = ctx._sub(
             x764,
             x763,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x766 = ctx._and_eqz(
             x762,
             x765,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x767 = ctx._get(u, 330, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x767 = ctx._get(u, 330, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x768 = ctx._get_global(
             out,
             15,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x769 = ctx._sub(
             x768,
             x767,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x770 = ctx._and_eqz(
             x766,
             x769,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
-        let x771 = ctx._get(u, 336, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77");
+        let x771 = ctx._get(u, 336, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75");
         let x772 = ctx._get_global(
             out,
             16,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x773 = ctx._sub(
             x772,
             x771,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
         let x774 = ctx._and_eqz(
             x770,
             x773,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:77",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:75",
         );
-        let x775 = ctx._get(u, 342, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78");
+        let x775 = ctx._get(u, 342, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76");
         let x776 = ctx._get_global(
             out,
             17,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x777 = ctx._sub(
             x776,
             x775,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x778 = ctx._and_eqz(
             x774,
             x777,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:78",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:76",
         );
         let x779 = ctx._and_cond(
             x706,
             x97,
             x778,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:74",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:72",
         );
         let x780 = ctx._and_cond(
             x702,
             x703,
             x779,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:72",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:70",
         );
-        let x781 = ctx._get(u, 713, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:82");
+        let x781 = ctx._get(u, 713, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:80");
         let x782 = ctx._sub(x108, x7, "circuits/rv32im-legacy/port.cpp:211");
         let x783 = ctx._and_eqz(x71, x782, "circuits/rv32im-legacy/port.cpp:211");
         let x784 = ctx._and_cond(
             x71,
             x698,
             x783,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:83",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:81",
         );
         let x785 = ctx._sub(
             x70,
             x698,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:82",
         );
         let x786 = ctx._sub(x108, x6, "circuits/rv32im-legacy/port.cpp:211");
         let x787 = ctx._and_eqz(x71, x786, "circuits/rv32im-legacy/port.cpp:211");
@@ -2777,36 +2777,36 @@ impl PolyExt for CircuitImpl {
             x784,
             x785,
             x787,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:82",
         );
         let x789 = ctx._and_cond(
             x780,
             x781,
             x788,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:82",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:80",
         );
-        let x790 = ctx._get(u, 715, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:91");
-        let x791 = ctx._get(u, 717, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:91");
+        let x790 = ctx._get(u, 715, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:85");
+        let x791 = ctx._get(u, 717, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:85");
         let x792 = ctx._add(
             x790,
             x791,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:85",
         );
-        let x793 = ctx._get(u, 695, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:92");
+        let x793 = ctx._get(u, 695, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:86");
         let x794 = ctx._sub(x108, x793, "circuits/rv32im-legacy/port.cpp:211");
         let x795 = ctx._and_eqz(x71, x794, "circuits/rv32im-legacy/port.cpp:211");
         let x796 = ctx._and_cond(
             x789,
             x792,
             x795,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:85",
         );
         let x797 = ctx._and_eqz(x71, x678, "circuits/rv32im-legacy/port.cpp:211");
         let x798 = ctx._and_cond(
             x796,
             x680,
             x797,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:94",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:88",
         );
         let x799 = ctx._get(
             u,
@@ -8678,7 +8678,7 @@ impl PolyExt for CircuitImpl {
             x798,
             x111,
             x2164,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:99",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:91",
         );
         let x2166 = ctx._get(
             u,
@@ -11784,7 +11784,7 @@ impl PolyExt for CircuitImpl {
             x2165,
             x78,
             x2997,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:96",
         );
         let x2999 = ctx._and_eqz(
             x2829,
@@ -13309,7 +13309,7 @@ impl PolyExt for CircuitImpl {
             x2998,
             x79,
             x3310,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:109",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:101",
         );
         let x3312 = ctx._and_eqz(
             x3110,
@@ -14562,7 +14562,7 @@ impl PolyExt for CircuitImpl {
             x3311,
             x82,
             x3578,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:114",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:106",
         );
         let x3580 = ctx._and_eqz(
             x2808,
@@ -15479,7 +15479,7 @@ impl PolyExt for CircuitImpl {
             x3579,
             x85,
             x3766,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:119",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:111",
         );
         let x3768 = ctx._get(u, 227, "external/risc0/risc0/zkvm/circuit/types.h:182");
         let x3769 = ctx._get(u, 233, "external/risc0/risc0/zkvm/circuit/types.h:182");
@@ -17783,7 +17783,7 @@ impl PolyExt for CircuitImpl {
             x3767,
             x88,
             x4251,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:124",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:116",
         );
         let x4253 = ctx._add(
             x2225,
@@ -18062,658 +18062,658 @@ impl PolyExt for CircuitImpl {
         let x4331 = ctx._get(
             u,
             683,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:81",
         );
         let x4332 = ctx._get(
             u,
             686,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:81",
         );
         let x4333 = ctx._get(
             u,
             684,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:81",
         );
         let x4334 = ctx._sub(
             x1529,
             x3861,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4335 = ctx._mul(
             x4334,
             x32,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4336 = ctx._and_eqz(
             x4330,
             x4335,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4337 = ctx._sub(
             x4331,
             x3877,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4338 = ctx._mul(
             x4337,
             x32,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4339 = ctx._and_eqz(
             x4336,
             x4338,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4340 = ctx._mul(
             x283,
             x3,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4341 = ctx._add(
             x281,
             x4340,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4342 = ctx._mul(
             x285,
             x11,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4343 = ctx._add(
             x4341,
             x4342,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4344 = ctx._mul(
             x287,
             x12,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4345 = ctx._add(
             x4343,
             x4344,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4346 = ctx._mul(
             x289,
             x13,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4347 = ctx._add(
             x4345,
             x4346,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4348 = ctx._mul(
             x291,
             x14,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4349 = ctx._add(
             x4347,
             x4348,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4350 = ctx._mul(
             x293,
             x15,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4351 = ctx._add(
             x4349,
             x4350,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4352 = ctx._mul(
             x295,
             x16,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4353 = ctx._add(
             x4351,
             x4352,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4354 = ctx._sub(
             x4333,
             x4353,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4355 = ctx._mul(
             x4354,
             x32,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4356 = ctx._and_eqz(
             x4339,
             x4355,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4357 = ctx._sub(
             x4332,
             x3905,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4358 = ctx._mul(
             x4357,
             x32,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4359 = ctx._and_eqz(
             x4356,
             x4358,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4360 = ctx._add(
             x243,
             x17,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4361 = ctx._sub(
             x4360,
             x4353,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4362 = ctx._sub(
             x4361,
             x70,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4363 = ctx._mul(
             x315,
             x3,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4364 = ctx._add(
             x313,
             x4363,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4365 = ctx._mul(
             x317,
             x11,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4366 = ctx._add(
             x4364,
             x4365,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4367 = ctx._mul(
             x319,
             x12,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4368 = ctx._add(
             x4366,
             x4367,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4369 = ctx._mul(
             x321,
             x13,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4370 = ctx._add(
             x4368,
             x4369,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4371 = ctx._mul(
             x323,
             x14,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4372 = ctx._add(
             x4370,
             x4371,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4373 = ctx._mul(
             x325,
             x15,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4374 = ctx._add(
             x4372,
             x4373,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4375 = ctx._mul(
             x327,
             x16,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4376 = ctx._add(
             x4374,
             x4375,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4377 = ctx._sub(
             x4362,
             x4376,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4378 = ctx._mul(
             x4377,
             x32,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
         );
         let x4379 = ctx._sub(
             x403,
             x4378,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:87",
         );
         let x4380 = ctx._and_eqz(
             x71,
             x4379,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:87",
         );
         let x4381 = ctx._sub(
             x3845,
             x3905,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:92",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
         );
         let x4382 = ctx._sub(
             x4381,
             x70,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:92",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
         );
         let x4383 = ctx._add(
             x4382,
             x403,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:92",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:90",
         );
         let x4384 = ctx._mul(
             x331,
             x3,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4385 = ctx._add(
             x329,
             x4384,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4386 = ctx._mul(
             x333,
             x11,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4387 = ctx._add(
             x4385,
             x4386,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4388 = ctx._mul(
             x335,
             x12,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4389 = ctx._add(
             x4387,
             x4388,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4390 = ctx._mul(
             x337,
             x13,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4391 = ctx._add(
             x4389,
             x4390,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4392 = ctx._mul(
             x339,
             x14,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4393 = ctx._add(
             x4391,
             x4392,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4394 = ctx._mul(
             x341,
             x15,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4395 = ctx._add(
             x4393,
             x4394,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4396 = ctx._mul(
             x343,
             x16,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4397 = ctx._add(
             x4395,
             x4396,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4398 = ctx._sub(
             x4383,
             x4397,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4399 = ctx._mul(
             x4398,
             x32,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:89",
         );
         let x4400 = ctx._and_eqz(
             x4380,
             x4399,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:93",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:91",
         );
         let x4401 = ctx._and_cond(
             x4359,
             x1415,
             x4400,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
         );
         let x4402 = ctx._add(
             x3891,
             x4349,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:94",
         );
         let x4403 = ctx._sub(
             x4402,
             x4012,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:94",
         );
         let x4404 = ctx._mul(
             x4403,
             x61,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:94",
         );
         let x4405 = ctx._and_eqz(
             x4401,
             x4404,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:94",
         );
         let x4406 = ctx._add(
             x3949,
             x3938,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4407 = ctx._mul(
             x295,
             x3,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4408 = ctx._add(
             x293,
             x4407,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4409 = ctx._mul(
             x297,
             x11,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4410 = ctx._add(
             x4408,
             x4409,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4411 = ctx._mul(
             x299,
             x12,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4412 = ctx._add(
             x4410,
             x4411,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4413 = ctx._mul(
             x301,
             x13,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4414 = ctx._add(
             x4412,
             x4413,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4415 = ctx._mul(
             x303,
             x14,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4416 = ctx._add(
             x4414,
             x4415,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4417 = ctx._add(
             x4406,
             x4416,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:98",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
         );
         let x4418 = ctx._add(
             x4417,
             x4027,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:99",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:97",
         );
         let x4419 = ctx._sub(
             x4418,
             x4052,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:97",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:95",
         );
         let x4420 = ctx._mul(
             x4419,
             x64,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:97",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:95",
         );
         let x4421 = ctx._and_eqz(
             x4405,
             x4420,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:97",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:95",
         );
         let x4422 = ctx._add(
             x4002,
             x3994,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:103",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:101",
         );
         let x4423 = ctx._add(
             x4422,
             x3992,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4424 = ctx._mul(
             x307,
             x3,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4425 = ctx._add(
             x305,
             x4424,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4426 = ctx._mul(
             x309,
             x11,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4427 = ctx._add(
             x4425,
             x4426,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4428 = ctx._mul(
             x311,
             x12,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4429 = ctx._add(
             x4427,
             x4428,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4430 = ctx._add(
             x4423,
             x4429,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4431 = ctx._add(
             x4430,
             x4066,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:104",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
         );
         let x4432 = ctx._mul(
             x391,
             x3,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4433 = ctx._add(
             x389,
             x4432,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4434 = ctx._mul(
             x393,
             x11,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4435 = ctx._add(
             x4433,
             x4434,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4436 = ctx._mul(
             x395,
             x12,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4437 = ctx._add(
             x4435,
             x4436,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4438 = ctx._sub(
             x4431,
             x4437,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4439 = ctx._mul(
             x4438,
             x65,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4440 = ctx._and_eqz(
             x4421,
             x4439,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4441 = ctx._mul(
             x4036,
             x15,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:110",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:108",
         );
         let x4442 = ctx._add(
             x1449,
             x4441,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:110",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:108",
         );
         let x4443 = ctx._sub(
             x4442,
             x4312,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:110",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:108",
         );
         let x4444 = ctx._and_eqz(
             x4440,
             x4443,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:110",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:108",
         );
         let x4445 = ctx._mul(
             x375,
             x3,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4446 = ctx._add(
             x373,
             x4445,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4447 = ctx._mul(
             x377,
             x11,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4448 = ctx._add(
             x4446,
             x4447,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4449 = ctx._mul(
             x379,
             x12,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4450 = ctx._add(
             x4448,
             x4449,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4451 = ctx._mul(
             x4437,
             x13,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4452 = ctx._add(
             x4450,
             x4451,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4453 = ctx._sub(
             x4452,
             x4315,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4454 = ctx._and_eqz(
             x4444,
             x4453,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4455 = ctx._add(
             x397,
             x399,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:127",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:125",
         );
         let x4456 = ctx._mul(
             x981,
             x399,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:127",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:125",
         );
         let x4457 = ctx._sub(
             x4455,
             x4456,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:127",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:125",
         );
         let x4458 = ctx._mul(
             x397,
             x4257,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:131",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:129",
         );
         let x4459 = ctx._sub(
             x4457,
             x4458,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:131",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:129",
         );
         let x4460 = ctx._sub(
             x401,
             x4459,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:137",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:135",
         );
         let x4461 = ctx._and_eqz(
             x4454,
             x4460,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:137",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:135",
         );
         let x4462 = ctx._sub(x17, x1529, "external/risc0/risc0/zkvm/circuit/types.h:239");
         let x4463 = ctx._sub(x4462, x17, "external/risc0/risc0/zkvm/circuit/types.h:240");
@@ -18811,7 +18811,7 @@ impl PolyExt for CircuitImpl {
         let x4487 = ctx._sub(
             x70,
             x401,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4488 = ctx._mul(x4487, x1529, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x4489 = ctx._mul(x4487, x4331, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -18820,22 +18820,22 @@ impl PolyExt for CircuitImpl {
         let x4492 = ctx._sub(
             x1121,
             x4490,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4493 = ctx._and_eqz(
             x4484,
             x4492,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4494 = ctx._sub(
             x995,
             x4491,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4495 = ctx._and_eqz(
             x4493,
             x4494,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4496 = ctx._and_cond(
             x77,
@@ -19015,78 +19015,78 @@ impl PolyExt for CircuitImpl {
         let x4538 = ctx._and_eqz(
             x4537,
             x4335,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4539 = ctx._and_eqz(
             x4538,
             x4338,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4540 = ctx._and_eqz(
             x4539,
             x4355,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4541 = ctx._and_eqz(
             x4540,
             x4358,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4542 = ctx._and_cond(
             x4541,
             x1415,
             x4400,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
         );
         let x4543 = ctx._and_eqz(
             x4542,
             x4404,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:94",
         );
         let x4544 = ctx._and_eqz(
             x4543,
             x4420,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:97",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:95",
         );
         let x4545 = ctx._and_eqz(
             x4544,
             x4439,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4546 = ctx._and_eqz(
             x4545,
             x4443,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:110",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:108",
         );
         let x4547 = ctx._and_eqz(
             x4546,
             x4453,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4548 = ctx._and_eqz(
             x4547,
             x401,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:137",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:135",
         );
         let x4549 = ctx._sub(
             x1121,
             x1529,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4550 = ctx._and_eqz(
             x4548,
             x4549,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4551 = ctx._sub(
             x995,
             x4331,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4552 = ctx._and_eqz(
             x4550,
             x4551,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4553 = ctx._sub(x68, x1019, "external/risc0/risc0/zkvm/circuit/types.h:220");
         let x4554 = ctx._and_eqz(
@@ -19156,12 +19156,12 @@ impl PolyExt for CircuitImpl {
         let x4569 = ctx._sub(
             x401,
             x397,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:137",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:135",
         );
         let x4570 = ctx._and_eqz(
             x4454,
             x4569,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:137",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:135",
         );
         let x4571 = ctx._sub(x17, x4333, "external/risc0/risc0/zkvm/circuit/types.h:239");
         let x4572 = ctx._sub(x4571, x17, "external/risc0/risc0/zkvm/circuit/types.h:240");
@@ -19258,22 +19258,22 @@ impl PolyExt for CircuitImpl {
         let x4595 = ctx._sub(
             x1121,
             x4593,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4596 = ctx._and_eqz(
             x4590,
             x4595,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4597 = ctx._sub(
             x995,
             x4594,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4598 = ctx._and_eqz(
             x4596,
             x4597,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:138",
         );
         let x4599 = ctx._and_cond(
             x4568,
@@ -19284,22 +19284,22 @@ impl PolyExt for CircuitImpl {
         let x4600 = ctx._sub(
             x1121,
             x4333,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4601 = ctx._and_eqz(
             x4548,
             x4600,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4602 = ctx._sub(
             x995,
             x4332,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4603 = ctx._and_eqz(
             x4601,
             x4602,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4604 = ctx._and_eqz(
             x4603,
@@ -19464,68 +19464,68 @@ impl PolyExt for CircuitImpl {
         let x4639 = ctx._and_eqz(
             x4638,
             x4335,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4640 = ctx._and_eqz(
             x4639,
             x4338,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4641 = ctx._and_eqz(
             x4640,
             x4355,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4642 = ctx._and_eqz(
             x4641,
             x4358,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4643 = ctx._and_cond(
             x4642,
             x1415,
             x4400,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
         );
         let x4644 = ctx._and_eqz(
             x4643,
             x4404,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:94",
         );
         let x4645 = ctx._and_eqz(
             x4644,
             x4420,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:97",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:95",
         );
         let x4646 = ctx._and_eqz(
             x4645,
             x4439,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4647 = ctx._and_eqz(
             x4646,
             x4443,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:110",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:108",
         );
         let x4648 = ctx._and_eqz(
             x4647,
             x4453,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4649 = ctx._and_eqz(
             x4648,
             x401,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:137",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:135",
         );
         let x4650 = ctx._and_eqz(
             x4649,
             x4549,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4651 = ctx._and_eqz(
             x4650,
             x4551,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:147",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:145",
         );
         let x4652 = ctx._and_eqz(
             x4651,
@@ -19562,67 +19562,67 @@ impl PolyExt for CircuitImpl {
         let x4659 = ctx._and_eqz(
             x4616,
             x399,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:57",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:55",
         );
         let x4660 = ctx._sub(
             x34,
             x2166,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:59",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:57",
         );
         let x4661 = ctx._mul(
             x397,
             x4660,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:59",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:57",
         );
         let x4662 = ctx._add(
             x4661,
             x4308,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:59",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:57",
         );
         let x4663 = ctx._sub(
             x34,
             x2167,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:60",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:58",
         );
         let x4664 = ctx._mul(
             x397,
             x4663,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:60",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:58",
         );
         let x4665 = ctx._add(
             x4664,
             x4309,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:60",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:58",
         );
         let x4666 = ctx._sub(
             x4312,
             x4662,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:58",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:56",
         );
         let x4667 = ctx._and_eqz(
             x4659,
             x4666,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:58",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:56",
         );
         let x4668 = ctx._sub(
             x4315,
             x4665,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:58",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:56",
         );
         let x4669 = ctx._and_eqz(
             x4667,
             x4668,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:58",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:56",
         );
         let x4670 = ctx._and_eqz(
             x4669,
             x4620,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:61",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:59",
         );
         let x4671 = ctx._and_eqz(
             x4670,
             x4623,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:61",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:59",
         );
         let x4672 = ctx._and_eqz(
             x4671,
@@ -19679,108 +19679,108 @@ impl PolyExt for CircuitImpl {
         let x4684 = ctx._and_eqz(
             x4683,
             x4335,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4685 = ctx._and_eqz(
             x4684,
             x4338,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:85",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:83",
         );
         let x4686 = ctx._and_eqz(
             x4685,
             x4355,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4687 = ctx._and_eqz(
             x4686,
             x4358,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:84",
         );
         let x4688 = ctx._and_cond(
             x4687,
             x1415,
             x4400,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:88",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:86",
         );
         let x4689 = ctx._and_eqz(
             x4688,
             x4404,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:96",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:94",
         );
         let x4690 = ctx._and_eqz(
             x4689,
             x4420,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:97",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:95",
         );
         let x4691 = ctx._and_eqz(
             x4690,
             x4439,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:102",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:100",
         );
         let x4692 = ctx._and_eqz(
             x4691,
             x4443,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:110",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:108",
         );
         let x4693 = ctx._and_eqz(
             x4692,
             x4453,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:111",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:109",
         );
         let x4694 = ctx._and_eqz(
             x4693,
             x4460,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:137",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:135",
         );
         let x4695 = ctx._sub(
             x34,
             x1529,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:143",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:141",
         );
         let x4696 = ctx._mul(
             x401,
             x4695,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:143",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:141",
         );
         let x4697 = ctx._add(
             x4696,
             x4488,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:143",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:141",
         );
         let x4698 = ctx._sub(
             x34,
             x4331,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:144",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:142",
         );
         let x4699 = ctx._mul(
             x401,
             x4698,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:144",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:142",
         );
         let x4700 = ctx._add(
             x4699,
             x4489,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:144",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:142",
         );
         let x4701 = ctx._sub(
             x1121,
             x4697,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:142",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
         );
         let x4702 = ctx._and_eqz(
             x4694,
             x4701,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:142",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
         );
         let x4703 = ctx._sub(
             x995,
             x4700,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:142",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
         );
         let x4704 = ctx._and_eqz(
             x4702,
             x4703,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:142",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:140",
         );
         let x4705 = ctx._and_eqz(
             x4704,
@@ -19829,22 +19829,22 @@ impl PolyExt for CircuitImpl {
         let x4714 = ctx._and_eqz(
             x4713,
             x2098,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:162",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:158",
         );
         let x4715 = ctx._and_eqz(
             x4714,
             x999,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:163",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:159",
         );
         let x4716 = ctx._and_eqz(
             x4715,
             x2373,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:164",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:160",
         );
         let x4717 = ctx._and_eqz(
             x4716,
             x2375,
-            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:164",
+            "external/risc0/risc0/zkvm/circuit/divide_cycle.cpp:160",
         );
         let x4718 = ctx._and_eqz(
             x4717,
@@ -19915,7 +19915,7 @@ impl PolyExt for CircuitImpl {
             x4252,
             x91,
             x4730,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:129",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:121",
         );
         let x4732 = ctx._sub(
             x4333,
@@ -20456,14 +20456,14 @@ impl PolyExt for CircuitImpl {
             x4731,
             x97,
             x4838,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:134",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:126",
         );
         let x4840 = ctx._sub(x1013, x163, "circuits/rv32im-legacy/port.cpp:211");
         let x4841 = ctx._and_eqz(x71, x4840, "circuits/rv32im-legacy/port.cpp:211");
         let x4842 = ctx._get(
             u,
             685,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:190",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
         );
         let x4843 = ctx._sub(
             x74,
@@ -20682,17 +20682,17 @@ impl PolyExt for CircuitImpl {
         let x4887 = ctx._get(
             u,
             694,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:158",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:157",
         );
         let x4888 = ctx._sub(
             x4887,
             x7,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:158",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:157",
         );
         let x4889 = ctx._and_eqz(
             x71,
             x4888,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:158",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:157",
         );
         let x4890 = ctx._and_cond(
             x4886,
@@ -20703,33 +20703,33 @@ impl PolyExt for CircuitImpl {
         let x4891 = ctx._sub(
             x4887,
             x9,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:161",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:158",
         );
         let x4892 = ctx._and_eqz(
             x71,
             x4891,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:161",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:158",
         );
         let x4893 = ctx._and_cond(
             x4890,
             x4884,
             x4892,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:160",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:158",
         );
         let x4894 = ctx._mul(
             x4287,
             x1040,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:164",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:160",
         );
         let x4895 = ctx._sub(
             x1019,
             x4894,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:164",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:160",
         );
         let x4896 = ctx._and_eqz(
             x4893,
             x4895,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:164",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:160",
         );
         let x4897 = ctx._get(u, 38, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:112");
         let x4898 = ctx._get(u, 44, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:112");
@@ -21785,109 +21785,109 @@ impl PolyExt for CircuitImpl {
             x4841,
             x1121,
             x5116,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:189",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:185",
         );
         let x5118 = ctx._get(
             u,
             645,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:196",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:192",
         );
         let x5119 = ctx._sub(
             x1018,
             x5118,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:196",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:192",
         );
         let x5120 = ctx._and_eqz(
             x4845,
             x5119,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:196",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:192",
         );
         let x5121 = ctx._get(
             u,
             647,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:197",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:193",
         );
         let x5122 = ctx._sub(
             x1019,
             x5121,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:197",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:193",
         );
         let x5123 = ctx._and_eqz(
             x5120,
             x5122,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:197",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:193",
         );
         let x5124 = ctx._and_eqz(
             x5123,
             x4856,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:198",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:194",
         );
         let x5125 = ctx._sub(
             x4332,
             x4846,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:199",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:195",
         );
         let x5126 = ctx._and_eqz(
             x5124,
             x5125,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:199",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:195",
         );
         let x5127 = ctx._and_eqz(
             x5126,
             x4876,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:200",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:196",
         );
         let x5128 = ctx._and_eqz(
             x5127,
             x4879,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:201",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:197",
         );
         let x5129 = ctx._and_eqz(
             x71,
             x4873,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:204",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:200",
         );
         let x5130 = ctx._and_eqz(
             x5129,
             x4853,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:205",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:201",
         );
         let x5131 = ctx._and_cond(
             x5128,
             x1018,
             x5130,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:202",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:198",
         );
         let x5132 = ctx._mul(
             x175,
             x17,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:206",
         );
         let x5133 = ctx._add(
             x5132,
             x172,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:206",
         );
         let x5134 = ctx._sub(
             x4312,
             x5133,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:211",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:207",
         );
         let x5135 = ctx._and_eqz(
             x71,
             x5134,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:211",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:207",
         );
         let x5136 = ctx._and_eqz(
             x5135,
             x4864,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:212",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:208",
         );
         let x5137 = ctx._and_cond(
             x5131,
             x4297,
             x5136,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:207",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:203",
         );
         let x5138 = ctx._and_cond(
             x5137,
@@ -21904,7 +21904,7 @@ impl PolyExt for CircuitImpl {
         let x5140 = ctx._and_eqz(
             x5139,
             x4888,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:215",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:211",
         );
         let x5141 = ctx._and_eqz(
             x5140,
@@ -21930,59 +21930,59 @@ impl PolyExt for CircuitImpl {
             x5117,
             x995,
             x5144,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:194",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:190",
         );
         let x5146 = ctx._and_eqz(
             x5126,
             x4873,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:223",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:219",
         );
         let x5147 = ctx._and_eqz(
             x5146,
             x4879,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:224",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:220",
         );
         let x5148 = ctx._and_eqz(
             x71,
             x4876,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:227",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:223",
         );
         let x5149 = ctx._and_eqz(
             x5148,
             x4853,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:228",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:224",
         );
         let x5150 = ctx._and_cond(
             x5147,
             x1018,
             x5149,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:225",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:221",
         );
         let x5151 = ctx._mul(
             x5133,
             x10,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:233",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:229",
         );
         let x5152 = ctx._sub(
             x4315,
             x5151,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:234",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:230",
         );
         let x5153 = ctx._and_eqz(
             x71,
             x5152,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:234",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:230",
         );
         let x5154 = ctx._and_eqz(
             x5153,
             x4864,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:235",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:231",
         );
         let x5155 = ctx._and_cond(
             x5150,
             x4297,
             x5154,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:230",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:226",
         );
         let x5156 = ctx._and_cond(
             x5155,
@@ -21999,7 +21999,7 @@ impl PolyExt for CircuitImpl {
         let x5158 = ctx._and_eqz(
             x5157,
             x4888,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:238",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:234",
         );
         let x5159 = ctx._and_eqz(
             x5158,
@@ -22025,54 +22025,54 @@ impl PolyExt for CircuitImpl {
             x5145,
             x996,
             x5162,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:217",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:213",
         );
         let x5164 = ctx._and_eqz(
             x5146,
             x4876,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:247",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:243",
         );
         let x5165 = ctx._and_eqz(
             x71,
             x4879,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:250",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:246",
         );
         let x5166 = ctx._and_eqz(
             x5165,
             x4853,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:251",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:247",
         );
         let x5167 = ctx._and_cond(
             x5164,
             x1018,
             x5166,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:248",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:244",
         );
         let x5168 = ctx._add(
             x5151,
             x0,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:255",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:251",
         );
         let x5169 = ctx._sub(
             x4737,
             x5168,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:255",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:251",
         );
         let x5170 = ctx._and_eqz(
             x71,
             x5169,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:255",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:251",
         );
         let x5171 = ctx._and_eqz(
             x5170,
             x4864,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:256",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:252",
         );
         let x5172 = ctx._and_cond(
             x5167,
             x4297,
             x5171,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:253",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:249",
         );
         let x5173 = ctx._and_cond(
             x5172,
@@ -22089,12 +22089,12 @@ impl PolyExt for CircuitImpl {
         let x5175 = ctx._sub(
             x4887,
             x8,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:259",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:255",
         );
         let x5176 = ctx._and_eqz(
             x5174,
             x5175,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:259",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:255",
         );
         let x5177 = ctx._and_eqz(
             x5176,
@@ -22120,22 +22120,22 @@ impl PolyExt for CircuitImpl {
             x5163,
             x999,
             x5180,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:240",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:236",
         );
         let x5182 = ctx._add(
             x1002,
             x1005,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:262",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:258",
         );
         let x5183 = ctx._add(
             x5182,
             x1008,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:262",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:258",
         );
         let x5184 = ctx._add(
             x5183,
             x1011,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:262",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:258",
         );
         let x5185 = ctx._sub(
             x74,
@@ -22155,27 +22155,27 @@ impl PolyExt for CircuitImpl {
         let x5188 = ctx._and_eqz(
             x5187,
             x4853,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:264",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:260",
         );
         let x5189 = ctx._and_eqz(
             x5188,
             x4856,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:265",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:261",
         );
         let x5190 = ctx._and_eqz(
             x5189,
             x4873,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:266",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:262",
         );
         let x5191 = ctx._and_eqz(
             x5190,
             x4876,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:267",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:263",
         );
         let x5192 = ctx._and_eqz(
             x5191,
             x5125,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:268",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:264",
         );
         let x5193 = ctx._get(u, 39, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:26");
         let x5194 = ctx._get(u, 45, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:26");
@@ -22546,22 +22546,22 @@ impl PolyExt for CircuitImpl {
         let x5319 = ctx._sub(
             x1409,
             x5317,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:273",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:269",
         );
         let x5320 = ctx._and_eqz(
             x5192,
             x5319,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:273",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:269",
         );
         let x5321 = ctx._sub(
             x1412,
             x5318,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:273",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:269",
         );
         let x5322 = ctx._and_eqz(
             x5320,
             x5321,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:273",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:269",
         );
         let x5323 = ctx._mul(
             x5226,
@@ -22868,22 +22868,22 @@ impl PolyExt for CircuitImpl {
         let x5385 = ctx._sub(
             x1415,
             x5383,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:274",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:270",
         );
         let x5386 = ctx._and_eqz(
             x5322,
             x5385,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:274",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:270",
         );
         let x5387 = ctx._sub(
             x1418,
             x5384,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:274",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:270",
         );
         let x5388 = ctx._and_eqz(
             x5386,
             x5387,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:274",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:270",
         );
         let x5389 = ctx._mul(
             x4858,
@@ -22980,130 +22980,130 @@ impl PolyExt for CircuitImpl {
         let x5413 = ctx._and_eqz(
             x5412,
             x4888,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:286",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:282",
         );
         let x5414 = ctx._add(
             x4878,
             x70,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:290",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:286",
         );
         let x5415 = ctx._sub(
             x4737,
             x5414,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:290",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:286",
         );
         let x5416 = ctx._and_eqz(
             x71,
             x5415,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:290",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:286",
         );
         let x5417 = ctx._and_cond(
             x5413,
             x1457,
             x5416,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:287",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:283",
         );
         let x5418 = ctx._get(
             u,
             700,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:300",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:296",
         );
         let x5419 = ctx._get(
             u,
             698,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:301",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:297",
         );
         let x5420 = ctx._sub(
             x4878,
             x70,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:303",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:299",
         );
         let x5421 = ctx._sub(
             x4737,
             x5420,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:303",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:299",
         );
         let x5422 = ctx._and_eqz(
             x71,
             x5421,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:303",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:299",
         );
         let x5423 = ctx._sub(
             x900,
             x175,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:304",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:300",
         );
         let x5424 = ctx._and_eqz(
             x5422,
             x5423,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:304",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:300",
         );
         let x5425 = ctx._sub(
             x867,
             x172,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:305",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:301",
         );
         let x5426 = ctx._and_eqz(
             x5424,
             x5425,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:305",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:301",
         );
         let x5427 = ctx._sub(
             x2289,
             x5418,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:306",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:302",
         );
         let x5428 = ctx._and_eqz(
             x5426,
             x5427,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:306",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:302",
         );
         let x5429 = ctx._sub(
             x2256,
             x5419,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:307",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:303",
         );
         let x5430 = ctx._and_eqz(
             x5428,
             x5429,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:307",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:303",
         );
         let x5431 = ctx._and_cond(
             x5417,
             x5392,
             x5430,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:292",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:288",
         );
         let x5432 = ctx._and_eqz(
             x5431,
             x2143,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:276",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:272",
         );
         let x5433 = ctx._and_eqz(
             x5432,
             x2146,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:277",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:273",
         );
         let x5434 = ctx._and_eqz(
             x5433,
             x2149,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:278",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:274",
         );
         let x5435 = ctx._and_eqz(
             x5434,
             x2152,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:279",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:275",
         );
         let x5436 = ctx._and_eqz(
             x5435,
             x2160,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:280",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:276",
         );
         let x5437 = ctx._and_cond(
             x5181,
             x5184,
             x5436,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:262",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:258",
         );
         let x5438 = ctx._and_eqz(
             x5437,
@@ -23608,53 +23608,53 @@ impl PolyExt for CircuitImpl {
         let x5538 = ctx._and_eqz(
             x5537,
             x2093,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5539 = ctx._and_eqz(
             x5538,
             x2096,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5540 = ctx._and_eqz(
             x5539,
             x2099,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5541 = ctx._and_eqz(
             x5540,
             x2102,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5542 = ctx._and_eqz(
             x5541,
             x2105,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5543 = ctx._and_eqz(
             x5542,
             x2108,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5544 = ctx._and_eqz(
             x5543,
             x2111,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5545 = ctx._and_eqz(
             x5544,
             x2114,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5546 = ctx._and_eqz(
             x5545,
             x2123,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:186",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:182",
         );
         let x5547 = ctx._and_cond(
             x4839,
             x100,
             x5546,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:139",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:131",
         );
         let x5548 = ctx._get(u, 420, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:26");
         let x5549 = ctx._get(u, 427, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:26");
@@ -27038,44 +27038,44 @@ impl PolyExt for CircuitImpl {
         let x6331 = ctx._sub(
             x1529,
             x6329,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:332",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:328",
         );
         let x6332 = ctx._and_eqz(
             x71,
             x6331,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:332",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:328",
         );
         let x6333 = ctx._sub(
             x4331,
             x6330,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:332",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:328",
         );
         let x6334 = ctx._and_eqz(
             x6332,
             x6333,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:332",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:328",
         );
         let x6335 = ctx._and_eqz(
             x6334,
             x4853,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:370",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:366",
         );
         let x6336 = ctx._and_eqz(
             x6335,
             x4856,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:371",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:367",
         );
         let x6337 = ctx._and_eqz(
             x6336,
             x5125,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:372",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:368",
         );
         let x6338 = ctx._and_eqz(
             x6337,
             x4873,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:373",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:369",
         );
-        let x6339 = ctx._get(u, 26, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380");
+        let x6339 = ctx._get(u, 26, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:376");
         let x6340 = ctx._sub(
             x74,
             x4875,
@@ -27094,246 +27094,246 @@ impl PolyExt for CircuitImpl {
         let x6343 = ctx._mul(
             x363,
             x1,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6344 = ctx._add(
             x361,
             x6343,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6345 = ctx._mul(
             x365,
             x3,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6346 = ctx._add(
             x6344,
             x6345,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6347 = ctx._mul(
             x367,
             x6,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6348 = ctx._add(
             x6346,
             x6347,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6349 = ctx._mul(
             x369,
             x11,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6350 = ctx._add(
             x6348,
             x6349,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6351 = ctx._mul(
             x371,
             x26,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6352 = ctx._add(
             x6350,
             x6351,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6353 = ctx._mul(
             x373,
             x12,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6354 = ctx._add(
             x6352,
             x6353,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6355 = ctx._mul(
             x375,
             x27,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6356 = ctx._add(
             x6354,
             x6355,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6357 = ctx._sub(
             x175,
             x6356,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6358 = ctx._mul(
             x6357,
             x65,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6359 = ctx._sub(
             x6358,
             x2310,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6360 = ctx._mul(
             x6359,
             x65,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6361 = ctx._and_eqz(
             x6342,
             x6360,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6362 = ctx._mul(
             x395,
             x1,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6363 = ctx._add(
             x393,
             x6362,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6364 = ctx._mul(
             x397,
             x3,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6365 = ctx._add(
             x6363,
             x6364,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6366 = ctx._mul(
             x399,
             x6,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6367 = ctx._add(
             x6365,
             x6366,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6368 = ctx._mul(
             x401,
             x11,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6369 = ctx._add(
             x6367,
             x6368,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6370 = ctx._mul(
             x403,
             x26,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6371 = ctx._add(
             x6369,
             x6370,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6372 = ctx._mul(
             x405,
             x12,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6373 = ctx._add(
             x6371,
             x6372,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6374 = ctx._mul(
             x407,
             x27,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6375 = ctx._add(
             x6373,
             x6374,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6376 = ctx._sub(
             x172,
             x6375,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6377 = ctx._mul(
             x6376,
             x65,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6378 = ctx._sub(
             x6377,
             x2345,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6379 = ctx._mul(
             x6378,
             x65,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6380 = ctx._and_eqz(
             x6361,
             x6379,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
         );
         let x6381 = ctx._add(
             x4875,
             x70,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:385",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:381",
         );
         let x6382 = ctx._sub(
             x4315,
             x6381,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:385",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:381",
         );
         let x6383 = ctx._and_eqz(
             x6380,
             x6382,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:385",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:381",
         );
         let x6384 = ctx._and_eqz(
             x6383,
             x4879,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:386",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:382",
         );
         let x6385 = ctx._and_cond(
             x6338,
             x6339,
             x6384,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:380",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:376",
         );
-        let x6386 = ctx._get(u, 27, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:388");
+        let x6386 = ctx._get(u, 27, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384");
         let x6387 = ctx._and_eqz(
             x5187,
             x5421,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:394",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:390",
         );
         let x6388 = ctx._and_cond(
             x71,
             x163,
             x6387,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:390",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:386",
         );
         let x6389 = ctx._sub(
             x70,
             x163,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:396",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:392",
         );
         let x6390 = ctx._and_eqz(
             x77,
             x4879,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:398",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:394",
         );
         let x6391 = ctx._and_cond(
             x6388,
             x6389,
             x6390,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:396",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:392",
         );
         let x6392 = ctx._sub(
             x1529,
@@ -27383,13 +27383,13 @@ impl PolyExt for CircuitImpl {
         let x6405 = ctx._and_eqz(
             x6404,
             x4876,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:401",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:397",
         );
         let x6406 = ctx._and_cond(
             x6385,
             x6386,
             x6405,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:388",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:384",
         );
         let x6407 = ctx._get(u, 113, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:26");
         let x6408 = ctx._get(u, 119, "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:26");
@@ -33669,44 +33669,44 @@ impl PolyExt for CircuitImpl {
         let x7762 = ctx._sub(
             x1409,
             x7760,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:360",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:356",
         );
         let x7763 = ctx._and_eqz(
             x6406,
             x7762,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:360",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:356",
         );
         let x7764 = ctx._sub(
             x1412,
             x7761,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:360",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:356",
         );
         let x7765 = ctx._and_eqz(
             x7763,
             x7764,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:360",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:356",
         );
         let x7766 = ctx._add(x7220, x4942, "external/risc0/risc0/zkvm/circuit/types.h:62");
         let x7767 = ctx._add(x7221, x4988, "external/risc0/risc0/zkvm/circuit/types.h:62");
         let x7768 = ctx._sub(
             x1415,
             x7766,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:361",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:357",
         );
         let x7769 = ctx._and_eqz(
             x7765,
             x7768,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:361",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:357",
         );
         let x7770 = ctx._sub(
             x1418,
             x7767,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:361",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:357",
         );
         let x7771 = ctx._and_eqz(
             x7769,
             x7770,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:361",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:357",
         );
         let x7772 = ctx._mul(x995, x1, "external/risc0/risc0/zkvm/circuit/types.h:140");
         let x7773 = ctx._add(
@@ -33805,19 +33805,19 @@ impl PolyExt for CircuitImpl {
         let x7802 = ctx._and_eqz(
             x71,
             x5175,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:414",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:409",
         );
         let x7803 = ctx._and_cond(
             x7801,
             x169,
             x7802,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:413",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:409",
         );
         let x7804 = ctx._and_cond(
             x7803,
             x166,
             x4889,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:416",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:410",
         );
         let x7805 = ctx._and_eqz(
             x7804,
@@ -34322,94 +34322,94 @@ impl PolyExt for CircuitImpl {
         let x7905 = ctx._and_eqz(
             x7904,
             x2093,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:374",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:370",
         );
         let x7906 = ctx._and_eqz(
             x7905,
             x2096,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:374",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:370",
         );
         let x7907 = ctx._and_eqz(
             x7906,
             x2099,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:374",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:370",
         );
         let x7908 = ctx._and_eqz(
             x7907,
             x2102,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:375",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:371",
         );
         let x7909 = ctx._and_eqz(
             x7908,
             x2105,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:375",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:371",
         );
         let x7910 = ctx._and_eqz(
             x7909,
             x2108,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:375",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:371",
         );
         let x7911 = ctx._and_eqz(
             x7910,
             x2111,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:376",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:372",
         );
         let x7912 = ctx._and_eqz(
             x7911,
             x2114,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:376",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:372",
         );
         let x7913 = ctx._and_eqz(
             x7912,
             x2143,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:376",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:372",
         );
         let x7914 = ctx._and_eqz(
             x7913,
             x2146,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:377",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:373",
         );
         let x7915 = ctx._and_eqz(
             x7914,
             x2149,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:377",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:373",
         );
         let x7916 = ctx._and_eqz(
             x7915,
             x2152,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:377",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:373",
         );
         let x7917 = ctx._and_eqz(
             x7916,
             x2160,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:378",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:374",
         );
         let x7918 = ctx._and_eqz(
             x7917,
             x2163,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:378",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:374",
         );
         let x7919 = ctx._and_eqz(
             x7918,
             x2993,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:379",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:375",
         );
         let x7920 = ctx._and_eqz(
             x7919,
             x5115,
-            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:379",
+            "external/risc0/risc0/zkvm/circuit/sha_cycle.cpp:375",
         );
         let x7921 = ctx._and_cond(
             x5547,
             x103,
             x7920,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:144",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:136",
         );
         let x7922 = ctx._and_cond(
             x7921,
             x106,
             x77,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:149",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:141",
         );
         let x7923 = ctx._and_eqz(
             x7922,
@@ -35830,51 +35830,51 @@ impl PolyExt for CircuitImpl {
             x8307,
             "external/risc0/risc0/zkvm/circuit/data_regs.cpp:63",
         );
-        let x8309 = ctx._get(u, 20, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:153");
+        let x8309 = ctx._get(u, 20, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:143");
         let x8310 = ctx._sub(
             x70,
             x680,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:160",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:150",
         );
         let x8311 = ctx._sub(
             x8310,
             x781,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:160",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:150",
         );
         let x8312 = ctx._sub(
             x8311,
             x790,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:160",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:150",
         );
         let x8313 = ctx._sub(
             x8312,
             x791,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:160",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:150",
         );
         let x8314 = ctx._and_eqz(x71, x109, "circuits/rv32im-legacy/port.cpp:211");
         let x8315 = ctx._and_cond(
             x71,
             x8313,
             x8314,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:160",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:150",
         );
         let x8316 = ctx._and_cond(
             x8315,
             x781,
             x788,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:163",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:153",
         );
         let x8317 = ctx._and_cond(
             x8316,
             x792,
             x795,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:172",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:158",
         );
         let x8318 = ctx._and_cond(
             x8317,
             x680,
             x797,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:175",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:161",
         );
         let x8319 = ctx._get(
             u,
@@ -36226,56 +36226,56 @@ impl PolyExt for CircuitImpl {
         let x8388 = ctx._get(
             u,
             654,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:38",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:36",
         );
         let x8389 = ctx._mul(
             x2192,
             x1,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:38",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:36",
         );
         let x8390 = ctx._add(
             x2189,
             x8389,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:38",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:36",
         );
         let x8391 = ctx._add(
             x8390,
             x2194,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:38",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:36",
         );
         let x8392 = ctx._mul(
             x8388,
             x8391,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:38",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:36",
         );
         let x8393 = ctx._sub(x212, x8392, "circuits/rv32im-legacy/port.cpp:211");
         let x8394 = ctx._and_eqz(x8387, x8393, "circuits/rv32im-legacy/port.cpp:211");
         let x8395 = ctx._mul(
             x2199,
             x1,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:37",
         );
         let x8396 = ctx._add(
             x2196,
             x8395,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:37",
         );
         let x8397 = ctx._mul(
             x8388,
             x8396,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:37",
         );
         let x8398 = ctx._sub(x220, x8397, "circuits/rv32im-legacy/port.cpp:211");
         let x8399 = ctx._and_eqz(x8394, x8398, "circuits/rv32im-legacy/port.cpp:211");
         let x8400 = ctx._mul(
             x194,
             x578,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8401 = ctx._sub(
             x70,
             x8400,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8402 = ctx._mul(x8401, x6490, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8403 = ctx._mul(x8401, x6491, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36286,32 +36286,32 @@ impl PolyExt for CircuitImpl {
         let x8408 = ctx._sub(
             x285,
             x8406,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8409 = ctx._and_eqz(
             x8399,
             x8408,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8410 = ctx._sub(
             x287,
             x8407,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8411 = ctx._and_eqz(
             x8409,
             x8410,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8412 = ctx._mul(
             x195,
             x578,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8413 = ctx._sub(
             x70,
             x8412,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8414 = ctx._mul(x8413, x6492, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8415 = ctx._mul(x8413, x6493, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36322,32 +36322,32 @@ impl PolyExt for CircuitImpl {
         let x8420 = ctx._sub(
             x289,
             x8418,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8421 = ctx._and_eqz(
             x8411,
             x8420,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8422 = ctx._sub(
             x291,
             x8419,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8423 = ctx._and_eqz(
             x8421,
             x8422,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8424 = ctx._mul(
             x198,
             x578,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8425 = ctx._sub(
             x70,
             x8424,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8426 = ctx._mul(x8425, x6494, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8427 = ctx._mul(x8425, x6495, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36358,32 +36358,32 @@ impl PolyExt for CircuitImpl {
         let x8432 = ctx._sub(
             x293,
             x8430,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8433 = ctx._and_eqz(
             x8423,
             x8432,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8434 = ctx._sub(
             x295,
             x8431,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8435 = ctx._and_eqz(
             x8433,
             x8434,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8436 = ctx._mul(
             x201,
             x578,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8437 = ctx._sub(
             x70,
             x8436,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8438 = ctx._mul(x8437, x6496, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8439 = ctx._mul(x8437, x6497, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36394,32 +36394,32 @@ impl PolyExt for CircuitImpl {
         let x8444 = ctx._sub(
             x297,
             x8442,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8445 = ctx._and_eqz(
             x8435,
             x8444,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8446 = ctx._sub(
             x299,
             x8443,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8447 = ctx._and_eqz(
             x8445,
             x8446,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8448 = ctx._mul(
             x204,
             x578,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8449 = ctx._sub(
             x70,
             x8448,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8450 = ctx._mul(x8449, x6498, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8451 = ctx._mul(x8449, x6499, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36430,32 +36430,32 @@ impl PolyExt for CircuitImpl {
         let x8456 = ctx._sub(
             x301,
             x8454,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8457 = ctx._and_eqz(
             x8447,
             x8456,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8458 = ctx._sub(
             x303,
             x8455,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8459 = ctx._and_eqz(
             x8457,
             x8458,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8460 = ctx._mul(
             x207,
             x578,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8461 = ctx._sub(
             x70,
             x8460,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8462 = ctx._mul(x8461, x6500, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8463 = ctx._mul(x8461, x6501, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36466,32 +36466,32 @@ impl PolyExt for CircuitImpl {
         let x8468 = ctx._sub(
             x305,
             x8466,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8469 = ctx._and_eqz(
             x8459,
             x8468,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8470 = ctx._sub(
             x307,
             x8467,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8471 = ctx._and_eqz(
             x8469,
             x8470,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8472 = ctx._mul(
             x210,
             x578,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8473 = ctx._sub(
             x70,
             x8472,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8474 = ctx._mul(x8473, x6502, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8475 = ctx._mul(x8473, x6503, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36502,32 +36502,32 @@ impl PolyExt for CircuitImpl {
         let x8480 = ctx._sub(
             x309,
             x8478,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8481 = ctx._and_eqz(
             x8471,
             x8480,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8482 = ctx._sub(
             x311,
             x8479,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8483 = ctx._and_eqz(
             x8481,
             x8482,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8484 = ctx._mul(
             x521,
             x214,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8485 = ctx._sub(
             x70,
             x8484,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8486 = ctx._mul(x8485, x6504, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8487 = ctx._mul(x8485, x6505, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36538,32 +36538,32 @@ impl PolyExt for CircuitImpl {
         let x8492 = ctx._sub(
             x313,
             x8490,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8493 = ctx._and_eqz(
             x8483,
             x8492,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8494 = ctx._sub(
             x315,
             x8491,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8495 = ctx._and_eqz(
             x8493,
             x8494,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8496 = ctx._mul(
             x194,
             x214,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8497 = ctx._sub(
             x70,
             x8496,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8498 = ctx._mul(x8497, x6506, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8499 = ctx._mul(x8497, x6507, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36574,32 +36574,32 @@ impl PolyExt for CircuitImpl {
         let x8504 = ctx._sub(
             x317,
             x8502,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8505 = ctx._and_eqz(
             x8495,
             x8504,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8506 = ctx._sub(
             x319,
             x8503,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8507 = ctx._and_eqz(
             x8505,
             x8506,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8508 = ctx._mul(
             x195,
             x214,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8509 = ctx._sub(
             x70,
             x8508,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8510 = ctx._mul(x8509, x6508, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8511 = ctx._mul(x8509, x6509, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36610,32 +36610,32 @@ impl PolyExt for CircuitImpl {
         let x8516 = ctx._sub(
             x321,
             x8514,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8517 = ctx._and_eqz(
             x8507,
             x8516,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8518 = ctx._sub(
             x323,
             x8515,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8519 = ctx._and_eqz(
             x8517,
             x8518,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8520 = ctx._mul(
             x198,
             x214,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8521 = ctx._sub(
             x70,
             x8520,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8522 = ctx._mul(x8521, x6510, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8523 = ctx._mul(x8521, x6511, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36646,32 +36646,32 @@ impl PolyExt for CircuitImpl {
         let x8528 = ctx._sub(
             x325,
             x8526,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8529 = ctx._and_eqz(
             x8519,
             x8528,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8530 = ctx._sub(
             x327,
             x8527,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8531 = ctx._and_eqz(
             x8529,
             x8530,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8532 = ctx._mul(
             x201,
             x214,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8533 = ctx._sub(
             x70,
             x8532,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8534 = ctx._mul(x8533, x6512, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8535 = ctx._mul(x8533, x6513, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36682,32 +36682,32 @@ impl PolyExt for CircuitImpl {
         let x8540 = ctx._sub(
             x329,
             x8538,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8541 = ctx._and_eqz(
             x8531,
             x8540,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8542 = ctx._sub(
             x331,
             x8539,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8543 = ctx._and_eqz(
             x8541,
             x8542,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8544 = ctx._mul(
             x204,
             x214,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8545 = ctx._sub(
             x70,
             x8544,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8546 = ctx._mul(x8545, x6514, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8547 = ctx._mul(x8545, x6515, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36718,32 +36718,32 @@ impl PolyExt for CircuitImpl {
         let x8552 = ctx._sub(
             x333,
             x8550,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8553 = ctx._and_eqz(
             x8543,
             x8552,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8554 = ctx._sub(
             x335,
             x8551,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8555 = ctx._and_eqz(
             x8553,
             x8554,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8556 = ctx._mul(
             x207,
             x214,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8557 = ctx._sub(
             x70,
             x8556,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8558 = ctx._mul(x8557, x6516, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8559 = ctx._mul(x8557, x6517, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36754,32 +36754,32 @@ impl PolyExt for CircuitImpl {
         let x8564 = ctx._sub(
             x337,
             x8562,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8565 = ctx._and_eqz(
             x8555,
             x8564,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8566 = ctx._sub(
             x339,
             x8563,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8567 = ctx._and_eqz(
             x8565,
             x8566,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8568 = ctx._mul(
             x210,
             x214,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8569 = ctx._sub(
             x70,
             x8568,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8570 = ctx._mul(x8569, x6518, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8571 = ctx._mul(x8569, x6519, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36790,42 +36790,42 @@ impl PolyExt for CircuitImpl {
         let x8576 = ctx._sub(
             x341,
             x8574,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8577 = ctx._and_eqz(
             x8567,
             x8576,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8578 = ctx._sub(
             x343,
             x8575,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8579 = ctx._and_eqz(
             x8577,
             x8578,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8580 = ctx._mul(
             x521,
             x215,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8581 = ctx._sub(
             x70,
             x8580,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8582 = ctx._get(
             u,
             421,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8583 = ctx._get(
             u,
             428,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8584 = ctx._mul(x8581, x8582, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8585 = ctx._mul(x8581, x8583, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36836,42 +36836,42 @@ impl PolyExt for CircuitImpl {
         let x8590 = ctx._sub(
             x345,
             x8588,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8591 = ctx._and_eqz(
             x8579,
             x8590,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8592 = ctx._sub(
             x347,
             x8589,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8593 = ctx._and_eqz(
             x8591,
             x8592,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8594 = ctx._mul(
             x194,
             x215,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8595 = ctx._sub(
             x70,
             x8594,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8596 = ctx._get(
             u,
             435,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8597 = ctx._get(
             u,
             442,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8598 = ctx._mul(x8595, x8596, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8599 = ctx._mul(x8595, x8597, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36882,42 +36882,42 @@ impl PolyExt for CircuitImpl {
         let x8604 = ctx._sub(
             x349,
             x8602,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8605 = ctx._and_eqz(
             x8593,
             x8604,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8606 = ctx._sub(
             x351,
             x8603,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8607 = ctx._and_eqz(
             x8605,
             x8606,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8608 = ctx._mul(
             x195,
             x215,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8609 = ctx._sub(
             x70,
             x8608,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8610 = ctx._get(
             u,
             449,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8611 = ctx._get(
             u,
             456,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8612 = ctx._mul(x8609, x8610, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8613 = ctx._mul(x8609, x8611, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36928,42 +36928,42 @@ impl PolyExt for CircuitImpl {
         let x8618 = ctx._sub(
             x353,
             x8616,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8619 = ctx._and_eqz(
             x8607,
             x8618,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8620 = ctx._sub(
             x355,
             x8617,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8621 = ctx._and_eqz(
             x8619,
             x8620,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8622 = ctx._mul(
             x198,
             x215,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8623 = ctx._sub(
             x70,
             x8622,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8624 = ctx._get(
             u,
             463,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8625 = ctx._get(
             u,
             470,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8626 = ctx._mul(x8623, x8624, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8627 = ctx._mul(x8623, x8625, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -36974,42 +36974,42 @@ impl PolyExt for CircuitImpl {
         let x8632 = ctx._sub(
             x357,
             x8630,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8633 = ctx._and_eqz(
             x8621,
             x8632,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8634 = ctx._sub(
             x359,
             x8631,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8635 = ctx._and_eqz(
             x8633,
             x8634,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8636 = ctx._mul(
             x201,
             x215,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8637 = ctx._sub(
             x70,
             x8636,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8638 = ctx._get(
             u,
             477,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8639 = ctx._get(
             u,
             484,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8640 = ctx._mul(x8637, x8638, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8641 = ctx._mul(x8637, x8639, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37020,42 +37020,42 @@ impl PolyExt for CircuitImpl {
         let x8646 = ctx._sub(
             x361,
             x8644,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8647 = ctx._and_eqz(
             x8635,
             x8646,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8648 = ctx._sub(
             x363,
             x8645,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8649 = ctx._and_eqz(
             x8647,
             x8648,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8650 = ctx._mul(
             x204,
             x215,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8651 = ctx._sub(
             x70,
             x8650,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8652 = ctx._get(
             u,
             491,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8653 = ctx._get(
             u,
             498,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8654 = ctx._mul(x8651, x8652, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8655 = ctx._mul(x8651, x8653, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37066,42 +37066,42 @@ impl PolyExt for CircuitImpl {
         let x8660 = ctx._sub(
             x365,
             x8658,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8661 = ctx._and_eqz(
             x8649,
             x8660,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8662 = ctx._sub(
             x367,
             x8659,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8663 = ctx._and_eqz(
             x8661,
             x8662,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8664 = ctx._mul(
             x207,
             x215,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8665 = ctx._sub(
             x70,
             x8664,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8666 = ctx._get(
             u,
             505,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8667 = ctx._get(
             u,
             512,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8668 = ctx._mul(x8665, x8666, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8669 = ctx._mul(x8665, x8667, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37112,42 +37112,42 @@ impl PolyExt for CircuitImpl {
         let x8674 = ctx._sub(
             x369,
             x8672,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8675 = ctx._and_eqz(
             x8663,
             x8674,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8676 = ctx._sub(
             x371,
             x8673,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8677 = ctx._and_eqz(
             x8675,
             x8676,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8678 = ctx._mul(
             x210,
             x215,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8679 = ctx._sub(
             x70,
             x8678,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8680 = ctx._get(
             u,
             519,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8681 = ctx._get(
             u,
             526,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8682 = ctx._mul(x8679, x8680, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8683 = ctx._mul(x8679, x8681, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37158,42 +37158,42 @@ impl PolyExt for CircuitImpl {
         let x8688 = ctx._sub(
             x373,
             x8686,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8689 = ctx._and_eqz(
             x8677,
             x8688,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8690 = ctx._sub(
             x375,
             x8687,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8691 = ctx._and_eqz(
             x8689,
             x8690,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8692 = ctx._mul(
             x521,
             x218,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8693 = ctx._sub(
             x70,
             x8692,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8694 = ctx._get(
             u,
             533,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8695 = ctx._get(
             u,
             540,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8696 = ctx._mul(x8693, x8694, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8697 = ctx._mul(x8693, x8695, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37204,42 +37204,42 @@ impl PolyExt for CircuitImpl {
         let x8702 = ctx._sub(
             x377,
             x8700,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8703 = ctx._and_eqz(
             x8691,
             x8702,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8704 = ctx._sub(
             x379,
             x8701,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8705 = ctx._and_eqz(
             x8703,
             x8704,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8706 = ctx._mul(
             x194,
             x218,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8707 = ctx._sub(
             x70,
             x8706,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8708 = ctx._get(
             u,
             547,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8709 = ctx._get(
             u,
             554,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8710 = ctx._mul(x8707, x8708, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8711 = ctx._mul(x8707, x8709, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37250,42 +37250,42 @@ impl PolyExt for CircuitImpl {
         let x8716 = ctx._sub(
             x381,
             x8714,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8717 = ctx._and_eqz(
             x8705,
             x8716,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8718 = ctx._sub(
             x383,
             x8715,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8719 = ctx._and_eqz(
             x8717,
             x8718,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8720 = ctx._mul(
             x195,
             x218,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8721 = ctx._sub(
             x70,
             x8720,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8722 = ctx._get(
             u,
             561,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8723 = ctx._get(
             u,
             568,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8724 = ctx._mul(x8721, x8722, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8725 = ctx._mul(x8721, x8723, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37296,42 +37296,42 @@ impl PolyExt for CircuitImpl {
         let x8730 = ctx._sub(
             x385,
             x8728,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8731 = ctx._and_eqz(
             x8719,
             x8730,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8732 = ctx._sub(
             x387,
             x8729,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8733 = ctx._and_eqz(
             x8731,
             x8732,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8734 = ctx._mul(
             x198,
             x218,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8735 = ctx._sub(
             x70,
             x8734,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8736 = ctx._get(
             u,
             575,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8737 = ctx._get(
             u,
             582,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8738 = ctx._mul(x8735, x8736, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8739 = ctx._mul(x8735, x8737, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37342,42 +37342,42 @@ impl PolyExt for CircuitImpl {
         let x8744 = ctx._sub(
             x389,
             x8742,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8745 = ctx._and_eqz(
             x8733,
             x8744,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8746 = ctx._sub(
             x391,
             x8743,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8747 = ctx._and_eqz(
             x8745,
             x8746,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8748 = ctx._mul(
             x201,
             x218,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8749 = ctx._sub(
             x70,
             x8748,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8750 = ctx._get(
             u,
             589,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8751 = ctx._get(
             u,
             596,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8752 = ctx._mul(x8749, x8750, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8753 = ctx._mul(x8749, x8751, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37388,42 +37388,42 @@ impl PolyExt for CircuitImpl {
         let x8758 = ctx._sub(
             x393,
             x8756,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8759 = ctx._and_eqz(
             x8747,
             x8758,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8760 = ctx._sub(
             x395,
             x8757,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8761 = ctx._and_eqz(
             x8759,
             x8760,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8762 = ctx._mul(
             x204,
             x218,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8763 = ctx._sub(
             x70,
             x8762,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8764 = ctx._get(
             u,
             603,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8765 = ctx._get(
             u,
             610,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8766 = ctx._mul(x8763, x8764, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8767 = ctx._mul(x8763, x8765, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37434,42 +37434,42 @@ impl PolyExt for CircuitImpl {
         let x8772 = ctx._sub(
             x397,
             x8770,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8773 = ctx._and_eqz(
             x8761,
             x8772,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8774 = ctx._sub(
             x399,
             x8771,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8775 = ctx._and_eqz(
             x8773,
             x8774,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8776 = ctx._mul(
             x207,
             x218,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8777 = ctx._sub(
             x70,
             x8776,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8778 = ctx._get(
             u,
             617,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8779 = ctx._get(
             u,
             624,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8780 = ctx._mul(x8777, x8778, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8781 = ctx._mul(x8777, x8779, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37480,42 +37480,42 @@ impl PolyExt for CircuitImpl {
         let x8786 = ctx._sub(
             x401,
             x8784,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8787 = ctx._and_eqz(
             x8775,
             x8786,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8788 = ctx._sub(
             x403,
             x8785,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8789 = ctx._and_eqz(
             x8787,
             x8788,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8790 = ctx._mul(
             x210,
             x218,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:41",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:39",
         );
         let x8791 = ctx._sub(
             x70,
             x8790,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8792 = ctx._get(
             u,
             631,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8793 = ctx._get(
             u,
             638,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8794 = ctx._mul(x8791, x8792, "external/risc0/risc0/zkvm/circuit/types.h:58");
         let x8795 = ctx._mul(x8791, x8793, "external/risc0/risc0/zkvm/circuit/types.h:58");
@@ -37526,82 +37526,82 @@ impl PolyExt for CircuitImpl {
         let x8800 = ctx._sub(
             x405,
             x8798,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8801 = ctx._and_eqz(
             x8789,
             x8800,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8802 = ctx._sub(
             x407,
             x8799,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8803 = ctx._and_eqz(
             x8801,
             x8802,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:40",
         );
         let x8804 = ctx._and_eqz(
             x8803,
             x279,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:44",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:42",
         );
         let x8805 = ctx._get(
             u,
             658,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:46",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:44",
         );
         let x8806 = ctx._sub(
             x8805,
             x243,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:46",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:44",
         );
         let x8807 = ctx._mul(
             x8806,
             x32,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:46",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:44",
         );
         let x8808 = ctx._sub(
             x270,
             x8807,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:46",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:44",
         );
         let x8809 = ctx._and_eqz(
             x8804,
             x8808,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:46",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:44",
         );
         let x8810 = ctx._get(
             u,
             660,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:47",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:45",
         );
         let x8811 = ctx._add(
             x8810,
             x270,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:47",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:45",
         );
         let x8812 = ctx._sub(
             x8811,
             x3845,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:47",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:45",
         );
         let x8813 = ctx._mul(
             x8812,
             x32,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:47",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:45",
         );
         let x8814 = ctx._sub(
             x272,
             x8813,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:47",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:45",
         );
         let x8815 = ctx._and_eqz(
             x8809,
             x8814,
-            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:47",
+            "external/risc0/risc0/zkvm/circuit/final_cycle.cpp:45",
         );
         let x8816 = ctx._and_eqz(
             x8815,
@@ -37687,31 +37687,31 @@ impl PolyExt for CircuitImpl {
             x8318,
             x94,
             x8831,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:180",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:164",
         );
         let x8833 = ctx._and_cond(
             x8832,
             x97,
             x4838,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:185",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:169",
         );
         let x8834 = ctx._and_cond(
             x8833,
             x100,
             x5546,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:190",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:174",
         );
         let x8835 = ctx._and_cond(
             x8834,
             x103,
             x7920,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:195",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:179",
         );
         let x8836 = ctx._and_cond(
             x8835,
             x106,
             x77,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:200",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:184",
         );
         let x8837 = ctx._and_eqz(
             x8836,
@@ -37942,32 +37942,32 @@ impl PolyExt for CircuitImpl {
             x8308,
             x8309,
             x8881,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:153",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:143",
         );
         let x8883 = ctx._add(
             x699,
             x8309,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         );
         let x8884 = ctx._add(
             x8883,
             x73,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         );
         let x8885 = ctx._add(
             x8884,
             x162,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         );
         let x8886 = ctx._add(
             x8885,
             x193,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         );
         let x8887 = ctx._add(
             x8886,
             x677,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         );
         let x8888 = ctx._get(u, 720, "external/risc0/risc0/zkvm/circuit/mem_check.cpp:37");
         let x8889 = ctx._get(u, 721, "external/risc0/risc0/zkvm/circuit/mem_check.cpp:38");
@@ -38649,7 +38649,7 @@ impl PolyExt for CircuitImpl {
             x8882,
             x8887,
             x9039,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:212",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:194",
         );
         let x9041 = ctx._get_global(
             mix,

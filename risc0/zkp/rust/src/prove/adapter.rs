@@ -82,14 +82,17 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
             &mut self.accum,
         ];
         for cycle in 0..self.steps - ZK_CYCLES {
-            self.exec.circuit.step_accum(
-                &CircuitStepContext {
-                    size: self.steps,
-                    cycle,
-                },
-                &mut self.exec.custom,
-                args,
-            );
+            self.exec
+                .circuit
+                .step_accum(
+                    &CircuitStepContext {
+                        size: self.steps,
+                        cycle,
+                    },
+                    &mut self.exec.custom,
+                    args,
+                )
+                .unwrap();
         }
         // Add random noise to end of accum
         let mut rng = thread_rng();

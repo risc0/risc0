@@ -93,7 +93,7 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
             &mut [],
             &mut [],
         ];
-        let result = self.circuit.step_exec(&ctx, &mut self.custom, args);
+        let result = self.circuit.step_exec(&ctx, &mut self.custom, args)?;
         // debug!("result: {:?}", result);
         self.halted = self.halted || result == Fp::new(0);
         self.cycle += 1;
@@ -153,7 +153,9 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
                 cycle: i,
                 size: self.steps,
             };
-            self.circuit.step_verify(&ctx, &mut self.custom, args);
+            self.circuit
+                .step_verify(&ctx, &mut self.custom, args)
+                .unwrap();
         }
         // Zero out 'invalid' entries in data
         for value in self.data.iter_mut() {

@@ -14,6 +14,8 @@
 
 use alloc::vec::Vec;
 
+use anyhow::{bail, Result};
+
 use crate::{
     core::{fp::Fp, fp4::Fp4},
     taps::TapSet,
@@ -27,7 +29,7 @@ pub struct MixState {
 }
 
 pub trait CustomStep {
-    fn call(&mut self, name: &str, extra: &str, args: &[Fp]) -> Vec<Fp>;
+    fn call(&mut self, name: &str, extra: &str, args: &[Fp]) -> Result<Vec<Fp>>;
 }
 
 pub struct CircuitStepContext {
@@ -45,8 +47,8 @@ impl CircuitStepContext {
     }
 
     pub fn _get(&self, base: &[Fp], offset: usize, back: usize, _loc: &str) -> Fp {
-        let ret =
-            base[offset * self.size + (self.size + (self.cycle - back) & self.mask()) % self.size];
+        let cycle = self.cycle.wrapping_sub(back);
+        let ret = base[offset * self.size + (cycle & self.mask())];
         // assert_ne!(ret, Fp::invalid());
         ret
     }
@@ -87,14 +89,11 @@ impl CircuitStepContext {
         Fp::new(a & b)
     }
 
-    pub fn _eqz(&self, a: Fp, loc: &str) {
-        assert_eq!(
-            a,
-            Fp::new(0),
-            "0x{:08X} is not zero at: {}",
-            u32::from(a),
-            loc
-        );
+    pub fn _eqz(&self, a: Fp, loc: &str) -> Result<()> {
+        if a != Fp::new(0) {
+            bail!("0x{:08X} is not zero at: {}", u32::from(a), loc);
+        }
+        Ok(())
     }
 
     pub fn _inv(&self, a: Fp, _loc: &str) -> Fp {
@@ -111,15 +110,30 @@ impl CircuitStepContext {
 }
 
 pub trait CircuitStepExec<S: CustomStep> {
-    fn step_exec(&self, ctx: &CircuitStepContext, custom: &mut S, args: &mut [&mut [Fp]]) -> Fp;
+    fn step_exec(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp>;
 }
 
 pub trait CircuitStepVerify<S: CustomStep> {
-    fn step_verify(&self, ctx: &CircuitStepContext, custom: &mut S, args: &mut [&mut [Fp]]) -> Fp;
+    fn step_verify(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp>;
 }
 
 pub trait CircuitStepAccum<S: CustomStep> {
-    fn step_accum(&self, ctx: &CircuitStepContext, custom: &mut S, args: &mut [&mut [Fp]]) -> Fp;
+    fn step_accum(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp>;
 }
 
 pub struct PolyFpContext {
@@ -302,14 +316,14 @@ impl CircuitStep {
         ctx: &CircuitStepContext,
         custom: &mut S,
         args: &mut [&mut [Fp]],
-    ) {
-        match self {
+    ) -> Result<()> {
+        Ok(match self {
             CircuitStep::Const(value, _loc) => {
                 stack.push(Fp::new(*value));
             }
             CircuitStep::Get(base, offset, back, _loc) => {
-                let value = args[*base]
-                    [offset * ctx.size + (ctx.size + (ctx.cycle - back) & ctx.mask()) % ctx.size];
+                let cycle = ctx.cycle.wrapping_sub(*back);
+                let value = args[*base][offset * ctx.size + (cycle & ctx.mask())];
                 // assert_ne!(value, Fp::invalid());
                 stack.push(value);
             }
@@ -329,7 +343,7 @@ impl CircuitStep {
                 if stack[*cond] != Fp::new(0) {
                     let mut stack = stack.clone();
                     for op in block.iter() {
-                        op.step(&mut stack, ctx, custom, args);
+                        op.step(&mut stack, ctx, custom, args)?;
                     }
                 }
             }
@@ -349,13 +363,9 @@ impl CircuitStep {
             }
             CircuitStep::EqZero(x, loc) => {
                 let value = stack[*x];
-                assert_eq!(
-                    value,
-                    Fp::new(0),
-                    "{x}: 0x{:08X} is not zero at: {}",
-                    u32::from(value),
-                    loc
-                );
+                if value != Fp::new(0) {
+                    bail!("{x}: 0x{:08X} is not zero at: {}", u32::from(value), loc);
+                }
             }
             CircuitStep::Inv(x, _loc) => {
                 stack.push(stack[*x].inv());
@@ -369,15 +379,15 @@ impl CircuitStep {
             }
             CircuitStep::Extern(name, extra, args, _loc) => {
                 let args: Vec<Fp> = args.iter().map(|x| stack[*x]).collect();
-                stack.extend(custom.call(name, extra, &args));
+                stack.extend(custom.call(name, extra, &args)?);
             }
             CircuitStep::Nondet(block, _loc) => {
                 let mut stack = stack.clone();
                 for op in block.iter() {
-                    op.step(&mut stack, ctx, custom, args);
+                    op.step(&mut stack, ctx, custom, args)?;
                 }
             }
-        }
+        })
     }
 }
 
@@ -387,11 +397,11 @@ impl CircuitStepDef {
         ctx: &CircuitStepContext,
         custom: &mut S,
         args: &mut [&mut [Fp]],
-    ) -> Fp {
+    ) -> Result<Fp> {
         let mut stack = Vec::new();
         for op in self.block.iter() {
-            op.step(&mut stack, ctx, custom, args);
+            op.step(&mut stack, ctx, custom, args)?;
         }
-        stack[self.ret]
+        Ok(stack[self.ret])
     }
 }

@@ -1,5 +1,6 @@
 // This code is automatically generated
 
+use anyhow::Result;
 use risc0_zkp::{
     adapter::{CircuitStep, CircuitStepContext, CircuitStepDef, CircuitStepVerify, CustomStep},
     core::fp::Fp,
@@ -77,32 +78,32 @@ const DEF: CircuitStepDef = CircuitStepDef {
             0,
             2,
             0,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:153",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:143",
         ),
         CircuitStep::Add(
             21,
             22,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         ),
         CircuitStep::Add(
             23,
             17,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         ),
         CircuitStep::Add(
             24,
             18,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         ),
         CircuitStep::Add(
             25,
             19,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         ),
         CircuitStep::Add(
             26,
             20,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:210",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192",
         ),
         CircuitStep::If(
             27,
@@ -1371,7 +1372,7 @@ const DEF: CircuitStepDef = CircuitStepDef {
                 CircuitStep::Mul(112, 113, "external/risc0/risc0/zkvm/circuit/mem_check.h:28"),
                 CircuitStep::EqZero(114, "external/risc0/risc0/zkvm/circuit/mem_check.h:28"),
             ],
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:212",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:194",
         ),
     ],
     ret: 15,
@@ -1379,7 +1380,12 @@ const DEF: CircuitStepDef = CircuitStepDef {
 
 impl<S: CustomStep> CircuitStepVerify<S> for CircuitImpl {
     #[allow(unused)]
-    fn step_verify(&self, ctx: &CircuitStepContext, custom: &mut S, args: &mut [&mut [Fp]]) -> Fp {
+    fn step_verify(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp> {
         DEF.step(ctx, custom, args)
     }
 }
