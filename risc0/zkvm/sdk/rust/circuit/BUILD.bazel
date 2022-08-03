@@ -10,5 +10,6 @@ rust_library(
     crate_name = "risc0_zkvm_circuit",
     deps = [
         "//risc0/zkp/rust:zkp_host",
+        "@crates_host//:anyhow",
     ],
 )
