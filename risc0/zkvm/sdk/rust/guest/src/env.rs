@@ -17,17 +17,14 @@ use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::{
     platform::{
-        io::{
-            host_sendrecv, IoDescriptor, GPIO_COMMIT, SENDRECV_CHANNEL_INITIAL_INPUT,
-            SENDRECV_CHANNEL_STDOUT,
-        },
+        io::{IoDescriptor, GPIO_COMMIT, SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT},
         memory, WORD_SIZE,
     },
     serde::{Deserializer, Serializer, Slice},
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{align_up, memory_barrier, sha};
+use crate::{align_up, io::host_sendrecv, memory_barrier, sha};
 
 struct Env {
     output: Serializer<Slice<'static>>,

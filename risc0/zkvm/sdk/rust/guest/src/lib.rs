@@ -31,6 +31,9 @@ pub mod env;
 /// Functions for computing SHA-256 hashes.
 pub mod sha;
 
+/// Functions for handling input and output
+pub mod io;
+
 use core::{arch::asm, mem, panic::PanicInfo, ptr};
 
 extern "C" {

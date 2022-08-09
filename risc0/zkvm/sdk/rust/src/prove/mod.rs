@@ -23,6 +23,7 @@ use risc0_zkp::{
 
 use crate::{
     elf::Program,
+    host::ProverOpts,
     method_id::MethodId,
     platform::{
         io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT},
@@ -33,19 +34,19 @@ use crate::{
 
 use self::exec::{IoHandler, RV32Executor};
 
-pub struct Prover {
+pub struct Prover<'a> {
     elf: Program,
     inner: ProverImpl,
     method_id: MethodId,
-    opts: ProverOpts,
+    opts: ProverOpts<'a>,
 }
 
-impl Prover {
+impl<'a> Prover<'a> {
     pub fn new(elf: &[u8], method_id: &[u8]) -> Result<Self> {
         Self::new_with_opts(elf, method_id, ProverOpts::default())
     }
 
-    pub fn new_with_opts(elf: &[u8], method_id: &[u8], opts: ProverOpts) -> Result<Self> {
+    pub fn new_with_opts(elf: &[u8], method_id: &[u8], opts: ProverOpts<'a>) -> Result<Self> {
         Ok(Prover {
             elf: Program::load_elf(&elf, MEM_SIZE as u32)?,
             inner: ProverImpl::new(),
@@ -135,14 +136,4 @@ impl IoHandler for ProverImpl {
     fn on_fault(&mut self, msg: &str) {
         panic!("{}", msg);
     }
-}
-
-/// Options available to modify the prover's behavior.
-#[non_exhaustive]
-#[derive(Default, Debug, Clone, Copy)]
-pub struct ProverOpts {
-    /// Skip generating the seal in receipt.  This should only be used
-    /// for testing.  In this case, performace will be much better but
-    /// we will not be able to cryptographically verify the execution.
-    pub skip_seal: bool,
 }

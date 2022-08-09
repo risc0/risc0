@@ -115,8 +115,8 @@ fn main() {
         })
     };
 
-    let mut opts: ProverOpts = Default::default();
-    opts.skip_seal = args.skip_seal || args.receipt.is_none();
+    let opts: ProverOpts =
+        ProverOpts::default().with_skip_seal(args.skip_seal || args.receipt.is_none());
 
     let mut prover =
         Prover::new_with_opts(&elf_contents, method_id.as_slice().unwrap(), opts).unwrap();
