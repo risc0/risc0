@@ -110,7 +110,7 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
     }
 
     fn eval_check(
-        &self,
+        &mut self,
         check: &Buffer<Fp>,
         code: &Buffer<Fp>,
         data: &Buffer<Fp>,
@@ -120,23 +120,26 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
         const EXP_PO2: usize = log2_ceil(INV_RATE);
 
         let domain = self.steps * INV_RATE;
-        code.view_mut(&mut |code| {
-            data.view_mut(&mut |data| {
-                accum.view_mut(&mut |accum| {
+        code.view_mut(&mut |mut code| {
+            data.view_mut(&mut |mut data| {
+                accum.view_mut(&mut |mut accum| {
                     check.view_mut(&mut |check| {
                         // TODO: parallelize
                         for cycle in 0..domain {
+                            let args: &mut [&mut [Fp]] = &mut [
+                                &mut code,
+                                &mut self.exec.output,
+                                &mut data,
+                                &mut self.mix,
+                                &mut accum,
+                            ];
                             let cond = self.exec.circuit.poly_fp(
                                 &PolyFpContext {
                                     size: domain,
                                     cycle,
                                     mix: poly_mix,
                                 },
-                                code,
-                                &self.exec.output,
-                                data,
-                                &self.mix,
-                                accum,
+                                args,
                             );
                             let x = Fp::new(ROU_FWD[self.exec.po2 + EXP_PO2]).pow(cycle);
                             // TODO: what is this magic number 3?

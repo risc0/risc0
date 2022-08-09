@@ -196,15 +196,7 @@ impl PolyFpContext {
 }
 
 pub trait PolyFp {
-    fn poly_fp(
-        &self,
-        ctx: &PolyFpContext,
-        code: &[Fp],
-        out: &[Fp],
-        data: &[Fp],
-        mix: &[Fp],
-        accum: &[Fp],
-    ) -> MixState;
+    fn poly_fp(&self, ctx: &PolyFpContext, args: &mut [&mut [Fp]]) -> MixState;
 }
 
 pub struct PolyExtContext {
@@ -403,5 +395,90 @@ impl CircuitStepDef {
             op.step(&mut stack, ctx, custom, args)?;
         }
         Ok(stack[self.ret])
+    }
+}
+
+pub struct PolyFpStepDef {
+    pub block: &'static [PolyFpStep],
+    pub ret: Var,
+}
+
+pub enum PolyFpStep {
+    Const(u32, &'static str),
+    Get(Arg, usize, usize, &'static str),
+    GetGlobal(Arg, usize, &'static str),
+    Add(Var, Var, &'static str),
+    Sub(Var, Var, &'static str),
+    Mul(Var, Var, &'static str),
+    True(&'static str),
+    AndEqz(Var, Var, &'static str),
+    AndCond(Var, Var, Var, &'static str),
+}
+
+impl PolyFpStep {
+    pub fn step(
+        &self,
+        fp_vars: &mut Vec<Fp>,
+        mix_vars: &mut Vec<MixState>,
+        ctx: &PolyFpContext,
+        args: &mut [&mut [Fp]],
+    ) {
+        match self {
+            PolyFpStep::Const(value, _loc) => {
+                fp_vars.push(Fp::new(*value));
+            }
+            PolyFpStep::Get(base, offset, back, _loc) => {
+                // Cycle here is over the expanded domain
+                let cycle = ctx.cycle.wrapping_sub(INV_RATE * back);
+                let value = args[*base][offset * ctx.size + (cycle & ctx.mask())];
+                fp_vars.push(value);
+            }
+            PolyFpStep::GetGlobal(base, offset, _loc) => {
+                fp_vars.push(args[*base][*offset]);
+            }
+            PolyFpStep::Add(x1, x2, _loc) => {
+                fp_vars.push(fp_vars[*x1] + fp_vars[*x2]);
+            }
+            PolyFpStep::Sub(x1, x2, _loc) => {
+                fp_vars.push(fp_vars[*x1] - fp_vars[*x2]);
+            }
+            PolyFpStep::Mul(x1, x2, _loc) => {
+                fp_vars.push(fp_vars[*x1] * fp_vars[*x2]);
+            }
+            PolyFpStep::True(_loc) => {
+                mix_vars.push(MixState {
+                    tot: Fp4::from_u32(0),
+                    mul: Fp4::from_u32(1),
+                });
+            }
+            PolyFpStep::AndEqz(x, val, _loc) => {
+                let x = mix_vars[*x];
+                let val = fp_vars[*val];
+                mix_vars.push(MixState {
+                    tot: x.tot + x.mul * val,
+                    mul: x.mul * ctx.mix,
+                });
+            }
+            PolyFpStep::AndCond(x, cond, inner, _loc) => {
+                let x = mix_vars[*x];
+                let cond = fp_vars[*cond];
+                let inner = mix_vars[*inner];
+                mix_vars.push(MixState {
+                    tot: x.tot + cond * inner.tot * x.mul,
+                    mul: x.mul * inner.mul,
+                });
+            }
+        }
+    }
+}
+
+impl PolyFpStepDef {
+    pub fn step(&self, ctx: &PolyFpContext, args: &mut [&mut [Fp]]) -> MixState {
+        let mut fp_vars = Vec::new();
+        let mut mix_vars = Vec::new();
+        for op in self.block.iter() {
+            op.step(&mut fp_vars, &mut mix_vars, ctx, args);
+        }
+        mix_vars[self.ret]
     }
 }
