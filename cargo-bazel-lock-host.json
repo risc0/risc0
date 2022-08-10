@@ -1,5 +1,5 @@
 {
-  "checksum": "6aee3cf3ec03000f8fcb2f4a22702457f8481ef5a45f545ed1540d9655da0509",
+  "checksum": "03e19223e8b7e97f4523b88db7849182b15ecd324af80f9fa37ba9864aebb8c9",
   "crates": {
     "adler 1.0.2": {
       "name": "adler",
@@ -137,13 +137,13 @@
       },
       "license": "Unlicense/MIT"
     },
-    "anyhow 1.0.59": {
+    "anyhow 1.0.60": {
       "name": "anyhow",
-      "version": "1.0.59",
+      "version": "1.0.60",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/anyhow/1.0.59/download",
-          "sha256": "c91f1f46651137be86f3a2b9a8359f9ab421d04d941c62b5982e1ca21113adf9"
+          "url": "https://crates.io/api/v1/crates/anyhow/1.0.60/download",
+          "sha256": "c794e162a5eff65c72ef524dfe393eb923c354e350bb78b9c7383df13f3bc142"
         }
       },
       "targets": [
@@ -184,14 +184,14 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.59",
+              "id": "anyhow 1.0.60",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.59"
+        "version": "1.0.60"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -408,7 +408,7 @@
             ],
             "cfg(unix)": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ],
@@ -659,7 +659,7 @@
               "target": "regex_automata"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
@@ -911,7 +911,7 @@
               "target": "bzip2_sys"
             },
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             }
           ],
@@ -969,7 +969,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             }
           ],
@@ -1050,7 +1050,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
@@ -1097,7 +1097,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
@@ -1154,7 +1154,7 @@
               "target": "semver"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             },
             {
@@ -1705,7 +1705,7 @@
               "target": "core_foundation_sys"
             },
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             }
           ],
@@ -1808,19 +1808,19 @@
           "selects": {
             "aarch64-apple-darwin": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ],
             "aarch64-linux-android": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ],
             "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ]
@@ -1981,7 +1981,7 @@
               "target": "regex"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             },
             {
@@ -2007,7 +2007,7 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "serde_derive 1.0.142",
+              "id": "serde_derive 1.0.143",
               "target": "serde_derive"
             }
           ],
@@ -2431,7 +2431,7 @@
               "target": "ryu"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
@@ -3902,7 +3902,7 @@
             ],
             "cfg(unix)": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ]
@@ -4279,7 +4279,7 @@
         "deps": {
           "common": [
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             }
           ],
@@ -5225,7 +5225,7 @@
           "selects": {
             "cfg(unix)": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ]
@@ -5311,13 +5311,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "libc 0.2.126": {
+    "libc 0.2.129": {
       "name": "libc",
-      "version": "0.2.126",
+      "version": "0.2.129",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/libc/0.2.126/download",
-          "sha256": "349d5a591cd28b49e1d1037471617a32ddcda5731b99419008085f72d5a53836"
+          "url": "https://crates.io/api/v1/crates/libc/0.2.129/download",
+          "sha256": "64de3cc433455c14174d42e554d4027ee631c4d046d43e3ecc6efc4636cdc7a7"
         }
       },
       "targets": [
@@ -5358,14 +5358,14 @@
         "deps": {
           "common": [
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2015",
-        "version": "0.2.126"
+        "version": "0.2.129"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -5844,7 +5844,7 @@
           "selects": {
             "cfg(target_os = \"wasi\")": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               },
               {
@@ -5854,7 +5854,7 @@
             ],
             "cfg(unix)": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ],
@@ -5925,7 +5925,7 @@
                 "target": "lazy_static"
               },
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               },
               {
@@ -6272,7 +6272,7 @@
             ],
             "cfg(not(windows))": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ]
@@ -6316,7 +6316,7 @@
           "selects": {
             "cfg(any(target_os = \"macos\", target_os = \"ios\", target_os = \"freebsd\"))": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ]
@@ -6487,7 +6487,7 @@
               "target": "foreign_types"
             },
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             },
             {
@@ -6661,7 +6661,7 @@
         "deps": {
           "common": [
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             },
             {
@@ -7690,7 +7690,7 @@
           "selects": {
             "cfg(unix)": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ]
@@ -8278,7 +8278,7 @@
               "target": "http"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             },
             {
@@ -8489,7 +8489,7 @@
             ],
             "cfg(any(target_os = \"android\", target_os = \"linux\"))": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               },
               {
@@ -8531,9 +8531,9 @@
       },
       "license": null
     },
-    "risc0-build 0.10.0": {
+    "risc0-build 0.11.0-rc.3": {
       "name": "risc0-build",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -8565,7 +8565,7 @@
               "target": "reqwest"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             },
             {
@@ -8584,13 +8584,13 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "license": "Apache-2.0"
     },
-    "risc0-core-sys 0.10.0": {
+    "risc0-core-sys 0.11.0-rc.3": {
       "name": "risc0-core-sys",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -8630,14 +8630,14 @@
               "target": "cxx"
             },
             {
-              "id": "risc0-core-sys 0.10.0",
+              "id": "risc0-core-sys 0.11.0-rc.3",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -8656,9 +8656,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-make-id 0.1.0": {
+    "risc0-make-id 0.11.0-rc.3": {
       "name": "risc0-make-id",
-      "version": "0.1.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -8689,13 +8689,13 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.1.0"
+        "version": "0.11.0-rc.3"
       },
       "license": null
     },
-    "risc0-r0vm 0.1.0": {
+    "risc0-r0vm 0.11.0-rc.3": {
       "name": "risc0-r0vm",
-      "version": "0.1.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -8732,7 +8732,7 @@
         "deps_dev": {
           "common": [
             {
-              "id": "anyhow 1.0.59",
+              "id": "anyhow 1.0.60",
               "target": "anyhow"
             },
             {
@@ -8747,13 +8747,13 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.1.0"
+        "version": "0.11.0-rc.3"
       },
-      "license": null
+      "license": "Apache-2.0"
     },
-    "risc0-zkp 0.10.0": {
+    "risc0-zkp 0.11.0-rc.3": {
       "name": "risc0-zkp",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -8784,7 +8784,7 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.59",
+              "id": "anyhow 1.0.60",
               "target": "anyhow"
             },
             {
@@ -8820,7 +8820,7 @@
               "target": "rayon"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             },
             {
@@ -8849,13 +8849,13 @@
           ],
           "selects": {}
         },
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkp-sys 0.10.0": {
+    "risc0-zkp-sys 0.11.0-rc.3": {
       "name": "risc0-zkp-sys",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -8899,7 +8899,7 @@
               "target": "log"
             },
             {
-              "id": "risc0-zkp-sys 0.10.0",
+              "id": "risc0-zkp-sys 0.11.0-rc.3",
               "target": "build_script_build"
             },
             {
@@ -8910,7 +8910,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -8929,9 +8929,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm 0.10.0": {
+    "risc0-zkvm 0.11.0-rc.3": {
       "name": "risc0-zkvm",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -8979,18 +8979,18 @@
               "target": "bytemuck"
             },
             {
-              "id": "risc0-zkvm 0.10.0",
+              "id": "risc0-zkvm 0.11.0-rc.3",
               "target": "build_script_build"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
           "selects": {
             "cfg(not(target_arch = \"riscv32\"))": [
               {
-                "id": "anyhow 1.0.59",
+                "id": "anyhow 1.0.60",
                 "target": "anyhow"
               },
               {
@@ -9048,7 +9048,7 @@
             ]
           }
         },
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9057,9 +9057,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-circuit 0.10.0": {
+    "risc0-zkvm-circuit 0.11.0-rc.3": {
       "name": "risc0-zkvm-circuit",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -9083,7 +9083,7 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.59",
+              "id": "anyhow 1.0.60",
               "target": "anyhow"
             },
             {
@@ -9103,13 +9103,13 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-circuit-gen 0.10.0": {
+    "risc0-zkvm-circuit-gen 0.11.0-rc.3": {
       "name": "risc0-zkvm-circuit-gen",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -9145,14 +9145,14 @@
         "deps": {
           "common": [
             {
-              "id": "risc0-zkvm-circuit-gen 0.10.0",
+              "id": "risc0-zkvm-circuit-gen 0.11.0-rc.3",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9162,9 +9162,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-circuit-sys 0.10.0": {
+    "risc0-zkvm-circuit-sys 0.11.0-rc.3": {
       "name": "risc0-zkvm-circuit-sys",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -9200,7 +9200,7 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.59",
+              "id": "anyhow 1.0.60",
               "target": "anyhow"
             },
             {
@@ -9208,14 +9208,14 @@
               "target": "cxx"
             },
             {
-              "id": "risc0-zkvm-circuit-sys 0.10.0",
+              "id": "risc0-zkvm-circuit-sys 0.11.0-rc.3",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9276,7 +9276,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
@@ -9292,9 +9292,9 @@
       },
       "license": null
     },
-    "risc0-zkvm-platform 0.10.0": {
+    "risc0-zkvm-platform 0.11.0-rc.3": {
       "name": "risc0-zkvm-platform",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -9316,13 +9316,13 @@
           "**"
         ],
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-platform-sys 0.10.0": {
+    "risc0-zkvm-platform-sys 0.11.0-rc.3": {
       "name": "risc0-zkvm-platform-sys",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -9362,14 +9362,14 @@
               "target": "cxx"
             },
             {
-              "id": "risc0-zkvm-platform-sys 0.10.0",
+              "id": "risc0-zkvm-platform-sys 0.11.0-rc.3",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9388,9 +9388,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-sys 0.10.0": {
+    "risc0-zkvm-sys 0.11.0-rc.3": {
       "name": "risc0-zkvm-sys",
-      "version": "0.10.0",
+      "version": "0.11.0-rc.3",
       "repository": null,
       "targets": [
         {
@@ -9430,7 +9430,7 @@
               "target": "cxx"
             },
             {
-              "id": "risc0-zkvm-sys 0.10.0",
+              "id": "risc0-zkvm-sys 0.11.0-rc.3",
               "target": "build_script_build"
             },
             {
@@ -9441,7 +9441,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.10.0"
+        "version": "0.11.0-rc.3"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9892,7 +9892,7 @@
               "target": "core_foundation_sys"
             },
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             },
             {
@@ -9946,7 +9946,7 @@
               "target": "core_foundation_sys"
             },
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             }
           ],
@@ -10009,7 +10009,7 @@
               "target": "build_script_build"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
@@ -10025,13 +10025,13 @@
       },
       "license": "MIT OR Apache-2.0"
     },
-    "serde 1.0.142": {
+    "serde 1.0.143": {
       "name": "serde",
-      "version": "1.0.142",
+      "version": "1.0.143",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde/1.0.142/download",
-          "sha256": "e590c437916fb6b221e1d00df6e3294f3fccd70ca7e92541c475d6ed6ef5fee2"
+          "url": "https://crates.io/api/v1/crates/serde/1.0.143/download",
+          "sha256": "53e8e5d5b70924f74ff5c6d64d9a5acd91422117c60f48c4e07855238a254553"
         }
       },
       "targets": [
@@ -10074,7 +10074,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "build_script_build"
             }
           ],
@@ -10084,13 +10084,13 @@
         "proc_macro_deps": {
           "common": [
             {
-              "id": "serde_derive 1.0.142",
+              "id": "serde_derive 1.0.143",
               "target": "serde_derive"
             }
           ],
           "selects": {}
         },
-        "version": "1.0.142"
+        "version": "1.0.143"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -10138,7 +10138,7 @@
               "target": "half"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
@@ -10149,13 +10149,13 @@
       },
       "license": "MIT/Apache-2.0"
     },
-    "serde_derive 1.0.142": {
+    "serde_derive 1.0.143": {
       "name": "serde_derive",
-      "version": "1.0.142",
+      "version": "1.0.143",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.142/download",
-          "sha256": "34b5b8d809babe02f538c2cfec6f2c1ed10804c0e5a6a041a049a4f5588ccc2e"
+          "url": "https://crates.io/api/v1/crates/serde_derive/1.0.143/download",
+          "sha256": "d3d8e8de557aee63c26b85b947f5e59b690d0454c753f3adeb5cd7835ab88391"
         }
       },
       "targets": [
@@ -10203,7 +10203,7 @@
               "target": "quote"
             },
             {
-              "id": "serde_derive 1.0.142",
+              "id": "serde_derive 1.0.143",
               "target": "build_script_build"
             },
             {
@@ -10214,7 +10214,7 @@
           "selects": {}
         },
         "edition": "2015",
-        "version": "1.0.142"
+        "version": "1.0.143"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -10279,7 +10279,7 @@
               "target": "ryu"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             },
             {
@@ -10342,7 +10342,7 @@
               "target": "ryu"
             },
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             }
           ],
@@ -10576,7 +10576,7 @@
           "selects": {
             "cfg(unix)": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ],
@@ -10893,7 +10893,7 @@
           "selects": {
             "cfg(any(unix, target_os = \"wasi\"))": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ],
@@ -11110,13 +11110,13 @@
       },
       "license": "Apache-2.0/MIT"
     },
-    "time 0.3.12": {
+    "time 0.3.13": {
       "name": "time",
-      "version": "0.3.12",
+      "version": "0.3.13",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/time/0.3.12/download",
-          "sha256": "74b7cc93fc23ba97fde84f7eea56c55d1ba183f495c6715defdfc7b9cb8c870f"
+          "url": "https://crates.io/api/v1/crates/time/0.3.13/download",
+          "sha256": "db76ff9fa4b1458b3c7f077f3ff9887394058460d21e634355b273aaf11eea45"
         }
       },
       "targets": [
@@ -11155,15 +11155,9 @@
             }
           ],
           "selects": {
-            "cfg(all(target_arch = \"wasm32\", not(any(target_os = \"emscripten\", target_os = \"wasi\"))))": [
-              {
-                "id": "js-sys 0.3.59",
-                "target": "js_sys"
-              }
-            ],
             "cfg(target_family = \"unix\")": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               },
               {
@@ -11183,7 +11177,7 @@
           ],
           "selects": {}
         },
-        "version": "0.3.12"
+        "version": "0.3.13"
       },
       "license": "MIT OR Apache-2.0"
     },
@@ -11251,7 +11245,7 @@
         "deps": {
           "common": [
             {
-              "id": "serde 1.0.142",
+              "id": "serde 1.0.143",
               "target": "serde"
             },
             {
@@ -11441,7 +11435,7 @@
           "selects": {
             "cfg(unix)": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ],
@@ -12239,7 +12233,7 @@
           "selects": {
             "cfg(unix)": [
               {
-                "id": "libc 0.2.126",
+                "id": "libc 0.2.129",
                 "target": "libc"
               }
             ]
@@ -13837,7 +13831,7 @@
               "target": "sha1"
             },
             {
-              "id": "time 0.3.12",
+              "id": "time 0.3.13",
               "target": "time"
             },
             {
@@ -13954,7 +13948,7 @@
         "deps": {
           "common": [
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             },
             {
@@ -14025,7 +14019,7 @@
         "deps": {
           "common": [
             {
-              "id": "libc 0.2.126",
+              "id": "libc 0.2.129",
               "target": "libc"
             },
             {
@@ -14066,20 +14060,20 @@
   ],
   "workspace_members": {
     "direct-cargo-bazel-deps 0.0.1": "",
-    "risc0-build 0.10.0": "risc0/zkvm/sdk/rust/build",
-    "risc0-core-sys 0.10.0": "risc0/core",
-    "risc0-make-id 0.1.0": "risc0/zkvm/prove/make-id",
-    "risc0-r0vm 0.1.0": "risc0/zkvm/r0vm",
-    "risc0-zkp 0.10.0": "risc0/zkp/rust",
-    "risc0-zkp-sys 0.10.0": "risc0/zkp",
-    "risc0-zkvm 0.10.0": "risc0/zkvm/sdk/rust",
-    "risc0-zkvm-circuit 0.10.0": "risc0/zkvm/sdk/rust/circuit",
-    "risc0-zkvm-circuit-gen 0.10.0": "risc0/zkvm/circuit/make-circuit",
-    "risc0-zkvm-circuit-sys 0.10.0": "risc0/zkvm/circuit",
+    "risc0-build 0.11.0-rc.3": "risc0/zkvm/sdk/rust/build",
+    "risc0-core-sys 0.11.0-rc.3": "risc0/core",
+    "risc0-make-id 0.11.0-rc.3": "risc0/zkvm/prove/make-id",
+    "risc0-r0vm 0.11.0-rc.3": "risc0/zkvm/r0vm",
+    "risc0-zkp 0.11.0-rc.3": "risc0/zkp/rust",
+    "risc0-zkp-sys 0.11.0-rc.3": "risc0/zkp",
+    "risc0-zkvm 0.11.0-rc.3": "risc0/zkvm/sdk/rust",
+    "risc0-zkvm-circuit 0.11.0-rc.3": "risc0/zkvm/sdk/rust/circuit",
+    "risc0-zkvm-circuit-gen 0.11.0-rc.3": "risc0/zkvm/circuit/make-circuit",
+    "risc0-zkvm-circuit-sys 0.11.0-rc.3": "risc0/zkvm/circuit",
     "risc0-zkvm-methods 0.1.0": "risc0/zkvm/sdk/rust/methods",
-    "risc0-zkvm-platform 0.10.0": "risc0/zkvm/sdk/rust/platform",
-    "risc0-zkvm-platform-sys 0.10.0": "risc0/zkvm/platform",
-    "risc0-zkvm-sys 0.10.0": "risc0/zkvm"
+    "risc0-zkvm-platform 0.11.0-rc.3": "risc0/zkvm/sdk/rust/platform",
+    "risc0-zkvm-platform-sys 0.11.0-rc.3": "risc0/zkvm/platform",
+    "risc0-zkvm-sys 0.11.0-rc.3": "risc0/zkvm"
   },
   "conditions": {
     "aarch64-apple-darwin": [
@@ -14093,9 +14087,6 @@
     "cfg(all(any(target_arch = \"x86_64\", target_arch = \"aarch64\"), target_os = \"hermit\"))": [],
     "cfg(all(target_arch = \"aarch64\", target_os = \"linux\"))": [
       "aarch64-unknown-linux-gnu"
-    ],
-    "cfg(all(target_arch = \"wasm32\", not(any(target_os = \"emscripten\", target_os = \"wasi\"))))": [
-      "wasm32-unknown-unknown"
     ],
     "cfg(all(target_arch = \"wasm32\", not(target_os = \"emscripten\")))": [
       "wasm32-unknown-unknown",

@@ -110,7 +110,7 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
     }
 
     fn eval_check(
-        &mut self,
+        &self,
         check: &Buffer<Fp>,
         code: &Buffer<Fp>,
         data: &Buffer<Fp>,

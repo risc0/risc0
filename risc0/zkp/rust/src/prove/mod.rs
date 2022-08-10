@@ -51,7 +51,7 @@ pub trait Circuit {
 
     /// Compute check polynomial.
     fn eval_check(
-        &mut self,
+        &self,
         check: &Buffer<Fp>,
         code: &Buffer<Fp>,
         data: &Buffer<Fp>,
