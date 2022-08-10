@@ -64,30 +64,43 @@ struct Prover::Impl : public IoHandler {
       , commitStream(commitBuffer)
       , inputWriter(inputStream)
       , outputReader(outputStream)
-      , commitReader(commitStream) {}
+      , commitReader(commitStream) {
+    // Set default handlers:
+    setSendRecvHandler(kSendRecvChannel_Stdout, [this](uint32_t, const BufferU8& buf) -> BufferU8 {
+      LOG(1, "IoHandler::Stdout> " << buf.size());
+      outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
+      return BufferU8();
+    });
+    setSendRecvHandler(kSendRecvChannel_Stderr, [](uint32_t, const BufferU8& buf) -> BufferU8 {
+      LOG(1, "IoHandler::Stderr> " << buf.size());
+      fwrite(buf.data(), buf.size(), 1, stderr);
+      return BufferU8();
+    });
+    setSendRecvHandler(
+        kSendRecvChannel_InitialInput, [this](uint32_t, const BufferU8& buf) -> BufferU8 {
+          const uint8_t* byte_ptr = reinterpret_cast<const uint8_t*>(inputStream.vec.data());
+          BufferU8 input(byte_ptr, byte_ptr + inputStream.vec.size() * sizeof(uint32_t));
+          LOG(1, "IoHandler::InitialInput, " << input.size() << " bytes");
+          return input;
+        });
+  }
 
   virtual ~Impl() {}
 
   void onInit(MemoryState& mem) override { LOG(1, "Prover::onInit>"); }
 
+  void setSendRecvHandler(
+      uint32_t channelId,
+      const std::function<BufferU8(uint32_t /* channelId*/, const BufferU8&)>& handler) {
+    sendRecvHandlers.insert(std::make_pair(channelId, handler));
+  }
+
   BufferU8 onSendRecv(uint32_t channel, const BufferU8& buf) override {
-    switch (channel) {
-    case kSendRecvChannel_Stdout:
-      LOG(1, "IoHandler::Stdout> " << buf.size());
-      outputBuffer.insert(outputBuffer.end(), buf.begin(), buf.end());
-      return BufferU8();
-    case kSendRecvChannel_Stderr:
-      LOG(1, "IoHandler::Stderr> " << buf.size());
-      fwrite(buf.data(), buf.size(), 1, stderr);
-      return BufferU8();
-    case kSendRecvChannel_InitialInput: {
-      const uint8_t* byte_ptr = reinterpret_cast<const uint8_t*>(inputStream.vec.data());
-      BufferU8 input(byte_ptr, byte_ptr + inputStream.vec.size() * sizeof(uint32_t));
-      LOG(1, "IoHandler::InitialInput, " << input.size() << " bytes");
-      return input;
+    auto it = sendRecvHandlers.find(channel);
+    if (it == sendRecvHandlers.end()) {
+      throw(std::runtime_error("Unknown channel " + std::to_string(channel)));
     }
-    }
-    throw(std::runtime_error("Unknown channel " + std::to_string(channel)));
+    return it->second(channel, buf);
   }
 
   void onCommit(const BufferU8& buf) override {
@@ -108,6 +121,10 @@ struct Prover::Impl : public IoHandler {
   ArchiveWriter<VectorStreamWriter> inputWriter;
   ArchiveReader<CheckedStreamReader> outputReader;
   ArchiveReader<CheckedStreamReader> commitReader;
+
+  std::map<uint32_t /* channel id */,
+           std::function<BufferU8(uint32_t /* channelId*/, const BufferU8&)> /* handler */>
+      sendRecvHandlers;
 };
 
 CheckedStreamReader::CheckedStreamReader(const BufferU8& buffer) : buffer(buffer), cursor(0) {}
@@ -202,27 +219,29 @@ void Prover::writeInput(const void* ptr, size_t size) {
   }
 }
 
+void Prover::setSendRecvHandler(
+    uint32_t channelId,
+    const std::function<BufferU8(uint32_t /* channelId*/, const BufferU8&)>& handler) {
+  impl->setSendRecvHandler(channelId, handler);
+}
+
 Receipt Prover::run() {
   // Set the memory handlers to call back to the impl
   MemoryHandler handler(impl.get());
   // Make the circuit
   std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfContents, handler);
-  BufferU32 seal = prove(*circuit);
-  // Attach the full version of the output journal + construct receipt object
-  Receipt receipt{getCommit(), seal};
-  // Verify receipt to make sure it works
-  receipt.verify(impl->methodId);
-  return receipt;
-}
-
-Receipt Prover::runWithoutSeal() {
-  // Set the memory handlers to call back to the impl
-  MemoryHandler handler(impl.get());
-  // Make the circuit
-  std::unique_ptr<ProveCircuit> circuit = getRiscVProveCircuit(impl->elfContents, handler);
-  risc0::runWithoutSeal(*circuit);
-  Receipt receipt{getCommit(), {} /* no seal */};
-  return receipt;
+  if (skip_seal) {
+    risc0::runWithoutSeal(*circuit);
+    Receipt receipt{getCommit(), {} /* no seal */};
+    return receipt;
+  } else {
+    BufferU32 seal = prove(*circuit);
+    // Attach the full version of the output journal + construct receipt object
+    Receipt receipt{getCommit(), seal};
+    // Verify receipt to make sure it works
+    receipt.verify(impl->methodId);
+    return receipt;
+  }
 }
 
 } // namespace risc0

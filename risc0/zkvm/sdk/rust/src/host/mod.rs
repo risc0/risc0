@@ -15,12 +15,16 @@
 #![deny(missing_docs)]
 #![doc = include_str!("README.md")]
 
+use std::collections::HashMap;
+
 #[cfg(not(feature = "pure-prove"))]
 mod ffi;
 #[cfg(feature = "pure-prove")]
 mod prove;
 #[cfg(not(feature = "pure-prove"))]
 use ffi as prove;
+
+pub use prove::Prover;
 
 mod exception;
 
@@ -29,13 +33,52 @@ pub use exception::Exception;
 #[cxx::bridge]
 mod bridge {}
 
+/// Options available to modify the prover's behavior.
+pub struct ProverOpts<'a> {
+    skip_seal: bool,
+
+    sendrecv_callbacks: HashMap<u32, Box<dyn Fn(u32, &[u8]) -> Vec<u8> + 'a + Sync>>,
+}
+
+impl<'a> ProverOpts<'a> {
+    /// If true, skip generating the seal in receipt.  This should
+    /// only be used for testing.  In this case, performace will be
+    /// much better but we will not be able to cryptographically
+    /// verify the execution.
+    pub fn with_skip_seal(self, skip_seal: bool) -> Self {
+        Self { skip_seal, ..self }
+    }
+
+    /// Add a callback handler for sendrecv ports, indexed by channel
+    /// numbers.  The guest can call these callbacks by invoking
+    /// risc0_zkvm_guest::host_sendrecv.
+    pub fn with_sendrecv_callback(
+        mut self,
+        channel_id: u32,
+        callback: impl Fn(u32, &[u8]) -> Vec<u8> + 'a + Sync,
+    ) -> Self {
+        self.sendrecv_callbacks
+            .insert(channel_id, Box::new(callback));
+        self
+    }
+}
+
+impl<'a> Default for ProverOpts<'a> {
+    fn default() -> ProverOpts<'a> {
+        ProverOpts {
+            skip_seal: false,
+            sendrecv_callbacks: HashMap::new(),
+        }
+    }
+}
+
 /// The default digest count when generating a MethodId.
 pub const DEFAULT_METHOD_ID_LIMIT: u32 = 12;
 
 /// A Result specialized for [Exception].
 pub type Result<T> = std::result::Result<T, Exception>;
 
-pub use prove::{MethodId, Prover, ProverOpts, Receipt};
+pub use prove::{MethodId, Receipt};
 
 #[cfg(test)]
 mod test {
@@ -46,7 +89,10 @@ mod test {
     };
     use anyhow::Result;
     use risc0_zkp::core::sha::Digest;
-    use risc0_zkvm_methods::{FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SHA_ID, SHA_PATH};
+    use risc0_zkvm_methods::{
+        FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SENDRECV_ID, SENDRECV_PATH, SHA_ID, SHA_PATH,
+    };
+    use std::sync::Mutex;
 
     #[test]
     fn sha() {
@@ -114,7 +160,7 @@ mod test {
     }
 
     fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
-        run_memio_with_opts(pairs, ProverOpts::default())
+        run_memio_with_opts(pairs, ProverOpts::default().with_skip_seal(true))
     }
 
     fn run_memio_with_opts(pairs: &[(usize, usize)], opts: ProverOpts) -> Result<Receipt> {
@@ -124,11 +170,12 @@ mod test {
             vec.push(*first as u32);
             vec.push(*second as u32);
         }
+        let skip_seal = opts.skip_seal;
         let mut prover =
             Prover::new_with_opts(&std::fs::read(IO_PATH).unwrap(), IO_ID, opts).unwrap();
         prover.add_input_u32_slice(vec.as_slice());
         let receipt = prover.run()?;
-        if !opts.skip_seal {
+        if !skip_seal {
             receipt.verify(IO_ID).unwrap();
         }
         Ok(receipt)
@@ -136,7 +183,8 @@ mod test {
 
     #[test]
     fn receipt_serde() {
-        let receipt: Receipt = run_memio(&[(HEAP.start(), 0)]).unwrap();
+        let receipt: Receipt =
+            run_memio_with_opts(&[(HEAP.start(), 0)], ProverOpts::default()).unwrap();
         let ser: Vec<u32> = crate::serde::to_vec(&receipt).unwrap();
         let de: Receipt = crate::serde::from_slice(&ser).unwrap();
         assert_eq!(de.get_journal().unwrap(), receipt.get_journal().unwrap());
@@ -146,8 +194,11 @@ mod test {
 
     #[test]
     fn receipt_serde_no_seal() {
-        let receipt: Receipt =
-            run_memio_with_opts(&[(HEAP.start(), 0)], ProverOpts { skip_seal: true }).unwrap();
+        let receipt: Receipt = run_memio_with_opts(
+            &[(HEAP.start(), 0)],
+            ProverOpts::default().with_skip_seal(true),
+        )
+        .unwrap();
         let ser: Vec<u32> = crate::serde::to_vec(&receipt).unwrap();
         let de: Receipt = crate::serde::from_slice(&ser).unwrap();
         assert_eq!(de.get_journal().unwrap(), receipt.get_journal().unwrap());
@@ -167,5 +218,49 @@ mod test {
         let method_id = MethodId::from_slice(FAIL_ID).unwrap();
         let clone = method_id.clone();
         assert!(method_id == clone);
+    }
+
+    #[test]
+    fn host_sendrecv() {
+        let expected: Vec<Vec<u8>> = vec![
+            "".into(),
+            "H".into(),
+            "He".into(),
+            "Hel".into(),
+            "Hell".into(),
+            "Hello".into(),
+        ];
+        let actual: Mutex<Vec<Vec<u8>>> = Vec::new().into();
+        let opts = ProverOpts::default()
+            .with_skip_seal(true)
+            .with_sendrecv_callback(5, |channel_id, buf| -> Vec<u8> {
+                assert_eq!(channel_id, 5);
+                let mut act = actual.lock().unwrap();
+                act.push(buf.into());
+                expected[act.len()].clone()
+            });
+        let mut prover =
+            Prover::new_with_opts(&std::fs::read(SENDRECV_PATH).unwrap(), SENDRECV_ID, opts)
+                .unwrap();
+        prover.add_input_u32_slice(&[5, expected.len() as u32 - 1]);
+        prover.run().unwrap();
+
+        assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
+    }
+
+    // Make sure panics in the callback get propagated correctly.
+    #[test]
+    #[should_panic(expected = "I am panicking from here!")]
+    fn host_sendrecv_callback_panic() {
+        let opts = ProverOpts::default()
+            .with_skip_seal(true)
+            .with_sendrecv_callback(5, |_channel_id, _buf| -> Vec<u8> {
+                panic!("I am panicking from here!");
+            });
+        let mut prover =
+            Prover::new_with_opts(&std::fs::read(SENDRECV_PATH).unwrap(), SENDRECV_ID, opts)
+                .unwrap();
+        prover.add_input_u32_slice(&[5, 5]);
+        prover.run().unwrap();
     }
 }
