@@ -39,10 +39,12 @@ use risc0_zkvm_methods::{
 fn run_guest(spec: SpecWithIters) -> Duration {
     let input_data: Vec<u32> = to_vec(&spec).unwrap();
 
-    let mut opts: ProverOpts = ProverOpts::default();
-    opts.skip_seal = true;
-    let mut prover =
-        Prover::new_with_opts(&std::fs::read(BENCH_PATH).unwrap(), BENCH_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(
+        &std::fs::read(BENCH_PATH).unwrap(),
+        BENCH_ID,
+        ProverOpts::default().with_skip_seal(true),
+    )
+    .unwrap();
     prover.add_input(input_data.as_slice()).unwrap();
 
     let start = Instant::now();

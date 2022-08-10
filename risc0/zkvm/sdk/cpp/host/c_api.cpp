@@ -28,6 +28,10 @@ struct risc0_string {
   std::string str;
 };
 
+struct risc0_u8buffer {
+  std::vector<uint8_t> buf;
+};
+
 } // extern "C"
 
 template <typename F> void ffi_wrap_void(risc0_error* err, F fn) {
@@ -36,8 +40,6 @@ template <typename F> void ffi_wrap_void(risc0_error* err, F fn) {
     fn();
   } catch (const std::exception& ex) {
     err->msg = new risc0_string{ex.what()};
-  } catch (...) {
-    err->msg = new risc0_string{"C++ exception"};
   }
 }
 
@@ -47,9 +49,6 @@ template <typename T, typename F> T ffi_wrap(risc0_error* err, T val, F fn) {
     return fn();
   } catch (const std::exception& ex) {
     err->msg = new risc0_string{ex.what()};
-    return val;
-  } catch (...) {
-    err->msg = new risc0_string{"C++ exception"};
     return val;
   }
 }
@@ -81,6 +80,10 @@ const char* risc0_string_ptr(risc0_string* str) {
 void risc0_string_free(risc0_string* str) {
   risc0_error err;
   ffi_wrap_void(&err, [&] { delete str; });
+}
+
+risc0_u8buffer* risc0_u8buffer_new(const uint8_t* bytes, size_t len) {
+  return new risc0_u8buffer{std::vector<uint8_t>(bytes, bytes + len)};
 }
 
 risc0_method_id*
@@ -141,10 +144,26 @@ risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr) {
   });
 }
 
-risc0_receipt* risc0_prover_run_without_seal(risc0_error* err, risc0_prover* ptr) {
-  return ffi_wrap<risc0_receipt*>(err, nullptr, [&] {
-    risc0::Receipt receipt = ptr->prover->runWithoutSeal();
-    return new risc0_receipt{receipt};
+void risc0_prover_set_skip_seal(risc0_error* err, risc0_prover* ptr, bool skip_seal) {
+  return ffi_wrap_void(err, [&] { ptr->prover->setSkipSeal(skip_seal); });
+}
+
+void risc0_prover_set_sendrecv_handler(
+    risc0_error* err,
+    risc0_prover* ptr,
+    uint32_t channel_id,
+    risc0_u8buffer* (*callback)(uint32_t channel_id, const uint8_t* buf, size_t len, void* cbdata),
+    void* cbdata) {
+  return ffi_wrap_void(err, [&] {
+    ptr->prover->setSendRecvHandler(
+        channel_id,
+        [=](uint32_t channel_id, const std::vector<uint8_t>& buf) -> std::vector<uint8_t> {
+          risc0_u8buffer* to_guest_buf = callback(channel_id, buf.data(), buf.size(), cbdata);
+          risc0_u8buffer to_guest_vec = std::move(*to_guest_buf);
+          delete to_guest_buf;
+
+          return std::move(to_guest_vec.buf);
+        });
   });
 }
 

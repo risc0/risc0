@@ -16,11 +16,13 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{ffi::CStr, mem, os::raw::c_char};
 
 use super::exception::Exception;
+use super::ProverOpts;
 
 pub(crate) enum RawString {}
 pub(crate) enum RawProver {}
 pub(crate) enum RawReceipt {}
 pub(crate) enum RawMethodId {}
+pub(crate) enum RawU8Buffer {}
 
 #[repr(C)]
 pub(crate) struct RawError {
@@ -59,6 +61,8 @@ extern "C" {
     pub(crate) fn risc0_string_ptr(str: *const RawString) -> *const c_char;
 
     pub(crate) fn risc0_string_free(str: *const RawString);
+
+    pub(crate) fn risc0_u8buffer_new(bytes: *const u8, len: usize) -> *mut RawU8Buffer;
 
     pub(crate) fn risc0_method_id_compute(
         err: *mut RawError,
@@ -108,10 +112,24 @@ extern "C" {
     pub(crate) fn risc0_prover_run(err: *mut RawError, prover: *mut RawProver)
         -> *const RawReceipt;
 
-    pub(crate) fn risc0_prover_run_without_seal(
-        err: *mut RawError,
+    pub(crate) fn risc0_prover_set_skip_seal(
+        rr: *mut RawError,
         prover: *mut RawProver,
-    ) -> *const RawReceipt;
+        skip_seal: bool,
+    );
+
+    pub(crate) fn risc0_prover_set_sendrecv_handler(
+        rr: *mut RawError,
+        prover: *mut RawProver,
+        channel_id: u32,
+        callback: unsafe extern "C" fn(
+            channel_id: u32,
+            buf: *const u8,
+            len: usize,
+            cbdata: *const u8,
+        ) -> *mut RawU8Buffer,
+        cbdata: *const u8,
+    );
 
     pub(crate) fn risc0_receipt_new(
         err: *mut RawError,
@@ -161,19 +179,9 @@ pub struct Receipt {
 }
 
 /// The prover generates a [Receipt] by executing a given method in a ZKVM.
-pub struct Prover {
+pub struct Prover<'a> {
     ptr: *mut RawProver,
-    opts: ProverOpts,
-}
-
-/// Options available to modify the prover's behavior.
-#[non_exhaustive]
-#[derive(Default, Debug, Clone, Copy)]
-pub struct ProverOpts {
-    /// Skip generating the seal in receipt.  This should only be used
-    /// for testing.  In this case, performace will be much better but
-    /// we will not be able to cryptographically verify the execution.
-    pub skip_seal: bool,
+    opts: ProverOpts<'a>,
 }
 
 /// A MethodId represents a unique identifier associated with a particular ELF
@@ -336,7 +344,7 @@ impl<'de> Deserialize<'de> for Receipt {
     }
 }
 
-impl Prover {
+impl<'a> Prover<'a> {
     /// Create a new [Prover] with the given method (specified via
     /// `elf_contents`) and an associated method ID (specified via
     /// `method_id`).
@@ -350,7 +358,7 @@ impl Prover {
     pub fn new_with_opts(
         elf_contents: &[u8],
         method_id: &[u8],
-        opts: ProverOpts,
+        opts: ProverOpts<'a>,
     ) -> super::Result<Self> {
         let mut err = RawError::default();
         let ptr = unsafe {
@@ -414,17 +422,46 @@ impl Prover {
         into_words(self.get_output()?)
     }
 
+    unsafe extern "C" fn handle_callback(
+        channel_id: u32,
+        buf: *const u8,
+        len: usize,
+        cbdata: *const u8,
+    ) -> *mut RawU8Buffer {
+        let cb = cbdata as *const Box<dyn Fn(u32, &[u8]) -> Vec<u8>>;
+
+        let from_guest = std::slice::from_raw_parts(buf, len);
+        let to_guest = (*cb)(channel_id, from_guest);
+
+        risc0_u8buffer_new(to_guest.as_ptr(), to_guest.len())
+    }
+
     /// Execute the ZKVM to produce a [Receipt].
     pub fn run(&self) -> super::Result<Receipt> {
         let mut err = RawError::default();
 
-        let ptr = unsafe {
-            if self.opts.skip_seal {
-                risc0_prover_run_without_seal(&mut err, self.ptr)
-            } else {
-                risc0_prover_run(&mut err, self.ptr)
-            }
+        unsafe {
+            risc0_prover_set_skip_seal(&mut err, self.ptr, self.opts.skip_seal);
         };
+        check(err, || ())?;
+
+        for (channel_id, cb) in self.opts.sendrecv_callbacks.iter() {
+            let mut err = RawError::default();
+            unsafe {
+                let cb: *const Box<_> = cb;
+                risc0_prover_set_sendrecv_handler(
+                    &mut err,
+                    self.ptr,
+                    *channel_id,
+                    Self::handle_callback,
+                    cb.cast(),
+                );
+            };
+            check(err, || ())?;
+        }
+
+        let mut err = RawError::default();
+        let ptr = unsafe { risc0_prover_run(&mut err, self.ptr) };
         check(err, || Receipt { ptr })
     }
 }
@@ -437,7 +474,7 @@ impl Drop for Receipt {
     }
 }
 
-impl Drop for Prover {
+impl<'a> Drop for Prover<'a> {
     fn drop(&mut self) {
         let mut err = RawError::default();
         unsafe { risc0_prover_free(&mut err, self.ptr) };

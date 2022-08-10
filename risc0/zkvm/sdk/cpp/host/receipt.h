@@ -21,6 +21,7 @@
 #include "risc0/zkvm/prove/step.h"
 
 #include <array>
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -76,7 +77,7 @@ class Prover {
 public:
   Prover(const uint8_t* bytes, size_t len, const MethodId& methodId);
   Prover(std::vector<uint8_t> elfContents, const MethodId& methodId);
-  Prover(const std::string& elfFile, const MethodId& method_id);
+  Prover(const std::string& elfFile, const MethodId& methodId);
   ~Prover();
 
   // Allows access to key store to get/set keys
@@ -108,11 +109,10 @@ public:
   // method was run correctly.
   Receipt run();
 
-  // Run the method without generating a seal containing the proof of
-  // correct execution.  This is significantly faster than run(), but
-  // does not provide any of the cryptographic guarantees so should
-  // only be used for testing.
-  Receipt runWithoutSeal();
+  void setSkipSeal(bool skipSeal) { skip_seal = skipSeal; }
+  void setSendRecvHandler(
+      uint32_t channelId,
+      const std::function<BufferU8(uint32_t /* channelId*/, const BufferU8&)>& handler);
 
 private:
   Prover() = default;
@@ -124,6 +124,7 @@ private:
 private:
   struct Impl;
   std::unique_ptr<Impl> impl;
+  bool skip_seal = false;
 };
 
 } // namespace risc0

@@ -34,6 +34,7 @@ typedef struct risc0_string risc0_string;
 typedef struct risc0_prover risc0_prover;
 typedef struct risc0_receipt risc0_receipt;
 typedef struct risc0_method_id risc0_method_id;
+typedef struct risc0_u8buffer risc0_u8buffer;
 
 //
 // Error
@@ -50,6 +51,11 @@ typedef struct {
 const char* risc0_string_ptr(risc0_string* str);
 
 void risc0_string_free(risc0_string* str);
+
+//
+// U8buffer
+
+risc0_u8buffer* risc0_u8buffer_new(const uint8_t* bytes, size_t len);
 
 //
 // Library
@@ -91,7 +97,14 @@ size_t risc0_prover_get_output_len(risc0_error* err, const risc0_prover* ptr);
 
 risc0_receipt* risc0_prover_run(risc0_error* err, risc0_prover* ptr);
 
-risc0_receipt* risc0_prover_run_without_seal(risc0_error* err, risc0_prover* ptr);
+void risc0_prover_set_skip_seal(risc0_error* err, risc0_prover* ptr, bool skip_seal);
+
+void risc0_prover_set_sendrecv_handler(
+    risc0_error* err,
+    risc0_prover* ptr,
+    uint32_t channel_id,
+    risc0_u8buffer* (*callback)(uint32_t channel_id, const uint8_t* buf, size_t len, void* cbdata),
+    void* cbdata);
 
 //
 // Receipt
