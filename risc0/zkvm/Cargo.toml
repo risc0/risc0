@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-sys"
-version = "0.10.0"
+version = "0.11.0-rc.2"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM system crate"
 license = "Apache-2.0"
@@ -13,10 +13,10 @@ path = "lib.rs"
 
 [dependencies]
 cxx = "1.0"
-risc0-core-sys = { version = "0.10", path = "../core" }
-risc0-zkp-sys = { version = "0.10", path = "../zkp" }
-risc0-zkvm-circuit-gen = { version = "0.10", path = "circuit/make-circuit" }
-risc0-zkvm-circuit-sys = { version = "0.10", path = "circuit" }
+risc0-core-sys = { version = "0.11.0-rc.2", path = "../core" }
+risc0-zkp-sys = { version = "0.11.0-rc.2", path = "../zkp" }
+risc0-zkvm-circuit-gen = { version = "0.11.0-rc.2", path = "circuit/make-circuit" }
+risc0-zkvm-circuit-sys = { version = "0.11.0-rc.2", path = "circuit" }
 tbb-sys = "1.1"
 
 [build-dependencies]

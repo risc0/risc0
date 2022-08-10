@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkp"
-version = "0.10.0"
+version = "0.11.0-rc.2"
 edition = "2021"
 description = "RISC Zero zero-knowledge proof system core crate"
 license = "Apache-2.0"

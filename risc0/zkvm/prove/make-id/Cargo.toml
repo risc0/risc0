@@ -1,11 +1,11 @@
 [package]
 name = "risc0-make-id"
-version = "0.1.0"
+version = "0.11.0-rc.2"
 edition = "2021"
 
 [dependencies]
 clap = { version = "3.2", features = ["derive"] }
-risc0-zkvm = { version = "0.10", path = "../../sdk/rust" }
+risc0-zkvm = { version = "0.11.0-rc.2", path = "../../sdk/rust" }
 
 [package.metadata.release]
 release = false
