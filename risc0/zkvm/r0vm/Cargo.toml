@@ -1,12 +1,12 @@
 [package]
 name = "risc0-r0vm"
-version = "0.11.0-rc.2"
+version = "0.11.0-rc.3"
 edition = "2021"
 
 [dependencies]
 bytemuck = { version = "1.9" }
 clap = { version = "3.2", features = ["derive"] }
-risc0-zkvm = { version = "0.11.0-rc.2", path = "../sdk/rust" }
+risc0-zkvm = { version = "0.11.0-rc.3", path = "../sdk/rust" }
 
 [dev-dependencies]
 anyhow = "1.0"
