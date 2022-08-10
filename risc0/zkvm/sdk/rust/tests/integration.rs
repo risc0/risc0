@@ -28,7 +28,10 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
     log::debug!("io_path: {IO_PATH}");
     let mut prover = Prover::new(&elf_contents, method_id.as_slice()?)?;
     prover.add_input_u32_slice(vec.as_slice());
-    prover.run()
+    let receipt = prover.run()?;
+    // receipt.verify(&method_id)?;
+
+    Ok(receipt)
 }
 
 mod integration {

@@ -9101,8 +9101,7 @@ PolyFpStep::AndCond(2262, 6536, 2277, "external/risc0/risc0/zkvm/circuit/accum_r
 };
 
 impl PolyFp for CircuitImpl {
-    #[allow(unused)]
-    fn poly_fp(&self, ctx: &PolyFpContext, args: &mut [&mut [Fp]]) -> MixState {
+    fn poly_fp(&self, ctx: &PolyFpContext, args: &[&[Fp]]) -> MixState {
         DEF.step(ctx, args)
     }
 }

@@ -196,7 +196,7 @@ impl PolyFpContext {
 }
 
 pub trait PolyFp {
-    fn poly_fp(&self, ctx: &PolyFpContext, args: &mut [&mut [Fp]]) -> MixState;
+    fn poly_fp(&self, ctx: &PolyFpContext, args: &[&[Fp]]) -> MixState;
 }
 
 pub struct PolyExtContext {
@@ -251,7 +251,7 @@ impl PolyExtContext {
 }
 
 pub trait PolyExt {
-    fn poly_ext(&self, ctx: &PolyExtContext, u: &[Fp4], out: &[Fp], mix: &[Fp]) -> MixState;
+    fn poly_ext(&self, ctx: &PolyExtContext, u: &[Fp4], args: &[&[Fp]]) -> MixState;
 }
 
 pub trait TapsProvider {
@@ -421,7 +421,7 @@ impl PolyFpStep {
         fp_vars: &mut Vec<Fp>,
         mix_vars: &mut Vec<MixState>,
         ctx: &PolyFpContext,
-        args: &mut [&mut [Fp]],
+        args: &[&[Fp]],
     ) {
         match self {
             PolyFpStep::Const(value, _loc) => {
@@ -473,11 +473,94 @@ impl PolyFpStep {
 }
 
 impl PolyFpStepDef {
-    pub fn step(&self, ctx: &PolyFpContext, args: &mut [&mut [Fp]]) -> MixState {
+    pub fn step(&self, ctx: &PolyFpContext, args: &[&[Fp]]) -> MixState {
         let mut fp_vars = Vec::new();
         let mut mix_vars = Vec::new();
         for op in self.block.iter() {
             op.step(&mut fp_vars, &mut mix_vars, ctx, args);
+        }
+        mix_vars[self.ret]
+    }
+}
+
+pub struct PolyExtStepDef {
+    pub block: &'static [PolyExtStep],
+    pub ret: Var,
+}
+
+pub enum PolyExtStep {
+    Const(u32, &'static str),
+    Get(usize, &'static str),
+    GetGlobal(Arg, usize, &'static str),
+    Add(Var, Var, &'static str),
+    Sub(Var, Var, &'static str),
+    Mul(Var, Var, &'static str),
+    True(&'static str),
+    AndEqz(Var, Var, &'static str),
+    AndCond(Var, Var, Var, &'static str),
+}
+
+impl PolyExtStep {
+    pub fn step(
+        &self,
+        fp_vars: &mut Vec<Fp4>,
+        mix_vars: &mut Vec<MixState>,
+        ctx: &PolyExtContext,
+        u: &[Fp4],
+        args: &[&[Fp]],
+    ) {
+        match self {
+            PolyExtStep::Const(value, _loc) => {
+                fp_vars.push(Fp4::from_u32(*value));
+            }
+            PolyExtStep::Get(tap, _loc) => {
+                fp_vars.push(u[*tap]);
+            }
+            PolyExtStep::GetGlobal(base, offset, _loc) => {
+                fp_vars.push(Fp4::from_fp(args[*base][*offset]));
+            }
+            PolyExtStep::Add(x1, x2, _loc) => {
+                fp_vars.push(fp_vars[*x1] + fp_vars[*x2]);
+            }
+            PolyExtStep::Sub(x1, x2, _loc) => {
+                fp_vars.push(fp_vars[*x1] - fp_vars[*x2]);
+            }
+            PolyExtStep::Mul(x1, x2, _loc) => {
+                fp_vars.push(fp_vars[*x1] * fp_vars[*x2]);
+            }
+            PolyExtStep::True(_loc) => {
+                mix_vars.push(MixState {
+                    tot: Fp4::from_u32(0),
+                    mul: Fp4::from_u32(1),
+                });
+            }
+            PolyExtStep::AndEqz(x, val, _loc) => {
+                let x = mix_vars[*x];
+                let val = fp_vars[*val];
+                mix_vars.push(MixState {
+                    tot: x.tot + x.mul * val,
+                    mul: x.mul * ctx.mix,
+                });
+            }
+            PolyExtStep::AndCond(x, cond, inner, _loc) => {
+                let x = mix_vars[*x];
+                let cond = fp_vars[*cond];
+                let inner = mix_vars[*inner];
+                mix_vars.push(MixState {
+                    tot: x.tot + cond * inner.tot * x.mul,
+                    mul: x.mul * inner.mul,
+                });
+            }
+        }
+    }
+}
+
+impl PolyExtStepDef {
+    pub fn step(&self, ctx: &PolyExtContext, u: &[Fp4], args: &[&[Fp]]) -> MixState {
+        let mut fp_vars = Vec::new();
+        let mut mix_vars = Vec::new();
+        for op in self.block.iter() {
+            op.step(&mut fp_vars, &mut mix_vars, ctx, u, args);
         }
         mix_vars[self.ret]
     }

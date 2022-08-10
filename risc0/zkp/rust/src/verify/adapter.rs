@@ -79,7 +79,8 @@ impl<'a, C: CircuitInfo + PolyExt + TapsProvider> Circuit for VerifyAdapter<'a, 
 
     fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4) -> Fp4 {
         let ctx = PolyExtContext { mix: poly_mix };
-        let result = self.circuit.poly_ext(&ctx, u, &self.out, &self.mix);
+        let args: &[&[Fp]] = &[&self.out, &self.mix];
+        let result = self.circuit.poly_ext(&ctx, u, args);
         result.tot
     }
 }

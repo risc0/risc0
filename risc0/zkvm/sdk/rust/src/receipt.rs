@@ -12,10 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::method_id::MethodId;
-
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
+
+use risc0_zkp::core::sha::default_implementation;
+use risc0_zkp::verify::adapter::VerifyAdapter;
+use risc0_zkvm_circuit::CircuitImpl;
+
+use crate::method_id::MethodId;
 
 #[derive(Deserialize, Serialize)]
 pub struct Receipt {
@@ -35,7 +39,10 @@ impl Receipt {
     where
         M: IntoMethodId,
     {
-        todo!()
+        let circuit = CircuitImpl::new();
+        let mut verifier = VerifyAdapter::new(&circuit);
+        let sha = default_implementation();
+        Ok(risc0_zkp::verify::verify(sha, &mut verifier, &self.seal).unwrap())
     }
 
     // Compatible API with FFI-based prover.
