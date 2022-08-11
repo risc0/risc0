@@ -1,5 +1,5 @@
 {
-  "checksum": "03e19223e8b7e97f4523b88db7849182b15ecd324af80f9fa37ba9864aebb8c9",
+  "checksum": "cdd4ea33a17f55f1d6ef235a8a5de19ff2af25bd97123ba01bb641d94d07a80b",
   "crates": {
     "adler 1.0.2": {
       "name": "adler",
@@ -137,13 +137,13 @@
       },
       "license": "Unlicense/MIT"
     },
-    "anyhow 1.0.60": {
+    "anyhow 1.0.61": {
       "name": "anyhow",
-      "version": "1.0.60",
+      "version": "1.0.61",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/anyhow/1.0.60/download",
-          "sha256": "c794e162a5eff65c72ef524dfe393eb923c354e350bb78b9c7383df13f3bc142"
+          "url": "https://crates.io/api/v1/crates/anyhow/1.0.61/download",
+          "sha256": "508b352bb5c066aac251f6daf6b36eccd03e8a88e8081cd44959ea277a3af9a8"
         }
       },
       "targets": [
@@ -184,14 +184,14 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.60",
+              "id": "anyhow 1.0.61",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.60"
+        "version": "1.0.61"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -8531,9 +8531,9 @@
       },
       "license": null
     },
-    "risc0-build 0.11.0-rc.3": {
+    "risc0-build 0.11.0-rc.4": {
       "name": "risc0-build",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -8584,13 +8584,13 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "license": "Apache-2.0"
     },
-    "risc0-core-sys 0.11.0-rc.3": {
+    "risc0-core-sys 0.11.0-rc.4": {
       "name": "risc0-core-sys",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -8630,14 +8630,14 @@
               "target": "cxx"
             },
             {
-              "id": "risc0-core-sys 0.11.0-rc.3",
+              "id": "risc0-core-sys 0.11.0-rc.4",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -8656,9 +8656,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-make-id 0.11.0-rc.3": {
+    "risc0-make-id 0.11.0-rc.4": {
       "name": "risc0-make-id",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -8689,13 +8689,13 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "license": null
     },
-    "risc0-r0vm 0.11.0-rc.3": {
+    "risc0-r0vm 0.11.0-rc.4": {
       "name": "risc0-r0vm",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -8732,7 +8732,7 @@
         "deps_dev": {
           "common": [
             {
-              "id": "anyhow 1.0.60",
+              "id": "anyhow 1.0.61",
               "target": "anyhow"
             },
             {
@@ -8747,13 +8747,13 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkp 0.11.0-rc.3": {
+    "risc0-zkp 0.11.0-rc.4": {
       "name": "risc0-zkp",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -8784,7 +8784,7 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.60",
+              "id": "anyhow 1.0.61",
               "target": "anyhow"
             },
             {
@@ -8849,13 +8849,13 @@
           ],
           "selects": {}
         },
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkp-sys 0.11.0-rc.3": {
+    "risc0-zkp-sys 0.11.0-rc.4": {
       "name": "risc0-zkp-sys",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -8899,7 +8899,7 @@
               "target": "log"
             },
             {
-              "id": "risc0-zkp-sys 0.11.0-rc.3",
+              "id": "risc0-zkp-sys 0.11.0-rc.4",
               "target": "build_script_build"
             },
             {
@@ -8910,7 +8910,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -8929,9 +8929,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm 0.11.0-rc.3": {
+    "risc0-zkvm 0.11.0-rc.4": {
       "name": "risc0-zkvm",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -8979,7 +8979,7 @@
               "target": "bytemuck"
             },
             {
-              "id": "risc0-zkvm 0.11.0-rc.3",
+              "id": "risc0-zkvm 0.11.0-rc.4",
               "target": "build_script_build"
             },
             {
@@ -8990,7 +8990,7 @@
           "selects": {
             "cfg(not(target_arch = \"riscv32\"))": [
               {
-                "id": "anyhow 1.0.60",
+                "id": "anyhow 1.0.61",
                 "target": "anyhow"
               },
               {
@@ -9048,7 +9048,7 @@
             ]
           }
         },
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9057,9 +9057,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-circuit 0.11.0-rc.3": {
+    "risc0-zkvm-circuit 0.11.0-rc.4": {
       "name": "risc0-zkvm-circuit",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -9083,7 +9083,7 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.60",
+              "id": "anyhow 1.0.61",
               "target": "anyhow"
             },
             {
@@ -9103,13 +9103,13 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-circuit-gen 0.11.0-rc.3": {
+    "risc0-zkvm-circuit-gen 0.11.0-rc.4": {
       "name": "risc0-zkvm-circuit-gen",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -9145,14 +9145,14 @@
         "deps": {
           "common": [
             {
-              "id": "risc0-zkvm-circuit-gen 0.11.0-rc.3",
+              "id": "risc0-zkvm-circuit-gen 0.11.0-rc.4",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9162,9 +9162,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-circuit-sys 0.11.0-rc.3": {
+    "risc0-zkvm-circuit-sys 0.11.0-rc.4": {
       "name": "risc0-zkvm-circuit-sys",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -9200,7 +9200,7 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.60",
+              "id": "anyhow 1.0.61",
               "target": "anyhow"
             },
             {
@@ -9208,14 +9208,14 @@
               "target": "cxx"
             },
             {
-              "id": "risc0-zkvm-circuit-sys 0.11.0-rc.3",
+              "id": "risc0-zkvm-circuit-sys 0.11.0-rc.4",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9292,9 +9292,9 @@
       },
       "license": null
     },
-    "risc0-zkvm-platform 0.11.0-rc.3": {
+    "risc0-zkvm-platform 0.11.0-rc.4": {
       "name": "risc0-zkvm-platform",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -9316,13 +9316,13 @@
           "**"
         ],
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-platform-sys 0.11.0-rc.3": {
+    "risc0-zkvm-platform-sys 0.11.0-rc.4": {
       "name": "risc0-zkvm-platform-sys",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -9362,14 +9362,14 @@
               "target": "cxx"
             },
             {
-              "id": "risc0-zkvm-platform-sys 0.11.0-rc.3",
+              "id": "risc0-zkvm-platform-sys 0.11.0-rc.4",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -9388,9 +9388,9 @@
       },
       "license": "Apache-2.0"
     },
-    "risc0-zkvm-sys 0.11.0-rc.3": {
+    "risc0-zkvm-sys 0.11.0-rc.4": {
       "name": "risc0-zkvm-sys",
-      "version": "0.11.0-rc.3",
+      "version": "0.11.0-rc.4",
       "repository": null,
       "targets": [
         {
@@ -9430,7 +9430,7 @@
               "target": "cxx"
             },
             {
-              "id": "risc0-zkvm-sys 0.11.0-rc.3",
+              "id": "risc0-zkvm-sys 0.11.0-rc.4",
               "target": "build_script_build"
             },
             {
@@ -9441,7 +9441,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "0.11.0-rc.3"
+        "version": "0.11.0-rc.4"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -14060,20 +14060,20 @@
   ],
   "workspace_members": {
     "direct-cargo-bazel-deps 0.0.1": "",
-    "risc0-build 0.11.0-rc.3": "risc0/zkvm/sdk/rust/build",
-    "risc0-core-sys 0.11.0-rc.3": "risc0/core",
-    "risc0-make-id 0.11.0-rc.3": "risc0/zkvm/prove/make-id",
-    "risc0-r0vm 0.11.0-rc.3": "risc0/zkvm/r0vm",
-    "risc0-zkp 0.11.0-rc.3": "risc0/zkp/rust",
-    "risc0-zkp-sys 0.11.0-rc.3": "risc0/zkp",
-    "risc0-zkvm 0.11.0-rc.3": "risc0/zkvm/sdk/rust",
-    "risc0-zkvm-circuit 0.11.0-rc.3": "risc0/zkvm/sdk/rust/circuit",
-    "risc0-zkvm-circuit-gen 0.11.0-rc.3": "risc0/zkvm/circuit/make-circuit",
-    "risc0-zkvm-circuit-sys 0.11.0-rc.3": "risc0/zkvm/circuit",
+    "risc0-build 0.11.0-rc.4": "risc0/zkvm/sdk/rust/build",
+    "risc0-core-sys 0.11.0-rc.4": "risc0/core",
+    "risc0-make-id 0.11.0-rc.4": "risc0/zkvm/prove/make-id",
+    "risc0-r0vm 0.11.0-rc.4": "risc0/zkvm/r0vm",
+    "risc0-zkp 0.11.0-rc.4": "risc0/zkp/rust",
+    "risc0-zkp-sys 0.11.0-rc.4": "risc0/zkp",
+    "risc0-zkvm 0.11.0-rc.4": "risc0/zkvm/sdk/rust",
+    "risc0-zkvm-circuit 0.11.0-rc.4": "risc0/zkvm/sdk/rust/circuit",
+    "risc0-zkvm-circuit-gen 0.11.0-rc.4": "risc0/zkvm/circuit/make-circuit",
+    "risc0-zkvm-circuit-sys 0.11.0-rc.4": "risc0/zkvm/circuit",
     "risc0-zkvm-methods 0.1.0": "risc0/zkvm/sdk/rust/methods",
-    "risc0-zkvm-platform 0.11.0-rc.3": "risc0/zkvm/sdk/rust/platform",
-    "risc0-zkvm-platform-sys 0.11.0-rc.3": "risc0/zkvm/platform",
-    "risc0-zkvm-sys 0.11.0-rc.3": "risc0/zkvm"
+    "risc0-zkvm-platform 0.11.0-rc.4": "risc0/zkvm/sdk/rust/platform",
+    "risc0-zkvm-platform-sys 0.11.0-rc.4": "risc0/zkvm/platform",
+    "risc0-zkvm-sys 0.11.0-rc.4": "risc0/zkvm"
   },
   "conditions": {
     "aarch64-apple-darwin": [

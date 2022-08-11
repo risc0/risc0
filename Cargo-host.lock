@@ -31,9 +31,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.60"
+version = "1.0.61"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c794e162a5eff65c72ef524dfe393eb923c354e350bb78b9c7383df13f3bc142"
+checksum = "508b352bb5c066aac251f6daf6b36eccd03e8a88e8081cd44959ea277a3af9a8"
 
 [[package]]
 name = "array-init"
@@ -307,9 +307,9 @@ dependencies = [
 
 [[package]]
 name = "compiler_builtins"
-version = "0.1.78"
+version = "0.1.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "413b6b13f725a46cdec40364e0c1d564a22cf0aaac5f1e267a129d956478a6b4"
+checksum = "4f873ce2bd3550b0b565f878b3d04ea8253f4259dc3d20223af2e1ba86f5ecca"
 
 [[package]]
 name = "constant_time_eq"
@@ -1517,7 +1517,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "cargo_metadata",
  "reqwest",
@@ -1531,7 +1531,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core-sys"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1539,7 +1539,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-make-id"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "clap 3.2.16 (registry+https://github.com/rust-lang/crates.io-index)",
  "risc0-zkvm",
@@ -1547,7 +1547,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1560,7 +1560,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "anyhow",
  "array-init",
@@ -1579,7 +1579,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-sys"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1590,7 +1590,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1613,7 +1613,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "anyhow",
  "env_logger",
@@ -1623,14 +1623,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit-gen"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "risc0-zkvm-circuit-sys",
 ]
 
 [[package]]
 name = "risc0-zkvm-circuit-sys"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "anyhow",
  "cxx",
@@ -1649,7 +1649,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "compiler_builtins",
  "rustc-std-workspace-core",
@@ -1657,7 +1657,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform-sys"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1665,7 +1665,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-sys"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 dependencies = [
  "cxx",
  "cxx-build",

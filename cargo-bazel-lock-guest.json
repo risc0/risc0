@@ -1,13 +1,13 @@
 {
-  "checksum": "5737d61a1d4274f8d1e3496ba5f211cc4fac7d27964b1f4286c73624764e52d4",
+  "checksum": "1715c2707726d78560d61f4aab9069eae3a803cf23468c3623a4d9a9e407a4df",
   "crates": {
-    "anyhow 1.0.60": {
+    "anyhow 1.0.61": {
       "name": "anyhow",
-      "version": "1.0.60",
+      "version": "1.0.61",
       "repository": {
         "Http": {
-          "url": "https://crates.io/api/v1/crates/anyhow/1.0.60/download",
-          "sha256": "c794e162a5eff65c72ef524dfe393eb923c354e350bb78b9c7383df13f3bc142"
+          "url": "https://crates.io/api/v1/crates/anyhow/1.0.61/download",
+          "sha256": "508b352bb5c066aac251f6daf6b36eccd03e8a88e8081cd44959ea277a3af9a8"
         }
       },
       "targets": [
@@ -44,14 +44,14 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.60",
+              "id": "anyhow 1.0.61",
               "target": "build_script_build"
             }
           ],
           "selects": {}
         },
         "edition": "2018",
-        "version": "1.0.60"
+        "version": "1.0.61"
       },
       "build_script_attrs": {
         "data_glob": [
@@ -443,7 +443,7 @@
         "deps": {
           "common": [
             {
-              "id": "anyhow 1.0.60",
+              "id": "anyhow 1.0.61",
               "target": "anyhow"
             },
             {
