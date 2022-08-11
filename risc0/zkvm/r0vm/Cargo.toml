@@ -1,6 +1,6 @@
 [package]
 name = "risc0-r0vm"
-version = "0.11.0-rc.3"
+version = "0.11.0-rc.4"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM executable"
 license = "Apache-2.0"
@@ -10,7 +10,7 @@ repository = "https://github.com/risc0/risc0/"
 [dependencies]
 bytemuck = { version = "1.9" }
 clap = { version = "3.2", features = ["derive"] }
-risc0-zkvm = { version = "0.11.0-rc.3", path = "../sdk/rust" }
+risc0-zkvm = { version = "0.11.0-rc.4", path = "../sdk/rust" }
 
 [dev-dependencies]
 anyhow = "1.0"
