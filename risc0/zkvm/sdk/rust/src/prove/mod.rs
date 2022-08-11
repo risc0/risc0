@@ -85,8 +85,7 @@ impl<'a> Prover<'a> {
         };
 
         // Verify receipt to make sure it works
-        // TODO
-        // receipt.verify(&self.method_id)?;
+        receipt.verify(&self.method_id)?;
 
         Ok(receipt)
     }
