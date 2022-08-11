@@ -10,8 +10,8 @@ use super::CircuitImpl;
 
 const DEF: CircuitStepDef = CircuitStepDef {
     block: &[
-        CircuitStep::Const(2, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:28"),
         CircuitStep::Const(11, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:28"),
+        CircuitStep::Const(2, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:28"),
         CircuitStep::Const(2013265910, "external/risc0/risc0/zkvm/circuit/edsl.h:122"),
         CircuitStep::Const(1, "circuits/rv32im-legacy/port.cpp:207"),
         CircuitStep::Get(
@@ -42,25 +42,25 @@ const DEF: CircuitStepDef = CircuitStepDef {
             0,
             6,
             0,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:55",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:51",
         ),
         CircuitStep::Get(
             0,
             1,
             0,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:63",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:59",
         ),
         CircuitStep::Get(
             0,
             2,
             0,
-            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:143",
+            "external/risc0/risc0/zkvm/circuit/data_regs.cpp:139",
         ),
-        CircuitStep::Add(9, 10, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
-        CircuitStep::Add(11, 5, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
-        CircuitStep::Add(12, 6, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
-        CircuitStep::Add(13, 7, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
-        CircuitStep::Add(14, 8, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:192"),
+        CircuitStep::Add(9, 10, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:188"),
+        CircuitStep::Add(11, 5, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:188"),
+        CircuitStep::Add(12, 6, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:188"),
+        CircuitStep::Add(13, 7, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:188"),
+        CircuitStep::Add(14, 8, "external/risc0/risc0/zkvm/circuit/data_regs.cpp:188"),
         CircuitStep::If(
             15,
             &[
@@ -631,7 +631,7 @@ const DEF: CircuitStepDef = CircuitStepDef {
                 ),
                 CircuitStep::Mul(
                     124,
-                    0,
+                    1,
                     "external/risc0/risc0/zkvm/circuit/accum_regs.cpp:81",
                 ),
                 CircuitStep::Mul(
@@ -651,7 +651,7 @@ const DEF: CircuitStepDef = CircuitStepDef {
                 ),
                 CircuitStep::Mul(
                     131,
-                    1,
+                    0,
                     "external/risc0/risc0/zkvm/circuit/accum_regs.cpp:81",
                 ),
                 CircuitStep::Add(
@@ -661,7 +661,7 @@ const DEF: CircuitStepDef = CircuitStepDef {
                 ),
                 CircuitStep::Mul(
                     123,
-                    0,
+                    1,
                     "external/risc0/risc0/zkvm/circuit/accum_regs.cpp:82",
                 ),
                 CircuitStep::Mul(
@@ -686,7 +686,7 @@ const DEF: CircuitStepDef = CircuitStepDef {
                 ),
                 CircuitStep::Mul(
                     138,
-                    1,
+                    0,
                     "external/risc0/risc0/zkvm/circuit/accum_regs.cpp:82",
                 ),
                 CircuitStep::Add(
@@ -701,7 +701,7 @@ const DEF: CircuitStepDef = CircuitStepDef {
                 ),
                 CircuitStep::Mul(
                     140,
-                    1,
+                    0,
                     "external/risc0/risc0/zkvm/circuit/accum_regs.cpp:83",
                 ),
                 CircuitStep::Mul(

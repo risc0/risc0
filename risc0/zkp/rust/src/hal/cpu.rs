@@ -341,10 +341,10 @@ impl Hal for CpuHal {
             .as_slice_mut();
         let input = input.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
 
-        let mut tot = Fp4::default();
-        let mut cur_mix = Fp4::from_u32(1);
         // TODO: parallelize
         for idx in 0..count {
+            let mut tot = Fp4::default();
+            let mut cur_mix = Fp4::from_u32(1);
             for i in 0..FRI_FOLD {
                 let rev_i = bit_rev_32(i as u32) >> (32 - log2_ceil(FRI_FOLD));
                 let rev_idx = rev_i as usize * count + idx;

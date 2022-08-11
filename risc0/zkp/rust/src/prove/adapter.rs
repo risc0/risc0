@@ -126,17 +126,15 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
                     check.view_mut(&mut |check| {
                         // TODO: parallelize
                         for cycle in 0..domain {
+                            let args: &[&[Fp]] =
+                                &[&code, &self.exec.output, &data, &self.mix, &accum];
                             let cond = self.exec.circuit.poly_fp(
                                 &PolyFpContext {
                                     size: domain,
                                     cycle,
                                     mix: poly_mix,
                                 },
-                                code,
-                                &self.exec.output,
-                                data,
-                                &self.mix,
-                                accum,
+                                args,
                             );
                             let x = Fp::new(ROU_FWD[self.exec.po2 + EXP_PO2]).pow(cycle);
                             // TODO: what is this magic number 3?

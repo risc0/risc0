@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm"
-version = "0.10.0"
+version = "0.11.0-rc.3"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM"
 license = "Apache-2.0"
@@ -9,8 +9,8 @@ repository = "https://github.com/risc0/risc0/"
 
 [dependencies]
 bytemuck = "1.9"
-risc0-zkp = { version = "0.10", path = "../../../zkp/rust", default-features = false }
-risc0-zkvm-platform = { version = "0.10", path = "platform" }
+risc0-zkp = { version = "0.11.0-rc.3", path = "../../../zkp/rust", default-features = false }
+risc0-zkvm-platform = { version = "0.11.0-rc.3", path = "platform" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
 [dev-dependencies]
@@ -27,8 +27,8 @@ ctor = "0.1"
 cxx = "1.0"
 log = "0.4"
 rand = "0.8"
-risc0-zkvm-circuit = { version = "0.10.0", path = "circuit", optional = true }
-risc0-zkvm-sys = { version = "0.10", path = "../.." }
+risc0-zkvm-circuit = { version = "0.11.0-rc.3", path = "circuit", optional = true }
+risc0-zkvm-sys = { version = "0.11.0-rc.3", path = "../.." }
 sha2 = "0.10"
 xmas-elf = "0.8"
 
