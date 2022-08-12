@@ -15,8 +15,10 @@ repository = "https://github.com/risc0/risc0/"
 # library build scripts; see rustc-std-workspace-core/README.md in the
 # rust tree for details.
 [dependencies]
+bytemuck = { version = "1.11.0", optional = true }
 compiler_builtins = { version = "0.1", optional = true }
 core = { optional = true, package = "rustc-std-workspace-core", version = "1.0.0" }
 
 [features]
+default = ["bytemuck/derive"]
 rustc-dep-of-std = ["core", "compiler_builtins"]

@@ -63,16 +63,16 @@ pub mod addr {
 
 #[repr(C)]
 pub struct IoDescriptor {
-    pub size: usize,
-    pub addr: usize,
+    pub size: u32,
+    pub addr: u32,
 }
 
 #[repr(C)]
 pub struct SHADescriptor {
-    pub type_count: usize,
-    pub idx: usize,
-    pub source: usize,
-    pub digest: usize,
+    pub type_count: u32,
+    pub idx: u32,
+    pub source: u32,
+    pub digest: u32,
 }
 
 #[repr(C)]

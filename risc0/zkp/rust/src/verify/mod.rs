@@ -67,6 +67,9 @@ where
     S: Sha,
     C: Circuit,
 {
+    if seal.len() == 0 {
+        return Err(VerificationError::ReceiptFormatError);
+    }
     let taps = circuit.taps().clone();
 
     // Make IOP

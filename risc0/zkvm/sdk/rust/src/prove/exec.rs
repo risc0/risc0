@@ -19,7 +19,9 @@ use core::{
 use std::collections::{btree_map::Entry, BTreeMap, BTreeSet};
 
 use anyhow::{bail, Result};
+use lazy_regex::{regex, Captures};
 use log::{debug, trace};
+use risc0_zkp::core::sha::Sha;
 use risc0_zkp::{
     adapter::{CircuitDef, CustomStep},
     core::{fp::Fp, log2_ceil, sha::DIGEST_WORDS},
@@ -28,9 +30,12 @@ use risc0_zkp::{
 };
 use risc0_zkvm_circuit::CircuitImpl;
 use risc0_zkvm_platform::{
-    io::addr::{
-        GPIO_COMMIT, GPIO_FAULT, GPIO_GETKEY, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL,
-        GPIO_SENDRECV_SIZE, GPIO_SHA,
+    io::{
+        addr::{
+            GPIO_COMMIT, GPIO_FAULT, GPIO_GETKEY, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL,
+            GPIO_SENDRECV_SIZE, GPIO_SHA,
+        },
+        IoDescriptor, SHADescriptor,
     },
     memory::INPUT,
     WORD_SIZE,
@@ -76,6 +81,7 @@ const fn align_up(addr: usize, align: usize) -> usize {
 }
 
 impl MemoryState {
+    #[track_caller]
     fn load_u8(&self, addr: u32) -> u8 {
         // debug!("load_u8: 0x{addr:08X}");
         // align to the nearest word
@@ -85,6 +91,7 @@ impl MemoryState {
         ((word >> (offset * 8)) & 0xff) as u8
     }
 
+    #[track_caller]
     fn load_u32(&self, addr: u32) -> u32 {
         // debug!("load_u32: 0x{addr:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
@@ -95,10 +102,20 @@ impl MemoryState {
         }
     }
 
+    #[track_caller]
     fn load_be_u32(&self, addr: u32) -> u32 {
         self.load_u32(addr).to_be()
     }
 
+    #[track_caller]
+    fn load_region_u32(&self, start: u32, size: u32) -> Vec<u32> {
+        (start..start + size)
+            .step_by(WORD_SIZE)
+            .map(|addr| self.load_u32(addr))
+            .collect()
+    }
+
+    #[track_caller]
     fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
         let mut region = Vec::new();
         for addr in addr..addr + size {
@@ -107,6 +124,7 @@ impl MemoryState {
         region
     }
 
+    #[track_caller]
     fn store_u8(&mut self, addr: u32, value: u8) {
         // debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
         // align to the nearest word
@@ -118,6 +136,7 @@ impl MemoryState {
         self.store_u32(aligned, word);
     }
 
+    #[track_caller]
     fn store_u32(&mut self, addr: u32, value: u32) {
         // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
@@ -153,10 +172,19 @@ impl MemoryState {
         }
     }
 
+    #[track_caller]
     fn store_region(&mut self, addr: u32, slice: &[u8]) {
         // debug!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
         for i in 0..slice.len() {
             self.store_u8(addr + i as u32, slice[i]);
+        }
+    }
+
+    #[track_caller]
+    fn store_region_u32(&mut self, addr: u32, slice: &[u32]) {
+        assert!(addr % WORD_SIZE as u32 == 0);
+        for (offset, word) in slice.iter().enumerate() {
+            self.store_u32(addr + WORD_SIZE as u32 * offset as u32, *word);
         }
     }
 
@@ -276,12 +304,35 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
     }
 
     fn log(&self, msg: &str, args: &[Fp]) {
-        let args: Vec<String> = args
-            .iter()
-            .map(|x| format!("0x{:0X}", u32::from(x)))
-            .collect();
-        let str = args.join(", ");
-        trace!("{}: {}", msg, str);
+        if log::max_level() < log::LevelFilter::Trace {
+            // Don't bother to format it if we're not even logging.
+            return;
+        }
+
+        // "msg" is given to us in C++-style formatting, so interpret it.
+        let re = regex!("%([0-9]*)([xud])");
+        let mut args_left = args;
+        let formatted = re.replace_all(msg, |captures: &Captures| {
+            let arg: u32 = args_left[0].into();
+            args_left = &args_left[1..];
+            let width = captures
+                .get(1)
+                .map_or(0, |x| x.as_str().parse::<usize>().unwrap_or(0));
+            let format = captures.get(2).map_or("", |x| x.as_str());
+            match format {
+                "u" => format!("{:width$}", arg),
+                "x" => format!("{:0width$x}", arg),
+                "d" => format!("{:width$}", arg as i32),
+                _ => panic!("Unhandled printf format specification '{format}'"),
+            }
+        });
+        assert_eq!(
+            args_left.len(),
+            0,
+            "Args missing formatting: {:?}",
+            args_left
+        );
+        trace!("{}", formatted);
     }
 
     fn mem_check(&mut self) -> (Fp, Fp, Fp, Fp, Fp) {
@@ -350,15 +401,25 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         // debug!("on_write: 0x{:08X}: 0x{:08X}", addr, value);
         match addr {
             GPIO_COMMIT => {
-                debug!("on_write> GPIO_COMMIT");
-                // TODO
-                // IoDescriptor desc;
-                // mem.loadRegion(value, &desc, sizeof(desc));
-                // if (io) {
-                //   std::vector<uint8_t> buf(desc.size);
-                //   mem.loadRegion(desc.addr, buf.data(), desc.size);
-                //   io->onCommit(buf);
-                // }
+                debug!("on_write> GPIO_COMMIT, ptr = {value:08X}");
+                const SZ: usize = core::mem::size_of::<IoDescriptor>();
+                let descbuf: [u32; SZ / WORD_SIZE] = self
+                    .memory
+                    .load_region_u32(value, SZ as u32)
+                    .as_slice()
+                    .try_into()
+                    .unwrap();
+                // SAFETY: IoDescriptor is a plain-old-data type with
+                // repr(C) and no pointers so it's safe to fill it from bytes.
+                let desc: IoDescriptor = unsafe { std::mem::transmute(descbuf) };
+                debug!(
+                    "on_write> GPIO_COMMIT, commit region starts at {} and is {} bytes long",
+                    desc.addr, desc.size
+                );
+
+                let buf = self.memory.load_region_u32(desc.addr, desc.size);
+                debug!("Data: {:08X?}", &buf);
+                self.io.on_commit(buf.as_slice());
             }
             GPIO_FAULT => {
                 debug!("on_write> GPIO_FAULT");
@@ -397,14 +458,40 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 self.cur_host_to_guest_offset += aligned_len;
             }
             GPIO_SHA => {
-                debug!("on_write> GPIO_SHA");
-                // ShaDescriptor desc;
-                // mem.loadRegion(value, &desc, sizeof(desc));
-                // processSHA(mem, desc);
-                todo!()
+                debug!("on_write> GPIO_SHA, descriptor ptr = {value:08X}");
+                const SZ: usize = core::mem::size_of::<SHADescriptor>();
+                let descbuf: [u32; SZ / WORD_SIZE] = self
+                    .memory
+                    .load_region_u32(value, SZ as u32)
+                    .try_into()
+                    .unwrap();
+                // SAFETY: SHADescriptor is a plain-old-data type with
+                // repr(C) and no pointers so it's safe to fill it from bytes.
+                let desc: SHADescriptor = unsafe { std::mem::transmute(descbuf) };
+                self.process_sha(&desc);
             }
             _ => {}
         };
+    }
+
+    fn process_sha(&mut self, desc: &SHADescriptor) {
+        let sha_type: u16 = ((desc.type_count & 0xFFFF) >> 4) as u16;
+        let count: u16 = (desc.type_count & 0xFFFF) as u16;
+        debug!(
+            "SHA256 type: {}, count: {}, idx: {}, source: {:08X}, digest: {:08X}",
+            sha_type, count, desc.idx, desc.source, desc.digest
+        );
+
+        let sha = risc0_zkp::core::sha::default_implementation();
+        let words = self
+            .memory
+            .load_region_u32(desc.source as u32, (count * 64) as u32);
+        let digest = sha.hash_raw_words(bytemuck::cast_slice(words.as_slice()));
+
+        debug!("Digest result is {:X?}", digest.as_slice());
+
+        self.memory
+            .store_region_u32(desc.digest as u32, digest.as_slice());
     }
 }
 
@@ -627,6 +714,14 @@ impl<'a, H: IoHandler> RV32Executor<'a, H> {
     }
 
     pub fn run(&mut self) -> Result<()> {
+        load_code(self.elf.entry, &self.elf.image, |chunk, fini| {
+            self.executor.step(chunk, fini)
+        })?;
+        self.executor.finalize();
+        Ok(())
+    }
+
+    pub fn run_without_seal(&mut self) -> Result<()> {
         load_code(self.elf.entry, &self.elf.image, |chunk, fini| {
             self.executor.step(chunk, fini)
         })?;

@@ -81,10 +81,10 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
     let ptr = data.as_ptr();
     super::memory_barrier(ptr);
     desc_ptr.write_volatile(SHADescriptor {
-        type_count,
+        type_count: type_count as u32,
         idx: 0,
-        source: ptr as usize,
-        digest: digest as usize,
+        source: ptr as u32,
+        digest: digest as u32,
     });
 
     GPIO_SHA.as_ptr().write_volatile(desc_ptr);
@@ -182,7 +182,7 @@ pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
 pub(crate) fn finalize() {
     unsafe {
         let ptr = alloc_desc();
-        let type_field_ptr: *mut usize = core::ptr::addr_of_mut!((*ptr).type_count);
+        let type_field_ptr: *mut u32 = core::ptr::addr_of_mut!((*ptr).type_count);
         type_field_ptr.write_volatile(0);
     }
 }
@@ -202,6 +202,10 @@ impl risc0_zkp::core::sha::Sha for Impl {
 
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
         raw_digest(bytemuck::cast_slice(&[*a, *b]))
+    }
+
+    fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr {
+        raw_digest(words)
     }
 
     fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {

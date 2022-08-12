@@ -36,9 +36,8 @@ use self::exec::{IoHandler, RV32Executor};
 
 pub struct Prover<'a> {
     elf: Program,
-    inner: ProverImpl,
+    inner: ProverImpl<'a>,
     method_id: MethodId,
-    opts: ProverOpts<'a>,
 }
 
 impl<'a> Prover<'a> {
@@ -49,9 +48,8 @@ impl<'a> Prover<'a> {
     pub fn new_with_opts(elf: &[u8], method_id: &[u8], opts: ProverOpts<'a>) -> Result<Self> {
         Ok(Prover {
             elf: Program::load_elf(&elf, MEM_SIZE as u32)?,
-            inner: ProverImpl::new(),
+            inner: ProverImpl::new(opts),
             method_id: MethodId::from_slice(method_id).unwrap(),
-            opts,
         })
     }
 
@@ -70,13 +68,21 @@ impl<'a> Prover<'a> {
     }
 
     pub fn run(&mut self) -> Result<Receipt> {
+        let skip_seal = self.inner.opts.skip_seal;
+
         let mut executor = RV32Executor::new(&self.elf, &mut self.inner);
         executor.run()?;
 
         let mut prover = ProveAdapter::new(&mut executor.executor);
         let hal = CpuHal {};
         let sha = default_implementation();
-        let seal = risc0_zkp::prove::prove(&hal, sha, &mut prover);
+
+        let seal = if skip_seal {
+            risc0_zkp::prove::prove_without_seal(&hal, sha, &mut prover);
+            Vec::new()
+        } else {
+            risc0_zkp::prove::prove(&hal, sha, &mut prover)
+        };
 
         // Attach the full version of the output journal & construct receipt object
         let receipt = Receipt {
@@ -84,31 +90,38 @@ impl<'a> Prover<'a> {
             seal,
         };
 
-        // Verify receipt to make sure it works
-        receipt.verify(&self.method_id)?;
+        if !skip_seal {
+            // Verify receipt to make sure it works
+            receipt.verify(&self.method_id)?;
+        }
 
         Ok(receipt)
     }
 }
 
-struct ProverImpl {
+struct ProverImpl<'a> {
     pub input: Vec<u8>,
     pub output: Vec<u8>,
     pub commit: Vec<u32>,
+    pub opts: ProverOpts<'a>,
 }
 
-impl ProverImpl {
-    fn new() -> Self {
+impl<'a> ProverImpl<'a> {
+    fn new(opts: ProverOpts<'a>) -> Self {
         Self {
             input: Vec::new(),
             output: Vec::new(),
             commit: Vec::new(),
+            opts,
         }
     }
 }
 
-impl IoHandler for ProverImpl {
+impl<'a> IoHandler for ProverImpl<'a> {
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Vec<u8> {
+        if let Some(cb) = self.opts.sendrecv_callbacks.get(&channel) {
+            return cb(channel, buf);
+        }
         match channel {
             SENDRECV_CHANNEL_INITIAL_INPUT => {
                 log::debug!("SENDRECV_CHANNEL_INITIAL_INPUT: {}", buf.len());
@@ -116,12 +129,12 @@ impl IoHandler for ProverImpl {
             }
             SENDRECV_CHANNEL_STDOUT => {
                 log::debug!("SENDRECV_CHANNEL_STDOUT: {}", buf.len());
-                // TODO
+                self.output.extend(buf);
                 Vec::new()
             }
             SENDRECV_CHANNEL_STDERR => {
                 log::debug!("SENDRECV_CHANNEL_STDERR: {}", buf.len());
-                std::io::stderr().lock().write_all(buf);
+                std::io::stderr().lock().write_all(buf).unwrap();
                 Vec::new()
             }
             _ => panic!("Unknown channel: {channel}"),

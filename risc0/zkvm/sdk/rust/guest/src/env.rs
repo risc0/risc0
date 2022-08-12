@@ -168,8 +168,8 @@ impl Env {
         // Write the full data out to the host
         unsafe {
             let desc = IoDescriptor {
-                size: len_bytes,
-                addr: slice.as_ptr() as usize,
+                size: len_bytes as u32,
+                addr: slice.as_ptr() as u32,
             };
             let ptr: *const IoDescriptor = &desc;
             memory_barrier(ptr);

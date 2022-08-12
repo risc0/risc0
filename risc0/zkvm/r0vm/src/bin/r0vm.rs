@@ -84,6 +84,8 @@ fn read_method_id(
 }
 
 fn main() {
+    env_logger::init();
+
     let args = Args::parse();
     let elf_contents = fs::read(&args.elf).unwrap();
 

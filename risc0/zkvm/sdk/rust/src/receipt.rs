@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
 use risc0_zkp::core::sha::default_implementation;
@@ -42,7 +42,8 @@ impl Receipt {
         let circuit = CircuitImpl::new();
         let mut verifier = VerifyAdapter::new(&circuit);
         let sha = default_implementation();
-        Ok(risc0_zkp::verify::verify(sha, &mut verifier, &self.seal).unwrap())
+        risc0_zkp::verify::verify(sha, &mut verifier, &self.seal)
+            .map_err(|err| anyhow!("Verification failed: {:?}", err))
     }
 
     // Compatible API with FFI-based prover.

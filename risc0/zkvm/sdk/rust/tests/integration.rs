@@ -32,18 +32,14 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
 }
 
 mod integration {
+    use test_log::test;
+
     use risc0_zkvm::platform::memory::{COMMIT, HEAP};
 
     use crate::run_memio;
 
-    fn init() {
-        let _ = env_logger::builder().is_test(true).try_init();
-    }
-
     #[test]
     fn memory_io() {
-        init();
-
         // Double write to WOM are fine
         assert!(run_memio(&[(COMMIT.start(), 1), (COMMIT.start(), 1)]).is_ok());
 

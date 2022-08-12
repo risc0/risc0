@@ -28,6 +28,7 @@ risc0_rust_library_pair(
         "@crates_host//:anyhow",
         "@crates_host//:bytemuck",
         "@crates_host//:cxx",
+        "@crates_host//:lazy-regex",
         "@crates_host//:log",
         "@crates_host//:rand",
         "@crates_host//:serde",
