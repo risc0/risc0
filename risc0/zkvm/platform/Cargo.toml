@@ -1,6 +1,6 @@
 [package]
 name = "risc0-zkvm-platform-sys"
-version = "0.11.0"
+version = "0.11.1"
 edition = "2021"
 description = "RISC Zero zero-knowledge VM platform crate"
 license = "Apache-2.0"
