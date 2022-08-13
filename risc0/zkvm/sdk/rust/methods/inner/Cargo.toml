@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 bytemuck = "1.11"
-risc0-zkp = { version = "0.11", path = "../../../../../zkp/rust", default-features = false }
-risc0-zkvm-guest = { version = "0.11", path = "../../guest", default-features = false, features = ["std"] }
+risc0-zkp = { version = "0.11.0-rc.4", path = "../../../../../zkp/rust", default-features = false }
+risc0-zkvm-guest = { version = "0.11.0-rc.4", path = "../../guest", default-features = false, features = ["std"] }
 risc0-zkvm-methods = { version = "0.1", path = "..", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
@@ -17,7 +17,7 @@ lto = true
 opt-level = "z"
 
 [build-dependencies]
-risc0-build = { version = "0.11", path = "../../build" }
+risc0-build = { version = "0.11.0-rc.4", path = "../../build" }
 
 [package.metadata.release]
 release = false
