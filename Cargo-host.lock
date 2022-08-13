@@ -1517,7 +1517,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "cargo_metadata",
  "reqwest",
@@ -1531,7 +1531,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core-sys"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1539,7 +1539,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-make-id"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "clap 3.2.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "risc0-zkvm",
@@ -1547,7 +1547,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-r0vm"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "anyhow",
  "assert_cmd",
@@ -1560,7 +1560,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "anyhow",
  "array-init",
@@ -1579,7 +1579,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-sys"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1590,7 +1590,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1613,7 +1613,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "anyhow",
  "env_logger",
@@ -1623,14 +1623,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit-gen"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "risc0-zkvm-circuit-sys",
 ]
 
 [[package]]
 name = "risc0-zkvm-circuit-sys"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "anyhow",
  "cxx",
@@ -1649,7 +1649,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "compiler_builtins",
  "rustc-std-workspace-core",
@@ -1657,7 +1657,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform-sys"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1665,7 +1665,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-sys"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "cxx",
  "cxx-build",
