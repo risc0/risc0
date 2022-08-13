@@ -10,7 +10,7 @@ repository = "https://github.com/risc0/risc0/"
 [dependencies]
 anyhow = "1.0"
 log = "0.4"
-risc0-zkp = { version = "0.11.0-rc.4", path = "../../../../zkp/rust" }
+risc0-zkp = { version = "0.11", path = "../../../../zkp/rust" }
 
 [dev-dependencies]
 env_logger = "0.9"
