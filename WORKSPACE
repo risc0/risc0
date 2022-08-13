@@ -103,7 +103,6 @@ crates_repository(
     name = "crates_host",
     cargo_lockfile = "//:Cargo-host.lock",
     isolated = True,
-    lockfile = "//:cargo-bazel-lock-host.json",
     manifests = [
         "//:Cargo.toml",
         "//risc0/core:Cargo.toml",
@@ -131,7 +130,6 @@ crates_repository(
     name = "crates_guest",
     cargo_lockfile = "//:Cargo-guest.lock",
     isolated = True,
-    lockfile = "//:cargo-bazel-lock-guest.json",
     packages = {
         "anyhow": crate.spec(
             default_features = False,
