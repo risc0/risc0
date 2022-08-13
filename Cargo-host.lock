@@ -186,9 +186,9 @@ dependencies = [
 
 [[package]]
 name = "camino"
-version = "1.0.9"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "869119e97797867fd90f5e22af7d0bd274bd4635ebb9eb68c04f3f513ae6c412"
+checksum = "88ad0e1e3e88dd237a156ab9f571021b8a158caa0ae44b1968a241efb5144c1e"
 dependencies = [
  "serde",
 ]
@@ -258,9 +258,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.16"
+version = "3.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a3dbbb6653e7c55cc8595ad3e1f7be8f32aba4eb7ff7f0fd1163d4f3d137c0a9"
+checksum = "29e724a68d9319343bb3328c9cc2dfde263f4b3142ee1059a9980580171c954b"
 dependencies = [
  "atty",
  "bitflags",
@@ -275,9 +275,9 @@ dependencies = [
 
 [[package]]
 name = "clap_derive"
-version = "3.2.15"
+version = "3.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9ba52acd3b0a5c33aeada5cdaa3267cdc7c594a98731d4268cdc1532f4264cb4"
+checksum = "13547f7012c01ab4a0e8f8967730ada8f9fdf419e8b6c792788f39cf4e46eefa"
 dependencies = [
  "heck",
  "proc-macro-error",
@@ -974,9 +974,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.129"
+version = "0.2.131"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64de3cc433455c14174d42e554d4027ee631c4d046d43e3ecc6efc4636cdc7a7"
+checksum = "04c3b4822ccebfa39c02fc03d1534441b22ead323fa0f48bb7ddd8e6ba076a40"
 
 [[package]]
 name = "link-cplusplus"
@@ -1517,7 +1517,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "cargo_metadata",
  "reqwest",
@@ -1531,7 +1531,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core-sys"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1541,26 +1541,26 @@ dependencies = [
 name = "risc0-make-id"
 version = "0.11.0-rc.4"
 dependencies = [
- "clap 3.2.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clap 3.2.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "risc0-zkvm",
 ]
 
 [[package]]
 name = "risc0-r0vm"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "assert_cmd",
  "assert_fs",
  "bytemuck",
- "clap 3.2.16 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clap 3.2.17 (registry+https://github.com/rust-lang/crates.io-index)",
  "risc0-zkvm",
  "risc0-zkvm-methods",
 ]
 
 [[package]]
 name = "risc0-zkp"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "array-init",
@@ -1579,7 +1579,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp-sys"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1590,7 +1590,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1613,7 +1613,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "env_logger",
@@ -1623,14 +1623,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-circuit-gen"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "risc0-zkvm-circuit-sys",
 ]
 
 [[package]]
 name = "risc0-zkvm-circuit-sys"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "cxx",
@@ -1649,7 +1649,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "compiler_builtins",
  "rustc-std-workspace-core",
@@ -1657,7 +1657,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform-sys"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "cxx",
  "cxx-build",
@@ -1665,7 +1665,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-sys"
-version = "0.11.0-rc.4"
+version = "0.11.0"
 dependencies = [
  "cxx",
  "cxx-build",
