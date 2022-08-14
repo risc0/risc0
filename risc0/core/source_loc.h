@@ -21,35 +21,30 @@
 /// until c++20, we build our own minialist version.  This is currently used to help track EDSL
 /// expressions for the IR.
 
-#ifdef __has_builtin
-#if __has_builtin(__builtin_FILE)
-#define FILE_EXPR __builtin_FILE()
-#else
-#define FILE_EXPR __FILE__
-#endif
-#else
-#define FILE_EXPR __FILE__
-#endif
-
-#ifdef __has_builtin
-#if __has_builtin(__builtin_LINE)
-#define LINE_EXPR __builtin_LINE()
-#else
-#define LINE_EXPR __LINE__
-#endif
-#else
-#define LINE_EXPR __LINE__
-#endif
-
-#ifdef __has_builtin
-#if __has_builtin(__builtin_COLUMN)
-#define COLUMN_EXPR __builtin_COLUMN()
-#else
-#define COLUMN_EXPR 0
-#endif
-#else
-#define COLUMN_EXPR 0
-#endif
+#ifdef __clang__
+#if defined(__has_builtin)
+#if __has_builtin(__builtin_FILE) && __has_builtin(__builtin_LINE)
+#define HAS_FILE_LINE 1
+#else // __has_builtin(__builtin_FILE) && __has_builtin(__builtin_LINE)
+#define HAS_FILE_LINE 0
+#endif //  __has_builtin(__builtin_FILE) && __has_builtin(__builtin_LINE)
+#if __has_builtin(__builtin_COLUMN) && __has_builtin(__builtin_COLUMN)
+#define HAS_COLUMN 1
+#else // __has_builtin(__builtin_COLUMN) && __has_builtin(__builtin_COLUMN)
+#define HAS_COLUMN 0
+#endif // __has_builtin(__builtin_COLUMN) && __has_builtin(__builtin_COLUMN)
+#else  //  defined(__has_builtin)
+#define HAS_FILE_LINE 0
+#define HAS_COLUMN 0
+#endif //  defined(__has_builtin)
+#elif defined(__GNUC__) && __GNUC__ >= 7
+// gcc says it supports __has_builtin but experimentation indicates otherwise.
+#define HAS_FILE_LINE 1
+#define HAS_COLUMN 0
+#else // defined(__GNUC__) && __GNUC__ >= 7
+#define HAS_FILE_LINE 0
+#define HAS_COLUMN 0
+#endif // defined(__GNUC__) && __GNUC__ >= 7
 
 namespace risc0 {
 
@@ -58,9 +53,20 @@ struct SourceLoc {
 public:
   /// Get the "current" source location.  When used in default values, this effectively captures the
   /// call site of the function declaring the default value, which is very useful.
-  static constexpr SourceLoc current(const char* filename = FILE_EXPR,
-                                     int line = LINE_EXPR,
-                                     int column = COLUMN_EXPR) noexcept {
+  static constexpr SourceLoc current(
+#if HAS_FILE_LINE
+      const char* filename = __builtin_FILE(),
+      int line = __builtin_LINE(),
+#else
+      const char* filename = __FILE__,
+      int line = __LINE__,
+#endif
+#if HAS_COLUMN
+      int column = __builtin_COLUMN()
+#else
+      int column = 0
+#endif
+          ) noexcept {
     SourceLoc loc;
     loc.filename = filename;
     loc.line = line;
