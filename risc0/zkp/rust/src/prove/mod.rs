@@ -68,6 +68,11 @@ pub trait Circuit {
     fn get_accum(&self) -> &[Fp];
 }
 
+pub fn prove_without_seal<H: Hal, S: Sha, C: Circuit>(_hal: &H, sha: &S, circuit: &mut C) {
+    let mut iop = WriteIOP::new(sha);
+    circuit.execute(&mut iop);
+}
+
 pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> Vec<u32> {
     let taps = circuit.get_taps().clone();
     let code_size = taps.group_size(RegisterGroup::Code);

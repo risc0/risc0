@@ -156,6 +156,10 @@ pub trait Sha: Clone + Debug {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
+    /// Generate a SHA from a slice of words without adding padding or
+    /// length.
+    fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr;
+
     /// Generate a SHA from a pair of [Digests](Digest).
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr;
 

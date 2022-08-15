@@ -30,3 +30,6 @@ debug = false
 
 [workspace.metadata.workspaces]
 allow_branch = "main"
+
+[profile.dev.package.risc0-zkp]
+opt-level = 3

@@ -95,6 +95,23 @@ impl Sha for Impl {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
+    fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr {
+        assert!(
+            words.len() % 16 == 0,
+            "{} should be a multiple of 16, the number of words per SHA block",
+            words.len()
+        );
+        let mut state = INIT_256;
+        for block in words.chunks(16) {
+            let block_u8: &[u8] = bytemuck::cast_slice(block);
+            compress256(
+                &mut state,
+                slice::from_ref(GenericArray::from_slice(block_u8)),
+            )
+        }
+        Box::new(Digest::new(state))
+    }
+
     fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
         self.hash_fps_stride(fps, 0, fps.len(), 1)
     }

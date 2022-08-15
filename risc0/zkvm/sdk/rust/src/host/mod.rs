@@ -35,9 +35,9 @@ mod bridge {}
 
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
-    skip_seal: bool,
+    pub(crate) skip_seal: bool,
 
-    sendrecv_callbacks: HashMap<u32, Box<dyn Fn(u32, &[u8]) -> Vec<u8> + 'a + Sync>>,
+    pub(crate) sendrecv_callbacks: HashMap<u32, Box<dyn Fn(u32, &[u8]) -> Vec<u8> + 'a + Sync>>,
 }
 
 impl<'a> ProverOpts<'a> {
@@ -93,6 +93,7 @@ mod test {
         FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SENDRECV_ID, SENDRECV_PATH, SHA_ID, SHA_PATH,
     };
     use std::sync::Mutex;
+    use test_log::test;
 
     #[test]
     fn sha() {

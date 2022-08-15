@@ -9,5 +9,6 @@ rust_binary(
         "//risc0/zkvm/sdk/rust:zkvm_host",
         "@crates_host//:bytemuck",
         "@crates_host//:clap",
+        "@crates_host//:env_logger",
     ],
 )
