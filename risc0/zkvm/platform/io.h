@@ -21,7 +21,7 @@ constexpr size_t kGPIO_SHA = 0x01F00000;
 constexpr size_t kGPIO_Commit = 0x01F00004;
 constexpr size_t kGPIO_Fault = 0x01F00008;
 constexpr size_t kGPIO_Log = 0x01F0000C;
-constexpr size_t kGPIO_GetKey = 0x01F0010;
+constexpr size_t kGPIO_GetKey = 0x01F00010;
 
 constexpr size_t kGPIO_SendRecvChannel = 0x01F00014;
 constexpr size_t kGPIO_SendRecvSize = 0x01F00018;
