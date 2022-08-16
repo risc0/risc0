@@ -21,7 +21,7 @@ namespace risc0 {
 
 // Compare core operations against simple % P implementations
 TEST(Fp, FpCompareNative) {
-  PsuedoRng rng(2);
+  PseudoRng rng(2);
   for (size_t i = 0; i < 100000; i++) {
     Fp fa = Fp::random(rng);
     Fp fb = Fp::random(rng);
