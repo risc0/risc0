@@ -19,6 +19,7 @@ use crate::{
         fp::Fp,
         sha::{Digest, Sha},
     },
+    field::Elem,
     merkle::MerkleTreeParams,
     verify::read_iop::ReadIOP,
 };
@@ -65,7 +66,7 @@ impl MerkleTreeVerifier {
     pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Vec<Fp> {
         assert!(idx < self.params.row_size);
         // Initialize a vector to hold field elements.
-        let mut out = vec![Fp::new(0); self.params.col_size];
+        let mut out = vec![Fp::ZERO; self.params.col_size];
         // Read out field elements from IOP.
         iop.read_fps(&mut out);
         // Get the hash at the leaf of the tree by hashing these field elements.

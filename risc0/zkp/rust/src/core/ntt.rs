@@ -14,15 +14,17 @@
 
 //! An implementation of a Numeric Theoretic Transform (NTT).
 
-use core::ops::{Add, Sub};
+use core::ops::{Add, Mul, Sub};
 
 use paste::paste;
 
 use super::{
-    fp::{Fp, FpMul},
+    fp::Fp,
     log2_ceil,
     rou::{ROU_FWD, ROU_REV},
 };
+
+use crate::field::Elem;
 
 /// Reverses the bits in a 32 bit number
 /// For example 1011...0100 becomes 0010...1101
@@ -65,7 +67,7 @@ macro_rules! butterfly {
             #[inline]
             fn [<fwd_butterfly_ $n>]<T>(io: &mut [T], expand_bits: usize)
             where
-                T: Copy + FpMul + Add<Output = T> + Sub<Output = T>,
+                T: Copy + Mul<Fp, Output = T> + Add<Output = T> + Sub<Output = T>,
             {
                 if $n == expand_bits {
                     return;
@@ -74,10 +76,10 @@ macro_rules! butterfly {
                 [<fwd_butterfly_ $x>](&mut io[..half], expand_bits);
                 [<fwd_butterfly_ $x>](&mut io[half..], expand_bits);
                 let step = Fp::new(ROU_FWD[$n]);
-                let mut cur = Fp::new(1);
+                let mut cur = Fp::ONE;
                 for i in 0..half {
                     let a = io[i];
-                    let b = io[i + half].fp_mul(cur);
+                    let b = io[i + half] * cur;
                     io[i] = a + b;
                     io[i + half] = a - b;
                     cur *= step;
@@ -87,16 +89,16 @@ macro_rules! butterfly {
             #[inline]
             fn [<rev_butterfly_ $n>]<T>(io: &mut [T])
             where
-                T: Copy + FpMul + Add<Output = T> + Sub<Output = T>,
+                T: Copy + Mul<Fp, Output = T> + Add<Output = T> + Sub<Output = T>,
             {
                 let half = 1 << ($n - 1);
                 let step = Fp::new(ROU_REV[$n]);
-                let mut cur = Fp::new(1);
+                let mut cur = Fp::ONE;
                 for i in 0..half {
                     let a = io[i];
                     let b = io[i + half];
                     io[i] = a + b;
-                    io[i + half] = (a - b).fp_mul(cur);
+                    io[i + half] = (a - b) * cur;
                     cur *= step;
                 }
                 [<rev_butterfly_ $x>](&mut io[..half]);
@@ -197,7 +199,7 @@ butterfly!(1, 0);
 /// which is 6. So i' in the exponent of the index-3 value is 6.
 pub fn interpolate_ntt<T>(io: &mut [T])
 where
-    T: Copy + FpMul + Add<Output = T> + Sub<Output = T>,
+    T: Copy + Mul<Fp, Output = T> + Add<Output = T> + Sub<Output = T>,
 {
     let size = io.len();
     let n = log2_ceil(size);
@@ -235,14 +237,14 @@ where
     }
     let norm = Fp::new(size as u32).inv();
     for i in 0..size {
-        io[i] = io[i].fp_mul(norm);
+        io[i] = io[i] * norm;
     }
 }
 
 /// Perform a forward butterfly transform of a buffer of (1 << n) numbers.
 pub fn evaluate_ntt<T>(io: &mut [T], expand_bits: usize)
 where
-    T: Copy + FpMul + Add<Output = T> + Sub<Output = T>,
+    T: Copy + Mul<Fp, Output = T> + Add<Output = T> + Sub<Output = T>,
 {
     // do_ntt::<T, false>(io, expand_bits);
     let size = io.len();
@@ -295,13 +297,13 @@ where
 
 #[cfg(test)]
 mod tests {
+    use crate::field::Elem;
     use rand::thread_rng;
 
     use crate::core::{
         fp::Fp,
         ntt::{bit_reverse, evaluate_ntt, interpolate_ntt},
         rou::ROU_FWD,
-        Random,
     };
 
     // Compare the complex version to the naive version
@@ -313,13 +315,13 @@ mod tests {
         // Randomly fill input
         let mut buf = [Fp::random(&mut rng); SIZE];
         // Compute the hard way
-        let mut goal = [Fp::default(); SIZE];
+        let mut goal = [Fp::ZERO; SIZE];
         // Compute polynomial at each ROU power (starting at 0, i.e. x = 1)
-        let mut x = Fp::new(1);
+        let mut x = Fp::ONE;
         for i in 0..SIZE {
             // Compute the polynomial
-            let mut tot = Fp::new(0);
-            let mut xn = Fp::new(1);
+            let mut tot = Fp::ZERO;
+            let mut xn = Fp::ONE;
             for j in 0..SIZE {
                 tot += buf[j] * xn;
                 xn *= x;
@@ -362,7 +364,7 @@ mod tests {
         const SIZE_OUT: usize = 1 << N;
         let mut rng = thread_rng();
         let mut cmp = [Fp::random(&mut rng); SIZE_IN];
-        let mut buf = [Fp::default(); SIZE_OUT];
+        let mut buf = [Fp::ZERO; SIZE_OUT];
         // Do plain interpolate on cmp
         interpolate_ntt(&mut cmp);
         // Expand to buf
@@ -372,13 +374,13 @@ mod tests {
         // Order cmp nicely for the check
         bit_reverse(&mut cmp);
         // Now verify by comparing with the slow way
-        let mut goal = [Fp::default(); SIZE_OUT];
+        let mut goal = [Fp::ZERO; SIZE_OUT];
         // Compute polynomial at each ROU power (starting at 0, i.e. x = 1)
-        let mut x = Fp::new(1);
+        let mut x = Fp::ONE;
         for i in 0..SIZE_OUT {
             // Compute the polynomial
-            let mut tot = Fp::new(0);
-            let mut xn = Fp::new(1);
+            let mut tot = Fp::ZERO;
+            let mut xn = Fp::ONE;
             for j in 0..SIZE_IN {
                 tot += cmp[j] * xn;
                 xn *= x;

@@ -19,8 +19,21 @@ extern crate alloc;
 
 use rand::Rng;
 
-pub mod fp;
-pub mod fp4;
+/// Transitional "fp" module until ZKP has been genericized to work
+/// with multiple fields.
+pub mod fp {
+    pub use crate::field::baby_bear::Elem as Fp;
+}
+/// Transitional "fp4" module until ZKP has been genericized to work
+/// with multiple fields.
+pub mod fp4 {
+    pub use crate::field::baby_bear::ExtElem as Fp4;
+    use crate::field::ExtElem;
+
+    /// Transitional reexport until ZKP has been genericized to work
+    /// with multiple fields.
+    pub const EXT_SIZE: usize = Fp4::EXT_SIZE;
+}
 pub mod ntt;
 pub mod poly;
 pub mod rou;
