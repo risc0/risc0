@@ -130,3 +130,54 @@ impl MerkleTreeProver {
         out
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use rand::thread_rng;
+    use rand::rngs::ThreadRng;
+    use crate::hal::cpu::CpuHal;
+    use crate::core::sha_cpu;
+
+    // use crate::MerkleTreeProver;
+    // use super::hal::Hal;
+    use super::*;
+
+    fn do_test<H: Hal, S: Sha>(
+        rng: ThreadRng,
+        sha: &S,
+        hal: &H,
+        rows: usize,
+        cols: usize,
+        queries: usize,
+    ) {
+
+        // TODO: Uninitialized
+        // TODO: Nothing needed is in scope
+        // TODO: Wrong size
+        let matrix: Rc<dyn BufferTrait<Fp>> = hal.alloc(domain * EXT_SIZE);
+
+
+        let prover = MerkleTreeProver::new(
+            hal,
+            matrix,
+            rows,
+            cols,
+            queries,
+        );
+        {
+            let mut iop: WriteIOP<S> = WriteIOP::new(sha);
+            prover.prove(
+                &mut iop,
+                rows,
+            );
+        }
+    }
+
+    #[test]
+    fn merkle_cpu_1_1_1() {
+        let rng = rand::thread_rng();  // TODO: probably wrong but adjust once I'm actually using it
+        let sha: sha_cpu::Impl;
+        let hal: CpuHal;
+        do_test(rng, &sha, &hal, 1, 1, 1);
+    }
+}
