@@ -20,7 +20,7 @@ extern uint32_t get_random_u32();
 
 namespace risc0 {
 
-PsuedoRng::PsuedoRng() {
+PseudoRng::PseudoRng() {
   static uint64_t seed = CryptoRng::shared().generate();
   static bool logged = false;
   if (!logged) {

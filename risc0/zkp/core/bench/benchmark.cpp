@@ -24,7 +24,7 @@ static void BM_Interpolate_NTT(benchmark::State& state) {
   size_t size = 1 << n;
 
   std::vector<Fp> buf(size);
-  PsuedoRng rng(2);
+  PseudoRng rng(2);
   for (size_t i = 0; i < size; i++) {
     buf[i] = Fp::random(rng);
   }
