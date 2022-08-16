@@ -141,6 +141,44 @@ mod tests {
     // use super::hal::Hal;
     use super::*;
 
+    fn init_prover<H: Hal>(
+        hal: &H,
+        rows: usize,
+        cols: usize,
+        queries: usize,
+    ) -> MerkleTreeProver {
+        // Initialize a prover with leaves 0..size
+        let size: u32 = (rows*cols).try_into().unwrap();
+        let mut data = Vec::<Fp>::new();
+        for val in 0..size {
+            data.push(Fp::from(val));
+        }
+        let matrix = hal.copy_from(data.as_slice());
+
+        MerkleTreeProver::new(
+            hal,
+            &matrix,
+            rows,
+            cols,
+            queries,
+        )
+    }
+
+    fn test_bad_row_access<H: Hal, S: Sha>(
+        sha: &S,
+        hal: &H,
+        rows: usize,
+        cols: usize,
+        queries: usize,
+    ) {
+        let prover = init_prover(hal, rows, cols, queries);
+        let mut iop: WriteIOP<S> = WriteIOP::new(sha);
+        prover.prove(
+            &mut iop,
+            rows,
+        );
+    }
+
     fn do_test<H: Hal, S: Sha>(
         rng: ThreadRng,
         sha: &S,
@@ -156,7 +194,6 @@ mod tests {
         }
         let matrix = hal.copy_from(data.as_slice());
 
-
         let prover = MerkleTreeProver::new(
             hal,
             &matrix,
@@ -171,6 +208,15 @@ mod tests {
                 rows,
             );
         }
+    }
+
+    #[test]
+    #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
+    fn merkle_cpu_1_1_1_bad_row_access() {
+        let rng = rand::thread_rng();  // TODO: probably wrong but adjust once I'm actually using it
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        test_bad_row_access(&sha, &hal, 1, 1, 1);
     }
 
     #[test]
