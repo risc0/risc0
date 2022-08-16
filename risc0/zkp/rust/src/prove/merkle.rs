@@ -133,7 +133,6 @@ impl MerkleTreeProver {
 
 #[cfg(test)]
 mod tests {
-    use rand::thread_rng;
     use rand::rngs::ThreadRng;
     use crate::hal::cpu::CpuHal;
     use crate::core::sha_cpu;
@@ -150,16 +149,17 @@ mod tests {
         cols: usize,
         queries: usize,
     ) {
-
-        // TODO: Uninitialized
-        // TODO: Nothing needed is in scope
-        // TODO: Wrong size
-        let matrix: Rc<dyn BufferTrait<Fp>> = hal.alloc(domain * EXT_SIZE);
+        let size: u32 = (rows*cols).try_into().unwrap();
+        let mut data: Vec<Fp> = vec![];
+        for val in 0..size {
+            data.push(Fp::from(val));
+        }
+        let matrix = hal.copy_from(data.as_slice());
 
 
         let prover = MerkleTreeProver::new(
             hal,
-            matrix,
+            &matrix,
             rows,
             cols,
             queries,
@@ -176,8 +176,8 @@ mod tests {
     #[test]
     fn merkle_cpu_1_1_1() {
         let rng = rand::thread_rng();  // TODO: probably wrong but adjust once I'm actually using it
-        let sha: sha_cpu::Impl;
-        let hal: CpuHal;
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
         do_test(rng, &sha, &hal, 1, 1, 1);
     }
 }
