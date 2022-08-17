@@ -15,10 +15,7 @@
 use alloc::{vec, vec::Vec};
 
 use crate::{
-    core::{
-        fp::Fp,
-        sha::{Digest, Sha},
-    },
+    core::{fp::Fp, sha::hash_pair, sha::hash_raw_words, sha::Digest},
     field::Elem,
     merkle::MerkleTreeParams,
     verify::read_iop::ReadIOP,
@@ -35,12 +32,7 @@ pub struct MerkleTreeVerifier {
 impl MerkleTreeVerifier {
     /// Constructs a new MerkleTreeVerifier by making the params, and then
     /// computing the root hashes from the top level hashes.
-    pub fn new<S: Sha>(
-        iop: &mut ReadIOP<S>,
-        row_size: usize,
-        col_size: usize,
-        queries: usize,
-    ) -> Self {
+    pub fn new(iop: &mut ReadIOP, row_size: usize, col_size: usize, queries: usize) -> Self {
         let params = MerkleTreeParams::new(row_size, col_size, queries);
         // Initialize a vector to hold the digests.
         // Vector is twice as long as the "top" row - the children of the entry at index
@@ -50,7 +42,7 @@ impl MerkleTreeVerifier {
         iop.read_digests(&mut top[params.top_size..]);
         // Populate hashes up to the root of the tree.
         for i in (1..params.top_size).rev() {
-            top[i] = *iop.get_sha().hash_pair(&top[2 * i], &top[2 * i + 1]);
+            top[i] = *hash_pair(&top[2 * i], &top[2 * i + 1]);
         }
         // Commit to root (index 1).
         iop.commit(&top[1]);
@@ -63,14 +55,14 @@ impl MerkleTreeVerifier {
     }
 
     /// Verifies a branch provided by an IOP.
-    pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Vec<Fp> {
+    pub fn verify(&self, iop: &mut ReadIOP, mut idx: usize) -> Vec<Fp> {
         assert!(idx < self.params.row_size);
         // Initialize a vector to hold field elements.
         let mut out = vec![Fp::ZERO; self.params.col_size];
         // Read out field elements from IOP.
         iop.read_fps(&mut out);
         // Get the hash at the leaf of the tree by hashing these field elements.
-        let mut cur = *iop.get_sha().hash_fps(&out);
+        let mut cur = *hash_raw_words(bytemuck::cast_slice(&out));
         // Shift idx to start of the row
         idx += self.params.row_size;
         while idx >= 2 * self.params.top_size {
@@ -83,9 +75,9 @@ impl MerkleTreeVerifier {
             // Now ascend to the parent index, and compute the hash there.
             idx /= 2;
             if low_bit == 1 {
-                cur = *iop.get_sha().hash_pair(&other[0], &cur);
+                cur = *hash_pair(&other[0], &cur);
             } else {
-                cur = *iop.get_sha().hash_pair(&cur, &other[0]);
+                cur = *hash_pair(&cur, &other[0]);
             }
         }
         // Once we reduce to an index for which we have the hash, check that it's

@@ -15,7 +15,6 @@
 use anyhow::{anyhow, Result};
 use serde::{Deserialize, Serialize};
 
-use risc0_zkp::core::sha::default_implementation;
 use risc0_zkp::verify::adapter::VerifyAdapter;
 use risc0_zkvm_circuit::CircuitImpl;
 
@@ -41,8 +40,7 @@ impl Receipt {
     {
         let circuit = CircuitImpl::new();
         let mut verifier = VerifyAdapter::new(&circuit);
-        let sha = default_implementation();
-        risc0_zkp::verify::verify(sha, &mut verifier, &self.seal)
+        risc0_zkp::verify::verify(&mut verifier, &self.seal)
             .map_err(|err| anyhow!("Verification failed: {:?}", err))
     }
 

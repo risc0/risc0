@@ -22,7 +22,7 @@ use crate::{
         fp::Fp,
         fp4::{Fp4, EXT_SIZE},
         log2_ceil,
-        sha::Sha,
+        sha::hash_raw_words,
     },
     field::Elem,
     hal::{Buffer, Hal},
@@ -42,7 +42,7 @@ impl ProveRoundInfo {
     /// produce the evaluations of the polynomial, the merkle tree
     /// committing to the evaluation, and the coefficients of the folded
     /// polynomial.
-    pub fn new<H: Hal, S: Sha>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>) -> Self {
+    pub fn new<H: Hal>(hal: &H, iop: &mut WriteIOP, coeffs: &Buffer<Fp>) -> Self {
         debug!("Doing FRI folding");
         // Get the number of coefficients of the polynomial over the extension field.
         let size = coeffs.size() / EXT_SIZE;
@@ -79,7 +79,7 @@ impl ProveRoundInfo {
         }
     }
 
-    pub fn prove_query<S: Sha>(&mut self, iop: &mut WriteIOP<S>, pos: &mut usize) {
+    pub fn prove_query(&mut self, iop: &mut WriteIOP, pos: &mut usize) {
         // Compute which group we are in
         let group = *pos % (self.domain / FRI_FOLD);
         // Generate the proof
@@ -89,9 +89,9 @@ impl ProveRoundInfo {
     }
 }
 
-pub fn fri_prove<H: Hal, S: Sha, F>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>, mut f: F)
+pub fn fri_prove<H: Hal, F>(hal: &H, iop: &mut WriteIOP, coeffs: &Buffer<Fp>, mut f: F)
 where
-    F: FnMut(&mut WriteIOP<S>, usize),
+    F: FnMut(&mut WriteIOP, usize),
 {
     let orig_domain = coeffs.size() / EXT_SIZE * INV_RATE;
     let mut rounds = Vec::new();
@@ -108,7 +108,7 @@ where
     // Dump final polynomial + commit
     final_coeffs.view(&mut |view| {
         iop.write_fp_slice(view);
-        let digest = iop.get_sha().hash_fps(view);
+        let digest = hash_raw_words(bytemuck::cast_slice(view));
         iop.commit(&digest);
     });
     // Do queries

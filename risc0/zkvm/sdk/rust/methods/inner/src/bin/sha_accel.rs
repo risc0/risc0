@@ -24,5 +24,5 @@ pub fn main() {
     let digest = sha::digest_u8_slice(data);
     env::commit(&digest);
 
-    risc0_zkp::core::sha::testutil::test_sha_impl(&risc0_zkvm_guest::sha::Impl {})
+    risc0_zkp::core::sha::testutil::test_sha_impl()
 }

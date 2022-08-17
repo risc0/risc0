@@ -30,7 +30,7 @@ use crate::{
         fp4::{Fp4, EXT_SIZE},
         poly::{poly_divide, poly_interpolate},
         rou::ROU_REV,
-        sha::Sha,
+        sha::hash_raw_words,
     },
     field::Elem,
     hal::{Buffer, Hal},
@@ -44,10 +44,10 @@ pub trait Circuit {
 
     /// Perform initial 'execution' setting code + data.
     /// Additionally, write any 'results' as needed.
-    fn execute<S: Sha>(&mut self, iop: &mut WriteIOP<S>);
+    fn execute(&mut self, iop: &mut WriteIOP);
 
     /// Perform 'accumlate' stage, using the iop for any RNG state.
-    fn accumulate<S: Sha>(&mut self, iop: &mut WriteIOP<S>);
+    fn accumulate(&mut self, iop: &mut WriteIOP);
 
     /// Compute check polynomial.
     fn eval_check(
@@ -68,17 +68,17 @@ pub trait Circuit {
     fn get_accum(&self) -> &[Fp];
 }
 
-pub fn prove_without_seal<H: Hal, S: Sha, C: Circuit>(_hal: &H, sha: &S, circuit: &mut C) {
-    let mut iop = WriteIOP::new(sha);
+pub fn prove_without_seal<H: Hal, C: Circuit>(_hal: &H, circuit: &mut C) {
+    let mut iop = WriteIOP::new();
     circuit.execute(&mut iop);
 }
 
-pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> Vec<u32> {
+pub fn prove<H: Hal, C: Circuit>(hal: &H, circuit: &mut C) -> Vec<u32> {
     let taps = circuit.get_taps().clone();
     let code_size = taps.group_size(RegisterGroup::Code);
     let data_size = taps.group_size(RegisterGroup::Data);
     let accum_size = taps.group_size(RegisterGroup::Accum);
-    let mut iop = WriteIOP::new(sha);
+    let mut iop = WriteIOP::new();
 
     circuit.execute(&mut iop);
 
@@ -228,7 +228,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     debug!("Size of U = {}", coeff_u.len());
     iop.write_fp4_slice(&coeff_u);
-    let hash_u = sha.hash_fp4s(&coeff_u);
+    let hash_u = hash_raw_words(bytemuck::cast_slice(&coeff_u));
     iop.commit(&hash_u);
 
     // Set the mix mix value

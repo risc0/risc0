@@ -37,9 +37,13 @@ pub mod fp4 {
 pub mod ntt;
 pub mod poly;
 pub mod rou;
-pub mod sha;
-pub mod sha_cpu;
 pub mod sha_rng;
+
+pub mod sha;
+#[cfg(not(target_os = "zkvm"))]
+pub(crate) mod sha_cpu;
+#[cfg(target_os = "zkvm")]
+mod sha_zkvm;
 
 /// For x = (1 << po2), given x, find po2.
 pub fn to_po2(x: usize) -> usize {

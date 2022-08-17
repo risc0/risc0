@@ -15,17 +15,11 @@
 use _alloc::{boxed::Box, vec::Vec};
 use core::{cell::UnsafeCell, mem};
 
-use risc0_zkp::core::{
-    fp::Fp,
-    fp4::Fp4,
-    sha::{Digest, DIGEST_WORDS},
-};
-use risc0_zkvm::{
-    platform::{
-        io::{SHADescriptor, GPIO_SHA},
-        memory, WORD_SIZE,
-    },
-    serde::to_vec_with_capacity,
+use risc0_zkp::core::sha::Digest;
+use risc0_zkvm::serde::to_vec_with_capacity;
+use risc0_zkvm_platform::{
+    io::{SHADescriptor, GPIO_SHA},
+    memory, WORD_SIZE,
 };
 use serde::Serialize;
 
@@ -58,6 +52,8 @@ fn alloc_desc() -> *mut SHADescriptor {
 /// Computes a raw digest of the given slice.  For compatibility with
 /// the SHA specification, the data must already contain the end
 /// marker and the trailer
+// Exported manually to avoid circular dependency; see zkp/src/core/sha_zkvm.rs for details.
+#[export_name = "zkvm_sha_raw_digest"]
 pub fn raw_digest(data: &[u32]) -> &'static Digest {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     // Allocate fresh memory that's guaranteed to be uninitialized so
@@ -147,6 +143,8 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
 /// Makes a digest for a slice of bytes.
 ///
 /// Since there are no guarantees on alignment, an internal copy is made.
+// Exported manually to avoid circular dependency; see zkp/src/core/sha_zkvm.rs for details.
+#[export_name = "zkvm_sha_digest_u8_slice"]
 pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     let len_bytes = data.len();
     let cap = compute_capacity_needed(len_bytes);
@@ -184,57 +182,5 @@ pub(crate) fn finalize() {
         let ptr = alloc_desc();
         let type_field_ptr: *mut u32 = core::ptr::addr_of_mut!((*ptr).type_count);
         type_field_ptr.write_volatile(0);
-    }
-}
-
-/// A guest-side [Sha] implementation.
-///
-/// [Sha]: risc0_zkp::core::sha::Sha
-#[derive(Debug, Clone)]
-pub struct Impl {}
-
-impl risc0_zkp::core::sha::Sha for Impl {
-    type DigestPtr = &'static Digest;
-
-    fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
-        digest_u8_slice(bytes)
-    }
-
-    fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
-        raw_digest(bytemuck::cast_slice(&[*a, *b]))
-    }
-
-    fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr {
-        raw_digest(words)
-    }
-
-    fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
-        // Fps do not not include standard sha header.
-        if fps.len() % CHUNK_SIZE == 0 {
-            raw_digest(bytemuck::cast_slice(fps))
-        } else {
-            let size = align_up(fps.len(), CHUNK_SIZE);
-            let mut buf: Vec<u32> = Vec::with_capacity(size);
-            buf.extend(bytemuck::cast_slice(fps));
-            buf.resize(size, 0);
-            raw_digest(&buf)
-        }
-    }
-
-    fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr {
-        self.hash_fps(bytemuck::cast_slice(fp4s))
-    }
-
-    // Generate a new digest by mixing two digests together via XOR,
-    // and storing into the first digest.
-    fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest) {
-        let mut digest = Box::<Digest>::new(Digest::default());
-        for i in 0..DIGEST_WORDS {
-            digest.get_mut()[i] = pool.get()[i] ^ val.get()[i];
-        }
-        unsafe {
-            let ptr: *const Digest = &*digest;
-            *pool = &*ptr
-        }
     }
 }

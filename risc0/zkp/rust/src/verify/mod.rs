@@ -28,7 +28,7 @@ use crate::{
         log2_ceil,
         poly::poly_eval,
         rou::{ROU_FWD, ROU_REV},
-        sha::{Digest, Sha},
+        sha::{hash_raw_words, Digest},
     },
     field::Elem,
     taps::{RegisterGroup, TapSet},
@@ -55,16 +55,15 @@ impl fmt::Display for VerificationError {
 
 pub trait Circuit {
     fn taps(&self) -> &TapSet;
-    fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
-    fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
+    fn execute(&mut self, iop: &mut ReadIOP);
+    fn accumulate(&mut self, iop: &mut ReadIOP);
     fn po2(&self) -> u32;
     fn check_code(&self, root: &Digest) -> Result<(), VerificationError>;
     fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4;
 }
 
-pub fn verify<S, C>(sha: &S, circuit: &mut C, seal: &[u32]) -> Result<(), VerificationError>
+pub fn verify<C>(circuit: &mut C, seal: &[u32]) -> Result<(), VerificationError>
 where
-    S: Sha,
     C: Circuit,
 {
     if seal.len() == 0 {
@@ -73,7 +72,7 @@ where
     let taps = circuit.taps().clone();
 
     // Make IOP
-    let mut iop = ReadIOP::new(sha, seal);
+    let mut iop = ReadIOP::new(seal);
 
     // Read any execution state
     circuit.execute(&mut iop);
@@ -120,7 +119,7 @@ where
     let num_taps = taps.tap_size();
     let mut coeff_u = vec![Fp4::ZERO; num_taps + CHECK_SIZE];
     iop.read_fp4s(&mut coeff_u);
-    let hash_u = *sha.hash_fp4s(&coeff_u);
+    let hash_u = *hash_raw_words(bytemuck::cast_slice(&coeff_u));
     iop.commit(&hash_u);
 
     // Now, convert to evaluated values
@@ -185,7 +184,7 @@ where
 
     let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
     // debug!("FRI-verify, size = {size}");
-    fri_verify(&mut iop, size, |iop: &mut ReadIOP<S>, idx: usize| -> Fp4 {
+    fri_verify(&mut iop, size, |iop: &mut ReadIOP, idx: usize| -> Fp4 {
         let x = Fp4::from_fp(gen.pow(idx));
         let mut rows = vec![];
         rows.push(accum_merkle.verify(iop, idx));

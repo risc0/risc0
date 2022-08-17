@@ -13,45 +13,44 @@
 // limitations under the License.
 
 //! A SHA-256 based CRNG used in Fiat-Shamir
+use alloc::borrow::Cow;
 use rand::{Error, RngCore};
 use rand_core::impls;
 
-use super::sha::{Digest, Sha, DIGEST_WORDS};
+use super::sha::{digest_mix, hash_bytes, hash_pair, Digest, DIGEST_WORDS};
 
 /// A random number generator driven by a [Sha].
 #[derive(Clone, Debug)]
-pub struct ShaRng<S: Sha> {
-    sha: S,
-    pool0: S::DigestPtr,
-    pool1: S::DigestPtr,
+pub struct ShaRng<'a> {
+    pool0: Cow<'a, Digest>,
+    pool1: Cow<'a, Digest>,
     pool_used: usize,
 }
 
-impl<S: Sha> ShaRng<S> {
-    /// Create a new [ShaRng] from a given [Sha].
-    pub fn new(sha: &S) -> ShaRng<S> {
+impl<'a> ShaRng<'a> {
+    /// Create a new [ShaRng].
+    pub fn new() -> ShaRng<'a> {
         ShaRng {
-            sha: sha.clone(),
-            pool0: sha.hash_bytes(b"Hello"),
-            pool1: sha.hash_bytes(b"World"),
+            pool0: hash_bytes(b"Hello"),
+            pool1: hash_bytes(b"World"),
             pool_used: 0,
         }
     }
 
     /// Mix the pool with a specified [Digest].
     pub fn mix(&mut self, val: &Digest) {
-        self.sha.mix(&mut self.pool0, val);
+        digest_mix(self.pool0.to_mut(), val);
         self.step();
     }
 
     fn step(&mut self) {
-        self.pool0 = self.sha.hash_pair(&self.pool0, &self.pool1);
-        self.pool1 = self.sha.hash_pair(&self.pool0, &self.pool1);
+        self.pool0 = hash_pair(&self.pool0, &self.pool1);
+        self.pool1 = hash_pair(&self.pool0, &self.pool1);
         self.pool_used = 0;
     }
 }
 
-impl<S: Sha> RngCore for ShaRng<S> {
+impl<'a> RngCore for ShaRng<'a> {
     fn next_u32(&mut self) -> u32 {
         if self.pool_used == DIGEST_WORDS {
             self.step();
@@ -78,18 +77,19 @@ impl<S: Sha> RngCore for ShaRng<S> {
 #[allow(missing_docs)]
 pub mod testutil {
     use super::ShaRng;
-    use crate::core::sha::Sha;
     use rand::RngCore;
 
     // Runs conformance test on a SHA implementation to make sure it
-    // properly behaves for generating pseudo-random numbers.
-    pub fn test_sha_rng_impl<S: Sha>(sha: &S) {
-        let mut x = ShaRng::new(sha);
+    // properly behaves for generating pseudo-random numbers.  This is
+    //  purposefully not behind #[cfg(test)] so that it can be run in
+    //  a zkvm guest.
+    pub fn test_sha_rng_impl() {
+        let mut x = ShaRng::new();
         for _ in 0..10 {
             x.next_u32();
         }
         assert_eq!(x.next_u32(), 1826198275);
-        x.mix(&*sha.hash_bytes(b"foo"));
+        x.mix(&crate::core::sha::hash_bytes(b"foo"));
         assert_eq!(x.next_u32(), 1753965479);
     }
 }

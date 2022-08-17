@@ -14,31 +14,20 @@
 
 use alloc::vec::Vec;
 
-use crate::core::{
-    fp::Fp,
-    fp4::Fp4,
-    sha::{Digest, Sha},
-    sha_rng::ShaRng,
-};
+use crate::core::{fp::Fp, fp4::Fp4, sha::Digest, sha_rng::ShaRng};
 
-pub struct WriteIOP<S: Sha> {
-    sha: S,
+pub struct WriteIOP<'a> {
     pub proof: Vec<u32>,
-    pub rng: ShaRng<S>,
+    pub rng: ShaRng<'a>,
 }
 
-impl<S: Sha> WriteIOP<S> {
+impl<'a> WriteIOP<'a> {
     /// Create a new empty proof
-    pub fn new(sha: &S) -> Self {
+    pub fn new() -> Self {
         WriteIOP {
-            sha: sha.clone(),
             proof: Vec::new(),
-            rng: ShaRng::new(sha),
+            rng: ShaRng::new(),
         }
-    }
-
-    pub fn get_sha(&self) -> &S {
-        &self.sha
     }
 
     /// Called by the prover to write some data.

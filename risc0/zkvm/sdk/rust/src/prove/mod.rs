@@ -17,9 +17,7 @@ pub mod exec;
 use std::io::Write;
 
 use anyhow::Result;
-use risc0_zkp::{
-    core::sha::default_implementation, hal::cpu::CpuHal, prove::adapter::ProveAdapter,
-};
+use risc0_zkp::{hal::cpu::CpuHal, prove::adapter::ProveAdapter};
 
 use crate::{
     elf::Program,
@@ -75,13 +73,12 @@ impl<'a> Prover<'a> {
 
         let mut prover = ProveAdapter::new(&mut executor.executor);
         let hal = CpuHal {};
-        let sha = default_implementation();
 
         let seal = if skip_seal {
-            risc0_zkp::prove::prove_without_seal(&hal, sha, &mut prover);
+            risc0_zkp::prove::prove_without_seal(&hal, &mut prover);
             Vec::new()
         } else {
-            risc0_zkp::prove::prove(&hal, sha, &mut prover)
+            risc0_zkp::prove::prove(&hal, &mut prover)
         };
 
         // Attach the full version of the output journal & construct receipt object

@@ -25,8 +25,7 @@ use crate::{
         fp4::{Fp4, EXT_SIZE},
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
-        sha::{Digest, Sha},
-        sha_cpu,
+        sha::{hash_pair, Digest},
     },
     field::Elem,
     FRI_FOLD,
@@ -377,9 +376,10 @@ impl Hal for CpuHal {
             .unwrap()
             .as_slice()
             .to_vec(); // TODO: avoid copy
-        let sha = sha_cpu::Impl {};
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            *output = *sha.hash_fps_stride(&matrix, idx, col_size, count);
+            // TODO: Consider moving this out of sha_cpu, since it's only used by the
+            // prover.
+            *output = *crate::core::sha_cpu::hash_fps_stride(&matrix, idx, col_size, count);
         });
     }
 
@@ -389,7 +389,6 @@ impl Hal for CpuHal {
             .downcast_ref::<CpuBuffer<Digest>>()
             .unwrap()
             .as_slice_mut();
-        let sha = sha_cpu::Impl {};
         let (output, input) = unsafe {
             (
                 from_raw_parts_mut(io.as_mut_ptr().add(output_size), output_size),
@@ -400,7 +399,7 @@ impl Hal for CpuHal {
             .par_iter_mut()
             .zip(input.par_chunks_exact(2))
             .for_each(|(output, input)| {
-                *output = *sha.hash_pair(&input[0], &input[1]);
+                *output = *hash_pair(&input[0], &input[1]);
             });
     }
 }

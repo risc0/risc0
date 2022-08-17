@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Simple SHA-256 wrappers.
+//! A CPU-based [Sha] implementation.
 
-use alloc::{boxed::Box, vec, vec::Vec};
+use alloc::{borrow::Cow, boxed::Box, vec::Vec};
 use core::slice;
 
 use sha2::{
@@ -23,143 +23,102 @@ use sha2::{
     Digest as ShaDigest, Sha256,
 };
 
-use super::{
-    fp::Fp,
-    fp4::Fp4,
-    sha::{Digest, Sha, DIGEST_WORDS},
-};
+use super::sha::{Digest, BLOCK_WORDS, DIGEST_WORDS};
 
 static INIT_256: [u32; DIGEST_WORDS] = [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
 ];
 
-/// A CPU-based [Sha] implementation.
-#[derive(Clone)]
-pub struct Impl {}
-
 fn set_word(buf: &mut [u8], idx: usize, word: u32) {
     buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_le_bytes());
 }
 
-impl Impl {
-    /// Compute the hash of an array of [Fp]s using the specified stride.
-    pub fn hash_fps_stride(
-        &self,
-        fps: &[Fp],
-        offset: usize,
-        size: usize,
-        stride: usize,
-    ) -> Box<Digest> {
-        let mut state = INIT_256;
-        let mut block: GenericArray<u8, U64> = GenericArray::default();
-        let mut off = 0;
-        for i in 0..size {
-            set_word(
-                block.as_mut_slice(),
-                off,
-                u32::from(fps[offset + i * stride]),
-            );
-            off += 1;
-            if off == 16 {
-                compress256(&mut state, slice::from_ref(&block));
-                off = 0;
-            }
-        }
-        if off != 0 {
-            block[off * 4..].fill(0);
-            compress256(&mut state, slice::from_ref(&block));
-        }
-        Box::new(Digest::new(state))
-    }
-}
-
-impl Sha for Impl {
-    type DigestPtr = Box<Digest>;
-
-    fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
-        let mut hasher = Sha256::new();
-        hasher.update(bytes);
-        Box::new(Digest::new(
-            hasher
-                .finalize()
-                .as_slice()
-                .chunks(4)
-                .map(|chunk| u32::from_be_bytes(chunk.try_into().unwrap()))
-                .collect::<Vec<u32>>()
-                .try_into()
-                .unwrap(),
-        ))
-    }
-
-    fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
-        self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
-    }
-
-    fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr {
-        assert!(
-            words.len() % 16 == 0,
-            "{} should be a multiple of 16, the number of words per SHA block",
-            words.len()
+/// Compute the hash of an array of [Fp]s using the specified stride.
+/// TODO: Consider moving this to hal layer since it's only used by the prover.
+pub fn hash_fps_stride(
+    fps: &[crate::core::fp::Fp],
+    offset: usize,
+    size: usize,
+    stride: usize,
+) -> Box<Digest> {
+    let mut state = INIT_256;
+    let mut block: GenericArray<u8, U64> = GenericArray::default();
+    let mut off = 0;
+    for i in 0..size {
+        set_word(
+            block.as_mut_slice(),
+            off,
+            u32::from(fps[offset + i * stride]),
         );
-        let mut state = INIT_256;
-        for block in words.chunks(16) {
-            let block_u8: &[u8] = bytemuck::cast_slice(block);
-            compress256(
-                &mut state,
-                slice::from_ref(GenericArray::from_slice(block_u8)),
-            )
+        off += 1;
+        if off == 16 {
+            compress256(&mut state, slice::from_ref(&block));
+            off = 0;
         }
-        Box::new(Digest::new(state))
     }
-
-    fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
-        self.hash_fps_stride(fps, 0, fps.len(), 1)
-    }
-
-    fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr {
-        let mut flat: Vec<Fp> = vec![];
-        for i in 0..fp4s.len() {
-            for j in 0..4 {
-                flat.push(fp4s[i].elems()[j]);
-            }
-        }
-        return self.hash_fps(&flat);
-    }
-
-    // Digest two digest into one
-    fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
-        let mut state = INIT_256;
-        let mut block: GenericArray<u8, U64> = GenericArray::default();
-        for i in 0..8 {
-            set_word(block.as_mut_slice(), i, a.as_slice()[i]);
-            set_word(block.as_mut_slice(), 8 + i, b.as_slice()[i]);
-        }
+    if off != 0 {
+        block[off * 4..].fill(0);
         compress256(&mut state, slice::from_ref(&block));
-        Box::new(Digest::new(state))
     }
-
-    // Generate a new digest by mixing two digests together via XOR,
-    // and stores it back in the pool.
-    fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest) {
-        // CPU based sha can do this in place without generating another digest pointer.
-        for (pool_word, val_word) in pool.get_mut().iter_mut().zip(val.get()) {
-            *pool_word ^= *val_word;
-        }
-    }
+    Box::new(Digest::new(state))
 }
 
-impl core::fmt::Debug for Impl {
-    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        core::write!(f, "CPU SHA256 implementation")
+pub fn hash_bytes(bytes: &[u8]) -> Cow<'static, Digest> {
+    let mut hasher = Sha256::new();
+    hasher.update(bytes);
+    Cow::Owned(Digest::new(
+        hasher
+            .finalize()
+            .as_slice()
+            .chunks(4)
+            .map(|chunk| u32::from_be_bytes(chunk.try_into().unwrap()))
+            .collect::<Vec<u32>>()
+            .try_into()
+            .unwrap(),
+    ))
+}
+
+pub fn hash_raw_words(words: &[u32]) -> Cow<'static, Digest> {
+    let mut wordbuf: Vec<u32>;
+
+    // Add padding if necessary.
+    let words = if words.len() % 16 != 0 {
+        let padded_len = ((words.len() + BLOCK_WORDS - 1) / BLOCK_WORDS) * BLOCK_WORDS;
+        wordbuf = Vec::with_capacity(padded_len);
+        wordbuf.extend(words);
+        wordbuf.resize(padded_len, 0);
+        wordbuf.as_slice()
+    } else {
+        words
+    };
+
+    let mut state = INIT_256;
+    for block in words.chunks(16) {
+        let block_u8: &[u8] = bytemuck::cast_slice(block);
+        compress256(
+            &mut state,
+            slice::from_ref(GenericArray::from_slice(block_u8)),
+        )
     }
+    Cow::Owned(Digest::new(state))
+}
+
+// Digest two digest into one
+pub fn hash_pair(a: &Digest, b: &Digest) -> Cow<'static, Digest> {
+    let mut state = INIT_256;
+    let mut block: GenericArray<u8, U64> = GenericArray::default();
+    for i in 0..8 {
+        set_word(block.as_mut_slice(), i, a.as_slice()[i]);
+        set_word(block.as_mut_slice(), 8 + i, b.as_slice()[i]);
+    }
+    compress256(&mut state, slice::from_ref(&block));
+    Cow::Owned(Digest::new(state))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Impl;
-
     #[test]
     fn test_impl() {
-        crate::core::sha::testutil::test_sha_impl(&Impl {})
+        crate::core::sha::testutil::test_sha_impl()
     }
 }

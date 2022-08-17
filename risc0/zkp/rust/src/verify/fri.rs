@@ -23,7 +23,7 @@ use crate::{
         log2_ceil,
         ntt::{bit_reverse, interpolate_ntt},
         rou::{ROU_FWD, ROU_REV},
-        sha::Sha,
+        sha::hash_raw_words,
     },
     field::Elem,
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
@@ -56,7 +56,7 @@ fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
 }
 
 impl VerifyRoundInfo {
-    pub fn new<S: Sha>(iop: &mut ReadIOP<S>, in_domain: usize) -> Self {
+    pub fn new(iop: &mut ReadIOP, in_domain: usize) -> Self {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
@@ -65,7 +65,7 @@ impl VerifyRoundInfo {
         }
     }
 
-    pub fn verify_query<S: Sha>(&mut self, iop: &mut ReadIOP<S>, pos: &mut usize, goal: &mut Fp4) {
+    pub fn verify_query(&mut self, iop: &mut ReadIOP, pos: &mut usize, goal: &mut Fp4) {
         let quot = *pos / self.domain;
         let group = *pos % self.domain;
         // Get the column data
@@ -87,9 +87,9 @@ impl VerifyRoundInfo {
     }
 }
 
-pub fn fri_verify<S: Sha, F>(iop: &mut ReadIOP<S>, mut degree: usize, mut inner: F)
+pub fn fri_verify<F>(iop: &mut ReadIOP, mut degree: usize, mut inner: F)
 where
-    F: FnMut(&mut ReadIOP<S>, usize) -> Fp4,
+    F: FnMut(&mut ReadIOP, usize) -> Fp4,
 {
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
@@ -103,7 +103,7 @@ where
     // Grab the final coeffs + commit
     let mut final_coeffs = vec![Fp::ZERO; EXT_SIZE * degree];
     iop.read_fps(&mut final_coeffs);
-    let final_digest = iop.get_sha().hash_fps(&final_coeffs); // padding?
+    let final_digest = hash_raw_words(bytemuck::cast_slice(&final_coeffs));
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
     let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);

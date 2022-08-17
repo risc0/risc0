@@ -21,10 +21,13 @@ use std::collections::{btree_map::Entry, BTreeMap, BTreeSet};
 use anyhow::{bail, Result};
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
-use risc0_zkp::core::sha::Sha;
 use risc0_zkp::{
     adapter::{CircuitDef, CustomStep},
-    core::{fp::Fp, log2_ceil, sha::DIGEST_WORDS},
+    core::{
+        fp::Fp,
+        log2_ceil,
+        sha::{hash_raw_words, DIGEST_WORDS},
+    },
     field::Elem,
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
@@ -483,11 +486,10 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             sha_type, count, desc.idx, desc.source, desc.digest
         );
 
-        let sha = risc0_zkp::core::sha::default_implementation();
         let words = self
             .memory
             .load_region_u32(desc.source as u32, (count * 64) as u32);
-        let digest = sha.hash_raw_words(bytemuck::cast_slice(words.as_slice()));
+        let digest = hash_raw_words(bytemuck::cast_slice(words.as_slice()));
 
         debug!("Digest result is {:X?}", digest.as_slice());
 

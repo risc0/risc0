@@ -23,7 +23,6 @@ use crate::{
         fp4::{Fp4, EXT_SIZE},
         log2_ceil,
         rou::ROU_FWD,
-        sha::Sha,
     },
     field::Elem,
     hal::Buffer,
@@ -58,12 +57,12 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
         self.exec.circuit.get_taps()
     }
 
-    fn execute<S: Sha>(&mut self, iop: &mut WriteIOP<S>) {
+    fn execute(&mut self, iop: &mut WriteIOP) {
         iop.write_fp_slice(&self.exec.output);
         iop.write_u32_slice(&[self.exec.po2 as u32]);
     }
 
-    fn accumulate<S: Sha>(&mut self, iop: &mut WriteIOP<S>) {
+    fn accumulate(&mut self, iop: &mut WriteIOP) {
         // Make the mixing values
         self.mix
             .resize_with(self.exec.circuit.mix_size(), || Fp::random(&mut iop.rng));

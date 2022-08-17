@@ -18,10 +18,7 @@ use core::cmp;
 use log::debug;
 
 use crate::{
-    core::{
-        fp::Fp,
-        sha::{Digest, Sha},
-    },
+    core::{fp::Fp, sha::Digest},
     hal::{Buffer, Hal},
     merkle::MerkleTreeParams,
     prove::write_iop::WriteIOP,
@@ -85,7 +82,7 @@ impl MerkleTreeProver {
     }
 
     /// Write the 'top' of the merkle tree and commit to the root.
-    pub fn commit<H: Hal, S: Sha>(&self, hal: &H, iop: &mut WriteIOP<S>) {
+    pub fn commit<H: Hal>(&self, hal: &H, iop: &mut WriteIOP) {
         let top_size = self.params.top_size;
         let mut proof_slice = self.tmp_proof.slice(0, top_size);
         hal.eltwise_copy_digest(&mut proof_slice, &self.nodes.slice(top_size, top_size));
@@ -109,7 +106,7 @@ impl MerkleTreeProver {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
-    pub fn prove<S: Sha>(&self, iop: &mut WriteIOP<S>, idx: usize) -> Vec<Fp> {
+    pub fn prove(&self, iop: &mut WriteIOP, idx: usize) -> Vec<Fp> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);
         self.matrix.view(&mut |view| {
