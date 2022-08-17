@@ -295,7 +295,7 @@ fn build_guest_package<P>(
     pkg: &Package,
     target_dir: P,
     guest_build_env: &GuestBuildEnv,
-    features: Vec<String>,
+    features: &Vec<String>,
 ) where
     P: AsRef<Path>,
 {
@@ -375,6 +375,114 @@ fn build_guest_package<P>(
     }
 }
 
+fn test_guest_package<P>(
+    pkg: &Package,
+    target_dir: P,
+    guest_build_env: &GuestBuildEnv,
+    mut features: &Vec<String>,
+) where
+    P: AsRef<Path>,
+{
+    fs::create_dir_all(target_dir.as_ref()).unwrap();
+    let cargo = env::var("CARGO").unwrap();
+
+    // Install r0vm into the project for further setting as a runner for riscv32im-risc0-zkvm-elf
+    // TODO:Find a way to install same risc0 version as we are depending on
+    let root = "--root=".to_owned() + &target_dir.as_ref().to_str().unwrap().to_owned();
+    let mut args2 = vec!["install", root.as_str(), "risc0-r0vm"];
+    let mut cmd = Command::new(&cargo);
+    let mut child = cmd.args(args2).status().unwrap();
+
+    let mut args = vec![
+        "test",
+        "--verbose",
+        "--verbose",
+        "--release",
+        "--target",
+        guest_build_env.target_spec.to_str().unwrap(),
+        "-Z",
+        "build-std=core,alloc,std,proc_macro,panic_abort",
+        "-Z",
+        "build-std-features=compiler-builtins-mem",
+        "--manifest-path",
+        pkg.manifest_path.as_str(),
+        "--target-dir",
+        target_dir.as_ref().to_str().unwrap(),
+    ];
+    let features_str = features.join(",");
+    if !features.is_empty() {
+        args.push("--features");
+        args.push(&features_str);
+    }
+    println!("Testing guest package: {cargo} {}", args.join(" "));
+    // The RISC0_STANDARD_LIB variable can be set for testing purposes
+    // to override the downloaded standard library.  It should point
+    // to the root of the rust repository.
+    let risc0_standard_lib: String = if let Ok(path) = env::var("RISC0_STANDARD_LIB") {
+        path
+    } else {
+        guest_build_env.rust_lib_src.to_str().unwrap().into()
+    };
+
+    println!("Using rust standard library root: {}", risc0_standard_lib);
+
+    let mut cmd = Command::new(cargo);
+    let mut child = cmd
+        .env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic")
+        .env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib)
+        .env(
+            "CARGO_TARGET_RISCV32IM_RISC0_ZKVM_ELF_RUNNER",
+            target_dir.as_ref().to_str().unwrap().to_owned() + "/bin/r0vm --skip-seal --elf",
+        )
+        .args(args)
+        .stderr(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+
+    let output = child.wait_with_output().unwrap();
+    let stderr = BufReader::new(&*output.stderr);
+    let stdout = BufReader::new(&*output.stdout);
+
+    // HACK: Attempt to bypass the parent cargo output capture and
+    // send directly to the tty, if available.  This way we get
+    // progress messages from the inner cargo so the user doesn't
+    // think it's just hanging.
+    let mut tty = fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .open("/dev/tty")
+        .ok();
+
+    if let Some(tty) = &mut tty {
+        write!(
+            tty,
+            "{}: Starting build for riscv32im-risc0-zkvm-elf   \n",
+            pkg.name
+        )
+        .unwrap();
+    }
+
+    for line in stderr.lines() {
+        match &mut tty {
+            Some(tty) => write!(tty, "{}: {}   \n", pkg.name, line.unwrap()).unwrap(),
+            None => eprintln!("{}", line.unwrap()),
+        }
+    }
+
+    for line in stdout.lines() {
+        match &mut tty {
+            Some(tty) => write!(tty, "{}: {}   \n", pkg.name, line.unwrap()).unwrap(),
+            None => eprintln!("{}", line.unwrap()),
+        }
+    }
+
+    let status = cmd.status().unwrap();
+
+    if !status.success() {
+        std::process::exit(status.code().unwrap());
+    }
+}
 /// Options defining how to embed a guest package in
 /// [`embed_methods_with_options`].
 pub struct GuestOptions {
@@ -383,6 +491,7 @@ pub struct GuestOptions {
 
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
+    pub test_mode: bool,
 }
 
 impl Default for GuestOptions {
@@ -390,6 +499,7 @@ impl Default for GuestOptions {
         GuestOptions {
             code_limit: DEFAULT_METHOD_ID_LIMIT,
             features: vec![],
+            test_mode: false,
         }
     }
 }
@@ -415,11 +525,20 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
 
+        if guest_options.test_mode {
+            test_guest_package(
+                &guest_pkg,
+                &out_dir.join("riscv-guest"),
+                &guest_build_env,
+                &guest_options.features,
+            );
+        }
+
         build_guest_package(
             &guest_pkg,
             &out_dir.join("riscv-guest"),
             &guest_build_env,
-            guest_options.features,
+            &guest_options.features,
         );
 
         for method in guest_methods(&guest_pkg, &out_dir) {
