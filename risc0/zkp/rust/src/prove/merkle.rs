@@ -134,8 +134,12 @@ impl MerkleTreeProver {
 #[cfg(test)]
 mod tests {
     use rand::rngs::ThreadRng;
+    use rand::RngCore;
     use crate::hal::cpu::CpuHal;
     use crate::core::sha_cpu;
+    use crate::core::Random;
+    use crate::verify::read_iop::ReadIOP;
+    use crate::verify::merkle::MerkleTreeVerifier;
 
     // use crate::MerkleTreeProver;
     // use super::hal::Hal;
@@ -164,7 +168,7 @@ mod tests {
         )
     }
 
-    fn test_bad_row_access<H: Hal, S: Sha>(
+    fn bad_row_access<H: Hal, S: Sha>(
         sha: &S,
         hal: &H,
         rows: usize,
@@ -179,13 +183,14 @@ mod tests {
         );
     }
 
-    fn do_test<H: Hal, S: Sha>(
+    fn bad_query<H: Hal, S: Sha>(
         rng: ThreadRng,
         sha: &S,
         hal: &H,
         rows: usize,
         cols: usize,
         queries: usize,
+        bad_query: usize,
     ) {
         let size: u32 = (rows*cols).try_into().unwrap();
         let mut data: Vec<Fp> = vec![];
@@ -201,12 +206,43 @@ mod tests {
             cols,
             queries,
         );
+        let mut iop: WriteIOP<S> = WriteIOP::new(sha);
+        prover.commit(
+            hal,
+            &mut iop,
+        );
+        for query in 0..queries {
+            let r_idx = (iop.rng.next_u32() as usize) % rows;
+            let col = prover.prove(&mut iop, r_idx);
+            for c_idx in 0..cols {
+                assert_eq!(col[c_idx], Fp::from((r_idx + c_idx * rows) as u32));
+            }
+        }
         {
-            let mut iop: WriteIOP<S> = WriteIOP::new(sha);
-            prover.prove(
-                &mut iop,
+            let mut r_iop = ReadIOP::new(sha, &iop.proof);
+            let verifier = MerkleTreeVerifier::new(
+                &mut r_iop,
                 rows,
+                cols,
+                queries,
             );
+            assert_eq!(verifier.root(), prover.root());
+            let err = false;
+            for query in 0..queries {
+                let r_idx = (r_iop.next_u32() as usize) % rows;
+                if query == bad_query {
+                    let r_idx = r_idx + 1 % rows;
+                    // verifier.verify(&mut r_iop, r_idx);
+                    // TODO This is broken
+                    let verify_result = std::panic::catch_unwind(core::panic::AssertUnwindSafe(||verifier.verify(&mut r_iop, r_idx)));
+                    assert!(verify_result.is_err());
+                }
+                let col = verifier.verify(&mut r_iop, r_idx);  // TODO
+                for c_idx in 0..cols {
+                    assert_eq!(col[c_idx], Fp::from((r_idx + c_idx * rows) as u32));
+                }
+            }
+            r_iop.verify_complete();
         }
     }
 
@@ -216,14 +252,15 @@ mod tests {
         let rng = rand::thread_rng();  // TODO: probably wrong but adjust once I'm actually using it
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
-        test_bad_row_access(&sha, &hal, 1, 1, 1);
+        bad_row_access(&sha, &hal, 1, 1, 1);
     }
 
     #[test]
-    fn merkle_cpu_1_1_1() {
+    fn merkle_cpu_4_3_2() {
         let rng = rand::thread_rng();  // TODO: probably wrong but adjust once I'm actually using it
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
-        do_test(rng, &sha, &hal, 1, 1, 1);
+        // Test a complete verification with no bad queries (by setting bad_query out of range)
+        bad_query(rng, &sha, &hal, 4, 3, 2, 4);
     }
 }
