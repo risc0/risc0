@@ -21,13 +21,14 @@ use std::{cell::RefCell, rc::Rc};
 
 use crate::{
     core::{
-        fp::{Fp, FpMul},
+        fp::Fp,
         fp4::{Fp4, EXT_SIZE},
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
         sha::{Digest, Sha},
         sha_cpu,
     },
+    field::Elem,
     FRI_FOLD,
 };
 #[allow(unused_imports)]
@@ -202,13 +203,13 @@ impl Hal for CpuHal {
         (&which[..], &xs[..], &mut out[..])
             .into_par_iter()
             .for_each(|(id, x, out)| {
-                let mut tot = Fp4::zero();
-                let mut cur = Fp4::new(Fp::new(1), Fp::new(0), Fp::new(0), Fp::new(0));
+                let mut tot = Fp4::ZERO;
+                let mut cur = Fp4::new(Fp::ONE, Fp::ZERO, Fp::ZERO, Fp::ZERO);
                 let id = *id as usize;
                 let count = 1 << po2;
                 let local = &coeffs[count * id..count * id + count];
                 for coeff in local {
-                    tot += cur.fp_mul(*coeff);
+                    tot += cur * *coeff;
                     cur *= *x;
                 }
                 *out = tot;
@@ -288,7 +289,7 @@ impl Hal for CpuHal {
         let input = ArrayView::from_shape((to_add, count), &input).unwrap();
         let input = input.axis_iter(Axis(1)).into_par_iter();
         output.zip(input).for_each(|(mut output, input)| {
-            let mut sum = Fp4::zero();
+            let mut sum = Fp4::ZERO;
             for i in input {
                 sum += *i;
             }
@@ -343,7 +344,7 @@ impl Hal for CpuHal {
 
         // TODO: parallelize
         for idx in 0..count {
-            let mut tot = Fp4::default();
+            let mut tot = Fp4::ZERO;
             let mut cur_mix = Fp4::from_u32(1);
             for i in 0..FRI_FOLD {
                 let rev_i = bit_rev_32(i as u32) >> (32 - log2_ceil(FRI_FOLD));
@@ -411,7 +412,6 @@ mod test {
     use rand::thread_rng;
 
     use super::*;
-    use crate::core::Random;
 
     #[test]
     #[should_panic]
@@ -438,7 +438,7 @@ mod test {
 
     fn test_binary<T, H, HF, CF>(hal: &H, hal_fn: HF, cpu_fn: CF, count: usize)
     where
-        T: 'static + Random + Default + Clone + PartialEq + Debug,
+        T: Elem + Default + Debug + 'static,
         H: Hal,
         HF: Fn(&Buffer<T>, &Buffer<T>, &Buffer<T>),
         CF: Fn(&T, &T) -> T,

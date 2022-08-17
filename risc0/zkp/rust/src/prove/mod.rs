@@ -31,8 +31,8 @@ use crate::{
         poly::{poly_divide, poly_interpolate},
         rou::ROU_REV,
         sha::Sha,
-        Random,
     },
+    field::Elem,
     hal::{Buffer, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::{RegisterGroup, TapSet},
@@ -203,7 +203,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Now, convert the values to coefficients via interpolation
     let mut pos = 0;
-    let mut coeff_u = vec![Fp4::default(); eval_u.len()];
+    let mut coeff_u = vec![Fp4::ZERO; eval_u.len()];
     for reg in taps.regs() {
         poly_interpolate(
             &mut coeff_u[pos..],
@@ -238,9 +238,9 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     // Do the coefficent mixing
     // Begin by making a zeroed output buffer
     let combo_count = taps.combos_size();
-    let combos = vec![Fp4::default(); size * (combo_count + 1)];
+    let combos = vec![Fp4::ZERO; size * (combo_count + 1)];
     let combos = hal.copy_from(combos.as_slice());
-    let mut cur_mix = Fp4::one();
+    let mut cur_mix = Fp4::ONE;
 
     let mut mix_group = |id: RegisterGroup, pg: &PolyGroup| {
         let mut which = Vec::new();
@@ -275,7 +275,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     combos.view_mut(&mut |combos| {
         // Subtract the U coeffs from the combos
         let mut cur_pos = 0;
-        let mut cur = Fp4::one();
+        let mut cur = Fp4::ONE;
         for reg in taps.regs() {
             for i in 0..reg.size() {
                 combos[size * reg.combo_id() + i] -= cur * coeff_u[cur_pos + i];
@@ -297,7 +297,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
                         &mut combos[combo * size..combo * size + size],
                         z * back_one.pow((*back).into())
                     ),
-                    Fp4::zero()
+                    Fp4::ZERO
                 );
             }
         }
@@ -307,7 +307,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
                 &mut combos[combo_count * size..combo_count * size + size],
                 z4
             ),
-            Fp4::zero()
+            Fp4::ZERO
         );
     });
 

@@ -32,7 +32,7 @@ void testNTT(const char* name,
   std::vector<Fp> b(size * count);
   LOG(1, "Testing " << name);
   {
-    PsuedoRng rng(2);
+    PseudoRng rng(2);
     LOG(1, "Randomizing");
     AccelReadWriteLock cpuA(a);
     for (size_t i = 0; i < size * count; i++) {

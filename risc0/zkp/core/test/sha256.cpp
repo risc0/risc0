@@ -69,7 +69,7 @@ TEST(Sha256, TestVectors) {
 
 TEST(Sha256, compareFpVsBytes) {
   // Try sizes 0 - 100 for variety
-  PsuedoRng rng(2);
+  PseudoRng rng(2);
   for (size_t i = 0; i < 100; i++) {
     // Make a vector of fp values and their 'stringified' form
     std::vector<Fp> vals(i);

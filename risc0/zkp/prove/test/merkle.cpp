@@ -21,7 +21,7 @@
 
 namespace risc0 {
 
-void doTest(PsuedoRng& rng, size_t rowSize, size_t colSize, size_t queries) {
+void doTest(PseudoRng& rng, size_t rowSize, size_t colSize, size_t queries) {
   LOG(1, "Testing rowSize = " << rowSize << ", colSize = " << colSize << ", queries = " << queries);
   // Make some leaves
   auto leavesAccel = AccelSlice<Fp>::allocate(rowSize * colSize);
@@ -90,7 +90,7 @@ void doTest(PsuedoRng& rng, size_t rowSize, size_t colSize, size_t queries) {
 }
 
 TEST(Crypto, Merkle) {
-  PsuedoRng rng(2);
+  PseudoRng rng(2);
   doTest(rng, 1, 1, 1);
   doTest(rng, 4, 4, 2);
   auto logish = [&]() {

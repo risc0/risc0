@@ -24,8 +24,8 @@ use crate::{
         log2_ceil,
         rou::ROU_FWD,
         sha::Sha,
-        Random,
     },
+    field::Elem,
     hal::Buffer,
     prove::{executor::Executor, write_iop::WriteIOP, Circuit},
     taps::{RegisterGroup, TapSet},
@@ -73,7 +73,7 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
             .circuit
             .get_taps()
             .group_size(RegisterGroup::Accum);
-        self.accum.resize(self.steps * accum_size, Fp::invalid());
+        self.accum.resize(self.steps * accum_size, Fp::ZERO);
         let args: &mut [&mut [Fp]] = &mut [
             &mut self.exec.code,
             &mut self.exec.output,
@@ -99,12 +99,6 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
         for i in self.steps - ZK_CYCLES..self.steps {
             for j in 0..accum_size {
                 self.accum[j * self.steps + i] = Fp::random(&mut rng);
-            }
-        }
-        // Zero out 'invalid' entries in accum
-        for x in self.accum.iter_mut() {
-            if *x == Fp::invalid() {
-                *x = Fp::new(0);
             }
         }
     }
