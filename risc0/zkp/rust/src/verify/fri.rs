@@ -24,8 +24,8 @@ use crate::{
         ntt::{bit_reverse, interpolate_ntt},
         rou::{ROU_FWD, ROU_REV},
         sha::Sha,
-        Random,
     },
+    field::Elem,
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
@@ -44,9 +44,9 @@ fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
     bit_reverse(values);
     let root_po2 = log2_ceil(FRI_FOLD * s);
     let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);
-    let mut mul = Fp::new(1);
-    let mut tot = Fp4::zero();
-    let mut mix_pow = Fp4::one();
+    let mut mul = Fp::ONE;
+    let mut tot = Fp4::ZERO;
+    let mut mix_pow = Fp4::ONE;
     for i in 0..FRI_FOLD {
         tot += values[i] * mul * mix_pow;
         mul *= inv_wk;
@@ -101,7 +101,7 @@ where
         degree /= FRI_FOLD;
     }
     // Grab the final coeffs + commit
-    let mut final_coeffs = vec![Fp::default(); EXT_SIZE * degree];
+    let mut final_coeffs = vec![Fp::ZERO; EXT_SIZE * degree];
     iop.read_fps(&mut final_coeffs);
     let final_digest = iop.get_sha().hash_fps(&final_coeffs); // padding?
     iop.commit(&final_digest);
@@ -119,8 +119,8 @@ where
         }
         // Do final verification
         let x = gen.pow(pos);
-        let mut fx = Fp4::zero();
-        let mut cur = Fp::new(1);
+        let mut fx = Fp4::ZERO;
+        let mut cur = Fp::ONE;
         for i in 0..degree {
             let coeff = Fp4::new(
                 final_coeffs[0 * degree + i],

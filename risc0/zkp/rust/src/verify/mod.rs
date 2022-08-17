@@ -29,8 +29,8 @@ use crate::{
         poly::poly_eval,
         rou::{ROU_FWD, ROU_REV},
         sha::{Digest, Sha},
-        Random,
     },
+    field::Elem,
     taps::{RegisterGroup, TapSet},
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
@@ -118,7 +118,7 @@ where
 
     // Read the U coeffs + commit their hash
     let num_taps = taps.tap_size();
-    let mut coeff_u = vec![Fp4::default(); num_taps + CHECK_SIZE];
+    let mut coeff_u = vec![Fp4::ZERO; num_taps + CHECK_SIZE];
     iop.read_fp4s(&mut coeff_u);
     let hash_u = *sha.hash_fp4s(&coeff_u);
     iop.commit(&hash_u);
@@ -140,7 +140,7 @@ where
     // debug!("Result = {result:?}");
 
     // Now generate the check polynomial
-    let mut check = Fp4::zero();
+    let mut check = Fp4::ZERO;
     let remap = [0, 2, 1, 3];
     let fp0 = Fp::from(0 as u32);
     let fp1 = Fp::from(1 as u32);
@@ -151,7 +151,7 @@ where
         check += coeff_u[num_taps + rmi + 8] * z.pow(i) * Fp4::new(fp0, fp0, fp1, fp0);
         check += coeff_u[num_taps + rmi + 12] * z.pow(i) * Fp4::new(fp0, fp0, fp0, fp1);
     }
-    check *= (Fp4::from_u32(3) * z).pow(size) - Fp4::one();
+    check *= (Fp4::from_u32(3) * z).pow(size) - Fp4::ONE;
     // debug!("Check = {check:?}");
     assert_eq!(check, result);
 
@@ -162,9 +162,9 @@ where
     // Make the mixed U polynomials
     let mut combo_u = vec![];
     for i in 0..combo_count {
-        combo_u.push(vec![Fp4::zero(); taps.get_combo(i).size()]);
+        combo_u.push(vec![Fp4::ZERO; taps.get_combo(i).size()]);
     }
-    let mut cur_mix = Fp4::one();
+    let mut cur_mix = Fp4::ONE;
     cur_pos = 0;
     for reg in taps.regs() {
         for i in 0..reg.size() {
@@ -175,7 +175,7 @@ where
     }
     // debug!("cur_mix: {cur_mix:?}, cur_pos: {cur_pos}");
     // Handle check group
-    combo_u.push(vec![Fp4::zero()]);
+    combo_u.push(vec![Fp4::ZERO]);
     for _ in 0..CHECK_SIZE {
         combo_u[combo_count][0] += cur_mix * coeff_u[cur_pos];
         cur_pos += 1;
@@ -192,8 +192,8 @@ where
         rows.push(code_merkle.verify(iop, idx));
         rows.push(data_merkle.verify(iop, idx));
         let check_row = check_merkle.verify(iop, idx);
-        let mut cur = Fp4::one();
-        let mut tot = vec![Fp4::zero(); combo_count + 1];
+        let mut cur = Fp4::ONE;
+        let mut tot = vec![Fp4::ZERO; combo_count + 1];
         for reg in taps.regs() {
             tot[reg.combo_id()] += cur * rows[reg.group() as usize][reg.offset()];
             cur *= mix;
@@ -202,10 +202,10 @@ where
             tot[combo_count] += cur * check_row[i];
             cur *= mix;
         }
-        let mut ret = Fp4::zero();
+        let mut ret = Fp4::ZERO;
         for i in 0..combo_count {
             let num = tot[i] - poly_eval(&combo_u[i], x);
-            let mut divisor = Fp4::one();
+            let mut divisor = Fp4::ONE;
             for back in taps.get_combo(i).slice() {
                 divisor *= x - z * back_one.pow(*back as usize);
             }
