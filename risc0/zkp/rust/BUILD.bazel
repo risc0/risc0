@@ -9,6 +9,7 @@ risc0_rust_library_pair(
     crate_name = "risc0_zkp",
     data = glob(["**/README.md"]),
     guest_deps = [
+        "//risc0/zkvm/sdk/rust/platform:platform_guest",
         "@crates_guest//:anyhow",
         "@crates_guest//:bytemuck",
         "@crates_guest//:rand",

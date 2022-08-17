@@ -14,22 +14,16 @@
 
 use crate::core::sha::{Digest, BLOCK_WORDS};
 use alloc::{borrow::Cow, vec::Vec};
+use risc0_zkvm_platform::abi::{sha_digest_u8_slice, sha_raw_digest};
 
 use bytemuck;
 
 // TODO: Figure out a better way to resolve this circular dependency.
 // Perhaps risc0_zkvm_guest should not have a dependency on zkp?  Or
 // maybe risc0_zkvm_guest::sha should move to risc0_zkvm_platform?
-extern "Rust" {
-    #[link_name = "zkvm_sha_raw_digest"]
-    pub fn raw_digest(data: &[u32]) -> &'static Digest;
-
-    #[link_name = "zkvm_sha_digest_u8_slice"]
-    pub fn digest_u8_slice(data: &[u8]) -> &'static Digest;
-}
 
 pub fn hash_bytes(bytes: &[u8]) -> Cow<'static, Digest> {
-    Cow::Borrowed(unsafe { digest_u8_slice(bytes) })
+    Cow::Borrowed(bytemuck::cast_ref(sha_digest_u8_slice(bytes)))
 }
 
 pub fn hash_raw_words(words: &[u32]) -> Cow<'static, Digest> {
@@ -45,10 +39,12 @@ pub fn hash_raw_words(words: &[u32]) -> Cow<'static, Digest> {
         words
     };
 
-    Cow::Borrowed(unsafe { raw_digest(words) })
+    Cow::Borrowed(bytemuck::cast_ref(sha_raw_digest(words)))
 }
 
 pub fn hash_pair(a: &Digest, b: &Digest) -> Cow<'static, Digest> {
     let block: [Digest; 2] = [*a, *b];
-    Cow::Borrowed(unsafe { raw_digest(bytemuck::cast_slice(&block)) })
+    Cow::Borrowed(bytemuck::cast_ref(sha_raw_digest(bytemuck::cast_slice(
+        &block,
+    ))))
 }

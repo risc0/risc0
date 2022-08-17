@@ -25,6 +25,9 @@ rayon = { version = "1.5", optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 
+[target.'cfg(target_os = "zkvm")'.dependencies]
+risc0-zkvm-platform = { version = "0.11", path = "../../zkvm/sdk/rust/platform" }
+
 [dev-dependencies]
 criterion = "0.3"
 rand = { version = "0.8", features = ["small_rng"] }

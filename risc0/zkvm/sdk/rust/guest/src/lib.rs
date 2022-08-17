@@ -34,6 +34,9 @@ pub mod sha;
 /// Functions for handling input and output
 pub mod io;
 
+// Implementations of runtime functions exposed in risc0_zkvm_platform::abi.
+mod abi;
+
 use core::{arch::asm, mem, panic::PanicInfo, ptr};
 
 extern "C" {

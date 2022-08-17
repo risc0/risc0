@@ -52,8 +52,6 @@ fn alloc_desc() -> *mut SHADescriptor {
 /// Computes a raw digest of the given slice.  For compatibility with
 /// the SHA specification, the data must already contain the end
 /// marker and the trailer
-// Exported manually to avoid circular dependency; see zkp/src/core/sha_zkvm.rs for details.
-#[export_name = "zkvm_sha_raw_digest"]
 pub fn raw_digest(data: &[u32]) -> &'static Digest {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     // Allocate fresh memory that's guaranteed to be uninitialized so
@@ -143,8 +141,6 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
 /// Makes a digest for a slice of bytes.
 ///
 /// Since there are no guarantees on alignment, an internal copy is made.
-// Exported manually to avoid circular dependency; see zkp/src/core/sha_zkvm.rs for details.
-#[export_name = "zkvm_sha_digest_u8_slice"]
 pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     let len_bytes = data.len();
     let cap = compute_capacity_needed(len_bytes);

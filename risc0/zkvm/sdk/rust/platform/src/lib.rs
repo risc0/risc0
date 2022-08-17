@@ -14,6 +14,7 @@
 
 #![no_std]
 
+pub mod abi;
 pub mod io;
 pub mod memory;
 
