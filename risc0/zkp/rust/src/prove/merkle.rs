@@ -237,6 +237,17 @@ mod tests {
         }
     }
 
+    fn randomize_sizes() -> (usize, usize, usize) {
+        // Chooses random values of `rows`, `cols`, and `queries` such that:
+        // `rows` is a power of 2
+        // `cols` & `queries` have a wide distribution but tend to take small values
+        let mut rng = rand::thread_rng();
+        let rows = 1 << (rng.gen::<u8>() % 10);
+        let cols = (rng.gen::<usize>() % (1 << (rng.gen::<u8>() % 10))) + 1;
+        let queries = (rng.gen::<usize>() % (1 << (rng.gen::<u8>() % 10))) + 1;
+        (rows, cols, queries)
+    }
+
     #[test]
     #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
     fn merkle_cpu_1_1_1_bad_row_access() {
@@ -246,34 +257,117 @@ mod tests {
     }
 
     #[test]
-    fn merkle_cpu_4_3_2_verify() {
+    #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
+    fn merkle_cpu_4_4_2_bad_row_access() {
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        bad_row_access(&sha, &hal, 4, 4, 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
+    fn merkle_cpu_randomized_bad_row_access() {
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        let (rows, cols, queries) = randomize_sizes();
+        bad_row_access(&sha, &hal, rows, cols, queries);
+    }
+
+    #[test]
+    fn merkle_cpu_1_1_1_verify() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
         // Test a complete verification with no bad queries (by setting bad_query out of range)
-        possibly_bad_verify(&sha, &hal, 4, 3, 2, 4, false);
+        possibly_bad_verify(&sha, &hal, 1, 1, 1, 4, false);
+    }
+
+    #[test]
+    fn merkle_cpu_4_4_2_verify() {
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        // Test a complete verification with no bad queries (by setting bad_query out of range)
+        possibly_bad_verify(&sha, &hal, 4, 4, 2, 4, false);
+    }
+
+    #[test]
+    fn merkle_cpu_randomized_verify() {
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        for reps in 0..100 {
+            let (rows, cols, queries) = randomize_sizes();
+            // Test a complete verification with no bad queries (by setting bad_query out of range)
+            possibly_bad_verify(&sha, &hal, rows, cols, queries, queries + 1, false);
+        }
     }
 
     #[test]
     #[should_panic(expected = "The hash from `top` at idx")]
-    fn merkle_cpu_4_3_2_bad_query() {
+    fn merkle_cpu_2_1_1_bad_query() {
+        // n.b. since we test bad queries by incrementing the row, we can't test for a bad query with rows == 1
+        let mut rng = rand::thread_rng();
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        possibly_bad_verify(&sha, &hal, 2, 1, 1, 0, false);
+    }
+
+    #[test]
+    #[should_panic(expected = "The hash from `top` at idx")]
+    fn merkle_cpu_4_4_2_bad_query() {
         let mut rng = rand::thread_rng();
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
         let queries = 2;
         // Test a complete verification with a bad query
         let bad_query = rng.gen::<usize>() % queries;
-        possibly_bad_verify(&sha, &hal, 4, 3, queries, bad_query, false);
+        possibly_bad_verify(&sha, &hal, 4, 4, queries, bad_query, false);
+    }
+
+    #[test]
+    #[should_panic(expected = "The hash from `top` at idx")]
+    fn merkle_cpu_randomized_bad_query() {
+        let mut rng = rand::thread_rng();
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        let (rows, cols, queries) = randomize_sizes();
+        // Test a complete verification with a bad query
+        let bad_query = rng.gen::<usize>() % queries;
+        possibly_bad_verify(&sha, &hal, rows, cols, queries, bad_query, false);
     }
 
     #[test]
     #[should_panic]
-    fn merkle_cpu_4_3_2_verify_manipulated() {
+    fn merkle_cpu_1_1_1_verify_manipulated() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
         for rep in 0..50 {
             // Test a verification with a manipulated proof but no bad queries (by setting bad_query out of range)
             // Do this multiple times as the manipulation location is random
-            possibly_bad_verify(&sha, &hal, 4, 3, 2, 4, true);
+            possibly_bad_verify(&sha, &hal, 1, 1, 1, 2, true);
+        }
+    }
+
+    #[test]
+    #[should_panic]
+    fn merkle_cpu_4_4_2_verify_manipulated() {
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        for rep in 0..50 {
+            // Test a verification with a manipulated proof but no bad queries (by setting bad_query out of range)
+            // Do this multiple times as the manipulation location is random
+            possibly_bad_verify(&sha, &hal, 4, 4, 2, 4, true);
+        }
+    }
+
+    #[test]
+    #[should_panic]
+    fn merkle_cpu_randomized_verify_manipulated() {
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        for rep in 0..50 {
+            let (rows, cols, queries) = randomize_sizes();
+            // Test a verification with a manipulated proof but no bad queries (by setting bad_query out of range)
+            // Do this multiple times as the manipulation location is random
+            possibly_bad_verify(&sha, &hal, rows, cols, queries, queries + 1, true);
         }
     }
 }
