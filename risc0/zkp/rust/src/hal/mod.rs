@@ -14,71 +14,95 @@
 
 pub mod cpu;
 
-use std::rc::Rc;
-
 use crate::core::{fp::Fp, fp4::Fp4, sha::Digest};
-use downcast_rs::{impl_downcast, Downcast};
 
-pub type Buffer<T> = Rc<dyn BufferTrait<T>>;
-
-pub trait BufferTrait<T>: Downcast {
+pub trait Buffer<T>: Clone {
     fn size(&self) -> usize;
 
-    fn slice(&self, offset: usize, size: usize) -> Buffer<T>;
+    fn slice(&self, offset: usize, size: usize) -> Self;
 
-    fn view(&self, f: &mut dyn FnMut(&[T]));
+    fn view<F: FnOnce(&[T])>(&self, f: F);
 
-    fn view_mut(&self, f: &mut dyn FnMut(&mut [T]));
+    fn view_mut<F: FnOnce(&mut [T])>(&self, f: F);
 }
 
-impl_downcast!(BufferTrait<T>);
-
 pub trait Hal {
-    fn alloc<T: 'static + Default + Clone>(&self, size: usize) -> Buffer<T>;
+    type BufferDigest: Buffer<Digest>;
+    type BufferFp: Buffer<Fp>;
+    type BufferFp4: Buffer<Fp4>;
+    type BufferU32: Buffer<u32>;
 
-    fn copy_from<T: 'static + Clone>(&self, slice: &[T]) -> Buffer<T>;
+    fn alloc_digest(&self, size: usize) -> Self::BufferDigest;
+    fn alloc_fp(&self, size: usize) -> Self::BufferFp;
+    fn alloc_fp4(&self, size: usize) -> Self::BufferFp4;
+    fn alloc_u32(&self, size: usize) -> Self::BufferU32;
 
-    fn batch_expand(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, count: usize);
+    fn copy_digest_from(&self, slice: &[Digest]) -> Self::BufferDigest;
+    fn copy_fp_from(&self, slice: &[Fp]) -> Self::BufferFp;
+    fn copy_fp4_from(&self, slice: &[Fp4]) -> Self::BufferFp4;
+    fn copy_u32_from(&self, slice: &[u32]) -> Self::BufferU32;
 
-    fn batch_evaluate_ntt(&self, io: &Buffer<Fp>, count: usize, expand_bits: usize);
+    fn batch_expand(&self, output: &Self::BufferFp, input: &Self::BufferFp, count: usize);
 
-    fn batch_interpolate_ntt(&self, io: &Buffer<Fp>, count: usize);
+    fn batch_evaluate_ntt(&self, io: &Self::BufferFp, count: usize, expand_bits: usize);
 
-    fn batch_bit_reverse(&self, io: &Buffer<Fp>, count: usize);
+    fn batch_interpolate_ntt(&self, io: &Self::BufferFp, count: usize);
+
+    fn batch_bit_reverse(&self, io: &Self::BufferFp, count: usize);
 
     fn batch_evaluate_any(
         &self,
-        coeffs: &Buffer<Fp>,
+        coeffs: &Self::BufferFp,
         poly_count: usize,
-        which: &Buffer<u32>,
-        xs: &Buffer<Fp4>,
-        out: &Buffer<Fp4>,
+        which: &Self::BufferU32,
+        xs: &Self::BufferFp4,
+        out: &Self::BufferFp4,
     );
 
-    fn zk_shift(&self, io: &Buffer<Fp>, count: usize);
+    fn zk_shift(&self, io: &Self::BufferFp, count: usize);
 
     fn mix_poly_coeffs(
         &self,
-        out: &Buffer<Fp4>,
+        out: &Self::BufferFp4,
         mix_start: &Fp4,
         mix: &Fp4,
-        input: &Buffer<Fp>,
-        combos: &Buffer<u32>,
+        input: &Self::BufferFp,
+        combos: &Self::BufferU32,
         input_size: usize,
         count: usize,
     );
 
-    fn eltwise_add_fp(&self, output: &Buffer<Fp>, input1: &Buffer<Fp>, input2: &Buffer<Fp>);
+    fn eltwise_add_fp(
+        &self,
+        output: &Self::BufferFp,
+        input1: &Self::BufferFp,
+        input2: &Self::BufferFp,
+    );
 
-    fn eltwise_sum_fp4(&self, output: &Buffer<Fp>, input: &Buffer<Fp4>);
+    fn eltwise_sum_fp4(&self, output: &Self::BufferFp, input: &Self::BufferFp4);
 
-    fn eltwise_copy_fp(&self, output: &Buffer<Fp>, input: &Buffer<Fp>);
+    fn eltwise_copy_fp(&self, output: &Self::BufferFp, input: &Self::BufferFp);
 
-    fn eltwise_copy_digest(&self, output: &Buffer<Digest>, input: &Buffer<Digest>);
+    fn eltwise_copy_digest(&self, output: &Self::BufferDigest, input: &Self::BufferDigest);
 
-    fn fri_fold(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, mix: &Fp4);
+    fn fri_fold(&self, output: &Self::BufferFp, input: &Self::BufferFp, mix: &Fp4);
 
-    fn sha_rows(&self, output: &Buffer<Digest>, matrix: &Buffer<Fp>);
+    fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferFp);
 
-    fn sha_fold(&self, io: &Buffer<Digest>, input_size: usize, output_size: usize);
+    fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize);
+
+    /// Compute check polynomial.
+    fn eval_check(
+        &self,
+        circuit: &str,
+        check: &Self::BufferFp,
+        code: &Self::BufferFp,
+        data: &Self::BufferFp,
+        accum: &Self::BufferFp,
+        mix: &Self::BufferFp,
+        out: &Self::BufferFp,
+        poly_mix: Fp4,
+        po2: usize,
+        steps: usize,
+    );
 }

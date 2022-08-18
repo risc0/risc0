@@ -24,7 +24,6 @@ risc0_rust_library_pair(
         "@crates_host//:anyhow",
         "@crates_host//:array-init",
         "@crates_host//:bytemuck",
-        "@crates_host//:downcast-rs",
         "@crates_host//:log",
         "@crates_host//:ndarray",
         "@crates_host//:rand",

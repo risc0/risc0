@@ -104,11 +104,6 @@ impl MemoryState {
     }
 
     #[track_caller]
-    fn load_be_u32(&self, addr: u32) -> u32 {
-        self.load_u32(addr).to_be()
-    }
-
-    #[track_caller]
     fn load_region_u32(&self, start: u32, size: u32) -> Vec<u32> {
         (start..start + size)
             .step_by(WORD_SIZE)
@@ -705,9 +700,8 @@ pub struct RV32Executor<'a, H: IoHandler> {
 }
 
 impl<'a, H: IoHandler> RV32Executor<'a, H> {
-    pub fn new(elf: &'a Program, io: &'a mut H) -> Self {
+    pub fn new(circuit: &'static CircuitImpl, elf: &'a Program, io: &'a mut H) -> Self {
         debug!("image.size(): {}", elf.image.len());
-        let circuit = CircuitImpl::new();
         let machine = MachineContext::new(io);
         let min_po2 = log2_ceil(elf.image.len() + 3 + ZK_CYCLES);
         let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2);

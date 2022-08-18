@@ -210,7 +210,7 @@ mod test {
     #[test]
     fn fail() {
         // Check that a compliant host will fault.
-        let mut prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
+        let prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
         assert!(prover.run().is_err());
     }
 
