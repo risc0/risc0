@@ -12,21 +12,17 @@ use risc0_zkp::{
     taps::TapSet,
 };
 
-pub struct CircuitImpl {
-    taps: TapSet,
-}
+pub struct CircuitImpl;
 
 impl CircuitImpl {
     pub fn new() -> Self {
-        CircuitImpl {
-            taps: TapSet::new(taps::TAPS),
-        }
+        CircuitImpl
     }
 }
 
 impl TapsProvider for CircuitImpl {
-    fn get_taps(&self) -> &TapSet {
-        &self.taps
+    fn get_taps(&self) -> &'static TapSet<'static> {
+        taps::TAPSET
     }
 }
 
@@ -39,5 +35,25 @@ impl CircuitInfo for CircuitImpl {
     #[rustfmt::skip]
     fn mix_size(&self) -> usize {
         20
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::taps;
+    use risc0_zkp::taps::{TapSet, TapSetOwned};
+
+    #[test]
+    fn generated_tapset_matches() {
+        let cirgen_generated = taps::TAPSET;
+        let rs_generated = TapSetOwned::new(taps::TAPS);
+
+        // TapData includes its own PartialEq implementation which
+        // skips some fields, so make sure the debug representation of
+        // these two structures are identical.
+        assert_eq!(
+            format!("{:?}", &TapSet::from(&rs_generated)),
+            format!("{:?}", cirgen_generated)
+        );
     }
 }
