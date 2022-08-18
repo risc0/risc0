@@ -47,7 +47,7 @@ impl<'a, C: CircuitInfo + PolyExt + TapsProvider> VerifyAdapter<'a, C> {
 }
 
 impl<'a, C: CircuitInfo + PolyExt + TapsProvider> Circuit for VerifyAdapter<'a, C> {
-    fn taps(&self) -> &TapSet {
+    fn taps(&self) -> &'static TapSet<'static> {
         self.circuit.get_taps()
     }
 
