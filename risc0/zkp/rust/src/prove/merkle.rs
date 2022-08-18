@@ -133,55 +133,35 @@ impl MerkleTreeProver {
 
 #[cfg(test)]
 mod tests {
-    use rand::rngs::ThreadRng;
-    use rand::RngCore;
-    use rand::Rng;
-    use crate::hal::cpu::CpuHal;
     use crate::core::sha_cpu;
     use crate::core::Random;
-    use crate::verify::read_iop::ReadIOP;
+    use crate::hal::cpu::CpuHal;
     use crate::verify::merkle::MerkleTreeVerifier;
+    use crate::verify::read_iop::ReadIOP;
+    use rand::rngs::ThreadRng;
+    use rand::Rng;
+    use rand::RngCore;
 
     // use crate::MerkleTreeProver;
     // use super::hal::Hal;
     use super::*;
 
-    fn init_prover<H: Hal>(
-        hal: &H,
-        rows: usize,
-        cols: usize,
-        queries: usize,
-    ) -> MerkleTreeProver {
+    fn init_prover<H: Hal>(hal: &H, rows: usize, cols: usize, queries: usize) -> MerkleTreeProver {
         // Initialize a prover with leaves 0..size
-        let size: u32 = (rows*cols).try_into().unwrap();
+        let size: u32 = (rows * cols).try_into().unwrap();
         let mut data = Vec::<Fp>::new();
         for val in 0..size {
             data.push(Fp::from(val));
         }
         let matrix = hal.copy_from(data.as_slice());
 
-        MerkleTreeProver::new(
-            hal,
-            &matrix,
-            rows,
-            cols,
-            queries,
-        )
+        MerkleTreeProver::new(hal, &matrix, rows, cols, queries)
     }
 
-    fn bad_row_access<H: Hal, S: Sha>(
-        sha: &S,
-        hal: &H,
-        rows: usize,
-        cols: usize,
-        queries: usize,
-    ) {
+    fn bad_row_access<H: Hal, S: Sha>(sha: &S, hal: &H, rows: usize, cols: usize, queries: usize) {
         let prover = init_prover(hal, rows, cols, queries);
         let mut iop: WriteIOP<S> = WriteIOP::new(sha);
-        prover.prove(
-            &mut iop,
-            rows,
-        );
+        prover.prove(&mut iop, rows);
     }
 
     fn possibly_bad_verify<H: Hal, S: Sha>(
@@ -196,10 +176,7 @@ mod tests {
         let prover = init_prover(hal, rows, cols, queries);
 
         let mut iop: WriteIOP<S> = WriteIOP::new(sha);
-        prover.commit(
-            hal,
-            &mut iop,
-        );
+        prover.commit(hal, &mut iop);
         for query in 0..queries {
             let r_idx = (iop.rng.next_u32() as usize) % rows;
             let col = prover.prove(&mut iop, r_idx);
@@ -210,16 +187,11 @@ mod tests {
         {
             if manipulate_proof {
                 let mut rng = rand::thread_rng();
-                let manip_idx = rng.gen::<usize>() % iop.proof.len(); // TODO
+                let manip_idx = rng.gen::<usize>() % iop.proof.len();
                 iop.proof[manip_idx] ^= 1;
             }
             let mut r_iop = ReadIOP::new(sha, &iop.proof);
-            let verifier = MerkleTreeVerifier::new(
-                &mut r_iop,
-                rows,
-                cols,
-                queries,
-            );
+            let verifier = MerkleTreeVerifier::new(&mut r_iop, rows, cols, queries);
             assert_eq!(verifier.root(), prover.root());
             let err = false;
             for query in 0..queries {
@@ -228,7 +200,7 @@ mod tests {
                     let r_idx = (r_idx + 1) % rows;
                     verifier.verify(&mut r_iop, r_idx);
                 }
-                let col = verifier.verify(&mut r_iop, r_idx);  // TODO
+                let col = verifier.verify(&mut r_iop, r_idx);
                 for c_idx in 0..cols {
                     assert_eq!(col[c_idx], Fp::from((r_idx + c_idx * rows) as u32));
                 }

@@ -89,7 +89,11 @@ impl MerkleTreeVerifier {
         }
         // Once we reduce to an index for which we have the hash, check that it's
         // correct.
-        assert_eq!(self.top[idx], cur, "The hash from `top` at idx {} should match the current hash.", idx);
+        assert_eq!(
+            self.top[idx], cur,
+            "The hash from `top` at idx {} should match the current hash.",
+            idx
+        );
         out
     }
 }
