@@ -14,7 +14,7 @@
 
 use alloc::{
     collections::{BTreeMap, BTreeSet},
-    rc::Rc,
+    sync::Arc,
     vec,
     vec::Vec,
 };
@@ -100,7 +100,7 @@ struct TapSetData {
 
 #[derive(Clone)]
 pub struct TapSet {
-    data: Rc<TapSetData>,
+    data: Arc<TapSetData>,
 }
 
 impl TapSet {
@@ -166,7 +166,7 @@ impl TapSet {
         combo_begin.push(combo_taps.len().try_into().unwrap());
         assert!(combo_taps.len() < 64 * 1024);
         TapSet {
-            data: Rc::new(TapSetData {
+            data: Arc::new(TapSetData {
                 taps,
                 combo_taps,
                 combo_begin,
