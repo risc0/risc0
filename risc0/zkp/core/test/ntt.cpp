@@ -27,7 +27,7 @@ TEST(NTT, CmpEvaluate) {
   size_t size = (1 << N);
   std::vector<Fp> in(size);
   // Randomly fill input
-  PsuedoRng rng(2);
+  PseudoRng rng(2);
   for (size_t i = 0; i < size; i++) {
     in[i] = Fp::random(rng);
   }
@@ -59,7 +59,7 @@ TEST(NTT, Roundtrip) {
   size_t size = (1 << N);
   std::vector<Fp> buf(size);
   // Randomly fill buffer
-  PsuedoRng rng(2);
+  PseudoRng rng(2);
   for (size_t i = 0; i < size; i++) {
     buf[i] = Fp::random(rng);
   }
@@ -82,7 +82,7 @@ TEST(NTT, Expand) {
   size_t sizeOut = (1 << N);
   std::vector<Fp> cmp(sizeIn);
   std::vector<Fp> buf(sizeOut);
-  PsuedoRng rng(2);
+  PseudoRng rng(2);
   for (size_t i = 0; i < sizeIn; i++) {
     cmp[i] = Fp::random(rng);
   }

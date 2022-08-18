@@ -40,7 +40,7 @@ TEST(Prove, FRI) {
   size_t deg = 8192;
   size_t domain = deg * kInvRate;
   // Make a random polynomial
-  PsuedoRng rng(3);
+  PseudoRng rng(3);
   LOG(1, "Making random poly, in 'colwise' Fp4");
   auto poly = AccelSlice<Fp>::allocate(deg * 4);
   {

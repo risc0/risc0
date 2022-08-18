@@ -18,6 +18,7 @@ use anyhow::{bail, Result};
 
 use crate::{
     core::{fp::Fp, fp4::Fp4},
+    field::Elem,
     taps::TapSet,
     INV_RATE,
 };
@@ -55,7 +56,7 @@ impl CircuitStepContext {
 
     pub fn _set(&self, base: &mut [Fp], value: Fp, offset: usize, _loc: &str) {
         let reg = &mut base[offset * self.size + self.cycle];
-        assert!(*reg == Fp::invalid() || *reg == Fp::new(0) || *reg == value);
+        assert!(*reg == Fp::new(0) || *reg == value);
         *reg = value;
     }
 
@@ -83,6 +84,7 @@ impl CircuitStepContext {
         a * b
     }
 
+    #[allow(non_snake_case)]
     pub fn _bitAnd(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         let a: u32 = a.into();
         let b: u32 = b.into();
@@ -255,7 +257,7 @@ pub trait PolyExt {
 }
 
 pub trait TapsProvider {
-    fn get_taps(&self) -> &TapSet;
+    fn get_taps(&self) -> &'static TapSet<'static>;
 }
 
 pub trait CircuitInfo {
@@ -322,7 +324,7 @@ impl CircuitStep {
             CircuitStep::Set(base, value, offset, _loc) => {
                 let value = stack[*value];
                 let reg = &mut args[*base][offset * ctx.size + ctx.cycle];
-                assert!(*reg == Fp::invalid() || *reg == Fp::new(0) || *reg == value);
+                assert!(*reg == Fp::ZERO || *reg == value);
                 *reg = value;
             }
             CircuitStep::GetGlobal(base, offset, _loc) => {

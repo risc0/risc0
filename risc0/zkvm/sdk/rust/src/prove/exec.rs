@@ -25,6 +25,7 @@ use risc0_zkp::core::sha::Sha;
 use risc0_zkp::{
     adapter::{CircuitDef, CustomStep},
     core::{fp::Fp, log2_ceil, sha::DIGEST_WORDS},
+    field::Elem,
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
 };
@@ -100,11 +101,6 @@ impl MemoryState {
             Some(word) => *word,
             None => panic!("addr out of range: 0x{addr:08X}"),
         }
-    }
-
-    #[track_caller]
-    fn load_be_u32(&self, addr: u32) -> u32 {
-        self.load_u32(addr).to_be()
     }
 
     #[track_caller]
@@ -342,7 +338,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         (
             event.cycle.into(),
             event.addr.into(),
-            event.is_write.into(),
+            if event.is_write { Fp::ONE } else { Fp::ZERO },
             parts.0,
             parts.1,
         )
@@ -704,9 +700,8 @@ pub struct RV32Executor<'a, H: IoHandler> {
 }
 
 impl<'a, H: IoHandler> RV32Executor<'a, H> {
-    pub fn new(elf: &'a Program, io: &'a mut H) -> Self {
+    pub fn new(circuit: &'static CircuitImpl, elf: &'a Program, io: &'a mut H) -> Self {
         debug!("image.size(): {}", elf.image.len());
-        let circuit = CircuitImpl::new();
         let machine = MachineContext::new(io);
         let min_po2 = log2_ceil(elf.image.len() + 3 + ZK_CYCLES);
         let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2);

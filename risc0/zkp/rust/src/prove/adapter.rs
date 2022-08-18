@@ -17,22 +17,15 @@ use std::marker::PhantomData;
 use rand::thread_rng;
 
 use crate::{
-    adapter::{CircuitDef, CircuitStepContext, CustomStep, PolyFpContext},
-    core::{
-        fp::Fp,
-        fp4::{Fp4, EXT_SIZE},
-        log2_ceil,
-        rou::ROU_FWD,
-        sha::Sha,
-        Random,
-    },
-    hal::Buffer,
+    adapter::{CircuitDef, CircuitStepContext, CustomStep},
+    core::{fp::Fp, sha::Sha},
+    field::Elem,
     prove::{executor::Executor, write_iop::WriteIOP, Circuit},
     taps::{RegisterGroup, TapSet},
-    INV_RATE, ZK_CYCLES,
+    ZK_CYCLES,
 };
 
-pub struct ProveAdapter<'a, C: CircuitDef<S>, S: CustomStep> {
+pub struct ProveAdapter<'a, C: 'static + CircuitDef<S>, S: CustomStep> {
     exec: &'a mut Executor<C, S>,
     mix: Vec<Fp>,
     accum: Vec<Fp>,
@@ -54,7 +47,7 @@ impl<'a, C: CircuitDef<S>, S: CustomStep> ProveAdapter<'a, C, S> {
 }
 
 impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> {
-    fn get_taps(&self) -> &TapSet {
+    fn get_taps(&self) -> &'static TapSet<'static> {
         self.exec.circuit.get_taps()
     }
 
@@ -73,7 +66,7 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
             .circuit
             .get_taps()
             .group_size(RegisterGroup::Accum);
-        self.accum.resize(self.steps * accum_size, Fp::invalid());
+        self.accum.resize(self.steps * accum_size, Fp::ZERO);
         let args: &mut [&mut [Fp]] = &mut [
             &mut self.exec.code,
             &mut self.exec.output,
@@ -101,53 +94,6 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
                 self.accum[j * self.steps + i] = Fp::random(&mut rng);
             }
         }
-        // Zero out 'invalid' entries in accum
-        for x in self.accum.iter_mut() {
-            if *x == Fp::invalid() {
-                *x = Fp::new(0);
-            }
-        }
-    }
-
-    fn eval_check(
-        &self,
-        check: &Buffer<Fp>,
-        code: &Buffer<Fp>,
-        data: &Buffer<Fp>,
-        accum: &Buffer<Fp>,
-        poly_mix: Fp4,
-    ) {
-        const EXP_PO2: usize = log2_ceil(INV_RATE);
-
-        let domain = self.steps * INV_RATE;
-        code.view_mut(&mut |code| {
-            data.view_mut(&mut |data| {
-                accum.view_mut(&mut |accum| {
-                    check.view_mut(&mut |check| {
-                        // TODO: parallelize
-                        for cycle in 0..domain {
-                            let args: &[&[Fp]] =
-                                &[&code, &self.exec.output, &data, &self.mix, &accum];
-                            let cond = self.exec.circuit.poly_fp(
-                                &PolyFpContext {
-                                    size: domain,
-                                    cycle,
-                                    mix: poly_mix,
-                                },
-                                args,
-                            );
-                            let x = Fp::new(ROU_FWD[self.exec.po2 + EXP_PO2]).pow(cycle);
-                            // TODO: what is this magic number 3?
-                            let y = (Fp::new(3) * x).pow(1 << self.exec.po2);
-                            let ret = cond.tot * (y - Fp::new(1)).inv();
-                            for i in 0..EXT_SIZE {
-                                check[i * domain + cycle] = ret.elems()[i];
-                            }
-                        }
-                    });
-                });
-            });
-        });
     }
 
     fn po2(&self) -> u32 {
@@ -164,5 +110,17 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
 
     fn get_accum(&self) -> &[Fp] {
         &self.accum
+    }
+
+    fn get_mix(&self) -> &[Fp] {
+        &self.mix
+    }
+
+    fn get_output(&self) -> &[Fp] {
+        &self.exec.output
+    }
+
+    fn get_steps(&self) -> usize {
+        self.steps
     }
 }

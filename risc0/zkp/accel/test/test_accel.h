@@ -27,7 +27,7 @@ void testAccelUnary(const char* name, AccelFunc accelFunc, CpuFunc cpuFunc, size
   LOG(1, "Testing " << name);
   std::vector<T> goldenOut(count);
   {
-    PsuedoRng rng(2);
+    PseudoRng rng(2);
     LOG(1, "Randomizing");
     AccelReadWriteLock cpuA(a);
     for (size_t i = 0; i < count; i++) {
@@ -63,7 +63,7 @@ void testAccelBinary(const char* name, AccelFunc accelFunc, CpuFunc cpuFunc, siz
   LOG(1, "Testing " << name);
   std::vector<T> goldenOut(count);
   {
-    PsuedoRng rng(2);
+    PseudoRng rng(2);
     LOG(1, "Randomizing");
     AccelReadWriteLock cpuA(a);
     AccelReadWriteLock cpuB(b);

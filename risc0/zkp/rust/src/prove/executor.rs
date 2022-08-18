@@ -20,13 +20,14 @@ use rand::thread_rng;
 
 use crate::{
     adapter::{CircuitDef, CircuitStepContext, CustomStep},
-    core::{fp::Fp, Random},
+    core::fp::Fp,
+    field::Elem,
     taps::RegisterGroup,
     MIN_PO2, ZK_CYCLES,
 };
 
-pub struct Executor<C: CircuitDef<S>, S: CustomStep> {
-    pub circuit: C,
+pub struct Executor<C: 'static + CircuitDef<S>, S: CustomStep> {
+    pub circuit: &'static C,
     pub custom: S,
     pub code: Vec<Fp>,
     code_size: usize,
@@ -40,11 +41,12 @@ pub struct Executor<C: CircuitDef<S>, S: CustomStep> {
     pub cycle: usize,
 }
 
-impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
-    pub fn new(circuit: C, custom: S, min_po2: usize, max_po2: usize) -> Self {
+impl<C: 'static + CircuitDef<S>, S: CustomStep> Executor<C, S> {
+    pub fn new(circuit: &'static C, custom: S, min_po2: usize, max_po2: usize) -> Self {
         let po2 = max(min_po2, MIN_PO2);
-        let code_size = circuit.get_taps().group_size(RegisterGroup::Code);
-        let data_size = circuit.get_taps().group_size(RegisterGroup::Data);
+        let taps = circuit.get_taps();
+        let code_size = taps.group_size(RegisterGroup::Code);
+        let data_size = taps.group_size(RegisterGroup::Data);
         let steps = 1 << po2;
         let output_size = circuit.output_size();
         debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");
@@ -52,11 +54,11 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
             circuit,
             custom,
             // Initialize trace to min_po2 size
-            code: vec![Fp::default(); steps * code_size],
+            code: vec![Fp::ZERO; steps * code_size],
             code_size,
-            data: vec![Fp::default(); steps * data_size],
+            data: vec![Fp::ZERO; steps * data_size],
             data_size,
-            output: vec![Fp::invalid(); output_size],
+            output: vec![Fp::ZERO; output_size],
             po2,
             steps,
             halted: false,
@@ -95,7 +97,7 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
         ];
         let result = self.circuit.step_exec(&ctx, &mut self.custom, args)?;
         // debug!("result: {:?}", result);
-        self.halted = self.halted || result == Fp::new(0);
+        self.halted = self.halted || result == Fp::ZERO;
         self.cycle += 1;
         Ok(true)
     }
@@ -105,8 +107,8 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
         if self.steps >= (1 << self.max_po2) {
             bail!("Cannot expand, max po2 of {} reached.", self.max_po2);
         }
-        let mut new_code = vec![Fp::default(); self.code.len() * 2];
-        let mut new_data = vec![Fp::default(); self.data.len() * 2];
+        let mut new_code = vec![Fp::ZERO; self.code.len() * 2];
+        let mut new_data = vec![Fp::ZERO; self.data.len() * 2];
         for i in 0..self.code_size {
             let idx = i * self.steps;
             let src = &self.code[idx..idx + self.cycle];
@@ -134,7 +136,7 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
         // Make code be all zeros of zk cycles, and data be random
         for i in self.cycle..self.steps {
             for j in 0..self.code_size {
-                self.code[j * self.steps + i] = Fp::new(0);
+                self.code[j * self.steps + i] = Fp::ZERO;
             }
             for j in 0..self.data_size {
                 self.data[j * self.steps + i] = Fp::random(&mut rng);
@@ -156,12 +158,6 @@ impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
             self.circuit
                 .step_verify(&ctx, &mut self.custom, args)
                 .unwrap();
-        }
-        // Zero out 'invalid' entries in data
-        for value in self.data.iter_mut() {
-            if *value == Fp::invalid() {
-                *value = Fp::new(0);
-            }
         }
     }
 

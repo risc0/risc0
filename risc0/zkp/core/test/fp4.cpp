@@ -20,7 +20,7 @@
 namespace risc0 {
 
 TEST(Fp4, IsaField) {
-  PsuedoRng rng(2);
+  PseudoRng rng(2);
   // Pick random sets of 3 elements of Fp4, and verify they meet the requirements of a field.
   for (size_t i = 0; i < 1000000; i++) {
     Fp4 a = Fp4::random(rng);

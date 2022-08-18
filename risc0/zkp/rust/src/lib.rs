@@ -28,6 +28,8 @@ pub mod taps;
 #[cfg(feature = "verify")]
 pub mod verify;
 
+pub mod field;
+
 pub const MIN_CYCLES: usize = 512;
 pub const MAX_CYCLES_PO2: usize = 20;
 pub const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2;

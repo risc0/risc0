@@ -29,13 +29,13 @@ namespace risc0 {
 /// Uses `std::mt19937_64` under the hood.
 /// Basically, only really used for tests.
 /// For this reason, when default constructed, it pick and log a per-process seed.
-class PsuedoRng {
+class PseudoRng {
 public:
   /// Seed with a process specific seed, log on first construction.
-  PsuedoRng();
+  PseudoRng();
 
   /// Construct a reproducable PRNG with a specific seed.
-  explicit PsuedoRng(uint64_t seed) : state_(seed) {}
+  explicit PseudoRng(uint64_t seed) : state_(seed) {}
 
   /// Generate a random 32-bit value uniformly selected over all values.
   uint32_t generate() { return static_cast<uint32_t>(state_()); }
