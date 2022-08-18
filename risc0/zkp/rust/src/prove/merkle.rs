@@ -135,6 +135,7 @@ impl MerkleTreeProver {
 mod tests {
     use rand::rngs::ThreadRng;
     use rand::RngCore;
+    use rand::Rng;
     use crate::hal::cpu::CpuHal;
     use crate::core::sha_cpu;
     use crate::core::Random;
@@ -183,8 +184,7 @@ mod tests {
         );
     }
 
-    fn bad_query<H: Hal, S: Sha>(
-        rng: ThreadRng,
+    fn possibly_bad_verify<H: Hal, S: Sha>(
         sha: &S,
         hal: &H,
         rows: usize,
@@ -192,20 +192,8 @@ mod tests {
         queries: usize,
         bad_query: usize,
     ) {
-        let size: u32 = (rows*cols).try_into().unwrap();
-        let mut data: Vec<Fp> = vec![];
-        for val in 0..size {
-            data.push(Fp::from(val));
-        }
-        let matrix = hal.copy_from(data.as_slice());
+        let prover = init_prover(hal, rows, cols, queries);
 
-        let prover = MerkleTreeProver::new(
-            hal,
-            &matrix,
-            rows,
-            cols,
-            queries,
-        );
         let mut iop: WriteIOP<S> = WriteIOP::new(sha);
         prover.commit(
             hal,
@@ -231,11 +219,8 @@ mod tests {
             for query in 0..queries {
                 let r_idx = (r_iop.next_u32() as usize) % rows;
                 if query == bad_query {
-                    let r_idx = r_idx + 1 % rows;
-                    // verifier.verify(&mut r_iop, r_idx);
-                    // TODO This is broken
-                    let verify_result = std::panic::catch_unwind(core::panic::AssertUnwindSafe(||verifier.verify(&mut r_iop, r_idx)));
-                    assert!(verify_result.is_err());
+                    let r_idx = (r_idx + 1) % rows;
+                    verifier.verify(&mut r_iop, r_idx);
                 }
                 let col = verifier.verify(&mut r_iop, r_idx);  // TODO
                 for c_idx in 0..cols {
@@ -249,18 +234,28 @@ mod tests {
     #[test]
     #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
     fn merkle_cpu_1_1_1_bad_row_access() {
-        let rng = rand::thread_rng();  // TODO: probably wrong but adjust once I'm actually using it
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
         bad_row_access(&sha, &hal, 1, 1, 1);
     }
 
     #[test]
-    fn merkle_cpu_4_3_2() {
-        let rng = rand::thread_rng();  // TODO: probably wrong but adjust once I'm actually using it
+    fn merkle_cpu_4_3_2_verify() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
         // Test a complete verification with no bad queries (by setting bad_query out of range)
-        bad_query(rng, &sha, &hal, 4, 3, 2, 4);
+        possibly_bad_verify(&sha, &hal, 4, 3, 2, 4);
+    }
+
+    #[test]
+    #[should_panic(expected = "The hash from `top` at idx")]
+    fn merkle_cpu_4_3_2_bad_query() {
+        let mut rng = rand::thread_rng();
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        let queries = 2;
+        // Test a complete verification with a bad query
+        let bad_query = rng.gen::<usize>() % queries;
+        possibly_bad_verify(&sha, &hal, 4, 3, queries, bad_query);
     }
 }
