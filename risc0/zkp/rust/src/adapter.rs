@@ -257,7 +257,7 @@ pub trait PolyExt {
 }
 
 pub trait TapsProvider {
-    fn get_taps(&self) -> &TapSet;
+    fn get_taps(&self) -> &'static TapSet<'static>;
 }
 
 pub trait CircuitInfo {

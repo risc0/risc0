@@ -40,7 +40,7 @@ use crate::{
 };
 
 pub trait Circuit {
-    fn get_taps(&self) -> &TapSet;
+    fn get_taps(&self) -> &'static TapSet<'static>;
 
     /// Perform initial 'execution' setting code + data.
     /// Additionally, write any 'results' as needed.
@@ -70,7 +70,7 @@ pub fn prove_without_seal<H: Hal, S: Sha, C: Circuit>(_hal: &H, sha: &S, circuit
 }
 
 pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> Vec<u32> {
-    let taps = circuit.get_taps().clone();
+    let taps = circuit.get_taps();
     let code_size = taps.group_size(RegisterGroup::Code);
     let data_size = taps.group_size(RegisterGroup::Data);
     let accum_size = taps.group_size(RegisterGroup::Accum);

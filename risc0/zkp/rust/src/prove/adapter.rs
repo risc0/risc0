@@ -47,7 +47,7 @@ impl<'a, C: CircuitDef<S>, S: CustomStep> ProveAdapter<'a, C, S> {
 }
 
 impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> {
-    fn get_taps(&self) -> &TapSet {
+    fn get_taps(&self) -> &'static TapSet<'static> {
         self.exec.circuit.get_taps()
     }
 

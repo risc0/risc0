@@ -14,7 +14,6 @@
 
 use alloc::{
     collections::{BTreeMap, BTreeSet},
-    sync::Arc,
     vec,
     vec::Vec,
 };
@@ -90,7 +89,89 @@ impl PartialOrd for TapData {
     }
 }
 
-struct TapSetData {
+#[derive(Debug)]
+pub struct TapSet<'a> {
+    pub taps: &'a [TapData],
+    pub combo_taps: &'a [u16],
+    pub combo_begin: &'a [u16],
+    pub group_begin: [usize; REGISTER_GROUPS.len() + 1],
+    pub combos_count: usize,
+}
+
+impl<'a> TapSet<'a> {
+    pub fn tap_size(&self) -> usize {
+        self.group_begin[REGISTER_GROUPS.len()]
+    }
+
+    pub fn taps(&self) -> TapIter {
+        TapIter {
+            data: &self.taps,
+            cursor: 0,
+            end: self.group_begin[REGISTER_GROUPS.len()],
+        }
+    }
+
+    pub fn regs(&self) -> RegisterIter {
+        RegisterIter {
+            data: &self.taps,
+            cursor: 0,
+            end: self.group_begin[REGISTER_GROUPS.len()],
+        }
+    }
+
+    pub fn group_taps(&self, group: RegisterGroup) -> TapIter {
+        let group_id = group as usize;
+        TapIter {
+            data: &self.taps,
+            cursor: self.group_begin[group_id],
+            end: self.group_begin[group_id + 1],
+        }
+    }
+
+    pub fn group_regs(&self, group: RegisterGroup) -> RegisterIter {
+        let group_id = group as usize;
+        RegisterIter {
+            data: &self.taps,
+            cursor: self.group_begin[group_id],
+            end: self.group_begin[group_id + 1],
+        }
+    }
+
+    pub fn group_size(&self, group: RegisterGroup) -> usize {
+        let group_id = group as usize;
+        let idx = self.group_begin[group_id + 1] - 1;
+        let last = self.taps[idx].offset as usize;
+        last + 1
+    }
+
+    // size_t combosSize() const { return data_->combos.count; }
+    pub fn combos_size(&self) -> usize {
+        self.combos_count
+    }
+
+    pub fn combos(&self) -> ComboIter {
+        ComboIter {
+            data: ComboData {
+                taps: &self.combo_taps,
+                offsets: &self.combo_begin,
+            },
+            id: 0,
+            end: self.combos_count,
+        }
+    }
+
+    pub fn get_combo(&self, id: usize) -> ComboRef {
+        ComboRef {
+            data: ComboData {
+                taps: &self.combo_taps,
+                offsets: &self.combo_begin,
+            },
+            id,
+        }
+    }
+}
+
+pub struct TapSetOwned {
     taps: Vec<TapData>,
     combo_taps: Vec<u16>,
     combo_begin: Vec<u16>,
@@ -98,12 +179,7 @@ struct TapSetData {
     combos_count: usize,
 }
 
-#[derive(Clone)]
-pub struct TapSet {
-    data: Arc<TapSetData>,
-}
-
-impl TapSet {
+impl TapSetOwned {
     pub fn new(raw: &[Tap]) -> Self {
         type Reg = BTreeSet<usize>;
         type Group = BTreeMap<usize, Reg>;
@@ -165,85 +241,24 @@ impl TapSet {
         }
         combo_begin.push(combo_taps.len().try_into().unwrap());
         assert!(combo_taps.len() < 64 * 1024);
-        TapSet {
-            data: Arc::new(TapSetData {
-                taps,
-                combo_taps,
-                combo_begin,
-                group_begin,
-                combos_count: combos.len(),
-            }),
+        TapSetOwned {
+            taps,
+            combo_taps,
+            combo_begin,
+            group_begin,
+            combos_count: combos.len(),
         }
     }
+}
 
-    pub fn tap_size(&self) -> usize {
-        self.data.group_begin[REGISTER_GROUPS.len()]
-    }
-
-    pub fn taps(&self) -> TapIter {
-        TapIter {
-            data: &self.data.taps,
-            cursor: 0,
-            end: self.data.group_begin[REGISTER_GROUPS.len()],
-        }
-    }
-
-    pub fn regs(&self) -> RegisterIter {
-        RegisterIter {
-            data: &self.data.taps,
-            cursor: 0,
-            end: self.data.group_begin[REGISTER_GROUPS.len()],
-        }
-    }
-
-    pub fn group_taps(&self, group: RegisterGroup) -> TapIter {
-        let group_id = group as usize;
-        TapIter {
-            data: &self.data.taps,
-            cursor: self.data.group_begin[group_id],
-            end: self.data.group_begin[group_id + 1],
-        }
-    }
-
-    pub fn group_regs(&self, group: RegisterGroup) -> RegisterIter {
-        let group_id = group as usize;
-        RegisterIter {
-            data: &self.data.taps,
-            cursor: self.data.group_begin[group_id],
-            end: self.data.group_begin[group_id + 1],
-        }
-    }
-
-    pub fn group_size(&self, group: RegisterGroup) -> usize {
-        let group_id = group as usize;
-        let idx = self.data.group_begin[group_id + 1] - 1;
-        let last = self.data.taps[idx].offset as usize;
-        last + 1
-    }
-
-    // size_t combosSize() const { return data_->combos.count; }
-    pub fn combos_size(&self) -> usize {
-        self.data.combos_count
-    }
-
-    pub fn combos(&self) -> ComboIter {
-        ComboIter {
-            data: ComboData {
-                taps: &self.data.combo_taps,
-                offsets: &self.data.combo_begin,
-            },
-            id: 0,
-            end: self.data.combos_count,
-        }
-    }
-
-    pub fn get_combo(&self, id: usize) -> ComboRef {
-        ComboRef {
-            data: ComboData {
-                taps: &self.data.combo_taps,
-                offsets: &self.data.combo_begin,
-            },
-            id,
+impl<'a> From<&'a TapSetOwned> for TapSet<'a> {
+    fn from(owned: &'a TapSetOwned) -> Self {
+        Self {
+            taps: owned.taps.as_slice(),
+            combo_taps: owned.combo_taps.as_slice(),
+            combo_begin: owned.combo_begin.as_slice(),
+            group_begin: owned.group_begin,
+            combos_count: owned.combos_count,
         }
     }
 }
