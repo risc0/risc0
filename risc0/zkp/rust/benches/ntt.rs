@@ -14,7 +14,10 @@
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use rand::thread_rng;
-use risc0_zkp::core::{fp::Fp, ntt::interpolate_ntt, Random};
+use risc0_zkp::{
+    core::{fp::Fp, ntt::interpolate_ntt},
+    field::Elem,
+};
 
 pub fn ntt(c: &mut Criterion) {
     let mut group = c.benchmark_group("interpolate_ntt");

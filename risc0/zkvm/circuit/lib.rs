@@ -26,7 +26,8 @@ mod ffi {
     }
 }
 
-/// Produces a machine generated .h file that implements the RISC-V circuit and writes it to a file.
+/// Produces a machine generated .h file that implements the RISC-V circuit and
+/// writes it to a file.
 pub fn make_circuit(path: &str) -> Result<()> {
     let_cxx_string!(path = path);
     Ok(ffi::make_circuit(&path)?)

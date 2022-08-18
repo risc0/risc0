@@ -20,8 +20,8 @@ use crate::{
         fp::Fp,
         fp4::Fp4,
         sha::{Digest, Sha},
-        Random,
     },
+    field::Elem,
     taps::TapSet,
     verify::{read_iop::ReadIOP, Circuit, VerificationError},
 };
@@ -53,7 +53,7 @@ impl<'a, C: CircuitInfo + PolyExt + TapsProvider> Circuit for VerifyAdapter<'a, 
 
     fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {
         // Read the outputs + size
-        self.out.resize(self.circuit.output_size(), Fp::default());
+        self.out.resize(self.circuit.output_size(), Fp::ZERO);
         iop.read_fps(&mut self.out);
         let mut slice = [0u32; 1];
         iop.read_u32s(&mut slice);

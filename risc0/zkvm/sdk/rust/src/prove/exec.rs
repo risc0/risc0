@@ -25,6 +25,7 @@ use risc0_zkp::core::sha::Sha;
 use risc0_zkp::{
     adapter::{CircuitDef, CustomStep},
     core::{fp::Fp, log2_ceil, sha::DIGEST_WORDS},
+    field::Elem,
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
 };
@@ -337,7 +338,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         (
             event.cycle.into(),
             event.addr.into(),
-            event.is_write.into(),
+            if event.is_write { Fp::ONE } else { Fp::ZERO },
             parts.0,
             parts.1,
         )
