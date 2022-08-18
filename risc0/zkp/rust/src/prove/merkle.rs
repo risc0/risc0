@@ -191,6 +191,7 @@ mod tests {
         cols: usize,
         queries: usize,
         bad_query: usize,
+        manipulate_proof: bool,
     ) {
         let prover = init_prover(hal, rows, cols, queries);
 
@@ -207,6 +208,11 @@ mod tests {
             }
         }
         {
+            if manipulate_proof {
+                let mut rng = rand::thread_rng();
+                let manip_idx = rng.gen::<usize>() % iop.proof.len(); // TODO
+                iop.proof[manip_idx] ^= 1;
+            }
             let mut r_iop = ReadIOP::new(sha, &iop.proof);
             let verifier = MerkleTreeVerifier::new(
                 &mut r_iop,
@@ -244,7 +250,7 @@ mod tests {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
         // Test a complete verification with no bad queries (by setting bad_query out of range)
-        possibly_bad_verify(&sha, &hal, 4, 3, 2, 4);
+        possibly_bad_verify(&sha, &hal, 4, 3, 2, 4, false);
     }
 
     #[test]
@@ -256,6 +262,18 @@ mod tests {
         let queries = 2;
         // Test a complete verification with a bad query
         let bad_query = rng.gen::<usize>() % queries;
-        possibly_bad_verify(&sha, &hal, 4, 3, queries, bad_query);
+        possibly_bad_verify(&sha, &hal, 4, 3, queries, bad_query, false);
+    }
+
+    #[test]
+    #[should_panic]
+    fn merkle_cpu_4_3_2_verify_manipulated() {
+        let sha = sha_cpu::Impl {};
+        let hal = CpuHal {};
+        for rep in 0..50 {
+            // Test a verification with a manipulated proof but no bad queries (by setting bad_query out of range)
+            // Do this multiple times as the manipulation location is random
+            possibly_bad_verify(&sha, &hal, 4, 3, 2, 4, true);
+        }
     }
 }
