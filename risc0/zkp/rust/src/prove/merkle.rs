@@ -244,7 +244,8 @@ mod tests {
     fn merkle_cpu_1_1_1_verify() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
-        // Test a complete verification with no bad queries (by setting bad_query out of range)
+        // Test a complete verification with no bad queries (by setting bad_query out of
+        // range)
         possibly_bad_verify(&sha, &hal, 1, 1, 1, 4, false);
     }
 
@@ -252,7 +253,8 @@ mod tests {
     fn merkle_cpu_4_4_2_verify() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
-        // Test a complete verification with no bad queries (by setting bad_query out of range)
+        // Test a complete verification with no bad queries (by setting bad_query out of
+        // range)
         possibly_bad_verify(&sha, &hal, 4, 4, 2, 4, false);
     }
 
@@ -262,7 +264,8 @@ mod tests {
         let hal = CpuHal {};
         for reps in 0..100 {
             let (rows, cols, queries) = randomize_sizes();
-            // Test a complete verification with no bad queries (by setting bad_query out of range)
+            // Test a complete verification with no bad queries (by setting bad_query out of
+            // range)
             possibly_bad_verify(&sha, &hal, rows, cols, queries, queries + 1, false);
         }
     }
@@ -270,7 +273,8 @@ mod tests {
     #[test]
     #[should_panic(expected = "The hash from `top` at idx")]
     fn merkle_cpu_2_1_1_bad_query() {
-        // n.b. since we test bad queries by incrementing the row, we can't test for a bad query with rows == 1
+        // n.b. since we test bad queries by incrementing the row, we can't test for a
+        // bad query with rows == 1
         let mut rng = rand::thread_rng();
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
@@ -307,8 +311,9 @@ mod tests {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
         for rep in 0..50 {
-            // Test a verification with a manipulated proof but no bad queries (by setting bad_query out of range)
-            // Do this multiple times as the manipulation location is random
+            // Test a verification with a manipulated proof but no bad queries (by setting
+            // bad_query out of range) Do this multiple times as the
+            // manipulation location is random
             possibly_bad_verify(&sha, &hal, 1, 1, 1, 2, true);
         }
     }
@@ -319,8 +324,9 @@ mod tests {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal {};
         for rep in 0..50 {
-            // Test a verification with a manipulated proof but no bad queries (by setting bad_query out of range)
-            // Do this multiple times as the manipulation location is random
+            // Test a verification with a manipulated proof but no bad queries (by setting
+            // bad_query out of range) Do this multiple times as the
+            // manipulation location is random
             possibly_bad_verify(&sha, &hal, 4, 4, 2, 4, true);
         }
     }
@@ -332,8 +338,9 @@ mod tests {
         let hal = CpuHal {};
         for rep in 0..50 {
             let (rows, cols, queries) = randomize_sizes();
-            // Test a verification with a manipulated proof but no bad queries (by setting bad_query out of range)
-            // Do this multiple times as the manipulation location is random
+            // Test a verification with a manipulated proof but no bad queries (by setting
+            // bad_query out of range) Do this multiple times as the
+            // manipulation location is random
             possibly_bad_verify(&sha, &hal, rows, cols, queries, queries + 1, true);
         }
     }
