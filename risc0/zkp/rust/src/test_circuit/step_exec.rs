@@ -1,10 +1,10 @@
 // This code is automatically generated
 
-use anyhow::Result;
 use crate::{
-    adapter::{CircuitStep, CircuitStepExec, CircuitStepContext, CircuitStepDef, CustomStep},
+    adapter::{CircuitStep, CircuitStepContext, CircuitStepDef, CircuitStepExec, CustomStep},
     core::fp::Fp,
 };
+use anyhow::Result;
 
 use super::CircuitImpl;
 
@@ -31,7 +31,12 @@ CircuitStep::Sub(0, 3, "circuits/fib/gen_fib.cpp:25"),
 
 impl<S: CustomStep> CircuitStepExec<S> for CircuitImpl {
     #[allow(unused)]
-    fn step_exec(&self, ctx: &CircuitStepContext, custom: &mut S, args: &mut [&mut [Fp]]) -> Result<Fp> {
+    fn step_exec(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp> {
         DEF.step(ctx, custom, args)
     }
 }

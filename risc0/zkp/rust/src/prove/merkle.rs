@@ -130,9 +130,9 @@ impl<H: Hal> MerkleTreeProver<H> {
 mod tests {
     use crate::core::sha_cpu;
     use crate::hal::cpu::CpuHal;
+    use crate::test_circuit::CircuitImpl;
     use crate::verify::merkle::MerkleTreeVerifier;
     use crate::verify::read_iop::ReadIOP;
-    use crate::test_circuit::CircuitImpl;
     use rand::Rng;
     use rand::RngCore;
 
@@ -144,7 +144,12 @@ mod tests {
         pub static ref CIRCUIT: CircuitImpl = CircuitImpl::new();
     }
 
-    fn init_prover<H: Hal>(hal: &H, rows: usize, cols: usize, queries: usize) -> MerkleTreeProver<H> {
+    fn init_prover<H: Hal>(
+        hal: &H,
+        rows: usize,
+        cols: usize,
+        queries: usize,
+    ) -> MerkleTreeProver<H> {
         // Initialize a prover with leaves 0..size
         let size: u32 = (rows * cols).try_into().unwrap();
         let mut data = Vec::<Fp>::new();

@@ -1,10 +1,10 @@
 // This code is automatically generated
 
-use anyhow::Result;
 use crate::{
     adapter::{CircuitStep, CircuitStepAccum, CircuitStepContext, CircuitStepDef, CustomStep},
     core::fp::Fp,
 };
+use anyhow::Result;
 
 use super::CircuitImpl;
 
@@ -24,7 +24,12 @@ CircuitStep::If(5, &[CircuitStep::Set(4, 0, 0, "circuits/fib/gen_fib.cpp:28"),
 
 impl<S: CustomStep> CircuitStepAccum<S> for CircuitImpl {
     #[allow(unused)]
-    fn step_accum(&self, ctx: &CircuitStepContext, custom: &mut S, args: &mut [&mut [Fp]]) -> Result<Fp> {
+    fn step_accum(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp> {
         DEF.step(ctx, custom, args)
     }
 }

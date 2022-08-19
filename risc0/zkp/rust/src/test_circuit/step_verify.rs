@@ -1,10 +1,10 @@
 // This code is automatically generated
 
-use anyhow::Result;
 use crate::{
-    adapter::{CircuitStep, CircuitStepVerify, CircuitStepContext, CircuitStepDef, CustomStep},
+    adapter::{CircuitStep, CircuitStepContext, CircuitStepDef, CircuitStepVerify, CustomStep},
     core::fp::Fp,
 };
+use anyhow::Result;
 
 use super::CircuitImpl;
 
@@ -17,7 +17,12 @@ const DEF: CircuitStepDef = CircuitStepDef {
 
 impl<S: CustomStep> CircuitStepVerify<S> for CircuitImpl {
     #[allow(unused)]
-    fn step_verify(&self, ctx: &CircuitStepContext, custom: &mut S, args: &mut [&mut [Fp]]) -> Result<Fp> {
+    fn step_verify(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp> {
         DEF.step(ctx, custom, args)
     }
 }
