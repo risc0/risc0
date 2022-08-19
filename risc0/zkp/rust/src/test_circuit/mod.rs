@@ -17,6 +17,7 @@ use crate::{
 pub struct CircuitImpl;
 
 impl CircuitImpl {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         CircuitImpl
     }

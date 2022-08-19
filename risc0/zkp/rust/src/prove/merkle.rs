@@ -180,7 +180,7 @@ mod tests {
 
         let mut iop: WriteIOP<S> = WriteIOP::new(sha);
         prover.commit(hal, &mut iop);
-        for query in 0..queries {
+        for _query in 0..queries {
             let r_idx = (iop.rng.next_u32() as usize) % rows;
             let col = prover.prove(&mut iop, r_idx);
             for c_idx in 0..cols {
@@ -196,7 +196,6 @@ mod tests {
             let mut r_iop = ReadIOP::new(sha, &iop.proof);
             let verifier = MerkleTreeVerifier::new(&mut r_iop, rows, cols, queries);
             assert_eq!(verifier.root(), prover.root());
-            let err = false;
             for query in 0..queries {
                 let r_idx = (r_iop.next_u32() as usize) % rows;
                 if query == bad_query {
@@ -270,7 +269,7 @@ mod tests {
     fn merkle_cpu_randomized_verify() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
-        for reps in 0..100 {
+        for _rep in 0..100 {
             let (rows, cols, queries) = randomize_sizes();
             // Test a complete verification with no bad queries (by setting bad_query out of
             // range)
@@ -283,7 +282,6 @@ mod tests {
     fn merkle_cpu_2_1_1_bad_query() {
         // n.b. since we test bad queries by incrementing the row, we can't test for a
         // bad query with rows == 1
-        let mut rng = rand::thread_rng();
         let sha = sha_cpu::Impl {};
         let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
         possibly_bad_verify(&sha, &hal, 2, 1, 1, 0, false);
@@ -318,7 +316,7 @@ mod tests {
     fn merkle_cpu_1_1_1_verify_manipulated() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
-        for rep in 0..50 {
+        for _rep in 0..50 {
             // Test a verification with a manipulated proof but no bad queries (by setting
             // bad_query out of range) Do this multiple times as the
             // manipulation location is random
@@ -331,7 +329,7 @@ mod tests {
     fn merkle_cpu_4_4_2_verify_manipulated() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
-        for rep in 0..50 {
+        for _rep in 0..50 {
             // Test a verification with a manipulated proof but no bad queries (by setting
             // bad_query out of range) Do this multiple times as the
             // manipulation location is random
@@ -344,7 +342,7 @@ mod tests {
     fn merkle_cpu_randomized_verify_manipulated() {
         let sha = sha_cpu::Impl {};
         let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
-        for rep in 0..50 {
+        for _rep in 0..50 {
             let (rows, cols, queries) = randomize_sizes();
             // Test a verification with a manipulated proof but no bad queries (by setting
             // bad_query out of range) Do this multiple times as the
