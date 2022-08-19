@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use _alloc::{boxed::Box, vec::Vec};
+use alloc_crate::{boxed::Box, vec::Vec};
 use core::{cell::UnsafeCell, mem};
 
 use risc0_zkp::core::{
@@ -20,12 +20,10 @@ use risc0_zkp::core::{
     fp4::Fp4,
     sha::{Digest, DIGEST_WORDS},
 };
-use risc0_zkvm::{
-    platform::{
-        io::{SHADescriptor, GPIO_SHA},
-        memory, WORD_SIZE,
-    },
-    serde::to_vec_with_capacity,
+use risc0_zkvm::serde::to_vec_with_capacity;
+use risc0_zkvm_platform::{
+    io::{SHADescriptor, GPIO_SHA},
+    memory, WORD_SIZE,
 };
 use serde::Serialize;
 
