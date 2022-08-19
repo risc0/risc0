@@ -128,13 +128,13 @@ impl<H: Hal> MerkleTreeProver<H> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::sha_cpu;
-    use crate::hal::cpu::CpuHal;
-    use crate::test_circuit::CircuitImpl;
-    use crate::verify::merkle::MerkleTreeVerifier;
-    use crate::verify::read_iop::ReadIOP;
-    use rand::Rng;
-    use rand::RngCore;
+    use crate::{
+        core::sha_cpu,
+        hal::cpu::CpuHal,
+        test_circuit::CircuitImpl,
+        verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
+    };
+    use rand::{Rng, RngCore};
 
     use lazy_static::lazy_static;
 
