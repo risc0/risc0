@@ -12,14 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
+// Runtime routines to support the zkvm.
 
-pub mod io;
-pub mod memory;
+mod host_sendrecv;
 
-pub const WORD_SIZE: usize = core::mem::size_of::<u32>();
-
-#[cfg(target_os = "zkvm")]
-/// Runtime support for running on the ZKVM.  Provided here for the
-/// rust standard library to use.
-pub mod rt;
+pub use host_sendrecv::host_sendrecv;
