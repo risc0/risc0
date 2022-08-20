@@ -16,9 +16,14 @@
 /// ! Support for the base finite field modulo 15*2^27 + 1
 use crate::field::{self, Elem as FieldElem};
 
+use alloc::fmt;
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
+
+// montgomery form constants
+const M: u32 = 0x88000001;
+const R2: u32 = 1172168163;
 
 /// The BabyBear class is an element of the finite field F_p, where P is the
 /// prime number 15*2^27 + 1. Put another way, Fp is basically integer
@@ -39,13 +44,19 @@ use bytemuck::{Pod, Zeroable};
 ///
 /// The Fp class wraps all the standard arithmetic operations to make the finite
 /// field elements look basically like ordinary numbers (which they mostly are).
-#[derive(Eq, PartialEq, Clone, Copy, Debug, Pod, Zeroable)]
+#[derive(Eq, PartialEq, Clone, Copy, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Elem(u32);
 
 impl Default for Elem {
     fn default() -> Self {
         Self::ZERO
+    }
+}
+
+impl fmt::Debug for Elem {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(f, "{}", decode(self.0))
     }
 }
 
@@ -110,7 +121,13 @@ impl field::RootsOfUnity for Elem {
 impl Elem {
     /// Create a new [BabyBear] from a raw integer.
     pub const fn new(x: u32) -> Self {
-        Self(x % P)
+        Self(encode(x % P))
+    }
+
+    /// Return the montgomery form representation used for byte-based
+    /// hashes of slices of [BabyBear]s.
+    pub const fn as_u32_montgomery(&self) -> u32 {
+        self.0
     }
 }
 
@@ -162,36 +179,36 @@ impl ops::Neg for Elem {
 
 impl From<Elem> for u32 {
     fn from(x: Elem) -> Self {
-        x.0
+        decode(x.0)
     }
 }
 
 impl From<&Elem> for u32 {
     fn from(x: &Elem) -> Self {
-        x.0
+        decode(x.0)
     }
 }
 
 impl From<Elem> for u64 {
     fn from(x: Elem) -> Self {
-        x.0.into()
+        decode(x.0).into()
     }
 }
 
 impl From<u32> for Elem {
     fn from(x: u32) -> Self {
-        Elem(x % P)
+        Elem::new(x)
     }
 }
 
 impl From<u64> for Elem {
     fn from(x: u64) -> Self {
-        Elem((x % P_U64) as u32)
+        Elem::new((x % P_U64) as u32)
     }
 }
 
 fn add(lhs: u32, rhs: u32) -> u32 {
-    let x = lhs + rhs;
+    let x = lhs.wrapping_add(rhs);
     return if x >= P { x - P } else { x };
 }
 
@@ -200,8 +217,34 @@ fn sub(lhs: u32, rhs: u32) -> u32 {
     return if x > P { x.wrapping_add(P) } else { x };
 }
 
-fn mul(lhs: u32, rhs: u32) -> u32 {
-    (((lhs as u64) * (rhs as u64)) % P_U64) as u32
+// Copied from C++ implementation (fp.h)
+const fn mul(lhs: u32, rhs: u32) -> u32 {
+    // uint64_t o64 = uint64_t(a) * uint64_t(b);
+    let mut o64: u64 = (lhs as u64).wrapping_mul(rhs as u64);
+    // uint32_t low = -uint32_t(o64);
+    let low: u32 = 0u32.wrapping_sub(o64 as u32);
+    // uint32_t red = M * low;
+    let red = M.wrapping_mul(low);
+    // o64 += uint64_t(red) * uint64_t(P);
+    o64 += (red as u64).wrapping_mul(P_U64);
+    // uint32_t ret = o64 >> 32;
+    let ret = (o64 >> 32) as u32;
+    // return (ret >= P ? ret - P : ret);
+    if ret >= P {
+        ret - P
+    } else {
+        ret
+    }
+}
+
+/// Encode to montgomery form from direct form.
+const fn encode(a: u32) -> u32 {
+    mul(R2, a)
+}
+
+/// Decode from montgomery form from direct form.
+const fn decode(a: u32) -> u32 {
+    mul(1, a)
 }
 
 /// The size of the extension field in elements, 4 in this case.
@@ -500,19 +543,22 @@ mod tests {
     #[test]
     fn inv() {
         // Smoke test for inv
-        assert_eq!(Elem(5).inv() * Elem(5), Elem(1));
+        assert_eq!(Elem::new(5).inv() * Elem::new(5), Elem::new(1));
     }
 
     #[test]
     fn pow() {
         // Smoke tests for pow
-        assert_eq!(Elem(5).pow(0), Elem(1));
-        assert_eq!(Elem(5).pow(1), Elem(5));
-        assert_eq!(Elem(5).pow(2), Elem(25));
+        assert_eq!(Elem::new(5).pow(0), Elem::new(1));
+        assert_eq!(Elem::new(5).pow(1), Elem::new(5));
+        assert_eq!(Elem::new(5).pow(2), Elem::new(25));
         // Mathematica says PowerMod[5, 1000, 15*2^27 + 1] == 589699054
-        assert_eq!(Elem(5).pow(1000), Elem(589699054));
-        assert_eq!(Elem(5).pow((P - 2) as usize) * Elem(5), Elem(1));
-        assert_eq!(Elem(5).pow((P - 1) as usize), Elem(1));
+        assert_eq!(Elem::new(5).pow(1000), Elem::new(589699054));
+        assert_eq!(
+            Elem::new(5).pow((P - 2) as usize) * Elem::new(5),
+            Elem::new(1)
+        );
+        assert_eq!(Elem::new(5).pow((P - 1) as usize), Elem::new(1));
     }
 
     #[test]

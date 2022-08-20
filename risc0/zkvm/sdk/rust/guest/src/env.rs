@@ -15,16 +15,26 @@
 use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 
 use risc0_zkp::core::sha::Digest;
-use risc0_zkvm::{
-    platform::{
-        io::{IoDescriptor, GPIO_COMMIT, SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT},
-        memory, WORD_SIZE,
-    },
-    serde::{Deserializer, Serializer, Slice},
+use risc0_zkvm::serde::{Deserializer, Serializer, Slice};
+use risc0_zkvm_platform::{
+    io::{IoDescriptor, GPIO_COMMIT, SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT},
+    memory, WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{align_up, io::host_sendrecv, memory_barrier, sha};
+use crate::{align_up, memory_barrier, sha};
+
+// Re-export for easy use by user programs.
+#[cfg(target_os = "zkvm")]
+pub use risc0_zkvm_platform::rt::host_sendrecv;
+
+#[cfg(not(target_os = "zkvm"))]
+// Bazel really wants to compile this file for the host too, so provide a stub.
+/// Stub version of risc0_zkvm_platform::rt::host_sendrecv, re-exported for
+/// easy access through the SDK.
+pub fn host_sendrecv(_channel: u32, _buf: &[u8]) -> (&'static [u32], usize) {
+    unimplemented!()
+}
 
 struct Env {
     output: Serializer<Slice<'static>>,

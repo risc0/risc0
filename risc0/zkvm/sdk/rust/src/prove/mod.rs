@@ -22,17 +22,12 @@ use risc0_zkp::{
     core::sha::default_implementation, hal::cpu::CpuHal, prove::adapter::ProveAdapter,
 };
 use risc0_zkvm_circuit::CircuitImpl;
-
-use crate::{
-    elf::Program,
-    host::ProverOpts,
-    method_id::MethodId,
-    platform::{
-        io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT},
-        memory::MEM_SIZE,
-    },
-    receipt::Receipt,
+use risc0_zkvm_platform::{
+    io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT},
+    memory::MEM_SIZE,
 };
+
+use crate::{elf::Program, host::ProverOpts, method_id::MethodId, receipt::Receipt};
 
 lazy_static! {
     pub static ref CIRCUIT: CircuitImpl = CircuitImpl::new();
