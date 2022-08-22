@@ -22,6 +22,7 @@ use crate::{
     field::Elem,
     merkle::MerkleTreeParams,
     verify::read_iop::ReadIOP,
+    verify::VerificationError,
 };
 
 /// A struct against which we verify merkle branches, consisting of the
@@ -63,7 +64,8 @@ impl MerkleTreeVerifier {
     }
 
     /// Verifies a branch provided by an IOP.
-    pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Vec<Fp> {
+    pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Result<Vec<Fp>, VerificationError> {
+        // TODO: Return an error result instead
         assert!(idx < self.params.row_size);
         // Initialize a vector to hold field elements.
         let mut out = vec![Fp::ZERO; self.params.col_size];
@@ -90,7 +92,11 @@ impl MerkleTreeVerifier {
         }
         // Once we reduce to an index for which we have the hash, check that it's
         // correct.
-        assert_eq!(self.top[idx], cur);
-        out
+        // TODO: Return an error result instead
+        if self.top[idx] == cur {
+            Ok(out)
+        } else {
+            Err(VerificationError::MerkleHashMismatchError(idx, self.top[idx], cur))
+        }
     }
 }

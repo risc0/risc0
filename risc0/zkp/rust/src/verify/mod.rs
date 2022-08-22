@@ -42,6 +42,7 @@ const CHECK_SIZE: usize = INV_RATE * EXT_SIZE;
 pub enum VerificationError {
     ReceiptFormatError,
     MethodVerificationError,
+    MerkleHashMismatchError(usize, Digest, Digest),
 }
 
 impl fmt::Display for VerificationError {
@@ -49,6 +50,7 @@ impl fmt::Display for VerificationError {
         match self {
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
             VerificationError::MethodVerificationError => write!(f, "method verification failed"),
+            VerificationError::MerkleHashMismatchError(idx, _, _) => write!(f, "Merkle validation failed with hash mismatch at index {}", idx),
         }
     }
 }
@@ -185,13 +187,13 @@ where
 
     let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
     // debug!("FRI-verify, size = {size}");
-    fri_verify(&mut iop, size, |iop: &mut ReadIOP<S>, idx: usize| -> Fp4 {
+    fri_verify(&mut iop, size, |iop: &mut ReadIOP<S>, idx: usize| -> Result<Fp4, VerificationError> {
         let x = Fp4::from_fp(gen.pow(idx));
         let mut rows = vec![];
-        rows.push(accum_merkle.verify(iop, idx));
-        rows.push(code_merkle.verify(iop, idx));
-        rows.push(data_merkle.verify(iop, idx));
-        let check_row = check_merkle.verify(iop, idx);
+        rows.push(accum_merkle.verify(iop, idx)?);
+        rows.push(code_merkle.verify(iop, idx)?);
+        rows.push(data_merkle.verify(iop, idx)?);
+        let check_row = check_merkle.verify(iop, idx)?;
         let mut cur = Fp4::ONE;
         let mut tot = vec![Fp4::ZERO; combo_count + 1];
         for reg in taps.regs() {
@@ -214,8 +216,8 @@ where
         let check_num = tot[combo_count] - combo_u[combo_count][0];
         let check_div = x - z.pow(INV_RATE);
         ret += check_num * check_div.inv();
-        ret
-    });
+        Ok(ret)
+    })?;
     iop.verify_complete();
     Ok(())
 }
