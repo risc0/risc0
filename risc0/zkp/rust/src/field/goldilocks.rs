@@ -245,7 +245,7 @@ impl From<u64> for Elem {
 /// Wrapping addition of [Elem] using Goldilocks prime modulus
 fn add(lhs: u64, rhs: u64) -> u64 {
     let x = lhs.wrapping_add(rhs);
-    // If we've done an u64
+    // If we're above P or have done a u64::MAX modulus
     if x < rhs || x >= P {
         x.wrapping_sub(P)
     } else {
