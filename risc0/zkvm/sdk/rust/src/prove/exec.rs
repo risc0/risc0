@@ -38,11 +38,11 @@ use risc0_zkvm_platform::{
         },
         IoDescriptor, SHADescriptor,
     },
-    memory::INPUT,
+    memory::{INPUT, MEM_BITS},
     WORD_SIZE,
 };
 
-use crate::{elf::Program, platform::memory::MEM_BITS, CODE_SIZE};
+use crate::{elf::Program, CODE_SIZE};
 
 pub trait IoHandler {
     fn on_commit(&mut self, buf: &[u32]);
