@@ -270,11 +270,11 @@ fn mul(lhs: u64, rhs: u64) -> u64 {
     let med: u32 = (prod >> 64) as u32;
     let high: u32 = (prod >> 96) as u32;
     // Subtract out high bits, add in P if underflow
+    let ret = 
     if ret >= (high as u64) {
-        ret = ret.wrapping_sub(high as u64);
+        ret.wrapping_sub(high as u64)
     } else {
-        ret = ret.wrapping_sub(high as u64);
-        ret = ret.wrapping_add(P);
+        ret.wrapping_sub(high as u64).wrapping_add(P)
     }
     // Compute shifted effect of medium
     let med_shift = ((med as u64) << 32).wrapping_sub(med as u64);
