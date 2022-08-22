@@ -96,7 +96,7 @@ impl MerkleTreeVerifier {
         if self.top[idx] == cur {
             Ok(out)
         } else {
-            Err(VerificationError::MerkleHashMismatchError(idx, self.top[idx], cur))
+            Err(VerificationError::InvalidProof)
         }
     }
 }
