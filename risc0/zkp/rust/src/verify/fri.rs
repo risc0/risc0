@@ -80,8 +80,9 @@ impl VerifyRoundInfo {
             ));
         }
         // Check the existing goal
-        // TODO: Return an error result instead
-        assert_eq!(data4[quot], *goal);
+        if data4[quot] != *goal {
+            return Err(VerificationError::InvalidProof);
+        }
         // Compute the new goal + pos
         *goal = fold_eval(&mut data4, self.mix, self.domain, group);
         *pos = group;
@@ -133,8 +134,9 @@ where
             fx += cur * coeff;
             cur *= x;
         }
-        // TODO: Return an error result instead
-        assert_eq!(fx, goal)
+        if fx != goal {
+            return Err(VerificationError::InvalidProof);
+        }
     }
     Ok(())
 }

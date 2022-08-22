@@ -43,6 +43,8 @@ pub enum VerificationError {
     ReceiptFormatError,
     MethodVerificationError,
     MerkleHashMismatchError(usize, Digest, Digest),
+    MerkleQueryOutOfRange{idx: usize, rows: usize},
+    InvalidProof,
 }
 
 impl fmt::Display for VerificationError {
@@ -51,6 +53,8 @@ impl fmt::Display for VerificationError {
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
             VerificationError::MethodVerificationError => write!(f, "method verification failed"),
             VerificationError::MerkleHashMismatchError(idx, _, _) => write!(f, "Merkle validation failed with hash mismatch at index {}", idx),
+            VerificationError::MerkleQueryOutOfRange{idx, rows} => write!(f, "Requested Merkle validation on row {}, but only {} rows exist", idx, rows),
+            VerificationError::InvalidProof => write!(f, "Verification indicates proof is invalid"),
         }
     }
 }
@@ -155,7 +159,9 @@ where
     }
     check *= (Fp4::from_u32(3) * z).pow(size) - Fp4::ONE;
     // debug!("Check = {check:?}");
-    assert_eq!(check, result);
+    if check != result {
+        return Err(VerificationError::InvalidProof);
+    }
 
     // Set the mix mix value
     let mix = Fp4::random(&mut iop);

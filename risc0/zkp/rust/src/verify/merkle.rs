@@ -65,8 +65,9 @@ impl MerkleTreeVerifier {
 
     /// Verifies a branch provided by an IOP.
     pub fn verify<S: Sha>(&self, iop: &mut ReadIOP<S>, mut idx: usize) -> Result<Vec<Fp>, VerificationError> {
-        // TODO: Return an error result instead
-        assert!(idx < self.params.row_size);
+        if idx >= self.params.row_size {
+            return Err(VerificationError::MerkleQueryOutOfRange{idx: idx, rows: self.params.row_size});
+        }
         // Initialize a vector to hold field elements.
         let mut out = vec![Fp::ZERO; self.params.col_size];
         // Read out field elements from IOP.
@@ -92,7 +93,6 @@ impl MerkleTreeVerifier {
         }
         // Once we reduce to an index for which we have the hash, check that it's
         // correct.
-        // TODO: Return an error result instead
         if self.top[idx] == cur {
             Ok(out)
         } else {
