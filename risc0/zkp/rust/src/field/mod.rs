@@ -159,3 +159,4 @@ pub mod test {
 
 /// Fields available for use with zkp:
 pub mod baby_bear;
+pub mod goldilocks;
