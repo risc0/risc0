@@ -22,7 +22,8 @@ use bytemuck::{Pod, Zeroable};
 
 /// The Goldilocks class is an element of the finite field F_p, where P is the
 /// prime number 2^64 - 2^32 + 1. Here we implement integer
-/// arithmetic modulo P for both Goldilocks and for a field extension of Goldilocks.
+/// arithmetic modulo P for both Goldilocks and for a field extension of
+/// Goldilocks.
 ///
 /// The `Fp` datatype is the core type of all of the operations done within the
 /// zero knowledge proofs, and is the smallest 'addressable' datatype, and the
@@ -31,7 +32,8 @@ use bytemuck::{Pod, Zeroable};
 /// and its operations as wrapping operations which respect word size P.
 ///
 /// The Fp class wraps all standard arithmetic operations to make finite
-/// field elements appear like ordinary numbers (which, for the most part, they are).
+/// field elements appear like ordinary numbers (which, for the most part, they
+/// are).
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct Elem(u64);
@@ -65,10 +67,11 @@ impl field::Elem for Elem {
 
     /// Generate a random value within our Goldilocks field
     fn random(rng: &mut impl rand::Rng) -> Self {
-        // The range of possible RNG-generated u64 integers includes an uneven region modulo P.
-        // We want to reject u64 values from this region because, if mapped to finite field elements
-        // (wrapped), it leads to over-selection of the wrapped values. Here, P happens to
-        // fit only once into a 64-bit space, so we accept only RNG-generated u64 values less than P.
+        // The range of possible RNG-generated u64 integers includes an uneven region
+        // modulo P. We want to reject u64 values from this region because, if
+        // mapped to finite field elements (wrapped), it leads to over-selection
+        // of the wrapped values. Here, P happens to fit only once into a 64-bit
+        // space, so we accept only RNG-generated u64 values less than P.
         let mut val: u64 = rng.gen();
         while val >= P {
             val = rng.gen();
@@ -83,7 +86,8 @@ macro_rules! rou_array {
     }
 }
 
-/// Maximum power of two for which we have a root of unity using Goldilocks field
+/// Maximum power of two for which we have a root of unity using Goldilocks
+/// field
 impl field::RootsOfUnity for Elem {
     const MAX_ROU_PO2: usize = 32;
 
@@ -291,7 +295,8 @@ const EXT_SIZE: usize = 2;
 /// operations depends on the size of the field. The field extension `ExtElem`
 /// has `Elem` as a subfield, so operations on elements of each are compatible.
 /// The irreducible polynomial `x^2 - 11` was chosen because `11` is
-/// the simplest choice of `B` for `x^2 - B` that makes this polynomial irreducible.
+/// the simplest choice of `B` for `x^2 - B` that makes this polynomial
+/// irreducible.
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
@@ -329,11 +334,12 @@ impl field::Elem for ExtElem {
     /// Compute the multiplicative inverse of a field element [ExtElem].
     fn inv(self) -> Self {
         let a = &self.0;
-        // Compute the multiplicative inverse by looking at Fp2 as a composite field and using the
-        // same basic methods used to invert complex numbers.
-        // Starting with field element `a`, we begin with the initial value `out = 1 / a`. Setting `a'` to be `a` with a_1 negated,
-        // we multiply the numerator and the denominator by `a'` to produce
-        // `a' / (a * a') = (a_0 - a_1) / (a_0^2 + B * a_1^2)`. To safely compute this value,
+        // Compute the multiplicative inverse by looking at Fp2 as a composite field and
+        // using the same basic methods used to invert complex numbers.
+        // Starting with field element `a`, we begin with the initial value `out = 1 /
+        // a`. Setting `a'` to be `a` with a_1 negated, we multiply the
+        // numerator and the denominator by `a'` to produce `a' / (a * a') =
+        // (a_0 - a_1) / (a_0^2 + B * a_1^2)`. To safely compute this value,
         // we multiply by the safe inverse of the denominator.
         let det: Elem = a[0] * a[0] + BETA * a[1] * a[1];
         let invdet: Elem = det.inv();
@@ -463,7 +469,10 @@ impl ops::Mul<ExtElem> for Elem {
     }
 }
 
-// Multiply the polynomial representations, and then reduce modulo `x^2 - B`, which shifts terms with powers >= 2 back 2 and multiplies by `-Beta`. We could write this as a double loop with conditionals and hope it gets unrolled properly, but it's small enough to hand write.
+// Multiply the polynomial representations, and then reduce modulo `x^2 - B`,
+// which shifts terms with powers >= 2 back 2 and multiplies by `-Beta`. We
+// could write this as a double loop with conditionals and hope it gets unrolled
+// properly, but it's small enough to hand write.
 impl ops::MulAssign for ExtElem {
     /// Simple multiplication case for [ExtElem]
     fn mul_assign(&mut self, rhs: Self) {
@@ -697,7 +706,7 @@ mod tests {
     fn compare_native() {
         // Compare core operations against simple % P implementations
         let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
-        for _ in 0..100_000 {
+        for _ in 0..1000 {
             let fa = Elem::random(&mut rng);
             let fb = Elem::random(&mut rng);
             let a: u64 = fa.into();
@@ -710,7 +719,8 @@ mod tests {
                 b
             );
             // This is a workaround that doesn't need to exist for baby bear
-            // because it doesn't overflow u64 under addition. Here, we could have P - b + a either overflow or wrap under u64.
+            // because it doesn't overflow u64 under addition. Here, we could have P - b + a
+            // either overflow or wrap under u64.
             let diff: u64 = if a < b {
                 ((a as u128 + (P - b) as u128) % (P as u128)) as u64
             } else {
