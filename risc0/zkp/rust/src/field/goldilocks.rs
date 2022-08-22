@@ -295,7 +295,7 @@ const EXT_SIZE: usize = 2;
 /// operations depends on the size of the field. The field extension `ExtElem`
 /// has `Elem` as a subfield, so operations on elements of each are compatible.
 /// The irreducible polynomial `x^2 - 11` was chosen because `11` is
-/// the simplest choice of `B` for `x^2 - B` that makes this polynomial
+/// the simplest choice of `BETA` for `x^2 - BETA` that makes this polynomial
 /// irreducible.
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
