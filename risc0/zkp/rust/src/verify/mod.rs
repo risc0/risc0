@@ -14,7 +14,7 @@
 
 pub mod adapter;
 mod fri;
-pub mod merkle;
+pub(crate) mod merkle;
 pub mod read_iop;
 
 use alloc::vec;

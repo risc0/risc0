@@ -151,7 +151,7 @@ mod tests {
         queries: usize,
     ) -> MerkleTreeProver<H> {
         // Initialize a prover with leaves 0..size
-        let size: u32 = (rows * cols).try_into().unwrap();
+        let size: u32 = (rows * cols) as u32;
         let mut data = Vec::<Fp>::new();
         for val in 0..size {
             data.push(Fp::from(val));
@@ -163,7 +163,7 @@ mod tests {
 
     fn bad_row_access<H: Hal, S: Sha>(sha: &S, hal: &H, rows: usize, cols: usize, queries: usize) {
         let prover = init_prover(hal, rows, cols, queries);
-        let mut iop: WriteIOP<S> = WriteIOP::new(sha);
+        let mut iop = WriteIOP::new(sha);
         prover.prove(&mut iop, rows);
     }
 
