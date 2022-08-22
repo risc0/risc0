@@ -34,7 +34,7 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
 mod integration {
     use test_log::test;
 
-    use risc0_zkvm::platform::memory::{COMMIT, HEAP};
+    use risc0_zkvm_platform::memory::{COMMIT, HEAP};
 
     use crate::run_memio;
 

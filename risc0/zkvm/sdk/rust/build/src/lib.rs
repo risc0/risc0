@@ -106,14 +106,11 @@ struct ZipMapEntry {
     dst_prefix: &'static str,
 }
 
-/// ID of rust library source version.  This is an arbitrary string,
-/// but must change if we need to download a new library version.  So
-/// let's just use the GIT commit ID.
-const RUST_LIB_ID: &str = "13dd9c85310093d42bed1528c07aec397cb76716";
+// Sources for standard library, and where they should be mapped to.
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry{
-	zip_url: "https://github.com/risc0/rust/archive/9df34d93b963521ddb646840181aa9ee6494df48.zip",
-	src_prefix: "rust-9df34d93b963521ddb646840181aa9ee6494df48/library",
+	zip_url: "https://github.com/risc0/rust/archive/3c7914f106c899500d633feb3f713e3d22ba16e5.zip",
+	src_prefix: "rust-3c7914f106c899500d633feb3f713e3d22ba16e5/library",
 	dst_prefix: "library"},
     ZipMapEntry{
 	zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
@@ -223,8 +220,9 @@ where
     let target_spec_path = out_dir.as_ref().join("riscv32im-risc0-zkvm-elf.json");
     fs::write(&target_spec_path, TARGET_JSON).unwrap();
 
-    // Rust standard library
-    let (_, src_id_hash) = sha_digest_with_hex(RUST_LIB_ID.as_bytes());
+    // Rust standard library.  If any of the RUST_LIB_MAP changed, we
+    // want to have a different hash so that we make sure we recompile.
+    let (_, src_id_hash) = sha_digest_with_hex(format!("{:?}", RUST_LIB_MAP).as_bytes());
     let rust_lib_path = out_dir.as_ref().join(format!("rust-std_{}", src_id_hash));
     if !rust_lib_path.exists() {
         println!(

@@ -54,7 +54,7 @@ impl fmt::Display for VerificationError {
 }
 
 pub trait Circuit {
-    fn taps(&self) -> &TapSet;
+    fn taps(&self) -> &'static TapSet<'static>;
     fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
     fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
     fn po2(&self) -> u32;
@@ -70,7 +70,7 @@ where
     if seal.len() == 0 {
         return Err(VerificationError::ReceiptFormatError);
     }
-    let taps = circuit.taps().clone();
+    let taps = circuit.taps();
 
     // Make IOP
     let mut iop = ReadIOP::new(sha, seal);

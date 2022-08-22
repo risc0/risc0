@@ -83,15 +83,13 @@ pub use prove::{MethodId, Receipt};
 #[cfg(test)]
 mod test {
     use super::{MethodId, Prover, ProverOpts, Receipt};
-    use crate::{
-        platform::memory::{COMMIT, HEAP},
-        serde::{from_slice, to_vec},
-    };
+    use crate::serde::{from_slice, to_vec};
     use anyhow::Result;
     use risc0_zkp::core::sha::Digest;
     use risc0_zkvm_methods::{
         FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SENDRECV_ID, SENDRECV_PATH, SHA_ID, SHA_PATH,
     };
+    use risc0_zkvm_platform::memory::{COMMIT, HEAP};
     use std::sync::Mutex;
     use test_log::test;
 
@@ -210,7 +208,7 @@ mod test {
     #[test]
     fn fail() {
         // Check that a compliant host will fault.
-        let mut prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
+        let prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
         assert!(prover.run().is_err());
     }
 

@@ -20,7 +20,7 @@
 #![cfg_attr(target_arch = "riscv32", feature(alloc_error_handler))]
 #![cfg_attr(target_arch = "riscv32", feature(new_uninit))]
 
-extern crate alloc as _alloc;
+extern crate alloc as alloc_crate;
 
 #[cfg(not(feature = "std"))]
 mod alloc;
@@ -31,9 +31,6 @@ pub mod env;
 /// Functions for computing SHA-256 hashes.
 pub mod sha;
 
-/// Functions for handling input and output
-pub mod io;
-
 use core::{arch::asm, mem, panic::PanicInfo, ptr};
 
 extern "C" {
@@ -43,9 +40,9 @@ extern "C" {
 #[cfg(all(target_arch = "riscv32", not(feature = "std")))]
 #[panic_handler]
 unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
-    use risc0_zkvm::platform::io::GPIO_FAULT;
+    use risc0_zkvm_platform::io::GPIO_FAULT;
 
-    let msg = _alloc::format!("{}\0", panic_info);
+    let msg = alloc_crate::format!("{}\0", panic_info);
     let ptr = msg.as_ptr();
     memory_barrier(ptr);
     // A compliant host should fault when it receives this descriptor.

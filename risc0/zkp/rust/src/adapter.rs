@@ -84,6 +84,7 @@ impl CircuitStepContext {
         a * b
     }
 
+    #[allow(non_snake_case)]
     pub fn _bitAnd(&self, a: Fp, b: Fp, _loc: &str) -> Fp {
         let a: u32 = a.into();
         let b: u32 = b.into();
@@ -256,7 +257,7 @@ pub trait PolyExt {
 }
 
 pub trait TapsProvider {
-    fn get_taps(&self) -> &TapSet;
+    fn get_taps(&self) -> &'static TapSet<'static>;
 }
 
 pub trait CircuitInfo {

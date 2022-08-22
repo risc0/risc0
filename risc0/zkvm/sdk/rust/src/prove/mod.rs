@@ -17,22 +17,21 @@ pub mod exec;
 use std::io::Write;
 
 use anyhow::Result;
+use lazy_static::lazy_static;
 use risc0_zkp::{
     core::sha::default_implementation, hal::cpu::CpuHal, prove::adapter::ProveAdapter,
 };
-
-use crate::{
-    elf::Program,
-    host::ProverOpts,
-    method_id::MethodId,
-    platform::{
-        io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT},
-        memory::MEM_SIZE,
-    },
-    receipt::Receipt,
+use risc0_zkvm_circuit::CircuitImpl;
+use risc0_zkvm_platform::{
+    io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT},
+    memory::MEM_SIZE,
 };
 
-use self::exec::{IoHandler, RV32Executor};
+use crate::{elf::Program, host::ProverOpts, method_id::MethodId, receipt::Receipt};
+
+lazy_static! {
+    pub static ref CIRCUIT: CircuitImpl = CircuitImpl::new();
+}
 
 pub struct Prover<'a> {
     elf: Program,
@@ -70,11 +69,11 @@ impl<'a> Prover<'a> {
     pub fn run(&mut self) -> Result<Receipt> {
         let skip_seal = self.inner.opts.skip_seal;
 
-        let mut executor = RV32Executor::new(&self.elf, &mut self.inner);
+        let mut executor = exec::RV32Executor::new(&CIRCUIT, &self.elf, &mut self.inner);
         executor.run()?;
 
         let mut prover = ProveAdapter::new(&mut executor.executor);
-        let hal = CpuHal {};
+        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
         let sha = default_implementation();
 
         let seal = if skip_seal {
@@ -117,7 +116,7 @@ impl<'a> ProverImpl<'a> {
     }
 }
 
-impl<'a> IoHandler for ProverImpl<'a> {
+impl<'a> exec::IoHandler for ProverImpl<'a> {
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Vec<u8> {
         if let Some(cb) = self.opts.sendrecv_callbacks.get(&channel) {
             return cb(channel, buf);

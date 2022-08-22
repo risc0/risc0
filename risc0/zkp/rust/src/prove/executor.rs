@@ -26,8 +26,8 @@ use crate::{
     MIN_PO2, ZK_CYCLES,
 };
 
-pub struct Executor<C: CircuitDef<S>, S: CustomStep> {
-    pub circuit: C,
+pub struct Executor<C: 'static + CircuitDef<S>, S: CustomStep> {
+    pub circuit: &'static C,
     pub custom: S,
     pub code: Vec<Fp>,
     code_size: usize,
@@ -41,11 +41,12 @@ pub struct Executor<C: CircuitDef<S>, S: CustomStep> {
     pub cycle: usize,
 }
 
-impl<C: CircuitDef<S>, S: CustomStep> Executor<C, S> {
-    pub fn new(circuit: C, custom: S, min_po2: usize, max_po2: usize) -> Self {
+impl<C: 'static + CircuitDef<S>, S: CustomStep> Executor<C, S> {
+    pub fn new(circuit: &'static C, custom: S, min_po2: usize, max_po2: usize) -> Self {
         let po2 = max(min_po2, MIN_PO2);
-        let code_size = circuit.get_taps().group_size(RegisterGroup::Code);
-        let data_size = circuit.get_taps().group_size(RegisterGroup::Data);
+        let taps = circuit.get_taps();
+        let code_size = taps.group_size(RegisterGroup::Code);
+        let data_size = taps.group_size(RegisterGroup::Data);
         let steps = 1 << po2;
         let output_size = circuit.output_size();
         debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");

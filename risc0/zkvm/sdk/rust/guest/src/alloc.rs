@@ -17,7 +17,7 @@ use core::{
     cell::UnsafeCell,
 };
 
-use risc0_zkvm::platform::{memory, WORD_SIZE};
+use risc0_zkvm_platform::{memory, WORD_SIZE};
 
 use crate::{_fault, align_up};
 
