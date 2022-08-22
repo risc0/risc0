@@ -40,24 +40,14 @@ use crate::{
 };
 
 pub trait Circuit {
-    fn get_taps(&self) -> &TapSet;
+    fn get_taps(&self) -> &'static TapSet<'static>;
 
     /// Perform initial 'execution' setting code + data.
     /// Additionally, write any 'results' as needed.
     fn execute<S: Sha>(&mut self, iop: &mut WriteIOP<S>);
 
-    /// Perform 'accumlate' stage, using the iop for any RNG state.
+    /// Perform 'accumulate' stage, using the iop for any RNG state.
     fn accumulate<S: Sha>(&mut self, iop: &mut WriteIOP<S>);
-
-    /// Compute check polynomial.
-    fn eval_check(
-        &self,
-        check: &Buffer<Fp>,
-        code: &Buffer<Fp>,
-        data: &Buffer<Fp>,
-        accum: &Buffer<Fp>,
-        poly_mix: Fp4,
-    );
 
     fn po2(&self) -> u32;
 
@@ -66,6 +56,12 @@ pub trait Circuit {
     fn get_data(&self) -> &[Fp];
 
     fn get_accum(&self) -> &[Fp];
+
+    fn get_mix(&self) -> &[Fp];
+
+    fn get_output(&self) -> &[Fp];
+
+    fn get_steps(&self) -> usize;
 }
 
 pub fn prove_without_seal<H: Hal, S: Sha, C: Circuit>(_hal: &H, sha: &S, circuit: &mut C) {
@@ -74,7 +70,7 @@ pub fn prove_without_seal<H: Hal, S: Sha, C: Circuit>(_hal: &H, sha: &S, circuit
 }
 
 pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> Vec<u32> {
-    let taps = circuit.get_taps().clone();
+    let taps = circuit.get_taps();
     let code_size = taps.group_size(RegisterGroup::Code);
     let data_size = taps.group_size(RegisterGroup::Data);
     let accum_size = taps.group_size(RegisterGroup::Accum);
@@ -112,13 +108,20 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Now generate the check polynomial
     let domain = size * INV_RATE;
-    let check_poly = hal.alloc(EXT_SIZE * domain);
-    circuit.eval_check(
+    let check_poly = hal.alloc_fp(EXT_SIZE * domain);
+    let mix = hal.copy_fp_from(circuit.get_mix());
+    let out = hal.copy_fp_from(circuit.get_output());
+    hal.eval_check(
+        "rv32im",
         &check_poly,
         &code_group.evaluated,
         &data_group.evaluated,
         &accum_group.evaluated,
+        &mix,
+        &out,
         poly_mix,
+        po2 as usize,
+        circuit.get_steps(),
     );
 
     // #ifdef CIRCUIT_DEBUG
@@ -174,7 +177,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Do evaluations of all of the various polynomials at the appropriate points.
     let mut eval_u: Vec<Fp4> = Vec::new();
-    let mut eval_group = |id: RegisterGroup, pg: &PolyGroup| {
+    let mut eval_group = |id: RegisterGroup, pg: &PolyGroup<H>| {
         let mut which = Vec::new();
         let mut xs = Vec::new();
         for tap in taps.group_taps(id) {
@@ -183,11 +186,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
             xs.push(x);
             all_xs.push(x);
         }
-        let which = hal.copy_from(which.as_slice());
-        let xs = hal.copy_from(xs.as_slice());
-        let out = hal.alloc(which.size());
+        let which = hal.copy_u32_from(which.as_slice());
+        let xs = hal.copy_fp4_from(xs.as_slice());
+        let out = hal.alloc_fp4(which.size());
         hal.batch_evaluate_any(&pg.coeffs, pg.count, &which, &xs, &out);
-        out.view(&mut |view| {
+        out.view(|view| {
             eval_u.extend(view);
         });
     };
@@ -218,11 +221,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     let z4 = z.pow(EXT_SIZE);
     let which: [u32; CHECK_SIZE] = array_init(|i| i as u32);
     let xs = [z4; CHECK_SIZE];
-    let out = hal.alloc(CHECK_SIZE);
-    let which = hal.copy_from(which.as_slice());
-    let xs = hal.copy_from(xs.as_slice());
+    let out = hal.alloc_fp4(CHECK_SIZE);
+    let which = hal.copy_u32_from(which.as_slice());
+    let xs = hal.copy_fp4_from(xs.as_slice());
     hal.batch_evaluate_any(&check_group.coeffs, CHECK_SIZE, &which, &xs, &out);
-    out.view(&mut |view| {
+    out.view(|view| {
         coeff_u.extend(view);
     });
 
@@ -239,15 +242,15 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     // Begin by making a zeroed output buffer
     let combo_count = taps.combos_size();
     let combos = vec![Fp4::ZERO; size * (combo_count + 1)];
-    let combos = hal.copy_from(combos.as_slice());
+    let combos = hal.copy_fp4_from(combos.as_slice());
     let mut cur_mix = Fp4::ONE;
 
-    let mut mix_group = |id: RegisterGroup, pg: &PolyGroup| {
+    let mut mix_group = |id: RegisterGroup, pg: &PolyGroup<H>| {
         let mut which = Vec::new();
         for reg in taps.group_regs(id) {
             which.push(reg.combo_id() as u32);
         }
-        let which_buf = hal.copy_from(which.as_slice());
+        let which_buf = hal.copy_u32_from(which.as_slice());
         let group_size = taps.group_size(id);
         hal.mix_poly_coeffs(
             &combos, &cur_mix, &mix, &pg.coeffs, &which_buf, group_size, size,
@@ -260,7 +263,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     mix_group(RegisterGroup::Data, &data_group);
 
     let which = [combo_count as u32; CHECK_SIZE];
-    let which_buf = hal.copy_from(which.as_slice());
+    let which_buf = hal.copy_u32_from(which.as_slice());
     hal.mix_poly_coeffs(
         &combos,
         &cur_mix,
@@ -272,7 +275,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     );
 
     // Load the near final coefficients back to the CPU
-    combos.view_mut(&mut |combos| {
+    combos.view_mut(|combos| {
         // Subtract the U coeffs from the combos
         let mut cur_pos = 0;
         let mut cur = Fp4::ONE;
@@ -313,7 +316,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
 
     // Sum the combos up into one final polynomial + make it into 4 Fp polys.
     // Additionally, it needs to be bit reversed to make everyone happy
-    let final_poly_coeffs = hal.alloc(size * EXT_SIZE);
+    let final_poly_coeffs = hal.alloc_fp(size * EXT_SIZE);
     hal.eltwise_sum_fp4(&final_poly_coeffs, &combos);
 
     // Finally do the FRI protocol to prove the degree of the polynomial
@@ -333,9 +336,9 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     proof
 }
 
-fn make_coeffs<H: Hal>(hal: &H, input: &[Fp], count: usize) -> Buffer<Fp> {
+fn make_coeffs<H: Hal>(hal: &H, input: &[Fp], count: usize) -> H::BufferFp {
     // Copy into accel buffer
-    let buf = hal.copy_from(input);
+    let buf = hal.copy_fp_from(input);
     // Do interpolate
     hal.batch_interpolate_ntt(&buf, count);
     // Convert f(x) -> f(3x), which effective multiplies cofficent c_i by 3^i.

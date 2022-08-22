@@ -12,6 +12,7 @@ rust_library(
     deps = [
         "//risc0/zkp/rust:zkp_guest",
         "//risc0/zkvm/sdk/rust:zkvm_guest",
+        "//risc0/zkvm/sdk/rust/platform:platform_guest",
         "@crates_guest//:bytemuck",
         "@crates_guest//:serde",
     ],

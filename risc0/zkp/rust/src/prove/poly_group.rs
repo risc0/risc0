@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use crate::{
-    core::{fp::Fp, log2_ceil},
+    core::log2_ceil,
     hal::{Buffer, Hal},
     prove::merkle::MerkleTreeProver,
     INV_RATE, QUERIES,
@@ -49,18 +49,18 @@ use crate::{
 /// which means that the normal NTT evaluation domain does not reveal anything
 /// about the original datapoints (i.e. is zero knowledge) so long as the number
 /// of queries is less than the randomized padding.
-pub struct PolyGroup<'a> {
-    pub coeffs: &'a Buffer<Fp>,
+pub struct PolyGroup<'a, H: Hal> {
+    pub coeffs: &'a H::BufferFp,
     pub count: usize,
-    pub evaluated: Buffer<Fp>,
-    pub merkle: MerkleTreeProver,
+    pub evaluated: H::BufferFp,
+    pub merkle: MerkleTreeProver<H>,
 }
 
-impl<'a> PolyGroup<'a> {
-    pub fn new<H: Hal>(hal: &H, coeffs: &'a Buffer<Fp>, count: usize, size: usize) -> Self {
+impl<'a, H: Hal> PolyGroup<'a, H> {
+    pub fn new(hal: &H, coeffs: &'a H::BufferFp, count: usize, size: usize) -> Self {
         assert_eq!(coeffs.size(), count * size);
         let domain = size * INV_RATE;
-        let evaluated = hal.alloc(count * domain);
+        let evaluated = hal.alloc_fp(count * domain);
         hal.batch_expand(&evaluated, &coeffs, count);
         hal.batch_evaluate_ntt(&evaluated, count, log2_ceil(INV_RATE));
         hal.batch_bit_reverse(&coeffs, count);

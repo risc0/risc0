@@ -15,7 +15,7 @@
 #![no_main]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use risc0_zkvm_guest::{env, io::host_sendrecv};
+use risc0_zkvm_guest::env;
 
 risc0_zkvm_guest::entry!(main);
 
@@ -27,7 +27,7 @@ pub fn main() {
     let mut input_len : usize = 0;
     
     for _ in 0..count {
-        let (host_data, host_len) = host_sendrecv(channel_id, &input[..input_len]);
+        let (host_data, host_len) = env::host_sendrecv(channel_id, &input[..input_len]);
 
         input = bytemuck::cast_slice(host_data);
         input_len = host_len;

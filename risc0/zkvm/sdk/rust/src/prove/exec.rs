@@ -38,11 +38,11 @@ use risc0_zkvm_platform::{
         },
         IoDescriptor, SHADescriptor,
     },
-    memory::INPUT,
+    memory::{INPUT, MEM_BITS},
     WORD_SIZE,
 };
 
-use crate::{elf::Program, platform::memory::MEM_BITS, CODE_SIZE};
+use crate::{elf::Program, CODE_SIZE};
 
 pub trait IoHandler {
     fn on_commit(&mut self, buf: &[u32]);
@@ -101,11 +101,6 @@ impl MemoryState {
             Some(word) => *word,
             None => panic!("addr out of range: 0x{addr:08X}"),
         }
-    }
-
-    #[track_caller]
-    fn load_be_u32(&self, addr: u32) -> u32 {
-        self.load_u32(addr).to_be()
     }
 
     #[track_caller]
@@ -705,9 +700,8 @@ pub struct RV32Executor<'a, H: IoHandler> {
 }
 
 impl<'a, H: IoHandler> RV32Executor<'a, H> {
-    pub fn new(elf: &'a Program, io: &'a mut H) -> Self {
+    pub fn new(circuit: &'static CircuitImpl, elf: &'a Program, io: &'a mut H) -> Self {
         debug!("image.size(): {}", elf.image.len());
-        let circuit = CircuitImpl::new();
         let machine = MachineContext::new(io);
         let min_po2 = log2_ceil(elf.image.len() + 3 + ZK_CYCLES);
         let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2);

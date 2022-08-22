@@ -57,7 +57,7 @@ impl Impl {
             set_word(
                 block.as_mut_slice(),
                 off,
-                u32::from(fps[offset + i * stride]),
+                fps[offset + i * stride].as_u32_montgomery(),
             );
             off += 1;
             if off == 16 {

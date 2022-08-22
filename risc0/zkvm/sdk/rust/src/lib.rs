@@ -50,8 +50,5 @@ pub mod serde;
 #[cfg(feature = "verify")]
 pub mod verify;
 
-pub use risc0_zkvm_platform as platform;
-
+// TODO: get this from the cirgen circuit
 const CODE_SIZE: usize = 16;
-const DATA_SIZE: usize = 162;
-const ACCUM_SIZE: usize = 10;
