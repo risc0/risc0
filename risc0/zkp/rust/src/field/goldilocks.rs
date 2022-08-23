@@ -46,6 +46,11 @@ impl Default for Elem {
 }
 
 /// The modulus of our Goldilocks field: 2^64 - 2^32 + 1
+/// Calculation steps chosen to avoid overflowing u64 with 2^64:
+/// 1. Wrapping subtract from 0u64, which leaves all ones
+/// 2. Left-shift ones over by 32, leaving 32 ones and 32 zeros (2^64-2^32)
+/// 3. Add one to get 2^64 - 2^32 + 1
+
 const P: u64 = (0u64.wrapping_sub(1) << 32) + 1;
 // TODO: Vestigial, should be improved on generic implementation
 const P_U64: u64 = P;
@@ -426,7 +431,7 @@ impl ops::AddAssign for ExtElem {
 
 impl ops::Sub for ExtElem {
     type Output = Self;
-    
+
     /// Subtraction for [ExtElem]
     fn sub(self, rhs: Self) -> Self {
         let mut lhs = self;
