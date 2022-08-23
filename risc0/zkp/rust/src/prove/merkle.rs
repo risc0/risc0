@@ -133,8 +133,8 @@ mod tests {
         hal::cpu::CpuHal,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     };
-    use risc0_circuit_fib::CircuitImpl;
     use rand::{Rng, RngCore};
+    use risc0_circuit_fib::CircuitImpl;
 
     use lazy_static::lazy_static;
 
