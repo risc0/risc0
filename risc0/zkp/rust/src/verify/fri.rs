@@ -65,7 +65,12 @@ impl VerifyRoundInfo {
         }
     }
 
-    pub fn verify_query<S: Sha>(&mut self, iop: &mut ReadIOP<S>, pos: &mut usize, goal: &mut Fp4) -> Result<(), VerificationError> {
+    pub fn verify_query<S: Sha>(
+        &mut self,
+        iop: &mut ReadIOP<S>,
+        pos: &mut usize,
+        goal: &mut Fp4,
+    ) -> Result<(), VerificationError> {
         let quot = *pos / self.domain;
         let group = *pos % self.domain;
         // Get the column data
@@ -90,7 +95,11 @@ impl VerifyRoundInfo {
     }
 }
 
-pub fn fri_verify<S: Sha, F>(iop: &mut ReadIOP<S>, mut degree: usize, mut inner: F) -> Result<(), VerificationError>
+pub fn fri_verify<S: Sha, F>(
+    iop: &mut ReadIOP<S>,
+    mut degree: usize,
+    mut inner: F,
+) -> Result<(), VerificationError>
 where
     F: FnMut(&mut ReadIOP<S>, usize) -> Result<Fp4, VerificationError>,
 {
