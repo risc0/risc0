@@ -1,6 +1,6 @@
 // This code is automatically generated
 
-use crate::{
+use risc0_zkp::{
     adapter::{CircuitStep, CircuitStepAccum, CircuitStepContext, CircuitStepDef, CustomStep},
     core::fp::Fp,
 };

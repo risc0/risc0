@@ -28,6 +28,7 @@ sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 [dev-dependencies]
 criterion = "0.3"
 rand = { version = "0.8", features = ["small_rng"] }
+risc0-circuit-fib = { version = "0.11", path = "src/circuit-fib" }
 
 [features]
 default = ["prove", "std", "verify"]

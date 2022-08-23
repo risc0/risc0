@@ -25,8 +25,6 @@ mod merkle;
 #[cfg(feature = "prove")]
 pub mod prove;
 pub mod taps;
-#[cfg(feature = "prove")]
-mod test_circuit;
 #[cfg(feature = "verify")]
 pub mod verify;
 

@@ -1,6 +1,6 @@
 // This code is automatically generated
 
-use crate::{
+use risc0_zkp::{
     adapter::{MixState, PolyFp, PolyFpContext, PolyFpStep, PolyFpStepDef},
     core::fp::Fp,
 };

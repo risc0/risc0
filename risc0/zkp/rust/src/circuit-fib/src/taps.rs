@@ -1,6 +1,6 @@
 // This code is automatically generated
 
-use crate::taps::{RegisterGroup, Tap, TapData, TapSet};
+use risc0_zkp::taps::{RegisterGroup, Tap, TapData, TapSet};
 
 #[allow(dead_code)]
 pub(crate) const TAPS: &[Tap] = &[
