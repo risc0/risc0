@@ -42,6 +42,8 @@ const CHECK_SIZE: usize = INV_RATE * EXT_SIZE;
 pub enum VerificationError {
     ReceiptFormatError,
     MethodVerificationError,
+    MerkleQueryOutOfRange { idx: usize, rows: usize },
+    InvalidProof,
 }
 
 impl fmt::Display for VerificationError {
@@ -49,6 +51,12 @@ impl fmt::Display for VerificationError {
         match self {
             VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
             VerificationError::MethodVerificationError => write!(f, "method verification failed"),
+            VerificationError::MerkleQueryOutOfRange { idx, rows } => write!(
+                f,
+                "Requested Merkle validation on row {}, but only {} rows exist",
+                idx, rows
+            ),
+            VerificationError::InvalidProof => write!(f, "Verification indicates proof is invalid"),
         }
     }
 }
@@ -153,7 +161,9 @@ where
     }
     check *= (Fp4::from_u32(3) * z).pow(size) - Fp4::ONE;
     // debug!("Check = {check:?}");
-    assert_eq!(check, result);
+    if check != result {
+        return Err(VerificationError::InvalidProof);
+    }
 
     // Set the mix mix value
     let mix = Fp4::random(&mut iop);
@@ -185,37 +195,41 @@ where
 
     let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
     // debug!("FRI-verify, size = {size}");
-    fri_verify(&mut iop, size, |iop: &mut ReadIOP<S>, idx: usize| -> Fp4 {
-        let x = Fp4::from_fp(gen.pow(idx));
-        let mut rows = vec![];
-        rows.push(accum_merkle.verify(iop, idx));
-        rows.push(code_merkle.verify(iop, idx));
-        rows.push(data_merkle.verify(iop, idx));
-        let check_row = check_merkle.verify(iop, idx);
-        let mut cur = Fp4::ONE;
-        let mut tot = vec![Fp4::ZERO; combo_count + 1];
-        for reg in taps.regs() {
-            tot[reg.combo_id()] += cur * rows[reg.group() as usize][reg.offset()];
-            cur *= mix;
-        }
-        for i in 0..CHECK_SIZE {
-            tot[combo_count] += cur * check_row[i];
-            cur *= mix;
-        }
-        let mut ret = Fp4::ZERO;
-        for i in 0..combo_count {
-            let num = tot[i] - poly_eval(&combo_u[i], x);
-            let mut divisor = Fp4::ONE;
-            for back in taps.get_combo(i).slice() {
-                divisor *= x - z * back_one.pow(*back as usize);
+    fri_verify(
+        &mut iop,
+        size,
+        |iop: &mut ReadIOP<S>, idx: usize| -> Result<Fp4, VerificationError> {
+            let x = Fp4::from_fp(gen.pow(idx));
+            let mut rows = vec![];
+            rows.push(accum_merkle.verify(iop, idx)?);
+            rows.push(code_merkle.verify(iop, idx)?);
+            rows.push(data_merkle.verify(iop, idx)?);
+            let check_row = check_merkle.verify(iop, idx)?;
+            let mut cur = Fp4::ONE;
+            let mut tot = vec![Fp4::ZERO; combo_count + 1];
+            for reg in taps.regs() {
+                tot[reg.combo_id()] += cur * rows[reg.group() as usize][reg.offset()];
+                cur *= mix;
             }
-            ret += num * divisor.inv();
-        }
-        let check_num = tot[combo_count] - combo_u[combo_count][0];
-        let check_div = x - z.pow(INV_RATE);
-        ret += check_num * check_div.inv();
-        ret
-    });
+            for i in 0..CHECK_SIZE {
+                tot[combo_count] += cur * check_row[i];
+                cur *= mix;
+            }
+            let mut ret = Fp4::ZERO;
+            for i in 0..combo_count {
+                let num = tot[i] - poly_eval(&combo_u[i], x);
+                let mut divisor = Fp4::ONE;
+                for back in taps.get_combo(i).slice() {
+                    divisor *= x - z * back_one.pow(*back as usize);
+                }
+                ret += num * divisor.inv();
+            }
+            let check_num = tot[combo_count] - combo_u[combo_count][0];
+            let check_div = x - z.pow(INV_RATE);
+            ret += check_num * check_div.inv();
+            Ok(ret)
+        },
+    )?;
     iop.verify_complete();
     Ok(())
 }
