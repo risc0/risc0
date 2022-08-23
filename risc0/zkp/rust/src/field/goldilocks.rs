@@ -426,6 +426,7 @@ impl ops::AddAssign for ExtElem {
 
 impl ops::Sub for ExtElem {
     type Output = Self;
+    
     /// Subtraction for [ExtElem]
     fn sub(self, rhs: Self) -> Self {
         let mut lhs = self;
