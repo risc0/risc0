@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// ! Goldilocks field.
-/// ! Support for the base finite field modulo 2^64 - 2^32 + 1
-use crate::field::{self, Elem as FieldElem};
-
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
+
+/// ! Goldilocks field.
+/// ! Support for the base finite field modulo 2^64 - 2^32 + 1
+use crate::field::{self, Elem as FieldElem};
 
 /// The Goldilocks class is an element of the finite field F_p, where P is the
 /// prime number 2^64 - 2^32 + 1. Here we implement integer
@@ -246,7 +246,7 @@ impl From<u64> for Elem {
 fn add(lhs: u64, rhs: u64) -> u64 {
     let x = lhs.wrapping_add(rhs);
     // If we're above P or have done a u64::MAX modulus
-    if x < rhs || x >= P {
+    if x < lhs || x >= P {
         x.wrapping_sub(P)
     } else {
         x
@@ -265,25 +265,26 @@ fn mul(lhs: u64, rhs: u64) -> u64 {
     let prod: u128 = (lhs as u128).wrapping_mul(rhs as u128);
 
     // Initialize result to low 64 bits (by converting)
-    let mut ret: u64 = prod as u64;
+    let ret: u64 = prod as u64;
     // Get two high words
     let med: u32 = (prod >> 64) as u32;
     let high: u32 = (prod >> 96) as u32;
     // Subtract out high bits, add in P if underflow
-    let ret = 
-    if ret >= (high as u64) {
+    let ret = if ret >= (high as u64) {
         ret.wrapping_sub(high as u64)
     } else {
         ret.wrapping_sub(high as u64).wrapping_add(P)
-    }
+    };
     // Compute shifted effect of medium
     let med_shift = ((med as u64) << 32).wrapping_sub(med as u64);
     // Add in, if overflow, subtract a P
-    ret = ret.wrapping_add(med_shift);
-    if ret < med_shift || ret >= P {
-        ret = ret.wrapping_sub(P)
-    }
-    ret as u64
+    let ret = ret.wrapping_add(med_shift);
+    let ret = if ret < med_shift || ret >= P {
+        ret.wrapping_sub(P)
+    } else {
+        ret
+    };
+    ret
 }
 
 /// The size of the extension field (as number of elements).
@@ -393,12 +394,12 @@ impl ExtElem {
         Self::from_u64(1)
     }
 
-    /// Returns the constant portion of a [Elem].
+    /// Returns the base field portion of an [Elem].
     pub fn const_part(self) -> Elem {
         self.0[0]
     }
 
-    /// Returns the elements of an [Elem].
+    /// Returns [Elem] as a vector of base field values.
     pub fn elems(&self) -> &[Elem] {
         &self.0
     }
@@ -611,12 +612,15 @@ mod tests {
 
     #[test]
     fn compare_native_add_u64_wrap() {
-        // Test for addition when P < a + b < 2^64
-        let fa = Elem::from(P - 2u64);
-        let fb = Elem::from(5u64);
+        // Test for addition when 0 < (a + b) mod 2^64 < P
+        let fa = Elem::from(P - 1u64);
+        let fb = Elem::from(P - 1u64);
         let a: u64 = fa.into();
         let b: u64 = fb.into();
-        assert_eq!(fa + fb, Elem::from(a.wrapping_add(b)));
+        assert_eq!(
+            fa + fb,
+            Elem::from(((a as u128 + b as u128) % P as u128) as u64)
+        );
     }
 
     #[test]
@@ -689,8 +693,8 @@ mod tests {
     fn compare_native_multiplication_subfield_wrap() {
         // P < a * b < 2^64
         // We expect the result mod P, but there's no u64 overflow
-        let fa = Elem::from(P / 2u64);
-        let fb = Elem::from(3u64);
+        let fa = Elem::from(2u64 ^ 30);
+        let fb = Elem::from(2u64 ^ 34 - 1u64);
         let a: u64 = fa.into();
         let b: u64 = fb.into();
         assert_eq!(
