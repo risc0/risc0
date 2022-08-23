@@ -725,7 +725,7 @@ mod tests {
             // This is a workaround that doesn't need to exist for baby bear
             // because it doesn't overflow u64 under addition. Here, we could have P - b + a
             // either overflow or wrap under u64.
-            let diff: u64 = if a < b {
+            let diff = if a < b {
                 ((a as u128 + (P - b) as u128) % (P as u128)) as u64
             } else {
                 ((a as u128 - b as u128) % (P as u128)) as u64
