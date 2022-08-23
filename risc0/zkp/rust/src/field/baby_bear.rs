@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// ! Baby bear field.
-/// ! Support for the base finite field modulo 15*2^27 + 1
-use crate::field::{self, Elem as FieldElem};
-
 use alloc::fmt;
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
+
+/// ! Baby bear field.
+/// ! Support for the base finite field modulo 15*2^27 + 1
+use crate::field::{self, Elem as FieldElem};
 
 // montgomery form constants
 const M: u32 = 0x88000001;
@@ -379,12 +379,12 @@ impl ExtElem {
         Self::from_u32(1)
     }
 
-    /// Returns the constant portion of a [Elem].
+    /// Returns the base field portion of a [Elem].
     pub fn const_part(self) -> Elem {
         self.0[0]
     }
 
-    /// Returns the elements of a [Elem].
+    /// Returns [Elem] as a vector of base field values.
     pub fn elems(&self) -> &[Elem] {
         &self.0
     }
@@ -517,8 +517,8 @@ mod tests {
     #[test]
     fn isa_field() {
         let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
-        // Pick random sets of 3 elements of ExtElem, and verify they meet the
-        // requirements of a field.
+        // Generate three extended field elements using randomly generated base field
+        // values, and verify they meet the requirements of a field.
         for _ in 0..1_000 {
             let a = ExtElem::random(&mut rng);
             let b = ExtElem::random(&mut rng);
