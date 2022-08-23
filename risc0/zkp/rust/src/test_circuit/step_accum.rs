@@ -1,7 +1,7 @@
 // This code is automatically generated
 
 use anyhow::Result;
-use risc0_zkp::{
+use crate::{
     adapter::{CircuitStep, CircuitStepAccum, CircuitStepContext, CircuitStepDef, CustomStep},
     core::fp::Fp,
 };

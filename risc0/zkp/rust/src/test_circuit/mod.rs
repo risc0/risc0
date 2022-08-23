@@ -9,7 +9,7 @@ mod step_exec;
 mod step_verify;
 mod taps;
 
-use risc0_zkp::{
+use crate::{
     adapter::{CircuitInfo, TapsProvider},
     taps::TapSet,
 };
@@ -44,7 +44,7 @@ impl CircuitInfo for CircuitImpl {
 #[cfg(test)]
 mod test {
     use super::taps;
-    use risc0_zkp::taps::{TapSet, TapSetOwned};
+    use crate::taps::{TapSet, TapSetOwned};
 
     #[test]
     fn generated_tapset_matches() {

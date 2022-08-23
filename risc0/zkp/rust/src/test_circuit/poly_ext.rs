@@ -1,6 +1,6 @@
 // This code is automatically generated
 
-use risc0_zkp::{
+use crate::{
     adapter::{MixState, PolyExt, PolyExtContext, PolyExtStep, PolyExtStepDef},
     core::{fp::Fp, fp4::Fp4},
 };

@@ -131,10 +131,10 @@ mod tests {
     use crate::{
         core::sha_cpu,
         hal::cpu::CpuHal,
+        test_circuit::CircuitImpl,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     };
     use rand::{Rng, RngCore};
-    use risc0_circuit_fib::CircuitImpl;
 
     use lazy_static::lazy_static;
 
