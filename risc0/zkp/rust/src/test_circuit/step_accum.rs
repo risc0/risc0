@@ -1,10 +1,10 @@
 // This code is automatically generated
 
-use anyhow::Result;
 use crate::{
     adapter::{CircuitStep, CircuitStepAccum, CircuitStepContext, CircuitStepDef, CustomStep},
     core::fp::Fp,
 };
+use anyhow::Result;
 
 use super::CircuitImpl;
 
