@@ -1547,14 +1547,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-circuit-fib"
-version = "0.11.1"
-dependencies = [
- "anyhow",
- "risc0-zkp",
-]
-
-[[package]]
 name = "risc0-core-sys"
 version = "0.11.1"
 dependencies = [
@@ -1592,14 +1584,12 @@ dependencies = [
  "array-init",
  "bytemuck",
  "criterion",
- "lazy_static",
  "log",
  "ndarray",
  "paste",
  "rand",
  "rand_core",
  "rayon",
- "risc0-circuit-fib",
  "serde",
  "sha2",
 ]
