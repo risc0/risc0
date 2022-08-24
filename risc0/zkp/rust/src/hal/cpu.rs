@@ -25,27 +25,23 @@ use rayon::prelude::*;
 
 use super::{Buffer, Hal};
 use crate::{
-    adapter::{PolyFp, PolyFpContext},
     core::{
         fp::Fp,
         fp4::{Fp4, EXT_SIZE},
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
-        rou::ROU_FWD,
         sha::{Digest, Sha},
         sha_cpu,
     },
     field::Elem,
-    FRI_FOLD, INV_RATE,
+    FRI_FOLD,
 };
 
-pub struct CpuHal<'a, C: PolyFp> {
-    circuit: &'a C,
-}
+pub struct CpuHal {}
 
-impl<'a, C: PolyFp> CpuHal<'a, C> {
-    pub fn new(circuit: &'a C) -> Self {
-        CpuHal { circuit }
+impl CpuHal {
+    pub fn new() -> Self {
+        CpuHal {}
     }
 }
 
@@ -92,7 +88,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         }
     }
 
-    fn as_slice<'a>(&'a self) -> Ref<'a, [T]> {
+    pub fn as_slice<'a>(&'a self) -> Ref<'a, [T]> {
         let vec = self.buf.borrow();
         Ref::map(vec, |vec| {
             let slice = bytemuck::cast_slice(vec);
@@ -100,7 +96,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         })
     }
 
-    fn as_slice_mut<'a>(&'a self) -> RefMut<'a, [T]> {
+    pub fn as_slice_mut<'a>(&'a self) -> RefMut<'a, [T]> {
         let vec = self.buf.borrow_mut();
         RefMut::map(vec, |vec| {
             let slice = bytemuck::cast_slice_mut(vec);
@@ -136,7 +132,7 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
     }
 }
 
-impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
+impl Hal for CpuHal {
     type BufferFp = CpuBuffer<Fp>;
     type BufferFp4 = CpuBuffer<Fp4>;
     type BufferDigest = CpuBuffer<Digest>;
@@ -414,49 +410,6 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
                 *output = *sha.hash_pair(&input[0], &input[1]);
             });
     }
-
-    fn eval_check(
-        &self,
-        _circuit: &str,
-        check: &CpuBuffer<Fp>,
-        code: &CpuBuffer<Fp>,
-        data: &CpuBuffer<Fp>,
-        accum: &CpuBuffer<Fp>,
-        mix: &CpuBuffer<Fp>,
-        out: &CpuBuffer<Fp>,
-        poly_mix: Fp4,
-        po2: usize,
-        steps: usize,
-    ) {
-        const EXP_PO2: usize = log2_ceil(INV_RATE);
-
-        let domain = steps * INV_RATE;
-        let code = code.as_slice();
-        let data = data.as_slice();
-        let accum = accum.as_slice();
-        let mix = mix.as_slice();
-        let out = out.as_slice();
-        let mut check = check.as_slice_mut();
-        // TODO: parallelize
-        for cycle in 0..domain {
-            let args: &[&[Fp]] = &[&code, &out, &data, &mix, &accum];
-            let cond = self.circuit.poly_fp(
-                &PolyFpContext {
-                    size: domain,
-                    cycle,
-                    mix: poly_mix,
-                },
-                args,
-            );
-            let x = Fp::new(ROU_FWD[po2 + EXP_PO2]).pow(cycle);
-            // TODO: what is this magic number 3?
-            let y = (Fp::new(3) * x).pow(1 << po2);
-            let ret = cond.tot * (y - Fp::new(1)).inv();
-            for i in 0..EXT_SIZE {
-                check[i * domain + cycle] = ret.elems()[i];
-            }
-        }
-    }
 }
 
 #[cfg(test)]
@@ -465,19 +418,10 @@ mod test {
 
     use super::*;
 
-    struct PolyFpMock {}
-
-    impl PolyFp for PolyFpMock {
-        fn poly_fp(&self, _ctx: &PolyFpContext, _args: &[&[Fp]]) -> crate::adapter::MixState {
-            unimplemented!()
-        }
-    }
-
     #[test]
     #[should_panic]
     fn check_req() {
-        let mock = PolyFpMock {};
-        let hal = CpuHal::new(&mock);
+        let hal = CpuHal::new();
         let a = hal.alloc_fp(10);
         let b = hal.alloc_fp(20);
         hal.eltwise_add_fp(&a, &b, &b);
@@ -485,8 +429,7 @@ mod test {
 
     #[test]
     fn fp() {
-        let mock = PolyFpMock {};
-        let hal = CpuHal::new(&mock);
+        let hal = CpuHal::new();
         const COUNT: usize = 1024 * 1024;
         test_binary(
             &hal,
