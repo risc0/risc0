@@ -267,8 +267,6 @@ impl MemoryState {
     }
 }
 
-impl MemoryState {}
-
 fn split_word(value: u32) -> (Fp, Fp) {
     (Fp::new(value & 0xffff), Fp::new(value >> 16))
 }
