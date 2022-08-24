@@ -132,7 +132,7 @@ mod tests {
         core::sha_cpu,
         hal::cpu::CpuHal,
         test_circuit::CircuitImpl,
-        verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
+        verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     };
     use rand::{Rng, RngCore};
 
@@ -196,18 +196,31 @@ mod tests {
             let mut r_iop = ReadIOP::new(sha, &iop.proof);
             let verifier = MerkleTreeVerifier::new(&mut r_iop, rows, cols, queries);
             assert_eq!(verifier.root(), prover.root());
+            let mut err = false;
             for query in 0..queries {
                 let r_idx = (r_iop.next_u32() as usize) % rows;
                 if query == bad_query {
+                    if rows == 1 {
+                        assert!(false, "Cannot test for bad query if there is only one row");
+                    }
                     let r_idx = (r_idx + 1) % rows;
-                    verifier.verify(&mut r_iop, r_idx);
+                    let verification = verifier.verify(&mut r_iop, r_idx);
+                    match verification {
+                        Ok(_) => assert!(false, "Merkle tree wrongly passed verify when tested on the wrong row"),
+                        Err(VerificationError::InvalidProof) => {},
+                        Err(_) => assert!(false, "Merkle tree failed validation for an unexpected reason"),
+                    }
+                    err = true;
+                    break;
                 }
-                let col = verifier.verify(&mut r_iop, r_idx);
+                let col = verifier.verify(&mut r_iop, r_idx).unwrap();
                 for c_idx in 0..cols {
                     assert_eq!(col[c_idx], Fp::from((r_idx + c_idx * rows) as u32));
                 }
             }
-            r_iop.verify_complete();
+            if !err {
+                r_iop.verify_complete();
+            }
         }
     }
 
@@ -278,7 +291,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "The hash from `top` at idx")]
     fn merkle_cpu_2_1_1_bad_query() {
         // n.b. since we test bad queries by incrementing the row, we can't test for a
         // bad query with rows == 1
@@ -288,7 +300,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "The hash from `top` at idx")]
     fn merkle_cpu_4_4_2_bad_query() {
         let mut rng = rand::thread_rng();
         let sha = sha_cpu::Impl {};
@@ -300,12 +311,17 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected = "The hash from `top` at idx")]
     fn merkle_cpu_randomized_bad_query() {
         let mut rng = rand::thread_rng();
         let sha = sha_cpu::Impl {};
         let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
         let (rows, cols, queries) = randomize_sizes();
+        // At least two rows are required to test querying an incorrect row
+        let rows = if rows == 1 {
+            2
+        } else {
+            rows
+        };
         // Test a complete verification with a bad query
         let bad_query = rng.gen::<usize>() % queries;
         possibly_bad_verify(&sha, &hal, rows, cols, queries, bad_query, false);
