@@ -398,7 +398,7 @@ impl ExtElem {
         Self::from_u64(1)
     }
 
-    /// Returns the base field portion of an [Elem].
+    /// Returns the base field term of an [Elem].
     pub fn const_part(self) -> Elem {
         self.0[0]
     }
