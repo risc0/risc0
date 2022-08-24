@@ -284,12 +284,11 @@ fn mul(lhs: u64, rhs: u64) -> u64 {
     let med_shift = ((med as u64) << 32).wrapping_sub(med as u64);
     // Add in, if overflow, subtract a P
     let ret = ret.wrapping_add(med_shift);
-    let ret = if ret < med_shift || ret >= P {
+    if ret < med_shift || ret >= P {
         ret.wrapping_sub(P)
     } else {
         ret
-    };
-    ret
+    }
 }
 
 /// The size of the extension field (as number of elements).
