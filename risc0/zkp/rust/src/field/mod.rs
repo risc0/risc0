@@ -36,7 +36,7 @@ pub trait Elem:
     /// One, the multiplicative identity.
     const ONE: Self;
 
-    /// Compute the multiplicative inverse of `x`, or `1 / x` in finite field
+    /// Computes the multiplicative inverse of `x`, or `1 / x` in finite field
     /// terms.
     fn inv(self) -> Self;
 
@@ -59,7 +59,7 @@ pub trait Elem:
     fn random(rng: &mut impl rand::Rng) -> Self;
 }
 
-/// A field extensension.
+/// A polynomial field extension
 pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
     type SubElem: Elem;
 
@@ -69,17 +69,17 @@ pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
 }
 
 pub trait RootsOfUnity: Sized + 'static {
-    /// Maximum root of unity which is a power of 2, i.e. there is
-    /// 2^MAX_ROU_PO2th root of unity, but no 2^(MAX_ROU_PO2+1)th.
+    /// Maximum root of unity which is a power of 2 (i.e., there is
+    /// a 2^MAX_ROU_PO2th root of unity, but no 2^(MAX_ROU_PO2+1)th.
     const MAX_ROU_PO2: usize;
 
-    /// For each power of 2, what is the 'forward' root of unity for
+    /// For each power of 2, provides the 'forward' root of unity for
     /// the po2.  That is, this list satisfies ROU_FWD\[i+1\] ^ 2 =
-    /// ROU_FWD\[i\] in the prime field which implies ROU_FWD\[i\] ^
+    /// ROU_FWD\[i\] in the prime field, which implies ROU_FWD\[i\] ^
     /// (2 ^ i) = 1.
     const ROU_FWD: &'static [Self];
 
-    /// For each power of 2, what is the 'reverse' root of unity for
+    /// For each power of 2, provides the 'reverse' root of unity for
     /// the po2.  This list satisfies ROU_FWD\[i\] * ROU_REV\[i\] = 1
     /// in the prime field F_2013265921.
     const ROU_REV: &'static [Self];
@@ -122,7 +122,8 @@ pub mod test {
     where
         F: Into<u64> + From<u64> + Debug,
     {
-        // We do 128-bit arithmetic so we don't have to worry about overflows.
+        // For testng, we do 128-bit arithmetic so we don't have to worry about
+        // overflows.
         let p: u128 = p_u64 as _;
 
         assert_eq!(F::from(0), F::ZERO);
@@ -133,8 +134,8 @@ pub mod test {
         assert_eq!(F::ZERO.inv(), F::ZERO);
         assert_eq!(F::ONE.inv(), F::ONE);
 
-        // Compare against a bunch of numbers to make sure it matches
-        // with regular modulo arithmetic.
+        // Compare against many randomly generated numbers to make sure results match
+        // the expected results for regular modular arithmetic.
         let mut rng = rand::thread_rng();
 
         for _ in 0..1000 {
@@ -157,5 +158,6 @@ pub mod test {
     }
 }
 
-/// Fields available for use with zkp:
+/// The field extension for a field of order 15*2^27 + 1
+/// Notably, its elements may be added without overflowing a 32-bit word
 pub mod baby_bear;
