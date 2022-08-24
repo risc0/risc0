@@ -114,8 +114,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     // Now generate the check polynomial
     let domain = size * INV_RATE;
     let check_poly = hal.alloc_fp(EXT_SIZE * domain);
-    let mix = hal.copy_fp_from(circuit.get_mix());
-    let out = hal.copy_fp_from(circuit.get_output());
+    let mix = hal.copy_fp_from(H::from_baby_bear_fp_slice(circuit.get_mix()));
+    let out = hal.copy_fp_from(H::from_baby_bear_fp_slice(circuit.get_output()));
     eval.eval_check(
         &check_poly,
         &code_group.evaluated,
@@ -123,7 +123,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         &accum_group.evaluated,
         &mix,
         &out,
-        poly_mix,
+        H::from_baby_bear_fp4(poly_mix),
         po2 as usize,
         circuit.get_steps(),
     );
@@ -191,11 +191,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
             all_xs.push(x);
         }
         let which = hal.copy_u32_from(which.as_slice());
-        let xs = hal.copy_fp4_from(xs.as_slice());
+        let xs = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(xs.as_slice()));
         let out = hal.alloc_fp4(which.size());
         hal.batch_evaluate_any(&pg.coeffs, pg.count, &which, &xs, &out);
         out.view(|view| {
-            eval_u.extend(view);
+            eval_u.extend(H::to_baby_bear_fp4_slice(view));
         });
     };
 
@@ -227,10 +227,10 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let xs = [z4; CHECK_SIZE];
     let out = hal.alloc_fp4(CHECK_SIZE);
     let which = hal.copy_u32_from(which.as_slice());
-    let xs = hal.copy_fp4_from(xs.as_slice());
+    let xs = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(xs.as_slice()));
     hal.batch_evaluate_any(&check_group.coeffs, CHECK_SIZE, &which, &xs, &out);
     out.view(|view| {
-        coeff_u.extend(view);
+        coeff_u.extend(H::to_baby_bear_fp4_slice(view));
     });
 
     debug!("Size of U = {}", coeff_u.len());
@@ -246,7 +246,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     // Begin by making a zeroed output buffer
     let combo_count = taps.combos_size();
     let combos = vec![Fp4::ZERO; size * (combo_count + 1)];
-    let combos = hal.copy_fp4_from(combos.as_slice());
+    let combos = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(combos.as_slice()));
     let mut cur_mix = Fp4::ONE;
 
     let mut mix_group = |id: RegisterGroup, pg: &PolyGroup<H>| {
@@ -257,7 +257,13 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         let which_buf = hal.copy_u32_from(which.as_slice());
         let group_size = taps.group_size(id);
         hal.mix_poly_coeffs(
-            &combos, &cur_mix, &mix, &pg.coeffs, &which_buf, group_size, size,
+            &combos,
+            &H::from_baby_bear_fp4(cur_mix),
+            &H::from_baby_bear_fp4(mix),
+            &pg.coeffs,
+            &which_buf,
+            group_size,
+            size,
         );
         cur_mix *= mix.pow(group_size);
     };
@@ -270,8 +276,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let which_buf = hal.copy_u32_from(which.as_slice());
     hal.mix_poly_coeffs(
         &combos,
-        &cur_mix,
-        &mix,
+        &H::from_baby_bear_fp4(cur_mix),
+        &H::from_baby_bear_fp4(mix),
         &check_group.coeffs,
         &which_buf,
         CHECK_SIZE,
@@ -280,6 +286,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     // Load the near final coefficients back to the CPU
     combos.view_mut(|combos| {
+        let combos = H::to_baby_bear_fp4_slice_mut(combos);
         // Subtract the U coeffs from the combos
         let mut cur_pos = 0;
         let mut cur = Fp4::ONE;
@@ -342,7 +349,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
 fn make_coeffs<H: Hal>(hal: &H, input: &[Fp], count: usize) -> H::BufferFp {
     // Copy into accel buffer
-    let buf = hal.copy_fp_from(input);
+    let buf = hal.copy_fp_from(H::from_baby_bear_fp_slice(input));
     // Do interpolate
     hal.batch_interpolate_ntt(&buf, count);
     // Convert f(x) -> f(3x), which effective multiplies cofficent c_i by 3^i.

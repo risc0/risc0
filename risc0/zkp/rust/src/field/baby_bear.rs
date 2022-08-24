@@ -21,6 +21,15 @@ use bytemuck::{Pod, Zeroable};
 /// ! Support for the base finite field modulo 15*2^27 + 1
 use crate::field::{self, Elem as FieldElem};
 
+/// Definition of this field for operations that operate on the baby
+/// bear field and its 4th degree extension.
+pub struct BabyBear;
+
+impl field::Field for BabyBear {
+    type Elem = Elem;
+    type ExtElem = ExtElem;
+}
+
 // montgomery form constants
 const M: u32 = 0x88000001;
 const R2: u32 = 1172168163;
@@ -90,6 +99,10 @@ impl field::Elem for Elem {
         while val >= REJECT_CUTOFF {
             val = rng.gen();
         }
+        Elem::from(val)
+    }
+
+    fn from_u64(val: u64) -> Self {
         Elem::from(val)
     }
 }
@@ -344,6 +357,10 @@ impl field::Elem for ExtElem {
             a[1] * b2 - a[3] * b0,
         ])
     }
+
+    fn from_u64(val: u64) -> Self {
+        Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+    }
 }
 
 impl field::ExtElem for ExtElem {
@@ -353,6 +370,26 @@ impl field::ExtElem for ExtElem {
 
     fn from_subfield(elem: &Elem) -> Self {
         Self::from([elem.clone(), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+    }
+
+    fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self {
+        let mut iter = elems.into_iter();
+        let elem = Self::from([
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+        ]);
+        assert!(
+            iter.next().is_none(),
+            "Extra elements passed to create element in extension field"
+        );
+        elem
+    }
+
+    /// Returns the subelements of a [Elem].
+    fn subelems(&self) -> &[Elem] {
+        &self.0
     }
 }
 

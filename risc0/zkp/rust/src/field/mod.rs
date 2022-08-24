@@ -13,9 +13,16 @@
 // limitations under the License.
 
 // TODO: Document better
+
 //! Defines field extension (and base fields) used for finite field-based
 //! operations across the RISC Zero zkVM architecture
-use core::{cmp, ops};
+use core::{cmp, fmt::Debug, ops};
+
+/// A pair of fields, one of which is an extension field of the other.
+pub trait Field {
+    type Elem: Elem;
+    type ExtElem: ExtElem<SubElem = Self::Elem>;
+}
 
 /// Subfield elements that can be compared, copied, and operated
 /// on via multiplication, addition, and subtraction
@@ -31,6 +38,14 @@ pub trait Elem:
     + core::clone::Clone
     + core::marker::Copy
     + Sized
+    + bytemuck::Pod
+    + core::default::Default
+    + Clone
+    + Copy
+    + Send
+    + Sync
+    + Debug
+    + 'static
 {
     /// Zero, the additive identity.
     const ZERO: Self;
@@ -59,6 +74,9 @@ pub trait Elem:
 
     /// Returns a random valid field element.
     fn random(rng: &mut impl rand::Rng) -> Self;
+
+    /// Import a number into the field from the natural numbers.
+    fn from_u64(val: u64) -> Self;
 }
 
 /// A field extension which can be constructed from a subfield element [Elem]
@@ -69,6 +87,10 @@ pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
 
     /// Construct a field element
     fn from_subfield(elem: &Self::SubElem) -> Self;
+
+    fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self;
+
+    fn subelems(&self) -> &[Self::SubElem];
 }
 
 /// Roots of unity for the field whose elements are represented by [ExtElem] and
