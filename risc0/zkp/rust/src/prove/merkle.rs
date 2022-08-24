@@ -131,18 +131,11 @@ mod tests {
     use crate::{
         core::sha_cpu,
         hal::cpu::CpuHal,
-        test_circuit::CircuitImpl,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     };
     use rand::{Rng, RngCore};
 
-    use lazy_static::lazy_static;
-
     use super::*;
-
-    lazy_static! {
-        pub static ref CIRCUIT: CircuitImpl = CircuitImpl::new();
-    }
 
     fn init_prover<H: Hal>(
         hal: &H,
