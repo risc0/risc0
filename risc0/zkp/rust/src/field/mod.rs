@@ -16,7 +16,8 @@
 
 use core::{cmp, ops};
 
-/// A field with field elements.
+/// Subfield elements that can be compared, copied, and operated
+/// on via multiplication, addition, and subtraction
 pub trait Elem:
     ops::Mul<Output = Self>
     + ops::MulAssign
@@ -36,11 +37,11 @@ pub trait Elem:
     /// One, the multiplicative identity.
     const ONE: Self;
 
-    /// Compute the multiplicative inverse of `x`, or `1 / x` in finite field
-    /// terms.
+    /// Compute the multiplicative inverse of `x` (or `1 / x` in finite field
+    /// terms).
     fn inv(self) -> Self;
 
-    /// Returns this element raised to the given power.
+    /// Return an element raised to the given power.
     fn pow(self, exp: usize) -> Self {
         let mut n = exp;
         let mut tot = Self::ONE;
@@ -59,15 +60,18 @@ pub trait Elem:
     fn random(rng: &mut impl rand::Rng) -> Self;
 }
 
-/// A field extension.
+/// A field extension which can be constructed from a subfield element [Elem]
 pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
     type SubElem: Elem;
 
     const EXT_SIZE: usize;
 
+    /// Construct a field element
     fn from_subfield(elem: &Self::SubElem) -> Self;
 }
 
+/// Roots of unity for the field whose elements are represented by [ExtElem] and
+/// whose subfield elements are represented by [Elem]
 pub trait RootsOfUnity: Sized + 'static {
     /// Maximum root of unity which is a power of 2 (i.e., there is a
     /// 2^MAX_ROU_PO2th root of unity, but no 2^(MAX_ROU_PO2+1)th root.
@@ -117,7 +121,6 @@ pub mod test {
             }
         }
     }
-
     pub fn test_field_ops<F: Elem>(p_u64: u64)
     where
         F: Into<u64> + From<u64> + Debug,
