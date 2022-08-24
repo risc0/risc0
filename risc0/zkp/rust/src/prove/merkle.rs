@@ -245,7 +245,7 @@ mod tests {
     #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
     fn merkle_cpu_1_1_1_bad_row_access() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         bad_row_access(&sha, &hal, 1, 1, 1);
     }
 
@@ -253,7 +253,7 @@ mod tests {
     #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
     fn merkle_cpu_4_4_2_bad_row_access() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         bad_row_access(&sha, &hal, 4, 4, 2);
     }
 
@@ -261,7 +261,7 @@ mod tests {
     #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
     fn merkle_cpu_randomized_bad_row_access() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         let (rows, cols, queries) = randomize_sizes();
         bad_row_access(&sha, &hal, rows, cols, queries);
     }
@@ -269,7 +269,7 @@ mod tests {
     #[test]
     fn merkle_cpu_1_1_1_verify() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         // Test a complete verification with no bad queries (by setting bad_query out of
         // range)
         possibly_bad_verify(&sha, &hal, 1, 1, 1, 4, false);
@@ -278,7 +278,7 @@ mod tests {
     #[test]
     fn merkle_cpu_4_4_2_verify() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         // Test a complete verification with no bad queries (by setting bad_query out of
         // range)
         possibly_bad_verify(&sha, &hal, 4, 4, 2, 4, false);
@@ -287,7 +287,7 @@ mod tests {
     #[test]
     fn merkle_cpu_randomized_verify() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         for _rep in 0..100 {
             let (rows, cols, queries) = randomize_sizes();
             // Test a complete verification with no bad queries (by setting bad_query out of
@@ -301,7 +301,7 @@ mod tests {
         // n.b. since we test bad queries by incrementing the row, we can't test for a
         // bad query with rows == 1
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         possibly_bad_verify(&sha, &hal, 2, 1, 1, 0, false);
     }
 
@@ -309,7 +309,7 @@ mod tests {
     fn merkle_cpu_4_4_2_bad_query() {
         let mut rng = rand::thread_rng();
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         let queries = 2;
         // Test a complete verification with a bad query
         let bad_query = rng.gen::<usize>() % queries;
@@ -320,7 +320,7 @@ mod tests {
     fn merkle_cpu_randomized_bad_query() {
         let mut rng = rand::thread_rng();
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         let (rows, cols, queries) = randomize_sizes();
         // At least two rows are required to test querying an incorrect row
         let rows = if rows == 1 { 2 } else { rows };
@@ -333,7 +333,7 @@ mod tests {
     #[should_panic]
     fn merkle_cpu_1_1_1_verify_manipulated() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         for _rep in 0..50 {
             // Test a verification with a manipulated proof but no bad queries (by setting
             // bad_query out of range) Do this multiple times as the
@@ -346,7 +346,7 @@ mod tests {
     #[should_panic]
     fn merkle_cpu_4_4_2_verify_manipulated() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         for _rep in 0..50 {
             // Test a verification with a manipulated proof but no bad queries (by setting
             // bad_query out of range) Do this multiple times as the
@@ -359,7 +359,7 @@ mod tests {
     #[should_panic]
     fn merkle_cpu_randomized_verify_manipulated() {
         let sha = sha_cpu::Impl {};
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
+        let hal = CpuHal::new();
         for _rep in 0..50 {
             let (rows, cols, queries) = randomize_sizes();
             // Test a verification with a manipulated proof but no bad queries (by setting
