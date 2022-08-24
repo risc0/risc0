@@ -33,7 +33,7 @@ use crate::{
         sha::Sha,
     },
     field::Elem,
-    hal::{Buffer, Hal},
+    hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::{RegisterGroup, TapSet},
     CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2,
@@ -64,12 +64,17 @@ pub trait Circuit {
     fn get_steps(&self) -> usize;
 }
 
-pub fn prove_without_seal<H: Hal, S: Sha, C: Circuit>(_hal: &H, sha: &S, circuit: &mut C) {
+pub fn prove_without_seal<S: Sha, C: Circuit>(sha: &S, circuit: &mut C) {
     let mut iop = WriteIOP::new(sha);
     circuit.execute(&mut iop);
 }
 
-pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> Vec<u32> {
+pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
+    hal: &H,
+    sha: &S,
+    circuit: &mut C,
+    eval: &E,
+) -> Vec<u32> {
     let taps = circuit.get_taps();
     let code_size = taps.group_size(RegisterGroup::Code);
     let data_size = taps.group_size(RegisterGroup::Data);
@@ -111,8 +116,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit>(hal: &H, sha: &S, circuit: &mut C) -> V
     let check_poly = hal.alloc_fp(EXT_SIZE * domain);
     let mix = hal.copy_fp_from(circuit.get_mix());
     let out = hal.copy_fp_from(circuit.get_output());
-    hal.eval_check(
-        "rv32im",
+    eval.eval_check(
         &check_poly,
         &code_group.evaluated,
         &data_group.evaluated,
