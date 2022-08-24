@@ -598,7 +598,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native_add_easy() {
+    fn check_addition_small_values() {
         // Test addition when 0 < a + b < P
         let fa = Elem::from(2u64);
         let fb = Elem::from(2u64);
@@ -608,7 +608,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native_add_subfield_wrap() {
+    fn check_addition_subfield_wrap() {
         // Test for addition when P < a + b < 2^64
         let fa = Elem::from(P - 2u64);
         let fb = Elem::from(5u64);
@@ -618,7 +618,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native_add_u64_wrap() {
+    fn check_addition_u64_wrap() {
         // Test for addition when 0 < (a + b) mod 2^64 < P
         let fa = Elem::from(P - 1u64);
         let fb = Elem::from(P - 1u64);
@@ -631,7 +631,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native_subtraction_easy() {
+    fn check_subtraction_small_values() {
         // 0 < a - b < P  (when a > b)
         let fa: Elem = Elem::from(P - 2u64);
         let fb: Elem = Elem::from(3u64);
@@ -644,7 +644,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native_subtraction_negative_result() {
+    fn check_subtraction_u64_wrap() {
         // Checks subtraction for `a-b` when P < (a - b) mod 2^64 < 2^64
         // (when b < a, but a - b doesn't wrap all the way into our field)
         let fa: Elem = Elem::from(1u64);
@@ -661,7 +661,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native_subtraction_prime_boundary() {
+    fn check_subtraction_subfield_wrap() {
         // Unlike baby bear, in which addition can't overflow a u64,
         // here A + (P - B) is greater than 2^64,
         // so this checks which modulus is being respected when
@@ -680,7 +680,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native_multiplication_easy() {
+    fn check_multiplication_small_values() {
         // 0 < a * b < P
         // Simple case of o u64 overflow
         let fa = Elem::from(2u64);
@@ -697,7 +697,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native_multiplication_subfield_wrap() {
+    fn check_multiplication_subfield_wrap() {
         // P < a * b < 2^64
         // We expect the result mod P, but there's no u64 overflow
         let fa = Elem::from(2u64 ^ 30);
@@ -714,7 +714,7 @@ mod tests {
     }
 
     #[test]
-    fn compare_native() {
+    fn compare_core_operations_to_simple_mod_operations() {
         // Compare core operations against simple % P implementations
         let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
         for _ in 0..1000 {
