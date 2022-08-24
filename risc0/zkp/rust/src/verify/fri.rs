@@ -26,7 +26,7 @@ use crate::{
         sha::Sha,
     },
     field::Elem,
-    verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
+    verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
 
@@ -65,11 +65,16 @@ impl VerifyRoundInfo {
         }
     }
 
-    pub fn verify_query<S: Sha>(&mut self, iop: &mut ReadIOP<S>, pos: &mut usize, goal: &mut Fp4) {
+    pub fn verify_query<S: Sha>(
+        &mut self,
+        iop: &mut ReadIOP<S>,
+        pos: &mut usize,
+        goal: &mut Fp4,
+    ) -> Result<(), VerificationError> {
         let quot = *pos / self.domain;
         let group = *pos % self.domain;
         // Get the column data
-        let data = self.merkle.verify(iop, group);
+        let data = self.merkle.verify(iop, group)?;
         let mut data4 = vec![];
         for i in 0..FRI_FOLD {
             data4.push(Fp4::new(
@@ -80,16 +85,23 @@ impl VerifyRoundInfo {
             ));
         }
         // Check the existing goal
-        assert_eq!(data4[quot], *goal);
+        if data4[quot] != *goal {
+            return Err(VerificationError::InvalidProof);
+        }
         // Compute the new goal + pos
         *goal = fold_eval(&mut data4, self.mix, self.domain, group);
         *pos = group;
+        Ok(())
     }
 }
 
-pub fn fri_verify<S: Sha, F>(iop: &mut ReadIOP<S>, mut degree: usize, mut inner: F)
+pub fn fri_verify<S: Sha, F>(
+    iop: &mut ReadIOP<S>,
+    mut degree: usize,
+    mut inner: F,
+) -> Result<(), VerificationError>
 where
-    F: FnMut(&mut ReadIOP<S>, usize) -> Fp4,
+    F: FnMut(&mut ReadIOP<S>, usize) -> Result<Fp4, VerificationError>,
 {
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
@@ -112,10 +124,10 @@ where
         let rng = iop.next_u32();
         let mut pos = rng as usize % orig_domain;
         // Do the 'inner' verification for this index
-        let mut goal = inner(iop, pos);
+        let mut goal = inner(iop, pos)?;
         // Verify the per-round proofs
         for round in &mut rounds {
-            round.verify_query(iop, &mut pos, &mut goal);
+            round.verify_query(iop, &mut pos, &mut goal)?;
         }
         // Do final verification
         let x = gen.pow(pos);
@@ -131,6 +143,9 @@ where
             fx += cur * coeff;
             cur *= x;
         }
-        assert_eq!(fx, goal)
+        if fx != goal {
+            return Err(VerificationError::InvalidProof);
+        }
     }
+    Ok(())
 }
