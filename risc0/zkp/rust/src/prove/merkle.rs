@@ -206,9 +206,15 @@ mod tests {
                     let r_idx = (r_idx + 1) % rows;
                     let verification = verifier.verify(&mut r_iop, r_idx);
                     match verification {
-                        Ok(_) => assert!(false, "Merkle tree wrongly passed verify when tested on the wrong row"),
-                        Err(VerificationError::InvalidProof) => {},
-                        Err(_) => assert!(false, "Merkle tree failed validation for an unexpected reason"),
+                        Ok(_) => assert!(
+                            false,
+                            "Merkle tree wrongly passed verify when tested on the wrong row"
+                        ),
+                        Err(VerificationError::InvalidProof) => {}
+                        Err(_) => assert!(
+                            false,
+                            "Merkle tree failed validation for an unexpected reason"
+                        ),
                     }
                     err = true;
                     break;
@@ -317,11 +323,7 @@ mod tests {
         let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
         let (rows, cols, queries) = randomize_sizes();
         // At least two rows are required to test querying an incorrect row
-        let rows = if rows == 1 {
-            2
-        } else {
-            rows
-        };
+        let rows = if rows == 1 { 2 } else { rows };
         // Test a complete verification with a bad query
         let bad_query = rng.gen::<usize>() % queries;
         possibly_bad_verify(&sha, &hal, rows, cols, queries, bad_query, false);
