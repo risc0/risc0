@@ -91,9 +91,9 @@ macro_rules! rou_array {
     }
 }
 
-/// Maximum power of two for which we have a root of unity using Goldilocks
-/// field
 impl field::RootsOfUnity for Elem {
+    /// Maximum power of two for which we have a root of unity using Goldilocks
+    /// field
     const MAX_ROU_PO2: usize = 32;
 
     const ROU_FWD: &'static [Elem] = &rou_array![
