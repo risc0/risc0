@@ -554,7 +554,7 @@ mod tests {
 
     #[test]
     fn isa_field() {
-        // Generate three extended field elements using randomly generated base field
+        // Generate three field extension elements using randomly generated base field
         // values, and verify they meet the requirements of a field.
         let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
         for _ in 0..1_000 {
