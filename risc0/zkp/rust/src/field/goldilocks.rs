@@ -51,7 +51,7 @@ impl Default for Elem {
 /// 2. Left-shift ones over by 32, leaving 32 ones and 32 zeros (2^64-2^32)
 /// 3. Add one to get 2^64 - 2^32 + 1
 
-const P: u64 = (0u64.wrapping_sub(1) << 32) + 1;
+const P: u64 = (0xffffffff_ffffffff << 32) + 1;
 // TODO: Vestigial, should be improved on generic implementation
 const P_U64: u64 = P;
 
