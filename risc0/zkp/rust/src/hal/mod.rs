@@ -90,17 +90,18 @@ pub trait Hal {
     fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferFp);
 
     fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize);
+}
 
+pub trait EvalCheck<H: Hal> {
     /// Compute check polynomial.
     fn eval_check(
         &self,
-        circuit: &str,
-        check: &Self::BufferFp,
-        code: &Self::BufferFp,
-        data: &Self::BufferFp,
-        accum: &Self::BufferFp,
-        mix: &Self::BufferFp,
-        out: &Self::BufferFp,
+        check: &H::BufferFp,
+        code: &H::BufferFp,
+        data: &H::BufferFp,
+        accum: &H::BufferFp,
+        mix: &H::BufferFp,
+        out: &H::BufferFp,
         poly_mix: Fp4,
         po2: usize,
         steps: usize,
