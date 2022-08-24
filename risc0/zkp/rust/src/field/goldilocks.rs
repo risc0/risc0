@@ -70,7 +70,7 @@ impl field::Elem for Elem {
         self.pow((P - 2) as usize)
     }
 
-    /// Generate a random value within our Goldilocks field
+    /// Generate a random value within the Goldilocks field
     fn random(rng: &mut impl rand::Rng) -> Self {
         // The range of possible RNG-generated u64 integers includes an uneven region
         // modulo P. We want to reject u64 values from this region because, if
@@ -96,6 +96,7 @@ impl field::RootsOfUnity for Elem {
     /// field
     const MAX_ROU_PO2: usize = 32;
 
+    /// 'Forward' root of unity for each power of two.
     const ROU_FWD: &'static [Elem] = &rou_array![
         1,
         18446744069414584320,
@@ -132,6 +133,7 @@ impl field::RootsOfUnity for Elem {
         1753635133440165772,
     ];
 
+    /// 'Reverse' root of unity for each power of two.
     const ROU_REV: &'static [Elem] = &rou_array![
         1,
         18446744069414584320,
@@ -178,14 +180,14 @@ impl Elem {
 
 impl ops::Add for Elem {
     type Output = Self;
-    /// Addition for Goldilocks field elements [Elem]
+    /// Addition for Goldilocks field [Elem]
     fn add(self, rhs: Self) -> Self {
         Elem(add(self.0, rhs.0))
     }
 }
 
 impl ops::AddAssign for Elem {
-    /// Simple addition case for Goldilocks field elements [Elem]
+    /// Simple addition case for Goldilocks field [Elem]
     fn add_assign(&mut self, rhs: Self) {
         self.0 = add(self.0, rhs.0)
     }
@@ -193,14 +195,14 @@ impl ops::AddAssign for Elem {
 
 impl ops::Sub for Elem {
     type Output = Self;
-    /// Subtraction for Goldilocks field elements [Elem]
+    /// Subtraction for Goldilocks field [Elem]
     fn sub(self, rhs: Self) -> Self {
         Elem(sub(self.0, rhs.0))
     }
 }
 
 impl ops::SubAssign for Elem {
-    /// Simple subtraction case for Goldilocks [Elem]
+    /// Simple subtraction case for Goldilocks field [Elem]
     fn sub_assign(&mut self, rhs: Self) {
         self.0 = sub(self.0, rhs.0)
     }
@@ -208,14 +210,14 @@ impl ops::SubAssign for Elem {
 
 impl ops::Mul for Elem {
     type Output = Self;
-    /// Multiplication for Goldilocks [Elem]
+    /// Multiplication for Goldilocks field [Elem]
     fn mul(self, rhs: Self) -> Self {
         Elem(mul(self.0, rhs.0))
     }
 }
 
 impl ops::MulAssign for Elem {
-    /// Simple multiplication case for Goldilocks [Elem]
+    /// Simple multiplication case for Goldilocks field [Elem]
     fn mul_assign(&mut self, rhs: Self) {
         self.0 = mul(self.0, rhs.0)
     }
@@ -223,7 +225,7 @@ impl ops::MulAssign for Elem {
 
 impl ops::Neg for Elem {
     type Output = Self;
-    /// Negation for Goldilocks [Elem]
+    /// Negation for Goldilocks field [Elem]
     fn neg(self) -> Self {
         Elem(0) - self
     }
@@ -247,7 +249,7 @@ impl From<u64> for Elem {
     }
 }
 
-/// Wrapping addition of [Elem] using Goldilocks prime modulus
+/// Wrapping addition of [Elem] using Goldilocks field modulus
 fn add(lhs: u64, rhs: u64) -> u64 {
     let x = lhs.wrapping_add(rhs);
     // If we're above P or have done a u64::MAX modulus
@@ -258,13 +260,13 @@ fn add(lhs: u64, rhs: u64) -> u64 {
     }
 }
 
-/// Wrapping subtraction of [Elem] using Goldilocks prime
+/// Wrapping subtraction of [Elem] using Goldilocks field modulus
 fn sub(lhs: u64, rhs: u64) -> u64 {
     let x = lhs.wrapping_sub(rhs);
     return if x > lhs { x.wrapping_add(P) } else { x };
 }
 
-/// Wrapping multiplication of [Elem] using Goldilocks prime
+/// Wrapping multiplication of [Elem] using Goldilocks field modulus
 fn mul(lhs: u64, rhs: u64) -> u64 {
     // To prevent u64 overflow, we first perform with u128
     let prod: u128 = (lhs as u128).wrapping_mul(rhs as u128);
@@ -373,12 +375,12 @@ const BETA: Elem = Elem::new(11u64);
 const NBETA: Elem = Elem::new(P - 11);
 
 impl ExtElem {
-    /// Explicitly construct a field element [ExtElem] from parts.
+    /// Explicitly construct an [ExtElem] from parts.
     pub fn new(x0: Elem, x1: Elem) -> Self {
         Self([x0, x1])
     }
 
-    /// Create a [ExtElem] from a [Elem].
+    /// Create a [ExtElem] from an [Elem].
     pub fn from_fp(x: Elem) -> Self {
         Self([x, Elem::new(0)])
     }
@@ -388,22 +390,22 @@ impl ExtElem {
         Self([Elem::new(x0), Elem::new(0)])
     }
 
-    /// Returns the value zero.
+    /// Return the value zero.
     const fn zero() -> Self {
         Self::from_u64(0)
     }
 
-    /// Returns the value one.
+    /// Return the value one.
     const fn one() -> Self {
         Self::from_u64(1)
     }
 
-    /// Returns the base field term of an [Elem].
+    /// Return the base field term of an [Elem].
     pub fn const_part(self) -> Elem {
         self.0[0]
     }
 
-    /// Returns [Elem] as a vector of base field values.
+    /// Return [Elem] as a vector of base field values.
     pub fn elems(&self) -> &[Elem] {
         &self.0
     }
@@ -411,7 +413,7 @@ impl ExtElem {
 
 impl ops::Add for ExtElem {
     type Output = Self;
-    /// Addition for [ExtElem]
+    /// Addition for Goldilocks [ExtElem]
     fn add(self, rhs: Self) -> Self {
         let mut lhs = self;
         lhs += rhs;
@@ -420,7 +422,7 @@ impl ops::Add for ExtElem {
 }
 
 impl ops::AddAssign for ExtElem {
-    /// Simple addition case for [ExtElem]
+    /// Simple addition case for Goldilocks [ExtElem]
     fn add_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
             self.0[i] += rhs.0[i];
@@ -431,7 +433,7 @@ impl ops::AddAssign for ExtElem {
 impl ops::Sub for ExtElem {
     type Output = Self;
 
-    /// Subtraction for [ExtElem]
+    /// Subtraction for Goldilocks [ExtElem]
     fn sub(self, rhs: Self) -> Self {
         let mut lhs = self;
         lhs -= rhs;
@@ -440,7 +442,7 @@ impl ops::Sub for ExtElem {
 }
 
 impl ops::SubAssign for ExtElem {
-    /// Simple subtraction case for [ExtElem]
+    /// Simple subtraction case for Goldilocks [ExtElem]
     fn sub_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
             self.0[i] -= rhs.0[i];
@@ -459,7 +461,7 @@ impl ops::Mul<Elem> for ExtElem {
 }
 
 impl ops::MulAssign<Elem> for ExtElem {
-    /// Simple multiplication case for [ExtElem]
+    /// Simple multiplication case for Goldilocks [ExtElem]
     fn mul_assign(&mut self, rhs: Elem) {
         for i in 0..self.0.len() {
             self.0[i] *= rhs;
@@ -469,7 +471,7 @@ impl ops::MulAssign<Elem> for ExtElem {
 
 impl ops::Mul<ExtElem> for Elem {
     type Output = ExtElem;
-    /// Multiplication of [Elem] by [ExtElem]
+    /// Multiplication of [Elem] by Goldilocks [ExtElem]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         rhs * self
     }
@@ -480,7 +482,7 @@ impl ops::Mul<ExtElem> for Elem {
 // could write this as a double loop with conditionals and hope it gets unrolled
 // properly, but it's small enough to hand write.
 impl ops::MulAssign for ExtElem {
-    /// Simple multiplication case for [ExtElem]
+    /// Simple multiplication case for Goldilocks [ExtElem]
     fn mul_assign(&mut self, rhs: Self) {
         // Rename the element arrays to something small for readability.
         let a = &self.0;
@@ -491,7 +493,7 @@ impl ops::MulAssign for ExtElem {
 
 impl ops::Mul for ExtElem {
     type Output = ExtElem;
-    /// Multiplication for [ExtElem]
+    /// Multiplication for Goldilocks [ExtElem]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         let mut lhs = self;
         lhs *= rhs;
@@ -501,7 +503,7 @@ impl ops::Mul for ExtElem {
 
 impl ops::Neg for ExtElem {
     type Output = Self;
-    /// Unary negation for [ExtElem]
+    /// Unary negation for Goldilocks [ExtElem]
     fn neg(self) -> Self {
         ExtElem::ZERO - self
     }

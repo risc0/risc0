@@ -59,7 +59,7 @@ pub trait Elem:
     fn random(rng: &mut impl rand::Rng) -> Self;
 }
 
-/// A field extensension.
+/// A field extension.
 pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
     type SubElem: Elem;
 
@@ -69,17 +69,17 @@ pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
 }
 
 pub trait RootsOfUnity: Sized + 'static {
-    /// Maximum root of unity which is a power of 2, i.e. there is
-    /// 2^MAX_ROU_PO2th root of unity, but no 2^(MAX_ROU_PO2+1)th.
+    /// Maximum root of unity which is a power of 2 (i.e., there is a
+    /// 2^MAX_ROU_PO2th root of unity, but no 2^(MAX_ROU_PO2+1)th root.
     const MAX_ROU_PO2: usize;
 
-    /// For each power of 2, what is the 'forward' root of unity for
+    /// For each power of 2, the 'forward' root of unity for
     /// the po2.  That is, this list satisfies ROU_FWD\[i+1\] ^ 2 =
-    /// ROU_FWD\[i\] in the prime field which implies ROU_FWD\[i\] ^
+    /// ROU_FWD\[i\] in the prime field, which implies ROU_FWD\[i\] ^
     /// (2 ^ i) = 1.
     const ROU_FWD: &'static [Self];
 
-    /// For each power of 2, what is the 'reverse' root of unity for
+    /// For each power of 2, the 'reverse' root of unity for
     /// the po2.  This list satisfies ROU_FWD\[i\] * ROU_REV\[i\] = 1
     /// in the prime field F_2013265921.
     const ROU_REV: &'static [Self];
@@ -157,6 +157,9 @@ pub mod test {
     }
 }
 
-/// Fields available for use with zkp:
+/// The field extension whose subfield is order 15*2^27 + 1;
+/// this field choice allows 32-bit addition without overflow
 pub mod baby_bear;
+/// The field extension whose subfield is order 2^64 - 2^32 + 1;
+/// this field choice allows for fast reduction
 pub mod goldilocks;
