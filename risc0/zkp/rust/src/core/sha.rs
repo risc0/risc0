@@ -148,10 +148,12 @@ pub trait Sha: Clone + Debug {
     /// implementation wants to manage its own memory.
     type DigestPtr: Deref<Target = Digest> + Debug;
 
-    /// Generate a SHA from a slice of bytes.
+    /// Generate a SHA from a slice of bytes, padding to block size
+    /// and adding the SHA trailer.
     fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr;
 
-    /// Generate a SHA from a slice of words.
+    /// Generate a SHA from a slice of words, padding to block size
+    /// and adding the SHA trailer.
     fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
@@ -163,11 +165,10 @@ pub trait Sha: Clone + Debug {
     /// Generate a SHA from a pair of [Digests](Digest).
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr;
 
-    /// Generate a SHA from a slice of [Fps](Fp).
-    fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr;
-
-    /// Generate a SHA from a slice of [Fp4s](Fp4).
-    fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr;
+    /// Generate a SHA from a slice of anything that can be
+    /// represented as plain old data.  Pads up to the Sha block
+    /// boundry, but does not add the standard SHA trailer.
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, fps: &[T]) -> Self::DigestPtr;
 
     /// Generate a new digest by mixing two digests together via XOR,
     /// and storing into the first digest.
@@ -257,7 +258,7 @@ pub mod testutil {
 
     fn hash_fpvec<S: Sha>(sha: &S, len: usize) -> Digest {
         let items: Vec<Fp> = (0..len as u32).into_iter().map(|x| Fp::new(x)).collect();
-        *sha.hash_fps(items.as_slice())
+        *sha.hash_raw_pod_slice(items.as_slice())
     }
 
     fn hash_fp4vec<S: Sha>(sha: &S, len: usize) -> Digest {
@@ -272,7 +273,7 @@ pub mod testutil {
                 )
             })
             .collect();
-        *sha.hash_fp4s(items.as_slice())
+        *sha.hash_raw_pod_slice(items.as_slice())
     }
 
     fn test_fps<S: Sha>(sha: &S) {

@@ -14,7 +14,7 @@
 
 //! Simple wrappers for a CPU-based SHA-256 implementation.
 
-use alloc::{boxed::Box, vec, vec::Vec};
+use alloc::{boxed::Box, vec::Vec};
 use core::slice;
 
 use sha2::{
@@ -23,11 +23,7 @@ use sha2::{
     Digest as ShaDigest, Sha256,
 };
 
-use super::{
-    fp::Fp,
-    fp4::Fp4,
-    sha::{Digest, Sha, DIGEST_WORDS},
-};
+use super::sha::{Digest, Sha, DIGEST_WORDS};
 
 static INIT_256: [u32; DIGEST_WORDS] = [
     0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
@@ -42,22 +38,37 @@ fn set_word(buf: &mut [u8], idx: usize, word: u32) {
 }
 
 impl Impl {
-    /// Compute the hash of an array of [Fp]s using the specified stride.
-    pub fn hash_fps_stride(
+    /// Compute the hash of a slice of plain-old-data using the
+    /// specified offset and stride.  'size' specifies the number of
+    /// elements to hash.
+    pub fn hash_pod_stride<T: bytemuck::Pod>(
         &self,
-        fps: &[Fp],
+        pods: &[T],
         offset: usize,
         size: usize,
         stride: usize,
     ) -> Box<Digest> {
         let mut state = INIT_256;
         let mut block: GenericArray<u8, U64> = GenericArray::default();
+
+        let mut u8s = pods
+            .iter()
+            .skip(offset)
+            .step_by(stride)
+            .take(size)
+            .flat_map(|pod| bytemuck::cast_slice(slice::from_ref(pod)) as &[u8])
+            .cloned()
+            .fuse();
+
         let mut off = 0;
-        for i in 0..size {
+        while let Some(b1) = u8s.next() {
+            let b2 = u8s.next().unwrap_or(0);
+            let b3 = u8s.next().unwrap_or(0);
+            let b4 = u8s.next().unwrap_or(0);
             set_word(
                 block.as_mut_slice(),
                 off,
-                fps[offset + i * stride].as_u32_montgomery(),
+                u32::from_le_bytes([b1, b2, b3, b4]),
             );
             off += 1;
             if off == 16 {
@@ -112,18 +123,21 @@ impl Sha for Impl {
         Box::new(Digest::new(state))
     }
 
-    fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
-        self.hash_fps_stride(fps, 0, fps.len(), 1)
-    }
-
-    fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr {
-        let mut flat: Vec<Fp> = vec![];
-        for i in 0..fp4s.len() {
-            for j in 0..4 {
-                flat.push(fp4s[i].elems()[j]);
-            }
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, pod: &[T]) -> Self::DigestPtr {
+        let u8s: &[u8] = bytemuck::cast_slice(pod);
+        let mut state = INIT_256;
+        let mut blocks = u8s.chunks_exact(64);
+        for block in blocks.by_ref() {
+            compress256(&mut state, slice::from_ref(GenericArray::from_slice(block)));
         }
-        return self.hash_fps(&flat);
+        let remainder = blocks.remainder();
+        if remainder.len() > 0 {
+            let mut last_block: GenericArray<u8, U64> = GenericArray::default();
+            bytemuck::cast_slice_mut(last_block.as_mut_slice())[..remainder.len()]
+                .clone_from_slice(remainder);
+            compress256(&mut state, slice::from_ref(&last_block));
+        }
+        Box::new(Digest::new(state))
     }
 
     // Digest two digest into one
