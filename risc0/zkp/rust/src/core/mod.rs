@@ -21,17 +21,17 @@ extern crate alloc;
 
 use rand::Rng;
 
-/// This transitional "fp" module will remain until ZKP has been genericized to
-/// work with multiple fields. This module includes the field extension whose
-/// base field is of order 15*2^27 + 1.
+/// This transitional "fp4" module will remain until ZKP has been genericized to
+/// work with multiple fields. This module includes the base field of order
+/// 15*2^27 + 1).
 ///
 /// # Example
 pub mod fp {
     pub use crate::field::baby_bear::Elem as Fp;
 }
 /// This transitional "fp4" module will remain until ZKP has been genericized to
-/// work with multiple fields. This module includes the base field of order
-/// 15*2^27 + 1).
+/// work with multiple fields. This module includes the field extension whose
+/// base field is of order 15*2^27 + 1.
 pub mod fp4 {
     pub use crate::field::baby_bear::ExtElem as Fp4;
     use crate::field::ExtElem;
