@@ -90,10 +90,12 @@ impl Risc0Method {
         let elf_path = self.elf_path.display();
         let upper = self.name.to_uppercase();
         let method_id = self.make_method_id(code_limit);
+        let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
             r##"
 pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
 pub const {upper}_ID: &'static [u8] = &{method_id:?};
+pub const {upper}_CONTENTS: &'static [u8] = &{elf_contents:?};
             "##
         )
     }
