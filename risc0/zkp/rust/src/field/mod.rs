@@ -13,7 +13,8 @@
 // limitations under the License.
 
 // TODO: Document better
-
+//! Defines field extension (and base fields) used for finite field-based
+//! operations across the RISC Zero zkVM architecture
 use core::{cmp, ops};
 
 /// Subfield elements that can be compared, copied, and operated
@@ -125,7 +126,8 @@ pub mod test {
     where
         F: Into<u64> + From<u64> + Debug,
     {
-        // We do 128-bit arithmetic so we don't have to worry about overflows.
+        // For testng, we do 128-bit arithmetic so we don't have to worry about
+        // overflows.
         let p: u128 = p_u64 as _;
 
         assert_eq!(F::from(0), F::ZERO);
@@ -136,8 +138,8 @@ pub mod test {
         assert_eq!(F::ZERO.inv(), F::ZERO);
         assert_eq!(F::ONE.inv(), F::ONE);
 
-        // Compare against a bunch of numbers to make sure it matches
-        // with regular modulo arithmetic.
+        // Compare against many randomly generated numbers to make sure results match
+        // the expected results for regular modular arithmetic.
         let mut rng = rand::thread_rng();
 
         for _ in 0..1000 {

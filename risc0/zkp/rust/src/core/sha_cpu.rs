@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Simple SHA-256 wrappers.
+//! Simple wrappers for a CPU-based SHA-256 implementation.
 
 use alloc::{boxed::Box, vec, vec::Vec};
 use core::slice;
