@@ -148,7 +148,7 @@ mod tests {
         let size: u32 = (rows * cols) as u32;
         let mut data = Vec::<Fp>::new();
         for val in 0..size {
-            data.push(Fp::from(val));
+            data.push(Fp::from((u32::MAX / 2) - val));
         }
         let matrix = hal.copy_fp_from(H::from_baby_bear_fp_slice(data.as_slice()));
 
@@ -178,7 +178,7 @@ mod tests {
             let r_idx = (iop.rng.next_u32() as usize) % rows;
             let col = prover.prove(&mut iop, r_idx);
             for c_idx in 0..cols {
-                assert_eq!(col[c_idx], Fp::from((r_idx + c_idx * rows) as u32));
+                assert_eq!(col[c_idx], Fp::from((u32::MAX / 2) - ((r_idx + c_idx * rows) as u32)));
             }
         }
         {
@@ -215,7 +215,7 @@ mod tests {
                 }
                 let col = verifier.verify(&mut r_iop, r_idx).unwrap();
                 for c_idx in 0..cols {
-                    assert_eq!(col[c_idx], Fp::from((r_idx + c_idx * rows) as u32));
+                    assert_eq!(col[c_idx], Fp::from((u32::MAX / 2) - ((r_idx + c_idx * rows) as u32)));
                 }
             }
             if !err {
