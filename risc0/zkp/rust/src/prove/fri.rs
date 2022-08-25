@@ -19,11 +19,11 @@ use rand::RngCore;
 
 use crate::{
     core::{
-        fp4::{Fp4, EXT_SIZE},
+        fp4::EXT_SIZE,
         log2_ceil,
         sha::Sha,
     },
-    field::Elem,
+    field::{self, Elem},
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
@@ -66,11 +66,11 @@ impl<H: Hal> ProveRoundInfo<H> {
         // Send the merkle tree (as a commitment) to the virtual IOP verifier
         merkle.commit(hal, iop);
         // Retrieve from the IOP verifier a random value to mix the polynomial slices.
-        let fold_mix = Fp4::random(&mut iop.rng);
+        let fold_mix = <H::Field as field::Field>::ExtElem::random(&mut iop.rng);
         // Create a buffer to hold the mixture of slices.
         let out_coeffs = hal.alloc_fp(size / FRI_FOLD * EXT_SIZE);
         // Compute the folded polynomial
-        hal.fri_fold(&out_coeffs, coeffs, &H::from_baby_bear_fp4(fold_mix));
+        hal.fri_fold(&out_coeffs, coeffs, &fold_mix);
         ProveRoundInfo {
             domain,
             coeffs: out_coeffs,
