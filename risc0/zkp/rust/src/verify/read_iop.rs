@@ -50,21 +50,23 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
 
     pub fn read_fps(&mut self, x: &mut [Fp]) {
         for i in 0..x.len() {
-            x[i] = Fp::from(self.proof[i]);
+            x[i] = Fp::from(self.proof[2*i]);
+            // Ignore the odd-numbered values, which will be 0 for baby-bear
         }
-        self.proof = &self.proof[x.len()..];
+        self.proof = &self.proof[2*x.len()..];
     }
 
     pub fn read_fp4s(&mut self, x: &mut [Fp4]) {
+        // TODO: This isn't a good approach for the general field, should work for baby-bear
         for i in 0..x.len() {
             x[i] = Fp4::new(
-                Fp::from(self.proof[4 * i + 0]),
-                Fp::from(self.proof[4 * i + 1]),
-                Fp::from(self.proof[4 * i + 2]),
-                Fp::from(self.proof[4 * i + 3]),
+                Fp::from(self.proof[8 * i + 0]),
+                Fp::from(self.proof[8 * i + 2]),
+                Fp::from(self.proof[8 * i + 4]),
+                Fp::from(self.proof[8 * i + 6]),
             )
         }
-        self.proof = &self.proof[4 * x.len()..];
+        self.proof = &self.proof[8 * x.len()..];
     }
 
     pub fn read_digests(&mut self, x: &mut [Digest]) {

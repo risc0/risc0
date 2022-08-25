@@ -53,8 +53,8 @@ impl<S: Sha> WriteIOP<S> {
     pub fn write_fp_slice(&mut self, slice: &[Fp]) {
         self.proof.extend(slice.iter().map(|x| {
             let x: u32 = x.into();
-            x
-        }));
+            [x, 0]
+        }).flatten());
     }
 
     /// Called by the prover to write some data.
