@@ -35,6 +35,8 @@ constexpr uint32_t kSendRecvChannel_InitialInput = 0;
 constexpr uint32_t kSendRecvChannel_Stdout = 1;
 // Write bytes to standard error
 constexpr uint32_t kSendRecvChannel_Stderr = 2;
+// Request aux tape to the guest
+constexpr uint32_t kSendRecvChannel_InitialInputAux = 3;
 
 // To invoke accelerated SHA, the guest writes ShaDescriptor structs
 // in sequence to the "SHA" memory region.  Once the ShaDescriptor has

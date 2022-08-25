@@ -102,6 +102,13 @@ extern "C" {
         len: usize,
     );
 
+    pub(crate) fn risc0_prover_add_aux_input(
+        err: *mut RawError,
+        prover: *mut RawProver,
+        buf: *const u8,
+        len: usize,
+    );
+
     pub(crate) fn risc0_prover_get_output_buf(
         err: *mut RawError,
         prover: *mut RawProver,
@@ -386,6 +393,29 @@ impl<'a> Prover<'a> {
             )
         };
         check(err, || ())
+    }
+
+    /// Provide private input data that is availble to guest-side method code
+    /// to 'read_aux_input'.
+    pub fn add_aux_input(&mut self, slice: &[u32]) -> super::Result<()> {
+        let mut err = RawError::default();
+        unsafe {
+            risc0_prover_add_aux_input(
+                &mut err,
+                self.ptr,
+                slice.as_ptr().cast(),
+                slice.len() * mem::size_of::<u32>(),
+            )
+        };
+        check(err, || ())
+    }
+
+    /// Allow auxiliary input to be passed in as u8 with zero-copy framework
+    pub fn add_input_u8_slice_aux(&mut self, slice: &[u8]) {
+        let mut v: Vec<u32> = Vec::new();
+        v.resize((slice.len() + 3) / 4, 0);
+        bytemuck::cast_slice_mut(v.as_mut_slice())[..slice.len()].clone_from_slice(slice);
+        self.add_aux_input(v.as_slice()).unwrap()
     }
 
     /// Compatibility with pure-rust prover

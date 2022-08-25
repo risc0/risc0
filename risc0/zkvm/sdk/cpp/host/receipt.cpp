@@ -63,6 +63,7 @@ struct Prover::Impl : public IoHandler {
       , outputStream(outputBuffer)
       , commitStream(commitBuffer)
       , inputWriter(inputStream)
+      , inputWriterAux(inputStreamAux)
       , outputReader(outputStream)
       , commitReader(commitStream) {
     // Set default handlers:
@@ -81,6 +82,13 @@ struct Prover::Impl : public IoHandler {
           const uint8_t* byte_ptr = reinterpret_cast<const uint8_t*>(inputStream.vec.data());
           BufferU8 input(byte_ptr, byte_ptr + inputStream.vec.size() * sizeof(uint32_t));
           LOG(1, "IoHandler::InitialInput, " << input.size() << " bytes");
+          return input;
+        });
+    setSendRecvHandler(
+        kSendRecvChannel_InitialInputAux, [this](uint32_t, const BufferU8& buf) -> BufferU8 {
+          const uint8_t* byte_ptr = reinterpret_cast<const uint8_t*>(inputStreamAux.vec.data());
+          BufferU8 input(byte_ptr, byte_ptr + inputStreamAux.vec.size() * sizeof(uint32_t));
+          LOG(1, "IoHandler::InitialInputAux, " << input.size() << " bytes");
           return input;
         });
   }
@@ -116,9 +124,11 @@ struct Prover::Impl : public IoHandler {
   BufferU8 outputBuffer;
   BufferU8 commitBuffer;
   VectorStreamWriter inputStream;
+  VectorStreamWriter inputStreamAux;
   CheckedStreamReader outputStream;
   CheckedStreamReader commitStream;
   ArchiveWriter<VectorStreamWriter> inputWriter;
+  ArchiveWriter<VectorStreamWriter> inputWriterAux;
   ArchiveReader<CheckedStreamReader> outputReader;
   ArchiveReader<CheckedStreamReader> commitReader;
 
@@ -216,6 +226,31 @@ void Prover::writeInput(const void* ptr, size_t size) {
     }
     LOG(1, "  write_word: " << hex(word));
     impl->inputStream.write_word(word);
+  }
+}
+
+void Prover::writeInputAux(const void* ptr, size_t size) {
+  LOG(1, "Prover::writeInputAux> size: " << size);
+  const uint8_t* ptr_u8 = static_cast<const uint8_t*>(ptr);
+  while (size >= sizeof(uint32_t)) {
+    uint32_t word = 0;
+    word |= *ptr_u8++;
+    word |= *ptr_u8++ << 8;
+    word |= *ptr_u8++ << 16;
+    word |= *ptr_u8++ << 24;
+    LOG(1, "  write_word: " << hex(word));
+    impl->inputStreamAux.write_word(word);
+    size -= sizeof(uint32_t);
+  }
+
+  if (size) {
+    LOG(1, "  tail: " << size);
+    uint32_t word = 0;
+    for (size_t i = 0; i < size; i++) {
+      word |= *ptr_u8++ << (8 * i);
+    }
+    LOG(1, "  write_word: " << hex(word));
+    impl->inputStreamAux.write_word(word);
   }
 }
 

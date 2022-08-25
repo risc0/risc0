@@ -87,6 +87,8 @@ public:
 
   void writeInput(const void* ptr, size_t size);
 
+  void writeInputAux(const void* ptr, size_t size);
+
   template <typename T> void writeInput(const T& obj) { getInputWriter().transfer(obj); }
 
   const BufferU8& getOutput();

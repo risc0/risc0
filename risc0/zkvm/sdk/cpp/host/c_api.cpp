@@ -129,6 +129,13 @@ void risc0_prover_add_input(risc0_error* err, risc0_prover* ptr, const uint8_t* 
   ffi_wrap_void(err, [&] { ptr->prover->writeInput(buf, len); });
 }
 
+void risc0_prover_add_aux_input(risc0_error* err,
+                                risc0_prover* ptr,
+                                const uint8_t* buf,
+                                size_t len) {
+  ffi_wrap_void(err, [&] { ptr->prover->writeInputAux(buf, len); });
+}
+
 const void* risc0_prover_get_output_buf(risc0_error* err, const risc0_prover* ptr) {
   return ffi_wrap<const void*>(err, nullptr, [&] { return ptr->prover->getOutput().data(); });
 }

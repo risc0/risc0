@@ -86,3 +86,4 @@ pub struct GetKeyDescriptor {
 pub const SENDRECV_CHANNEL_INITIAL_INPUT: u32 = 0;
 pub const SENDRECV_CHANNEL_STDOUT: u32 = 1;
 pub const SENDRECV_CHANNEL_STDERR: u32 = 2;
+pub const SENDRECV_CHANNEL_INITIAL_AUX_INPUT: u32 = 3;

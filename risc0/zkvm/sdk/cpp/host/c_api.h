@@ -89,6 +89,11 @@ void risc0_prover_free(risc0_error* err, risc0_prover* ptr);
 
 void risc0_prover_add_input(risc0_error* err, risc0_prover* ptr, const uint8_t* buf, size_t len);
 
+void risc0_prover_add_aux_input(risc0_error* err,
+                                risc0_prover* ptr,
+                                const uint8_t* buf,
+                                size_t len);
+
 size_t risc0_prover_get_num_outputs(risc0_error* err, risc0_prover* ptr);
 
 const void* risc0_prover_get_output_buf(risc0_error* err, const risc0_prover* ptr);
