@@ -52,8 +52,6 @@ impl Default for Elem {
 /// 3. Add one to get 2^64 - 2^32 + 1
 
 const P: u64 = (0xffffffff_ffffffff << 32) + 1;
-// TODO: Vestigial, should be improved on generic implementation
-const P_U64: u64 = P;
 
 impl field::Elem for Elem {
     const ZERO: Self = Elem::new(0u64);
@@ -82,6 +80,10 @@ impl field::Elem for Elem {
             val = rng.gen();
         }
         Elem::from(val)
+    }
+
+    fn from_u64(x0: u64) -> Self {
+        Elem::new(x0)
     }
 }
 
@@ -352,6 +354,10 @@ impl field::Elem for ExtElem {
         let invdet: Elem = det.inv();
         ExtElem([a[0] * invdet, -a[1] * invdet])
     }
+
+    fn from_u64(x0: u64) -> Self {
+        Self([Elem::new(x0), Elem::new(0)])
+    }
 }
 
 impl field::ExtElem for ExtElem {
@@ -361,6 +367,21 @@ impl field::ExtElem for ExtElem {
 
     fn from_subfield(elem: &Elem) -> Self {
         Self::from([elem.clone(), Elem::ZERO])
+    }
+
+    fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self {
+        let mut iter = elems.into_iter();
+        let elem = Self::from([iter.next().unwrap(), iter.next().unwrap()]);
+        assert!(
+            iter.next().is_none(),
+            "Extra elements passed to create element in extension field"
+        );
+        elem
+    }
+
+    /// Returns the subelements of a [Elem].
+    fn subelems(&self) -> &[Elem] {
+        &self.0
     }
 }
 
@@ -524,7 +545,7 @@ impl From<Elem> for ExtElem {
 #[cfg(test)]
 mod tests {
     use super::field;
-    use super::{Elem, ExtElem, P, P_U64};
+    use super::{Elem, ExtElem, P};
     use crate::field::Elem as FieldElem;
     use rand::SeedableRng;
 

@@ -22,6 +22,7 @@ use risc0_zkp::{
         log2_ceil,
         sha::{Digest, DIGEST_WORDS, DIGEST_WORD_SIZE},
     },
+    field::baby_bear::BabyBear,
     MAX_CYCLES, MIN_CYCLES, ZK_CYCLES,
 };
 
@@ -72,7 +73,7 @@ impl MethodId {
         };
         use risc0_zkvm_platform::memory::MEM_SIZE;
 
-        let hal = CpuHal::new();
+        let hal: CpuHal<BabyBear> = CpuHal::new();
         let program = Program::load_elf(elf_contents, MEM_SIZE as u32)?;
 
         // Start with an empty table

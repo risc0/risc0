@@ -20,7 +20,7 @@ use risc0_zkp::{
         log2_ceil,
         rou::ROU_FWD,
     },
-    field::Elem,
+    field::{baby_bear::BabyBear, Elem},
     hal::{
         cpu::{CpuBuffer, CpuHal},
         EvalCheck,
@@ -38,7 +38,7 @@ impl<'a, C: PolyFp> CpuEvalCheck<'a, C> {
     }
 }
 
-impl<'a, C: PolyFp> EvalCheck<CpuHal> for CpuEvalCheck<'a, C> {
+impl<'a, C: PolyFp> EvalCheck<CpuHal<BabyBear>> for CpuEvalCheck<'a, C> {
     fn eval_check(
         &self,
         check: &CpuBuffer<Fp>,
