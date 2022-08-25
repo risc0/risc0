@@ -67,7 +67,8 @@ pub fn to_po2(x: usize) -> usize {
 /// ```
 /// # use risc0_zkp::core::log2_ceil;
 /// #
-/// assert_eq!(log2_ceil())
+/// assert_eq!(log2_ceil(8), 3); // 2^3 = 8
+/// assert_eq!(log2_ceil(32), 5); // 2^5 = 32
 /// ```
 #[inline]
 pub const fn log2_ceil(value: usize) -> usize {
