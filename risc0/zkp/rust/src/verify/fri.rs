@@ -115,7 +115,7 @@ where
     // Grab the final coeffs + commit
     let mut final_coeffs = vec![Fp::ZERO; EXT_SIZE * degree];
     iop.read_fps(&mut final_coeffs);
-    let final_digest = iop.get_sha().hash_fps(&final_coeffs); // padding?
+    let final_digest = iop.get_sha().hash_raw_pod_slice(final_coeffs.as_slice());
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
     let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);

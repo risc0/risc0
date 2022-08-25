@@ -394,7 +394,7 @@ impl<F: Field> Hal for CpuHal<F> {
         let fp_matrix = CpuHal::<F>::to_baby_bear_fp_slice(matrix.as_slice());
         let sha = sha_cpu::Impl {};
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            *output = *sha.hash_fps_stride(fp_matrix, idx, col_size, count);
+            *output = *sha.hash_pod_stride(fp_matrix, idx, col_size, count);
         });
     }
 

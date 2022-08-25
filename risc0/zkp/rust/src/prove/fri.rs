@@ -108,7 +108,7 @@ where
     final_coeffs.view(|view| {
         let view = H::to_baby_bear_fp_slice(view);
         iop.write_fp_slice(view);
-        let digest = iop.get_sha().hash_fps(view);
+        let digest = iop.get_sha().hash_raw_pod_slice(view);
         iop.commit(&digest);
     });
     // Do queries
