@@ -13,7 +13,8 @@
 // limitations under the License.
 
 // TODO: Document better
-
+//! Defines field extension (and base fields) used for finite field-based
+//! operations across the RISC Zero zkVM architecture
 use core::{cmp, ops};
 
 /// Subfield elements that can be compared, copied, and operated

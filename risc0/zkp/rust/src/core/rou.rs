@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Tables containing the root of unity for the base field.
-//!
-//! There are two table, which are inverses of each other.
+//! Tables containing the roots of unity (currently for the base
+//! field of order `15*2^27 + 1`).
+//! There are two tables, each of which are inverses of the other.
 
-/// Maximum root of unity which is a power of 2, i.e. there is 2^27th root of
-/// unity, but no 2^28th.
+/// Maximum root of unity which is a power of 2. For example, for the base field
+/// of order `15*2^27 + 1`, there is a 2^27th root of unity , but not a 2^28th.
 pub const MAX_ROU_PO2: usize = 27;
 
-/// For each power of 2, what is the 'forward' root of unity for the po2.
+/// For each power of 2, the 'forward' root of unity for the po2.
 /// That is, this list satisfies ROU_FWD\[i+1\] ^ 2 = ROU_FWD\[i\] in the prime
 /// field F_2013265921, which implies ROU_FWD\[i\] ^ (2 ^ i) = 1.
 pub const ROU_FWD: [u32; MAX_ROU_PO2 + 1] = [
@@ -30,7 +30,7 @@ pub const ROU_FWD: [u32; MAX_ROU_PO2 + 1] = [
     352275361, 18769, 137,
 ];
 
-/// For each power of 2, what is the 'reverse' root of unity for the po2.
+/// For each power of 2, the 'reverse' root of unity for the po2.
 /// This list satisfies ROU_FWD\[i\] * ROU_REV\[i\] = 1 in the prime field
 /// F_2013265921.
 pub const ROU_REV: [u32; MAX_ROU_PO2 + 1] = [
