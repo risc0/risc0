@@ -235,7 +235,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     debug!("Size of U = {}", coeff_u.len());
     iop.write_fp4_slice(&coeff_u);
-    let hash_u = sha.hash_fp4s(&coeff_u);
+    let hash_u = sha.hash_raw_pod_slice(coeff_u.as_slice());
     iop.commit(&hash_u);
 
     // Set the mix mix value

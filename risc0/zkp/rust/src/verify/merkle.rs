@@ -80,7 +80,7 @@ impl MerkleTreeVerifier {
         // Read out field elements from IOP.
         iop.read_fps(&mut out);
         // Get the hash at the leaf of the tree by hashing these field elements.
-        let mut cur = *iop.get_sha().hash_fps(&out);
+        let mut cur = *iop.get_sha().hash_raw_pod_slice(out.as_slice());
         // Shift idx to start of the row
         idx += self.params.row_size;
         while idx >= 2 * self.params.top_size {

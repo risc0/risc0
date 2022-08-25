@@ -128,7 +128,7 @@ where
     let num_taps = taps.tap_size();
     let mut coeff_u = vec![Fp4::ZERO; num_taps + CHECK_SIZE];
     iop.read_fp4s(&mut coeff_u);
-    let hash_u = *sha.hash_fp4s(&coeff_u);
+    let hash_u = *sha.hash_raw_pod_slice(coeff_u.as_slice());
     iop.commit(&hash_u);
 
     // Now, convert to evaluated values
