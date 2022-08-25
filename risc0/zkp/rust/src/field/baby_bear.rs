@@ -12,14 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// ! Baby bear field.
-/// ! Support for the base finite field modulo 15*2^27 + 1
-use crate::field::{self, Elem as FieldElem};
-
 use alloc::fmt;
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
+
+/// ! Baby bear field.
+/// ! Support for the base finite field modulo 15*2^27 + 1
+use crate::field::{self, Elem as FieldElem};
+
+/// Definition of this field for operations that operate on the baby
+/// bear field and its 4th degree extension.
+pub struct BabyBear;
+
+impl field::Field for BabyBear {
+    type Elem = Elem;
+    type ExtElem = ExtElem;
+}
 
 // montgomery form constants
 const M: u32 = 0x88000001;
@@ -67,20 +76,20 @@ const P_U64: u64 = P as u64;
 
 impl field::Elem for Elem {
     const ZERO: Self = Elem::new(0);
-
     const ONE: Self = Elem::new(1);
 
     /// Compute the multiplicative inverse of `x`, or `1 / x` in finite field
-    /// terms. Since `x ^ (P - 1) == 1 % P` for any `x != 0` (as a
-    /// consequence of Fermat's little theorem), it follows that `x *
-    /// x ^ (P - 2) == 1 % P` for `x != 0`.  That is, `x ^ (P - 2)` is the
-    /// multiplicative inverse of `x`. Computed this way, the *inverse* of
-    /// zero comes out as zero, which is convenient in many cases, so we
-    /// leave it.
+    /// terms. Since we know by Fermat's Little Theorem that
+    /// `x ^ (P - 1) == 1 % P` for any `x != 0`,
+    /// it follows that `x * x ^ (P - 2) == 1 % P` for `x != 0`.
+    /// That is, `x ^ (P - 2)` is the multiplicative inverse of `x`.
+    /// Note that if computed this way, the *inverse* of zero comes out as zero,
+    /// which we allow because it is convenient in many cases.
     fn inv(self) -> Self {
         self.pow((P - 2) as usize)
     }
 
+    /// Generate a random value within the Baby Bear field
     fn random(rng: &mut impl rand::Rng) -> Self {
         // Reject the last modulo-P region of possible uint32_t values, since it's
         // uneven and will only return random values less than (2^32 % P).
@@ -92,6 +101,10 @@ impl field::Elem for Elem {
         }
         Elem::from(val)
     }
+
+    fn from_u64(val: u64) -> Self {
+        Elem::from(val)
+    }
 }
 
 macro_rules! rou_array {
@@ -101,8 +114,11 @@ macro_rules! rou_array {
 }
 
 impl field::RootsOfUnity for Elem {
+    /// Maximum power of two for which we have a root of unity using Baby Bear
+    /// field
     const MAX_ROU_PO2: usize = 27;
 
+    /// 'Forward' root of unity for each power of two.
     const ROU_FWD: &'static [Elem] = &rou_array![
         1, 2013265920, 284861408, 1801542727, 567209306, 740045640, 918899846, 1881002012,
         1453957774, 65325759, 1538055801, 515192888, 483885487, 157393079, 1695124103, 2005211659,
@@ -110,6 +126,7 @@ impl field::RootsOfUnity for Elem {
         1164520853, 352275361, 18769, 137
     ];
 
+    /// 'Reverse' root of unity for each power of two.
     const ROU_REV: &'static [Elem] = &rou_array![
         1, 2013265920, 1728404513, 1592366214, 196396260, 1253260071, 72041623, 1091445674,
         145223211, 1446820157, 1030796471, 2010749425, 1827366325, 1239938613, 246299276,
@@ -124,7 +141,7 @@ impl Elem {
         Self(encode(x % P))
     }
 
-    /// Return the montgomery form representation used for byte-based
+    /// Return the Montgomery form representation used for byte-based
     /// hashes of slices of [BabyBear]s.
     pub const fn as_u32_montgomery(&self) -> u32 {
         self.0
@@ -133,12 +150,14 @@ impl Elem {
 
 impl ops::Add for Elem {
     type Output = Self;
+    /// Addition for Baby Bear [Elem]
     fn add(self, rhs: Self) -> Self {
         Elem(add(self.0, rhs.0))
     }
 }
 
 impl ops::AddAssign for Elem {
+    /// Simple addition case for Baby Bear [Elem]
     fn add_assign(&mut self, rhs: Self) {
         self.0 = add(self.0, rhs.0)
     }
@@ -146,12 +165,14 @@ impl ops::AddAssign for Elem {
 
 impl ops::Sub for Elem {
     type Output = Self;
+    /// Subtraction for Baby Bear [Elem]
     fn sub(self, rhs: Self) -> Self {
         Elem(sub(self.0, rhs.0))
     }
 }
 
 impl ops::SubAssign for Elem {
+    /// Simple subtraction case for Baby Bear [Elem]
     fn sub_assign(&mut self, rhs: Self) {
         self.0 = sub(self.0, rhs.0)
     }
@@ -159,12 +180,14 @@ impl ops::SubAssign for Elem {
 
 impl ops::Mul for Elem {
     type Output = Self;
+    /// Multiplication for Baby Bear [Elem]
     fn mul(self, rhs: Self) -> Self {
         Elem(mul(self.0, rhs.0))
     }
 }
 
 impl ops::MulAssign for Elem {
+    /// Simple multiplication case for Baby Bear [Elem]
     fn mul_assign(&mut self, rhs: Self) {
         self.0 = mul(self.0, rhs.0)
     }
@@ -207,17 +230,20 @@ impl From<u64> for Elem {
     }
 }
 
+/// Wrapping addition of [Elem] using Baby Bear field modulus
 fn add(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_add(rhs);
     return if x >= P { x - P } else { x };
 }
 
+/// Wrapping subtraction of [Elem] using Baby Bear field modulus
 fn sub(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_sub(rhs);
     return if x > P { x.wrapping_add(P) } else { x };
 }
 
-// Copied from C++ implementation (fp.h)
+/// Wrapping multiplication of [Elem]  using Baby Bear field modulus
+// Copied from the C++ implementation (fp.h)
 const fn mul(lhs: u32, rhs: u32) -> u32 {
     // uint64_t o64 = uint64_t(a) * uint64_t(b);
     let mut o64: u64 = (lhs as u64).wrapping_mul(rhs as u64);
@@ -237,27 +263,26 @@ const fn mul(lhs: u32, rhs: u32) -> u32 {
     }
 }
 
-/// Encode to montgomery form from direct form.
+/// Encode to Montgomery form from direct form.
 const fn encode(a: u32) -> u32 {
     mul(R2, a)
 }
 
-/// Decode from montgomery form from direct form.
+/// Decode from Montgomery form from direct form.
 const fn decode(a: u32) -> u32 {
     mul(1, a)
 }
 
 /// The size of the extension field in elements, 4 in this case.
 const EXT_SIZE: usize = 4;
-
 /// Instances of `ExtElem` are elements of a finite field `F_p^4`. They are
-/// represented as elements of `F_p[X] / (X^4 - 11)`. Basically, this is a *big*
-/// finite field (about `2^128` elements), which is used when the security of
-/// various operations depends on the size of the field. It has the field
-/// `Elem` as a subfield, which means operations by the two are compatable,
-/// which is important. The irreducible polynomial was choosen to be the most
-/// simple possible one, `x^4 - B`, where `11` is the smallest `B` which makes
-/// the polynomial irreducable.
+/// represented as elements of `F_p[X] / (X^4 - 11)`. This large
+/// finite field (about `2^128` elements) is used when the security of
+/// operations depends on the size of the field. The field extension `ExtElem`
+/// has `Elem` as a subfield, so operations on elements of each are compatible.
+/// The irreducible polynomial `x^4 - 11` was chosen because `11` is
+/// the simplest choice of `BETA` for `x^2 - BETA` that makes this polynomial
+/// irreducible.
 #[derive(Eq, PartialEq, Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
@@ -332,6 +357,10 @@ impl field::Elem for ExtElem {
             a[1] * b2 - a[3] * b0,
         ])
     }
+
+    fn from_u64(val: u64) -> Self {
+        Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+    }
 }
 
 impl field::ExtElem for ExtElem {
@@ -341,6 +370,26 @@ impl field::ExtElem for ExtElem {
 
     fn from_subfield(elem: &Elem) -> Self {
         Self::from([elem.clone(), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+    }
+
+    fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self {
+        let mut iter = elems.into_iter();
+        let elem = Self::from([
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+            iter.next().unwrap(),
+        ]);
+        assert!(
+            iter.next().is_none(),
+            "Extra elements passed to create element in extension field"
+        );
+        elem
+    }
+
+    /// Returns the subelements of a [Elem].
+    fn subelems(&self) -> &[Elem] {
+        &self.0
     }
 }
 
@@ -359,32 +408,32 @@ impl ExtElem {
         Self([x0, x1, x2, x3])
     }
 
-    /// Create a [ExtElem] from a [Elem].
+    /// Create an [ExtElem] from an [Elem].
     pub fn from_fp(x: Elem) -> Self {
         Self([x, Elem::new(0), Elem::new(0), Elem::new(0)])
     }
 
-    /// Create a [ExtElem] from a raw integer.
+    /// Create an [ExtElem] from a raw integer.
     pub const fn from_u32(x0: u32) -> Self {
         Self([Elem::new(x0), Elem::new(0), Elem::new(0), Elem::new(0)])
     }
 
-    /// Returns the value zero.
+    /// Return the value zero.
     const fn zero() -> Self {
         Self::from_u32(0)
     }
 
-    /// Returns the value one.
+    /// Return the value one.
     const fn one() -> Self {
         Self::from_u32(1)
     }
 
-    /// Returns the constant portion of a [Elem].
+    /// Return the base field term of an [Elem].
     pub fn const_part(self) -> Elem {
         self.0[0]
     }
 
-    /// Returns the elements of a [Elem].
+    /// Return [Elem] as a vector of base field values.
     pub fn elems(&self) -> &[Elem] {
         &self.0
     }
@@ -392,6 +441,7 @@ impl ExtElem {
 
 impl ops::Add for ExtElem {
     type Output = Self;
+    /// Addition for Baby Bear [ExtElem]
     fn add(self, rhs: Self) -> Self {
         let mut lhs = self;
         lhs += rhs;
@@ -400,6 +450,7 @@ impl ops::Add for ExtElem {
 }
 
 impl ops::AddAssign for ExtElem {
+    /// Simple addition case for Baby Bear [ExtElem]
     fn add_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
             self.0[i] += rhs.0[i];
@@ -409,6 +460,7 @@ impl ops::AddAssign for ExtElem {
 
 impl ops::Sub for ExtElem {
     type Output = Self;
+    /// Subtraction for Baby Bear [ExtElem]
     fn sub(self, rhs: Self) -> Self {
         let mut lhs = self;
         lhs -= rhs;
@@ -417,6 +469,7 @@ impl ops::Sub for ExtElem {
 }
 
 impl ops::SubAssign for ExtElem {
+    /// Simple subtraction case for Baby Bear [ExtElem]
     fn sub_assign(&mut self, rhs: Self) {
         for i in 0..self.0.len() {
             self.0[i] -= rhs.0[i];
@@ -424,8 +477,9 @@ impl ops::SubAssign for ExtElem {
     }
 }
 
-/// Implement the simple multiplication case by the subfield Elem.
 impl ops::MulAssign<Elem> for ExtElem {
+    /// Simple multiplication case by a
+    /// Baby Bear [Elem]
     fn mul_assign(&mut self, rhs: Elem) {
         for i in 0..self.0.len() {
             self.0[i] *= rhs;
@@ -435,6 +489,7 @@ impl ops::MulAssign<Elem> for ExtElem {
 
 impl ops::Mul<Elem> for ExtElem {
     type Output = Self;
+    /// Multiplication by a Baby Bear [Elem]
     fn mul(self, rhs: Elem) -> Self {
         let mut lhs = self;
         lhs *= rhs;
@@ -444,6 +499,7 @@ impl ops::Mul<Elem> for ExtElem {
 
 impl ops::Mul<ExtElem> for Elem {
     type Output = ExtElem;
+    /// Multiplication for a subfield [Elem] by an [ExtElem]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         rhs * self
     }
@@ -517,8 +573,8 @@ mod tests {
     #[test]
     fn isa_field() {
         let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
-        // Pick random sets of 3 elements of ExtElem, and verify they meet the
-        // requirements of a field.
+        // Generate three field extension elements using randomly generated base field
+        // values, and verify they meet the requirements of a field.
         for _ in 0..1_000 {
             let a = ExtElem::random(&mut rng);
             let b = ExtElem::random(&mut rng);

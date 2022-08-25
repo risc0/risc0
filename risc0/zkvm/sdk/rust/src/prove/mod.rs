@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod cpu_eval;
 pub mod exec;
 
 use std::io::Write;
@@ -19,7 +20,9 @@ use std::io::Write;
 use anyhow::Result;
 use lazy_static::lazy_static;
 use risc0_zkp::{
-    core::sha::default_implementation, hal::cpu::CpuHal, prove::adapter::ProveAdapter,
+    core::sha::default_implementation,
+    hal::{cpu::CpuHal, EvalCheck, Hal},
+    prove::adapter::ProveAdapter,
 };
 use risc0_zkvm_circuit::CircuitImpl;
 use risc0_zkvm_platform::{
@@ -28,6 +31,8 @@ use risc0_zkvm_platform::{
 };
 
 use crate::{elf::Program, host::ProverOpts, method_id::MethodId, receipt::Receipt};
+
+use self::cpu_eval::CpuEvalCheck;
 
 lazy_static! {
     pub static ref CIRCUIT: CircuitImpl = CircuitImpl::new();
@@ -67,20 +72,27 @@ impl<'a> Prover<'a> {
     }
 
     pub fn run(&mut self) -> Result<Receipt> {
+        let hal = CpuHal::new();
+        let circuit: &CircuitImpl = &CIRCUIT;
+        let eval = CpuEvalCheck::new(circuit);
+        self.run_with_hal(&hal, &eval)
+    }
+
+    pub fn run_with_hal<H: Hal, E: EvalCheck<H>>(&mut self, hal: &H, eval: &E) -> Result<Receipt> {
         let skip_seal = self.inner.opts.skip_seal;
 
-        let mut executor = exec::RV32Executor::new(&CIRCUIT, &self.elf, &mut self.inner);
+        let circuit: &CircuitImpl = &CIRCUIT;
+        let mut executor = exec::RV32Executor::new(circuit, &self.elf, &mut self.inner);
         executor.run()?;
 
         let mut prover = ProveAdapter::new(&mut executor.executor);
-        let hal = CpuHal::<CircuitImpl>::new(&CIRCUIT);
         let sha = default_implementation();
 
         let seal = if skip_seal {
-            risc0_zkp::prove::prove_without_seal(&hal, sha, &mut prover);
+            risc0_zkp::prove::prove_without_seal(sha, &mut prover);
             Vec::new()
         } else {
-            risc0_zkp::prove::prove(&hal, sha, &mut prover)
+            risc0_zkp::prove::prove(hal, sha, &mut prover, eval)
         };
 
         // Attach the full version of the output journal & construct receipt object

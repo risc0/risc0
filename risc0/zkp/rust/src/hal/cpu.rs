@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Hardware abstraction layer for RISC Zero zkVM
 use core::{
     cell::{Ref, RefMut},
+    marker::PhantomData,
     ops::Range,
     slice::{from_raw_parts, from_raw_parts_mut},
 };
@@ -25,27 +27,25 @@ use rayon::prelude::*;
 
 use super::{Buffer, Hal};
 use crate::{
-    adapter::{PolyFp, PolyFpContext},
     core::{
-        fp::Fp,
-        fp4::{Fp4, EXT_SIZE},
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
-        rou::ROU_FWD,
         sha::{Digest, Sha},
         sha_cpu,
     },
-    field::Elem,
-    FRI_FOLD, INV_RATE,
+    field::{Elem, ExtElem, Field},
+    FRI_FOLD,
 };
 
-pub struct CpuHal<'a, C: PolyFp> {
-    circuit: &'a C,
+pub struct CpuHal<F: Field> {
+    _phantom: PhantomData<F>,
 }
 
-impl<'a, C: PolyFp> CpuHal<'a, C> {
-    pub fn new(circuit: &'a C) -> Self {
-        CpuHal { circuit }
+impl<F: Field> CpuHal<F> {
+    pub fn new() -> Self {
+        CpuHal {
+            _phantom: PhantomData,
+        }
     }
 }
 
@@ -92,7 +92,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         }
     }
 
-    fn as_slice<'a>(&'a self) -> Ref<'a, [T]> {
+    pub fn as_slice<'a>(&'a self) -> Ref<'a, [T]> {
         let vec = self.buf.borrow();
         Ref::map(vec, |vec| {
             let slice = bytemuck::cast_slice(vec);
@@ -100,7 +100,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         })
     }
 
-    fn as_slice_mut<'a>(&'a self) -> RefMut<'a, [T]> {
+    pub fn as_slice_mut<'a>(&'a self) -> RefMut<'a, [T]> {
         let vec = self.buf.borrow_mut();
         RefMut::map(vec, |vec| {
             let slice = bytemuck::cast_slice_mut(vec);
@@ -136,25 +136,27 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
     }
 }
 
-impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
-    type BufferFp = CpuBuffer<Fp>;
-    type BufferFp4 = CpuBuffer<Fp4>;
+impl<F: Field> Hal for CpuHal<F> {
+    type Field = F;
+
+    type BufferFp = CpuBuffer<F::Elem>;
+    type BufferFp4 = CpuBuffer<F::ExtElem>;
     type BufferDigest = CpuBuffer<Digest>;
     type BufferU32 = CpuBuffer<u32>;
 
-    fn alloc_fp(&self, size: usize) -> CpuBuffer<Fp> {
+    fn alloc_fp(&self, size: usize) -> CpuBuffer<F::Elem> {
         CpuBuffer::new(size)
     }
 
-    fn copy_fp_from(&self, slice: &[Fp]) -> CpuBuffer<Fp> {
+    fn copy_fp_from(&self, slice: &[F::Elem]) -> CpuBuffer<F::Elem> {
         CpuBuffer::copy_from(slice)
     }
 
-    fn alloc_fp4(&self, size: usize) -> CpuBuffer<Fp4> {
+    fn alloc_fp4(&self, size: usize) -> CpuBuffer<F::ExtElem> {
         CpuBuffer::new(size)
     }
 
-    fn copy_fp4_from(&self, slice: &[Fp4]) -> CpuBuffer<Fp4> {
+    fn copy_fp4_from(&self, slice: &[F::ExtElem]) -> CpuBuffer<F::ExtElem> {
         CpuBuffer::copy_from(slice)
     }
 
@@ -174,7 +176,7 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
         CpuBuffer::copy_from(slice)
     }
 
-    fn batch_expand(&self, output: &CpuBuffer<Fp>, input: &CpuBuffer<Fp>, count: usize) {
+    fn batch_expand(&self, output: &CpuBuffer<F::Elem>, input: &CpuBuffer<F::Elem>, count: usize) {
         let out_size = output.size() / count;
         let in_size = input.size() / count;
         let expand_bits = log2_ceil(out_size / in_size);
@@ -190,27 +192,27 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
             });
     }
 
-    fn batch_evaluate_ntt(&self, io: &CpuBuffer<Fp>, count: usize, expand_bits: usize) {
+    fn batch_evaluate_ntt(&self, io: &CpuBuffer<F::Elem>, count: usize, expand_bits: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         io.as_slice_mut()
             .par_chunks_exact_mut(row_size)
             .for_each(|row| {
-                evaluate_ntt(row, expand_bits);
+                evaluate_ntt(Self::to_baby_bear_fp_slice_mut(row), expand_bits);
             });
     }
 
-    fn batch_interpolate_ntt(&self, io: &CpuBuffer<Fp>, count: usize) {
+    fn batch_interpolate_ntt(&self, io: &CpuBuffer<F::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         io.as_slice_mut()
             .par_chunks_exact_mut(row_size)
             .for_each(|row| {
-                interpolate_ntt(row);
+                interpolate_ntt(Self::to_baby_bear_fp_slice_mut(row));
             });
     }
 
-    fn batch_bit_reverse(&self, io: &CpuBuffer<Fp>, count: usize) {
+    fn batch_bit_reverse(&self, io: &CpuBuffer<F::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         io.as_slice_mut()
@@ -222,11 +224,11 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
 
     fn batch_evaluate_any(
         &self,
-        coeffs: &CpuBuffer<Fp>,
+        coeffs: &CpuBuffer<F::Elem>,
         poly_count: usize,
         which: &CpuBuffer<u32>,
-        xs: &CpuBuffer<Fp4>,
-        out: &CpuBuffer<Fp4>,
+        xs: &CpuBuffer<F::ExtElem>,
+        out: &CpuBuffer<F::ExtElem>,
     ) {
         let po2 = log2_ceil(coeffs.size() / poly_count);
         assert_eq!(poly_count * (1 << po2), coeffs.size());
@@ -240,8 +242,8 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
         (&which[..], &xs[..], &mut out[..])
             .into_par_iter()
             .for_each(|(id, x, out)| {
-                let mut tot = Fp4::ZERO;
-                let mut cur = Fp4::new(Fp::ONE, Fp::ZERO, Fp::ZERO, Fp::ZERO);
+                let mut tot = F::ExtElem::ZERO;
+                let mut cur = F::ExtElem::ONE;
                 let id = *id as usize;
                 let count = 1 << po2;
                 let local = &coeffs[count * id..count * id + count];
@@ -253,7 +255,7 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
             });
     }
 
-    fn zk_shift(&self, io: &CpuBuffer<Fp>, poly_count: usize) {
+    fn zk_shift(&self, io: &CpuBuffer<F::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));
@@ -263,17 +265,17 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
             .for_each(|(io, idx)| {
                 let pos = idx & ((1 << bits) - 1);
                 let rev = bit_rev_32(pos as u32) >> (32 - bits);
-                let pow3 = Fp::new(3).pow(rev as usize);
+                let pow3 = F::Elem::from_u64(3).pow(rev as usize);
                 *io = *io * pow3;
             });
     }
 
     fn mix_poly_coeffs(
         &self,
-        output: &CpuBuffer<Fp4>,
-        mix_start: &Fp4,
-        mix: &Fp4,
-        input: &CpuBuffer<Fp>,
+        output: &CpuBuffer<F::ExtElem>,
+        mix_start: &F::ExtElem,
+        mix: &F::ExtElem,
+        input: &CpuBuffer<F::Elem>,
         combos: &CpuBuffer<u32>,
         input_size: usize,
         count: usize,
@@ -294,9 +296,9 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
 
     fn eltwise_add_fp(
         &self,
-        output: &CpuBuffer<Fp>,
-        input1: &CpuBuffer<Fp>,
-        input2: &CpuBuffer<Fp>,
+        output: &CpuBuffer<F::Elem>,
+        input1: &CpuBuffer<F::Elem>,
+        input2: &CpuBuffer<F::Elem>,
     ) {
         assert_eq!(output.size(), input1.size());
         assert_eq!(output.size(), input2.size());
@@ -310,29 +312,30 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
             });
     }
 
-    fn eltwise_sum_fp4(&self, output: &CpuBuffer<Fp>, input: &CpuBuffer<Fp4>) {
-        let count = output.size() / EXT_SIZE;
+    fn eltwise_sum_fp4(&self, output: &CpuBuffer<F::Elem>, input: &CpuBuffer<F::ExtElem>) {
+        let count = output.size() / F::ExtElem::EXT_SIZE;
         let to_add = input.size() / count;
-        assert_eq!(output.size(), count * EXT_SIZE);
+        assert_eq!(output.size(), count * F::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), count * to_add);
         let mut output = output.as_slice_mut();
-        let mut output = ArrayViewMut::from_shape((EXT_SIZE, count), &mut output).unwrap();
+        let mut output =
+            ArrayViewMut::from_shape((F::ExtElem::EXT_SIZE, count), &mut output).unwrap();
         let output = output.axis_iter_mut(Axis(1)).into_par_iter();
         let input = input.as_slice();
         let input = ArrayView::from_shape((to_add, count), &input).unwrap();
         let input = input.axis_iter(Axis(1)).into_par_iter();
         output.zip(input).for_each(|(mut output, input)| {
-            let mut sum = Fp4::ZERO;
+            let mut sum = F::ExtElem::ZERO;
             for i in input {
                 sum += *i;
             }
-            for i in 0..EXT_SIZE {
-                output[i] = sum.elems()[i];
+            for i in 0..F::ExtElem::EXT_SIZE {
+                output[i] = sum.subelems()[i]
             }
         });
     }
 
-    fn eltwise_copy_fp(&self, output: &CpuBuffer<Fp>, input: &CpuBuffer<Fp>) {
+    fn eltwise_copy_fp(&self, output: &CpuBuffer<F::Elem>, input: &CpuBuffer<F::Elem>) {
         let count = output.size();
         assert_eq!(count, input.size());
         let mut output = output.as_slice_mut();
@@ -356,44 +359,42 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
             });
     }
 
-    fn fri_fold(&self, output: &CpuBuffer<Fp>, input: &CpuBuffer<Fp>, mix: &Fp4) {
-        let count = output.size() / EXT_SIZE;
-        assert_eq!(output.size(), count * EXT_SIZE);
+    fn fri_fold(&self, output: &CpuBuffer<F::Elem>, input: &CpuBuffer<F::Elem>, mix: &F::ExtElem) {
+        let count = output.size() / F::ExtElem::EXT_SIZE;
+        assert_eq!(output.size(), count * F::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
         let mut output = output.as_slice_mut();
         let input = input.as_slice();
 
         // TODO: parallelize
         for idx in 0..count {
-            let mut tot = Fp4::ZERO;
-            let mut cur_mix = Fp4::from_u32(1);
+            let mut tot = F::ExtElem::ZERO;
+            let mut cur_mix = F::ExtElem::ONE;
             for i in 0..FRI_FOLD {
                 let rev_i = bit_rev_32(i as u32) >> (32 - log2_ceil(FRI_FOLD));
                 let rev_idx = rev_i as usize * count + idx;
-                let factor = Fp4::new(
-                    input[0 * count * FRI_FOLD + rev_idx],
-                    input[1 * count * FRI_FOLD + rev_idx],
-                    input[2 * count * FRI_FOLD + rev_idx],
-                    input[3 * count * FRI_FOLD + rev_idx],
+                let factor = F::ExtElem::from_subelems(
+                    (0..F::ExtElem::EXT_SIZE).map(|i| input[i * count * FRI_FOLD + rev_idx]),
                 );
                 tot += cur_mix * factor;
                 cur_mix *= *mix;
             }
-            for i in 0..EXT_SIZE {
-                output[count * i + idx] = tot.elems()[i];
+            for i in 0..F::ExtElem::EXT_SIZE {
+                output[count * i + idx] = tot.subelems()[i];
             }
         }
     }
 
-    fn sha_rows(&self, output: &CpuBuffer<Digest>, matrix: &CpuBuffer<Fp>) {
+    fn sha_rows(&self, output: &CpuBuffer<Digest>, matrix: &CpuBuffer<F::Elem>) {
         let count = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * count);
         let mut output = output.as_slice_mut();
         let matrix = matrix.as_slice().to_vec(); // TODO: avoid copy
+        let fp_matrix = CpuHal::<F>::to_baby_bear_fp_slice(matrix.as_slice());
         let sha = sha_cpu::Impl {};
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            *output = *sha.hash_fps_stride(&matrix, idx, col_size, count);
+            *output = *sha.hash_fps_stride(fp_matrix, idx, col_size, count);
         });
     }
 
@@ -414,70 +415,19 @@ impl<'a, E: PolyFp> Hal for CpuHal<'a, E> {
                 *output = *sha.hash_pair(&input[0], &input[1]);
             });
     }
-
-    fn eval_check(
-        &self,
-        _circuit: &str,
-        check: &CpuBuffer<Fp>,
-        code: &CpuBuffer<Fp>,
-        data: &CpuBuffer<Fp>,
-        accum: &CpuBuffer<Fp>,
-        mix: &CpuBuffer<Fp>,
-        out: &CpuBuffer<Fp>,
-        poly_mix: Fp4,
-        po2: usize,
-        steps: usize,
-    ) {
-        const EXP_PO2: usize = log2_ceil(INV_RATE);
-
-        let domain = steps * INV_RATE;
-        let code = code.as_slice();
-        let data = data.as_slice();
-        let accum = accum.as_slice();
-        let mix = mix.as_slice();
-        let out = out.as_slice();
-        let mut check = check.as_slice_mut();
-        // TODO: parallelize
-        for cycle in 0..domain {
-            let args: &[&[Fp]] = &[&code, &out, &data, &mix, &accum];
-            let cond = self.circuit.poly_fp(
-                &PolyFpContext {
-                    size: domain,
-                    cycle,
-                    mix: poly_mix,
-                },
-                args,
-            );
-            let x = Fp::new(ROU_FWD[po2 + EXP_PO2]).pow(cycle);
-            // TODO: what is this magic number 3?
-            let y = (Fp::new(3) * x).pow(1 << po2);
-            let ret = cond.tot * (y - Fp::new(1)).inv();
-            for i in 0..EXT_SIZE {
-                check[i * domain + cycle] = ret.elems()[i];
-            }
-        }
-    }
 }
 
 #[cfg(test)]
 mod test {
+    use crate::field::baby_bear::BabyBear;
     use rand::thread_rng;
 
     use super::*;
 
-    struct PolyFpMock {}
-
-    impl PolyFp for PolyFpMock {
-        fn poly_fp(&self, _ctx: &PolyFpContext, _args: &[&[Fp]]) -> crate::adapter::MixState {
-            unimplemented!()
-        }
-    }
-
     #[test]
     #[should_panic]
     fn check_req() {
-        let mock = PolyFpMock {};
-        let hal = CpuHal::new(&mock);
+        let hal = CpuHal::<BabyBear>::new();
         let a = hal.alloc_fp(10);
         let b = hal.alloc_fp(20);
         hal.eltwise_add_fp(&a, &b, &b);
@@ -485,8 +435,7 @@ mod test {
 
     #[test]
     fn fp() {
-        let mock = PolyFpMock {};
-        let hal = CpuHal::new(&mock);
+        let hal = CpuHal::<BabyBear>::new();
         const COUNT: usize = 1024 * 1024;
         test_binary(
             &hal,
@@ -502,7 +451,7 @@ mod test {
     where
         H: Hal,
         HF: Fn(&H::BufferFp, &H::BufferFp, &H::BufferFp),
-        CF: Fn(&Fp, &Fp) -> Fp,
+        CF: Fn(&<H::Field as Field>::Elem, &<H::Field as Field>::Elem) -> <H::Field as Field>::Elem,
     {
         let a = hal.alloc_fp(count);
         let b = hal.alloc_fp(count);
@@ -512,8 +461,8 @@ mod test {
         a.view_mut(|a| {
             b.view_mut(|b| {
                 for i in 0..count {
-                    a[i] = Fp::random(&mut rng);
-                    b[i] = Fp::random(&mut rng);
+                    a[i] = <H::Field as Field>::Elem::random(&mut rng);
+                    b[i] = <H::Field as Field>::Elem::random(&mut rng);
                 }
                 for i in 0..count {
                     golden.push(cpu_fn(&a[i], &b[i]));

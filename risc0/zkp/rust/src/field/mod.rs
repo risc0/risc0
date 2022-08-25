@@ -14,9 +14,18 @@
 
 // TODO: Document better
 
-use core::{cmp, ops};
+//! Defines field extension (and base fields) used for finite field-based
+//! operations across the RISC Zero zkVM architecture
+use core::{cmp, fmt::Debug, ops};
 
-/// A field with field elements.
+/// A pair of fields, one of which is an extension field of the other.
+pub trait Field {
+    type Elem: Elem;
+    type ExtElem: ExtElem<SubElem = Self::Elem>;
+}
+
+/// Subfield elements that can be compared, copied, and operated
+/// on via multiplication, addition, and subtraction
 pub trait Elem:
     ops::Mul<Output = Self>
     + ops::MulAssign
@@ -29,6 +38,14 @@ pub trait Elem:
     + core::clone::Clone
     + core::marker::Copy
     + Sized
+    + bytemuck::Pod
+    + core::default::Default
+    + Clone
+    + Copy
+    + Send
+    + Sync
+    + Debug
+    + 'static
 {
     /// Zero, the additive identity.
     const ZERO: Self;
@@ -36,11 +53,11 @@ pub trait Elem:
     /// One, the multiplicative identity.
     const ONE: Self;
 
-    /// Compute the multiplicative inverse of `x`, or `1 / x` in finite field
-    /// terms.
+    /// Compute the multiplicative inverse of `x` (or `1 / x` in finite field
+    /// terms).
     fn inv(self) -> Self;
 
-    /// Returns this element raised to the given power.
+    /// Return an element raised to the given power.
     fn pow(self, exp: usize) -> Self {
         let mut n = exp;
         let mut tot = Self::ONE;
@@ -57,29 +74,39 @@ pub trait Elem:
 
     /// Returns a random valid field element.
     fn random(rng: &mut impl rand::Rng) -> Self;
+
+    /// Import a number into the field from the natural numbers.
+    fn from_u64(val: u64) -> Self;
 }
 
-/// A field extensension.
+/// A field extension which can be constructed from a subfield element [Elem]
 pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
     type SubElem: Elem;
 
     const EXT_SIZE: usize;
 
+    /// Construct a field element
     fn from_subfield(elem: &Self::SubElem) -> Self;
+
+    fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self;
+
+    fn subelems(&self) -> &[Self::SubElem];
 }
 
+/// Roots of unity for the field whose elements are represented by [ExtElem] and
+/// whose subfield elements are represented by [Elem]
 pub trait RootsOfUnity: Sized + 'static {
-    /// Maximum root of unity which is a power of 2, i.e. there is
-    /// 2^MAX_ROU_PO2th root of unity, but no 2^(MAX_ROU_PO2+1)th.
+    /// Maximum root of unity which is a power of 2 (i.e., there is a
+    /// 2^MAX_ROU_PO2th root of unity, but no 2^(MAX_ROU_PO2+1)th root.
     const MAX_ROU_PO2: usize;
 
-    /// For each power of 2, what is the 'forward' root of unity for
+    /// For each power of 2, the 'forward' root of unity for
     /// the po2.  That is, this list satisfies ROU_FWD\[i+1\] ^ 2 =
-    /// ROU_FWD\[i\] in the prime field which implies ROU_FWD\[i\] ^
+    /// ROU_FWD\[i\] in the prime field, which implies ROU_FWD\[i\] ^
     /// (2 ^ i) = 1.
     const ROU_FWD: &'static [Self];
 
-    /// For each power of 2, what is the 'reverse' root of unity for
+    /// For each power of 2, the 'reverse' root of unity for
     /// the po2.  This list satisfies ROU_FWD\[i\] * ROU_REV\[i\] = 1
     /// in the prime field F_2013265921.
     const ROU_REV: &'static [Self];
@@ -117,12 +144,12 @@ pub mod test {
             }
         }
     }
-
     pub fn test_field_ops<F: Elem>(p_u64: u64)
     where
         F: Into<u64> + From<u64> + Debug,
     {
-        // We do 128-bit arithmetic so we don't have to worry about overflows.
+        // For testng, we do 128-bit arithmetic so we don't have to worry about
+        // overflows.
         let p: u128 = p_u64 as _;
 
         assert_eq!(F::from(0), F::ZERO);
@@ -133,8 +160,8 @@ pub mod test {
         assert_eq!(F::ZERO.inv(), F::ZERO);
         assert_eq!(F::ONE.inv(), F::ONE);
 
-        // Compare against a bunch of numbers to make sure it matches
-        // with regular modulo arithmetic.
+        // Compare against many randomly generated numbers to make sure results match
+        // the expected results for regular modular arithmetic.
         let mut rng = rand::thread_rng();
 
         for _ in 0..1000 {
@@ -157,5 +184,9 @@ pub mod test {
     }
 }
 
-/// Fields available for use with zkp:
+/// The field extension whose subfield is order 15*2^27 + 1;
+/// this field choice allows 32-bit addition without overflow
 pub mod baby_bear;
+/// The field extension whose subfield is order 2^64 - 2^32 + 1;
+/// this field choice allows for fast reduction
+pub mod goldilocks;
