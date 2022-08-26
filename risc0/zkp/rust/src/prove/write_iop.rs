@@ -20,6 +20,7 @@ use crate::core::{
     sha::{Digest, Sha},
     sha_rng::ShaRng,
 };
+use crate::field::Elem;
 
 pub struct WriteIOP<S: Sha> {
     sha: S,
@@ -52,8 +53,7 @@ impl<S: Sha> WriteIOP<S> {
     /// Called by the prover to write some data.
     pub fn write_fp_slice(&mut self, slice: &[Fp]) {
         self.proof.extend(slice.iter().map(|x| {
-            let x: u32 = x.into();
-            [x, 0]
+            x.to_u32s()
         }).flatten());
     }
 
