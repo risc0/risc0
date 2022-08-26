@@ -375,8 +375,7 @@ impl field::Elem for ExtElem {
     }
 
     fn to_u32s(&self) -> Vec::<u32> {
-        // TODO: This is wrong but fast to implement
-        self.0[0].to_u32s()
+        self.elems().iter().flat_map(|elem|{ elem.to_u32s() }).collect()
     }
 
     fn from_u32s(val: &[u32]) -> Self {
