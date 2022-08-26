@@ -12,35 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Hardware abstraction layer for RISC Zero zkVM
 use core::{
     cell::{Ref, RefMut},
+    marker::PhantomData,
     ops::Range,
     slice::{from_raw_parts, from_raw_parts_mut},
 };
 use std::{cell::RefCell, rc::Rc};
 
+use bytemuck::Pod;
+use ndarray::{ArrayView, ArrayViewMut, Axis};
+use rayon::prelude::*;
+
+use super::{Buffer, Hal};
 use crate::{
     core::{
-        fp::Fp,
-        fp4::{Fp4, EXT_SIZE},
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
         sha::{Digest, Sha},
         sha_cpu,
     },
-    field::Elem,
+    field::{Elem, ExtElem, Field},
     FRI_FOLD,
 };
-#[allow(unused_imports)]
-use log::debug;
-use ndarray::{ArrayView, ArrayViewMut, Axis};
-use rayon::prelude::*;
 
-use super::{Buffer, BufferTrait, Hal};
+pub struct CpuHal<F: Field> {
+    _phantom: PhantomData<F>,
+}
 
-pub struct CpuHal {}
+impl<F: Field> CpuHal<F> {
+    pub fn new() -> Self {
+        CpuHal {
+            _phantom: PhantomData,
+        }
+    }
+}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 struct Region(usize, usize);
 
 impl Region {
@@ -60,12 +69,13 @@ impl Region {
     }
 }
 
-struct CpuBuffer<T> {
+#[derive(Clone)]
+pub struct CpuBuffer<T> {
     buf: Rc<RefCell<Vec<T>>>,
     region: Region,
 }
 
-impl<T: Default + Clone> CpuBuffer<T> {
+impl<T: Default + Clone + Pod> CpuBuffer<T> {
     fn new(size: usize) -> Self {
         let buf = vec![T::default(); size];
         CpuBuffer {
@@ -73,138 +83,167 @@ impl<T: Default + Clone> CpuBuffer<T> {
             region: Region(0, size),
         }
     }
-}
 
-impl<T: Clone> CpuBuffer<T> {
     fn copy_from(slice: &[T]) -> Self {
+        let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
-            buf: Rc::new(RefCell::new(Vec::from(slice))),
+            buf: Rc::new(RefCell::new(Vec::from(bytes))),
             region: Region(0, slice.len()),
         }
     }
-}
 
-impl<T> CpuBuffer<T> {
-    fn as_slice<'a>(&'a self) -> Ref<'a, [T]> {
+    pub fn as_slice<'a>(&'a self) -> Ref<'a, [T]> {
         let vec = self.buf.borrow();
-        Ref::map(vec, |vec| &vec[self.region.range()])
+        Ref::map(vec, |vec| {
+            let slice = bytemuck::cast_slice(vec);
+            &slice[self.region.range()]
+        })
     }
 
-    fn as_slice_mut<'a>(&'a self) -> RefMut<'a, [T]> {
+    pub fn as_slice_mut<'a>(&'a self) -> RefMut<'a, [T]> {
         let vec = self.buf.borrow_mut();
-        RefMut::map(vec, |vec| &mut vec[self.region.range()])
+        RefMut::map(vec, |vec| {
+            let slice = bytemuck::cast_slice_mut(vec);
+            &mut slice[self.region.range()]
+        })
     }
 }
 
-impl<T: 'static + Clone> BufferTrait<T> for CpuBuffer<T> {
+impl<T: Pod> Buffer<T> for CpuBuffer<T> {
     fn size(&self) -> usize {
         self.region.size()
     }
 
-    fn slice(&self, offset: usize, size: usize) -> Buffer<T> {
+    fn slice(&self, offset: usize, size: usize) -> CpuBuffer<T> {
         assert!(offset + size <= self.size());
         let region = Region(self.region.offset() + offset, size);
-        Rc::new(CpuBuffer {
+        CpuBuffer {
             buf: Rc::clone(&self.buf),
             region,
-        })
+        }
     }
 
-    fn view(&self, f: &mut dyn FnMut(&[T])) {
+    fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buf.borrow();
-        f(&buf[self.region.range()]);
+        let slice = bytemuck::cast_slice(&buf);
+        f(&slice[self.region.range()]);
     }
 
-    fn view_mut(&self, f: &mut dyn FnMut(&mut [T])) {
+    fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buf.borrow_mut();
-        f(&mut buf[self.region.range()]);
+        let slice = bytemuck::cast_slice_mut(&mut buf);
+        f(&mut slice[self.region.range()]);
     }
 }
 
-impl Hal for CpuHal {
-    fn alloc<T: 'static + Default + Clone>(&self, size: usize) -> Buffer<T> {
-        let buf = CpuBuffer::new(size);
-        Rc::new(buf)
+impl<F: Field> Hal for CpuHal<F> {
+    type Field = F;
+
+    type BufferFp = CpuBuffer<F::Elem>;
+    type BufferFp4 = CpuBuffer<F::ExtElem>;
+    type BufferDigest = CpuBuffer<Digest>;
+    type BufferU32 = CpuBuffer<u32>;
+
+    fn alloc_fp(&self, size: usize) -> CpuBuffer<F::Elem> {
+        CpuBuffer::new(size)
     }
 
-    fn copy_from<T: 'static + Clone>(&self, slice: &[T]) -> Buffer<T> {
-        let buf = CpuBuffer::copy_from(slice);
-        Rc::new(buf)
+    fn copy_fp_from(&self, slice: &[F::Elem]) -> CpuBuffer<F::Elem> {
+        CpuBuffer::copy_from(slice)
     }
 
-    fn batch_expand(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, count: usize) {
+    fn alloc_fp4(&self, size: usize) -> CpuBuffer<F::ExtElem> {
+        CpuBuffer::new(size)
+    }
+
+    fn copy_fp4_from(&self, slice: &[F::ExtElem]) -> CpuBuffer<F::ExtElem> {
+        CpuBuffer::copy_from(slice)
+    }
+
+    fn alloc_digest(&self, size: usize) -> CpuBuffer<Digest> {
+        CpuBuffer::new(size)
+    }
+
+    fn copy_digest_from(&self, slice: &[Digest]) -> CpuBuffer<Digest> {
+        CpuBuffer::copy_from(slice)
+    }
+
+    fn alloc_u32(&self, size: usize) -> CpuBuffer<u32> {
+        CpuBuffer::new(size)
+    }
+
+    fn copy_u32_from(&self, slice: &[u32]) -> CpuBuffer<u32> {
+        CpuBuffer::copy_from(slice)
+    }
+
+    fn batch_expand(&self, output: &CpuBuffer<F::Elem>, input: &CpuBuffer<F::Elem>, count: usize) {
         let out_size = output.size() / count;
         let in_size = input.size() / count;
         let expand_bits = log2_ceil(out_size / in_size);
         assert_eq!(out_size, in_size * (1 << expand_bits));
         assert_eq!(out_size * count, output.size());
         assert_eq!(in_size * count, input.size());
-        let mut output = output
-            .downcast_ref::<CpuBuffer<Fp>>()
-            .unwrap()
-            .as_slice_mut();
-        let input = input.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
         output
+            .as_slice_mut()
             .par_chunks_exact_mut(out_size)
-            .zip(input.par_chunks_exact(in_size))
+            .zip(input.as_slice().par_chunks_exact(in_size))
             .for_each(|(output, input)| {
                 expand(output, input, expand_bits);
             });
     }
 
-    fn batch_evaluate_ntt(&self, io: &Buffer<Fp>, count: usize, expand_bits: usize) {
+    fn batch_evaluate_ntt(&self, io: &CpuBuffer<F::Elem>, count: usize, expand_bits: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
-        let mut io = io.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice_mut();
-        io.par_chunks_exact_mut(row_size).for_each(|row| {
-            evaluate_ntt(row, expand_bits);
-        });
+        io.as_slice_mut()
+            .par_chunks_exact_mut(row_size)
+            .for_each(|row| {
+                evaluate_ntt(Self::to_baby_bear_fp_slice_mut(row), expand_bits);
+            });
     }
 
-    fn batch_interpolate_ntt(&self, io: &Buffer<Fp>, count: usize) {
+    fn batch_interpolate_ntt(&self, io: &CpuBuffer<F::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
-        let mut io = io.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice_mut();
-        io.par_chunks_exact_mut(row_size).for_each(|row| {
-            interpolate_ntt(row);
-        });
+        io.as_slice_mut()
+            .par_chunks_exact_mut(row_size)
+            .for_each(|row| {
+                interpolate_ntt(Self::to_baby_bear_fp_slice_mut(row));
+            });
     }
 
-    fn batch_bit_reverse(&self, io: &Buffer<Fp>, count: usize) {
+    fn batch_bit_reverse(&self, io: &CpuBuffer<F::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
-        let mut io = io.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice_mut();
-        io.par_chunks_exact_mut(row_size).for_each(|row| {
-            bit_reverse(row);
-        });
+        io.as_slice_mut()
+            .par_chunks_exact_mut(row_size)
+            .for_each(|row| {
+                bit_reverse(row);
+            });
     }
 
     fn batch_evaluate_any(
         &self,
-        coeffs: &Buffer<Fp>,
+        coeffs: &CpuBuffer<F::Elem>,
         poly_count: usize,
-        which: &Buffer<u32>,
-        xs: &Buffer<Fp4>,
-        out: &Buffer<Fp4>,
+        which: &CpuBuffer<u32>,
+        xs: &CpuBuffer<F::ExtElem>,
+        out: &CpuBuffer<F::ExtElem>,
     ) {
         let po2 = log2_ceil(coeffs.size() / poly_count);
         assert_eq!(poly_count * (1 << po2), coeffs.size());
         let eval_count = which.size();
         assert_eq!(xs.size(), eval_count);
         assert_eq!(out.size(), eval_count);
-        let coeffs = coeffs
-            .downcast_ref::<CpuBuffer<Fp>>()
-            .unwrap()
-            .as_slice()
-            .to_vec(); // TODO: avoid copy
-        let which = which.downcast_ref::<CpuBuffer<u32>>().unwrap().as_slice();
-        let xs = xs.downcast_ref::<CpuBuffer<Fp4>>().unwrap().as_slice();
-        let mut out = out.downcast_ref::<CpuBuffer<Fp4>>().unwrap().as_slice_mut();
+        let coeffs = coeffs.as_slice().to_vec(); // TODO: avoid copy
+        let which = which.as_slice();
+        let xs = xs.as_slice();
+        let mut out = out.as_slice_mut();
         (&which[..], &xs[..], &mut out[..])
             .into_par_iter()
             .for_each(|(id, x, out)| {
-                let mut tot = Fp4::ZERO;
-                let mut cur = Fp4::new(Fp::ONE, Fp::ZERO, Fp::ZERO, Fp::ZERO);
+                let mut tot = F::ExtElem::ZERO;
+                let mut cur = F::ExtElem::ONE;
                 let id = *id as usize;
                 let count = 1 << po2;
                 let local = &coeffs[count * id..count * id + count];
@@ -216,37 +255,34 @@ impl Hal for CpuHal {
             });
     }
 
-    fn zk_shift(&self, io: &Buffer<Fp>, poly_count: usize) {
+    fn zk_shift(&self, io: &CpuBuffer<F::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));
-        let mut io = io.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice_mut();
+        let mut io = io.as_slice_mut();
         (&mut io[..], 0..count)
             .into_par_iter()
             .for_each(|(io, idx)| {
                 let pos = idx & ((1 << bits) - 1);
                 let rev = bit_rev_32(pos as u32) >> (32 - bits);
-                let pow3 = Fp::new(3).pow(rev as usize);
+                let pow3 = F::Elem::from_u64(3).pow(rev as usize);
                 *io = *io * pow3;
             });
     }
 
     fn mix_poly_coeffs(
         &self,
-        output: &Buffer<Fp4>,
-        mix_start: &Fp4,
-        mix: &Fp4,
-        input: &Buffer<Fp>,
-        combos: &Buffer<u32>,
+        output: &CpuBuffer<F::ExtElem>,
+        mix_start: &F::ExtElem,
+        mix: &F::ExtElem,
+        input: &CpuBuffer<F::Elem>,
+        combos: &CpuBuffer<u32>,
         input_size: usize,
         count: usize,
     ) {
-        let mut output = output
-            .downcast_ref::<CpuBuffer<Fp4>>()
-            .unwrap()
-            .as_slice_mut();
-        let input = input.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
-        let combos = combos.downcast_ref::<CpuBuffer<u32>>().unwrap().as_slice();
+        let mut output = output.as_slice_mut();
+        let input = input.as_slice();
+        let combos = combos.as_slice();
         // TODO: parallelize
         for idx in 0..count {
             let mut cur = *mix_start;
@@ -258,15 +294,17 @@ impl Hal for CpuHal {
         }
     }
 
-    fn eltwise_add_fp(&self, output: &Buffer<Fp>, input1: &Buffer<Fp>, input2: &Buffer<Fp>) {
+    fn eltwise_add_fp(
+        &self,
+        output: &CpuBuffer<F::Elem>,
+        input1: &CpuBuffer<F::Elem>,
+        input2: &CpuBuffer<F::Elem>,
+    ) {
         assert_eq!(output.size(), input1.size());
         assert_eq!(output.size(), input2.size());
-        let mut output = output
-            .downcast_ref::<CpuBuffer<Fp>>()
-            .unwrap()
-            .as_slice_mut();
-        let input1 = input1.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
-        let input2 = input2.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
+        let mut output = output.as_slice_mut();
+        let input1 = input1.as_slice();
+        let input2 = input2.as_slice();
         (&mut output[..], &input1[..], &input2[..])
             .into_par_iter()
             .for_each(|(o, a, b)| {
@@ -274,39 +312,34 @@ impl Hal for CpuHal {
             });
     }
 
-    fn eltwise_sum_fp4(&self, output: &Buffer<Fp>, input: &Buffer<Fp4>) {
-        let count = output.size() / EXT_SIZE;
+    fn eltwise_sum_fp4(&self, output: &CpuBuffer<F::Elem>, input: &CpuBuffer<F::ExtElem>) {
+        let count = output.size() / F::ExtElem::EXT_SIZE;
         let to_add = input.size() / count;
-        assert_eq!(output.size(), count * EXT_SIZE);
+        assert_eq!(output.size(), count * F::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), count * to_add);
-        let mut output = output
-            .downcast_ref::<CpuBuffer<Fp>>()
-            .unwrap()
-            .as_slice_mut();
-        let mut output = ArrayViewMut::from_shape((EXT_SIZE, count), &mut output).unwrap();
+        let mut output = output.as_slice_mut();
+        let mut output =
+            ArrayViewMut::from_shape((F::ExtElem::EXT_SIZE, count), &mut output).unwrap();
         let output = output.axis_iter_mut(Axis(1)).into_par_iter();
-        let input = input.downcast_ref::<CpuBuffer<Fp4>>().unwrap().as_slice();
+        let input = input.as_slice();
         let input = ArrayView::from_shape((to_add, count), &input).unwrap();
         let input = input.axis_iter(Axis(1)).into_par_iter();
         output.zip(input).for_each(|(mut output, input)| {
-            let mut sum = Fp4::ZERO;
+            let mut sum = F::ExtElem::ZERO;
             for i in input {
                 sum += *i;
             }
-            for i in 0..EXT_SIZE {
-                output[i] = sum.elems()[i];
+            for i in 0..F::ExtElem::EXT_SIZE {
+                output[i] = sum.subelems()[i]
             }
         });
     }
 
-    fn eltwise_copy_fp(&self, output: &Buffer<Fp>, input: &Buffer<Fp>) {
+    fn eltwise_copy_fp(&self, output: &CpuBuffer<F::Elem>, input: &CpuBuffer<F::Elem>) {
         let count = output.size();
         assert_eq!(count, input.size());
-        let mut output = output
-            .downcast_ref::<CpuBuffer<Fp>>()
-            .unwrap()
-            .as_slice_mut();
-        let input = input.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
+        let mut output = output.as_slice_mut();
+        let input = input.as_slice();
         (&mut output[..], &input[..])
             .into_par_iter()
             .for_each(|(output, input)| {
@@ -314,17 +347,11 @@ impl Hal for CpuHal {
             });
     }
 
-    fn eltwise_copy_digest(&self, output: &Buffer<Digest>, input: &Buffer<Digest>) {
+    fn eltwise_copy_digest(&self, output: &CpuBuffer<Digest>, input: &CpuBuffer<Digest>) {
         let count = output.size();
         assert_eq!(count, input.size());
-        let mut output = output
-            .downcast_ref::<CpuBuffer<Digest>>()
-            .unwrap()
-            .as_slice_mut();
-        let input = input
-            .downcast_ref::<CpuBuffer<Digest>>()
-            .unwrap()
-            .as_slice();
+        let mut output = output.as_slice_mut();
+        let input = input.as_slice();
         (&mut output[..], &input[..])
             .into_par_iter()
             .for_each(|(output, input)| {
@@ -332,63 +359,48 @@ impl Hal for CpuHal {
             });
     }
 
-    fn fri_fold(&self, output: &Buffer<Fp>, input: &Buffer<Fp>, mix: &Fp4) {
-        let count = output.size() / EXT_SIZE;
-        assert_eq!(output.size(), count * EXT_SIZE);
+    fn fri_fold(&self, output: &CpuBuffer<F::Elem>, input: &CpuBuffer<F::Elem>, mix: &F::ExtElem) {
+        let count = output.size() / F::ExtElem::EXT_SIZE;
+        assert_eq!(output.size(), count * F::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
-        let mut output = output
-            .downcast_ref::<CpuBuffer<Fp>>()
-            .unwrap()
-            .as_slice_mut();
-        let input = input.downcast_ref::<CpuBuffer<Fp>>().unwrap().as_slice();
+        let mut output = output.as_slice_mut();
+        let input = input.as_slice();
 
         // TODO: parallelize
         for idx in 0..count {
-            let mut tot = Fp4::ZERO;
-            let mut cur_mix = Fp4::from_u32(1);
+            let mut tot = F::ExtElem::ZERO;
+            let mut cur_mix = F::ExtElem::ONE;
             for i in 0..FRI_FOLD {
                 let rev_i = bit_rev_32(i as u32) >> (32 - log2_ceil(FRI_FOLD));
                 let rev_idx = rev_i as usize * count + idx;
-                let factor = Fp4::new(
-                    input[0 * count * FRI_FOLD + rev_idx],
-                    input[1 * count * FRI_FOLD + rev_idx],
-                    input[2 * count * FRI_FOLD + rev_idx],
-                    input[3 * count * FRI_FOLD + rev_idx],
+                let factor = F::ExtElem::from_subelems(
+                    (0..F::ExtElem::EXT_SIZE).map(|i| input[i * count * FRI_FOLD + rev_idx]),
                 );
                 tot += cur_mix * factor;
                 cur_mix *= *mix;
             }
-            for i in 0..EXT_SIZE {
-                output[count * i + idx] = tot.elems()[i];
+            for i in 0..F::ExtElem::EXT_SIZE {
+                output[count * i + idx] = tot.subelems()[i];
             }
         }
     }
 
-    fn sha_rows(&self, output: &Buffer<Digest>, matrix: &Buffer<Fp>) {
+    fn sha_rows(&self, output: &CpuBuffer<Digest>, matrix: &CpuBuffer<F::Elem>) {
         let count = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * count);
-        let mut output = output
-            .downcast_ref::<CpuBuffer<Digest>>()
-            .unwrap()
-            .as_slice_mut();
-        let matrix = matrix
-            .downcast_ref::<CpuBuffer<Fp>>()
-            .unwrap()
-            .as_slice()
-            .to_vec(); // TODO: avoid copy
+        let mut output = output.as_slice_mut();
+        let matrix = matrix.as_slice().to_vec(); // TODO: avoid copy
+        let fp_matrix = CpuHal::<F>::to_baby_bear_fp_slice(matrix.as_slice());
         let sha = sha_cpu::Impl {};
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            *output = *sha.hash_fps_stride(&matrix, idx, col_size, count);
+            *output = *sha.hash_pod_stride(fp_matrix, idx, col_size, count);
         });
     }
 
-    fn sha_fold(&self, io: &Buffer<Digest>, input_size: usize, output_size: usize) {
+    fn sha_fold(&self, io: &CpuBuffer<Digest>, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
-        let mut io = io
-            .downcast_ref::<CpuBuffer<Digest>>()
-            .unwrap()
-            .as_slice_mut();
+        let mut io = io.as_slice_mut();
         let sha = sha_cpu::Impl {};
         let (output, input) = unsafe {
             (
@@ -407,8 +419,7 @@ impl Hal for CpuHal {
 
 #[cfg(test)]
 mod test {
-    use std::fmt::Debug;
-
+    use crate::field::baby_bear::BabyBear;
     use rand::thread_rng;
 
     use super::*;
@@ -416,15 +427,15 @@ mod test {
     #[test]
     #[should_panic]
     fn check_req() {
-        let hal = CpuHal {};
-        let a = hal.alloc(10);
-        let b = hal.alloc(20);
+        let hal = CpuHal::<BabyBear>::new();
+        let a = hal.alloc_fp(10);
+        let b = hal.alloc_fp(20);
         hal.eltwise_add_fp(&a, &b, &b);
     }
 
     #[test]
     fn fp() {
-        let hal = CpuHal {};
+        let hal = CpuHal::<BabyBear>::new();
         const COUNT: usize = 1024 * 1024;
         test_binary(
             &hal,
@@ -436,23 +447,22 @@ mod test {
         );
     }
 
-    fn test_binary<T, H, HF, CF>(hal: &H, hal_fn: HF, cpu_fn: CF, count: usize)
+    fn test_binary<H, HF, CF>(hal: &H, hal_fn: HF, cpu_fn: CF, count: usize)
     where
-        T: Elem + Default + Debug + 'static,
         H: Hal,
-        HF: Fn(&Buffer<T>, &Buffer<T>, &Buffer<T>),
-        CF: Fn(&T, &T) -> T,
+        HF: Fn(&H::BufferFp, &H::BufferFp, &H::BufferFp),
+        CF: Fn(&<H::Field as Field>::Elem, &<H::Field as Field>::Elem) -> <H::Field as Field>::Elem,
     {
-        let a: Buffer<T> = hal.alloc(count);
-        let b: Buffer<T> = hal.alloc(count);
-        let o: Buffer<T> = hal.alloc(count);
+        let a = hal.alloc_fp(count);
+        let b = hal.alloc_fp(count);
+        let o = hal.alloc_fp(count);
         let mut golden = Vec::with_capacity(count);
         let mut rng = thread_rng();
-        a.view_mut(&mut |a| {
-            b.view_mut(&mut |b| {
+        a.view_mut(|a| {
+            b.view_mut(|b| {
                 for i in 0..count {
-                    a[i] = T::random(&mut rng);
-                    b[i] = T::random(&mut rng);
+                    a[i] = <H::Field as Field>::Elem::random(&mut rng);
+                    b[i] = <H::Field as Field>::Elem::random(&mut rng);
                 }
                 for i in 0..count {
                     golden.push(cpu_fn(&a[i], &b[i]));
@@ -460,7 +470,7 @@ mod test {
             });
         });
         hal_fn(&o, &a, &b);
-        o.view(&mut |o| {
+        o.view(|o| {
             assert_eq!(o, &golden[..]);
         });
     }

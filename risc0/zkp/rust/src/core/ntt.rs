@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! An implementation of a Numeric Theoretic Transform (NTT).
+//! An implementation of a number-theoretic transform (NTT).
 
 use core::ops::{Add, Mul, Sub};
 
@@ -26,20 +26,46 @@ use super::{
 
 use crate::field::Elem;
 
-/// Reverses the bits in a 32 bit number
-/// For example 1011...0100 becomes 0010...1101
+/// Reverses the bits in a 32-bit number.
+/// # Example
+/// ```
+/// # use risc0_zkp::core::ntt::bit_rev_32;
+/// #
+/// let a: u32 = 2^8 + 2^4 + 1;
+///
+/// assert_eq!(format!("{:b}", a), "1101");
+/// assert_eq!(format!("{:b}", bit_rev_32(a)), "10110000000000000000000000000000");
+/// ```
 pub fn bit_rev_32(mut x: u32) -> u32 {
+    // The values used here are, in binary:
+    // 10101010101010101010101010101010, 01010101010101010101010101010101
     x = ((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1);
+    // 110011001100110011001100, 001100110011001100110011
     x = ((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2);
+    // 111100001111000011110000, 000011110000111100001111
     x = ((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4);
+    // 11111111000000001111111100000000, 00000000111111110000000011111111
     x = ((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8);
     (x >> 16) | (x << 16)
 }
 
-/// Bit reverses the indices in an array of (1 << n) numbers.
+/// Bit-reverses the indices in an array of (1 << n) numbers.
 /// This permutes the values in the array so that a value which is previously
-/// in index i, will now go in the index i' given by reversing the bits of i.
-/// For example, with n=4, the value at index 3=0011 will go to index 12=1100.
+/// in index i will now go in the index i', given by reversing the bits of i.
+///
+/// # Example
+/// For example, with the array given below of size n=4,
+/// the indices are `0, 1, 2, 3`; bitwise, they're `0, 01, 10, 11`.
+///
+/// Reversed, these give `0, 10, 01, 11`, permuting the second and third
+/// values.
+/// ```
+/// # use risc0_zkp::core::ntt::bit_reverse;
+/// #
+/// let mut some_values = [1, 2, 3, 4];
+/// bit_reverse(&mut some_values);
+/// assert_eq!(some_values, [1, 3, 2, 4]);
+/// ```
 pub fn bit_reverse<T: Copy>(io: &mut [T]) {
     let n = log2_ceil(io.len());
     assert_eq!(1 << n, io.len());
@@ -138,10 +164,10 @@ butterfly!(1, 0);
 
 /// Perform a reverse butterfly transform of a buffer of (1 << n) numbers.
 /// The result of this computation is a discrete Fourier transform, but with
-/// changed indices. This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms)
-/// The output of rev_butterfly(io, n) at index i is the sum over k from 0 to
-/// 2^n-1 of io\[k\] ROU_REV\[n\]^(k i'), where i' is i bit-reversed as an n-bit
-/// number.
+/// changed indices. This is described [here](https://en.wikipedia.org/wiki/Cooley%E2%80%93Tukey_FFT_algorithm#Data_reordering,_bit_reversal,_and_in-place_algorithms).
+/// The output of `rev_butterfly(io, n)` at index i is the sum over k from 0 to
+/// 2^n-1 of io\[k\] ROU_REV\[n\]^(k i'), where i' is i bit-reversed as an
+/// n-bit number and ROU_REV are the 'reverse' roots of unity.
 ///
 /// As an example, we'll work through a trace of the rev_butterfly algorithm
 /// with n = 3 on a list of length 8. Let w = ROU_REV\[3\] be the eighth root of
@@ -346,7 +372,7 @@ mod tests {
         let mut buf = [Fp::random(&mut rng); SIZE];
         // Copy it
         let orig = buf.clone();
-        // Now go backwords
+        // Now go backwards
         interpolate_ntt(&mut buf);
         // Make sure something changed
         assert_ne!(orig, buf);

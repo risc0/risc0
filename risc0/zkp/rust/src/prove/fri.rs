@@ -19,7 +19,6 @@ use rand::RngCore;
 
 use crate::{
     core::{
-        fp::Fp,
         fp4::{Fp4, EXT_SIZE},
         log2_ceil,
         sha::Sha,
@@ -30,26 +29,26 @@ use crate::{
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
 
-struct ProveRoundInfo {
+struct ProveRoundInfo<H: Hal> {
     domain: usize,
-    coeffs: Buffer<Fp>,
-    merkle: MerkleTreeProver,
+    coeffs: H::BufferFp,
+    merkle: MerkleTreeProver<H>,
 }
 
-impl ProveRoundInfo {
+impl<H: Hal> ProveRoundInfo<H> {
     /// Computes a round of the folding protocol. Takes in the coefficients of
     /// the current polynomial, and interacts with the IOP verifier to
     /// produce the evaluations of the polynomial, the merkle tree
     /// committing to the evaluation, and the coefficients of the folded
     /// polynomial.
-    pub fn new<H: Hal, S: Sha>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>) -> Self {
+    pub fn new<S: Sha>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &H::BufferFp) -> Self {
         debug!("Doing FRI folding");
         // Get the number of coefficients of the polynomial over the extension field.
         let size = coeffs.size() / EXT_SIZE;
         // Get a larger domain to interpolate over.
         let domain = size * INV_RATE;
         // Allocate space in which to put the interpolated values.
-        let evaluated = hal.alloc(domain * EXT_SIZE);
+        let evaluated = hal.alloc_fp(domain * EXT_SIZE);
         // Put in the coefficients, padding out with zeros so that we are left with the
         // same polynomial represented by a larger coefficient list
         hal.batch_expand(&evaluated, coeffs, EXT_SIZE);
@@ -69,9 +68,9 @@ impl ProveRoundInfo {
         // Retrieve from the IOP verifier a random value to mix the polynomial slices.
         let fold_mix = Fp4::random(&mut iop.rng);
         // Create a buffer to hold the mixture of slices.
-        let out_coeffs = hal.alloc(size / FRI_FOLD * EXT_SIZE);
+        let out_coeffs = hal.alloc_fp(size / FRI_FOLD * EXT_SIZE);
         // Compute the folded polynomial
-        hal.fri_fold(&out_coeffs, coeffs, &fold_mix);
+        hal.fri_fold(&out_coeffs, coeffs, &H::from_baby_bear_fp4(fold_mix));
         ProveRoundInfo {
             domain,
             coeffs: out_coeffs,
@@ -89,7 +88,7 @@ impl ProveRoundInfo {
     }
 }
 
-pub fn fri_prove<H: Hal, S: Sha, F>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &Buffer<Fp>, mut f: F)
+pub fn fri_prove<H: Hal, S: Sha, F>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &H::BufferFp, mut f: F)
 where
     F: FnMut(&mut WriteIOP<S>, usize),
 {
@@ -102,13 +101,14 @@ where
         rounds.push(round);
     }
     // Put the final coefficients into natural order
-    let final_coeffs = hal.alloc(coeffs.size());
+    let final_coeffs = hal.alloc_fp(coeffs.size());
     hal.eltwise_copy_fp(&final_coeffs, &coeffs);
     hal.batch_bit_reverse(&final_coeffs, EXT_SIZE);
     // Dump final polynomial + commit
-    final_coeffs.view(&mut |view| {
+    final_coeffs.view(|view| {
+        let view = H::to_baby_bear_fp_slice(view);
         iop.write_fp_slice(view);
-        let digest = iop.get_sha().hash_fps(view);
+        let digest = iop.get_sha().hash_raw_pod_slice(view);
         iop.commit(&digest);
     });
     // Do queries

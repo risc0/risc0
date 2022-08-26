@@ -13,25 +13,31 @@
 // limitations under the License.
 
 #![deny(missing_docs)]
+//! Core objects used by the zk-STARK prover
+//! and verifier.
 #![doc = include_str!("README.md")]
 
 extern crate alloc;
 
 use rand::Rng;
 
-/// Transitional "fp" module until ZKP has been genericized to work
-/// with multiple fields.
+/// This transitional "fp4" module will remain until ZKP has been genericized to
+/// work with multiple fields. This module includes the base field of order
+/// 15*2^27 + 1).
+///
+/// # Example
 pub mod fp {
     pub use crate::field::baby_bear::Elem as Fp;
 }
-/// Transitional "fp4" module until ZKP has been genericized to work
-/// with multiple fields.
+/// This transitional "fp4" module will remain until ZKP has been genericized to
+/// work with multiple fields. This module includes the field extension whose
+/// base field is of order 15*2^27 + 1.
 pub mod fp4 {
     pub use crate::field::baby_bear::ExtElem as Fp4;
     use crate::field::ExtElem;
 
-    /// Transitional reexport until ZKP has been genericized to work
-    /// with multiple fields.
+    /// This transitional re-export will remain until ZKP has been genericized
+    /// to work with multiple fields.
     pub const EXT_SIZE: usize = Fp4::EXT_SIZE;
 }
 pub mod ntt;
@@ -42,13 +48,28 @@ pub mod sha_cpu;
 pub mod sha_rng;
 
 /// For x = (1 << po2), given x, find po2.
+/// # Example
+/// ```
+/// # use risc0_zkp::core::to_po2;
+/// #
+/// assert_eq!(to_po2(7), 2);
+/// assert_eq!(to_po2(10), 3);
+/// ```
 pub fn to_po2(x: usize) -> usize {
     (31 - (x as u32).leading_zeros()) as usize
 }
 
 /// Compute `ceil(log_2(value))`
 ///
-/// Find the smallest value `result` such that `2^result >= value`.
+/// Find the smallest `result` such that, for the provided value,
+/// `2^result >= value`.
+/// # Example
+/// ```
+/// # use risc0_zkp::core::log2_ceil;
+/// #
+/// assert_eq!(log2_ceil(8), 3); // 2^3 = 8
+/// assert_eq!(log2_ceil(32), 5); // 2^5 = 32
+/// ```
 #[inline]
 pub const fn log2_ceil(value: usize) -> usize {
     let mut result = 0;
@@ -65,6 +86,7 @@ pub trait Random {
 }
 
 impl Random for u32 {
+    /// Return a random u32 value.
     fn random<R: Rng>(rng: &mut R) -> Self {
         rng.next_u32()
     }

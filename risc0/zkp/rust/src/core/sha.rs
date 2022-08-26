@@ -148,10 +148,12 @@ pub trait Sha: Clone + Debug {
     /// implementation wants to manage its own memory.
     type DigestPtr: Deref<Target = Digest> + Debug;
 
-    /// Generate a SHA from a slice of bytes.
+    /// Generate a SHA from a slice of bytes, padding to block size
+    /// and adding the SHA trailer.
     fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr;
 
-    /// Generate a SHA from a slice of words.
+    /// Generate a SHA from a slice of words, padding to block size
+    /// and adding the SHA trailer.
     fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
@@ -163,11 +165,10 @@ pub trait Sha: Clone + Debug {
     /// Generate a SHA from a pair of [Digests](Digest).
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr;
 
-    /// Generate a SHA from a slice of [Fps](Fp).
-    fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr;
-
-    /// Generate a SHA from a slice of [Fp4s](Fp4).
-    fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr;
+    /// Generate a SHA from a slice of anything that can be
+    /// represented as plain old data.  Pads up to the Sha block
+    /// boundry, but does not add the standard SHA trailer.
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, fps: &[T]) -> Self::DigestPtr;
 
     /// Generate a new digest by mixing two digests together via XOR,
     /// and storing into the first digest.
@@ -257,7 +258,7 @@ pub mod testutil {
 
     fn hash_fpvec<S: Sha>(sha: &S, len: usize) -> Digest {
         let items: Vec<Fp> = (0..len as u32).into_iter().map(|x| Fp::new(x)).collect();
-        *sha.hash_fps(items.as_slice())
+        *sha.hash_raw_pod_slice(items.as_slice())
     }
 
     fn hash_fp4vec<S: Sha>(sha: &S, len: usize) -> Digest {
@@ -272,17 +273,18 @@ pub mod testutil {
                 )
             })
             .collect();
-        *sha.hash_fp4s(items.as_slice())
+        *sha.hash_raw_pod_slice(items.as_slice())
     }
 
     fn test_fps<S: Sha>(sha: &S) {
         const LENS: &[usize] = &[0, 1, 7, 8, 9];
+        // It doesn't matter what fps hash to, as long as they're consistent.
         const EXPECTED_STRS: &[&str] = &[
             "6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19",
             "da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8",
-            "f5291d65176f19d6c22b9377df2ed418e0f4ea044e9dee9fa2f8dbf863f1c615",
-            "8a5f075fdf7d09b8103c0e88c30a906f13a962e0c4562c09d2c95b928d9cee46",
-            "ab57060d5b4b27718986483158dcf069e87ba7a52f6bf960d49f6d305b733281",
+            "643f71dab15c4f6a6e8820dee5f59cc07818b9c4473b47bba9516cc3be992f1c",
+            "3dae53575097f63d0a461048813cc9ab870f0ddbcf9e4aea8dcddecc0aea736d",
+            "903fe671a0971f6dea6e8a1180dcd1ce87b56d0b42ee3861212e86428a983a5b",
         ];
 
         let expected: Vec<Digest> = EXPECTED_STRS.iter().map(|x| Digest::from_str(x)).collect();
@@ -292,12 +294,13 @@ pub mod testutil {
 
     fn test_fp4s<S: Sha>(sha: &S) {
         const LENS: &[usize] = &[0, 1, 7, 8, 9];
+        // It doesn't matter what fp4s hash to, as long as they're consistent.
         const EXPECTED_STRS: &[&str] = &[
             "6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19",
-            "04fcce36de1b9c057f7d11c89cd35fc7cec7fa8058764d15119ffdfb7c16d54b",
-            "d136c9e9616ef6dcc57dd20cc85a5df366177fe48b14a367a773c888b6382dc4",
-            "2f0b744a280f1700f6fa0ca5c51cbb51054ceb2c11460e1f04cb906b552e1e6d",
-            "08aa99c90d0cb74713d13f7451b0d2c0257a7716d5164b15f4a855fc54573ef1",
+            "6343c9ca9260f2d6cf190c2d2bbff0bf928789e4d2c1a24654137a5d48f254bc",
+            "07d3bfa65009530790a51cca21b83dd492c60ade96ee1d2c5b25c4c5cfe257b0",
+            "60a53ad42dfe03c7c0d1d46790a832356d09b52c6812eada27622476d6180392",
+            "5af62d0303208f4573656ac707d7447f0303fd76a134a775f329104d03c37985",
         ];
 
         let expected: Vec<Digest> = EXPECTED_STRS.iter().map(|x| Digest::from_str(x)).collect();

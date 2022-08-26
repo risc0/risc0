@@ -22,6 +22,7 @@ use risc0_zkp::{
         log2_ceil,
         sha::{Digest, DIGEST_WORDS, DIGEST_WORD_SIZE},
     },
+    field::baby_bear::BabyBear,
     MAX_CYCLES, MIN_CYCLES, ZK_CYCLES,
 };
 
@@ -65,13 +66,14 @@ impl MethodId {
 
     #[cfg(feature = "prove")]
     pub fn compute_with_limit(elf_contents: &[u8], limit: u32) -> Result<Self> {
-        use crate::{elf::Program, platform::memory::MEM_SIZE, CODE_SIZE};
+        use crate::{elf::Program, CODE_SIZE};
         use risc0_zkp::{
             hal::{cpu::CpuHal, Hal},
             prove::poly_group::PolyGroup,
         };
+        use risc0_zkvm_platform::memory::MEM_SIZE;
 
-        let hal = CpuHal {};
+        let hal: CpuHal<BabyBear> = CpuHal::new();
         let program = Program::load_elf(elf_contents, MEM_SIZE as u32)?;
 
         // Start with an empty table
@@ -92,7 +94,7 @@ impl MethodId {
             load_code(&mut code, &program, cycles)?;
 
             // Copy into accel buffer
-            let coeffs = hal.copy_from(&code);
+            let coeffs = hal.copy_fp_from(&code);
             // Do interpolate & shift
             hal.batch_interpolate_ntt(&coeffs, CODE_SIZE);
             hal.zk_shift(&coeffs, CODE_SIZE);

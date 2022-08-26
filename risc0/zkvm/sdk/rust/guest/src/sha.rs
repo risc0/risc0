@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use _alloc::{boxed::Box, vec::Vec};
+use alloc_crate::{boxed::Box, vec::Vec};
 use core::{cell::UnsafeCell, mem};
 
 use risc0_zkp::core::{
@@ -20,12 +20,10 @@ use risc0_zkp::core::{
     fp4::Fp4,
     sha::{Digest, DIGEST_WORDS},
 };
-use risc0_zkvm::{
-    platform::{
-        io::{SHADescriptor, GPIO_SHA},
-        memory, WORD_SIZE,
-    },
-    serde::to_vec_with_capacity,
+use risc0_zkvm::serde::to_vec_with_capacity;
+use risc0_zkvm_platform::{
+    io::{SHADescriptor, GPIO_SHA},
+    memory, WORD_SIZE,
 };
 use serde::Serialize;
 
@@ -208,21 +206,19 @@ impl risc0_zkp::core::sha::Sha for Impl {
         raw_digest(words)
     }
 
-    fn hash_fps(&self, fps: &[Fp]) -> Self::DigestPtr {
-        // Fps do not not include standard sha header.
-        if fps.len() % CHUNK_SIZE == 0 {
-            raw_digest(bytemuck::cast_slice(fps))
-        } else {
-            let size = align_up(fps.len(), CHUNK_SIZE);
-            let mut buf: Vec<u32> = Vec::with_capacity(size);
-            buf.extend(bytemuck::cast_slice(fps));
-            buf.resize(size, 0);
-            raw_digest(&buf)
-        }
-    }
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, pod: &[T]) -> Self::DigestPtr {
+        let u8s: &[u8] = bytemuck::cast_slice(pod);
 
-    fn hash_fp4s(&self, fp4s: &[Fp4]) -> Self::DigestPtr {
-        self.hash_fps(bytemuck::cast_slice(fp4s))
+        if u8s.len() % (CHUNK_SIZE * WORD_SIZE) == 0 {
+            // Already padded; no need to copy it.
+            raw_digest(bytemuck::cast_slice(pod))
+        } else {
+            let size = align_up(u8s.len(), CHUNK_SIZE * WORD_SIZE);
+            let mut buf: Vec<u8> = Vec::with_capacity(size);
+            buf.extend(bytemuck::cast_slice(pod));
+            buf.resize(size, 0);
+            raw_digest(bytemuck::cast_slice(buf.as_slice()))
+        }
     }
 
     // Generate a new digest by mixing two digests together via XOR,
