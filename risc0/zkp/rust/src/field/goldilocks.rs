@@ -88,17 +88,11 @@ impl field::Elem for Elem {
     }
 
     fn to_u32s(&self) -> Vec::<u32> {
-        // let val = self as u64;
-        // let val = val.to_le_bytes();
-
-        // TODO: This is wrong but fast to implement
-        Vec::<u32>::from([self.0 as u32])
+        Vec::<u32>::from([self.0 as u32, (self.0 >> 32) as u32])
     }
 
     fn from_u32s(val: &[u32]) -> Self {
-        // TODO: ENDIANNESS CONCERNS!
-        // TODO
-        let val: u64 = val[0] as u64 + val[1] as u64 * (1 << 32);
+        let val: u64 = val[0] as u64 + (val[1] as u64) << 32;
         Self(val)
     }
 }
@@ -377,13 +371,12 @@ impl field::Elem for ExtElem {
     }
 
     fn to_u32s(&self) -> Vec::<u32> {
-        // TODO: This is wrong but fast to implement
-        self.0[0].to_u32s()
+        self.elems().iter().flat_map(|elem|{ elem.to_u32s() }).collect()
     }
 
     fn from_u32s(val: &[u32]) -> Self {
-        // TODO: This is wrong! but fast to implement...
-        field::ExtElem::from_subelems([Elem(val[0] as u64), Elem(val[1] as u64)])
+        let iter = val.iter().step_by(2).zip(val.iter().skip(1).step_by(2));
+        field::ExtElem::from_subelems(iter.map(|word|{ Elem::from_u32s(&[*word.0, *word.1]) }))
     }
 }
 
