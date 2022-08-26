@@ -106,8 +106,7 @@ where
     hal.batch_bit_reverse(&final_coeffs, EXT_SIZE);
     // Dump final polynomial + commit
     final_coeffs.view(|view| {
-        let view = H::to_baby_bear_fp_slice(view);
-        iop.write_fp_slice(view);
+        iop.write_fp_slice::<<<H as Hal>::Field as field::Field>::Elem>(view);
         let digest = iop.get_sha().hash_raw_pod_slice(view);
         iop.commit(&digest);
     });

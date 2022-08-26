@@ -15,7 +15,6 @@
 use alloc::vec::Vec;
 
 use crate::core::{
-    fp::Fp,
     fp4::Fp4,
     sha::{Digest, Sha},
     sha_rng::ShaRng,
@@ -51,7 +50,7 @@ impl<S: Sha> WriteIOP<S> {
     }
 
     /// Called by the prover to write some data.
-    pub fn write_fp_slice(&mut self, slice: &[Fp]) {
+    pub fn write_fp_slice<E: Elem>(&mut self, slice: &[E]) {
         self.proof.extend(slice.iter().map(|x| {
             x.to_u32s()
         }).flatten());
