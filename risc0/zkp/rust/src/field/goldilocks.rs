@@ -56,6 +56,7 @@ const P: u64 = (0xffffffff_ffffffff << 32) + 1;
 impl field::Elem for Elem {
     const ZERO: Self = Elem::new(0u64);
     const ONE: Self = Elem::new(1u64);
+    const WORDS: usize = 2;
 
     /// Compute the multiplicative inverse of `x`, or `1 / x` in finite field
     /// terms. Since we know by Fermat's Little Theorem that
@@ -84,6 +85,21 @@ impl field::Elem for Elem {
 
     fn from_u64(x0: u64) -> Self {
         Elem::new(x0)
+    }
+
+    fn to_u32s(&self) -> Vec::<u32> {
+        // let val = self as u64;
+        // let val = val.to_le_bytes();
+
+        // TODO: This is wrong but fast to implement
+        Vec::<u32>::from([self.0 as u32])
+    }
+
+    fn from_u32s(val: &[u32]) -> Self {
+        // TODO: ENDIANNESS CONCERNS!
+        // TODO
+        let val: u64 = val[0] as u64 + val[1] as u64 * (1 << 32);
+        Self(val)
     }
 }
 
@@ -319,6 +335,7 @@ impl Default for ExtElem {
 impl field::Elem for ExtElem {
     const ZERO: ExtElem = ExtElem::zero();
     const ONE: ExtElem = ExtElem::one();
+    const WORDS: usize = 4;
 
     /// Generate a random [ExtElem] uniformly.
     fn random(rng: &mut impl rand::Rng) -> Self {
@@ -357,6 +374,16 @@ impl field::Elem for ExtElem {
 
     fn from_u64(x0: u64) -> Self {
         Self([Elem::new(x0), Elem::new(0)])
+    }
+
+    fn to_u32s(&self) -> Vec::<u32> {
+        // TODO: This is wrong but fast to implement
+        self.0[0].to_u32s()
+    }
+
+    fn from_u32s(val: &[u32]) -> Self {
+        // TODO: This is wrong! but fast to implement...
+        field::ExtElem::from_subelems([Elem(val[0] as u64), Elem(val[1] as u64)])
     }
 }
 

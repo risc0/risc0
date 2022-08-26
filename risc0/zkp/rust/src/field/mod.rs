@@ -53,6 +53,9 @@ pub trait Elem:
     /// One, the multiplicative identity.
     const ONE: Self;
 
+    /// How many u32 words are required to hold a single element
+    const WORDS: usize;
+
     /// Compute the multiplicative inverse of `x` (or `1 / x` in finite field
     /// terms).
     fn inv(self) -> Self;
@@ -77,6 +80,12 @@ pub trait Elem:
 
     /// Import a number into the field from the natural numbers.
     fn from_u64(val: u64) -> Self;
+
+    /// TODO: Doc once finalized
+    fn to_u32s(&self) -> Vec::<u32>;
+
+    /// TODO: Doc once finalized
+    fn from_u32s(val: &[u32]) -> Self;
 }
 
 /// A field extension which can be constructed from a subfield element [Elem]

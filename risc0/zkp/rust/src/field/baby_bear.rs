@@ -73,10 +73,13 @@ impl fmt::Debug for Elem {
 const P: u32 = 15 * (1 << 27) + 1;
 /// The modulus of the field as a u64.
 const P_U64: u64 = P as u64;
+/// The amount of memory to store a field element, as number of u32 words
+const WORDS: usize = 1;
 
 impl field::Elem for Elem {
     const ZERO: Self = Elem::new(0);
     const ONE: Self = Elem::new(1);
+    const WORDS: usize = WORDS;
 
     /// Compute the multiplicative inverse of `x`, or `1 / x` in finite field
     /// terms. Since we know by Fermat's Little Theorem that
@@ -104,6 +107,14 @@ impl field::Elem for Elem {
 
     fn from_u64(val: u64) -> Self {
         Elem::from(val)
+    }
+
+    fn to_u32s(&self) -> Vec::<u32> {
+        Vec::<u32>::from([self.0])
+    }
+
+    fn from_u32s(val: &[u32]) -> Self {
+        Self(val[0])
     }
 }
 
@@ -296,6 +307,7 @@ impl Default for ExtElem {
 impl field::Elem for ExtElem {
     const ZERO: ExtElem = ExtElem::zero();
     const ONE: ExtElem = ExtElem::one();
+    const WORDS: usize = WORDS * EXT_SIZE;
 
     /// Generate a random field element uniformly.
     fn random(rng: &mut impl rand::Rng) -> Self {
@@ -360,6 +372,15 @@ impl field::Elem for ExtElem {
 
     fn from_u64(val: u64) -> Self {
         Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+    }
+
+    fn to_u32s(&self) -> Vec::<u32> {
+        // TODO: This is wrong but fast to implement
+        self.0[0].to_u32s()
+    }
+
+    fn from_u32s(val: &[u32]) -> Self {
+        field::ExtElem::from_subelems(val.iter().map(|word|{ Elem(*word) }))
     }
 }
 
