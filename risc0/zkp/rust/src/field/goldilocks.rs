@@ -92,7 +92,7 @@ impl field::Elem for Elem {
     }
 
     fn from_u32s(val: &[u32]) -> Self {
-        let val: u64 = val[0] as u64 + (val[1] as u64) << 32;
+        let val: u64 = val[0] as u64 + ((val[1] as u64) << 32);
         Self(val)
     }
 }
@@ -567,7 +567,7 @@ mod tests {
     use super::field;
     use super::{Elem, ExtElem, P};
     use crate::field::Elem as FieldElem;
-    use rand::SeedableRng;
+    use rand::{Rng, SeedableRng};
 
     #[test]
     /// Roots of unity tests common to all fields under test
@@ -792,6 +792,25 @@ mod tests {
                 a,
                 b
             );
+        }
+    }
+
+    #[test]
+    fn u32s_conversions() {
+        let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
+        for _ in 0..100 {
+            let elem = Elem::random(&mut rng);
+            assert_eq!(elem, Elem::from_u32s(&elem.to_u32s()));
+
+            let vec: Vec<u32> = vec!(rng.gen(), rng.gen());
+            assert_eq!(vec, Elem::from_u32s(&vec).to_u32s());
+        }
+        for _ in 0..100 {
+            let elem = ExtElem::random(&mut rng);
+            assert_eq!(elem, ExtElem::from_u32s(&elem.to_u32s()));
+
+            let vec: Vec<u32> = vec!(rng.gen(), rng.gen(), rng.gen(), rng.gen());
+            assert_eq!(vec, ExtElem::from_u32s(&vec).to_u32s());
         }
     }
 }
