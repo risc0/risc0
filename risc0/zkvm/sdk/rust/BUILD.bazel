@@ -37,6 +37,7 @@ risc0_rust_library_pair(
     ],
     host_features = [
         "bazel",
+        "circuit",
         "host",
         "prove",
         "std",
