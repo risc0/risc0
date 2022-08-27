@@ -18,11 +18,7 @@ use log::debug;
 use rand::RngCore;
 
 use crate::{
-    core::{
-        fp4::EXT_SIZE,
-        log2_ceil,
-        sha::Sha,
-    },
+    core::{fp4::EXT_SIZE, log2_ceil, sha::Sha},
     field::{self, Elem},
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},

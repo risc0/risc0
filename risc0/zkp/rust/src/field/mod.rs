@@ -82,7 +82,7 @@ pub trait Elem:
     fn from_u64(val: u64) -> Self;
 
     /// Represent a field element as a sequence of u32s
-    fn to_u32_words(&self) -> Vec::<u32>;
+    fn to_u32_words(&self) -> Vec<u32>;
 
     /// Interpret a sequence of u32s as a field element
     fn from_u32_words(val: &[u32]) -> Self;

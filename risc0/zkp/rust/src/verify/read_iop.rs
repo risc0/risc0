@@ -65,7 +65,9 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
             let mut subelems = Vec::<<Fp4 as ExtElem>::SubElem>::new();
             for j in 0..<Fp4 as ExtElem>::EXT_SIZE {
                 let offset: usize = ext_size * i + j;
-                subelems.push(<Fp4 as ExtElem>::SubElem::from_u32_words(&self.proof[elem_words * offset..elem_words * (offset+1)]));
+                subelems.push(<Fp4 as ExtElem>::SubElem::from_u32_words(
+                    &self.proof[elem_words * offset..elem_words * (offset + 1)],
+                ));
             }
             x[i] = <Fp4 as ExtElem>::from_subelems(subelems);
         }

@@ -102,7 +102,11 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
-    pub fn prove<S: Sha>(&self, iop: &mut WriteIOP<S>, idx: usize) -> Vec<<<H as Hal>::Field as Field>::Elem> {
+    pub fn prove<S: Sha>(
+        &self,
+        iop: &mut WriteIOP<S>,
+        idx: usize,
+    ) -> Vec<<<H as Hal>::Field as Field>::Elem> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);
         self.matrix.view(|view| {
@@ -127,7 +131,7 @@ impl<H: Hal> MerkleTreeProver<H> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        core::{sha_cpu, fp::Fp},
+        core::{fp::Fp, sha_cpu},
         field::{baby_bear::BabyBear, Elem},
         hal::cpu::CpuHal,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
@@ -146,7 +150,9 @@ mod tests {
         let size: u32 = (rows * cols) as u32;
         let mut data = Vec::<<<H as Hal>::Field as Field>::Elem>::new();
         for val in 0..size {
-            data.push(<<H as Hal>::Field as Field>::Elem::from_u64((u32::MAX / 2) as u64 - val as u64));
+            data.push(<<H as Hal>::Field as Field>::Elem::from_u64(
+                (u32::MAX / 2) as u64 - val as u64,
+            ));
         }
         let matrix = hal.copy_fp_from(data.as_slice());
 
@@ -176,7 +182,12 @@ mod tests {
             let r_idx = (iop.rng.next_u32() as usize) % rows;
             let col = prover.prove(&mut iop, r_idx);
             for c_idx in 0..cols {
-                assert_eq!(col[c_idx], <<H as Hal>::Field as Field>::Elem::from_u64((u32::MAX / 2) as u64 - ((r_idx + c_idx * rows) as u64)));
+                assert_eq!(
+                    col[c_idx],
+                    <<H as Hal>::Field as Field>::Elem::from_u64(
+                        (u32::MAX / 2) as u64 - ((r_idx + c_idx * rows) as u64)
+                    )
+                );
             }
         }
         {
@@ -213,7 +224,10 @@ mod tests {
                 }
                 let col = verifier.verify(&mut r_iop, r_idx).unwrap();
                 for c_idx in 0..cols {
-                    assert_eq!(col[c_idx], Fp::from((u32::MAX / 2) - ((r_idx + c_idx * rows) as u32)));
+                    assert_eq!(
+                        col[c_idx],
+                        Fp::from((u32::MAX / 2) - ((r_idx + c_idx * rows) as u32))
+                    );
                 }
             }
             if !err {
