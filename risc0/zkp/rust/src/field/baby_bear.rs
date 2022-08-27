@@ -109,11 +109,11 @@ impl field::Elem for Elem {
         Elem::from(val)
     }
 
-    fn to_u32s(&self) -> Vec::<u32> {
+    fn to_u32_words(&self) -> Vec::<u32> {
         Vec::<u32>::from([self.0])
     }
 
-    fn from_u32s(val: &[u32]) -> Self {
+    fn from_u32_words(val: &[u32]) -> Self {
         Self(val[0])
     }
 }
@@ -374,11 +374,11 @@ impl field::Elem for ExtElem {
         Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
     }
 
-    fn to_u32s(&self) -> Vec::<u32> {
-        self.elems().iter().flat_map(|elem|{ elem.to_u32s() }).collect()
+    fn to_u32_words(&self) -> Vec::<u32> {
+        self.elems().iter().flat_map(|elem|{ elem.to_u32_words() }).collect()
     }
 
-    fn from_u32s(val: &[u32]) -> Self {
+    fn from_u32_words(val: &[u32]) -> Self {
         field::ExtElem::from_subelems(val.iter().map(|word|{ Elem(*word) }))
     }
 }
@@ -657,18 +657,18 @@ mod tests {
         let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
         for _ in 0..100 {
             let elem = Elem::random(&mut rng);
-            assert_eq!(elem, Elem::from_u32s(&elem.to_u32s()));
+            assert_eq!(elem, Elem::from_u32_words(&elem.to_u32_words()));
 
             let val: u32 = rng.gen();
-            assert_eq!(val, Elem::from_u32s(&[val]).to_u32s()[0]);
+            assert_eq!(val, Elem::from_u32_words(&[val]).to_u32_words()[0]);
         }
         for _ in 0..100 {
             let elem = ExtElem::random(&mut rng);
-            assert_eq!(elem, ExtElem::from_u32s(&elem.to_u32s()));
+            assert_eq!(elem, ExtElem::from_u32_words(&elem.to_u32_words()));
 
             let vec: Vec<u32> = vec!(rng.gen(), rng.gen(), rng.gen(), rng.gen());
 
-            assert_eq!(vec, ExtElem::from_u32s(&vec).to_u32s());
+            assert_eq!(vec, ExtElem::from_u32_words(&vec).to_u32_words());
         }
     }
 }

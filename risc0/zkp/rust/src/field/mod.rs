@@ -81,11 +81,11 @@ pub trait Elem:
     /// Import a number into the field from the natural numbers.
     fn from_u64(val: u64) -> Self;
 
-    /// TODO: Doc once finalized
-    fn to_u32s(&self) -> Vec::<u32>;
+    /// Represent a field element as a sequence of u32s
+    fn to_u32_words(&self) -> Vec::<u32>;
 
-    /// TODO: Doc once finalized
-    fn from_u32s(val: &[u32]) -> Self;
+    /// Interpret a sequence of u32s as a field element
+    fn from_u32_words(val: &[u32]) -> Self;
 }
 
 /// A field extension which can be constructed from a subfield element [Elem]

@@ -51,9 +51,9 @@ impl<S: Sha> WriteIOP<S> {
 
     /// Called by the prover to write some data.
     pub fn write_fp_slice<E: Elem>(&mut self, slice: &[E]) {
-        self.proof.extend(slice.iter().map(|x| {
-            x.to_u32s()
-        }).flatten());
+        self.proof.extend(slice.iter().flat_map(|x| {
+            x.to_u32_words()
+        }));
     }
 
     /// Called by the prover to write some data.

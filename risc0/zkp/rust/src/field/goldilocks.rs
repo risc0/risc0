@@ -87,11 +87,11 @@ impl field::Elem for Elem {
         Elem::new(x0)
     }
 
-    fn to_u32s(&self) -> Vec::<u32> {
+    fn to_u32_words(&self) -> Vec::<u32> {
         Vec::<u32>::from([self.0 as u32, (self.0 >> 32) as u32])
     }
 
-    fn from_u32s(val: &[u32]) -> Self {
+    fn from_u32_words(val: &[u32]) -> Self {
         let val: u64 = val[0] as u64 + ((val[1] as u64) << 32);
         Self(val)
     }
@@ -370,13 +370,13 @@ impl field::Elem for ExtElem {
         Self([Elem::new(x0), Elem::new(0)])
     }
 
-    fn to_u32s(&self) -> Vec::<u32> {
-        self.elems().iter().flat_map(|elem|{ elem.to_u32s() }).collect()
+    fn to_u32_words(&self) -> Vec::<u32> {
+        self.elems().iter().flat_map(|elem|{ elem.to_u32_words() }).collect()
     }
 
-    fn from_u32s(val: &[u32]) -> Self {
+    fn from_u32_words(val: &[u32]) -> Self {
         let iter = val.iter().step_by(2).zip(val.iter().skip(1).step_by(2));
-        field::ExtElem::from_subelems(iter.map(|word|{ Elem::from_u32s(&[*word.0, *word.1]) }))
+        field::ExtElem::from_subelems(iter.map(|word|{ Elem::from_u32_words(&[*word.0, *word.1]) }))
     }
 }
 
@@ -800,17 +800,17 @@ mod tests {
         let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
         for _ in 0..100 {
             let elem = Elem::random(&mut rng);
-            assert_eq!(elem, Elem::from_u32s(&elem.to_u32s()));
+            assert_eq!(elem, Elem::from_u32_words(&elem.to_u32_words()));
 
             let vec: Vec<u32> = vec!(rng.gen(), rng.gen());
-            assert_eq!(vec, Elem::from_u32s(&vec).to_u32s());
+            assert_eq!(vec, Elem::from_u32_words(&vec).to_u32_words());
         }
         for _ in 0..100 {
             let elem = ExtElem::random(&mut rng);
-            assert_eq!(elem, ExtElem::from_u32s(&elem.to_u32s()));
+            assert_eq!(elem, ExtElem::from_u32_words(&elem.to_u32_words()));
 
             let vec: Vec<u32> = vec!(rng.gen(), rng.gen(), rng.gen(), rng.gen());
-            assert_eq!(vec, ExtElem::from_u32s(&vec).to_u32s());
+            assert_eq!(vec, ExtElem::from_u32_words(&vec).to_u32_words());
         }
     }
 }

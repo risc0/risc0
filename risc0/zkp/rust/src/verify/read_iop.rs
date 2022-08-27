@@ -52,7 +52,7 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
     pub fn read_fps(&mut self, x: &mut [Fp]) {
         let words = <Fp as Elem>::WORDS;
         for i in 0..x.len() {
-            x[i] = <Fp as Elem>::from_u32s(&self.proof[words * i..words * (i + 1)]);
+            x[i] = <Fp as Elem>::from_u32_words(&self.proof[words * i..words * (i + 1)]);
             // Ignore the odd-numbered values, which will be 0 for baby-bear
         }
         self.proof = &self.proof[<Fp as Elem>::WORDS * x.len()..];
@@ -65,7 +65,7 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
             let mut subelems = Vec::<<Fp4 as ExtElem>::SubElem>::new();
             for j in 0..<Fp4 as ExtElem>::EXT_SIZE {
                 let offset: usize = ext_size * i + j;
-                subelems.push(<Fp4 as ExtElem>::SubElem::from_u32s(&self.proof[elem_words * offset..elem_words * (offset+1)]));
+                subelems.push(<Fp4 as ExtElem>::SubElem::from_u32_words(&self.proof[elem_words * offset..elem_words * (offset+1)]));
             }
             x[i] = <Fp4 as ExtElem>::from_subelems(subelems);
         }
