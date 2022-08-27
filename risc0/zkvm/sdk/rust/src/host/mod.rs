@@ -15,23 +15,27 @@
 #![deny(missing_docs)]
 #![doc = include_str!("README.md")]
 
-use std::collections::HashMap;
-
+#[cxx::bridge]
+mod bridge {}
+mod exception;
 #[cfg(not(feature = "pure-prove"))]
 mod ffi;
 #[cfg(feature = "pure-prove")]
 mod prove;
+
+use std::collections::HashMap;
+
 #[cfg(not(feature = "pure-prove"))]
 use ffi as prove;
 
-pub use prove::Prover;
-
-mod exception;
-
 pub use exception::Exception;
+pub use prove::{MethodId, Prover, Receipt};
 
-#[cxx::bridge]
-mod bridge {}
+/// The default digest count when generating a MethodId.
+pub const DEFAULT_METHOD_ID_LIMIT: u32 = 12;
+
+/// A Result specialized for [Exception].
+pub type Result<T> = std::result::Result<T, Exception>;
 
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
@@ -71,14 +75,6 @@ impl<'a> Default for ProverOpts<'a> {
         }
     }
 }
-
-/// The default digest count when generating a MethodId.
-pub const DEFAULT_METHOD_ID_LIMIT: u32 = 12;
-
-/// A Result specialized for [Exception].
-pub type Result<T> = std::result::Result<T, Exception>;
-
-pub use prove::{MethodId, Receipt};
 
 #[cfg(test)]
 mod test {
@@ -182,8 +178,7 @@ mod test {
 
     #[test]
     fn receipt_serde() {
-        let receipt: Receipt =
-            run_memio_with_opts(&[(HEAP.start(), 0)], ProverOpts::default()).unwrap();
+        let receipt = run_memio_with_opts(&[(HEAP.start(), 0)], ProverOpts::default()).unwrap();
         let ser: Vec<u32> = crate::serde::to_vec(&receipt).unwrap();
         let de: Receipt = crate::serde::from_slice(&ser).unwrap();
         assert_eq!(de.get_journal().unwrap(), receipt.get_journal().unwrap());
@@ -193,7 +188,7 @@ mod test {
 
     #[test]
     fn receipt_serde_no_seal() {
-        let receipt: Receipt = run_memio_with_opts(
+        let receipt = run_memio_with_opts(
             &[(HEAP.start(), 0)],
             ProverOpts::default().with_skip_seal(true),
         )
@@ -208,7 +203,7 @@ mod test {
     #[test]
     fn fail() {
         // Check that a compliant host will fault.
-        let prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
+        let mut prover = Prover::new(&std::fs::read(FAIL_PATH).unwrap(), FAIL_ID).unwrap();
         assert!(prover.run().is_err());
     }
 

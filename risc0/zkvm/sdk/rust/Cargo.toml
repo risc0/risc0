@@ -48,7 +48,7 @@ prove = ["circuit", "risc0-zkp/prove"]
 std = ["risc0-zkp/std", "serde/std"]
 verify = ["circuit", "risc0-zkp/verify"]
 # Run rust-based prover instead of FFI-based prover.
-pure-prove = ["prove", "std"]
+pure-prove = ["prove", "std", "risc0-zkvm-platform/pure-prove"]
 
 [[bench]]
 name = "guest_run"

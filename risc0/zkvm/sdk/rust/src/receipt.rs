@@ -17,32 +17,53 @@ use serde::{Deserialize, Serialize};
 
 use risc0_zkp::core::sha::default_implementation;
 use risc0_zkp::verify::adapter::VerifyAdapter;
-use risc0_zkvm_circuit::CircuitImpl;
 
 use crate::method_id::MethodId;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone)]
 pub struct Receipt {
     pub journal: Vec<u32>,
     pub seal: Vec<u32>,
 }
 
-// FIXME: Remove this temporary trait to convert method IDs once our API is the
-// same between FFI and rust-based provers.
-pub trait IntoMethodId {}
-impl IntoMethodId for &MethodId {}
-impl IntoMethodId for &[u8] {}
+// FIXME: Remove this temporary conversion once our API is the same between
+// FFI and rust-based provers.
+impl From<&MethodId> for MethodId {
+    fn from(method_id: &MethodId) -> Self {
+        method_id.clone()
+    }
+}
 
 impl Receipt {
     #[cfg(feature = "verify")]
-    pub fn verify<M>(&self, _method_id: M) -> Result<()>
+    pub fn verify<'a, M>(&self, method_id: &'a M) -> Result<()>
     where
-        M: IntoMethodId,
+        M: ?Sized,
+        MethodId: From<&'a M>,
     {
-        let circuit = CircuitImpl::new();
-        let mut verifier = VerifyAdapter::new(&circuit);
+        use risc0_zkp::{
+            core::{log2_ceil, sha::Digest},
+            verify::verify,
+            MIN_CYCLES,
+        };
+        let method_id: MethodId = method_id.into();
+        let check_code = |po2, merkle_root: &Digest| {
+            let which = po2 as usize - log2_ceil(MIN_CYCLES);
+            if log::log_enabled!(log::Level::Debug) {
+                log::debug!("merkle_root: {merkle_root}");
+                log::debug!("MethodId");
+                for (i, entry) in method_id.table.iter().enumerate() {
+                    let marker = if i == which { "*" } else { "" };
+                    log::debug!("  {i}: {entry}{marker}");
+                }
+            }
+            method_id.table[which] == *merkle_root
+        };
+
         let sha = default_implementation();
-        risc0_zkp::verify::verify(sha, &mut verifier, &self.seal)
+        let circuit: &risc0_zkvm_circuit::CircuitImpl = &crate::CIRCUIT;
+        let mut adapter = VerifyAdapter::new(circuit);
+        verify(sha, &mut adapter, &self.seal, check_code)
             .map_err(|err| anyhow!("Verification failed: {:?}", err))
     }
 

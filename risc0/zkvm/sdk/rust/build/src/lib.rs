@@ -26,7 +26,10 @@ use std::{
 };
 
 use cargo_metadata::{MetadataCommand, Package};
+#[cfg(not(feature = "pure-prove"))]
 use risc0_zkvm::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
+#[cfg(feature = "pure-prove")]
+use risc0_zkvm::method_id::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 use risc0_zkvm_platform_sys::LINKER_SCRIPT;
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
@@ -67,7 +70,13 @@ impl Risc0Method {
         let method_id_path = self.elf_path.with_extension("id");
         let elf_sha_path = self.elf_path.with_extension("sha");
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
-        let (elf_sha, elf_sha_hex) = sha_digest_with_hex(&elf_contents);
+        // This HACK is in place to ensure that MethodIDs are considered distinct
+        // between pure-prove and C++ provers.
+        #[cfg(not(feature = "pure-prove"))]
+        let label = "";
+        #[cfg(feature = "pure-prove")]
+        let label = "pure-prove";
+        let (elf_sha, elf_sha_hex) = sha_digest_with_hex(&elf_contents, label);
         if method_id_path.exists() {
             if let Ok(cached_sha) = std::fs::read(&elf_sha_path) {
                 if cached_sha == elf_sha.as_slice() {
@@ -124,8 +133,11 @@ const RUST_LIB_MAP : &[ZipMapEntry] = &[
 	dst_prefix: "library/backtrace"},
 ];
 
-fn sha_digest_with_hex(data: &[u8]) -> (Vec<u8>, String) {
-    let bin_sha = Sha256::new().chain_update(data).finalize();
+fn sha_digest_with_hex(data: &[u8], label: &str) -> (Vec<u8>, String) {
+    let bin_sha = Sha256::new()
+        .chain_update(data)
+        .chain_update(label)
+        .finalize();
     (
         bin_sha.to_vec(),
         bin_sha
@@ -224,7 +236,7 @@ where
 
     // Rust standard library.  If any of the RUST_LIB_MAP changed, we
     // want to have a different hash so that we make sure we recompile.
-    let (_, src_id_hash) = sha_digest_with_hex(format!("{:?}", RUST_LIB_MAP).as_bytes());
+    let (_, src_id_hash) = sha_digest_with_hex(format!("{:?}", RUST_LIB_MAP).as_bytes(), "");
     let rust_lib_path = out_dir.as_ref().join(format!("rust-std_{}", src_id_hash));
     if !rust_lib_path.exists() {
         println!(
@@ -315,6 +327,10 @@ fn build_guest_package<P>(
         "--target-dir",
         target_dir.as_ref().to_str().unwrap(),
     ];
+    #[cfg(feature = "pure-prove")]
+    let mut features = features.clone();
+    #[cfg(feature = "pure-prove")]
+    features.push("pure-prove".to_string());
     let features_str = features.join(",");
     if !features.is_empty() {
         args.push("--features");
@@ -398,6 +414,10 @@ impl Default for GuestOptions {
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
 pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
+    if env::var("RISC0_SKIP_BUILD").is_ok() {
+        return;
+    }
+
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env);
 

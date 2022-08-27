@@ -16,14 +16,10 @@ use alloc::vec::Vec;
 
 use crate::{
     adapter::{CircuitInfo, PolyExt, PolyExtContext, TapsProvider},
-    core::{
-        fp::Fp,
-        fp4::Fp4,
-        sha::{Digest, Sha},
-    },
+    core::{fp::Fp, fp4::Fp4, sha::Sha},
     field::Elem,
     taps::TapSet,
-    verify::{read_iop::ReadIOP, Circuit, VerificationError},
+    verify::{read_iop::ReadIOP, Circuit},
 };
 
 pub struct VerifyAdapter<'a, C: CircuitInfo + PolyExt + TapsProvider> {
@@ -70,11 +66,6 @@ impl<'a, C: CircuitInfo + PolyExt + TapsProvider> Circuit for VerifyAdapter<'a, 
 
     fn po2(&self) -> u32 {
         self.po2
-    }
-
-    fn check_code(&self, _root: &Digest) -> Result<(), VerificationError> {
-        // TODO: check code merkle tree
-        Ok(())
     }
 
     fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4) -> Fp4 {

@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Baby bear field.
+//! Support for the base finite field modulo `15 * 2^27 + 1`.
+
 use alloc::fmt;
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
 
-/// ! Baby bear field.
-/// ! Support for the base finite field modulo 15*2^27 + 1
 use crate::field::{self, Elem as FieldElem};
 
 /// Definition of this field for operations that operate on the baby
