@@ -6,5 +6,13 @@ risc0_rust_library_pair(
     name = "platform",
     srcs = glob(["src/**/*.rs"]),
     crate_name = "risc0_zkvm_platform",
+    guest_deps = [
+        "@crates_guest//:bytemuck",
+    ],
+    guest_features = ["bytemuck"],
+    host_deps = [
+        "@crates_host//:bytemuck",
+    ],
+    host_features = ["bytemuck"],
     visibility = ["//visibility:public"],
 )

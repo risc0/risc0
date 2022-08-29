@@ -21,7 +21,7 @@ use std::collections::{btree_map::Entry, BTreeMap, BTreeSet};
 use anyhow::{bail, Result};
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
-use risc0_zkp::core::sha::Sha;
+use risc0_zkp::core::sha::{Digest, Sha};
 use risc0_zkp::{
     adapter::{CircuitDef, CustomStep},
     core::{fp::Fp, log2_ceil, sha::DIGEST_WORDS},
@@ -33,10 +33,11 @@ use risc0_zkvm_circuit::CircuitImpl;
 use risc0_zkvm_platform::{
     io::{
         addr::{
-            GPIO_COMMIT, GPIO_FAULT, GPIO_GETKEY, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL,
-            GPIO_SENDRECV_SIZE, GPIO_SHA,
+            GPIO_COMMIT, GPIO_CYCLECOUNT, GPIO_FAULT, GPIO_GETKEY, GPIO_INSECURESHACOMPRESS,
+            GPIO_INSECURESHAHASH, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE,
+            GPIO_SHA,
         },
-        IoDescriptor, SHADescriptor,
+        InsecureShaCompressDescriptor, InsecureShaHashDescriptor, IoDescriptor, SHADescriptor,
     },
     memory::{INPUT, MEM_BITS},
     WORD_SIZE,
@@ -389,6 +390,31 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         Ok(())
     }
 
+    // Writes to the guest's INPUT region.  Zero pads up to the next
+    // word, and advances the host to guest offset.
+    fn send_to_guest(&mut self, bytes: &[u8]) {
+        let nwords = align_up(bytes.len(), WORD_SIZE);
+        assert!(
+            self.cur_host_to_guest_offset + nwords < INPUT.end(),
+            "Read buffer overrun"
+        );
+        self.memory
+            .store_region(self.cur_host_to_guest_offset as u32, bytes);
+        self.cur_host_to_guest_offset += nwords
+    }
+
+    // Reads a C structure from a guest's memory
+    fn read_descriptor<T: bytemuck::Pod + Sized>(&self, addr: u32) -> T {
+        const SZ: usize = 32; // core::mem::size_of::<T>();
+        assert_eq!(SZ % WORD_SIZE, 0, "Descriptors should be word aligned");
+        let descbuf: [u32; SZ / WORD_SIZE] = self
+            .memory
+            .load_region_u32(addr, SZ as u32)
+            .try_into()
+            .unwrap();
+        *bytemuck::cast_ref(&descbuf)
+    }
+
     fn on_write(&mut self, cycle: u32, addr: u32, value: u32) {
         use risc0_zkvm_platform::io::addr::GPIO_LOG;
 
@@ -439,30 +465,55 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 let size = self.memory.load_u32(GPIO_SENDRECV_SIZE);
                 let region = self.memory.load_region(value, size);
                 let result = self.io.on_txrx(channel, &region);
-                let aligned_len = align_up(result.len(), WORD_SIZE);
-                assert!(
-                    self.cur_host_to_guest_offset + WORD_SIZE + aligned_len < INPUT.end(),
-                    "Read buffer overrun"
-                );
-                self.memory
-                    .store_u32(self.cur_host_to_guest_offset as u32, result.len() as u32);
-                self.cur_host_to_guest_offset += WORD_SIZE;
-                self.memory
-                    .store_region(self.cur_host_to_guest_offset as u32, &result);
-                self.cur_host_to_guest_offset += aligned_len;
+                self.send_to_guest(bytemuck::cast_slice(&[result.len() as u32]));
+                self.send_to_guest(result.as_slice())
             }
             GPIO_SHA => {
                 debug!("on_write> GPIO_SHA, descriptor ptr = {value:08X}");
-                const SZ: usize = core::mem::size_of::<SHADescriptor>();
-                let descbuf: [u32; SZ / WORD_SIZE] = self
-                    .memory
-                    .load_region_u32(value, SZ as u32)
-                    .try_into()
-                    .unwrap();
-                // SAFETY: SHADescriptor is a plain-old-data type with
-                // repr(C) and no pointers so it's safe to fill it from bytes.
-                let desc: SHADescriptor = unsafe { std::mem::transmute(descbuf) };
+                let desc: SHADescriptor = self.read_descriptor(value);
                 self.process_sha(&desc);
+            }
+            GPIO_CYCLECOUNT => {
+                debug!("onWrite> GPIO_CycleCount, cycle = {cycle:08X}");
+
+                assert_eq!(
+                    value, 0,
+                    "CycleCount request should only be written as zero"
+                );
+                self.send_to_guest(bytemuck::cast_slice(&[cycle as u32]));
+            }
+            GPIO_INSECURESHACOMPRESS => {
+                debug!("onWrite> GPIO_InsecureShaCompress");
+                let desc: InsecureShaCompressDescriptor = self.read_descriptor(value);
+
+                let sha = risc0_zkp::core::sha::default_implementation();
+
+                const DIGEST_BYTES: u32 = (WORD_SIZE * DIGEST_WORDS) as u32;
+                let state = self.memory.load_region_u32(desc.state, DIGEST_BYTES);
+                let block_half1 = self.memory.load_region_u32(desc.block_half1, DIGEST_BYTES);
+                let block_half2 = self.memory.load_region_u32(desc.block_half2, DIGEST_BYTES);
+
+                let digest = sha.compress(
+                    &Digest::from_slice(state.as_slice()),
+                    &Digest::from_slice(block_half1.as_slice()),
+                    &Digest::from_slice(block_half2.as_slice()),
+                );
+                self.send_to_guest(bytemuck::cast_slice(digest.as_slice()));
+            }
+            GPIO_INSECURESHAHASH => {
+                debug!("onWrite> GPIO_InsecureShaHash");
+                let desc: InsecureShaHashDescriptor = self.read_descriptor(value);
+
+                let sha = risc0_zkp::core::sha::default_implementation();
+
+                let orig_state = self
+                    .memory
+                    .load_region_u32(desc.state, (WORD_SIZE * DIGEST_WORDS) as u32);
+                let state: Digest = Digest::from_slice(orig_state.as_slice());
+                let bytes = self.memory.load_region(desc.start, desc.len);
+
+                let digest = sha.update(&state, bytes.as_slice());
+                self.send_to_guest(bytemuck::cast_slice(digest.as_slice()));
             }
             _ => {}
         };

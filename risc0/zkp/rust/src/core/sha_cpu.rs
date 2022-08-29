@@ -141,14 +141,47 @@ impl Sha for Impl {
     }
 
     // Digest two digest into one
-    fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
-        let mut state = INIT_256;
+    fn compress(
+        &self,
+        orig_state: &Digest,
+        block_half1: &Digest,
+        block_half2: &Digest,
+    ) -> Self::DigestPtr {
+        let mut state: [u32; DIGEST_WORDS] = *orig_state.get();
         let mut block: GenericArray<u8, U64> = GenericArray::default();
         for i in 0..8 {
-            set_word(block.as_mut_slice(), i, a.as_slice()[i]);
-            set_word(block.as_mut_slice(), 8 + i, b.as_slice()[i]);
+            set_word(block.as_mut_slice(), i, block_half1.as_slice()[i]);
+            set_word(block.as_mut_slice(), 8 + i, block_half2.as_slice()[i]);
         }
         compress256(&mut state, slice::from_ref(&block));
+        Box::new(Digest::new(state))
+    }
+
+    fn update(&self, orig_state: &Digest, bytes: &[u8]) -> Self::DigestPtr {
+        let mut state = *orig_state.get();
+        let mut block: GenericArray<u8, U64> = GenericArray::default();
+
+        let mut u8s = bytes.iter().fuse().cloned();
+        let mut off = 0;
+        while let Some(b1) = u8s.next() {
+            let b2 = u8s.next().unwrap_or(0);
+            let b3 = u8s.next().unwrap_or(0);
+            let b4 = u8s.next().unwrap_or(0);
+            set_word(
+                block.as_mut_slice(),
+                off,
+                u32::from_le_bytes([b1, b2, b3, b4]),
+            );
+            off += 1;
+            if off == 16 {
+                compress256(&mut state, slice::from_ref(&block));
+                off = 0;
+            }
+        }
+        if off != 0 {
+            block[off * 4..].fill(0);
+            compress256(&mut state, slice::from_ref(&block));
+        }
         Box::new(Digest::new(state))
     }
 

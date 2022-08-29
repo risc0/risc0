@@ -244,4 +244,17 @@ impl risc0_zkp::core::sha::Sha for Impl {
             *pool = &*ptr
         }
     }
+
+    fn compress(
+        &self,
+        _state: &Digest,
+        block_half1: &Digest,
+        block_half2: &Digest,
+    ) -> Self::DigestPtr {
+        unimplemented!()
+    }
+
+    fn update(&self, _state: &Digest, _bytes: &[u8]) -> Self::DigestPtr {
+        unimplemented!()
+    }
 }

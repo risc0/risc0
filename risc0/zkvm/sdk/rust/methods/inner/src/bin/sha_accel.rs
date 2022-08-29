@@ -48,7 +48,9 @@ pub fn main() {
             let overhead = count2 - count1;
             let total = (count3 - count2) - overhead;
 
-            assert!(total >= 76);
+            // We expect our acceleration circuit to use 72 cycles, so make sure that
+            // our simulation doesn't run faster.
+            assert!(total >= 72, "total: {total}");
         }
         _ => unimplemented!(),
     }
