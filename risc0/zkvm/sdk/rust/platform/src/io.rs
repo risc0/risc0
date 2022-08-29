@@ -16,9 +16,6 @@
 // for documentation on these GPIO ports.
 use core::marker::PhantomData;
 
-#[cfg(feature = "bytemuck")]
-use bytemuck::{Pod, Zeroable};
-
 pub struct Gpio<T> {
     addr: u32,
     _marker: PhantomData<T>,
@@ -76,14 +73,12 @@ pub mod addr {
     pub const GPIO_SENDRECV_ADDR: u32 = super::GPIO_SENDRECV_ADDR.addr();
 }
 
-#[cfg_attr(feature = "bytemuck", derive(Clone, Copy, Zeroable, Pod))]
 #[repr(C)]
 pub struct IoDescriptor {
     pub size: u32,
     pub addr: u32,
 }
 
-#[cfg_attr(feature = "bytemuck", derive(Clone, Copy, Zeroable, Pod))]
 #[repr(C)]
 pub struct SHADescriptor {
     pub type_count: u32,
@@ -92,7 +87,6 @@ pub struct SHADescriptor {
     pub digest: u32,
 }
 
-#[cfg_attr(feature = "bytemuck", derive(Clone, Copy, Zeroable, Pod))]
 #[repr(C)]
 pub struct GetKeyDescriptor {
     pub name: u32,
@@ -100,7 +94,6 @@ pub struct GetKeyDescriptor {
     pub mode: u32,
 }
 
-#[cfg_attr(feature = "bytemuck", derive(Clone, Copy, Zeroable, Pod))]
 #[repr(C)]
 pub struct InsecureShaCompressDescriptor {
     pub state: u32,
@@ -108,7 +101,6 @@ pub struct InsecureShaCompressDescriptor {
     pub block_half2: u32,
 }
 
-#[cfg_attr(feature = "bytemuck", derive(Clone, Copy, Zeroable, Pod))]
 #[repr(C)]
 pub struct InsecureShaHashDescriptor {
     pub state: u32,

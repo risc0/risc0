@@ -403,12 +403,15 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         self.cur_host_to_guest_offset += nwords
     }
 
-    // Reads a C structure from a guest's memory
-    fn read_descriptor<T: bytemuck::Pod + Sized>(&self, addr: u32) -> T {
+    // Reads a C structure from a guest's memory and transmutes it
+    // into the given structure, which should be repr(C) and plain old
+    // data.
+    unsafe fn read_descriptor<T: Send>(&self, addr: u32) -> T {
         let size = core::mem::size_of::<T>();
         assert_eq!(size % WORD_SIZE, 0, "Descriptors should be word aligned");
         let buf = self.memory.load_region_u32(addr, size as u32);
-        *bytemuck::from_bytes(bytemuck::cast_slice(buf.as_slice()))
+        assert_eq!(buf.len(), size);
+        core::ptr::read_unaligned(buf.as_ptr() as *const T)
     }
 
     fn on_write(&mut self, cycle: u32, addr: u32, value: u32) {
@@ -466,7 +469,9 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
             GPIO_SHA => {
                 debug!("on_write> GPIO_SHA, descriptor ptr = {value:08X}");
-                let desc: SHADescriptor = self.read_descriptor(value);
+                // SAFETY: ShaDescriptor is a plain old repr(C)
+                // structure and has no pointers.
+                let desc: SHADescriptor = unsafe { self.read_descriptor(value) };
                 self.process_sha(&desc);
             }
             GPIO_CYCLECOUNT => {
@@ -480,7 +485,9 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
             GPIO_INSECURESHACOMPRESS => {
                 debug!("onWrite> GPIO_InsecureShaCompress");
-                let desc: InsecureShaCompressDescriptor = self.read_descriptor(value);
+                // SAFETY: InsecureShaCompressDescriptor is a plain
+                // old repr(C) structure and has no pointers.
+                let desc: InsecureShaCompressDescriptor = unsafe { self.read_descriptor(value) };
 
                 let sha = risc0_zkp::core::sha::default_implementation();
 
@@ -498,7 +505,9 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
             GPIO_INSECURESHAHASH => {
                 debug!("onWrite> GPIO_InsecureShaHash");
-                let desc: InsecureShaHashDescriptor = self.read_descriptor(value);
+                // SAFETY: InsecureShaHashDescriptor is a plain old
+                // repr(C) structure and has no pointers.
+                let desc: InsecureShaHashDescriptor = unsafe { self.read_descriptor(value) };
 
                 let sha = risc0_zkp::core::sha::default_implementation();
 

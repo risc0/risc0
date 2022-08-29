@@ -273,6 +273,7 @@ mod test {
     }
 
     #[test]
+    #[cfg(feature = "pure-prove")]
     fn insecure_sha_accel() {
         let opts = ProverOpts::default().with_skip_seal(true);
         let mut prover =
@@ -286,6 +287,7 @@ mod test {
     }
 
     #[test]
+    #[cfg(feature = "pure-prove")]
     fn sha_cycle_count() {
         let opts = ProverOpts::default().with_skip_seal(true);
         let mut prover =

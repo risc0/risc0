@@ -15,6 +15,7 @@
 #![no_main]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(feature = "pure-prove")]
 use risc0_zkp::core::sha::{Digest, Sha};
 use risc0_zkvm_guest::{env, sha};
 
@@ -28,9 +29,11 @@ pub fn main() {
 
     match impl_select {
         0 => risc0_zkp::core::sha::testutil::test_sha_impl(&risc0_zkvm_guest::sha::Impl {}),
+        #[cfg(feature = "pure-prove")]
         1 => {
             risc0_zkp::core::sha::testutil::test_sha_impl(&risc0_zkvm_guest::sha_insecure::Impl {})
         }
+        #[cfg(feature = "pure-prove")]
         2 => {
             // Time the simulated sha so that it estimates what we'd
             // see when it's a custom circuit.
