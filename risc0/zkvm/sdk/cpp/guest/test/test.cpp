@@ -206,6 +206,26 @@ TEST(CoreTests, Memset) {
 TEST(CoreTests, SHAAccel) {
   MethodId methodId = loadMethodId("risc0/zkvm/sdk/rust/methods/test_sha_accel.id");
   Prover prover("risc0/zkvm/sdk/rust/methods/test_sha_accel", methodId);
+  prover.writeInput(0); // Test risc0_zkvm_guest::sha::Impl
+  prover.writeInput(0); // Compute an empty digest
+  Receipt receipt = prover.run();
+  receipt.verify(methodId);
+}
+
+TEST(CoreTests, InsecureSHAAccel) {
+  MethodId methodId = loadMethodId("risc0/zkvm/sdk/rust/methods/test_sha_accel.id");
+  Prover prover("risc0/zkvm/sdk/rust/methods/test_sha_accel", methodId);
+  prover.writeInput(1); // Test risc0_zkvm_guest::sha::InsecureImpl
+  prover.writeInput(0); // Compute an empty digest
+  Receipt receipt = prover.run();
+  receipt.verify(methodId);
+}
+
+// Test simulated SHA cycle count; should be 76
+TEST(CoreTests, ShaCycleCount) {
+  MethodId methodId = loadMethodId("risc0/zkvm/sdk/rust/methods/test_sha_accel.id");
+  Prover prover("risc0/zkvm/sdk/rust/methods/test_sha_accel", methodId);
+  prover.writeInput(2);
   prover.writeInput(0); // Compute an empty digest
   Receipt receipt = prover.run();
   receipt.verify(methodId);

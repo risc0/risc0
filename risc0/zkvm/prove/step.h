@@ -91,6 +91,9 @@ public:
   virtual void onHalt(const MemoryState& mem, const std::array<uint32_t, 8>& output) {}
 
 private:
+  // Copies the given words to the guest's input area, and advances cur_host_to_guest_offset.
+  void sendToGuest(MemoryState& me, const BufferU32& words);
+
   IoHandler* io;
 
   // Memory address of current host->guest transmission.  The host can only

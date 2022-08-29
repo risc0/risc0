@@ -23,7 +23,9 @@ use risc0_zkp::core::{
 use risc0_zkvm::serde::to_vec_with_capacity;
 use risc0_zkvm_platform::{
     io::{SHADescriptor, GPIO_SHA},
-    memory, WORD_SIZE,
+    memory,
+    rt::host_io::host_recv,
+    WORD_SIZE,
 };
 use serde::Serialize;
 
@@ -146,6 +148,13 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
 ///
 /// Since there are no guarantees on alignment, an internal copy is made.
 pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
+    with_sha_trailer(data, |slice| raw_digest(slice))
+}
+
+pub(crate) fn with_sha_trailer(
+    data: &[u8],
+    f: impl Fn(&[u32]) -> &'static Digest,
+) -> &'static Digest {
     let len_bytes = data.len();
     let cap = compute_capacity_needed(len_bytes);
     let mut data_u32 = Vec::<u32>::with_capacity(cap);
@@ -156,6 +165,7 @@ pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     match bytemuck::try_cast_slice(&data[..whole_words * WORD_SIZE]) as Result<&[u32], _> {
         Ok(words) => {
             data_u32.extend_from_slice(words);
+
             words_copied = whole_words;
         }
         Err(_) => {
@@ -170,7 +180,8 @@ pub fn digest_u8_slice(data: &[u8]) -> &'static Digest {
     remaining_out[..remaining_in.len()].clone_from_slice(remaining_in);
 
     add_trailer(data_u32.as_mut_slice(), len_bytes, MemoryType::Normal);
-    raw_digest(data_u32.as_slice())
+
+    f(data_u32.as_slice())
 }
 
 // Set a marker so that the VM knows when the last SHA descriptor is

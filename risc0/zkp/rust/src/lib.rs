@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
+// TODO: clean up feature sets so that we don't get warnings when
+// compiling without "prove" or "verify".
+#![cfg_attr(not(any(feature = "prove", feature = "verify")), allow(dead_code))]
 
 extern crate alloc;
 

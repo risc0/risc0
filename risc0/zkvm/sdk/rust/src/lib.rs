@@ -51,4 +51,5 @@ pub mod serde;
 pub mod verify;
 
 // TODO: get this from the cirgen circuit
+#[cfg(any(feature = "prove", feature = "verify"))]
 const CODE_SIZE: usize = 16;

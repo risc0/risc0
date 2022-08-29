@@ -44,7 +44,7 @@ pub struct Digest([u32; DIGEST_WORDS]);
 
 impl Digest {
     /// Create a new [Digest] from an existing array of words.
-    pub fn new(data: [u32; DIGEST_WORDS]) -> Digest {
+    pub const fn new(data: [u32; DIGEST_WORDS]) -> Digest {
         Digest(data)
     }
 
