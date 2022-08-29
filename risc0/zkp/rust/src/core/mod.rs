@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Core module used to implement a zk-STARK prover and verifier.
+
 #![deny(missing_docs)]
-//! Core objects used by the zk-STARK prover
-//! and verifier.
 #![doc = include_str!("README.md")]
 
 extern crate alloc;
@@ -24,8 +24,6 @@ use rand::Rng;
 /// This transitional "fp4" module will remain until ZKP has been genericized to
 /// work with multiple fields. This module includes the base field of order
 /// 15*2^27 + 1).
-///
-/// # Example
 pub mod fp {
     pub use crate::field::baby_bear::Elem as Fp;
 }

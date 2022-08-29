@@ -36,6 +36,12 @@ pub struct MethodId {
     pub table: Vec<Digest>,
 }
 
+impl From<&[u8]> for MethodId {
+    fn from(bytes: &[u8]) -> Self {
+        MethodId::from_slice(bytes).unwrap()
+    }
+}
+
 impl MethodId {
     pub fn as_slice(&self) -> Result<&[u8]> {
         Ok(bytemuck::cast_slice(self.table.as_slice()))
@@ -73,6 +79,7 @@ impl MethodId {
         };
         use risc0_zkvm_platform::memory::MEM_SIZE;
 
+        let code_size = *CODE_SIZE;
         let hal: CpuHal<BabyBear> = CpuHal::new();
         let program = Program::load_elf(elf_contents, MEM_SIZE as u32)?;
 
@@ -90,16 +97,16 @@ impl MethodId {
             }
 
             // Make a vector & set it up with the elf data
-            let mut code = vec![Fp::default(); cycles * CODE_SIZE];
+            let mut code = vec![Fp::default(); cycles * code_size];
             load_code(&mut code, &program, cycles)?;
 
             // Copy into accel buffer
             let coeffs = hal.copy_fp_from(&code);
             // Do interpolate & shift
-            hal.batch_interpolate_ntt(&coeffs, CODE_SIZE);
-            hal.zk_shift(&coeffs, CODE_SIZE);
+            hal.batch_interpolate_ntt(&coeffs, code_size);
+            hal.zk_shift(&coeffs, code_size);
             // Make the poly-group & extract the root
-            let code_group = PolyGroup::new(&hal, &coeffs, CODE_SIZE, cycles);
+            let code_group = PolyGroup::new(&hal, &coeffs, code_size, cycles);
             table.push(code_group.merkle.root().clone());
         }
 
@@ -113,7 +120,7 @@ fn load_code(code: &mut [Fp], elf: &crate::elf::Program, cycles: usize) -> Resul
 
     let mut cycle = 0;
     exec::load_code(elf.entry, &elf.image, |chunk, fini| {
-        for i in 0..CODE_SIZE {
+        for i in 0..*CODE_SIZE {
             code[cycles * i + cycle] = chunk[i];
         }
         if cycle + fini + ZK_CYCLES < cycles {

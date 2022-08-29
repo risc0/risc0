@@ -18,7 +18,6 @@ pub mod exec;
 use std::io::Write;
 
 use anyhow::Result;
-use lazy_static::lazy_static;
 use risc0_zkp::{
     core::sha::default_implementation,
     hal::{cpu::CpuHal, EvalCheck, Hal},
@@ -30,13 +29,9 @@ use risc0_zkvm_platform::{
     memory::MEM_SIZE,
 };
 
-use crate::{elf::Program, host::ProverOpts, method_id::MethodId, receipt::Receipt};
+use crate::{elf::Program, host::ProverOpts, method_id::MethodId, receipt::Receipt, CIRCUIT};
 
 use self::cpu_eval::CpuEvalCheck;
-
-lazy_static! {
-    pub static ref CIRCUIT: CircuitImpl = CircuitImpl::new();
-}
 
 pub struct Prover<'a> {
     elf: Program,

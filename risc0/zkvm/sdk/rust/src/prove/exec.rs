@@ -530,11 +530,11 @@ enum CodeIndex {
 const ZERO: Fp = Fp::new(0);
 const ONE: Fp = Fp::new(1);
 
-struct CodeRegisters([Fp; CODE_SIZE]);
+struct CodeRegisters(Vec<Fp>);
 
 impl CodeRegisters {
     fn new() -> Self {
-        Self([ZERO; CODE_SIZE])
+        Self(vec![ZERO; *CODE_SIZE])
     }
 
     fn reset(&mut self) {

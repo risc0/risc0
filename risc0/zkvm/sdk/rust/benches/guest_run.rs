@@ -14,7 +14,7 @@
 
 //! `guest_run' runs benchmarks on various guest tasks.  The purpose
 //! of these benchmarks is to gather performance data on code compiled
-//! for the guest, as opposed to performance data on the prover As
+//! for the guest, as opposed to performance data on the prover. As
 //! such, they do not generate seals, and these performance numbers
 //! are not indicitive of performance with cryptographically secure
 //! proofs.
@@ -45,7 +45,7 @@ fn run_guest(spec: SpecWithIters) -> Duration {
         ProverOpts::default().with_skip_seal(true),
     )
     .unwrap();
-    prover.add_input(input_data.as_slice()).unwrap();
+    prover.add_input_u32_slice(input_data.as_slice());
 
     let start = Instant::now();
     black_box(prover.run().unwrap());
@@ -179,6 +179,6 @@ pub fn bench(c: &mut Criterion) {
 }
 
 criterion_group!(name = benches;
-                 config = Criterion::default();// 
+                 config = Criterion::default();
                  targets = bench);
 criterion_main!(benches);

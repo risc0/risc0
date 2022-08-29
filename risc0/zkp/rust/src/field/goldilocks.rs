@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Goldilocks field.
+//! Support for the base finite field modulo `2^64 - 2^32 + 1`.
+
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
 
-/// ! Goldilocks field.
-/// ! Support for the base finite field modulo 2^64 - 2^32 + 1
 use crate::field::{self, Elem as FieldElem};
 
 /// The Goldilocks class is an element of the finite field F_p, where P is the

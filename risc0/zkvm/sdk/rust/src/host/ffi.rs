@@ -437,7 +437,7 @@ impl<'a> Prover<'a> {
     }
 
     /// Execute the ZKVM to produce a [Receipt].
-    pub fn run(&self) -> super::Result<Receipt> {
+    pub fn run(&mut self) -> super::Result<Receipt> {
         let mut err = RawError::default();
 
         unsafe {
