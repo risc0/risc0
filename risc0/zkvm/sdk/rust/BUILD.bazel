@@ -15,6 +15,7 @@ risc0_rust_library_pair(
         "//risc0/zkp/rust:zkp_guest",
         "//risc0/zkvm/sdk/rust/platform:platform_guest",
         "//risc0/zkvm/sdk/cpp/guest:crt0",
+        "@crates_guest//:anyhow",
         "@crates_guest//:bytemuck",
         "@crates_guest//:cfg-if",
         "@crates_guest//:serde",
