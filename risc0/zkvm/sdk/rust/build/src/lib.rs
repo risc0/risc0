@@ -119,18 +119,21 @@ struct ZipMapEntry {
 
 // Sources for standard library, and where they should be mapped to.
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
-    ZipMapEntry{
-	zip_url: "https://github.com/risc0/rust/archive/3c7914f106c899500d633feb3f713e3d22ba16e5.zip",
-	src_prefix: "rust-3c7914f106c899500d633feb3f713e3d22ba16e5/library",
-	dst_prefix: "library"},
-    ZipMapEntry{
-	zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
-	src_prefix:"stdarch-28335054b1f417175ab5005cf1d9cf7937737930",
-	dst_prefix: "library/stdarch"},
-    ZipMapEntry{
-	zip_url: "https://github.com/rust-lang/backtrace-rs/archive/4e5a3f72929f152752d5659e95bb15c8f6b41eff.zip",
-	src_prefix:"backtrace-rs-4e5a3f72929f152752d5659e95bb15c8f6b41eff",
-	dst_prefix: "library/backtrace"},
+    ZipMapEntry {
+        zip_url: "https://github.com/risc0/rust/archive/3c7914f106c899500d633feb3f713e3d22ba16e5.zip",
+        src_prefix: "rust-3c7914f106c899500d633feb3f713e3d22ba16e5/library",
+        dst_prefix: "library"
+    },
+    ZipMapEntry {
+        zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
+        src_prefix:"stdarch-28335054b1f417175ab5005cf1d9cf7937737930",
+        dst_prefix: "library/stdarch"
+    },
+    ZipMapEntry {
+        zip_url: "https://github.com/rust-lang/backtrace-rs/archive/4e5a3f72929f152752d5659e95bb15c8f6b41eff.zip",
+        src_prefix:"backtrace-rs-4e5a3f72929f152752d5659e95bb15c8f6b41eff",
+        dst_prefix: "library/backtrace"
+    },
 ];
 
 fn sha_digest_with_hex(data: &[u8], label: &str) -> (Vec<u8>, String) {
@@ -308,18 +311,24 @@ fn build_guest_package<P>(
     target_dir: P,
     guest_build_env: &GuestBuildEnv,
     features: Vec<String>,
+    std: bool,
 ) where
     P: AsRef<Path>,
 {
     fs::create_dir_all(target_dir.as_ref()).unwrap();
     let cargo = env::var("CARGO").unwrap();
+    let mut std_parts = vec!["alloc", "core", "proc_macro", "panic_abort"];
+    if std {
+        std_parts.push("std");
+    }
+    let build_std = format!("build-std={}", std_parts.join(","));
     let mut args = vec![
         "build",
         "--release",
         "--target",
         guest_build_env.target_spec.to_str().unwrap(),
         "-Z",
-        "build-std=core,alloc,std,proc_macro,panic_abort",
+        build_std.as_str(),
         "-Z",
         "build-std-features=compiler-builtins-mem",
         "--manifest-path",
@@ -399,6 +408,9 @@ pub struct GuestOptions {
 
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
+
+    /// Enable standard library support
+    pub std: bool,
 }
 
 impl Default for GuestOptions {
@@ -406,6 +418,7 @@ impl Default for GuestOptions {
         GuestOptions {
             code_limit: DEFAULT_METHOD_ID_LIMIT,
             features: vec![],
+            std: true,
         }
     }
 }
@@ -440,6 +453,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             &out_dir.join("riscv-guest"),
             &guest_build_env,
             guest_options.features,
+            guest_options.std,
         );
 
         for method in guest_methods(&guest_pkg, &out_dir) {

@@ -7,13 +7,11 @@ fn main() {
         return;
     }
 
-    let inner_pkg_options = GuestOptions {
+    let options = GuestOptions {
         code_limit: 10,
-        features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
-        std: true,
+        features: vec![],
+        std: false,
     };
-
-    let map = HashMap::from([("risc0-zkvm-methods-inner", inner_pkg_options)]);
-
+    let map = HashMap::from([("risc0-zkvm-methods-verify-inner", options)]);
     embed_methods_with_options(map);
 }

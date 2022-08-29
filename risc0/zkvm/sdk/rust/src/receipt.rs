@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{anyhow, Result};
+use alloc::vec::Vec;
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
-
-use risc0_zkp::core::sha::default_implementation;
-use risc0_zkp::verify::adapter::VerifyAdapter;
 
 use crate::method_id::MethodId;
 
@@ -34,37 +32,62 @@ impl From<&MethodId> for MethodId {
     }
 }
 
+#[cfg(feature = "verify")]
+pub fn verify_with_sha<'a, M, S>(method_id: &'a M, sha: &S, seal: &[u32]) -> Result<()>
+where
+    S: risc0_zkp::core::sha::Sha,
+    M: ?Sized,
+    MethodId: From<&'a M>,
+{
+    use anyhow::anyhow;
+    use risc0_zkp::{
+        core::{log2_ceil, sha::Digest},
+        verify::adapter::VerifyAdapter,
+        verify::verify,
+        MIN_CYCLES,
+    };
+    use risc0_zkvm_circuit::CircuitImpl;
+    let method_id: MethodId = method_id.into();
+    let check_code = |po2, merkle_root: &Digest| {
+        let which = po2 as usize - log2_ceil(MIN_CYCLES);
+        #[cfg(not(target_arch = "riscv32"))]
+        if log::log_enabled!(log::Level::Debug) {
+            log::debug!("merkle_root: {merkle_root}");
+            log::debug!("MethodId");
+            for (i, entry) in method_id.table.iter().enumerate() {
+                let marker = if i == which { "*" } else { "" };
+                log::debug!("  {i}: {entry}{marker}");
+            }
+        }
+        method_id.table[which] == *merkle_root
+    };
+
+    let circuit: &CircuitImpl = &crate::CIRCUIT;
+    let mut adapter = VerifyAdapter::new(circuit);
+    verify(sha, &mut adapter, seal, check_code)
+        .map_err(|err| anyhow!("Verification failed: {:?}", err))
+}
+
 impl Receipt {
-    #[cfg(feature = "verify")]
+    #[cfg(all(feature = "verify", not(target_arch = "riscv32")))]
     pub fn verify<'a, M>(&self, method_id: &'a M) -> Result<()>
     where
         M: ?Sized,
         MethodId: From<&'a M>,
     {
-        use risc0_zkp::{
-            core::{log2_ceil, sha::Digest},
-            verify::verify,
-            MIN_CYCLES,
-        };
-        let method_id: MethodId = method_id.into();
-        let check_code = |po2, merkle_root: &Digest| {
-            let which = po2 as usize - log2_ceil(MIN_CYCLES);
-            if log::log_enabled!(log::Level::Debug) {
-                log::debug!("merkle_root: {merkle_root}");
-                log::debug!("MethodId");
-                for (i, entry) in method_id.table.iter().enumerate() {
-                    let marker = if i == which { "*" } else { "" };
-                    log::debug!("  {i}: {entry}{marker}");
-                }
-            }
-            method_id.table[which] == *merkle_root
-        };
-
+        use risc0_zkp::core::sha::default_implementation;
         let sha = default_implementation();
-        let circuit: &risc0_zkvm_circuit::CircuitImpl = &crate::CIRCUIT;
-        let mut adapter = VerifyAdapter::new(circuit);
-        verify(sha, &mut adapter, &self.seal, check_code)
-            .map_err(|err| anyhow!("Verification failed: {:?}", err))
+        self.verify_with_sha(method_id, sha)
+    }
+
+    #[cfg(feature = "verify")]
+    pub fn verify_with_sha<'a, M, S>(&self, method_id: &'a M, sha: &S) -> Result<()>
+    where
+        S: risc0_zkp::core::sha::Sha,
+        M: ?Sized,
+        MethodId: From<&'a M>,
+    {
+        verify_with_sha(method_id, sha, &self.seal)
     }
 
     // Compatible API with FFI-based prover.

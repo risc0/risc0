@@ -1,0 +1,16 @@
+[package]
+name = "risc0-zkvm-methods-verify"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+risc0-build = { version = "0.11", path = "../../build" }
+
+[package.metadata.release]
+release = false
+
+[package.metadata.risc0]
+methods = ["inner"]
+
+[dependencies]
+serde = { version = "1.0", default-features = false, features = ["derive"] }

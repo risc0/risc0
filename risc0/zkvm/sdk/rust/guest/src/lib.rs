@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
 #![allow(unused)]
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
