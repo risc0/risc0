@@ -52,8 +52,10 @@ pub const GPIO_SENDRECV_CHANNEL: Gpio<u32> = Gpio::new(0x01F0_0014);
 pub const GPIO_SENDRECV_SIZE: Gpio<usize> = Gpio::new(0x01F0_0018);
 pub const GPIO_SENDRECV_ADDR: Gpio<*const u8> = Gpio::new(0x01F0_001C);
 
-pub const GPIO_INSECURESHA256COMPRESS: Gpio<*const InsecureShaDescriptor> = Gpio::new(0x01F00020);
-pub const GPIO_CYCLECOUNT: Gpio<u32> = Gpio::new(0x01F00024);
+pub const GPIO_CYCLECOUNT: Gpio<u32> = Gpio::new(0x01F00020);
+pub const GPIO_INSECURESHACOMPRESS: Gpio<*const InsecureShaCompressDescriptor> =
+    Gpio::new(0x01F00024);
+pub const GPIO_INSECURESHAHASH: Gpio<*const InsecureShaHashDescriptor> = Gpio::new(0x01F00028);
 
 pub mod addr {
     pub const GPIO_SHA: u32 = super::GPIO_SHA.addr();
@@ -89,10 +91,17 @@ pub struct GetKeyDescriptor {
 }
 
 #[repr(C)]
-pub struct InsecureShaDescriptor {
+pub struct InsecureShaCompressDescriptor {
     pub state: u32,
     pub block_half1: u32,
     pub block_half2: u32,
+}
+
+#[repr(C)]
+pub struct InsecureShaHashDescriptor {
+    pub state: u32,
+    pub start: u32,
+    pub len: u32,
 }
 
 // Standard ZKVM channels; must match zkvm/platform/io.h.

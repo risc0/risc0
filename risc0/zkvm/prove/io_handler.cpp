@@ -171,18 +171,13 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
     cyclebuf.push_back(cycle);
     sendToGuest(mem, cyclebuf);
   } break;
-  case kGPIO_InsecureSha256Compress: {
+  case kGPIO_InsecureShaCompress: {
     LOG(1, "MemoryHandler::onWrite> GPIO_InsecureSha256Compress, descriptor at " << hex(value));
-    InsecureShaDescriptor desc;
+    InsecureShaCompressDescriptor desc;
     mem.loadRegion(value, &desc, sizeof(desc));
     if (!io) {
       throw std::runtime_error("InsecureSHA called with no IO handler set");
     }
-    LOG(1,
-        "MemoryHandler::onWrite> stateptr = " << hex(desc.state)
-                                              << " block_half1: " << hex(desc.block_half1)
-                                              << " block_half2: " << hex(desc.block_half2));
-
     constexpr size_t kDigestWords = 8;
 
     ShaDigest state;
@@ -196,6 +191,33 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
     }
     impl::compress(state, chunk);
 
+    BufferU32 result(std::begin(state.words), std::end(state.words));
+    sendToGuest(mem, result);
+  } break;
+  case kGPIO_InsecureShaHash: {
+    LOG(1, "MemoryHandler::onWrite> GPIO_InsecureSha256Hash, descriptor at " << hex(value));
+    InsecureShaHashDescriptor desc;
+    mem.loadRegion(value, &desc, sizeof(desc));
+    if (!io) {
+      throw std::runtime_error("InsecureSHA called with no IO handler set");
+    }
+    constexpr size_t kDigestWords = 8;
+
+    ShaDigest state;
+    mem.loadRegion(desc.state, &state, sizeof(state));
+    constexpr size_t kBlockLen = kDigestWords * 2 * sizeof(uint32_t);
+    for (size_t i = 0; i < desc.len; i += kBlockLen) {
+      uint32_t chunk[kBlockLen];
+      size_t chunk_len = std::min<size_t>(i + kBlockLen, desc.len) - i;
+      mem.loadRegion(desc.start + i, &chunk, chunk_len);
+      memset(reinterpret_cast<uint8_t*>(&chunk) + chunk_len, 0, kBlockLen - chunk_len);
+
+      // Convert to bigendian for impl::compress
+      for (auto& i : chunk) {
+        i = impl::convertU32(i);
+      }
+      impl::compress(state, chunk);
+    }
     BufferU32 result(std::begin(state.words), std::end(state.words));
     sendToGuest(mem, result);
   } break;
