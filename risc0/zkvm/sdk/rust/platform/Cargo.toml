@@ -23,3 +23,5 @@ core = { optional = true, package = "rustc-std-workspace-core", version = "1.0.0
 default = ["bytemuck"]
 rustc-dep-of-std = ["core", "compiler_builtins"]
 bytemuck = ["dep:bytemuck"]
+# Run rust-based prover instead of FFI-based prover.
+pure-prove = []

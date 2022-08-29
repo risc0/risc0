@@ -13,9 +13,6 @@
 // limitations under the License.
 
 #![cfg_attr(not(feature = "std"), no_std)]
-// TODO: clean up feature sets so that we don't get warnings when
-// compiling without "prove" or "verify".
-#![cfg_attr(not(any(feature = "prove", feature = "verify")), allow(dead_code))]
 
 extern crate alloc;
 
@@ -24,6 +21,7 @@ pub mod adapter;
 pub mod core;
 #[cfg(feature = "hal")]
 pub mod hal;
+#[cfg(any(feature = "prove", feature = "verify"))]
 mod merkle;
 #[cfg(feature = "prove")]
 pub mod prove;
@@ -43,8 +41,11 @@ pub const ZK_CYCLES: usize = QUERIES;
 pub const MIN_PO2: usize = core::log2_ceil(1 + ZK_CYCLES);
 
 pub const INV_RATE: usize = 4;
+#[cfg(any(feature = "prove", feature = "verify"))]
 const FRI_FOLD_PO2: usize = 4;
+#[cfg(any(feature = "prove", feature = "verify"))]
 const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
+#[cfg(any(feature = "prove", feature = "verify"))]
 const FRI_MIN_DEGREE: usize = 256;
-
+#[cfg(any(feature = "prove", feature = "verify"))]
 const CHECK_SIZE: usize = INV_RATE * core::fp4::EXT_SIZE;

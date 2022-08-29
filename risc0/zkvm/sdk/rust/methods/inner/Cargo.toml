@@ -24,6 +24,8 @@ release = false
 
 [features]
 default = ["std"]
+# Run rust-based prover instead of FFI-based prover.
+pure-prove = ["risc0-zkvm-guest/pure-prove"]
 std = []
 test_feature1 = []
 test_feature2 = []

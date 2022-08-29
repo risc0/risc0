@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Hardware abstraction layer for RISC Zero zkVM
+//! CPU implementation of the HAL.
+
 use core::{
     cell::{Ref, RefMut},
     marker::PhantomData,

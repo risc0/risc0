@@ -21,6 +21,8 @@ risc0-build = { version = "0.11", path = "../build" }
 bazel = []
 default = ["std"]
 doc = ["std"]
+# Run rust-based prover instead of FFI-based prover.
+pure-prove = ["risc0-zkvm-platform/pure-prove"]
 std = ["risc0-zkp/std", "serde/std"]
 
 [workspace]
