@@ -405,14 +405,10 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
 
     // Reads a C structure from a guest's memory
     fn read_descriptor<T: bytemuck::Pod + Sized>(&self, addr: u32) -> T {
-        const SZ: usize = 32; // core::mem::size_of::<T>();
-        assert_eq!(SZ % WORD_SIZE, 0, "Descriptors should be word aligned");
-        let descbuf: [u32; SZ / WORD_SIZE] = self
-            .memory
-            .load_region_u32(addr, SZ as u32)
-            .try_into()
-            .unwrap();
-        *bytemuck::cast_ref(&descbuf)
+        let size = core::mem::size_of::<T>();
+        assert_eq!(size % WORD_SIZE, 0, "Descriptors should be word aligned");
+        let buf = self.memory.load_region_u32(addr, size as u32);
+        *bytemuck::from_bytes(bytemuck::cast_slice(buf.as_slice()))
     }
 
     fn on_write(&mut self, cycle: u32, addr: u32, value: u32) {
