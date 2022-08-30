@@ -52,7 +52,7 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
     }
 
     fn execute<S: Sha>(&mut self, iop: &mut WriteIOP<S>) {
-        iop.write_fp_slice(&self.exec.output);
+        iop.write_pod_slice(&self.exec.output);
         iop.write_u32_slice(&[self.exec.po2 as u32]);
     }
 

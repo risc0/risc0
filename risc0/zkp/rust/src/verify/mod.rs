@@ -30,7 +30,7 @@ use crate::{
         rou::{ROU_FWD, ROU_REV},
         sha::{Digest, Sha},
     },
-    field::Elem,
+    field::{baby_bear::BabyBear, Elem},
     taps::{RegisterGroup, TapSet},
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2, QUERIES,
@@ -59,23 +59,23 @@ impl fmt::Display for VerificationError {
     }
 }
 
-pub trait Circuit {
+pub trait Circuit<'a> {
     fn taps(&self) -> &'static TapSet<'static>;
-    fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
-    fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
+    fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>);
+    fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>);
     fn po2(&self) -> u32;
     fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4;
 }
 
-pub fn verify<S, C, F>(
-    sha: &S,
+pub fn verify<'a, S, C, F>(
+    sha: &'a S,
     circuit: &mut C,
-    seal: &[u32],
+    seal: &'a [u32],
     check_code: F,
 ) -> Result<(), VerificationError>
 where
     S: Sha,
-    C: Circuit,
+    C: Circuit<'a>,
     F: Fn(u32, &Digest) -> bool,
 {
     if seal.len() == 0 {
@@ -131,9 +131,8 @@ where
 
     // Read the U coeffs + commit their hash
     let num_taps = taps.tap_size();
-    let mut coeff_u = vec![Fp4::ZERO; num_taps + CHECK_SIZE];
-    iop.read_fp4s(&mut coeff_u);
-    let hash_u = *sha.hash_raw_pod_slice(coeff_u.as_slice());
+    let coeff_u = iop.read_pod_slice(num_taps + CHECK_SIZE);
+    let hash_u = *sha.hash_raw_pod_slice(coeff_u);
     iop.commit(&hash_u);
 
     // Now, convert to evaluated values
@@ -206,10 +205,10 @@ where
         |iop: &mut ReadIOP<S>, idx: usize| -> Result<Fp4, VerificationError> {
             let x = Fp4::from_fp(gen.pow(idx));
             let mut rows = vec![];
-            rows.push(accum_merkle.verify(iop, idx)?);
-            rows.push(code_merkle.verify(iop, idx)?);
-            rows.push(data_merkle.verify(iop, idx)?);
-            let check_row = check_merkle.verify(iop, idx)?;
+            rows.push(accum_merkle.verify::<BabyBear>(iop, idx)?);
+            rows.push(code_merkle.verify::<BabyBear>(iop, idx)?);
+            rows.push(data_merkle.verify::<BabyBear>(iop, idx)?);
+            let check_row = check_merkle.verify::<BabyBear>(iop, idx)?;
             let mut cur = Fp4::ONE;
             let mut tot = vec![Fp4::ZERO; combo_count + 1];
             for reg in taps.regs() {

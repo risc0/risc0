@@ -15,11 +15,9 @@
 use alloc::vec::Vec;
 
 use crate::core::{
-    fp4::Fp4,
     sha::{Digest, Sha},
     sha_rng::ShaRng,
 };
-use crate::field::Elem;
 
 pub struct WriteIOP<S: Sha> {
     sha: S,
@@ -50,23 +48,8 @@ impl<S: Sha> WriteIOP<S> {
     }
 
     /// Called by the prover to write some data.
-    pub fn write_fp_slice<E: Elem>(&mut self, slice: &[E]) {
-        self.proof
-            .extend(slice.iter().flat_map(|x| x.to_u32_words()));
-    }
-
-    /// Called by the prover to write some data.
-    pub fn write_fp4_slice(&mut self, slice: &[Fp4]) {
-        for x in slice {
-            self.write_fp_slice(x.elems());
-        }
-    }
-
-    /// Called by the prover to write some data.
-    pub fn write_digest_slice(&mut self, digest: &[Digest]) {
-        for x in digest {
-            self.write_u32_slice(x.as_slice());
-        }
+    pub fn write_pod_slice<T: bytemuck::Pod>(&mut self, slice: &[T]) {
+        self.proof.extend(bytemuck::cast_slice(slice))
     }
 
     /// Called by the prover to commit to some hash (usually data written
