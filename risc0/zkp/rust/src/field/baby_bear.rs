@@ -15,7 +15,7 @@
 //! Baby bear field.
 //! Support for the base finite field modulo `15 * 2^27 + 1`.
 
-use alloc::fmt;
+use alloc::{fmt, vec::Vec};
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
@@ -74,10 +74,13 @@ impl fmt::Debug for Elem {
 const P: u32 = 15 * (1 << 27) + 1;
 /// The modulus of the field as a u64.
 const P_U64: u64 = P as u64;
+/// The amount of memory to store a field element, as number of u32 words
+const WORDS: usize = 1;
 
 impl field::Elem for Elem {
     const ZERO: Self = Elem::new(0);
     const ONE: Self = Elem::new(1);
+    const WORDS: usize = WORDS;
 
     /// Compute the multiplicative inverse of `x`, or `1 / x` in finite field
     /// terms. Since we know by Fermat's Little Theorem that
@@ -105,6 +108,14 @@ impl field::Elem for Elem {
 
     fn from_u64(val: u64) -> Self {
         Elem::from(val)
+    }
+
+    fn to_u32_words(&self) -> Vec<u32> {
+        Vec::<u32>::from([self.0])
+    }
+
+    fn from_u32_words(val: &[u32]) -> Self {
+        Self(val[0])
     }
 }
 
@@ -297,6 +308,7 @@ impl Default for ExtElem {
 impl field::Elem for ExtElem {
     const ZERO: ExtElem = ExtElem::zero();
     const ONE: ExtElem = ExtElem::one();
+    const WORDS: usize = WORDS * EXT_SIZE;
 
     /// Generate a random field element uniformly.
     fn random(rng: &mut impl rand::Rng) -> Self {
@@ -361,6 +373,17 @@ impl field::Elem for ExtElem {
 
     fn from_u64(val: u64) -> Self {
         Self([Elem::from_u64(val), Elem::ZERO, Elem::ZERO, Elem::ZERO])
+    }
+
+    fn to_u32_words(&self) -> Vec<u32> {
+        self.elems()
+            .iter()
+            .flat_map(|elem| elem.to_u32_words())
+            .collect()
+    }
+
+    fn from_u32_words(val: &[u32]) -> Self {
+        field::ExtElem::from_subelems(val.iter().map(|word| Elem(*word)))
     }
 }
 
@@ -556,10 +579,10 @@ impl From<Elem> for ExtElem {
 
 #[cfg(test)]
 mod tests {
-    use super::field;
-    use super::{Elem, ExtElem, P, P_U64};
+    use super::{field, Elem, ExtElem, P, P_U64};
     use crate::field::Elem as FieldElem;
-    use rand::SeedableRng;
+    use alloc::{vec, vec::Vec};
+    use rand::{Rng, SeedableRng};
 
     #[test]
     pub fn roots_of_unity() {
@@ -630,6 +653,26 @@ mod tests {
             assert_eq!(fa + fb, Elem::from(a + b));
             assert_eq!(fa - fb, Elem::from(a + (P_U64 - b)));
             assert_eq!(fa * fb, Elem::from(a * b));
+        }
+    }
+
+    #[test]
+    fn u32s_conversions() {
+        let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
+        for _ in 0..100 {
+            let elem = Elem::random(&mut rng);
+            assert_eq!(elem, Elem::from_u32_words(&elem.to_u32_words()));
+
+            let val: u32 = rng.gen();
+            assert_eq!(val, Elem::from_u32_words(&[val]).to_u32_words()[0]);
+        }
+        for _ in 0..100 {
+            let elem = ExtElem::random(&mut rng);
+            assert_eq!(elem, ExtElem::from_u32_words(&elem.to_u32_words()));
+
+            let vec: Vec<u32> = vec![rng.gen(), rng.gen(), rng.gen(), rng.gen()];
+
+            assert_eq!(vec, ExtElem::from_u32_words(&vec).to_u32_words());
         }
     }
 }

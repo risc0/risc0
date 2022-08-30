@@ -17,6 +17,7 @@
 //! Defines field extension (and base fields) used for finite field-based
 //! operations across the RISC Zero zkVM architecture
 
+use alloc::vec::Vec;
 use core::{cmp, fmt::Debug, ops};
 
 /// A pair of fields, one of which is an extension field of the other.
@@ -54,6 +55,9 @@ pub trait Elem:
     /// One, the multiplicative identity.
     const ONE: Self;
 
+    /// How many u32 words are required to hold a single element
+    const WORDS: usize;
+
     /// Compute the multiplicative inverse of `x` (or `1 / x` in finite field
     /// terms).
     fn inv(self) -> Self;
@@ -78,6 +82,12 @@ pub trait Elem:
 
     /// Import a number into the field from the natural numbers.
     fn from_u64(val: u64) -> Self;
+
+    /// Represent a field element as a sequence of u32s
+    fn to_u32_words(&self) -> Vec<u32>;
+
+    /// Interpret a sequence of u32s as a field element
+    fn from_u32_words(val: &[u32]) -> Self;
 }
 
 /// A field extension which can be constructed from a subfield element [Elem]

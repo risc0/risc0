@@ -27,6 +27,10 @@ constexpr size_t kGPIO_SendRecvChannel = 0x01F00014;
 constexpr size_t kGPIO_SendRecvSize = 0x01F00018;
 constexpr size_t kGPIO_SendRecvAddr = 0x01F0001C;
 
+constexpr size_t kGPIO_CycleCount = 0x01F00020;
+constexpr size_t kGPIO_InsecureShaCompress = 0x01F00024;
+constexpr size_t kGPIO_InsecureShaHash = 0x01F00028;
+
 // Standard ZKVM channels; must match zkvm/sdk/rust/platform/src/io.rs.
 
 // Request the initial input to the guest.
@@ -119,6 +123,45 @@ inline const char* volatile* GPIO_Fault() {
 // a null-terminated string containing the log message to GPIO_Log.
 inline const char* volatile* GPIO_Log() {
   return reinterpret_cast<const char* volatile*>(kGPIO_Log);
+}
+
+// To have the host execute a sha256 "compress" operation, write the
+// address of an InsecureShaCompressDescriptor to
+// kGPIO_InsecureShaCompress.  The output state (64 bytes) is written
+// to the guest's INPUT area.  WARNING: The host calculates this
+// independently and does not include the calculation in the proof, so
+// this should not be used when security is a concern.
+struct InsecureShaCompressDescriptor {
+  uint32_t state;       // Pointer to input state, 64 bytes
+  uint32_t block_half1; // Pointer to first half of block
+  uint32_t block_half2; // Pointer to second half of block
+};
+
+inline const InsecureShaCompressDescriptor* volatile* GPIO_InsecureShaCompress() {
+  return reinterpret_cast<const InsecureShaCompressDescriptor* volatile*>(
+      kGPIO_InsecureShaCompress);
+}
+
+// To have the host zero-pad and hash zero or more blocks,write the
+// address of a InsecureShaHashDescriptor to kGPIO_InsecureShaHash.
+// The output state (64 bytes) is written to the guest's INPUT area.
+// WARNING: The host calculates this independently and does not
+// include the calculation in the proof, so this should not be used
+// when security is a concern.
+struct InsecureShaHashDescriptor {
+  uint32_t state; // Pointer to input state, 64 bytes
+  uint32_t start; // Pointer to beginning of data region
+  uint32_t len;   // Number of bytes in the region to be hashed
+};
+
+inline const InsecureShaHashDescriptor* volatile* GPIO_InsecureShaHash() {
+  return reinterpret_cast<const InsecureShaHashDescriptor* volatile*>(kGPIO_InsecureShaHash);
+}
+
+// To get the current cycle count of the ZKVM, write a 0 to
+// GPIO_CycleCount and read one word from the guest's INPUT area.
+inline const uint32_t volatile* GPIO_CycleCount() {
+  return reinterpret_cast<const uint32_t volatile*>(kGPIO_CycleCount);
 }
 
 // TODO(nils) Document GetKey.

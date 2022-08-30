@@ -83,7 +83,8 @@ mod test {
     use anyhow::Result;
     use risc0_zkp::core::sha::Digest;
     use risc0_zkvm_methods::{
-        FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SENDRECV_ID, SENDRECV_PATH, SHA_ID, SHA_PATH,
+        FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SENDRECV_ID, SENDRECV_PATH, SHA_ACCEL_ID,
+        SHA_ACCEL_PATH, SHA_ID, SHA_PATH,
     };
     use risc0_zkvm_platform::memory::{COMMIT, HEAP};
     use std::sync::Mutex;
@@ -255,6 +256,47 @@ mod test {
             Prover::new_with_opts(&std::fs::read(SENDRECV_PATH).unwrap(), SENDRECV_ID, opts)
                 .unwrap();
         prover.add_input_u32_slice(&[5, 5]);
+        prover.run().unwrap();
+    }
+
+    #[test]
+    fn sha_accel() {
+        let opts = ProverOpts::default().with_skip_seal(true);
+        let mut prover =
+            Prover::new_with_opts(&std::fs::read(SHA_ACCEL_PATH).unwrap(), SHA_ACCEL_ID, opts)
+                .unwrap();
+        prover.add_input_u32_slice(&[
+            0, // Test risc0_zkvm_guest::sha::Impl
+            0, // Compute an empty digest
+        ]);
+        prover.run().unwrap();
+    }
+
+    #[test]
+    #[cfg(feature = "pure-prove")]
+    fn insecure_sha_accel() {
+        let opts = ProverOpts::default().with_skip_seal(true);
+        let mut prover =
+            Prover::new_with_opts(&std::fs::read(SHA_ACCEL_PATH).unwrap(), SHA_ACCEL_ID, opts)
+                .unwrap();
+        prover.add_input_u32_slice(&[
+            1, // Test risc0_zkvm_guest::sha_insecure::Impl
+            0, // Compute an empty digest
+        ]);
+        prover.run().unwrap();
+    }
+
+    #[test]
+    #[cfg(feature = "pure-prove")]
+    fn sha_cycle_count() {
+        let opts = ProverOpts::default().with_skip_seal(true);
+        let mut prover =
+            Prover::new_with_opts(&std::fs::read(SHA_ACCEL_PATH).unwrap(), SHA_ACCEL_ID, opts)
+                .unwrap();
+        prover.add_input_u32_slice(&[
+            2, // Check insecure cycle count < expected from accel
+            0, // Compute an empty digest
+        ]);
         prover.run().unwrap();
     }
 

@@ -30,6 +30,11 @@ pub mod env;
 /// Functions for computing SHA-256 hashes.
 pub mod sha;
 
+/// Faster than "sha", but delegates to host so should not be trusted
+/// to prove anything.
+#[cfg(feature = "pure-prove")]
+pub mod sha_insecure;
+
 use core::{arch::asm, mem, panic::PanicInfo, ptr};
 
 extern "C" {

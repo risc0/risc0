@@ -15,14 +15,46 @@
 #![no_main]
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(feature = "pure-prove")]
+use risc0_zkp::core::sha::{Digest, Sha};
 use risc0_zkvm_guest::{env, sha};
 
 risc0_zkvm_guest::entry!(main);
 
 pub fn main() {
+    let impl_select: u32 = env::read();
     let data: &[u8] = env::read();
     let digest = sha::digest_u8_slice(data);
     env::commit(&digest);
 
-    risc0_zkp::core::sha::testutil::test_sha_impl(&risc0_zkvm_guest::sha::Impl {})
+    match impl_select {
+        0 => risc0_zkp::core::sha::testutil::test_sha_impl(&risc0_zkvm_guest::sha::Impl {}),
+        #[cfg(feature = "pure-prove")]
+        1 => {
+            risc0_zkp::core::sha::testutil::test_sha_impl(&risc0_zkvm_guest::sha_insecure::Impl {})
+        }
+        #[cfg(feature = "pure-prove")]
+        2 => {
+            // Time the simulated sha so that it estimates what we'd
+            // see when it's a custom circuit.
+            let a: &Digest = &Digest::new([1, 2, 3, 4, 5, 6, 7, 8]);
+
+            let count1 = env::get_cycle_count();
+            risc0_zkvm_guest::memory_barrier(&count1);
+            let count2 = env::get_cycle_count();
+            risc0_zkvm_guest::memory_barrier(&count2);
+            let result = risc0_zkvm_guest::sha_insecure::Impl {}.hash_pair(a, a);
+            risc0_zkvm_guest::memory_barrier(&result);
+            let count3 = env::get_cycle_count();
+            risc0_zkvm_guest::memory_barrier(&count3);
+
+            let overhead = count2 - count1;
+            let total = (count3 - count2) - overhead;
+
+            // We expect our acceleration circuit to use 72 cycles, so make sure that
+            // our simulation doesn't run faster.
+            assert!(total >= 72, "total: {total}");
+        }
+        _ => unimplemented!(),
+    }
 }

@@ -15,6 +15,7 @@
 //! Goldilocks field.
 //! Support for the base finite field modulo `2^64 - 2^32 + 1`.
 
+use alloc::vec::Vec;
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
@@ -48,15 +49,16 @@ impl Default for Elem {
 
 /// The modulus of our Goldilocks field: 2^64 - 2^32 + 1
 /// Calculation steps chosen to avoid overflowing u64 with 2^64:
-/// 1. Wrapping subtract from 0u64, which leaves all ones
-/// 2. Left-shift ones over by 32, leaving 32 ones and 32 zeros (2^64-2^32)
-/// 3. Add one to get 2^64 - 2^32 + 1
+/// 1. Start with all 64-bits of ones
+/// 2. Left-shift ones over by 32, leaving 32 ones and 32 zeros: `(2^64 - 2^32)`
+/// 3. Add one to get `2^64 - 2^32 + 1`
 
 const P: u64 = (0xffffffff_ffffffff << 32) + 1;
 
 impl field::Elem for Elem {
     const ZERO: Self = Elem::new(0u64);
     const ONE: Self = Elem::new(1u64);
+    const WORDS: usize = 2;
 
     /// Compute the multiplicative inverse of `x`, or `1 / x` in finite field
     /// terms. Since we know by Fermat's Little Theorem that
@@ -85,6 +87,15 @@ impl field::Elem for Elem {
 
     fn from_u64(x0: u64) -> Self {
         Elem::new(x0)
+    }
+
+    fn to_u32_words(&self) -> Vec<u32> {
+        Vec::<u32>::from([self.0 as u32, (self.0 >> 32) as u32])
+    }
+
+    fn from_u32_words(val: &[u32]) -> Self {
+        let val: u64 = val[0] as u64 + ((val[1] as u64) << 32);
+        Self(val)
     }
 }
 
@@ -320,6 +331,7 @@ impl Default for ExtElem {
 impl field::Elem for ExtElem {
     const ZERO: ExtElem = ExtElem::zero();
     const ONE: ExtElem = ExtElem::one();
+    const WORDS: usize = 4;
 
     /// Generate a random [ExtElem] uniformly.
     fn random(rng: &mut impl rand::Rng) -> Self {
@@ -358,6 +370,18 @@ impl field::Elem for ExtElem {
 
     fn from_u64(x0: u64) -> Self {
         Self([Elem::new(x0), Elem::new(0)])
+    }
+
+    fn to_u32_words(&self) -> Vec<u32> {
+        self.elems()
+            .iter()
+            .flat_map(|elem| elem.to_u32_words())
+            .collect()
+    }
+
+    fn from_u32_words(val: &[u32]) -> Self {
+        let iter = val.iter().step_by(2).zip(val.iter().skip(1).step_by(2));
+        field::ExtElem::from_subelems(iter.map(|word| Elem::from_u32_words(&[*word.0, *word.1])))
     }
 }
 
@@ -545,10 +569,10 @@ impl From<Elem> for ExtElem {
 
 #[cfg(test)]
 mod tests {
-    use super::field;
-    use super::{Elem, ExtElem, P};
+    use super::{field, Elem, ExtElem, P};
     use crate::field::Elem as FieldElem;
-    use rand::SeedableRng;
+    use alloc::{vec, vec::Vec};
+    use rand::{Rng, SeedableRng};
 
     #[test]
     /// Roots of unity tests common to all fields under test
@@ -773,6 +797,25 @@ mod tests {
                 a,
                 b
             );
+        }
+    }
+
+    #[test]
+    fn u32s_conversions() {
+        let mut rng = rand::rngs::SmallRng::seed_from_u64(2);
+        for _ in 0..100 {
+            let elem = Elem::random(&mut rng);
+            assert_eq!(elem, Elem::from_u32_words(&elem.to_u32_words()));
+
+            let vec: Vec<u32> = vec![rng.gen(), rng.gen()];
+            assert_eq!(vec, Elem::from_u32_words(&vec).to_u32_words());
+        }
+        for _ in 0..100 {
+            let elem = ExtElem::random(&mut rng);
+            assert_eq!(elem, ExtElem::from_u32_words(&elem.to_u32_words()));
+
+            let vec: Vec<u32> = vec![rng.gen(), rng.gen(), rng.gen(), rng.gen()];
+            assert_eq!(vec, ExtElem::from_u32_words(&vec).to_u32_words());
         }
     }
 }

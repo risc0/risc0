@@ -15,11 +15,11 @@
 use alloc::vec::Vec;
 
 use crate::core::{
-    fp::Fp,
     fp4::Fp4,
     sha::{Digest, Sha},
     sha_rng::ShaRng,
 };
+use crate::field::Elem;
 
 pub struct WriteIOP<S: Sha> {
     sha: S,
@@ -50,11 +50,9 @@ impl<S: Sha> WriteIOP<S> {
     }
 
     /// Called by the prover to write some data.
-    pub fn write_fp_slice(&mut self, slice: &[Fp]) {
-        self.proof.extend(slice.iter().map(|x| {
-            let x: u32 = x.into();
-            x
-        }));
+    pub fn write_fp_slice<E: Elem>(&mut self, slice: &[E]) {
+        self.proof
+            .extend(slice.iter().flat_map(|x| x.to_u32_words()));
     }
 
     /// Called by the prover to write some data.

@@ -18,10 +18,8 @@ use core::cmp;
 use log::debug;
 
 use crate::{
-    core::{
-        fp::Fp,
-        sha::{Digest, Sha},
-    },
+    core::sha::{Digest, Sha},
+    field::Field,
     hal::{Buffer, Hal},
     merkle::MerkleTreeParams,
     prove::write_iop::WriteIOP,
@@ -104,15 +102,19 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
-    pub fn prove<S: Sha>(&self, iop: &mut WriteIOP<S>, idx: usize) -> Vec<Fp> {
+    pub fn prove<S: Sha>(
+        &self,
+        iop: &mut WriteIOP<S>,
+        idx: usize,
+    ) -> Vec<<<H as Hal>::Field as Field>::Elem> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);
         self.matrix.view(|view| {
             for i in 0..self.params.col_size {
-                out.push(H::to_baby_bear_fp(view[idx + i * self.params.row_size]));
+                out.push(view[idx + i * self.params.row_size]);
             }
         });
-        iop.write_fp_slice(out.as_slice());
+        iop.write_fp_slice::<<<H as Hal>::Field as Field>::Elem>(out.as_slice());
         let mut idx = idx + self.params.row_size;
         self.nodes.view(|view| {
             while idx >= 2 * self.params.top_size {
@@ -129,8 +131,8 @@ impl<H: Hal> MerkleTreeProver<H> {
 #[cfg(test)]
 mod tests {
     use crate::{
-        core::sha_cpu,
-        field::baby_bear::BabyBear,
+        core::{fp::Fp, sha_cpu},
+        field::{baby_bear::BabyBear, Elem},
         hal::cpu::CpuHal,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     };
@@ -146,11 +148,13 @@ mod tests {
     ) -> MerkleTreeProver<H> {
         // Initialize a prover with leaves 0..size
         let size: u32 = (rows * cols) as u32;
-        let mut data = Vec::<Fp>::new();
+        let mut data = Vec::<<<H as Hal>::Field as Field>::Elem>::new();
         for val in 0..size {
-            data.push(Fp::from(val));
+            data.push(<<H as Hal>::Field as Field>::Elem::from_u64(
+                (u32::MAX / 2) as u64 - val as u64,
+            ));
         }
-        let matrix = hal.copy_fp_from(H::from_baby_bear_fp_slice(data.as_slice()));
+        let matrix = hal.copy_fp_from(data.as_slice());
 
         MerkleTreeProver::new(hal, &matrix, rows, cols, queries)
     }
@@ -178,7 +182,12 @@ mod tests {
             let r_idx = (iop.rng.next_u32() as usize) % rows;
             let col = prover.prove(&mut iop, r_idx);
             for c_idx in 0..cols {
-                assert_eq!(col[c_idx], Fp::from((r_idx + c_idx * rows) as u32));
+                assert_eq!(
+                    col[c_idx],
+                    <<H as Hal>::Field as Field>::Elem::from_u64(
+                        (u32::MAX / 2) as u64 - ((r_idx + c_idx * rows) as u64)
+                    )
+                );
             }
         }
         {
@@ -215,7 +224,10 @@ mod tests {
                 }
                 let col = verifier.verify(&mut r_iop, r_idx).unwrap();
                 for c_idx in 0..cols {
-                    assert_eq!(col[c_idx], Fp::from((r_idx + c_idx * rows) as u32));
+                    assert_eq!(
+                        col[c_idx],
+                        Fp::from((u32::MAX / 2) - ((r_idx + c_idx * rows) as u32))
+                    );
                 }
             }
             if !err {
