@@ -410,7 +410,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         let size = core::mem::size_of::<T>();
         assert_eq!(size % WORD_SIZE, 0, "Descriptors should be word aligned");
         let buf = self.memory.load_region_u32(addr, size as u32);
-        assert_eq!(buf.len(), size);
+        assert_eq!(buf.len() * WORD_SIZE, size);
         core::ptr::read_unaligned(buf.as_ptr() as *const T)
     }
 
