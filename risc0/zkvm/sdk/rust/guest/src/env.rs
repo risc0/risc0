@@ -17,8 +17,13 @@ use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{Deserializer, Serializer, Slice};
 use risc0_zkvm_platform::{
-    io::{IoDescriptor, GPIO_COMMIT, SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT},
-    memory, WORD_SIZE,
+    io::{
+        IoDescriptor, GPIO_COMMIT, GPIO_CYCLECOUNT, SENDRECV_CHANNEL_INITIAL_INPUT,
+        SENDRECV_CHANNEL_STDOUT,
+    },
+    memory,
+    rt::host_io::host_recv,
+    WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
@@ -26,7 +31,7 @@ use crate::{align_up, memory_barrier, sha};
 
 // Re-export for easy use by user programs.
 #[cfg(target_os = "zkvm")]
-pub use risc0_zkvm_platform::rt::host_sendrecv;
+pub use risc0_zkvm_platform::rt::host_io::host_sendrecv;
 
 #[cfg(not(target_os = "zkvm"))]
 // Bazel really wants to compile this file for the host too, so provide a stub.
@@ -116,6 +121,12 @@ pub fn write<T: Serialize>(data: &T) {
 /// Commit public data to the journal.
 pub fn commit<T: Serialize>(data: &T) {
     ENV.get().commit(data);
+}
+
+/// Returns the number of processor cycles that have occured since the guest
+/// began.
+pub fn get_cycle_count() -> usize {
+    ENV.get().get_cycle_count()
 }
 
 impl Env {
@@ -215,5 +226,13 @@ impl Env {
             memory_barrier(result);
         };
         sha::finalize();
+    }
+
+    fn get_cycle_count(&self) -> usize {
+        unsafe { GPIO_CYCLECOUNT.as_ptr().write_volatile(0) }
+        match host_recv(1) {
+            &[nbytes] => nbytes as usize,
+            _ => unreachable!(),
+        }
     }
 }

@@ -14,6 +14,6 @@
 
 // Runtime routines to support the zkvm.
 
-mod host_sendrecv;
+// Used by standard library:
 
-pub use host_sendrecv::host_sendrecv;
+pub mod host_io;

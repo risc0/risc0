@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Platform definitions for ZKVM, including IO port addresses, memory
+//! regions, and low-level runtime functions.
+
 #![no_std]
 
 pub mod io;
@@ -20,6 +23,20 @@ pub mod memory;
 pub const WORD_SIZE: usize = core::mem::size_of::<u32>();
 
 #[cfg(target_os = "zkvm")]
-/// Runtime support for running on the ZKVM.  Provided here for the
-/// rust standard library to use.
+/// Runtime support for running on the ZKVM.  These are low-level
+/// routines; in general, users should prefer to use the
+/// risc0-zkvm-guest package.
 pub mod rt;
+
+/// Stub out guest-only routines for non-guest compiles.
+#[cfg(not(target_os = "zkvm"))]
+pub mod rt {
+    pub mod host_io {
+        pub fn host_sendrecv(_channel: u32, _buf: &[u8]) -> (&'static [u32], usize) {
+            unimplemented!()
+        }
+        pub fn host_recv(_nwords: usize) -> &'static [u32] {
+            unimplemented!()
+        }
+    }
+}

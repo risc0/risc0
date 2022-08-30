@@ -21,7 +21,27 @@ use crate::{
 
 // Current offset in number of words from the INPUT memory region that
 // we're reading,
-static mut READ_PTR: UnsafeCell<usize> = UnsafeCell::new(0);
+static mut READ_PTR: UnsafeCell<usize> = UnsafeCell::new(memory::INPUT.start());
+
+/// Reads a fixed-length message from the host, with the size
+/// specified in number of words.  Normally this would be called in
+/// response to a GPIO request of some sort.  Callers should always
+/// call this as soon as possible after the GPIO request in order to
+/// avoid desynchronization.
+pub fn host_recv(nwords: usize) -> &'static [u32] {
+    // SAFETY: We're single threaded, so it's ok to borrow READ_PTR while in this
+    // routine.
+    let read_ptr: &mut usize = unsafe { &mut *READ_PTR.get() };
+    let read_start = *read_ptr;
+    let read_end = read_ptr.checked_add(nwords * WORD_SIZE).unwrap();
+    if read_end > memory::INPUT.end() {
+        panic!("host_recv overran input buffer with {nwords} word read");
+    }
+    *read_ptr = read_end;
+
+    // SAFETY: This region is in the INPUT region and we just did a bounds check.
+    unsafe { core::slice::from_raw_parts(read_start as *const u32, nwords) }
+}
 
 /// Interacts with the host.  'channel' specifies the ZKVM channel to
 /// use, and 'buf' provides the data to tsend to the host.
@@ -31,27 +51,19 @@ static mut READ_PTR: UnsafeCell<usize> = UnsafeCell::new(0);
 /// not match the length of the returned slice * WORD_SIZE in the case
 /// that the returned buffer does not fall on a word boundry.
 pub fn host_sendrecv(channel: u32, buf: &[u8]) -> (&'static [u32], usize) {
-    // SAFETY: Single threaded, so it's ok to borrow READ_PTR while in this routine.
-    let read_ptr: &mut usize = unsafe { &mut *READ_PTR.get() };
-
-    // Tell the host to execute the sendrecv.
+    // Tell the host to send us some data.
     unsafe {
         GPIO_SENDRECV_CHANNEL.as_ptr().write_volatile(channel);
         GPIO_SENDRECV_SIZE.as_ptr().write_volatile(buf.len());
         GPIO_SENDRECV_ADDR.as_ptr().write_volatile(buf.as_ptr());
     }
 
-    // Receive
-    let read_start: *const u32 = memory::INPUT.start() as _;
-    let response_nbytes = unsafe { read_start.add(*read_ptr).read_volatile() } as usize;
-    *read_ptr += 1;
+    let response_nbytes = match host_recv(1) {
+        &[nbytes] => nbytes,
+        _ => unreachable!(),
+    } as usize;
+
     let response_nwords = (response_nbytes + WORD_SIZE - 1) / WORD_SIZE;
 
-    assert!(*read_ptr + response_nwords < memory::INPUT.len_words());
-    // SAFETY: This region is in the INPUT region and we just did a bounds check.
-    let response_data =
-        unsafe { core::slice::from_raw_parts(read_start.add(*read_ptr), response_nwords) };
-    *read_ptr += response_nwords;
-
-    (response_data, response_nbytes)
+    (host_recv(response_nwords), response_nbytes)
 }
