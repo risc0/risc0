@@ -12,13 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::vec::Vec;
+
 use rand::{Error, RngCore};
 
-use crate::core::{
-    fp::Fp,
-    fp4::Fp4,
-    sha::{Digest, Sha, DIGEST_WORDS},
-    sha_rng::ShaRng,
+use crate::{
+    core::{
+        fp::Fp,
+        fp4::Fp4,
+        sha::{Digest, Sha, DIGEST_WORDS},
+        sha_rng::ShaRng,
+    },
+    field::{Elem, ExtElem},
 };
 
 #[derive(Debug)]
@@ -49,22 +54,28 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
     }
 
     pub fn read_fps(&mut self, x: &mut [Fp]) {
+        let words = <Fp as Elem>::WORDS;
         for i in 0..x.len() {
-            x[i] = Fp::from(self.proof[i]);
+            x[i] = <Fp as Elem>::from_u32_words(&self.proof[words * i..words * (i + 1)]);
+            // Ignore the odd-numbered values, which will be 0 for baby-bear
         }
-        self.proof = &self.proof[x.len()..];
+        self.proof = &self.proof[<Fp as Elem>::WORDS * x.len()..];
     }
 
     pub fn read_fp4s(&mut self, x: &mut [Fp4]) {
+        let elem_words = <Fp4 as ExtElem>::SubElem::WORDS;
+        let ext_size = <Fp4 as ExtElem>::EXT_SIZE;
         for i in 0..x.len() {
-            x[i] = Fp4::new(
-                Fp::from(self.proof[4 * i + 0]),
-                Fp::from(self.proof[4 * i + 1]),
-                Fp::from(self.proof[4 * i + 2]),
-                Fp::from(self.proof[4 * i + 3]),
-            )
+            let mut subelems = Vec::<<Fp4 as ExtElem>::SubElem>::new();
+            for j in 0..ext_size {
+                let offset: usize = ext_size * i + j;
+                subelems.push(<Fp4 as ExtElem>::SubElem::from_u32_words(
+                    &self.proof[elem_words * offset..elem_words * (offset + 1)],
+                ));
+            }
+            x[i] = <Fp4 as ExtElem>::from_subelems(subelems);
         }
-        self.proof = &self.proof[4 * x.len()..];
+        self.proof = &self.proof[<Fp4 as Elem>::WORDS * x.len()..];
     }
 
     pub fn read_digests(&mut self, x: &mut [Digest]) {
