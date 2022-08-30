@@ -60,6 +60,18 @@ void MemoryHandler::onInit(MemoryState& mem) {
   }
 }
 
+void MemoryHandler::sendToGuest(MemoryState& mem, const BufferU32& words) {
+  if ((cur_host_to_guest_offset + words.size()) >= kMemInputEnd) {
+    throw(std::runtime_error("Read buffer overrun"));
+  }
+  LOG(1, "Filling " << words.size() << " words of guest input area");
+  for (uint32_t word : words) {
+    LOG(1, "... " << word);
+    mem.store(cur_host_to_guest_offset, word);
+    cur_host_to_guest_offset += sizeof(uint32_t);
+  }
+}
+
 void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uint32_t value) {
   LOG(2, "MemoryHandler::onWrite> " << hex(addr) << ": " << hex(value));
   switch (addr) {
@@ -133,19 +145,81 @@ void MemoryHandler::onWrite(MemoryState& mem, uint32_t cycle, uint32_t addr, uin
       LOG(1,
           "MemoryHandler::onWrite> GPIO_SendReceive, host replied with " << result.size()
                                                                          << " bytes");
-      size_t aligned_len = align(result.size());
-      if ((cur_host_to_guest_offset + sizeof(uint32_t) + aligned_len) >= kMemInputEnd) {
-        throw(std::runtime_error("Read buffer overrun"));
-      }
-      mem.store(cur_host_to_guest_offset, result.size());
-      cur_host_to_guest_offset += sizeof(uint32_t);
-      for (size_t i = 0; i < result.size(); ++i) {
-        mem.storeByte(cur_host_to_guest_offset + i, result[i]);
-      }
-      cur_host_to_guest_offset += aligned_len;
+
+      // Send length in bytes
+      uint32_t result_bytes = result.size();
+      BufferU32 words;
+      words.push_back(result_bytes);
+      sendToGuest(mem, words);
+
+      // Send the buffer.
+      words.clear();
+      words.resize((result.size() + sizeof(uint32_t) - 1) / sizeof(uint32_t), 0);
+      memcpy(words.data(), result.data(), result_bytes);
+      sendToGuest(mem, words);
     } else {
       throw std::runtime_error("SendRecv called with no IO handler set");
     }
+  } break;
+  case kGPIO_CycleCount: {
+    LOG(1, "MemoryHandler::onWrite> GPIO_CycleCount, cycle = " << cycle);
+    if (value != 0) {
+      throw std::runtime_error("CycleCount GPIO should only be written as zero.");
+    }
+
+    BufferU32 cyclebuf;
+    cyclebuf.push_back(cycle);
+    sendToGuest(mem, cyclebuf);
+  } break;
+  case kGPIO_InsecureShaCompress: {
+    LOG(1, "MemoryHandler::onWrite> GPIO_InsecureSha256Compress, descriptor at " << hex(value));
+    InsecureShaCompressDescriptor desc;
+    mem.loadRegion(value, &desc, sizeof(desc));
+    if (!io) {
+      throw std::runtime_error("InsecureSHA called with no IO handler set");
+    }
+    constexpr size_t kDigestWords = 8;
+
+    ShaDigest state;
+    mem.loadRegion(desc.state, &state, sizeof(state));
+    uint32_t chunk[kDigestWords * 2];
+    mem.loadRegion(desc.block_half1, &chunk[0], sizeof(chunk) / 2);
+    mem.loadRegion(desc.block_half2, &chunk[kDigestWords], sizeof(chunk) / 2);
+
+    for (auto& i : chunk) {
+      i = impl::convertU32(i);
+    }
+    impl::compress(state, chunk);
+
+    BufferU32 result(std::begin(state.words), std::end(state.words));
+    sendToGuest(mem, result);
+  } break;
+  case kGPIO_InsecureShaHash: {
+    LOG(1, "MemoryHandler::onWrite> GPIO_InsecureSha256Hash, descriptor at " << hex(value));
+    InsecureShaHashDescriptor desc;
+    mem.loadRegion(value, &desc, sizeof(desc));
+    if (!io) {
+      throw std::runtime_error("InsecureSHA called with no IO handler set");
+    }
+    constexpr size_t kDigestWords = 8;
+
+    ShaDigest state;
+    mem.loadRegion(desc.state, &state, sizeof(state));
+    constexpr size_t kBlockLen = kDigestWords * 2 * sizeof(uint32_t);
+    for (size_t i = 0; i < desc.len; i += kBlockLen) {
+      uint32_t chunk[kBlockLen];
+      size_t chunk_len = std::min<size_t>(i + kBlockLen, desc.len) - i;
+      mem.loadRegion(desc.start + i, &chunk, chunk_len);
+      memset(reinterpret_cast<uint8_t*>(&chunk) + chunk_len, 0, kBlockLen - chunk_len);
+
+      // Convert to bigendian for impl::compress
+      for (auto& i : chunk) {
+        i = impl::convertU32(i);
+      }
+      impl::compress(state, chunk);
+    }
+    BufferU32 result(std::begin(state.words), std::end(state.words));
+    sendToGuest(mem, result);
   } break;
   }
 }

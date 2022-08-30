@@ -35,6 +35,11 @@ pub const DIGEST_WORDS: usize = 8;
 /// The size of a word within a [Digest] (32-bits = 4 bytes).
 pub const DIGEST_WORD_SIZE: usize = mem::size_of::<u32>();
 
+/// Standard SHA initialization vector .
+pub static SHA256_INIT: Digest = Digest::new([
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+]);
+
 /// The result of a SHA-256 hashing function.
 // TODO(nils): Remove 'Copy' trait on Digest; these are not small and
 // we don't want to copy them around accidentally.
@@ -44,7 +49,7 @@ pub struct Digest([u32; DIGEST_WORDS]);
 
 impl Digest {
     /// Create a new [Digest] from an existing array of words.
-    pub fn new(data: [u32; DIGEST_WORDS]) -> Digest {
+    pub const fn new(data: [u32; DIGEST_WORDS]) -> Digest {
         Digest(data)
     }
 
@@ -162,8 +167,25 @@ pub trait Sha: Clone + Debug {
     /// length.
     fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr;
 
+    /// Update a SHA digest with zero or more new blocks, zero padded
+    /// up to the next block boundry.  Not all implementations provide
+    /// this.
+    fn update(&self, state: &Digest, bytes: &[u8]) -> Self::DigestPtr;
+
     /// Generate a SHA from a pair of [Digests](Digest).
-    fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr;
+    fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
+        self.compress(&SHA256_INIT, a, b)
+    }
+
+    /// Execute the sha256 "compress" operation.  The block is
+    /// specified as two half-blocks.  Not all implementations provide
+    /// this.
+    fn compress(
+        &self,
+        state: &Digest,
+        block_half1: &Digest,
+        block_half2: &Digest,
+    ) -> Self::DigestPtr;
 
     /// Generate a SHA from a slice of anything that can be
     /// represented as plain old data.  Pads up to the Sha block

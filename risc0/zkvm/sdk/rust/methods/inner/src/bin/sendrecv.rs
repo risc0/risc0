@@ -23,9 +23,9 @@ pub fn main() {
     let channel_id = env::read();
     let count = env::read();
 
-    let mut input : &[u8] = &[];
-    let mut input_len : usize = 0;
-    
+    let mut input: &[u8] = &[];
+    let mut input_len: usize = 0;
+
     for _ in 0..count {
         let (host_data, host_len) = env::host_sendrecv(channel_id, &input[..input_len]);
 
