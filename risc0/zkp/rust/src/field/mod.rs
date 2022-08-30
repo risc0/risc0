@@ -17,6 +17,7 @@
 //! Defines field extension (and base fields) used for finite field-based
 //! operations across the RISC Zero zkVM architecture
 
+use alloc::vec::Vec;
 use core::{cmp, fmt::Debug, ops};
 
 /// A pair of fields, one of which is an extension field of the other.

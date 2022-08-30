@@ -15,7 +15,7 @@
 //! Baby bear field.
 //! Support for the base finite field modulo `15 * 2^27 + 1`.
 
-use alloc::fmt;
+use alloc::{fmt, vec::Vec};
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
@@ -579,9 +579,9 @@ impl From<Elem> for ExtElem {
 
 #[cfg(test)]
 mod tests {
-    use super::field;
-    use super::{Elem, ExtElem, P, P_U64};
+    use super::{field, Elem, ExtElem, P, P_U64};
     use crate::field::Elem as FieldElem;
+    use alloc::{vec, vec::Vec};
     use rand::{Rng, SeedableRng};
 
     #[test]

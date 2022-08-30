@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::vec::Vec;
+
 use rand::{Error, RngCore};
 
-use crate::core::{
-    fp::Fp,
-    fp4::Fp4,
-    sha::{Digest, Sha, DIGEST_WORDS},
-    sha_rng::ShaRng,
+use crate::{
+    core::{
+        fp::Fp,
+        fp4::Fp4,
+        sha::{Digest, Sha, DIGEST_WORDS},
+        sha_rng::ShaRng,
+    },
+    field::{Elem, ExtElem},
 };
-use crate::field::{Elem, ExtElem};
 
 #[derive(Debug)]
 pub struct ReadIOP<'a, S: Sha> {
@@ -63,7 +67,7 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
         let ext_size = <Fp4 as ExtElem>::EXT_SIZE;
         for i in 0..x.len() {
             let mut subelems = Vec::<<Fp4 as ExtElem>::SubElem>::new();
-            for j in 0..<Fp4 as ExtElem>::EXT_SIZE {
+            for j in 0..ext_size {
                 let offset: usize = ext_size * i + j;
                 subelems.push(<Fp4 as ExtElem>::SubElem::from_u32_words(
                     &self.proof[elem_words * offset..elem_words * (offset + 1)],

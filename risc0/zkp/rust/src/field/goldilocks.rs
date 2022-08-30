@@ -15,6 +15,7 @@
 //! Goldilocks field.
 //! Support for the base finite field modulo `2^64 - 2^32 + 1`.
 
+use alloc::vec::Vec;
 use core::ops;
 
 use bytemuck::{Pod, Zeroable};
@@ -48,9 +49,9 @@ impl Default for Elem {
 
 /// The modulus of our Goldilocks field: 2^64 - 2^32 + 1
 /// Calculation steps chosen to avoid overflowing u64 with 2^64:
-/// 1. Wrapping subtract from 0u64, which leaves all ones
-/// 2. Left-shift ones over by 32, leaving 32 ones and 32 zeros (2^64-2^32)
-/// 3. Add one to get 2^64 - 2^32 + 1
+/// 1. Start with all 64-bits of ones
+/// 2. Left-shift ones over by 32, leaving 32 ones and 32 zeros: `(2^64 - 2^32)`
+/// 3. Add one to get `2^64 - 2^32 + 1`
 
 const P: u64 = (0xffffffff_ffffffff << 32) + 1;
 
@@ -568,9 +569,9 @@ impl From<Elem> for ExtElem {
 
 #[cfg(test)]
 mod tests {
-    use super::field;
-    use super::{Elem, ExtElem, P};
+    use super::{field, Elem, ExtElem, P};
     use crate::field::Elem as FieldElem;
+    use alloc::{vec, vec::Vec};
     use rand::{Rng, SeedableRng};
 
     #[test]
