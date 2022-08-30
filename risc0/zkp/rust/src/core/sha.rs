@@ -223,8 +223,9 @@ mod tests {
 
 #[allow(missing_docs)]
 pub mod testutil {
-    use super::{Digest, Fp, Fp4, Sha};
     use alloc::vec::Vec;
+
+    use super::{Digest, Fp, Fp4, Sha};
 
     // Runs conformance test on a SHA implementation to make sure it properly
     // behaves.

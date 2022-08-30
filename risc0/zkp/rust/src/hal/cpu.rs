@@ -420,10 +420,10 @@ impl<F: Field> Hal for CpuHal<F> {
 
 #[cfg(test)]
 mod test {
-    use crate::field::baby_bear::BabyBear;
     use rand::thread_rng;
 
     use super::*;
+    use crate::field::baby_bear::BabyBear;
 
     #[test]
     #[should_panic]

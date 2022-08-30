@@ -1,5 +1,6 @@
 extern crate alloc;
 use alloc::vec::Vec;
+
 use serde::{Deserialize, Serialize};
 
 // Benchmark support structures for communication between host and guest.

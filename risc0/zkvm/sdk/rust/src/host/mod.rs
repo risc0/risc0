@@ -25,10 +25,9 @@ mod prove;
 
 use std::collections::HashMap;
 
+pub use exception::Exception;
 #[cfg(not(feature = "pure-prove"))]
 use ffi as prove;
-
-pub use exception::Exception;
 pub use prove::{MethodId, Prover, Receipt};
 
 /// The default digest count when generating a MethodId.
@@ -78,8 +77,8 @@ impl<'a> Default for ProverOpts<'a> {
 
 #[cfg(test)]
 mod test {
-    use super::{MethodId, Prover, ProverOpts, Receipt};
-    use crate::serde::{from_slice, to_vec};
+    use std::sync::Mutex;
+
     use anyhow::Result;
     use risc0_zkp::core::sha::Digest;
     use risc0_zkvm_methods::{
@@ -87,8 +86,10 @@ mod test {
         SHA_ACCEL_PATH, SHA_ID, SHA_PATH,
     };
     use risc0_zkvm_platform::memory::{COMMIT, HEAP};
-    use std::sync::Mutex;
     use test_log::test;
+
+    use super::{MethodId, Prover, ProverOpts, Receipt};
+    use crate::serde::{from_slice, to_vec};
 
     #[test]
     fn sha() {

@@ -14,6 +14,7 @@
 
 use alloc::vec::Vec;
 use core::cmp;
+
 #[allow(unused_imports)]
 use log::debug;
 
@@ -130,15 +131,15 @@ impl<H: Hal> MerkleTreeProver<H> {
 
 #[cfg(test)]
 mod tests {
+    use rand::{Rng, RngCore};
+
+    use super::*;
     use crate::{
         core::{fp::Fp, sha_cpu},
         field::{baby_bear::BabyBear, Elem},
         hal::cpu::CpuHal,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     };
-    use rand::{Rng, RngCore};
-
-    use super::*;
 
     fn init_prover<H: Hal>(
         hal: &H,

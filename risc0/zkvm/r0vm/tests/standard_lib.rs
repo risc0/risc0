@@ -3,7 +3,6 @@ use std::path::Path;
 use anyhow::Result;
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
-
 use risc0_zkvm::host::Receipt;
 
 static EXPECTED_STDOUT: &str = "Hello world on stdout!\n";

@@ -579,10 +579,12 @@ impl From<Elem> for ExtElem {
 
 #[cfg(test)]
 mod tests {
+    use alloc::{vec, vec::Vec};
+
+    use rand::{Rng, SeedableRng};
+
     use super::{field, Elem, ExtElem, P, P_U64};
     use crate::field::Elem as FieldElem;
-    use alloc::{vec, vec::Vec};
-    use rand::{Rng, SeedableRng};
 
     #[test]
     pub fn roots_of_unity() {

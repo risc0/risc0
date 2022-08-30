@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use clap::Parser;
 use std::default::Default;
 use std::{fs, io::Write};
 
+use clap::Parser;
 use risc0_zkvm::host::{MethodId, Prover, ProverOpts, Receipt, DEFAULT_METHOD_ID_LIMIT};
 
 /// Generates a MethodID for a given RISC-V ELF binary.

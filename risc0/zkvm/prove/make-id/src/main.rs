@@ -21,9 +21,9 @@
 //! our [Risc Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter)
 //! for help getting started.
 
-use clap::Parser;
 use std::fs;
 
+use clap::Parser;
 use risc0_zkvm::host::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 
 /// Generates a MethodID for a given RISC-V ELF binary.

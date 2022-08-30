@@ -28,8 +28,9 @@ fn align_up(addr: usize, align: usize) -> usize {
 
 #[cfg(test)]
 mod test {
-    use crate::serde::{from_slice, to_vec};
     use std::collections::HashMap;
+
+    use crate::serde::{from_slice, to_vec};
 
     #[test]
     fn test_vec_round_trip() {

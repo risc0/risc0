@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{ffi::CStr, mem, os::raw::c_char};
+
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
 use super::exception::Exception;
 use super::ProverOpts;
