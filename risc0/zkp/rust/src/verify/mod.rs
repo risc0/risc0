@@ -24,7 +24,7 @@ use core::fmt;
 use crate::{
     core::{
         fp::Fp,
-        fp4::{Fp4, EXT_SIZE},
+        fp4::Fp4,
         log2_ceil,
         poly::poly_eval,
         rou::{ROU_FWD, ROU_REV},
@@ -33,10 +33,8 @@ use crate::{
     field::Elem,
     taps::{RegisterGroup, TapSet},
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
-    INV_RATE, MAX_CYCLES_PO2, QUERIES,
+    CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
-
-const CHECK_SIZE: usize = INV_RATE * EXT_SIZE;
 
 #[derive(Debug)]
 pub enum VerificationError {
@@ -66,14 +64,19 @@ pub trait Circuit {
     fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
     fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
     fn po2(&self) -> u32;
-    fn check_code(&self, root: &Digest) -> Result<(), VerificationError>;
     fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4;
 }
 
-pub fn verify<S, C>(sha: &S, circuit: &mut C, seal: &[u32]) -> Result<(), VerificationError>
+pub fn verify<S, C, F>(
+    sha: &S,
+    circuit: &mut C,
+    seal: &[u32],
+    check_code: F,
+) -> Result<(), VerificationError>
 where
     S: Sha,
     C: Circuit,
+    F: Fn(u32, &Digest) -> bool,
 {
     if seal.len() == 0 {
         return Err(VerificationError::ReceiptFormatError);
@@ -106,7 +109,9 @@ where
     // debug!("dataRoot = {}", data_merkle.root());
 
     // Verify code is valid
-    circuit.check_code(code_merkle.root())?;
+    if !check_code(po2, code_merkle.root()) {
+        return Err(VerificationError::MethodVerificationError);
+    }
 
     // Prep accumulation
     circuit.accumulate(&mut iop);
