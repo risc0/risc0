@@ -33,6 +33,9 @@ impl<T> Gpio<T> {
         if cfg!(target_os = "zkvm") {
             self.addr as _
         } else {
+            // If we're not on zkvm, don't make it easy to get a
+            // pointer to a GPIO port since it'll point off to the
+            // middle of nowhere.
             unimplemented!()
         }
     }

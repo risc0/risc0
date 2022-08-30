@@ -294,8 +294,7 @@ mod test {
             Prover::new_with_opts(&std::fs::read(SHA_ACCEL_PATH).unwrap(), SHA_ACCEL_ID, opts)
                 .unwrap();
         prover.add_input_u32_slice(&[
-            2, /* Check the cycle count on insecure sha matches what we expect from the
-                * acceleration circuit */
+            2, // Check insecure cycle count < expected from accel
             0, // Compute an empty digest
         ]);
         prover.run().unwrap();

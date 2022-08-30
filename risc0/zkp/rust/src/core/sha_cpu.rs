@@ -23,11 +23,7 @@ use sha2::{
     Digest as ShaDigest, Sha256,
 };
 
-use super::sha::{Digest, Sha, DIGEST_WORDS};
-
-static INIT_256: [u32; DIGEST_WORDS] = [
-    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
-];
+use super::sha::{Digest, Sha, DIGEST_WORDS, SHA256_INIT};
 
 /// A CPU-based [Sha] implementation.
 #[derive(Clone)]
@@ -48,7 +44,7 @@ impl Impl {
         size: usize,
         stride: usize,
     ) -> Box<Digest> {
-        let mut state = INIT_256;
+        let mut state = *SHA256_INIT.get();
         let mut block: GenericArray<u8, U64> = GenericArray::default();
 
         let mut u8s = pods
@@ -112,7 +108,7 @@ impl Sha for Impl {
             "{} should be a multiple of 16, the number of words per SHA block",
             words.len()
         );
-        let mut state = INIT_256;
+        let mut state = *SHA256_INIT.get();
         for block in words.chunks(16) {
             let block_u8: &[u8] = bytemuck::cast_slice(block);
             compress256(
@@ -125,7 +121,7 @@ impl Sha for Impl {
 
     fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, pod: &[T]) -> Self::DigestPtr {
         let u8s: &[u8] = bytemuck::cast_slice(pod);
-        let mut state = INIT_256;
+        let mut state = *SHA256_INIT.get();
         let mut blocks = u8s.chunks_exact(64);
         for block in blocks.by_ref() {
             compress256(&mut state, slice::from_ref(GenericArray::from_slice(block)));

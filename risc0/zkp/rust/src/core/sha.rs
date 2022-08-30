@@ -182,7 +182,7 @@ pub trait Sha: Clone + Debug {
     /// this.
     fn compress(
         &self,
-        _state: &Digest,
+        state: &Digest,
         block_half1: &Digest,
         block_half2: &Digest,
     ) -> Self::DigestPtr;
