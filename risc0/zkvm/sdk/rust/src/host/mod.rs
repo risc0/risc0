@@ -304,7 +304,7 @@ mod test {
     #[ignore = "Cannot expand, max po2 of 24 reached"]
     #[cfg(feature = "pure-prove")]
     fn recursion() {
-        use risc0_zkvm_methods_verify::{VERIFY_ID, VERIFY_PATH};
+        use risc0_zkvm_methods::{VERIFY_ID, VERIFY_PATH};
 
         let mut prover = Prover::new(&std::fs::read(IO_PATH).unwrap(), IO_ID).unwrap();
         let vec = vec![1u32, HEAP.start() as u32, 1];

@@ -37,7 +37,6 @@ xmas-elf = "0.8"
 [target.'cfg(not(target_arch = "riscv32"))'.dev-dependencies]
 env_logger = "0.9"
 risc0-zkvm-methods = { path = "methods" }
-risc0-zkvm-methods-verify = { path = "methods/verify" }
 test-log = "0.2"
 
 [features]
