@@ -198,9 +198,11 @@ pub trait Sha: Clone + Debug {
 }
 
 // Default implementation is CPU-based.
+#[cfg(feature = "prove")]
 pub use super::sha_cpu::Impl as DefaultImplementation;
 
 /// Return the default implementation of a [Sha].
+#[cfg(feature = "prove")]
 pub fn default_implementation() -> &'static DefaultImplementation {
     static DEFAULT_IMPLEMENTATION: DefaultImplementation = DefaultImplementation {};
     &DEFAULT_IMPLEMENTATION

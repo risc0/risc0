@@ -12,24 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate alloc;
-
 use alloc::vec::Vec;
 use anyhow::Result;
 use risc0_zkp::{
     core::{
-        fp::Fp,
         log2_ceil,
         sha::{Digest, DIGEST_WORDS, DIGEST_WORD_SIZE},
     },
-    field::baby_bear::BabyBear,
-    MAX_CYCLES, MIN_CYCLES, ZK_CYCLES,
+    MAX_CYCLES, MIN_CYCLES,
 };
 
 /// The default digest count when generating a MethodId.
 pub const DEFAULT_METHOD_ID_LIMIT: u32 = 12;
 
-const MAX_CODE_DIGEST_COUNT: u32 = (log2_ceil(MAX_CYCLES / MIN_CYCLES) + 1) as _;
+pub const MAX_CODE_DIGEST_COUNT: u32 = (log2_ceil(MAX_CYCLES / MIN_CYCLES) + 1) as _;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct MethodId {
@@ -39,6 +35,16 @@ pub struct MethodId {
 impl From<&[u8]> for MethodId {
     fn from(bytes: &[u8]) -> Self {
         MethodId::from_slice(bytes).unwrap()
+    }
+}
+
+impl From<&[u32]> for MethodId {
+    fn from(words: &[u32]) -> Self {
+        let mut table = Vec::new();
+        for digest in words.chunks_exact(DIGEST_WORDS) {
+            table.push(Digest::from_slice(digest));
+        }
+        MethodId { table }
     }
 }
 
@@ -72,13 +78,27 @@ impl MethodId {
 
     #[cfg(feature = "prove")]
     pub fn compute_with_limit(elf_contents: &[u8], limit: u32) -> Result<Self> {
-        use crate::{elf::Program, CODE_SIZE};
-        use risc0_zkp::{
-            hal::{cpu::CpuHal, Hal},
-            prove::poly_group::PolyGroup,
-        };
-        use risc0_zkvm_platform::memory::MEM_SIZE;
+        prove::compute_with_limit(elf_contents, limit)
+    }
+}
 
+#[cfg(feature = "prove")]
+mod prove {
+    use anyhow::Result;
+    use risc0_zkp::{
+        core::{fp::Fp, sha::Digest},
+        field::baby_bear::BabyBear,
+        hal::{cpu::CpuHal, Hal},
+        prove::poly_group::PolyGroup,
+        MIN_CYCLES, ZK_CYCLES,
+    };
+    use risc0_zkvm_platform::memory::MEM_SIZE;
+
+    use crate::{elf::Program, prove::exec, CODE_SIZE};
+
+    use super::{MethodId, MAX_CODE_DIGEST_COUNT};
+
+    pub fn compute_with_limit(elf_contents: &[u8], limit: u32) -> Result<MethodId> {
         let code_size = *CODE_SIZE;
         let hal: CpuHal<BabyBear> = CpuHal::new();
         let program = Program::load_elf(elf_contents, MEM_SIZE as u32)?;
@@ -112,22 +132,19 @@ impl MethodId {
 
         Ok(MethodId { table })
     }
-}
 
-#[cfg(feature = "prove")]
-fn load_code(code: &mut [Fp], elf: &crate::elf::Program, cycles: usize) -> Result<()> {
-    use crate::{prove::exec, CODE_SIZE};
-
-    let mut cycle = 0;
-    exec::load_code(elf.entry, &elf.image, |chunk, fini| {
-        for i in 0..*CODE_SIZE {
-            code[cycles * i + cycle] = chunk[i];
-        }
-        if cycle + fini + ZK_CYCLES < cycles {
-            cycle += 1;
-            Ok(true)
-        } else {
-            Ok(false)
-        }
-    })
+    fn load_code(code: &mut [Fp], elf: &crate::elf::Program, cycles: usize) -> Result<()> {
+        let mut cycle = 0;
+        exec::load_code(elf.entry, &elf.image, |chunk, fini| {
+            for i in 0..*CODE_SIZE {
+                code[cycles * i + cycle] = chunk[i];
+            }
+            if cycle + fini + ZK_CYCLES < cycles {
+                cycle += 1;
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        })
+    }
 }

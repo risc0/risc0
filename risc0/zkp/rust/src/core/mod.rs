@@ -19,8 +19,6 @@
 
 extern crate alloc;
 
-use rand::Rng;
-
 /// This transitional "fp4" module will remain until ZKP has been genericized to
 /// work with multiple fields. This module includes the base field of order
 /// 15*2^27 + 1).
@@ -42,8 +40,11 @@ pub mod ntt;
 pub mod poly;
 pub mod rou;
 pub mod sha;
+#[cfg(feature = "prove")]
 pub mod sha_cpu;
 pub mod sha_rng;
+
+use rand::Rng;
 
 /// For x = (1 << po2), given x, find po2.
 /// # Example

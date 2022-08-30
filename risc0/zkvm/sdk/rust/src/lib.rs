@@ -40,11 +40,9 @@ pub mod core;
 pub mod elf;
 #[cfg(feature = "host")]
 pub mod host;
-#[cfg(feature = "host")]
 pub mod method_id;
 #[cfg(feature = "prove")]
 pub mod prove;
-#[cfg(feature = "host")]
 pub mod receipt;
 pub mod serde;
 

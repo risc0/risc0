@@ -299,4 +299,25 @@ mod test {
         ]);
         prover.run().unwrap();
     }
+
+    #[test]
+    #[ignore = "Cannot expand, max po2 of 24 reached"]
+    #[cfg(feature = "pure-prove")]
+    fn recursion() {
+        use risc0_zkvm_methods::{VERIFY_ID, VERIFY_PATH};
+
+        let mut prover = Prover::new(&std::fs::read(IO_PATH).unwrap(), IO_ID).unwrap();
+        let vec = vec![1u32, HEAP.start() as u32, 1];
+        prover.add_input_u32_slice(vec.as_slice());
+        let receipt = prover.run().unwrap();
+
+        let opts = ProverOpts::default().with_skip_seal(true);
+        let mut prover =
+            Prover::new_with_opts(&std::fs::read(VERIFY_PATH).unwrap(), VERIFY_ID, opts).unwrap();
+        prover.add_input_u32_slice(&[receipt.seal.len() as u32]);
+        prover.add_input_u32_slice(&receipt.seal);
+        prover.add_input_u32_slice(&[(IO_ID.len() / 4) as u32]);
+        prover.add_input_u8_slice(IO_ID);
+        prover.run().unwrap();
+    }
 }

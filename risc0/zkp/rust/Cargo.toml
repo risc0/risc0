@@ -22,7 +22,7 @@ rand = { version = "0.8", default-features = false, features = ["small_rng"] }
 rand_core = "0.6"
 rayon = { version = "1.5", optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
-sha2 = { version = "0.10", default-features = false, features = ["compress"] }
+sha2 = { version = "0.10", optional = true, default-features = false, features = ["compress"] }
 
 [dev-dependencies]
 criterion = "0.3"
@@ -31,6 +31,6 @@ rand = { version = "0.8", features = ["small_rng"] }
 [features]
 default = ["prove", "std", "verify"]
 hal = ["dep:ndarray", "dep:rayon"]
-prove = ["dep:array-init", "hal", "rand/std", "rand/std_rng"]
+prove = ["dep:array-init", "dep:sha2", "hal", "rand/std", "rand/std_rng"]
 std = []
 verify = []
