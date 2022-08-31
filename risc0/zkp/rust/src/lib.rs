@@ -32,7 +32,7 @@ pub mod verify;
 pub mod field;
 
 pub const MIN_CYCLES: usize = 512;
-pub const MAX_CYCLES_PO2: usize = 26;
+pub const MAX_CYCLES_PO2: usize = 24;
 pub const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2;
 
 /// ~100 bits of conjectured security
