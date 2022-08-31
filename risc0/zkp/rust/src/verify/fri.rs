@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::vec;
+use alloc::vec::Vec;
 
 use rand::RngCore;
 
@@ -27,7 +27,7 @@ use crate::{
     },
     field::{baby_bear::BabyBear, Elem},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
-    FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
+    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
 
 /// VerifyRoundInfo contains the data against which the queries for a particular
@@ -75,15 +75,16 @@ impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
         let group = *pos % self.domain;
         // Get the column data
         let data = self.merkle.verify::<BabyBear>(iop, group)?;
-        let mut data4 = vec![];
-        for i in 0..FRI_FOLD {
-            data4.push(Fp4::new(
-                data[0 * FRI_FOLD + i],
-                data[1 * FRI_FOLD + i],
-                data[2 * FRI_FOLD + i],
-                data[3 * FRI_FOLD + i],
-            ));
-        }
+        let mut data4: Vec<_> = (0..FRI_FOLD)
+            .map(|i| {
+                Fp4::new(
+                    data[0 * FRI_FOLD + i],
+                    data[1 * FRI_FOLD + i],
+                    data[2 * FRI_FOLD + i],
+                    data[3 * FRI_FOLD + i],
+                )
+            })
+            .collect();
         // Check the existing goal
         if data4[quot] != *goal {
             return Err(VerificationError::InvalidProof);
@@ -106,12 +107,23 @@ where
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
     // Prep the folding verfiers
-    let mut rounds = vec![];
+    let rounds_capacity =
+        (log2_ceil((degree + FRI_FOLD - 1) / FRI_FOLD) + FRI_FOLD_PO2 - 1) / FRI_FOLD_PO2;
+    let mut rounds = Vec::with_capacity(rounds_capacity);
     while degree > FRI_MIN_DEGREE {
         rounds.push(VerifyRoundInfo::new(iop, domain));
         domain /= FRI_FOLD;
         degree /= FRI_FOLD;
     }
+    // We want to minimize reallocation in verify, so make sure we
+    // didn't have to reallocate.
+    assert!(
+        rounds.len() < rounds_capacity,
+        "Did not allocate enough rounds; needed {} for degree {} but only allocated {}",
+        rounds.len(),
+        degree,
+        rounds_capacity
+    );
     // Grab the final coeffs + commit
     let final_coeffs = iop.read_pod_slice(EXT_SIZE * degree);
     let final_digest = iop.get_sha().hash_raw_pod_slice(final_coeffs);
