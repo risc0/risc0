@@ -18,8 +18,7 @@ pub(crate) mod merkle;
 pub mod read_iop;
 
 use alloc::{vec, vec::Vec};
-use core::fmt;
-use core::iter::zip;
+use core::{fmt, iter::zip};
 
 // use log::debug;
 use crate::{
