@@ -5949,4 +5949,5 @@ pub(crate) const TAPSET: &'static TapSet = &TapSet::<'static> {
     combo_begin: &[0, 1, 3, 9, 16, 18],
     group_begin: [0, 18, 34, 742],
     combos_count: 5,
+    reg_count: 188,
 };

@@ -84,7 +84,7 @@ impl<H: Hal> MerkleTreeProver<H> {
         let mut proof_slice = self.tmp_proof.slice(0, top_size);
         hal.eltwise_copy_digest(&mut proof_slice, &self.nodes.slice(top_size, top_size));
         proof_slice.view(|view| {
-            iop.write_digest_slice(view);
+            iop.write_pod_slice(view);
         });
         iop.commit(self.root());
     }
@@ -115,14 +115,14 @@ impl<H: Hal> MerkleTreeProver<H> {
                 out.push(view[idx + i * self.params.row_size]);
             }
         });
-        iop.write_fp_slice::<<<H as Hal>::Field as Field>::Elem>(out.as_slice());
+        iop.write_pod_slice::<<<H as Hal>::Field as Field>::Elem>(out.as_slice());
         let mut idx = idx + self.params.row_size;
         self.nodes.view(|view| {
             while idx >= 2 * self.params.top_size {
                 let low_bit = idx % 2;
                 idx /= 2;
                 let other_idx = 2 * idx + (1 - low_bit);
-                iop.write_digest_slice(&[view[other_idx]]);
+                iop.write_pod_slice(&[view[other_idx]]);
             }
         });
         out
@@ -208,7 +208,7 @@ mod tests {
                         assert!(false, "Cannot test for bad query if there is only one row");
                     }
                     let r_idx = (r_idx + 1) % rows;
-                    let verification = verifier.verify(&mut r_iop, r_idx);
+                    let verification = verifier.verify::<BabyBear>(&mut r_iop, r_idx);
                     match verification {
                         Ok(_) => assert!(
                             false,
@@ -223,7 +223,7 @@ mod tests {
                     err = true;
                     break;
                 }
-                let col = verifier.verify(&mut r_iop, r_idx).unwrap();
+                let col = verifier.verify::<BabyBear>(&mut r_iop, r_idx).unwrap();
                 for c_idx in 0..cols {
                     assert_eq!(
                         col[c_idx],

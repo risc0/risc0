@@ -335,10 +335,11 @@ impl CircuitStep {
             }
             CircuitStep::If(cond, block, _loc) => {
                 if stack[*cond] != Fp::new(0) {
-                    let mut stack = stack.clone();
+                    let stacklen = stack.len();
                     for op in block.iter() {
-                        op.step(&mut stack, ctx, custom, args)?;
+                        op.step(stack, ctx, custom, args)?;
                     }
+                    stack.truncate(stacklen);
                 }
             }
             CircuitStep::Add(x1, x2, _loc) => {
@@ -376,10 +377,11 @@ impl CircuitStep {
                 stack.extend(custom.call(name, extra, &args)?);
             }
             CircuitStep::Nondet(block, _loc) => {
-                let mut stack = stack.clone();
+                let stacklen = stack.len();
                 for op in block.iter() {
-                    op.step(&mut stack, ctx, custom, args)?;
+                    op.step(stack, ctx, custom, args)?;
                 }
+                stack.truncate(stacklen);
             }
         })
     }
@@ -559,11 +561,21 @@ impl PolyExtStep {
 
 impl PolyExtStepDef {
     pub fn step(&self, ctx: &PolyExtContext, u: &[Fp4], args: &[&[Fp]]) -> MixState {
-        let mut fp_vars = Vec::new();
-        let mut mix_vars = Vec::new();
+        let mut fp_vars = Vec::with_capacity(self.block.len() - (self.ret + 1));
+        let mut mix_vars = Vec::with_capacity(self.ret + 1);
         for op in self.block.iter() {
             op.step(&mut fp_vars, &mut mix_vars, ctx, u, args);
         }
+        assert_eq!(
+            fp_vars.len(),
+            self.block.len() - (self.ret + 1),
+            "Miscalculated capacity for fp_vars"
+        );
+        assert_eq!(
+            mix_vars.len(),
+            self.ret + 1,
+            "Miscalculated capacity for mix_vars"
+        );
         mix_vars[self.ret]
     }
 }

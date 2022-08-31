@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::vec;
+use alloc::vec::Vec;
 
 use rand::RngCore;
 
@@ -25,17 +25,17 @@ use crate::{
         rou::{ROU_FWD, ROU_REV},
         sha::Sha,
     },
-    field::Elem,
+    field::{baby_bear::BabyBear, Elem},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
-    FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
+    FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
 
 /// VerifyRoundInfo contains the data against which the queries for a particular
 /// round are checked. This includes the Merkle tree top row data, as well as
 /// the size of the domain of the polynomial, and the mixing parameter.
-struct VerifyRoundInfo {
+struct VerifyRoundInfo<'a, S: Sha> {
     domain: usize,
-    merkle: MerkleTreeVerifier,
+    merkle: MerkleTreeVerifier<'a, S>,
     mix: Fp4,
 }
 
@@ -55,8 +55,8 @@ fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
     tot
 }
 
-impl VerifyRoundInfo {
-    pub fn new<S: Sha>(iop: &mut ReadIOP<S>, in_domain: usize) -> Self {
+impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
+    pub fn new(iop: &mut ReadIOP<'a, S>, in_domain: usize) -> Self {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
@@ -65,25 +65,26 @@ impl VerifyRoundInfo {
         }
     }
 
-    pub fn verify_query<S: Sha>(
+    pub fn verify_query(
         &mut self,
-        iop: &mut ReadIOP<S>,
+        iop: &mut ReadIOP<'a, S>,
         pos: &mut usize,
         goal: &mut Fp4,
     ) -> Result<(), VerificationError> {
         let quot = *pos / self.domain;
         let group = *pos % self.domain;
         // Get the column data
-        let data = self.merkle.verify(iop, group)?;
-        let mut data4 = vec![];
-        for i in 0..FRI_FOLD {
-            data4.push(Fp4::new(
-                data[0 * FRI_FOLD + i],
-                data[1 * FRI_FOLD + i],
-                data[2 * FRI_FOLD + i],
-                data[3 * FRI_FOLD + i],
-            ));
-        }
+        let data = self.merkle.verify::<BabyBear>(iop, group)?;
+        let mut data4: Vec<_> = (0..FRI_FOLD)
+            .map(|i| {
+                Fp4::new(
+                    data[0 * FRI_FOLD + i],
+                    data[1 * FRI_FOLD + i],
+                    data[2 * FRI_FOLD + i],
+                    data[3 * FRI_FOLD + i],
+                )
+            })
+            .collect();
         // Check the existing goal
         if data4[quot] != *goal {
             return Err(VerificationError::InvalidProof);
@@ -95,27 +96,37 @@ impl VerifyRoundInfo {
     }
 }
 
-pub fn fri_verify<S: Sha, F>(
-    iop: &mut ReadIOP<S>,
+pub fn fri_verify<'a, S: Sha + 'a, F>(
+    iop: &mut ReadIOP<'a, S>,
     mut degree: usize,
     mut inner: F,
 ) -> Result<(), VerificationError>
 where
-    F: FnMut(&mut ReadIOP<S>, usize) -> Result<Fp4, VerificationError>,
+    F: FnMut(&mut ReadIOP<'a, S>, usize) -> Result<Fp4, VerificationError>,
 {
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
     // Prep the folding verfiers
-    let mut rounds = vec![];
+    let rounds_capacity =
+        (log2_ceil((degree + FRI_FOLD - 1) / FRI_FOLD) + FRI_FOLD_PO2 - 1) / FRI_FOLD_PO2;
+    let mut rounds = Vec::with_capacity(rounds_capacity);
     while degree > FRI_MIN_DEGREE {
         rounds.push(VerifyRoundInfo::new(iop, domain));
         domain /= FRI_FOLD;
         degree /= FRI_FOLD;
     }
+    // We want to minimize reallocation in verify, so make sure we
+    // didn't have to reallocate.
+    assert!(
+        rounds.len() < rounds_capacity,
+        "Did not allocate enough rounds; needed {} for degree {} but only allocated {}",
+        rounds.len(),
+        degree,
+        rounds_capacity
+    );
     // Grab the final coeffs + commit
-    let mut final_coeffs = vec![Fp::ZERO; EXT_SIZE * degree];
-    iop.read_fps(&mut final_coeffs);
-    let final_digest = iop.get_sha().hash_raw_pod_slice(final_coeffs.as_slice());
+    let final_coeffs = iop.read_pod_slice(EXT_SIZE * degree);
+    let final_digest = iop.get_sha().hash_raw_pod_slice(final_coeffs);
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
     let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);

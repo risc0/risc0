@@ -12,28 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::vec::Vec;
-
 use rand::{Error, RngCore};
 
-use crate::{
-    core::{
-        fp::Fp,
-        fp4::Fp4,
-        sha::{Digest, Sha, DIGEST_WORDS},
-        sha_rng::ShaRng,
-    },
-    field::{Elem, ExtElem},
+use crate::core::{
+    sha::{Digest, Sha},
+    sha_rng::ShaRng,
 };
 
 #[derive(Debug)]
-pub struct ReadIOP<'a, S: Sha> {
+pub struct ReadIOP<'a, S: Sha + 'a> {
     sha: S,
     proof: &'a [u32],
     rng: ShaRng<S>,
 }
 
-impl<'a, S: Sha> ReadIOP<'a, S> {
+impl<'a, S: Sha + 'a> ReadIOP<'a, S> {
     pub fn new(sha: &'a S, proof: &'a [u32]) -> Self {
         ReadIOP {
             sha: sha.clone(),
@@ -46,43 +39,18 @@ impl<'a, S: Sha> ReadIOP<'a, S> {
         &self.sha
     }
 
-    pub fn read_u32s(&mut self, x: &mut [u32]) {
-        for i in 0..x.len() {
-            x[i] = self.proof[i];
-        }
-        self.proof = &self.proof[x.len()..];
+    pub fn read_u32s(&mut self, n: usize) -> &'a [u32] {
+        let u32s;
+        (u32s, self.proof) = self.proof.split_at(n);
+        u32s
     }
 
-    pub fn read_fps(&mut self, x: &mut [Fp]) {
-        let words = <Fp as Elem>::WORDS;
-        for i in 0..x.len() {
-            x[i] = <Fp as Elem>::from_u32_words(&self.proof[words * i..words * (i + 1)]);
-            // Ignore the odd-numbered values, which will be 0 for baby-bear
-        }
-        self.proof = &self.proof[<Fp as Elem>::WORDS * x.len()..];
-    }
-
-    pub fn read_fp4s(&mut self, x: &mut [Fp4]) {
-        let elem_words = <Fp4 as ExtElem>::SubElem::WORDS;
-        let ext_size = <Fp4 as ExtElem>::EXT_SIZE;
-        for i in 0..x.len() {
-            let mut subelems = Vec::<<Fp4 as ExtElem>::SubElem>::new();
-            for j in 0..ext_size {
-                let offset: usize = ext_size * i + j;
-                subelems.push(<Fp4 as ExtElem>::SubElem::from_u32_words(
-                    &self.proof[elem_words * offset..elem_words * (offset + 1)],
-                ));
-            }
-            x[i] = <Fp4 as ExtElem>::from_subelems(subelems);
-        }
-        self.proof = &self.proof[<Fp4 as Elem>::WORDS * x.len()..];
-    }
-
-    pub fn read_digests(&mut self, x: &mut [Digest]) {
-        for i in 0..x.len() {
-            x[i] = Digest::from_slice(&self.proof[DIGEST_WORDS * i..DIGEST_WORDS * (i + 1)]);
-        }
-        self.proof = &self.proof[DIGEST_WORDS * x.len()..];
+    pub fn read_pod_slice<T: bytemuck::Pod>(&mut self, n: usize) -> &'a [T] {
+        let u32s;
+        (u32s, self.proof) = self
+            .proof
+            .split_at(n * core::mem::size_of::<T>() / core::mem::size_of::<u32>());
+        bytemuck::cast_slice(u32s)
     }
 
     pub fn commit(&mut self, digest: &Digest) {
