@@ -37,7 +37,7 @@ pub struct MerkleTreeVerifier<'a, S: Sha> {
     // contains the virtual indexes [top_size..top_size*2).
     top: &'a [Digest],
 
-    // These are the rest of the tree.  These have the virutal indexes [1, top_Size).
+    // These are the rest of the tree.  These have the virtual indexes [1, top_size).
     rest: Vec<S::DigestPtr>,
 }
 
