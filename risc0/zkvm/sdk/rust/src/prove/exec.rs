@@ -453,10 +453,19 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
             GPIO_LOG => {
                 debug!("on_write> GPIO_LOG");
-                let len = self.memory.strlen(value);
-                let buf = self.memory.load_region(value, len as u32);
+                const SZ: usize = core::mem::size_of::<IoDescriptor>();
+                let descbuf: [u32; SZ / WORD_SIZE] = self
+                    .memory
+                    .load_region_u32(value, SZ as u32)
+                    .as_slice()
+                    .try_into()
+                    .unwrap();
+                // SAFETY: IoDescriptor is a plain-old-data type with
+                // repr(C) and no pointers so it's safe to fill it from bytes.
+                let desc: IoDescriptor = unsafe { std::mem::transmute(descbuf) };
+                let buf = self.memory.load_region(desc.addr, desc.size);
                 let str = String::from_utf8(buf).unwrap();
-                debug!("R0VM[C{cycle}> {}", str);
+                println!("R0VM[{cycle}]> {}", str);
             }
             GPIO_SENDRECV_ADDR => {
                 debug!("on_write> GPIO_SENDRECV_ADDR");

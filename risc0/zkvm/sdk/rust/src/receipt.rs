@@ -33,9 +33,9 @@ impl From<&MethodId> for MethodId {
 }
 
 #[cfg(feature = "verify")]
-pub fn verify_with_sha<'a, M, S>(method_id: &'a M, sha: &S, seal: &[u32]) -> Result<()>
+pub fn verify_with_hal<'a, M, H>(hal: &H, method_id: &'a M, seal: &[u32]) -> Result<()>
 where
-    S: risc0_zkp::core::sha::Sha,
+    H: risc0_zkp::verify::VerifyHal,
     M: ?Sized,
     MethodId: From<&'a M>,
 {
@@ -64,7 +64,7 @@ where
 
     let circuit: &CircuitImpl = &crate::CIRCUIT;
     let mut adapter = VerifyAdapter::new(circuit);
-    verify(sha, &mut adapter, seal, check_code)
+    verify(hal, &mut adapter, seal, check_code)
         .map_err(|err| anyhow!("Verification failed: {:?}", err))
 }
 
@@ -75,19 +75,22 @@ impl Receipt {
         M: ?Sized,
         MethodId: From<&'a M>,
     {
-        use risc0_zkp::core::sha::default_implementation;
+        use risc0_zkp::{core::sha::default_implementation, verify::VerifyImpl};
+        use risc0_zkvm_circuit::CircuitImpl;
         let sha = default_implementation();
-        self.verify_with_sha(method_id, sha)
+        let circuit: &CircuitImpl = &crate::CIRCUIT;
+        let hal = VerifyImpl::new(sha, circuit);
+        self.verify_with_hal(&hal, method_id)
     }
 
     #[cfg(feature = "verify")]
-    pub fn verify_with_sha<'a, M, S>(&self, method_id: &'a M, sha: &S) -> Result<()>
+    pub fn verify_with_hal<'a, M, H>(&self, hal: &H, method_id: &'a M) -> Result<()>
     where
-        S: risc0_zkp::core::sha::Sha,
+        H: risc0_zkp::verify::VerifyHal,
         M: ?Sized,
         MethodId: From<&'a M>,
     {
-        verify_with_sha(method_id, sha, &self.seal)
+        verify_with_hal(hal, method_id, &self.seal)
     }
 
     // Compatible API with FFI-based prover.

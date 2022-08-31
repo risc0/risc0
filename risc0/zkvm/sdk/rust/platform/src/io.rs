@@ -48,7 +48,7 @@ impl<T> Gpio<T> {
 pub const GPIO_SHA: Gpio<*const SHADescriptor> = Gpio::new(0x01F0_0000);
 pub const GPIO_COMMIT: Gpio<*const IoDescriptor> = Gpio::new(0x01F0_0004);
 pub const GPIO_FAULT: Gpio<*const u8> = Gpio::new(0x01F0_0008);
-pub const GPIO_LOG: Gpio<*const u8> = Gpio::new(0x01F0_000C);
+pub const GPIO_LOG: Gpio<*const IoDescriptor> = Gpio::new(0x01F0_000C);
 pub const GPIO_GETKEY: Gpio<*const GetKeyDescriptor> = Gpio::new(0x01F0_0010);
 
 pub const GPIO_SENDRECV_CHANNEL: Gpio<u32> = Gpio::new(0x01F0_0014);
@@ -56,9 +56,12 @@ pub const GPIO_SENDRECV_SIZE: Gpio<usize> = Gpio::new(0x01F0_0018);
 pub const GPIO_SENDRECV_ADDR: Gpio<*const u8> = Gpio::new(0x01F0_001C);
 
 pub const GPIO_CYCLECOUNT: Gpio<u32> = Gpio::new(0x01F00020);
+
 pub const GPIO_INSECURESHACOMPRESS: Gpio<*const InsecureShaCompressDescriptor> =
     Gpio::new(0x01F00024);
 pub const GPIO_INSECURESHAHASH: Gpio<*const InsecureShaHashDescriptor> = Gpio::new(0x01F00028);
+
+pub const GPIO_COMPUTE_POLY: Gpio<*const ComputePolyDescriptor> = Gpio::new(0x01F0002C);
 
 pub mod addr {
     pub const GPIO_SHA: u32 = super::GPIO_SHA.addr();
@@ -67,13 +70,16 @@ pub mod addr {
     pub const GPIO_LOG: u32 = super::GPIO_LOG.addr();
     pub const GPIO_GETKEY: u32 = super::GPIO_GETKEY.addr();
 
-    pub const GPIO_CYCLECOUNT: u32 = super::GPIO_CYCLECOUNT.addr();
-    pub const GPIO_INSECURESHACOMPRESS: u32 = super::GPIO_INSECURESHACOMPRESS.addr();
-    pub const GPIO_INSECURESHAHASH: u32 = super::GPIO_INSECURESHAHASH.addr();
-
     pub const GPIO_SENDRECV_CHANNEL: u32 = super::GPIO_SENDRECV_CHANNEL.addr();
     pub const GPIO_SENDRECV_SIZE: u32 = super::GPIO_SENDRECV_SIZE.addr();
     pub const GPIO_SENDRECV_ADDR: u32 = super::GPIO_SENDRECV_ADDR.addr();
+
+    pub const GPIO_CYCLECOUNT: u32 = super::GPIO_CYCLECOUNT.addr();
+
+    pub const GPIO_INSECURESHACOMPRESS: u32 = super::GPIO_INSECURESHACOMPRESS.addr();
+    pub const GPIO_INSECURESHAHASH: u32 = super::GPIO_INSECURESHAHASH.addr();
+
+    pub const GPIO_COMPUTE_POLY: u32 = super::GPIO_COMPUTE_POLY.addr();
 }
 
 #[repr(C)]
@@ -109,6 +115,14 @@ pub struct InsecureShaHashDescriptor {
     pub state: u32,
     pub start: u32,
     pub len: u32,
+}
+
+#[repr(C)]
+pub struct ComputePolyDescriptor {
+    pub eval_u: u32,
+    pub poly_mix: u32,
+    pub out: u32,
+    pub mix: u32,
 }
 
 // Standard ZKVM channels; must match zkvm/platform/io.h.

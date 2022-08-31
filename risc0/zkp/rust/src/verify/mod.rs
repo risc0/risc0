@@ -22,6 +22,7 @@ use core::fmt;
 // use log::debug;
 
 use crate::{
+    adapter::{CircuitInfo, PolyExt, PolyExtContext, TapsProvider},
     core::{
         fp::Fp,
         fp4::Fp4,
@@ -31,10 +32,12 @@ use crate::{
         sha::{Digest, Sha},
     },
     field::Elem,
-    taps::{RegisterGroup, TapSet},
+    taps::RegisterGroup,
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
+
+use self::adapter::VerifyAdapter;
 
 #[derive(Debug)]
 pub enum VerificationError {
@@ -59,38 +62,72 @@ impl fmt::Display for VerificationError {
     }
 }
 
-pub trait Circuit {
-    fn taps(&self) -> &'static TapSet<'static>;
-    fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
-    fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>);
-    fn po2(&self) -> u32;
-    fn compute_polynomial(&self, u: &[Fp4], mix: Fp4) -> Fp4;
+pub trait VerifyHal {
+    type Sha: Sha;
+
+    fn sha(&self) -> &Self::Sha;
+
+    fn debug(&self, msg: &str);
+
+    fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4;
 }
 
-pub fn verify<S, C, F>(
-    sha: &S,
-    circuit: &mut C,
+pub struct VerifyImpl<'a, S: Sha, C: PolyExt> {
+    sha: &'a S,
+    circuit: &'a C,
+}
+
+impl<'a, S: Sha, C: PolyExt> VerifyImpl<'a, S, C> {
+    pub fn new(sha: &'a S, circuit: &'a C) -> Self {
+        Self { sha, circuit }
+    }
+}
+
+impl<'a, S: Sha, C: PolyExt> VerifyHal for VerifyImpl<'a, S, C> {
+    type Sha = S;
+
+    fn sha(&self) -> &Self::Sha {
+        self.sha
+    }
+
+    fn debug(&self, msg: &str) {
+        log::debug!("{}", msg);
+    }
+
+    fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4 {
+        let ctx = PolyExtContext { mix: poly_mix };
+        let args: &[&[Fp]] = &[out, mix];
+        let result = self.circuit.poly_ext(&ctx, u, args);
+        result.tot
+    }
+}
+
+pub fn verify<'a, H, C, F>(
+    hal: &H,
+    adapter: &mut VerifyAdapter<'a, C>,
     seal: &[u32],
     check_code: F,
 ) -> Result<(), VerificationError>
 where
-    S: Sha,
-    C: Circuit,
+    H: VerifyHal,
+    C: CircuitInfo + TapsProvider,
     F: Fn(u32, &Digest) -> bool,
 {
     if seal.len() == 0 {
         return Err(VerificationError::ReceiptFormatError);
     }
-    let taps = circuit.taps();
+    let taps = adapter.taps();
 
     // Make IOP
-    let mut iop = ReadIOP::new(sha, seal);
+    let mut iop = ReadIOP::new(hal.sha(), seal);
 
     // Read any execution state
-    circuit.execute(&mut iop);
+    hal.debug("> execute");
+    adapter.execute(&mut iop);
+    hal.debug("< execute");
 
     // Get the size
-    let po2 = circuit.po2();
+    let po2 = adapter.po2();
     assert!(po2 as usize <= MAX_CYCLES_PO2);
     let size = 1 << po2;
     let domain = INV_RATE * size;
@@ -103,8 +140,10 @@ where
     let combo_count = taps.combos_size();
 
     // Get code and data merkle roots
+    hal.debug("code_merkle");
     let code_merkle = MerkleTreeVerifier::new(&mut iop, domain, code_size, QUERIES);
     // debug!("codeRoot = {}", code_merkle.root());
+    hal.debug("data_merkle");
     let data_merkle = MerkleTreeVerifier::new(&mut iop, domain, data_size, QUERIES);
     // debug!("dataRoot = {}", data_merkle.root());
 
@@ -114,14 +153,17 @@ where
     }
 
     // Prep accumulation
-    circuit.accumulate(&mut iop);
+    hal.debug("accumulate");
+    adapter.accumulate(&mut iop);
 
+    hal.debug("accum_merkle");
     let accum_merkle = MerkleTreeVerifier::new(&mut iop, domain, accum_size, QUERIES);
     // debug!("accumRoot = {}", accum_merkle.root());
 
     // Set the poly mix value
     let poly_mix = Fp4::random(&mut iop);
 
+    hal.debug("check_merkle");
     let check_merkle = MerkleTreeVerifier::new(&mut iop, domain, CHECK_SIZE, QUERIES);
     // debug!("checkRoot = {}", check_merkle.root());
 
@@ -133,13 +175,15 @@ where
     let num_taps = taps.tap_size();
     let mut coeff_u = vec![Fp4::ZERO; num_taps + CHECK_SIZE];
     iop.read_fp4s(&mut coeff_u);
-    let hash_u = *sha.hash_raw_pod_slice(coeff_u.as_slice());
+    let hash_u = *hal.sha().hash_raw_pod_slice(coeff_u.as_slice());
     iop.commit(&hash_u);
 
     // Now, convert to evaluated values
+    hal.debug("poly_eval");
     let mut cur_pos = 0;
     let mut eval_u = vec![];
     for reg in taps.regs() {
+        hal.debug("reg");
         for i in 0..reg.size() {
             let x = back_one.pow(reg.back(i)) * z;
             let fx = poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x);
@@ -149,7 +193,9 @@ where
     }
 
     // Compute the core polynomial
-    let result = circuit.compute_polynomial(&eval_u, poly_mix);
+    hal.debug("> compute_polynomial");
+    let result = hal.compute_polynomial(&eval_u, poly_mix, &adapter.out, &adapter.mix);
+    hal.debug("< compute_polynomial");
     // debug!("Result = {result:?}");
 
     // Now generate the check polynomial
@@ -203,7 +249,8 @@ where
     fri_verify(
         &mut iop,
         size,
-        |iop: &mut ReadIOP<S>, idx: usize| -> Result<Fp4, VerificationError> {
+        |iop: &mut ReadIOP<_>, idx: usize| -> Result<Fp4, VerificationError> {
+            hal.debug("fri_verify");
             let x = Fp4::from_fp(gen.pow(idx));
             let mut rows = vec![];
             rows.push(accum_merkle.verify(iop, idx)?);

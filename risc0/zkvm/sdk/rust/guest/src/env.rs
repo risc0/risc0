@@ -18,7 +18,7 @@ use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{Deserializer, Serializer, Slice};
 use risc0_zkvm_platform::{
     io::{
-        IoDescriptor, GPIO_COMMIT, GPIO_CYCLECOUNT, SENDRECV_CHANNEL_INITIAL_INPUT,
+        IoDescriptor, GPIO_COMMIT, GPIO_CYCLECOUNT, GPIO_LOG, SENDRECV_CHANNEL_INITIAL_INPUT,
         SENDRECV_CHANNEL_STDOUT,
     },
     memory,
@@ -127,6 +127,17 @@ pub fn commit<T: Serialize>(data: &T) {
 /// began.
 pub fn get_cycle_count() -> usize {
     ENV.get().get_cycle_count()
+}
+
+/// Print a message to the debug console.
+pub fn println(msg: &str) {
+    let desc = IoDescriptor {
+        size: msg.len() as u32,
+        addr: msg.as_ptr() as u32,
+    };
+    let ptr: *const IoDescriptor = &desc;
+    memory_barrier(ptr);
+    unsafe { GPIO_LOG.as_ptr().write_volatile(&desc) };
 }
 
 impl Env {
