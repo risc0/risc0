@@ -16,6 +16,9 @@ use core::{cell::UnsafeCell, mem::MaybeUninit, slice};
 
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{Deserializer, Serializer, Slice};
+// Re-export for easy use by user programs.
+#[cfg(target_os = "zkvm")]
+pub use risc0_zkvm_platform::rt::host_io::host_sendrecv;
 use risc0_zkvm_platform::{
     io::{
         IoDescriptor, GPIO_COMMIT, GPIO_CYCLECOUNT, GPIO_LOG, SENDRECV_CHANNEL_INITIAL_INPUT,
@@ -28,10 +31,6 @@ use risc0_zkvm_platform::{
 use serde::{Deserialize, Serialize};
 
 use crate::{align_up, memory_barrier, sha};
-
-// Re-export for easy use by user programs.
-#[cfg(target_os = "zkvm")]
-pub use risc0_zkvm_platform::rt::host_io::host_sendrecv;
 
 #[cfg(not(target_os = "zkvm"))]
 // Bazel really wants to compile this file for the host too, so provide a stub.

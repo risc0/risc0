@@ -19,6 +19,8 @@
 //! are not indicitive of performance with cryptographically secure
 //! proofs.
 
+use std::time::{Duration, Instant};
+
 use criterion::{
     black_box, criterion_group, criterion_main, Bencher, BenchmarkId, Criterion, SamplingMode,
     Throughput,
@@ -27,8 +29,6 @@ use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
-use std::time::{Duration, Instant};
-
 use risc0_zkvm::host::{Prover, ProverOpts};
 use risc0_zkvm::serde::to_vec;
 use risc0_zkvm_methods::{

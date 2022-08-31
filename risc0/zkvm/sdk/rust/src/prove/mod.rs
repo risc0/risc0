@@ -28,9 +28,8 @@ use risc0_zkvm_platform::{
     memory::MEM_SIZE,
 };
 
-use crate::{elf::Program, host::ProverOpts, method_id::MethodId, receipt::Receipt, CIRCUIT};
-
 use self::cpu_eval::CpuEvalCheck;
+use crate::{elf::Program, host::ProverOpts, method_id::MethodId, receipt::Receipt, CIRCUIT};
 
 pub struct Prover<'a> {
     elf: Program,

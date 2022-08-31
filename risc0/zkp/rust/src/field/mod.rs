@@ -125,9 +125,11 @@ pub trait RootsOfUnity: Sized + 'static {
 
 #[cfg(test)]
 pub mod test {
-    use super::{Elem, RootsOfUnity};
     use core::fmt::Debug;
+
     use rand::Rng;
+
+    use super::{Elem, RootsOfUnity};
 
     pub fn test_roots_of_unity<F: Elem + RootsOfUnity + Debug>() {
         let mut cur: Option<F> = None;

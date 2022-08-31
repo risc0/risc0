@@ -1,5 +1,6 @@
-use risc0_build::{embed_methods_with_options, GuestOptions};
 use std::{collections::HashMap, env};
+
+use risc0_build::{embed_methods_with_options, GuestOptions};
 
 fn main() {
     if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {

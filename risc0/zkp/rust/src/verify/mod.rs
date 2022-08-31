@@ -19,8 +19,12 @@ pub mod read_iop;
 
 use alloc::{vec, vec::Vec};
 use core::{fmt, iter::zip};
-// use log::debug;
 
+#[cfg(feature = "host")]
+pub use host::VerifyImpl;
+
+use self::adapter::VerifyAdapter;
+// use log::debug;
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
     core::{
@@ -36,11 +40,6 @@ use crate::{
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
-
-use self::adapter::VerifyAdapter;
-
-#[cfg(feature = "host")]
-pub use host::VerifyImpl;
 
 #[derive(Debug)]
 pub enum VerificationError {
@@ -77,9 +76,8 @@ pub trait VerifyHal {
 
 #[cfg(feature = "host")]
 mod host {
-    use crate::adapter::{PolyExt, PolyExtContext};
-
     use super::*;
+    use crate::adapter::{PolyExt, PolyExtContext};
 
     pub struct VerifyImpl<'a, S: Sha, C: PolyExt> {
         sha: &'a S,

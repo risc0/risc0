@@ -78,9 +78,10 @@ impl<S: Sha> RngCore for ShaRng<S> {
 
 #[allow(missing_docs)]
 pub mod testutil {
+    use rand::RngCore;
+
     use super::ShaRng;
     use crate::core::sha::Sha;
-    use rand::RngCore;
 
     // Runs conformance test on a SHA implementation to make sure it
     // properly behaves for generating pseudo-random numbers.

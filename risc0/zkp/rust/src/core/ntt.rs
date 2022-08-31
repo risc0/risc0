@@ -23,7 +23,6 @@ use super::{
     log2_ceil,
     rou::{ROU_FWD, ROU_REV},
 };
-
 use crate::field::Elem;
 
 /// Reverses the bits in a 32-bit number.
@@ -323,7 +322,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::field::Elem;
     use rand::thread_rng;
 
     use crate::core::{
@@ -331,6 +329,7 @@ mod tests {
         ntt::{bit_reverse, evaluate_ntt, interpolate_ntt},
         rou::ROU_FWD,
     };
+    use crate::field::Elem;
 
     // Compare the complex version to the naive version
     #[test]

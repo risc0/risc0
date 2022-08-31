@@ -497,9 +497,11 @@ impl StreamWriter for AllocVec {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use alloc::string::String;
+
     use serde::Serialize;
+
+    use super::*;
 
     #[test]
     fn test_struct() {
