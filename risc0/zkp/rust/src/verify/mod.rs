@@ -22,7 +22,7 @@ use core::{fmt, iter::zip};
 // use log::debug;
 
 use crate::{
-    adapter::{CircuitInfo, PolyExt, PolyExtContext, TapsProvider},
+    adapter::{CircuitInfo, TapsProvider},
     core::{
         fp::Fp,
         fp4::Fp4,
@@ -38,6 +38,9 @@ use crate::{
 };
 
 use self::adapter::VerifyAdapter;
+
+#[cfg(feature = "host")]
+pub use host::VerifyImpl;
 
 #[derive(Debug)]
 pub enum VerificationError {
@@ -72,33 +75,40 @@ pub trait VerifyHal {
     fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4;
 }
 
-pub struct VerifyImpl<'a, S: Sha, C: PolyExt> {
-    sha: &'a S,
-    circuit: &'a C,
-}
+#[cfg(feature = "host")]
+mod host {
+    use crate::adapter::{PolyExt, PolyExtContext};
 
-impl<'a, S: Sha, C: PolyExt> VerifyImpl<'a, S, C> {
-    pub fn new(sha: &'a S, circuit: &'a C) -> Self {
-        Self { sha, circuit }
-    }
-}
+    use super::*;
 
-impl<'a, S: Sha, C: PolyExt> VerifyHal for VerifyImpl<'a, S, C> {
-    type Sha = S;
-
-    fn sha(&self) -> &Self::Sha {
-        self.sha
+    pub struct VerifyImpl<'a, S: Sha, C: PolyExt> {
+        sha: &'a S,
+        circuit: &'a C,
     }
 
-    fn debug(&self, msg: &str) {
-        log::debug!("{}", msg);
+    impl<'a, S: Sha, C: PolyExt> VerifyImpl<'a, S, C> {
+        pub fn new(sha: &'a S, circuit: &'a C) -> Self {
+            Self { sha, circuit }
+        }
     }
 
-    fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4 {
-        let ctx = PolyExtContext { mix: poly_mix };
-        let args: &[&[Fp]] = &[out, mix];
-        let result = self.circuit.poly_ext(&ctx, u, args);
-        result.tot
+    impl<'a, S: Sha, C: PolyExt> VerifyHal for VerifyImpl<'a, S, C> {
+        type Sha = S;
+
+        fn sha(&self) -> &Self::Sha {
+            self.sha
+        }
+
+        fn debug(&self, msg: &str) {
+            log::debug!("{}", msg);
+        }
+
+        fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4 {
+            let ctx = PolyExtContext { mix: poly_mix };
+            let args: &[&[Fp]] = &[out, mix];
+            let result = self.circuit.poly_ext(&ctx, u, args);
+            result.tot
+        }
     }
 }
 

@@ -66,7 +66,7 @@ where
 }
 
 impl Receipt {
-    #[cfg(all(feature = "verify", not(target_arch = "riscv32")))]
+    #[cfg(all(feature = "verify", feature = "host"))]
     pub fn verify<'a, M>(&self, method_id: &'a M) -> Result<()>
     where
         M: ?Sized,

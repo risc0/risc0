@@ -14,7 +14,6 @@ risc0_rust_library_pair(
         "@crates_guest//:rand",
         "@crates_guest//:rand_core",
         "@crates_guest//:serde",
-        "@crates_guest//:sha2",
     ],
     guest_features = ["verify"],
     guest_proc_macro_deps = [
@@ -34,6 +33,7 @@ risc0_rust_library_pair(
     ],
     host_features = [
         "hal",
+        "host",
         "prove",
         "std",
         "verify",
