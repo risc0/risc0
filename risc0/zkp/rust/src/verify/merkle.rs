@@ -12,14 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::{vec, vec::Vec};
+use alloc::vec::Vec;
 
 use crate::{
-    core::{
-        fp::Fp,
-        sha::{Digest, Sha},
-    },
-    field::Elem,
+    core::sha::{Digest, Sha},
+    field::Field,
     merkle::MerkleTreeParams,
     verify::read_iop::ReadIOP,
     verify::VerificationError,
@@ -28,47 +25,115 @@ use crate::{
 /// A struct against which we verify merkle branches, consisting of the
 /// parameters of the Merkle tree and top - the vector of hash values in the top
 /// row of the tree, above which we verify only once.
-pub struct MerkleTreeVerifier {
+pub struct MerkleTreeVerifier<'a, S: Sha> {
     params: MerkleTreeParams,
-    top: Vec<Digest>,
+
+    // Conceptually, the merkle tree here is twice as long as the
+    // "top" row (params.top_size), minus element #0.  The children of
+    // the entry at virtual index i are stored at 2*i and 2*i+1.  The
+    // root of the tree is at virtual element #1.
+
+    // "top" is a reference, top_size long, to the top row.  This
+    // contains the virtual indexes [top_size..top_size*2).
+    top: &'a [Digest],
+
+    // These are the rest of the tree.  These have the virtual indexes [1, top_size).
+    rest: Vec<S::DigestPtr>,
 }
 
-impl MerkleTreeVerifier {
+// Translates from virtual indexes to indexes in the "top" and "rest" arrays.
+trait SplitMerkleIndex {
+    fn idx_to_top(&self, idx: usize) -> usize;
+    fn idx_to_rest(&self, idx: usize) -> usize;
+}
+
+impl SplitMerkleIndex for MerkleTreeParams {
+    // Returns the index into "top" of the given element
+    #[track_caller]
+    fn idx_to_top(&self, idx: usize) -> usize {
+        debug_assert!(
+            idx >= self.top_size,
+            "idx = {idx}, top_size = {}",
+            self.top_size
+        );
+        debug_assert!(
+            idx < 2 * self.top_size,
+            "idx = {idx}, top_size = {}",
+            self.top_size
+        );
+        idx - self.top_size
+    }
+
+    // Returns the index into "rest" of the given element
+    #[track_caller]
+    fn idx_to_rest(&self, idx: usize) -> usize {
+        debug_assert!(
+            idx < self.top_size,
+            "idx = {idx}, top_size = {}",
+            self.top_size
+        );
+        debug_assert!(idx >= 1, "idx = {idx}, top_size = {}", self.top_size);
+        idx - 1
+    }
+}
+
+impl<'a, S: Sha> MerkleTreeVerifier<'a, S> {
     /// Constructs a new MerkleTreeVerifier by making the params, and then
     /// computing the root hashes from the top level hashes.
-    pub fn new<S: Sha>(
-        iop: &mut ReadIOP<S>,
-        row_size: usize,
-        col_size: usize,
-        queries: usize,
-    ) -> Self {
+    pub fn new(iop: &mut ReadIOP<'a, S>, row_size: usize, col_size: usize, queries: usize) -> Self {
         let params = MerkleTreeParams::new(row_size, col_size, queries);
-        // Initialize a vector to hold the digests.
-        // Vector is twice as long as the "top" row - the children of the entry at index
-        // i are stored at 2*i and 2*i+1.
-        let mut top = vec![Digest::default(); params.top_size * 2];
+
         // Fill top vector with digests from IOP.
-        iop.read_digests(&mut top[params.top_size..]);
+        let top = iop.read_pod_slice(params.top_size);
         // Populate hashes up to the root of the tree.
-        for i in (1..params.top_size).rev() {
-            top[i] = *iop.get_sha().hash_pair(&top[2 * i], &top[2 * i + 1]);
+        let mut rest = Vec::<S::DigestPtr>::with_capacity(params.top_size - 1);
+
+        let fill_rest = rest.spare_capacity_mut();
+
+        if !fill_rest.is_empty() {
+            for i in (params.top_size / 2..params.top_size).rev() {
+                let top_idx = params.idx_to_top(2 * i);
+                fill_rest[params.idx_to_rest(i)]
+                    .write(iop.get_sha().hash_pair(&top[top_idx], &top[top_idx + 1]));
+            }
         }
+        for i in (1..params.top_size / 2).rev() {
+            // SAFETY: We're working from the top down, so we will
+            // have already filled elements at upper_rest_idx.
+            let upper_rest_idx = params.idx_to_rest(i * 2);
+            fill_rest[params.idx_to_rest(i)].write(iop.get_sha().hash_pair(
+                unsafe { fill_rest[upper_rest_idx].assume_init_ref() },
+                unsafe { fill_rest[upper_rest_idx + 1].assume_init_ref() },
+            ));
+        }
+
+        // SAFETY: These are all the elements we just filled.
+        unsafe {
+            let filled = fill_rest.len();
+            rest.set_len(filled);
+        };
+
         // Commit to root (index 1).
-        iop.commit(&top[1]);
-        MerkleTreeVerifier { params, top }
+        let verifier = MerkleTreeVerifier { params, top, rest };
+        iop.commit(verifier.root());
+        verifier
     }
 
     /// Returns the root hash of the tree.
     pub fn root(&self) -> &Digest {
-        &self.top[1]
+        if self.rest.is_empty() {
+            &self.top[self.params.idx_to_top(1)]
+        } else {
+            &*self.rest[self.params.idx_to_rest(1)]
+        }
     }
 
     /// Verifies a branch provided by an IOP.
-    pub fn verify<S: Sha>(
+    pub fn verify<F: Field>(
         &self,
-        iop: &mut ReadIOP<S>,
+        iop: &mut ReadIOP<'a, S>,
         mut idx: usize,
-    ) -> Result<Vec<Fp>, VerificationError> {
+    ) -> Result<&'a [F::Elem], VerificationError> {
         if idx >= self.params.row_size {
             return Err(VerificationError::MerkleQueryOutOfRange {
                 idx: idx,
@@ -76,11 +141,9 @@ impl MerkleTreeVerifier {
             });
         }
         // Initialize a vector to hold field elements.
-        let mut out = vec![Fp::ZERO; self.params.col_size];
-        // Read out field elements from IOP.
-        iop.read_fps(&mut out);
+        let out: &[F::Elem] = iop.read_pod_slice(self.params.col_size);
         // Get the hash at the leaf of the tree by hashing these field elements.
-        let mut cur = *iop.get_sha().hash_raw_pod_slice(out.as_slice());
+        let mut cur: S::DigestPtr = iop.get_sha().hash_raw_pod_slice(out);
         // Shift idx to start of the row
         idx += self.params.row_size;
         while idx >= 2 * self.params.top_size {
@@ -88,19 +151,26 @@ impl MerkleTreeVerifier {
             // child.
             let low_bit = idx % 2;
             // Retrieve the other parent from the IOP.
-            let mut other = [Digest::default(); 1];
-            iop.read_digests(&mut other);
+            let other: &Digest = match iop.read_pod_slice(1) {
+                [other] => other,
+                _ => unreachable!(),
+            };
             // Now ascend to the parent index, and compute the hash there.
             idx /= 2;
             if low_bit == 1 {
-                cur = *iop.get_sha().hash_pair(&other[0], &cur);
+                cur = iop.get_sha().hash_pair(&other, &cur);
             } else {
-                cur = *iop.get_sha().hash_pair(&cur, &other[0]);
+                cur = iop.get_sha().hash_pair(&cur, &other);
             }
         }
         // Once we reduce to an index for which we have the hash, check that it's
         // correct.
-        if self.top[idx] == cur {
+        let present_hash: &Digest = if idx >= self.params.top_size {
+            &self.top[self.params.idx_to_top(idx)]
+        } else {
+            &self.rest[self.params.idx_to_rest(idx)]
+        };
+        if *present_hash == *cur {
             Ok(out)
         } else {
             Err(VerificationError::InvalidProof)
