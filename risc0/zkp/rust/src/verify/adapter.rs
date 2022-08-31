@@ -26,7 +26,7 @@ pub struct VerifyAdapter<'a, C: CircuitInfo + TapsProvider> {
     circuit: &'a C,
     po2: u32,
     steps: usize,
-    pub out: Vec<Fp>,
+    pub out: Option<&'a [Fp]>,
     pub mix: Vec<Fp>,
 }
 
@@ -36,7 +36,7 @@ impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
             circuit,
             po2: 0,
             steps: 0,
-            out: Vec::new(),
+            out: None,
             mix: Vec::new(),
         }
     }
@@ -45,21 +45,21 @@ impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
         self.circuit.get_taps()
     }
 
-    pub fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {
+    pub fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
         // Read the outputs + size
-        self.out.resize(self.circuit.output_size(), Fp::ZERO);
-        iop.read_fps(&mut self.out);
-        let mut slice = [0u32; 1];
-        iop.read_u32s(&mut slice);
-        self.po2 = slice[0];
+        self.out = Some(iop.read_pod_slice(self.circuit.output_size()));
+        self.po2 = match iop.read_u32s(1) {
+            &[po2] => po2,
+            _ => unreachable!(),
+        };
         self.steps = 1 << self.po2;
     }
 
-    pub fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {
+    pub fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
         // Fill in accum mix
-        for _ in 0..self.circuit.mix_size() {
-            self.mix.push(Fp::random(iop));
-        }
+        self.mix = (0..self.circuit.mix_size())
+            .map(|_| Fp::random(iop))
+            .collect();
     }
 
     pub fn po2(&self) -> u32 {
