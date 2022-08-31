@@ -41,7 +41,7 @@ pub struct MerkleTreeVerifier<'a, S: Sha> {
     rest: Vec<S::DigestPtr>,
 }
 
-// Transltaes from virtual indexes to indexes in the "top" and "rest" arrays.
+// Translates from virtual indexes to indexes in the "top" and "rest" arrays.
 trait SplitMerkleIndex {
     fn idx_to_top(&self, idx: usize) -> usize;
     fn idx_to_rest(&self, idx: usize) -> usize;
