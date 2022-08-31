@@ -40,13 +40,14 @@ where
     M: ?Sized,
     MethodId: From<&'a M>,
 {
-    use crate::CIRCUIT;
     use anyhow::anyhow;
     use risc0_zkp::{
         core::{log2_ceil, sha::Digest},
         verify::verify,
         MIN_CYCLES,
     };
+
+    use crate::CIRCUIT;
 
     let method_id: MethodId = method_id.into();
     let check_code = |po2, merkle_root: &Digest| {
@@ -73,8 +74,9 @@ impl Receipt {
         M: ?Sized,
         MethodId: From<&'a M>,
     {
-        use crate::CIRCUIT;
         use risc0_zkp::{core::sha::default_implementation, verify::VerifyImpl};
+
+        use crate::CIRCUIT;
 
         let sha = default_implementation();
         let hal = VerifyImpl::new(sha, &CIRCUIT);
