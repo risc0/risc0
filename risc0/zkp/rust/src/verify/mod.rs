@@ -178,11 +178,10 @@ where
     iop.commit(&hash_u);
 
     // Now, convert to evaluated values
-    hal.debug("poly_eval");
+    hal.debug("> poly_eval");
     let mut cur_pos = 0;
     let mut eval_u = Vec::with_capacity(num_taps);
     for reg in taps.regs() {
-        hal.debug("reg");
         for i in 0..reg.size() {
             let x = back_one.pow(reg.back(i)) * z;
             let fx = poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x);
@@ -191,6 +190,7 @@ where
         cur_pos += reg.size();
     }
     assert_eq!(eval_u.len(), num_taps, "Miscalculated capacity for eval_us");
+    hal.debug("< poly_eval");
 
     // Compute the core polynomial
     hal.debug("> compute_polynomial");
