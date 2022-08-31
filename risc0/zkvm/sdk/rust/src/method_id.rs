@@ -86,6 +86,7 @@ impl MethodId {
 mod prove {
     use anyhow::Result;
     use risc0_zkp::{
+        adapter::TapsProvider,
         core::{fp::Fp, sha::Digest},
         field::baby_bear::BabyBear,
         hal::{cpu::CpuHal, Hal},
@@ -94,12 +95,12 @@ mod prove {
     };
     use risc0_zkvm_platform::memory::MEM_SIZE;
 
-    use crate::{elf::Program, prove::exec, CODE_SIZE};
+    use crate::{elf::Program, prove::exec, CIRCUIT};
 
     use super::{MethodId, MAX_CODE_DIGEST_COUNT};
 
     pub fn compute_with_limit(elf_contents: &[u8], limit: u32) -> Result<MethodId> {
-        let code_size = *CODE_SIZE;
+        let code_size = CIRCUIT.code_size();
         let hal: CpuHal<BabyBear> = CpuHal::new();
         let program = Program::load_elf(elf_contents, MEM_SIZE as u32)?;
 
@@ -134,9 +135,10 @@ mod prove {
     }
 
     fn load_code(code: &mut [Fp], elf: &crate::elf::Program, cycles: usize) -> Result<()> {
+        let code_size = CIRCUIT.code_size();
         let mut cycle = 0;
         exec::load_code(elf.entry, &elf.image, |chunk, fini| {
-            for i in 0..*CODE_SIZE {
+            for i in 0..code_size {
                 code[cycles * i + cycle] = chunk[i];
             }
             if cycle + fini + ZK_CYCLES < cycles {

@@ -14,7 +14,7 @@
 
 // These must match the values in zkvm/platform/io.h.  See that file
 // for documentation on these GPIO ports.
-use core::marker::PhantomData;
+use core::{marker::PhantomData, mem};
 
 pub struct Gpio<T> {
     addr: u32,
@@ -118,14 +118,30 @@ pub struct InsecureShaHashDescriptor {
 }
 
 #[repr(C)]
+pub struct SliceDescriptor {
+    pub size: u32,
+    pub addr: u32,
+}
+
+#[repr(C)]
 pub struct ComputePolyDescriptor {
-    pub eval_u: u32,
+    pub eval_u: SliceDescriptor,
     pub poly_mix: u32,
-    pub out: u32,
-    pub mix: u32,
+    pub out: SliceDescriptor,
+    pub mix: SliceDescriptor,
 }
 
 // Standard ZKVM channels; must match zkvm/platform/io.h.
 pub const SENDRECV_CHANNEL_INITIAL_INPUT: u32 = 0;
 pub const SENDRECV_CHANNEL_STDOUT: u32 = 1;
 pub const SENDRECV_CHANNEL_STDERR: u32 = 2;
+
+impl SliceDescriptor {
+    pub fn new<T>(slice: &[T]) -> Self {
+        let size = slice.len() * mem::size_of::<T>();
+        Self {
+            size: size as u32,
+            addr: slice.as_ptr() as u32,
+        }
+    }
+}

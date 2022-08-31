@@ -15,6 +15,8 @@
 #![no_std]
 #![no_main]
 
+use core::mem;
+
 use risc0_zkp::{
     core::{fp::Fp, fp4::Fp4},
     verify::VerifyHal,
@@ -22,7 +24,9 @@ use risc0_zkp::{
 use risc0_zkvm::receipt::verify_with_hal;
 use risc0_zkvm_guest::{entry, env, memory_barrier, sha_insecure};
 use risc0_zkvm_platform::{
-    io::{ComputePolyDescriptor, GPIO_COMPUTE_POLY, SENDRECV_CHANNEL_INITIAL_INPUT},
+    io::{
+        ComputePolyDescriptor, SliceDescriptor, GPIO_COMPUTE_POLY, SENDRECV_CHANNEL_INITIAL_INPUT,
+    },
     rt::host_io::host_recv,
 };
 
@@ -51,29 +55,20 @@ impl VerifyHal for VerifyImpl {
     }
 
     fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4 {
-        use risc0_zkp::adapter::PolyExt;
-        use risc0_zkp::adapter::PolyExtContext;
-        let circuit: &risc0_zkvm_circuit::CircuitImpl = &risc0_zkvm::CIRCUIT;
-        let ctx = PolyExtContext { mix: poly_mix };
-        let args: &[&[Fp]] = &[out, mix];
-        let result = circuit.poly_ext(&ctx, u, args);
-        result.tot
+        let desc = &ComputePolyDescriptor {
+            eval_u: SliceDescriptor::new(u),
+            poly_mix: &poly_mix as *const Fp4 as u32,
+            out: SliceDescriptor::new(out),
+            mix: SliceDescriptor::new(mix),
+        };
 
-        // let desc = &ComputePolyDescriptor {
-        //     eval_u: u.as_ptr() as u32,
-        //     poly_mix: &poly_mix as *const Fp4 as u32,
-        //     out: out.as_ptr() as u32,
-        //     mix: mix.as_ptr() as u32,
-        // };
+        memory_barrier(desc);
+        unsafe { GPIO_COMPUTE_POLY.as_ptr().write_volatile(desc) }
 
-        // memory_barrier(desc);
-        // unsafe { GPIO_COMPUTE_POLY.as_ptr().write_volatile(desc) }
+        const FP4_WORDS: usize = mem::size_of::<Fp4>() / mem::size_of::<u32>();
+        let words: &[u32; FP4_WORDS] = host_recv(FP4_WORDS).try_into().unwrap();
 
-        // const FP4_WORDS: usize = core::mem::size_of::<Fp4>() / 4;
-        // let words: &[u32; FP4_WORDS] =
-        // host_recv(FP4_WORDS).try_into().unwrap();
-
-        // *bytemuck::cast_ref(words)
+        *bytemuck::cast_ref(words)
     }
 }
 

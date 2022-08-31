@@ -47,15 +47,4 @@ pub mod receipt;
 pub mod serde;
 
 #[cfg(feature = "circuit")]
-lazy_static::lazy_static! {
-    pub static ref CIRCUIT: risc0_zkvm_circuit::CircuitImpl =
-        risc0_zkvm_circuit::CircuitImpl::new();
-
-    pub static ref CODE_SIZE: usize = code_size();
-}
-
-#[cfg(feature = "circuit")]
-fn code_size() -> usize {
-    use risc0_zkp::{adapter::TapsProvider, taps::RegisterGroup};
-    CIRCUIT.get_taps().group_size(RegisterGroup::Code)
-}
+pub const CIRCUIT: risc0_zkvm_circuit::CircuitImpl = risc0_zkvm_circuit::CircuitImpl::new();

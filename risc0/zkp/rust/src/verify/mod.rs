@@ -104,7 +104,7 @@ impl<'a, S: Sha, C: PolyExt> VerifyHal for VerifyImpl<'a, S, C> {
 
 pub fn verify<'a, H, C, F>(
     hal: &'a H,
-    adapter: &mut VerifyAdapter<'a, C>,
+    circuit: &C,
     seal: &'a [u32],
     check_code: F,
 ) -> Result<(), VerificationError>
@@ -116,6 +116,8 @@ where
     if seal.len() == 0 {
         return Err(VerificationError::ReceiptFormatError);
     }
+
+    let mut adapter = VerifyAdapter::new(circuit);
     let taps = adapter.taps();
 
     // Make IOP

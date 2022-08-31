@@ -17,7 +17,7 @@ use risc0_zkp::{
 pub struct CircuitImpl;
 
 impl CircuitImpl {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         CircuitImpl
     }
 }

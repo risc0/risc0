@@ -39,14 +39,14 @@ where
     M: ?Sized,
     MethodId: From<&'a M>,
 {
+    use crate::CIRCUIT;
     use anyhow::anyhow;
     use risc0_zkp::{
         core::{log2_ceil, sha::Digest},
-        verify::adapter::VerifyAdapter,
         verify::verify,
         MIN_CYCLES,
     };
-    use risc0_zkvm_circuit::CircuitImpl;
+
     let method_id: MethodId = method_id.into();
     let check_code = |po2, merkle_root: &Digest| {
         let which = po2 as usize - log2_ceil(MIN_CYCLES);
@@ -62,10 +62,7 @@ where
         method_id.table[which] == *merkle_root
     };
 
-    let circuit: &CircuitImpl = &crate::CIRCUIT;
-    let mut adapter = VerifyAdapter::new(circuit);
-    verify(hal, &mut adapter, seal, check_code)
-        .map_err(|err| anyhow!("Verification failed: {:?}", err))
+    verify(hal, &CIRCUIT, seal, check_code).map_err(|err| anyhow!("Verification failed: {:?}", err))
 }
 
 impl Receipt {
@@ -75,11 +72,11 @@ impl Receipt {
         M: ?Sized,
         MethodId: From<&'a M>,
     {
+        use crate::CIRCUIT;
         use risc0_zkp::{core::sha::default_implementation, verify::VerifyImpl};
-        use risc0_zkvm_circuit::CircuitImpl;
+
         let sha = default_implementation();
-        let circuit: &CircuitImpl = &crate::CIRCUIT;
-        let hal = VerifyImpl::new(sha, circuit);
+        let hal = VerifyImpl::new(sha, &CIRCUIT);
         self.verify_with_hal(&hal, method_id)
     }
 

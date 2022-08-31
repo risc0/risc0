@@ -19,7 +19,7 @@ use anyhow::{bail, Result};
 use crate::{
     core::{fp::Fp, fp4::Fp4},
     field::Elem,
-    taps::TapSet,
+    taps::{RegisterGroup, TapSet},
     INV_RATE,
 };
 
@@ -258,6 +258,10 @@ pub trait PolyExt {
 
 pub trait TapsProvider {
     fn get_taps(&self) -> &'static TapSet<'static>;
+
+    fn code_size(&self) -> usize {
+        self.get_taps().group_size(RegisterGroup::Code)
+    }
 }
 
 pub trait CircuitInfo {
