@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use alloc_crate::vec::Vec;
-
 use risc0_zkp::core::sha::{Digest, DIGEST_WORDS, SHA256_INIT};
 use risc0_zkvm_platform::{
     io::{

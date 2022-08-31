@@ -432,6 +432,7 @@ impl<'de, 'a> serde::Deserializer<'de> for &'a mut Deserializer<'de> {
 #[cfg(test)]
 mod test {
     use alloc::string::String;
+
     use serde::{Deserialize, Serialize};
 
     use super::*;

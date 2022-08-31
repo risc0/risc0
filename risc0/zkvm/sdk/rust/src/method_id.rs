@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::vec::Vec;
+
 use anyhow::Result;
 use risc0_zkp::{
     core::{
@@ -94,9 +95,8 @@ mod prove {
     };
     use risc0_zkvm_platform::memory::MEM_SIZE;
 
-    use crate::{elf::Program, prove::exec, CODE_SIZE};
-
     use super::{MethodId, MAX_CODE_DIGEST_COUNT};
+    use crate::{elf::Program, prove::exec, CODE_SIZE};
 
     pub fn compute_with_limit(elf_contents: &[u8], limit: u32) -> Result<MethodId> {
         let code_size = *CODE_SIZE;

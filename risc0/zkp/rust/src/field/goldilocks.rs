@@ -569,10 +569,12 @@ impl From<Elem> for ExtElem {
 
 #[cfg(test)]
 mod tests {
+    use alloc::{vec, vec::Vec};
+
+    use rand::{Rng, SeedableRng};
+
     use super::{field, Elem, ExtElem, P};
     use crate::field::Elem as FieldElem;
-    use alloc::{vec, vec::Vec};
-    use rand::{Rng, SeedableRng};
 
     #[test]
     /// Roots of unity tests common to all fields under test

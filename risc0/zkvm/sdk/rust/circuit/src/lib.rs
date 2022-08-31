@@ -42,8 +42,9 @@ impl CircuitInfo for CircuitImpl {
 
 #[cfg(test)]
 mod test {
-    use super::taps;
     use risc0_zkp::taps::{TapSet, TapSetOwned};
+
+    use super::taps;
 
     #[test]
     fn generated_tapset_matches() {
