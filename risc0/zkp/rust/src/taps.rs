@@ -96,6 +96,7 @@ pub struct TapSet<'a> {
     pub combo_begin: &'a [u16],
     pub group_begin: [usize; REGISTER_GROUPS.len() + 1],
     pub combos_count: usize,
+    pub reg_count: usize,
 }
 
 impl<'a> TapSet<'a> {
@@ -149,6 +150,10 @@ impl<'a> TapSet<'a> {
         self.combos_count
     }
 
+    pub fn reg_count(&self) -> usize {
+        self.reg_count
+    }
+
     pub fn combos(&self) -> ComboIter {
         ComboIter {
             data: ComboData {
@@ -177,6 +182,7 @@ pub struct TapSetOwned {
     combo_begin: Vec<u16>,
     group_begin: [usize; REGISTER_GROUPS.len() + 1],
     combos_count: usize,
+    reg_count: usize,
 }
 
 impl TapSetOwned {
@@ -198,7 +204,7 @@ impl TapSetOwned {
         let mut combo_begin = Vec::new();
         let mut combo_taps = Vec::new();
         let mut taps = Vec::new();
-
+        let mut tot_reg_count = 0;
         // Pre-insert the 'only self' combo
         let myself = BTreeSet::from([0_usize]);
         let mut combos = vec![&myself];
@@ -211,6 +217,7 @@ impl TapSetOwned {
             group_begin[group_id] = taps.len();
             let regs = all.get(group).unwrap();
             let reg_count = regs.keys().last().unwrap() + 1;
+            tot_reg_count += reg_count;
             for reg in 0..reg_count {
                 // Make sure all registers have at least one tap
                 assert!(regs.contains_key(&reg));
@@ -247,6 +254,7 @@ impl TapSetOwned {
             combo_begin,
             group_begin,
             combos_count: combos.len(),
+            reg_count: tot_reg_count,
         }
     }
 }
@@ -259,6 +267,7 @@ impl<'a> From<&'a TapSetOwned> for TapSet<'a> {
             combo_begin: owned.combo_begin.as_slice(),
             group_begin: owned.group_begin,
             combos_count: owned.combos_count,
+            reg_count: owned.reg_count,
         }
     }
 }
