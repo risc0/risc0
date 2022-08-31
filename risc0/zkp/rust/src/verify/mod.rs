@@ -17,7 +17,7 @@ mod fri;
 pub(crate) mod merkle;
 pub mod read_iop;
 
-use alloc::vec;
+use alloc::{vec, vec::Vec};
 use core::fmt;
 use core::iter::zip;
 
