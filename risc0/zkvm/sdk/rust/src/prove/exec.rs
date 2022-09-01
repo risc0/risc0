@@ -39,7 +39,7 @@ use risc0_zkvm_platform::{
     io::{
         addr::{
             GPIO_COMMIT, GPIO_COMPUTE_POLY, GPIO_CYCLECOUNT, GPIO_FAULT, GPIO_GETKEY,
-            GPIO_INSECURESHACOMPRESS, GPIO_INSECURESHAHASH, GPIO_SENDRECV_ADDR,
+            GPIO_INSECURESHACOMPRESS, GPIO_INSECURESHAHASH, GPIO_LOG, GPIO_SENDRECV_ADDR,
             GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE, GPIO_SHA,
         },
         ComputePolyDescriptor, InsecureShaCompressDescriptor, InsecureShaHashDescriptor,
@@ -442,22 +442,13 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
     }
 
     fn on_write(&mut self, cycle: u32, addr: u32, value: u32) {
-        use risc0_zkvm_platform::io::addr::GPIO_LOG;
-
         // debug!("on_write: 0x{:08X}: 0x{:08X}", addr, value);
         match addr {
             GPIO_COMMIT => {
                 debug!("on_write> GPIO_COMMIT, ptr = {value:08X}");
-                const SZ: usize = core::mem::size_of::<IoDescriptor>();
-                let descbuf: [u32; SZ / WORD_SIZE] = self
-                    .memory
-                    .load_region_u32(value, SZ as u32)
-                    .as_slice()
-                    .try_into()
-                    .unwrap();
                 // SAFETY: IoDescriptor is a plain-old-data type with
                 // repr(C) and no pointers so it's safe to fill it from bytes.
-                let desc: IoDescriptor = unsafe { std::mem::transmute(descbuf) };
+                let desc: IoDescriptor = unsafe { self.memory.read_descriptor(value) };
                 debug!(
                     "on_write> GPIO_COMMIT, commit region starts at {} and is {} bytes long",
                     desc.addr, desc.size
@@ -480,16 +471,9 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
             GPIO_LOG => {
                 debug!("on_write> GPIO_LOG");
-                const SZ: usize = core::mem::size_of::<IoDescriptor>();
-                let descbuf: [u32; SZ / WORD_SIZE] = self
-                    .memory
-                    .load_region_u32(value, SZ as u32)
-                    .as_slice()
-                    .try_into()
-                    .unwrap();
                 // SAFETY: IoDescriptor is a plain-old-data type with
                 // repr(C) and no pointers so it's safe to fill it from bytes.
-                let desc: IoDescriptor = unsafe { std::mem::transmute(descbuf) };
+                let desc: IoDescriptor = unsafe { self.memory.read_descriptor(value) };
                 let buf = self.memory.load_region(desc.addr, desc.size);
                 let str = String::from_utf8(buf).unwrap();
                 println!("R0VM[{cycle}]> {}", str);
