@@ -31,7 +31,6 @@ use crate::{
         fp::Fp,
         fp4::Fp4,
         log2_ceil,
-        poly::poly_eval,
         rou::{ROU_FWD, ROU_REV},
         sha::{Digest, Sha},
     },
@@ -72,6 +71,20 @@ pub trait VerifyHal {
     fn debug(&self, msg: &str);
 
     fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4;
+
+    /// Evaluate a polynomial whose coefficients are in the extension field at a
+    /// point.
+    fn poly_eval(&self, coeffs: &[Fp4], x: Fp4, y: Fp) -> Fp4 {
+        let mut mul_fp = Fp::ONE;
+        let mut mul_fp4 = Fp4::ONE;
+        let mut tot = Fp4::ZERO;
+        for i in 0..coeffs.len() {
+            tot += coeffs[i] * mul_fp * mul_fp4;
+            mul_fp *= y;
+            mul_fp4 *= x;
+        }
+        tot
+    }
 }
 
 #[cfg(feature = "host")]
@@ -188,19 +201,17 @@ where
     iop.commit(&hash_u);
 
     // Now, convert to evaluated values
-    hal.debug("> poly_eval");
     let mut cur_pos = 0;
     let mut eval_u = Vec::with_capacity(num_taps);
     for reg in taps.regs() {
         for i in 0..reg.size() {
             let x = back_one.pow(reg.back(i)) * z;
-            let fx = poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x);
+            let fx = hal.poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x, Fp::ONE);
             eval_u.push(fx);
         }
         cur_pos += reg.size();
     }
     assert_eq!(eval_u.len(), num_taps, "Miscalculated capacity for eval_us");
-    hal.debug("< poly_eval");
 
     // Compute the core polynomial
     hal.debug("> compute_polynomial");
@@ -278,6 +289,7 @@ where
     let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
     // debug!("FRI-verify, size = {size}");
     fri_verify(
+        hal,
         &mut iop,
         size,
         |iop: &mut ReadIOP<_>, idx: usize| -> Result<Fp4, VerificationError> {
@@ -298,7 +310,7 @@ where
             }
             let mut ret = Fp4::ZERO;
             for i in 0..combo_count {
-                let num = tot[i] - poly_eval(&combo_u[i], x);
+                let num = tot[i] - hal.poly_eval(&combo_u[i], x, Fp::ONE);
                 let mut divisor = Fp4::ONE;
                 for back in taps.get_combo(i).slice() {
                     divisor *= x - z * back_one.pow(*back as usize);

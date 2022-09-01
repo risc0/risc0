@@ -302,7 +302,6 @@ mod test {
     }
 
     #[test]
-    #[ignore = "Cannot expand, max po2 of 24 reached"]
     #[cfg(feature = "pure-prove")]
     fn recursion() {
         use risc0_zkvm_methods::{VERIFY_ID, VERIFY_PATH};

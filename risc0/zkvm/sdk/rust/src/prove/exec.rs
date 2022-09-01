@@ -39,11 +39,11 @@ use risc0_zkvm_platform::{
     io::{
         addr::{
             GPIO_COMMIT, GPIO_COMPUTE_POLY, GPIO_CYCLECOUNT, GPIO_FAULT, GPIO_GETKEY,
-            GPIO_INSECURESHACOMPRESS, GPIO_INSECURESHAHASH, GPIO_LOG, GPIO_SENDRECV_ADDR,
-            GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE, GPIO_SHA,
+            GPIO_INSECURESHACOMPRESS, GPIO_INSECURESHAHASH, GPIO_LOG, GPIO_POLY_EVAL,
+            GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE, GPIO_SHA,
         },
         ComputePolyDescriptor, InsecureShaCompressDescriptor, InsecureShaHashDescriptor,
-        IoDescriptor, SHADescriptor, SliceDescriptor,
+        IoDescriptor, PolyEvalDescriptor, SHADescriptor, SliceDescriptor,
     },
     memory::{INPUT, MEM_BITS},
     WORD_SIZE,
@@ -554,6 +554,24 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 let args: &[&[Fp]] = &[&out, &mix];
                 let result = CIRCUIT.poly_ext(&ctx, &eval_u, args);
                 self.send_to_guest(bytemuck::bytes_of(&result.tot));
+            }
+            GPIO_POLY_EVAL => {
+                // SAFETY: PolyEvalDescriptor is a plain old
+                // repr(C) structure and has no pointers.
+                let desc: PolyEvalDescriptor = unsafe { self.memory.read_descriptor(value) };
+                let coeffs: Vec<Fp4> = self.memory.read_slice(&desc.coeffs);
+                let x: Fp4 = self.memory.read_value(desc.x);
+                let y: Fp = self.memory.read_value(desc.y);
+
+                let mut mul_fp = Fp::ONE;
+                let mut mul_fp4 = Fp4::ONE;
+                let mut tot = Fp4::ZERO;
+                for i in 0..coeffs.len() {
+                    tot += coeffs[i] * mul_fp * mul_fp4;
+                    mul_fp *= y;
+                    mul_fp4 *= x;
+                }
+                self.send_to_guest(bytemuck::bytes_of(&tot));
             }
             _ => {}
         };

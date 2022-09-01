@@ -25,7 +25,8 @@ use risc0_zkvm::receipt::verify_with_hal;
 use risc0_zkvm_guest::{entry, env, memory_barrier, sha_insecure};
 use risc0_zkvm_platform::{
     io::{
-        ComputePolyDescriptor, SliceDescriptor, GPIO_COMPUTE_POLY, SENDRECV_CHANNEL_INITIAL_INPUT,
+        ComputePolyDescriptor, PolyEvalDescriptor, SliceDescriptor, GPIO_COMPUTE_POLY,
+        GPIO_POLY_EVAL, SENDRECV_CHANNEL_INITIAL_INPUT,
     },
     rt::host_io::host_recv,
 };
@@ -67,6 +68,35 @@ impl VerifyHal for VerifyImpl {
 
         const FP4_WORDS: usize = mem::size_of::<Fp4>() / mem::size_of::<u32>();
         let words: &[u32; FP4_WORDS] = host_recv(FP4_WORDS).try_into().unwrap();
+
+        *bytemuck::cast_ref(words)
+    }
+
+    fn poly_eval(&self, coeffs: &[Fp4], x: Fp4, y: Fp) -> Fp4 {
+        let desc = &PolyEvalDescriptor {
+            coeffs: SliceDescriptor::new(coeffs),
+            x: &x as *const Fp4 as u32,
+            y: &y as *const Fp as u32,
+        };
+
+        memory_barrier(desc);
+        unsafe { GPIO_POLY_EVAL.as_ptr().write_volatile(desc) }
+
+        const FP4_WORDS: usize = mem::size_of::<Fp4>() / mem::size_of::<u32>();
+        let words: &[u32; FP4_WORDS] = host_recv(FP4_WORDS).try_into().unwrap();
+
+        // This is here to try to get more accurate cycle estimations.
+        for _ in 0..coeffs.len() {
+            unsafe {
+                core::arch::asm!(
+                    r#"
+                nop // loads
+                nop // muls
+                nop // adds/stores
+            "#
+                )
+            };
+        }
 
         *bytemuck::cast_ref(words)
     }
