@@ -31,9 +31,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.62"
+version = "1.0.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1485d4d2cc45e7b201ee3767015c96faa5904387c9d87c6efdd0fb511f12d305"
+checksum = "a26fa4d7e3f2eebadf743988fc8aec9fa9a9e82611acafd77c1462ed6262440a"
 
 [[package]]
 name = "array-init"
@@ -258,9 +258,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.18"
+version = "3.2.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b15f2ea93df33549dbe2e8eecd1ca55269d63ae0b3ba1f55db030817d1c2867f"
+checksum = "68d43934757334b5c0519ff882e1ab9647ac0258b47c24c4f490d78e42697fd5"
 dependencies = [
  "atty",
  "bitflags",
@@ -476,9 +476,9 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.73"
+version = "1.0.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "873c2e83af70859af2aaecd1f5d862f3790b747b1f4f50fb45a931d000ac0422"
+checksum = "1d32d767d2d7d8126dc126b959f5bb3ddb07f7f5c4c21351983444c9826786b1"
 dependencies = [
  "cc",
  "cxxbridge-flags",
@@ -488,9 +488,9 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.73"
+version = "1.0.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b49edea7163bbc7a39e3d829b4b0b66a9d30486973152842b7413f2c7b5632bf"
+checksum = "5326718a190b4a42e517ab8471c286cb1b6310a631672d56dc0e61fa044daee4"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -503,15 +503,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.73"
+version = "1.0.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f46b787c15af80277db5c88c6ac6c502ae545e622f010e06f95e540d34931acf"
+checksum = "53253a86460ad0d1f851f49ab57b45bfb5cfddf558ff714994fb599a64f0fc7a"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.73"
+version = "1.0.74"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ba3f3a7efa46626878fb5d324fabca4d19d2956b6ae97ce43044ef4515f5abc"
+checksum = "0e0e3dabc3f3f2c071a64cb39066234442bc0c15c7dbb64762e228cf0431589f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -801,9 +801,9 @@ dependencies = [
 
 [[package]]
 name = "httparse"
-version = "1.7.1"
+version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "496ce29bb5a52785b44e0f7ca2847ae0bb839c9bd28f69acac9b99d461c0c04c"
+checksum = "d897f394bad6a705d5f4104762e116a75639e470d80901eed05a860a95cb1904"
 
 [[package]]
 name = "httpdate"
@@ -1234,9 +1234,9 @@ dependencies = [
 
 [[package]]
 name = "paste"
-version = "1.0.8"
+version = "1.0.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9423e2b32f7a043629287a536f21951e8c6a82482d0acb1eeebfc90bc2225b22"
+checksum = "b1de2e551fb905ac83f73f7aedf2f0cb4a0da7e35efa24a202a936269f1f18e1"
 
 [[package]]
 name = "pbkdf2"
@@ -1561,7 +1561,7 @@ dependencies = [
 name = "risc0-make-id"
 version = "0.11.1"
 dependencies = [
- "clap 3.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clap 3.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "risc0-zkvm",
 ]
 
@@ -1573,7 +1573,7 @@ dependencies = [
  "assert_cmd",
  "assert_fs",
  "bytemuck",
- "clap 3.2.18 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clap 3.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger",
  "risc0-zkvm",
  "risc0-zkvm-methods",
@@ -1625,7 +1625,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-circuit",
  "risc0-zkvm-methods",
- "risc0-zkvm-methods-verify",
  "risc0-zkvm-platform",
  "risc0-zkvm-sys",
  "serde",
@@ -1665,14 +1664,6 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
- "serde",
-]
-
-[[package]]
-name = "risc0-zkvm-methods-verify"
 version = "0.1.0"
 dependencies = [
  "risc0-build",
@@ -1869,9 +1860,9 @@ dependencies = [
 
 [[package]]
 name = "sha1"
-version = "0.10.1"
+version = "0.10.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c77f4e7f65455545c2153c1253d25056825e77ee2533f0e41deb65a93a34852f"
+checksum = "5cf2781a4ca844dd4f9b608a1791eea19830df0ad3cdd9988cd05f1c66ccb63a"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -1880,9 +1871,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.2"
+version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55deaec60f81eefe3cce0dc50bda92d6d8e88f2a27df7c5033b42afeb1ed2676"
+checksum = "899bf02746a2c92bf1053d9327dadb252b01af1f81f90cdb902411f518bc7215"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -1900,9 +1891,9 @@ dependencies = [
 
 [[package]]
 name = "socket2"
-version = "0.4.6"
+version = "0.4.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10c98bba371b9b22a71a9414e420f92ddeb2369239af08200816169d5e2dd7aa"
+checksum = "02e2d2db9033d13a1567121ddd7a095ee144db4e1ca1b1bda3419bc0da294ebd"
 dependencies = [
  "libc",
  "winapi",

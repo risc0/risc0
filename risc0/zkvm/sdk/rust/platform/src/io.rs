@@ -14,7 +14,7 @@
 
 // These must match the values in zkvm/platform/io.h.  See that file
 // for documentation on these GPIO ports.
-use core::marker::PhantomData;
+use core::{marker::PhantomData, mem};
 
 pub struct Gpio<T> {
     addr: u32,
@@ -56,9 +56,13 @@ pub const GPIO_SENDRECV_SIZE: Gpio<usize> = Gpio::new(0x01F0_0018);
 pub const GPIO_SENDRECV_ADDR: Gpio<*const u8> = Gpio::new(0x01F0_001C);
 
 pub const GPIO_CYCLECOUNT: Gpio<u32> = Gpio::new(0x01F00020);
+
 pub const GPIO_INSECURESHACOMPRESS: Gpio<*const InsecureShaCompressDescriptor> =
     Gpio::new(0x01F00024);
 pub const GPIO_INSECURESHAHASH: Gpio<*const InsecureShaHashDescriptor> = Gpio::new(0x01F00028);
+
+pub const GPIO_COMPUTE_POLY: Gpio<*const ComputePolyDescriptor> = Gpio::new(0x01F0002C);
+pub const GPIO_POLY_EVAL: Gpio<*const PolyEvalDescriptor> = Gpio::new(0x01F00030);
 
 pub mod addr {
     pub const GPIO_SHA: u32 = super::GPIO_SHA.addr();
@@ -67,13 +71,17 @@ pub mod addr {
     pub const GPIO_LOG: u32 = super::GPIO_LOG.addr();
     pub const GPIO_GETKEY: u32 = super::GPIO_GETKEY.addr();
 
-    pub const GPIO_CYCLECOUNT: u32 = super::GPIO_CYCLECOUNT.addr();
-    pub const GPIO_INSECURESHACOMPRESS: u32 = super::GPIO_INSECURESHACOMPRESS.addr();
-    pub const GPIO_INSECURESHAHASH: u32 = super::GPIO_INSECURESHAHASH.addr();
-
     pub const GPIO_SENDRECV_CHANNEL: u32 = super::GPIO_SENDRECV_CHANNEL.addr();
     pub const GPIO_SENDRECV_SIZE: u32 = super::GPIO_SENDRECV_SIZE.addr();
     pub const GPIO_SENDRECV_ADDR: u32 = super::GPIO_SENDRECV_ADDR.addr();
+
+    pub const GPIO_CYCLECOUNT: u32 = super::GPIO_CYCLECOUNT.addr();
+
+    pub const GPIO_INSECURESHACOMPRESS: u32 = super::GPIO_INSECURESHACOMPRESS.addr();
+    pub const GPIO_INSECURESHAHASH: u32 = super::GPIO_INSECURESHAHASH.addr();
+
+    pub const GPIO_COMPUTE_POLY: u32 = super::GPIO_COMPUTE_POLY.addr();
+    pub const GPIO_POLY_EVAL: u32 = super::GPIO_POLY_EVAL.addr();
 }
 
 #[repr(C)]
@@ -111,7 +119,38 @@ pub struct InsecureShaHashDescriptor {
     pub len: u32,
 }
 
+#[repr(C)]
+pub struct SliceDescriptor {
+    pub size: u32,
+    pub addr: u32,
+}
+
+#[repr(C)]
+pub struct ComputePolyDescriptor {
+    pub eval_u: SliceDescriptor,
+    pub poly_mix: u32,
+    pub out: SliceDescriptor,
+    pub mix: SliceDescriptor,
+}
+
+#[repr(C)]
+pub struct PolyEvalDescriptor {
+    pub coeffs: SliceDescriptor,
+    pub x: u32,
+    pub y: u32,
+}
+
 // Standard ZKVM channels; must match zkvm/platform/io.h.
 pub const SENDRECV_CHANNEL_INITIAL_INPUT: u32 = 0;
 pub const SENDRECV_CHANNEL_STDOUT: u32 = 1;
 pub const SENDRECV_CHANNEL_STDERR: u32 = 2;
+
+impl SliceDescriptor {
+    pub fn new<T>(slice: &[T]) -> Self {
+        let size = slice.len() * mem::size_of::<T>();
+        Self {
+            size: size as u32,
+            addr: slice.as_ptr() as u32,
+        }
+    }
+}

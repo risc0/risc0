@@ -143,7 +143,7 @@ impl<'a, S: Sha> MerkleTreeVerifier<'a, S> {
         // Initialize a vector to hold field elements.
         let out: &[F::Elem] = iop.read_pod_slice(self.params.col_size);
         // Get the hash at the leaf of the tree by hashing these field elements.
-        let mut cur: S::DigestPtr = iop.get_sha().hash_raw_pod_slice(out);
+        let mut cur = iop.get_sha().hash_raw_pod_slice(out);
         // Shift idx to start of the row
         idx += self.params.row_size;
         while idx >= 2 * self.params.top_size {

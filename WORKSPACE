@@ -143,11 +143,6 @@ crates_repository(
         "cfg-if": crate.spec(version = "1.0"),
         "log": crate.spec(version = "0.4"),
         "paste": crate.spec(version = "1.0"),
-        "sha2": crate.spec(
-            default_features = False,
-            features = ["compress"],
-            version = "0.10",
-        ),
         "rand": crate.spec(
             default_features = False,
             features = ["small_rng"],

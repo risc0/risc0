@@ -34,20 +34,21 @@ impl From<&MethodId> for MethodId {
 }
 
 #[cfg(feature = "verify")]
-pub fn verify_with_sha<'a, M, S>(method_id: &'a M, sha: &S, seal: &[u32]) -> Result<()>
+pub fn verify_with_hal<'a, M, H>(hal: &H, method_id: &'a M, seal: &[u32]) -> Result<()>
 where
-    S: risc0_zkp::core::sha::Sha,
+    H: risc0_zkp::verify::VerifyHal,
     M: ?Sized,
     MethodId: From<&'a M>,
 {
     use anyhow::anyhow;
     use risc0_zkp::{
         core::{log2_ceil, sha::Digest},
-        verify::adapter::VerifyAdapter,
         verify::verify,
         MIN_CYCLES,
     };
-    use risc0_zkvm_circuit::CircuitImpl;
+
+    use crate::CIRCUIT;
+
     let method_id: MethodId = method_id.into();
     let check_code = |po2, merkle_root: &Digest| {
         let which = po2 as usize - log2_ceil(MIN_CYCLES);
@@ -63,32 +64,33 @@ where
         method_id.table[which] == *merkle_root
     };
 
-    let circuit: &CircuitImpl = &crate::CIRCUIT;
-    let mut adapter = VerifyAdapter::new(circuit);
-    verify(sha, &mut adapter, seal, check_code)
-        .map_err(|err| anyhow!("Verification failed: {:?}", err))
+    verify(hal, &CIRCUIT, seal, check_code).map_err(|err| anyhow!("Verification failed: {:?}", err))
 }
 
 impl Receipt {
-    #[cfg(all(feature = "verify", not(target_arch = "riscv32")))]
+    #[cfg(all(feature = "verify", feature = "host"))]
     pub fn verify<'a, M>(&self, method_id: &'a M) -> Result<()>
     where
         M: ?Sized,
         MethodId: From<&'a M>,
     {
-        use risc0_zkp::core::sha::default_implementation;
+        use risc0_zkp::{core::sha::default_implementation, verify::CpuVerifyHal};
+
+        use crate::CIRCUIT;
+
         let sha = default_implementation();
-        self.verify_with_sha(method_id, sha)
+        let hal = CpuVerifyHal::new(sha, &CIRCUIT);
+        self.verify_with_hal(&hal, method_id)
     }
 
     #[cfg(feature = "verify")]
-    pub fn verify_with_sha<'a, M, S>(&self, method_id: &'a M, sha: &S) -> Result<()>
+    pub fn verify_with_hal<'a, M, H>(&self, hal: &H, method_id: &'a M) -> Result<()>
     where
-        S: risc0_zkp::core::sha::Sha,
+        H: risc0_zkp::verify::VerifyHal,
         M: ?Sized,
         MethodId: From<&'a M>,
     {
-        verify_with_sha(method_id, sha, &self.seal)
+        verify_with_hal(hal, method_id, &self.seal)
     }
 
     // Compatible API with FFI-based prover.

@@ -19,7 +19,7 @@ use alloc::vec;
 use super::fp4::Fp4;
 use crate::field::Elem;
 
-/// Evaluate a polynomial whose coeffients are in the extension field at a
+/// Evaluate a polynomial whose coefficients are in the extension field at a
 /// point.
 pub fn poly_eval(coeffs: &[Fp4], x: Fp4) -> Fp4 {
     let mut mul = Fp4::ONE;

@@ -16,6 +16,7 @@ use alloc::vec::Vec;
 
 use rand::RngCore;
 
+use super::VerifyHal;
 use crate::{
     core::{
         fp::Fp,
@@ -39,19 +40,12 @@ struct VerifyRoundInfo<'a, S: Sha> {
     mix: Fp4,
 }
 
-fn fold_eval(values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
+fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
     interpolate_ntt(values);
     bit_reverse(values);
     let root_po2 = log2_ceil(FRI_FOLD * s);
     let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);
-    let mut mul = Fp::ONE;
-    let mut tot = Fp4::ZERO;
-    let mut mix_pow = Fp4::ONE;
-    for i in 0..FRI_FOLD {
-        tot += values[i] * mul * mix_pow;
-        mul *= inv_wk;
-        mix_pow *= mix;
-    }
+    let tot = hal.poly_eval(values, mix, inv_wk);
     tot
 }
 
@@ -65,8 +59,9 @@ impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
         }
     }
 
-    pub fn verify_query(
+    pub fn verify_query<H: VerifyHal>(
         &mut self,
+        hal: &H,
         iop: &mut ReadIOP<'a, S>,
         pos: &mut usize,
         goal: &mut Fp4,
@@ -90,19 +85,20 @@ impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
             return Err(VerificationError::InvalidProof);
         }
         // Compute the new goal + pos
-        *goal = fold_eval(&mut data4, self.mix, self.domain, group);
+        *goal = fold_eval(hal, &mut data4, self.mix, self.domain, group);
         *pos = group;
         Ok(())
     }
 }
 
-pub fn fri_verify<'a, S: Sha + 'a, F>(
-    iop: &mut ReadIOP<'a, S>,
+pub fn fri_verify<'a, H: VerifyHal, F>(
+    hal: &H,
+    iop: &mut ReadIOP<'a, H::Sha>,
     mut degree: usize,
     mut inner: F,
 ) -> Result<(), VerificationError>
 where
-    F: FnMut(&mut ReadIOP<'a, S>, usize) -> Result<Fp4, VerificationError>,
+    F: FnMut(&mut ReadIOP<'a, H::Sha>, usize) -> Result<Fp4, VerificationError>,
 {
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
@@ -138,7 +134,7 @@ where
         let mut goal = inner(iop, pos)?;
         // Verify the per-round proofs
         for round in &mut rounds {
-            round.verify_query(iop, &mut pos, &mut goal)?;
+            round.verify_query(hal, iop, &mut pos, &mut goal)?;
         }
         // Do final verification
         let x = gen.pow(pos);

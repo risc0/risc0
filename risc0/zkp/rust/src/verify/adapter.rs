@@ -15,22 +15,22 @@
 use alloc::vec::Vec;
 
 use crate::{
-    adapter::{CircuitInfo, PolyExt, PolyExtContext, TapsProvider},
-    core::{fp::Fp, fp4::Fp4, sha::Sha},
+    adapter::{CircuitInfo, TapsProvider},
+    core::{fp::Fp, sha::Sha},
     field::Elem,
     taps::TapSet,
-    verify::{read_iop::ReadIOP, Circuit},
+    verify::read_iop::ReadIOP,
 };
 
-pub struct VerifyAdapter<'a, C: CircuitInfo + PolyExt + TapsProvider> {
+pub struct VerifyAdapter<'a, C: CircuitInfo + TapsProvider> {
     circuit: &'a C,
     po2: u32,
     steps: usize,
-    out: Option<&'a [Fp]>,
-    mix: Vec<Fp>,
+    pub out: Option<&'a [Fp]>,
+    pub mix: Vec<Fp>,
 }
 
-impl<'a, C: CircuitInfo + PolyExt + TapsProvider> VerifyAdapter<'a, C> {
+impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
     pub fn new(circuit: &'a C) -> Self {
         VerifyAdapter {
             circuit,
@@ -40,14 +40,12 @@ impl<'a, C: CircuitInfo + PolyExt + TapsProvider> VerifyAdapter<'a, C> {
             mix: Vec::new(),
         }
     }
-}
 
-impl<'a, C: CircuitInfo + PolyExt + TapsProvider> Circuit<'a> for VerifyAdapter<'a, C> {
-    fn taps(&self) -> &'static TapSet<'static> {
+    pub fn taps(&self) -> &'static TapSet<'static> {
         self.circuit.get_taps()
     }
 
-    fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
+    pub fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
         // Read the outputs + size
         self.out = Some(iop.read_pod_slice(self.circuit.output_size()));
         self.po2 = match iop.read_u32s(1) {
@@ -57,21 +55,14 @@ impl<'a, C: CircuitInfo + PolyExt + TapsProvider> Circuit<'a> for VerifyAdapter<
         self.steps = 1 << self.po2;
     }
 
-    fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<S>) {
+    pub fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
         // Fill in accum mix
         self.mix = (0..self.circuit.mix_size())
             .map(|_| Fp::random(iop))
             .collect();
     }
 
-    fn po2(&self) -> u32 {
+    pub fn po2(&self) -> u32 {
         self.po2
-    }
-
-    fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4) -> Fp4 {
-        let ctx = PolyExtContext { mix: poly_mix };
-        let args: &[&[Fp]] = &[&self.out.unwrap(), &self.mix];
-        let result = self.circuit.poly_ext(&ctx, u, args);
-        result.tot
     }
 }

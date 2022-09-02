@@ -23,7 +23,6 @@ use risc0_zkp::{
     hal::{cpu::CpuHal, EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };
-use risc0_zkvm_circuit::CircuitImpl;
 use risc0_zkvm_platform::{
     io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT},
     memory::MEM_SIZE,
@@ -67,16 +66,14 @@ impl<'a> Prover<'a> {
 
     pub fn run(&mut self) -> Result<Receipt> {
         let hal = CpuHal::new();
-        let circuit: &CircuitImpl = &CIRCUIT;
-        let eval = CpuEvalCheck::new(circuit);
+        let eval = CpuEvalCheck::new(&CIRCUIT);
         self.run_with_hal(&hal, &eval)
     }
 
     pub fn run_with_hal<H: Hal, E: EvalCheck<H>>(&mut self, hal: &H, eval: &E) -> Result<Receipt> {
         let skip_seal = self.inner.opts.skip_seal;
 
-        let circuit: &CircuitImpl = &CIRCUIT;
-        let mut executor = exec::RV32Executor::new(circuit, &self.elf, &mut self.inner);
+        let mut executor = exec::RV32Executor::new(&CIRCUIT, &self.elf, &mut self.inner);
         executor.run()?;
 
         let mut prover = ProveAdapter::new(&mut executor.executor);

@@ -19,12 +19,17 @@ use core::{
 use std::collections::{btree_map::Entry, BTreeMap, BTreeSet};
 
 use anyhow::{bail, Result};
+use bytemuck::Pod;
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
-use risc0_zkp::core::sha::{Digest, Sha, SHA256_INIT};
 use risc0_zkp::{
-    adapter::{CircuitDef, CustomStep},
-    core::{fp::Fp, log2_ceil, sha::DIGEST_WORDS},
+    adapter::{CircuitDef, CustomStep, PolyExt, PolyExtContext, TapsProvider},
+    core::{
+        fp::Fp,
+        fp4::Fp4,
+        log2_ceil,
+        sha::{Digest, Sha, DIGEST_WORDS, SHA256_INIT},
+    },
     field::Elem,
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
@@ -33,17 +38,18 @@ use risc0_zkvm_circuit::CircuitImpl;
 use risc0_zkvm_platform::{
     io::{
         addr::{
-            GPIO_COMMIT, GPIO_CYCLECOUNT, GPIO_FAULT, GPIO_GETKEY, GPIO_INSECURESHACOMPRESS,
-            GPIO_INSECURESHAHASH, GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE,
-            GPIO_SHA,
+            GPIO_COMMIT, GPIO_COMPUTE_POLY, GPIO_CYCLECOUNT, GPIO_FAULT, GPIO_GETKEY,
+            GPIO_INSECURESHACOMPRESS, GPIO_INSECURESHAHASH, GPIO_LOG, GPIO_POLY_EVAL,
+            GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE, GPIO_SHA,
         },
-        InsecureShaCompressDescriptor, InsecureShaHashDescriptor, IoDescriptor, SHADescriptor,
+        ComputePolyDescriptor, InsecureShaCompressDescriptor, InsecureShaHashDescriptor,
+        IoDescriptor, PolyEvalDescriptor, SHADescriptor, SliceDescriptor,
     },
     memory::{INPUT, MEM_BITS},
     WORD_SIZE,
 };
 
-use crate::{elf::Program, CODE_SIZE};
+use crate::{elf::Program, CIRCUIT};
 
 pub trait IoHandler {
     fn on_commit(&mut self, buf: &[u32]);
@@ -167,6 +173,38 @@ impl MemoryState {
                 entry.insert(value);
             }
         }
+    }
+
+    // Reads a C structure from a guest's memory and transmutes it
+    // into the given structure, which should be repr(C) and plain old
+    // data.
+    unsafe fn read_descriptor<T: Send>(&self, addr: u32) -> T {
+        let size = core::mem::size_of::<T>();
+        assert_eq!(size % WORD_SIZE, 0, "Descriptors should be word aligned");
+        let buf = self.load_region_u32(addr, size as u32);
+        assert_eq!(buf.len() * WORD_SIZE, size);
+        core::ptr::read_unaligned(buf.as_ptr() as *const T)
+    }
+
+    // Reads words from guest's memory and transmutes it into the given structure,
+    // which should be repr(C) and plain old data.
+    fn read_slice<T: Pod>(&self, desc: &SliceDescriptor) -> Vec<T> {
+        let elt_size = core::mem::size_of::<T>();
+        assert_eq!(elt_size % WORD_SIZE, 0, "T should be word aligned");
+        let bytes = self.load_region(desc.addr, desc.size);
+        bytes
+            .chunks_exact(elt_size)
+            .map(|chunk| *bytemuck::from_bytes(chunk))
+            .collect()
+    }
+
+    // Reads words from guest's memory and transmutes it into the given value,
+    // which should be repr(C) and plain old data.
+    fn read_value<T: Pod>(&self, addr: u32) -> T {
+        let size = core::mem::size_of::<T>();
+        assert_eq!(size % WORD_SIZE, 0, "T should be word aligned");
+        let bytes = self.load_region(addr, size as u32);
+        *bytemuck::from_bytes(&bytes)
     }
 
     #[track_caller]
@@ -403,34 +441,14 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         self.cur_host_to_guest_offset += nwords
     }
 
-    // Reads a C structure from a guest's memory and transmutes it
-    // into the given structure, which should be repr(C) and plain old
-    // data.
-    unsafe fn read_descriptor<T: Send>(&self, addr: u32) -> T {
-        let size = core::mem::size_of::<T>();
-        assert_eq!(size % WORD_SIZE, 0, "Descriptors should be word aligned");
-        let buf = self.memory.load_region_u32(addr, size as u32);
-        assert_eq!(buf.len() * WORD_SIZE, size);
-        core::ptr::read_unaligned(buf.as_ptr() as *const T)
-    }
-
     fn on_write(&mut self, cycle: u32, addr: u32, value: u32) {
-        use risc0_zkvm_platform::io::addr::GPIO_LOG;
-
         // debug!("on_write: 0x{:08X}: 0x{:08X}", addr, value);
         match addr {
             GPIO_COMMIT => {
                 debug!("on_write> GPIO_COMMIT, ptr = {value:08X}");
-                const SZ: usize = core::mem::size_of::<IoDescriptor>();
-                let descbuf: [u32; SZ / WORD_SIZE] = self
-                    .memory
-                    .load_region_u32(value, SZ as u32)
-                    .as_slice()
-                    .try_into()
-                    .unwrap();
                 // SAFETY: IoDescriptor is a plain-old-data type with
                 // repr(C) and no pointers so it's safe to fill it from bytes.
-                let desc: IoDescriptor = unsafe { std::mem::transmute(descbuf) };
+                let desc: IoDescriptor = unsafe { self.memory.read_descriptor(value) };
                 debug!(
                     "on_write> GPIO_COMMIT, commit region starts at {} and is {} bytes long",
                     desc.addr, desc.size
@@ -456,7 +474,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 let len = self.memory.strlen(value);
                 let buf = self.memory.load_region(value, len as u32);
                 let str = String::from_utf8(buf).unwrap();
-                debug!("R0VM[C{cycle}> {}", str);
+                println!("R0VM[{cycle}]> {}", str);
             }
             GPIO_SENDRECV_ADDR => {
                 debug!("on_write> GPIO_SENDRECV_ADDR");
@@ -471,7 +489,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 debug!("on_write> GPIO_SHA, descriptor ptr = {value:08X}");
                 // SAFETY: ShaDescriptor is a plain old repr(C)
                 // structure and has no pointers.
-                let desc: SHADescriptor = unsafe { self.read_descriptor(value) };
+                let desc: SHADescriptor = unsafe { self.memory.read_descriptor(value) };
                 self.process_sha(&desc);
             }
             GPIO_CYCLECOUNT => {
@@ -487,7 +505,8 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 debug!("onWrite> GPIO_InsecureShaCompress");
                 // SAFETY: InsecureShaCompressDescriptor is a plain
                 // old repr(C) structure and has no pointers.
-                let desc: InsecureShaCompressDescriptor = unsafe { self.read_descriptor(value) };
+                let desc: InsecureShaCompressDescriptor =
+                    unsafe { self.memory.read_descriptor(value) };
 
                 let sha = risc0_zkp::core::sha::default_implementation();
 
@@ -507,7 +526,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 debug!("onWrite> GPIO_InsecureShaHash");
                 // SAFETY: InsecureShaHashDescriptor is a plain old
                 // repr(C) structure and has no pointers.
-                let desc: InsecureShaHashDescriptor = unsafe { self.read_descriptor(value) };
+                let desc: InsecureShaHashDescriptor = unsafe { self.memory.read_descriptor(value) };
 
                 let sha = risc0_zkp::core::sha::default_implementation();
 
@@ -519,6 +538,38 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
 
                 let digest = sha.update(&state, bytes.as_slice());
                 self.send_to_guest(bytemuck::cast_slice(digest.as_slice()));
+            }
+            GPIO_COMPUTE_POLY => {
+                // SAFETY: ComputePolyDescriptor is a plain old
+                // repr(C) structure and has no pointers.
+                let desc: ComputePolyDescriptor = unsafe { self.memory.read_descriptor(value) };
+                let eval_u: Vec<Fp4> = self.memory.read_slice(&desc.eval_u);
+                let poly_mix = self.memory.read_value(desc.poly_mix);
+                let out: Vec<Fp> = self.memory.read_slice(&desc.out);
+                let mix: Vec<Fp> = self.memory.read_slice(&desc.mix);
+
+                let ctx = PolyExtContext { mix: poly_mix };
+                let args: &[&[Fp]] = &[&out, &mix];
+                let result = CIRCUIT.poly_ext(&ctx, &eval_u, args);
+                self.send_to_guest(bytemuck::bytes_of(&result.tot));
+            }
+            GPIO_POLY_EVAL => {
+                // SAFETY: PolyEvalDescriptor is a plain old
+                // repr(C) structure and has no pointers.
+                let desc: PolyEvalDescriptor = unsafe { self.memory.read_descriptor(value) };
+                let coeffs: Vec<Fp4> = self.memory.read_slice(&desc.coeffs);
+                let x: Fp4 = self.memory.read_value(desc.x);
+                let y: Fp = self.memory.read_value(desc.y);
+
+                let mut mul_fp = Fp::ONE;
+                let mut mul_fp4 = Fp4::ONE;
+                let mut tot = Fp4::ZERO;
+                for i in 0..coeffs.len() {
+                    tot += coeffs[i] * mul_fp * mul_fp4;
+                    mul_fp *= y;
+                    mul_fp4 *= x;
+                }
+                self.send_to_guest(bytemuck::bytes_of(&tot));
             }
             _ => {}
         };
@@ -586,7 +637,7 @@ struct CodeRegisters(Vec<Fp>);
 
 impl CodeRegisters {
     fn new() -> Self {
-        Self(vec![ZERO; *CODE_SIZE])
+        Self(vec![ZERO; CIRCUIT.code_size()])
     }
 
     fn reset(&mut self) {

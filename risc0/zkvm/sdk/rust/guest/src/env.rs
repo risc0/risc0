@@ -21,7 +21,7 @@ use risc0_zkvm::serde::{Deserializer, Serializer, Slice};
 pub use risc0_zkvm_platform::rt::host_io::host_sendrecv;
 use risc0_zkvm_platform::{
     io::{
-        IoDescriptor, GPIO_COMMIT, GPIO_CYCLECOUNT, SENDRECV_CHANNEL_INITIAL_INPUT,
+        IoDescriptor, GPIO_COMMIT, GPIO_CYCLECOUNT, GPIO_LOG, SENDRECV_CHANNEL_INITIAL_INPUT,
         SENDRECV_CHANNEL_STDOUT,
     },
     memory,
@@ -126,6 +126,15 @@ pub fn commit<T: Serialize>(data: &T) {
 /// began.
 pub fn get_cycle_count() -> usize {
     ENV.get().get_cycle_count()
+}
+
+/// Print a message to the debug console.
+pub fn log(msg: &str) {
+    // TODO: format! is expensive, replace with a better solution.
+    let msg = alloc_crate::format!("{}\0", msg);
+    let ptr = msg.as_ptr();
+    memory_barrier(ptr);
+    unsafe { GPIO_LOG.as_ptr().write_volatile(ptr) };
 }
 
 impl Env {
