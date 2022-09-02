@@ -129,14 +129,12 @@ pub fn get_cycle_count() -> usize {
 }
 
 /// Print a message to the debug console.
-pub fn println(msg: &str) {
-    let desc = IoDescriptor {
-        size: msg.len() as u32,
-        addr: msg.as_ptr() as u32,
-    };
-    let ptr: *const IoDescriptor = &desc;
+pub fn log(msg: &str) {
+    // TODO: format! is expensive, replace with a better solution.
+    let msg = alloc_crate::format!("{}\0", msg);
+    let ptr = msg.as_ptr();
     memory_barrier(ptr);
-    unsafe { GPIO_LOG.as_ptr().write_volatile(&desc) };
+    unsafe { GPIO_LOG.as_ptr().write_volatile(ptr) };
 }
 
 impl Env {

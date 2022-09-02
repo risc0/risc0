@@ -74,12 +74,12 @@ impl Receipt {
         M: ?Sized,
         MethodId: From<&'a M>,
     {
-        use risc0_zkp::{core::sha::default_implementation, verify::VerifyImpl};
+        use risc0_zkp::{core::sha::default_implementation, verify::CpuVerifyHal};
 
         use crate::CIRCUIT;
 
         let sha = default_implementation();
-        let hal = VerifyImpl::new(sha, &CIRCUIT);
+        let hal = CpuVerifyHal::new(sha, &CIRCUIT);
         self.verify_with_hal(&hal, method_id)
     }
 

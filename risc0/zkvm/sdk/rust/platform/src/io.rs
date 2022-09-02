@@ -48,7 +48,7 @@ impl<T> Gpio<T> {
 pub const GPIO_SHA: Gpio<*const SHADescriptor> = Gpio::new(0x01F0_0000);
 pub const GPIO_COMMIT: Gpio<*const IoDescriptor> = Gpio::new(0x01F0_0004);
 pub const GPIO_FAULT: Gpio<*const u8> = Gpio::new(0x01F0_0008);
-pub const GPIO_LOG: Gpio<*const IoDescriptor> = Gpio::new(0x01F0_000C);
+pub const GPIO_LOG: Gpio<*const u8> = Gpio::new(0x01F0_000C);
 pub const GPIO_GETKEY: Gpio<*const GetKeyDescriptor> = Gpio::new(0x01F0_0010);
 
 pub const GPIO_SENDRECV_CHANNEL: Gpio<u32> = Gpio::new(0x01F0_0014);

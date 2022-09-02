@@ -33,18 +33,18 @@ use risc0_zkvm_platform::{
 
 entry!(main);
 
-struct VerifyImpl {
+struct GuestVerifyHal {
     sha: sha_insecure::Impl,
 }
 
-impl VerifyImpl {
+impl GuestVerifyHal {
     fn new() -> Self {
         let sha = sha_insecure::Impl {};
         Self { sha }
     }
 }
 
-impl VerifyHal for VerifyImpl {
+impl VerifyHal for GuestVerifyHal {
     type Sha = sha_insecure::Impl;
 
     fn sha(&self) -> &Self::Sha {
@@ -52,7 +52,7 @@ impl VerifyHal for VerifyImpl {
     }
 
     fn debug(&self, msg: &str) {
-        env::println(msg);
+        env::log(msg);
     }
 
     fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4 {
@@ -103,7 +103,7 @@ impl VerifyHal for VerifyImpl {
 }
 
 pub fn main() {
-    env::println("main");
+    env::log("main");
 
     let (words, _) = env::send_recv_as_u32(SENDRECV_CHANNEL_INITIAL_INPUT, &[]);
     let seal_len = words[0] as usize;
@@ -111,8 +111,8 @@ pub fn main() {
     let id_len = words[1 + seal_len] as usize;
     let method_id = &words[2 + seal_len..2 + seal_len + id_len];
 
-    let hal = VerifyImpl::new();
+    let hal = GuestVerifyHal::new();
     verify_with_hal(&hal, method_id, seal).unwrap();
 
-    env::println("done");
+    env::log("done");
 }

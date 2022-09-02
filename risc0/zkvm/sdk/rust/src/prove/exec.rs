@@ -471,10 +471,8 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
             GPIO_LOG => {
                 debug!("on_write> GPIO_LOG");
-                // SAFETY: IoDescriptor is a plain-old-data type with
-                // repr(C) and no pointers so it's safe to fill it from bytes.
-                let desc: IoDescriptor = unsafe { self.memory.read_descriptor(value) };
-                let buf = self.memory.load_region(desc.addr, desc.size);
+                let len = self.memory.strlen(value);
+                let buf = self.memory.load_region(value, len as u32);
                 let str = String::from_utf8(buf).unwrap();
                 println!("R0VM[{cycle}]> {}", str);
             }

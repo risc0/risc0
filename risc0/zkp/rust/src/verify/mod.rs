@@ -21,7 +21,7 @@ use alloc::{vec, vec::Vec};
 use core::{fmt, iter::zip};
 
 #[cfg(feature = "host")]
-pub use host::VerifyImpl;
+pub use host::CpuVerifyHal;
 
 use self::adapter::VerifyAdapter;
 // use log::debug;
@@ -92,18 +92,18 @@ mod host {
     use super::*;
     use crate::adapter::{PolyExt, PolyExtContext};
 
-    pub struct VerifyImpl<'a, S: Sha, C: PolyExt> {
+    pub struct CpuVerifyHal<'a, S: Sha, C: PolyExt> {
         sha: &'a S,
         circuit: &'a C,
     }
 
-    impl<'a, S: Sha, C: PolyExt> VerifyImpl<'a, S, C> {
+    impl<'a, S: Sha, C: PolyExt> CpuVerifyHal<'a, S, C> {
         pub fn new(sha: &'a S, circuit: &'a C) -> Self {
             Self { sha, circuit }
         }
     }
 
-    impl<'a, S: Sha, C: PolyExt> VerifyHal for VerifyImpl<'a, S, C> {
+    impl<'a, S: Sha, C: PolyExt> VerifyHal for CpuVerifyHal<'a, S, C> {
         type Sha = S;
 
         fn sha(&self) -> &Self::Sha {
