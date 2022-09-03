@@ -8,6 +8,7 @@ cc_library(
         "elf.cpp",
         "log.cpp",
         "rng.cpp",
+        "source_loc.cpp",
         "util.cpp",
     ] + select(
         {

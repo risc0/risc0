@@ -1,5 +1,4 @@
 // This code is automatically generated
-
 #![cfg_attr(not(test), no_std)]
 
 mod poly_ext;

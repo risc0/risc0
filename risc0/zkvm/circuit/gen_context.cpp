@@ -300,7 +300,7 @@ std::ostream& GenContext::defl() {
 }
 
 std::string GenContext::loc(SourceLoc loc) {
-  return std::string(loc.filename) + ":" + std::to_string(loc.line);
+  return loc.as_string();
 }
 
 std::string GenContext::endl(SourceLoc loc) {

@@ -15,6 +15,12 @@
 #pragma once
 
 #include <cstddef>
+#include <string>
+
+// TODO: Can we get CIRCUIT_BACKTRACE to work with clang?
+#if defined(CIRCUIT_BACKTRACE) && !defined(__clang__)
+#include <backtrace.h>
+#endif
 
 /// \file
 /// SourceLoc is basically a near clone of std::source_location, but since it's not in the spec
@@ -53,7 +59,7 @@ struct SourceLoc {
 public:
   /// Get the "current" source location.  When used in default values, this effectively captures the
   /// call site of the function declaring the default value, which is very useful.
-  static constexpr SourceLoc current(
+  static SourceLoc current(
 #if HAS_FILE_LINE
       const char* filename = __builtin_FILE(),
       int line = __builtin_LINE(),
@@ -66,19 +72,18 @@ public:
 #else
       int column = 0
 #endif
-          ) noexcept {
-    SourceLoc loc;
-    loc.filename = filename;
-    loc.line = line;
-    loc.column = column;
-    return loc;
-  }
+  );
 
-  constexpr SourceLoc() noexcept : filename(""), line(0), column(0) {}
+  std::string as_string() const;
 
+  size_t get_line() const { return line; }
+  const char* get_filename() const { return filename; }
+
+private:
   const char* filename;
   size_t line;
   size_t column;
+  std::string frames;
 };
 
 } // namespace risc0

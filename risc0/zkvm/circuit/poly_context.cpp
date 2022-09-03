@@ -306,14 +306,11 @@ struct PolyContext::Impl {
     }
     opToName[op] = opName;
     std::string expr = op->output(*this, opName);
-    outs << expr << " // deg=" << op->degree() << ", " << opToLoc[op].filename << ":"
-         << opToLoc[op].line << "\n";
+    outs << expr << " // deg=" << op->degree() << ", " << opToLoc[op].as_string() << "\n";
     return opName;
   }
   void onCriticalPath(PolyOp op) {
-    LOG(0,
-        "  name=" << opToName[op] << ", deg=" << op->degree() << " " << opToLoc[op].filename << ":"
-                  << opToLoc[op].line);
+    LOG(0, "  name=" << opToName[op] << ", deg=" << op->degree() << " " << opToLoc[op].as_string());
   }
 };
 
@@ -388,7 +385,7 @@ void OpBegin::findCriticalPath(PolyContext::Impl& impl) {}
 std::string OpAssertZero::output(PolyContext::Impl& impl, const std::string& out) {
   auto opLoc = impl.opToLoc[shared_from_this()];
   return "do_assert_zero(" + out + ", " + impl.eval(prev) + ", " + impl.eval(zero) + ", \"" +
-         opLoc.filename + ":" + std::to_string(opLoc.line) + "\")";
+         opLoc.as_string() + "\")";
 }
 
 void OpAssertZero::findCriticalPath(PolyContext::Impl& impl) {
@@ -403,7 +400,7 @@ void OpAssertZero::findCriticalPath(PolyContext::Impl& impl) {
 std::string OpCombine::output(PolyContext::Impl& impl, const std::string& out) {
   auto opLoc = impl.opToLoc[shared_from_this()];
   return "do_combine(" + out + ", " + impl.eval(prev) + ", " + impl.eval(mul) + "," +
-         impl.eval(inner) + ", \"" + opLoc.filename + ":" + std::to_string(opLoc.line) + "\")";
+         impl.eval(inner) + ", \"" + opLoc.as_string() + "\")";
 }
 
 void OpCombine::findCriticalPath(PolyContext::Impl& impl) {
