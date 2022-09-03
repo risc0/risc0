@@ -52,9 +52,9 @@ use risc0_zkvm_platform::{
 use crate::{elf::Program, CIRCUIT};
 
 pub trait IoHandler {
-    fn on_commit(&mut self, buf: &[u32]);
-    fn on_fault(&mut self, msg: &str);
-    fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Vec<u8>;
+    fn on_commit(&mut self, buf: &[u32]) -> Result<()>;
+    fn on_fault(&mut self, msg: &str) -> Result<()>;
+    fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>>;
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -424,7 +424,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 entry.insert(data);
             }
         };
-        self.on_write(cycle, addr * 4, data);
+        self.on_write(cycle, addr * 4, data)?;
         Ok(())
     }
 
@@ -441,7 +441,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         self.cur_host_to_guest_offset += nwords
     }
 
-    fn on_write(&mut self, cycle: u32, addr: u32, value: u32) {
+    fn on_write(&mut self, cycle: u32, addr: u32, value: u32) -> Result<()> {
         // debug!("on_write: 0x{:08X}: 0x{:08X}", addr, value);
         match addr {
             GPIO_COMMIT => {
@@ -456,14 +456,14 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
 
                 let buf = self.memory.load_region_u32(desc.addr, desc.size);
                 debug!("Data: {:08X?}", &buf);
-                self.io.on_commit(buf.as_slice());
+                self.io.on_commit(buf.as_slice())?;
             }
             GPIO_FAULT => {
                 debug!("on_write> GPIO_FAULT");
                 let len = self.memory.strlen(value);
                 let buf = self.memory.load_region(value, len as u32);
                 let str = String::from_utf8(buf).unwrap();
-                self.io.on_fault(&str);
+                self.io.on_fault(&str)?;
             }
             GPIO_GETKEY => {
                 debug!("on_write> GPIO_GETKEY");
@@ -481,7 +481,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                 let channel = self.memory.load_u32(GPIO_SENDRECV_CHANNEL);
                 let size = self.memory.load_u32(GPIO_SENDRECV_SIZE);
                 let region = self.memory.load_region(value, size);
-                let result = self.io.on_txrx(channel, &region);
+                let result = self.io.on_txrx(channel, &region)?;
                 self.send_to_guest(bytemuck::cast_slice(&[result.len() as u32]));
                 self.send_to_guest(result.as_slice())
             }
@@ -573,6 +573,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
             _ => {}
         };
+        Ok(())
     }
 
     fn process_sha(&mut self, desc: &SHADescriptor) {

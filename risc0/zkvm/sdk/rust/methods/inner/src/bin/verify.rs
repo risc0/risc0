@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #![no_std]
+#![feature(alloc_error_handler)]
 #![no_main]
 
 use core::mem;
@@ -22,7 +23,7 @@ use risc0_zkp::{
     verify::VerifyHal,
 };
 use risc0_zkvm::receipt::verify_with_hal;
-use risc0_zkvm_guest::{entry, env, memory_barrier, sha_insecure};
+use risc0_zkvm_guest::{entry, env, memory_barrier, sha_insecure, standalone_handlers};
 use risc0_zkvm_platform::{
     io::{
         ComputePolyDescriptor, PolyEvalDescriptor, SliceDescriptor, GPIO_COMPUTE_POLY,
@@ -31,6 +32,7 @@ use risc0_zkvm_platform::{
     rt::host_io::host_recv,
 };
 
+standalone_handlers!();
 entry!(main);
 
 struct GuestVerifyHal {
