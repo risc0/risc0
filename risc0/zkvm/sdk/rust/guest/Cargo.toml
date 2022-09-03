@@ -22,7 +22,7 @@ bazel = []
 default = ["std"]
 doc = ["std"]
 # Run rust-based prover instead of FFI-based prover.
-pure-prove = ["risc0-zkvm-platform/pure-prove"]
+pure-prove = []
 std = ["risc0-zkp/std", "serde/std"]
 
 [workspace]

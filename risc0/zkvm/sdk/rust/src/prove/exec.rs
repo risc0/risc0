@@ -751,7 +751,7 @@ where
                 self.code[CodeIndex::Data1High] = round.1;
             } else {
                 self.code[CodeIndex::ShaCtrl] = ONE;
-                self.code[CodeIndex::P1] = Fp::new((sha_phase - 64 + 4) as u32);
+                self.code[CodeIndex::P1] = Fp::new((sha_phase - 68 + 4) as u32);
             }
 
             if !self.next_fini(1)? {

@@ -61,15 +61,7 @@ pub const HEAP: Region = Region::new(0x00A0_0000, mb(20));
 pub const INPUT: Region = Region::new(0x01E0_0000, mb(1));
 pub const GPIO: Region = Region::new(0x01F0_0000, mb(1));
 pub const PROG: Region = Region::new(0x0200_0000, mb(10));
-#[cfg(not(feature = "pure-prove"))]
 pub const SHA: Region = Region::new(0x02A0_0000, mb(1));
-#[cfg(feature = "pure-prove")]
-// This HACK will cause the SHA accelerator to be skipped.
-// This is intended as a temporary workaround for bugs in the SHA circuit.
-// The hash will still be computed on the host via a GPIO signal,
-// but the polynomial constraints will not be applied to the ZKP.
-// *DO NOT USE IN PRODUCTION*
-pub const SHA: Region = Region::new(0x02A0_0004, mb(1));
 pub const WOM: Region = Region::new(0x02B0_0000, mb(21));
 pub const OUTPUT: Region = Region::new(0x02B0_0000, mb(20));
 pub const COMMIT: Region = Region::new(0x03F0_0000, mb(1));
