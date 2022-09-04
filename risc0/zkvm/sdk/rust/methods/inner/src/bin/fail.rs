@@ -13,10 +13,11 @@
 // limitations under the License.
 
 #![no_main]
-#![cfg_attr(not(feature = "std"), no_std)]
-#![allow(non_snake_case)]
+#![no_std]
+#![feature(alloc_error_handler)]
 
 risc0_zkvm_guest::entry!(main);
+risc0_zkvm_guest::standalone_handlers!();
 
 pub fn main() {
     panic!("Failure");
