@@ -17,6 +17,7 @@
 /// \file
 /// Defines the core finite field data type, Fp, and some free functions on the type.
 
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 
