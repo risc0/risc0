@@ -16,6 +16,7 @@
 #include "fp.h"
 
 #include <cstdint>
+#include <stdexcept>
 
 using namespace risc0;
 
