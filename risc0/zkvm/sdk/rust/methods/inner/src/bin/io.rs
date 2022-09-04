@@ -13,12 +13,13 @@
 // limitations under the License.
 
 #![no_main]
-#![cfg_attr(not(feature = "std"), no_std)]
-#![allow(non_snake_case)]
+#![no_std]
+#![feature(alloc_error_handler)]
 
 use risc0_zkvm_guest::env;
 
 risc0_zkvm_guest::entry!(main);
+risc0_zkvm_guest::standalone_handlers!();
 
 pub fn main() {
     let count: u32 = env::read();

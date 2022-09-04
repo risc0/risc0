@@ -17,7 +17,7 @@ pub mod exec;
 
 use std::io::Write;
 
-use anyhow::Result;
+use anyhow::{bail, Result};
 use risc0_zkp::{
     core::sha::default_implementation,
     hal::{cpu::CpuHal, EvalCheck, Hal},
@@ -120,34 +120,35 @@ impl<'a> ProverImpl<'a> {
 }
 
 impl<'a> exec::IoHandler for ProverImpl<'a> {
-    fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Vec<u8> {
+    fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>> {
         if let Some(cb) = self.opts.sendrecv_callbacks.get(&channel) {
-            return cb(channel, buf);
+            return Ok(cb(channel, buf));
         }
         match channel {
             SENDRECV_CHANNEL_INITIAL_INPUT => {
                 log::debug!("SENDRECV_CHANNEL_INITIAL_INPUT: {}", buf.len());
-                self.input.clone()
+                Ok(self.input.clone())
             }
             SENDRECV_CHANNEL_STDOUT => {
                 log::debug!("SENDRECV_CHANNEL_STDOUT: {}", buf.len());
                 self.output.extend(buf);
-                Vec::new()
+                Ok(Vec::new())
             }
             SENDRECV_CHANNEL_STDERR => {
                 log::debug!("SENDRECV_CHANNEL_STDERR: {}", buf.len());
                 std::io::stderr().lock().write_all(buf).unwrap();
-                Vec::new()
+                Ok(Vec::new())
             }
-            _ => panic!("Unknown channel: {channel}"),
+            _ => bail!("Unknown channel: {channel}"),
         }
     }
 
-    fn on_commit(&mut self, buf: &[u32]) {
+    fn on_commit(&mut self, buf: &[u32]) -> Result<()> {
         self.commit.extend_from_slice(buf);
+        Ok(())
     }
 
-    fn on_fault(&mut self, msg: &str) {
-        panic!("{}", msg);
+    fn on_fault(&mut self, msg: &str) -> Result<()> {
+        bail!("{}", msg)
     }
 }

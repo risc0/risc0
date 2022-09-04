@@ -15,13 +15,12 @@
 #![allow(unused)]
 #![deny(missing_docs)]
 #![doc = include_str!("../README.md")]
-#![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(target_arch = "riscv32", feature(alloc_error_handler))]
-#![cfg_attr(target_arch = "riscv32", feature(new_uninit))]
+#![cfg_attr(not(test), no_std)]
 
-extern crate alloc as alloc_crate;
+pub extern crate alloc as alloc_crate;
+// Allow our generated macros to reference alloc_crate.
+pub use alloc_crate as _alloc_crate;
 
-#[cfg(not(feature = "std"))]
 mod alloc;
 
 /// Functions for interacting with the host environment.
@@ -35,26 +34,55 @@ pub mod sha;
 #[cfg(feature = "pure-prove")]
 pub mod sha_insecure;
 
-use core::{arch::asm, mem, panic::PanicInfo, ptr};
+use core::{arch::asm, mem, ptr};
 
 extern "C" {
     fn _fault() -> !;
 }
 
-#[cfg(all(target_arch = "riscv32", not(feature = "std")))]
-#[panic_handler]
-unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
+/// Aborts the guest with the given message.  This message should
+/// include a trailing \0.
+pub unsafe fn _fail(msg: &str) -> ! {
     use risc0_zkvm_platform::io::GPIO_FAULT;
-
-    let msg = alloc_crate::format!("{}\0", panic_info);
     let ptr = msg.as_ptr();
     memory_barrier(ptr);
+
     // A compliant host should fault when it receives this descriptor.
-    GPIO_FAULT.as_ptr().write_volatile(ptr);
+    unsafe { GPIO_FAULT.as_ptr().write_volatile(ptr) }
 
     // As a fallback for uncompliant hosts, force an unaligned write, which causes a
     // fault within the Risc0 VM.
-    _fault()
+    unsafe {
+        _fault();
+    }
+
+    unreachable!();
+}
+
+/// This defines standalone (no_std) panic and alloc error handlers in
+/// a guest method, for guest methods that do not want to use the
+/// standard library.
+///
+/// Guest methods will also need to specify these at the beginning of the file:
+///
+/// #![no_std]
+/// #![feature(alloc_error_handler)]
+
+#[macro_export]
+macro_rules! standalone_handlers {
+    () => {
+        #[panic_handler]
+        unsafe fn panic_fault(panic_info: &::core::panic::PanicInfo) -> ! {
+            ::risc0_zkvm_guest::_fail(&::risc0_zkvm_guest::_alloc_crate::format!(
+                "{}\0", panic_info
+            ))
+        }
+
+        #[alloc_error_handler]
+        unsafe fn alloc_fault(_layout: ::core::alloc::Layout) -> ! {
+            ::risc0_zkvm_guest::_fail("Memory allocation failure")
+        }
+    };
 }
 
 /// Used for defining a main entrypoint.
@@ -62,7 +90,7 @@ unsafe fn panic_fault(panic_info: &PanicInfo<'static>) -> ! {
 /// # Example
 ///
 /// ```
-/// risc0_zkvm::guest::entry!(main);
+/// risc0_zkvm_guest::entry!(main);
 ///
 /// pub fn main() { }
 /// ```

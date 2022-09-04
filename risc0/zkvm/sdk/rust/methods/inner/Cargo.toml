@@ -8,13 +8,16 @@ edition = "2021"
 [dependencies]
 bytemuck = "1.12"
 risc0-zkp = { version = "0.11", path = "../../../../../zkp/rust", default-features = false }
-risc0-zkvm-guest = { version = "0.11", path = "../../guest", default-features = false }
+risc0-zkvm = { version = "0.11", path = "../..", default-features = false, features = ["pure-prove", "verify"] }
+risc0-zkvm-circuit = { version = "0.11", path = "../../circuit", default-features = false }
+risc0-zkvm-guest = { version = "0.11", path = "../../guest", default-features = false, features = ["pure-prove"] }
 risc0-zkvm-methods = { version = "0.1", path = "..", default-features = false }
+risc0-zkvm-platform = { version = "0.11", path = "../../platform" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
 [profile.release]
 lto = true
-opt-level = "z"
+opt-level = 3
 
 [build-dependencies]
 risc0-build = { version = "0.11", path = "../../build" }
@@ -23,9 +26,7 @@ risc0-build = { version = "0.11", path = "../../build" }
 release = false
 
 [features]
-default = ["std"]
-# Run rust-based prover instead of FFI-based prover.
-pure-prove = ["risc0-zkvm-guest/pure-prove"]
-std = ["risc0-zkvm-guest/std"]
+default = []
 test_feature1 = []
 test_feature2 = []
+pure-prove = []
