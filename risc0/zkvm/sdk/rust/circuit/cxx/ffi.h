@@ -31,9 +31,9 @@ struct risc0_error {
   risc0_string* msg;
 };
 
-extern "C" const char* risc0_string_ptr(risc0_string* str);
+extern "C" const char* risc0_circuit_string_ptr(risc0_string* str);
 
-extern "C" void risc0_string_free(risc0_string* str);
+extern "C" void risc0_circuit_string_free(risc0_string* str);
 
 template <typename T, typename F> T ffi_wrap(risc0_error* err, T val, F fn) {
   try {

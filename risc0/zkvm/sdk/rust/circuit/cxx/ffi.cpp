@@ -20,11 +20,11 @@
 
 using namespace risc0;
 
-extern "C" const char* risc0_string_ptr(risc0_string* str) {
+extern "C" const char* risc0_circuit_string_ptr(risc0_string* str) {
   return str->str.c_str();
 }
 
-extern "C" void risc0_string_free(risc0_string* str) {
+extern "C" void risc0_circuit_string_free(risc0_string* str) {
   delete str;
 }
 

@@ -51,9 +51,9 @@ impl Default for RawError {
 }
 
 extern "C" {
-    pub(crate) fn risc0_string_ptr(str: *const RawString) -> *const c_char;
+    pub(crate) fn risc0_circuit_string_ptr(str: *const RawString) -> *const c_char;
 
-    pub(crate) fn risc0_string_free(str: *const RawString);
+    pub(crate) fn risc0_circuit_string_free(str: *const RawString);
 
     pub(crate) fn risc0_circuit_rv32im_step_accum(
         err: *mut RawError,
@@ -169,9 +169,9 @@ where
         Ok(result)
     } else {
         let what = unsafe {
-            let str = risc0_string_ptr(err.msg);
+            let str = risc0_circuit_string_ptr(err.msg);
             let msg = CStr::from_ptr(str).to_str().unwrap().to_string();
-            risc0_string_free(err.msg);
+            risc0_circuit_string_free(err.msg);
             msg
         };
         Err(anyhow!(what))
