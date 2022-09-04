@@ -3,6 +3,7 @@
 #include "ffi.h"
 #include "fp.h"
 
+#include <stdexcept>
 #include <vector>
 
 // clang-format off
