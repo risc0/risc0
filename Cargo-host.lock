@@ -22,9 +22,9 @@ dependencies = [
 
 [[package]]
 name = "aho-corasick"
-version = "0.7.18"
+version = "0.7.19"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1e37cfd5e7657ada45f742d6e99ca5788580b5c529dc78faf11ece6dc702656f"
+checksum = "b4f55bd91a0978cbfd91c457a164bab8b4001c833b7f323132c0a4e1922dd44e"
 dependencies = [
  "memchr",
 ]
@@ -258,9 +258,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "3.2.19"
+version = "3.2.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68d43934757334b5c0519ff882e1ab9647ac0258b47c24c4f490d78e42697fd5"
+checksum = "23b71c3ce99b7611011217b366d923f1d0a7e07a92bb2dbf1e84508c673ca3bd"
 dependencies = [
  "atty",
  "bitflags",
@@ -476,9 +476,9 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.74"
+version = "1.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1d32d767d2d7d8126dc126b959f5bb3ddb07f7f5c4c21351983444c9826786b1"
+checksum = "8b7df2292959b7e22a5cb39d37b7e72b2c748b12f956cc409b529fddcdc8857b"
 dependencies = [
  "cc",
  "cxxbridge-flags",
@@ -488,9 +488,9 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.74"
+version = "1.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5326718a190b4a42e517ab8471c286cb1b6310a631672d56dc0e61fa044daee4"
+checksum = "0806e5c64f74bd64b94d857b1c28cc3d493579a65f5f31e7d3451706d4025405"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -503,15 +503,15 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.74"
+version = "1.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53253a86460ad0d1f851f49ab57b45bfb5cfddf558ff714994fb599a64f0fc7a"
+checksum = "d2069b1573efd6e5901004e8fdca2e28bc6f47f86dc24da81182851e71cf3208"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.74"
+version = "1.0.75"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e0e3dabc3f3f2c071a64cb39066234442bc0c15c7dbb64762e228cf0431589f"
+checksum = "d980827d1ec28ea6e0db545fceaa611eb8e43f70eff8c1c33cc2c96ffa0f0476"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1154,9 +1154,9 @@ dependencies = [
 
 [[package]]
 name = "once_cell"
-version = "1.13.1"
+version = "1.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "074864da206b4973b84eb91683020dbefd6a8c3f0f38e054d93954e891935e4e"
+checksum = "2f7254b99e31cad77da24b08ebf628882739a608578bb1bcdfc1f9c21260d7c0"
 
 [[package]]
 name = "oorandom"
@@ -1561,7 +1561,7 @@ dependencies = [
 name = "risc0-make-id"
 version = "0.11.1"
 dependencies = [
- "clap 3.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clap 3.2.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "risc0-zkvm",
 ]
 
@@ -1573,7 +1573,7 @@ dependencies = [
  "assert_cmd",
  "assert_fs",
  "bytemuck",
- "clap 3.2.19 (registry+https://github.com/rust-lang/crates.io-index)",
+ "clap 3.2.20 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger",
  "risc0-zkvm",
  "risc0-zkvm-methods",
@@ -1639,7 +1639,9 @@ name = "risc0-zkvm-circuit"
 version = "0.11.1"
 dependencies = [
  "anyhow",
+ "cc",
  "env_logger",
+ "glob",
  "log",
  "risc0-zkp",
 ]
@@ -1860,9 +1862,9 @@ dependencies = [
 
 [[package]]
 name = "sha1"
-version = "0.10.2"
+version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5cf2781a4ca844dd4f9b608a1791eea19830df0ad3cdd9988cd05f1c66ccb63a"
+checksum = "006769ba83e921b3085caa8334186b00cf92b4cb1a6cf4632fbccc8eff5c7549"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -1871,9 +1873,9 @@ dependencies = [
 
 [[package]]
 name = "sha2"
-version = "0.10.3"
+version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "899bf02746a2c92bf1053d9327dadb252b01af1f81f90cdb902411f518bc7215"
+checksum = "cf9db03534dff993187064c4e0c05a5708d2a9728ace9a8959b77bedf415dac5"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -2047,9 +2049,9 @@ checksum = "cda74da7e1a664f795bb1f8a87ec406fb89a02522cf6e50620d016add6dbbf5c"
 
 [[package]]
 name = "tokio"
-version = "1.20.1"
+version = "1.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7a8325f63a7d4774dd041e363b2409ed1c5cbbd0f867795e661df066b2b0a581"
+checksum = "89797afd69d206ccd11fb0ea560a44bbb87731d020670e79416d442919257d42"
 dependencies = [
  "autocfg",
  "bytes",

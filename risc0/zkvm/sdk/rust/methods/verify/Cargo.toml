@@ -9,7 +9,7 @@ edition = "2021"
 bytemuck = "1.11"
 risc0-zkp = { version = "0.11", path = "../../../../../zkp/rust", default-features = false }
 risc0-zkvm = { version = "0.11", path = "../..", default-features = false, features = ["pure-prove", "verify"] }
-risc0-zkvm-circuit = { version = "0.11", path = "../../circuit" }
+risc0-zkvm-circuit = { version = "0.11", path = "../../circuit", default-features = false }
 risc0-zkvm-guest = { version = "0.11", path = "../../guest", default-features = false, features = ["pure-prove"] }
 risc0-zkvm-platform = { version = "0.11", path = "../../platform", features = ["pure-prove"] }
 

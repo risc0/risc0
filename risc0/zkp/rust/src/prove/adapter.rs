@@ -59,7 +59,7 @@ impl<'a, C: CircuitDef<CS>, CS: CustomStep> Circuit for ProveAdapter<'a, C, CS> 
     fn accumulate<S: Sha>(&mut self, iop: &mut WriteIOP<S>) {
         // Make the mixing values
         self.mix
-            .resize_with(self.exec.circuit.mix_size(), || Fp::random(&mut iop.rng));
+            .resize_with(C::MIX_SIZE, || Fp::random(&mut iop.rng));
         // Make and compute accum data
         let accum_size = self
             .exec

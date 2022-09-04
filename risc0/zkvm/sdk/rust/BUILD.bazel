@@ -24,7 +24,6 @@ risc0_rust_library_pair(
     host_deps = [
         "//risc0/zkp/rust:zkp_host",
         "//risc0/zkvm/sdk/cpp/host",
-        "//risc0/zkvm/sdk/rust/circuit",
         "//risc0/zkvm/sdk/rust/platform:platform_host",
         "@crates_host//:anyhow",
         "@crates_host//:bytemuck",
@@ -38,11 +37,8 @@ risc0_rust_library_pair(
     ],
     host_features = [
         "bazel",
-        "circuit",
         "host",
-        "prove",
         "std",
-        "verify",
     ],
     host_proc_macro_deps = ["@crates_host//:ctor"],
     rustc_flags = ["-Coverflow_checks=on"],

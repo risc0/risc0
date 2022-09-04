@@ -6,7 +6,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bytemuck = "1.11"
+bytemuck = "1.12"
 risc0-zkp = { version = "0.11", path = "../../../../../zkp/rust", default-features = false }
 risc0-zkvm-guest = { version = "0.11", path = "../../guest", default-features = false }
 risc0-zkvm-methods = { version = "0.1", path = "..", default-features = false }

@@ -10,11 +10,16 @@ repository = "https://github.com/risc0/risc0/"
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 log = "0.4"
-risc0-zkp = { version = "0.11", path = "../../../../zkp/rust", default-features = false }
+risc0-zkp = { version = "0.11", path = "../../../../zkp/rust", default-features = false, features = ["verify"] }
 
 [dev-dependencies]
 env_logger = "0.9"
 
-# This is required to prevent a stack overflow in rustc
-[profile.dev]
-debug = false
+[build-dependencies]
+cc = { version = "1.0", features = ["parallel"] }
+glob = "0.3"
+
+[features]
+default = ["cpp"]
+cpp = ["std"]
+std = []

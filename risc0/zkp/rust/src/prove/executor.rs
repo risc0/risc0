@@ -48,7 +48,7 @@ impl<C: 'static + CircuitDef<S>, S: CustomStep> Executor<C, S> {
         let code_size = taps.group_size(RegisterGroup::Code);
         let data_size = taps.group_size(RegisterGroup::Data);
         let steps = 1 << po2;
-        let output_size = circuit.output_size();
+        let output_size = C::OUTPUT_SIZE;
         debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");
         Executor {
             circuit,

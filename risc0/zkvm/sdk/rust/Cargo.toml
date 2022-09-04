@@ -9,11 +9,11 @@ repository = "https://github.com/risc0/risc0/"
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-bytemuck = "1.9"
+bytemuck = "1.12"
 lazy-regex = { version = "2.3", optional = true }
 lazy_static = { version = "1.4", features = ["spin_no_std"] }
 risc0-zkp = { version = "0.11", path = "../../../zkp/rust", default-features = false }
-risc0-zkvm-circuit = { version = "0.11", path = "circuit", optional = true }
+risc0-zkvm-circuit = { version = "0.11", path = "circuit", default-features = false }
 risc0-zkvm-platform = { version = "0.11", path = "platform" }
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 
@@ -40,11 +40,11 @@ risc0-zkvm-methods = { path = "methods" }
 test-log = "0.2"
 
 [features]
-circuit = ["dep:risc0-zkvm-circuit"]
+circuit = []
 default = ["host", "prove", "std", "verify"]
 doc = ["std"]
 host = ["risc0-zkp/host"]
-prove = ["circuit", "dep:lazy-regex", "risc0-zkp/prove"]
+prove = ["circuit", "dep:lazy-regex", "risc0-zkp/prove", "risc0-zkvm-circuit/cpp"]
 std = ["risc0-zkp/std", "serde/std"]
 verify = ["circuit", "risc0-zkp/verify"]
 # Run rust-based prover instead of FFI-based prover.
