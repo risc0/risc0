@@ -3,16 +3,16 @@
 #include "ffi.h"
 #include "fp.h"
 
+#include <array>
 #include <stdexcept>
-#include <vector>
 
 // clang-format off
 namespace risc0::circuit::rv32im {
 
 Fp step_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
-  std::vector<Fp> host_args;
-  std::vector<Fp> host_outs;
+  std::array<Fp, 32> host_args;
+  std::array<Fp, 5> host_outs;
   Fp x0(2);
   Fp x1(11);
   Fp x2(2013265910);

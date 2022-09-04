@@ -3,16 +3,16 @@
 #include "ffi.h"
 #include "fp.h"
 
+#include <array>
 #include <stdexcept>
-#include <vector>
 
 // clang-format off
 namespace risc0::circuit::rv32im {
 
 Fp step_verify(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
-  std::vector<Fp> host_args;
-  std::vector<Fp> host_outs;
+  std::array<Fp, 32> host_args;
+  std::array<Fp, 5> host_outs;
   Fp x0(2);
   Fp x1(3);
   Fp x2(4);
@@ -43,8 +43,6 @@ Fp step_verify(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args
   Fp x27 = x26 + x20;
   if (x27 != 0) {
     {
-      host_args.clear();
-      host_outs.resize(5);
       host(ctx, "memCheck", "", host_args.data(), 0, host_outs.data(), 5);
       Fp x28 = host_outs[0];
       Fp x29 = host_outs[1];
