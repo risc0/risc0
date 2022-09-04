@@ -57,9 +57,3 @@ static HEAP: BumpPointerAlloc = BumpPointerAlloc {
     head: UnsafeCell::new(memory::HEAP.start()),
     end: memory::HEAP.end(),
 };
-
-#[cfg(target_arch = "riscv32")]
-#[alloc_error_handler]
-unsafe fn alloc_fault(_layout: Layout) -> ! {
-    _fault()
-}

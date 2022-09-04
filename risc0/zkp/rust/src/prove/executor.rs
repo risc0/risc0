@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cmp::max;
+use core::cmp::max;
 
 use anyhow::{bail, Result};
 use log::debug;
