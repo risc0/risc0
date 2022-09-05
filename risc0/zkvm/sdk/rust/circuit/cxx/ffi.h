@@ -21,7 +21,7 @@
 #include <string>
 
 using Callback =
-    void(void*, const char*, const char*, risc0::Fp*, size_t, risc0::Fp*, size_t, bool&);
+    bool(void*, const char*, const char*, const risc0::Fp*, size_t, risc0::Fp*, size_t);
 
 struct risc0_string {
   std::string str;
@@ -47,7 +47,7 @@ template <typename T, typename F> T ffi_wrap(risc0_error* err, T val, F fn) {
 
 namespace risc0::circuit::rv32im {
 
-using HostBridge = void(void*, const char*, const char*, Fp*, size_t, Fp*, size_t);
+using HostBridge = void(void*, const char*, const char*, const Fp*, size_t, Fp*, size_t);
 
 Fp step_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
 Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);

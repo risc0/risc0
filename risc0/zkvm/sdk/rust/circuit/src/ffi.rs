@@ -32,8 +32,7 @@ type Callback = unsafe extern "C" fn(
     args_len: usize,
     outs_ptr: *mut Fp,
     outs_len: usize,
-    ok: &mut bool,
-);
+) -> bool;
 
 pub(crate) enum RawString {}
 
@@ -88,7 +87,7 @@ extern "C" {
 
 pub fn get_trampoline<F>(_closure: &F) -> Callback
 where
-    F: FnMut(&str, &str, &[Fp], &mut [Fp], &mut bool),
+    F: FnMut(&str, &str, &[Fp], &mut [Fp]) -> bool,
 {
     trampoline::<F>
 }
@@ -101,9 +100,9 @@ extern "C" fn trampoline<F>(
     args_len: usize,
     outs_ptr: *mut Fp,
     outs_len: usize,
-    ok: &mut bool,
-) where
-    F: FnMut(&str, &str, &[Fp], &mut [Fp], &mut bool),
+) -> bool
+where
+    F: FnMut(&str, &str, &[Fp], &mut [Fp]) -> bool,
 {
     unsafe {
         let name = CStr::from_ptr(name).to_str().unwrap();
@@ -111,7 +110,7 @@ extern "C" fn trampoline<F>(
         let args = slice::from_raw_parts(args_ptr, args_len);
         let outs = slice::from_raw_parts_mut(outs_ptr, outs_len);
         let callback = &mut *(ctx as *mut F);
-        callback(name, extra, args, outs, ok);
+        callback(name, extra, args, outs)
     }
 }
 
@@ -126,16 +125,15 @@ where
     F: FnOnce(*mut RawError, *mut c_void, Callback, usize, usize, *const *mut Fp, usize) -> Fp,
 {
     let mut last_err = None;
-    let mut call =
-        |name: &str, extra: &str, args: &[Fp], outs: &mut [Fp], ok: &mut bool| match custom
-            .call(name, extra, args, outs)
-        {
-            Ok(()) => *ok = true,
-            Err(err) => {
-                last_err = Some(err);
-                *ok = false
-            }
-        };
+    let mut call = |name: &str, extra: &str, args: &[Fp], outs: &mut [Fp]| match custom
+        .call(name, extra, args, outs)
+    {
+        Ok(()) => true,
+        Err(err) => {
+            last_err = Some(err);
+            false
+        }
+    };
     let trampoline = get_trampoline(&call);
     let mut err = RawError::default();
     let args: Vec<*mut Fp> = args.iter_mut().map(|x| (*x).as_mut_ptr()).collect();

@@ -36,14 +36,12 @@ struct BridgeContext {
 void bridgeCallback(void* ctx,
                     const char* name,
                     const char* extra,
-                    Fp* args_ptr,
+                    const Fp* args_ptr,
                     size_t args_len,
                     Fp* outs_ptr,
                     size_t outs_len) {
-  bool ok = false;
   BridgeContext* bridgeCtx = reinterpret_cast<BridgeContext*>(ctx);
-  bridgeCtx->callback(bridgeCtx->ctx, name, extra, args_ptr, args_len, outs_ptr, outs_len, ok);
-  if (!ok) {
+  if (!bridgeCtx->callback(bridgeCtx->ctx, name, extra, args_ptr, args_len, outs_ptr, outs_len)) {
     throw std::runtime_error("Host callback failure");
   }
 }
