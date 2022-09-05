@@ -67,9 +67,16 @@ mod test {
     struct CustomStepMock {}
 
     impl CustomStep for CustomStepMock {
-        fn call(&mut self, name: &str, extra: &str, args: &[Fp]) -> anyhow::Result<Vec<Fp>> {
+        fn call(
+            &mut self,
+            name: &str,
+            extra: &str,
+            args: &[Fp],
+            outs: &mut [Fp],
+        ) -> anyhow::Result<()> {
             println!("name: {name}, extra: {extra}, args: {args:?}");
-            Ok(vec![Fp::new(2)])
+            outs[0] = Fp::new(2);
+            Ok(())
         }
     }
 
