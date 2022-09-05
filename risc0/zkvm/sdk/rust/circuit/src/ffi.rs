@@ -30,9 +30,9 @@ type Callback = unsafe extern "C" fn(
     extra: *const c_char,
     args_ptr: *const Fp,
     args_len: usize,
+    outs_ptr: *mut Fp,
+    outs_len: usize,
     ok: &mut bool,
-    result_ptr: *mut Fp,
-    result_len: usize,
 );
 
 pub(crate) enum RawString {}
@@ -88,7 +88,7 @@ extern "C" {
 
 pub fn get_trampoline<F>(_closure: &F) -> Callback
 where
-    F: FnMut(&str, &str, &[Fp], &mut bool, &mut [Fp]),
+    F: FnMut(&str, &str, &[Fp], &mut [Fp], &mut bool),
 {
     trampoline::<F>
 }
@@ -99,43 +99,19 @@ extern "C" fn trampoline<F>(
     extra: *const c_char,
     args_ptr: *const Fp,
     args_len: usize,
+    outs_ptr: *mut Fp,
+    outs_len: usize,
     ok: &mut bool,
-    result_ptr: *mut Fp,
-    result_len: usize,
 ) where
-    F: FnMut(&str, &str, &[Fp], &mut bool, &mut [Fp]),
+    F: FnMut(&str, &str, &[Fp], &mut [Fp], &mut bool),
 {
     unsafe {
         let name = CStr::from_ptr(name).to_str().unwrap();
         let extra = CStr::from_ptr(extra).to_str().unwrap();
         let args = slice::from_raw_parts(args_ptr, args_len);
-        let result = slice::from_raw_parts_mut(result_ptr, result_len);
+        let outs = slice::from_raw_parts_mut(outs_ptr, outs_len);
         let callback = &mut *(ctx as *mut F);
-        callback(name, extra, args, ok, result);
-    }
-}
-
-pub(crate) struct CustomBridge<'a, S: CustomStep> {
-    custom: &'a mut S,
-}
-
-impl<'a, S: CustomStep> CustomBridge<'a, S> {
-    pub fn new(custom: &'a mut S) -> Self {
-        Self { custom }
-    }
-
-    pub fn call(&mut self, name: &str, extra: &str, args: &[Fp], ok: &mut bool, result: &mut [Fp]) {
-        match self.custom.call(name, extra, args) {
-            Ok(value) => {
-                *ok = true;
-                for i in 0..value.len() {
-                    result[i] = value[i];
-                }
-            }
-            Err(_err) => {
-                *ok = false;
-            }
-        };
+        callback(name, extra, args, outs, ok);
     }
 }
 
@@ -149,10 +125,17 @@ where
     S: CustomStep,
     F: FnOnce(*mut RawError, *mut c_void, Callback, usize, usize, *const *mut Fp, usize) -> Fp,
 {
-    let mut bridge = CustomBridge::new(custom);
-    let mut call = |name: &str, extra: &str, args: &[Fp], ok: &mut bool, result: &mut [Fp]| {
-        bridge.call(name, extra, args, ok, result);
-    };
+    let mut last_err = None;
+    let mut call =
+        |name: &str, extra: &str, args: &[Fp], outs: &mut [Fp], ok: &mut bool| match custom
+            .call(name, extra, args, outs)
+        {
+            Ok(()) => *ok = true,
+            Err(err) => {
+                last_err = Some(err);
+                *ok = false
+            }
+        };
     let trampoline = get_trampoline(&call);
     let mut err = RawError::default();
     let args: Vec<*mut Fp> = args.iter_mut().map(|x| (*x).as_mut_ptr()).collect();
@@ -165,6 +148,9 @@ where
         args.as_ptr(),
         args.len(),
     );
+    if let Some(err) = last_err {
+        return Err(err);
+    }
     if err.msg.is_null() {
         Ok(result)
     } else {

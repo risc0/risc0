@@ -21,7 +21,7 @@
 #include <string>
 
 using Callback =
-    void(void*, const char*, const char*, risc0::Fp*, size_t, bool&, risc0::Fp*, size_t);
+    void(void*, const char*, const char*, risc0::Fp*, size_t, risc0::Fp*, size_t, bool&);
 
 struct risc0_string {
   std::string str;

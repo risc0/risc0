@@ -29,7 +29,7 @@ pub struct MixState {
 }
 
 pub trait CustomStep {
-    fn call(&mut self, name: &str, extra: &str, args: &[Fp]) -> Result<Vec<Fp>>;
+    fn call(&mut self, name: &str, extra: &str, args: &[Fp], outs: &mut [Fp]) -> Result<()>;
 }
 
 pub struct CircuitStepContext {
