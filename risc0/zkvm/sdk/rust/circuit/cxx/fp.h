@@ -55,19 +55,19 @@ private:
   // doing inline assembly or some crazy CUDA stuff.
 
   // Add two numbers
-  static constexpr uint32_t add(uint32_t a, uint32_t b) {
+  static constexpr inline uint32_t add(uint32_t a, uint32_t b) {
     uint32_t r = a + b;
     return (r >= P ? r - P : r);
   }
 
   // Subtract two numbers
-  static constexpr uint32_t sub(uint32_t a, uint32_t b) {
+  static constexpr inline uint32_t sub(uint32_t a, uint32_t b) {
     uint32_t r = a - b;
     return (r > P ? r + P : r);
   }
 
   // Multiply two numbers
-  static constexpr uint32_t mul(uint32_t a, uint32_t b) {
+  static constexpr inline uint32_t mul(uint32_t a, uint32_t b) {
     uint64_t o64 = uint64_t(a) * uint64_t(b);
     uint32_t low = -uint32_t(o64);
     uint32_t red = M * low;
@@ -77,87 +77,87 @@ private:
   }
 
   // Encode / Decode
-  static constexpr uint32_t encode(uint32_t a) { return mul(R2, a); }
-  static constexpr uint32_t decode(uint32_t a) { return mul(1, a); }
+  static constexpr inline uint32_t encode(uint32_t a) { return mul(R2, a); }
+  static constexpr inline uint32_t decode(uint32_t a) { return mul(1, a); }
 
   // A private constructor that take the 'interal' form.
-  constexpr Fp(uint32_t val, bool /*ignore*/) : val(val) {}
+  constexpr inline Fp(uint32_t val, bool /*ignore*/) : val(val) {}
 
 public:
   /// Default constructor, sets value to 0.
-  constexpr Fp() : val(0) {}
+  constexpr inline Fp() : val(0) {}
 
   /// Construct an FP from a uint32_t, wrap if needed
-  constexpr Fp(uint32_t val) : val(encode(val)) {}
+  constexpr inline Fp(uint32_t val) : val(encode(val)) {}
 
   /// Convert to a uint32_t
-  constexpr uint32_t asUInt32() const { return decode(val); }
+  constexpr inline uint32_t asUInt32() const { return decode(val); }
 
   /// Return the underlying value
-  constexpr uint32_t asRaw() const { return val; }
+  constexpr inline uint32_t asRaw() const { return val; }
 
   /// Get the largest value, basically P - 1.
-  static constexpr Fp maxVal() { return P - 1; }
+  static constexpr inline Fp maxVal() { return P - 1; }
 
   /// Get an 'invalid' Fp value
-  static constexpr Fp invalid() { return Fp(0xfffffffful, true); }
+  static constexpr inline Fp invalid() { return Fp(0xfffffffful, true); }
 
   // Implement all the various overloads
-  constexpr Fp operator+(Fp rhs) const { return Fp(add(val, rhs.val), true); }
+  constexpr inline Fp operator+(Fp rhs) const { return Fp(add(val, rhs.val), true); }
 
-  constexpr Fp operator-() const { return Fp(sub(0, val), true); }
+  constexpr inline Fp operator-() const { return Fp(sub(0, val), true); }
 
-  constexpr Fp operator-(Fp rhs) const { return Fp(sub(val, rhs.val), true); }
+  constexpr inline Fp operator-(Fp rhs) const { return Fp(sub(val, rhs.val), true); }
 
-  constexpr Fp operator*(Fp rhs) const { return Fp(mul(val, rhs.val), true); }
+  constexpr inline Fp operator*(Fp rhs) const { return Fp(mul(val, rhs.val), true); }
 
-  constexpr Fp operator+=(Fp rhs) {
+  constexpr inline Fp operator+=(Fp rhs) {
     val = add(val, rhs.val);
     return *this;
   }
 
-  constexpr Fp operator-=(Fp rhs) {
+  constexpr inline Fp operator-=(Fp rhs) {
     val = sub(val, rhs.val);
     return *this;
   }
 
-  constexpr Fp operator*=(Fp rhs) {
+  constexpr inline Fp operator*=(Fp rhs) {
     val = mul(val, rhs.val);
     return *this;
   }
 
-  constexpr bool operator==(Fp rhs) const { return val == rhs.val; }
+  constexpr inline bool operator==(Fp rhs) const { return val == rhs.val; }
 
-  constexpr bool operator!=(Fp rhs) const { return val != rhs.val; }
+  constexpr inline bool operator!=(Fp rhs) const { return val != rhs.val; }
 
-  constexpr bool operator<(Fp rhs) const { return decode(val) < decode(rhs.val); }
+  constexpr inline bool operator<(Fp rhs) const { return decode(val) < decode(rhs.val); }
 
-  constexpr bool operator<=(Fp rhs) const { return decode(val) <= decode(rhs.val); }
+  constexpr inline bool operator<=(Fp rhs) const { return decode(val) <= decode(rhs.val); }
 
-  constexpr bool operator>(Fp rhs) const { return decode(val) > decode(rhs.val); }
+  constexpr inline bool operator>(Fp rhs) const { return decode(val) > decode(rhs.val); }
 
-  constexpr bool operator>=(Fp rhs) const { return decode(val) >= decode(rhs.val); }
+  constexpr inline bool operator>=(Fp rhs) const { return decode(val) >= decode(rhs.val); }
 
   // Post-inc/dec
-  constexpr Fp operator++(int) {
+  constexpr inline Fp operator++(int) {
     Fp r = *this;
     val = add(val, encode(1));
     return r;
   }
 
-  constexpr Fp operator--(int) {
+  constexpr inline Fp operator--(int) {
     Fp r = *this;
     val = sub(val, encode(1));
     return r;
   }
 
   // Pre-inc/dec
-  constexpr Fp operator++() {
+  constexpr inline Fp operator++() {
     val = add(val, encode(1));
     return *this;
   }
 
-  constexpr Fp operator--() {
+  constexpr inline Fp operator--() {
     val = sub(val, encode(1));
     return *this;
   }
