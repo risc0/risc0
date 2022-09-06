@@ -32,7 +32,7 @@ use crate::{
         rou::ROU_REV,
         sha::Sha,
     },
-    field::{Elem, Field},
+    field::{Elem, ExtElem, Field, RootsOfUnity},
     hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::{RegisterGroup, TapSet},
@@ -166,7 +166,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     debug!("checkGroup: {}", check_group.merkle.root());
 
     // Now pick a value for Z
-    let z = Fp4::random(&mut iop.rng);
+    let z = <H::Field as Field>::ExtElem::random(&mut iop.rng);
     // #ifdef CIRCUIT_DEBUG
     //   if (badZ != Fp4(0)) {
     //     Z = badZ;
@@ -176,7 +176,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     //   LOG(1, "Z = " << Z);
 
     // Get rev rou for size
-    let back_one = Fp4::from_u32(ROU_REV[po2 as usize]);
+    let back_one = <H::Field as Field>::ExtElem::from_subfield(&<H::Field as Field>::Elem::ROU_REV[po2 as usize]);
     let mut all_xs = Vec::new();
 
     // Do evaluations of all of the various polynomials at the appropriate points.
@@ -191,7 +191,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
             all_xs.push(x);
         }
         let which = hal.copy_u32_from(which.as_slice());
-        let xs = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(xs.as_slice()));
+        let xs = hal.copy_fp4_from(xs.as_slice());
         let out = hal.alloc_fp4(which.size());
         hal.batch_evaluate_any(&pg.coeffs, pg.count, &which, &xs, &out);
         out.view(|view| {
@@ -212,9 +212,10 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let mut pos = 0;
     let mut coeff_u = vec![Fp4::ZERO; eval_u.len()];
     for reg in taps.regs() {
+        // TODO: poly_interpolate should be refactorable
         poly_interpolate(
             &mut coeff_u[pos..],
-            &all_xs[pos..],
+            H::to_baby_bear_fp4_slice(&all_xs[pos..]),
             &eval_u[pos..],
             reg.size(),
         );
@@ -227,7 +228,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let xs = [z4; CHECK_SIZE];
     let out = hal.alloc_fp4(CHECK_SIZE);
     let which = hal.copy_u32_from(which.as_slice());
-    let xs = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(xs.as_slice()));
+    let xs = hal.copy_fp4_from(xs.as_slice());
     hal.batch_evaluate_any(&check_group.coeffs, CHECK_SIZE, &which, &xs, &out);
     out.view(|view| {
         coeff_u.extend(H::to_baby_bear_fp4_slice(view));
@@ -307,9 +308,10 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         for combo in 0..combo_count {
             for back in taps.get_combo(combo).slice() {
                 assert_eq!(
+                    // TODO: poly_divide should be refactorable
                     poly_divide(
                         &mut combos[combo * size..combo * size + size],
-                        z * back_one.pow((*back).into())
+                        H::to_baby_bear_fp4(z * back_one.pow((*back).into()))
                     ),
                     Fp4::ZERO
                 );
@@ -317,9 +319,10 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         }
         // Divide check polys by Z4
         assert_eq!(
+            // TODO: poly_divide should be refactorable
             poly_divide(
                 &mut combos[combo_count * size..combo_count * size + size],
-                z4
+                H::to_baby_bear_fp4(z4)
             ),
             Fp4::ZERO
         );
