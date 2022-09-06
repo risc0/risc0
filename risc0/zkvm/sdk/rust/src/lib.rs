@@ -38,6 +38,8 @@ extern crate alloc;
 pub mod core;
 #[cfg(feature = "prove")]
 pub mod elf;
+#[cfg(feature = "prove")]
+pub mod emu;
 #[cfg(feature = "host")]
 pub mod host;
 pub mod method_id;

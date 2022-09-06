@@ -16,6 +16,7 @@ risc0-zkp = { version = "0.11", path = "../../../zkp/rust", default-features = f
 risc0-zkvm-circuit = { version = "0.11", path = "circuit", optional = true }
 risc0-zkvm-platform = { version = "0.11", path = "platform" }
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+thiserror = "1.0"
 
 [dev-dependencies]
 criterion = "0.3"
