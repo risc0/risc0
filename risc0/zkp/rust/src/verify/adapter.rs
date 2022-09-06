@@ -47,7 +47,7 @@ impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
 
     pub fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
         // Read the outputs + size
-        self.out = Some(iop.read_pod_slice(self.circuit.output_size()));
+        self.out = Some(iop.read_pod_slice(C::OUTPUT_SIZE));
         self.po2 = match iop.read_u32s(1) {
             &[po2] => po2,
             _ => unreachable!(),
@@ -57,9 +57,7 @@ impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
 
     pub fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
         // Fill in accum mix
-        self.mix = (0..self.circuit.mix_size())
-            .map(|_| Fp::random(iop))
-            .collect();
+        self.mix = (0..C::MIX_SIZE).map(|_| Fp::random(iop)).collect();
     }
 
     pub fn po2(&self) -> u32 {

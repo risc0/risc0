@@ -14,7 +14,7 @@ harness = false
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
 array-init = { version = "2.0", optional = true }
-bytemuck = { version = "1.9", features = ["derive"] }
+bytemuck = { version = "1.12", features = ["derive"] }
 log = { version = "0.4", optional = true }
 ndarray = { version = "0.15", optional = true, features = ["rayon"] }
 paste = "1.0"

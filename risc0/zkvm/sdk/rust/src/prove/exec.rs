@@ -270,27 +270,38 @@ impl Ord for MemoryEvent {
 impl<'a, H: IoHandler> CircuitDef<MachineContext<'a, H>> for CircuitImpl {}
 
 impl<'a, H: IoHandler> CustomStep for MachineContext<'a, H> {
-    fn call(&mut self, name: &str, extra: &str, args: &[Fp]) -> Result<Vec<Fp>> {
+    fn call(&mut self, name: &str, extra: &str, args: &[Fp], outs: &mut [Fp]) -> Result<()> {
         match name {
             "divide32" => {
                 let ((x0, x1), (x2, x3)) = self.divide32((args[0], args[1]), (args[2], args[3]));
-                Ok(vec![x0, x1, x2, x3])
+                outs[0] = x0;
+                outs[1] = x1;
+                outs[2] = x2;
+                outs[3] = x3;
+                Ok(())
             }
             "log" => {
                 self.log(extra, args);
-                Ok(vec![])
+                Ok(())
             }
             "memCheck" => {
                 let (x0, x1, x2, x3, x4) = self.mem_check();
-                Ok(vec![x0, x1, x2, x3, x4])
+                outs[0] = x0;
+                outs[1] = x1;
+                outs[2] = x2;
+                outs[3] = x3;
+                outs[4] = x4;
+                Ok(())
             }
             "memRead" => {
                 let (x0, x1) = self.mem_read(args[0], args[1]);
-                Ok(vec![x0, x1])
+                outs[0] = x0;
+                outs[1] = x1;
+                Ok(())
             }
             "memWrite" => {
                 self.mem_write(args[0], args[1], (args[2], args[3]))?;
-                Ok(vec![])
+                Ok(())
             }
             _ => unreachable!(),
         }
@@ -811,14 +822,6 @@ impl<'a, H: IoHandler> RV32Executor<'a, H> {
     }
 
     pub fn run(&mut self) -> Result<()> {
-        load_code(self.elf.entry, &self.elf.image, |chunk, fini| {
-            self.executor.step(chunk, fini)
-        })?;
-        self.executor.finalize();
-        Ok(())
-    }
-
-    pub fn run_without_seal(&mut self) -> Result<()> {
         load_code(self.elf.entry, &self.elf.image, |chunk, fini| {
             self.executor.step(chunk, fini)
         })?;
