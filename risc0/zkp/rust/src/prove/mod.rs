@@ -32,7 +32,7 @@ use crate::{
         rou::ROU_REV,
         sha::Sha,
     },
-    field::Elem,
+    field::{Elem, Field},
     hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::{RegisterGroup, TapSet},
@@ -88,12 +88,12 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let size = 1 << po2;
 
     // Make code + data PolyGroups + commit them
-    let code_coeffs = make_coeffs(hal, circuit.get_code(), code_size);
+    let code_coeffs = make_coeffs(hal, H::from_baby_bear_fp_slice(circuit.get_code()), code_size);
     let code_group = PolyGroup::new(hal, &code_coeffs, code_size, size);
     code_group.merkle.commit(hal, &mut iop);
     debug!("codeGroup: {}", code_group.merkle.root());
 
-    let data_coeffs = make_coeffs(hal, circuit.get_data(), data_size);
+    let data_coeffs = make_coeffs(hal, H::from_baby_bear_fp_slice(circuit.get_data()), data_size);
     let data_group = PolyGroup::new(hal, &data_coeffs, data_size, size);
     data_group.merkle.commit(hal, &mut iop);
     debug!("dataGroup: {}", data_group.merkle.root());
@@ -103,7 +103,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     // Make the accum group + commit
     debug!("size = {size}, accumSize = {accum_size}");
     debug!("getAccum.size() = {}", circuit.get_accum().len());
-    let accum_coeffs = make_coeffs(hal, circuit.get_accum(), accum_size);
+    let accum_coeffs = make_coeffs(hal, H::from_baby_bear_fp_slice(circuit.get_accum()), accum_size);
     let accum_group = PolyGroup::new(hal, &accum_coeffs, accum_size, size);
     accum_group.merkle.commit(hal, &mut iop);
     debug!("accumGroup: {}", accum_group.merkle.root());
@@ -347,9 +347,9 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     proof
 }
 
-fn make_coeffs<H: Hal>(hal: &H, input: &[Fp], count: usize) -> H::BufferFp {
+fn make_coeffs<H: Hal>(hal: &H, input: &[<H::Field as Field>::Elem], count: usize) -> H::BufferFp {
     // Copy into accel buffer
-    let buf = hal.copy_fp_from(H::from_baby_bear_fp_slice(input));
+    let buf = hal.copy_fp_from(input);
     // Do interpolate
     hal.batch_interpolate_ntt(&buf, count);
     // Convert f(x) -> f(3x), which effective multiplies cofficent c_i by 3^i.
