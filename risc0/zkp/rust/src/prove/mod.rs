@@ -109,7 +109,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     debug!("accumGroup: {}", accum_group.merkle.root());
 
     // Set the poly mix value
-    let poly_mix = Fp4::random(&mut iop.rng);
+    let poly_mix = <<H as Hal>::Field as Field>::ExtElem::random(&mut iop.rng);
 
     // Now generate the check polynomial
     let domain = size * INV_RATE;
@@ -123,7 +123,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         &accum_group.evaluated,
         &mix,
         &out,
-        H::from_baby_bear_fp4(poly_mix),
+        poly_mix,
         po2 as usize,
         circuit.get_steps(),
     );
