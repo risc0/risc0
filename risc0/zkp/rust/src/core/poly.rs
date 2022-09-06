@@ -17,13 +17,13 @@
 use alloc::vec;
 
 use super::fp4::Fp4;
-use crate::field::Elem;
+use crate::field::{Elem, ExtElem};
 
 /// Evaluate a polynomial whose coefficients are in the extension field at a
 /// point.
-pub fn poly_eval(coeffs: &[Fp4], x: Fp4) -> Fp4 {
-    let mut mul = Fp4::ONE;
-    let mut tot = Fp4::ZERO;
+pub fn poly_eval<E: ExtElem>(coeffs: &[E], x: E) -> E {
+    let mut mul = E::ONE;
+    let mut tot = E::ZERO;
     for i in 0..coeffs.len() {
         tot += coeffs[i] * mul;
         mul *= x;
