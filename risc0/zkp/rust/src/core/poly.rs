@@ -16,8 +16,7 @@
 
 use alloc::vec;
 
-use super::fp4::Fp4;
-use crate::field::{Elem, ExtElem};
+use crate::field::ExtElem;
 
 /// Evaluate a polynomial whose coefficients are in the extension field at a
 /// point.

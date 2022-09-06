@@ -27,9 +27,7 @@ use log::debug;
 use crate::{
     core::{
         fp::Fp,
-        fp4::{Fp4, EXT_SIZE},
         poly::{poly_divide, poly_interpolate},
-        rou::ROU_REV,
         sha::Sha,
     },
     field::{Elem, ExtElem, Field, RootsOfUnity},
@@ -113,7 +111,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     // Now generate the check polynomial
     let domain = size * INV_RATE;
-    let check_poly = hal.alloc_fp(EXT_SIZE * domain);
+    let check_poly = hal.alloc_fp(<H::Field as Field>::ExtElem::EXT_SIZE * domain);
     let mix = hal.copy_fp_from(H::from_baby_bear_fp_slice(circuit.get_mix()));
     let out = hal.copy_fp_from(H::from_baby_bear_fp_slice(circuit.get_output()));
     eval.eval_check(
@@ -147,7 +145,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     // roots of unity (which are the only thing that and values get multiplied
     // by) are in Fp, Fp4 values act like simple vectors of Fp for the
     // purposes of interpolate/evaluate.
-    hal.batch_interpolate_ntt(&check_poly, EXT_SIZE);
+    hal.batch_interpolate_ntt(&check_poly, <H::Field as Field>::ExtElem::EXT_SIZE);
 
     // The next step is to convert the degree 4*n check polynomial into 4 degreen n
     // polynomials so that f(x) = g0(x^4) + g1(x^4) x + g2(x^4) x^2 + g3(x^4)
@@ -222,9 +220,9 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     }
 
     // Add in the coeffs of the check polynomials.
-    let z4 = z.pow(EXT_SIZE);
+    let z_pow = z.pow(<H::Field as Field>::ExtElem::EXT_SIZE);
     let which: [u32; CHECK_SIZE] = array_init(|i| i as u32);
-    let xs = [z4; CHECK_SIZE];
+    let xs = [z_pow; CHECK_SIZE];
     let out = hal.alloc_fp4(CHECK_SIZE);
     let which = hal.copy_u32_from(which.as_slice());
     let xs = hal.copy_fp4_from(xs.as_slice());
@@ -314,11 +312,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
                 );
             }
         }
-        // Divide check polys by Z4
+        // Divide check polys by z^EXT_SIZE
         assert_eq!(
             poly_divide(
                 &mut combos[combo_count * size..combo_count * size + size],
-                z4
+                z_pow
             ),
             <H::Field as Field>::ExtElem::ZERO
         );
@@ -326,12 +324,12 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     // Sum the combos up into one final polynomial + make it into 4 Fp polys.
     // Additionally, it needs to be bit reversed to make everyone happy
-    let final_poly_coeffs = hal.alloc_fp(size * EXT_SIZE);
+    let final_poly_coeffs = hal.alloc_fp(size * <H::Field as Field>::ExtElem::EXT_SIZE);
     hal.eltwise_sum_fp4(&final_poly_coeffs, &combos);
 
     // Finally do the FRI protocol to prove the degree of the polynomial
-    hal.batch_bit_reverse(&final_poly_coeffs, EXT_SIZE);
-    debug!("FRI-proof, size = {}", final_poly_coeffs.size() / EXT_SIZE);
+    hal.batch_bit_reverse(&final_poly_coeffs, <H::Field as Field>::ExtElem::EXT_SIZE);
+    debug!("FRI-proof, size = {}", final_poly_coeffs.size() / <H::Field as Field>::ExtElem::EXT_SIZE);
 
     fri_prove(hal, &mut iop, &final_poly_coeffs, |iop, idx| {
         accum_group.merkle.prove(iop, idx);
