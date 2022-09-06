@@ -180,7 +180,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let mut all_xs = Vec::new();
 
     // Do evaluations of all of the various polynomials at the appropriate points.
-    let mut eval_u: Vec<Fp4> = Vec::new();
+    let mut eval_u: Vec<<H::Field as Field>::ExtElem> = Vec::new();
     let mut eval_group = |id: RegisterGroup, pg: &PolyGroup<H>| {
         let mut which = Vec::new();
         let mut xs = Vec::new();
@@ -195,7 +195,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         let out = hal.alloc_fp4(which.size());
         hal.batch_evaluate_any(&pg.coeffs, pg.count, &which, &xs, &out);
         out.view(|view| {
-            eval_u.extend(H::to_baby_bear_fp4_slice(view));
+            eval_u.extend(view);
         });
     };
 
@@ -210,12 +210,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     // Now, convert the values to coefficients via interpolation
     let mut pos = 0;
-    let mut coeff_u = vec![Fp4::ZERO; eval_u.len()];
+    let mut coeff_u = vec![<H::Field as Field>::ExtElem::ZERO; eval_u.len()];
     for reg in taps.regs() {
-        // TODO: poly_interpolate should be refactorable
         poly_interpolate(
             &mut coeff_u[pos..],
-            H::to_baby_bear_fp4_slice(&all_xs[pos..]),
+            &all_xs[pos..],
             &eval_u[pos..],
             reg.size(),
         );
@@ -231,7 +230,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let xs = hal.copy_fp4_from(xs.as_slice());
     hal.batch_evaluate_any(&check_group.coeffs, CHECK_SIZE, &which, &xs, &out);
     out.view(|view| {
-        coeff_u.extend(H::to_baby_bear_fp4_slice(view));
+        coeff_u.extend(view);
     });
 
     debug!("Size of U = {}", coeff_u.len());
@@ -240,15 +239,15 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     iop.commit(&hash_u);
 
     // Set the mix mix value
-    let mix = Fp4::random(&mut iop.rng);
+    let mix = <H::Field as Field>::ExtElem::random(&mut iop.rng);
     debug!("Mix = {mix:?}");
 
     // Do the coefficent mixing
     // Begin by making a zeroed output buffer
     let combo_count = taps.combos_size();
-    let combos = vec![Fp4::ZERO; size * (combo_count + 1)];
-    let combos = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(combos.as_slice()));
-    let mut cur_mix = Fp4::ONE;
+    let combos = vec![<H::Field as Field>::ExtElem::ZERO; size * (combo_count + 1)];
+    let combos = hal.copy_fp4_from(combos.as_slice());
+    let mut cur_mix = <H::Field as Field>::ExtElem::ONE;
 
     let mut mix_group = |id: RegisterGroup, pg: &PolyGroup<H>| {
         let mut which = Vec::new();
@@ -259,8 +258,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         let group_size = taps.group_size(id);
         hal.mix_poly_coeffs(
             &combos,
-            &H::from_baby_bear_fp4(cur_mix),
-            &H::from_baby_bear_fp4(mix),
+            &cur_mix,
+            &mix,
             &pg.coeffs,
             &which_buf,
             group_size,
@@ -277,8 +276,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let which_buf = hal.copy_u32_from(which.as_slice());
     hal.mix_poly_coeffs(
         &combos,
-        &H::from_baby_bear_fp4(cur_mix),
-        &H::from_baby_bear_fp4(mix),
+        &cur_mix,
+        &mix,
         &check_group.coeffs,
         &which_buf,
         CHECK_SIZE,
@@ -287,10 +286,9 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     // Load the near final coefficients back to the CPU
     combos.view_mut(|combos| {
-        let combos = H::to_baby_bear_fp4_slice_mut(combos);
         // Subtract the U coeffs from the combos
         let mut cur_pos = 0;
-        let mut cur = Fp4::ONE;
+        let mut cur = <H::Field as Field>::ExtElem::ONE;
         for reg in taps.regs() {
             for i in 0..reg.size() {
                 combos[size * reg.combo_id() + i] -= cur * coeff_u[cur_pos + i];
@@ -308,23 +306,21 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         for combo in 0..combo_count {
             for back in taps.get_combo(combo).slice() {
                 assert_eq!(
-                    // TODO: poly_divide should be refactorable
                     poly_divide(
                         &mut combos[combo * size..combo * size + size],
-                        H::to_baby_bear_fp4(z * back_one.pow((*back).into()))
+                        z * back_one.pow((*back).into())
                     ),
-                    Fp4::ZERO
+                    <H::Field as Field>::ExtElem::ZERO
                 );
             }
         }
         // Divide check polys by Z4
         assert_eq!(
-            // TODO: poly_divide should be refactorable
             poly_divide(
                 &mut combos[combo_count * size..combo_count * size + size],
-                H::to_baby_bear_fp4(z4)
+                z4
             ),
-            Fp4::ZERO
+            <H::Field as Field>::ExtElem::ZERO
         );
     });
 
