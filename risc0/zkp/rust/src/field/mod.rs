@@ -22,7 +22,7 @@ use core::{cmp, fmt::Debug, ops};
 
 /// A pair of fields, one of which is an extension field of the other.
 pub trait Field {
-    type Elem: Elem;
+    type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
 }
 
