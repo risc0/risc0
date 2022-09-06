@@ -33,6 +33,7 @@ pub trait Elem:
     + ops::MulAssign
     + ops::Add<Output = Self>
     + ops::AddAssign
+    + ops::Neg
     + ops::Sub<Output = Self>
     + ops::SubAssign
     + cmp::PartialEq
@@ -91,7 +92,19 @@ pub trait Elem:
 }
 
 /// A field extension which can be constructed from a subfield element [Elem]
-pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
+pub trait ExtElem:
+    Elem
+    + ops::Add<Output = Self>
+    + ops::AddAssign
+    + ops::Neg<Output = Self>
+    + ops::Mul<Self::SubElem, Output = Self>
+    + ops::Mul<Self, Output = Self>
+    + ops::MulAssign
+    + ops::Sub<Output = Self>
+    + ops::SubAssign
+    + cmp::PartialEq
+    + cmp::Eq
+{
     type SubElem: Elem;
 
     const EXT_SIZE: usize;
