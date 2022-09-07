@@ -28,7 +28,6 @@ use self::adapter::VerifyAdapter;
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
     core::{
-        // TODO: Cleanup imports
         fp::Fp,
         fp4::Fp4,
         log2_ceil,

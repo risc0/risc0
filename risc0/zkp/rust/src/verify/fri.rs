@@ -19,7 +19,6 @@ use rand::RngCore;
 use super::VerifyHal;
 use crate::{
     core::{
-        fp4::{Fp4, EXT_SIZE}, // TODO: Cleanup imports
         log2_ceil,
         ntt::{bit_reverse, interpolate_ntt},
         sha::Sha,
@@ -52,7 +51,7 @@ impl<'a, S: Sha, H: VerifyHal> VerifyRoundInfo<'a, S, H> {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
-            merkle: MerkleTreeVerifier::new(iop, domain, FRI_FOLD * EXT_SIZE, QUERIES),
+            merkle: MerkleTreeVerifier::new(iop, domain, FRI_FOLD * <H::Field as Field>::ExtElem::EXT_SIZE, QUERIES),
             mix: <H::Field as Field>::ExtElem::random(iop),
         }
     }
@@ -120,7 +119,7 @@ where
         rounds_capacity
     );
     // Grab the final coeffs + commit
-    let final_coeffs = iop.read_pod_slice(EXT_SIZE * degree);
+    let final_coeffs = iop.read_pod_slice(<H::Field as Field>::ExtElem::EXT_SIZE * degree);
     let final_digest = iop.get_sha().hash_raw_pod_slice(final_coeffs);
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
