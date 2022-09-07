@@ -63,6 +63,61 @@ impl fmt::Display for VerificationError {
     }
 }
 
+// [borrowed from the main HAL]
+//
+// Baby bear adapters to facilitate migration to generics.  They
+// convert between a genericizied baby bear type and a concreate baby
+// bear type.  Once everything uses genericized types, we can get rid
+// of these.
+//
+// If called with a non-baby-bear field, they will produce an error at
+// runtime.
+//
+// TODO: Make it so these aren't necessary anymore.
+macro_rules! baby_bear_adapter {
+    ($fn_name:ident, $slice_fn_name:ident, $mut_slice_fn_name:ident, $from_ty:ty, $to_ty: ty $(,)?) => {
+        fn $fn_name(val: $from_ty) -> $to_ty {
+            let val_any = &val as &dyn core::any::Any;
+            if let Some(val) = val_any.downcast_ref::<$to_ty>() {
+                *val
+            } else {
+                panic!("Unable to convert between baby bear types {} and {}; other fields not supported yet.",
+                       core::any::type_name::<$from_ty>(),
+                       core::any::type_name::<$to_ty>());
+            }
+        }
+
+        // Rust doesn't let us put a reference in an any, so we have
+        // to resort to unsafe.  Specify lifetimes explicitly here
+        // to avoid any confusion.
+        fn $slice_fn_name<'a>(val: &'a [$from_ty]) -> &'a [$to_ty] {
+            let len = val.len();
+            if core::any::TypeId::of::<$from_ty>() == core::any::TypeId::of::<$to_ty>() {
+                let ptr: *const $from_ty = val.as_ptr();
+                let out: *const $to_ty = ptr.cast();
+                unsafe { core::slice::from_raw_parts(out, len) }
+            } else {
+                panic!("Unable to convert between baby bear types &[{}] and &[{}]; other fields not supported yet.",
+                       core::any::type_name::<$from_ty>(),
+                       core::any::type_name::<$to_ty>());
+            }
+        }
+
+        fn $mut_slice_fn_name<'a>(val: &'a mut [$from_ty]) -> &'a mut [$to_ty] {
+            let len = val.len();
+            if core::any::TypeId::of::<$from_ty>() == core::any::TypeId::of::<$to_ty>() {
+                let ptr: *mut $from_ty = val.as_mut_ptr();
+                let out: *mut $to_ty = ptr.cast();
+                unsafe { core::slice::from_raw_parts_mut(out, len) }
+            } else {
+                panic!("Unable to convert between baby bear types &mut [{}] and &mut [{}]; other fields not supported yet.",
+                       core::any::type_name::<$from_ty>(),
+                       core::any::type_name::<$to_ty>());
+            }
+        }
+    };
+}
+
 pub trait VerifyHal {
     type Sha: Sha;
     type Field: Field;
@@ -86,6 +141,37 @@ pub trait VerifyHal {
         }
         tot
     }
+
+    // Adapters to convert to/from baby bear field until all code is migrated.
+    // TODO: Remove once migration complete
+    baby_bear_adapter!(
+        to_baby_bear_fp,
+        to_baby_bear_fp_slice,
+        to_baby_bear_fp_slice_mut,
+        <Self::Field as field::Field>::Elem,
+        <BabyBear as field::Field>::Elem,
+    );
+    baby_bear_adapter!(
+        to_baby_bear_fp4,
+        to_baby_bear_fp4_slice,
+        to_baby_bear_fp4_slice_mut,
+        <Self::Field as field::Field>::ExtElem,
+        <BabyBear as field::Field>::ExtElem,
+    );
+    baby_bear_adapter!(
+        from_baby_bear_fp,
+        from_baby_bear_fp_slice,
+        from_baby_bear_fp_slice_mut,
+        <BabyBear as field::Field>::Elem,
+        <Self::Field as field::Field>::Elem,
+    );
+    baby_bear_adapter!(
+        from_baby_bear_fp4,
+        from_baby_bear_fp4_slice,
+        from_baby_bear_fp4_slice_mut,
+        <BabyBear as field::Field>::ExtElem,
+        <Self::Field as field::Field>::ExtElem,
+    );
 }
 
 #[cfg(feature = "host")]
