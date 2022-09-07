@@ -18,9 +18,7 @@ use core::ops::{Add, Mul, Sub};
 
 use paste::paste;
 
-use super::{
-    log2_ceil,
-};
+use super::log2_ceil;
 use crate::field::{Elem, RootsOfUnity};
 
 /// Reverses the bits in a 32-bit number.
