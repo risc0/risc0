@@ -97,9 +97,10 @@ pub trait ExtElem:
     + ops::Add<Output = Self>
     + ops::AddAssign
     + ops::Neg<Output = Self>
-    + ops::Mul<Self::SubElem, Output = Self>
     + ops::Mul<Self, Output = Self>
-    + ops::MulAssign
+    + ops::Mul<Self::SubElem, Output = Self>
+    + ops::MulAssign<Self>
+    + ops::MulAssign<Self::SubElem>
     + ops::Sub<Output = Self>
     + ops::SubAssign
     + cmp::PartialEq
