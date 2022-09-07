@@ -26,7 +26,7 @@ use crate::{
         rou::{ROU_FWD, ROU_REV},
         sha::Sha,
     },
-    field::{baby_bear::BabyBear, Elem},
+    field::{baby_bear::BabyBear, Elem, Field},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
@@ -40,11 +40,11 @@ struct VerifyRoundInfo<'a, S: Sha> {
     mix: Fp4,
 }
 
-fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
-    interpolate_ntt::<Fp, Fp4>(values);
+fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [<H::Field as Field>::ExtElem], mix: <H::Field as Field>::ExtElem, s: usize, j: usize) -> <H::Field as Field>::ExtElem {
+    interpolate_ntt::<<H::Field as Field>::Elem, <H::Field as Field>::ExtElem>(values);
     bit_reverse(values);
     let root_po2 = log2_ceil(FRI_FOLD * s);
-    let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);
+    let inv_wk: Fp = <H::Field as Field>::Elem::new(<H::Field as Field>::Elem::ROU_REV[root_po2]).pow(j);
     let tot = hal.poly_eval(values, mix, inv_wk);
     tot
 }

@@ -34,7 +34,7 @@ use crate::{
         rou::{ROU_FWD, ROU_REV},
         sha::{Digest, Sha},
     },
-    field::{baby_bear::BabyBear, Elem},
+    field::{baby_bear::BabyBear, Elem, Field},
     taps::RegisterGroup,
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2, QUERIES,
@@ -65,19 +65,20 @@ impl fmt::Display for VerificationError {
 
 pub trait VerifyHal {
     type Sha: Sha;
+    type Field: Field;
 
     fn sha(&self) -> &Self::Sha;
 
     fn debug(&self, msg: &str);
 
-    fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4;
+    fn compute_polynomial(&self, u: &[<Self::Field as Field>::ExtElem], poly_mix: <Self::Field as Field>::ExtElem, out: &[<Self::Field as Field>::Elem], mix: &[<Self::Field as Field>::Elem]) -> <Self::Field as Field>::ExtElem;
 
     /// Evaluate a polynomial whose coefficients are in the extension field at a
     /// point.
-    fn poly_eval(&self, coeffs: &[Fp4], x: Fp4, y: Fp) -> Fp4 {
-        let mut mul_fp = Fp::ONE;
-        let mut mul_fp4 = Fp4::ONE;
-        let mut tot = Fp4::ZERO;
+    fn poly_eval(&self, coeffs: &[<Self::Field as Field>::ExtElem], x: <Self::Field as Field>::ExtElem, y: <Self::Field as Field>::Elem) -> <Self::Field as Field>::ExtElem {
+        let mut mul_fp = <Self::Field as Field>::Elem::ONE;
+        let mut mul_fp4 = <Self::Field as Field>::ExtElem::ONE;
+        let mut tot = <Self::Field as Field>::ExtElem::ZERO;
         for i in 0..coeffs.len() {
             tot += coeffs[i] * mul_fp * mul_fp4;
             mul_fp *= y;
@@ -92,19 +93,21 @@ mod host {
     use super::*;
     use crate::adapter::{PolyExt, PolyExtContext};
 
-    pub struct CpuVerifyHal<'a, S: Sha, C: PolyExt> {
+    pub struct CpuVerifyHal<'a, S: Sha, C: PolyExt, F: Field> {
         sha: &'a S,
         circuit: &'a C,
+        field: &'a F,
     }
 
-    impl<'a, S: Sha, C: PolyExt> CpuVerifyHal<'a, S, C> {
-        pub fn new(sha: &'a S, circuit: &'a C) -> Self {
-            Self { sha, circuit }
+    impl<'a, S: Sha, C: PolyExt, F: Field> CpuVerifyHal<'a, S, C, F> {
+        pub fn new(sha: &'a S, circuit: &'a C, field: &'a F) -> Self {
+            Self { sha, circuit, field }
         }
     }
 
-    impl<'a, S: Sha, C: PolyExt> VerifyHal for CpuVerifyHal<'a, S, C> {
+    impl<'a, S: Sha, C: PolyExt, F: Field> VerifyHal for CpuVerifyHal<'a, S, C, F> {
         type Sha = S;
+        type Field = F;
 
         fn sha(&self) -> &Self::Sha {
             self.sha
@@ -114,7 +117,7 @@ mod host {
             log::debug!("{}", msg);
         }
 
-        fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4 {
+        fn compute_polynomial(&self, u: &[<F as Field>::ExtElem], poly_mix: <F as Field>::ExtElem, out: &[<F as Field>::Elem], mix: &[<F as Field>::Elem]) -> <F as Field>::ExtElem {
             let ctx = PolyExtContext { mix: poly_mix };
             let args: &[&[Fp]] = &[out, mix];
             let result = self.circuit.poly_ext(&ctx, u, args);
@@ -184,15 +187,15 @@ where
     // debug!("accumRoot = {}", accum_merkle.root());
 
     // Set the poly mix value
-    let poly_mix = Fp4::random(&mut iop);
+    let poly_mix = <H::Field as Field>::ExtElem::random(&mut iop);
 
     hal.debug("check_merkle");
     let check_merkle = MerkleTreeVerifier::new(&mut iop, domain, CHECK_SIZE, QUERIES);
     // debug!("checkRoot = {}", check_merkle.root());
 
-    let z = Fp4::random(&mut iop);
+    let z = <H::Field as Field>::ExtElem::random(&mut iop);
     // debug!("Z = {z:?}");
-    let back_one = Fp::from(ROU_REV[po2 as usize]);
+    let back_one = <H::Field as Field>::Elem::from(ROU_REV[po2 as usize]);
 
     // Read the U coeffs + commit their hash
     let num_taps = taps.tap_size();
