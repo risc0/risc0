@@ -392,10 +392,9 @@ impl<F: Field> Hal for CpuHal<F> {
         assert_eq!(matrix.size(), col_size * count);
         let mut output = output.as_slice_mut();
         let matrix = matrix.as_slice().to_vec(); // TODO: avoid copy
-        let fp_matrix = CpuHal::<F>::to_baby_bear_fp_slice(matrix.as_slice());
         let sha = sha_cpu::Impl {};
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            *output = *sha.hash_pod_stride(fp_matrix, idx, col_size, count);
+            *output = *sha.hash_pod_stride(matrix.as_slice(), idx, col_size, count);
         });
     }
 

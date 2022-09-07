@@ -310,7 +310,9 @@ where
     // debug!("Result = {result:?}");
 
     // Now generate the check polynomial
-    // TODO: This currently treats the extension degree as hardcoded at 4
+    // TODO: This currently treats the extension degree as hardcoded at 4, with
+    // the structure of the code and the value of `remap` (and how it is
+    // accessed) only working in the extension degree = 4 case.
     // However, for generic fields the extension degree may be different
     // TODO: Therefore just using the to/from baby bear shims for now
     let mut check = Fp4::ZERO;
