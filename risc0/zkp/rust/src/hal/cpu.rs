@@ -199,7 +199,7 @@ impl<F: Field> Hal for CpuHal<F> {
         io.as_slice_mut()
             .par_chunks_exact_mut(row_size)
             .for_each(|row| {
-                evaluate_ntt(Self::to_baby_bear_fp_slice_mut(row), expand_bits);
+                evaluate_ntt::<F::Elem, F::Elem>(row, expand_bits);
             });
     }
 
@@ -209,7 +209,7 @@ impl<F: Field> Hal for CpuHal<F> {
         io.as_slice_mut()
             .par_chunks_exact_mut(row_size)
             .for_each(|row| {
-                interpolate_ntt(Self::to_baby_bear_fp_slice_mut(row));
+                interpolate_ntt::<F::Elem, F::Elem>(row);
             });
     }
 

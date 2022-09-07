@@ -41,7 +41,7 @@ struct VerifyRoundInfo<'a, S: Sha> {
 }
 
 fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
-    interpolate_ntt(values);
+    interpolate_ntt::<Fp, Fp4>(values);
     bit_reverse(values);
     let root_po2 = log2_ceil(FRI_FOLD * s);
     let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);
