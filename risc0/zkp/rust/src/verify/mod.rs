@@ -148,29 +148,29 @@ pub trait VerifyHal {
         to_baby_bear_fp,
         to_baby_bear_fp_slice,
         to_baby_bear_fp_slice_mut,
-        <Self::Field as field::Field>::Elem,
-        <BabyBear as field::Field>::Elem,
+        <Self::Field as Field>::Elem,
+        <BabyBear as Field>::Elem,
     );
     baby_bear_adapter!(
         to_baby_bear_fp4,
         to_baby_bear_fp4_slice,
         to_baby_bear_fp4_slice_mut,
-        <Self::Field as field::Field>::ExtElem,
-        <BabyBear as field::Field>::ExtElem,
+        <Self::Field as Field>::ExtElem,
+        <BabyBear as Field>::ExtElem,
     );
     baby_bear_adapter!(
         from_baby_bear_fp,
         from_baby_bear_fp_slice,
         from_baby_bear_fp_slice_mut,
-        <BabyBear as field::Field>::Elem,
-        <Self::Field as field::Field>::Elem,
+        <BabyBear as Field>::Elem,
+        <Self::Field as Field>::Elem,
     );
     baby_bear_adapter!(
         from_baby_bear_fp4,
         from_baby_bear_fp4_slice,
         from_baby_bear_fp4_slice_mut,
-        <BabyBear as field::Field>::ExtElem,
-        <Self::Field as field::Field>::ExtElem,
+        <BabyBear as Field>::ExtElem,
+        <Self::Field as Field>::ExtElem,
     );
 }
 
