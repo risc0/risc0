@@ -25,8 +25,6 @@ use anyhow::{Error, Result};
 use bytemuck::{Pod, Zeroable};
 use serde::{Deserialize, Serialize};
 
-use super::{fp::Fp, fp4::Fp4};
-
 /// The number of words represented by a [Digest].
 // We represent a SHA-256 digest as 8 32-bit words instead of the
 // traditional 32 8-bit bytes.
@@ -225,7 +223,8 @@ mod tests {
 pub mod testutil {
     use alloc::vec::Vec;
 
-    use super::{Digest, Fp, Fp4, Sha};
+    use crate::core::{fp::Fp, fp4::Fp4};
+    use super::{Digest, Sha};
 
     // Runs conformance test on a SHA implementation to make sure it properly
     // behaves.
