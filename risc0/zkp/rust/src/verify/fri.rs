@@ -19,14 +19,12 @@ use rand::RngCore;
 use super::VerifyHal;
 use crate::{
     core::{
-        fp::Fp,
-        fp4::{Fp4, EXT_SIZE},
+        fp4::{Fp4, EXT_SIZE}, // TODO: Cleanup imports
         log2_ceil,
         ntt::{bit_reverse, interpolate_ntt},
-        rou::{ROU_FWD, ROU_REV},
         sha::Sha,
     },
-    field::{baby_bear::BabyBear, Elem, ExtElem, Field, RootsOfUnity},
+    field::{Elem, ExtElem, Field, RootsOfUnity},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };

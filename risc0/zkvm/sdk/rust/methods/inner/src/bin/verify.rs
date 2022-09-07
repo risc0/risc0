@@ -20,6 +20,7 @@ use core::mem;
 
 use risc0_zkp::{
     core::{fp::Fp, fp4::Fp4},
+    field::baby_bear::BabyBear,
     verify::VerifyHal,
 };
 use risc0_zkvm::receipt::verify_with_hal;
@@ -48,6 +49,7 @@ impl GuestVerifyHal {
 
 impl VerifyHal for GuestVerifyHal {
     type Sha = sha_insecure::Impl;
+    type Field = BabyBear;
 
     fn sha(&self) -> &Self::Sha {
         &self.sha

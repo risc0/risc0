@@ -17,6 +17,8 @@ use alloc::vec::Vec;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 
+use risc0_zkp::field::baby_bear::BabyBear;
+
 use crate::method_id::MethodId;
 
 #[derive(Deserialize, Serialize, Clone)]
@@ -79,7 +81,7 @@ impl Receipt {
         use crate::CIRCUIT;
 
         let sha = default_implementation();
-        let hal = CpuVerifyHal::new(sha, &CIRCUIT);
+        let hal = CpuVerifyHal::new(sha, &CIRCUIT, &BabyBear);
         self.verify_with_hal(&hal, method_id)
     }
 

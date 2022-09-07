@@ -28,13 +28,13 @@ use self::adapter::VerifyAdapter;
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
     core::{
+        // TODO: Cleanup imports
         fp::Fp,
         fp4::Fp4,
         log2_ceil,
-        rou::{ROU_FWD, ROU_REV},
         sha::{Digest, Sha},
     },
-    field::{baby_bear::BabyBear, Elem, Field},
+    field::{baby_bear::BabyBear, Elem, ExtElem, Field, RootsOfUnity},
     taps::RegisterGroup,
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     CHECK_SIZE, INV_RATE, MAX_CYCLES_PO2, QUERIES,
@@ -204,10 +204,10 @@ mod host {
         }
 
         fn compute_polynomial(&self, u: &[<F as Field>::ExtElem], poly_mix: <F as Field>::ExtElem, out: &[<F as Field>::Elem], mix: &[<F as Field>::Elem]) -> <F as Field>::ExtElem {
-            let ctx = PolyExtContext { mix: poly_mix };
-            let args: &[&[Fp]] = &[out, mix];
-            let result = self.circuit.poly_ext(&ctx, u, args);
-            result.tot
+            let ctx = PolyExtContext { mix: <Self as VerifyHal>::to_baby_bear_fp4(poly_mix) };
+            let args: &[&[Fp]] = &[<Self as VerifyHal>::to_baby_bear_fp_slice(out), <Self as VerifyHal>::to_baby_bear_fp_slice(mix)];
+            let result = self.circuit.poly_ext(&ctx, <Self as VerifyHal>::to_baby_bear_fp4_slice(u), args);
+            <Self as VerifyHal>::from_baby_bear_fp4(result.tot)
         }
     }
 }
@@ -281,7 +281,7 @@ where
 
     let z = <H::Field as Field>::ExtElem::random(&mut iop);
     // debug!("Z = {z:?}");
-    let back_one = <H::Field as Field>::Elem::from(ROU_REV[po2 as usize]);
+    let back_one = <<H::Field as Field>::Elem as RootsOfUnity>::ROU_REV[po2 as usize];
 
     // Read the U coeffs + commit their hash
     let num_taps = taps.tap_size();
@@ -294,8 +294,8 @@ where
     let mut eval_u = Vec::with_capacity(num_taps);
     for reg in taps.regs() {
         for i in 0..reg.size() {
-            let x = back_one.pow(reg.back(i)) * z;
-            let fx = hal.poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x, Fp::ONE);
+            let x = z * back_one.pow(reg.back(i));
+            let fx = hal.poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x, <H::Field as Field>::Elem::ONE);
             eval_u.push(fx);
         }
         cur_pos += reg.size();
@@ -304,40 +304,43 @@ where
 
     // Compute the core polynomial
     hal.debug("> compute_polynomial");
-    let result = hal.compute_polynomial(&eval_u, poly_mix, &adapter.out.unwrap(), &adapter.mix);
+    let result = hal.compute_polynomial(&eval_u, poly_mix, <H as VerifyHal>::from_baby_bear_fp_slice(&adapter.out.unwrap()), <H as VerifyHal>::from_baby_bear_fp_slice(&adapter.mix));
     hal.debug("< compute_polynomial");
     // debug!("Result = {result:?}");
 
     // Now generate the check polynomial
+    // TODO: This currently treats the extension degree as hardcoded at 4
+    // However, for generic fields the extension degree may be different
+    // TODO: Therefore just using the to/from baby bear shims for now
     let mut check = Fp4::ZERO;
     let remap = [0, 2, 1, 3];
     let fp0 = Fp::from(0 as u32);
     let fp1 = Fp::from(1 as u32);
     for i in 0..4 {
         let rmi = remap[i];
-        check += coeff_u[num_taps + rmi + 0] * z.pow(i) * Fp4::new(fp1, fp0, fp0, fp0);
-        check += coeff_u[num_taps + rmi + 4] * z.pow(i) * Fp4::new(fp0, fp1, fp0, fp0);
-        check += coeff_u[num_taps + rmi + 8] * z.pow(i) * Fp4::new(fp0, fp0, fp1, fp0);
-        check += coeff_u[num_taps + rmi + 12] * z.pow(i) * Fp4::new(fp0, fp0, fp0, fp1);
+        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 0] * z.pow(i)) * Fp4::new(fp1, fp0, fp0, fp0);
+        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 4] * z.pow(i)) * Fp4::new(fp0, fp1, fp0, fp0);
+        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 8] * z.pow(i)) * Fp4::new(fp0, fp0, fp1, fp0);
+        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 12] * z.pow(i)) * Fp4::new(fp0, fp0, fp0, fp1);
     }
-    check *= (Fp4::from_u32(3) * z).pow(size) - Fp4::ONE;
+    check *= (Fp4::from_u32(3) * <H as VerifyHal>::to_baby_bear_fp4(z)).pow(size) - Fp4::ONE;
     // debug!("Check = {check:?}");
-    if check != result {
+    if <H as VerifyHal>::from_baby_bear_fp4(check) != result {
         return Err(VerificationError::InvalidProof);
     }
 
     // Set the mix mix value
-    let mix = Fp4::random(&mut iop);
+    let mix = <H::Field as Field>::ExtElem::random(&mut iop);
     // debug!("mix = {mix:?}");
 
     // Make the mixed U polynomials
-    let mut combo_u: Vec<Vec<Fp4>> = Vec::with_capacity(combo_count + 1);
+    let mut combo_u: Vec<Vec<<H::Field as Field>::ExtElem>> = Vec::with_capacity(combo_count + 1);
     combo_u.extend(
         (0..combo_count)
             .into_iter()
-            .map(|i| vec![Fp4::ZERO; taps.get_combo(i).size()]),
+            .map(|i| vec![<H::Field as Field>::ExtElem::ZERO; taps.get_combo(i).size()]),
     );
-    let mut cur_mix = Fp4::ONE;
+    let mut cur_mix = <H::Field as Field>::ExtElem::ONE;
     cur_pos = 0;
     let mut tap_mix_pows = Vec::with_capacity(taps.reg_count());
     for reg in taps.regs() {
@@ -355,7 +358,7 @@ where
     );
     // debug!("cur_mix: {cur_mix:?}, cur_pos: {cur_pos}");
     // Handle check group
-    combo_u.push(vec![Fp4::ZERO]);
+    combo_u.push(vec![<H::Field as Field>::ExtElem::ZERO]);
     assert_eq!(
         combo_u.len(),
         combo_count + 1,
@@ -375,32 +378,32 @@ where
     );
     // debug!("cur_mix: {cur_mix:?}");
 
-    let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
+    let gen = <<H::Field as Field>::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
     // debug!("FRI-verify, size = {size}");
     fri_verify(
         hal,
         &mut iop,
         size,
-        |iop: &mut ReadIOP<_>, idx: usize| -> Result<Fp4, VerificationError> {
+        |iop: &mut ReadIOP<_>, idx: usize| -> Result<<H::Field as Field>::ExtElem, VerificationError> {
             hal.debug("fri_verify");
-            let x = Fp4::from_fp(gen.pow(idx));
+            let x = <H::Field as Field>::ExtElem::from_subfield(&gen.pow(idx));
             let rows = [
-                accum_merkle.verify::<BabyBear>(iop, idx)?,
-                code_merkle.verify::<BabyBear>(iop, idx)?,
-                data_merkle.verify::<BabyBear>(iop, idx)?,
+                accum_merkle.verify::<H::Field>(iop, idx)?,
+                code_merkle.verify::<H::Field>(iop, idx)?,
+                data_merkle.verify::<H::Field>(iop, idx)?,
             ];
-            let check_row = check_merkle.verify::<BabyBear>(iop, idx)?;
-            let mut tot = vec![Fp4::ZERO; combo_count + 1];
+            let check_row = check_merkle.verify::<H::Field>(iop, idx)?;
+            let mut tot = vec![<H::Field as Field>::ExtElem::ZERO; combo_count + 1];
             for (reg, cur) in zip(taps.regs(), tap_mix_pows.iter()) {
                 tot[reg.combo_id()] += *cur * rows[reg.group() as usize][reg.offset()];
             }
             for (i, cur) in zip(0..CHECK_SIZE, check_mix_pows.iter()) {
                 tot[combo_count] += *cur * check_row[i];
             }
-            let mut ret = Fp4::ZERO;
+            let mut ret = <H::Field as Field>::ExtElem::ZERO;
             for i in 0..combo_count {
-                let num = tot[i] - hal.poly_eval(&combo_u[i], x, Fp::ONE);
-                let mut divisor = Fp4::ONE;
+                let num = tot[i] - hal.poly_eval(&combo_u[i], x, <H::Field as Field>::Elem::ONE);
+                let mut divisor = <H::Field as Field>::ExtElem::ONE;
                 for back in taps.get_combo(i).slice() {
                     divisor *= x - z * back_one.pow(*back as usize);
                 }
