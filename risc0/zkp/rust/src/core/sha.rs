@@ -223,8 +223,8 @@ mod tests {
 pub mod testutil {
     use alloc::vec::Vec;
 
-    use crate::core::{fp::Fp, fp4::Fp4};
     use super::{Digest, Sha};
+    use crate::core::{fp::Fp, fp4::Fp4};
 
     // Runs conformance test on a SHA implementation to make sure it properly
     // behaves.

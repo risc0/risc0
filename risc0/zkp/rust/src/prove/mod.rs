@@ -86,12 +86,20 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let size = 1 << po2;
 
     // Make code + data PolyGroups + commit them
-    let code_coeffs = make_coeffs(hal, H::from_baby_bear_fp_slice(circuit.get_code()), code_size);
+    let code_coeffs = make_coeffs(
+        hal,
+        H::from_baby_bear_fp_slice(circuit.get_code()),
+        code_size,
+    );
     let code_group = PolyGroup::new(hal, &code_coeffs, code_size, size);
     code_group.merkle.commit(hal, &mut iop);
     debug!("codeGroup: {}", code_group.merkle.root());
 
-    let data_coeffs = make_coeffs(hal, H::from_baby_bear_fp_slice(circuit.get_data()), data_size);
+    let data_coeffs = make_coeffs(
+        hal,
+        H::from_baby_bear_fp_slice(circuit.get_data()),
+        data_size,
+    );
     let data_group = PolyGroup::new(hal, &data_coeffs, data_size, size);
     data_group.merkle.commit(hal, &mut iop);
     debug!("dataGroup: {}", data_group.merkle.root());
@@ -101,7 +109,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     // Make the accum group + commit
     debug!("size = {size}, accumSize = {accum_size}");
     debug!("getAccum.size() = {}", circuit.get_accum().len());
-    let accum_coeffs = make_coeffs(hal, H::from_baby_bear_fp_slice(circuit.get_accum()), accum_size);
+    let accum_coeffs = make_coeffs(
+        hal,
+        H::from_baby_bear_fp_slice(circuit.get_accum()),
+        accum_size,
+    );
     let accum_group = PolyGroup::new(hal, &accum_coeffs, accum_size, size);
     accum_group.merkle.commit(hal, &mut iop);
     debug!("accumGroup: {}", accum_group.merkle.root());
@@ -174,7 +186,9 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     //   LOG(1, "Z = " << Z);
 
     // Get rev rou for size
-    let back_one = <H::Field as Field>::ExtElem::from_subfield(&<H::Field as Field>::Elem::ROU_REV[po2 as usize]);
+    let back_one = <H::Field as Field>::ExtElem::from_subfield(
+        &<H::Field as Field>::Elem::ROU_REV[po2 as usize],
+    );
     let mut all_xs = Vec::new();
 
     // Do evaluations of all of the various polynomials at the appropriate points.
@@ -255,13 +269,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         let which_buf = hal.copy_u32_from(which.as_slice());
         let group_size = taps.group_size(id);
         hal.mix_poly_coeffs(
-            &combos,
-            &cur_mix,
-            &mix,
-            &pg.coeffs,
-            &which_buf,
-            group_size,
-            size,
+            &combos, &cur_mix, &mix, &pg.coeffs, &which_buf, group_size, size,
         );
         cur_mix *= mix.pow(group_size);
     };
@@ -329,7 +337,10 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     // Finally do the FRI protocol to prove the degree of the polynomial
     hal.batch_bit_reverse(&final_poly_coeffs, <H::Field as Field>::ExtElem::EXT_SIZE);
-    debug!("FRI-proof, size = {}", final_poly_coeffs.size() / <H::Field as Field>::ExtElem::EXT_SIZE);
+    debug!(
+        "FRI-proof, size = {}",
+        final_poly_coeffs.size() / <H::Field as Field>::ExtElem::EXT_SIZE
+    );
 
     fri_prove(hal, &mut iop, &final_poly_coeffs, |iop, idx| {
         accum_group.merkle.prove(iop, idx);

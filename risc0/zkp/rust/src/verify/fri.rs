@@ -37,7 +37,13 @@ struct VerifyRoundInfo<'a, S: Sha, H: VerifyHal> {
     mix: <H::Field as Field>::ExtElem,
 }
 
-fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [<H::Field as Field>::ExtElem], mix: <H::Field as Field>::ExtElem, s: usize, j: usize) -> <H::Field as Field>::ExtElem {
+fn fold_eval<H: VerifyHal>(
+    hal: &H,
+    values: &mut [<H::Field as Field>::ExtElem],
+    mix: <H::Field as Field>::ExtElem,
+    s: usize,
+    j: usize,
+) -> <H::Field as Field>::ExtElem {
     interpolate_ntt::<<H::Field as Field>::Elem, <H::Field as Field>::ExtElem>(values);
     bit_reverse(values);
     let root_po2 = log2_ceil(FRI_FOLD * s);
@@ -51,7 +57,12 @@ impl<'a, S: Sha, H: VerifyHal> VerifyRoundInfo<'a, S, H> {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
-            merkle: MerkleTreeVerifier::new(iop, domain, FRI_FOLD * <H::Field as Field>::ExtElem::EXT_SIZE, QUERIES),
+            merkle: MerkleTreeVerifier::new(
+                iop,
+                domain,
+                FRI_FOLD * <H::Field as Field>::ExtElem::EXT_SIZE,
+                QUERIES,
+            ),
             mix: <H::Field as Field>::ExtElem::random(iop),
         }
     }
@@ -73,9 +84,7 @@ impl<'a, S: Sha, H: VerifyHal> VerifyRoundInfo<'a, S, H> {
                 for j in 0..<H::Field as Field>::ExtElem::EXT_SIZE {
                     inps.push(data[j * FRI_FOLD + i]);
                 }
-                <H::Field as Field>::ExtElem::from_subelems(
-                    inps
-                )
+                <H::Field as Field>::ExtElem::from_subelems(inps)
             })
             .collect();
         // Check the existing goal
@@ -96,7 +105,10 @@ pub fn fri_verify<'a, H: VerifyHal, F>(
     mut inner: F,
 ) -> Result<(), VerificationError>
 where
-    F: FnMut(&mut ReadIOP<'a, H::Sha>, usize) -> Result<<H::Field as Field>::ExtElem, VerificationError>,
+    F: FnMut(
+        &mut ReadIOP<'a, H::Sha>,
+        usize,
+    ) -> Result<<H::Field as Field>::ExtElem, VerificationError>,
 {
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;

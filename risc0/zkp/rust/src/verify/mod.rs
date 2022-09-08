@@ -125,11 +125,22 @@ pub trait VerifyHal {
 
     fn debug(&self, msg: &str);
 
-    fn compute_polynomial(&self, u: &[<Self::Field as Field>::ExtElem], poly_mix: <Self::Field as Field>::ExtElem, out: &[<Self::Field as Field>::Elem], mix: &[<Self::Field as Field>::Elem]) -> <Self::Field as Field>::ExtElem;
+    fn compute_polynomial(
+        &self,
+        u: &[<Self::Field as Field>::ExtElem],
+        poly_mix: <Self::Field as Field>::ExtElem,
+        out: &[<Self::Field as Field>::Elem],
+        mix: &[<Self::Field as Field>::Elem],
+    ) -> <Self::Field as Field>::ExtElem;
 
     /// Evaluate a polynomial whose coefficients are in the extension field at a
     /// point.
-    fn poly_eval(&self, coeffs: &[<Self::Field as Field>::ExtElem], x: <Self::Field as Field>::ExtElem, y: <Self::Field as Field>::Elem) -> <Self::Field as Field>::ExtElem {
+    fn poly_eval(
+        &self,
+        coeffs: &[<Self::Field as Field>::ExtElem],
+        x: <Self::Field as Field>::ExtElem,
+        y: <Self::Field as Field>::Elem,
+    ) -> <Self::Field as Field>::ExtElem {
         let mut mul_fp = <Self::Field as Field>::Elem::ONE;
         let mut mul_fp4 = <Self::Field as Field>::ExtElem::ONE;
         let mut tot = <Self::Field as Field>::ExtElem::ZERO;
@@ -188,7 +199,11 @@ mod host {
 
     impl<'a, S: Sha, C: PolyExt, F: Field> CpuVerifyHal<'a, S, C, F> {
         pub fn new(sha: &'a S, circuit: &'a C, field: &'a F) -> Self {
-            Self { sha, circuit, field }
+            Self {
+                sha,
+                circuit,
+                field,
+            }
         }
     }
 
@@ -204,10 +219,23 @@ mod host {
             log::debug!("{}", msg);
         }
 
-        fn compute_polynomial(&self, u: &[<F as Field>::ExtElem], poly_mix: <F as Field>::ExtElem, out: &[<F as Field>::Elem], mix: &[<F as Field>::Elem]) -> <F as Field>::ExtElem {
-            let ctx = PolyExtContext { mix: <Self as VerifyHal>::to_baby_bear_fp4(poly_mix) };
-            let args: &[&[Fp]] = &[<Self as VerifyHal>::to_baby_bear_fp_slice(out), <Self as VerifyHal>::to_baby_bear_fp_slice(mix)];
-            let result = self.circuit.poly_ext(&ctx, <Self as VerifyHal>::to_baby_bear_fp4_slice(u), args);
+        fn compute_polynomial(
+            &self,
+            u: &[<F as Field>::ExtElem],
+            poly_mix: <F as Field>::ExtElem,
+            out: &[<F as Field>::Elem],
+            mix: &[<F as Field>::Elem],
+        ) -> <F as Field>::ExtElem {
+            let ctx = PolyExtContext {
+                mix: <Self as VerifyHal>::to_baby_bear_fp4(poly_mix),
+            };
+            let args: &[&[Fp]] = &[
+                <Self as VerifyHal>::to_baby_bear_fp_slice(out),
+                <Self as VerifyHal>::to_baby_bear_fp_slice(mix),
+            ];
+            let result =
+                self.circuit
+                    .poly_ext(&ctx, <Self as VerifyHal>::to_baby_bear_fp4_slice(u), args);
             <Self as VerifyHal>::from_baby_bear_fp4(result.tot)
         }
     }
@@ -296,7 +324,11 @@ where
     for reg in taps.regs() {
         for i in 0..reg.size() {
             let x = z * back_one.pow(reg.back(i));
-            let fx = hal.poly_eval(&coeff_u[cur_pos..(cur_pos + reg.size())], x, <H::Field as Field>::Elem::ONE);
+            let fx = hal.poly_eval(
+                &coeff_u[cur_pos..(cur_pos + reg.size())],
+                x,
+                <H::Field as Field>::Elem::ONE,
+            );
             eval_u.push(fx);
         }
         cur_pos += reg.size();
@@ -305,7 +337,12 @@ where
 
     // Compute the core polynomial
     hal.debug("> compute_polynomial");
-    let result = hal.compute_polynomial(&eval_u, poly_mix, <H as VerifyHal>::from_baby_bear_fp_slice(&adapter.out.unwrap()), <H as VerifyHal>::from_baby_bear_fp_slice(&adapter.mix));
+    let result = hal.compute_polynomial(
+        &eval_u,
+        poly_mix,
+        <H as VerifyHal>::from_baby_bear_fp_slice(&adapter.out.unwrap()),
+        <H as VerifyHal>::from_baby_bear_fp_slice(&adapter.mix),
+    );
     hal.debug("< compute_polynomial");
     // debug!("Result = {result:?}");
 
@@ -321,10 +358,14 @@ where
     let fp1 = Fp::from(1 as u32);
     for i in 0..4 {
         let rmi = remap[i];
-        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 0] * z.pow(i)) * Fp4::new(fp1, fp0, fp0, fp0);
-        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 4] * z.pow(i)) * Fp4::new(fp0, fp1, fp0, fp0);
-        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 8] * z.pow(i)) * Fp4::new(fp0, fp0, fp1, fp0);
-        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 12] * z.pow(i)) * Fp4::new(fp0, fp0, fp0, fp1);
+        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 0] * z.pow(i))
+            * Fp4::new(fp1, fp0, fp0, fp0);
+        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 4] * z.pow(i))
+            * Fp4::new(fp0, fp1, fp0, fp0);
+        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 8] * z.pow(i))
+            * Fp4::new(fp0, fp0, fp1, fp0);
+        check += <H as VerifyHal>::to_baby_bear_fp4(coeff_u[num_taps + rmi + 12] * z.pow(i))
+            * Fp4::new(fp0, fp0, fp0, fp1);
     }
     check *= (Fp4::from_u32(3) * <H as VerifyHal>::to_baby_bear_fp4(z)).pow(size) - Fp4::ONE;
     // debug!("Check = {check:?}");
@@ -387,7 +428,9 @@ where
         hal,
         &mut iop,
         size,
-        |iop: &mut ReadIOP<_>, idx: usize| -> Result<<H::Field as Field>::ExtElem, VerificationError> {
+        |iop: &mut ReadIOP<_>,
+         idx: usize|
+         -> Result<<H::Field as Field>::ExtElem, VerificationError> {
             hal.debug("fri_verify");
             let x = <H::Field as Field>::ExtElem::from_subfield(&gen.pow(idx));
             let rows = [

@@ -350,7 +350,7 @@ mod tests {
         ntt::{bit_reverse, evaluate_ntt, interpolate_ntt},
         rou::ROU_FWD,
     };
-    use crate::field::{Elem, goldilocks};
+    use crate::field::{goldilocks, Elem};
 
     // Compare the complex version to the naive version
     #[test]

@@ -15,9 +15,8 @@
 use alloc::vec::Vec;
 
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
-
 use risc0_zkp::field::baby_bear::BabyBear;
+use serde::{Deserialize, Serialize};
 
 use crate::method_id::MethodId;
 
