@@ -73,12 +73,12 @@ pub fn bit_reverse<T: Copy>(io: &mut [T]) {
 }
 
 #[inline]
-fn fwd_butterfly_0<F, T>(_: &mut [T], _: usize) {
+fn fwd_butterfly_0<B, T>(_: &mut [T], _: usize) {
     // no-op base case
 }
 
 #[inline]
-fn rev_butterfly_0<F, T>(_: &mut [T]) {
+fn rev_butterfly_0<B, T>(_: &mut [T]) {
     // no-op base case
 }
 
@@ -88,19 +88,20 @@ macro_rules! butterfly {
     ($n:literal, $x:literal) => {
         paste! {
             #[inline]
-            fn [<fwd_butterfly_ $n>]<F, T>(io: &mut [T], expand_bits: usize)
+            fn [<fwd_butterfly_ $n>]<B, T>(io: &mut [T], expand_bits: usize)
             where
-                F: Elem + RootsOfUnity,
-                T: Copy + Mul<F, Output = T> + Add<Output = T> + Sub<Output = T>,
+                // B is a base field element, T may be either base or extension
+                B: Elem + RootsOfUnity,
+                T: Copy + Mul<B, Output = T> + Add<Output = T> + Sub<Output = T>,
             {
                 if $n == expand_bits {
                     return;
                 }
                 let half = 1 << ($n - 1);
-                [<fwd_butterfly_ $x>]::<F, T>(&mut io[..half], expand_bits);
-                [<fwd_butterfly_ $x>]::<F, T>(&mut io[half..], expand_bits);
-                let step = <F as RootsOfUnity>::ROU_FWD[$n];
-                let mut cur = F::ONE;
+                [<fwd_butterfly_ $x>]::<B, T>(&mut io[..half], expand_bits);
+                [<fwd_butterfly_ $x>]::<B, T>(&mut io[half..], expand_bits);
+                let step = <B as RootsOfUnity>::ROU_FWD[$n];
+                let mut cur = B::ONE;
                 for i in 0..half {
                     let a = io[i];
                     let b = io[i + half] * cur;
@@ -111,14 +112,15 @@ macro_rules! butterfly {
             }
 
             #[inline]
-            fn [<rev_butterfly_ $n>]<F, T>(io: &mut [T])
+            fn [<rev_butterfly_ $n>]<B, T>(io: &mut [T])
             where
-                F: Elem + RootsOfUnity,
-                T: Copy + Mul<F, Output = T> + Add<Output = T> + Sub<Output = T>,
+                // B is a base field element, T may be either base or extension
+                B: Elem + RootsOfUnity,
+                T: Copy + Mul<B, Output = T> + Add<Output = T> + Sub<Output = T>,
             {
                 let half = 1 << ($n - 1);
-                let step = <F as RootsOfUnity>::ROU_REV[$n];
-                let mut cur = F::ONE;
+                let step = <B as RootsOfUnity>::ROU_REV[$n];
+                let mut cur = B::ONE;
                 for i in 0..half {
                     let a = io[i];
                     let b = io[i + half];
@@ -126,8 +128,8 @@ macro_rules! butterfly {
                     io[i + half] = (a - b) * cur;
                     cur *= step;
                 }
-                [<rev_butterfly_ $x>]::<F, T>(&mut io[..half]);
-                [<rev_butterfly_ $x>]::<F, T>(&mut io[half..]);
+                [<rev_butterfly_ $x>]::<B, T>(&mut io[..half]);
+                [<rev_butterfly_ $x>]::<B, T>(&mut io[half..]);
             }
         }
     };
@@ -227,16 +229,17 @@ butterfly!(1, 0);
 /// The exponent multiplicands in the sum arise from reversing the indices as
 /// three-bit numbers. For example, 3 is 011 in binary, which reversed is 110,
 /// which is 6. So i' in the exponent of the index-3 value is 6.
-pub fn interpolate_ntt<F, T>(io: &mut [T])
+pub fn interpolate_ntt<B, T>(io: &mut [T])
 where
-    F: Elem + RootsOfUnity,
-    T: Copy + Mul<F, Output = T> + Add<Output = T> + Sub<Output = T>,
+    // B is a base field element, T may be either base or extension
+    B: Elem + RootsOfUnity,
+    T: Copy + Mul<B, Output = T> + Add<Output = T> + Sub<Output = T>,
 {
     let size = io.len();
     let n = log2_ceil(size);
     assert_eq!(1 << n, size);
     match n {
-        0 => rev_butterfly_0::<F, T>(io),
+        0 => rev_butterfly_0::<B, T>(io),
         1 => rev_butterfly_1(io),
         2 => rev_butterfly_2(io),
         3 => rev_butterfly_3(io),
@@ -271,24 +274,25 @@ where
         32 => rev_butterfly_32(io),
         _ => unreachable!(),
     }
-    let norm = F::from_u64(size as u64).inv();
+    let norm = B::from_u64(size as u64).inv();
     for i in 0..size {
         io[i] = io[i] * norm;
     }
 }
 
 /// Perform a forward butterfly transform of a buffer of (1 << n) numbers.
-pub fn evaluate_ntt<F, T>(io: &mut [T], expand_bits: usize)
+pub fn evaluate_ntt<B, T>(io: &mut [T], expand_bits: usize)
 where
-    F: Elem + RootsOfUnity,
-    T: Copy + Mul<F, Output = T> + Add<Output = T> + Sub<Output = T>,
+    // B is a base field element, T may be either base or extension
+    B: Elem + RootsOfUnity,
+    T: Copy + Mul<B, Output = T> + Add<Output = T> + Sub<Output = T>,
 {
     // do_ntt::<T, false>(io, expand_bits);
     let size = io.len();
     let n = log2_ceil(size);
     assert_eq!(1 << n, size);
     match n {
-        0 => fwd_butterfly_0::<F, T>(io, expand_bits),
+        0 => fwd_butterfly_0::<B, T>(io, expand_bits),
         1 => fwd_butterfly_1(io, expand_bits),
         2 => fwd_butterfly_2(io, expand_bits),
         3 => fwd_butterfly_3(io, expand_bits),

@@ -178,7 +178,7 @@ mod host {
     use super::*;
     use crate::adapter::{PolyExt, PolyExtContext};
 
-    // TODO: Not entirely sure how to handle the unused Field that's needed to
+    // TODO: Not certain how best to handle the unused Field that's needed to
     // indicate which sorts of elements to use for calculations...
     pub struct CpuVerifyHal<'a, S: Sha, C: PolyExt, F: Field> {
         sha: &'a S,
