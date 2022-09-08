@@ -26,7 +26,7 @@ use crate::{
         rou::{ROU_FWD, ROU_REV},
         sha::Sha,
     },
-    field::{baby_bear::BabyBear, Elem},
+    field::{baby_bear::BabyBear, Elem, Field, RootsOfUnity},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
@@ -40,17 +40,17 @@ struct VerifyRoundInfo<'a, S: Sha> {
     mix: Fp4,
 }
 
-fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
-    interpolate_ntt::<Fp, Fp4>(values);
+fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [<H::Field as Field>::ExtElem], mix: <H::Field as Field>::ExtElem, s: usize, j: usize) -> <H::Field as Field>::ExtElem {
+    interpolate_ntt::<<H::Field as Field>::Elem, <H::Field as Field>::ExtElem>(values);
     bit_reverse(values);
     let root_po2 = log2_ceil(FRI_FOLD * s);
-    let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);
+    let inv_wk: <H::Field as Field>::Elem = <H::Field as Field>::Elem::ROU_REV[root_po2].pow(j);
     let tot = hal.poly_eval(
-        H::from_baby_bear_fp4_slice(values),
-        H::from_baby_bear_fp4(mix),
-        H::from_baby_bear_fp(inv_wk),
+        values,
+        mix,
+        inv_wk,
     );
-    H::to_baby_bear_fp4(tot)
+    tot
 }
 
 impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
@@ -89,7 +89,7 @@ impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
             return Err(VerificationError::InvalidProof);
         }
         // Compute the new goal + pos
-        *goal = fold_eval(hal, &mut data4, self.mix, self.domain, group);
+        *goal = H::to_baby_bear_fp4(fold_eval(hal, &mut H::from_baby_bear_fp4_slice_mut(&mut data4), H::from_baby_bear_fp4(self.mix), self.domain, group));
         *pos = group;
         Ok(())
     }
