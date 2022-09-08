@@ -19,11 +19,14 @@ use rand::RngCore;
 use super::VerifyHal;
 use crate::{
     core::{
+        fp::Fp,
+        fp4::{Fp4, EXT_SIZE},
         log2_ceil,
         ntt::{bit_reverse, interpolate_ntt},
+        rou::{ROU_FWD, ROU_REV},
         sha::Sha,
     },
-    field::{Elem, ExtElem, Field, RootsOfUnity},
+    field::{baby_bear::BabyBear, Elem},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
@@ -31,68 +34,62 @@ use crate::{
 /// VerifyRoundInfo contains the data against which the queries for a particular
 /// round are checked. This includes the Merkle tree top row data, as well as
 /// the size of the domain of the polynomial, and the mixing parameter.
-struct VerifyRoundInfo<'a, S: Sha, H: VerifyHal> {
+struct VerifyRoundInfo<'a, S: Sha> {
     domain: usize,
     merkle: MerkleTreeVerifier<'a, S>,
-    mix: <H::Field as Field>::ExtElem,
+    mix: Fp4,
 }
 
-fn fold_eval<H: VerifyHal>(
-    hal: &H,
-    values: &mut [<H::Field as Field>::ExtElem],
-    mix: <H::Field as Field>::ExtElem,
-    s: usize,
-    j: usize,
-) -> <H::Field as Field>::ExtElem {
-    interpolate_ntt::<<H::Field as Field>::Elem, <H::Field as Field>::ExtElem>(values);
+fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
+    interpolate_ntt::<Fp, Fp4>(values);
     bit_reverse(values);
     let root_po2 = log2_ceil(FRI_FOLD * s);
-    let inv_wk = <H::Field as Field>::Elem::ROU_REV[root_po2].pow(j);
-    let tot = hal.poly_eval(values, mix, inv_wk);
-    tot
+    let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);
+    let tot = hal.poly_eval(
+        H::from_baby_bear_fp4_slice(values),
+        H::from_baby_bear_fp4(mix),
+        H::from_baby_bear_fp(inv_wk),
+    );
+    H::to_baby_bear_fp4(tot)
 }
 
-impl<'a, S: Sha, H: VerifyHal> VerifyRoundInfo<'a, S, H> {
+impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
     pub fn new(iop: &mut ReadIOP<'a, S>, in_domain: usize) -> Self {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
-            merkle: MerkleTreeVerifier::new(
-                iop,
-                domain,
-                FRI_FOLD * <H::Field as Field>::ExtElem::EXT_SIZE,
-                QUERIES,
-            ),
-            mix: <H::Field as Field>::ExtElem::random(iop),
+            merkle: MerkleTreeVerifier::new(iop, domain, FRI_FOLD * EXT_SIZE, QUERIES),
+            mix: Fp4::random(iop),
         }
     }
 
-    pub fn verify_query(
+    pub fn verify_query<H: VerifyHal>(
         &mut self,
         hal: &H,
         iop: &mut ReadIOP<'a, S>,
         pos: &mut usize,
-        goal: &mut <H::Field as Field>::ExtElem,
+        goal: &mut Fp4,
     ) -> Result<(), VerificationError> {
         let quot = *pos / self.domain;
         let group = *pos % self.domain;
         // Get the column data
-        let data = self.merkle.verify::<H::Field>(iop, group)?;
-        let mut data_ext: Vec<_> = (0..FRI_FOLD)
+        let data = self.merkle.verify::<BabyBear>(iop, group)?;
+        let mut data4: Vec<_> = (0..FRI_FOLD)
             .map(|i| {
-                let mut inps = Vec::with_capacity(<H::Field as Field>::ExtElem::EXT_SIZE);
-                for j in 0..<H::Field as Field>::ExtElem::EXT_SIZE {
-                    inps.push(data[j * FRI_FOLD + i]);
-                }
-                <H::Field as Field>::ExtElem::from_subelems(inps)
+                Fp4::new(
+                    data[0 * FRI_FOLD + i],
+                    data[1 * FRI_FOLD + i],
+                    data[2 * FRI_FOLD + i],
+                    data[3 * FRI_FOLD + i],
+                )
             })
             .collect();
         // Check the existing goal
-        if data_ext[quot] != *goal {
+        if data4[quot] != *goal {
             return Err(VerificationError::InvalidProof);
         }
         // Compute the new goal + pos
-        *goal = fold_eval(hal, &mut data_ext, self.mix, self.domain, group);
+        *goal = fold_eval(hal, &mut data4, self.mix, self.domain, group);
         *pos = group;
         Ok(())
     }
@@ -105,10 +102,7 @@ pub fn fri_verify<'a, H: VerifyHal, F>(
     mut inner: F,
 ) -> Result<(), VerificationError>
 where
-    F: FnMut(
-        &mut ReadIOP<'a, H::Sha>,
-        usize,
-    ) -> Result<<H::Field as Field>::ExtElem, VerificationError>,
+    F: FnMut(&mut ReadIOP<'a, H::Sha>, usize) -> Result<Fp4, VerificationError>,
 {
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
@@ -131,11 +125,11 @@ where
         rounds_capacity
     );
     // Grab the final coeffs + commit
-    let final_coeffs = iop.read_pod_slice(<H::Field as Field>::ExtElem::EXT_SIZE * degree);
+    let final_coeffs = iop.read_pod_slice(EXT_SIZE * degree);
     let final_digest = iop.get_sha().hash_raw_pod_slice(final_coeffs);
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
-    let gen = <<H::Field as Field>::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
+    let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
     // Do queries
     for _ in 0..QUERIES {
         let rng = iop.next_u32();
@@ -148,14 +142,15 @@ where
         }
         // Do final verification
         let x = gen.pow(pos);
-        let mut fx = <H::Field as Field>::ExtElem::ZERO;
-        let mut cur = <H::Field as Field>::ExtElem::ONE;
+        let mut fx = Fp4::ZERO;
+        let mut cur = Fp::ONE;
         for i in 0..degree {
-            let mut inps = Vec::with_capacity(<H::Field as Field>::ExtElem::EXT_SIZE);
-            for j in 0..<H::Field as Field>::ExtElem::EXT_SIZE {
-                inps.push(final_coeffs[j * degree + i]);
-            }
-            let coeff = <H::Field as Field>::ExtElem::from_subelems(inps);
+            let coeff = Fp4::new(
+                final_coeffs[0 * degree + i],
+                final_coeffs[1 * degree + i],
+                final_coeffs[2 * degree + i],
+                final_coeffs[3 * degree + i],
+            );
             fx += cur * coeff;
             cur *= x;
         }
