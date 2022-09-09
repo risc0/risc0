@@ -187,6 +187,8 @@ pub trait VerifyHal {
 
 #[cfg(feature = "host")]
 mod host {
+    use core::marker::PhantomData;
+
     use super::*;
     use crate::adapter::{PolyExt, PolyExtContext};
 
@@ -195,15 +197,15 @@ mod host {
     pub struct CpuVerifyHal<'a, S: Sha, C: PolyExt, F: Field> {
         sha: &'a S,
         circuit: &'a C,
-        field: &'a F,
+        field: PhantomData<&'a F>,
     }
 
     impl<'a, S: Sha, C: PolyExt, F: Field> CpuVerifyHal<'a, S, C, F> {
-        pub fn new(sha: &'a S, circuit: &'a C, field: &'a F) -> Self {
+        pub fn new(sha: &'a S, circuit: &'a C) -> Self {
             Self {
                 sha,
                 circuit,
-                field,
+                field: PhantomData,
             }
         }
     }
