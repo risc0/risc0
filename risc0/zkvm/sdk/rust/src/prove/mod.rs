@@ -14,6 +14,7 @@
 
 mod cpu_eval;
 pub mod exec;
+mod ffpu;
 
 use std::io::Write;
 

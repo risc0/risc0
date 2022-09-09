@@ -13,6 +13,7 @@
 // limitations under the License.
 
 pub mod adapter;
+pub mod ffpu;
 mod fri;
 pub(crate) mod merkle;
 pub mod read_iop;
@@ -72,6 +73,8 @@ pub trait VerifyHal {
 
     fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4;
 
+    fn fold_eval(&self, io: &mut [Fp4], mix: Fp4, inv_wk: Fp) -> Fp4;
+
     /// Evaluate a polynomial whose coefficients are in the extension field at a
     /// point.
     fn poly_eval(&self, coeffs: &[Fp4], x: Fp4, y: Fp) -> Fp4 {
@@ -90,7 +93,10 @@ pub trait VerifyHal {
 #[cfg(feature = "host")]
 mod host {
     use super::*;
-    use crate::adapter::{PolyExt, PolyExtContext};
+    use crate::{
+        adapter::{PolyExt, PolyExtContext},
+        core::ntt::{bit_reverse, interpolate_ntt},
+    };
 
     pub struct CpuVerifyHal<'a, S: Sha, C: PolyExt> {
         sha: &'a S,
@@ -114,12 +120,30 @@ mod host {
             log::debug!("{}", msg);
         }
 
+        fn fold_eval(&self, io: &mut [Fp4], mix: Fp4, inv_wk: Fp) -> Fp4 {
+            interpolate_ntt(io);
+            bit_reverse(io);
+            poly_eval(io, mix, inv_wk)
+        }
+
         fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4 {
             let ctx = PolyExtContext { mix: poly_mix };
             let args: &[&[Fp]] = &[out, mix];
             let result = self.circuit.poly_ext(&ctx, u, args);
             result.tot
         }
+    }
+
+    fn poly_eval(coeffs: &[Fp4], x: Fp4, y: Fp) -> Fp4 {
+        let mut mul_fp = Fp::ONE;
+        let mut mul_fp4 = Fp4::ONE;
+        let mut tot = Fp4::ZERO;
+        for i in 0..coeffs.len() {
+            tot += coeffs[i] * mul_fp * mul_fp4;
+            mul_fp *= y;
+            mul_fp4 *= x;
+        }
+        tot
     }
 }
 

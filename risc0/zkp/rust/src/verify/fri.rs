@@ -22,7 +22,6 @@ use crate::{
         fp::Fp,
         fp4::{Fp4, EXT_SIZE},
         log2_ceil,
-        ntt::{bit_reverse, interpolate_ntt},
         rou::{ROU_FWD, ROU_REV},
         sha::Sha,
     },
@@ -38,15 +37,6 @@ struct VerifyRoundInfo<'a, S: Sha> {
     domain: usize,
     merkle: MerkleTreeVerifier<'a, S>,
     mix: Fp4,
-}
-
-fn fold_eval<H: VerifyHal>(hal: &H, values: &mut [Fp4], mix: Fp4, s: usize, j: usize) -> Fp4 {
-    interpolate_ntt(values);
-    bit_reverse(values);
-    let root_po2 = log2_ceil(FRI_FOLD * s);
-    let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(j);
-    let tot = hal.poly_eval(values, mix, inv_wk);
-    tot
 }
 
 impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
@@ -85,7 +75,9 @@ impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
             return Err(VerificationError::InvalidProof);
         }
         // Compute the new goal + pos
-        *goal = fold_eval(hal, &mut data4, self.mix, self.domain, group);
+        let root_po2 = log2_ceil(FRI_FOLD * self.domain);
+        let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(group);
+        *goal = hal.fold_eval(&mut data4, self.mix, inv_wk);
         *pos = group;
         Ok(())
     }
