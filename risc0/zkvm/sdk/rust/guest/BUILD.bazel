@@ -8,7 +8,7 @@ rust_library(
     name = "guest",
     srcs = glob(["src/**/*.rs"]),
     crate_name = "risc0_zkvm_guest",
-    data = ["README.md"],
+    data = ["README.md", "src/memset.s", "src/memcpy.s"],
     deps = [
         "//risc0/zkp/rust:zkp_guest",
         "//risc0/zkvm/sdk/rust:zkvm_guest",
