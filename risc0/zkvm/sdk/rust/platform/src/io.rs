@@ -63,6 +63,7 @@ pub const GPIO_INSECURESHAHASH: Gpio<*const InsecureShaHashDescriptor> = Gpio::n
 
 pub const GPIO_COMPUTE_POLY: Gpio<*const ComputePolyDescriptor> = Gpio::new(0x01F0002C);
 pub const GPIO_POLY_EVAL: Gpio<*const PolyEvalDescriptor> = Gpio::new(0x01F00030);
+pub const GPIO_FFPU: Gpio<*const FfpuDescriptor> = Gpio::new(0x01F00034);
 
 pub mod addr {
     pub const GPIO_SHA: u32 = super::GPIO_SHA.addr();
@@ -82,6 +83,7 @@ pub mod addr {
 
     pub const GPIO_COMPUTE_POLY: u32 = super::GPIO_COMPUTE_POLY.addr();
     pub const GPIO_POLY_EVAL: u32 = super::GPIO_POLY_EVAL.addr();
+    pub const GPIO_FFPU: u32 = super::GPIO_FFPU.addr();
 }
 
 #[repr(C)]
@@ -138,6 +140,12 @@ pub struct PolyEvalDescriptor {
     pub coeffs: SliceDescriptor,
     pub x: u32,
     pub y: u32,
+}
+
+#[repr(C)]
+pub struct FfpuDescriptor {
+    pub code: SliceDescriptor,
+    pub args: SliceDescriptor,
 }
 
 // Standard ZKVM channels; must match zkvm/platform/io.h.
