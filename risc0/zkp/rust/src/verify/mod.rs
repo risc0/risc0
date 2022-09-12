@@ -29,7 +29,6 @@ use self::adapter::VerifyAdapter;
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
     core::{
-        // TODO: Cleanup imports
         fp::Fp,
         fp4::Fp4,
         log2_ceil,
@@ -467,7 +466,9 @@ where
         hal,
         &mut iop,
         size,
-        |iop: &mut ReadIOP<_>, idx: usize| -> Result<Fp4, VerificationError> {
+        |iop: &mut ReadIOP<_>,
+         idx: usize|
+         -> Result<<H::Field as Field>::ExtElem, VerificationError> {
             hal.debug("fri_verify");
             let x = <H::Field as Field>::ExtElem::from_subfield(&gen.pow(idx));
             let rows = [
@@ -495,7 +496,7 @@ where
             let check_num = tot[combo_count] - combo_u[combo_count][0];
             let check_div = x - z.pow(INV_RATE);
             ret += check_num * check_div.inv();
-            Ok(H::to_baby_bear_fp4(ret))
+            Ok(ret)
         },
     )?;
     iop.verify_complete();
