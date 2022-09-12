@@ -240,11 +240,11 @@ mod host {
         ) -> <F as Field>::ExtElem {
             interpolate_ntt::<<F as Field>::Elem, <F as Field>::ExtElem>(io);
             bit_reverse(io);
-            <Self as VerifyHal>::from_baby_bear_fp4(poly_eval(
-                <Self as VerifyHal>::to_baby_bear_fp4_slice_mut(io),
-                <Self as VerifyHal>::to_baby_bear_fp4(mix),
-                <Self as VerifyHal>::to_baby_bear_fp(inv_wk),
-            ))
+            self.poly_eval(
+                io,
+                mix,
+                inv_wk,
+            )
         }
 
         fn compute_polynomial(
@@ -266,18 +266,6 @@ mod host {
                     .poly_ext(&ctx, <Self as VerifyHal>::to_baby_bear_fp4_slice(u), args);
             <Self as VerifyHal>::from_baby_bear_fp4(result.tot)
         }
-    }
-
-    fn poly_eval(coeffs: &[Fp4], x: Fp4, y: Fp) -> Fp4 {
-        let mut mul_fp = Fp::ONE;
-        let mut mul_fp4 = Fp4::ONE;
-        let mut tot = Fp4::ZERO;
-        for i in 0..coeffs.len() {
-            tot += coeffs[i] * mul_fp * mul_fp4;
-            mul_fp *= y;
-            mul_fp4 *= x;
-        }
-        tot
     }
 }
 
