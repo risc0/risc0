@@ -151,11 +151,9 @@ where
         let mut fx = <H::Field as Field>::ExtElem::ZERO;
         let mut cur = <H::Field as Field>::ExtElem::ONE;
         for i in 0..degree {
-            let mut inps = Vec::with_capacity(<H::Field as Field>::ExtElem::EXT_SIZE);
-            for j in 0..<H::Field as Field>::ExtElem::EXT_SIZE {
-                inps.push(final_coeffs[j * degree + i]);
-            }
-            let coeff = <H::Field as Field>::ExtElem::from_subelems(inps);
+            let coeff = <H::Field as Field>::ExtElem::from_subelems(
+                (0..<H::Field as Field>::ExtElem::EXT_SIZE).map(|j| final_coeffs[j * degree + i]),
+            );
             fx += cur * coeff;
             cur *= x;
         }
