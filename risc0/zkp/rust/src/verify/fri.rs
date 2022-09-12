@@ -77,7 +77,7 @@ impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
         // Compute the new goal + pos
         let root_po2 = log2_ceil(FRI_FOLD * self.domain);
         let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(group);
-        *goal = hal.fold_eval(&mut data4, self.mix, inv_wk);
+        *goal = H::to_baby_bear_fp4(hal.fold_eval(H::from_baby_bear_fp4_slice_mut(data4.as_mut_slice()), H::from_baby_bear_fp4(self.mix), H::from_baby_bear_fp(inv_wk)));
         *pos = group;
         Ok(())
     }

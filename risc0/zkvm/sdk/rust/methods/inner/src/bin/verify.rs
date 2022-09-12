@@ -25,6 +25,7 @@ use risc0_zkp::{
         ffpu::fold_eval::{CODE as FOLD_EVAL_CODE, DATA as FOLD_EVAL_DATA},
         VerifyHal,
     },
+    field::baby_bear::BabyBear,
 };
 use risc0_zkvm::receipt::verify_with_hal;
 use risc0_zkvm_guest::{entry, env, memory_barrier, sha_insecure, standalone_handlers};
@@ -52,6 +53,7 @@ impl GuestVerifyHal {
 
 impl VerifyHal for GuestVerifyHal {
     type Sha = sha_insecure::Impl;
+    type Field = BabyBear;
 
     fn sha(&self) -> &Self::Sha {
         &self.sha

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// TODO: Once the field genericization is complete, these can be deprecated in
+// favor of the field-specific root of unity tables
+
 //! Tables containing the roots of unity (currently for the base
 //! field of order `15*2^27 + 1`).
 //! There are two tables, each of which are inverses of the other.

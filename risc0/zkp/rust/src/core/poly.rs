@@ -16,14 +16,13 @@
 
 use alloc::vec;
 
-use super::fp4::Fp4;
-use crate::field::Elem;
+use crate::field::ExtElem;
 
 /// Evaluate a polynomial whose coefficients are in the extension field at a
 /// point.
-pub fn poly_eval(coeffs: &[Fp4], x: Fp4) -> Fp4 {
-    let mut mul = Fp4::ONE;
-    let mut tot = Fp4::ZERO;
+pub fn poly_eval<E: ExtElem>(coeffs: &[E], x: E) -> E {
+    let mut mul = E::ONE;
+    let mut tot = E::ZERO;
     for i in 0..coeffs.len() {
         tot += coeffs[i] * mul;
         mul *= x;
@@ -35,7 +34,7 @@ pub fn poly_eval(coeffs: &[Fp4], x: Fp4) -> Fp4 {
 ///
 /// Given the goal value f(x) at a set of evalation points x, compute
 /// coefficients.
-pub fn poly_interpolate(out: &mut [Fp4], x: &[Fp4], fx: &[Fp4], size: usize) {
+pub fn poly_interpolate<E: ExtElem>(out: &mut [E], x: &[E], fx: &[E], size: usize) {
     // Special case the very easy ones
     if size == 1 {
         out[0] = fx[0];
@@ -47,8 +46,8 @@ pub fn poly_interpolate(out: &mut [Fp4], x: &[Fp4], fx: &[Fp4], size: usize) {
         return;
     }
     // Compute ft = product of (x - x_i) for all i
-    let mut ft = vec![Fp4::ZERO; size + 1];
-    ft[0] = Fp4::ONE;
+    let mut ft = vec![E::ZERO; size + 1];
+    ft[0] = E::ONE;
     for i in 0..size {
         for j in (0..i + 1).rev() {
             let value = ft[j];
@@ -58,7 +57,7 @@ pub fn poly_interpolate(out: &mut [Fp4], x: &[Fp4], fx: &[Fp4], size: usize) {
     }
     // Clear output
     for i in 0..size {
-        out[i] = Fp4::ZERO;
+        out[i] = E::ZERO;
     }
     for i in 0..size {
         // Compute fr = ft / (x - x_i)
@@ -79,8 +78,8 @@ pub fn poly_interpolate(out: &mut [Fp4], x: &[Fp4], fx: &[Fp4], size: usize) {
 ///
 /// Take the coefficients in P, and divide by (X - z) for some z, return the
 /// remainder.
-pub fn poly_divide(p: &mut [Fp4], z: Fp4) -> Fp4 {
-    let mut cur = Fp4::ZERO;
+pub fn poly_divide<E: ExtElem>(p: &mut [E], z: E) -> E {
+    let mut cur = E::ZERO;
     for i in (0..p.len()).rev() {
         let next = z * cur + p[i];
         p[i] = cur;

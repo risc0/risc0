@@ -18,12 +18,8 @@ use core::ops::{Add, Mul, Sub};
 
 use paste::paste;
 
-use super::{
-    fp::Fp,
-    log2_ceil,
-    rou::{ROU_FWD, ROU_REV},
-};
-use crate::field::Elem;
+use super::log2_ceil;
+use crate::field::{Elem, RootsOfUnity};
 
 /// Reverses the bits in a 32-bit number.
 /// # Example
@@ -77,31 +73,35 @@ pub fn bit_reverse<T: Copy>(io: &mut [T]) {
 }
 
 #[inline]
-fn fwd_butterfly_0<T>(_: &mut [T], _: usize) {
+fn fwd_butterfly_0<B, T>(_: &mut [T], _: usize) {
     // no-op base case
 }
 
 #[inline]
-fn rev_butterfly_0<T>(_: &mut [T]) {
+fn rev_butterfly_0<B, T>(_: &mut [T]) {
     // no-op base case
 }
 
+// TODO: This generates butterfly functions up to $n = 32, but will panic if $n
+// is bigger than <F as RootsOfUnity>::MAX_ROU_PO2 -- is this the best approach?
 macro_rules! butterfly {
     ($n:literal, $x:literal) => {
         paste! {
             #[inline]
-            fn [<fwd_butterfly_ $n>]<T>(io: &mut [T], expand_bits: usize)
+            fn [<fwd_butterfly_ $n>]<B, T>(io: &mut [T], expand_bits: usize)
             where
-                T: Copy + Mul<Fp, Output = T> + Add<Output = T> + Sub<Output = T>,
+                // B is a base field element, T may be either base or extension
+                B: Elem + RootsOfUnity,
+                T: Copy + Mul<B, Output = T> + Add<Output = T> + Sub<Output = T>,
             {
                 if $n == expand_bits {
                     return;
                 }
                 let half = 1 << ($n - 1);
-                [<fwd_butterfly_ $x>](&mut io[..half], expand_bits);
-                [<fwd_butterfly_ $x>](&mut io[half..], expand_bits);
-                let step = Fp::new(ROU_FWD[$n]);
-                let mut cur = Fp::ONE;
+                [<fwd_butterfly_ $x>]::<B, T>(&mut io[..half], expand_bits);
+                [<fwd_butterfly_ $x>]::<B, T>(&mut io[half..], expand_bits);
+                let step = <B as RootsOfUnity>::ROU_FWD[$n];
+                let mut cur = B::ONE;
                 for i in 0..half {
                     let a = io[i];
                     let b = io[i + half] * cur;
@@ -112,13 +112,15 @@ macro_rules! butterfly {
             }
 
             #[inline]
-            fn [<rev_butterfly_ $n>]<T>(io: &mut [T])
+            fn [<rev_butterfly_ $n>]<B, T>(io: &mut [T])
             where
-                T: Copy + Mul<Fp, Output = T> + Add<Output = T> + Sub<Output = T>,
+                // B is a base field element, T may be either base or extension
+                B: Elem + RootsOfUnity,
+                T: Copy + Mul<B, Output = T> + Add<Output = T> + Sub<Output = T>,
             {
                 let half = 1 << ($n - 1);
-                let step = Fp::new(ROU_REV[$n]);
-                let mut cur = Fp::ONE;
+                let step = <B as RootsOfUnity>::ROU_REV[$n];
+                let mut cur = B::ONE;
                 for i in 0..half {
                     let a = io[i];
                     let b = io[i + half];
@@ -126,13 +128,18 @@ macro_rules! butterfly {
                     io[i + half] = (a - b) * cur;
                     cur *= step;
                 }
-                [<rev_butterfly_ $x>](&mut io[..half]);
-                [<rev_butterfly_ $x>](&mut io[half..]);
+                [<rev_butterfly_ $x>]::<B, T>(&mut io[..half]);
+                [<rev_butterfly_ $x>]::<B, T>(&mut io[half..]);
             }
         }
     };
 }
 
+butterfly!(32, 31);
+butterfly!(31, 30);
+butterfly!(30, 29);
+butterfly!(29, 28);
+butterfly!(28, 27);
 butterfly!(27, 26);
 butterfly!(26, 25);
 butterfly!(25, 24);
@@ -222,15 +229,17 @@ butterfly!(1, 0);
 /// The exponent multiplicands in the sum arise from reversing the indices as
 /// three-bit numbers. For example, 3 is 011 in binary, which reversed is 110,
 /// which is 6. So i' in the exponent of the index-3 value is 6.
-pub fn interpolate_ntt<T>(io: &mut [T])
+pub fn interpolate_ntt<B, T>(io: &mut [T])
 where
-    T: Copy + Mul<Fp, Output = T> + Add<Output = T> + Sub<Output = T>,
+    // B is a base field element, T may be either base or extension
+    B: Elem + RootsOfUnity,
+    T: Copy + Mul<B, Output = T> + Add<Output = T> + Sub<Output = T>,
 {
     let size = io.len();
     let n = log2_ceil(size);
     assert_eq!(1 << n, size);
     match n {
-        0 => rev_butterfly_0(io),
+        0 => rev_butterfly_0::<B, T>(io),
         1 => rev_butterfly_1(io),
         2 => rev_butterfly_2(io),
         3 => rev_butterfly_3(io),
@@ -258,25 +267,32 @@ where
         25 => rev_butterfly_25(io),
         26 => rev_butterfly_26(io),
         27 => rev_butterfly_27(io),
+        28 => rev_butterfly_28(io),
+        29 => rev_butterfly_29(io),
+        30 => rev_butterfly_30(io),
+        31 => rev_butterfly_31(io),
+        32 => rev_butterfly_32(io),
         _ => unreachable!(),
     }
-    let norm = Fp::new(size as u32).inv();
+    let norm = B::from_u64(size as u64).inv();
     for i in 0..size {
         io[i] = io[i] * norm;
     }
 }
 
 /// Perform a forward butterfly transform of a buffer of (1 << n) numbers.
-pub fn evaluate_ntt<T>(io: &mut [T], expand_bits: usize)
+pub fn evaluate_ntt<B, T>(io: &mut [T], expand_bits: usize)
 where
-    T: Copy + Mul<Fp, Output = T> + Add<Output = T> + Sub<Output = T>,
+    // B is a base field element, T may be either base or extension
+    B: Elem + RootsOfUnity,
+    T: Copy + Mul<B, Output = T> + Add<Output = T> + Sub<Output = T>,
 {
     // do_ntt::<T, false>(io, expand_bits);
     let size = io.len();
     let n = log2_ceil(size);
     assert_eq!(1 << n, size);
     match n {
-        0 => fwd_butterfly_0(io, expand_bits),
+        0 => fwd_butterfly_0::<B, T>(io, expand_bits),
         1 => fwd_butterfly_1(io, expand_bits),
         2 => fwd_butterfly_2(io, expand_bits),
         3 => fwd_butterfly_3(io, expand_bits),
@@ -304,6 +320,11 @@ where
         25 => fwd_butterfly_25(io, expand_bits),
         26 => fwd_butterfly_26(io, expand_bits),
         27 => fwd_butterfly_27(io, expand_bits),
+        28 => fwd_butterfly_28(io, expand_bits),
+        29 => fwd_butterfly_29(io, expand_bits),
+        30 => fwd_butterfly_30(io, expand_bits),
+        31 => fwd_butterfly_31(io, expand_bits),
+        32 => fwd_butterfly_32(io, expand_bits),
         _ => unreachable!(),
     }
 }
@@ -329,7 +350,7 @@ mod tests {
         ntt::{bit_reverse, evaluate_ntt, interpolate_ntt},
         rou::ROU_FWD,
     };
-    use crate::field::Elem;
+    use crate::field::{goldilocks, Elem};
 
     // Compare the complex version to the naive version
     #[test]
@@ -356,7 +377,7 @@ mod tests {
         }
         // Now compute multiEvaluate in place
         bit_reverse(&mut buf);
-        evaluate_ntt(&mut buf, 0);
+        evaluate_ntt::<Fp, Fp>(&mut buf, 0);
         // Compare
         assert_eq!(goal, buf);
     }
@@ -372,11 +393,31 @@ mod tests {
         // Copy it
         let orig = buf.clone();
         // Now go backwards
-        interpolate_ntt(&mut buf);
+        interpolate_ntt::<Fp, Fp>(&mut buf);
         // Make sure something changed
         assert_ne!(orig, buf);
         // Now go forward
-        evaluate_ntt(&mut buf, 0);
+        evaluate_ntt::<Fp, Fp>(&mut buf, 0);
+        // It should be back to identical
+        assert_eq!(orig, buf);
+    }
+
+    // Make sure fwd + rev is identity over goldilocks field
+    #[test]
+    fn roundtrip_goldilocks() {
+        const N: usize = 10;
+        const SIZE: usize = 1 << N;
+        // Randomly fill buffer
+        let mut rng = thread_rng();
+        let mut buf = [<goldilocks::Elem as Elem>::random(&mut rng); SIZE];
+        // Copy it
+        let orig = buf.clone();
+        // Now go backwards
+        interpolate_ntt::<goldilocks::Elem, goldilocks::Elem>(&mut buf);
+        // Make sure something changed
+        assert_ne!(orig, buf);
+        // Now go forward
+        evaluate_ntt::<goldilocks::Elem, goldilocks::Elem>(&mut buf, 0);
         // It should be back to identical
         assert_eq!(orig, buf);
     }
@@ -391,11 +432,11 @@ mod tests {
         let mut cmp = [Fp::random(&mut rng); SIZE_IN];
         let mut buf = [Fp::ZERO; SIZE_OUT];
         // Do plain interpolate on cmp
-        interpolate_ntt(&mut cmp);
+        interpolate_ntt::<Fp, Fp>(&mut cmp);
         // Expand to buf
         super::expand(&mut buf, &cmp, L);
         // Evaluate over the larger space
-        evaluate_ntt(&mut buf, L);
+        evaluate_ntt::<Fp, Fp>(&mut buf, L);
         // Order cmp nicely for the check
         bit_reverse(&mut cmp);
         // Now verify by comparing with the slow way
