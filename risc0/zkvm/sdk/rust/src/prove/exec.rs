@@ -51,12 +51,14 @@ use risc0_zkvm_platform::{
 };
 
 use super::ffpu::ffpu_execute;
-use crate::{elf::Program, CIRCUIT};
+use crate::{elf::Program, host::TraceEvent, CIRCUIT};
 
 pub trait IoHandler {
+    fn is_trace_enabled(&self) -> bool;
     fn on_commit(&mut self, buf: &[u32]) -> Result<()>;
     fn on_fault(&mut self, msg: &str) -> Result<()>;
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>>;
+    fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -285,6 +287,7 @@ pub struct MachineContext<'a, H: IoHandler> {
     memory: MemoryState,
     io: &'a mut H,
     cur_host_to_guest_offset: usize,
+    trace_enabled: bool,
 }
 
 impl PartialOrd for MemoryEvent {
@@ -367,6 +370,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
     pub fn new(io: &'a mut H) -> Self {
         MachineContext {
             memory: MemoryState::new(),
+            trace_enabled: io.is_trace_enabled(),
             io,
             cur_host_to_guest_offset: INPUT.start(),
         }
@@ -383,7 +387,31 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         (split_word(quot), split_word(rem))
     }
 
-    fn log(&self, msg: &str, args: &[Fp]) {
+    fn extract_trace(&mut self, message: &str, args: &[Fp]) -> Result<()> {
+        match message {
+            msg if msg.starts_with("C%u: pc: %08x Decode") => {
+                let (cycle, pc) = (args[0], args[1]);
+                self.io.on_trace(TraceEvent::InstructionStart {
+                    cycle: cycle.into(),
+                    pc: pc.into(),
+                })?
+            }
+            "C%u: pc: %08x Final: 0x%04x%04x -> r%u, next: %08x" => {
+                let (val_high, val_low, reg) = (args[2], args[3], args[4]);
+                self.io.on_trace(TraceEvent::RegisterSet {
+                    reg: u32::from(reg) as usize,
+                    value: ((u32::from(val_high)) * (1 << 16) + (u32::from(val_low))),
+                })?
+            }
+            _ => (),
+        }
+        Ok(())
+    }
+
+    fn log(&mut self, msg: &str, args: &[Fp]) {
+        if self.trace_enabled {
+            self.extract_trace(msg, args).unwrap();
+        }
         if log::max_level() < log::LevelFilter::Trace {
             // Don't bother to format it if we're not even logging.
             return;
@@ -472,6 +500,12 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
         };
         self.on_write(cycle, addr * 4, data)?;
+        if self.trace_enabled {
+            self.io.on_trace(TraceEvent::MemorySet {
+                addr: addr * 4,
+                value: data,
+            })?
+        }
         Ok(())
     }
 
