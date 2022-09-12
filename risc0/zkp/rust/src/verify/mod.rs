@@ -13,6 +13,7 @@
 // limitations under the License.
 
 pub mod adapter;
+pub mod ffpu;
 mod fri;
 pub(crate) mod merkle;
 pub mod read_iop;
@@ -28,7 +29,6 @@ use self::adapter::VerifyAdapter;
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
     core::{
-        // TODO: Cleanup imports
         fp::Fp,
         fp4::Fp4,
         log2_ceil,
@@ -134,6 +134,13 @@ pub trait VerifyHal {
         mix: &[<Self::Field as Field>::Elem],
     ) -> <Self::Field as Field>::ExtElem;
 
+    fn fold_eval(
+        &self,
+        io: &mut [<Self::Field as Field>::ExtElem],
+        mix: <Self::Field as Field>::ExtElem,
+        inv_wk: <Self::Field as Field>::Elem,
+    ) -> <Self::Field as Field>::ExtElem;
+
     /// Evaluate a polynomial whose coefficients are in the extension field at a
     /// point.
     fn poly_eval(
@@ -190,7 +197,10 @@ mod host {
     use core::marker::PhantomData;
 
     use super::*;
-    use crate::adapter::{PolyExt, PolyExtContext};
+    use crate::{
+        adapter::{PolyExt, PolyExtContext},
+        core::ntt::{bit_reverse, interpolate_ntt},
+    };
 
     // TODO: Not certain how best to handle the unused Field that's needed to
     // indicate which sorts of elements to use for calculations...
@@ -222,6 +232,21 @@ mod host {
             log::debug!("{}", msg);
         }
 
+        fn fold_eval(
+            &self,
+            io: &mut [<F as Field>::ExtElem],
+            mix: <F as Field>::ExtElem,
+            inv_wk: <F as Field>::Elem,
+        ) -> <F as Field>::ExtElem {
+            interpolate_ntt::<<F as Field>::Elem, <F as Field>::ExtElem>(io);
+            bit_reverse(io);
+            <Self as VerifyHal>::from_baby_bear_fp4(poly_eval(
+                <Self as VerifyHal>::to_baby_bear_fp4_slice_mut(io),
+                <Self as VerifyHal>::to_baby_bear_fp4(mix),
+                <Self as VerifyHal>::to_baby_bear_fp(inv_wk),
+            ))
+        }
+
         fn compute_polynomial(
             &self,
             u: &[<F as Field>::ExtElem],
@@ -241,6 +266,18 @@ mod host {
                     .poly_ext(&ctx, <Self as VerifyHal>::to_baby_bear_fp4_slice(u), args);
             <Self as VerifyHal>::from_baby_bear_fp4(result.tot)
         }
+    }
+
+    fn poly_eval(coeffs: &[Fp4], x: Fp4, y: Fp) -> Fp4 {
+        let mut mul_fp = Fp::ONE;
+        let mut mul_fp4 = Fp4::ONE;
+        let mut tot = Fp4::ZERO;
+        for i in 0..coeffs.len() {
+            tot += coeffs[i] * mul_fp * mul_fp4;
+            mul_fp *= y;
+            mul_fp4 *= x;
+        }
+        tot
     }
 }
 
@@ -431,7 +468,9 @@ where
         hal,
         &mut iop,
         size,
-        |iop: &mut ReadIOP<_>, idx: usize| -> Result<Fp4, VerificationError> {
+        |iop: &mut ReadIOP<_>,
+         idx: usize|
+         -> Result<<H::Field as Field>::ExtElem, VerificationError> {
             hal.debug("fri_verify");
             let x = <H::Field as Field>::ExtElem::from_subfield(&gen.pow(idx));
             let rows = [
@@ -459,7 +498,7 @@ where
             let check_num = tot[combo_count] - combo_u[combo_count][0];
             let check_div = x - z.pow(INV_RATE);
             ret += check_num * check_div.inv();
-            Ok(H::to_baby_bear_fp4(ret))
+            Ok(ret)
         },
     )?;
     iop.verify_complete();

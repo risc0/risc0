@@ -12,9 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Runs different tests based on the first u32 provided.
+
 #![no_main]
 #![no_std]
 #![feature(alloc_error_handler)]
+
+use core::arch::asm;
 
 #[cfg(feature = "pure-prove")]
 use risc0_zkp::core::sha::{Digest, Sha};
@@ -22,6 +26,18 @@ use risc0_zkvm_guest::{env, sha};
 
 risc0_zkvm_guest::entry!(main);
 risc0_zkvm_guest::standalone_handlers!();
+
+#[inline(never)]
+#[no_mangle]
+fn profile_test_func1() {
+    profile_test_func2()
+}
+
+#[inline(always)]
+#[no_mangle]
+fn profile_test_func2() {
+    unsafe { asm!("nop") }
+}
 
 pub fn main() {
     let impl_select: u32 = env::read();
@@ -56,6 +72,21 @@ pub fn main() {
             // We expect our acceleration circuit to use 72 cycles, so make sure that
             // our simulation doesn't run faster.
             assert!(total >= 72, "total: {total}");
+        }
+        #[cfg(feature = "pure-prove")]
+        3 => unsafe {
+            let mut _x: u32;
+            // Exeute some instructions with distinctive arguments
+            // that are easy to find in the event trace.
+            asm!(r"
+      li x5, 1337
+      sw x5, 548(zero)
+", out("x5") _x,);
+        },
+        #[cfg(feature = "pure-prove")]
+        4 => {
+            // Call an external function to make sure it's detected during profiling.
+            profile_test_func1()
         }
         _ => unimplemented!(),
     }

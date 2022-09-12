@@ -19,6 +19,10 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 lto = true
 opt-level = 3
 
+[profile.release.package.risc0-zkvm-methods-inner]
+# Include debug symbols so we can test the profiler.
+debug = 1
+
 [build-dependencies]
 risc0-build = { version = "0.11", path = "../../build" }
 

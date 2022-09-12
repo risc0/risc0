@@ -13,26 +13,39 @@
 // limitations under the License.
 
 use std::default::Default;
-use std::{fs, io::Write};
+use std::{
+    fs,
+    io::Write,
+    path::{Path, PathBuf},
+};
 
+use anyhow::Result;
 use clap::Parser;
-use risc0_zkvm::host::{MethodId, Prover, ProverOpts, Receipt, DEFAULT_METHOD_ID_LIMIT};
+use risc0_zkvm::host::{
+    profiler::Profiler, MethodId, Prover, ProverOpts, Receipt, DEFAULT_METHOD_ID_LIMIT,
+};
 
 /// Generates a MethodID for a given RISC-V ELF binary.
 #[derive(Parser)]
 #[clap(about, version, author)]
 struct Args {
     /// The ELF file to run
-    #[clap(long)]
-    elf: String,
+    #[clap(long, parse(from_os_str))]
+    elf: PathBuf,
 
     /// MethodID file; created if needed and it doesn't exist.
-    #[clap(long)]
-    method_id: Option<String>,
+    #[clap(long, parse(from_os_str))]
+    method_id: Option<PathBuf>,
 
     /// Receipt output file.
+    #[clap(long, parse(from_os_str))]
+    receipt: Option<PathBuf>,
+
+    /// EXPERIMENTAL: When enabled, writes the receipt in a format usable by the
+    /// "verify" guest method.
+    #[cfg(feature = "pure-prove")]
     #[clap(long)]
-    receipt: Option<String>,
+    input_for_verify: bool,
 
     /// Skip generating the seal in receipt.  This should only be used
     /// for testing.  In this case, performace will be much better but
@@ -41,8 +54,8 @@ struct Args {
     skip_seal: bool,
 
     /// File to read initial input from.
-    #[clap(long)]
-    initial_input: Option<String>,
+    #[clap(long, parse(from_os_str))]
+    initial_input: Option<PathBuf>,
 
     /// Display verbose output.
     #[clap(short, long, action = clap::ArgAction::Count)]
@@ -51,13 +64,15 @@ struct Args {
     /// Limit the number of hash table entries to compute.
     #[clap(short, long, default_value_t = DEFAULT_METHOD_ID_LIMIT)]
     limit: u32,
+
+    /// Write "pprof" protobuf output of the guest's run to this file.
+    /// You can use google's pprof (https://github.com/google/pprof)
+    /// to read it.
+    #[clap(long, parse(from_os_str))]
+    pprof_out: Option<PathBuf>,
 }
 
-fn read_method_id(
-    verbose: u8,
-    elf_file: &str,
-    method_id_file: &Option<String>,
-) -> Option<MethodId> {
+fn read_method_id(verbose: u8, elf_file: &Path, method_id_file: Option<&Path>) -> Option<MethodId> {
     let elf_mtime = fs::metadata(elf_file).ok()?.modified().ok()?;
     let id_mtime = fs::metadata(method_id_file.as_ref()?)
         .ok()?
@@ -76,11 +91,42 @@ fn read_method_id(
     if verbose > 0 {
         println!(
             "Successfully read method id from {}",
-            method_id_file.as_ref().unwrap()
+            method_id_file.unwrap().display()
         );
     }
 
     Some(id)
+}
+
+fn run_prover(
+    elf_contents: &[u8],
+    method_id: &[u8],
+    opts: ProverOpts,
+    initial_input: Option<Vec<u8>>,
+) -> Result<(Receipt, Vec<u8>)> {
+    let mut prover = Prover::new_with_opts(&elf_contents, method_id, opts).unwrap();
+    if let Some(bytes) = initial_input {
+        prover.add_input_u8_slice(bytes.as_slice());
+    }
+    let receipt = prover.run()?;
+    let output = prover.get_output()?;
+    Ok((receipt, output.to_vec()))
+}
+
+fn encode_receipt(receipt: &Receipt, _method_id: &[u8], _args: &Args) -> Vec<u8> {
+    #[cfg(feature = "pure-prove")]
+    if _args.input_for_verify {
+        let mut encoded: Vec<u8> = Vec::new();
+        let mut add_input_u32_slice =
+            |slice: &[u32]| encoded.write_all(bytemuck::cast_slice(slice)).unwrap();
+        add_input_u32_slice(&[receipt.seal.len() as u32]);
+        add_input_u32_slice(&receipt.seal);
+        add_input_u32_slice(&[(_method_id.len() / 4) as u32]);
+        encoded.write_all(_method_id).unwrap();
+        return encoded;
+    }
+
+    bytemuck::cast_slice(risc0_zkvm::serde::to_vec(&receipt).unwrap().as_slice()).into()
 }
 
 fn main() {
@@ -93,7 +139,7 @@ fn main() {
         eprintln!(
             "Read {} bytes of ELF from {}",
             elf_contents.len(),
-            &args.elf
+            args.elf.display()
         );
     }
 
@@ -102,15 +148,20 @@ fn main() {
         // generate an actual proof.
         MethodId::from_slice(&[]).unwrap()
     } else {
-        read_method_id(args.verbose, &args.elf, &args.method_id).unwrap_or_else(|| {
+        read_method_id(
+            args.verbose,
+            &args.elf,
+            args.method_id.as_ref().map(|p| p.as_path()),
+        )
+        .unwrap_or_else(|| {
             if args.verbose > 0 {
                 eprintln!("Computing method id");
             }
             let computed = MethodId::compute_with_limit(&elf_contents, args.limit).unwrap();
-            if let Some(method_id_file) = args.method_id {
+            if let Some(method_id_file) = args.method_id.as_ref() {
                 std::fs::write(&method_id_file, computed.as_slice().unwrap()).unwrap();
                 if args.verbose > 0 {
-                    eprintln!("Saved method id to {}", method_id_file);
+                    eprintln!("Saved method id to {}", method_id_file.display());
                 }
             }
             computed
@@ -120,18 +171,39 @@ fn main() {
     let opts: ProverOpts =
         ProverOpts::default().with_skip_seal(args.skip_seal || args.receipt.is_none());
 
-    let mut prover =
-        Prover::new_with_opts(&elf_contents, method_id.as_slice().unwrap(), opts).unwrap();
-    if let Some(input) = args.initial_input {
-        let input_bytes = fs::read(input).unwrap();
-        if args.verbose > 0 {
-            eprintln!("Supplying {} bytes of initial input", input_bytes.len());
-        }
-        prover.add_input_u8_slice(&input_bytes);
+    let mut guest_prof: Option<Profiler> = None;
+
+    if args.pprof_out.is_some() {
+        guest_prof = Some(Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());
     }
 
-    let receipt: Receipt = prover.run().unwrap();
-    let receipt_data = risc0_zkvm::serde::to_vec(&receipt).unwrap();
+    let proof = run_prover(
+        &elf_contents,
+        method_id.as_slice().unwrap(),
+        if let Some(ref mut profiler) = guest_prof {
+            opts.with_trace_callback(profiler.make_trace_callback())
+        } else {
+            opts
+        },
+        args.initial_input.as_ref().map(|input| {
+            let input_bytes = fs::read(input).unwrap();
+            if args.verbose > 0 {
+                eprintln!("Supplying {} bytes of initial input", input_bytes.len());
+            }
+            input_bytes
+        }),
+    );
+
+    // Now that we're done with the prover, we can collect the guest profiling data.
+    if let Some(ref mut profiler) = guest_prof.as_mut() {
+        profiler.finalize();
+        let report = profiler.encode_to_vec();
+        fs::write(args.pprof_out.as_ref().unwrap(), &report)
+            .expect("Unable to write profiling output");
+    }
+    let (receipt, output) = proof.expect("Run failed");
+
+    let receipt_data = encode_receipt(&receipt, method_id.as_slice().unwrap(), &args);
 
     if args.skip_seal || args.receipt.is_none() {
         if args.verbose > 0 {
@@ -143,19 +215,20 @@ fn main() {
             receipt.verify(method_id.as_slice().unwrap()).unwrap();
         }
     }
-    if let Some(receipt_file) = args.receipt {
-        fs::write(&receipt_file, bytemuck::cast_slice(&receipt_data)).unwrap();
+
+    if let Some(receipt_file) = args.receipt.as_ref() {
+        fs::write(receipt_file, receipt_data.as_slice()).expect("Unable to write receipt file");
         if args.verbose > 0 {
             eprintln!(
                 "Wrote {} bytes of receipt to {}",
                 receipt_data.len(),
-                receipt_file
+                receipt_file.display()
             );
         }
     }
-    let output = prover.get_output().unwrap();
+
     if args.verbose > 0 {
         eprintln!("Writing {} bytes of output to stdout", output.len());
     }
-    std::io::stdout().write_all(output).unwrap();
+    std::io::stdout().write_all(output.as_slice()).unwrap();
 }

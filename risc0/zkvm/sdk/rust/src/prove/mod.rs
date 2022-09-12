@@ -14,6 +14,7 @@
 
 mod cpu_eval;
 pub mod exec;
+mod ffpu;
 
 use std::io::Write;
 
@@ -29,7 +30,13 @@ use risc0_zkvm_platform::{
 };
 
 use self::cpu_eval::CpuEvalCheck;
-use crate::{elf::Program, host::ProverOpts, method_id::MethodId, receipt::Receipt, CIRCUIT};
+use crate::{
+    elf::Program,
+    host::{ProverOpts, TraceEvent},
+    method_id::MethodId,
+    receipt::Receipt,
+    CIRCUIT,
+};
 
 pub struct Prover<'a> {
     elf: Program,
@@ -140,6 +147,18 @@ impl<'a> exec::IoHandler for ProverImpl<'a> {
                 Ok(Vec::new())
             }
             _ => bail!("Unknown channel: {channel}"),
+        }
+    }
+
+    fn is_trace_enabled(&self) -> bool {
+        self.opts.trace_callback.is_some()
+    }
+
+    fn on_trace(&mut self, event: TraceEvent) -> Result<()> {
+        if let Some(ref mut cb) = self.opts.trace_callback {
+            cb(event)
+        } else {
+            Ok(())
         }
     }
 

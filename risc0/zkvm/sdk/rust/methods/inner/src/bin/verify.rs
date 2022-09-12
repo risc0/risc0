@@ -16,19 +16,23 @@
 #![feature(alloc_error_handler)]
 #![no_main]
 
-use core::mem;
+extern crate alloc;
 
 use risc0_zkp::{
     core::{fp::Fp, fp4::Fp4},
+    field::Elem,
+    verify::{
+        ffpu::fold_eval::{CODE as FOLD_EVAL_CODE, DATA as FOLD_EVAL_DATA},
+        VerifyHal,
+    },
     field::baby_bear::BabyBear,
-    verify::VerifyHal,
 };
 use risc0_zkvm::receipt::verify_with_hal;
 use risc0_zkvm_guest::{entry, env, memory_barrier, sha_insecure, standalone_handlers};
 use risc0_zkvm_platform::{
     io::{
-        ComputePolyDescriptor, PolyEvalDescriptor, SliceDescriptor, GPIO_COMPUTE_POLY,
-        GPIO_POLY_EVAL, SENDRECV_CHANNEL_INITIAL_INPUT,
+        ComputePolyDescriptor, FfpuDescriptor, PolyEvalDescriptor, SliceDescriptor,
+        GPIO_COMPUTE_POLY, GPIO_FFPU, GPIO_POLY_EVAL, SENDRECV_CHANNEL_INITIAL_INPUT,
     },
     rt::host_io::host_recv,
 };
@@ -70,9 +74,33 @@ impl VerifyHal for GuestVerifyHal {
         memory_barrier(desc);
         unsafe { GPIO_COMPUTE_POLY.as_ptr().write_volatile(desc) }
 
-        const FP4_WORDS: usize = mem::size_of::<Fp4>() / mem::size_of::<u32>();
-        let words: &[u32; FP4_WORDS] = host_recv(FP4_WORDS).try_into().unwrap();
+        let words: &[u32; Fp4::WORDS] = host_recv(Fp4::WORDS).try_into().unwrap();
+        *bytemuck::cast_ref(words)
+    }
 
+    fn fold_eval(&self, io: &mut [Fp4], mix: Fp4, inv_wk: Fp) -> Fp4 {
+        let data: alloc::vec::Vec<Fp4> = FOLD_EVAL_DATA.iter().map(|x| Fp4::from_u32(*x)).collect();
+        let mix = [mix];
+        let inv_wk = [Fp4::from_fp(inv_wk)];
+        let out = [Fp4::default()];
+
+        let args = [
+            SliceDescriptor::new(&data),
+            SliceDescriptor::new(io),
+            SliceDescriptor::new(&mix),
+            SliceDescriptor::new(&inv_wk),
+            SliceDescriptor::new(&out),
+        ];
+
+        let desc = &FfpuDescriptor {
+            code: SliceDescriptor::new(&FOLD_EVAL_CODE),
+            args: SliceDescriptor::new(&args),
+        };
+
+        memory_barrier(desc);
+        unsafe { GPIO_FFPU.as_ptr().write_volatile(desc) }
+
+        let words: &[u32; Fp4::WORDS] = host_recv(Fp4::WORDS).try_into().unwrap();
         *bytemuck::cast_ref(words)
     }
 
@@ -86,8 +114,7 @@ impl VerifyHal for GuestVerifyHal {
         memory_barrier(desc);
         unsafe { GPIO_POLY_EVAL.as_ptr().write_volatile(desc) }
 
-        const FP4_WORDS: usize = mem::size_of::<Fp4>() / mem::size_of::<u32>();
-        let words: &[u32; FP4_WORDS] = host_recv(FP4_WORDS).try_into().unwrap();
+        let words: &[u32; Fp4::WORDS] = host_recv(Fp4::WORDS).try_into().unwrap();
 
         // This is here to try to get more accurate cycle estimations.
         for _ in 0..coeffs.len() {
@@ -119,4 +146,8 @@ pub fn main() {
     verify_with_hal(&hal, method_id, seal).unwrap();
 
     env::log("done");
+    
+    // Avoid accidental cycle count regressions.
+    let cycles = env::get_cycle_count();
+    assert!(cycles < 12_000_000, "Ran in {cycles} cycles; expecting under 12 million.");
 }

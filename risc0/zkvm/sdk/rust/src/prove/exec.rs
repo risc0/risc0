@@ -38,23 +38,27 @@ use risc0_zkvm_circuit::CircuitImpl;
 use risc0_zkvm_platform::{
     io::{
         addr::{
-            GPIO_COMMIT, GPIO_COMPUTE_POLY, GPIO_CYCLECOUNT, GPIO_FAULT, GPIO_GETKEY,
+            GPIO_COMMIT, GPIO_COMPUTE_POLY, GPIO_CYCLECOUNT, GPIO_FAULT, GPIO_FFPU, GPIO_GETKEY,
             GPIO_INSECURESHACOMPRESS, GPIO_INSECURESHAHASH, GPIO_LOG, GPIO_POLY_EVAL,
             GPIO_SENDRECV_ADDR, GPIO_SENDRECV_CHANNEL, GPIO_SENDRECV_SIZE, GPIO_SHA,
         },
-        ComputePolyDescriptor, InsecureShaCompressDescriptor, InsecureShaHashDescriptor,
-        IoDescriptor, PolyEvalDescriptor, SHADescriptor, SliceDescriptor,
+        ComputePolyDescriptor, FfpuDescriptor, InsecureShaCompressDescriptor,
+        InsecureShaHashDescriptor, IoDescriptor, PolyEvalDescriptor, SHADescriptor,
+        SliceDescriptor,
     },
     memory::{INPUT, MEM_BITS},
     WORD_SIZE,
 };
 
-use crate::{elf::Program, CIRCUIT};
+use super::ffpu::ffpu_execute;
+use crate::{elf::Program, host::TraceEvent, CIRCUIT};
 
 pub trait IoHandler {
+    fn is_trace_enabled(&self) -> bool;
     fn on_commit(&mut self, buf: &[u32]) -> Result<()>;
     fn on_fault(&mut self, msg: &str) -> Result<()>;
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>>;
+    fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
 }
 
 #[derive(Clone, PartialEq, Eq)]
@@ -111,10 +115,30 @@ impl MemoryState {
     }
 
     #[track_caller]
+    fn load_fp4(&self, addr: u32) -> Fp4 {
+        let words = &[
+            self.load_u32(addr + 0 * WORD_SIZE as u32),
+            self.load_u32(addr + 1 * WORD_SIZE as u32),
+            self.load_u32(addr + 2 * WORD_SIZE as u32),
+            self.load_u32(addr + 3 * WORD_SIZE as u32),
+        ];
+        Fp4::from_u32_words(words)
+    }
+
+    #[track_caller]
     fn load_region_u32(&self, start: u32, size: u32) -> Vec<u32> {
         (start..start + size)
             .step_by(WORD_SIZE)
             .map(|addr| self.load_u32(addr))
+            .collect()
+    }
+
+    #[track_caller]
+    fn load_region_fp4(&self, start: u32, size: u32) -> Vec<Fp4> {
+        debug!("load_region_fp4: 0x{start:08X}:{size}");
+        (start..start + size)
+            .step_by(WORD_SIZE * Fp4::WORDS)
+            .map(|addr| self.load_fp4(addr))
             .collect()
     }
 
@@ -175,6 +199,22 @@ impl MemoryState {
         }
     }
 
+    #[track_caller]
+    fn store_region(&mut self, addr: u32, slice: &[u8]) {
+        // debug!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
+        for i in 0..slice.len() {
+            self.store_u8(addr + i as u32, slice[i]);
+        }
+    }
+
+    #[track_caller]
+    fn store_region_u32(&mut self, addr: u32, slice: &[u32]) {
+        assert!(addr % WORD_SIZE as u32 == 0);
+        for (offset, word) in slice.iter().enumerate() {
+            self.store_u32(addr + WORD_SIZE as u32 * offset as u32, *word);
+        }
+    }
+
     // Reads a C structure from a guest's memory and transmutes it
     // into the given structure, which should be repr(C) and plain old
     // data.
@@ -198,6 +238,20 @@ impl MemoryState {
             .collect()
     }
 
+    fn read_slices(&self, desc: &SliceDescriptor) -> Vec<SliceDescriptor> {
+        let elt_size = core::mem::size_of::<SliceDescriptor>();
+        assert_eq!(elt_size % WORD_SIZE, 0, "T should be word aligned");
+        let bytes = self.load_region(desc.addr, desc.size);
+        bytes
+            .chunks_exact(elt_size)
+            .map(|chunk| {
+                let size: u32 = *bytemuck::from_bytes(&chunk[..4]);
+                let addr: u32 = *bytemuck::from_bytes(&chunk[4..]);
+                SliceDescriptor { size, addr }
+            })
+            .collect()
+    }
+
     // Reads words from guest's memory and transmutes it into the given value,
     // which should be repr(C) and plain old data.
     fn read_value<T: Pod>(&self, addr: u32) -> T {
@@ -205,22 +259,6 @@ impl MemoryState {
         assert_eq!(size % WORD_SIZE, 0, "T should be word aligned");
         let bytes = self.load_region(addr, size as u32);
         *bytemuck::from_bytes(&bytes)
-    }
-
-    #[track_caller]
-    fn store_region(&mut self, addr: u32, slice: &[u8]) {
-        // debug!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
-        for i in 0..slice.len() {
-            self.store_u8(addr + i as u32, slice[i]);
-        }
-    }
-
-    #[track_caller]
-    fn store_region_u32(&mut self, addr: u32, slice: &[u32]) {
-        assert!(addr % WORD_SIZE as u32 == 0);
-        for (offset, word) in slice.iter().enumerate() {
-            self.store_u32(addr + WORD_SIZE as u32 * offset as u32, *word);
-        }
     }
 
     fn strlen(&self, addr: u32) -> usize {
@@ -249,6 +287,7 @@ pub struct MachineContext<'a, H: IoHandler> {
     memory: MemoryState,
     io: &'a mut H,
     cur_host_to_guest_offset: usize,
+    trace_enabled: bool,
 }
 
 impl PartialOrd for MemoryEvent {
@@ -331,6 +370,7 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
     pub fn new(io: &'a mut H) -> Self {
         MachineContext {
             memory: MemoryState::new(),
+            trace_enabled: io.is_trace_enabled(),
             io,
             cur_host_to_guest_offset: INPUT.start(),
         }
@@ -347,7 +387,31 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
         (split_word(quot), split_word(rem))
     }
 
-    fn log(&self, msg: &str, args: &[Fp]) {
+    fn extract_trace(&mut self, message: &str, args: &[Fp]) -> Result<()> {
+        match message {
+            msg if msg.starts_with("C%u: pc: %08x Decode") => {
+                let (cycle, pc) = (args[0], args[1]);
+                self.io.on_trace(TraceEvent::InstructionStart {
+                    cycle: cycle.into(),
+                    pc: pc.into(),
+                })?
+            }
+            "C%u: pc: %08x Final: 0x%04x%04x -> r%u, next: %08x" => {
+                let (val_high, val_low, reg) = (args[2], args[3], args[4]);
+                self.io.on_trace(TraceEvent::RegisterSet {
+                    reg: u32::from(reg) as usize,
+                    value: ((u32::from(val_high)) * (1 << 16) + (u32::from(val_low))),
+                })?
+            }
+            _ => (),
+        }
+        Ok(())
+    }
+
+    fn log(&mut self, msg: &str, args: &[Fp]) {
+        if self.trace_enabled {
+            self.extract_trace(msg, args).unwrap();
+        }
         if log::max_level() < log::LevelFilter::Trace {
             // Don't bother to format it if we're not even logging.
             return;
@@ -436,6 +500,12 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
             }
         };
         self.on_write(cycle, addr * 4, data)?;
+        if self.trace_enabled {
+            self.io.on_trace(TraceEvent::MemorySet {
+                addr: addr * 4,
+                value: data,
+            })?
+        }
         Ok(())
     }
 
@@ -581,6 +651,33 @@ impl<'a, H: IoHandler> MachineContext<'a, H> {
                     mul_fp4 *= x;
                 }
                 self.send_to_guest(bytemuck::bytes_of(&tot));
+            }
+            GPIO_FFPU => {
+                // SAFETY: FfpuDescriptor is a plain old
+                // repr(C) structure and has no pointers.
+                let desc: FfpuDescriptor = unsafe { self.memory.read_descriptor(value) };
+                let code: Vec<u32> = self.memory.read_slice(&desc.code);
+                log::debug!(
+                    "GPIO_FFPU> code: 0x{:08X}:{}, args: 0x{:08X}:{}",
+                    desc.code.addr,
+                    desc.code.size,
+                    desc.args.addr,
+                    desc.args.size
+                );
+                let desc_args = self.memory.read_slices(&desc.args);
+                let mut args: Vec<Vec<Fp4>> = desc_args
+                    .iter()
+                    .map(|desc| self.memory.load_region_fp4(desc.addr, desc.size))
+                    .collect();
+                let mut args: Vec<&mut [Fp4]> = args.iter_mut().map(|x| x.as_mut_slice()).collect();
+                debug!("args[0]: {:?}", args[0]);
+                debug!("args[1]: {:?}", args[1]);
+                debug!("args[2]: {:?}", args[2]);
+                debug!("args[3]: {:?}", args[3]);
+                debug!("args[4]: {:?}", args[4]);
+                ffpu_execute(&code, &mut args);
+                debug!("args[4]: {:?}", args[4]);
+                self.send_to_guest(bytemuck::cast_slice(&args[4]));
             }
             _ => {}
         };

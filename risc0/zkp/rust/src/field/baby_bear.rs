@@ -72,8 +72,10 @@ impl fmt::Debug for Elem {
 
 /// The modulus of the field.
 const P: u32 = 15 * (1 << 27) + 1;
+
 /// The modulus of the field as a u64.
 const P_U64: u64 = P as u64;
+
 /// The amount of memory to store a field element, as number of u32 words
 const WORDS: usize = 1;
 
@@ -177,6 +179,7 @@ impl ops::AddAssign for Elem {
 
 impl ops::Sub for Elem {
     type Output = Self;
+
     /// Subtraction for Baby Bear [Elem]
     fn sub(self, rhs: Self) -> Self {
         Elem(sub(self.0, rhs.0))
@@ -192,6 +195,7 @@ impl ops::SubAssign for Elem {
 
 impl ops::Mul for Elem {
     type Output = Self;
+
     /// Multiplication for Baby Bear [Elem]
     fn mul(self, rhs: Self) -> Self {
         Elem(mul(self.0, rhs.0))
@@ -287,6 +291,7 @@ const fn decode(a: u32) -> u32 {
 
 /// The size of the extension field in elements, 4 in this case.
 const EXT_SIZE: usize = 4;
+
 /// Instances of `ExtElem` are elements of a finite field `F_p^4`. They are
 /// represented as elements of `F_p[X] / (X^4 - 11)`. This large
 /// finite field (about `2^128` elements) is used when the security of
@@ -465,6 +470,7 @@ impl ExtElem {
 
 impl ops::Add for ExtElem {
     type Output = Self;
+
     /// Addition for Baby Bear [ExtElem]
     fn add(self, rhs: Self) -> Self {
         let mut lhs = self;
@@ -484,6 +490,7 @@ impl ops::AddAssign for ExtElem {
 
 impl ops::Sub for ExtElem {
     type Output = Self;
+
     /// Subtraction for Baby Bear [ExtElem]
     fn sub(self, rhs: Self) -> Self {
         let mut lhs = self;
@@ -513,6 +520,7 @@ impl ops::MulAssign<Elem> for ExtElem {
 
 impl ops::Mul<Elem> for ExtElem {
     type Output = Self;
+
     /// Multiplication by a Baby Bear [Elem]
     fn mul(self, rhs: Elem) -> Self {
         let mut lhs = self;
@@ -523,6 +531,7 @@ impl ops::Mul<Elem> for ExtElem {
 
 impl ops::Mul<ExtElem> for Elem {
     type Output = ExtElem;
+
     /// Multiplication for a subfield [Elem] by an [ExtElem]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         rhs * self
@@ -536,6 +545,7 @@ impl ops::Mul<ExtElem> for Elem {
 // some `if`s and hope it gets unrolled properly, but it's small
 // enough to just hand write.
 impl ops::MulAssign for ExtElem {
+    #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
         // Rename the element arrays to something small for readability.
         let a = &self.0;
@@ -551,6 +561,7 @@ impl ops::MulAssign for ExtElem {
 
 impl ops::Mul for ExtElem {
     type Output = ExtElem;
+    #[inline(always)]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         let mut lhs = self;
         lhs *= rhs;
