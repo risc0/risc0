@@ -240,11 +240,7 @@ mod host {
         ) -> <F as Field>::ExtElem {
             interpolate_ntt::<<F as Field>::Elem, <F as Field>::ExtElem>(io);
             bit_reverse(io);
-            self.poly_eval(
-                io,
-                mix,
-                inv_wk,
-            )
+            self.poly_eval(io, mix, inv_wk)
         }
 
         fn compute_polynomial(
