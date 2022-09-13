@@ -41,12 +41,12 @@ static CUR_DESC: CurDesc = CurDesc(UnsafeCell::new(0));
 
 const END_MARKER: u8 = 0x80;
 
-// Chunk size in words for optimized SHA to operate on; all SHA
+// Chunk size in words on which the optimized SHA will operate; all SHA
 // requests must be a multiple of this size.
 const CHUNK_SIZE: usize = 64 / WORD_SIZE;
 
 fn alloc_desc() -> *mut SHADescriptor {
-    // SAFETY: Single threaded and this is the only place we use CUR_DESC.
+    // SAFETY: Single-threaded and this is the only place we use CUR_DESC.
     unsafe {
         let cur_desc = CUR_DESC.0.get();
         let ptr = (memory::SHA.start() as *mut SHADescriptor).add(*cur_desc);
@@ -57,7 +57,7 @@ fn alloc_desc() -> *mut SHADescriptor {
 
 /// Computes a raw digest of the given slice.  For compatibility with
 /// the SHA specification, the data must already contain the end
-/// marker and the trailer
+/// marker and the trailer.
 pub fn raw_digest(data: &[u32]) -> &'static Digest {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     // Allocate fresh memory that's guaranteed to be uninitialized so
@@ -71,7 +71,7 @@ pub fn raw_digest(data: &[u32]) -> &'static Digest {
 }
 
 // Computes a raw digest of the given slice, and stores the digest in
-// the given pointer.  The digest memory must be uninitilaized.
+// the given pointer.  The digest memory must be uninitialized.
 pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
     assert_eq!(data.len() % CHUNK_SIZE, 0);
     let type_count = data.len() / CHUNK_SIZE;
@@ -90,8 +90,8 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
     GPIO_SHA.as_ptr().write_volatile(desc_ptr);
 }
 
-// Calculates the number of words of capacity needed, including end
-// marker and trailer, to take the SHA hash of len_bytes bytes.
+// Calculates the capacity needed as a number of words, including end
+// marker and trailer, in order to take the SHA hash of len_bytes bytes.
 pub(crate) const fn compute_capacity_needed(len_bytes: usize) -> usize {
     // Add one for end marker, round up, then 2 words for the 64-bit size.
     let len_words = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE + 2;
@@ -132,6 +132,27 @@ pub(crate) fn add_trailer(data: &mut [u32], len_bytes: usize, memtype: MemoryTyp
 }
 
 /// Computes the SHA256 digest of a serialized object.
+/// Within the RISC Zero zkVM, this is useful in combination with calls to
+/// publicly `commit` the SHA digest, in cases where it is desirable to
+/// publicly associate data with guest program execution without revealing its
+/// contents.
+///
+/// # Examples
+/// ```rust, ignore
+/// let message_digest: Digest = sha::digest(&message);
+/// ```
+/// In our in-progress [voting machine example](https://www.github.com/risc0/risc0-rust-examples/tree/main/voting-machine),
+/// we publicly commit a SHA digest of private state parameters:
+/// ```rust, ignore
+///  env::commit(&FreezeVotingMachineCommit {
+///     old_state: *sha::digest(&params.state),
+///     new_state: *sha::digest(&result.state),
+///     polls_open: polls_open,
+///     voter_bitfield: voter_bitfield,
+///     count: count,
+/// });
+/// ```
+
 pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     // If the object to be serialized is a plain old structure in memory, this
     // should be a good guess for the allocation needed.

@@ -29,8 +29,8 @@ pub mod env;
 /// Functions for computing SHA-256 hashes.
 pub mod sha;
 
-/// Faster than "sha", but delegates to host so should not be trusted
-/// to prove anything.
+/// `sha_insecure` is faster than `sha`, but delegates to the host, so it should
+/// not be trusted to prove anything.
 #[cfg(feature = "pure-prove")]
 pub mod sha_insecure;
 
@@ -40,8 +40,8 @@ extern "C" {
     fn _fault() -> !;
 }
 
-/// Aborts the guest with the given message.  This message should
-/// include a trailing \0.
+/// Aborts the guest with the given message.
+/// This message should include a trailing \0.
 pub unsafe fn _fail(msg: &str) -> ! {
     use risc0_zkvm_platform::io::GPIO_FAULT;
     let ptr = msg.as_ptr();
@@ -85,7 +85,7 @@ macro_rules! standalone_handlers {
     };
 }
 
-/// Used for defining a main entrypoint.
+/// Used for defining a main entry point.
 ///
 /// # Example
 ///
