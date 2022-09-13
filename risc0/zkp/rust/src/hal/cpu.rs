@@ -199,7 +199,7 @@ impl<F: Field> Hal for CpuHal<F> {
         io.as_slice_mut()
             .par_chunks_exact_mut(row_size)
             .for_each(|row| {
-                evaluate_ntt(Self::to_baby_bear_fp_slice_mut(row), expand_bits);
+                evaluate_ntt::<F::Elem, F::Elem>(row, expand_bits);
             });
     }
 
@@ -209,7 +209,7 @@ impl<F: Field> Hal for CpuHal<F> {
         io.as_slice_mut()
             .par_chunks_exact_mut(row_size)
             .for_each(|row| {
-                interpolate_ntt(Self::to_baby_bear_fp_slice_mut(row));
+                interpolate_ntt::<F::Elem, F::Elem>(row);
             });
     }
 
@@ -392,10 +392,9 @@ impl<F: Field> Hal for CpuHal<F> {
         assert_eq!(matrix.size(), col_size * count);
         let mut output = output.as_slice_mut();
         let matrix = matrix.as_slice().to_vec(); // TODO: avoid copy
-        let fp_matrix = CpuHal::<F>::to_baby_bear_fp_slice(matrix.as_slice());
         let sha = sha_cpu::Impl {};
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            *output = *sha.hash_pod_stride(fp_matrix, idx, col_size, count);
+            *output = *sha.hash_pod_stride(matrix.as_slice(), idx, col_size, count);
         });
     }
 

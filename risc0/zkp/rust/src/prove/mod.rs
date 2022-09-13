@@ -27,12 +27,10 @@ use log::debug;
 use crate::{
     core::{
         fp::Fp,
-        fp4::{Fp4, EXT_SIZE},
         poly::{poly_divide, poly_interpolate},
-        rou::ROU_REV,
         sha::Sha,
     },
-    field::Elem,
+    field::{Elem, ExtElem, Field, RootsOfUnity},
     hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::{RegisterGroup, TapSet},
@@ -88,12 +86,20 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let size = 1 << po2;
 
     // Make code + data PolyGroups + commit them
-    let code_coeffs = make_coeffs(hal, circuit.get_code(), code_size);
+    let code_coeffs = make_coeffs(
+        hal,
+        H::from_baby_bear_fp_slice(circuit.get_code()),
+        code_size,
+    );
     let code_group = PolyGroup::new(hal, &code_coeffs, code_size, size);
     code_group.merkle.commit(hal, &mut iop);
     debug!("codeGroup: {}", code_group.merkle.root());
 
-    let data_coeffs = make_coeffs(hal, circuit.get_data(), data_size);
+    let data_coeffs = make_coeffs(
+        hal,
+        H::from_baby_bear_fp_slice(circuit.get_data()),
+        data_size,
+    );
     let data_group = PolyGroup::new(hal, &data_coeffs, data_size, size);
     data_group.merkle.commit(hal, &mut iop);
     debug!("dataGroup: {}", data_group.merkle.root());
@@ -103,17 +109,21 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     // Make the accum group + commit
     debug!("size = {size}, accumSize = {accum_size}");
     debug!("getAccum.size() = {}", circuit.get_accum().len());
-    let accum_coeffs = make_coeffs(hal, circuit.get_accum(), accum_size);
+    let accum_coeffs = make_coeffs(
+        hal,
+        H::from_baby_bear_fp_slice(circuit.get_accum()),
+        accum_size,
+    );
     let accum_group = PolyGroup::new(hal, &accum_coeffs, accum_size, size);
     accum_group.merkle.commit(hal, &mut iop);
     debug!("accumGroup: {}", accum_group.merkle.root());
 
     // Set the poly mix value
-    let poly_mix = Fp4::random(&mut iop.rng);
+    let poly_mix = <<H as Hal>::Field as Field>::ExtElem::random(&mut iop.rng);
 
     // Now generate the check polynomial
     let domain = size * INV_RATE;
-    let check_poly = hal.alloc_fp(EXT_SIZE * domain);
+    let check_poly = hal.alloc_fp(<H::Field as Field>::ExtElem::EXT_SIZE * domain);
     let mix = hal.copy_fp_from(H::from_baby_bear_fp_slice(circuit.get_mix()));
     let out = hal.copy_fp_from(H::from_baby_bear_fp_slice(circuit.get_output()));
     eval.eval_check(
@@ -123,7 +133,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         &accum_group.evaluated,
         &mix,
         &out,
-        H::from_baby_bear_fp4(poly_mix),
+        poly_mix,
         po2 as usize,
         circuit.get_steps(),
     );
@@ -147,7 +157,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     // roots of unity (which are the only thing that and values get multiplied
     // by) are in Fp, Fp4 values act like simple vectors of Fp for the
     // purposes of interpolate/evaluate.
-    hal.batch_interpolate_ntt(&check_poly, EXT_SIZE);
+    hal.batch_interpolate_ntt(&check_poly, <H::Field as Field>::ExtElem::EXT_SIZE);
 
     // The next step is to convert the degree 4*n check polynomial into 4 degreen n
     // polynomials so that f(x) = g0(x^4) + g1(x^4) x + g2(x^4) x^2 + g3(x^4)
@@ -166,7 +176,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     debug!("checkGroup: {}", check_group.merkle.root());
 
     // Now pick a value for Z
-    let z = Fp4::random(&mut iop.rng);
+    let z = <H::Field as Field>::ExtElem::random(&mut iop.rng);
     // #ifdef CIRCUIT_DEBUG
     //   if (badZ != Fp4(0)) {
     //     Z = badZ;
@@ -176,11 +186,13 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     //   LOG(1, "Z = " << Z);
 
     // Get rev rou for size
-    let back_one = Fp4::from_u32(ROU_REV[po2 as usize]);
+    let back_one = <H::Field as Field>::ExtElem::from_subfield(
+        &<H::Field as Field>::Elem::ROU_REV[po2 as usize],
+    );
     let mut all_xs = Vec::new();
 
     // Do evaluations of all of the various polynomials at the appropriate points.
-    let mut eval_u: Vec<Fp4> = Vec::new();
+    let mut eval_u: Vec<<H::Field as Field>::ExtElem> = Vec::new();
     let mut eval_group = |id: RegisterGroup, pg: &PolyGroup<H>| {
         let mut which = Vec::new();
         let mut xs = Vec::new();
@@ -191,11 +203,11 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
             all_xs.push(x);
         }
         let which = hal.copy_u32_from(which.as_slice());
-        let xs = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(xs.as_slice()));
+        let xs = hal.copy_fp4_from(xs.as_slice());
         let out = hal.alloc_fp4(which.size());
         hal.batch_evaluate_any(&pg.coeffs, pg.count, &which, &xs, &out);
         out.view(|view| {
-            eval_u.extend(H::to_baby_bear_fp4_slice(view));
+            eval_u.extend(view);
         });
     };
 
@@ -210,7 +222,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     // Now, convert the values to coefficients via interpolation
     let mut pos = 0;
-    let mut coeff_u = vec![Fp4::ZERO; eval_u.len()];
+    let mut coeff_u = vec![<H::Field as Field>::ExtElem::ZERO; eval_u.len()];
     for reg in taps.regs() {
         poly_interpolate(
             &mut coeff_u[pos..],
@@ -222,15 +234,15 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     }
 
     // Add in the coeffs of the check polynomials.
-    let z4 = z.pow(EXT_SIZE);
+    let z_pow = z.pow(<H::Field as Field>::ExtElem::EXT_SIZE);
     let which: [u32; CHECK_SIZE] = array_init(|i| i as u32);
-    let xs = [z4; CHECK_SIZE];
+    let xs = [z_pow; CHECK_SIZE];
     let out = hal.alloc_fp4(CHECK_SIZE);
     let which = hal.copy_u32_from(which.as_slice());
-    let xs = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(xs.as_slice()));
+    let xs = hal.copy_fp4_from(xs.as_slice());
     hal.batch_evaluate_any(&check_group.coeffs, CHECK_SIZE, &which, &xs, &out);
     out.view(|view| {
-        coeff_u.extend(H::to_baby_bear_fp4_slice(view));
+        coeff_u.extend(view);
     });
 
     debug!("Size of U = {}", coeff_u.len());
@@ -239,15 +251,15 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     iop.commit(&hash_u);
 
     // Set the mix mix value
-    let mix = Fp4::random(&mut iop.rng);
+    let mix = <H::Field as Field>::ExtElem::random(&mut iop.rng);
     debug!("Mix = {mix:?}");
 
     // Do the coefficent mixing
     // Begin by making a zeroed output buffer
     let combo_count = taps.combos_size();
-    let combos = vec![Fp4::ZERO; size * (combo_count + 1)];
-    let combos = hal.copy_fp4_from(H::from_baby_bear_fp4_slice(combos.as_slice()));
-    let mut cur_mix = Fp4::ONE;
+    let combos = vec![<H::Field as Field>::ExtElem::ZERO; size * (combo_count + 1)];
+    let combos = hal.copy_fp4_from(combos.as_slice());
+    let mut cur_mix = <H::Field as Field>::ExtElem::ONE;
 
     let mut mix_group = |id: RegisterGroup, pg: &PolyGroup<H>| {
         let mut which = Vec::new();
@@ -257,13 +269,7 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
         let which_buf = hal.copy_u32_from(which.as_slice());
         let group_size = taps.group_size(id);
         hal.mix_poly_coeffs(
-            &combos,
-            &H::from_baby_bear_fp4(cur_mix),
-            &H::from_baby_bear_fp4(mix),
-            &pg.coeffs,
-            &which_buf,
-            group_size,
-            size,
+            &combos, &cur_mix, &mix, &pg.coeffs, &which_buf, group_size, size,
         );
         cur_mix *= mix.pow(group_size);
     };
@@ -276,8 +282,8 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     let which_buf = hal.copy_u32_from(which.as_slice());
     hal.mix_poly_coeffs(
         &combos,
-        &H::from_baby_bear_fp4(cur_mix),
-        &H::from_baby_bear_fp4(mix),
+        &cur_mix,
+        &mix,
         &check_group.coeffs,
         &which_buf,
         CHECK_SIZE,
@@ -286,10 +292,9 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
 
     // Load the near final coefficients back to the CPU
     combos.view_mut(|combos| {
-        let combos = H::to_baby_bear_fp4_slice_mut(combos);
         // Subtract the U coeffs from the combos
         let mut cur_pos = 0;
-        let mut cur = Fp4::ONE;
+        let mut cur = <H::Field as Field>::ExtElem::ONE;
         for reg in taps.regs() {
             for i in 0..reg.size() {
                 combos[size * reg.combo_id() + i] -= cur * coeff_u[cur_pos + i];
@@ -311,28 +316,31 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
                         &mut combos[combo * size..combo * size + size],
                         z * back_one.pow((*back).into())
                     ),
-                    Fp4::ZERO
+                    <H::Field as Field>::ExtElem::ZERO
                 );
             }
         }
-        // Divide check polys by Z4
+        // Divide check polys by z^EXT_SIZE
         assert_eq!(
             poly_divide(
                 &mut combos[combo_count * size..combo_count * size + size],
-                z4
+                z_pow
             ),
-            Fp4::ZERO
+            <H::Field as Field>::ExtElem::ZERO
         );
     });
 
     // Sum the combos up into one final polynomial + make it into 4 Fp polys.
     // Additionally, it needs to be bit reversed to make everyone happy
-    let final_poly_coeffs = hal.alloc_fp(size * EXT_SIZE);
+    let final_poly_coeffs = hal.alloc_fp(size * <H::Field as Field>::ExtElem::EXT_SIZE);
     hal.eltwise_sum_fp4(&final_poly_coeffs, &combos);
 
     // Finally do the FRI protocol to prove the degree of the polynomial
-    hal.batch_bit_reverse(&final_poly_coeffs, EXT_SIZE);
-    debug!("FRI-proof, size = {}", final_poly_coeffs.size() / EXT_SIZE);
+    hal.batch_bit_reverse(&final_poly_coeffs, <H::Field as Field>::ExtElem::EXT_SIZE);
+    debug!(
+        "FRI-proof, size = {}",
+        final_poly_coeffs.size() / <H::Field as Field>::ExtElem::EXT_SIZE
+    );
 
     fri_prove(hal, &mut iop, &final_poly_coeffs, |iop, idx| {
         accum_group.merkle.prove(iop, idx);
@@ -347,9 +355,9 @@ pub fn prove<H: Hal, S: Sha, C: Circuit, E: EvalCheck<H>>(
     proof
 }
 
-fn make_coeffs<H: Hal>(hal: &H, input: &[Fp], count: usize) -> H::BufferFp {
+fn make_coeffs<H: Hal>(hal: &H, input: &[<H::Field as Field>::Elem], count: usize) -> H::BufferFp {
     // Copy into accel buffer
-    let buf = hal.copy_fp_from(H::from_baby_bear_fp_slice(input));
+    let buf = hal.copy_fp_from(input);
     // Do interpolate
     hal.batch_interpolate_ntt(&buf, count);
     // Convert f(x) -> f(3x), which effective multiplies cofficent c_i by 3^i.

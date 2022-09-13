@@ -12,10 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![cfg_attr(not(feature = "std"), no_std)]
-
-pub mod bench;
-pub mod multi_test;
-
-#[cfg(not(any(target_os = "zkvm", feature = "bazel")))]
-include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+pub mod fold_eval;

@@ -16,18 +16,22 @@
 #![feature(alloc_error_handler)]
 #![no_main]
 
-use core::mem;
+extern crate alloc;
 
 use risc0_zkp::{
-    core::{fp::Fp, fp4::Fp4},
-    verify::VerifyHal,
+    field::Elem,
+    verify::{
+        ffpu::fold_eval::{CODE as FOLD_EVAL_CODE, DATA as FOLD_EVAL_DATA},
+        VerifyHal,
+    },
+    field::{baby_bear::BabyBear, Field},
 };
 use risc0_zkvm::receipt::verify_with_hal;
 use risc0_zkvm_guest::{entry, env, memory_barrier, sha_insecure, standalone_handlers};
 use risc0_zkvm_platform::{
     io::{
-        ComputePolyDescriptor, PolyEvalDescriptor, SliceDescriptor, GPIO_COMPUTE_POLY,
-        GPIO_POLY_EVAL, SENDRECV_CHANNEL_INITIAL_INPUT,
+        ComputePolyDescriptor, FfpuDescriptor, PolyEvalDescriptor, SliceDescriptor,
+        GPIO_COMPUTE_POLY, GPIO_FFPU, GPIO_POLY_EVAL, SENDRECV_CHANNEL_INITIAL_INPUT,
     },
     rt::host_io::host_recv,
 };
@@ -48,6 +52,7 @@ impl GuestVerifyHal {
 
 impl VerifyHal for GuestVerifyHal {
     type Sha = sha_insecure::Impl;
+    type Field = BabyBear;
 
     fn sha(&self) -> &Self::Sha {
         &self.sha
@@ -57,10 +62,11 @@ impl VerifyHal for GuestVerifyHal {
         env::log(msg);
     }
 
-    fn compute_polynomial(&self, u: &[Fp4], poly_mix: Fp4, out: &[Fp], mix: &[Fp]) -> Fp4 {
+    // TODO: Here
+    fn compute_polynomial(&self, u: &[<Self::Field as Field>::ExtElem], poly_mix: <Self::Field as Field>::ExtElem, out: &[<Self::Field as Field>::Elem], mix: &[<Self::Field as Field>::Elem]) -> <Self::Field as Field>::ExtElem {
         let desc = &ComputePolyDescriptor {
             eval_u: SliceDescriptor::new(u),
-            poly_mix: &poly_mix as *const Fp4 as u32,
+            poly_mix: &poly_mix as *const <Self::Field as Field>::ExtElem as u32,
             out: SliceDescriptor::new(out),
             mix: SliceDescriptor::new(mix),
         };
@@ -68,24 +74,47 @@ impl VerifyHal for GuestVerifyHal {
         memory_barrier(desc);
         unsafe { GPIO_COMPUTE_POLY.as_ptr().write_volatile(desc) }
 
-        const FP4_WORDS: usize = mem::size_of::<Fp4>() / mem::size_of::<u32>();
-        let words: &[u32; FP4_WORDS] = host_recv(FP4_WORDS).try_into().unwrap();
-
+        let words: &[u32; <Self::Field as Field>::ExtElem::WORDS] = host_recv(<Self::Field as Field>::ExtElem::WORDS).try_into().unwrap();
         *bytemuck::cast_ref(words)
     }
 
-    fn poly_eval(&self, coeffs: &[Fp4], x: Fp4, y: Fp) -> Fp4 {
+    fn fold_eval(&self, io: &mut [<Self::Field as Field>::ExtElem], mix: <Self::Field as Field>::ExtElem, inv_wk: <Self::Field as Field>::Elem) -> <Self::Field as Field>::ExtElem {
+        let data: alloc::vec::Vec<<Self::Field as Field>::ExtElem> = FOLD_EVAL_DATA.iter().map(|x| <Self::Field as Field>::ExtElem::from_u32(*x)).collect();
+        let mix = [mix];
+        let inv_wk = [<Self::Field as Field>::ExtElem::from_fp(inv_wk)];
+        let out = [<Self::Field as Field>::ExtElem::default()];
+
+        let args = [
+            SliceDescriptor::new(&data),
+            SliceDescriptor::new(io),
+            SliceDescriptor::new(&mix),
+            SliceDescriptor::new(&inv_wk),
+            SliceDescriptor::new(&out),
+        ];
+
+        let desc = &FfpuDescriptor {
+            code: SliceDescriptor::new(&FOLD_EVAL_CODE),
+            args: SliceDescriptor::new(&args),
+        };
+
+        memory_barrier(desc);
+        unsafe { GPIO_FFPU.as_ptr().write_volatile(desc) }
+
+        let words: &[u32; <Self::Field as Field>::ExtElem::WORDS] = host_recv(<Self::Field as Field>::ExtElem::WORDS).try_into().unwrap();
+        *bytemuck::cast_ref(words)
+    }
+
+    fn poly_eval(&self, coeffs: &[<Self::Field as Field>::ExtElem], x: <Self::Field as Field>::ExtElem, y: <Self::Field as Field>::Elem) -> <Self::Field as Field>::ExtElem {
         let desc = &PolyEvalDescriptor {
             coeffs: SliceDescriptor::new(coeffs),
-            x: &x as *const Fp4 as u32,
-            y: &y as *const Fp as u32,
+            x: &x as *const <Self::Field as Field>::ExtElem as u32,
+            y: &y as *const <Self::Field as Field>::Elem as u32,
         };
 
         memory_barrier(desc);
         unsafe { GPIO_POLY_EVAL.as_ptr().write_volatile(desc) }
 
-        const FP4_WORDS: usize = mem::size_of::<Fp4>() / mem::size_of::<u32>();
-        let words: &[u32; FP4_WORDS] = host_recv(FP4_WORDS).try_into().unwrap();
+        let words: &[u32; <Self::Field as Field>::ExtElem::WORDS] = host_recv(<Self::Field as Field>::ExtElem::WORDS).try_into().unwrap();
 
         // This is here to try to get more accurate cycle estimations.
         for _ in 0..coeffs.len() {
@@ -117,4 +146,8 @@ pub fn main() {
     verify_with_hal(&hal, method_id, seal).unwrap();
 
     env::log("done");
+    
+    // Avoid accidental cycle count regressions.
+    let cycles = env::get_cycle_count();
+    assert!(cycles < 12_000_000, "Ran in {cycles} cycles; expecting under 12 million.");
 }

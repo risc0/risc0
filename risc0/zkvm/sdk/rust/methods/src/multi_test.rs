@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![cfg_attr(not(feature = "std"), no_std)]
+// Definitions for test selection codes used by the "multi_test" test.
 
-pub mod bench;
-pub mod multi_test;
+use serde::{Deserialize, Serialize};
 
-#[cfg(not(any(target_os = "zkvm", feature = "bazel")))]
-include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+#[derive(Serialize, Deserialize)]
+pub enum MultiTestSpec {
+    ShaConforms,
+    ShaInsecureConforms,
+    ShaCycleCount,
+    EventTrace,
+    Profiler,
+}

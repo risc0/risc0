@@ -15,11 +15,7 @@
 use core::{cell::UnsafeCell, mem};
 
 use alloc_crate::{boxed::Box, vec::Vec};
-use risc0_zkp::core::{
-    fp::Fp,
-    fp4::Fp4,
-    sha::{Digest, DIGEST_WORDS},
-};
+use risc0_zkp::core::sha::{Digest, DIGEST_WORDS};
 use risc0_zkvm::serde::to_vec_with_capacity;
 use risc0_zkvm_platform::{
     io::{SHADescriptor, GPIO_SHA},
