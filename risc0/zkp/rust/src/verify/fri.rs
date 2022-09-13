@@ -19,13 +19,11 @@ use rand::RngCore;
 use super::VerifyHal;
 use crate::{
     core::{
-        fp::Fp,
-        fp4::{Fp4, EXT_SIZE},
         log2_ceil,
-        rou::{ROU_FWD, ROU_REV},
+        ntt::{bit_reverse, interpolate_ntt},
         sha::Sha,
     },
-    field::{baby_bear::BabyBear, Elem},
+    field::{Elem, ExtElem, Field, RootsOfUnity},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
@@ -33,51 +31,68 @@ use crate::{
 /// VerifyRoundInfo contains the data against which the queries for a particular
 /// round are checked. This includes the Merkle tree top row data, as well as
 /// the size of the domain of the polynomial, and the mixing parameter.
-struct VerifyRoundInfo<'a, S: Sha> {
+struct VerifyRoundInfo<'a, S: Sha, H: VerifyHal> {
     domain: usize,
     merkle: MerkleTreeVerifier<'a, S>,
-    mix: Fp4,
+    mix: <H::Field as Field>::ExtElem,
 }
 
-impl<'a, S: Sha> VerifyRoundInfo<'a, S> {
+fn fold_eval<H: VerifyHal>(
+    hal: &H,
+    values: &mut [<H::Field as Field>::ExtElem],
+    mix: <H::Field as Field>::ExtElem,
+    s: usize,
+    j: usize,
+) -> <H::Field as Field>::ExtElem {
+    interpolate_ntt::<<H::Field as Field>::Elem, <H::Field as Field>::ExtElem>(values);
+    bit_reverse(values);
+    let root_po2 = log2_ceil(FRI_FOLD * s);
+    let inv_wk = <H::Field as Field>::Elem::ROU_REV[root_po2].pow(j);
+    let tot = hal.poly_eval(values, mix, inv_wk);
+    tot
+}
+
+impl<'a, S: Sha, H: VerifyHal> VerifyRoundInfo<'a, S, H> {
     pub fn new(iop: &mut ReadIOP<'a, S>, in_domain: usize) -> Self {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
-            merkle: MerkleTreeVerifier::new(iop, domain, FRI_FOLD * EXT_SIZE, QUERIES),
-            mix: Fp4::random(iop),
+            merkle: MerkleTreeVerifier::new(
+                iop,
+                domain,
+                FRI_FOLD * <H::Field as Field>::ExtElem::EXT_SIZE,
+                QUERIES,
+            ),
+            mix: <H::Field as Field>::ExtElem::random(iop),
         }
     }
 
-    pub fn verify_query<H: VerifyHal>(
+    pub fn verify_query(
         &mut self,
         hal: &H,
         iop: &mut ReadIOP<'a, S>,
         pos: &mut usize,
-        goal: &mut Fp4,
+        goal: &mut <H::Field as Field>::ExtElem,
     ) -> Result<(), VerificationError> {
         let quot = *pos / self.domain;
         let group = *pos % self.domain;
         // Get the column data
-        let data = self.merkle.verify::<BabyBear>(iop, group)?;
-        let mut data4: Vec<_> = (0..FRI_FOLD)
+        let data = self.merkle.verify::<H::Field>(iop, group)?;
+        let mut data_ext: Vec<_> = (0..FRI_FOLD)
             .map(|i| {
-                Fp4::new(
-                    data[0 * FRI_FOLD + i],
-                    data[1 * FRI_FOLD + i],
-                    data[2 * FRI_FOLD + i],
-                    data[3 * FRI_FOLD + i],
-                )
+                let mut inps = Vec::with_capacity(<H::Field as Field>::ExtElem::EXT_SIZE);
+                for j in 0..<H::Field as Field>::ExtElem::EXT_SIZE {
+                    inps.push(data[j * FRI_FOLD + i]);
+                }
+                <H::Field as Field>::ExtElem::from_subelems(inps)
             })
             .collect();
         // Check the existing goal
-        if data4[quot] != *goal {
+        if data_ext[quot] != *goal {
             return Err(VerificationError::InvalidProof);
         }
         // Compute the new goal + pos
-        let root_po2 = log2_ceil(FRI_FOLD * self.domain);
-        let inv_wk: Fp = Fp::new(ROU_REV[root_po2]).pow(group);
-        *goal = hal.fold_eval(&mut data4, self.mix, inv_wk);
+        *goal = fold_eval(hal, &mut data_ext, self.mix, self.domain, group);
         *pos = group;
         Ok(())
     }
@@ -90,7 +105,10 @@ pub fn fri_verify<'a, H: VerifyHal, F>(
     mut inner: F,
 ) -> Result<(), VerificationError>
 where
-    F: FnMut(&mut ReadIOP<'a, H::Sha>, usize) -> Result<Fp4, VerificationError>,
+    F: FnMut(
+        &mut ReadIOP<'a, H::Sha>,
+        usize,
+    ) -> Result<<H::Field as Field>::ExtElem, VerificationError>,
 {
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
@@ -113,11 +131,11 @@ where
         rounds_capacity
     );
     // Grab the final coeffs + commit
-    let final_coeffs = iop.read_pod_slice(EXT_SIZE * degree);
+    let final_coeffs = iop.read_pod_slice(<H::Field as Field>::ExtElem::EXT_SIZE * degree);
     let final_digest = iop.get_sha().hash_raw_pod_slice(final_coeffs);
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
-    let gen = Fp::new(ROU_FWD[log2_ceil(domain)]);
+    let gen = <<H::Field as Field>::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
     // Do queries
     for _ in 0..QUERIES {
         let rng = iop.next_u32();
@@ -130,14 +148,11 @@ where
         }
         // Do final verification
         let x = gen.pow(pos);
-        let mut fx = Fp4::ZERO;
-        let mut cur = Fp::ONE;
+        let mut fx = <H::Field as Field>::ExtElem::ZERO;
+        let mut cur = <H::Field as Field>::ExtElem::ONE;
         for i in 0..degree {
-            let coeff = Fp4::new(
-                final_coeffs[0 * degree + i],
-                final_coeffs[1 * degree + i],
-                final_coeffs[2 * degree + i],
-                final_coeffs[3 * degree + i],
+            let coeff = <H::Field as Field>::ExtElem::from_subelems(
+                (0..<H::Field as Field>::ExtElem::EXT_SIZE).map(|j| final_coeffs[j * degree + i]),
             );
             fx += cur * coeff;
             cur *= x;

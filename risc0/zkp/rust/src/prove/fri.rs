@@ -18,8 +18,8 @@ use log::debug;
 use rand::RngCore;
 
 use crate::{
-    core::{fp4::EXT_SIZE, log2_ceil, sha::Sha},
-    field::{self, Elem},
+    core::{log2_ceil, sha::Sha},
+    field::{self, Elem, ExtElem, Field},
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
@@ -39,24 +39,25 @@ impl<H: Hal> ProveRoundInfo<H> {
     /// polynomial.
     pub fn new<S: Sha>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &H::BufferFp) -> Self {
         debug!("Doing FRI folding");
+        let ext_size = <H::Field as Field>::ExtElem::EXT_SIZE;
         // Get the number of coefficients of the polynomial over the extension field.
-        let size = coeffs.size() / EXT_SIZE;
+        let size = coeffs.size() / ext_size;
         // Get a larger domain to interpolate over.
         let domain = size * INV_RATE;
         // Allocate space in which to put the interpolated values.
-        let evaluated = hal.alloc_fp(domain * EXT_SIZE);
+        let evaluated = hal.alloc_fp(domain * ext_size);
         // Put in the coefficients, padding out with zeros so that we are left with the
         // same polynomial represented by a larger coefficient list
-        hal.batch_expand(&evaluated, coeffs, EXT_SIZE);
+        hal.batch_expand(&evaluated, coeffs, ext_size);
         // Evaluate the NTT in-place, filling the buffer with the evaluations of the
         // polynomial.
-        hal.batch_evaluate_ntt(&evaluated, EXT_SIZE, log2_ceil(INV_RATE));
+        hal.batch_evaluate_ntt(&evaluated, ext_size, log2_ceil(INV_RATE));
         // Compute a Merkle tree committing to the polynomial evaluations.
         let merkle = MerkleTreeProver::new(
             hal,
             &evaluated,
             domain / FRI_FOLD,
-            FRI_FOLD * EXT_SIZE,
+            FRI_FOLD * ext_size,
             QUERIES,
         );
         // Send the merkle tree (as a commitment) to the virtual IOP verifier
@@ -64,7 +65,7 @@ impl<H: Hal> ProveRoundInfo<H> {
         // Retrieve from the IOP verifier a random value to mix the polynomial slices.
         let fold_mix = <H::Field as field::Field>::ExtElem::random(&mut iop.rng);
         // Create a buffer to hold the mixture of slices.
-        let out_coeffs = hal.alloc_fp(size / FRI_FOLD * EXT_SIZE);
+        let out_coeffs = hal.alloc_fp(size / FRI_FOLD * ext_size);
         // Compute the folded polynomial
         hal.fri_fold(&out_coeffs, coeffs, &fold_mix);
         ProveRoundInfo {
@@ -88,10 +89,11 @@ pub fn fri_prove<H: Hal, S: Sha, F>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &H::
 where
     F: FnMut(&mut WriteIOP<S>, usize),
 {
-    let orig_domain = coeffs.size() / EXT_SIZE * INV_RATE;
+    let ext_size = <H::Field as Field>::ExtElem::EXT_SIZE;
+    let orig_domain = coeffs.size() / ext_size * INV_RATE;
     let mut rounds = Vec::new();
     let mut coeffs = coeffs.clone();
-    while coeffs.size() / EXT_SIZE > FRI_MIN_DEGREE {
+    while coeffs.size() / ext_size > FRI_MIN_DEGREE {
         let round = ProveRoundInfo::new(hal, iop, &coeffs);
         coeffs = round.coeffs.clone();
         rounds.push(round);
@@ -99,7 +101,7 @@ where
     // Put the final coefficients into natural order
     let final_coeffs = hal.alloc_fp(coeffs.size());
     hal.eltwise_copy_fp(&final_coeffs, &coeffs);
-    hal.batch_bit_reverse(&final_coeffs, EXT_SIZE);
+    hal.batch_bit_reverse(&final_coeffs, ext_size);
     // Dump final polynomial + commit
     final_coeffs.view(|view| {
         iop.write_pod_slice::<<<H as Hal>::Field as field::Field>::Elem>(view);

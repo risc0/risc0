@@ -22,7 +22,7 @@ use core::{cmp, fmt::Debug, ops};
 
 /// A pair of fields, one of which is an extension field of the other.
 pub trait Field {
-    type Elem: Elem;
+    type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
 }
 
@@ -33,6 +33,7 @@ pub trait Elem:
     + ops::MulAssign
     + ops::Add<Output = Self>
     + ops::AddAssign
+    + ops::Neg
     + ops::Sub<Output = Self>
     + ops::SubAssign
     + cmp::PartialEq
@@ -91,7 +92,20 @@ pub trait Elem:
 }
 
 /// A field extension which can be constructed from a subfield element [Elem]
-pub trait ExtElem: Elem + ops::Mul<Self::SubElem, Output = Self> {
+pub trait ExtElem:
+    Elem
+    + ops::Add<Output = Self>
+    + ops::AddAssign
+    + ops::Neg<Output = Self>
+    + ops::Mul<Self, Output = Self>
+    + ops::Mul<Self::SubElem, Output = Self>
+    + ops::MulAssign<Self>
+    + ops::MulAssign<Self::SubElem>
+    + ops::Sub<Output = Self>
+    + ops::SubAssign
+    + cmp::PartialEq
+    + cmp::Eq
+{
     type SubElem: Elem;
 
     const EXT_SIZE: usize;

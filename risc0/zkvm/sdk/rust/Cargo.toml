@@ -48,7 +48,7 @@ test-log = "0.2"
 
 [features]
 circuit = []
-default = ["host", "prove", "std", "verify"]
+default = ["host", "prove", "std", "verify", "profiler"]
 doc = ["std"]
 host = ["risc0-zkp/host"]
 prove = ["circuit", "dep:lazy-regex", "risc0-zkp/prove", "risc0-zkvm-circuit/cpp"]

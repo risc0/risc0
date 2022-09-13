@@ -80,7 +80,7 @@ mod test {
     use super::ffpu_execute;
 
     fn fold_eval_cpu_impl(values: &mut [Fp4], mix: Fp4, inv_wk: Fp) -> Fp4 {
-        interpolate_ntt(values);
+        interpolate_ntt::<Fp, Fp4>(values);
         bit_reverse(values);
         poly_eval(values, mix, inv_wk)
     }

@@ -26,7 +26,7 @@ pub fn ntt(c: &mut Criterion) {
             let size = 1 << n;
             let mut rng = thread_rng();
             let mut buf = vec![Fp::random(&mut rng); size];
-            b.iter(|| interpolate_ntt(&mut buf));
+            b.iter(|| interpolate_ntt::<Fp, Fp>(&mut buf));
         });
     }
 }

@@ -545,6 +545,7 @@ impl ops::Mul<ExtElem> for Elem {
 // some `if`s and hope it gets unrolled properly, but it's small
 // enough to just hand write.
 impl ops::MulAssign for ExtElem {
+    #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
         // Rename the element arrays to something small for readability.
         let a = &self.0;
@@ -560,6 +561,7 @@ impl ops::MulAssign for ExtElem {
 
 impl ops::Mul for ExtElem {
     type Output = ExtElem;
+    #[inline(always)]
     fn mul(self, rhs: ExtElem) -> ExtElem {
         let mut lhs = self;
         lhs *= rhs;
