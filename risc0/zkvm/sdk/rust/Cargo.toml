@@ -26,16 +26,16 @@ tempfile = "3.3"
 #
 # Host dependencies
 [target.'cfg(not(target_arch = "riscv32"))'.dependencies]
-addr2line = "0.18.0"
+addr2line = { version = "0.18", optional = true }
 ctor = "0.1"
 cxx = "1.0"
-gimli = "0.26.2"
+gimli = { version = "0.26", optional = true }
 log = "0.4"
 rand = "0.8"
 risc0-zkvm-sys = { version = "0.11", path = "../.." }
 sha2 = "0.10"
 xmas-elf = "0.8"
-prost = "0.11.0"
+prost = { version = "0.11", optional = true }
 
 [build-dependencies]
 prost-build = { version = "0.11", optional = true }
@@ -48,13 +48,13 @@ test-log = "0.2"
 
 [features]
 circuit = []
-default = ["host", "prove", "std", "verify", "profiler"]
+default = ["host", "prove", "std", "verify"]
 doc = ["std"]
 host = ["risc0-zkp/host"]
 prove = ["circuit", "dep:lazy-regex", "risc0-zkp/prove", "risc0-zkvm-circuit/cpp"]
 std = ["risc0-zkp/std", "serde/std"]
 verify = ["circuit", "risc0-zkp/verify"]
-profiler = ["dep:prost-build", "dep:protobuf-src"]
+profiler = ["dep:addr2line", "dep:gimli", "dep:prost", "dep:prost-build", "dep:protobuf-src"]
 # Run rust-based prover instead of FFI-based prover.
 pure-prove = []
 

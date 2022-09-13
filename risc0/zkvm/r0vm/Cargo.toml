@@ -12,7 +12,7 @@ anyhow = "1.0"
 bytemuck = "1.12"
 clap = { version = "3.2", features = ["derive"] }
 env_logger = "0.9.0"
-risc0-zkvm = { version = "0.11", path = "../sdk/rust" }
+risc0-zkvm = { version = "0.11", path = "../sdk/rust", features = ["profiler"] }
 
 [dev-dependencies]
 anyhow = "1.0"
