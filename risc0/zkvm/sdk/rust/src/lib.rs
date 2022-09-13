@@ -12,24 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! A virtual machine to produces ZK proofs of computation
+//! A virtual machine that produces zero-knowledge proofs of computation.
 //!
 //! The RISC Zero zkVM is a RISC-V virtual machine that produces
 //! [zero-knowledge proofs](https://en.wikipedia.org/wiki/Zero-knowledge_proof)
-//! of code it executes. By using the zkVM, a cryptographic
-//! [Receipt](host::Receipt) is produced which anyone can verify was produced by
-//! the zkVM's guest code. No additional information about the code execution
-//! (such as, for example, the inputs provided) is revealed by publishing the
+//! about the code it executes. When programs are executed in the RISC Zero
+//! zkVM, a cryptographic [Receipt](host::Receipt) is generated. Anyone with the
+//! receipt can verify that it was produced via execution of the zkVM's guest
+//! code. No additional information about code execution (such as which inputs
+//! were provided to the guest) is revealed by publishing the
 //! [Receipt](host::Receipt). A high-level overview of how the zkVM is
-//! structured to accomplish this is available in our
-//! [Overview of the zkVM](https://www.risczero.com/docs/explainers/zkvm/zkvm_overview)
-//! explainer.
+//! structured to accomplish this is available in our [Overview of the zkVM](https://www.risczero.com/docs/explainers/zkvm/zkvm_overview).
 //!
-//! Developers new to RISC Zero are encouraged to get started with our
+//! Developers new to RISC Zero are encouraged to begin with our
 //! [Risc Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter),
-//! which provides an example of producing a zero-knowledge proof that a number
-//! is composite, along with an introduction to key components of the RISC Zero
-//! zkVM.
+//! a minimal example program that demonstrates through zero-knowledge proof
+//! that a number is composite. The example also introduces key components of
+//! the RISC Zero zkVM.
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
