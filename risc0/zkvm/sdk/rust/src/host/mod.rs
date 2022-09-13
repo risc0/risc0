@@ -127,8 +127,8 @@ mod test {
     use anyhow::Result;
     use risc0_zkp::core::sha::Digest;
     use risc0_zkvm_methods::{
-        FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, MULTI_TEST_ID, MULTI_TEST_PATH, SENDRECV_ID,
-        SENDRECV_PATH, SHA_ID, SHA_PATH,
+        multi_test::MultiTestSpec, FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, MULTI_TEST_ID,
+        MULTI_TEST_PATH, SENDRECV_ID, SENDRECV_PATH, SHA_ID, SHA_PATH,
     };
     use risc0_zkvm_platform::memory::{COMMIT, HEAP};
     use test_log::test;
@@ -317,8 +317,8 @@ mod test {
         )
         .unwrap();
         prover.add_input_u32_slice(&[
-            0, // Test risc0_zkvm_guest::sha::Impl
-            0, // Compute an empty digest
+            MultiTestSpec::ShaConforms as _, // Test risc0_zkvm_guest::sha::Impl
+            0,                               // Compute an empty digest
         ]);
         prover.run().unwrap();
     }
@@ -334,8 +334,8 @@ mod test {
         )
         .unwrap();
         prover.add_input_u32_slice(&[
-            1, // Test risc0_zkvm_guest::sha_insecure::Impl
-            0, // Compute an empty digest
+            MultiTestSpec::ShaInsecureConforms as _, // Test risc0_zkvm_guest::sha_insecure::Impl
+            0,                                       // Compute an empty digest
         ]);
         prover.run().unwrap();
     }
@@ -351,8 +351,8 @@ mod test {
         )
         .unwrap();
         prover.add_input_u32_slice(&[
-            2, // Check insecure cycle count < expected from accel
-            0, // Compute an empty digest
+            MultiTestSpec::ShaCycleCount as _, // Check insecure cycle count < expected from accel
+            0,                                 // Compute an empty digest
         ]);
         prover.run().unwrap();
     }
@@ -370,7 +370,7 @@ mod test {
                 .with_trace_callback(prof.make_trace_callback());
             let mut prover = Prover::new_with_opts(&elf_contents, MULTI_TEST_ID, opts).unwrap();
             prover.add_input_u32_slice(&[
-                4, // Generate known profiling trace
+                MultiTestSpec::Profiler as _, // Generate known profiling trace
                 0,
             ]);
             prover.run().unwrap();
@@ -457,7 +457,7 @@ mod test {
             )
             .unwrap();
             prover.add_input_u32_slice(&[
-                3, // Generate known trace events
+                MultiTestSpec::EventTrace as _, // Generate known trace events
                 0,
             ]);
             prover.run().unwrap();
