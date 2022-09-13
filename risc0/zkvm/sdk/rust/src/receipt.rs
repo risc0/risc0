@@ -68,6 +68,17 @@ where
 }
 
 impl Receipt {
+    /// Verifies the proof receipt generated when the guest program is run.
+    ///
+    /// # Arguments
+    ///
+    /// * `MethodID` - The unique method ID of the guest binary.
+    ///
+    /// # Example
+    ///
+    /// ```rust, ignore
+    /// receipt.verify(MY_PROGRAM_ID).unwrap();
+    /// ```
     #[cfg(all(feature = "verify", feature = "host"))]
     pub fn verify<'a, M>(&self, method_id: &'a M) -> Result<()>
     where
@@ -83,6 +94,13 @@ impl Receipt {
         self.verify_with_hal(&hal, method_id)
     }
 
+    /// This function is called by [verify](Receipt::verify), which provides the
+    /// CPU HAL generated using the program circuit.
+    ///
+    /// # Arguments
+    ///
+    /// * `hal` - the HAL used to represent the guest program circuit.
+    /// * `MethodID` - The unique method ID of the guest binary.
     #[cfg(feature = "verify")]
     pub fn verify_with_hal<'a, M, H>(&self, hal: &H, method_id: &'a M) -> Result<()>
     where
@@ -94,17 +112,29 @@ impl Receipt {
     }
 
     // Compatible API with FFI-based prover.
+    /// Retrieves the receipt journal as a vector of `u32` values.
+    /// This journal contains all values publicly committed to the journal by
+    /// the guest.
+    ///
+    /// # Example
+    ///
+    /// ```rust, ignore
+    /// let receipt: Receipt = prover.run();
+    /// let result: Vec<u32> = self.receipt.get_journal_vec()?;
+    /// ```
     pub fn get_journal_vec(&self) -> Result<Vec<u32>> {
         Ok(self.journal.clone())
     }
 
     // Compatible API with FFI-based prover.
+    /// Retrieves the receipt journal as a byte array.
     pub fn get_journal(&self) -> Result<&[u8]> {
         Ok(bytemuck::cast_slice(self.journal.as_slice()))
     }
 
     // Compatible API with FFI-based prover.
     // FIXME: Change API to avoid copy.
+    /// Retrieves the receipt seal as a vector of `u32` values.
     pub fn get_seal(&self) -> Result<&[u32]> {
         Ok(self.seal.as_slice())
     }
