@@ -1,12 +1,27 @@
-load("//bazel/rules/risc0:defs.bzl", "risc0_rust_method")
+load("//bazel/rules/risc0:defs.bzl", "risc0_rust_library_pair", "risc0_rust_method")
+
+risc0_rust_library_pair(
+    name = "methods",
+    srcs = glob(["src/**/*.rs"]),
+    crate_name = "risc0_zkvm_methods",
+    guest_deps = [
+        "@crates_guest//:serde",
+    ],
+    guest_features = ["bazel"],
+    host_deps = [
+        "@crates_host//:serde",
+    ],
+    host_features = ["bazel"],
+    visibility = ["//visibility:public"],
+)
 
 filegroup(
     name = "methods",
     srcs = [
         "test_fail",
         "test_mem",
+        "test_multi_test",
         "test_sha",
-        "test_sha_accel",
     ],
     visibility = ["//visibility:public"],
 )
@@ -22,11 +37,12 @@ risc0_rust_method(
 )
 
 risc0_rust_method(
-    name = "test_sha_accel",
-    srcs = ["inner/src/bin/sha_accel.rs"],
+    name = "test_multi_test",
+    srcs = ["inner/src/bin/multi_test.rs"],
     limit = 10,
     visibility = ["//visibility:public"],
     deps = [
+        ":methods_guest",
         "//risc0/zkp/rust:zkp_guest",
         "//risc0/zkvm/sdk/rust/guest",
     ],

@@ -25,6 +25,7 @@ risc0_rust_library_pair(
         "//risc0/zkp/rust:zkp_host",
         "//risc0/zkvm/sdk/cpp/host",
         "//risc0/zkvm/sdk/rust/platform:platform_host",
+        "//risc0/zkvm/sdk/rust/methods:methods_host",
         "@crates_host//:anyhow",
         "@crates_host//:bytemuck",
         "@crates_host//:cxx",

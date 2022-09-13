@@ -5,4 +5,10 @@ fn main() {
         println!("cargo:rustc-link-lib=static=risc0-zkp-sys");
         println!("cargo:rustc-link-lib=static=risc0-zkvm-sys");
     }
+
+    #[cfg(feature = "profiler")]
+    {
+        std::env::set_var("PROTOC", protobuf_src::protoc());
+        prost_build::compile_protos(&["src/host/profile.proto"], &["src/host/"]).unwrap();
+    }
 }

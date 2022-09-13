@@ -30,17 +30,51 @@ pub use exception::Exception;
 use ffi as prove;
 pub use prove::{MethodId, Prover, Receipt};
 
+#[cfg(feature = "profiler")]
+pub mod profiler;
+
 /// The default digest count when generating a MethodId.
 pub const DEFAULT_METHOD_ID_LIMIT: u32 = 12;
 
 /// A Result specialized for [Exception].
 pub type Result<T> = std::result::Result<T, Exception>;
 
+/// An event traced from the running VM.
+#[non_exhaustive]
+#[derive(Debug)]
+pub enum TraceEvent {
+    /// An instruction has started at the given program counter
+    InstructionStart {
+        /// Cycle number since startup
+        cycle: u32,
+        /// Program counter of the instruction being executed
+        pc: u32,
+    },
+
+    /// A register has been set
+    RegisterSet {
+        /// Register ID (0-16)
+        reg: usize,
+        /// New value in the register
+        value: u32,
+    },
+
+    /// A memory location has been written
+    MemorySet {
+        /// Address of word that's been written
+        addr: u32,
+        /// Value of word that's been written
+        value: u32,
+    },
+}
+
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
     pub(crate) skip_seal: bool,
 
     pub(crate) sendrecv_callbacks: HashMap<u32, Box<dyn Fn(u32, &[u8]) -> Vec<u8> + 'a + Sync>>,
+
+    pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> anyhow::Result<()> + 'a>>,
 }
 
 impl<'a> ProverOpts<'a> {
@@ -64,6 +98,16 @@ impl<'a> ProverOpts<'a> {
             .insert(channel_id, Box::new(callback));
         self
     }
+
+    /// Add a callback handler for raw trace messages.
+    pub fn with_trace_callback(
+        mut self,
+        callback: impl FnMut(TraceEvent) -> anyhow::Result<()> + 'a,
+    ) -> Self {
+        assert!(!self.trace_callback.is_some(), "Duplicate trace callback");
+        self.trace_callback = Some(Box::new(callback));
+        self
+    }
 }
 
 impl<'a> Default for ProverOpts<'a> {
@@ -71,6 +115,7 @@ impl<'a> Default for ProverOpts<'a> {
         ProverOpts {
             skip_seal: false,
             sendrecv_callbacks: HashMap::new(),
+            trace_callback: None,
         }
     }
 }
@@ -82,13 +127,15 @@ mod test {
     use anyhow::Result;
     use risc0_zkp::core::sha::Digest;
     use risc0_zkvm_methods::{
-        FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, SENDRECV_ID, SENDRECV_PATH, SHA_ACCEL_ID,
-        SHA_ACCEL_PATH, SHA_ID, SHA_PATH,
+        multi_test::MultiTestSpec, FAIL_ID, FAIL_PATH, IO_ID, IO_PATH, MULTI_TEST_ID,
+        MULTI_TEST_PATH, SENDRECV_ID, SENDRECV_PATH, SHA_ID, SHA_PATH,
     };
     use risc0_zkvm_platform::memory::{COMMIT, HEAP};
     use test_log::test;
 
     use super::{MethodId, Prover, ProverOpts, Receipt};
+    #[cfg(feature = "pure-prove")]
+    use crate::host::TraceEvent;
     use crate::serde::{from_slice, to_vec};
 
     #[test]
@@ -263,12 +310,15 @@ mod test {
     #[test]
     fn sha_accel() {
         let opts = ProverOpts::default().with_skip_seal(true);
-        let mut prover =
-            Prover::new_with_opts(&std::fs::read(SHA_ACCEL_PATH).unwrap(), SHA_ACCEL_ID, opts)
-                .unwrap();
+        let mut prover = Prover::new_with_opts(
+            &std::fs::read(MULTI_TEST_PATH).unwrap(),
+            MULTI_TEST_ID,
+            opts,
+        )
+        .unwrap();
         prover.add_input_u32_slice(&[
-            0, // Test risc0_zkvm_guest::sha::Impl
-            0, // Compute an empty digest
+            MultiTestSpec::ShaConforms as _, // Test risc0_zkvm_guest::sha::Impl
+            0,                               // Compute an empty digest
         ]);
         prover.run().unwrap();
     }
@@ -277,12 +327,15 @@ mod test {
     #[cfg(feature = "pure-prove")]
     fn insecure_sha_accel() {
         let opts = ProverOpts::default().with_skip_seal(true);
-        let mut prover =
-            Prover::new_with_opts(&std::fs::read(SHA_ACCEL_PATH).unwrap(), SHA_ACCEL_ID, opts)
-                .unwrap();
+        let mut prover = Prover::new_with_opts(
+            &std::fs::read(MULTI_TEST_PATH).unwrap(),
+            MULTI_TEST_ID,
+            opts,
+        )
+        .unwrap();
         prover.add_input_u32_slice(&[
-            1, // Test risc0_zkvm_guest::sha_insecure::Impl
-            0, // Compute an empty digest
+            MultiTestSpec::ShaInsecureConforms as _, // Test risc0_zkvm_guest::sha_insecure::Impl
+            0,                                       // Compute an empty digest
         ]);
         prover.run().unwrap();
     }
@@ -291,14 +344,157 @@ mod test {
     #[cfg(feature = "pure-prove")]
     fn sha_cycle_count() {
         let opts = ProverOpts::default().with_skip_seal(true);
-        let mut prover =
-            Prover::new_with_opts(&std::fs::read(SHA_ACCEL_PATH).unwrap(), SHA_ACCEL_ID, opts)
-                .unwrap();
+        let mut prover = Prover::new_with_opts(
+            &std::fs::read(MULTI_TEST_PATH).unwrap(),
+            MULTI_TEST_ID,
+            opts,
+        )
+        .unwrap();
         prover.add_input_u32_slice(&[
-            2, // Check insecure cycle count < expected from accel
-            0, // Compute an empty digest
+            MultiTestSpec::ShaCycleCount as _, // Check insecure cycle count < expected from accel
+            0,                                 // Compute an empty digest
         ]);
         prover.run().unwrap();
+    }
+
+    #[test]
+    #[cfg(feature = "pure-prove")]
+    fn profiler() {
+        use crate::host::profiler::Frame;
+        let elf_contents = std::fs::read(MULTI_TEST_PATH).unwrap();
+        let mut prof =
+            crate::host::profiler::Profiler::new("multi_test.elf", &elf_contents).unwrap();
+        {
+            let opts = ProverOpts::default()
+                .with_skip_seal(true)
+                .with_trace_callback(prof.make_trace_callback());
+            let mut prover = Prover::new_with_opts(&elf_contents, MULTI_TEST_ID, opts).unwrap();
+            prover.add_input_u32_slice(&[
+                MultiTestSpec::Profiler as _, // Generate known profiling trace
+                0,
+            ]);
+            prover.run().unwrap();
+        }
+
+        prof.finalize();
+
+        // Gather up anything containing our profile_test functions.
+        // If the test doesn't pass, we don't want to display the
+        // whole profiling structure.
+        let occurences: Vec<_> = prof
+            .iter()
+            .filter(|(frames, _addr, _count)| {
+                frames.iter().any(|fr| fr.name.contains("profile_test"))
+            })
+            .collect();
+
+        assert!(!occurences.is_empty(), "{:#?}", Vec::from_iter(prof.iter()));
+
+        let elf_mem = crate::elf::Program::load_elf(elf_contents.as_slice(), u32::MAX)
+            .unwrap()
+            .image;
+
+        assert!(
+            occurences.iter().any(|(fr, addr, _count)| {
+                match fr.as_slice() {
+                    [fr1 @ Frame {
+                        name: name1,
+                        filename: fn1,
+                        ..
+                    }, fr2 @ Frame {
+                        name: name2,
+                        filename: fn2,
+                        ..
+                    }] => {
+                        println!("Inspecting frames:\n{fr1:?}\n{fr2:?}\n");
+                        if name1 != "profile_test_func2" || name2 != "profile_test_func1" {
+                            println!("Names did not match: {}, {}", name1, name2);
+                            return false;
+                        }
+                        if !fn1.ends_with("multi_test.rs") || !fn2.ends_with("multi_test.rs") {
+                            println!("Filenames did not match: {}, {}", fn1, fn2);
+                            return false;
+                        }
+                        // Check to make sure we hit the "nop" instruction
+                        match elf_mem.get(&(*addr as u32)) {
+                            None => {
+                                println!("Addr {addr} not present in elf");
+                                return false;
+                            }
+                            Some(0x00_00_00_13) => (),
+                            Some(inst) => {
+                                println!("Looking for 'nop'; got 0x{inst:08x}");
+                                return false;
+                            }
+                        }
+
+                        // All checks passed; this is the occurence we were looking for.
+                        true
+                    }
+                    _ => {
+                        println!("{:#?}", fr);
+                        false
+                    }
+                }
+            }),
+            "{:#?}",
+            occurences
+        );
+    }
+
+    #[test]
+    #[cfg(feature = "pure-prove")]
+    fn trace() {
+        let mut events: Vec<TraceEvent> = Vec::new();
+        {
+            let opts = ProverOpts::default()
+                .with_skip_seal(true)
+                .with_trace_callback(|event| Ok(events.push(event)));
+            let mut prover = Prover::new_with_opts(
+                &std::fs::read(MULTI_TEST_PATH).unwrap(),
+                MULTI_TEST_ID,
+                opts,
+            )
+            .unwrap();
+            prover.add_input_u32_slice(&[
+                MultiTestSpec::EventTrace as _, // Generate known trace events
+                0,
+            ]);
+            prover.run().unwrap();
+        }
+        let occurances = events
+            .windows(4)
+            .filter_map(|window| {
+                if let &[TraceEvent::InstructionStart {
+                    // li x5, 1337
+                    cycle: cycle1,
+                    pc: pc1,
+                }, TraceEvent::RegisterSet {
+                    reg: 5,
+                    value: 1337,
+                }, TraceEvent::InstructionStart {
+                    // sw x5, 548(zero)
+                    cycle: cycle2,
+                    pc: pc2,
+                }, TraceEvent::MemorySet {
+                    addr: 548,
+                    value: 1337,
+                }] = window
+                {
+                    assert_eq!(cycle1 + 3, cycle2, "li should take 3 cycles: {:#?}", window);
+                    assert_eq!(
+                        pc1 + 4,
+                        pc2,
+                        "program counter should advance one word: {:#?}",
+                        window
+                    );
+                    Some(())
+                } else {
+                    None
+                }
+            })
+            .count();
+        assert_eq!(occurances, 1, "trace events: {:#?}", &events);
     }
 
     #[test]

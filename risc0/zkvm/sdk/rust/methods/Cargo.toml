@@ -14,3 +14,6 @@ methods = ["inner"]
 
 [dependencies]
 serde = { version = "1.0", default-features = false, features = ["derive"] }
+
+[features]
+pure-prove = ["risc0-build/pure-prove"]

@@ -144,4 +144,8 @@ pub fn main() {
     verify_with_hal(&hal, method_id, seal).unwrap();
 
     env::log("done");
+    
+    // Avoid accidental cycle count regressions.
+    let cycles = env::get_cycle_count();
+    assert!(cycles < 12_000_000, "Ran in {cycles} cycles; expecting under 12 million.");
 }
