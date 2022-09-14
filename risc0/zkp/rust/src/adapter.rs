@@ -47,7 +47,14 @@ pub trait CircuitStepExec<S: CustomStep> {
 }
 
 pub trait CircuitStepVerify<S: CustomStep> {
-    fn step_verify(
+    fn step_verify_bytes(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp>;
+
+    fn step_verify_mem(
         &self,
         ctx: &CircuitStepContext,
         custom: &mut S,
