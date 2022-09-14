@@ -80,11 +80,7 @@ impl Receipt {
         use crate::CIRCUIT;
 
         let sha = default_implementation();
-        let hal: CpuVerifyHal<
-            risc0_zkp::core::sha_cpu::Impl,
-            risc0_zkvm_circuit::CircuitImpl,
-            BabyBear,
-        > = CpuVerifyHal::new(sha, &CIRCUIT);
+        let hal: CpuVerifyHal<_, _, BabyBear> = CpuVerifyHal::new(sha, &CIRCUIT);
         self.verify_with_hal(&hal, method_id)
     }
 

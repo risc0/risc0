@@ -72,15 +72,30 @@ extern "C" uint32_t risc0_circuit_rv32im_step_exec(risc0_error* err,
   });
 }
 
-extern "C" uint32_t risc0_circuit_rv32im_step_verify(risc0_error* err,
-                                                     void* ctx,
-                                                     Callback callback,
-                                                     size_t steps,
-                                                     size_t cycle,
-                                                     Fp** args_ptr,
-                                                     size_t /*args_len*/) {
+extern "C" uint32_t risc0_circuit_rv32im_step_verify_bytes(risc0_error* err,
+                                                           void* ctx,
+                                                           Callback callback,
+                                                           size_t steps,
+                                                           size_t cycle,
+                                                           Fp** args_ptr,
+                                                           size_t /*args_len*/) {
   return ffi_wrap<uint32_t>(err, 0, [&] {
     BridgeContext bridgeCtx{ctx, callback};
-    return circuit::rv32im::step_verify(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr).asRaw();
+    return circuit::rv32im::step_verify_bytes(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
+        .asRaw();
+  });
+}
+
+extern "C" uint32_t risc0_circuit_rv32im_step_verify_mem(risc0_error* err,
+                                                         void* ctx,
+                                                         Callback callback,
+                                                         size_t steps,
+                                                         size_t cycle,
+                                                         Fp** args_ptr,
+                                                         size_t /*args_len*/) {
+  return ffi_wrap<uint32_t>(err, 0, [&] {
+    BridgeContext bridgeCtx{ctx, callback};
+    return circuit::rv32im::step_verify_mem(&bridgeCtx, bridgeCallback, steps, cycle, args_ptr)
+        .asRaw();
   });
 }

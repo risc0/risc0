@@ -23,7 +23,7 @@ use risc0_zkp::{
 use crate::{
     ffi::{
         call_step, risc0_circuit_rv32im_step_accum, risc0_circuit_rv32im_step_exec,
-        risc0_circuit_rv32im_step_verify,
+        risc0_circuit_rv32im_step_verify_bytes, risc0_circuit_rv32im_step_verify_mem,
     },
     CircuitImpl,
 };
@@ -69,7 +69,7 @@ impl<S: CustomStep> CircuitStepExec<S> for CircuitImpl {
 }
 
 impl<S: CustomStep> CircuitStepVerify<S> for CircuitImpl {
-    fn step_verify(
+    fn step_verify_bytes(
         &self,
         ctx: &CircuitStepContext,
         custom: &mut S,
@@ -80,7 +80,25 @@ impl<S: CustomStep> CircuitStepVerify<S> for CircuitImpl {
             custom,
             args,
             |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
-                risc0_circuit_rv32im_step_verify(
+                risc0_circuit_rv32im_step_verify_bytes(
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
+                )
+            },
+        )
+    }
+
+    fn step_verify_mem(
+        &self,
+        ctx: &CircuitStepContext,
+        custom: &mut S,
+        args: &mut [&mut [Fp]],
+    ) -> Result<Fp> {
+        call_step(
+            ctx,
+            custom,
+            args,
+            |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
+                risc0_circuit_rv32im_step_verify_mem(
                     err, ctx, trampoline, size, cycle, args_ptr, args_len,
                 )
             },

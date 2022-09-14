@@ -51,6 +51,7 @@ using HostBridge = void(void*, const char*, const char*, const Fp*, size_t, Fp*,
 
 Fp step_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
 Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
-Fp step_verify(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
+Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
+Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args);
 
 } // namespace risc0::circuit::rv32im

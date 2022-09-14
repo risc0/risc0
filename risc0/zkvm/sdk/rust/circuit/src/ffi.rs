@@ -74,7 +74,17 @@ extern "C" {
         args_len: usize,
     ) -> Fp;
 
-    pub(crate) fn risc0_circuit_rv32im_step_verify(
+    pub(crate) fn risc0_circuit_rv32im_step_verify_bytes(
+        err: *mut RawError,
+        ctx: *mut c_void,
+        cb: Callback,
+        steps: usize,
+        cycle: usize,
+        args_ptr: *const *mut Fp,
+        args_len: usize,
+    ) -> Fp;
+
+    pub(crate) fn risc0_circuit_rv32im_step_verify_mem(
         err: *mut RawError,
         ctx: *mut c_void,
         cb: Callback,
