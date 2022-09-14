@@ -87,7 +87,7 @@ pub(crate) unsafe fn raw_digest_to(data: &[u32], digest: *mut Digest) {
 }
 
 // Calculates the capacity needed as a number of words, including end
-// marker and trailer, in order to take the SHA hash of len_bytes bytes.
+// marker and trailer, in order to take the SHA hash of `len_bytes` bytes.
 pub(crate) const fn compute_capacity_needed(len_bytes: usize) -> usize {
     // Add one for end marker, round up, then 2 words for the 64-bit size.
     let len_words = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE + 2;
