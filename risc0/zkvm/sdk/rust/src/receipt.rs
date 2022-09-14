@@ -69,7 +69,7 @@ where
 }
 
 impl Receipt {
-    /// Verifies the proof receipt generated when the guest program is run.
+    /// Verifies a RISC Zero receipt generated when the guest program is run.
     /// This method calls [verify_with_hal](Receipt::verify_with_hal) using the
     /// default HAL.
     ///

@@ -403,12 +403,12 @@ fn build_guest_package<P>(
 /// Options defining how to embed a guest package in
 /// [`embed_methods_with_options`].
 pub struct GuestOptions {
-    /// The number of po2 entries to generate in the MethodID.
+    /// The number of entries in the MethodID.
     ///
     /// By default, this value is set to `DEFAULT_METHOD_ID_LIMIT`.
     ///
     /// Successive MethodID entries increase in size by powers of two, so
-    /// increasing the limit by 1 effectively doubles the limit on code
+    /// increasing `code_limit` by 1 effectively doubles the limit on code
     /// size.
     pub code_limit: u32,
 

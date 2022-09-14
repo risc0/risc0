@@ -16,7 +16,7 @@
 //!
 //! The RISC Zero zkVM is a RISC-V virtual machine that produces
 //! [zero-knowledge proofs](https://en.wikipedia.org/wiki/Zero-knowledge_proof)
-//! about the code it executes. When programs are executed in the RISC Zero
+//! of code it executes. When programs are executed in the RISC Zero
 //! zkVM, a cryptographic [Receipt](host::Receipt) is generated. Anyone with the
 //! receipt can verify that it was produced via execution of the zkVM's guest
 //! code. No additional information about code execution (such as which inputs

@@ -18,7 +18,7 @@ use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{Deserializer, Serializer, Slice};
 // Re-export for easy use by user programs.
 #[cfg(target_os = "zkvm")]
-pub use risc0_zkvm_platform::rt::host_io::host_sendrecv;
+pub use risc0_zkvm_platform::rt::{host_io::host_sendrecv, host_sendrecv};
 use risc0_zkvm_platform::{
     io::{
         IoDescriptor, GPIO_COMMIT, GPIO_CYCLECOUNT, GPIO_LOG, SENDRECV_CHANNEL_INITIAL_INPUT,
@@ -34,7 +34,7 @@ use crate::{align_up, memory_barrier, sha};
 
 #[cfg(not(target_os = "zkvm"))]
 // Bazel really wants to compile this file for the host too, so provide a stub.
-/// This is a stub version of risc0_zkvm_platform::rt::host_sendrecv,
+/// This is a stub version of `risc0_zkvm_platform::rt::host_sendrecv`,
 /// re-exported for easy access through the SDK.
 pub fn host_sendrecv(_channel: u32, _buf: &[u8]) -> (&'static [u32], usize) {
     unimplemented!()
@@ -96,7 +96,9 @@ pub(crate) fn finalize(result: *mut usize) {
 }
 
 /// Exchanges data with the host, returning data from the host
-/// as a slice of bytes. In most cases, using env::write() is preferred.
+/// as a slice of bytes.
+/// See `env::write` for details on passing structured data to the
+/// host.
 pub fn send_recv(channel: u32, buf: &[u8]) -> &'static [u8] {
     ENV.get().send_recv(channel, buf)
 }
@@ -112,17 +114,24 @@ pub fn send_recv_as_u32(channel: u32, buf: &[u8]) -> (&'static [u32], usize) {
 /// # Examples
 /// Values are read in the order in which they are written by the host,
 /// as in a queue. In the following example, `first_value` and `second_value`
-/// have been shared consecutively by the host via `env::write`.
+/// have been shared consecutively by the host via
+/// `prover.add_input_u32_slice()` or `prover.add_input_u8_slice()`.
+///
 /// ```rust, ignore
 /// let first_value: u64 = env::read();
 /// let second_value: u64 = env::read();
 /// ```
 /// For ease and clarity, we recommend sharing multiple values between guest and
-/// host as a struct. As a practical example, in our [digital signature example](https://github.com/risc0/risc0-rust-examples/tree/main/digital-signature),
-/// we read in a `SigningRequest` that contains both a `Passphrase` and a
-/// `Message`:
-/// ```
-/// let request: SigningRequest = env::read();
+/// host as a struct. In this example, we read in details about an overdue
+/// library book.
+/// ```rust, ignore
+/// #[derive(Serialize, Deserialize, Debug)]
+/// struct LibraryBookDetails {
+///     book_id: u64,
+///     overdue: bool
+/// }
+///
+/// let book_info: LibraryBookDetails = from_slice(&receipt.get_journal_vec().unwrap()).unwrap();
 /// ```
 pub fn read<T: Deserialize<'static>>() -> T {
     ENV.get().read()
