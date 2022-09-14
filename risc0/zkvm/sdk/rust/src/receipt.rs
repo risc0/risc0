@@ -70,6 +70,8 @@ where
 
 impl Receipt {
     /// Verifies the proof receipt generated when the guest program is run.
+    /// This method calls [verify_with_hal](Receipt::verify_with_hal) using the
+    /// default HAL.
     ///
     /// # Arguments
     ///
@@ -99,12 +101,13 @@ impl Receipt {
         self.verify_with_hal(&hal, method_id)
     }
 
-    /// This function is called by [verify](Receipt::verify), which provides the
-    /// CPU HAL generated using the program circuit.
+    /// This function is called by [verify](Receipt::verify) and allows the
+    /// caller to select their preferred HAL for verification.
     ///
     /// # Arguments
     ///
-    /// * `hal` - the HAL used to represent the guest program circuit.
+    /// * `hal` - the hardware abstraction layer provided for efficient
+    ///   execution of portions of the verification process
     /// * `MethodID` - The unique method ID of the guest binary.
     #[cfg(feature = "verify")]
     pub fn verify_with_hal<'a, M, H>(&self, hal: &H, method_id: &'a M) -> Result<()>
