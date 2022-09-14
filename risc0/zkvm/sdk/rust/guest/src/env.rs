@@ -185,7 +185,7 @@ pub fn commit<T: Serialize>(data: &T) {
 /// let count1 = get_cycle_count();
 /// doSomething();
 /// let count2 = get_cycle_count();
-/// cycles_elapsed = count2 - count1;
+/// let cycles_elapsed = count2 - count1;
 /// ```
 pub fn get_cycle_count() -> usize {
     ENV.get().get_cycle_count()
