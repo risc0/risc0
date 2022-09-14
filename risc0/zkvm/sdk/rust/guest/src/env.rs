@@ -110,7 +110,7 @@ pub fn send_recv_as_u32(channel: u32, buf: &[u8]) -> (&'static [u32], usize) {
 /// Reads private data from the host.
 ///
 /// # Examples
-/// Values are read in the order in which they are written by the host),
+/// Values are read in the order in which they are written by the host,
 /// as in a queue. In the following example, `first_value` and `second_value`
 /// have been shared consecutively by the host via `env::write`.
 /// ```rust, ignore
