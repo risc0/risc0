@@ -144,7 +144,7 @@ pub fn read<T: Deserialize<'static>>() -> T {
 /// * `data` - serialized data to be made available in host-readable memory.
 /// # Example
 /// In this example, the value `42` is written and is then
-/// accessible to the host via `env::read`.
+/// accessible to the host via `prover.get_output()`.
 /// ```rust, ignore
 /// let integer_to_share: u32 = 42;
 /// env::write(&integer_to_share);
