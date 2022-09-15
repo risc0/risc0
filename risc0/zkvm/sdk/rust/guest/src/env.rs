@@ -18,7 +18,7 @@ use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{Deserializer, Serializer, Slice};
 // Re-export for easy use by user programs.
 #[cfg(target_os = "zkvm")]
-pub use risc0_zkvm_platform::rt::{host_io::host_sendrecv, host_sendrecv};
+pub use risc0_zkvm_platform::rt::host_io::host_sendrecv;
 use risc0_zkvm_platform::{
     io::{
         IoDescriptor, GPIO_COMMIT, GPIO_CYCLECOUNT, GPIO_LOG, SENDRECV_CHANNEL_INITIAL_INPUT,
