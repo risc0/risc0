@@ -204,7 +204,7 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
         .collect()
 }
 
-/// Returns all methods associated with the given riscv guest package.
+/// Returns all methods associated with the given RISC-V guest package.
 fn guest_methods<P>(pkg: &Package, out_dir: P) -> Vec<Risc0Method>
 where
     P: AsRef<Path>,
@@ -304,7 +304,7 @@ where
     fs::rename(&tmp_dest_base, dest_base.as_ref()).unwrap();
 }
 
-// Builds a package that targets the riscv guest into the specified target
+// Builds a package targeting the RISC-V guest into the specified target
 // directory.
 fn build_guest_package<P>(
     pkg: &Package,
@@ -403,13 +403,19 @@ fn build_guest_package<P>(
 /// Options defining how to embed a guest package in
 /// [`embed_methods_with_options`].
 pub struct GuestOptions {
-    /// The number of po2 entries to generate in the MethodID.
+    /// The number of entries in the MethodID.
+    ///
+    /// By default, this value is set to `DEFAULT_METHOD_ID_LIMIT`.
+    ///
+    /// Successive MethodID entries increase in size by powers of two, so
+    /// increasing `code_limit` by 1 effectively doubles the limit on code
+    /// size.
     pub code_limit: u32,
 
-    /// Features for cargo to build the guest with.
+    /// Features provided to cargo for building the guest.
     pub features: Vec<String>,
 
-    /// Enable standard library support
+    /// Flag for enabling standard library support.
     pub std: bool,
 }
 
