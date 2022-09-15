@@ -156,7 +156,16 @@ impl<C: 'static + CircuitDef<S>, S: CustomStep> Executor<C, S> {
                 size: self.steps,
             };
             self.circuit
-                .step_verify(&ctx, &mut self.custom, args)
+                .step_verify_mem(&ctx, &mut self.custom, args)
+                .unwrap();
+        }
+        for i in 0..self.cycle {
+            let ctx = CircuitStepContext {
+                cycle: i,
+                size: self.steps,
+            };
+            self.circuit
+                .step_verify_bytes(&ctx, &mut self.custom, args)
                 .unwrap();
         }
     }

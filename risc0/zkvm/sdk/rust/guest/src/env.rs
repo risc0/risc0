@@ -34,8 +34,8 @@ use crate::{align_up, memory_barrier, sha};
 
 #[cfg(not(target_os = "zkvm"))]
 // Bazel really wants to compile this file for the host too, so provide a stub.
-/// Stub version of risc0_zkvm_platform::rt::host_sendrecv, re-exported for
-/// easy access through the SDK.
+/// This is a stub version of `risc0_zkvm_platform::rt::host_sendrecv`,
+/// re-exported for easy access through the SDK.
 pub fn host_sendrecv(_channel: u32, _buf: &[u8]) -> (&'static [u32], usize) {
     unimplemented!()
 }
@@ -57,7 +57,7 @@ unsafe impl<T: Send + Sync> Sync for Once<T> {}
 pub struct Reader(Deserializer<'static>);
 
 impl Reader {
-    /// Read private data from the host.
+    /// Reads private data from the host.
     pub fn read<T: Deserialize<'static>>(&mut self) -> T {
         T::deserialize(&mut self.0).unwrap()
     }
@@ -95,8 +95,10 @@ pub(crate) fn finalize(result: *mut usize) {
     ENV.get().finalize(result);
 }
 
-/// Exchanges data with the host, returning the data from the host
+/// Exchanges data with the host, returning data from the host
 /// as a slice of bytes.
+/// See `env::write` for details on passing structured data to the
+/// host.
 pub fn send_recv(channel: u32, buf: &[u8]) -> &'static [u8] {
     ENV.get().send_recv(channel, buf)
 }
@@ -107,28 +109,103 @@ pub fn send_recv_as_u32(channel: u32, buf: &[u8]) -> (&'static [u32], usize) {
     ENV.get().send_recv_as_u32(channel, buf)
 }
 
-/// Read private data from the host.
+/// Reads private data from the host.
+///
+/// # Examples
+/// Values are read in the order in which they are written by the host,
+/// as in a queue. In the following example, `first_value` and `second_value`
+/// have been shared consecutively by the host via
+/// `prover.add_input_u32_slice()` or `prover.add_input_u8_slice()`.
+///
+/// ```rust, ignore
+/// let first_value: u64 = env::read();
+/// let second_value: u64 = env::read();
+/// ```
+/// For ease and clarity, we recommend sharing multiple values between guest and
+/// host as a struct. In this example, we read in details about an overdue
+/// library book.
+/// ```rust, ignore
+/// #[derive(Serialize, Deserialize, Debug)]
+/// struct LibraryBookDetails {
+///     book_id: u64,
+///     overdue: bool
+/// }
+///
+/// let book_info: LibraryBookDetails = from_slice(&receipt.get_journal_vec().unwrap()).unwrap();
+/// ```
 pub fn read<T: Deserialize<'static>>() -> T {
     ENV.get().read()
 }
 
-/// Write private data to the host.
+/// Writes private data to the host.
+///
+/// # Arguments
+///
+/// * `data` - serialized data to be made available in host-readable memory.
+/// # Example
+/// In this example, the value `42` is written and is then
+/// accessible to the host via `prover.get_output()`.
+/// ```rust, ignore
+/// let integer_to_share: u32 = 42;
+/// env::write(&integer_to_share);
+/// ```
 pub fn write<T: Serialize>(data: &T) {
     ENV.get().write(data);
 }
 
-/// Commit public data to the journal.
+/// Commits public data to the journal.
+///
+/// # Examples
+/// In this example, we want to publicly share the results of a private
+/// computation, so we commit the value to the journal.
+/// ```rust, ignore
+/// env::commit(&some_result);
+/// ```
+/// When committing values to the journal, keep in mind that journal contents
+/// must be deserialized from a single vector. If multiple values are to be
+/// committed, consider creating a commitment data struct.
+/// In our [digital signature example](https://github.com/risc0/risc0-rust-examples/tree/main/digital-signature),
+/// we commit message and signature together.
+/// ```rust, ignore
+/// pub struct SigningRequest {
+///     pub passphrase: Passphrase,
+///     pub msg: Message,
+/// }
+///
+/// env::commit(&SignMessageCommit {
+///     identity: *sha::digest(&request.passphrase.pass),
+///     msg: request.msg,
+/// });
+/// ```
 pub fn commit<T: Serialize>(data: &T) {
     ENV.get().commit(data);
 }
 
-/// Returns the number of processor cycles that have occured since the guest
+/// Returns the number of processor cycles that have occurred since the guest
 /// began.
+///
+/// # Examples
+/// ```rust, ignore
+/// let count = get_cycle_count();
+/// ```
+/// This function can be used to note how many cycles have elapsed during a
+/// guest operation:
+/// ```
+/// let count1 = get_cycle_count();
+/// doSomething();
+/// let count2 = get_cycle_count();
+/// let cycles_elapsed = count2 - count1;
+/// ```
 pub fn get_cycle_count() -> usize {
     ENV.get().get_cycle_count()
 }
 
 /// Print a message to the debug console.
+///
+/// # Example
+/// ```
+/// env::log("This is an example log message");
+/// ```
 pub fn log(msg: &str) {
     // TODO: format! is expensive, replace with a better solution.
     let msg = alloc_crate::format!("{}\0", msg);
@@ -193,7 +270,6 @@ impl Env {
         let slice: &mut [u32] = unsafe {
             slice::from_raw_parts_mut(memory::COMMIT.start() as _, memory::COMMIT.len_words())
         };
-
         // Write the full data out to the host
         unsafe {
             let desc = IoDescriptor {
@@ -206,7 +282,7 @@ impl Env {
         }
 
         // If the total proof message is small (<= 32 bytes), return it directly
-        // from the proof, otherwise SHA it and return the hash.
+        // from the proof. Otherwise, SHA it and return the hash.
         if len_words <= 8 {
             for i in 0..len_words {
                 unsafe {
@@ -236,6 +312,7 @@ impl Env {
         sha::finalize();
     }
 
+    /// Gets the current count of instruction cycles.
     fn get_cycle_count(&self) -> usize {
         unsafe { GPIO_CYCLECOUNT.as_ptr().write_volatile(0) }
         match host_recv(1) {

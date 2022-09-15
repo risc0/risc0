@@ -9,7 +9,7 @@
 // clang-format off
 namespace risc0::circuit::rv32im {
 
-Fp step_verify(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
+Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
   std::array<Fp, 32> host_args;
   std::array<Fp, 5> host_outs;
