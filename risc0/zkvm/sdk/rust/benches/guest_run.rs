@@ -84,6 +84,19 @@ pub fn bench(c: &mut Criterion) {
     }
     sha_group.finish();
 
+    let mut api_sha_group = c.benchmark_group("api_sha");
+    api_sha_group
+        .sampling_mode(SamplingMode::Flat)
+        .measurement_time(Duration::new(20, 0));
+    for buf_bytes in [0u64, 64, 512, 2048, 8192] {
+        api_sha_group.throughput(Throughput::Bytes(buf_bytes));
+        api_sha_group.bench_function(BenchmarkId::from_parameter(buf_bytes), |b| {
+            let buf: Vec<u8> = rand_buffer(buf_bytes as usize);
+            guest_iter(b, BenchmarkSpec::ApiSha { buf: buf.clone() })
+        });
+    }
+    api_sha_group.finish();
+
     let mut memset_group = c.benchmark_group("memset");
     memset_group.sampling_mode(SamplingMode::Flat);
     for buf_bytes in [32u64, 64, 128, 256, 512, 1024, 2048, 4096] {

@@ -10,6 +10,9 @@ pub enum BenchmarkSpec {
     RawSha {
         buf: Vec<u32>,
     },
+    ApiSha {
+        buf: Vec<u8>,
+    },
     Memcpy {
         src: Vec<u8>,
         src_align: usize,

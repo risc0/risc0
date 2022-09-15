@@ -27,6 +27,11 @@ pub fn main() {
                 memory_barrier(&i);
             }
         }
+        BenchmarkSpec::ApiSha { buf } => {
+            for _ in 0..iters {
+                memory_barrier(&sha::digest_u8_slice(&buf));
+            }
+        }
         BenchmarkSpec::RawSha { buf } => {
             for _ in 0..iters {
                 memory_barrier(&sha::raw_digest(&buf));
