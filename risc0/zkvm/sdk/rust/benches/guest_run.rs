@@ -83,7 +83,6 @@ pub fn bench(c: &mut Criterion) {
         });
     }
     sha_group.finish();
-
     let mut api_sha_group = c.benchmark_group("api_sha");
     api_sha_group
         .sampling_mode(SamplingMode::Flat)
@@ -100,6 +99,7 @@ pub fn bench(c: &mut Criterion) {
     let mut memset_group = c.benchmark_group("memset");
     memset_group.sampling_mode(SamplingMode::Flat);
     for buf_bytes in [32u64, 64, 128, 256, 512, 1024, 2048, 4096] {
+        memset_group.throughput(Throughput::Bytes(buf_bytes));
         memset_group.bench_with_input(
             BenchmarkId::new("memset", buf_bytes),
             &buf_bytes,
