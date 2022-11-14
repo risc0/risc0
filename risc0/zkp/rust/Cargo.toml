@@ -19,7 +19,7 @@ log = { version = "0.4", optional = true }
 ndarray = { version = "0.15", optional = true, features = ["rayon"] }
 paste = "1.0"
 rand = { version = "0.8", default-features = false, features = ["small_rng"] }
-rand_core = "0.6"
+rand_core = { version = "0.6", default-features = false }
 rayon = { version = "1.5", optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 sha2 = { version = "0.10", optional = true, default-features = false, features = ["compress"] }

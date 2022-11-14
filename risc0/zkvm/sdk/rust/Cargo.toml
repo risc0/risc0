@@ -31,7 +31,7 @@ ctor = "0.1"
 cxx = "1.0"
 gimli = { version = "0.26", optional = true }
 log = "0.4"
-rand = "0.8"
+rand = { version = "0.8", default-features = false }
 risc0-zkvm-sys = { version = "0.11", path = "../.." }
 sha2 = "0.10"
 xmas-elf = "0.8"
