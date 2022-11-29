@@ -12,7 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cxx::bridge]
-mod ffi {}
+//! Platform definitions for ZKVM, including IO port addresses, memory
+//! regions, and low-level runtime functions.
 
-pub const LINKER_SCRIPT: &[u8] = include_bytes!("../risc0.ld");
+#![no_std]
+#![allow(unused_variables)]
+
+pub mod abi;
+pub mod io;
+pub mod memory;
+pub mod syscall;
+
+pub const WORD_SIZE: usize = core::mem::size_of::<u32>();

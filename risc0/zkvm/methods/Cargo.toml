@@ -1,0 +1,18 @@
+[package]
+name = "risc0-zkvm-methods"
+version = { workspace = true }
+edition = { workspace = true }
+
+[build-dependencies]
+env_logger = "0.10"
+risc0-build = { version = "0.12", path = "../../build" }
+
+[package.metadata.release]
+release = false
+
+[package.metadata.risc0]
+methods = ["guest", "std"]
+
+[dependencies]
+risc0-zeroio = { path = "../../zeroio", default-features = false }
+serde = { version = "1.0", default-features = false, features = ["derive"] }

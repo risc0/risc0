@@ -1,0 +1,350 @@
+// Copyright 2022 Risc0, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use core::{
+    cmp::Ordering,
+    fmt::{self, Debug},
+};
+
+#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Hash, Ord, Debug)]
+pub enum RegisterGroup {
+    Accum = 0,
+    Code = 1,
+    Data = 2,
+}
+
+const REGISTER_GROUPS: &[RegisterGroup] = &[
+    RegisterGroup::Accum,
+    RegisterGroup::Code,
+    RegisterGroup::Data,
+];
+
+/// This class is an implementation detail and carefully built to be efficient
+/// on RISC-V for use in recursion.
+#[derive(Debug)]
+pub struct TapData {
+    // The offset in register group (reg #)
+    pub offset: u16,
+    // How many cycles back this tap is
+    pub back: u16,
+    // Which register group this tap is a part of
+    pub group: RegisterGroup,
+    // Which combo this register is part of
+    pub combo: u8,
+    // How far to skip to next register
+    pub skip: u8,
+}
+
+impl PartialEq for TapData {
+    fn eq(&self, other: &Self) -> bool {
+        self.offset == other.offset && self.back == other.back && self.group == other.group
+    }
+}
+
+impl PartialOrd for TapData {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        match self.group.partial_cmp(&other.group) {
+            Some(Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.offset.partial_cmp(&other.offset) {
+            Some(Ordering::Equal) => {}
+            ord => return ord,
+        }
+        self.back.partial_cmp(&other.back)
+    }
+}
+
+#[derive(Debug)]
+pub struct TapSet<'a> {
+    pub taps: &'a [TapData],
+    pub combo_taps: &'a [u16],
+    pub combo_begin: &'a [u16],
+    pub group_begin: [usize; REGISTER_GROUPS.len() + 1],
+    pub combos_count: usize,
+    pub reg_count: usize,
+    pub tot_combo_backs: usize,
+}
+
+impl<'a> TapSet<'a> {
+    pub fn tap_size(&self) -> usize {
+        self.group_begin[REGISTER_GROUPS.len()]
+    }
+
+    pub fn taps(&self) -> TapIter {
+        TapIter {
+            data: &self.taps,
+            cursor: 0,
+            end: self.group_begin[REGISTER_GROUPS.len()],
+        }
+    }
+
+    pub fn regs(&self) -> RegisterIter {
+        RegisterIter {
+            data: &self.taps,
+            cursor: 0,
+            end: self.group_begin[REGISTER_GROUPS.len()],
+        }
+    }
+
+    pub fn group_taps(&self, group: RegisterGroup) -> TapIter {
+        let group_id = group as usize;
+        TapIter {
+            data: &self.taps,
+            cursor: self.group_begin[group_id],
+            end: self.group_begin[group_id + 1],
+        }
+    }
+
+    pub fn group_regs(&self, group: RegisterGroup) -> RegisterIter {
+        let group_id = group as usize;
+        RegisterIter {
+            data: &self.taps,
+            cursor: self.group_begin[group_id],
+            end: self.group_begin[group_id + 1],
+        }
+    }
+
+    pub fn group_size(&self, group: RegisterGroup) -> usize {
+        let group_id = group as usize;
+        let idx = self.group_begin[group_id + 1] - 1;
+        let last = self.taps[idx].offset as usize;
+        last + 1
+    }
+
+    // size_t combosSize() const { return data_->combos.count; }
+    pub fn combos_size(&self) -> usize {
+        self.combos_count
+    }
+
+    pub fn reg_count(&self) -> usize {
+        self.reg_count
+    }
+
+    pub fn combos(&self) -> ComboIter {
+        ComboIter {
+            data: ComboData {
+                taps: &self.combo_taps,
+                offsets: &self.combo_begin,
+            },
+            id: 0,
+            end: self.combos_count,
+        }
+    }
+
+    pub fn get_combo(&self, id: usize) -> ComboRef {
+        ComboRef {
+            data: ComboData {
+                taps: &self.combo_taps,
+                offsets: &self.combo_begin,
+            },
+            id,
+        }
+    }
+}
+
+pub struct RegisterRef<'a> {
+    data: &'a [TapData],
+    cursor: usize,
+}
+
+impl<'a> RegisterRef<'a> {
+    pub fn group(&self) -> RegisterGroup {
+        self.data[self.cursor].group
+    }
+
+    pub fn offset(&self) -> usize {
+        self.data[self.cursor].offset as usize
+    }
+
+    pub fn combo_id(&self) -> usize {
+        self.data[self.cursor].combo as usize
+    }
+
+    /// Number of taps in the register
+    pub fn size(&self) -> usize {
+        self.data[self.cursor].skip as usize
+    }
+
+    /// Get a specific 'back' value
+    pub fn back(&self, i: usize) -> usize {
+        self.data[self.cursor + i].back as usize
+    }
+}
+
+impl<'a> Debug for RegisterRef<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("RegisterRef")
+            .field("group", &self.group())
+            .field("offset", &self.offset())
+            .field("combo_id", &self.combo_id())
+            .field("size", &self.size())
+            .finish()
+    }
+}
+
+impl<'a> IntoIterator for RegisterRef<'a> {
+    type Item = TapRef<'a>;
+    type IntoIter = TapIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        TapIter {
+            data: self.data,
+            cursor: self.cursor,
+            end: self.cursor + self.size(),
+        }
+    }
+}
+
+pub struct RegisterIter<'a> {
+    data: &'a [TapData],
+    cursor: usize,
+    end: usize,
+}
+
+impl<'a> Iterator for RegisterIter<'a> {
+    type Item = RegisterRef<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let cursor = self.cursor;
+        if cursor >= self.data.len() {
+            return None;
+        }
+        let next = cursor + self.data[cursor].skip as usize;
+        if next > self.end {
+            return None;
+        }
+        self.cursor = next;
+        Some(RegisterRef {
+            data: self.data,
+            cursor,
+        })
+    }
+}
+
+pub struct TapRef<'a> {
+    data: &'a TapData,
+}
+
+impl<'a> TapRef<'a> {
+    pub fn group(&self) -> RegisterGroup {
+        self.data.group
+    }
+
+    pub fn offset(&self) -> usize {
+        self.data.offset as usize
+    }
+
+    pub fn back(&self) -> usize {
+        self.data.back as usize
+    }
+
+    pub fn combo_id(&self) -> usize {
+        self.data.combo as usize
+    }
+}
+
+impl<'a> Debug for TapRef<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("TapRef")
+            .field("group", &self.group())
+            .field("offset", &self.offset())
+            .field("back", &self.back())
+            .field("conmbo_id", &self.combo_id())
+            .finish()
+    }
+}
+
+pub struct TapIter<'a> {
+    data: &'a [TapData],
+    cursor: usize,
+    end: usize,
+}
+
+impl<'a> Iterator for TapIter<'a> {
+    type Item = TapRef<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let cursor = self.cursor;
+        let next = self.cursor + 1;
+        if next > self.end {
+            return None;
+        }
+        self.cursor = next;
+        Some(TapRef {
+            data: &self.data[cursor],
+        })
+    }
+}
+
+/// Combo data holds the tap set for each 'combo'.
+///
+/// Basically, combo N consists of taps in the range [offsets\[n\],
+/// offsets\[n+1\]). Again this is an implementation detail, and the format is
+/// designed to put the actual arrays into static data.
+#[derive(Clone)]
+pub struct ComboData<'a> {
+    taps: &'a [u16],
+    offsets: &'a [u16],
+}
+
+pub struct ComboRef<'a> {
+    data: ComboData<'a>,
+    id: usize,
+}
+
+impl<'a> ComboRef<'a> {
+    pub fn id(&self) -> usize {
+        self.id
+    }
+
+    pub fn size(&self) -> usize {
+        self.next_offset() - self.self_offset()
+    }
+
+    pub fn slice(&self) -> &[u16] {
+        &self.data.taps[self.self_offset()..self.next_offset()]
+    }
+
+    fn self_offset(&self) -> usize {
+        self.data.offsets[self.id] as usize
+    }
+
+    fn next_offset(&self) -> usize {
+        self.data.offsets[self.id + 1] as usize
+    }
+}
+
+pub struct ComboIter<'a> {
+    data: ComboData<'a>,
+    id: usize,
+    end: usize,
+}
+
+impl<'a> Iterator for ComboIter<'a> {
+    type Item = ComboRef<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let id = self.id;
+        let next = self.id + 1;
+        if next > self.end {
+            return None;
+        }
+        self.id = next;
+        Some(ComboRef {
+            data: self.data.clone(),
+            id,
+        })
+    }
+}

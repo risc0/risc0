@@ -1,1 +1,3 @@
-bazel/rules/rust/rustfmt.toml
+wrap_comments = true
+normalize_comments = true
+group_imports = "StdExternalCrate"

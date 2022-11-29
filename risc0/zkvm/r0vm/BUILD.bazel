@@ -1,3 +1,0 @@
-load("@rules_rust//rust:defs.bzl", "rust_binary")
-
-exports_files(["Cargo.toml"])
