@@ -1,4 +1,0 @@
-filegroup(
-    name = "docs_anchor",
-    visibility = ["//visibility:public"],
-)

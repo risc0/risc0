@@ -6,37 +6,13 @@ on:
   pull_request:
     branches: [ main ]
 
-  # Allows running this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: [self-hosted, "${{ matrix.os }}"]
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [Linux, macOS, Windows]
-        include:
-          - os: Linux
-            config: --config=ci
-
+  check:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: risc0/actions-bazelisk@6c0030d04c5269c111620b552fe2b7f619849944
-      - name: Build & test
-        env:
-          CONFIG: ${{ matrix.config }}
-        run: bazelisk test //... $CONFIG --config=cpu
-
-  cargo:
-    runs-on: [self-hosted, "${{ matrix.os }}"]
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [Linux, macOS]
-
-    steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: risc0/actions-rs-toolchain@v1
         with:
           toolchain: stable
@@ -45,9 +21,35 @@ jobs:
         with:
           crate: cargo-sort
           version: "1.0"
-      - run: cargo test --release
-      - run: cargo test --release --features pure-prove
-      - run: cargo check --benches
       - run: cargo fmt --all -- --check
       - run: cargo sort --workspace --check
+
+  test:
+    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        arch: [X64]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: risc0/actions-rs-toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo test
+        env:
+          RUST_BACKTRACE: "1"
+      - run: cargo test --tests -- --ignored
+        env:
+          RUST_BACKTRACE: "1"
+      - run: cargo build -p risc0-zkvm -F verify-only --target=wasm32-unknown-unknown
+      - run: cargo check --benches
+
+  doc:
+    runs-on: [self-hosted, Linux]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: risc0/actions-rs-toolchain@v1
+        with:
+          toolchain: stable
       - run: cargo doc
