@@ -1,0 +1,29 @@
+[package]
+name = "risc0-zeroio"
+version = "0.1.0"
+edition = "2021"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bytemuck = "1.12"
+impl-trait-for-tuples = "0.2"
+log = "0.4"
+risc0-zeroio-derive = { path = "../zeroio_derive" }
+tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+
+[target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+test-log = { version = "0.2", features = ["trace"] }
+env_logger = "0.10"
+
+[features]
+default = ["std"]
+std = []
+# Enabling the "debug-derive" feature will allow errors in generated
+# code to be reported in context by writing out the generated code to
+# an external file and then using the "include" macro as opposed to
+# emitting it inline.
+#
+# Warning: Enabling this feature will litter your source tree with
+# generated files.
+debug-derive = ["risc0-zeroio-derive/debug-derive"]

@@ -1,32 +1,25 @@
 [workspace]
+resolver = "2"
 members = [
-  "risc0/core",
+  "risc0/build",
+  "risc0/circuit/rv32im",
+  "risc0/r0vm",
+  "risc0/tools",
+  "risc0/zeroio",
+  "risc0/zeroio_derive",
   "risc0/zkp",
-  "risc0/zkp/rust",
   "risc0/zkvm",
-  "risc0/zkvm/circuit",
-  "risc0/zkvm/circuit/make-circuit",
+  "risc0/zkvm/methods",
   "risc0/zkvm/platform",
-  "risc0/zkvm/prove/make-id",
-  "risc0/zkvm/r0vm",
-  "risc0/zkvm/sdk/rust",
-  "risc0/zkvm/sdk/rust/build",
-  "risc0/zkvm/sdk/rust/circuit",
 ]
 
-exclude = [
-  "risc0/zkvm/sdk/rust/cargo-risc0",
-  "risc0/zkvm/sdk/rust/methods",
-]
-
-[profile.release]
+[profile.bench]
 lto = true
 
-[profile.bootstrap]
-inherits = "release"
-
-[workspace.metadata.workspaces]
-allow_branch = "main"
-
-[profile.dev.package.risc0-zkp]
+# Always optimize; otherwise tests take excessively long.
+[profile.dev]
 opt-level = 3
+
+[profile.release]
+debug = 1
+lto = true
