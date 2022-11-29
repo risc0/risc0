@@ -91,27 +91,27 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
   Fp x34(31);
   // loc("cirgen/circuit/rv32im/multiply.cpp":59:34)
   Fp x35(192);
-  // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+  // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
   Fp x36(35);
   // loc("cirgen/circuit/rv32im/memio.cpp":76:79)
   Fp x37(16384);
   // loc("cirgen/circuit/rv32im/memio.cpp":76:56)
   Fp x38(4194304);
-  // loc("./cirgen/circuit/rv32im/rv32im.inl":70:68)
+  // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
   Fp x39(23);
-  // loc("./cirgen/circuit/rv32im/rv32im.inl":69:68)
+  // loc("./cirgen/circuit/rv32im/rv32im.inl":58:68)
   Fp x40(55);
-  // loc("./cirgen/circuit/rv32im/rv32im.inl":68:68)
+  // loc("./cirgen/circuit/rv32im/rv32im.inl":57:68)
   Fp x41(103);
-  // loc("./cirgen/circuit/rv32im/rv32im.inl":67:68)
+  // loc("./cirgen/circuit/rv32im/rv32im.inl":56:68)
   Fp x42(111);
-  // loc("./cirgen/circuit/rv32im/rv32im.inl":61:68)
+  // loc("./cirgen/circuit/rv32im/rv32im.inl":50:68)
   Fp x43(99);
   // loc("cirgen/circuit/rv32im/decode.cpp":85:7)
   Fp x44(240);
-  // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
+  // loc("./cirgen/circuit/rv32im/rv32im.inl":44:68)
   Fp x45(19);
-  // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
+  // loc("./cirgen/circuit/rv32im/rv32im.inl":37:68)
   Fp x46(51);
   // loc("cirgen/components/u32.cpp":55:36)
   Fp x47(1996488705);
@@ -3493,7 +3493,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         if (x788 != 0) throw std::runtime_error("eqz failed at: ./cirgen/components/onehot.h:34");
       }
       {
-        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":48:68))
+        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":37:68))
         auto x789 = args[2][170 * steps + ((cycle - 0) & mask)];
         assert(x789 != Fp::invalid());
         if (x789 != 0) {
@@ -3558,7 +3558,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":49:68))
+        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":38:68))
         auto x790 = args[2][171 * steps + ((cycle - 0) & mask)];
         assert(x790 != Fp::invalid());
         if (x790 != 0) {
@@ -3623,7 +3623,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":50:69))
+        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":39:69))
         auto x791 = args[2][172 * steps + ((cycle - 0) & mask)];
         assert(x791 != Fp::invalid());
         if (x791 != 0) {
@@ -3688,7 +3688,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x72;
           }
         }
-        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":51:69))
+        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":40:69))
         auto x792 = args[2][173 * steps + ((cycle - 0) & mask)];
         assert(x792 != Fp::invalid());
         if (x792 != 0) {
@@ -3753,7 +3753,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x72;
           }
         }
-        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":52:69))
+        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":41:69))
         auto x793 = args[2][174 * steps + ((cycle - 0) & mask)];
         assert(x793 != Fp::invalid());
         if (x793 != 0) {
@@ -3818,7 +3818,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x72;
           }
         }
-        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":53:68))
+        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":42:68))
         auto x794 = args[2][175 * steps + ((cycle - 0) & mask)];
         assert(x794 != Fp::invalid());
         if (x794 != 0) {
@@ -3883,7 +3883,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":54:68))
+        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":43:68))
         auto x795 = args[2][176 * steps + ((cycle - 0) & mask)];
         assert(x795 != Fp::invalid());
         if (x795 != 0) {
@@ -3948,7 +3948,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":55:68))
+        // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":44:68))
         auto x796 = args[2][177 * steps + ((cycle - 0) & mask)];
         assert(x796 != Fp::invalid());
         if (x796 != 0) {
@@ -4849,18 +4849,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       }
       // loc("cirgen/circuit/rv32im/compute.cpp":156:13)
       auto x1001 = x526 + x80;
-      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":48:68))
+      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":37:68))
       auto x1002 = args[2][170 * steps + ((cycle - 0) & mask)];
       assert(x1002 != Fp::invalid());
       if (x1002 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":37:68)
         auto x1003 = x750 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
-        if (x1003 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:48");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
-        if (x739 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:48");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
-        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:48");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":37:68)
+        if (x1003 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:37");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":37:68)
+        if (x739 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:37");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":37:68)
+        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:37");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -5022,7 +5022,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/0/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1027 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1027 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":37:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1027);
@@ -5035,7 +5035,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x937;
           host_args.at(4) = x941;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":37:68)
           auto x1028 = x993 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -5181,20 +5181,20 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":49:68))
+      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":38:68))
       auto x1037 = args[2][171 * steps + ((cycle - 0) & mask)];
       assert(x1037 != Fp::invalid());
       if (x1037 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
         auto x1038 = x750 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
-        if (x1038 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:49");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
-        if (x739 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:49");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
+        if (x1038 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:38");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
+        if (x739 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:38");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
         auto x1039 = x715 - x62;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
-        if (x1039 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:49");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
+        if (x1039 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:38");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -5356,7 +5356,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/0/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1063 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1063 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1063);
@@ -5369,7 +5369,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x937;
           host_args.at(4) = x941;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
           auto x1064 = x993 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -5515,20 +5515,20 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":50:69))
+      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":39:69))
       auto x1073 = args[2][172 * steps + ((cycle - 0) & mask)];
       assert(x1073 != Fp::invalid());
       if (x1073 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":39:69)
         auto x1074 = x750 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:69)
-        if (x1074 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:50");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":39:69)
+        if (x1074 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:39");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":39:69)
         auto x1075 = x739 - x80;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:69)
-        if (x1075 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:50");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:69)
-        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:50");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":39:69)
+        if (x1075 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:39");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":39:69)
+        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:39");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -5690,7 +5690,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/0/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1099 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1099 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":39:69)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1099);
@@ -5703,7 +5703,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x937;
           host_args.at(4) = x941;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":50:69)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":39:69)
           auto x1100 = x993 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -5849,20 +5849,20 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":51:69))
+      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":40:69))
       auto x1109 = args[2][173 * steps + ((cycle - 0) & mask)];
       assert(x1109 != Fp::invalid());
       if (x1109 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
         auto x1110 = x750 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:69)
-        if (x1110 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:51");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
+        if (x1110 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:40");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
         auto x1111 = x739 - x72;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:69)
-        if (x1111 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:51");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:69)
-        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:51");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
+        if (x1111 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:40");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
+        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:40");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -6024,7 +6024,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/0/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1135 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1135 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1135);
@@ -6037,7 +6037,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x937;
           host_args.at(4) = x941;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":51:69)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
           auto x1136 = x993 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -6183,20 +6183,20 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":52:69))
+      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":41:69))
       auto x1145 = args[2][174 * steps + ((cycle - 0) & mask)];
       assert(x1145 != Fp::invalid());
       if (x1145 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
         auto x1146 = x750 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:69)
-        if (x1146 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:52");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
+        if (x1146 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:41");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
         auto x1147 = x739 - x71;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:69)
-        if (x1147 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:52");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:69)
-        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:52");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
+        if (x1147 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:41");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
+        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:41");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -6358,7 +6358,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/0/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1171 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1171 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1171);
@@ -6371,7 +6371,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x937;
           host_args.at(4) = x941;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":52:69)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
           auto x1172 = x993 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -6517,20 +6517,20 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":53:68))
+      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":42:68))
       auto x1181 = args[2][175 * steps + ((cycle - 0) & mask)];
       assert(x1181 != Fp::invalid());
       if (x1181 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":42:68)
         auto x1182 = x750 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
-        if (x1182 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:53");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":42:68)
+        if (x1182 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:42");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":42:68)
         auto x1183 = x739 - x84;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
-        if (x1183 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:53");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
-        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:53");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":42:68)
+        if (x1183 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:42");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":42:68)
+        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:42");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -6692,7 +6692,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/0/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1207 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1207 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":42:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1207);
@@ -6705,7 +6705,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x86;
           host_args.at(4) = x86;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":42:68)
           auto x1208 = x993 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -6851,20 +6851,20 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":54:68))
+      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":43:68))
       auto x1217 = args[2][176 * steps + ((cycle - 0) & mask)];
       assert(x1217 != Fp::invalid());
       if (x1217 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
         auto x1218 = x750 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
-        if (x1218 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:54");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
+        if (x1218 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:43");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
         auto x1219 = x739 - x79;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
-        if (x1219 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:54");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
-        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:54");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
+        if (x1219 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:43");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
+        if (x715 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:43");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -7026,7 +7026,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/0/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1243 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1243 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1243);
@@ -7039,7 +7039,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x86;
           host_args.at(4) = x86;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
           auto x1244 = x993 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -7185,16 +7185,16 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":55:68))
+      // loc("Top/Mux/4/Mux/0/ComputeCycle/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":44:68))
       auto x1253 = args[2][177 * steps + ((cycle - 0) & mask)];
       assert(x1253 != Fp::invalid());
       if (x1253 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":44:68)
         auto x1254 = x750 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
-        if (x1254 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:55");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
-        if (x739 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:55");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":44:68)
+        if (x1254 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:44");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":44:68)
+        if (x739 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:44");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x1255 = x710 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -7374,7 +7374,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/0/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1287 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1287 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":44:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1287);
@@ -7387,7 +7387,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x937;
           host_args.at(4) = x941;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":44:68)
           auto x1288 = x993 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -8067,7 +8067,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         if (x1425 != 0) throw std::runtime_error("eqz failed at: ./cirgen/components/onehot.h:34");
       }
       {
-        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":56:69))
+        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":45:69))
         auto x1426 = args[2][170 * steps + ((cycle - 0) & mask)];
         assert(x1426 != Fp::invalid());
         if (x1426 != 0) {
@@ -8154,7 +8154,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x72;
           }
         }
-        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":57:69))
+        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":46:69))
         auto x1438 = args[2][171 * steps + ((cycle - 0) & mask)];
         assert(x1438 != Fp::invalid());
         if (x1438 != 0) {
@@ -8241,7 +8241,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x72;
           }
         }
-        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":58:69))
+        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":47:69))
         auto x1450 = args[2][172 * steps + ((cycle - 0) & mask)];
         assert(x1450 != Fp::invalid());
         if (x1450 != 0) {
@@ -8328,7 +8328,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x72;
           }
         }
-        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":59:68))
+        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":48:68))
         auto x1462 = args[2][173 * steps + ((cycle - 0) & mask)];
         assert(x1462 != Fp::invalid());
         if (x1462 != 0) {
@@ -8415,7 +8415,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":60:68))
+        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":49:68))
         auto x1474 = args[2][174 * steps + ((cycle - 0) & mask)];
         assert(x1474 != Fp::invalid());
         if (x1474 != 0) {
@@ -8502,7 +8502,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":61:68))
+        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":50:68))
         auto x1486 = args[2][175 * steps + ((cycle - 0) & mask)];
         assert(x1486 != Fp::invalid());
         if (x1486 != 0) {
@@ -8595,7 +8595,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":62:68))
+        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":51:68))
         auto x1501 = args[2][176 * steps + ((cycle - 0) & mask)];
         assert(x1501 != Fp::invalid());
         if (x1501 != 0) {
@@ -8688,7 +8688,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":63:68))
+        // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":52:68))
         auto x1516 = args[2][177 * steps + ((cycle - 0) & mask)];
         assert(x1516 != Fp::invalid());
         if (x1516 != 0) {
@@ -9631,18 +9631,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x1741 = x1740 * x1724;
       // loc("cirgen/circuit/rv32im/compute.cpp":166:13)
       auto x1742 = x1739 + x1741;
-      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":56:69))
+      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":45:69))
       auto x1743 = args[2][170 * steps + ((cycle - 0) & mask)];
       assert(x1743 != Fp::invalid());
       if (x1743 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":56:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":45:69)
         auto x1744 = x1387 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":56:69)
-        if (x1744 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:56");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":56:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":45:69)
+        if (x1744 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:45");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":45:69)
         auto x1745 = x1376 - x80;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":56:69)
-        if (x1745 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:56");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":45:69)
+        if (x1745 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:45");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x1746 = x1347 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -9822,7 +9822,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/1/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1778 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1778 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":56:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":45:69)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1778);
@@ -9835,7 +9835,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x1660;
           host_args.at(4) = x1664;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":56:69)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":45:69)
           auto x1779 = x1716 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -9981,18 +9981,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":57:69))
+      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":46:69))
       auto x1788 = args[2][171 * steps + ((cycle - 0) & mask)];
       assert(x1788 != Fp::invalid());
       if (x1788 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":46:69)
         auto x1789 = x1387 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:69)
-        if (x1789 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:57");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":46:69)
+        if (x1789 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:46");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":46:69)
         auto x1790 = x1376 - x72;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:69)
-        if (x1790 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:57");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":46:69)
+        if (x1790 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:46");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x1791 = x1347 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -10172,7 +10172,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/1/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1823 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1823 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":46:69)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1823);
@@ -10185,7 +10185,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x1660;
           host_args.at(4) = x1664;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":57:69)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":46:69)
           auto x1824 = x1716 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -10331,18 +10331,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":58:69))
+      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":47:69))
       auto x1833 = args[2][172 * steps + ((cycle - 0) & mask)];
       assert(x1833 != Fp::invalid());
       if (x1833 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":58:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":47:69)
         auto x1834 = x1387 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":58:69)
-        if (x1834 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:58");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":58:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":47:69)
+        if (x1834 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:47");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":47:69)
         auto x1835 = x1376 - x71;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":58:69)
-        if (x1835 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:58");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":47:69)
+        if (x1835 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:47");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x1836 = x1347 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -10522,7 +10522,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/1/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1868 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1868 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":58:69)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":47:69)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1868);
@@ -10535,7 +10535,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x1660;
           host_args.at(4) = x1664;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":58:69)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":47:69)
           auto x1869 = x1716 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -10681,18 +10681,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":59:68))
+      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":48:68))
       auto x1878 = args[2][173 * steps + ((cycle - 0) & mask)];
       assert(x1878 != Fp::invalid());
       if (x1878 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
         auto x1879 = x1387 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
-        if (x1879 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:59");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
+        if (x1879 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:48");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
         auto x1880 = x1376 - x84;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
-        if (x1880 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:59");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
+        if (x1880 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:48");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x1881 = x1347 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -10872,7 +10872,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/1/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1913 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1913 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1913);
@@ -10885,7 +10885,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x86;
           host_args.at(4) = x86;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":48:68)
           auto x1914 = x1716 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -11031,18 +11031,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":60:68))
+      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":49:68))
       auto x1923 = args[2][174 * steps + ((cycle - 0) & mask)];
       assert(x1923 != Fp::invalid());
       if (x1923 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":60:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
         auto x1924 = x1387 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":60:68)
-        if (x1924 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:60");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":60:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
+        if (x1924 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:49");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
         auto x1925 = x1376 - x79;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":60:68)
-        if (x1925 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:60");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
+        if (x1925 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:49");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x1926 = x1347 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -11222,7 +11222,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/1/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x1958 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x1958 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":60:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x1958);
@@ -11235,7 +11235,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x86;
           host_args.at(4) = x86;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":60:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":49:68)
           auto x1959 = x1716 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -11381,16 +11381,16 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":61:68))
+      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":50:68))
       auto x1968 = args[2][175 * steps + ((cycle - 0) & mask)];
       assert(x1968 != Fp::invalid());
       if (x1968 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":61:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:68)
         auto x1969 = x1387 - x43;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":61:68)
-        if (x1969 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:61");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":61:68)
-        if (x1376 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:61");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:68)
+        if (x1969 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:50");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:68)
+        if (x1376 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:50");
         // loc("cirgen/circuit/rv32im/decode.cpp":84:7)
         auto x1970 = x1347 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":84:21)
@@ -11576,7 +11576,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/1/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2005 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2005 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":61:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2005);
@@ -11589,7 +11589,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x1660;
           host_args.at(4) = x1664;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":61:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":50:68)
           auto x2006 = x1716 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -11690,7 +11690,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2014;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":61:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":50:68)
         auto x2015 = x1719 + x87;
         if (x2015 != 0) {
           // loc("cirgen/components/ram.cpp":39:3)
@@ -11737,18 +11737,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":62:68))
+      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":51:68))
       auto x2016 = args[2][176 * steps + ((cycle - 0) & mask)];
       assert(x2016 != Fp::invalid());
       if (x2016 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":62:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:68)
         auto x2017 = x1387 - x43;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":62:68)
-        if (x2017 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:62");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":62:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:68)
+        if (x2017 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:51");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:68)
         auto x2018 = x1376 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":62:68)
-        if (x2018 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:62");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:68)
+        if (x2018 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:51");
         // loc("cirgen/circuit/rv32im/decode.cpp":84:7)
         auto x2019 = x1347 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":84:21)
@@ -11934,7 +11934,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/1/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2054 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2054 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":62:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2054);
@@ -11947,7 +11947,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x1660;
           host_args.at(4) = x1664;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":62:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":51:68)
           auto x2055 = x1716 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -12048,7 +12048,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2063;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":62:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":51:68)
         auto x2064 = x1719 + x87;
         if (x2064 != 0) {
           // loc("cirgen/components/ram.cpp":39:3)
@@ -12095,18 +12095,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":63:68))
+      // loc("Top/Mux/4/Mux/1/ComputeCycle/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":52:68))
       auto x2065 = args[2][177 * steps + ((cycle - 0) & mask)];
       assert(x2065 != Fp::invalid());
       if (x2065 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":63:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:68)
         auto x2066 = x1387 - x43;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":63:68)
-        if (x2066 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:63");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":63:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:68)
+        if (x2066 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:52");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:68)
         auto x2067 = x1376 - x80;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":63:68)
-        if (x2067 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:63");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:68)
+        if (x2067 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:52");
         // loc("cirgen/circuit/rv32im/decode.cpp":84:7)
         auto x2068 = x1347 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":84:21)
@@ -12292,7 +12292,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/1/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2103 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2103 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":63:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2103);
@@ -12305,7 +12305,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x1660;
           host_args.at(4) = x1664;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":63:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":52:68)
           auto x2104 = x1716 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -12406,7 +12406,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2112;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":63:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":52:68)
         auto x2113 = x1719 + x87;
         if (x2113 != 0) {
           // loc("cirgen/components/ram.cpp":39:3)
@@ -12987,7 +12987,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         if (x2242 != 0) throw std::runtime_error("eqz failed at: ./cirgen/components/onehot.h:34");
       }
       {
-        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":64:68))
+        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":53:68))
         auto x2243 = args[2][170 * steps + ((cycle - 0) & mask)];
         assert(x2243 != Fp::invalid());
         if (x2243 != 0) {
@@ -13080,7 +13080,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":65:68))
+        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":54:68))
         auto x2258 = args[2][171 * steps + ((cycle - 0) & mask)];
         assert(x2258 != Fp::invalid());
         if (x2258 != 0) {
@@ -13173,7 +13173,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":66:68))
+        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":55:68))
         auto x2273 = args[2][172 * steps + ((cycle - 0) & mask)];
         assert(x2273 != Fp::invalid());
         if (x2273 != 0) {
@@ -13266,7 +13266,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":67:68))
+        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":56:68))
         auto x2288 = args[2][173 * steps + ((cycle - 0) & mask)];
         assert(x2288 != Fp::invalid());
         if (x2288 != 0) {
@@ -13363,7 +13363,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":68:68))
+        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":57:68))
         auto x2305 = args[2][174 * steps + ((cycle - 0) & mask)];
         assert(x2305 != Fp::invalid());
         if (x2305 != 0) {
@@ -13450,7 +13450,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":69:68))
+        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":58:68))
         auto x2317 = args[2][175 * steps + ((cycle - 0) & mask)];
         assert(x2317 != Fp::invalid());
         if (x2317 != 0) {
@@ -13515,7 +13515,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x77;
           }
         }
-        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":70:68))
+        // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":59:68))
         auto x2318 = args[2][176 * steps + ((cycle - 0) & mask)];
         assert(x2318 != Fp::invalid());
         if (x2318 != 0) {
@@ -14440,18 +14440,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       auto x2534 = x2530 * x2520;
       // loc("cirgen/circuit/rv32im/compute.cpp":169:14)
       auto x2535 = x2533 + x2534;
-      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":64:68))
+      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":53:68))
       auto x2536 = args[2][170 * steps + ((cycle - 0) & mask)];
       assert(x2536 != Fp::invalid());
       if (x2536 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":64:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
         auto x2537 = x2204 - x43;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":64:68)
-        if (x2537 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:64");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":64:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
+        if (x2537 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:53");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
         auto x2538 = x2193 - x73;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":64:68)
-        if (x2538 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:64");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
+        if (x2538 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:53");
         // loc("cirgen/circuit/rv32im/decode.cpp":84:7)
         auto x2539 = x2164 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":84:21)
@@ -14637,7 +14637,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/2/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2574 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2574 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":64:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2574);
@@ -14650,7 +14650,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x2448;
           host_args.at(4) = x2452;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":64:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
           auto x2575 = x2504 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -14751,7 +14751,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2583;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":64:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
         auto x2584 = x2507 + x87;
         if (x2584 != 0) {
           // loc("cirgen/components/ram.cpp":39:3)
@@ -14798,18 +14798,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":65:68))
+      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":54:68))
       auto x2585 = args[2][171 * steps + ((cycle - 0) & mask)];
       assert(x2585 != Fp::invalid());
       if (x2585 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":65:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
         auto x2586 = x2204 - x43;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":65:68)
-        if (x2586 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:65");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":65:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
+        if (x2586 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:54");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
         auto x2587 = x2193 - x72;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":65:68)
-        if (x2587 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:65");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
+        if (x2587 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:54");
         // loc("cirgen/circuit/rv32im/decode.cpp":84:7)
         auto x2588 = x2164 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":84:21)
@@ -14995,7 +14995,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/2/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2623 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2623 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":65:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2623);
@@ -15008,7 +15008,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x2448;
           host_args.at(4) = x2452;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":65:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
           auto x2624 = x2504 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -15109,7 +15109,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2632;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":65:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":54:68)
         auto x2633 = x2507 + x87;
         if (x2633 != 0) {
           // loc("cirgen/components/ram.cpp":39:3)
@@ -15156,18 +15156,18 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":66:68))
+      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":55:68))
       auto x2634 = args[2][172 * steps + ((cycle - 0) & mask)];
       assert(x2634 != Fp::invalid());
       if (x2634 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":66:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
         auto x2635 = x2204 - x43;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":66:68)
-        if (x2635 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:66");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":66:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
+        if (x2635 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:55");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
         auto x2636 = x2193 - x71;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":66:68)
-        if (x2636 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:66");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
+        if (x2636 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:55");
         // loc("cirgen/circuit/rv32im/decode.cpp":84:7)
         auto x2637 = x2164 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":84:21)
@@ -15353,7 +15353,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/2/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2672 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2672 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":66:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2672);
@@ -15366,7 +15366,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x2448;
           host_args.at(4) = x2452;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":66:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
           auto x2673 = x2504 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -15467,7 +15467,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2681;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":66:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":55:68)
         auto x2682 = x2507 + x87;
         if (x2682 != 0) {
           // loc("cirgen/components/ram.cpp":39:3)
@@ -15514,14 +15514,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":67:68))
+      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":56:68))
       auto x2683 = args[2][173 * steps + ((cycle - 0) & mask)];
       assert(x2683 != Fp::invalid());
       if (x2683 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":67:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":56:68)
         auto x2684 = x2204 - x42;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":67:68)
-        if (x2684 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:67");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":56:68)
+        if (x2684 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:56");
         // loc("cirgen/circuit/rv32im/decode.cpp":102:7)
         auto x2685 = x2164 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":102:21)
@@ -15711,7 +15711,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/2/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2722 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2722 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":67:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":56:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2722);
@@ -15724,7 +15724,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x517;
           host_args.at(4) = x2354;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":67:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":56:68)
           auto x2723 = x2504 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -15870,16 +15870,16 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":68:68))
+      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":57:68))
       auto x2732 = args[2][174 * steps + ((cycle - 0) & mask)];
       assert(x2732 != Fp::invalid());
       if (x2732 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":68:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:68)
         auto x2733 = x2204 - x41;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":68:68)
-        if (x2733 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:68");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":68:68)
-        if (x2193 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:68");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:68)
+        if (x2733 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:57");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:68)
+        if (x2193 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:57");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x2734 = x2164 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -16059,7 +16059,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/2/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2766 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2766 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":68:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":57:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2766);
@@ -16072,7 +16072,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x517;
           host_args.at(4) = x2354;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":68:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":57:68)
           auto x2767 = x2504 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -16218,14 +16218,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":69:68))
+      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":58:68))
       auto x2776 = args[2][175 * steps + ((cycle - 0) & mask)];
       assert(x2776 != Fp::invalid());
       if (x2776 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":69:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":58:68)
         auto x2777 = x2204 - x40;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":69:68)
-        if (x2777 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:69");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":58:68)
+        if (x2777 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:58");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -16387,7 +16387,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/2/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2801 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2801 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":69:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":58:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2801);
@@ -16400,7 +16400,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x2448;
           host_args.at(4) = x2452;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":69:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":58:68)
           auto x2802 = x2504 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -16546,14 +16546,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           }
         }
       }
-      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":70:68))
+      // loc("Top/Mux/4/Mux/2/ComputeCycle/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":59:68))
       auto x2811 = args[2][176 * steps + ((cycle - 0) & mask)];
       assert(x2811 != Fp::invalid());
       if (x2811 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":70:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
         auto x2812 = x2204 - x39;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":70:68)
-        if (x2812 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:70");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
+        if (x2812 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:59");
         // loc("cirgen/components/u32.cpp":24:5)
         {
           auto& reg = args[2][178 * steps + cycle];
@@ -16715,7 +16715,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/Mux/2/ComputeCycle/ComputeControl/Reg5"("./cirgen/compiler/edsl/component.h":81:27))
         auto x2836 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x2836 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":70:68)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
         {
           auto& reg = args[2][93 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x2836);
@@ -16728,7 +16728,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           host_args.at(3) = x2448;
           host_args.at(4) = x2452;
           host(ctx, "log", "  Writing to rd=x%u, val = %w", host_args.data(), 5, host_outs.data(), 0);
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":70:68)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":59:68)
           auto x2837 = x2504 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -17408,7 +17408,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         if (x2974 != 0) throw std::runtime_error("eqz failed at: ./cirgen/components/onehot.h:34");
       }
       {
-        // loc("Top/Mux/4/Mux/3/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":88:46))
+        // loc("Top/Mux/4/Mux/3/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":77:46))
         auto x2975 = args[2][189 * steps + ((cycle - 0) & mask)];
         assert(x2975 != Fp::invalid());
         if (x2975 != 0) {
@@ -17459,7 +17459,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2986;
           }
         }
-        // loc("Top/Mux/4/Mux/3/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":89:46))
+        // loc("Top/Mux/4/Mux/3/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":78:46))
         auto x2987 = args[2][190 * steps + ((cycle - 0) & mask)];
         assert(x2987 != Fp::invalid());
         if (x2987 != 0) {
@@ -17510,7 +17510,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x2998;
           }
         }
-        // loc("Top/Mux/4/Mux/3/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":90:46))
+        // loc("Top/Mux/4/Mux/3/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":79:46))
         auto x2999 = args[2][191 * steps + ((cycle - 0) & mask)];
         assert(x2999 != Fp::invalid());
         if (x2999 != 0) {
@@ -17561,7 +17561,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3010;
           }
         }
-        // loc("Top/Mux/4/Mux/3/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":91:46))
+        // loc("Top/Mux/4/Mux/3/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":80:46))
         auto x3011 = args[2][192 * steps + ((cycle - 0) & mask)];
         assert(x3011 != Fp::invalid());
         if (x3011 != 0) {
@@ -17612,7 +17612,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3022;
           }
         }
-        // loc("Top/Mux/4/Mux/3/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":92:46))
+        // loc("Top/Mux/4/Mux/3/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":81:46))
         auto x3023 = args[2][193 * steps + ((cycle - 0) & mask)];
         assert(x3023 != Fp::invalid());
         if (x3023 != 0) {
@@ -17663,7 +17663,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3034;
           }
         }
-        // loc("Top/Mux/4/Mux/3/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":93:46))
+        // loc("Top/Mux/4/Mux/3/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":82:46))
         auto x3035 = args[2][194 * steps + ((cycle - 0) & mask)];
         assert(x3035 != Fp::invalid());
         if (x3035 != 0) {
@@ -17718,7 +17718,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3048;
           }
         }
-        // loc("Top/Mux/4/Mux/3/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":94:46))
+        // loc("Top/Mux/4/Mux/3/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":83:46))
         auto x3049 = args[2][195 * steps + ((cycle - 0) & mask)];
         assert(x3049 != Fp::invalid());
         if (x3049 != 0) {
@@ -17773,7 +17773,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x3062;
           }
         }
-        // loc("Top/Mux/4/Mux/3/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":95:46))
+        // loc("Top/Mux/4/Mux/3/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":84:46))
         auto x3063 = args[2][196 * steps + ((cycle - 0) & mask)];
         assert(x3063 != Fp::invalid());
         if (x3063 != 0) {
@@ -18606,31 +18606,31 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(reg == Fp::invalid() || reg == x77);
         reg = x77;
       }
-      // loc("Top/Mux/4/Mux/3/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":88:46))
+      // loc("Top/Mux/4/Mux/3/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":77:46))
       auto x3244 = args[2][189 * steps + ((cycle - 0) & mask)];
       assert(x3244 != Fp::invalid());
       if (x3244 != 0) {
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":88:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":77:46))
           auto x3245 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3245 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
           auto x3246 = x3245 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
-          if (x3246 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:88");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
+          if (x3246 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:77");
         }
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":88:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":77:46))
           auto x3247 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3247 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
           auto x3248 = x3247 + x3168;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
           auto x3249 = x3248 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
-          if (x3249 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:88");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
+          if (x3249 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:77");
         }
-        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":88:46))
+        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":77:46))
         auto x3250 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3250 != Fp::invalid());
         if (x3250 != 0) {
@@ -18685,9 +18685,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
           auto x3255 = args[2][36 * steps + ((cycle - 0) & mask)];
           assert(x3255 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
           auto x3256 = Fp(x3255.asUInt32() & x65.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
           auto x3257 = x3256 * x64;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -18695,9 +18695,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             assert(reg == Fp::invalid() || reg == x3257);
             reg = x3257;
           }
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
           auto x3258 = Fp(x3255.asUInt32() & x53.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
           auto x3259 = x3258 * x84;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -18709,43 +18709,43 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg1"("cirgen/components/bytes.cpp":74:10))
         auto x3260 = args[2][37 * steps + ((cycle - 0) & mask)];
         assert(x3260 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3261 = x87 - x3260;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3262 = x3260 * x3261;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
-        if (x3262 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:88");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
+        if (x3262 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:77");
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3263 = args[2][36 * steps + ((cycle - 0) & mask)];
         assert(x3263 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3264 = x3260 * x65;
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement14/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3265 = args[2][38 * steps + ((cycle - 0) & mask)];
         assert(x3265 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3266 = x3265 * x57;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3267 = x3264 + x3266;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3268 = x3263 - x3267;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
-        if (x3268 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:88");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
+        if (x3268 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:77");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3269 = x3260 * x83;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3270 = x3250 * x3216;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3271 = x3167 * x3217;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3272 = x3270 + x3271;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3273 = x3168 * x3218;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3274 = x3272 + x3273;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3275 = x3171 * x3219;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3276 = x3274 + x3275;
         // loc("cirgen/components/u32.cpp":24:5)
         {
@@ -18790,7 +18790,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         host_args.at(4) = x3280;
         host(ctx, "log", "  fillByte = %x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
         if (x3112 != 0) {
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
           auto x3281 = x3108 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -18935,12 +18935,12 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x86;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
         auto x3290 = x2936 - x79;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
-        if (x3290 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:88");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":88:46)
-        if (x2925 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:88");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
+        if (x3290 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:77");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":77:46)
+        if (x2925 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:77");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x3291 = x2896 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -18984,31 +18984,31 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3299;
         }
       }
-      // loc("Top/Mux/4/Mux/3/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":89:46))
+      // loc("Top/Mux/4/Mux/3/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":78:46))
       auto x3300 = args[2][190 * steps + ((cycle - 0) & mask)];
       assert(x3300 != Fp::invalid());
       if (x3300 != 0) {
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":89:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":78:46))
           auto x3301 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3301 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
           auto x3302 = x3301 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
-          if (x3302 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:89");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
+          if (x3302 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:78");
         }
         if (x87 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":89:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":78:46))
           auto x3303 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3303 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
           auto x3304 = x3303 + x3168;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
           auto x3305 = x3304 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
-          if (x3305 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:89");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
+          if (x3305 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:78");
         }
-        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":89:46))
+        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":78:46))
         auto x3306 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3306 != Fp::invalid());
         if (x3306 != 0) {
@@ -19039,9 +19039,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
           auto x3309 = args[2][36 * steps + ((cycle - 0) & mask)];
           assert(x3309 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
           auto x3310 = Fp(x3309.asUInt32() & x65.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
           auto x3311 = x3310 * x64;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -19049,9 +19049,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             assert(reg == Fp::invalid() || reg == x3311);
             reg = x3311;
           }
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
           auto x3312 = Fp(x3309.asUInt32() & x53.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
           auto x3313 = x3312 * x84;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -19063,41 +19063,41 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg1"("cirgen/components/bytes.cpp":74:10))
         auto x3314 = args[2][37 * steps + ((cycle - 0) & mask)];
         assert(x3314 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3315 = x87 - x3314;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3316 = x3314 * x3315;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
-        if (x3316 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:89");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
+        if (x3316 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:78");
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3317 = args[2][36 * steps + ((cycle - 0) & mask)];
         assert(x3317 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3318 = x3314 * x65;
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement14/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3319 = args[2][38 * steps + ((cycle - 0) & mask)];
         assert(x3319 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3320 = x3319 * x57;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3321 = x3318 + x3320;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3322 = x3317 - x3321;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
-        if (x3322 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:89");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
+        if (x3322 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:78");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3323 = x3314 * x83;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3324 = x3306 * x3216;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3325 = x3168 * x3218;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3326 = x3324 + x3325;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3327 = x3306 * x3217;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3328 = x3168 * x3219;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3329 = x3327 + x3328;
         // loc("cirgen/components/u32.cpp":24:5)
         {
@@ -19142,7 +19142,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         host_args.at(4) = x3333;
         host(ctx, "log", "  fillByte = %x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
         if (x3112 != 0) {
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
           auto x3334 = x3108 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -19287,14 +19287,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x86;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3343 = x2936 - x79;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
-        if (x3343 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:89");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
+        if (x3343 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:78");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
         auto x3344 = x2925 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":89:46)
-        if (x3344 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:89");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":78:46)
+        if (x3344 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:78");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x3345 = x2896 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -19338,31 +19338,31 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3353;
         }
       }
-      // loc("Top/Mux/4/Mux/3/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":90:46))
+      // loc("Top/Mux/4/Mux/3/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":79:46))
       auto x3354 = args[2][191 * steps + ((cycle - 0) & mask)];
       assert(x3354 != Fp::invalid());
       if (x3354 != 0) {
         if (x87 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":90:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":79:46))
           auto x3355 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3355 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
           auto x3356 = x3355 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
-          if (x3356 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:90");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
+          if (x3356 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:79");
         }
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":90:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":79:46))
           auto x3357 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3357 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
           auto x3358 = x3357 + x3168;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
           auto x3359 = x3358 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
-          if (x3359 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:90");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
+          if (x3359 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:79");
         }
-        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":90:46))
+        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":79:46))
         auto x3360 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3360 != Fp::invalid());
         if (x3360 != 0) {
@@ -19381,9 +19381,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
           auto x3362 = args[2][36 * steps + ((cycle - 0) & mask)];
           assert(x3362 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
           auto x3363 = Fp(x3362.asUInt32() & x65.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
           auto x3364 = x3363 * x64;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -19391,9 +19391,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             assert(reg == Fp::invalid() || reg == x3364);
             reg = x3364;
           }
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
           auto x3365 = Fp(x3362.asUInt32() & x53.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
           auto x3366 = x3365 * x84;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -19405,35 +19405,35 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg1"("cirgen/components/bytes.cpp":74:10))
         auto x3367 = args[2][37 * steps + ((cycle - 0) & mask)];
         assert(x3367 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3368 = x87 - x3367;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3369 = x3367 * x3368;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
-        if (x3369 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:90");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
+        if (x3369 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:79");
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3370 = args[2][36 * steps + ((cycle - 0) & mask)];
         assert(x3370 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3371 = x3367 * x65;
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement14/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3372 = args[2][38 * steps + ((cycle - 0) & mask)];
         assert(x3372 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3373 = x3372 * x57;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3374 = x3371 + x3373;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3375 = x3370 - x3374;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
-        if (x3375 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:90");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
+        if (x3375 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:79");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3376 = x3360 * x3216;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3377 = x3360 * x3217;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3378 = x3360 * x3218;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3379 = x3360 * x3219;
         // loc("cirgen/components/u32.cpp":24:5)
         {
@@ -19478,7 +19478,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         host_args.at(4) = x3383;
         host(ctx, "log", "  fillByte = %x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
         if (x3112 != 0) {
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
           auto x3384 = x3108 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -19623,14 +19623,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x86;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3393 = x2936 - x79;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
-        if (x3393 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:90");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
+        if (x3393 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:79");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
         auto x3394 = x2925 - x84;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":90:46)
-        if (x3394 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:90");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":79:46)
+        if (x3394 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:79");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x3395 = x2896 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -19674,31 +19674,31 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3403;
         }
       }
-      // loc("Top/Mux/4/Mux/3/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":91:46))
+      // loc("Top/Mux/4/Mux/3/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":80:46))
       auto x3404 = args[2][192 * steps + ((cycle - 0) & mask)];
       assert(x3404 != Fp::invalid());
       if (x3404 != 0) {
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":91:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":80:46))
           auto x3405 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3405 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
           auto x3406 = x3405 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
-          if (x3406 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:91");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
+          if (x3406 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:80");
         }
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":91:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":80:46))
           auto x3407 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3407 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
           auto x3408 = x3407 + x3168;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
           auto x3409 = x3408 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
-          if (x3409 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:91");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
+          if (x3409 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:80");
         }
-        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":91:46))
+        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":80:46))
         auto x3410 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3410 != Fp::invalid());
         if (x3410 != 0) {
@@ -19753,9 +19753,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
           auto x3415 = args[2][36 * steps + ((cycle - 0) & mask)];
           assert(x3415 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
           auto x3416 = Fp(x3415.asUInt32() & x65.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
           auto x3417 = x3416 * x64;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -19763,9 +19763,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             assert(reg == Fp::invalid() || reg == x3417);
             reg = x3417;
           }
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
           auto x3418 = Fp(x3415.asUInt32() & x53.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
           auto x3419 = x3418 * x84;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -19777,41 +19777,41 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg1"("cirgen/components/bytes.cpp":74:10))
         auto x3420 = args[2][37 * steps + ((cycle - 0) & mask)];
         assert(x3420 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3421 = x87 - x3420;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3422 = x3420 * x3421;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
-        if (x3422 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:91");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
+        if (x3422 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:80");
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3423 = args[2][36 * steps + ((cycle - 0) & mask)];
         assert(x3423 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3424 = x3420 * x65;
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement14/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3425 = args[2][38 * steps + ((cycle - 0) & mask)];
         assert(x3425 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3426 = x3425 * x57;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3427 = x3424 + x3426;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3428 = x3423 - x3427;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
-        if (x3428 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:91");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
+        if (x3428 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:80");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3429 = x3410 * x3216;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3430 = x3167 * x3217;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3431 = x3429 + x3430;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3432 = x3168 * x3218;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3433 = x3431 + x3432;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3434 = x3171 * x3219;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3435 = x3433 + x3434;
         // loc("cirgen/components/u32.cpp":24:5)
         {
@@ -19856,7 +19856,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         host_args.at(4) = x3439;
         host(ctx, "log", "  fillByte = %x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
         if (x3112 != 0) {
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
           auto x3440 = x3108 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -20001,14 +20001,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x86;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3449 = x2936 - x79;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
-        if (x3449 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:91");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
+        if (x3449 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:80");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
         auto x3450 = x2925 - x80;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":91:46)
-        if (x3450 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:91");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":80:46)
+        if (x3450 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:80");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x3451 = x2896 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -20052,31 +20052,31 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3459;
         }
       }
-      // loc("Top/Mux/4/Mux/3/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":92:46))
+      // loc("Top/Mux/4/Mux/3/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":81:46))
       auto x3460 = args[2][193 * steps + ((cycle - 0) & mask)];
       assert(x3460 != Fp::invalid());
       if (x3460 != 0) {
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":92:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":81:46))
           auto x3461 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3461 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
           auto x3462 = x3461 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
-          if (x3462 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:92");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
+          if (x3462 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:81");
         }
         if (x87 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":92:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":81:46))
           auto x3463 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3463 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
           auto x3464 = x3463 + x3168;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
           auto x3465 = x3464 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
-          if (x3465 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:92");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
+          if (x3465 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:81");
         }
-        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":92:46))
+        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":81:46))
         auto x3466 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3466 != Fp::invalid());
         if (x3466 != 0) {
@@ -20107,9 +20107,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
           auto x3469 = args[2][36 * steps + ((cycle - 0) & mask)];
           assert(x3469 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
           auto x3470 = Fp(x3469.asUInt32() & x65.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
           auto x3471 = x3470 * x64;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -20117,9 +20117,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             assert(reg == Fp::invalid() || reg == x3471);
             reg = x3471;
           }
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
           auto x3472 = Fp(x3469.asUInt32() & x53.asUInt32());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
           auto x3473 = x3472 * x84;
           // loc("cirgen/components/bytes.cpp":83:3)
           {
@@ -20131,39 +20131,39 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg1"("cirgen/components/bytes.cpp":74:10))
         auto x3474 = args[2][37 * steps + ((cycle - 0) & mask)];
         assert(x3474 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3475 = x87 - x3474;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3476 = x3474 * x3475;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
-        if (x3476 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:92");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
+        if (x3476 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:81");
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement13/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3477 = args[2][36 * steps + ((cycle - 0) & mask)];
         assert(x3477 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3478 = x3474 * x65;
         // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement14/Reg"("cirgen/components/bytes.cpp":74:10))
         auto x3479 = args[2][38 * steps + ((cycle - 0) & mask)];
         assert(x3479 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3480 = x3479 * x57;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3481 = x3478 + x3480;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3482 = x3477 - x3481;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
-        if (x3482 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:92");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
+        if (x3482 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:81");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3483 = x3466 * x3216;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3484 = x3168 * x3218;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3485 = x3483 + x3484;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3486 = x3466 * x3217;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3487 = x3168 * x3219;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3488 = x3486 + x3487;
         // loc("cirgen/components/u32.cpp":24:5)
         {
@@ -20208,7 +20208,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         host_args.at(4) = x3492;
         host(ctx, "log", "  fillByte = %x, extended: %w", host_args.data(), 5, host_outs.data(), 0);
         if (x3112 != 0) {
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
           auto x3493 = x3108 + x49;
           // loc("cirgen/components/u32.cpp":24:5)
           {
@@ -20353,14 +20353,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             reg = x86;
           }
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3502 = x2936 - x79;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
-        if (x3502 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:92");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
+        if (x3502 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:81");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
         auto x3503 = x2925 - x73;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":92:46)
-        if (x3503 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:92");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":81:46)
+        if (x3503 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:81");
         // loc("cirgen/circuit/rv32im/decode.cpp":66:7)
         auto x3504 = x2896 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":66:21)
@@ -20404,29 +20404,29 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3512;
         }
       }
-      // loc("Top/Mux/4/Mux/3/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":93:46))
+      // loc("Top/Mux/4/Mux/3/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":82:46))
       auto x3513 = args[2][194 * steps + ((cycle - 0) & mask)];
       assert(x3513 != Fp::invalid());
       if (x3513 != 0) {
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":93:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":82:46))
           auto x3514 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3514 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
           auto x3515 = x3514 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
-          if (x3515 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:93");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
+          if (x3515 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:82");
         }
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":93:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":82:46))
           auto x3516 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3516 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
           auto x3517 = x3516 + x3168;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
           auto x3518 = x3517 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
-          if (x3518 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:93");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
+          if (x3518 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:82");
         }
         // loc("cirgen/components/bytes.cpp":83:3)
         {
@@ -20446,40 +20446,40 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x86);
           reg = x86;
         }
-        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":93:46))
+        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":82:46))
         auto x3519 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3519 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3520 = x3519 * x3097;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3521 = x87 - x3519;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3522 = x3521 * x3216;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3523 = x3520 + x3522;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3524 = x3167 * x3097;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3525 = x87 - x3167;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3526 = x3525 * x3217;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3527 = x3524 + x3526;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3528 = x3168 * x3097;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3529 = x87 - x3168;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3530 = x3529 * x3218;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3531 = x3528 + x3530;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3532 = x3171 * x3097;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3533 = x87 - x3171;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3534 = x3533 * x3219;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3535 = x3532 + x3534;
         host_args.at(0) = x3523;
         host_args.at(1) = x3527;
@@ -20584,12 +20584,12 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x3543);
           reg = x3543;
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
         auto x3544 = x2936 - x36;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
-        if (x3544 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:93");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":93:46)
-        if (x2925 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:93");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
+        if (x3544 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:82");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":82:46)
+        if (x2925 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:82");
         // loc("cirgen/circuit/rv32im/decode.cpp":75:7)
         auto x3545 = x2896 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":75:21)
@@ -20633,29 +20633,29 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3553;
         }
       }
-      // loc("Top/Mux/4/Mux/3/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":94:46))
+      // loc("Top/Mux/4/Mux/3/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":83:46))
       auto x3554 = args[2][195 * steps + ((cycle - 0) & mask)];
       assert(x3554 != Fp::invalid());
       if (x3554 != 0) {
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":94:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":83:46))
           auto x3555 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3555 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
           auto x3556 = x3555 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
-          if (x3556 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:94");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
+          if (x3556 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:83");
         }
         if (x87 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":94:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":83:46))
           auto x3557 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3557 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
           auto x3558 = x3557 + x3168;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
           auto x3559 = x3558 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
-          if (x3559 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:94");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
+          if (x3559 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:83");
         }
         // loc("cirgen/components/bytes.cpp":83:3)
         {
@@ -20675,36 +20675,36 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x86);
           reg = x86;
         }
-        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":94:46))
+        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":83:46))
         auto x3560 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3560 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3561 = x3560 * x3097;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3562 = x87 - x3560;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3563 = x3562 * x3216;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3564 = x3561 + x3563;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3565 = x3168 * x3097;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3566 = x87 - x3168;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3567 = x3566 * x3218;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3568 = x3565 + x3567;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3569 = x3560 * x3098;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3570 = x3562 * x3217;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3571 = x3569 + x3570;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3572 = x3168 * x3098;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3573 = x3566 * x3219;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3574 = x3572 + x3573;
         host_args.at(0) = x3564;
         host_args.at(1) = x3571;
@@ -20809,14 +20809,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x3582);
           reg = x3582;
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3583 = x2936 - x36;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
-        if (x3583 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:94");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
+        if (x3583 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:83");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
         auto x3584 = x2925 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":94:46)
-        if (x3584 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:94");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
+        if (x3584 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:83");
         // loc("cirgen/circuit/rv32im/decode.cpp":75:7)
         auto x3585 = x2896 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":75:21)
@@ -20860,29 +20860,29 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x3593;
         }
       }
-      // loc("Top/Mux/4/Mux/3/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":95:46))
+      // loc("Top/Mux/4/Mux/3/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":84:46))
       auto x3594 = args[2][196 * steps + ((cycle - 0) & mask)];
       assert(x3594 != Fp::invalid());
       if (x3594 != 0) {
         if (x87 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":95:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":84:46))
           auto x3595 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3595 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
           auto x3596 = x3595 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
-          if (x3596 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:95");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
+          if (x3596 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:84");
         }
         if (x86 != 0) {
-          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":95:46))
+          // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":84:46))
           auto x3597 = args[2][199 * steps + ((cycle - 0) & mask)];
           assert(x3597 != Fp::invalid());
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
           auto x3598 = x3597 + x3168;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
           auto x3599 = x3598 - x87;
-          // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
-          if (x3599 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:95");
+          // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
+          if (x3599 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:84");
         }
         // loc("cirgen/components/bytes.cpp":83:3)
         {
@@ -20902,34 +20902,34 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x86);
           reg = x86;
         }
-        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":95:46))
+        // loc("Top/Mux/4/Mux/3/OneHot1/Reg"("./cirgen/circuit/rv32im/rv32im.inl":84:46))
         auto x3600 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x3600 != Fp::invalid());
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3601 = x3600 * x3097;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3602 = x87 - x3600;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3603 = x3602 * x3216;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3604 = x3601 + x3603;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3605 = x3600 * x3098;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3606 = x3602 * x3217;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3607 = x3605 + x3606;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3608 = x3600 * x3099;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3609 = x3602 * x3218;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3610 = x3608 + x3609;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3611 = x3600 * x3100;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3612 = x3602 * x3219;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3613 = x3611 + x3612;
         host_args.at(0) = x3604;
         host_args.at(1) = x3607;
@@ -21034,14 +21034,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x3621);
           reg = x3621;
         }
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3622 = x2936 - x36;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
-        if (x3622 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:95");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
+        if (x3622 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:84");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
         auto x3623 = x2925 - x84;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":95:46)
-        if (x3623 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:95");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":84:46)
+        if (x3623 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:84");
         // loc("cirgen/circuit/rv32im/decode.cpp":75:7)
         auto x3624 = x2896 * x65;
         // loc("cirgen/circuit/rv32im/decode.cpp":75:21)
@@ -21590,26 +21590,26 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       host_args.at(3) = x86;
       host_args.at(4) = x86;
       host(ctx, "log", "  useImm=%u, usePo2=%u, signedA=%u, signedB=%u, useHigh=%u", host_args.data(), 5, host_outs.data(), 0);
-      // loc("Top/Mux/4/Mux/4/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":113:49))
+      // loc("Top/Mux/4/Mux/4/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":102:49))
       auto x3752 = args[2][186 * steps + ((cycle - 0) & mask)];
       assert(x3752 != Fp::invalid());
-      // loc("Top/Mux/4/Mux/4/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":114:49))
+      // loc("Top/Mux/4/Mux/4/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":103:49))
       auto x3753 = args[2][187 * steps + ((cycle - 0) & mask)];
       assert(x3753 != Fp::invalid());
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":114:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":103:49)
       auto x3754 = x3752 + x3753;
-      // loc("Top/Mux/4/Mux/4/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":115:49))
+      // loc("Top/Mux/4/Mux/4/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":104:49))
       auto x3755 = args[2][188 * steps + ((cycle - 0) & mask)];
       assert(x3755 != Fp::invalid());
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":115:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":104:49)
       auto x3756 = x3754 + x3755;
-      // loc("Top/Mux/4/Mux/4/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":116:49))
+      // loc("Top/Mux/4/Mux/4/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":105:49))
       auto x3757 = args[2][189 * steps + ((cycle - 0) & mask)];
       assert(x3757 != Fp::invalid());
-      // loc("Top/Mux/4/Mux/4/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":117:49))
+      // loc("Top/Mux/4/Mux/4/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":106:49))
       auto x3758 = args[2][190 * steps + ((cycle - 0) & mask)];
       assert(x3758 != Fp::invalid());
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":117:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":106:49)
       auto x3759 = x3757 + x3758;
       // loc("cirgen/circuit/rv32im/decode.cpp":33:10)
       auto x3760 = x3701 * x70;
@@ -22941,86 +22941,86 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x86;
         }
       }
-      // loc("Top/Mux/4/Mux/4/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":112:49))
+      // loc("Top/Mux/4/Mux/4/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":101:49))
       auto x4067 = args[2][185 * steps + ((cycle - 0) & mask)];
       assert(x4067 != Fp::invalid());
       if (x4067 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":112:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":101:49)
         auto x4068 = x3723 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":112:49)
-        if (x4068 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:112");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":112:49)
-        if (x3712 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:112");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":112:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":101:49)
+        if (x4068 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:101");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":101:49)
+        if (x3712 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:101");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":101:49)
         auto x4069 = x3688 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":112:49)
-        if (x4069 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:112");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":101:49)
+        if (x4069 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:101");
       }
       if (x3752 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":113:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":102:49)
         auto x4070 = x3723 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":113:49)
-        if (x4070 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:113");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":113:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":102:49)
+        if (x4070 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:102");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":102:49)
         auto x4071 = x3712 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":113:49)
-        if (x4071 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:113");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":113:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":102:49)
+        if (x4071 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:102");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":102:49)
         auto x4072 = x3688 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":113:49)
-        if (x4072 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:113");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":102:49)
+        if (x4072 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:102");
       }
       if (x3753 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":114:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":103:49)
         auto x4073 = x3723 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":114:49)
-        if (x4073 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:114");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":114:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":103:49)
+        if (x4073 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:103");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":103:49)
         auto x4074 = x3712 - x84;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":114:49)
-        if (x4074 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:114");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":114:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":103:49)
+        if (x4074 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:103");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":103:49)
         auto x4075 = x3688 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":114:49)
-        if (x4075 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:114");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":103:49)
+        if (x4075 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:103");
       }
       if (x3755 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":115:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":104:49)
         auto x4076 = x3723 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":115:49)
-        if (x4076 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:115");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":115:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":104:49)
+        if (x4076 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:104");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":104:49)
         auto x4077 = x3712 - x79;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":115:49)
-        if (x4077 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:115");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":115:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":104:49)
+        if (x4077 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:104");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":104:49)
         auto x4078 = x3688 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":115:49)
-        if (x4078 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:115");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":104:49)
+        if (x4078 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:104");
       }
       if (x3757 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":116:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":105:49)
         auto x4079 = x3723 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":116:49)
-        if (x4079 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:116");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":116:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":105:49)
+        if (x4079 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:105");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":105:49)
         auto x4080 = x3712 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":116:49)
-        if (x4080 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:116");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":116:49)
-        if (x3688 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:116");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":105:49)
+        if (x4080 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:105");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":105:49)
+        if (x3688 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:105");
       }
       if (x3758 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":117:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":106:49)
         auto x4081 = x3723 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":117:49)
-        if (x4081 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:117");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":117:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":106:49)
+        if (x4081 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:106");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":106:49)
         auto x4082 = x3712 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":117:49)
-        if (x4082 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:117");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":117:49)
-        if (x3688 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:117");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":106:49)
+        if (x4082 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:106");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":106:49)
+        if (x3688 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:106");
       }
     }
     // loc("Top/Mux/4/OneHot/Reg5"("./cirgen/components/mux.h":33:25))
@@ -23555,44 +23555,44 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("./cirgen/components/onehot.h":34:8)
         if (x4211 != 0) throw std::runtime_error("eqz failed at: ./cirgen/components/onehot.h:34");
       }
-      // loc("Top/Mux/4/Mux/5/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":134:49))
+      // loc("Top/Mux/4/Mux/5/OneHot/Reg"("./cirgen/circuit/rv32im/rv32im.inl":123:49))
       auto x4212 = args[2][170 * steps + ((cycle - 0) & mask)];
       assert(x4212 != Fp::invalid());
-      // loc("Top/Mux/4/Mux/5/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":136:49))
+      // loc("Top/Mux/4/Mux/5/OneHot/Reg2"("./cirgen/circuit/rv32im/rv32im.inl":125:49))
       auto x4213 = args[2][172 * steps + ((cycle - 0) & mask)];
       assert(x4213 != Fp::invalid());
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":136:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":125:49)
       auto x4214 = x4212 + x4213;
-      // loc("Top/Mux/4/Mux/5/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":137:49))
+      // loc("Top/Mux/4/Mux/5/OneHot/Reg3"("./cirgen/circuit/rv32im/rv32im.inl":126:49))
       auto x4215 = args[2][173 * steps + ((cycle - 0) & mask)];
       assert(x4215 != Fp::invalid());
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":137:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":126:49)
       auto x4216 = x4213 + x4215;
-      // loc("Top/Mux/4/Mux/5/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":138:49))
+      // loc("Top/Mux/4/Mux/5/OneHot/Reg4"("./cirgen/circuit/rv32im/rv32im.inl":127:49))
       auto x4217 = args[2][174 * steps + ((cycle - 0) & mask)];
       assert(x4217 != Fp::invalid());
-      // loc("Top/Mux/4/Mux/5/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":139:49))
+      // loc("Top/Mux/4/Mux/5/OneHot/Reg5"("./cirgen/circuit/rv32im/rv32im.inl":128:49))
       auto x4218 = args[2][175 * steps + ((cycle - 0) & mask)];
       assert(x4218 != Fp::invalid());
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":139:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":128:49)
       auto x4219 = x4217 + x4218;
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":139:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":128:49)
       auto x4220 = x4214 + x4218;
-      // loc("Top/Mux/4/Mux/5/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":140:49))
+      // loc("Top/Mux/4/Mux/5/OneHot/Reg6"("./cirgen/circuit/rv32im/rv32im.inl":129:49))
       auto x4221 = args[2][176 * steps + ((cycle - 0) & mask)];
       assert(x4221 != Fp::invalid());
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":140:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":129:49)
       auto x4222 = x4219 + x4221;
-      // loc("Top/Mux/4/Mux/5/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":141:49))
+      // loc("Top/Mux/4/Mux/5/OneHot/Reg7"("./cirgen/circuit/rv32im/rv32im.inl":130:49))
       auto x4223 = args[2][177 * steps + ((cycle - 0) & mask)];
       assert(x4223 != Fp::invalid());
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
       auto x4224 = x4221 + x4223;
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
       auto x4225 = x4222 + x4223;
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
       auto x4226 = x4220 + x4223;
-      // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
+      // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
       auto x4227 = x4218 + x4223;
       // loc("cirgen/circuit/rv32im/divide.cpp":42:3)
       {
@@ -24674,115 +24674,115 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         reg = x71;
       }
       if (x4212 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":134:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":123:49)
         auto x4433 = x4173 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":134:49)
-        if (x4433 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:134");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":134:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":123:49)
+        if (x4433 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:123");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":123:49)
         auto x4434 = x4162 - x80;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":134:49)
-        if (x4434 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:134");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":134:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":123:49)
+        if (x4434 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:123");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":123:49)
         auto x4435 = x4138 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":134:49)
-        if (x4435 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:134");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":123:49)
+        if (x4435 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:123");
       }
-      // loc("Top/Mux/4/Mux/5/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":135:49))
+      // loc("Top/Mux/4/Mux/5/OneHot/Reg1"("./cirgen/circuit/rv32im/rv32im.inl":124:49))
       auto x4436 = args[2][171 * steps + ((cycle - 0) & mask)];
       assert(x4436 != Fp::invalid());
       if (x4436 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":135:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":124:49)
         auto x4437 = x4173 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":135:49)
-        if (x4437 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:135");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":135:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":124:49)
+        if (x4437 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:124");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":124:49)
         auto x4438 = x4162 - x73;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":135:49)
-        if (x4438 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:135");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":135:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":124:49)
+        if (x4438 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:124");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":124:49)
         auto x4439 = x4138 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":135:49)
-        if (x4439 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:135");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":124:49)
+        if (x4439 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:124");
       }
       if (x4213 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":136:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":125:49)
         auto x4440 = x4173 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":136:49)
-        if (x4440 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:136");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":136:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":125:49)
+        if (x4440 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:125");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":125:49)
         auto x4441 = x4162 - x72;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":136:49)
-        if (x4441 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:136");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":136:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":125:49)
+        if (x4441 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:125");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":125:49)
         auto x4442 = x4138 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":136:49)
-        if (x4442 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:136");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":125:49)
+        if (x4442 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:125");
       }
       if (x4215 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":137:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":126:49)
         auto x4443 = x4173 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":137:49)
-        if (x4443 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:137");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":137:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":126:49)
+        if (x4443 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:126");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":126:49)
         auto x4444 = x4162 - x71;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":137:49)
-        if (x4444 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:137");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":137:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":126:49)
+        if (x4444 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:126");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":126:49)
         auto x4445 = x4138 - x87;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":137:49)
-        if (x4445 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:137");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":126:49)
+        if (x4445 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:126");
       }
       if (x4217 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":138:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":127:49)
         auto x4446 = x4173 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":138:49)
-        if (x4446 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:138");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":138:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":127:49)
+        if (x4446 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:127");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":127:49)
         auto x4447 = x4162 - x73;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":138:49)
-        if (x4447 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:138");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":138:49)
-        if (x4138 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:138");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":127:49)
+        if (x4447 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:127");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":127:49)
+        if (x4138 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:127");
       }
       if (x4218 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":139:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":128:49)
         auto x4448 = x4173 - x46;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":139:49)
-        if (x4448 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:139");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":139:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":128:49)
+        if (x4448 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:128");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":128:49)
         auto x4449 = x4162 - x73;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":139:49)
-        if (x4449 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:139");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":139:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":128:49)
+        if (x4449 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:128");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":128:49)
         auto x4450 = x4138 - x62;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":139:49)
-        if (x4450 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:139");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":128:49)
+        if (x4450 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:128");
       }
       if (x4221 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":140:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":129:49)
         auto x4451 = x4173 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":140:49)
-        if (x4451 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:140");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":140:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":129:49)
+        if (x4451 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:129");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":129:49)
         auto x4452 = x4162 - x73;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":140:49)
-        if (x4452 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:140");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":140:49)
-        if (x4138 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:140");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":129:49)
+        if (x4452 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:129");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":129:49)
+        if (x4138 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:129");
       }
       if (x4223 != 0) {
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
         auto x4453 = x4173 - x45;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
-        if (x4453 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:141");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
+        if (x4453 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:130");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
         auto x4454 = x4162 - x73;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
-        if (x4454 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:141");
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
+        if (x4454 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:130");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
         auto x4455 = x4138 - x62;
-        // loc("./cirgen/circuit/rv32im/rv32im.inl":141:49)
-        if (x4455 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:141");
+        // loc("./cirgen/circuit/rv32im/rv32im.inl":130:49)
+        if (x4455 != 0) throw std::runtime_error("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl:130");
       }
     }
     // loc("Top/Mux/4/OneHot/Reg6"("./cirgen/components/mux.h":33:25))

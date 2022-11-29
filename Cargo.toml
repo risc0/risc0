@@ -17,8 +17,6 @@ members = [
 version = "0.12.0"
 edition = "2021"
 
-[workspace.dependencies]
-
 [profile.bench]
 lto = true
 
