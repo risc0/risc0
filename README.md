@@ -23,7 +23,7 @@ the case of RISC Zero, the prover can show they correctly executed some code
 code, not any of its inputs or any state during execution.
 
 The code runs in a special virtual machine, called a *ZKVM*.  The RISC Zero
-ZKVM emulates a small RISC-V computer, allowing it to run arbitrary code in any
+ZKVM emulates a small [RISC-V](https://en.wikipedia.org/wiki/RISC-V) computer, allowing it to run arbitrary code in any
 language, so long as a compiler toolchain exists that targets RISC-V.
 Currently, SDK support exists for Rust, C, and C++.
 
