@@ -15,6 +15,8 @@
 //! Hardware Abstraction Layer (HAL) for accelerating the ZKP system.
 
 pub mod cpu;
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+pub mod gpu;
 
 use crate::{
     core::sha::Digest,
@@ -154,6 +156,22 @@ pub trait Hal {
     fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferFp);
 
     fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize);
+
+    // fn fri_fold_new(&self, input: &Self::BufferFp, mix: &<Self::Field as
+    // field::Field>::ExtElem) -> Self::BufferFp {     let output =
+    // self.alloc_fp() }
+
+    fn fri_finalize(
+        &self,
+        input: &Self::BufferFp,
+        input_size: usize,
+        ext_size: usize,
+    ) -> Self::BufferFp {
+        let coeffs = self.alloc_fp(input_size);
+        self.eltwise_copy_fp(&coeffs, &input);
+        self.batch_bit_reverse(&coeffs, ext_size);
+        coeffs
+    }
 
     // Adapters to convert to/from baby bear field until all code is migrated.
     baby_bear_adapter!(

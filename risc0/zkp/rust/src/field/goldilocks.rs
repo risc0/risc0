@@ -54,6 +54,8 @@ impl Default for Elem {
 /// 3. Add one to get `2^64 - 2^32 + 1`
 
 const P: u64 = (0xffffffff_ffffffff << 32) + 1;
+//
+const R2: u64 = 18446744065119617025;
 
 impl field::Elem for Elem {
     const ZERO: Self = Elem::new(0u64);
@@ -304,6 +306,30 @@ fn mul(lhs: u64, rhs: u64) -> u64 {
         ret.wrapping_sub(P)
     } else {
         ret
+    }
+}
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+impl ec_gpu::GpuName for Elem {
+    fn name() -> String {
+        ec_gpu::name!()
+    }
+}
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+impl ec_gpu::GpuField for Elem {
+    fn one() -> Vec<u32> {
+        Self::ONE.to_u32_words()
+    }
+
+    fn r2() -> Vec<u32> {
+        // 2^128 mod p
+        Self::new(R2).to_u32_words()
+    }
+
+    fn modulus() -> Vec<u32> {
+        // Self(P).to_u32_words()
+        vec![P as u32, (P >> 32) as u32]
     }
 }
 
@@ -564,6 +590,34 @@ impl From<u64> for ExtElem {
 impl From<Elem> for ExtElem {
     fn from(x: Elem) -> Self {
         Self([x, Elem::ZERO])
+    }
+}
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+impl ec_gpu::GpuName for ExtElem {
+    fn name() -> String {
+        ec_gpu::name!()
+    }
+}
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+impl ec_gpu::GpuField for ExtElem {
+    fn one() -> Vec<u32> {
+        Self::ONE.to_u32_words()
+    }
+
+    fn r2() -> Vec<u32> {
+        Self::from_u64(R2).to_u32_words()
+    }
+
+    fn modulus() -> Vec<u32> {
+        // Self::from_fp(Elem(P)).to_u32_words()
+        vec![P as u32, (P >> 32) as u32, 0, 0]
+    }
+
+    fn sub_field_name() -> Option<String> {
+        use ec_gpu::GpuName;
+        Some(<Self as field::ExtElem>::SubElem::name())
     }
 }
 

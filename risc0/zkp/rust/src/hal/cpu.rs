@@ -208,9 +208,7 @@ impl<F: Field> Hal for CpuHal<F> {
         assert_eq!(row_size * count, io.size());
         io.as_slice_mut()
             .par_chunks_exact_mut(row_size)
-            .for_each(|row| {
-                interpolate_ntt::<F::Elem, F::Elem>(row);
-            });
+            .for_each(interpolate_ntt::<F::Elem, F::Elem>);
     }
 
     fn batch_bit_reverse(&self, io: &CpuBuffer<F::Elem>, count: usize) {
@@ -218,9 +216,7 @@ impl<F: Field> Hal for CpuHal<F> {
         assert_eq!(row_size * count, io.size());
         io.as_slice_mut()
             .par_chunks_exact_mut(row_size)
-            .for_each(|row| {
-                bit_reverse(row);
-            });
+            .for_each(bit_reverse);
     }
 
     fn batch_evaluate_any(

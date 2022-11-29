@@ -15,6 +15,8 @@ harness = false
 anyhow = { version = "1.0", default-features = false }
 array-init = { version = "2.0", optional = true }
 bytemuck = { version = "1.12", features = ["derive"] }
+ec-gpu = { version = "0.2", optional = true }
+ec-gpu-gen = { version = "0.4", optional = true }
 log = { version = "0.4", optional = true }
 ndarray = { version = "0.15", optional = true, features = ["rayon"] }
 paste = "1.0"
@@ -28,8 +30,14 @@ sha2 = { version = "0.10", optional = true, default-features = false, features =
 criterion = "0.3"
 rand = { version = "0.8", features = ["small_rng"] }
 
+# [build-dependencies]
+# ec-gpu-gen = { version = "0.4", features = ["opencl"] }
+# # risc0-zkp = { path = "./", features = ["gpu"] }
+
 [features]
 default = ["host", "prove", "std", "verify"]
+cuda = ["dep:ec-gpu", "ec-gpu-gen/cuda"]
+opencl = ["dep:ec-gpu", "ec-gpu-gen/opencl"]
 hal = ["dep:ndarray", "dep:rayon"]
 host = ["dep:log"]
 prove = ["dep:array-init", "dep:log", "dep:sha2", "hal", "rand/std", "rand/std_rng"]

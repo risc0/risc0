@@ -17,12 +17,15 @@
 #![feature(alloc_error_handler)]
 
 use risc0_zkvm_guest::{env, sha};
+use risc0_zkvm_platform::io::SENDRECV_CHANNEL_INITIAL_INPUT;
 
 risc0_zkvm_guest::entry!(main);
 risc0_zkvm_guest::standalone_handlers!();
 
 pub fn main() {
-    let data: &[u8] = env::read();
-    let digest = sha::digest_u8_slice(data);
+    let data: [u8; 32] = env::send_recv(SENDRECV_CHANNEL_INITIAL_INPUT, &[])
+        .try_into()
+        .unwrap();
+    let digest = sha::digest_u8_slice(&data);
     env::commit(&digest);
 }

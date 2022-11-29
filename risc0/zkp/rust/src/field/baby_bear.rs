@@ -20,7 +20,8 @@ use core::ops;
 
 use bytemuck::{Pod, Zeroable};
 
-use crate::field::{self, Elem as FieldElem};
+use super::RootsOfUnity;
+use crate::field::{self, Elem as _};
 
 /// Definition of this field for operations that operate on the baby
 /// bear field and its 4th degree extension.
@@ -258,7 +259,7 @@ fn sub(lhs: u32, rhs: u32) -> u32 {
     return if x > P { x.wrapping_add(P) } else { x };
 }
 
-/// Wrapping multiplication of [Elem]  using Baby Bear field modulus
+/// Wrapping multiplication of [Elem] using Baby Bear field modulus
 // Copied from the C++ implementation (fp.h)
 const fn mul(lhs: u32, rhs: u32) -> u32 {
     // uint64_t o64 = uint64_t(a) * uint64_t(b);
@@ -284,9 +285,32 @@ const fn encode(a: u32) -> u32 {
     mul(R2, a)
 }
 
-/// Decode from Montgomery form from direct form.
+/// Decode from Montgomery form to direct form.
 const fn decode(a: u32) -> u32 {
     mul(1, a)
+}
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+impl ec_gpu::GpuName for Elem {
+    fn name() -> String {
+        ec_gpu::name!()
+    }
+}
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+impl ec_gpu::GpuField for Elem {
+    fn one() -> Vec<u32> {
+        Self::ONE.to_u32_words()
+    }
+
+    fn r2() -> Vec<u32> {
+        // 2^64 mod p
+        vec![R2]
+    }
+
+    fn modulus() -> Vec<u32> {
+        vec![P]
+    }
 }
 
 /// The size of the extension field in elements, 4 in this case.
@@ -585,6 +609,36 @@ impl From<u32> for ExtElem {
 impl From<Elem> for ExtElem {
     fn from(x: Elem) -> Self {
         Self([x, Elem::ZERO, Elem::ZERO, Elem::ZERO])
+    }
+}
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+static SOURCE: ec_gpu_gen::SourceBuilder = ec_gpu_gen::SourceBuilder::new().add_field::<ExtElem>();
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+impl ec_gpu::GpuName for ExtElem {
+    fn name() -> String {
+        ec_gpu::name!()
+    }
+}
+
+#[cfg(any(feature = "opencl", feature = "cuda"))]
+impl ec_gpu::GpuField for ExtElem {
+    fn one() -> Vec<u32> {
+        Self::ONE.to_u32_words()
+    }
+
+    fn r2() -> Vec<u32> {
+        vec![R2, 0, 0, 0]
+    }
+
+    fn modulus() -> Vec<u32> {
+        vec![P, 0, 0, 0]
+    }
+
+    fn sub_field_name() -> Option<String> {
+        use ec_gpu::GpuName;
+        Some(<Self as field::ExtElem>::SubElem::name())
     }
 }
 

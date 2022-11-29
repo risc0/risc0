@@ -50,6 +50,8 @@ test-log = "0.2"
 circuit = []
 default = ["host", "prove", "std", "verify", "profiler"]
 doc = ["std"]
+cuda = ["risc0-zkp/cuda", "pure-prove"]
+opencl = ["risc0-zkp/opencl", "pure-prove"]
 host = ["risc0-zkp/host"]
 prove = ["circuit", "dep:lazy-regex", "risc0-zkp/prove", "risc0-zkvm-circuit/cpp"]
 std = ["risc0-zkp/std", "serde/std"]
@@ -61,3 +63,7 @@ pure-prove = []
 [[bench]]
 name = "guest_run"
 harness = false
+
+[[example]]
+name = "roundtrip"
+required-features = ["opencl"]
