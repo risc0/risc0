@@ -217,6 +217,7 @@ pub mod testutil {
     // behaves.
     pub fn test_sha_impl<S: Sha>(sha: &S) {
         test_hash_pair(sha);
+        test_hash_raw_pod_slice(sha);
         test_sha_basics(sha);
         test_elems(sha);
         test_extelems(sha);
@@ -320,6 +321,36 @@ pub mod testutil {
         let expected: Vec<Digest> = EXPECTED_STRS.iter().map(|x| Digest::from_str(x)).collect();
         let actual: Vec<Digest> = LENS.iter().map(|x| hash_extelems(sha, *x)).collect();
         assert_eq!(expected, actual);
+    }
+
+    fn test_hash_raw_pod_slice<S: Sha>(sha: &S) {
+        {
+            let items: &[u32] = &[1];
+            assert_eq!(
+                *sha.hash_raw_pod_slice(items),
+                Digest::from_str(
+                    "e3050856aac389661ae490656ad0ea57df6aff0ff6eef306f8cc2eed4f240249"
+                )
+            );
+        }
+        {
+            let items: &[u32] = &[1, 2];
+            assert_eq!(
+                *sha.hash_raw_pod_slice(items),
+                Digest::from_str(
+                    "4138ebae12299733cc677d1150c2a0139454662fc76ec95da75d2bf9efddc57a"
+                )
+            );
+        }
+        {
+            let items: &[u32] = &[0xffffffff];
+            assert_eq!(
+                *sha.hash_raw_pod_slice(items),
+                Digest::from_str(
+                    "a3dba037d56175209dfd4191f727e91c5feb67e65a6ab5ed4daf0893c89598c8"
+                )
+            );
+        }
     }
 
     fn test_hash_pair<S: Sha>(sha: &S) {
