@@ -22,7 +22,10 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum BenchmarkSpec {
     SimpleLoop,
-    RawSha {
+    HashBytes {
+        buf: Vec<u8>,
+    },
+    HashRawWords {
         buf: Vec<u32>,
     },
     Memcpy {
