@@ -60,3 +60,38 @@ impl MerkleTreeParams {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_merkle_tree_params_1() {
+        let row_size: usize = 1024;
+        let col_size: usize = 1234;
+        let queries: usize = 50;
+        let params = MerkleTreeParams::new(row_size, col_size, queries);
+
+        assert_eq!(params.row_size, row_size);
+        assert_eq!(params.col_size, col_size);
+        assert_eq!(params.queries, queries);
+        assert_eq!(params.layers, 10);
+        assert_eq!(params.top_layer, 5);
+        assert_eq!(params.top_size, 32);
+    }
+
+    #[test]
+    fn new_merkle_tree_params_2() {
+        let row_size: usize = 2048;
+        let col_size: usize = 31337;
+        let queries: usize = 128;
+        let params = MerkleTreeParams::new(row_size, col_size, queries);
+
+        assert_eq!(params.row_size, row_size);
+        assert_eq!(params.col_size, col_size);
+        assert_eq!(params.queries, queries);
+        assert_eq!(params.layers, 11);
+        assert_eq!(params.top_layer, 7);
+        assert_eq!(params.top_size, 128);
+    }
+}
