@@ -62,6 +62,11 @@ use risc0_zkvm_platform::syscall::sys_panic;
 
 pub use crate::entry;
 
+#[cfg(target_os = "zkvm")]
+core::arch::global_asm!(include_str!("memset.s"));
+#[cfg(target_os = "zkvm")]
+core::arch::global_asm!(include_str!("memcpy.s"));
+
 fn _fault() -> ! {
     #[cfg(target_os = "zkvm")]
     unsafe {
