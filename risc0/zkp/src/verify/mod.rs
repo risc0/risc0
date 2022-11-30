@@ -306,7 +306,7 @@ where
                 }
             }
         } else {
-            let journal_digest = hal.sha().hash_words(journal);
+            let journal_digest = hal.sha().hash_raw_pod_slice(journal);
             let journal_hash = journal_digest.as_slice();
             for i in 0..journal_hash.len() {
                 if journal_hash[i]
