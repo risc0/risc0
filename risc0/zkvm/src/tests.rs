@@ -18,7 +18,8 @@ use anyhow::Result;
 use risc0_zeroio::{from_slice, to_vec};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, FIB_CONTENTS, FIB_ID, MULTI_TEST_CONTENTS, MULTI_TEST_ID,
+    multi_test::MultiTestSpec, FIB_CONTENTS, FIB_ID, HELLO_COMMIT_CONTENTS, HELLO_COMMIT_ID,
+    MULTI_TEST_CONTENTS, MULTI_TEST_ID,
 };
 use risc0_zkvm_platform::{
     memory::{COMMIT, HEAP},
@@ -193,6 +194,19 @@ fn long_fib() {
             .to_string(),
         "Verification failed: Method execution cycle exceeded code limit. Increase code limit to at least 15."
     );
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+fn commit_hello_world() {
+    let receipt = {
+        let mut prover = Prover::new(HELLO_COMMIT_CONTENTS, HELLO_COMMIT_ID).unwrap();
+        prover.run().expect("Could not get receipt")
+    };
+
+    receipt
+        .verify(HELLO_COMMIT_ID)
+        .expect("Could not verify receipt");
 }
 
 #[test]
