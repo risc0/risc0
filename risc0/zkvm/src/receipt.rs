@@ -21,6 +21,17 @@ use serde::{Deserialize, Serialize};
 
 use crate::{method_id::MethodId, CIRCUIT};
 
+#[cfg(not(target_os = "zkvm"))]
+pub fn insecure_skip_seal() -> bool {
+    cfg!(feature = "insecure_skip_seal")
+        && std::env::var("RISC0_INSECURE_SKIP_SEAL").unwrap_or_default() == "1"
+}
+
+#[cfg(target_os = "zkvm")]
+pub fn insecure_skip_seal() -> bool {
+    cfg!(feature = "insecure_skip_seal")
+}
+
 #[derive(Deserialize, Serialize, ZeroioSerialize, ZeroioDeserialize, Clone, Debug)]
 pub struct Receipt {
     pub journal: Vec<u32>,
@@ -57,8 +68,7 @@ where
         }
     };
 
-    #[cfg(not(target_os = "zkvm"))]
-    if crate::prove::insecure_skip_seal() {
+    if insecure_skip_seal() {
         return Ok(());
     }
 

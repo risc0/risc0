@@ -17,7 +17,7 @@ use std::path::Path;
 use anyhow::Result;
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
-use risc0_zkvm::{prove::insecure_skip_seal, Receipt};
+use risc0_zkvm::{receipt::insecure_skip_seal, Receipt};
 
 static EXPECTED_STDOUT: &str = "Hello world on stdout!\n";
 static EXPECTED_STDERR: &str = "Hello world on stderr!\n";
