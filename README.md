@@ -98,7 +98,8 @@ starter template here:
 Add a `methods` crate, which will act as a container for code that runs within
 the zkVM. This crate will be configured with a special build-script to enable
 cross-compilation of RISC-V code. The resulting ELF binary will be embedded
-within this crate so that it referenced as a dependency in your application.
+within this crate so that it can be referenced as a dependency in your
+application.
 
 ```
 cargo new --lib methods
