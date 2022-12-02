@@ -1,0 +1,4 @@
+pre-release-replacements = [
+  {file="README.md", search="risc0-build = .*", replace="risc0-build = \"{{version}}\""},
+  {file="risc0/build/src/lib.rs", search="risc0-build = .*", replace="risc0-build = \"{{version}}\""},
+]

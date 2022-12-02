@@ -15,11 +15,13 @@
 //! Creates RISC Zero MethodIDs from ELF files
 //!
 //! A simple command line tool for creating
-//! [MethodID](risc0_zkvm::MethodId)s from RISC-V ELF files. It is
-//! intended for basic, low-level use cases. In particular, users looking to
-//! create MethodIDs for Rust code are advised to instead use our zkVM: visit
-//! our [Risc Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter)
-//! for help getting started.
+//! [MethodID](risc0_zkvm::MethodId)s from RISC-V ELF files.
+//! It is intended for basic, low-level use cases.
+//! In particular, users looking to create MethodIDs for Rust code are advised
+//! to instead use the [`risc0-build`](https://crates.io/crates/risc0-build) crate.
+//! Visit our [RISC Zero Rust Starter
+//! repository](https://github.com/risc0/risc0-rust-starter) for help getting
+//! started.
 
 use std::fs;
 
