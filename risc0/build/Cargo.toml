@@ -11,10 +11,10 @@ repository = { workspace = true }
 cargo_metadata = "0.15"
 downloader = "0.2"
 home = "0.5"
-risc0-circuit-rv32im = { version = "0.12", path = "../circuit/rv32im" }
-risc0-zkp = { version = "0.12", path = "../zkp" }
-risc0-zkvm = { version = "0.12", path = "../zkvm" }
-risc0-zkvm-platform = { version = "0.12", path = "../zkvm/platform" }
+risc0-circuit-rv32im = { version = "1.0.0-rc.1", path = "../circuit/rv32im" }
+risc0-zkp = { version = "1.0.0-rc.1", path = "../zkp" }
+risc0-zkvm = { version = "1.0.0-rc.1", path = "../zkvm" }
+risc0-zkvm-platform = { version = "1.0.0-rc.1", path = "../zkvm/platform" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10"

@@ -5,7 +5,7 @@ edition = { workspace = true }
 
 [build-dependencies]
 env_logger = "0.10"
-risc0-build = { version = "0.12", path = "../../build" }
+risc0-build = { version = "1.0.0-rc.1", path = "../../build" }
 
 [package.metadata.release]
 release = false
@@ -14,5 +14,5 @@ release = false
 methods = ["guest", "std"]
 
 [dependencies]
-risc0-zeroio = { path = "../../zeroio", default-features = false }
+risc0-zeroio = { version = "1.0.0-rc.1", path = "../../zeroio", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }

@@ -13,8 +13,8 @@ harness = false
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-risc0-zkp = { version = "0.12", path = "../../../risc0/zkp", default-features = false }
-risc0-zkvm-platform = { version = "0.12", path = "../../../risc0/zkvm/platform" }
+risc0-zkp = { version = "1.0.0-rc.1", path = "../../../risc0/zkp", default-features = false }
+risc0-zkvm-platform = { version = "1.0.0-rc.1", path = "../../../risc0/zkvm/platform" }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]

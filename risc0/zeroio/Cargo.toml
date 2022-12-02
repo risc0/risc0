@@ -11,7 +11,7 @@ repository = { workspace = true }
 bytemuck = "1.12"
 impl-trait-for-tuples = "0.2"
 log = "0.4"
-risc0-zeroio-derive = { version = "0.12", path = "../zeroio_derive" }
+risc0-zeroio-derive = { version = "1.0.0-rc.1", path = "../zeroio_derive" }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]

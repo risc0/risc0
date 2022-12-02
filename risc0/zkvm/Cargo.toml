@@ -23,10 +23,10 @@ protobuf-src = { version = "1.1", optional = true }
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.12"
 cfg-if = "1.0"
-risc0-circuit-rv32im = { version = "0.12", path = "../circuit/rv32im", default-features = false }
-risc0-zeroio = { version = "0.12", path = "../zeroio", default-features = false }
-risc0-zkp = { version = "0.12", path = "../zkp", default-features = false }
-risc0-zkvm-platform = { version = "0.12", path = "platform" }
+risc0-circuit-rv32im = { version = "1.0.0-rc.1", path = "../circuit/rv32im", default-features = false }
+risc0-zeroio = { version = "1.0.0-rc.1", path = "../zeroio", default-features = false }
+risc0-zkp = { version = "1.0.0-rc.1", path = "../zkp", default-features = false }
+risc0-zkvm-platform = { version = "1.0.0-rc.1", path = "platform" }
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
