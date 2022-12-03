@@ -16,11 +16,11 @@ use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
 };
 use risc0_zkvm::{Prover, ProverOpts};
-use risc0_zkvm_methods::{FIB_CONTENTS, FIB_ID};
+use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 
 fn prover_setup(iterations: u32, with_seal: bool) -> Prover<'static> {
     let opts = ProverOpts::default().with_skip_seal(!with_seal);
-    let mut prover = Prover::new_with_opts(FIB_CONTENTS, FIB_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(FIB_ELF, FIB_ID, opts).unwrap();
     prover.add_input_u32_slice(&[iterations]);
     prover
 }

@@ -57,18 +57,15 @@
 //! include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 //! ```
 //!
-//! This process will generate a method ID (`*_ID`) and a path to an ELF file
-//! (`*_PATH`). The names will be derived from the name of the file containing
-//! the guest method, which will be converted to ALL_CAPS to comply with rust
-//! naming conventions. Thus, in the [starter example](https://github.com/risc0/risc0-rust-starter),
-//! where the guest method is in
-//! [`multiply.rs`](https://github.com/risc0/risc0-rust-starter/blob/main/methods/guest/src/bin/multiply.rs),
-//! the method ID is named `methods::MULTIPLY_ID` and the path to the ELF file
-//! is named `methods::MULTIPLY_PATH`.
-//! These are included at the beginning of the
-//! [host code](https://github.com/risc0/risc0-rust-starter/blob/main/starter/src/main.rs):
+//! This process will generate a method ID (`*_ID`) and the contents of an ELF
+//! file (`*_ELF`). The names will be derived from the name of the ELF
+//! binary, which will be converted to ALL_CAPS to comply with rust naming
+//! conventions. Thus, if a method binary is named `multiply`, the method ID
+//! will be named `methods::MULTIPLY_ID` and the contents of the ELF file will
+//! be named `methods::MULTIPLY_ELF`. These are included at the beginning
+//! of the host-side code:
 //! ```text
-//! use methods::{MULTIPLY_ID, MULTIPLY_PATH};
+//! use methods::{MULTIPLY_ELF, MULTIPLY_ID};
 //! ```
 
 #![deny(missing_docs)]
@@ -172,9 +169,9 @@ impl Risc0Method {
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
             r##"
-pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
+pub const {upper}_ELF: &'static [u8] = &{elf_contents:?};
 pub const {upper}_ID: &'static [u8] = &{method_id:?};
-pub const {upper}_CONTENTS: &'static [u8] = &{elf_contents:?};
+pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
             "##
         )
     }
@@ -582,8 +579,8 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 ///
 /// To conform to rust's naming conventions, the constants are mapped
 /// to uppercase.  For instance, if you have a method named
-/// "my_method", the method ID and elf filename will be defined as
-/// "MY_METHOD_ID" and "MY_METHOD_PATH" respectively.
+/// "my_method", the method ID and elf contents will be defined as
+/// "MY_METHOD_ID" and "MY_METHOD_ELF" respectively.
 pub fn embed_methods() {
     embed_methods_with_options(HashMap::new())
 }

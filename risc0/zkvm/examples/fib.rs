@@ -18,7 +18,7 @@ use risc0_zkp::{
     hal::{EvalCheck, Hal},
 };
 use risc0_zkvm::{prove::default_hal, Prover, Receipt};
-use risc0_zkvm_methods::{FIB_CONTENTS, FIB_ID};
+use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(Parser)]
@@ -55,7 +55,7 @@ where
     H: Hal<Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
     E: EvalCheck<H>,
 {
-    let mut prover = Prover::new(FIB_CONTENTS, FIB_ID).unwrap();
+    let mut prover = Prover::new(FIB_ELF, FIB_ID).unwrap();
     prover.add_input_u32_slice(&[iterations]);
     prover.run_with_hal(hal, eval).unwrap()
 }

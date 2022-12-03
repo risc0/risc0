@@ -153,7 +153,7 @@ Edit the code in `methods/guest/src/example.rs`:
 #![no_main]
 #![no_std]
 
-risc0_zkvm_guest::entry!(main);
+risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
     // TODO: Implement your guest code here
@@ -171,11 +171,11 @@ risc0-zkvm = "1.0.0-rc.2"
 Call the prover from your application:
 
 ```rust
-use methods::{EXAMPLE_CONTENTS, EXAMPLE_ID};
-use risc0_zkvm::host::Prover;
+use methods::{EXAMPLE_ELF, EXAMPLE_ID};
+use risc0_zkvm::Prover;
 
 fn main() {
-  let mut prover = Prover::new(EXAMPLE_CONTENTS, EXAMPLE_ID).unwrap();
+  let mut prover = Prover::new(EXAMPLE_ELF, EXAMPLE_ID).unwrap();
   let receipt = prover.run().unwrap();
 
   // The receipt can be sent to another party, where they can:
