@@ -18,8 +18,8 @@ use anyhow::Result;
 use risc0_zeroio::{from_slice, to_vec};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, FIB_CONTENTS, FIB_ID, HELLO_COMMIT_CONTENTS, HELLO_COMMIT_ID,
-    MULTI_TEST_CONTENTS, MULTI_TEST_ID,
+    multi_test::MultiTestSpec, FIB_ELF, FIB_ID, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF,
+    MULTI_TEST_ID,
 };
 use risc0_zkvm_platform::{
     memory::{COMMIT, HEAP},
@@ -65,7 +65,7 @@ fn sha_basics() {
 }
 
 fn run_sha(msg: &str) -> Digest {
-    let mut prover = Prover::new(MULTI_TEST_CONTENTS, MULTI_TEST_ID).unwrap();
+    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap());
     let receipt = prover.run().unwrap();
     from_slice::<Digest>(&receipt.journal).unwrap().into_orig()
@@ -110,13 +110,13 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
             .map(|(addr, value)| (addr as u32, value as u32))
             .collect(),
     };
-    let mut prover = Prover::new(MULTI_TEST_CONTENTS, MULTI_TEST_ID).unwrap();
+    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
     prover.add_input_u32_slice(&to_vec(&spec).unwrap());
     prover.run()
 }
 
 fn run_do_nothing(opts: ProverOpts) -> Result<Receipt> {
-    let mut prover = Prover::new_with_opts(MULTI_TEST_CONTENTS, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
     prover.run()
 }
@@ -145,7 +145,7 @@ fn receipt_serde_no_seal() {
 #[test]
 fn fail() {
     // Check that a compliant host will fault.
-    let mut prover = Prover::new(MULTI_TEST_CONTENTS, MULTI_TEST_ID).unwrap();
+    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Fail).unwrap());
 
     assert!(unwrap_err(prover.run())
@@ -183,7 +183,7 @@ fn check_code() {
 #[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
 fn long_fib() {
-    let mut prover = Prover::new(FIB_CONTENTS, FIB_ID).unwrap();
+    let mut prover = Prover::new(FIB_ELF, FIB_ID).unwrap();
     prover.add_input_u32_slice(&[2000]);
     assert_eq!(
         prover
@@ -200,7 +200,7 @@ fn long_fib() {
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
 fn commit_hello_world() {
     let receipt = {
-        let mut prover = Prover::new(HELLO_COMMIT_CONTENTS, HELLO_COMMIT_ID).unwrap();
+        let mut prover = Prover::new(HELLO_COMMIT_ELF, HELLO_COMMIT_ID).unwrap();
         prover.run().expect("Could not get receipt")
     };
 
@@ -228,7 +228,7 @@ fn host_sendrecv() {
             act.push(buf.into());
             expected[act.len()].clone()
         });
-    let mut prover = Prover::new_with_opts(MULTI_TEST_CONTENTS, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(
         &to_vec(&MultiTestSpec::SendRecv {
             channel_id: 5,
@@ -250,7 +250,7 @@ fn host_sendrecv_callback_panic() {
         .with_sendrecv_callback(5, |_channel_id, _buf| -> Vec<u8> {
             panic!("I am panicking from here!");
         });
-    let mut prover = Prover::new_with_opts(MULTI_TEST_CONTENTS, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(
         &to_vec(&MultiTestSpec::SendRecv {
             channel_id: 5,
@@ -264,7 +264,7 @@ fn host_sendrecv_callback_panic() {
 #[test]
 fn sha_accel() {
     let opts = ProverOpts::default().with_skip_seal(true);
-    let mut prover = Prover::new_with_opts(MULTI_TEST_CONTENTS, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaConforms).unwrap());
     prover.run().unwrap();
 }
@@ -272,7 +272,7 @@ fn sha_accel() {
 #[test]
 fn sha_cycle_count() {
     let opts = ProverOpts::default().with_skip_seal(true);
-    let mut prover = Prover::new_with_opts(MULTI_TEST_CONTENTS, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaCycleCount).unwrap());
     prover.run().unwrap();
 }
@@ -285,12 +285,12 @@ fn profiler() {
         profiler::{Frame, Profiler},
     };
 
-    let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_CONTENTS).unwrap();
+    let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
     {
         let opts = ProverOpts::default()
             .with_skip_seal(true)
             .with_trace_callback(prof.make_trace_callback());
-        let mut prover = Prover::new_with_opts(MULTI_TEST_CONTENTS, MULTI_TEST_ID, opts).unwrap();
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
         prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Profiler).unwrap());
         prover.run().unwrap();
     }
@@ -307,9 +307,7 @@ fn profiler() {
 
     assert!(!occurences.is_empty(), "{:#?}", Vec::from_iter(prof.iter()));
 
-    let elf_mem = Program::load_elf(MULTI_TEST_CONTENTS, u32::MAX)
-        .unwrap()
-        .image;
+    let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
 
     assert!(
         occurences.iter().any(|(fr, addr, _count)| {
@@ -366,7 +364,7 @@ fn trace() {
         let opts = ProverOpts::default()
             .with_skip_seal(true)
             .with_trace_callback(|event| Ok(events.push(event)));
-        let mut prover = Prover::new_with_opts(MULTI_TEST_CONTENTS, MULTI_TEST_ID, opts).unwrap();
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
         prover.add_input_u32_slice(&to_vec(&MultiTestSpec::EventTrace).unwrap());
 
         prover.run().unwrap();

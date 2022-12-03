@@ -32,14 +32,14 @@ use rand::{
 use risc0_zkvm::{serde::to_vec, Prover, ProverOpts};
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
-    BENCH_CONTENTS, BENCH_ID,
+    BENCH_ELF, BENCH_ID,
 };
 
 fn run_guest(spec: SpecWithIters) -> Duration {
     let input_data: Vec<u32> = to_vec(&spec).unwrap();
 
     let mut prover = Prover::new_with_opts(
-        BENCH_CONTENTS,
+        BENCH_ELF,
         BENCH_ID,
         ProverOpts::default().with_skip_seal(true),
     )

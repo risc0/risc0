@@ -13,8 +13,8 @@ harness = false
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-risc0-zkp = { version = "1.0.0-rc.1", path = "../../../risc0/zkp", default-features = false }
-risc0-zkvm-platform = { version = "1.0.0-rc.1", path = "../../../risc0/zkvm/platform" }
+risc0-zkp = { version = "1.0.0-rc.2", path = "../../../risc0/zkp", default-features = false }
+risc0-zkvm-platform = { version = "1.0.0-rc.2", path = "../../../risc0/zkvm/platform" }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
@@ -42,6 +42,6 @@ sha2 = "0.10"
 [features]
 cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std"]
 default = ["std", "test"]
-std = []
+std = ["risc0-zkp/std"]
 test = []
 verify-only = []

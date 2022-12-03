@@ -75,7 +75,8 @@ fn build_metal_kernels(out_dir: &Path) {
     let compiler = compiler.trim_end();
     eprintln!("compiler: {compiler}");
 
-    let inc_path = "../../../risc0/zkp/kernels/metal";
+    let inc_path = Path::new(&env::var("DEP_RISC0_ZKP_INCLUDE").unwrap()).join("kernels/metal");
+    let inc_path = inc_path.to_str().unwrap();
 
     for kernel in KERNELS {
         let out_path = out_dir.join(kernel).with_extension("air");
@@ -133,7 +134,9 @@ fn build_cuda_kernels(out_dir: &Path) {
     let out_path = out_dir.join("kernels.fatbin");
     let out_path = out_path.display().to_string();
     let sha_path = out_dir.join("kernels.sha");
-    let inc_path = "../../../risc0/zkp/kernels/cuda";
+
+    let inc_path = Path::new(&env::var("DEP_RISC0_ZKP_INCLUDE").unwrap()).join("kernels/cuda");
+    let inc_path = inc_path.to_str().unwrap();
 
     let args = ["--fatbin", &src_path, "-I", &inc_path, "-o", &out_path];
 
