@@ -112,7 +112,7 @@ Adjust `methods/Cargo.toml` to include:
 
 ```toml
 [build-dependencies]
-risc0-build = "1.0.0-rc.1"
+risc0-build = "1.0.0-rc.2"
 
 [package.metadata.risc0]
 methods = ["guest"]
@@ -144,7 +144,7 @@ Add `risc0-zkvm` to the `methods/guest/Cargo.toml` file:
 
 ```toml
 [dependencies]
-risc0-zkvm = { version = "1.0.0-rc.1", default-features = false }
+risc0-zkvm = { version = "1.0.0-rc.2", default-features = false }
 ```
 
 Edit the code in `methods/guest/src/example.rs`:
@@ -165,7 +165,7 @@ Add `risc0-zkvm` and the `methods` crate to your dependencies:
 ```toml
 [dependencies]
 methods = { path = "methods" }
-risc0-zkvm = "1.0.0-rc.1"
+risc0-zkvm = "1.0.0-rc.2"
 ```
 
 Call the prover from your application:
