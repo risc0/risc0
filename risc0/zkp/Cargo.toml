@@ -1,5 +1,6 @@
 [package]
 name = "risc0-zkp"
+links = "risc0-zkp"
 description = "RISC Zero zero-knowledge proof system core crate"
 version = { workspace = true }
 edition = { workspace = true }

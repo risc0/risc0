@@ -21,6 +21,7 @@ fn main() {
 
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
+    println!("cargo:include={}", env!("CARGO_MANIFEST_DIR"));
 
     if env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
         build_metal_kernels(&out_dir);
