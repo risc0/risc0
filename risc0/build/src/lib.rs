@@ -24,8 +24,8 @@
 //! ## Using risc0-build to build guest methods
 //!
 //! Using this crate can be a bit delicate, so we encourage you to follow along
-//! in our [Risc Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter).
-//! In that repo, `risc0-build` is used in the
+//! in our [RISC Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter).
+//! In that repository, `risc0-build` is used in the
 //! [`methods` directory](https://github.com/risc0/risc0-rust-starter/tree/main/methods).
 //!
 //! Guest methods are embedded for the host to use by calling [embed_methods]
@@ -44,7 +44,7 @@
 //! then `Cargo.toml` might include
 //! ```toml
 //! [build-dependencies]
-//! risc0-build = "0.12"
+//! risc0-build = "1.0.0-rc.1"
 //!
 //! [package.metadata.risc0]
 //! methods = ["guest"]

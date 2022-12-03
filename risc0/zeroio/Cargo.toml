@@ -1,14 +1,17 @@
 [package]
 name = "risc0-zeroio"
+description = "RISC Zero zero-copy deserialization"
 version = { workspace = true }
 edition = { workspace = true }
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [dependencies]
 bytemuck = "1.12"
 impl-trait-for-tuples = "0.2"
 log = "0.4"
-risc0-zeroio-derive = { path = "../zeroio_derive" }
+risc0-zeroio-derive = { version = "1.0.0-rc.1", path = "../zeroio_derive" }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]

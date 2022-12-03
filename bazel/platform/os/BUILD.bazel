@@ -1,5 +1,0 @@
-constraint_value(
-    name = "risc0",
-    constraint_setting = "@platforms//os",
-    visibility = ["//visibility:public"],
-)

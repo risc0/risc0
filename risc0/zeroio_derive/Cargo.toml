@@ -1,7 +1,11 @@
 [package]
 name = "risc0-zeroio-derive"
+description = "Derive macro for risc0-zeroio"
 version = { workspace = true }
 edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [lib]
 proc-macro = true
