@@ -331,12 +331,12 @@ const fn decode(a: u32) -> u32 {
 const EXT_SIZE: usize = 4;
 
 /// Instances of `ExtElem` are elements of a finite field `F_p^4`. They are
-/// represented as elements of `F_p[X] / (X^4 - 11)`. This large
+/// represented as elements of `F_p[X] / (X^4 + 11)`. This large
 /// finite field (about `2^128` elements) is used when the security of
 /// operations depends on the size of the field. The field extension `ExtElem`
 /// has `Elem` as a subfield, so operations on elements of each are compatible.
-/// The irreducible polynomial `x^4 - 11` was chosen because `11` is
-/// the simplest choice of `BETA` for `x^2 - BETA` that makes this polynomial
+/// The irreducible polynomial `x^4 + 11` was chosen because `11` is
+/// the simplest choice of `BETA` for `x^2 + BETA` that makes this polynomial
 /// irreducible.
 #[derive(Eq, Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
@@ -692,6 +692,16 @@ mod tests {
     #[test]
     pub fn field_ops() {
         field::tests::test_field_ops::<Elem>(P_U64);
+    }
+
+    #[test]
+    pub fn linear() {
+        let x = ExtElem::new(Elem::new(1880084280), Elem::new(1788985953), Elem::new(1273325207), Elem::new(277471107));
+        let c0 = ExtElem::new(Elem::new(1582815482), Elem::new(2011839994), Elem::new(589901), Elem::new(698998108));
+        let c1 = ExtElem::new(Elem::new(1262573828), Elem::new(1903841444), Elem::new(1738307519), Elem::new(100967278));
+
+        assert_eq!(x * c1, ExtElem::new(Elem::new(876029217), Elem::new(1948387849), Elem::new(498773186), Elem::new(1997003991)));
+        assert_eq!(c0 + x * c1, ExtElem::new(Elem::new(445578778), Elem::new(1946961922), Elem::new(499363087), Elem::new(682736178)));
     }
 
     #[test]
