@@ -696,12 +696,43 @@ mod tests {
 
     #[test]
     pub fn linear() {
-        let x = ExtElem::new(Elem::new(1880084280), Elem::new(1788985953), Elem::new(1273325207), Elem::new(277471107));
-        let c0 = ExtElem::new(Elem::new(1582815482), Elem::new(2011839994), Elem::new(589901), Elem::new(698998108));
-        let c1 = ExtElem::new(Elem::new(1262573828), Elem::new(1903841444), Elem::new(1738307519), Elem::new(100967278));
+        let x = ExtElem::new(
+            Elem::new(1880084280),
+            Elem::new(1788985953),
+            Elem::new(1273325207),
+            Elem::new(277471107),
+        );
+        let c0 = ExtElem::new(
+            Elem::new(1582815482),
+            Elem::new(2011839994),
+            Elem::new(589901),
+            Elem::new(698998108),
+        );
+        let c1 = ExtElem::new(
+            Elem::new(1262573828),
+            Elem::new(1903841444),
+            Elem::new(1738307519),
+            Elem::new(100967278),
+        );
 
-        assert_eq!(x * c1, ExtElem::new(Elem::new(876029217), Elem::new(1948387849), Elem::new(498773186), Elem::new(1997003991)));
-        assert_eq!(c0 + x * c1, ExtElem::new(Elem::new(445578778), Elem::new(1946961922), Elem::new(499363087), Elem::new(682736178)));
+        assert_eq!(
+            x * c1,
+            ExtElem::new(
+                Elem::new(876029217),
+                Elem::new(1948387849),
+                Elem::new(498773186),
+                Elem::new(1997003991)
+            )
+        );
+        assert_eq!(
+            c0 + x * c1,
+            ExtElem::new(
+                Elem::new(445578778),
+                Elem::new(1946961922),
+                Elem::new(499363087),
+                Elem::new(682736178)
+            )
+        );
     }
 
     #[test]
