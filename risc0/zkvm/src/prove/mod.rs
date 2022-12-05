@@ -19,7 +19,7 @@ mod plonk;
 #[cfg(feature = "profiler")]
 pub mod profiler;
 
-use std::{collections::HashMap, env, fmt::Debug, io::Write, rc::Rc};
+use std::{collections::HashMap, fmt::Debug, io::Write, rc::Rc};
 
 use anyhow::{bail, Result};
 use risc0_zkp::{
@@ -33,12 +33,12 @@ use risc0_zkvm_platform::{
 };
 
 use self::elf::Program;
-use crate::{method_id::MethodId, receipt::Receipt, sha::sha, CIRCUIT};
-
-pub fn insecure_skip_seal() -> bool {
-    cfg!(feature = "insecure_skip_seal")
-        && env::var("RISC0_INSECURE_SKIP_SEAL").unwrap_or_default() == "1"
-}
+use crate::{
+    method_id::MethodId,
+    receipt::{insecure_skip_seal, Receipt},
+    sha::sha,
+    CIRCUIT,
+};
 
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
