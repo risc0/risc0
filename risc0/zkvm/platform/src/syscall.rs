@@ -272,6 +272,30 @@ pub unsafe fn sys_sha_compress(
             in("a1") in_state,
             in("a2") block1_ptr,
             in("a3") block2_ptr,
+            in("a4") 1,
+        );
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+#[inline(always)]
+pub unsafe fn sys_sha_buffer(
+    out_state: *mut [u32; SHA_DIGEST_WORDS],
+    in_state: *const [u32; SHA_DIGEST_WORDS],
+    buf: *const u8,
+    count: u32,
+) {
+    #[cfg(target_os = "zkvm")]
+    {
+        asm!(
+            "ecall",
+            in("t0") ecall::SHA,
+            in("a0") out_state,
+            in("a1") in_state,
+            in("a2") buf,
+            in("a3") buf.add(DIGEST_BYTES),
+            in("a4") count,
         );
     }
     #[cfg(not(target_os = "zkvm"))]

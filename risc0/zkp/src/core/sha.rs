@@ -217,6 +217,7 @@ pub mod testutil {
     // behaves.
     pub fn test_sha_impl<S: Sha>(sha: &S) {
         test_hash_pair(sha);
+        test_hash_raw_words(sha);
         test_hash_raw_pod_slice(sha);
         test_sha_basics(sha);
         test_elems(sha);
@@ -364,6 +365,43 @@ pub mod testutil {
                 )
             ),
             Digest::from_str("3aa2c47c47cd9e5c5259fd1c3428c30b9608201f5e163061deea8d2d7c65f2c3")
+        );
+    }
+
+    fn test_hash_raw_words<S: Sha>(sha: &S) {
+        assert_eq!(
+            *sha.hash_raw_words(&[
+                1u32.to_be(),
+                2u32.to_be(),
+                3u32.to_be(),
+                4u32.to_be(),
+                5u32.to_be(),
+                6u32.to_be(),
+                7u32.to_be(),
+                8u32.to_be(),
+                7u32.to_be(),
+                6u32.to_be(),
+                5u32.to_be(),
+                4u32.to_be(),
+                3u32.to_be(),
+                2u32.to_be(),
+                1u32.to_be(),
+                0u32.to_be(),
+            ]),
+            Digest::from_str("b6f1e1b52e435545aa21cc9d3ce54e9af9da118042163abf2a739aebd413ac8d")
+        );
+
+        assert_eq!(
+            *sha.hash_raw_words(&[1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0,]),
+            Digest::from_str("0410500505eb63608def984ecc0b7820cba1012570e3d288c483f35021c971a6")
+        );
+
+        assert_eq!(
+            *sha.hash_raw_words(&[
+                1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0, //
+                1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+            ]),
+            Digest::from_str("0343d500097e63123d3c7f418f465bfd2253652f351c90c75a05cb33946e71f1")
         );
     }
 }
