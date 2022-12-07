@@ -134,3 +134,19 @@ fn structs_enums() {
     let u8s: Vec<u8> = Vec::from([1, 2, 3, 4, 5].as_slice());
     test_round_trip(&u8s);
 }
+
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
+struct Arrays {
+    a: [u8; 7],
+    b: [u8; 16],
+}
+
+#[test]
+fn arrays() {
+    test_round_trip(&Arrays {
+        a: [1, 2, 3, 4, 5, 6, 7],
+        b: [
+            11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
+        ],
+    });
+}
