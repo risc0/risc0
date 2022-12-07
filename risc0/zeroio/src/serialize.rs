@@ -254,6 +254,24 @@ impl<T: Serialize, const N: usize> Serialize for [T; N] {
     }
 }
 
+impl<const N: usize> Serialize for [u8; N] {
+    const FIXED_WORDS: usize = align_bytes_to_words(N);
+
+    fn tot_len(&self) -> usize {
+        Self::FIXED_WORDS
+    }
+
+    fn fill(&self, buf: &mut AllocBuf, _a: &mut Alloc) -> Result<()> {
+        for (w, val) in core::iter::zip(
+            buf.buf(Self::FIXED_WORDS)?.iter_mut(),
+            as_words_padded(self.into_iter().cloned()),
+        ) {
+            *w = val;
+        }
+        Ok(())
+    }
+}
+
 #[impl_for_tuples(1, 5)]
 impl Serialize for Tuple {
     for_tuples!(const FIXED_WORDS: usize = #(Tuple::FIXED_WORDS)+*; );
