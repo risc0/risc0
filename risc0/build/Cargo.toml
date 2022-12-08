@@ -11,7 +11,7 @@ repository = { workspace = true }
 cargo_metadata = "0.15"
 downloader = "0.2"
 home = "0.5"
-risc0-circuit-rv32im = { version = "1.0.0-rc.2", path = "../circuit/rv32im" }
+risc0-circuit-rv32im = { version = "1.0.0-rc.2", path = "../circuit/rv32im", default-features = false }
 risc0-zkp = { version = "1.0.0-rc.2", path = "../zkp" }
 risc0-zkvm = { version = "1.0.0-rc.2", path = "../zkvm" }
 risc0-zkvm-platform = { version = "1.0.0-rc.2", path = "../zkvm/platform" }

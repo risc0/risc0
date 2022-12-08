@@ -20,10 +20,10 @@ extern crate alloc;
 pub mod adapter;
 pub mod core;
 pub mod field;
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub mod hal;
 mod merkle;
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub mod prove;
 pub mod taps;
 pub mod verify;

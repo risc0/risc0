@@ -108,14 +108,14 @@ impl field::Elem for Elem {
     }
 
     /// Generate a random value within the Baby Bear field
-    fn random(rng: &mut impl rand::Rng) -> Self {
+    fn random(rng: &mut impl rand_core::RngCore) -> Self {
         // Reject the last modulo-P region of possible uint32_t values, since it's
         // uneven and will only return random values less than (2^32 % P).
         const REJECT_CUTOFF: u32 = (u32::MAX / P) * P;
-        let mut val: u32 = rng.gen();
+        let mut val: u32 = rng.next_u32();
 
         while val >= REJECT_CUTOFF {
-            val = rng.gen();
+            val = rng.next_u32();
         }
         Elem::from(val)
     }
@@ -357,7 +357,7 @@ impl field::Elem for ExtElem {
     const WORDS: usize = WORDS * EXT_SIZE;
 
     /// Generate a random field element uniformly.
-    fn random(rng: &mut impl rand::Rng) -> Self {
+    fn random(rng: &mut impl rand_core::RngCore) -> Self {
         Self([
             Elem::random(rng),
             Elem::random(rng),

@@ -14,7 +14,7 @@
 
 use alloc::vec::Vec;
 
-use rand::RngCore;
+use rand_core::RngCore;
 
 use super::VerifyHal;
 use crate::{

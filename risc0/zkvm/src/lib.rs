@@ -40,7 +40,7 @@ extern crate alloc;
 #[cfg(any(target_os = "zkvm", doc))]
 pub mod guest;
 pub mod method_id;
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub mod prove;
 pub mod receipt;
 pub mod serde;
@@ -50,7 +50,7 @@ mod tests;
 
 pub use anyhow::Result;
 
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub use crate::prove::{Prover, ProverOpts};
 pub use crate::{
     method_id::{MethodId, DEFAULT_METHOD_ID_LIMIT},

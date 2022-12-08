@@ -14,16 +14,16 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 mod cpp;
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 mod ffi;
 mod info;
-#[cfg(all(target_os = "macos", not(feature = "verify-only")))]
+#[cfg(target_os = "macos")]
 pub mod metal;
 mod poly_ext;
 mod taps;
