@@ -1,0 +1,9 @@
+[workspace]
+
+[package]
+name = "risc0-wasm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkvm = { version = "1.0.0-rc.2", path = "../zkvm", default-features = false }

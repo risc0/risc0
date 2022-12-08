@@ -85,7 +85,7 @@ pub trait Elem:
     }
 
     /// Returns a random valid field element.
-    fn random(rng: &mut impl rand::Rng) -> Self;
+    fn random(rng: &mut impl rand_core::RngCore) -> Self;
 
     /// Import a number into the field from the natural numbers.
     fn from_u64(val: u64) -> Self;

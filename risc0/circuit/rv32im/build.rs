@@ -24,9 +24,7 @@ use sha2::{Digest, Sha256};
 const KERNELS: &[&str] = &["eval_check"];
 
 fn main() {
-    if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm")
-        || env::var("CARGO_FEATURE_VERIFY_ONLY").is_ok()
-    {
+    if !env::var("CARGO_FEATURE_PROVE").is_ok() {
         return;
     }
 

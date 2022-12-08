@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use rand::{Error, RngCore};
+use rand_core::{Error, RngCore};
 
 use crate::{
     core::{

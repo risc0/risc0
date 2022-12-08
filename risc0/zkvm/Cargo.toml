@@ -36,30 +36,14 @@ tracing = { version = "0.1", default-features = false, features = ["attributes"]
 # Host dependencies
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 addr2line = { version = "0.19", optional = true }
-elf = "0.7"
+elf = { version = "0.7", optional = true }
 gimli = { version = "0.27", optional = true }
-lazy-regex = "2.3"
+lazy-regex = { version = "2.3", optional = true }
 log = "0.4"
-num-traits = "0.2"
-num-derive = "0.3"
 prost = { version = "0.11", optional = true }
-rand = "0.8"
-rayon = "1.5"
-sha2 = "0.10"
-thiserror = "1.0"
-
-[target.'cfg(target_os = "zkvm")'.dependencies]
-# Lots of things depend on getrandom, and it throws a compiler error
-# for environments it doesn't support.  So, we depend on it here to
-# add the "custom" feature flag.
-#
-# To actually use getrandom, one must provide a custom implementation per
-# https://docs.rs/getrandom/latest/getrandom/#custom-implementations or it
-# will panic.
-getrandom = { version = "0.2", features = ["custom"] }
-
-[target.wasm32-unknown-unknown.dependencies]
-getrandom = { version = "0.2", features = ["js"] }
+rand = { version = "0.8", optional = true }
+rayon = { version = "1.5", optional = true }
+sha2 = { version = "0.10", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
@@ -80,10 +64,19 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = ["risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
-default = ["std"]
+default = ["prove"]
 dual = []
 insecure_skip_seal = []
 metal = []
 profiler = ["dep:addr2line", "dep:gimli", "dep:prost", "dep:prost-build", "dep:protobuf-src"]
+prove = [
+    "dep:elf",
+    "dep:lazy-regex",
+    "dep:rand",
+    "dep:rayon",
+    "dep:sha2",
+    "risc0-circuit-rv32im/prove",
+    "risc0-zkp/prove",
+    "std"
+]
 std = ["anyhow/std", "risc0-circuit-rv32im/std", "risc0-zeroio/std", "risc0-zkp/std", "serde/std"]
-verify-only = ["risc0-circuit-rv32im/verify-only"]
