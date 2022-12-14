@@ -30897,14 +30897,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/Mux/4/Mux/9/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
       auto x5868 = args[2][113 * steps + ((cycle - 0) & mask)];
       assert(x5868 != Fp::invalid());
-      // loc("cirgen/circuit/rv32im/sha.cpp":132:26)
-      auto x5869 = x5866 * x83;
-      // loc("cirgen/circuit/rv32im/sha.cpp":132:11)
-      auto x5870 = x5865 + x5869;
-      // loc("cirgen/circuit/rv32im/sha.cpp":132:61)
-      auto x5871 = x5868 * x83;
-      // loc("cirgen/circuit/rv32im/sha.cpp":132:46)
-      auto x5872 = x5867 + x5871;
+      // loc("cirgen/circuit/rv32im/sha.cpp":136:26)
+      auto x5869 = x5867 * x83;
+      // loc("cirgen/circuit/rv32im/sha.cpp":136:11)
+      auto x5870 = x5868 + x5869;
+      // loc("cirgen/circuit/rv32im/sha.cpp":136:61)
+      auto x5871 = x5865 * x83;
+      // loc("cirgen/circuit/rv32im/sha.cpp":136:46)
+      auto x5872 = x5866 + x5871;
       {
         // loc("cirgen/circuit/rv32im/sha.cpp":104:29)
         auto x5873 = Fp(x5870.asUInt32() & x88.asUInt32());
@@ -31509,14 +31509,14 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
       // loc("Top/Mux/4/Mux/9/ShaCycle/RamBody/PlonkBody/RamPlonkElement1/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
       auto x6047 = args[2][120 * steps + ((cycle - 0) & mask)];
       assert(x6047 != Fp::invalid());
-      // loc("cirgen/circuit/rv32im/sha.cpp":132:26)
-      auto x6048 = x6045 * x83;
-      // loc("cirgen/circuit/rv32im/sha.cpp":132:11)
-      auto x6049 = x6044 + x6048;
-      // loc("cirgen/circuit/rv32im/sha.cpp":132:61)
-      auto x6050 = x6047 * x83;
-      // loc("cirgen/circuit/rv32im/sha.cpp":132:46)
-      auto x6051 = x6046 + x6050;
+      // loc("cirgen/circuit/rv32im/sha.cpp":136:26)
+      auto x6048 = x6046 * x83;
+      // loc("cirgen/circuit/rv32im/sha.cpp":136:11)
+      auto x6049 = x6047 + x6048;
+      // loc("cirgen/circuit/rv32im/sha.cpp":136:61)
+      auto x6050 = x6044 * x83;
+      // loc("cirgen/circuit/rv32im/sha.cpp":136:46)
+      auto x6051 = x6045 + x6050;
       {
         // loc("cirgen/circuit/rv32im/sha.cpp":104:29)
         auto x6052 = Fp(x6049.asUInt32() & x88.asUInt32());
@@ -43550,85 +43550,85 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         assert(x10355 != Fp::invalid());
         // loc("cirgen/circuit/rv32im/sha.cpp":379:25)
         auto x10356 = x10355 + x8504;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10357 = x9883 * x85;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10358 = x9880 + x10357;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10359 = x9969 * x85;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10360 = x9966 + x10359;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10361 = x9886 * x81;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10362 = x10358 + x10361;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10363 = x9972 * x81;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10364 = x10360 + x10363;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10365 = x9889 * x71;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10366 = x10362 + x10365;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10367 = x9975 * x71;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10368 = x10364 + x10367;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10369 = x9892 * x61;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10370 = x10366 + x10369;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10371 = x9978 * x61;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10372 = x10368 + x10371;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10373 = x9895 * x63;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10374 = x10370 + x10373;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10375 = x9981 * x63;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10376 = x10372 + x10375;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10377 = x9898 * x57;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10378 = x10374 + x10377;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10379 = x9984 * x57;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10380 = x10376 + x10379;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10381 = x9901 * x66;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10382 = x10378 + x10381;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10383 = x9987 * x66;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10384 = x10380 + x10383;
         // loc("cirgen/components/u32.cpp":28:5)
         {
           auto& reg = args[2][110 * steps + cycle];
-          assert(reg == Fp::invalid() || reg == x9879);
-          reg = x9879;
+          assert(reg == Fp::invalid() || reg == x10384);
+          reg = x10384;
         }
         // loc("cirgen/components/u32.cpp":28:5)
         {
           auto& reg = args[2][111 * steps + cycle];
-          assert(reg == Fp::invalid() || reg == x10382);
-          reg = x10382;
-        }
-        // loc("cirgen/components/u32.cpp":28:5)
-        {
-          auto& reg = args[2][112 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x9965);
           reg = x9965;
         }
         // loc("cirgen/components/u32.cpp":28:5)
         {
+          auto& reg = args[2][112 * steps + cycle];
+          assert(reg == Fp::invalid() || reg == x10382);
+          reg = x10382;
+        }
+        // loc("cirgen/components/u32.cpp":28:5)
+        {
           auto& reg = args[2][113 * steps + cycle];
-          assert(reg == Fp::invalid() || reg == x10384);
-          reg = x10384;
+          assert(reg == Fp::invalid() || reg == x9879);
+          reg = x9879;
         }
         {
           // loc("Top/Mux/4/Mux/11/ShaCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))
@@ -43708,85 +43708,85 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x10393 = x10355 + x81;
         // loc("cirgen/circuit/rv32im/sha.cpp":380:25)
         auto x10394 = x10393 + x8504;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10395 = x10240 * x85;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10396 = x10237 + x10395;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10397 = x10326 * x85;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10398 = x10323 + x10397;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10399 = x10243 * x81;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10400 = x10396 + x10399;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10401 = x10329 * x81;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10402 = x10398 + x10401;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10403 = x10246 * x71;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10404 = x10400 + x10403;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10405 = x10332 * x71;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10406 = x10402 + x10405;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10407 = x10249 * x61;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10408 = x10404 + x10407;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10409 = x10335 * x61;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10410 = x10406 + x10409;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10411 = x10252 * x63;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10412 = x10408 + x10411;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10413 = x10338 * x63;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10414 = x10410 + x10413;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10415 = x10255 * x57;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10416 = x10412 + x10415;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10417 = x10341 * x57;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10418 = x10414 + x10417;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10419 = x10258 * x66;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10420 = x10416 + x10419;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:37)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:53)
         auto x10421 = x10344 * x66;
-        // loc("cirgen/circuit/rv32im/sha.cpp":147:22)
+        // loc("cirgen/circuit/rv32im/sha.cpp":147:30)
         auto x10422 = x10418 + x10421;
         // loc("cirgen/components/u32.cpp":28:5)
         {
           auto& reg = args[2][117 * steps + cycle];
-          assert(reg == Fp::invalid() || reg == x10236);
-          reg = x10236;
+          assert(reg == Fp::invalid() || reg == x10422);
+          reg = x10422;
         }
         // loc("cirgen/components/u32.cpp":28:5)
         {
           auto& reg = args[2][118 * steps + cycle];
-          assert(reg == Fp::invalid() || reg == x10420);
-          reg = x10420;
-        }
-        // loc("cirgen/components/u32.cpp":28:5)
-        {
-          auto& reg = args[2][119 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x10322);
           reg = x10322;
         }
         // loc("cirgen/components/u32.cpp":28:5)
         {
+          auto& reg = args[2][119 * steps + cycle];
+          assert(reg == Fp::invalid() || reg == x10420);
+          reg = x10420;
+        }
+        // loc("cirgen/components/u32.cpp":28:5)
+        {
           auto& reg = args[2][120 * steps + cycle];
-          assert(reg == Fp::invalid() || reg == x10422);
-          reg = x10422;
+          assert(reg == Fp::invalid() || reg == x10236);
+          reg = x10236;
         }
         {
           // loc("Top/Mux/4/Mux/11/ShaCycle/RamBody/PlonkBody/RamPlonkElement1/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))

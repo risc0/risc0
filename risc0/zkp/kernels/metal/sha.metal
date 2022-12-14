@@ -22,7 +22,7 @@ kernel void sha_rows(device ShaDigest* out,
                      device uint32_t& count,
                      device uint32_t& col_size,
                      uint gid [[thread_position_in_grid]]) {
-  out[gid] = shaHash(matrix + gid, col_size, count, false);
+  out[gid] = shaHash(matrix + gid, col_size, count);
 }
 
 kernel void sha_fold(device ShaDigest* out,
