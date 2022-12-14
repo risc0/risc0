@@ -23,7 +23,6 @@ use core::{
 
 use risc0_zkp::core::sha::{Digest, DIGEST_WORDS, SHA256_INIT};
 use risc0_zkvm_platform::{
-    memory,
     syscall::{sys_sha_buffer, sys_sha_compress},
     WORD_SIZE,
 };
