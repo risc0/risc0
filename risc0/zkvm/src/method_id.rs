@@ -52,7 +52,7 @@ impl MethodId {
     ///
     /// Bump this whenever the way that a MethodID is created or represented
     /// changes.
-    pub const VERSION: usize = 1;
+    pub const VERSION: usize = 2;
 
     pub fn as_slice(&self) -> &[u8] {
         bytemuck::cast_slice(self.table.as_slice())
@@ -76,18 +76,18 @@ impl MethodId {
         Ok(MethodId { table })
     }
 
-    #[cfg(not(target_os = "zkvm"))]
+    #[cfg(feature = "prove")]
     pub fn compute(elf_contents: &[u8]) -> Result<Self> {
         MethodId::compute_with_limit(elf_contents, DEFAULT_METHOD_ID_LIMIT)
     }
 
-    #[cfg(not(target_os = "zkvm"))]
+    #[cfg(feature = "prove")]
     pub fn compute_with_limit(elf_contents: &[u8], limit: usize) -> Result<Self> {
         prove::compute_with_limit(elf_contents, limit)
     }
 }
 
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 mod prove {
     use anyhow::Result;
     use risc0_zkp::{

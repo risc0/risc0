@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{method_id::MethodId, CIRCUIT};
 
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(all(feature = "std", not(target_os = "zkvm")))]
 pub fn insecure_skip_seal() -> bool {
     cfg!(feature = "insecure_skip_seal")
         && std::env::var("RISC0_INSECURE_SKIP_SEAL").unwrap_or_default() == "1"
@@ -68,6 +68,7 @@ where
         }
     };
 
+    #[cfg(any(feature = "std", target_os = "zkvm"))]
     if insecure_skip_seal() {
         return Ok(());
     }

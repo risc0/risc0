@@ -37,29 +37,53 @@ fn sha_basics() {
     assert_eq!(
         run_sha(""),
         Digest::new([
-            0xe3b0c442, 0x98fc1c14, 0x9afbf4c8, 0x996fb924, 0x27ae41e4, 0x649b934c, 0xa495991b,
-            0x7852b855,
+            0xe3b0c442_u32.to_be(),
+            0x98fc1c14_u32.to_be(),
+            0x9afbf4c8_u32.to_be(),
+            0x996fb924_u32.to_be(),
+            0x27ae41e4_u32.to_be(),
+            0x649b934c_u32.to_be(),
+            0xa495991b_u32.to_be(),
+            0x7852b855_u32.to_be(),
         ])
     );
     assert_eq!(
         run_sha("a"),
         Digest::new([
-            0xca978112, 0xca1bbdca, 0xfac231b3, 0x9a23dc4d, 0xa786eff8, 0x147c4e72, 0xb9807785,
-            0xafee48bb,
+            0xca978112_u32.to_be(),
+            0xca1bbdca_u32.to_be(),
+            0xfac231b3_u32.to_be(),
+            0x9a23dc4d_u32.to_be(),
+            0xa786eff8_u32.to_be(),
+            0x147c4e72_u32.to_be(),
+            0xb9807785_u32.to_be(),
+            0xafee48bb_u32.to_be(),
         ])
     );
     assert_eq!(
         run_sha("abc"),
         Digest::new([
-            0xba7816bf, 0x8f01cfea, 0x414140de, 0x5dae2223, 0xb00361a3, 0x96177a9c, 0xb410ff61,
-            0xf20015ad
+            0xba7816bf_u32.to_be(),
+            0x8f01cfea_u32.to_be(),
+            0x414140de_u32.to_be(),
+            0x5dae2223_u32.to_be(),
+            0xb00361a3_u32.to_be(),
+            0x96177a9c_u32.to_be(),
+            0xb410ff61_u32.to_be(),
+            0xf20015ad_u32.to_be()
         ])
     );
     assert_eq!(
         run_sha("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
         Digest::new([
-            0x248d6a61, 0xd20638b8, 0xe5c02693, 0x0c3e6039, 0xa33ce459, 0x64ff2167, 0xf6ecedd4,
-            0x19db06c1
+            0x248d6a61_u32.to_be(),
+            0xd20638b8_u32.to_be(),
+            0xe5c02693_u32.to_be(),
+            0x0c3e6039_u32.to_be(),
+            0xa33ce459_u32.to_be(),
+            0x64ff2167_u32.to_be(),
+            0xf6ecedd4_u32.to_be(),
+            0x19db06c1_u32.to_be()
         ])
     );
 }

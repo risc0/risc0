@@ -30,7 +30,7 @@ use super::sha::{Digest, Sha, DIGEST_WORDS, SHA256_INIT};
 pub struct Impl {}
 
 fn set_word(buf: &mut [u8], idx: usize, word: u32) {
-    buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_le_bytes());
+    buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_ne_bytes());
 }
 
 impl Impl {
@@ -45,9 +45,13 @@ impl Impl {
         stride: usize,
     ) -> Box<Digest> {
         let mut state = *SHA256_INIT.get();
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
+
         let mut block: GenericArray<u8, U64> = GenericArray::default();
 
-        let mut u8s = pods
+        let mut bytes = pods
             .iter()
             .skip(offset)
             .step_by(stride)
@@ -57,14 +61,14 @@ impl Impl {
             .fuse();
 
         let mut off = 0;
-        while let Some(b1) = u8s.next() {
-            let b2 = u8s.next().unwrap_or(0);
-            let b3 = u8s.next().unwrap_or(0);
-            let b4 = u8s.next().unwrap_or(0);
+        while let Some(b1) = bytes.next() {
+            let b2 = bytes.next().unwrap_or(0);
+            let b3 = bytes.next().unwrap_or(0);
+            let b4 = bytes.next().unwrap_or(0);
             set_word(
                 block.as_mut_slice(),
                 off,
-                u32::from_le_bytes([b1, b2, b3, b4]),
+                u32::from_ne_bytes([b1, b2, b3, b4]),
             );
             off += 1;
             if off == 16 {
@@ -76,6 +80,10 @@ impl Impl {
             block[off * 4..].fill(0);
             compress256(&mut state, slice::from_ref(&block));
         }
+
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
         Box::new(Digest::new(state))
     }
 }
@@ -84,18 +92,13 @@ impl Sha for Impl {
     type DigestPtr = Box<Digest>;
 
     fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
-        let mut hasher = Sha256::new();
-        hasher.update(bytes);
-        Box::new(Digest::new(
-            hasher
-                .finalize()
-                .as_slice()
-                .chunks(4)
-                .map(|chunk| u32::from_be_bytes(chunk.try_into().unwrap()))
-                .collect::<Vec<u32>>()
-                .try_into()
-                .unwrap(),
-        ))
+        let digest = Sha256::digest(bytes);
+        let words: Vec<u32> = digest
+            .as_slice()
+            .chunks(4)
+            .map(|chunk| u32::from_ne_bytes(chunk.try_into().unwrap()))
+            .collect();
+        Box::new(Digest::new(words.try_into().unwrap()))
     }
 
     fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
@@ -109,6 +112,9 @@ impl Sha for Impl {
             words.len()
         );
         let mut state = *SHA256_INIT.get();
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
         for block in words.chunks(16) {
             let block_u8: &[u8] = bytemuck::cast_slice(block);
             compress256(
@@ -116,12 +122,18 @@ impl Sha for Impl {
                 slice::from_ref(GenericArray::from_slice(block_u8)),
             )
         }
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
         Box::new(Digest::new(state))
     }
 
     fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, pod: &[T]) -> Self::DigestPtr {
         let u8s: &[u8] = bytemuck::cast_slice(pod);
         let mut state = *SHA256_INIT.get();
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
         let mut blocks = u8s.chunks_exact(64);
         for block in blocks.by_ref() {
             compress256(&mut state, slice::from_ref(GenericArray::from_slice(block)));
@@ -132,6 +144,9 @@ impl Sha for Impl {
             bytemuck::cast_slice_mut(last_block.as_mut_slice())[..remainder.len()]
                 .clone_from_slice(remainder);
             compress256(&mut state, slice::from_ref(&last_block));
+        }
+        for word in state.iter_mut() {
+            *word = word.to_be();
         }
         Box::new(Digest::new(state))
     }
@@ -144,12 +159,18 @@ impl Sha for Impl {
         block_half2: &Digest,
     ) -> Self::DigestPtr {
         let mut state: [u32; DIGEST_WORDS] = *orig_state.get();
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
         let mut block: GenericArray<u8, U64> = GenericArray::default();
         for i in 0..8 {
             set_word(block.as_mut_slice(), i, block_half1.as_slice()[i]);
             set_word(block.as_mut_slice(), 8 + i, block_half2.as_slice()[i]);
         }
         compress256(&mut state, slice::from_ref(&block));
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
         Box::new(Digest::new(state))
     }
 

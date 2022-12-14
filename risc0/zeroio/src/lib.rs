@@ -86,7 +86,7 @@ impl core::fmt::Display for ZeroioError {
     }
 }
 
-pub fn align_bytes_to_words(bytes: usize) -> usize {
+pub const fn align_bytes_to_words(bytes: usize) -> usize {
     (bytes + WORD_SIZE - 1) / WORD_SIZE
 }
 

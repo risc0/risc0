@@ -22,7 +22,10 @@ use core::{
 };
 
 use risc0_zkp::core::sha::{Digest, DIGEST_WORDS, SHA256_INIT};
-use risc0_zkvm_platform::{memory, syscall::sys_sha_compress, WORD_SIZE};
+use risc0_zkvm_platform::{
+    syscall::{sys_sha_buffer, sys_sha_compress},
+    WORD_SIZE,
+};
 use serde::Serialize;
 
 use crate::guest::align_up;
@@ -49,7 +52,7 @@ fn compress(
     block_half1: &HalfBlock,
     block_half2: &HalfBlock,
 ) {
-    // SAFETY: This is only called from this crate.  It's perfectly
+    // SAFETY: This is only called from this crate.  It's perfectly fine
     // for in_state and out_state to point at the same place, and for
     // out_state to be uninitialized memory, and those preclude us
     // from using references.
@@ -122,8 +125,19 @@ fn copy_and_update(
 
     match bytemuck::pod_align_to::<u32, Block>(padbuf.as_slice()) {
         (&[], blocks @ &[..], &[]) => {
-            for block in blocks.iter() {
-                compress(out_state, in_state, &block[0], &block[1]);
+            // SAFETY: This is only called from this crate.  It's perfectly fine
+            // for in_state and out_state to point at the same place, and for
+            // out_state to be uninitialized memory, and those preclude us
+            // from using references.
+            if blocks.len() > 0 {
+                unsafe {
+                    sys_sha_buffer(
+                        out_state.cast(),
+                        in_state.cast(),
+                        bytemuck::cast_slice(blocks).as_ptr(),
+                        blocks.len() as u32,
+                    );
+                }
                 in_state = out_state;
             }
         }
@@ -143,10 +157,22 @@ pub(crate) fn update_u32(
 ) {
     match bytemuck::pod_align_to::<u32, Block>(words) {
         (&[], blocks @ &[..], rest @ &[..]) => {
-            for block in blocks.iter() {
-                compress(out_state, in_state, &block[0], &block[1]);
+            // SAFETY: This is only called from this crate.  It's perfectly fine
+            // for in_state and out_state to point at the same place, and for
+            // out_state to be uninitialized memory, and those preclude us
+            // from using references.
+            if blocks.len() > 0 {
+                unsafe {
+                    sys_sha_buffer(
+                        out_state.cast(),
+                        in_state.cast(),
+                        bytemuck::cast_slice(blocks).as_ptr(),
+                        blocks.len() as u32,
+                    );
+                }
                 in_state = out_state;
             }
+
             copy_and_update(out_state, in_state, bytemuck::cast_slice(rest), trailer);
         }
         _ => unreachable!(
@@ -159,8 +185,19 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
     match bytemuck::pod_align_to::<u8, Block>(bytes) {
         (&[], blocks @ &[..], rest @ &[..]) => {
             // Start is aligned on word boundary.
-            for block in blocks.iter() {
-                compress(out_state, in_state, &block[0], &block[1]);
+            // SAFETY: This is only called from this crate.  It's perfectly fine
+            // for in_state and out_state to point at the same place, and for
+            // out_state to be uninitialized memory, and those preclude us
+            // from using references.
+            if blocks.len() > 0 {
+                unsafe {
+                    sys_sha_buffer(
+                        out_state.cast(),
+                        in_state.cast(),
+                        bytemuck::cast_slice(blocks).as_ptr(),
+                        blocks.len() as u32,
+                    );
+                }
                 in_state = out_state;
             }
             copy_and_update(out_state, in_state, rest, trailer);

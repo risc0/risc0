@@ -27,6 +27,7 @@
     "ios": "cpp",
     "iosfwd": "cpp",
     "vector": "cpp",
-    "charconv": "cpp"
+    "charconv": "cpp",
+    "stdexcept": "cpp"
   }
 }

@@ -17,6 +17,8 @@ use core::marker::PhantomData;
 
 use impl_trait_for_tuples::impl_for_tuples;
 
+use super::align_bytes_to_words;
+
 pub trait Deserialize<'a> {
     type RefType;
 
@@ -207,6 +209,21 @@ impl<'a, T: Deserialize<'a>, const N: usize> Deserialize<'a> for [T; N] {
             Ok(result) => result,
             _ => panic!("VecRef iterator didn't return the proper number of elements"),
         }
+    }
+}
+
+impl<'a, const N: usize> Deserialize<'a> for [u8; N] {
+    type RefType = &'a [u8; N];
+
+    const FIXED_WORDS: usize = align_bytes_to_words(N);
+
+    fn deserialize_from(words: &'a [u32]) -> Self::RefType {
+        let slice = &bytemuck::cast_slice(words)[..N];
+        slice.try_into().unwrap()
+    }
+
+    fn from_ref(val: &Self::RefType) -> Self {
+        **val
     }
 }
 

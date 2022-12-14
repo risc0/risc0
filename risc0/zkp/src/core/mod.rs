@@ -31,7 +31,7 @@ pub mod sha;
 pub mod sha_cpu;
 pub mod sha_rng;
 
-use rand::Rng;
+use rand_core::RngCore;
 
 /// For x = (1 << po2), given x, find po2.
 /// # Example
@@ -68,12 +68,12 @@ pub const fn log2_ceil(value: usize) -> usize {
 /// Generic trait for generating random values.
 pub trait Random {
     /// Generate a uniform random value.
-    fn random<R: Rng>(rng: &mut R) -> Self;
+    fn random<R: RngCore>(rng: &mut R) -> Self;
 }
 
 impl Random for u32 {
     /// Return a random u32 value.
-    fn random<R: Rng>(rng: &mut R) -> Self {
+    fn random<R: RngCore>(rng: &mut R) -> Self {
         rng.next_u32()
     }
 }

@@ -36,7 +36,14 @@ pub const DIGEST_WORD_SIZE: usize = mem::size_of::<u32>();
 
 /// Standard SHA initialization vector .
 pub static SHA256_INIT: Digest = Digest::new([
-    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
+    0x6a09e667_u32.to_be(),
+    0xbb67ae85_u32.to_be(),
+    0x3c6ef372_u32.to_be(),
+    0xa54ff53a_u32.to_be(),
+    0x510e527f_u32.to_be(),
+    0x9b05688c_u32.to_be(),
+    0x1f83d9ab_u32.to_be(),
+    0x5be0cd19_u32.to_be(),
 ]);
 
 /// The result of a SHA-256 hashing function.
@@ -95,7 +102,7 @@ impl Digest {
         }
         self.0
             .iter()
-            .flat_map(|word| word.to_be_bytes())
+            .flat_map(|word| word.to_ne_bytes())
             .flat_map(|byte| [hex(byte >> 4), hex(byte & 0xF)])
             .collect()
     }
@@ -110,7 +117,11 @@ impl From<&str> for Digest {
     fn from(s: &str) -> Digest {
         let words: Vec<u32> = (0..DIGEST_WORDS)
             .into_iter()
-            .map(|x| u32::from_str_radix(&s[x * 8..(x + 1) * 8], 16).unwrap())
+            .map(|x| {
+                u32::from_str_radix(&s[x * 8..(x + 1) * 8], 16)
+                    .unwrap()
+                    .to_be()
+            })
             .collect();
         Digest::new(words.try_into().unwrap())
     }
@@ -124,19 +135,13 @@ impl Default for Digest {
 
 impl Display for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        for word in self.0 {
-            core::write!(f, "{:08x?}", word)?;
-        }
-        Ok(())
+        f.write_str(&self.to_hex())
     }
 }
 
 impl Debug for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        for word in self.0 {
-            core::write!(f, "{:08x?}", word)?;
-        }
-        Ok(())
+        f.write_str(&self.to_hex())
     }
 }
 
@@ -201,8 +206,23 @@ mod tests {
     fn test_from_str() {
         assert_eq!(
             Digest::from_str("00000077000000AA0000001200000034000000560000007a000000a900000009"),
-            Digest::new([119, 170, 18, 52, 86, 122, 169, 9])
+            Digest::new([
+                0x77_u32.to_be(),
+                0xaa_u32.to_be(),
+                0x12_u32.to_be(),
+                0x34_u32.to_be(),
+                0x56_u32.to_be(),
+                0x7a_u32.to_be(),
+                0xa9_u32.to_be(),
+                0x09_u32.to_be(),
+            ])
         );
+    }
+
+    #[test]
+    fn test_roundtrip() {
+        const HEX: &str = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
+        assert_eq!(Digest::from_str(HEX).to_hex(), HEX);
     }
 }
 
@@ -217,6 +237,7 @@ pub mod testutil {
     // behaves.
     pub fn test_sha_impl<S: Sha>(sha: &S) {
         test_hash_pair(sha);
+        test_hash_raw_words(sha);
         test_hash_raw_pod_slice(sha);
         test_sha_basics(sha);
         test_elems(sha);
@@ -228,36 +249,21 @@ pub mod testutil {
     fn test_sha_basics<S: Sha>(sha: &S) {
         // Standard test vectors
         assert_eq!(
-            *sha.hash_bytes("abc".as_bytes()),
-            Digest::new([
-                0xba7816bf, 0x8f01cfea, 0x414140de, 0x5dae2223, 0xb00361a3, 0x96177a9c, 0xb410ff61,
-                0xf20015ad
-            ])
+            sha.hash_bytes("abc".as_bytes()).to_hex(),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
         assert_eq!(
-            *sha.hash_bytes("".as_bytes()),
-            Digest::new([
-                0xe3b0c442, 0x98fc1c14, 0x9afbf4c8, 0x996fb924, 0x27ae41e4, 0x649b934c, 0xa495991b,
-                0x7852b855
-            ])
+            sha.hash_bytes("".as_bytes()).to_hex(),
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         );
         assert_eq!(
-            *sha.hash_bytes("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()),
-            Digest::new([
-                0x248d6a61, 0xd20638b8, 0xe5c02693, 0x0c3e6039, 0xa33ce459, 0x64ff2167, 0xf6ecedd4,
-                0x19db06c1
-            ])
+            sha.hash_bytes("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes())
+                .to_hex(),
+            "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
         );
-        assert_eq!(*sha.hash_bytes(
-            "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes()),
-            Digest::new([0xcf5b16a7,
-                       0x78af8380,
-                       0x036ce59e,
-                       0x7b049237,
-                       0x0b249b11,
-                       0xe8f07a51,
-                       0xafac4503,
-                       0x7afee9d1]));
+        assert_eq!(sha.hash_bytes(
+            "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes()).to_hex(),
+            "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1");
         // Test also the 'hexDigest' bit.
         // Python says:
         // >>> hashlib.sha256("Byzantium").hexdigest()
@@ -357,13 +363,61 @@ pub mod testutil {
         assert_eq!(
             *sha.hash_pair(
                 &Digest::from_str(
-                    "6a09e667bb67ae853c6ef372a54ff53a510e527f9b05688c1f83d9ab5be0cd19"
+                    "67e6096a85ae67bb72f36e3c3af54fa57f520e518c68059babd9831f19cde05b"
                 ),
                 &Digest::from_str(
-                    "ed375cadc653bb9078cee904acee6f7ff2bf7476c92dc92911bae27c41ebc015"
+                    "ad5c37ed90bb53c604e9ce787f6feeac7674bff229c92dc97ce2ba1115c0eb41"
                 )
             ),
             Digest::from_str("3aa2c47c47cd9e5c5259fd1c3428c30b9608201f5e163061deea8d2d7c65f2c3")
+        );
+        assert_eq!(
+            *sha.hash_pair(
+                &Digest::from_str(
+                    "0000000000000000000000000000000000000000000000000000000000000000"
+                ),
+                &Digest::from_str(
+                    "0000000000000000000000000000000000000000000000000000000000000000"
+                )
+            ),
+            Digest::from_str("da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8")
+        );
+    }
+
+    fn test_hash_raw_words<S: Sha>(sha: &S) {
+        assert_eq!(
+            *sha.hash_raw_words(&[
+                1u32.to_be(),
+                2u32.to_be(),
+                3u32.to_be(),
+                4u32.to_be(),
+                5u32.to_be(),
+                6u32.to_be(),
+                7u32.to_be(),
+                8u32.to_be(),
+                7u32.to_be(),
+                6u32.to_be(),
+                5u32.to_be(),
+                4u32.to_be(),
+                3u32.to_be(),
+                2u32.to_be(),
+                1u32.to_be(),
+                0u32.to_be(),
+            ]),
+            Digest::from_str("b6f1e1b52e435545aa21cc9d3ce54e9af9da118042163abf2a739aebd413ac8d")
+        );
+
+        assert_eq!(
+            *sha.hash_raw_words(&[1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0,]),
+            Digest::from_str("0410500505eb63608def984ecc0b7820cba1012570e3d288c483f35021c971a6")
+        );
+
+        assert_eq!(
+            *sha.hash_raw_words(&[
+                1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0, //
+                1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+            ]),
+            Digest::from_str("0343d500097e63123d3c7f418f465bfd2253652f351c90c75a05cb33946e71f1")
         );
     }
 }

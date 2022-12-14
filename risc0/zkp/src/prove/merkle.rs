@@ -45,6 +45,10 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// determines the size of the 'top' layer. It is important that the
     /// verifier is constructed with identical size parameters, including # of
     /// queries, or verification may fail.
+    ///
+    /// matrix: `rows * cols`
+    /// rows: `domain = steps * INV_RATE`, `steps` is always a power of 2.
+    /// cols: `count = circuit_cols`
     #[tracing::instrument(name = "MerkleTreeProver", skip_all)]
     pub fn new(hal: &H, matrix: &H::BufferElem, rows: usize, cols: usize, queries: usize) -> Self {
         assert_eq!(matrix.size(), rows * cols);

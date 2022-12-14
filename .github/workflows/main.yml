@@ -43,7 +43,7 @@ jobs:
       - run: cargo test --tests -- --ignored
         env:
           RUST_BACKTRACE: "1"
-      - run: cargo build -p risc0-zkvm -F verify-only --target=wasm32-unknown-unknown
+      - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
       - run: cargo check --benches
 
   doc:

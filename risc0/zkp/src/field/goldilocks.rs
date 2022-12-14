@@ -75,15 +75,15 @@ impl field::Elem for Elem {
     }
 
     /// Generate a random value within the Goldilocks field
-    fn random(rng: &mut impl rand::Rng) -> Self {
+    fn random(rng: &mut impl rand_core::RngCore) -> Self {
         // The range of possible RNG-generated u64 integers includes an uneven region
         // modulo P. We want to reject u64 values from this region because, if
         // mapped to finite field elements (wrapped), it leads to over-selection
         // of the wrapped values. Here, P happens to fit only once into a 64-bit
         // space, so we accept only RNG-generated u64 values less than P.
-        let mut val: u64 = rng.gen();
+        let mut val: u64 = rng.next_u64();
         while val >= P {
-            val = rng.gen();
+            val = rng.next_u64();
         }
         Elem::from(val)
     }
@@ -344,7 +344,7 @@ impl field::Elem for ExtElem {
     const WORDS: usize = 4;
 
     /// Generate a random [ExtElem] uniformly.
-    fn random(rng: &mut impl rand::Rng) -> Self {
+    fn random(rng: &mut impl rand_core::RngCore) -> Self {
         Self([Elem::random(rng), Elem::random(rng)])
     }
 
