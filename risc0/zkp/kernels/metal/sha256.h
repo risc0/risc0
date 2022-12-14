@@ -55,20 +55,34 @@ struct ShaDigest {
 // Namespace to hide away some of the details from the user.
 namespace impl {
 
+inline uint32_t convertU32(uint32_t in) {
+  uint32_t x0 = in & 0x000000ff;
+  uint32_t x1 = in & 0x0000ff00;
+  uint32_t x2 = in & 0x00ff0000;
+  uint32_t x3 = in & 0xff000000;
+  return (x0 << 24) | (x1 << 8) | (x2 >> 8) | (x3 >> 24);
+}
+
+inline uint32_t convertU32(Fp in) {
+  return convertU32(in.asRaw());
+}
+
 // Generate the initialization for hash state.
 inline ShaDigest initState() {
-  return {{0x6a09e667,
-           0xbb67ae85,
-           0x3c6ef372,
-           0xa54ff53a,
-           0x510e527f,
-           0x9b05688c,
-           0x1f83d9ab,
-           0x5be0cd19}};
+  return {{
+      convertU32(0x6a09e667),
+      convertU32(0xbb67ae85),
+      convertU32(0x3c6ef372),
+      convertU32(0xa54ff53a),
+      convertU32(0x510e527f),
+      convertU32(0x9b05688c),
+      convertU32(0x1f83d9ab),
+      convertU32(0x5be0cd19),
+  }};
 }
 
 // Internal compression function, presumes chunk of 16 elements)
-inline void compress(thread ShaDigest& state, const thread uint32_t* chunk) { // NOLINT
+inline void compress(thread ShaDigest& state, const thread uint32_t* chunk) {
   uint32_t roundK[64] = {0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
                          0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
                          0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786,
@@ -141,74 +155,41 @@ inline void compress(thread ShaDigest& state, const thread uint32_t* chunk) { //
 #undef ROUND_FUNC
 }
 
-inline uint32_t convertU32(uint32_t in) {
-  uint32_t x0 = in & 0x000000ff;
-  uint32_t x1 = in & 0x0000ff00;
-  uint32_t x2 = in & 0x00ff0000;
-  uint32_t x3 = in & 0xff000000;
-  return (x0 << 24) | (x1 << 8) | (x2 >> 8) | (x3 >> 24);
-}
+} // namespace impl
 
-inline uint32_t convertU32(Fp in) {
-  return convertU32(in.asRaw());
-}
-
-// Main entry point for uint32_t sized objects
-template <typename T>
-inline ShaDigest shaHashInner(const device T* data, size_t size, size_t stride, bool pad) {
+// Main entry points
+inline ShaDigest shaHash(const device Fp* data, size_t size, size_t stride) {
   // Prepare the inital state
   uint32_t words[16];
   uint32_t curWord = 0;
-  ShaDigest state = initState();
+  ShaDigest state = impl::initState();
+  for (size_t i = 0; i < 8; i++) {
+    state.words[i] = impl::convertU32(state.words[i]);
+  }
 
   // Push all of the values
   for (size_t i = 0; i < size; i++) {
-    words[curWord++] = convertU32(data[i * stride]);
+    words[curWord++] = impl::convertU32(data[i * stride]);
     if (curWord == 16) {
-      compress(state, words);
+      impl::compress(state, words);
       curWord = 0;
     }
-  }
-  if (pad) {
-    // Add padding
-    words[curWord++] = 0x80000000UL;
   }
   // Clear rest of the block
   for (size_t i = curWord; i < 16; i++) {
     words[i] = 0;
   }
 
-  // If we can't fit the size in the remaining room, compress + clear
-  if (pad) {
-    if (curWord > 14) {
-      compress(state, words);
-      for (size_t i = 0; i < 16; i++) {
-        words[i] = 0;
-      }
-    }
-    // Now add size in bits
-    uint64_t bitSize = size * uint64_t(32);
-    words[14] = bitSize >> 32;
-    words[15] = bitSize & 0xffffffff;
-  }
   // Do final compression
-  if (pad || curWord != 0) {
-    compress(state, words);
+  if (curWord != 0) {
+    impl::compress(state, words);
+  }
+
+  for (size_t i = 0; i < 8; i++) {
+    state.words[i] = impl::convertU32(state.words[i]);
   }
 
   return state;
-}
-
-} // namespace impl
-
-// Main entry points
-inline ShaDigest
-shaHash(const device uint32_t* data, size_t size, size_t stride = 1, bool pad = true) {
-  return impl::shaHashInner(data, size, stride, pad);
-}
-
-inline ShaDigest shaHash(const device Fp* data, size_t size, size_t stride = 1, bool pad = true) {
-  return impl::shaHashInner(data, size, stride, pad);
 }
 
 inline ShaDigest shaHashPair(ShaDigest x, ShaDigest y) {
@@ -223,7 +204,15 @@ inline ShaDigest shaHashPair(ShaDigest x, ShaDigest y) {
 
   // Initialize state + compress
   ShaDigest state = impl::initState();
+  for (size_t i = 0; i < 8; i++) {
+    state.words[i] = impl::convertU32(state.words[i]);
+  }
+
   impl::compress(state, words);
+
+  for (size_t i = 0; i < 8; i++) {
+    state.words[i] = impl::convertU32(state.words[i]);
+  }
 
   // Return the results
   return state;

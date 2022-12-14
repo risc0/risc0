@@ -510,4 +510,27 @@ mod tests {
             assert_eq!(o, &golden[..]);
         });
     }
+
+    fn do_sha_rows(rows: usize, cols: usize, expected: &[&str]) {
+        let hal: BabyBearCpuHal = CpuHal::new();
+        let matrix_size = rows * cols;
+        let matrix = hal.alloc_elem("matrix", matrix_size);
+        let output = hal.alloc_digest("output", rows);
+        hal.sha_rows(&output, &matrix);
+        output.view(|view| {
+            assert_eq!(expected.len(), view.len());
+            for (expected, actual) in expected.iter().zip(view) {
+                assert_eq!(Digest::from_str(expected), *actual);
+            }
+        });
+    }
+
+    #[test]
+    fn sha_rows() {
+        do_sha_rows(
+            1,
+            16,
+            &["da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8"],
+        );
+    }
 }

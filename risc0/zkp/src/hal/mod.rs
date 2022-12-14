@@ -572,7 +572,7 @@ mod testutil {
                 output_gpu.view(|g| {
                     output_cpu.view(|c| {
                         for i in 0..g.len() {
-                            assert_eq!(c[i], g[i]);
+                            assert_eq!(c[i], g[i], "rows: {row_count}, cols: {col_count}, i: {i}");
                         }
                     });
                 });

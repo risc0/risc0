@@ -1,0 +1,11 @@
+AlignOperands: true
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: true
+AllowShortLoopsOnASingleLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakConstructorInitializersBeforeComma: true
+ColumnLimit: 100
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+PointerAlignment: Left

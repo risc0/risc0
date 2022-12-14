@@ -90,8 +90,8 @@ pub mod testutil {
         for _ in 0..10 {
             x.next_u32();
         }
-        assert_eq!(x.next_u32(), 1826198275);
+        assert_eq!(x.next_u32(), 785921476);
         x.mix(&*sha.hash_bytes(b"foo"));
-        assert_eq!(x.next_u32(), 1753965479);
+        assert_eq!(x.next_u32(), 4167871101);
     }
 }
