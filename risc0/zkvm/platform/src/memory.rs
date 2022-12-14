@@ -14,7 +14,7 @@
 
 use super::WORD_SIZE;
 
-pub const MEM_BITS: usize = 24;
+pub const MEM_BITS: usize = 28;
 pub const MEM_SIZE: usize = (1 << MEM_BITS) * 4;
 
 pub struct Region {
@@ -53,17 +53,13 @@ impl Region {
     }
 }
 
-// These should match zkvm/platform/memory.h and zkvm/platform/risc0.ld.
-// Write-only section must match the range hardcoded in the circuit.
-pub const STACK: Region = Region::new(0x0000_0000, mb(9));
-pub const DATA: Region = Region::new(0x0090_0000, mb(1));
-pub const HEAP: Region = Region::new(0x00A0_0000, mb(20));
-pub const INPUT: Region = Region::new(0x01E0_0000, mb(1));
-pub const GPIO: Region = Region::new(0x01F0_0000, mb(1));
-pub const PROG: Region = Region::new(0x0200_0000, mb(10));
-pub const SHA: Region = Region::new(0x02A0_0000, mb(1));
-pub const WOM: Region = Region::new(0x02B0_0000, mb(21));
-pub const OUTPUT: Region = Region::new(0x02B0_0000, mb(20));
-pub const COMMIT: Region = Region::new(0x03F0_0000, mb(1));
+// These should match the linker script in `risc0/build/risc0.ld`.
+pub const STACK: Region = Region::new(0x0000_0000, mb(16));
+pub const DATA: Region = Region::new(0x0100_0000, mb(16));
+pub const HEAP: Region = Region::new(0x0200_0000, mb(32));
+pub const INPUT: Region = Region::new(0x0400_0000, mb(32));
+pub const PROG: Region = Region::new(0x0600_0000, mb(32));
+pub const OUTPUT: Region = Region::new(0x0800_0000, mb(32));
+pub const COMMIT: Region = Region::new(0x0A00_0000, mb(32));
 pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(64));
 pub const FFPU: Region = Region::new(0x0C00_0000 + 192 * WORD_SIZE, mb(64) - 192 * WORD_SIZE);
