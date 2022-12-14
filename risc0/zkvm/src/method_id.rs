@@ -52,7 +52,7 @@ impl MethodId {
     ///
     /// Bump this whenever the way that a MethodID is created or represented
     /// changes.
-    pub const VERSION: usize = 1;
+    pub const VERSION: usize = 2;
 
     pub fn as_slice(&self) -> &[u8] {
         bytemuck::cast_slice(self.table.as_slice())

@@ -39,26 +39,40 @@ fn build_metal_kernels(out_dir: &Path) {
     let mut src_paths = vec![];
     let mut air_paths = vec![];
 
+    println!("cargo:rerun-if-changed=kernels/metal/fp.h");
+    println!("cargo:rerun-if-changed=kernels/metal/fp4.h");
+    println!("cargo:rerun-if-changed=kernels/metal/sha256.h");
+
     for kernel in KERNELS {
         let out_path = out_dir.join(kernel).with_extension("air");
+        air_paths.push(out_path);
+
         let src_path = Path::new("kernels/metal")
             .join(kernel)
             .with_extension("metal");
-        src_paths.push(src_path.display().to_string());
+        let src = src_path.display().to_string();
+        println!("cargo:rerun-if-changed={src}");
+        src_paths.push(src);
+    }
 
-        let result = Command::new("xcrun")
+    let mut kids = Vec::new();
+    for (src_path, out_path) in src_paths.iter().zip(air_paths.iter()) {
+        let child = Command::new("xcrun")
             .args(&["--sdk", "macosx"])
             .arg("metal")
             .arg("-c")
             .arg(src_path)
             .arg("-o")
             .arg(&out_path)
-            .status()
+            .spawn()
             .unwrap();
-        if !result.success() {
-            panic!("Failed to build metal kernels");
+        kids.push(child);
+    }
+
+    for mut kid in kids {
+        if !kid.wait().unwrap().success() {
+            panic!("Failed to compile metal kernels");
         }
-        air_paths.push(out_path);
     }
 
     let result = Command::new("xcrun")
@@ -69,10 +83,8 @@ fn build_metal_kernels(out_dir: &Path) {
         .arg(&out_path)
         .status()
         .unwrap();
-    if result.success() {
-        for src in src_paths {
-            println!("cargo:rerun-if-changed={src}");
-        }
+    if !result.success() {
+        panic!("Failed to build metallib");
     }
 }
 
