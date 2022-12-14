@@ -76,18 +76,18 @@ impl MethodId {
         Ok(MethodId { table })
     }
 
-    #[cfg(not(target_os = "zkvm"))]
+    #[cfg(feature = "prove")]
     pub fn compute(elf_contents: &[u8]) -> Result<Self> {
         MethodId::compute_with_limit(elf_contents, DEFAULT_METHOD_ID_LIMIT)
     }
 
-    #[cfg(not(target_os = "zkvm"))]
+    #[cfg(feature = "prove")]
     pub fn compute_with_limit(elf_contents: &[u8], limit: usize) -> Result<Self> {
         prove::compute_with_limit(elf_contents, limit)
     }
 }
 
-#[cfg(not(target_os = "zkvm"))]
+#[cfg(feature = "prove")]
 mod prove {
     use anyhow::Result;
     use risc0_zkp::{

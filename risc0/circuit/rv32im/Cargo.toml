@@ -20,8 +20,8 @@ tracing = { version = "0.1", default-features = false, features = ["attributes"]
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 fil-rustacuda = { version = "0.1", optional = true }
 log = "0.4"
-rand = "0.8"
-rayon = "1.5"
+rand = { version = "0.8", optional = true }
+rayon = { version = "1.5", optional = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
 
@@ -41,7 +41,7 @@ sha2 = "0.10"
 
 [features]
 cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std"]
-default = ["std", "test"]
+default = ["prove", "test"]
+prove = ["dep:rand", "dep:rayon", "std"]
 std = ["risc0-zkp/std"]
 test = []
-verify-only = []

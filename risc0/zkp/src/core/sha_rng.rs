@@ -14,8 +14,7 @@
 
 //! A SHA-256 based CRNG used in Fiat-Shamir.
 
-use rand::{Error, RngCore};
-use rand_core::impls;
+use rand_core::{impls, Error, RngCore};
 
 use super::sha::{Digest, Sha, DIGEST_WORDS};
 
@@ -78,7 +77,7 @@ impl<S: Sha> RngCore for ShaRng<S> {
 
 #[allow(missing_docs)]
 pub mod testutil {
-    use rand::RngCore;
+    use rand_core::RngCore;
 
     use super::ShaRng;
     use crate::core::sha::Sha;

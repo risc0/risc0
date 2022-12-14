@@ -17,7 +17,6 @@ anyhow = { version = "1.0", default-features = false }
 bytemuck = { version = "1.12", features = ["derive"] }
 fil-rustacuda = { version = "0.1", optional = true }
 paste = "1.0"
-rand = { version = "0.8", default-features = false, features = ["small_rng"] }
 rand_core = "0.6"
 risc0-zeroio = { version = "1.0.0-rc.2", path = "../zeroio", default-features = false }
 rustacuda_core = { version = "0.1", optional = true }
@@ -27,18 +26,10 @@ tracing = { version = "0.1", default-features = false, features = ["attributes"]
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 log = "0.4"
-ndarray = { version = "0.15", features = ["rayon"] }
-rayon = "1.5"
+ndarray = { version = "0.15", features = ["rayon"], optional = true }
+rand = { version = "0.8", optional = true }
+rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
-
-[target.'cfg(target_os = "zkvm")'.dependencies]
-# Lots of things depend on getrandom, and it throws a compiler error
-# for environments it doesn't support.
-#
-# To actually use getrandom, one must provide a custom implementation per
-# https://docs.rs/getrandom/latest/getrandom/#custom-implementations or it
-# will panic.
-getrandom = { version = "0.2", features = ["custom"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 metal = "0.24"
@@ -52,6 +43,12 @@ test-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-default = ["std"]
+default = ["prove"]
 cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive"]
-std = ["anyhow/std", "risc0-zeroio/std", "rand/std", "rand/std_rng"]
+prove = [
+    "dep:ndarray",
+    "dep:rand",
+    "dep:rayon",
+    "std"
+]
+std = ["anyhow/std", "risc0-zeroio/std"]
