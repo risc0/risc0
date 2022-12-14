@@ -109,15 +109,18 @@ impl field::Elem for Elem {
 
     /// Generate a random value within the Baby Bear field
     fn random(rng: &mut impl rand_core::RngCore) -> Self {
-        // Reject the last modulo-P region of possible uint32_t values, since it's
-        // uneven and will only return random values less than (2^32 % P).
-        const REJECT_CUTOFF: u32 = (u32::MAX / P) * P;
-        let mut val: u32 = rng.next_u32();
-
-        while val >= REJECT_CUTOFF {
-            val = rng.next_u32();
+        let val: u64 = (rng.next_u32() as u64) << 32 | (rng.next_u32() as u64);
+        // To make sure we are evenly distributed we pull a u64 divide it into
+        // baby-bear sized parts.  If it's not in one of those (change of less than 6 *
+        // 10-11) we implode.  In practice, running the proof again will succeed
+        // due to new ZK padding, and even at 1 proof-per-second, mean time to
+        // failure is > 2 years In a better world, we might propagate this
+        // failure and retry at the proof level
+        const REJECT_CUTOFF: u64 = (u64::MAX / (P as u64)) * (P as u64);
+        if val >= REJECT_CUTOFF {
+            panic!("Random number generator got very unlucky");
         }
-        Elem::from(val)
+        Elem::from((val % (P as u64)) as u32)
     }
 
     fn from_u64(val: u64) -> Self {
