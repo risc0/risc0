@@ -114,7 +114,7 @@ impl field::Elem for Elem {
         // baby-bear sized parts.  If it's not in one of those (chance of less than 6 *
         // 10^-11) we implode.  In practice, running the proof again will succeed
         // due to new ZK padding, and even at 1 proof-per-second, mean time to
-        // failure is > 2 years In a better world, we might propagate this
+        // failure is > 2 years. In a better world, we might propagate this
         // failure and retry at the proof level
         const REJECT_CUTOFF: u64 = (u64::MAX / (P as u64)) * (P as u64);
         if val >= REJECT_CUTOFF {
