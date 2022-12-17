@@ -111,8 +111,8 @@ impl field::Elem for Elem {
     fn random(rng: &mut impl rand_core::RngCore) -> Self {
         let val: u64 = (rng.next_u32() as u64) << 32 | (rng.next_u32() as u64);
         // To make sure we are evenly distributed we pull a u64 divide it into
-        // baby-bear sized parts.  If it's not in one of those (change of less than 6 *
-        // 10-11) we implode.  In practice, running the proof again will succeed
+        // baby-bear sized parts.  If it's not in one of those (chance of less than 6 *
+        // 10^-11) we implode.  In practice, running the proof again will succeed
         // due to new ZK padding, and even at 1 proof-per-second, mean time to
         // failure is > 2 years In a better world, we might propagate this
         // failure and retry at the proof level
