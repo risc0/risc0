@@ -134,8 +134,8 @@ impl field::Elem for Elem {
         let mut val: u64 = 0;
         for _ in 0..6 {
             val <<= 32;
-            val += rng.next_u32();
-            val %= (P as u64);
+            val += rng.next_u32() as u64;
+            val %= P as u64;
         }
         Elem::from(val as u32)
     }
