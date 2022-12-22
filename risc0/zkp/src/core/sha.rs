@@ -66,6 +66,13 @@ impl Digest {
         Ok(Digest(words.try_into().map_err(Error::msg)?))
     }
 
+    /// Try to create a [Digest] from a slice of bytes.
+    pub fn try_from_bytes(bytes: &[u8]) -> Result<Self> {
+        Ok(Digest(
+            bytemuck::cast_slice(bytes).try_into().map_err(Error::msg)?,
+        ))
+    }
+
     /// Create a [Digest] from a slice of words.
     ///
     /// # Panics
@@ -75,9 +82,24 @@ impl Digest {
         Self::try_from_slice(words).unwrap()
     }
 
+    /// Create a [Digest] from a slice of bytes.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the number of bytes is not exactly `[DIGEST_WORDS] *
+    /// [DIGEST_WORD_SIZE]`.
+    pub fn from_bytes(bytes: &[u8]) -> Self {
+        Self::try_from_bytes(bytes).unwrap()
+    }
+
     /// Returns a slice of words.
     pub fn as_slice(&self) -> &[u32] {
         &self.0
+    }
+
+    /// Returns a slice of bytes.
+    pub fn as_bytes(&self) -> &[u8] {
+        bytemuck::cast_slice(&self.0)
     }
 
     /// Returns a mutable slice of words.
@@ -85,12 +107,12 @@ impl Digest {
         &mut self.0
     }
 
-    /// Returns a slice of words.
+    /// Returns an array of words.
     pub fn get(&self) -> &[u32; DIGEST_WORDS] {
         &self.0
     }
 
-    /// Returns a mutable slice of words.
+    /// Returns a mutable array of words.
     pub fn get_mut(&mut self) -> &mut [u32; DIGEST_WORDS] {
         &mut self.0
     }

@@ -15,7 +15,7 @@
 use super::WORD_SIZE;
 
 pub const MEM_BITS: usize = 28;
-pub const MEM_SIZE: usize = (1 << MEM_BITS) * 4;
+pub const MEM_SIZE: usize = 1 << MEM_BITS;
 
 pub struct Region {
     start: usize,
@@ -63,3 +63,8 @@ pub const OUTPUT: Region = Region::new(0x0800_0000, mb(32));
 pub const COMMIT: Region = Region::new(0x0A00_0000, mb(32));
 pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(64));
 pub const FFPU: Region = Region::new(0x0C00_0000 + 192 * WORD_SIZE, mb(64) - 192 * WORD_SIZE);
+
+// TODO: adjust memory map in the near future
+// pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(16));
+pub const PAGE_TABLE: Region = Region::new(0x0D00_0000, mb(16));
+// pub const FFPU: Region = Region::new(0x0E00_0000, mb(32));

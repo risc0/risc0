@@ -19,8 +19,6 @@ use core::{arch::asm, cell::UnsafeCell};
 use crate::memory;
 use crate::{io::SliceDescriptor, WORD_SIZE};
 
-const SHA_DIGEST_WORDS: usize = 8;
-
 pub mod ecall {
     pub const HALT: u32 = 0;
     pub const OUTPUT: u32 = 1;
@@ -72,6 +70,8 @@ pub mod reg_abi {
     pub const REG_T4: usize = 29; // temporary
     pub const REG_T5: usize = 30; // temporary
     pub const REG_T6: usize = 31; // temporary
+    pub const REG_PC: usize = 32; // program counter
+    pub const REG_MAX: usize = 33; // maximum number of registers
 }
 
 pub const DIGEST_WORDS: usize = 8;
@@ -258,10 +258,10 @@ pub unsafe fn sys_output(output_id: u32, output_value: u32) {
 
 #[inline(always)]
 pub unsafe fn sys_sha_compress(
-    out_state: *mut [u32; SHA_DIGEST_WORDS],
-    in_state: *const [u32; SHA_DIGEST_WORDS],
-    block1_ptr: *const [u32; SHA_DIGEST_WORDS],
-    block2_ptr: *const [u32; SHA_DIGEST_WORDS],
+    out_state: *mut [u32; DIGEST_WORDS],
+    in_state: *const [u32; DIGEST_WORDS],
+    block1_ptr: *const [u32; DIGEST_WORDS],
+    block2_ptr: *const [u32; DIGEST_WORDS],
 ) {
     #[cfg(target_os = "zkvm")]
     {
@@ -281,8 +281,8 @@ pub unsafe fn sys_sha_compress(
 
 #[inline(always)]
 pub unsafe fn sys_sha_buffer(
-    out_state: *mut [u32; SHA_DIGEST_WORDS],
-    in_state: *const [u32; SHA_DIGEST_WORDS],
+    out_state: *mut [u32; DIGEST_WORDS],
+    in_state: *const [u32; DIGEST_WORDS],
     buf: *const u8,
     count: u32,
 ) {

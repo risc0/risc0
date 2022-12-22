@@ -51,7 +51,7 @@ mod tests;
 pub use anyhow::Result;
 
 #[cfg(feature = "prove")]
-pub use crate::prove::{Prover, ProverOpts};
+pub use crate::prove::{image::MemoryImage, Prover, ProverOpts};
 pub use crate::{
     method_id::{MethodId, DEFAULT_METHOD_ID_LIMIT},
     receipt::Receipt,
