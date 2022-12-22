@@ -92,12 +92,14 @@ impl<'a, F: Field> Handler<'a, F> {
 }
 
 impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
+    /// Performs an extern call
     fn call(
         &mut self,
         cycle: usize,
-        // TODO what is name?
+        // The name of the extern call to perform.
+        // Examples include getMajor, ramRead, syscall, etc
         name: &str,
-        // TODO what is extra?
+        // This is an extra string argument that is only used by the `log` extern call.
         extra: &str,
         args: &[F::Elem],
         outs: &mut [F::Elem],
