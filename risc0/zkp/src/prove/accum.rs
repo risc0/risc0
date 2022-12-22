@@ -21,16 +21,20 @@ use crate::{
     field::{Elem, ExtElem, Field},
 };
 
-/// Tracks plonk accumulations for an execution.
+/// Tracks grand product accumulations for PLOOKUP.
 pub struct Accum<E: Elem> {
     /// Total number of cycles in this run.
     cycles: usize,
 
-    // Plonk kinds and their data.
+    // PLOOKUP relies on two grand product accumulation checks;
+    // one for the memory permutation and a second for a lookup table.
+    // We have two `kinds`: memory and bytes.
+    // TODO check with Jeremy if this is accurate. (what are "kinds?")
     kinds: BTreeMap<String, Vec<E>>,
 }
 
 impl<E: Elem> Accum<E> {
+    // Constructs a new Accum
     pub fn new(cycles: usize) -> Self {
         Accum {
             cycles,
@@ -38,6 +42,8 @@ impl<E: Elem> Accum<E> {
         }
     }
 
+    // Generates "pre-" side of grand product accumulation
+    // TODO check with Jeremy if this is accurate. (what is "prefix?")
     pub fn calc_prefix_products(&mut self) {
         for (_kind, elems) in self.kinds.iter_mut() {
             let mut tot = E::ONE;
@@ -57,6 +63,7 @@ impl<E: Elem> Accum<E> {
 }
 
 pub struct Handler<'a, F: Field> {
+    // TODO what is p?
     p: &'a Mutex<Accum<F::ExtElem>>,
     cycles: usize,
     kinds: BTreeMap<String, *mut F::ExtElem>,
@@ -88,7 +95,9 @@ impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
     fn call(
         &mut self,
         cycle: usize,
+        // TODO what is name?
         name: &str,
+        // TODO what is extra?
         extra: &str,
         args: &[F::Elem],
         outs: &mut [F::Elem],
