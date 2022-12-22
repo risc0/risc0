@@ -34,7 +34,6 @@ pub struct Accum<E: Elem> {
 }
 
 impl<E: Elem> Accum<E> {
-    // Constructs a new Accum
     pub fn new(cycles: usize) -> Self {
         Accum {
             cycles,
