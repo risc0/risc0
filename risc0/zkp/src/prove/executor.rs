@@ -32,16 +32,27 @@ where
     S: CircuitStepHandler<F::Elem>,
 {
     pub circuit: &'static C,
+    // Circuit Step Handler
     pub handler: S,
+    // Control Instructions
     pub code: Vec<F::Elem>,
+    // Number of columns used for control instructions
     code_size: usize,
+    // Execution Trace Data
     pub data: Vec<F::Elem>,
+    // Number of columns used for execution trace data
     data_size: usize,
+    // Circuit output
     pub output: Vec<F::Elem>,
+    // Power of 2
     pub po2: usize,
+    // Counter for zkvm execution
     pub steps: usize,
+    // Indicates whether the guest program has already halted
     pub halted: bool,
+    // Maximum allowable execution length of guest program
     max_po2: usize,
+    // Counter for guest execution inside the zkvm
     pub cycle: usize,
 }
 
