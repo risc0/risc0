@@ -539,20 +539,21 @@ impl Build {
             .target("riscv32im-unknown-none-elf")
             .opt_level(3)
             .flag("-O3")
-            .flag("--target=riscv32-unknown-none-elf")
+            //.flag("--target=riscv32-unknown-none-elf")
             .flag("-mabi=ilp32")
             .flag("-mcmodel=medany")
             .flag("-fdata-sections")
             .flag("-ffunction-sections")
             .flag("-dead_strip")
-            .flag("-flto")
+            //.flag("-flto")
             .flag("-march=rv32im")
             .flag("-static")
             .flag(&format!(
                 "--sysroot={}/riscv32-unknown-elf",
                 self.rv_cc_install_path
             ))
-            .flag(&format!("--gcc-toolchain={}", self.rv_cc_install_path));
+            //.flag(&format!("--gcc-toolchain={}", self.rv_cc_install_path))
+            ;
 
         if !self.release {
             return;
