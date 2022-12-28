@@ -64,10 +64,14 @@ where
     C: CircuitDef<F>,
     CS: CircuitStepHandler<F::Elem>,
 {
+    // The taps are the entries of the trace used in evaluating the constraints.
     let taps = circuit.get_taps();
 
+    // The number of columns used for encoding zkvm control instructions.
     let code_size = taps.group_size(RegisterGroup::Code);
+    // The number of columns used for encoding the execution trace.
     let data_size = taps.group_size(RegisterGroup::Data);
+    // The number of columns used for the PLOOKUP argument.
     let accum_size = taps.group_size(RegisterGroup::Accum);
     debug!(
         "code: {code_size}/{}, data: {data_size}/{}, accum: {accum_size}/{}",
@@ -80,6 +84,7 @@ where
 
     circuit.execute(&mut iop);
 
+    // The log of the number of steps in the execution trace.
     let po2 = circuit.po2();
     assert!(po2 as usize <= MAX_CYCLES_PO2);
     let size = 1 << po2;
@@ -95,6 +100,7 @@ where
     data_group.merkle.commit(&mut iop);
     debug!("dataGroup: {}", data_group.merkle.root());
 
+    // Generates values for PLOOKUP accumulations.
     circuit.accumulate(&mut iop);
 
     // Make the accum group + commit
@@ -105,11 +111,14 @@ where
     accum_group.merkle.commit(&mut iop);
     debug!("accumGroup: {}", accum_group.merkle.root());
 
-    // Set the poly mix value
+    // Set the poly mix value, which is used for constraint compression in the DEEP-ALI protocol.
     let poly_mix = H::ExtElem::random(&mut iop.rng);
-
-    // Now generate the check polynomial
     let domain = size * INV_RATE;
+
+    // Now generate the check polynomial.
+    // The check polynomial is the core of the STARK: if the constraints are satisfied,
+    // the check polynomial will be a low-degree polynomial. See DEEP-ALI paper for
+    // details on the construction of the check_poly.
     let check_poly = hal.alloc_elem("check_poly", H::ExtElem::EXT_SIZE * domain);
     let mix = hal.copy_from_elem("mix", circuit.get_mix());
     let out = hal.copy_from_elem("out", circuit.get_output());
@@ -157,7 +166,7 @@ where
     check_group.merkle.commit(&mut iop);
     debug!("checkGroup: {}", check_group.merkle.root());
 
-    // Now pick a value for Z
+    // Now pick a value for Z, which is used as the DEEP-ALI query point.
     let z = H::ExtElem::random(&mut iop.rng);
     // #ifdef CIRCUIT_DEBUG
     //   if (badZ != Fp4(0)) {
@@ -230,7 +239,7 @@ where
     let hash_u = sha.hash_raw_pod_slice(coeff_u.as_slice());
     iop.commit(&hash_u);
 
-    // Set the mix mix value
+    // Set the mix mix value, which is used for FRI batching.
     let mix = H::ExtElem::random(&mut iop.rng);
     debug!("Mix = {mix:?}");
 
