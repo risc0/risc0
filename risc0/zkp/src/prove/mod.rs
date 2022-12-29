@@ -111,14 +111,15 @@ where
     accum_group.merkle.commit(&mut iop);
     debug!("accumGroup: {}", accum_group.merkle.root());
 
-    // Set the poly mix value, which is used for constraint compression in the DEEP-ALI protocol.
+    // Set the poly mix value, which is used for constraint compression in the
+    // DEEP-ALI protocol.
     let poly_mix = H::ExtElem::random(&mut iop.rng);
     let domain = size * INV_RATE;
 
     // Now generate the check polynomial.
-    // The check polynomial is the core of the STARK: if the constraints are satisfied,
-    // the check polynomial will be a low-degree polynomial. See DEEP-ALI paper for
-    // details on the construction of the check_poly.
+    // The check polynomial is the core of the STARK: if the constraints are
+    // satisfied, the check polynomial will be a low-degree polynomial. See
+    // DEEP-ALI paper for details on the construction of the check_poly.
     let check_poly = hal.alloc_elem("check_poly", H::ExtElem::EXT_SIZE * domain);
     let mix = hal.copy_from_elem("mix", circuit.get_mix());
     let out = hal.copy_from_elem("out", circuit.get_output());
