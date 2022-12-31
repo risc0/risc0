@@ -21,15 +21,14 @@ use crate::{
     field::{Elem, ExtElem, Field},
 };
 
-/// Tracks grand product accumulations for PLOOKUP.
+/// Tracks grand product accumulations for PLONK-style permutation arguments.
 pub struct Accum<E: Elem> {
     /// Total number of cycles in this run.
     cycles: usize,
 
-    // PLOOKUP relies on two grand product accumulation checks;
+    // We use two PLONK-style grand product accumulation checks;
     // one for the memory permutation and a second for a lookup table.
     // We have two `kinds`: memory and bytes.
-    // TODO check with Jeremy if this is accurate. (what are "kinds?")
     kinds: BTreeMap<String, Vec<E>>,
 }
 
@@ -41,8 +40,7 @@ impl<E: Elem> Accum<E> {
         }
     }
 
-    // Generates "pre-" side of grand product accumulation
-    // TODO check with Jeremy if this is accurate. (what is "prefix?")
+    // Generates prefix products for grand product accumulation
     pub fn calc_prefix_products(&mut self) {
         for (_kind, elems) in self.kinds.iter_mut() {
             let mut tot = E::ONE;
