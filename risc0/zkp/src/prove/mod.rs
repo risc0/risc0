@@ -100,7 +100,7 @@ where
     data_group.merkle.commit(&mut iop);
     debug!("dataGroup: {}", data_group.merkle.root());
 
-    // Generates values for PLOOKUP accumulations.
+    // Generates grand product accumulations for PLONK-style permutation arguments
     circuit.accumulate(&mut iop);
 
     // Make the accum group + commit
