@@ -46,13 +46,13 @@ where
     pub output: Vec<F::Elem>,
     // Power of 2
     pub po2: usize,
-    // Counter for zkvm execution
+    // steps = 2^po2 is the total number of steps in the zkVM execution
     pub steps: usize,
     // Indicates whether the guest program has already halted
     pub halted: bool,
     // Maximum allowable execution length of guest program
     max_po2: usize,
-    // Counter for guest execution inside the zkvm
+    // Counter for zkVM execution
     pub cycle: usize,
 }
 
