@@ -22,7 +22,7 @@ use risc0_zkp::{
 use super::CircuitImpl;
 
 #[rustfmt::skip]
-const DEF: PolyExtStepDef = PolyExtStepDef {
+pub const DEF: PolyExtStepDef = PolyExtStepDef {
     block: &[PolyExtStep::Const(1, "cirgen/circuit/rv32im/top.cpp:18"),
 PolyExtStep::Const(0, "cirgen/components/bytes.cpp:21"),
 PolyExtStep::Const(254, "cirgen/components/bytes.cpp:34"),
