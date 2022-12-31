@@ -46,7 +46,7 @@ where
     pub output: Vec<F::Elem>,
     // Power of 2
     pub po2: usize,
-    // steps = 2^po2 is the total number of steps in the zkVM execution
+    // steps = 2^po2 is the total number of cycles in the zkVM execution
     pub steps: usize,
     // Indicates whether the guest program has already halted
     pub halted: bool,
