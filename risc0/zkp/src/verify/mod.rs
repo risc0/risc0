@@ -358,7 +358,9 @@ where
     // Each permutation check consists of a pre-permutation accumulation and a
     // post-permutation accumulation.
     // The first permutation check uses memory-based values (see PLONK paper for details).
-    // The second permutation cehck uses bytes-based values (see PLOOKUP paper for details).
+    // This permutation is used to re-order memory accesses for quicker verification.
+    // The second permutation check uses bytes-based values (see PLOOKUP paper for details).
+    // This permutation is used to implement a look-up table.
     hal.debug("accum_merkle");
     let accum_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, accum_size, QUERIES);
     // debug!("accumRoot = {}", accum_merkle.root());
