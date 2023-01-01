@@ -331,7 +331,9 @@ where
     let data_size = taps.group_size(RegisterGroup::Data);
     let accum_size = taps.group_size(RegisterGroup::Accum);
 
-    // Get code and data merkle roots
+    // Get merkle root for the code merkle tree.
+    // The code merkle tree contains the control instructions for the zkVM,
+    // including the byte code from the ELF file being executed.
     hal.debug("code_merkle");
     let code_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, code_size, QUERIES);
     // debug!("codeRoot = {}", code_merkle.root());
@@ -339,6 +341,10 @@ where
     // Verify code is valid
     check_code(po2, code_merkle.root())?;
 
+    // Get merkle root for the data merkle tree.
+    // The data merkle tree contains the execution trace of the program being run,
+    // including memory accesses as well as the permutation of those memory
+    // accesses sorted by location used by PLONK.
     hal.debug("data_merkle");
     let data_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, data_size, QUERIES);
     // debug!("dataRoot = {}", data_merkle.root());
@@ -347,28 +353,39 @@ where
     hal.debug("accumulate");
     adapter.accumulate(&mut iop);
 
+    // Get merkle root for the accum merkle tree.
+    // The accum merkle tree contains the accumulations for two permutation check arguments:
+    // Each permutation check consists of a pre-permutation accumulation and a
+    // post-permutation accumulation.
+    // The first permutation check uses memory-based values (see PLONK paper for details).
+    // The second permutation cehck uses bytes-based values (see PLOOKUP paper for details).
     hal.debug("accum_merkle");
     let accum_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, accum_size, QUERIES);
     // debug!("accumRoot = {}", accum_merkle.root());
 
-    // Set the poly mix value
+    // Get a pseudorandom value with which to mix the constraint polynomials.
+    // See DEEP-ALI protocol from DEEP-FRI paper for details on constraint mixing.
     let poly_mix = H::ExtElem::random(&mut iop);
 
     hal.debug("check_merkle");
     let check_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, H::CHECK_SIZE, QUERIES);
     // debug!("checkRoot = {}", check_merkle.root());
 
+    // Get a random DEEP query point
+    // See DEEP-ALI protocol from DEEP-FRI paper for details on DEEP query.
     let z = H::ExtElem::random(&mut iop);
     // debug!("Z = {z:?}");
     let back_one = <H::Elem as RootsOfUnity>::ROU_REV[po2 as usize];
 
-    // Read the U coeffs + commit their hash
+    // Read the U coeffs (the coefficients of the DEEP polynomial) + commit their
+    // hash
+    // TODO - are U coeffs the interpolations of the taps or the DEEP quotient poly?
     let num_taps = taps.tap_size();
     let coeff_u = iop.read_field_elem_slice(num_taps + H::CHECK_SIZE);
     let hash_u = *hal.sha().hash_raw_pod_slice(coeff_u);
     iop.commit(&hash_u);
 
-    // Now, convert to evaluated values
+    // Now, convert U polynomials from coefficient form to evaluation form
     let mut cur_pos = 0;
     let mut eval_u = Vec::with_capacity(num_taps);
     for reg in taps.regs() {
@@ -382,6 +399,7 @@ where
     assert_eq!(eval_u.len(), num_taps, "Miscalculated capacity for eval_us");
 
     // Compute the core polynomial
+    // TODO - clarify: what is the "core polynomial?"
     hal.debug("> compute_polynomial");
     let result = hal.compute_polynomial(
         &eval_u,
@@ -424,12 +442,13 @@ where
         return Err(VerificationError::InvalidProof);
     }
 
-    // Set the mix mix value
+    // Set the mix mix value, randomness used for FRI batching
     let mix = H::ExtElem::random(&mut iop);
     // debug!("mix = {mix:?}");
 
     // Make the mixed U polynomials.  combo_u has one element for each
     // back for each combo, plus 1 for the check.
+    // TODO what is combo_u?
     let mut combo_u: Vec<H::ExtElem> = vec![H::ExtElem::ZERO; taps.tot_combo_backs + 1];
     let mut cur_mix = H::ExtElem::ONE;
     cur_pos = 0;
