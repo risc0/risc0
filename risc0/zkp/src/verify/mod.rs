@@ -373,7 +373,7 @@ where
     let check_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, H::CHECK_SIZE, QUERIES);
     // debug!("checkRoot = {}", check_merkle.root());
 
-    // Get a random DEEP query point
+    // Get a pseudorandom DEEP query point
     // See DEEP-ALI protocol from DEEP-FRI paper for details on DEEP query.
     let z = H::ExtElem::random(&mut iop);
     // debug!("Z = {z:?}");
@@ -444,7 +444,7 @@ where
         return Err(VerificationError::InvalidProof);
     }
 
-    // Set the mix mix value, randomness used for FRI batching
+    // Set the mix mix value, pseudorandom value used for FRI batching
     let mix = H::ExtElem::random(&mut iop);
     // debug!("mix = {mix:?}");
 
