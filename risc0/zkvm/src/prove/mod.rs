@@ -288,7 +288,7 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
         Ok(())
     }
 
-    fn on_fault(&mut self, msg: &str) -> Result<()> {
+    fn on_panic(&mut self, msg: &str) -> Result<()> {
         bail!("{}", msg)
     }
 }

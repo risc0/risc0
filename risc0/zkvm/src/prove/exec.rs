@@ -35,16 +35,16 @@ use risc0_zkvm_platform::{
         nr::{SYS_COMMIT, SYS_COMPUTE_POLY, SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A7},
     },
-    WORD_SIZE,
+    PAGE_SIZE, WORD_SIZE,
 };
 
 use super::{elf::Program, loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
-use crate::CIRCUIT;
+use crate::{MemoryImage, CIRCUIT};
 
 pub trait HostHandler {
     fn is_trace_enabled(&self) -> bool;
     fn on_commit(&mut self, buf: &[u32]) -> Result<()>;
-    fn on_fault(&mut self, msg: &str) -> Result<()>;
+    fn on_panic(&mut self, msg: &str) -> Result<()>;
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>>;
     fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
 }
@@ -224,6 +224,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
             }
             "trace" => self.trace(cycle, args[0]),
             "getMajor" => {
+                // determine if page_fault is needed
                 let opcode = self.decode((args[0], args[1], args[2], args[3]));
                 outs[0] = BabyBearElem::new(opcode.major);
                 trace!("decode: {}", opcode.mnemonic);
@@ -558,7 +559,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 let buf = self.memory.load_region(msg_ptr, msg_len);
                 let str = String::from_utf8(buf).unwrap();
                 debug!("SYS_PANIC[{cycle}]> {str}");
-                self.handler.on_fault(&str)?;
+                self.handler.on_panic(&str)?;
                 Ok((split_word8(0), split_word8(0)))
             }
             SYS_LOG => {
@@ -707,6 +708,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
 }
 
 pub struct RV32Executor<'a, H: HostHandler> {
+    image: MemoryImage,
     loader: Loader,
     entry: u32,
     pub executor: Executor<BabyBear, CircuitImpl, MachineContext<'a, H>>,
@@ -718,7 +720,9 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         let machine = MachineContext::new(io);
         let min_po2 = log2_ceil(1570 + elf.image.len() / 3 + ZK_CYCLES);
         let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2);
+        let image = MemoryImage::new(elf, PAGE_SIZE);
         Self {
+            image,
             loader: Loader::new(&elf.image),
             entry: elf.entry,
             executor,

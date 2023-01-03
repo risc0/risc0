@@ -15,7 +15,7 @@
 use anyhow::{bail, Result};
 use risc0_zkp::core::sha::{Digest, Sha};
 use risc0_zkvm_platform::{
-    memory::{MEM_SIZE, PAGE_TABLE, PROG},
+    memory::{MEM_SIZE, PAGE_TABLE},
     syscall::DIGEST_BYTES,
     WORD_SIZE,
 };
@@ -57,13 +57,12 @@ pub struct MemoryImage {
 }
 
 impl MemoryImage {
-    pub fn new(elf_contents: &[u8], page_size: usize) -> Result<Self> {
-        let program = Program::load_elf(elf_contents, PROG.end() as u32)?;
+    pub fn new(program: &Program, page_size: usize) -> Self {
         let mut image = vec![0_u8; MEM_SIZE];
 
         // Load the ELF into the memory image.
-        for (addr, data) in program.image {
-            let addr = addr as usize;
+        for (addr, data) in program.image.iter() {
+            let addr = *addr as usize;
             let bytes = data.to_le_bytes();
             for i in 0..WORD_SIZE {
                 image[addr + i] = bytes[i];
@@ -91,11 +90,11 @@ impl MemoryImage {
         let root_addr = PAGE_TABLE.start() + info.total;
         image[root_addr..root_addr + DIGEST_BYTES].copy_from_slice(root.as_bytes());
 
-        Ok(Self {
+        Self {
             image,
             root: *root,
             info,
-        })
+        }
     }
 
     pub fn check(&self, page_idx: usize) -> Result<()> {
@@ -139,7 +138,7 @@ mod tests {
     };
 
     use super::MemoryImage;
-    use crate::prove::image::PageTableInfo;
+    use crate::prove::{elf::Program, image::PageTableInfo};
 
     fn page_table_size(max_mem: usize, page_size: usize) -> usize {
         PageTableInfo::new(max_mem, page_size).total
@@ -148,7 +147,8 @@ mod tests {
     #[test]
     fn check_integrity() {
         const PAGE_SIZE: usize = 1024;
-        let image = MemoryImage::new(MULTI_TEST_ELF, PAGE_SIZE).unwrap();
+        let program = Program::load_elf(MULTI_TEST_ELF, PROG.end() as u32).unwrap();
+        let image = MemoryImage::new(&program, PAGE_SIZE);
         // std::fs::write("/tmp/test.img", &image.image).unwrap();
         image.check(0).unwrap();
         image.check(PROG.start() / PAGE_SIZE).unwrap();
