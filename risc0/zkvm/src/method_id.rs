@@ -20,10 +20,10 @@ use risc0_zkp::core::sha::{Digest, DIGEST_WORDS, DIGEST_WORD_SIZE};
 /// The default digest count when generating a MethodId.
 pub const DEFAULT_METHOD_ID_LIMIT: usize = 21; // 2M
 
-#[derive(Clone, Eq, PartialEq)]
 /// The MethodId serves as a cryptographic identifier for the ELF file that the
 /// zkVM is executing. Intuitively, the MethodId can be considered as a hash of
 /// the ELF file.
+#[derive(Clone, Eq, PartialEq)]
 pub struct MethodId {
     /// In practice, the "code columns" determine the operation of the zkVM, and
     /// the merkle commitment for the "code merkle tree" serves as the
