@@ -37,7 +37,9 @@ pub fn insecure_skip_seal() -> bool {
 pub struct Receipt {
     /// The journal contains the public outputs of the computation.
     pub journal: Vec<u32>,
-    /// The seal is an opaque cryptographic blob that attests to the integrity of the computation. It consists of merkle commitments and query data for an AIR-FRI STARK that includes a PLONK-based permutation argument.
+    /// The seal is an opaque cryptographic blob that attests to the integrity
+    /// of the computation. It consists of merkle commitments and query data for
+    /// an AIR-FRI STARK that includes a PLONK-based permutation argument.
     pub seal: Vec<u32>,
 }
 

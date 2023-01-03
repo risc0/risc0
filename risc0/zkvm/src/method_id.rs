@@ -21,12 +21,18 @@ use risc0_zkp::core::sha::{Digest, DIGEST_WORDS, DIGEST_WORD_SIZE};
 pub const DEFAULT_METHOD_ID_LIMIT: usize = 21; // 2M
 
 #[derive(Clone, Eq, PartialEq)]
-/// The MethodId serves as a cryptographic identifier for the ELF file that the zkVM is executing.
-/// Intuitively, the MethodId can be considered as a hash of the ELF file.
+/// The MethodId serves as a cryptographic identifier for the ELF file that the
+/// zkVM is executing. Intuitively, the MethodId can be considered as a hash of
+/// the ELF file.
 pub struct MethodId {
-    /// In practice, the "code columns" determine the operation of the zkVM, and the merkle commitment for the "code merkle tree" serves as the cryptographic identifier for the zkVM behavior.
-    /// Since the MethodId is generated before zkVM operation and the "code merkle tree" depends on the length-of-zkVM-execution, the MethodId consists of a table with one row per possible execution length.
-    /// The receipt verification process checks that the merkle commitment for the "code merkle tree" is contained in the table.
+    /// In practice, the "code columns" determine the operation of the zkVM, and
+    /// the merkle commitment for the "code merkle tree" serves as the
+    /// cryptographic identifier for the zkVM behavior. Since the MethodId
+    /// is generated before zkVM operation and the "code merkle tree" depends on
+    /// the length-of-zkVM-execution, the MethodId consists of a table with one
+    /// row per possible execution length. The receipt verification process
+    /// checks that the merkle commitment for the "code merkle tree" is
+    /// contained in the table.
     pub table: Vec<Digest>,
 }
 
