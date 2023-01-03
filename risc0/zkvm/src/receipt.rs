@@ -33,8 +33,11 @@ pub fn insecure_skip_seal() -> bool {
 }
 
 #[derive(Deserialize, Serialize, ZeroioSerialize, ZeroioDeserialize, Clone, Debug)]
+/// The receipt serves as a zero-knowledge proof of computation.
 pub struct Receipt {
+    /// The journal contains the public outputs of the computation.
     pub journal: Vec<u32>,
+    /// The seal is an opaque cryptographic blob that attests to the integrity of the computation. It consists of merkle commitments and query data for an AIR-FRI STARK that includes a PLONK-based permutation argument.
     pub seal: Vec<u32>,
 }
 
@@ -86,6 +89,7 @@ impl Receipt {
     }
 
     #[cfg(not(target_os = "zkvm"))]
+    /// Verifies a receipt using CPU.
     pub fn verify<M>(&self, method_id: M) -> Result<()>
     where
         MethodId: From<M>,
@@ -96,6 +100,7 @@ impl Receipt {
         verify_with_hal(&hal, method_id, &self.seal, &self.journal)
     }
 
+    /// Verifies a receipt using the hardware acceleration layer.
     pub fn verify_with_hal<H, M>(&self, hal: &H, method_id: M) -> Result<()>
     where
         H: risc0_zkp::verify::VerifyHal,
@@ -104,10 +109,12 @@ impl Receipt {
         verify_with_hal(hal, method_id, &self.seal, &self.journal)
     }
 
+    /// Extracts the journal from the receipt, as a series of bytes.
     pub fn get_journal_bytes(&self) -> &[u8] {
         bytemuck::cast_slice(self.journal.as_slice())
     }
 
+    /// Extracts the seal from the receipt, as a series of bytes.
     pub fn get_seal_bytes(&self) -> &[u8] {
         bytemuck::cast_slice(self.seal.as_slice())
     }
