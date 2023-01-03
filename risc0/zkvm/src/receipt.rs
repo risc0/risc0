@@ -32,8 +32,8 @@ pub fn insecure_skip_seal() -> bool {
     cfg!(feature = "insecure_skip_seal")
 }
 
-#[derive(Deserialize, Serialize, ZeroioSerialize, ZeroioDeserialize, Clone, Debug)]
 /// The receipt serves as a zero-knowledge proof of computation.
+#[derive(Deserialize, Serialize, ZeroioSerialize, ZeroioDeserialize, Clone, Debug)]
 pub struct Receipt {
     /// The journal contains the public outputs of the computation.
     pub journal: Vec<u32>,
