@@ -70,6 +70,7 @@ impl<'a, S: Sha + 'a> ReadIOP<'a, S> {
         self.rng.mix(digest);
     }
 
+    /// Checks that the entire data of the IOP has been read.
     pub fn verify_complete(&self) {
         assert_eq!(self.proof.len(), 0);
     }
