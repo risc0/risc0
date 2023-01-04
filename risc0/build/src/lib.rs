@@ -87,6 +87,7 @@ use risc0_zkp::adapter::TapsProvider;
 use risc0_zkvm::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
+use tempfile::tempdir;
 use zip::ZipArchive;
 
 const LINKER_SCRIPT: &str = include_str!("../risc0.ld");
@@ -188,21 +189,21 @@ struct ZipMapEntry {
 // Sources for standard library, and where they should be mapped to.
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry {
-        filename: "97fe14f1b0bceaa053ca0b611a7375273b8398ba.zip",
-        zip_url: "https://github.com/risc0/rust/archive/97fe14f1b0bceaa053ca0b611a7375273b8398ba.zip",
-        src_prefix: "rust-97fe14f1b0bceaa053ca0b611a7375273b8398ba/library",
+        filename: "7923ccc1ea13f448f3a1d0cb5297c60502100984.zip",
+        zip_url: "https://github.com/risc0/rust/archive/7923ccc1ea13f448f3a1d0cb5297c60502100984.zip",
+        src_prefix: "rust-7923ccc1ea13f448f3a1d0cb5297c60502100984/library",
         dst_prefix: "library"
     },
     ZipMapEntry {
-        filename: "28335054b1f417175ab5005cf1d9cf7937737930.zip",
-        zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
-        src_prefix:"stdarch-28335054b1f417175ab5005cf1d9cf7937737930",
+        filename: "790411f93c4b5eada3c23abb4c9a063fb0b24d99.zip",
+        zip_url: "https://github.com/rust-lang/stdarch/archive/790411f93c4b5eada3c23abb4c9a063fb0b24d99.zip",
+        src_prefix:"stdarch-790411f93c4b5eada3c23abb4c9a063fb0b24d99",
         dst_prefix: "library/stdarch"
     },
     ZipMapEntry {
-        filename: "4e5a3f72929f152752d5659e95bb15c8f6b41eff.zip",
-        zip_url: "https://github.com/rust-lang/backtrace-rs/archive/4e5a3f72929f152752d5659e95bb15c8f6b41eff.zip",
-        src_prefix:"backtrace-rs-4e5a3f72929f152752d5659e95bb15c8f6b41eff",
+        filename: "07872f28cd8a65c3c7428811548dc85f1f2fb05b.zip",
+        zip_url: "https://github.com/rust-lang/backtrace-rs/archive/07872f28cd8a65c3c7428811548dc85f1f2fb05b.zip",
+        src_prefix:"backtrace-rs-07872f28cd8a65c3c7428811548dc85f1f2fb05b",
         dst_prefix: "library/backtrace"
     },
 ];
@@ -341,8 +342,10 @@ where
     if !cache_dir.is_dir() {
         fs::create_dir_all(&cache_dir).unwrap();
     }
+
+    let temp_dir = tempdir().unwrap();
     let mut downloader = Downloader::builder()
-        .download_folder(&cache_dir)
+        .download_folder(&temp_dir.path())
         .build()
         .unwrap();
 
@@ -369,6 +372,7 @@ where
                 let summary = x.as_ref().unwrap();
                 println!("Downloaded: {}", summary.file_name.display());
             });
+            fs::rename(temp_dir.path().join(zm.filename), &zip_path).unwrap();
         }
 
         let zip_file = File::open(zip_path).unwrap();
