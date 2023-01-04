@@ -188,21 +188,21 @@ struct ZipMapEntry {
 // Sources for standard library, and where they should be mapped to.
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry {
-        filename: "97fe14f1b0bceaa053ca0b611a7375273b8398ba.zip",
-        zip_url: "https://github.com/risc0/rust/archive/97fe14f1b0bceaa053ca0b611a7375273b8398ba.zip",
-        src_prefix: "rust-97fe14f1b0bceaa053ca0b611a7375273b8398ba/library",
+        filename: "7032c446101603de77d68b7d0135a5fec846bf9b.zip",
+        zip_url: "https://github.com/risc0/rust/archive/7032c446101603de77d68b7d0135a5fec846bf9b.zip",
+        src_prefix: "rust-7032c446101603de77d68b7d0135a5fec846bf9b/library",
         dst_prefix: "library"
     },
     ZipMapEntry {
-        filename: "28335054b1f417175ab5005cf1d9cf7937737930.zip",
-        zip_url: "https://github.com/rust-lang/stdarch/archive/28335054b1f417175ab5005cf1d9cf7937737930.zip",
-        src_prefix:"stdarch-28335054b1f417175ab5005cf1d9cf7937737930",
+        filename: "790411f93c4b5eada3c23abb4c9a063fb0b24d99.zip",
+        zip_url: "https://github.com/rust-lang/stdarch/archive/790411f93c4b5eada3c23abb4c9a063fb0b24d99.zip",
+        src_prefix:"stdarch-790411f93c4b5eada3c23abb4c9a063fb0b24d99",
         dst_prefix: "library/stdarch"
     },
     ZipMapEntry {
-        filename: "4e5a3f72929f152752d5659e95bb15c8f6b41eff.zip",
-        zip_url: "https://github.com/rust-lang/backtrace-rs/archive/4e5a3f72929f152752d5659e95bb15c8f6b41eff.zip",
-        src_prefix:"backtrace-rs-4e5a3f72929f152752d5659e95bb15c8f6b41eff",
+        filename: "07872f28cd8a65c3c7428811548dc85f1f2fb05b.zip",
+        zip_url: "https://github.com/rust-lang/backtrace-rs/archive/07872f28cd8a65c3c7428811548dc85f1f2fb05b.zip",
+        src_prefix:"backtrace-rs-07872f28cd8a65c3c7428811548dc85f1f2fb05b",
         dst_prefix: "library/backtrace"
     },
 ];
