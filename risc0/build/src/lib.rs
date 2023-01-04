@@ -87,6 +87,7 @@ use risc0_zkp::adapter::TapsProvider;
 use risc0_zkvm::{MethodId, DEFAULT_METHOD_ID_LIMIT};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
+use tempfile::tempdir;
 use zip::ZipArchive;
 
 const LINKER_SCRIPT: &str = include_str!("../risc0.ld");
@@ -341,8 +342,10 @@ where
     if !cache_dir.is_dir() {
         fs::create_dir_all(&cache_dir).unwrap();
     }
+
+    let temp_dir = tempdir().unwrap();
     let mut downloader = Downloader::builder()
-        .download_folder(&cache_dir)
+        .download_folder(&temp_dir.path())
         .build()
         .unwrap();
 
@@ -369,6 +372,7 @@ where
                 let summary = x.as_ref().unwrap();
                 println!("Downloaded: {}", summary.file_name.display());
             });
+            fs::rename(temp_dir.path().join(zm.filename), &zip_path).unwrap();
         }
 
         let zip_file = File::open(zip_path).unwrap();
