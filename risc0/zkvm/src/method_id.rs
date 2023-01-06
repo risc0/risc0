@@ -116,7 +116,7 @@ mod prove {
     pub fn compute_with_limit(elf_contents: &[u8], limit: usize) -> Result<MethodId> {
         let code_size = CIRCUIT.code_size();
         cfg_if::cfg_if! {
-            if #[cfg(target_os = "macos")] {
+            if #[cfg(all(feature = "metal", target_os = "macos"))] {
                 let hal = risc0_zkp::hal::metal::MetalHal::new();
             } else {
                 let hal = risc0_zkp::hal::cpu::BabyBearCpuHal::new();

@@ -30,9 +30,7 @@ ndarray = { version = "0.15", features = ["rayon"], optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
-
-[target.'cfg(target_os = "macos")'.dependencies]
-metal = "0.24"
+metal = { version = "0.24", optional = true }
 
 [dev-dependencies]
 criterion = "0.4"
@@ -43,7 +41,8 @@ test-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-default = ["prove"]
+default = ["prove", "metal"]
+metal = ["dep:metal"]
 cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive"]
 prove = [
     "dep:ndarray",
