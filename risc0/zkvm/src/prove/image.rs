@@ -14,7 +14,6 @@
 
 use anyhow::{bail, Result};
 use risc0_zkp::core::sha::{Digest, Sha};
-use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE},
     syscall::DIGEST_BYTES,
     WORD_SIZE,
