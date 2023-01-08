@@ -447,9 +447,11 @@ where
     let mix = H::ExtElem::random(&mut iop);
     // debug!("mix = {mix:?}");
 
-    // Make the mixed U polynomials.  combo_u has one element for each
-    // back for each combo, plus 1 for the check.
-    // TODO what is combo_u?
+    // Make the mixed U polynomials.  
+    // combo_u has one element for each column with the same set of taps.
+    // These columns share a denominator in the DEEP-ALI equation. 
+    // We group these terms together to reduce the number of inverses we 
+    // need to compute.
     let mut combo_u: Vec<H::ExtElem> = vec![H::ExtElem::ZERO; taps.tot_combo_backs + 1];
     let mut cur_mix = H::ExtElem::ONE;
     cur_pos = 0;
