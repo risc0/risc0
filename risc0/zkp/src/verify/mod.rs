@@ -399,8 +399,8 @@ where
     }
     assert_eq!(eval_u.len(), num_taps, "Miscalculated capacity for eval_us");
 
-    // Compute the core polynomial
-    // TODO - clarify: what is the "core polynomial?"
+    // Compute the core constraint polynomial. 
+    // I.e. the set of all constraints mixed by poly_mix
     hal.debug("> compute_polynomial");
     let result = hal.compute_polynomial(
         &eval_u,
