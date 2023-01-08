@@ -380,9 +380,7 @@ where
     // debug!("Z = {z:?}");
     let back_one = <H::Elem as RootsOfUnity>::ROU_REV[po2 as usize];
 
-    // Read the U coeffs (the coefficients of the DEEP polynomial) + commit their
-    // hash
-    // TODO - are U coeffs the interpolations of the taps or the DEEP quotient poly?
+    // Read the U coeffs (the interpolations of the taps) + commit their hash.
     let num_taps = taps.tap_size();
     let coeff_u = iop.read_field_elem_slice(num_taps + H::CHECK_SIZE);
     let hash_u = *hal.sha().hash_raw_pod_slice(coeff_u);
