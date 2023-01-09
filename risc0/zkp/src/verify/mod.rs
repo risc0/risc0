@@ -399,7 +399,7 @@ where
     }
     assert_eq!(eval_u.len(), num_taps, "Miscalculated capacity for eval_us");
 
-    // Compute the core constraint polynomial. 
+    // Compute the core constraint polynomial.
     // I.e. the set of all constraints mixed by poly_mix
     hal.debug("> compute_polynomial");
     let result = hal.compute_polynomial(
@@ -447,10 +447,10 @@ where
     let mix = H::ExtElem::random(&mut iop);
     // debug!("mix = {mix:?}");
 
-    // Make the mixed U polynomials.  
+    // Make the mixed U polynomials.
     // combo_u has one element for each column with the same set of taps.
-    // These columns share a denominator in the DEEP-ALI equation. 
-    // We group these terms together to reduce the number of inverses we 
+    // These columns share a denominator in the DEEP-ALI equation.
+    // We group these terms together to reduce the number of inverses we
     // need to compute.
     let mut combo_u: Vec<H::ExtElem> = vec![H::ExtElem::ZERO; taps.tot_combo_backs + 1];
     let mut cur_mix = H::ExtElem::ONE;
