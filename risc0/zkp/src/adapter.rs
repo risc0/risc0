@@ -129,15 +129,15 @@ pub struct PolyExtStepDef {
 }
 
 pub enum PolyExtStep {
-    Const(u32, &'static str),
-    Get(usize, &'static str),
-    GetGlobal(Arg, usize, &'static str),
-    Add(Var, Var, &'static str),
-    Sub(Var, Var, &'static str),
-    Mul(Var, Var, &'static str),
-    True(&'static str),
-    AndEqz(Var, Var, &'static str),
-    AndCond(Var, Var, Var, &'static str),
+    Const(u32),
+    Get(usize),
+    GetGlobal(Arg, usize),
+    Add(Var, Var),
+    Sub(Var, Var),
+    Mul(Var, Var),
+    True,
+    AndEqz(Var, Var),
+    AndCond(Var, Var, Var),
 }
 
 impl PolyExtStep {
@@ -150,32 +150,32 @@ impl PolyExtStep {
         args: &[&[F::Elem]],
     ) {
         match self {
-            PolyExtStep::Const(value, _loc) => {
+            PolyExtStep::Const(value) => {
                 let elem = F::Elem::from_u64(*value as u64);
                 fp_vars.push(F::ExtElem::from_subfield(&elem));
             }
-            PolyExtStep::Get(tap, _loc) => {
+            PolyExtStep::Get(tap) => {
                 fp_vars.push(u[*tap]);
             }
-            PolyExtStep::GetGlobal(base, offset, _loc) => {
+            PolyExtStep::GetGlobal(base, offset) => {
                 fp_vars.push(F::ExtElem::from_subfield(&args[*base][*offset]));
             }
-            PolyExtStep::Add(x1, x2, _loc) => {
+            PolyExtStep::Add(x1, x2) => {
                 fp_vars.push(fp_vars[*x1] + fp_vars[*x2]);
             }
-            PolyExtStep::Sub(x1, x2, _loc) => {
+            PolyExtStep::Sub(x1, x2) => {
                 fp_vars.push(fp_vars[*x1] - fp_vars[*x2]);
             }
-            PolyExtStep::Mul(x1, x2, _loc) => {
+            PolyExtStep::Mul(x1, x2) => {
                 fp_vars.push(fp_vars[*x1] * fp_vars[*x2]);
             }
-            PolyExtStep::True(_loc) => {
+            PolyExtStep::True => {
                 mix_vars.push(MixState {
                     tot: F::ExtElem::ZERO,
                     mul: F::ExtElem::ONE,
                 });
             }
-            PolyExtStep::AndEqz(x, val, _loc) => {
+            PolyExtStep::AndEqz(x, val) => {
                 let x = mix_vars[*x];
                 let val = fp_vars[*val];
                 mix_vars.push(MixState {
@@ -183,7 +183,7 @@ impl PolyExtStep {
                     mul: x.mul * *mix,
                 });
             }
-            PolyExtStep::AndCond(x, cond, inner, _loc) => {
+            PolyExtStep::AndCond(x, cond, inner) => {
                 let x = mix_vars[*x];
                 let cond = fp_vars[*cond];
                 let inner = mix_vars[*inner];
