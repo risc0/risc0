@@ -60,7 +60,7 @@ impl<E: Elem> Accum<E> {
 }
 
 pub struct Handler<'a, F: Field> {
-    // TODO what is p?
+    // p is a mutex lock that contains an Accum structure.
     p: &'a Mutex<Accum<F::ExtElem>>,
     cycles: usize,
     kinds: BTreeMap<String, *mut F::ExtElem>,
