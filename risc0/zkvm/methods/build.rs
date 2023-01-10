@@ -28,7 +28,6 @@ fn main() {
         (
             "risc0-zkvm-methods-guest",
             GuestOptions {
-                code_limit: 22,
                 features: Vec::new(),
                 std: false,
             },
@@ -36,7 +35,6 @@ fn main() {
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
-                code_limit: 14,
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
                 std: true,
             },
