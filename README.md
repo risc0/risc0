@@ -92,9 +92,8 @@ other manner of problems.  Caveat emptor.
 ## Getting Started
 
 To get started building applications using the zkVM in Rust, we provide a
-starter template here:
-
-[risc0-rust-starter](https://github.com/risc0/risc0-rust-starter)
+[starter template](https://github.com/risc0/risc0-rust-starter) and a 
+number of [working examples](https://github.com/risc0/risc0-rust-examples/).
 
 ## Example
 
