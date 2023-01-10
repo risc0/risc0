@@ -14,8 +14,10 @@
 
 #![no_main]
 
-use risc0_zkp::core::Digest;
-use risc0_zkvm::Receipt;
+use risc0_zkvm::{
+    sha::{Digest, DIGEST_WORDS},
+    Receipt,
+};
 
 // This binary is here as a way to check which deps are included
 // when building for the wasm32-unknown-unknown target.

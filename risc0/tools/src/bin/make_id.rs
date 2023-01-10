@@ -27,7 +27,7 @@ use std::fs;
 use clap::Parser;
 use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
 
-/// Generates a MethodID for a given RISC-V ELF binary.
+/// Generates an ImageID for a given RISC-V ELF binary.
 #[derive(Parser)]
 #[clap(about, version, author)]
 struct Args {
