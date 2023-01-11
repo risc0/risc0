@@ -26,7 +26,10 @@ pub use host::CpuVerifyHal;
 use self::adapter::VerifyAdapter;
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
-    core::{log2_ceil, sha::Sha},
+    core::{
+        log2_ceil,
+        sha::{Digest, Sha},
+    },
     field::{Elem, ExtElem, RootsOfUnity},
     taps::{RegisterGroup, TapSet},
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
@@ -246,16 +249,18 @@ mod host {
 }
 
 #[tracing::instrument(skip_all)]
-pub fn verify<'a, H, C, F>(
+pub fn verify<'a, H, C, CheckCode, CheckGlobals>(
     hal: &'a H,
     circuit: &C,
     seal: &'a [u32],
-    check_globals: F,
+    check_code: CheckCode,
+    check_globals: CheckGlobals,
 ) -> Result<(), VerificationError>
 where
     H: VerifyHal,
     C: CircuitInfo + TapsProvider,
-    F: Fn(&[u32]) -> Result<(), VerificationError>,
+    CheckCode: Fn(u32, &Digest) -> Result<(), VerificationError>,
+    CheckGlobals: Fn(&[u32]) -> Result<(), VerificationError>,
 {
     if seal.len() == 0 {
         return Err(VerificationError::ReceiptFormatError);
@@ -291,6 +296,7 @@ where
     hal.debug("code_merkle");
     let code_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, code_size, QUERIES);
     // debug!("codeRoot = {}", code_merkle.root());
+    check_code(po2, code_merkle.root())?;
 
     // Get merkle root for the data merkle tree.
     // The data merkle tree contains the execution trace of the program being run,
