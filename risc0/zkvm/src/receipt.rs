@@ -112,7 +112,12 @@ where
         return Ok(());
     }
 
-    risc0_zkp::verify::verify(hal, &CIRCUIT, seal, check_globals)
+    let check_code = |_po2: u32, _root: &Digest| -> Result<(), VerificationError> {
+        // TODO
+        Ok(())
+    };
+
+    risc0_zkp::verify::verify(hal, &CIRCUIT, seal, check_code, check_globals)
         .map_err(|err| anyhow!("Verification failed: {}", err))
 }
 
