@@ -14,19 +14,19 @@
 
 //! Simple SHA-256 wrappers.
 
-use alloc::{string::String, vec::Vec};
 use core::{
     fmt::{Debug, Display, Formatter},
     mem,
     ops::Deref,
 };
 
-use anyhow::{Error, Result};
+use anyhow::Result;
 use bytemuck::{Pod, Zeroable};
+use hex::{FromHex, FromHexError};
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 use serde::{Deserialize, Serialize};
 
-/// The number of words represented by a [Digest].
+/// The number of words in the representation of a [Digest].
 // We represent a SHA-256 digest as 8 32-bit words instead of the
 // traditional 32 8-bit bytes.
 pub const DIGEST_WORDS: usize = 8;
@@ -34,8 +34,12 @@ pub const DIGEST_WORDS: usize = 8;
 /// The size of a word within a [Digest] (32-bits = 4 bytes).
 pub const DIGEST_WORD_SIZE: usize = mem::size_of::<u32>();
 
-/// Standard SHA initialization vector .
-pub static SHA256_INIT: Digest = Digest::new([
+/// Size of the [Digest] representation in bytes.
+/// Note that digests are stored in memory as words instead of bytes.
+pub const DIGEST_BYTES: usize = DIGEST_WORDS * DIGEST_WORD_SIZE;
+
+/// Standard SHA-256 initialization vector.
+pub static SHA256_INIT: Digest = Digest([
     0x6a09e667_u32.to_be(),
     0xbb67ae85_u32.to_be(),
     0x3c6ef372_u32.to_be(),
@@ -46,106 +50,47 @@ pub static SHA256_INIT: Digest = Digest::new([
     0x5be0cd19_u32.to_be(),
 ]);
 
-/// The result of a SHA-256 hashing function.
-// TODO(nils): Remove 'Copy' trait on Digest; these are not small and
-// we don't want to copy them around accidentally.
+/// The result of the SHA-256 hash algorithm.
+///
+/// Note: Bytes in the [Digest] type are stored in big-endian order regardless
+/// of the host architecture. When interpretted as words, the numerical result
+/// will depend on the architecture.
+// TODO(victor) Removing the Copy trait also means this types cannot be bytemuck::Pod. Is this what
+// we want?
 #[derive(
-    Eq, PartialEq, Copy, Zeroable, Pod, Serialize, Deserialize, ZeroioSerialize, ZeroioDeserialize,
+    Copy,
+    Clone,
+    Eq,
+    PartialEq,
+    Pod,
+    Zeroable,
+    Serialize,
+    Deserialize,
+    ZeroioSerialize,
+    ZeroioDeserialize,
 )]
 #[repr(transparent)]
 pub struct Digest([u32; DIGEST_WORDS]);
 
 impl Digest {
-    /// Create a new [Digest] from an existing array of words.
-    pub const fn new(data: [u32; DIGEST_WORDS]) -> Digest {
-        Digest(data)
-    }
-
-    /// Try to create a [Digest] from a slice of words.
-    pub fn try_from_slice(words: &[u32]) -> Result<Self> {
-        Ok(Digest(words.try_into().map_err(Error::msg)?))
-    }
-
-    /// Try to create a [Digest] from a slice of bytes.
-    pub fn try_from_bytes(bytes: &[u8]) -> Result<Self> {
-        Ok(Digest(
-            bytemuck::cast_slice(bytes).try_into().map_err(Error::msg)?,
-        ))
-    }
-
-    /// Create a [Digest] from a slice of words.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the number of words is not exactly [DIGEST_WORDS].
-    pub fn from_slice(words: &[u32]) -> Self {
-        Self::try_from_slice(words).unwrap()
-    }
-
-    /// Create a [Digest] from a slice of bytes.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the number of bytes is not exactly `[DIGEST_WORDS] *
-    /// [DIGEST_WORD_SIZE]`.
-    pub fn from_bytes(bytes: &[u8]) -> Self {
-        Self::try_from_bytes(bytes).unwrap()
-    }
-
-    /// Returns a slice of words.
-    pub fn as_slice(&self) -> &[u32] {
+    /// Returns a reference to the Digest as a slice of words.
+    pub fn as_words(&self) -> &[u32] {
         &self.0
     }
 
-    /// Returns a slice of bytes.
+    /// Returns a reference to the DIgest as a slice of bytes.
     pub fn as_bytes(&self) -> &[u8] {
         bytemuck::cast_slice(&self.0)
     }
 
     /// Returns a mutable slice of words.
-    pub fn as_mut_slice(&mut self) -> &mut [u32] {
+    pub fn as_mut_words(&mut self) -> &mut [u32] {
         &mut self.0
     }
 
-    /// Returns an array of words.
-    pub fn get(&self) -> &[u32; DIGEST_WORDS] {
-        &self.0
-    }
-
-    /// Returns a mutable array of words.
-    pub fn get_mut(&mut self) -> &mut [u32; DIGEST_WORDS] {
-        &mut self.0
-    }
-
-    /// Returns a hexadecimal string representation of the [Digest].
-    pub fn to_hex(&self) -> String {
-        fn hex(digit: u8) -> char {
-            char::from_digit(digit as u32, 16).unwrap()
-        }
-        self.0
-            .iter()
-            .flat_map(|word| word.to_ne_bytes())
-            .flat_map(|byte| [hex(byte >> 4), hex(byte & 0xF)])
-            .collect()
-    }
-
-    /// Converts a hexadecimal string into a [Digest].
-    pub fn from_str(s: &str) -> Digest {
-        s.into()
-    }
-}
-
-impl From<&str> for Digest {
-    fn from(s: &str) -> Digest {
-        let words: Vec<u32> = (0..DIGEST_WORDS)
-            .into_iter()
-            .map(|x| {
-                u32::from_str_radix(&s[x * 8..(x + 1) * 8], 16)
-                    .unwrap()
-                    .to_be()
-            })
-            .collect();
-        Digest::new(words.try_into().unwrap())
+    /// Returns a mutable slice of bytes.
+    pub fn as_mut_bytes(&mut self) -> &mut [u8] {
+        bytemuck::cast_slice_mut(&mut self.0)
     }
 }
 
@@ -155,21 +100,115 @@ impl Default for Digest {
     }
 }
 
+/// Create a new [Digest] from an array of words.
+impl From<[u32; DIGEST_WORDS]> for Digest {
+    fn from(data: [u32; DIGEST_WORDS]) -> Self {
+        Self(data)
+    }
+}
+
+/// Create a new [Digest] from an array of bytes.
+impl From<[u8; DIGEST_BYTES]> for Digest {
+    fn from(data: [u8; DIGEST_BYTES]) -> Self {
+        Self(bytemuck::cast(data))
+    }
+}
+
+impl FromHex for Digest {
+    type Error = FromHexError;
+
+    fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, Self::Error> {
+        Ok(<[u8; DIGEST_BYTES]>::from_hex(hex)?.into())
+    }
+}
+
+// TODO(victor): Implement the other try_from variants that avoid copies?
+impl TryFrom<&[u8]> for Digest {
+    type Error = core::array::TryFromSliceError;
+
+    fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
+        Ok(<[u8; DIGEST_BYTES]>::try_from(data)?.into())
+    }
+}
+
+impl TryFrom<&[u32]> for Digest {
+    type Error = core::array::TryFromSliceError;
+
+    fn try_from(data: &[u32]) -> Result<Self, Self::Error> {
+        Ok(<[u32; DIGEST_WORDS]>::try_from(data)?.into())
+    }
+}
+
+impl Into<[u8; DIGEST_BYTES]> for Digest {
+    fn into(self) -> [u8; DIGEST_BYTES] {
+        bytemuck::cast(self.0)
+    }
+}
+
+impl Into<[u32; DIGEST_WORDS]> for Digest {
+    fn into(self) -> [u32; DIGEST_WORDS] {
+        self.0
+    }
+}
+
+impl AsRef<[u8; DIGEST_BYTES]> for Digest {
+    fn as_ref(&self) -> &[u8; DIGEST_BYTES] {
+        bytemuck::cast_ref(&self.0)
+    }
+}
+
+impl AsMut<[u8; DIGEST_BYTES]> for Digest {
+    fn as_mut(&mut self) -> &mut [u8; DIGEST_BYTES] {
+        bytemuck::cast_mut(&mut self.0)
+    }
+}
+
+impl AsRef<[u32; DIGEST_WORDS]> for Digest {
+    fn as_ref(&self) -> &[u32; DIGEST_WORDS] {
+        &self.0
+    }
+}
+
+impl AsMut<[u32; DIGEST_WORDS]> for Digest {
+    fn as_mut(&mut self) -> &mut [u32; DIGEST_WORDS] {
+        &mut self.0
+    }
+}
+
+impl AsRef<[u8]> for Digest {
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl AsMut<[u8]> for Digest {
+    fn as_mut(&mut self) -> &mut [u8] {
+        self.as_mut_bytes()
+    }
+}
+
+impl AsRef<[u32]> for Digest {
+    fn as_ref(&self) -> &[u32] {
+        self.as_words()
+    }
+}
+
+impl AsMut<[u32]> for Digest {
+    fn as_mut(&mut self) -> &mut [u32] {
+        self.as_mut_words()
+    }
+}
+
+// TODO(victor) Do these formatting definitions result in what a user my expect?
 impl Display for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&self.to_hex())
+        f.write_str(&hex::encode(&self))
     }
 }
 
 impl Debug for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&self.to_hex())
-    }
-}
-
-impl Clone for Digest {
-    fn clone(&self) -> Digest {
-        Digest(self.0)
+        f.write_str(&hex::encode(&self))
     }
 }
 
@@ -177,7 +216,7 @@ impl Clone for Digest {
 pub trait Sha: Clone + Debug {
     /// A pointer to the created digest.
     ///
-    /// This may either be a Box<Digest> or some other pointer in case the
+    /// This may either be a `Box<Digest>` or some other pointer in case the
     /// implementation wants to manage its own memory.
     type DigestPtr: Deref<Target = Digest> + Debug;
 
@@ -249,7 +288,9 @@ mod tests {
 }
 
 #[allow(missing_docs)]
+#[cfg(test)]
 pub mod testutil {
+    // TODO(victor) Fix these tests.
     use alloc::vec::Vec;
 
     use super::{Digest, Sha};

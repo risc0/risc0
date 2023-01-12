@@ -56,7 +56,7 @@ impl<S: Sha> RngCore for ShaRng<S> {
         if self.pool_used == DIGEST_WORDS {
             self.step();
         }
-        let out = self.pool0.get()[self.pool_used];
+        let out = self.pool0.as_words()[self.pool_used];
         // Mark this word as used.
         self.pool_used += 1;
         out

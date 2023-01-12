@@ -307,7 +307,7 @@ where
             }
         } else {
             let journal_digest = hal.sha().hash_raw_pod_slice(journal);
-            let journal_hash = journal_digest.as_slice();
+            let journal_hash = journal_digest.as_words();
             for i in 0..journal_hash.len() {
                 if journal_hash[i]
                     != (u32::from(outputs[i * 2]))
