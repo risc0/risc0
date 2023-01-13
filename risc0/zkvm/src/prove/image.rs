@@ -108,7 +108,7 @@ impl MemoryImage {
             let expected = sha.hash_bytes(page);
             let page_table_addr = PAGE_TABLE.start() + page_idx * DIGEST_BYTES;
             let page_table_entry = &self.image[page_table_addr..page_table_addr + DIGEST_BYTES];
-            let actual = Digest::from_bytes(page_table_entry);
+            let actual = Digest::try_from(page_table_entry)?;
             if *expected != actual {
                 bail!("Invalid page table entry: {} != {}", *expected, actual);
             }
@@ -121,7 +121,7 @@ impl MemoryImage {
         let expected = sha.hash_bytes(final_page);
         let root_addr = PAGE_TABLE.start() + self.info.total;
         let root_bytes = &self.image[root_addr..root_addr + DIGEST_BYTES];
-        let actual = Digest::from_bytes(root_bytes);
+        let actual = Digest::try_from(root_bytes)?;
         if *expected != actual {
             bail!("Invalid root hash: {} != {}", *expected, actual);
         }

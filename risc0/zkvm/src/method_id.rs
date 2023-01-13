@@ -52,7 +52,7 @@ impl From<&[u32]> for MethodId {
     fn from(words: &[u32]) -> Self {
         let mut table = Vec::new();
         for digest in words.chunks_exact(DIGEST_WORDS) {
-            table.push(Digest::from_slice(digest));
+            table.push(digest.try_into().unwrap());
         }
         MethodId { table }
     }
@@ -82,7 +82,8 @@ impl MethodId {
                     word
                 })
                 .collect();
-            table.push(Digest::try_from_slice(&words)?);
+            // Unwrap here since chunks_exact already would ensure no errors.
+            table.push(words.try_into().unwrap());
         }
         Ok(MethodId { table })
     }

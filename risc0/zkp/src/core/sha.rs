@@ -14,6 +14,7 @@
 
 //! Simple SHA-256 wrappers.
 
+use alloc::vec::Vec;
 use core::{
     fmt::{Debug, Display, Formatter},
     mem,
@@ -57,6 +58,8 @@ pub static SHA256_INIT: Digest = Digest([
 /// will depend on the architecture.
 // TODO(victor) Removing the Copy trait also means this types cannot be bytemuck::Pod. Is this what
 // we want?
+// TODO(victor) Decide whether or not to make the inner struct pub. It would make things somewhat
+// simpler.
 #[derive(
     Copy,
     Clone,
@@ -135,6 +138,22 @@ impl TryFrom<&[u32]> for Digest {
     type Error = core::array::TryFromSliceError;
 
     fn try_from(data: &[u32]) -> Result<Self, Self::Error> {
+        Ok(<[u32; DIGEST_WORDS]>::try_from(data)?.into())
+    }
+}
+
+impl TryFrom<Vec<u8>> for Digest {
+    type Error = Vec<u8>;
+
+    fn try_from(data: Vec<u8>) -> Result<Self, Self::Error> {
+        Ok(<[u8; DIGEST_BYTES]>::try_from(data)?.into())
+    }
+}
+
+impl TryFrom<Vec<u32>> for Digest {
+    type Error = Vec<u32>;
+
+    fn try_from(data: Vec<u32>) -> Result<Self, Self::Error> {
         Ok(<[u32; DIGEST_WORDS]>::try_from(data)?.into())
     }
 }
