@@ -59,7 +59,8 @@ pub static SHA256_INIT: Digest = Digest([
 // TODO(victor) Removing the Copy trait also means this types cannot be bytemuck::Pod. Is this what
 // we want?
 // TODO(victor) Decide whether or not to make the inner struct pub. It would make things somewhat
-// simpler.
+// simpler, but it is also somewhat clean that in the current factoring it is kind of agnostic to
+// whether it is bytes or words internally.
 #[derive(
     Copy,
     Clone,
@@ -125,7 +126,6 @@ impl FromHex for Digest {
     }
 }
 
-// TODO(victor): Implement the other try_from variants that avoid copies?
 impl TryFrom<&[u8]> for Digest {
     type Error = core::array::TryFromSliceError;
 
@@ -231,7 +231,9 @@ impl Debug for Digest {
     }
 }
 
-/// An implementation that provides SHA-256 hashing services.
+/// An implementation of the SHA-256 hashing algorithm of [FIPS 180-4].
+///
+/// [FIPS 180-4] https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 pub trait Sha: Clone + Debug {
     /// A pointer to the created digest.
     ///
@@ -251,16 +253,23 @@ pub trait Sha: Clone + Debug {
 
     /// Generate a SHA from a slice of words without adding padding or
     /// length.
+    // TODO(victor): IIUC, this function is unused and probably should be removed.
     fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr;
 
     /// Generate a SHA from a pair of [Digests](Digest).
+    // TODO(victor) This is an efficient way to produce H(a || b), which I am
+    // guesing is designed for use in Merkle trees. Is this the best method to
+    // be exposing here though? It does not use domain speration or added padding
+    // and length.
     fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
         self.compress(&SHA256_INIT, a, b)
     }
 
-    /// Execute the sha256 "compress" operation.  The block is
-    /// specified as two half-blocks.  Not all implementations provide
-    /// this.
+    /// Execute the SHA-256 compression function.
+    /// The block is specified as two half-blocks.
+    /// Not all implementations provide this.
+    ///
+    /// DANGER:
     fn compress(
         &self,
         state: &Digest,
@@ -269,12 +278,15 @@ pub trait Sha: Clone + Debug {
     ) -> Self::DigestPtr;
 
     /// Generate a SHA from a slice of anything that can be
-    /// represented as plain old data.  Pads up to the Sha block
+    /// represented as plain old data. Pads up to the Sha block
     /// boundry, but does not add the standard SHA trailer.
+    // TODO(victor): Understand why this function exists.
     fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, slice: &[T]) -> Self::DigestPtr;
 
     /// Generate a new digest by mixing two digests together via XOR,
     /// and storing into the first digest.
+    // TODO(victor): I'm guessing this is for use by a randomness pool. I may
+    // extract this function to there.
     fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest);
 }
 

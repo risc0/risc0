@@ -5,6 +5,7 @@ edition = { workspace = true }
 
 [build-dependencies]
 env_logger = "0.10"
+cfg-if = "1.0"
 risc0-build = { version = "1.0.0-rc.2", path = "../../build" }
 
 [package.metadata.release]

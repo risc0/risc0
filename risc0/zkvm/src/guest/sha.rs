@@ -272,10 +272,13 @@ impl risc0_zkp::core::sha::Sha for Impl {
 
     // Generate a new digest by mixing two digests together via XOR,
     // and storing into the first digest.
+    // TODO(victor): Understand why this is implemented by writing to a new
+    // heap-allocated digest rathe than modifying the input as the comment
+    // suggest.
     fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest) {
         let mut digest = Box::<Digest>::new(Digest::default());
         for i in 0..DIGEST_WORDS {
-            digest.get_mut()[i] = pool.get()[i] ^ val.get()[i];
+            digest.as_mut_words()[i] = pool.as_words()[i] ^ val.as_words()[i];
         }
         unsafe {
             let ptr: *const Digest = &*digest;
@@ -290,7 +293,7 @@ impl risc0_zkp::core::sha::Sha for Impl {
         block_half2: &Digest,
     ) -> &'static Digest {
         let digest = alloc_uninit_digest();
-        compress(digest, state, &block_half1.get(), &block_half2.get());
+        compress(digest, state, block_half1.as_ref(), block_half2.as_ref());
         // Now that digest is initialized, we can convert it to a reference.
         unsafe { &*digest }
     }

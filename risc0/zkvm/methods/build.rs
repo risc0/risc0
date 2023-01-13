@@ -11,14 +11,22 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 use std::{collections::HashMap, env};
 
 use risc0_build::{embed_methods_with_options, GuestOptions};
 
+#[allow(unreachable_code)]
+
 fn main() {
     env_logger::init();
 
+    cfg_if::cfg_if! {
+        if #[cfg(not(test))] {
+            // Methods only contains code for tests, so don't compile if not in tests.
+            // TODO(victor) Ensure we have not broken benchmarking.
+            return;
+        }
+    }
     if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
         // Guest shouldn't recursively depend on itself.
         return;
