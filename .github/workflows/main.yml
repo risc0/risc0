@@ -26,7 +26,7 @@ jobs:
       - run: |
           # Check that no source files updated this year have a missing or out-of-date copyright.
           set -e
-          MISSING_COPYRIGHT="$(comm -12 <(git log --since='Dec 31 2022' --name-only --pretty=format: | sort | uniq) <(npx @kt3k/license-checker | grep 'missing copyright' | sort | cut -d ' ' -f 1))"
+          MISSING_COPYRIGHT="$(comm -12 <(git log --name-only --pretty=format: d02f606ab7d59ad45dc75314eb3e0eef5c9a26b7... | sort | uniq) <(npx @kt3k/license-checker | grep 'missing copyright' | sort | cut -d ' ' -f 1))"
           echo $MISSING_COPYRIGHT
           [ -z "$MISSING_COPYRIGHT" ]
 
