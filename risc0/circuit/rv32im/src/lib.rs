@@ -91,6 +91,8 @@ mod tests {
     }
 }
 
+// TODO(victor): Is there a good way to gate other testutil packages behind a
+// simmilar feature flag?
 #[cfg(feature = "test")]
 pub mod testutil {
     use rand::{thread_rng, Rng};

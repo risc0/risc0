@@ -36,7 +36,7 @@ use crate::prove::TraceEvent;
 fn sha_basics() {
     assert_eq!(
         run_sha(""),
-        Digest::new([
+        Digest::from([
             0xe3b0c442_u32.to_be(),
             0x98fc1c14_u32.to_be(),
             0x9afbf4c8_u32.to_be(),
@@ -49,7 +49,7 @@ fn sha_basics() {
     );
     assert_eq!(
         run_sha("a"),
-        Digest::new([
+        Digest::from([
             0xca978112_u32.to_be(),
             0xca1bbdca_u32.to_be(),
             0xfac231b3_u32.to_be(),
@@ -62,7 +62,7 @@ fn sha_basics() {
     );
     assert_eq!(
         run_sha("abc"),
-        Digest::new([
+        Digest::from([
             0xba7816bf_u32.to_be(),
             0x8f01cfea_u32.to_be(),
             0x414140de_u32.to_be(),
@@ -75,7 +75,7 @@ fn sha_basics() {
     );
     assert_eq!(
         run_sha("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
-        Digest::new([
+        Digest::from([
             0x248d6a61_u32.to_be(),
             0xd20638b8_u32.to_be(),
             0xe5c02693_u32.to_be(),

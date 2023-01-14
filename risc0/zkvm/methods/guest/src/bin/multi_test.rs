@@ -48,7 +48,7 @@ pub fn main() {
         MultiTestSpecRef::ShaCycleCount(_) => {
             // Time the simulated sha so that it estimates what we'd
             // see when it's a custom circuit.
-            let a: &Digest = &Digest::new([1, 2, 3, 4, 5, 6, 7, 8]);
+            let a: &Digest = &Digest::from([1, 2, 3, 4, 5, 6, 7, 8]);
 
             let count1 = env::get_cycle_count();
             memory_barrier(&count1);

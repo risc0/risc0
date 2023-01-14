@@ -456,6 +456,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use hex::FromHex;
     use rand::thread_rng;
 
     use super::*;
@@ -520,7 +521,7 @@ mod tests {
         output.view(|view| {
             assert_eq!(expected.len(), view.len());
             for (expected, actual) in expected.iter().zip(view) {
-                assert_eq!(Digest::from_str(expected), *actual);
+                assert_eq!(Digest::from_hex(expected).unwrap(), *actual);
             }
         });
     }
