@@ -56,8 +56,8 @@ SECTIONS {
     *(COMMON)
     . = ALIGN(4);
     __result = .;
-    /* Result is 9 words * 4 = 36 bytes, 8 words for output, and 1 word for output size*/
-    __bss_end = . + 36;
+    /* Result is 8 words * 4 = 32 bytes, 8 words for output digest */
+    __bss_end = . + 32;
   } >data
 
   __bss_size = __bss_end - __bss_begin;

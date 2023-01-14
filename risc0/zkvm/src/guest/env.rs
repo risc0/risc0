@@ -174,32 +174,18 @@ impl Env {
         // Write the full data out to the host
         unsafe { sys_commit(slice.as_ptr(), len_bytes) };
 
-        // If the total proof message is small (<= 32 bytes), return it directly
-        // from the proof, otherwise SHA it and return the hash.
-        if len_words <= 8 {
-            for i in 0..len_words {
-                unsafe {
-                    result
-                        .add(i)
-                        .write_volatile(*slice.get_unchecked(i) as usize)
-                };
-            }
-            for i in len_words..8 {
-                unsafe { result.add(i).write_volatile(0) };
-            }
-        } else {
-            let digest = result as *mut Digest;
-            sha::update_u32(
-                result as *mut Digest,
-                &SHA256_INIT,
-                slice,
-                sha::WithoutTrailer,
-            );
-        }
+        let digest = result as *mut Digest;
+        sha::update_u32(
+            result as *mut Digest,
+            &SHA256_INIT,
+            slice,
+            sha::WithTrailer {
+                total_bits: 8 * len_bytes,
+            },
+        );
         unsafe {
-            result.add(8).write_volatile(len_bytes);
             memory_barrier(result);
-            for i in 0..9 {
+            for i in 0..8 {
                 sys_output(i, (*result.add(i.try_into().unwrap())).try_into().unwrap());
             }
             sys_halt()
