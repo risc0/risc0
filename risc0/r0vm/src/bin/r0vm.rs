@@ -150,7 +150,7 @@ fn main() {
                 eprintln!("Computing image id");
             }
             let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
-            let image = MemoryImage::new(&program, PAGE_SIZE);
+            let image = MemoryImage::new(&program, PAGE_SIZE as u32);
             if let Some(image_id_file) = args.image_id.as_ref() {
                 std::fs::write(&image_id_file, image.root.as_bytes()).unwrap();
                 if args.verbose > 0 {

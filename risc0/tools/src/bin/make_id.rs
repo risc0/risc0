@@ -42,6 +42,6 @@ fn main() {
     let args = Args::parse();
     let elf_contents = fs::read(args.elf).unwrap();
     let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
-    let image = MemoryImage::new(&program, PAGE_SIZE);
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32);
     std::fs::write(args.out, image.root.as_bytes()).unwrap();
 }

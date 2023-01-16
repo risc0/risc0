@@ -35474,25 +35474,25 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
     if (x17130 != 0) {
       {
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17131 = args[2][122 * steps + ((cycle - 0) & mask)];
+        auto x17131 = args[2][120 * steps + ((cycle - 0) & mask)];
         assert(x17131 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17132 = args[2][123 * steps + ((cycle - 0) & mask)];
+        auto x17132 = args[2][121 * steps + ((cycle - 0) & mask)];
         assert(x17132 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17133 = args[2][124 * steps + ((cycle - 0) & mask)];
+        auto x17133 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x17133 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17134 = args[2][125 * steps + ((cycle - 0) & mask)];
+        auto x17134 = args[2][123 * steps + ((cycle - 0) & mask)];
         assert(x17134 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17135 = args[2][126 * steps + ((cycle - 0) & mask)];
+        auto x17135 = args[2][124 * steps + ((cycle - 0) & mask)];
         assert(x17135 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17136 = args[2][127 * steps + ((cycle - 0) & mask)];
+        auto x17136 = args[2][125 * steps + ((cycle - 0) & mask)];
         assert(x17136 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17137 = args[2][128 * steps + ((cycle - 0) & mask)];
+        auto x17137 = args[2][126 * steps + ((cycle - 0) & mask)];
         assert(x17137 != Fp::invalid());
         // loc("Top/PlonkHeader1/FpExtReg1/Reg"("./cirgen/components/plonk.h":211:23))
         auto x17138 = args[3][8];
@@ -35657,25 +35657,25 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         // loc("./cirgen/components/plonk.h":211:17)
         auto x17218 = x17206 + x17214;
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement1/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17219 = args[2][129 * steps + ((cycle - 0) & mask)];
+        auto x17219 = args[2][127 * steps + ((cycle - 0) & mask)];
         assert(x17219 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement1/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17220 = args[2][130 * steps + ((cycle - 0) & mask)];
+        auto x17220 = args[2][128 * steps + ((cycle - 0) & mask)];
         assert(x17220 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement1/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17221 = args[2][131 * steps + ((cycle - 0) & mask)];
+        auto x17221 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x17221 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement1/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17222 = args[2][132 * steps + ((cycle - 0) & mask)];
+        auto x17222 = args[2][130 * steps + ((cycle - 0) & mask)];
         assert(x17222 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement1/U32Reg/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17223 = args[2][133 * steps + ((cycle - 0) & mask)];
+        auto x17223 = args[2][131 * steps + ((cycle - 0) & mask)];
         assert(x17223 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement1/U32Reg/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17224 = args[2][134 * steps + ((cycle - 0) & mask)];
+        auto x17224 = args[2][132 * steps + ((cycle - 0) & mask)];
         assert(x17224 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement1/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17225 = args[2][135 * steps + ((cycle - 0) & mask)];
+        auto x17225 = args[2][133 * steps + ((cycle - 0) & mask)];
         assert(x17225 != Fp::invalid());
         // loc("./cirgen/components/plonk.h":211:23)
         auto x17226 = x17138 * x17219;
@@ -35846,25 +35846,25 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         // loc("./cirgen/components/plonk.h":213:16)
         auto x17309 = x17307 + x17308;
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement2/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17310 = args[2][136 * steps + ((cycle - 0) & mask)];
+        auto x17310 = args[2][134 * steps + ((cycle - 0) & mask)];
         assert(x17310 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement2/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17311 = args[2][137 * steps + ((cycle - 0) & mask)];
+        auto x17311 = args[2][135 * steps + ((cycle - 0) & mask)];
         assert(x17311 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement2/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17312 = args[2][138 * steps + ((cycle - 0) & mask)];
+        auto x17312 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x17312 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement2/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17313 = args[2][139 * steps + ((cycle - 0) & mask)];
+        auto x17313 = args[2][137 * steps + ((cycle - 0) & mask)];
         assert(x17313 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement2/U32Reg/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17314 = args[2][140 * steps + ((cycle - 0) & mask)];
+        auto x17314 = args[2][138 * steps + ((cycle - 0) & mask)];
         assert(x17314 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement2/U32Reg/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17315 = args[2][141 * steps + ((cycle - 0) & mask)];
+        auto x17315 = args[2][139 * steps + ((cycle - 0) & mask)];
         assert(x17315 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement2/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17316 = args[2][142 * steps + ((cycle - 0) & mask)];
+        auto x17316 = args[2][140 * steps + ((cycle - 0) & mask)];
         assert(x17316 != Fp::invalid());
         // loc("./cirgen/components/plonk.h":211:23)
         auto x17317 = x17138 * x17310;
@@ -35973,25 +35973,25 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         // loc("./cirgen/components/plonk.h":211:17)
         auto x17369 = x17361 + x17365;
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement3/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17370 = args[2][143 * steps + ((cycle - 0) & mask)];
+        auto x17370 = args[2][141 * steps + ((cycle - 0) & mask)];
         assert(x17370 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement3/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17371 = args[2][144 * steps + ((cycle - 0) & mask)];
+        auto x17371 = args[2][142 * steps + ((cycle - 0) & mask)];
         assert(x17371 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement3/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17372 = args[2][145 * steps + ((cycle - 0) & mask)];
+        auto x17372 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x17372 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement3/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17373 = args[2][146 * steps + ((cycle - 0) & mask)];
+        auto x17373 = args[2][144 * steps + ((cycle - 0) & mask)];
         assert(x17373 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement3/U32Reg/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17374 = args[2][147 * steps + ((cycle - 0) & mask)];
+        auto x17374 = args[2][145 * steps + ((cycle - 0) & mask)];
         assert(x17374 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement3/U32Reg/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17375 = args[2][148 * steps + ((cycle - 0) & mask)];
+        auto x17375 = args[2][146 * steps + ((cycle - 0) & mask)];
         assert(x17375 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement3/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17376 = args[2][149 * steps + ((cycle - 0) & mask)];
+        auto x17376 = args[2][147 * steps + ((cycle - 0) & mask)];
         assert(x17376 != Fp::invalid());
         // loc("./cirgen/components/plonk.h":211:23)
         auto x17377 = x17138 * x17370;
@@ -36162,25 +36162,25 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         // loc("./cirgen/components/plonk.h":213:16)
         auto x17460 = x17458 + x17459;
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement4/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17461 = args[2][150 * steps + ((cycle - 0) & mask)];
+        auto x17461 = args[2][148 * steps + ((cycle - 0) & mask)];
         assert(x17461 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement4/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17462 = args[2][151 * steps + ((cycle - 0) & mask)];
+        auto x17462 = args[2][149 * steps + ((cycle - 0) & mask)];
         assert(x17462 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement4/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17463 = args[2][152 * steps + ((cycle - 0) & mask)];
+        auto x17463 = args[2][150 * steps + ((cycle - 0) & mask)];
         assert(x17463 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17464 = args[2][153 * steps + ((cycle - 0) & mask)];
+        auto x17464 = args[2][151 * steps + ((cycle - 0) & mask)];
         assert(x17464 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement4/U32Reg/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17465 = args[2][154 * steps + ((cycle - 0) & mask)];
+        auto x17465 = args[2][152 * steps + ((cycle - 0) & mask)];
         assert(x17465 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement4/U32Reg/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17466 = args[2][155 * steps + ((cycle - 0) & mask)];
+        auto x17466 = args[2][153 * steps + ((cycle - 0) & mask)];
         assert(x17466 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement4/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17467 = args[2][156 * steps + ((cycle - 0) & mask)];
+        auto x17467 = args[2][154 * steps + ((cycle - 0) & mask)];
         assert(x17467 != Fp::invalid());
         // loc("./cirgen/components/plonk.h":211:23)
         auto x17468 = x17138 * x17461;
@@ -36289,25 +36289,25 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         // loc("./cirgen/components/plonk.h":211:17)
         auto x17520 = x17512 + x17516;
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement5/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17521 = args[2][157 * steps + ((cycle - 0) & mask)];
+        auto x17521 = args[2][155 * steps + ((cycle - 0) & mask)];
         assert(x17521 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement5/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17522 = args[2][158 * steps + ((cycle - 0) & mask)];
+        auto x17522 = args[2][156 * steps + ((cycle - 0) & mask)];
         assert(x17522 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement5/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17523 = args[2][159 * steps + ((cycle - 0) & mask)];
+        auto x17523 = args[2][157 * steps + ((cycle - 0) & mask)];
         assert(x17523 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement5/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17524 = args[2][160 * steps + ((cycle - 0) & mask)];
+        auto x17524 = args[2][158 * steps + ((cycle - 0) & mask)];
         assert(x17524 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement5/U32Reg/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17525 = args[2][161 * steps + ((cycle - 0) & mask)];
+        auto x17525 = args[2][159 * steps + ((cycle - 0) & mask)];
         assert(x17525 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement5/U32Reg/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17526 = args[2][162 * steps + ((cycle - 0) & mask)];
+        auto x17526 = args[2][160 * steps + ((cycle - 0) & mask)];
         assert(x17526 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement5/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17527 = args[2][163 * steps + ((cycle - 0) & mask)];
+        auto x17527 = args[2][161 * steps + ((cycle - 0) & mask)];
         assert(x17527 != Fp::invalid());
         // loc("./cirgen/components/plonk.h":211:23)
         auto x17528 = x17138 * x17521;
@@ -36478,25 +36478,25 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
         // loc("./cirgen/components/plonk.h":213:16)
         auto x17611 = x17609 + x17610;
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement6/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17612 = args[2][164 * steps + ((cycle - 0) & mask)];
+        auto x17612 = args[2][162 * steps + ((cycle - 0) & mask)];
         assert(x17612 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement6/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17613 = args[2][165 * steps + ((cycle - 0) & mask)];
+        auto x17613 = args[2][163 * steps + ((cycle - 0) & mask)];
         assert(x17613 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement6/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17614 = args[2][166 * steps + ((cycle - 0) & mask)];
+        auto x17614 = args[2][164 * steps + ((cycle - 0) & mask)];
         assert(x17614 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement6/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17615 = args[2][167 * steps + ((cycle - 0) & mask)];
+        auto x17615 = args[2][165 * steps + ((cycle - 0) & mask)];
         assert(x17615 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement6/U32Reg/Reg1"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17616 = args[2][168 * steps + ((cycle - 0) & mask)];
+        auto x17616 = args[2][166 * steps + ((cycle - 0) & mask)];
         assert(x17616 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement6/U32Reg/Reg2"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17617 = args[2][169 * steps + ((cycle - 0) & mask)];
+        auto x17617 = args[2][167 * steps + ((cycle - 0) & mask)];
         assert(x17617 != Fp::invalid());
         // loc("Top/Mux/4/Mux/13/RamBody/PlonkBody/RamPlonkElement6/U32Reg/Reg3"("./cirgen/compiler/edsl/component.h":85:27))
-        auto x17618 = args[2][170 * steps + ((cycle - 0) & mask)];
+        auto x17618 = args[2][168 * steps + ((cycle - 0) & mask)];
         assert(x17618 != Fp::invalid());
         // loc("./cirgen/components/plonk.h":211:23)
         auto x17619 = x17138 * x17612;
