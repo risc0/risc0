@@ -33,12 +33,15 @@ pub const MIN_CYCLES: usize = 1 << MIN_CYCLES_PO2; // 1K
 pub const MAX_CYCLES_PO2: usize = 24;
 pub const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2; // 16M
 
-/// ~100 bits of conjectured security
+/// 50 FRI queries gives ~100 bits of conjectured security
 pub const QUERIES: usize = 50;
 pub const ZK_CYCLES: usize = QUERIES;
 pub const MIN_PO2: usize = core::log2_ceil(1 + ZK_CYCLES);
 
+/// Inverse of Reed-Solomon Expansion Rate
 pub const INV_RATE: usize = 4;
+/// FRI folding factor is 2 ^ FRI_FOLD_PO2
 const FRI_FOLD_PO2: usize = 4;
 pub const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
+/// FRI continues until the degree of the FRI polynomial reaches FRI_MIN_DEGREE
 const FRI_MIN_DEGREE: usize = 256;
