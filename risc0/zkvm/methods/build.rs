@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ fn main() {
         (
             "risc0-zkvm-methods-guest",
             GuestOptions {
-                code_limit: 22,
                 features: Vec::new(),
                 std: false,
             },
@@ -37,7 +36,6 @@ fn main() {
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
-                code_limit: 14,
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
                 std: true,
             },

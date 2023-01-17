@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,7 +39,6 @@ extern crate alloc;
 
 #[cfg(any(target_os = "zkvm", doc))]
 pub mod guest;
-pub mod method_id;
 #[cfg(feature = "prove")]
 pub mod prove;
 pub mod receipt;
@@ -49,12 +48,10 @@ pub mod sha;
 mod tests;
 
 pub use anyhow::Result;
+pub use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "prove")]
-pub use crate::prove::{image::MemoryImage, Prover, ProverOpts};
-pub use crate::{
-    method_id::{MethodId, DEFAULT_METHOD_ID_LIMIT},
-    receipt::Receipt,
-};
+pub use crate::prove::{elf::Program, image::MemoryImage, Prover, ProverOpts};
+pub use crate::receipt::Receipt;
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();

@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -122,7 +122,7 @@ where
     // DEEP-ALI paper for details on the construction of the check_poly.
     let check_poly = hal.alloc_elem("check_poly", H::ExtElem::EXT_SIZE * domain);
     let mix = hal.copy_from_elem("mix", circuit.get_mix());
-    let out = hal.copy_from_elem("out", circuit.get_output());
+    let out = hal.copy_from_elem("out", circuit.get_io());
     eval.eval_check(
         &check_poly,
         &code_group.evaluated,

@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,9 @@ use std::{
 
 use anyhow::Result;
 use clap::Parser;
-use risc0_zkvm::{
-    prove::profiler::Profiler, MethodId, Prover, ProverOpts, Receipt, DEFAULT_METHOD_ID_LIMIT,
-};
+use risc0_zkvm::sha::{Digest, DIGEST_WORDS};
+use risc0_zkvm::{prove::profiler::Profiler, Prover, ProverOpts, Receipt};
+use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -33,9 +33,9 @@ struct Args {
     #[clap(long)]
     elf: PathBuf,
 
-    /// MethodID file; created if needed and it doesn't exist.
+    /// ImageID file; created if needed and it doesn't exist.
     #[clap(long)]
-    method_id: Option<PathBuf>,
+    image_id: Option<PathBuf>,
 
     /// Receipt output file.
     #[clap(long)]
@@ -60,10 +60,6 @@ struct Args {
     #[clap(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
 
-    /// Limit the number of hash table entries to compute.
-    #[clap(short, long, default_value_t = DEFAULT_METHOD_ID_LIMIT)]
-    limit: usize,
-
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
     /// to read it.
@@ -71,9 +67,9 @@ struct Args {
     pprof_out: Option<PathBuf>,
 }
 
-fn read_method_id(verbose: u8, elf_file: &Path, method_id_file: Option<&Path>) -> Option<MethodId> {
+fn read_image_id(verbose: u8, elf_file: &Path, image_id_file: Option<&Path>) -> Option<Digest> {
     let elf_mtime = fs::metadata(elf_file).ok()?.modified().ok()?;
-    let id_mtime = fs::metadata(method_id_file.as_ref()?)
+    let id_mtime = fs::metadata(image_id_file.as_ref()?)
         .ok()?
         .modified()
         .ok()?;
@@ -82,15 +78,13 @@ fn read_method_id(verbose: u8, elf_file: &Path, method_id_file: Option<&Path>) -
         return None;
     }
 
-    let id = MethodId::from_slice(&fs::read(method_id_file.as_ref()?).ok()?).ok()?;
-
-    // TODO(nils): Check to make sure the limit is the same as the one
-    // that was saved.
+    let buf = fs::read(image_id_file?).ok()?;
+    let id = Digest::try_from_bytes(&buf).ok()?;
 
     if verbose > 0 {
         println!(
-            "Successfully read method id from {}",
-            method_id_file.unwrap().display()
+            "Successfully read image id from {}",
+            image_id_file.unwrap().display()
         );
     }
 
@@ -99,11 +93,11 @@ fn read_method_id(verbose: u8, elf_file: &Path, method_id_file: Option<&Path>) -
 
 fn run_prover(
     elf_contents: &[u8],
-    method_id: &MethodId,
+    image_id: &Digest,
     opts: ProverOpts,
     initial_input: Option<Vec<u8>>,
 ) -> Result<(Receipt, Vec<u8>)> {
-    let mut prover = Prover::new_with_opts(&elf_contents, method_id, opts).unwrap();
+    let mut prover = Prover::new_with_opts(&elf_contents, image_id, opts).unwrap();
     if let Some(bytes) = initial_input {
         prover.add_input_u8_slice(bytes.as_slice());
     }
@@ -112,15 +106,15 @@ fn run_prover(
     Ok((receipt, output.to_vec()))
 }
 
-fn encode_receipt(receipt: &Receipt, method_id: &[u8], args: &Args) -> Vec<u8> {
+fn encode_receipt(receipt: &Receipt, image_id: &[u8], args: &Args) -> Vec<u8> {
     if args.input_for_verify {
         let mut encoded: Vec<u8> = Vec::new();
         let mut add_input_u32_slice =
             |slice: &[u32]| encoded.write_all(bytemuck::cast_slice(slice)).unwrap();
         add_input_u32_slice(&[receipt.seal.len() as u32]);
         add_input_u32_slice(&receipt.seal);
-        add_input_u32_slice(&[(method_id.len() / 4) as u32]);
-        encoded.write_all(method_id).unwrap();
+        add_input_u32_slice(&[(image_id.len() / 4) as u32]);
+        encoded.write_all(image_id).unwrap();
         return encoded;
     }
 
@@ -141,28 +135,29 @@ fn main() {
         );
     }
 
-    let method_id: MethodId = if args.receipt.is_none() || args.skip_seal {
-        // No need to generate a method ID since we don't need to
+    let image_id: Digest = if args.receipt.is_none() || args.skip_seal {
+        // No need to generate a image ID since we don't need to
         // generate an actual proof.
-        MethodId::from_slice(&[]).unwrap()
+        Digest::new([0; DIGEST_WORDS])
     } else {
-        read_method_id(
+        read_image_id(
             args.verbose,
             &args.elf,
-            args.method_id.as_ref().map(|p| p.as_path()),
+            args.image_id.as_ref().map(|p| p.as_path()),
         )
         .unwrap_or_else(|| {
             if args.verbose > 0 {
-                eprintln!("Computing method id");
+                eprintln!("Computing image id");
             }
-            let computed = MethodId::compute_with_limit(&elf_contents, args.limit).unwrap();
-            if let Some(method_id_file) = args.method_id.as_ref() {
-                std::fs::write(&method_id_file, computed.as_slice()).unwrap();
+            let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
+            let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+            if let Some(image_id_file) = args.image_id.as_ref() {
+                std::fs::write(&image_id_file, image.root.as_bytes()).unwrap();
                 if args.verbose > 0 {
-                    eprintln!("Saved method id to {}", method_id_file.display());
+                    eprintln!("Saved image id to {}", image_id_file.display());
                 }
             }
-            computed
+            image.root
         })
     };
 
@@ -177,7 +172,7 @@ fn main() {
 
     let proof = run_prover(
         &elf_contents,
-        &method_id,
+        &image_id,
         if let Some(ref mut profiler) = guest_prof {
             opts.with_trace_callback(profiler.make_trace_callback())
         } else {
@@ -201,7 +196,7 @@ fn main() {
     }
     let (receipt, output) = proof.expect("Run failed");
 
-    let receipt_data = encode_receipt(&receipt, method_id.as_slice(), &args);
+    let receipt_data = encode_receipt(&receipt, image_id.as_bytes(), &args);
 
     if args.skip_seal || args.receipt.is_none() {
         if args.verbose > 0 {
@@ -210,7 +205,7 @@ fn main() {
     } else {
         if args.verbose > 0 {
             eprintln!("Verifying that we executed correctly.");
-            receipt.verify(&method_id).unwrap();
+            receipt.verify(&image_id).unwrap();
         }
     }
 

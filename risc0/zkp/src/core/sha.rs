@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -31,12 +31,15 @@ use serde::{Deserialize, Serialize};
 // traditional 32 8-bit bytes.
 pub const DIGEST_WORDS: usize = 8;
 
-/// The size of a word within a [Digest] (32-bits = 4 bytes).
+/// The size of a word in bytes within a [Digest] (32-bits = 4 bytes).
 pub const DIGEST_WORD_SIZE: usize = mem::size_of::<u32>();
 
 /// Size of the [Digest] representation in bytes.
 /// Note that digests are stored in memory as words instead of bytes.
 pub const DIGEST_BYTES: usize = DIGEST_WORDS * DIGEST_WORD_SIZE;
+
+/// The size of a SHA-256 block in bytes.
+pub const BLOCK_SIZE: usize = DIGEST_BYTES * 2;
 
 /// Standard SHA-256 initialization vector.
 pub static SHA256_INIT: Digest = Digest([
@@ -94,6 +97,18 @@ impl Digest {
     /// Returns a mutable slice of bytes.
     pub fn as_mut_bytes(&mut self) -> &mut [u8] {
         bytemuck::cast_slice_mut(&mut self.0)
+    }
+}
+
+impl From<&Digest> for Digest {
+    fn from(digest: &Digest) -> Self {
+        digest.clone()
+    }
+}
+
+impl From<&[u8]> for Digest {
+    fn from(bytes: &[u8]) -> Self {
+        Digest::from_bytes(bytes)
     }
 }
 

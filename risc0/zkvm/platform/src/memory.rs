@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,17 +54,14 @@ impl Region {
 }
 
 // These should match the linker script in `risc0/build/risc0.ld`.
-pub const STACK: Region = Region::new(0x0000_0000, mb(16));
-pub const DATA: Region = Region::new(0x0100_0000, mb(16));
-pub const HEAP: Region = Region::new(0x0200_0000, mb(32));
-pub const INPUT: Region = Region::new(0x0400_0000, mb(32));
-pub const PROG: Region = Region::new(0x0600_0000, mb(32));
+pub const INPUT: Region = Region::new(0x0000_0400, mb(32) - kb(1));
+pub const STACK: Region = Region::new(0x0200_0000, mb(16));
+pub const DATA: Region = Region::new(0x0300_0000, mb(16));
+pub const HEAP: Region = Region::new(0x0400_0000, mb(32));
+pub const TEXT: Region = Region::new(0x0600_0000, mb(32));
 pub const OUTPUT: Region = Region::new(0x0800_0000, mb(32));
 pub const COMMIT: Region = Region::new(0x0A00_0000, mb(32));
-pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(64));
-pub const FFPU: Region = Region::new(0x0C00_0000 + 192 * WORD_SIZE, mb(64) - 192 * WORD_SIZE);
-
-// TODO: adjust memory map in the near future
-// pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(16));
+pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(16));
 pub const PAGE_TABLE: Region = Region::new(0x0D00_0000, mb(16));
-// pub const FFPU: Region = Region::new(0x0E00_0000, mb(32));
+pub const PRE_LOAD: Region = Region::new(0x0D70_0000, mb(9));
+pub const FFPU: Region = Region::new(0x0F00_0000, mb(16));

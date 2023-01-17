@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,18 +23,22 @@ use anyhow::Result;
 use log::{debug, trace};
 use risc0_zkp::{
     adapter::TapsProvider,
+    core::sha::SHA256_INIT,
     field::{baby_bear::BabyBearElem, Elem},
-    ZK_CYCLES,
 };
-use risc0_zkvm_platform::memory;
+use risc0_zkvm_platform::{memory, WORD_SIZE};
 
 use super::split_word16;
 use crate::CIRCUIT;
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;
-const SHA_K_OFFSET: usize = memory::SYSTEM.start() + 32 * 4;
-static SHA_K: [u32; 64] = [
+
+const SHA_K_OFFSET: usize = memory::PRE_LOAD.start();
+const SHA_K_SIZE: usize = 64;
+const SHA_INIT_OFFSET: usize = SHA_K_OFFSET + SHA_K_SIZE * WORD_SIZE;
+
+static SHA_K: [u32; SHA_K_SIZE] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
     0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
@@ -192,11 +196,10 @@ where
     }
 
     /// Reset Phase
-    pub fn reset(&mut self, start_addr: u32) -> Result<bool> {
-        debug!("RESET: 0x{start_addr:08X}");
+    pub fn reset(&mut self) -> Result<bool> {
+        debug!("RESET");
         self.start();
         self.code[ControlIndex::Reset] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::new(start_addr);
         self.next()
     }
 
@@ -314,60 +317,42 @@ impl<'a> Iterator for TripleWordIter<'a> {
 }
 
 pub struct Loader {
-    user: Vec<TripleWord>,
     system: Vec<TripleWord>,
 }
 
 impl Loader {
-    const INIT_CYCLES: usize = 1;
-    const RESET_CYCLES: usize = 1;
     const SETUP_CYCLES: usize = setup_count(SETUP_STEP_REGS);
-    const FINI_CYCLES: usize = 2;
 
-    pub fn new(image: &BTreeMap<u32, u32>) -> Self {
-        let mut regs: BTreeMap<u32, u32> = BTreeMap::new();
+    pub fn new() -> Self {
+        let mut image: BTreeMap<u32, u32> = BTreeMap::new();
 
-        // Zero out registers
-        regs.extend((0..32).map(|idx| ((memory::SYSTEM.start() + idx * 4) as u32, 0)));
-        // Add 'k' for SHA
-        regs.extend(
-            SHA_K
-                .iter()
-                .enumerate()
-                .map(|(offset, val)| ((SHA_K_OFFSET + offset * 4) as u32, *val)),
-        );
+        // Setup 'k' for SHA
+        for (i, word) in SHA_K.iter().enumerate() {
+            image.insert((SHA_K_OFFSET + i * WORD_SIZE) as u32, *word);
+        }
+
+        // Setup SHA-256 Init
+        for (i, word) in SHA256_INIT.as_slice().iter().enumerate() {
+            image.insert((SHA_INIT_OFFSET + i * WORD_SIZE) as u32, *word);
+        }
 
         Self {
-            user: TripleWordIter::new(image).collect(),
-            system: TripleWordIter::new(&regs).collect(),
+            system: TripleWordIter::new(&image).collect(),
         }
     }
 
-    pub fn compute_min_cycles(&self) -> usize {
-        let load_cycles = self.user.len() + self.system.len();
-        Self::INIT_CYCLES
-            + Self::SETUP_CYCLES
-            + load_cycles
-            + Self::RESET_CYCLES
-            + Self::FINI_CYCLES
-            + ZK_CYCLES
-    }
-
     #[tracing::instrument(skip_all)]
-    pub fn load<F>(&self, start_addr: u32, step: F) -> Result<usize>
+    pub fn load<F>(&self, step: F) -> Result<usize>
     where
         F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
     {
         let mut loader = LoaderImpl::new(step);
         loader.init()?;
         loader.setup(Self::SETUP_CYCLES)?;
-        for triple in &self.user {
-            loader.load(triple)?;
-        }
         for triple in &self.system {
             loader.load(triple)?;
         }
-        loader.reset(start_addr)?;
+        loader.reset()?;
         loader.body()?;
         loader.fini()?;
         Ok(loader.cycle)

@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,3 +24,4 @@ pub mod memory;
 pub mod syscall;
 
 pub const WORD_SIZE: usize = core::mem::size_of::<u32>();
+pub const PAGE_SIZE: usize = 1024;

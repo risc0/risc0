@@ -27,6 +27,12 @@ lto = true
 [profile.dev]
 opt-level = 3
 
+[profile.dev.build-override]
+opt-level = 3
+
 [profile.release]
 debug = 1
 lto = true
+
+[profile.release.build-override]
+opt-level = 3
