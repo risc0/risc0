@@ -21,12 +21,14 @@ use crate::{
     field::{Elem, ExtElem, Field},
 };
 
-/// Tracks plonk accumulations for an execution.
+/// Tracks grand product accumulations for PLONK-style permutation arguments.
 pub struct Accum<E: Elem> {
     /// Total number of cycles in this run.
     cycles: usize,
 
-    // Plonk kinds and their data.
+    // We use two PLONK-style grand product accumulation checks;
+    // one for the memory permutation and a second for a lookup table.
+    // We have two `kinds`: memory and bytes.
     kinds: BTreeMap<String, Vec<E>>,
 }
 
@@ -38,6 +40,7 @@ impl<E: Elem> Accum<E> {
         }
     }
 
+    // Generates prefix products for grand product accumulation
     pub fn calc_prefix_products(&mut self) {
         for (_kind, elems) in self.kinds.iter_mut() {
             let mut tot = E::ONE;
@@ -57,6 +60,7 @@ impl<E: Elem> Accum<E> {
 }
 
 pub struct Handler<'a, F: Field> {
+    // p is a mutex lock that contains an Accum structure.
     p: &'a Mutex<Accum<F::ExtElem>>,
     cycles: usize,
     kinds: BTreeMap<String, *mut F::ExtElem>,
@@ -85,10 +89,14 @@ impl<'a, F: Field> Handler<'a, F> {
 }
 
 impl<'a, F: Field> CircuitStepHandler<F::Elem> for Handler<'a, F> {
+    /// Performs an extern call
     fn call(
         &mut self,
         cycle: usize,
+        // The name of the extern call to perform.
+        // Examples include getMajor, ramRead, syscall, etc
         name: &str,
+        // This is an extra string argument that is only used by the `log` extern call.
         extra: &str,
         args: &[F::Elem],
         outs: &mut [F::Elem],
