@@ -42,8 +42,8 @@ where
     pub data: Vec<F::Elem>,
     // Number of columns used for execution trace data
     data_size: usize,
-    // Circuit output
-    pub output: Vec<F::Elem>,
+    // Circuit inputs/outputs
+    pub io: Vec<F::Elem>,
     // Power of 2
     pub po2: usize,
     // steps = 2^po2 is the total number of cycles in the zkVM execution
@@ -62,13 +62,18 @@ where
     C: 'static + CircuitDef<F>,
     S: CircuitStepHandler<F::Elem>,
 {
-    pub fn new(circuit: &'static C, handler: S, min_po2: usize, max_po2: usize) -> Self {
+    pub fn new(
+        circuit: &'static C,
+        handler: S,
+        min_po2: usize,
+        max_po2: usize,
+        io: &[F::Elem],
+    ) -> Self {
         let po2 = max(min_po2, MIN_PO2);
         let taps = circuit.get_taps();
         let code_size = taps.group_size(RegisterGroup::Code);
         let data_size = taps.group_size(RegisterGroup::Data);
         let steps = 1 << po2;
-        let output_size = C::OUTPUT_SIZE;
         debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");
         Executor {
             circuit,
@@ -78,7 +83,7 @@ where
             code_size,
             data: vec![F::Elem::INVALID; steps * data_size],
             data_size,
-            output: vec![F::Elem::INVALID; output_size],
+            io: Vec::from(io),
             po2,
             steps,
             halted: false,
@@ -110,7 +115,7 @@ where
         };
         let args: &mut [&mut [F::Elem]] = &mut [
             &mut self.code,
-            &mut self.output,
+            &mut self.io,
             &mut self.data,
             &mut [],
             &mut [],
@@ -166,7 +171,7 @@ where
         // Do the verify cycles
         let args: &mut [&mut [F::Elem]] = &mut [
             &mut self.code,
-            &mut self.output,
+            &mut self.io,
             &mut self.data,
             &mut [],
             &mut [],
@@ -199,7 +204,7 @@ where
         });
 
         // Zero out 'invalid' entries in data and output.
-        for value in [self.data.iter_mut(), self.output.iter_mut()]
+        for value in [self.data.iter_mut(), self.io.iter_mut()]
             .into_iter()
             .flatten()
         {
@@ -215,7 +220,7 @@ where
         self.data[self.steps * offset + cycle]
     }
 
-    pub fn get_output(&self, idx: usize) -> F::Elem {
-        self.output[idx]
+    pub fn get_io(&self, idx: usize) -> F::Elem {
+        self.io[idx]
     }
 }

@@ -18,8 +18,7 @@ use anyhow::Result;
 use risc0_zeroio::{from_slice, to_vec};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, FIB_ELF, FIB_ID, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF,
-    MULTI_TEST_ID,
+    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
 };
 use risc0_zkvm_platform::{
     memory::{COMMIT, HEAP},
@@ -28,7 +27,7 @@ use risc0_zkvm_platform::{
 use serial_test::serial;
 use test_log::test;
 
-use super::{MethodId, Prover, ProverOpts, Receipt};
+use super::{Prover, ProverOpts, Receipt};
 use crate::prove::TraceEvent;
 
 #[test]
@@ -178,45 +177,22 @@ fn fail() {
 }
 
 #[test]
-fn clone_method_id() {
-    let method_id = MethodId::from_slice(MULTI_TEST_ID).unwrap();
-    let clone = method_id.clone();
-    assert!(method_id == clone);
-}
-
-#[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
-fn check_code() {
+fn check_image_id() {
     let receipt = run_do_nothing(ProverOpts::default()).unwrap();
     receipt
         .verify(MULTI_TEST_ID)
-        .expect("Verification should succeed before we corrupt the method id");
-    let corrupt_id: Vec<_> = MULTI_TEST_ID
-        .iter()
-        .map(|val| val.wrapping_add(1))
-        .collect();
+        .expect("Verification should succeed before we corrupt the image_id");
+    let mut digest: Digest = MULTI_TEST_ID.into();
+    for word in digest.as_mut_slice() {
+        *word = word.wrapping_add(1);
+    }
     assert_eq!(
         receipt
-            .verify(corrupt_id.as_slice())
-            .expect_err("Verification should fail with a corrupted method_id")
+            .verify(digest)
+            .expect_err("Verification should fail with a corrupted image_id")
             .to_string(),
-        "Verification failed: method verification failed"
-    );
-}
-
-#[test]
-#[cfg_attr(feature = "insecure_skip_seal", ignore)]
-fn long_fib() {
-    let mut prover = Prover::new(FIB_ELF, FIB_ID).unwrap();
-    prover.add_input_u32_slice(&[2000]);
-    assert_eq!(
-        prover
-            .run()
-            .expect_err(
-                "Execution should exceed code limit and cause a method id verification error"
-            )
-            .to_string(),
-        "Verification failed: Method execution cycle exceeded code limit. Increase code limit to at least 15."
+        "Verification failed: image_id mismatch"
     );
 }
 
@@ -407,9 +383,9 @@ fn trace() {
                 // sw x5, 548(zero)
                 cycle: cycle2,
                 pc: pc2,
-            }, TraceEvent::MemorySet {
-                addr: 548,
-                value: 1337,
+            }, TraceEvent::RegisterSet {
+                reg: 6,
+                value: 0x08000000,
             }] = window
             {
                 assert_eq!(cycle1 + 1, cycle2, "li should take 1 cycles: {:#?}", window);
@@ -426,4 +402,8 @@ fn trace() {
         })
         .count();
     assert_eq!(occurances, 1, "trace events: {:#?}", &events);
+    assert!(events.contains(&TraceEvent::MemorySet {
+        addr: 0x08000224,
+        value: 1337
+    }));
 }

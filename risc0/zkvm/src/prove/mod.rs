@@ -24,6 +24,7 @@ use std::{collections::HashMap, fmt::Debug, io::Write, rc::Rc};
 
 use anyhow::{bail, Result};
 use risc0_zkp::{
+    core::sha::Digest,
     field::baby_bear::{BabyBearElem, BabyBearExtElem},
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
@@ -35,7 +36,6 @@ use risc0_zkvm_platform::{
 
 use self::elf::Program;
 use crate::{
-    method_id::MethodId,
     receipt::{insecure_skip_seal, Receipt},
     sha::sha,
     CIRCUIT,
@@ -96,7 +96,7 @@ impl<'a> Default for ProverOpts<'a> {
 pub struct Prover<'a> {
     elf: Program,
     inner: ProverImpl<'a>,
-    method_id: MethodId,
+    image_id: Digest,
     pub cycles: usize,
 }
 
@@ -144,21 +144,21 @@ cfg_if::cfg_if! {
 }
 
 impl<'a> Prover<'a> {
-    pub fn new<M>(elf: &[u8], method_id: M) -> Result<Self>
+    pub fn new<D>(elf: &[u8], image_id: D) -> Result<Self>
     where
-        MethodId: From<M>,
+        Digest: From<D>,
     {
-        Self::new_with_opts(elf, method_id, ProverOpts::default())
+        Self::new_with_opts(elf, image_id, ProverOpts::default())
     }
 
-    pub fn new_with_opts<M>(elf: &[u8], method_id: M, opts: ProverOpts<'a>) -> Result<Self>
+    pub fn new_with_opts<D>(elf: &[u8], image_id: D, opts: ProverOpts<'a>) -> Result<Self>
     where
-        MethodId: From<M>,
+        Digest: From<D>,
     {
         Ok(Prover {
             elf: Program::load_elf(&elf, MEM_SIZE as u32)?,
             inner: ProverImpl::new(opts),
-            method_id: method_id.into(),
+            image_id: image_id.into(),
             cycles: 0,
         })
     }
@@ -222,7 +222,7 @@ impl<'a> Prover<'a> {
 
         if !skip_seal {
             // Verify receipt to make sure it works
-            receipt.verify(&self.method_id)?;
+            receipt.verify(&self.image_id)?;
         }
 
         Ok(receipt)
@@ -288,7 +288,7 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
         Ok(())
     }
 
-    fn on_fault(&mut self, msg: &str) -> Result<()> {
+    fn on_panic(&mut self, msg: &str) -> Result<()> {
         bail!("{}", msg)
     }
 }
@@ -319,6 +319,7 @@ fn merge_word8((x0, x1, x2, x3): (BabyBearElem, BabyBearElem, BabyBearElem, Baby
 
 /// An event traced from the running VM.
 #[non_exhaustive]
+#[derive(PartialEq)]
 pub enum TraceEvent {
     /// An instruction has started at the given program counter
     InstructionStart {

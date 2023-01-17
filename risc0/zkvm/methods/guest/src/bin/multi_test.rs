@@ -67,13 +67,13 @@ pub fn main() {
             assert!(total >= 72, "total: {total}");
         }
         MultiTestSpecRef::EventTrace(_) => unsafe {
-            let mut _x: u32;
-            // Exeute some instructions with distinctive arguments
+            // Execute some instructions with distinctive arguments
             // that are easy to find in the event trace.
             asm!(r"
       li x5, 1337
-      sw x5, 548(zero)
-", out("x5") _x,);
+      li x6, 0x08000000
+      sw x5, 548(x6)
+", out("x5") _, out("x6") _);
         },
         MultiTestSpecRef::Profiler(_) => {
             // Call an external function to make sure it's detected during profiling.

@@ -48,7 +48,7 @@ SDK support exists for Rust, C, and C++.
 First, the code to be proven must be compiled from its implementation language
 into a *method*.  A method is represented by a RISC-V ELF file with a special
 entry point that runs the code of the method.  Additionally, one can compute for
-a given method its *method ID* which is a special type of cryptographic hash of
+a given method its *image ID* which is a special type of cryptographic hash of
 the ELF file, and is required for verification.
 
 Next, the prover runs the method inside the zkVM.  The logical RISC-V machine
@@ -68,7 +68,7 @@ The verifier can then verify the receipt and examine the log. If any tampering
 was done to the journal or the seal, the receipt will fail to verify.
 Additionally, it is cryptographically infeasible to generate a valid receipt
 unless the output of the journal is the exactly correct output for some valid
-execution of the method whose method ID matches the receipt. In summary, the
+execution of the method whose image ID matches the receipt. In summary, the
 receipt acts as a zero knowledge proof of correct execution.
 
 Because the protocol is zero knowledge, the verifier cannot infer anything about
@@ -92,7 +92,7 @@ other manner of problems.  Caveat emptor.
 ## Getting Started
 
 To get started building applications using the zkVM in Rust, we provide a
-[starter template](https://github.com/risc0/risc0-rust-starter) and a 
+[starter template](https://github.com/risc0/risc0-rust-starter) and a
 number of [working examples](https://github.com/risc0/risc0-rust-examples/).
 
 ## Example

@@ -123,12 +123,17 @@ macro_rules! entry {
 
 #[cfg(target_os = "zkvm")]
 #[no_mangle]
-unsafe extern "C" fn __start(result: *mut usize) {
+unsafe extern "C" fn __start() {
     extern "C" {
-        static mut __bss_begin: u8;
-        static mut __bss_size: usize;
+        static mut __bss_begin: *mut u32;
+        static mut __bss_end: *mut u32;
     }
-    ptr::write_bytes(&mut __bss_begin as *mut u8, 0, __bss_size);
+
+    let mut bss = __bss_begin;
+    while bss < __bss_end {
+        ptr::write_volatile(bss, mem::zeroed());
+        bss = bss.offset(1);
+    }
 
     env::init();
 
@@ -137,7 +142,7 @@ unsafe extern "C" fn __start(result: *mut usize) {
     }
     __main();
 
-    env::finalize(result);
+    env::finalize();
 }
 
 /// Align the given address `addr` upwards to alignment `align`.
@@ -158,7 +163,6 @@ _start:
     la gp, __global_pointer$;
     .option pop;
     la sp, __stack_init$;
-    la a0, __result
     jal ra, __start
 "#
 );

@@ -40,6 +40,8 @@ elf = { version = "0.7", optional = true }
 gimli = { version = "0.27", optional = true }
 lazy-regex = { version = "2.3", optional = true }
 log = "0.4"
+num-derive = "0.3"
+num-traits = "0.2"
 prost = { version = "0.11", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
