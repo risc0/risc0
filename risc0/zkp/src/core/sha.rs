@@ -255,8 +255,9 @@ pub trait Sha: Clone + Debug {
 
     /// Generate a SHA from a slice of words, padding to block size
     /// and adding the SHA trailer.
-    // TODO(victor): What should a developer expect here as it relates to endianess? Should they
-    // expect the hash is invariant with the numeric value of words, or of the bytes?
+    // TODO(victor): What should a developer expect here as it relates to endianess?
+    // Should they expect the hash is invariant with the numeric value of words,
+    // or of the bytes?
     fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
