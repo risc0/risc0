@@ -926,7 +926,7 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         }
 
         // initialize ImageID
-        let image_id = image.root.as_slice();
+        let image_id = image.root.as_words();
         for i in 0..DIGEST_WORDS {
             let bytes = image_id[i].to_le_bytes();
             for j in 0..WORD_SIZE {

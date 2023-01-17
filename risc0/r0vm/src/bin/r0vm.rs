@@ -79,7 +79,7 @@ fn read_image_id(verbose: u8, elf_file: &Path, image_id_file: Option<&Path>) -> 
     }
 
     let buf = fs::read(image_id_file?).ok()?;
-    let id = Digest::try_from_bytes(&buf).ok()?;
+    let id = Digest::try_from(buf).ok()?;
 
     if verbose > 0 {
         println!(
@@ -138,7 +138,7 @@ fn main() {
     let image_id: Digest = if args.receipt.is_none() || args.skip_seal {
         // No need to generate a image ID since we don't need to
         // generate an actual proof.
-        Digest::new([0; DIGEST_WORDS])
+        Digest::from([0; DIGEST_WORDS])
     } else {
         read_image_id(
             args.verbose,

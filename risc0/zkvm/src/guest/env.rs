@@ -174,12 +174,12 @@ impl Env {
         // Write the full data out to the host
         unsafe { sys_commit(slice.as_ptr(), len_bytes) };
 
-        let mut output = Digest::new([0u32; DIGEST_WORDS]);
+        let mut output = Digest::from([0u32; DIGEST_WORDS]);
 
         // If the total proof message is small (<= 32 bytes), return it directly
         // from the proof, otherwise SHA it and return the hash.
         if len_words <= 8 {
-            let output = output.as_mut_slice();
+            let output = output.as_mut_words();
             for i in 0..len_words {
                 output[i] = slice[i];
             }
@@ -187,7 +187,7 @@ impl Env {
             let ptr: *mut Digest = &mut output;
             sha::update_u32(ptr, &SHA256_INIT, slice, sha::WithoutTrailer);
         }
-        let output = output.as_slice();
+        let output = output.as_words();
         unsafe {
             for i in 0..DIGEST_WORDS {
                 sys_output(i as u32, output[i]);

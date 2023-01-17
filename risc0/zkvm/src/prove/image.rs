@@ -194,8 +194,8 @@ fn hash_page(page: &[u8]) -> Digest {
     let mut state = SHA256_INIT;
     assert!(page.len() % BLOCK_SIZE == 0);
     for block in page.chunks_exact(BLOCK_SIZE) {
-        let block1 = Digest::from_bytes(&block[0..DIGEST_BYTES]);
-        let block2 = Digest::from_bytes(&block[DIGEST_BYTES..BLOCK_SIZE]);
+        let block1 = Digest::try_from(&block[0..DIGEST_BYTES]).unwrap();
+        let block2 = Digest::try_from(&block[DIGEST_BYTES..BLOCK_SIZE]).unwrap();
         state = *sha.compress(&state, &block1, &block2);
     }
     state

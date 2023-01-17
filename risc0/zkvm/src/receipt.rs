@@ -65,8 +65,8 @@ where
         }
         let slice = &io[WORD_SIZE..WORD_SIZE + DIGEST_BYTES];
         let bytes: Vec<u8> = slice.iter().map(|x| *x as u8).collect();
-        let actual = Digest::from_bytes(&bytes);
-        if image_id != actual {
+        let actual = Digest::try_from(bytes);
+        if !actual.map(|digest| image_id == digest).unwrap_or(false) {
             return Err(VerificationError::ImageVerificationError);
         }
 
@@ -96,7 +96,7 @@ where
             }
         } else {
             let digest = sha.hash_raw_pod_slice(journal);
-            let digest = digest.as_slice();
+            let digest = digest.as_words();
             for i in 0..DIGEST_WORDS {
                 if digest[i] != outputs[i] {
                     return Err(VerificationError::JournalSealRootMismatch);

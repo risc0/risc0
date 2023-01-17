@@ -106,12 +106,6 @@ impl From<&Digest> for Digest {
     }
 }
 
-impl From<&[u8]> for Digest {
-    fn from(bytes: &[u8]) -> Self {
-        Digest::from_bytes(bytes)
-    }
-}
-
 impl Default for Digest {
     fn default() -> Digest {
         Digest([0; DIGEST_WORDS])
