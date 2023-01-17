@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          # Fetch the merge commit and origin/HEAD.
+          fetch-depth: 2
       - uses: risc0/actions-rs-toolchain@v1
         with:
           toolchain: stable
@@ -26,7 +29,7 @@ jobs:
       - run: |
           # Check that no source files updated this year have a missing or out-of-date copyright.
           set -e
-          MISSING_COPYRIGHT="$(comm -12 <(git log --name-only --pretty=format: d02f606ab7d59ad45dc75314eb3e0eef5c9a26b7..HEAD | sort | uniq) <(npx @kt3k/license-checker | grep 'missing copyright' | sort | cut -d ' ' -f 1))"
+          MISSING_COPYRIGHT="$(comm -12 <(git diff --name-only --pretty=format: origin/HEAD | sort | uniq) <(npx @kt3k/license-checker | grep 'missing copyright' | sort | cut -d ' ' -f 1))"
           echo $MISSING_COPYRIGHT
           [ -z "$MISSING_COPYRIGHT" ]
 
