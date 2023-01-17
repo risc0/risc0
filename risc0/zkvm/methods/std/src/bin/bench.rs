@@ -34,12 +34,6 @@ pub fn main() {
                 memory_barrier(&sha.hash_bytes(&buf));
             }
         }
-        BenchmarkSpec::HashRawWords { buf } => {
-            let sha = sha::Impl {};
-            for _ in 0..iters {
-                memory_barrier(&sha.hash_raw_words(&buf));
-            }
-        }
         BenchmarkSpec::Memcpy {
             src,
             src_align,

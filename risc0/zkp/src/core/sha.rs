@@ -255,14 +255,11 @@ pub trait Sha: Clone + Debug {
 
     /// Generate a SHA from a slice of words, padding to block size
     /// and adding the SHA trailer.
+    // TODO(victor): What should a developer expect here as it relates to endianess? Should they
+    // expect the hash is invariant with the numeric value of words, or of the bytes?
     fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
-
-    /// Generate a SHA from a slice of words without adding padding or
-    /// length.
-    // TODO(victor): IIUC, this function is unused and probably should be removed.
-    fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr;
 
     /// Generate a SHA from a pair of [Digests](Digest).
     // TODO(victor) This is an efficient way to produce H(a || b), which I am
@@ -344,7 +341,6 @@ pub mod testutil {
     // behaves.
     pub fn test_sha_impl<S: Sha>(sha: &S) {
         test_hash_pair(sha);
-        test_hash_raw_words(sha);
         test_hash_raw_pod_slice(sha);
         test_sha_basics(sha);
         test_elems(sha);
@@ -506,46 +502,6 @@ pub mod testutil {
                 .unwrap()
             ),
             Digest::from_hex("da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8")
-                .unwrap()
-        );
-    }
-
-    fn test_hash_raw_words<S: Sha>(sha: &S) {
-        assert_eq!(
-            *sha.hash_raw_words(&[
-                1u32.to_be(),
-                2u32.to_be(),
-                3u32.to_be(),
-                4u32.to_be(),
-                5u32.to_be(),
-                6u32.to_be(),
-                7u32.to_be(),
-                8u32.to_be(),
-                7u32.to_be(),
-                6u32.to_be(),
-                5u32.to_be(),
-                4u32.to_be(),
-                3u32.to_be(),
-                2u32.to_be(),
-                1u32.to_be(),
-                0u32.to_be(),
-            ]),
-            Digest::from_hex("b6f1e1b52e435545aa21cc9d3ce54e9af9da118042163abf2a739aebd413ac8d")
-                .unwrap()
-        );
-
-        assert_eq!(
-            *sha.hash_raw_words(&[1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0,]),
-            Digest::from_hex("0410500505eb63608def984ecc0b7820cba1012570e3d288c483f35021c971a6")
-                .unwrap()
-        );
-
-        assert_eq!(
-            *sha.hash_raw_words(&[
-                1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0, //
-                1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1, 0,
-            ]),
-            Digest::from_hex("0343d500097e63123d3c7f418f465bfd2253652f351c90c75a05cb33946e71f1")
                 .unwrap()
         );
     }

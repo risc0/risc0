@@ -118,29 +118,6 @@ impl Sha for Impl {
         self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
-    fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr {
-        assert!(
-            words.len() % 16 == 0,
-            "{} should be a multiple of 16, the number of words per SHA block",
-            words.len()
-        );
-        let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
-        for word in state.iter_mut() {
-            *word = word.to_be();
-        }
-        for block in words.chunks(16) {
-            let block_u8: &[u8] = bytemuck::cast_slice(block);
-            compress256(
-                &mut state,
-                slice::from_ref(GenericArray::from_slice(block_u8)),
-            )
-        }
-        for word in state.iter_mut() {
-            *word = word.to_be();
-        }
-        Box::new(Digest::from(state))
-    }
-
     fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, pod: &[T]) -> Self::DigestPtr {
         let u8s: &[u8] = bytemuck::cast_slice(pod);
         let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
