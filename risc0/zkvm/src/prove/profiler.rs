@@ -110,7 +110,7 @@ impl Profiler {
         // Save the main binary name
         let bin_name = profiler.profile.get_string(filename);
         for segment in file.segments() {
-            if segment.address() == risc0_zkvm_platform::memory::PROG.start() as u64 {
+            if segment.address() == risc0_zkvm_platform::memory::TEXT.start() as u64 {
                 profiler.profile.profile.mapping.push(proto::Mapping {
                     id: 1,
                     memory_start: segment.address(),

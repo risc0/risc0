@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::collections::BTreeSet;
 use std::collections::BTreeMap;
 
 use anyhow::{bail, Result};
 use bytemuck::Pod;
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
+use num_traits::FromPrimitive;
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_zkp::{
-    adapter::{CircuitStepHandler, PolyExt},
-    core::log2_ceil,
+    adapter::{CircuitInfo, CircuitStepHandler, PolyExt},
+    core::{log2_ceil, sha::BLOCK_SIZE},
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem,
@@ -32,25 +34,34 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     memory::{FFPU, SYSTEM},
     syscall::{
+        ecall,
         nr::{SYS_COMMIT, SYS_COMPUTE_POLY, SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A7},
+        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A7, REG_T0},
+        DIGEST_WORDS,
     },
-    WORD_SIZE,
+    PAGE_SIZE, WORD_SIZE,
 };
 
-use super::{elf::Program, loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
-use crate::CIRCUIT;
+use super::{
+    elf::Program, image::PageTableInfo, loader::Loader, merge_word8, plonk, split_word8, TraceEvent,
+};
+use crate::{MemoryImage, CIRCUIT};
+
+const IMM_BITS: usize = 12;
 
 pub trait HostHandler {
     fn is_trace_enabled(&self) -> bool;
     fn on_commit(&mut self, buf: &[u32]) -> Result<()>;
-    fn on_fault(&mut self, msg: &str) -> Result<()>;
+    fn on_panic(&mut self, msg: &str) -> Result<()>;
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>>;
     fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
 }
 
 struct MemoryState {
-    pub ram: BTreeMap<u32, u32>,
+    pub ram: MemoryImage,
+    pub pages: BTreeSet<u32>,
+    resident: BTreeSet<u32>,
+
     // Ram in the FFPU section of memory; these RAM slots store four Fps instead of one u32.
     pub ffpu_ram: Vec<(BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem)>,
 
@@ -63,29 +74,37 @@ struct MemoryState {
 }
 
 impl MemoryState {
+    fn new(image: MemoryImage) -> Self {
+        Self {
+            ram: image,
+            pages: BTreeSet::new(),
+            resident: BTreeSet::new(),
+            ffpu_ram: Vec::new(),
+            ram_plonk: plonk::RamPlonk::new(),
+            bytes_plonk: plonk::BytesPlonk::new(),
+            plonk_accum: BTreeMap::new(),
+        }
+    }
+
     #[track_caller]
     fn load_u8(&self, addr: u32) -> u8 {
         // debug!("load_u8: 0x{addr:08X}");
-        // align to the nearest word
-        let aligned = addr & !(WORD_SIZE as u32 - 1);
-        let offset = addr % WORD_SIZE as u32;
-        let word = self.load_u32(aligned);
-        ((word >> (offset * 8)) & 0xff) as u8
+        self.ram.image[addr as usize]
     }
 
     #[track_caller]
     fn load_u32(&self, addr: u32) -> u32 {
         // debug!("load_u32: 0x{addr:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
-        let key = addr / 4;
-        match self.ram.get(&key) {
-            Some(word) => *word,
-            None => panic!("addr out of range: 0x{addr:08X}"),
+        let mut bytes = [0u8; WORD_SIZE];
+        for i in 0..WORD_SIZE {
+            bytes[i] = self.load_u8(addr + i as u32);
         }
+        u32::from_le_bytes(bytes)
     }
 
     fn load_register(&self, num: usize) -> u32 {
-        self.load_u32((SYSTEM.start() + num * 4) as u32)
+        self.load_u32((SYSTEM.start() + num * WORD_SIZE) as u32)
     }
 
     #[track_caller]
@@ -108,26 +127,19 @@ impl MemoryState {
     #[track_caller]
     fn store_u8(&mut self, addr: u32, value: u8) {
         // debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
-        // align to the nearest word
-        let aligned = addr & !(WORD_SIZE as u32 - 1);
-        let offset = addr % WORD_SIZE as u32;
-        let key = aligned / 4;
-        let mut word = self.ram.get(&key).unwrap_or(&0) & !(0xff << (offset * 8));
-        word |= (value as u32) << (offset * 8);
-        self.store_u32(aligned, word);
+        self.ram.image[addr as usize] = value;
     }
 
     #[track_caller]
     fn store_u32(&mut self, addr: u32, value: u32) {
         // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
-        let key = addr / 4;
-        self.ram.insert(key, value);
+        self.store_region(addr, &value.to_le_bytes());
     }
 
     #[track_caller]
     fn store_region(&mut self, addr: u32, slice: &[u8]) {
-        trace!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
+        // trace!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
         for i in 0..slice.len() {
             self.store_u8(addr + i as u32, slice[i]);
         }
@@ -136,8 +148,9 @@ impl MemoryState {
     #[track_caller]
     fn store_region_u32(&mut self, addr: u32, slice: &[u32]) {
         assert!(addr % WORD_SIZE as u32 == 0);
-        for (offset, word) in slice.iter().enumerate() {
-            self.store_u32(addr + WORD_SIZE as u32 * offset as u32, *word);
+        for (i, word) in slice.iter().enumerate() {
+            let offset = i * WORD_SIZE;
+            self.store_u32(addr + offset as u32, *word);
         }
     }
 
@@ -180,10 +193,37 @@ pub struct MachineContext<'a, H: HostHandler> {
     pc: u32,
 }
 
+#[allow(dead_code)]
+#[derive(Debug, num_derive::FromPrimitive, PartialEq)]
+#[repr(u32)]
+enum MajorType {
+    Compute0,
+    Compute1,
+    Compute2,
+    MemIo,
+    Multiply,
+    Divide,
+    VerifyAnd,
+    VerifyDivide,
+    ECall,
+    ShaInit,
+    ShaLoad,
+    ShaMain,
+    Ffpu,
+    PageFault,
+    MuxSize,
+}
+
+impl MajorType {
+    fn as_u32(self) -> u32 {
+        self as u32
+    }
+}
+
 #[derive(Debug)]
 struct OpCode {
     mnemonic: &'static str,
-    major: u32,
+    major: MajorType,
     minor: u32,
 }
 
@@ -191,16 +231,55 @@ impl OpCode {
     fn new(mnemonic: &'static str, idx: u32) -> Self {
         Self {
             mnemonic,
-            major: idx / 8,
+            major: FromPrimitive::from_u32(idx / 8).unwrap(),
             minor: idx % 8,
         }
     }
 
-    fn with_major_minor(mnemonic: &'static str, major: u32, minor: u32) -> Self {
+    fn with_major_minor(mnemonic: &'static str, major: MajorType, minor: u32) -> Self {
         Self {
             mnemonic,
             major,
             minor,
+        }
+    }
+}
+
+struct PageFaults {
+    reads: BTreeSet<u32>,
+}
+
+impl PageFaults {
+    pub fn new() -> Self {
+        Self {
+            reads: BTreeSet::new(),
+        }
+    }
+
+    pub fn include(&mut self, addr: u32, info: &PageTableInfo) {
+        if addr < info.mem_start {
+            let page_idx = info.get_page_index_nondet(addr);
+            self.reads.insert(page_idx);
+        } else {
+            let mut addr = addr;
+            loop {
+                let raw_page_idx = info.get_page_index_nondet(addr);
+                let page_idx = info.get_page_index(addr);
+                let entry_addr = info.get_page_entry_addr(page_idx);
+                self.reads.insert(raw_page_idx);
+                if raw_page_idx == info.raw_root_idx {
+                    break;
+                }
+                addr = entry_addr;
+            }
+        }
+    }
+
+    #[allow(dead_code)]
+    fn dump(&self) {
+        debug!("PageFaultInfo");
+        for idx in self.reads.iter().rev() {
+            debug!("  0x{:08X}", idx);
         }
     }
 }
@@ -224,14 +303,13 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
             }
             "trace" => self.trace(cycle, args[0]),
             "getMajor" => {
-                let opcode = self.decode((args[0], args[1], args[2], args[3]));
-                outs[0] = BabyBearElem::new(opcode.major);
-                trace!("decode: {}", opcode.mnemonic);
+                outs[0] = self.get_major(args[0])?;
                 Ok(())
             }
             "getMinor" => {
-                let opcode = self.decode((args[0], args[1], args[2], args[3]));
-                outs[0] = BabyBearElem::new(opcode.minor);
+                let inst = merge_word8((args[0], args[1], args[2], args[3]));
+                let opcode = self.decode(inst);
+                outs[0] = opcode.minor.into();
                 Ok(())
             }
             "divide" => {
@@ -245,12 +323,16 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 );
                 Ok(())
             }
+            "pageRead" => {
+                (outs[0], outs[1]) = self.page_read(args[0]);
+                Ok(())
+            }
             "ramWrite" => {
-                self.ram_write(args[0], (args[1], args[2], args[3], args[4]))?;
+                self.ram_write(args[0], (args[1], args[2], args[3], args[4]), args[5])?;
                 Ok(())
             }
             "ramRead" => {
-                (outs[0], outs[1], outs[2], outs[3]) = self.ram_read(args[0]);
+                (outs[0], outs[1], outs[2], outs[3]) = self.ram_read(args[0], args[1]);
                 Ok(())
             }
             "plonkWrite" => {
@@ -298,27 +380,118 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
     }
 }
 
-impl MemoryState {
-    fn new() -> Self {
-        Self {
-            ram: BTreeMap::new(),
-            ffpu_ram: Vec::new(),
-            ram_plonk: plonk::RamPlonk::new(),
-            bytes_plonk: plonk::BytesPlonk::new(),
-            plonk_accum: BTreeMap::new(),
-        }
-    }
+fn sign_extend(x: i32, bits: u32) -> i32 {
+    let remain = WORD_SIZE as u32 * 8 - bits;
+    x.wrapping_shl(remain).wrapping_shr(remain)
 }
 
 impl<'a, H: HostHandler> MachineContext<'a, H> {
-    pub fn new(io: &'a mut H) -> Self {
+    pub fn new(io: &'a mut H, image: MemoryImage) -> Self {
         MachineContext {
-            memory: MemoryState::new(),
+            memory: MemoryState::new(image),
             trace_enabled: io.is_trace_enabled(),
             handler: io,
             halted: false,
             pc: 0x00000000,
         }
+    }
+
+    fn get_major(&self, pc: BabyBearElem) -> Result<BabyBearElem> {
+        let pc: u32 = pc.into();
+        let inst = self.memory.load_u32(pc);
+        let opcode = self.decode(inst);
+        trace!("decode: {}", opcode.mnemonic);
+        // determine if PageFaults are needed
+        let faults = self.get_page_faults(pc, inst, &opcode);
+        // faults.dump();
+        for page_idx in faults.reads {
+            if !self.memory.pages.contains(&page_idx) {
+                return Ok(MajorType::PageFault.as_u32().into());
+            }
+        }
+        Ok(opcode.major.as_u32().into())
+    }
+
+    fn get_page_faults(&self, pc: u32, inst: u32, opcode: &OpCode) -> PageFaults {
+        let info = &self.memory.ram.info;
+        let mut faults = PageFaults::new();
+        faults.include(SYSTEM.start() as u32, info);
+        faults.include(pc, info);
+
+        if opcode.major == MajorType::MemIo {
+            let rs1 = (inst >> 15) & 0x1f;
+            let base = self.memory.load_register(rs1 as usize);
+            if opcode.minor < 5 {
+                // load: I-type
+                let imm = (inst >> 20) & 0x7ff;
+                let imm = sign_extend(imm as i32, IMM_BITS as u32);
+                let addr = base.checked_add_signed(imm).unwrap();
+                // debug!("  load: 0x{inst:08x}, M[x{rs1} + {imm}] -> 0x{addr:08x}");
+                faults.include(addr, info);
+            } else {
+                // store: S-type
+                let imm_low = (inst >> 7) & 0x1f;
+                let imm_high = (inst >> 25) & 0x7f;
+                let imm = (imm_high << 5) | imm_low;
+                let imm = sign_extend(imm as i32, IMM_BITS as u32);
+                let addr = base.checked_add_signed(imm).unwrap();
+                debug!("  store: 0x{inst:08x}, M[x{rs1} + {imm}] -> 0x{addr:08x}");
+                faults.include(addr, info);
+            }
+        } else if opcode.major == MajorType::ECall {
+            let minor = self.memory.load_register(REG_T0);
+            if minor == ecall::FFPU {
+                let code_addr = self.memory.load_register(REG_A0);
+                let args_addr = self.memory.load_register(REG_A1);
+                let const_addr = self.memory.load_u32(args_addr + (0 * WORD_SIZE) as u32);
+                let input_addr = self.memory.load_u32(args_addr + (1 * WORD_SIZE) as u32);
+                let output_addr = self.memory.load_u32(args_addr + (1 * WORD_SIZE) as u32);
+                faults.include(code_addr, info);
+                faults.include(args_addr, info);
+                faults.include(const_addr, info);
+                faults.include(input_addr, info);
+                faults.include(output_addr, info);
+            } else if minor == ecall::SHA {
+                let state_out_addr = self.memory.load_register(REG_A0);
+                let state_in_addr = self.memory.load_register(REG_A1);
+                let block1_addr = self.memory.load_register(REG_A2);
+                let block2_addr = self.memory.load_register(REG_A3);
+                let count = self.memory.load_register(REG_A4);
+                for i in 0..DIGEST_WORDS {
+                    faults.include(state_out_addr + (i * WORD_SIZE) as u32, info);
+                }
+                for i in 0..DIGEST_WORDS {
+                    faults.include(state_in_addr + (i * WORD_SIZE) as u32, info);
+                }
+                for i in 0..count {
+                    let addr1 = block1_addr + i * BLOCK_SIZE as u32;
+                    let addr2 = block2_addr + i * BLOCK_SIZE as u32;
+                    for j in 0..DIGEST_WORDS {
+                        faults.include(addr1 + (j * WORD_SIZE) as u32, info);
+                        faults.include(addr2 + (j * WORD_SIZE) as u32, info);
+                    }
+                }
+            }
+        }
+
+        faults
+    }
+
+    fn page_read(&mut self, pc: BabyBearElem) -> (BabyBearElem, BabyBearElem) {
+        let pc: u32 = pc.into();
+        let inst = self.memory.load_u32(pc);
+        let opcode = self.decode(inst);
+        let info = self.get_page_faults(pc, inst, &opcode);
+        for page_idx in info.reads.iter().rev() {
+            if !self.memory.pages.contains(page_idx) {
+                self.memory.pages.insert(*page_idx);
+                // debug!("page_idx: 0x{page_idx:08X}");
+                let is_nondet = self.memory.ram.info.is_nondet(*page_idx);
+                return ((*page_idx).into(), is_nondet.into());
+            }
+        }
+
+        (BabyBearElem::ZERO, BabyBearElem::ZERO)
     }
 
     fn trace(&mut self, cycle: usize, pc: BabyBearElem) -> Result<()> {
@@ -454,10 +627,12 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     fn ram_read(
         &mut self,
         addr: BabyBearElem,
+        page_in: BabyBearElem,
     ) -> (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem) {
         let addr: u32 = addr.into();
-        if addr as usize * 4 >= FFPU.start() {
-            let ffpu_addr = addr as usize - FFPU.start() / 4;
+        let page_in: u32 = page_in.into();
+        if addr as usize * WORD_SIZE >= FFPU.start() {
+            let ffpu_addr = addr as usize - FFPU.start() / WORD_SIZE;
             if ffpu_addr >= self.memory.ffpu_ram.len() {
                 return (
                     BabyBearElem::ZERO,
@@ -466,11 +641,29 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                     BabyBearElem::ZERO,
                 );
             }
-            return self.memory.ffpu_ram[ffpu_addr];
+            self.memory.ffpu_ram[ffpu_addr]
         } else {
-            let data = *self.memory.ram.entry(addr).or_insert(0);
-            // debug!("data: 0x{data:08X}");
-            split_word8(data)
+            if page_in == 1 {
+                self.memory.resident.insert(addr);
+            } else {
+                if !self.memory.resident.contains(&addr) {
+                    let addr = addr * WORD_SIZE as u32;
+                    if addr >= self.memory.ram.info.mem_start {
+                        let page_idx = self.memory.ram.info.get_page_index(addr);
+                        let entry_addr = self.memory.ram.info.get_page_entry_addr(page_idx);
+                        debug!("  ram_read: 0x{addr:08x}, page_in: {page_in}, entry_addr: 0x{entry_addr:08x}");
+                    }
+                }
+                assert!(
+                    self.memory.resident.contains(&addr),
+                    "Memory read before page in"
+                );
+            }
+
+            let addr = addr * WORD_SIZE as u32;
+            let word = self.memory.load_u32(addr);
+            // debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
+            split_word8(word)
         }
     }
 
@@ -478,24 +671,35 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         &mut self,
         addr: BabyBearElem,
         data: (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
+        page_in: BabyBearElem,
     ) -> Result<()> {
         let addr: u32 = addr.into();
-        if addr as usize * 4 >= FFPU.start() {
-            let ffpu_addr = addr as usize - FFPU.start() / 4;
+        let page_in: u32 = page_in.into();
+        if addr as usize * WORD_SIZE >= FFPU.start() {
+            let ffpu_addr = addr as usize - FFPU.start() / WORD_SIZE;
             if self.memory.ffpu_ram.len() <= ffpu_addr {
                 let z = BabyBearElem::ZERO;
                 self.memory.ffpu_ram.resize(ffpu_addr + 1, (z, z, z, z));
             }
             self.memory.ffpu_ram[ffpu_addr] = data
         } else {
+            if page_in == 1 {
+                self.memory.resident.insert(addr);
+            } else {
+                assert!(
+                    self.memory.resident.contains(&addr),
+                    "Memory write before page in"
+                );
+            }
             let data = merge_word8(data);
-            // debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr * 4, data);
-            self.memory.ram.insert(addr, data);
+            let addr = addr * WORD_SIZE as u32;
+            // debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
+            self.memory.store_u32(addr, data);
             if self.trace_enabled {
-                let addr = (addr * 4) as usize;
+                let addr = addr as usize;
                 if addr >= SYSTEM.start() && addr < SYSTEM.end() {
                     self.handler.on_trace(TraceEvent::RegisterSet {
-                        reg: (addr - SYSTEM.start()) / 4,
+                        reg: (addr - SYSTEM.start()) / WORD_SIZE,
                         value: data,
                     })?
                 } else {
@@ -558,7 +762,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 let buf = self.memory.load_region(msg_ptr, msg_len);
                 let str = String::from_utf8(buf).unwrap();
                 debug!("SYS_PANIC[{cycle}]> {str}");
-                self.handler.on_fault(&str)?;
+                self.handler.on_panic(&str)?;
                 Ok((split_word8(0), split_word8(0)))
             }
             SYS_LOG => {
@@ -618,8 +822,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         }
     }
 
-    fn decode(&self, word: (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem)) -> OpCode {
-        let word = merge_word8(word);
+    fn decode(&self, word: u32) -> OpCode {
         let opcode = word & 0x0000007f;
         let rs2 = (word & 0x01f00000) >> 20;
         let funct3 = (word & 0x00007000) >> 12;
@@ -695,8 +898,8 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             0b1101111 => OpCode::new("JAL", 19),
             0b1110011 => match funct3 {
                 0x0 => match (rs2, funct7) {
-                    (0x0, 0x0) => OpCode::with_major_minor("ECALL", 8, 0),
-                    (0x1, 0x0) => OpCode::with_major_minor("EBREAK", 8, 1),
+                    (0x0, 0x0) => OpCode::with_major_minor("ECALL", MajorType::ECall, 0),
+                    (0x1, 0x0) => OpCode::with_major_minor("EBREAK", MajorType::ECall, 1),
                     _ => unreachable!(),
                 },
                 _ => unreachable!(),
@@ -707,29 +910,40 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
 }
 
 pub struct RV32Executor<'a, H: HostHandler> {
-    loader: Loader,
-    entry: u32,
     pub executor: Executor<BabyBear, CircuitImpl, MachineContext<'a, H>>,
 }
 
 impl<'a, H: HostHandler> RV32Executor<'a, H> {
-    pub fn new(circuit: &'static CircuitImpl, elf: &'a Program, io: &'a mut H) -> Self {
+    pub fn new(circuit: &'static CircuitImpl, elf: &'a Program, host: &'a mut H) -> Self {
         debug!("image.size(): {}", elf.image.len());
-        let machine = MachineContext::new(io);
-        let min_po2 = log2_ceil(1570 + elf.image.len() / 3 + ZK_CYCLES);
-        let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2);
-        Self {
-            loader: Loader::new(&elf.image),
-            entry: elf.entry,
-            executor,
+        let image = MemoryImage::new(elf, PAGE_SIZE as u32);
+        let mut io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
+
+        // initialize PC
+        let entry_bytes = elf.entry.to_le_bytes();
+        for i in 0..WORD_SIZE {
+            io[i] = (entry_bytes[i] as u32).into();
         }
+
+        // initialize ImageID
+        let image_id = image.root.as_slice();
+        for i in 0..DIGEST_WORDS {
+            let bytes = image_id[i].to_le_bytes();
+            for j in 0..WORD_SIZE {
+                io[(i + 1) * WORD_SIZE + j] = (bytes[j] as u32).into();
+            }
+        }
+
+        let machine = MachineContext::new(host, image);
+        let min_po2 = log2_ceil(1570 + elf.image.len() / 3 + ZK_CYCLES);
+        let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2, &io);
+        Self { executor }
     }
 
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<usize> {
-        let cycles = self
-            .loader
-            .load(self.entry, |chunk, fini| self.executor.step(chunk, fini))?;
+        let loader = Loader::new();
+        let cycles = loader.load(|chunk, fini| self.executor.step(chunk, fini))?;
         self.executor.finalize();
         Ok(cycles)
     }

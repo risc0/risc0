@@ -14,7 +14,10 @@
 
 #![no_main]
 
-use risc0_zkvm::{MethodId, Receipt};
+use risc0_zkvm::{
+    sha::{Digest, DIGEST_WORDS},
+    Receipt,
+};
 
 // This binary is here as a way to check which deps are included
 // when building for the wasm32-unknown-unknown target.
@@ -22,8 +25,8 @@ use risc0_zkvm::{MethodId, Receipt};
 
 #[no_mangle]
 fn _start() {
-    // TODO: use a real receipt and method_id
+    // TODO: use a real receipt and image_id
     let receipt = Receipt::new(&[], &[]);
-    let method_id = MethodId::from_slice(&[]).unwrap();
-    receipt.verify(method_id).unwrap();
+    let image_id = Digest::new([0; DIGEST_WORDS]);
+    receipt.verify(image_id).unwrap();
 }

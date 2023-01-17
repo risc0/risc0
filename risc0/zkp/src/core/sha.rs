@@ -31,8 +31,11 @@ use serde::{Deserialize, Serialize};
 // traditional 32 8-bit bytes.
 pub const DIGEST_WORDS: usize = 8;
 
-/// The size of a word within a [Digest] (32-bits = 4 bytes).
+/// The size of a word in bytes within a [Digest] (32-bits = 4 bytes).
 pub const DIGEST_WORD_SIZE: usize = mem::size_of::<u32>();
+
+/// The size of a block in bytes.
+pub const BLOCK_SIZE: usize = DIGEST_WORDS * DIGEST_WORD_SIZE * 2;
 
 /// Standard SHA initialization vector .
 pub static SHA256_INIT: Digest = Digest::new([
@@ -146,6 +149,18 @@ impl From<&str> for Digest {
             })
             .collect();
         Digest::new(words.try_into().unwrap())
+    }
+}
+
+impl From<&Digest> for Digest {
+    fn from(digest: &Digest) -> Self {
+        digest.clone()
+    }
+}
+
+impl From<&[u8]> for Digest {
+    fn from(bytes: &[u8]) -> Self {
+        Digest::from_bytes(bytes)
     }
 }
 

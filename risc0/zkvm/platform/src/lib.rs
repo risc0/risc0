@@ -24,3 +24,4 @@ pub mod memory;
 pub mod syscall;
 
 pub const WORD_SIZE: usize = core::mem::size_of::<u32>();
+pub const PAGE_SIZE: usize = 1024;
