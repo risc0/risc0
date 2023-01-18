@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   size_t mask = steps - 1;
   std::array<Fp, 32> host_args;
   std::array<Fp, 32> host_outs;
-  // loc("cirgen/circuit/rv32im/ffpu.cpp":70:85)
+  // loc("cirgen/circuit/rv32im/ffpu.cpp":76:85)
   Fp x0(2013265910);
   // loc("./cirgen/components/onehot.h":35:32)
   Fp x1(11);
