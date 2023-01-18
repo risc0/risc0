@@ -80,6 +80,18 @@ pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 #[cfg(target_os = "zkvm")]
 static mut READ_PTR: UnsafeCell<usize> = UnsafeCell::new(memory::INPUT.start());
 
+/// Compute `ceil(a / b)` via truncated integer division.
+#[allow(dead_code)]
+const fn div_ceil(a: u32, b: u32) -> u32 {
+    (a + b - 1) / b
+}
+
+/// Round `a` up to the nearest multipe of `b`.
+#[allow(dead_code)]
+const fn round_up(a: u32, b: u32) -> u32 {
+    div_ceil(a, b) * b
+}
+
 #[inline(always)]
 pub unsafe fn sys_panic(msg_ptr: *const u8, msg_len: usize) -> ! {
     #[cfg(target_os = "zkvm")]
@@ -116,6 +128,7 @@ pub unsafe fn sys_io(channel: u32, buf_ptr: *const u8, buf_len: usize) -> &'stat
     #[cfg(target_os = "zkvm")]
     {
         let read_ptr: &mut usize = &mut *READ_PTR.get();
+        *read_ptr = round_up(*read_ptr as u32, crate::PAGE_SIZE as u32) as usize;
         let out_ptr = *read_ptr as *const u8;
         let out_nbytes: usize;
         asm!(
@@ -203,6 +216,7 @@ pub unsafe fn sys_compute_poly(
     #[cfg(target_os = "zkvm")]
     {
         let read_ptr: &mut usize = &mut *READ_PTR.get();
+        *read_ptr = round_up(*read_ptr as u32, crate::PAGE_SIZE as u32) as usize;
         let out_ptr = *read_ptr as *const u32;
         let out_nwords: usize;
         asm!(

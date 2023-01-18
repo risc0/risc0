@@ -33,7 +33,7 @@ Fp step_compute_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp
   size_t mask = steps - 1;
   std::array<Fp, 32> host_args;
   std::array<Fp, 32> host_outs;
-  // loc("cirgen/circuit/rv32im/ffpu.cpp":70:85)
+  // loc("cirgen/circuit/rv32im/ffpu.cpp":76:85)
   Fp x0(2013265910);
   // loc("./cirgen/components/onehot.h":35:32)
   Fp x1(11);
