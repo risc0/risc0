@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use risc0_zkp::core::sha::{Digest, Sha, DIGEST_WORDS, DIGEST_BYTES, BLOCK_SIZE, DIGEST_WORD_SIZE, SHA256_INIT};
+pub use risc0_zkp::core::sha::{
+    Digest, Sha, BLOCK_SIZE, DIGEST_BYTES, DIGEST_WORDS, DIGEST_WORD_SIZE, SHA256_INIT,
+};
 
 // Pick the appropriate implementation of SHA-256 depending on whether we are
 // in the zkVM guest.

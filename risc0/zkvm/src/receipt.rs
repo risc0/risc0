@@ -50,7 +50,8 @@ pub struct Receipt {
     pub seal: Vec<u32>,
 }
 
-// TODO(victor): Consider whether using the `Digest: From<D>` is the right constraint here.
+// TODO(victor): Consider whether using the `Digest: From<D>` is the right
+// constraint here.
 pub fn verify_with_hal<H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u32]) -> Result<()>
 where
     H: risc0_zkp::verify::VerifyHal,

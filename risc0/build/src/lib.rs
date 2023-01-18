@@ -83,7 +83,10 @@ use std::{
 
 use cargo_metadata::{MetadataCommand, Package};
 use downloader::{Download, Downloader};
-use risc0_zkvm::{sha::{Digest, DIGEST_BYTES}, MemoryImage, Program};
+use risc0_zkvm::{
+    sha::{Digest, DIGEST_BYTES},
+    MemoryImage, Program,
+};
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};

@@ -203,6 +203,7 @@ fn hash_page(page: &[u8]) -> Digest {
 
 #[cfg(test)]
 mod tests {
+    use risc0_zkvm_methods::MULTI_TEST_ELF;
     use risc0_zkvm_platform::{
         memory::{DATA, PAGE_TABLE, STACK, SYSTEM, TEXT},
         syscall::DIGEST_BYTES,
@@ -211,7 +212,6 @@ mod tests {
 
     use super::MemoryImage;
     use crate::prove::{elf::Program, image::PageTableInfo};
-    use risc0_zkvm_methods::MULTI_TEST_ELF;
 
     fn page_table_size(max_mem: u32, page_size: u32) -> u32 {
         PageTableInfo::new(0, max_mem, page_size)._page_table_size
