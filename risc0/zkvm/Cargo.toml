@@ -58,7 +58,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 env_logger = "0.10"
 lazy_static = "1.4"
 risc0-zkvm-methods = { path = "methods" }
-serial_test = "0.10"
+serial_test = "1.0"
 tar = "0.4"
 tempdir = "0.3"
 test-log = { version = "0.2", features = ["trace"] }

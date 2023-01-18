@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          # Fetch the merge commit and origin/HEAD.
+          fetch-depth: 2
       - uses: risc0/actions-rs-toolchain@v1
         with:
           toolchain: stable
@@ -23,7 +26,14 @@ jobs:
           version: "1.0"
       - run: cargo fmt --all -- --check
       - run: cargo sort --workspace --check
-      - run: npx @kt3k/license-checker
+      - run: |
+          # Check that no source files updated this year have a missing or out-of-date copyright.
+          # Locally, use the following command to check that copyrights have been updated.
+          # comm -12 <(git diff --name-only --pretty=format: origin/HEAD | sort | uniq) <(npx @kt3k/license-checker | grep 'missing copyright' | sort | cut -d ' ' -f 1)
+          set -e
+          MISSING_COPYRIGHT="$(comm -12 <(git diff --name-only --pretty=format: HEAD^ | sort | uniq) <(npx @kt3k/license-checker | grep 'missing copyright' | sort | cut -d ' ' -f 1))"
+          echo $MISSING_COPYRIGHT
+          [ -z "$MISSING_COPYRIGHT" ]
 
   test:
     runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.arch }}"]
