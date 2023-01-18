@@ -184,7 +184,7 @@ fn check_image_id() {
         .verify(MULTI_TEST_ID)
         .expect("Verification should succeed before we corrupt the image_id");
     let mut digest: Digest = MULTI_TEST_ID.into();
-    for word in digest.as_mut_slice() {
+    for word in digest.as_mut_words() {
         *word = word.wrapping_add(1);
     }
     assert_eq!(

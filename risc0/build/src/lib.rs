@@ -83,7 +83,7 @@ use std::{
 
 use cargo_metadata::{MetadataCommand, Package};
 use downloader::{Download, Downloader};
-use risc0_zkvm::{sha::Digest, MemoryImage, Program};
+use risc0_zkvm::{sha::{Digest, DIGEST_BYTES}, MemoryImage, Program};
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};
@@ -130,12 +130,12 @@ impl Risc0Method {
     fn rust_def(&self) -> String {
         let elf_path = self.elf_path.display();
         let upper = self.name.to_uppercase();
-        let image_id = self.make_image_id();
+        let image_id: [u8; DIGEST_BYTES] = self.make_image_id().into();
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
             r##"
 pub const {upper}_ELF: &'static [u8] = &{elf_contents:?};
-pub const {upper}_ID: &'static str = r#"{image_id:?}"#;
+pub const {upper}_ID: [u8; 32] = {image_id:?};
 pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
             "##
         )
