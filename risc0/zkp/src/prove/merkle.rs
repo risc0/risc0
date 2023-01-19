@@ -18,7 +18,7 @@ use alloc::vec::Vec;
 use log::debug;
 
 use crate::{
-    core::sha::{Digest, Sha},
+    core::sha::{Digest, Sha256},
     hal::{Buffer, Hal},
     merkle::MerkleTreeParams,
     prove::write_iop::WriteIOP,
@@ -55,7 +55,7 @@ impl<H: Hal> MerkleTreeProver<H> {
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes
         let nodes = hal.alloc_digest("nodes", rows * 2);
-        // Sha each column
+        // SHA-256 hash each column
         hal.sha_rows(&nodes.slice(rows, rows), matrix);
         // For each layer, sha up the layer below
         tracing::info_span!("sha_fold").in_scope(|| {
@@ -78,7 +78,7 @@ impl<H: Hal> MerkleTreeProver<H> {
     }
 
     /// Write the 'top' of the merkle tree and commit to the root.
-    pub fn commit<S: Sha>(&self, iop: &mut WriteIOP<S>) {
+    pub fn commit<S: Sha256>(&self, iop: &mut WriteIOP<S>) {
         let top_size = self.params.top_size;
         iop.write_pod_slice(&self.nodes[top_size..top_size * 2]);
         iop.commit(self.root());
@@ -98,7 +98,7 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
-    pub fn prove<S: Sha>(&self, iop: &mut WriteIOP<S>, idx: usize) -> Vec<H::Elem> {
+    pub fn prove<S: Sha256>(&self, iop: &mut WriteIOP<S>, idx: usize) -> Vec<H::Elem> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);
         self.matrix.view(|view| {
@@ -167,13 +167,19 @@ mod tests {
         MerkleTreeProver::new(hal, &matrix, rows, cols, queries)
     }
 
-    fn bad_row_access<H: Hal, S: Sha>(sha: &S, hal: &H, rows: usize, cols: usize, queries: usize) {
+    fn bad_row_access<H: Hal, S: Sha256>(
+        sha: &S,
+        hal: &H,
+        rows: usize,
+        cols: usize,
+        queries: usize,
+    ) {
         let prover = init_prover(hal, rows, cols, queries);
         let mut iop = WriteIOP::new(sha);
         prover.prove(&mut iop, rows);
     }
 
-    fn possibly_bad_verify<S: Sha>(
+    fn possibly_bad_verify<S: Sha256>(
         hal: &BabyBearCpuHal,
         verify_hal: &CpuVerifyHal<S, BabyBear, MockCircuit>,
         rows: usize,

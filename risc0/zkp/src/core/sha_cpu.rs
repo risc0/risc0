@@ -18,14 +18,13 @@ use alloc::{boxed::Box, vec::Vec};
 use core::slice;
 
 use sha2::{
-    compress256,
     digest::generic_array::{typenum::U64, GenericArray},
-    Digest as ShaDigest, Sha256,
+    Digest as _,
 };
 
-use super::sha::{Digest, Sha, DIGEST_WORDS, SHA256_INIT};
+use super::sha::{Digest, Sha256, DIGEST_WORDS, SHA256_INIT};
 
-/// A CPU-based [Sha] implementation.
+/// A CPU-based [Sha256] implementation.
 #[derive(Default, Clone)]
 pub struct Impl {}
 
@@ -38,14 +37,13 @@ impl Impl {
     /// specified offset and stride. 'size' specifies the number of
     /// elements to hash.
     pub fn hash_pod_stride<T: bytemuck::Pod>(
-        &self,
         pods: &[T],
         offset: usize,
         size: usize,
         stride: usize,
     ) -> Box<Digest> {
         // Because bytes in our digests are in big-endian order, regardless of host
-        // architecture, and the `compress256` function takes words in native
+        // architecture, and the `sha2::compress256` function takes words in native
         // byte order, the bytes of the IV need to be flipped on little-endian
         // machines (e.g. x86).
         let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
@@ -82,13 +80,13 @@ impl Impl {
             );
             off += 1;
             if off == 16 {
-                compress256(&mut state, slice::from_ref(&block));
+                sha2::compress256(&mut state, slice::from_ref(&block));
                 off = 0;
             }
         }
         if off != 0 {
             block[off * 4..].fill(0);
-            compress256(&mut state, slice::from_ref(&block));
+            sha2::compress256(&mut state, slice::from_ref(&block));
         }
 
         // Flip the bytes back to big-endian order from native order.
@@ -99,11 +97,11 @@ impl Impl {
     }
 }
 
-impl Sha for Impl {
+impl Sha256 for Impl {
     type DigestPtr = Box<Digest>;
 
-    fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
-        let digest = Sha256::digest(bytes);
+    fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr {
+        let digest = sha2::Sha256::digest(bytes);
         let words: Vec<u32> = digest
             .as_slice()
             .chunks(4)
@@ -114,11 +112,11 @@ impl Sha for Impl {
         ))
     }
 
-    fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
-        self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
+    fn hash_words(words: &[u32]) -> Self::DigestPtr {
+        Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
-    fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, pod: &[T]) -> Self::DigestPtr {
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(pod: &[T]) -> Self::DigestPtr {
         let u8s: &[u8] = bytemuck::cast_slice(pod);
         let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
         for word in state.iter_mut() {
@@ -126,14 +124,14 @@ impl Sha for Impl {
         }
         let mut blocks = u8s.chunks_exact(64);
         for block in blocks.by_ref() {
-            compress256(&mut state, slice::from_ref(GenericArray::from_slice(block)));
+            sha2::compress256(&mut state, slice::from_ref(GenericArray::from_slice(block)));
         }
         let remainder = blocks.remainder();
         if remainder.len() > 0 {
             let mut last_block: GenericArray<u8, U64> = GenericArray::default();
             bytemuck::cast_slice_mut(last_block.as_mut_slice())[..remainder.len()]
                 .clone_from_slice(remainder);
-            compress256(&mut state, slice::from_ref(&last_block));
+            sha2::compress256(&mut state, slice::from_ref(&last_block));
         }
         for word in state.iter_mut() {
             *word = word.to_be();
@@ -143,7 +141,6 @@ impl Sha for Impl {
 
     // Digest two digest into one
     fn compress(
-        &self,
         orig_state: &Digest,
         block_half1: &Digest,
         block_half2: &Digest,
@@ -157,7 +154,7 @@ impl Sha for Impl {
             set_word(block.as_mut_slice(), i, block_half1.as_words()[i]);
             set_word(block.as_mut_slice(), 8 + i, block_half2.as_words()[i]);
         }
-        compress256(&mut state, slice::from_ref(&block));
+        sha2::compress256(&mut state, slice::from_ref(&block));
         for word in state.iter_mut() {
             *word = word.to_be();
         }
@@ -166,17 +163,11 @@ impl Sha for Impl {
 
     // Generate a new digest by mixing two digests together via XOR,
     // and stores it back in the pool.
-    fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest) {
-        // CPU based sha can do this in place without generating another digest pointer.
+    fn mix(pool: &mut Self::DigestPtr, val: &Digest) {
+        // PU based sha can do this in place without generating another digest pointer.
         for (pool_word, val_word) in pool.as_mut_words().iter_mut().zip(val.as_words()) {
             *pool_word ^= *val_word;
         }
-    }
-}
-
-impl core::fmt::Debug for Impl {
-    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        core::write!(f, "CPU SHA256 implementation")
     }
 }
 
@@ -186,6 +177,6 @@ mod tests {
 
     #[test]
     fn test_impl() {
-        crate::core::sha::testutil::test_sha_impl(&Impl {})
+        crate::core::sha::testutil::test_sha_impl::<Impl>();
     }
 }

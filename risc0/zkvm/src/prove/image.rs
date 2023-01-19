@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_zkp::core::sha::{Digest, Sha, BLOCK_SIZE, SHA256_INIT};
+use risc0_zkp::core::sha::{Digest, Sha256, BLOCK_SIZE, SHA256_INIT};
 use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE, STACK},
     syscall::DIGEST_BYTES,
@@ -190,13 +190,12 @@ impl MemoryImage {
 }
 
 fn hash_page(page: &[u8]) -> Digest {
-    let sha = sha::sha();
     let mut state = SHA256_INIT;
     assert!(page.len() % BLOCK_SIZE == 0);
     for block in page.chunks_exact(BLOCK_SIZE) {
         let block1 = Digest::try_from(&block[0..DIGEST_BYTES]).unwrap();
         let block2 = Digest::try_from(&block[DIGEST_BYTES..BLOCK_SIZE]).unwrap();
-        state = *sha.compress(&state, &block1, &block2);
+        state = *sha::Impl::compress(&state, &block1, &block2);
     }
     state
 }

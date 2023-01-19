@@ -242,7 +242,9 @@ impl Debug for Digest {
 /// An implementation of the SHA-256 hashing algorithm of [FIPS 180-4].
 ///
 /// [FIPS 180-4] https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
-pub trait Sha: Clone + Debug {
+// TODO(victor): Is there anywhere this function is used when it should really
+// be a PRF?
+pub trait Sha256 {
     /// A pointer to the created digest.
     ///
     /// This may either be a `Box<Digest>` or some other pointer in case the
@@ -251,15 +253,15 @@ pub trait Sha: Clone + Debug {
 
     /// Generate a SHA from a slice of bytes, padding to block size
     /// and adding the SHA trailer.
-    fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr;
+    fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr;
 
     /// Generate a SHA from a slice of words, padding to block size
     /// and adding the SHA trailer.
     // TODO(victor): What should a developer expect here as it relates to endianess?
     // Should they expect the hash is invariant with the numeric value of words,
     // or of the bytes?
-    fn hash_words(&self, words: &[u32]) -> Self::DigestPtr {
-        self.hash_bytes(bytemuck::cast_slice(words) as &[u8])
+    fn hash_words(words: &[u32]) -> Self::DigestPtr {
+        Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
     /// Generate a SHA from a pair of [Digests](Digest).
@@ -267,33 +269,30 @@ pub trait Sha: Clone + Debug {
     // guesing is designed for use in Merkle trees. Is this the best method to
     // be exposing here though? It does not use domain speration or added padding
     // and length.
-    fn hash_pair(&self, a: &Digest, b: &Digest) -> Self::DigestPtr {
-        self.compress(&SHA256_INIT, a, b)
+    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+        Self::compress(&SHA256_INIT, a, b)
     }
 
     /// Execute the SHA-256 compression function.
     /// The block is specified as two half-blocks.
-    /// Not all implementations provide this.
     ///
-    /// DANGER:
-    fn compress(
-        &self,
-        state: &Digest,
-        block_half1: &Digest,
-        block_half2: &Digest,
-    ) -> Self::DigestPtr;
+    /// DANGER: This is the low-level SHA-256 compression function. It is a
+    /// primitive used to construct SHA-256, but it is NOT the full
+    /// algorithm and should be used directly only with extreme caution.
+    fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr;
 
-    /// Generate a SHA from a slice of anything that can be
-    /// represented as plain old data. Pads up to the Sha block
-    /// boundry, but does not add the standard SHA trailer.
-    // TODO(victor): Understand why this function exists.
-    fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, slice: &[T]) -> Self::DigestPtr;
+    /// Generate a SHA from a slice of anything that can be represented as plain
+    /// old data. Pads up to the SHA-256 block boundry, but does not add the
+    /// standard SHA trailer.
+    // TODO(victor): Look over the usages of this function to understand why it
+    // exists and if it should exist on this trait.
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
 
     /// Generate a new digest by mixing two digests together via XOR,
     /// and storing into the first digest.
     // TODO(victor): I'm guessing this is for use by a randomness pool. I may
     // extract this function to there.
-    fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest);
+    fn mix(pool: &mut Self::DigestPtr, val: &Digest);
 }
 
 #[cfg(test)]
@@ -329,47 +328,46 @@ mod tests {
 
 #[allow(missing_docs)]
 pub mod testutil {
-    // TODO(victor) Fix these tests.
     use alloc::vec::Vec;
     use core::ops::Deref;
 
     use hex::FromHex;
 
-    use super::{Digest, Sha};
+    use super::{Digest, Sha256};
     use crate::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
-    // Runs conformance test on a SHA implementation to make sure it properly
+    // Runs conformance test on a SHA-256 implementation to make sure it properly
     // behaves.
-    pub fn test_sha_impl<S: Sha>(sha: &S) {
-        test_hash_pair(sha);
-        test_hash_raw_pod_slice(sha);
-        test_sha_basics(sha);
-        test_elems(sha);
-        test_extelems(sha);
+    pub fn test_sha_impl<S: Sha256>() {
+        test_hash_pair::<S>();
+        test_hash_raw_pod_slice::<S>();
+        test_sha_basics::<S>();
+        test_elems::<S>();
+        test_extelems::<S>();
 
-        crate::core::sha_rng::testutil::test_sha_rng_impl(sha);
+        crate::core::sha_rng::testutil::test_sha_rng_impl::<S>();
     }
 
-    fn test_sha_basics<S: Sha>(sha: &S) {
+    fn test_sha_basics<S: Sha256>() {
         // Standard test vectors
         assert_eq!(
-            hex::encode(sha.hash_bytes("abc".as_bytes()).deref()),
+            hex::encode(S::hash_bytes("abc".as_bytes()).deref()),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
         assert_eq!(
-            hex::encode(sha.hash_bytes("".as_bytes()).deref()),
+            hex::encode(S::hash_bytes("".as_bytes()).deref()),
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         );
         assert_eq!(
             hex::encode(
-                &sha.hash_bytes(
+                &S::hash_bytes(
                     "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()
                 )
                 .deref()
             ),
             "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
         );
-        assert_eq!(hex::encode(&sha.hash_bytes(
+        assert_eq!(hex::encode(&S::hash_bytes(
             "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes()).deref()),
             "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1");
         // Test also the 'hexDigest' bit.
@@ -377,20 +375,20 @@ pub mod testutil {
         // >>> hashlib.sha256("Byzantium").hexdigest()
         // 'f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a'
         assert_eq!(
-            hex::encode(&sha.hash_bytes(&"Byzantium".as_bytes()).deref()),
+            hex::encode(&S::hash_bytes(&"Byzantium".as_bytes()).deref()),
             "f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a"
         );
     }
 
-    fn hash_elems<S: Sha>(sha: &S, len: usize) -> Digest {
+    fn hash_elems<S: Sha256>(len: usize) -> Digest {
         let items: Vec<BabyBearElem> = (0..len as u32)
             .into_iter()
             .map(|x| BabyBearElem::new(x))
             .collect();
-        *sha.hash_raw_pod_slice(items.as_slice())
+        *S::hash_raw_pod_slice(items.as_slice())
     }
 
-    fn hash_extelems<S: Sha>(sha: &S, len: usize) -> Digest {
+    fn hash_extelems<S: Sha256>(len: usize) -> Digest {
         let items: Vec<BabyBearExtElem> = (0..len as u32)
             .into_iter()
             .map(|x| {
@@ -402,10 +400,10 @@ pub mod testutil {
                 )
             })
             .collect();
-        *sha.hash_raw_pod_slice(items.as_slice())
+        *S::hash_raw_pod_slice(items.as_slice())
     }
 
-    fn test_elems<S: Sha>(sha: &S) {
+    fn test_elems<S: Sha256>() {
         const LENS: &[usize] = &[0, 1, 7, 8, 9];
         // It doesn't matter what elems hash to, as long as they're consistent.
         const EXPECTED_STRS: &[&str] = &[
@@ -420,11 +418,11 @@ pub mod testutil {
             .iter()
             .map(|x| Digest::from_hex(x).unwrap())
             .collect();
-        let actual: Vec<Digest> = LENS.iter().map(|x| hash_elems(sha, *x)).collect();
+        let actual: Vec<Digest> = LENS.iter().map(|x| hash_elems::<S>(*x)).collect();
         assert_eq!(expected, actual);
     }
 
-    fn test_extelems<S: Sha>(sha: &S) {
+    fn test_extelems<S: Sha256>() {
         const LENS: &[usize] = &[0, 1, 7, 8, 9];
         // It doesn't matter what extelems hash to, as long as they're consistent.
         const EXPECTED_STRS: &[&str] = &[
@@ -439,15 +437,15 @@ pub mod testutil {
             .iter()
             .map(|x| Digest::from_hex(x).unwrap())
             .collect();
-        let actual: Vec<Digest> = LENS.iter().map(|x| hash_extelems(sha, *x)).collect();
+        let actual: Vec<Digest> = LENS.iter().map(|x| hash_extelems::<S>(*x)).collect();
         assert_eq!(expected, actual);
     }
 
-    fn test_hash_raw_pod_slice<S: Sha>(sha: &S) {
+    fn test_hash_raw_pod_slice<S: Sha256>() {
         {
             let items: &[u32] = &[1];
             assert_eq!(
-                *sha.hash_raw_pod_slice(items),
+                *S::hash_raw_pod_slice(items),
                 Digest::from_hex(
                     "e3050856aac389661ae490656ad0ea57df6aff0ff6eef306f8cc2eed4f240249"
                 )
@@ -457,7 +455,7 @@ pub mod testutil {
         {
             let items: &[u32] = &[1, 2];
             assert_eq!(
-                *sha.hash_raw_pod_slice(items),
+                *S::hash_raw_pod_slice(items),
                 Digest::from_hex(
                     "4138ebae12299733cc677d1150c2a0139454662fc76ec95da75d2bf9efddc57a"
                 )
@@ -467,7 +465,7 @@ pub mod testutil {
         {
             let items: &[u32] = &[0xffffffff];
             assert_eq!(
-                *sha.hash_raw_pod_slice(items),
+                *S::hash_raw_pod_slice(items),
                 Digest::from_hex(
                     "a3dba037d56175209dfd4191f727e91c5feb67e65a6ab5ed4daf0893c89598c8"
                 )
@@ -476,9 +474,9 @@ pub mod testutil {
         }
     }
 
-    fn test_hash_pair<S: Sha>(sha: &S) {
+    fn test_hash_pair<S: Sha256>() {
         assert_eq!(
-            *sha.hash_pair(
+            *S::hash_pair(
                 &Digest::from_hex(
                     "67e6096a85ae67bb72f36e3c3af54fa57f520e518c68059babd9831f19cde05b"
                 )
@@ -492,7 +490,7 @@ pub mod testutil {
                 .unwrap()
         );
         assert_eq!(
-            *sha.hash_pair(
+            *S::hash_pair(
                 &Digest::from_hex(
                     "0000000000000000000000000000000000000000000000000000000000000000"
                 )

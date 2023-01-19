@@ -37,8 +37,7 @@ use risc0_zkvm_platform::{
 use self::elf::Program;
 use crate::{
     receipt::{insecure_skip_seal, Receipt},
-    sha::sha,
-    CIRCUIT,
+    sha, CIRCUIT,
 };
 
 /// Options available to modify the prover's behavior.
@@ -208,10 +207,10 @@ impl<'a> Prover<'a> {
         let mut prover = ProveAdapter::new(&mut executor.executor);
 
         let seal = if skip_seal {
-            risc0_zkp::prove::prove_without_seal(sha(), &mut prover);
+            risc0_zkp::prove::prove_without_seal::<_, sha::Impl, _, _>(&mut prover);
             Vec::new()
         } else {
-            risc0_zkp::prove::prove(hal, sha(), &mut prover, eval)
+            risc0_zkp::prove::prove::<_, _, sha::Impl, _, _, _>(hal, &mut prover, eval)
         };
 
         // Attach the full version of the output journal & construct receipt object

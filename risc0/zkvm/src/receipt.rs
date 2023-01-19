@@ -17,7 +17,7 @@ use alloc::vec::Vec;
 use anyhow::{anyhow, Result};
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 use risc0_zkp::{
-    core::sha::{Digest, Sha},
+    core::sha::{Digest, Sha256},
     verify::VerificationError,
 };
 use risc0_zkvm_platform::{
@@ -58,7 +58,6 @@ where
     Digest: From<D>,
 {
     let image_id: Digest = image_id.into();
-    let sha = sha::sha();
     let check_globals = |io: &[u32]| -> Result<(), VerificationError> {
         // verify the image_id
         #[cfg(not(target_os = "zkvm"))]
@@ -97,7 +96,7 @@ where
                 }
             }
         } else {
-            let digest = sha.hash_raw_pod_slice(journal);
+            let digest = sha::Impl::hash_raw_pod_slice(journal);
             let digest = digest.as_words();
             for i in 0..DIGEST_WORDS {
                 if digest[i] != outputs[i] {
@@ -137,8 +136,7 @@ impl Receipt {
     where
         Digest: From<D>,
     {
-        let sha = crate::sha::sha();
-        let hal = risc0_zkp::verify::CpuVerifyHal::new(sha, &crate::CIRCUIT);
+        let hal = risc0_zkp::verify::CpuVerifyHal::<sha::Impl, _, _>::new(&crate::CIRCUIT);
 
         verify_with_hal(&hal, image_id, &self.seal, &self.journal)
     }

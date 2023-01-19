@@ -16,7 +16,7 @@ use alloc::vec::Vec;
 
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
-    core::sha::Sha,
+    core::sha::Sha256,
     field::{baby_bear::BabyBearElem, Elem},
     taps::TapSet,
     verify::read_iop::ReadIOP,
@@ -45,7 +45,7 @@ impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
         self.circuit.get_taps()
     }
 
-    pub fn execute<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
+    pub fn execute<S: Sha256>(&mut self, iop: &mut ReadIOP<'a, S>) {
         // Read the outputs + size
         self.out = Some(iop.read_field_elem_slice(C::OUTPUT_SIZE));
         self.po2 = match iop.read_u32s(1) {
@@ -55,7 +55,7 @@ impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
         self.steps = 1 << self.po2;
     }
 
-    pub fn accumulate<S: Sha>(&mut self, iop: &mut ReadIOP<'a, S>) {
+    pub fn accumulate<S: Sha256>(&mut self, iop: &mut ReadIOP<'a, S>) {
         // Fill in accum mix
         self.mix = (0..C::MIX_SIZE)
             .map(|_| BabyBearElem::random(iop))

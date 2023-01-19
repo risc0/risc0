@@ -16,30 +16,24 @@ use rand_core::{Error, RngCore};
 
 use crate::{
     core::{
-        sha::{Digest, Sha},
+        sha::{Digest, Sha256},
         sha_rng::ShaRng,
     },
     field::{self},
 };
 
 #[derive(Debug)]
-pub struct ReadIOP<'a, S: Sha + 'a> {
-    sha: S,
+pub struct ReadIOP<'a, S: Sha256> {
     proof: &'a [u32],
     rng: ShaRng<S>,
 }
 
-impl<'a, S: Sha + 'a> ReadIOP<'a, S> {
-    pub fn new(sha: &'a S, proof: &'a [u32]) -> Self {
+impl<'a, S: Sha256> ReadIOP<'a, S> {
+    pub fn new(proof: &'a [u32]) -> Self {
         ReadIOP {
-            sha: sha.clone(),
             proof,
-            rng: ShaRng::new(sha),
+            rng: ShaRng::<S>::new(),
         }
-    }
-
-    pub fn get_sha(&self) -> &S {
-        &self.sha
     }
 
     pub fn read_u32s(&mut self, n: usize) -> &'a [u32] {
@@ -76,7 +70,7 @@ impl<'a, S: Sha + 'a> ReadIOP<'a, S> {
     }
 }
 
-impl<'a, S: Sha> RngCore for ReadIOP<'a, S> {
+impl<'a, S: Sha256> RngCore for ReadIOP<'a, S> {
     fn next_u32(&mut self) -> u32 {
         self.rng.next_u32()
     }

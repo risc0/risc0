@@ -13,25 +13,16 @@
 // limitations under the License.
 
 pub use risc0_zkp::core::sha::{
-    Digest, Sha, BLOCK_SIZE, DIGEST_BYTES, DIGEST_WORDS, DIGEST_WORD_SIZE, SHA256_INIT,
+    Digest, Sha256, BLOCK_SIZE, DIGEST_BYTES, DIGEST_WORDS, DIGEST_WORD_SIZE, SHA256_INIT,
 };
 
 // Pick the appropriate implementation of SHA-256 depending on whether we are
 // in the zkVM guest.
+// TODO(victor): Should I rename this to something other than Impl?
 cfg_if::cfg_if! {
     if #[cfg(target_os = "zkvm")] {
         pub use crate::guest::sha::Impl;
     } else {
         pub use risc0_zkp::core::sha_cpu::Impl;
     }
-}
-
-const IMPL: Impl = Impl {};
-
-/// Get a Sha implementation for the platform that is being compiled to.
-/// On the host, this will return a CPU implementation. In the zkVM guest this
-/// will return the guest implementation, which uses the SHA2 coprocessor inside
-/// the RISCV circuit.
-pub const fn sha() -> &'static impl Sha {
-    &IMPL
 }

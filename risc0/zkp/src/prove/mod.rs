@@ -29,7 +29,7 @@ use crate::{
     adapter::{CircuitDef, CircuitStepHandler},
     core::{
         poly::{poly_divide, poly_interpolate},
-        sha::Sha,
+        sha::Sha256,
     },
     field::{Elem, ExtElem, Field, RootsOfUnity},
     hal::{Buffer, EvalCheck, Hal},
@@ -38,28 +38,27 @@ use crate::{
     INV_RATE, MAX_CYCLES_PO2,
 };
 
-pub fn prove_without_seal<'a, F, S, C, CS>(sha: &S, circuit: &mut ProveAdapter<'a, F, C, CS>)
+pub fn prove_without_seal<'a, F, S, C, CS>(circuit: &mut ProveAdapter<'a, F, C, CS>)
 where
     F: Field,
-    S: Sha,
+    S: Sha256,
     C: CircuitDef<F>,
     CS: CircuitStepHandler<F::Elem>,
 {
-    let mut iop = WriteIOP::new(sha);
+    let mut iop = WriteIOP::<S>::new();
     circuit.execute(&mut iop);
 }
 
 #[tracing::instrument(skip_all)]
 pub fn prove<'a, F, H, S, E, C, CS>(
     hal: &H,
-    sha: &S,
     circuit: &mut ProveAdapter<'a, F, C, CS>,
     eval: &E,
 ) -> Vec<u32>
 where
     F: Field,
     H: Hal<Elem = F::Elem, ExtElem = F::ExtElem>,
-    S: Sha,
+    S: Sha256,
     E: EvalCheck<H>,
     C: CircuitDef<F>,
     CS: CircuitStepHandler<F::Elem>,
@@ -80,7 +79,7 @@ where
         circuit.get_accum().len()
     );
 
-    let mut iop = WriteIOP::new(sha);
+    let mut iop = WriteIOP::<S>::new();
 
     circuit.execute(&mut iop);
 
@@ -237,7 +236,7 @@ where
 
     debug!("Size of U = {}", coeff_u.len());
     iop.write_field_elem_slice(&coeff_u);
-    let hash_u = sha.hash_raw_pod_slice(coeff_u.as_slice());
+    let hash_u = S::hash_raw_pod_slice(coeff_u.as_slice());
     iop.commit(&hash_u);
 
     // Set the mix mix value, which is used for FRI batching.

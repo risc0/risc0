@@ -19,6 +19,8 @@ pub mod read_iop;
 
 use alloc::{vec, vec::Vec};
 use core::fmt;
+#[cfg(not(target_os = "zkvm"))]
+use core::marker::PhantomData;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use host::CpuVerifyHal;
@@ -28,7 +30,7 @@ use crate::{
     adapter::{CircuitInfo, TapsProvider},
     core::{
         log2_ceil,
-        sha::{Digest, Sha},
+        sha::{Digest, Sha256},
     },
     field::{Elem, ExtElem, RootsOfUnity},
     taps::{RegisterGroup, TapSet},
@@ -71,13 +73,11 @@ impl fmt::Display for VerificationError {
 }
 
 pub trait VerifyHal {
-    type Sha: Sha;
+    type Sha256: Sha256;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
-
-    fn sha(&self) -> &Self::Sha;
 
     fn debug(&self, msg: &str);
 
@@ -127,30 +127,26 @@ mod host {
         check_mix_pows: Vec<F::ExtElem>,
     }
 
-    pub struct CpuVerifyHal<'a, S: Sha, F: Field, C: PolyExt<F>> {
-        sha: &'a S,
+    pub struct CpuVerifyHal<'a, S: Sha256, F: Field, C: PolyExt<F>> {
         circuit: &'a C,
         tap_cache: RefCell<BTreeMap<*const TapSet<'static>, TapCache<F>>>,
+        phantom_sha: PhantomData<S>,
     }
 
-    impl<'a, S: Sha, F: Field, C: PolyExt<F>> CpuVerifyHal<'a, S, F, C> {
-        pub fn new(sha: &'a S, circuit: &'a C) -> Self {
+    impl<'a, S: Sha256, F: Field, C: PolyExt<F>> CpuVerifyHal<'a, S, F, C> {
+        pub fn new(circuit: &'a C) -> Self {
             Self {
-                sha,
                 circuit,
                 tap_cache: RefCell::new(BTreeMap::new()),
+                phantom_sha: PhantomData,
             }
         }
     }
 
-    impl<'a, S: Sha, F: Field, C: PolyExt<F>> VerifyHal for CpuVerifyHal<'a, S, F, C> {
-        type Sha = S;
+    impl<'a, S: Sha256, F: Field, C: PolyExt<F>> VerifyHal for CpuVerifyHal<'a, S, F, C> {
+        type Sha256 = S;
         type Elem = F::Elem;
         type ExtElem = F::ExtElem;
-
-        fn sha(&self) -> &Self::Sha {
-            self.sha
-        }
 
         fn debug(&self, msg: &str) {
             log::debug!("{}", msg);
@@ -270,7 +266,7 @@ where
     let taps = adapter.taps();
 
     // Make IOP
-    let mut iop = ReadIOP::new(hal.sha(), seal);
+    let mut iop = ReadIOP::<H::Sha256>::new(seal);
 
     // Read any execution state
     adapter.execute(&mut iop);
@@ -294,7 +290,7 @@ where
     // Get merkle root for the code merkle tree.
     // The code merkle tree contains the control instructions for the zkVM.
     hal.debug("code_merkle");
-    let code_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, code_size, QUERIES);
+    let code_merkle = MerkleTreeVerifier::<H>::new(&mut iop, domain, code_size, QUERIES);
     // debug!("codeRoot = {}", code_merkle.root());
     check_code(po2, code_merkle.root())?;
 
@@ -303,7 +299,7 @@ where
     // including memory accesses as well as the permutation of those memory
     // accesses sorted by location used by PLONK.
     hal.debug("data_merkle");
-    let data_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, data_size, QUERIES);
+    let data_merkle = MerkleTreeVerifier::<H>::new(&mut iop, domain, data_size, QUERIES);
     // debug!("dataRoot = {}", data_merkle.root());
 
     // Prep accumulation
@@ -320,7 +316,7 @@ where
     // values (see PLOOKUP paper for details). This permutation is used to
     // implement a look-up table.
     hal.debug("accum_merkle");
-    let accum_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, accum_size, QUERIES);
+    let accum_merkle = MerkleTreeVerifier::<H>::new(&mut iop, domain, accum_size, QUERIES);
     // debug!("accumRoot = {}", accum_merkle.root());
 
     // Get a pseudorandom value with which to mix the constraint polynomials.
@@ -328,7 +324,7 @@ where
     let poly_mix = H::ExtElem::random(&mut iop);
 
     hal.debug("check_merkle");
-    let check_merkle = MerkleTreeVerifier::new(hal, &mut iop, domain, H::CHECK_SIZE, QUERIES);
+    let check_merkle = MerkleTreeVerifier::<H>::new(&mut iop, domain, H::CHECK_SIZE, QUERIES);
     // debug!("checkRoot = {}", check_merkle.root());
 
     // Get a pseudorandom DEEP query point
@@ -340,7 +336,7 @@ where
     // Read the U coeffs (the interpolations of the taps) + commit their hash.
     let num_taps = taps.tap_size();
     let coeff_u = iop.read_field_elem_slice(num_taps + H::CHECK_SIZE);
-    let hash_u = *hal.sha().hash_raw_pod_slice(coeff_u);
+    let hash_u = *H::Sha256::hash_raw_pod_slice(coeff_u);
     iop.commit(&hash_u);
 
     // Now, convert U polynomials from coefficient form to evaluation form

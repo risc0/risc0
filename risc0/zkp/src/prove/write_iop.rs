@@ -16,30 +16,24 @@ use alloc::vec::Vec;
 
 use crate::{
     core::{
-        sha::{Digest, Sha},
+        sha::{Digest, Sha256},
         sha_rng::ShaRng,
     },
     field::{self},
 };
 
-pub struct WriteIOP<S: Sha> {
-    sha: S,
+pub struct WriteIOP<S: Sha256> {
     pub proof: Vec<u32>,
     pub rng: ShaRng<S>,
 }
 
-impl<S: Sha> WriteIOP<S> {
+impl<S: Sha256> WriteIOP<S> {
     /// Create a new empty proof
-    pub fn new(sha: &S) -> Self {
-        WriteIOP {
-            sha: sha.clone(),
+    pub fn new() -> Self {
+        Self {
             proof: Vec::new(),
-            rng: ShaRng::new(sha),
+            rng: ShaRng::<S>::new(),
         }
-    }
-
-    pub fn get_sha(&self) -> &S {
-        &self.sha
     }
 
     /// Called by the prover to write some data.

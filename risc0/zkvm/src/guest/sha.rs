@@ -232,16 +232,16 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     unsafe { &*digest }
 }
 
-/// A guest-side [Sha] implementation.
+/// A guest-side [Sha256] implementation.
 ///
-/// [Sha]: risc0_zkp::core::sha::Sha
+/// [Sha256]: risc0_zkp::core::sha::Sha256
 #[derive(Debug, Clone)]
 pub struct Impl {}
 
-impl risc0_zkp::core::sha::Sha for Impl {
+impl risc0_zkp::core::sha::Sha256 for Impl {
     type DigestPtr = &'static Digest;
 
-    fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
+    fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
         update_u8(
             digest,
@@ -255,7 +255,7 @@ impl risc0_zkp::core::sha::Sha for Impl {
         unsafe { &*digest }
     }
 
-    fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, pod: &[T]) -> Self::DigestPtr {
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(pod: &[T]) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
         let words: &[u32] = bytemuck::cast_slice(pod);
         update_u32(digest, &SHA256_INIT, words, WithoutTrailer);
@@ -266,9 +266,9 @@ impl risc0_zkp::core::sha::Sha for Impl {
     // Generate a new digest by mixing two digests together via XOR,
     // and storing into the first digest.
     // TODO(victor): Understand why this is implemented by writing to a new
-    // heap-allocated digest rathe than modifying the input as the comment
+    // heap-allocated digest rather than modifying the input as the comment
     // suggest.
-    fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest) {
+    fn mix(pool: &mut Self::DigestPtr, val: &Digest) {
         let mut digest = Box::<Digest>::new(Digest::default());
         for i in 0..DIGEST_WORDS {
             digest.as_mut_words()[i] = pool.as_words()[i] ^ val.as_words()[i];
@@ -279,12 +279,7 @@ impl risc0_zkp::core::sha::Sha for Impl {
         }
     }
 
-    fn compress(
-        &self,
-        state: &Digest,
-        block_half1: &Digest,
-        block_half2: &Digest,
-    ) -> &'static Digest {
+    fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> &'static Digest {
         let digest = alloc_uninit_digest();
         compress(digest, state, block_half1.as_ref(), block_half2.as_ref());
         // Now that digest is initialized, we can convert it to a reference.

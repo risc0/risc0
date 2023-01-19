@@ -22,7 +22,7 @@ use rayon::prelude::*;
 
 use crate::{
     adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler},
-    core::sha::Sha,
+    core::sha::Sha256,
     field::{Elem, Field},
     prove::{
         accum::{Accum, Handler},
@@ -67,14 +67,14 @@ where
 
     /// Perform initial 'execution' setting code + data.
     /// Additionally, write any 'results' as needed.
-    pub fn execute<S: Sha>(&mut self, iop: &mut WriteIOP<S>) {
+    pub fn execute<S: Sha256>(&mut self, iop: &mut WriteIOP<S>) {
         iop.write_field_elem_slice(&self.exec.io);
         iop.write_u32_slice(&[self.exec.po2 as u32]);
     }
 
     /// Perform 'accumulate' stage, using the iop for any RNG state.
     #[tracing::instrument(skip_all)]
-    pub fn accumulate<S: Sha>(&mut self, iop: &mut WriteIOP<S>) {
+    pub fn accumulate<S: Sha256>(&mut self, iop: &mut WriteIOP<S>) {
         // Make the mixing values
         self.mix
             .resize_with(C::MIX_SIZE, || F::Elem::random(&mut iop.rng));
