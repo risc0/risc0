@@ -101,7 +101,7 @@ fn build_cuda_kernels(out_dir: &Path) {
         .arg("-o")
         .arg(&out_path)
         .status()
-        .unwrap();
+        .expect("Failed to run 'nvcc' executable, do you have the 'cuda' package installed?");
     if result.success() {
         for src in src_paths {
             println!("cargo:rerun-if-changed={src}");
