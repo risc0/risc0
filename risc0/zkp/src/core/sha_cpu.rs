@@ -44,7 +44,7 @@ impl Impl {
         size: usize,
         stride: usize,
     ) -> Box<Digest> {
-        // Because bytes in our digests are in bid-endian order, regardless of host
+        // Because bytes in our digests are in big-endian order, regardless of host
         // architecture, and the `compress256` function takes words in native
         // byte order, the bytes of the IV need to be flipped on little-endian
         // machines (e.g. x86).
