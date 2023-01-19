@@ -25,11 +25,14 @@ use risc0_zkp::{
     adapter::TapsProvider,
     core::sha::SHA256_INIT,
     field::{baby_bear::BabyBearElem, Elem},
+    hal::{cpu::BabyBearCpuHal, Hal},
+    prove::poly_group::PolyGroup,
+    MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 
 use super::split_word16;
-use crate::CIRCUIT;
+use crate::{ControlId, CIRCUIT};
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;
@@ -357,14 +360,61 @@ impl Loader {
         loader.fini()?;
         Ok(loader.cycle)
     }
+
+    pub fn compute_control_id(&self) -> ControlId {
+        let code_size = CIRCUIT.code_size();
+        let hal = BabyBearCpuHal::new();
+
+        // Start with an empty table
+        let mut table = Vec::new();
+
+        // Make the digest for each level
+        for i in MIN_CYCLES_PO2..MAX_CYCLES_PO2 {
+            let cycles = 1 << i;
+            log::info!("po2: {i}");
+            // Make a vector & set it up with the elf data
+            let mut code = vec![BabyBearElem::default(); cycles * code_size];
+            self.load_code(&mut code, cycles);
+            // Copy into accel buffer
+            let coeffs = hal.copy_from_elem("coeffs", &code);
+            // Do interpolate & shift
+            hal.batch_interpolate_ntt(&coeffs, code_size);
+            hal.zk_shift(&coeffs, code_size);
+            // Make the poly-group & extract the root
+            let code_group = PolyGroup::new(&hal, &coeffs, code_size, cycles, "code");
+            table.push(code_group.merkle.root().clone());
+        }
+
+        ControlId { table }
+    }
+
+    fn load_code(&self, code: &mut [BabyBearElem], max_cycles: usize) {
+        let code_size = CIRCUIT.code_size();
+        let mut cycle = 0;
+        self.load(|chunk, fini| {
+            for i in 0..code_size {
+                code[max_cycles * i + cycle] = chunk[i];
+            }
+            let total = cycle + fini + ZK_CYCLES;
+            if total < max_cycles {
+                cycle += 1;
+                Ok(true)
+            } else {
+                log::info!("Halting. {cycle} + {fini} + ZK_CYCLES ({total}) < {max_cycles}");
+                Ok(false)
+            }
+        })
+        .unwrap();
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use alloc::collections::BTreeMap;
 
-    use super::TripleWordIter;
-    use crate::prove::loader::TripleWord;
+    use test_log::test;
+
+    use crate::prove::loader::{TripleWord, TripleWordIter};
 
     fn triple_test(input: &[(u32, u32)], expected: &[TripleWord]) {
         let mut map = BTreeMap::new();
