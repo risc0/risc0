@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Cryptographic algorithms for verifying a ZK proof of compute
+//!
+//! This module is not typically used directly. Instead, we recommend calling
+//! [`Receipt::verify`].
+//!
+//! [`Receipt::verify`]: ../../risc0_zkvm/receipt/struct.Receipt.html#method.verify
+
 pub mod adapter;
 mod fri;
 pub(crate) mod merkle;
@@ -250,6 +257,7 @@ mod host {
     }
 }
 
+/// Verify a seal is valid for the given circuit, code, and globals
 #[tracing::instrument(skip_all)]
 pub fn verify<'a, H, C, CheckCode, CheckGlobals>(
     hal: &'a H,

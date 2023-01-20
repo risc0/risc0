@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Run the zkVM guest and prove its results
+
 pub(crate) mod elf;
 mod exec;
 pub(crate) mod image;
@@ -93,6 +95,7 @@ impl<'a> Default for ProverOpts<'a> {
     }
 }
 
+/// Manages communication with and execution of a zkVM [Program]
 pub struct Prover<'a> {
     elf: Program,
     inner: ProverImpl<'a>,
