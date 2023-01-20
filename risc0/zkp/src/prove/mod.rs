@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Cryptographic algorithms for producing a ZK proof of compute
+//!
+//! This module is not typically used directly. Instead, we recommend the
+//! higher-level tools offered in [`risc0_zkvm::prove`].
+//!
+//! [`risc0_zkvm::prove`]: ../../risc0_zkvm/prove/index.html
+
 mod accum;
 pub mod adapter;
 pub mod executor;
@@ -38,6 +45,7 @@ use crate::{
     INV_RATE, MAX_CYCLES_PO2,
 };
 
+/// INSECURELY execute a circuit without producing a seal that proves execution
 pub fn prove_without_seal<'a, F, S, C, CS>(sha: &S, circuit: &mut ProveAdapter<'a, F, C, CS>)
 where
     F: Field,
@@ -49,6 +57,7 @@ where
     circuit.execute(&mut iop);
 }
 
+/// Construct a seal proving execution
 #[tracing::instrument(skip_all)]
 pub fn prove<'a, F, H, S, E, C, CS>(
     hal: &H,
