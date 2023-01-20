@@ -43,7 +43,7 @@ fn main() {
 }
 
 fn build_cpu_kernels() {
-    let srcs: Vec<PathBuf> = glob::glob("cxx/*.cpp")
+    let srcs: Vec<PathBuf> = glob::glob("src/cxx/*.cpp")
         .unwrap()
         .map(|x| x.unwrap())
         .collect();
@@ -77,13 +77,16 @@ fn build_metal_kernels(out_dir: &Path) {
     let compiler = compiler.trim_end();
     eprintln!("compiler: {compiler}");
 
-    let inc_path = Path::new(&env::var("DEP_RISC0_ZKP_INCLUDE").unwrap()).join("kernels/metal");
+    let inc_path = Path::new(&env::var("DEP_RISC0_ZKP_INCLUDE").unwrap()).join("src/kernels/metal");
     let inc_path = inc_path.to_str().unwrap();
 
     for kernel in KERNELS {
         let out_path = out_dir.join(kernel).with_extension("air");
         let sha_path = out_dir.join(kernel).with_extension("sha");
-        let src_path = Path::new("kernels").join(kernel).with_extension("metal");
+        let src_path = Path::new("src")
+            .join("kernels")
+            .join(kernel)
+            .with_extension("metal");
         let src_path = src_path.display().to_string();
         src_paths.push(src_path.clone());
 
@@ -132,7 +135,7 @@ fn build_metal_kernels(out_dir: &Path) {
 }
 
 fn build_cuda_kernels(out_dir: &Path) {
-    let src_path = "kernels/eval_check.cu";
+    let src_path = "src/kernels/eval_check.cu";
     let out_path = out_dir.join("kernels.fatbin");
     let out_path = out_path.display().to_string();
     let sha_path = out_dir.join("kernels.sha");

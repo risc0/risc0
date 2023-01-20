@@ -23,6 +23,7 @@ rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
+risc0-circuit-rv32im-sys = { version = "1.0.0-rc.2", path = "../rv32im-sys" }
 
 [target.'cfg(target_os = "zkvm")'.dependencies]
 risc0-zkvm-platform = { version = "1.0.0-rc.2", path = "../../../risc0/zkvm/platform" }
@@ -36,14 +37,9 @@ env_logger = "0.10"
 test-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-[build-dependencies]
-cc = { version = "1.0", features = ["parallel"] }
-glob = "0.3"
-sha2 = "0.10"
-
 [features]
-cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std"]
+cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std", "risc0-circuit-rv32im-sys/cuda"]
 default = ["prove", "test"]
-prove = ["dep:rand", "dep:rayon", "std"]
+prove = ["dep:rand", "dep:rayon", "std", "risc0-circuit-rv32im-sys/prove"]
 std = ["risc0-zkp/std"]
 test = []

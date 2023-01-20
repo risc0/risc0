@@ -481,7 +481,9 @@ impl Default for GuestOptions {
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
 pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
-    if env::var("RISC0_SKIP_BUILD").is_ok() {
+    let skip_var_name = "RISC0_SKIP_BUILD";
+    println!("cargo:rerun-if-env-changed={}", skip_var_name);
+    if env::var(skip_var_name).is_ok() {
         return;
     }
 

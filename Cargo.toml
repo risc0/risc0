@@ -3,6 +3,7 @@ resolver = "2"
 members = [
   "risc0/bootstrap",
   "risc0/build",
+  "risc0/circuit/rv32im-sys",
   "risc0/circuit/rv32im",
   "risc0/r0vm",
   "risc0/tools",

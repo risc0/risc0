@@ -360,7 +360,7 @@ const EXT_SIZE: usize = 4;
 /// irreducible.
 #[derive(Eq, Clone, Copy, Debug, Pod, Zeroable)]
 #[repr(transparent)]
-pub struct ExtElem([Elem; EXT_SIZE]);
+pub struct ExtElem(pub [Elem; EXT_SIZE]);
 
 pub type BabyBearExtElem = ExtElem;
 
