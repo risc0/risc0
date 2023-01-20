@@ -59,7 +59,7 @@
 //!
 //! This process will generate an image ID (`*_ID`) and the contents of an ELF
 //! file (`*_ELF`). The names will be derived from the name of the ELF
-//! binary, which will be converted to ALL_CAPS to comply with rust naming
+//! binary, which will be converted to ALL_CAPS to comply with Rust naming
 //! conventions. Thus, if a method binary is named `multiply`, the image ID
 //! will be named `methods::MULTIPLY_ID` and the contents of the ELF file will
 //! be named `methods::MULTIPLY_ELF`. These are included at the beginning

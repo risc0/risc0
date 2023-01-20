@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! SHA-256 hashing services
+
 pub use risc0_zkp::core::sha::{Digest, Sha, DIGEST_WORDS, DIGEST_WORD_SIZE, SHA256_INIT};
 
 pub fn sha() -> &'static impl Sha {

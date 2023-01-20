@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! A virtual machine to produces ZK proofs of computation
+//! A virtual machine to produce ZK proofs of computation
 //!
 //! The RISC Zero zkVM is a RISC-V virtual machine that produces
 //! [zero-knowledge proofs](https://en.wikipedia.org/wiki/Zero-knowledge_proof)
