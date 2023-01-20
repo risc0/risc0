@@ -97,7 +97,6 @@ impl<'a> Default for ProverOpts<'a> {
 
 /// Manages communication with and execution of a zkVM [Program]
 pub struct Prover<'a> {
-
     elf: Program,
     inner: ProverImpl<'a>,
     image_id: Digest,
