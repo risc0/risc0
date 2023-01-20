@@ -44,7 +44,7 @@
 //! then `Cargo.toml` might include
 //! ```toml
 //! [build-dependencies]
-//! risc0-build = "1.0.0-rc.2"
+//! risc0-build = "0.12"
 //!
 //! [package.metadata.risc0]
 //! methods = ["guest"]
