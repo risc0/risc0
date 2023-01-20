@@ -19,6 +19,7 @@ use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerializ
 use risc0_zkp::{
     core::sha::{Digest, Sha256},
     verify::VerificationError,
+    MIN_CYCLES_PO2,
 };
 use risc0_zkvm_platform::{
     syscall::{DIGEST_BYTES, DIGEST_WORDS},
@@ -26,7 +27,7 @@ use risc0_zkvm_platform::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{sha, CIRCUIT};
+use crate::{sha, ControlId, CIRCUIT};
 
 #[cfg(all(feature = "std", not(target_os = "zkvm")))]
 pub fn insecure_skip_seal() -> bool {
@@ -113,8 +114,16 @@ where
         return Ok(());
     }
 
-    let check_code = |_po2: u32, _root: &Digest| -> Result<(), VerificationError> {
-        // TODO
+    let control_id = ControlId::new();
+    let check_code = |po2: u32, merkle_root: &Digest| -> Result<(), VerificationError> {
+        let po2 = po2 as usize;
+        let which = po2 - MIN_CYCLES_PO2;
+        if which >= control_id.table.len() {
+            return Err(VerificationError::ControlVerificationError);
+        }
+        if control_id.table[which] != *merkle_root {
+            return Err(VerificationError::ControlVerificationError);
+        }
         Ok(())
     };
 

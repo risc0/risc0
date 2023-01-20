@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ fn build_cuda_kernels(out_dir: &Path) {
         .arg("-o")
         .arg(&out_path)
         .status()
-        .unwrap();
+        .expect("Failed to run 'nvcc' executable, do you have the 'cuda' package installed?");
     if result.success() {
         for src in src_paths {
             println!("cargo:rerun-if-changed={src}");

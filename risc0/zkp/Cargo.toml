@@ -39,7 +39,7 @@ metal = "0.24"
 criterion = "0.4"
 env_logger = "0.10"
 rand = { version = "0.8", features = ["small_rng"] }
-serial_test = "0.10"
+serial_test = "1.0"
 test-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

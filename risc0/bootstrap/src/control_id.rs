@@ -12,24 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
-use risc0_zkvm::guest::{entry, env};
-
-entry!(main);
-
-pub fn main() {
-    let iterations: u32 = env::read();
-    let answer = fibonacci(iterations);
-    env::commit(&answer);
-}
-
-pub fn fibonacci(n: u32) -> u64 {
-    let (mut a, mut b) = (0, 1);
-    for _ in 0..n {
-        let c = a;
-        a = b;
-        b += c;
-    }
-    a
-}
+pub const CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+];
