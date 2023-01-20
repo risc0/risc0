@@ -44,6 +44,6 @@ sha2 = "0.10"
 [features]
 cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std"]
 default = ["prove", "test"]
-prove = ["dep:rand", "dep:rayon", "std"]
+prove = ["dep:rand", "dep:rayon", "risc0-zkp/prove", "std"]
 std = ["risc0-zkp/std"]
 test = []
