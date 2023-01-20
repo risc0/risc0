@@ -50,6 +50,7 @@ mod tests;
 
 pub use anyhow::Result;
 use control_id::CONTROL_ID;
+use hex::FromHex;
 use risc0_zkp::core::sha::Digest;
 pub use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 
@@ -68,7 +69,7 @@ impl ControlId {
     pub fn new() -> Self {
         let mut table = alloc::vec::Vec::new();
         for entry in CONTROL_ID {
-            table.push(Digest::from(entry));
+            table.push(Digest::from_hex(entry).unwrap());
         }
         ControlId { table }
     }
