@@ -15,7 +15,7 @@
 [crates-url]: https://crates.io/crates/risc0-zkvm
 [licence-badge]: https://img.shields.io/github/license/risc0/risc0?color=blue
 [licence-url]: https://github.com/risc0/risc0/blob/main/LICENSE
-[actions-badge]: https://img.shields.io/github/workflow/status/risc0/risc0/CI/main
+[actions-badge]: https://img.shields.io/github/actions/workflow/status/risc0/risc0/main.yml?branch=main
 [actions-url]: https://github.com/risc0/risc0/actions?query=workflow%3ACI+branch%3Amain
 [discord-badge]: https://img.shields.io/discord/953703904086994974.svg?logo=discord&style=flat-square
 [discord-url]: https://discord.gg/risczero

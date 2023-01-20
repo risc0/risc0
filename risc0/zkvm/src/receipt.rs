@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Manages the output and cryptographic data for a proven computation
+
 use alloc::vec::Vec;
 
 use anyhow::{anyhow, Result};
