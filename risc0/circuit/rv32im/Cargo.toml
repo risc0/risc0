@@ -13,7 +13,7 @@ harness = false
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-risc0-zkp = { version = "1.0.0-rc.2", path = "../../../risc0/zkp", default-features = false }
+risc0-zkp = { workspace = true }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
@@ -25,7 +25,7 @@ rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
 
 [target.'cfg(target_os = "zkvm")'.dependencies]
-risc0-zkvm-platform = { version = "1.0.0-rc.2", path = "../../../risc0/zkvm/platform" }
+risc0-zkvm-platform = { workspace = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 metal = "0.24"
