@@ -6,3 +6,6 @@ publish = false
 
 [dependencies]
 risc0-zkvm = { workspace = true }
+
+[package.metadata.release]
+release = false
