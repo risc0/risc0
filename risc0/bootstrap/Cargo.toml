@@ -4,4 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-risc0-zkvm = { version = "1.0.0-rc.2", path = "../zkvm" }
+risc0-zkvm = { workspace = true }
+
+[package.metadata.workspaces]
+publish = false
