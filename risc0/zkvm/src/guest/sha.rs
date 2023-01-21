@@ -239,7 +239,7 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
 pub struct Impl {}
 
 impl risc0_zkp::core::sha::Sha256 for Impl {
-    type DigestPtr = &'static Digest;
+    type DigestPtr = &'static mut Digest;
 
     fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
@@ -252,7 +252,7 @@ impl risc0_zkp::core::sha::Sha256 for Impl {
             },
         );
         // Now that digest is initialized, we can convert it to a reference.
-        unsafe { &*digest }
+        unsafe { &mut *digest }
     }
 
     fn hash_raw_pod_slice<T: bytemuck::Pod>(pod: &[T]) -> Self::DigestPtr {
@@ -260,29 +260,13 @@ impl risc0_zkp::core::sha::Sha256 for Impl {
         let words: &[u32] = bytemuck::cast_slice(pod);
         update_u32(digest, &SHA256_INIT, words, WithoutTrailer);
         // Now that digest is initialized, we can convert it to a reference.
-        unsafe { &*digest }
+        unsafe { &mut *digest }
     }
 
-    // Generate a new digest by mixing two digests together via XOR,
-    // and storing into the first digest.
-    // TODO(victor): Understand why this is implemented by writing to a new
-    // heap-allocated digest rather than modifying the input as the comment
-    // suggest.
-    fn mix(pool: &mut Self::DigestPtr, val: &Digest) {
-        let mut digest = Box::<Digest>::new(Digest::default());
-        for i in 0..DIGEST_WORDS {
-            digest.as_mut_words()[i] = pool.as_words()[i] ^ val.as_words()[i];
-        }
-        unsafe {
-            let ptr: *const Digest = &*digest;
-            *pool = &*ptr
-        }
-    }
-
-    fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> &'static Digest {
+    fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
         compress(digest, state, block_half1.as_ref(), block_half2.as_ref());
         // Now that digest is initialized, we can convert it to a reference.
-        unsafe { &*digest }
+        unsafe { &mut *digest }
     }
 }

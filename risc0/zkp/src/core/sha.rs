@@ -18,7 +18,7 @@ use alloc::vec::Vec;
 use core::{
     fmt::{Debug, Display, Formatter},
     mem,
-    ops::Deref,
+    ops::DerefMut,
 };
 
 use bytemuck::{Pod, Zeroable};
@@ -245,11 +245,14 @@ impl Debug for Digest {
 // TODO(victor): Is there anywhere this function is used when it should really
 // be a PRF?
 pub trait Sha256 {
-    /// A pointer to the created digest.
+    /// A pointer to the digest created as the result of a hashing operation.
     ///
     /// This may either be a `Box<Digest>` or some other pointer in case the
-    /// implementation wants to manage its own memory.
-    type DigestPtr: Deref<Target = Digest> + Debug;
+    /// implementation wants to manage its own memory. Semantically, holding the
+    /// `DigestPtr` denotes ownership of the underlying value. (e.g. `DigestPtr`
+    /// does not implement `Copy` and the owner of `DigestPtr` can create a
+    /// mutable reference to the underlying digest)
+    type DigestPtr: DerefMut<Target = Digest> + Debug;
 
     /// Generate a SHA from a slice of bytes, padding to block size
     /// and adding the SHA trailer.
@@ -287,12 +290,6 @@ pub trait Sha256 {
     // TODO(victor): Look over the usages of this function to understand why it
     // exists and if it should exist on this trait.
     fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
-
-    /// Generate a new digest by mixing two digests together via XOR,
-    /// and storing into the first digest.
-    // TODO(victor): I'm guessing this is for use by a randomness pool. I may
-    // extract this function to there.
-    fn mix(pool: &mut Self::DigestPtr, val: &Digest);
 }
 
 #[cfg(test)]

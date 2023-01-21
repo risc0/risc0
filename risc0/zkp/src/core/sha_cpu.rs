@@ -160,15 +160,6 @@ impl Sha256 for Impl {
         }
         Box::new(Digest::from(state))
     }
-
-    // Generate a new digest by mixing two digests together via XOR,
-    // and stores it back in the pool.
-    fn mix(pool: &mut Self::DigestPtr, val: &Digest) {
-        // PU based sha can do this in place without generating another digest pointer.
-        for (pool_word, val_word) in pool.as_mut_words().iter_mut().zip(val.as_words()) {
-            *pool_word ^= *val_word;
-        }
-    }
 }
 
 #[cfg(test)]

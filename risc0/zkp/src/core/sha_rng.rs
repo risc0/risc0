@@ -55,7 +55,9 @@ impl<S: Sha256> ShaRng<S> {
 
     /// Mix the pool with a specified [Digest].
     pub fn mix(&mut self, val: &Digest) {
-        S::mix(&mut self.pool0, val);
+        for i in 0..DIGEST_WORDS {
+            self.pool0.as_mut_words()[i] = self.pool0.as_words()[i] ^ val.as_words()[i];
+        }
         self.step();
     }
 
