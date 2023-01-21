@@ -24,10 +24,6 @@ use sha2::{Digest, Sha256};
 const KERNELS: &[&str] = &["eval_check"];
 
 fn main() {
-    if !env::var("CARGO_FEATURE_PROVE").is_ok() {
-        return;
-    }
-
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
 
@@ -56,6 +52,7 @@ fn build_cpu_kernels() {
         .flag_if_supported("-fno-var-tracking")
         .flag_if_supported("-fno-var-tracking-assignments")
         .flag_if_supported("-g0")
+        .cpp_set_stdlib("stdc++")
         .compile("circuit");
     for src in srcs {
         println!("cargo:rerun-if-changed={}", src.display());

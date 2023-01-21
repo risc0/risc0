@@ -13,18 +13,19 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_circuit_rv32im_sys::{
-    risc0_circuit_rv32im_poly_fp, risc0_circuit_rv32im_step_compute_accum,
-    risc0_circuit_rv32im_step_exec, risc0_circuit_rv32im_step_verify_accum,
-    risc0_circuit_rv32im_step_verify_bytes, risc0_circuit_rv32im_step_verify_mem, BabyBearElemSys,
-    BabyBearExtElemSys,
-};
 use risc0_zkp::{
     adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
 };
 
-use crate::{ffi::call_step, CircuitImpl};
+use crate::{
+    ffi::{
+        call_step, risc0_circuit_rv32im_poly_fp, risc0_circuit_rv32im_step_compute_accum,
+        risc0_circuit_rv32im_step_exec, risc0_circuit_rv32im_step_verify_accum,
+        risc0_circuit_rv32im_step_verify_bytes, risc0_circuit_rv32im_step_verify_mem,
+    },
+    CircuitImpl,
+};
 
 impl CircuitStep<BabyBearElem> for CircuitImpl {
     fn step_compute_accum<S: CircuitStepHandler<BabyBearElem>>(
@@ -39,16 +40,8 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             args,
             |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
                 risc0_circuit_rv32im_step_compute_accum(
-                    err,
-                    ctx,
-                    trampoline,
-                    size,
-                    cycle,
-                    args_ptr as *const *mut BabyBearElemSys,
-                    args_len,
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
                 )
-                .0
-                .into()
             },
         )
     }
@@ -65,16 +58,8 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             args,
             |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
                 risc0_circuit_rv32im_step_verify_accum(
-                    err,
-                    ctx,
-                    trampoline,
-                    size,
-                    cycle,
-                    args_ptr as *const *mut BabyBearElemSys,
-                    args_len,
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
                 )
-                .0
-                .into()
             },
         )
     }
@@ -91,16 +76,8 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             args,
             |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
                 risc0_circuit_rv32im_step_exec(
-                    err,
-                    ctx,
-                    trampoline,
-                    size,
-                    cycle,
-                    args_ptr as *const *mut BabyBearElemSys,
-                    args_len,
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
                 )
-                .0
-                .into()
             },
         )
     }
@@ -117,16 +94,8 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             args,
             |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
                 risc0_circuit_rv32im_step_verify_bytes(
-                    err,
-                    ctx,
-                    trampoline,
-                    size,
-                    cycle,
-                    args_ptr as *const *mut BabyBearElemSys,
-                    args_len,
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
                 )
-                .0
-                .into()
             },
         )
     }
@@ -143,16 +112,8 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
             args,
             |err, ctx, trampoline, size, cycle, args_ptr, args_len| unsafe {
                 risc0_circuit_rv32im_step_verify_mem(
-                    err,
-                    ctx,
-                    trampoline,
-                    size,
-                    cycle,
-                    args_ptr as *const *mut BabyBearElemSys,
-                    args_len,
+                    err, ctx, trampoline, size, cycle, args_ptr, args_len,
                 )
-                .0
-                .into()
             },
         )
     }
@@ -168,18 +129,12 @@ impl PolyFp<BabyBear> for CircuitImpl {
     ) -> BabyBearExtElem {
         let args: Vec<*const BabyBearElem> = args.iter().map(|x| (*x).as_ptr()).collect();
         unsafe {
-            let res = risc0_circuit_rv32im_poly_fp(
+            risc0_circuit_rv32im_poly_fp(
                 cycle,
                 steps,
-                mix.0.as_ptr() as *const BabyBearExtElemSys,
-                args.as_ptr() as *const *const BabyBearElemSys,
+                mix as *const BabyBearExtElem,
+                args.as_ptr(),
                 args.len(),
-            );
-            BabyBearExtElem::new(
-                res.0[0].0.into(),
-                res.0[1].0.into(),
-                res.0[2].0.into(),
-                res.0[3].0.into(),
             )
         }
     }

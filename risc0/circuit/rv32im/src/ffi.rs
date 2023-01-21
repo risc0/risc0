@@ -19,13 +19,101 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
-use risc0_circuit_rv32im_sys::{
-    risc0_circuit_string_free, risc0_circuit_string_ptr, BabyBearElemSys, Callback, RawError,
-};
 use risc0_zkp::{
     adapter::{CircuitStepContext, CircuitStepHandler},
-    field::baby_bear::BabyBearElem,
+    field::baby_bear::{BabyBearElem, BabyBearExtElem},
 };
+
+type Callback = unsafe extern "C" fn(
+    ctx: *mut c_void,
+    name: *const c_char,
+    extra: *const c_char,
+    args_ptr: *const BabyBearElem,
+    args_len: usize,
+    outs_ptr: *mut BabyBearElem,
+    outs_len: usize,
+) -> bool;
+
+pub(crate) enum RawString {}
+
+#[repr(C)]
+pub(crate) struct RawError {
+    pub(crate) msg: *const RawString,
+}
+
+impl Default for RawError {
+    fn default() -> Self {
+        Self {
+            msg: std::ptr::null(),
+        }
+    }
+}
+
+#[link(name = "circuit")]
+#[link(name = "stdc++")]
+extern "C" {
+    pub(crate) fn risc0_circuit_string_ptr(str: *const RawString) -> *const c_char;
+
+    pub(crate) fn risc0_circuit_string_free(str: *const RawString);
+
+    pub(crate) fn risc0_circuit_rv32im_step_compute_accum(
+        err: *mut RawError,
+        ctx: *mut c_void,
+        cb: Callback,
+        steps: usize,
+        cycle: usize,
+        args_ptr: *const *mut BabyBearElem,
+        args_len: usize,
+    ) -> BabyBearElem;
+
+    pub(crate) fn risc0_circuit_rv32im_step_verify_accum(
+        err: *mut RawError,
+        ctx: *mut c_void,
+        cb: Callback,
+        steps: usize,
+        cycle: usize,
+        args_ptr: *const *mut BabyBearElem,
+        args_len: usize,
+    ) -> BabyBearElem;
+
+    pub(crate) fn risc0_circuit_rv32im_step_exec(
+        err: *mut RawError,
+        ctx: *mut c_void,
+        cb: Callback,
+        steps: usize,
+        cycle: usize,
+        args_ptr: *const *mut BabyBearElem,
+        args_len: usize,
+    ) -> BabyBearElem;
+
+    pub(crate) fn risc0_circuit_rv32im_step_verify_bytes(
+        err: *mut RawError,
+        ctx: *mut c_void,
+        cb: Callback,
+        steps: usize,
+        cycle: usize,
+        args_ptr: *const *mut BabyBearElem,
+        args_len: usize,
+    ) -> BabyBearElem;
+
+    pub(crate) fn risc0_circuit_rv32im_step_verify_mem(
+        err: *mut RawError,
+        ctx: *mut c_void,
+        cb: Callback,
+        steps: usize,
+        cycle: usize,
+        args_ptr: *const *mut BabyBearElem,
+        args_len: usize,
+    ) -> BabyBearElem;
+
+    pub(crate) fn risc0_circuit_rv32im_poly_fp(
+        cycle: usize,
+        steps: usize,
+        poly_mix: *const BabyBearExtElem,
+        args_ptr: *const *const BabyBearElem,
+        args_len: usize,
+    ) -> BabyBearExtElem;
+}
 
 pub fn get_trampoline<F>(_closure: &F) -> Callback
 where
@@ -38,9 +126,9 @@ extern "C" fn trampoline<F>(
     ctx: *mut c_void,
     name: *const c_char,
     extra: *const c_char,
-    args_ptr: *const BabyBearElemSys,
+    args_ptr: *const BabyBearElem,
     args_len: usize,
-    outs_ptr: *mut BabyBearElemSys,
+    outs_ptr: *mut BabyBearElem,
     outs_len: usize,
 ) -> bool
 where
@@ -49,10 +137,10 @@ where
     unsafe {
         let name = CStr::from_ptr(name).to_str().unwrap();
         let extra = CStr::from_ptr(extra).to_str().unwrap();
-        let args = slice::from_raw_parts(args_ptr as *const BabyBearElem, args_len);
-        let outs = slice::from_raw_parts_mut(outs_ptr as *mut BabyBearElem, outs_len);
+        let args = slice::from_raw_parts(args_ptr, args_len);
+        let outs = slice::from_raw_parts_mut(outs_ptr, outs_len);
         let callback = &mut *(ctx as *mut F);
-        callback(name, extra, args, outs as &mut [BabyBearElem])
+        callback(name, extra, args, outs)
     }
 }
 
