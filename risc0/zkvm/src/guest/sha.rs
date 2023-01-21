@@ -209,8 +209,8 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
     }
 }
 
-/// Computes the SHA256 digest of a serialized object.
-pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
+/// Computes the SHA256 digest of an object, serialized by [risc0_zkvm::serde].
+pub fn digest<T: Serialize>(val: &T) -> &'static mut Digest {
     // If the object to be serialized is a plain old structure in memory, this
     // should be a good guess for the allocation needed.
     let approx_len = mem::size_of_val(val);
@@ -229,7 +229,7 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     let digest = alloc_uninit_digest();
     update_u32(digest, &SHA256_INIT, buf.as_slice(), trailer);
     // Now that digest is initialized, we can convert it to a reference.
-    unsafe { &*digest }
+    unsafe { &mut *digest }
 }
 
 /// A guest-side [Sha256] implementation.
@@ -249,6 +249,20 @@ impl risc0_zkp::core::sha::Sha256 for Impl {
             bytes,
             WithTrailer {
                 total_bits: bytes.len() * 8,
+            },
+        );
+        // Now that digest is initialized, we can convert it to a reference.
+        unsafe { &mut *digest }
+    }
+
+    fn hash_words(words: &[u32]) -> Self::DigestPtr {
+        let digest = alloc_uninit_digest();
+        update_u32(
+            digest,
+            &SHA256_INIT,
+            words,
+            WithTrailer {
+                total_bits: words.len() * 32,
             },
         );
         // Now that digest is initialized, we can convert it to a reference.

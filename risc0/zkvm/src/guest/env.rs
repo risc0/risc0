@@ -185,6 +185,8 @@ impl Env {
             }
         } else {
             let ptr: *mut Digest = &mut output;
+            // TODO(victor) Why is the trailer not included here and is it possible for this
+            // to create any issues?
             sha::update_u32(ptr, &SHA256_INIT, slice, sha::WithoutTrailer);
         }
         let output = output.as_words();
