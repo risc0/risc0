@@ -17,7 +17,7 @@
 //! This module is not typically used directly. Instead, we recommend the
 //! higher-level tools offered in [`risc0_zkvm::prove`].
 //!
-//! [`risc0_zkvm::prove`]: ../../risc0_zkvm/prove/index.html
+//! [`risc0_zkvm::prove`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/prove/index.html
 
 mod accum;
 pub mod adapter;

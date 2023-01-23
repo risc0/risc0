@@ -17,7 +17,7 @@
 //! This module is not typically used directly. Instead, we recommend calling
 //! [`Receipt::verify`].
 //!
-//! [`Receipt::verify`]: ../../risc0_zkvm/receipt/struct.Receipt.html#method.verify
+//! [`Receipt::verify`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/receipt/struct.Receipt.html#method.verify
 
 pub mod adapter;
 mod fri;
