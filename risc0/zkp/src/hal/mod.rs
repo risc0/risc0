@@ -37,7 +37,6 @@ pub trait Buffer<T>: Clone {
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F);
 }
 
-// TODO(victor): Check whether the Hal impls actually use fields.
 pub trait Hal {
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;

@@ -251,7 +251,7 @@ pub trait Sha256 {
     /// implementation wants to manage its own memory. Semantically, holding the
     /// `DigestPtr` denotes ownership of the underlying value. (e.g. `DigestPtr`
     /// does not implement `Copy` and the owner of `DigestPtr` can create a
-    /// mutable reference to the underlying digest)
+    /// mutable reference to the underlying digest).
     type DigestPtr: DerefMut<Target = Digest> + Debug;
 
     /// Generate a SHA from a slice of bytes, padding to block size
@@ -260,17 +260,17 @@ pub trait Sha256 {
 
     /// Generate a SHA from a slice of words, padding to block size
     /// and adding the SHA trailer.
-    // TODO(victor): What should a developer expect here as it relates to endianess?
-    // Should they expect the hash is invariant with the numeric value of words,
-    // or of the bytes?
+    // TODO(victor): What should a developer expect here as it relates to
+    // endianness? Should they expect the hash is invariant with the numeric
+    // value of words, or of the bytes?
     fn hash_words(words: &[u32]) -> Self::DigestPtr {
         Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
     /// Generate a SHA from a pair of [Digests](Digest).
     // TODO(victor) This is an efficient way to produce H(a || b), which I am
-    // guesing is designed for use in Merkle trees. Is this the best method to
-    // be exposing here though? It does not use domain speration or added padding
+    // guessing is designed for use in Merkle trees. Is this the best method to
+    // be exposing here though? It does not use domain separation or added padding
     // and length.
     fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
         Self::compress(&SHA256_INIT, a, b)
@@ -285,12 +285,121 @@ pub trait Sha256 {
     fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr;
 
     /// Generate a SHA from a slice of anything that can be represented as plain
-    /// old data. Pads up to the SHA-256 block boundry, but does not add the
+    /// old data. Pads up to the SHA-256 block boundary, but does not add the
     /// standard SHA trailer.
     // TODO(victor): Look over the usages of this function to understand why it
     // exists and if it should exist on this trait.
     fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
 }
+
+// TODO(victor): Clean this up
+use core::fmt;
+
+use digest::{
+    block_buffer::Eager,
+    core_api::{
+        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
+        CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
+    },
+    typenum::{Unsigned, U32, U64},
+    HashMarker, InvalidOutputSize, Output,
+};
+
+/// Core block-level SHA-256 hasher with variable output size.
+///
+/// Supports initialization only for 28 and 32 byte output sizes,
+/// i.e. 224 and 256 bits respectively.
+#[derive(Clone)]
+pub struct Sha256VarCore<S: Sha256> {
+    // Current internal state of the SHA-256 hashing operation.
+    state: Option<S::DigestPtr>,
+    // Counter of the number of blocks hashed so far.
+    // TODO(victor) Consider using a u32. And see if it saves a few cycles.
+    // A u32 counter can accommodate pre-images of up to 2^26 bytes ~ 64 GB.
+    block_len: u64,
+}
+
+impl<S: Sha256> HashMarker for Sha256VarCore<S> {}
+
+impl<S: Sha256> BlockSizeUser for Sha256VarCore<S> {
+    type BlockSize = U64;
+}
+
+impl<S: Sha256> BufferKindUser for Sha256VarCore<S> {
+    type BufferKind = Eager;
+}
+
+impl<S: Sha256> UpdateCore for Sha256VarCore<S> {
+    #[inline]
+    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+        self.block_len += u64::try_from(blocks.len()).unwrap();
+        // TODO(victor): Ensure there are no copies here and see if I can avoid the loop
+        // reasonable.
+        for block in blocks {
+            let half_block1: &Digest = bytemuck::from_bytes(&block.as_slice()[..DIGEST_BYTES]);
+            let half_block2: &Digest = bytemuck::from_bytes(&block.as_slice()[DIGEST_BYTES..]);
+            self.state = Some(S::compress(
+                self.state.as_deref().unwrap_or(&SHA256_INIT),
+                half_block1,
+                half_block2,
+            ));
+        }
+    }
+}
+
+impl<S: Sha256> OutputSizeUser for Sha256VarCore<S> {
+    type OutputSize = U32;
+}
+
+impl<S: Sha256> VariableOutputCore for Sha256VarCore<S> {
+    const TRUNC_SIDE: TruncSide = TruncSide::Left;
+
+    #[inline]
+    fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
+        let state = match output_size {
+            32 => None,
+            _ => return Err(InvalidOutputSize),
+        };
+        let block_len = 0;
+        Ok(Self { state, block_len })
+    }
+
+    #[inline]
+    fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
+        let bs = Self::BlockSize::U64;
+        let bit_len = 8 * (u64::try_from(buffer.get_pos()).unwrap() + bs * self.block_len);
+        buffer.len64_padding_be(bit_len, |block| {
+            let half_block1: &Digest = bytemuck::from_bytes(&block.as_slice()[..DIGEST_BYTES]);
+            let half_block2: &Digest = bytemuck::from_bytes(&block.as_slice()[DIGEST_BYTES..]);
+            self.state = Some(S::compress(
+                self.state.as_deref().unwrap_or(&SHA256_INIT),
+                half_block1,
+                half_block2,
+            ));
+        });
+
+        out.copy_from_slice(self.state.as_deref().unwrap().as_bytes())
+    }
+}
+
+impl<S: Sha256> AlgorithmName for Sha256VarCore<S> {
+    #[inline]
+    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Sha256")
+    }
+}
+
+impl<S: Sha256> fmt::Debug for Sha256VarCore<S> {
+    #[inline]
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // TODO(victor): Add the type of S to this.
+        f.write_str("Sha256VarCore { ... }")
+    }
+}
+
+// TODO(victor): Rename this and possible add an Oid.
+/// SHA-256 implementation cross-compatible with `sha2::Sha256`.
+pub type Sha256_2<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
 
 #[cfg(test)]
 mod tests {
@@ -328,15 +437,17 @@ pub mod testutil {
     use alloc::vec::Vec;
     use core::ops::Deref;
 
+    use digest::Digest as _;
     use hex::FromHex;
 
-    use super::{Digest, Sha256};
+    use super::{Digest, Sha256, Sha256_2};
     use crate::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
     // Runs conformance test on a SHA-256 implementation to make sure it properly
     // behaves.
     pub fn test_sha_impl<S: Sha256>() {
         test_hash_pair::<S>();
+        test_rust_crypto_wrapper::<S>();
         test_hash_raw_pod_slice::<S>();
         test_sha_basics::<S>();
         test_elems::<S>();
@@ -373,6 +484,35 @@ pub mod testutil {
         // 'f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a'
         assert_eq!(
             hex::encode(&S::hash_bytes(&"Byzantium".as_bytes()).deref()),
+            "f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a"
+        );
+    }
+
+    fn test_rust_crypto_wrapper<S: Sha256>() {
+        // Standard test vectors
+        assert_eq!(
+            hex::encode(Sha256_2::<S>::digest("abc".as_bytes())),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+        assert_eq!(
+            hex::encode(Sha256_2::<S>::digest("".as_bytes())),
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        );
+        assert_eq!(
+            hex::encode(Sha256_2::<S>::digest(
+                "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()
+            )),
+            "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
+        );
+        assert_eq!(hex::encode(Sha256_2::<S>::digest(
+            "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes())),
+            "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1");
+        // Test also the 'hexDigest' bit.
+        // Python says:
+        // >>> hashlib.sha256("Byzantium").hexdigest()
+        // 'f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a'
+        assert_eq!(
+            hex::encode(Sha256_2::<S>::digest(&"Byzantium".as_bytes())),
             "f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a"
         );
     }
