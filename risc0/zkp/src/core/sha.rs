@@ -289,6 +289,9 @@ pub trait Sha256 {
     fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
 }
 
+// TODO(victor): Consider how best to make these functions available with a less
+// verbose path. (i.e. should I expose the Sha256 type alias in the
+// risc0_zkvm::sha module?)
 pub mod rust_crypto {
     //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
     //!
