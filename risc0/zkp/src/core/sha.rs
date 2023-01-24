@@ -260,9 +260,6 @@ pub trait Sha256 {
 
     /// Generate a SHA from a slice of words, padding to block size
     /// and adding the SHA trailer.
-    // TODO(victor): What should a developer expect here as it relates to
-    // endianness? Should they expect the hash is invariant with the numeric
-    // value of words, or of the bytes?
     fn hash_words(words: &[u32]) -> Self::DigestPtr {
         Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
@@ -292,114 +289,150 @@ pub trait Sha256 {
     fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
 }
 
-// TODO(victor): Clean this up
-use core::fmt;
+pub mod rust_crypto {
+    //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
+    //!
+    //! [Rust Crypto]: https://github.com/RustCrypto
+    //!
+    //! # Usage
+    //!
+    //! ```rust
+    //! use risc0_zkp::core::{
+    //!     sha::rust_crypto::{Sha256, Digest as _},
+    //!     sha_cpu,
+    //! };
+    //!
+    //! // create a Sha256 object
+    //! let mut hasher = Sha256::<sha_cpu::Impl>::new();
+    //!
+    //! // write input message
+    //! hasher.update(b"hello world");
+    //!
+    //! // read hash digest and consume hasher
+    //! let result = hasher.finalize();
+    //!
+    //! assert_eq!(hex::encode(result), "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
+    //!
+    //! // more concise version of the code above.
+    //! assert_eq!(hex::encode(Sha256::<sha_cpu::Impl>::digest(b"hello world")),
+    //!     "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+    //! );
+    //! ```
 
-use digest::{
-    block_buffer::Eager,
-    core_api::{
-        AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
-        CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
-    },
-    typenum::{Unsigned, U32, U64},
-    HashMarker, InvalidOutputSize, Output,
-};
+    use core::fmt::{Debug, Formatter};
 
-/// Core block-level SHA-256 hasher with variable output size.
-///
-/// Supports initialization only for 28 and 32 byte output sizes,
-/// i.e. 224 and 256 bits respectively.
-#[derive(Clone)]
-pub struct Sha256VarCore<S: Sha256> {
-    // Current internal state of the SHA-256 hashing operation.
-    state: Option<S::DigestPtr>,
-    // Counter of the number of blocks hashed so far.
-    // TODO(victor) Consider using a u32. And see if it saves a few cycles.
-    // A u32 counter can accommodate pre-images of up to 2^26 bytes ~ 64 GB.
-    block_len: u64,
-}
+    pub use digest::Digest;
+    use digest::{
+        block_buffer::Eager,
+        core_api::{
+            AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
+            CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
+        },
+        typenum::{Unsigned, U32, U64},
+        HashMarker, InvalidOutputSize, Output,
+    };
 
-impl<S: Sha256> HashMarker for Sha256VarCore<S> {}
+    use super::{DIGEST_BYTES, SHA256_INIT};
 
-impl<S: Sha256> BlockSizeUser for Sha256VarCore<S> {
-    type BlockSize = U64;
-}
+    /// Core block-level SHA-256 hasher with variable output size.
+    ///
+    /// Supports initialization only for the 32 byte output size.
+    #[derive(Clone)]
+    pub struct Sha256VarCore<S: super::Sha256> {
+        // Current internal state of the SHA-256 hashing operation.
+        state: Option<S::DigestPtr>,
+        // Counter of the number of blocks hashed so far.
+        // TODO(victor) Consider using a u32. And see if it saves a few cycles.
+        // A u32 counter can accommodate pre-images of up to 2^26 bytes ~ 64 GB.
+        block_len: u64,
+    }
 
-impl<S: Sha256> BufferKindUser for Sha256VarCore<S> {
-    type BufferKind = Eager;
-}
+    impl<S: super::Sha256> HashMarker for Sha256VarCore<S> {}
 
-impl<S: Sha256> UpdateCore for Sha256VarCore<S> {
-    #[inline]
-    fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-        self.block_len += u64::try_from(blocks.len()).unwrap();
-        // TODO(victor): Ensure there are no copies here and see if I can avoid the loop
-        // reasonable.
-        for block in blocks {
-            let half_block1: &Digest = bytemuck::from_bytes(&block.as_slice()[..DIGEST_BYTES]);
-            let half_block2: &Digest = bytemuck::from_bytes(&block.as_slice()[DIGEST_BYTES..]);
-            self.state = Some(S::compress(
-                self.state.as_deref().unwrap_or(&SHA256_INIT),
-                half_block1,
-                half_block2,
-            ));
+    impl<S: super::Sha256> BlockSizeUser for Sha256VarCore<S> {
+        type BlockSize = U64;
+    }
+
+    impl<S: super::Sha256> BufferKindUser for Sha256VarCore<S> {
+        type BufferKind = Eager;
+    }
+
+    impl<S: super::Sha256> UpdateCore for Sha256VarCore<S> {
+        #[inline]
+        fn update_blocks(&mut self, blocks: &[Block<Self>]) {
+            self.block_len += u64::try_from(blocks.len()).unwrap();
+            // TODO(victor): Ensure there are no copies here and see if I can avoid the loop
+            // reasonable.
+            for block in blocks {
+                let half_block1: &super::Digest =
+                    bytemuck::from_bytes(&block.as_slice()[..DIGEST_BYTES]);
+                let half_block2: &super::Digest =
+                    bytemuck::from_bytes(&block.as_slice()[DIGEST_BYTES..]);
+                self.state = Some(S::compress(
+                    self.state.as_deref().unwrap_or(&SHA256_INIT),
+                    half_block1,
+                    half_block2,
+                ));
+            }
         }
     }
-}
 
-impl<S: Sha256> OutputSizeUser for Sha256VarCore<S> {
-    type OutputSize = U32;
-}
-
-impl<S: Sha256> VariableOutputCore for Sha256VarCore<S> {
-    const TRUNC_SIDE: TruncSide = TruncSide::Left;
-
-    #[inline]
-    fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
-        let state = match output_size {
-            32 => None,
-            _ => return Err(InvalidOutputSize),
-        };
-        let block_len = 0;
-        Ok(Self { state, block_len })
+    impl<S: super::Sha256> OutputSizeUser for Sha256VarCore<S> {
+        type OutputSize = U32;
     }
 
-    #[inline]
-    fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-        let bs = Self::BlockSize::U64;
-        let bit_len = 8 * (u64::try_from(buffer.get_pos()).unwrap() + bs * self.block_len);
-        buffer.len64_padding_be(bit_len, |block| {
-            let half_block1: &Digest = bytemuck::from_bytes(&block.as_slice()[..DIGEST_BYTES]);
-            let half_block2: &Digest = bytemuck::from_bytes(&block.as_slice()[DIGEST_BYTES..]);
-            self.state = Some(S::compress(
-                self.state.as_deref().unwrap_or(&SHA256_INIT),
-                half_block1,
-                half_block2,
-            ));
-        });
+    impl<S: super::Sha256> VariableOutputCore for Sha256VarCore<S> {
+        const TRUNC_SIDE: TruncSide = TruncSide::Left;
 
-        out.copy_from_slice(self.state.as_deref().unwrap().as_bytes())
+        #[inline]
+        fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
+            let state = match output_size {
+                32 => None,
+                _ => return Err(InvalidOutputSize),
+            };
+            let block_len = 0;
+            Ok(Self { state, block_len })
+        }
+
+        #[inline]
+        fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
+            let bs = Self::BlockSize::U64;
+            let bit_len = 8 * (u64::try_from(buffer.get_pos()).unwrap() + bs * self.block_len);
+            buffer.len64_padding_be(bit_len, |block| {
+                let half_block1: &super::Digest =
+                    bytemuck::from_bytes(&block.as_slice()[..DIGEST_BYTES]);
+                let half_block2: &super::Digest =
+                    bytemuck::from_bytes(&block.as_slice()[DIGEST_BYTES..]);
+                self.state = Some(S::compress(
+                    self.state.as_deref().unwrap_or(&SHA256_INIT),
+                    half_block1,
+                    half_block2,
+                ));
+            });
+
+            out.copy_from_slice(self.state.as_deref().unwrap().as_bytes())
+        }
     }
-}
 
-impl<S: Sha256> AlgorithmName for Sha256VarCore<S> {
-    #[inline]
-    fn write_alg_name(f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Sha256")
+    impl<S: super::Sha256> AlgorithmName for Sha256VarCore<S> {
+        #[inline]
+        fn write_alg_name(f: &mut Formatter<'_>) -> core::fmt::Result {
+            f.write_str("Sha256")
+        }
     }
-}
 
-impl<S: Sha256> fmt::Debug for Sha256VarCore<S> {
-    #[inline]
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        // TODO(victor): Add the type of S to this.
-        f.write_str("Sha256VarCore { ... }")
+    impl<S: super::Sha256> Debug for Sha256VarCore<S> {
+        #[inline]
+        fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
+            // TODO(victor): Add the type of S to this.
+            f.write_str("Sha256VarCore { ... }")
+        }
     }
-}
 
-// TODO(victor): Rename this and possible add an Oid.
-/// SHA-256 implementation cross-compatible with `sha2::Sha256`.
-pub type Sha256_2<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
+    // TODO(victor): Rename this and possible add an Oid.
+    /// SHA-256 implementation cross-compatible with `sha2::Sha256`.
+    pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
+}
 
 #[cfg(test)]
 mod tests {
@@ -437,10 +470,10 @@ pub mod testutil {
     use alloc::vec::Vec;
     use core::ops::Deref;
 
-    use digest::Digest as _;
     use hex::FromHex;
 
-    use super::{Digest, Sha256, Sha256_2};
+    use super::rust_crypto::Digest as _;
+    use super::{rust_crypto, Digest, Sha256};
     use crate::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
     // Runs conformance test on a SHA-256 implementation to make sure it properly
@@ -491,20 +524,20 @@ pub mod testutil {
     fn test_rust_crypto_wrapper<S: Sha256>() {
         // Standard test vectors
         assert_eq!(
-            hex::encode(Sha256_2::<S>::digest("abc".as_bytes())),
+            hex::encode(rust_crypto::Sha256::<S>::digest("abc".as_bytes())),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
         );
         assert_eq!(
-            hex::encode(Sha256_2::<S>::digest("".as_bytes())),
+            hex::encode(rust_crypto::Sha256::<S>::digest("".as_bytes())),
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         );
         assert_eq!(
-            hex::encode(Sha256_2::<S>::digest(
+            hex::encode(rust_crypto::Sha256::<S>::digest(
                 "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()
             )),
             "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
         );
-        assert_eq!(hex::encode(Sha256_2::<S>::digest(
+        assert_eq!(hex::encode(rust_crypto::Sha256::<S>::digest(
             "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes())),
             "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1");
         // Test also the 'hexDigest' bit.
@@ -512,7 +545,7 @@ pub mod testutil {
         // >>> hashlib.sha256("Byzantium").hexdigest()
         // 'f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a'
         assert_eq!(
-            hex::encode(Sha256_2::<S>::digest(&"Byzantium".as_bytes())),
+            hex::encode(rust_crypto::Sha256::<S>::digest(&"Byzantium".as_bytes())),
             "f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a"
         );
     }
