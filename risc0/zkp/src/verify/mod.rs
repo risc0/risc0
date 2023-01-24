@@ -120,7 +120,6 @@ pub trait VerifyHal {
 
 #[cfg(not(target_os = "zkvm"))]
 mod host {
-    use alloc::collections::BTreeMap;
     use core::{cell::RefCell, iter::zip};
 
     use super::*;
@@ -132,6 +131,8 @@ mod host {
     };
 
     struct TapCache<F: Field> {
+        taps: *const TapSet<'static>,
+        mix: F::ExtElem,
         tap_mix_pows: Vec<F::ExtElem>,
         check_mix_pows: Vec<F::ExtElem>,
     }
@@ -139,7 +140,7 @@ mod host {
     pub struct CpuVerifyHal<'a, S: Sha, F: Field, C: PolyExt<F>> {
         sha: &'a S,
         circuit: &'a C,
-        tap_cache: RefCell<BTreeMap<*const TapSet<'static>, TapCache<F>>>,
+        tap_cache: RefCell<Option<TapCache<F>>>,
     }
 
     impl<'a, S: Sha, F: Field, C: PolyExt<F>> CpuVerifyHal<'a, S, F, C> {
@@ -147,7 +148,7 @@ mod host {
             Self {
                 sha,
                 circuit,
-                tap_cache: RefCell::new(BTreeMap::new()),
+                tap_cache: RefCell::new(None),
             }
         }
     }
@@ -206,8 +207,14 @@ mod host {
             let combo_count = taps.combos_size();
             let x = Self::ExtElem::from_subfield(&x);
 
-            let mut tap_cache_lock = self.tap_cache.borrow_mut();
-            let tap_cache = tap_cache_lock.entry(taps).or_insert_with(|| {
+            let mut tap_cache = self.tap_cache.borrow_mut();
+            if let Some(ref c) = &mut *tap_cache {
+                if c.taps != taps || c.mix != mix {
+                    // debug!("Resetting tap cache");
+                    tap_cache.take();
+                }
+            }
+            if tap_cache.is_none() {
                 let mut cur_mix = Self::ExtElem::ONE;
                 let mut tap_mix_pows = Vec::with_capacity(taps.reg_count());
                 for _reg in taps.regs() {
@@ -225,11 +232,15 @@ mod host {
                     cur_mix *= mix;
                 }
 
-                TapCache {
+                tap_cache.replace(TapCache {
+                    taps,
+                    mix,
                     tap_mix_pows,
                     check_mix_pows,
-                }
-            });
+                });
+            }
+            let tap_cache = tap_cache.as_ref().unwrap();
+
             for (reg, cur) in zip(taps.regs(), tap_cache.tap_mix_pows.iter()) {
                 tot[reg.combo_id()] += *cur * rows[reg.group() as usize][reg.offset()];
             }
