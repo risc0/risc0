@@ -279,6 +279,8 @@ pub trait Sha256 {
     /// DANGER: This is the low-level SHA-256 compression function. It is a
     /// primitive used to construct SHA-256, but it is NOT the full
     /// algorithm and should be used directly only with extreme caution.
+    // TODO(victor) Expose a way to compress a slice of blocks for use in places
+    // like the rust_crypto wrapper.
     fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr;
 
     /// Generate a SHA from a slice of anything that can be represented as plain
