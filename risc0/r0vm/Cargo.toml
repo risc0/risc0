@@ -12,7 +12,7 @@ anyhow = "1.0"
 bytemuck = "1.12"
 clap = { version = "4.0", features = ["derive"] }
 env_logger = "0.10.0"
-risc0-zkvm = { version = "1.0.0-rc.2", path = "../zkvm", features = ["profiler"] }
+risc0-zkvm = { workspace = true, features = ["default", "profiler"] }
 
 [dev-dependencies]
 anyhow = "1.0"

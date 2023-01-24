@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +11,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+//! Cryptographic algorithms for producing a ZK proof of compute
+//!
+//! This module is not typically used directly. Instead, we recommend the
+//! higher-level tools offered in [`risc0_zkvm::prove`].
+//!
+//! [`risc0_zkvm::prove`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/prove/index.html
 
 mod accum;
 pub mod adapter;
@@ -38,6 +45,7 @@ use crate::{
     INV_RATE, MAX_CYCLES_PO2,
 };
 
+/// INSECURELY execute a circuit without producing a seal that proves execution
 pub fn prove_without_seal<'a, F, S, C, CS>(sha: &S, circuit: &mut ProveAdapter<'a, F, C, CS>)
 where
     F: Field,
@@ -49,6 +57,7 @@ where
     circuit.execute(&mut iop);
 }
 
+/// Construct a seal proving execution
 #[tracing::instrument(skip_all)]
 pub fn prove<'a, F, H, S, E, C, CS>(
     hal: &H,
@@ -122,7 +131,7 @@ where
     // DEEP-ALI paper for details on the construction of the check_poly.
     let check_poly = hal.alloc_elem("check_poly", H::ExtElem::EXT_SIZE * domain);
     let mix = hal.copy_from_elem("mix", circuit.get_mix());
-    let out = hal.copy_from_elem("out", circuit.get_output());
+    let out = hal.copy_from_elem("out", circuit.get_io());
     eval.eval_check(
         &check_poly,
         &code_group.evaluated,

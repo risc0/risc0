@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 use core::{cell::UnsafeCell, mem::MaybeUninit, ptr, slice};
 
-use risc0_zkp::core::sha::{Digest, SHA256_INIT};
+use risc0_zkp::core::sha::{Digest, DIGEST_WORDS, SHA256_INIT};
 use risc0_zkvm_platform::{
     io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT},
     memory,
@@ -81,8 +81,8 @@ pub(crate) fn init() {
     ENV.init(Env::new());
 }
 
-pub(crate) fn finalize(result: *mut usize) {
-    ENV.get().finalize(result);
+pub(crate) fn finalize() {
+    ENV.get().finalize();
 }
 
 /// Exchanges data with the host, returning the data from the host
@@ -165,7 +165,7 @@ impl Env {
         send_recv(SENDRECV_CHANNEL_STDOUT, bytemuck::cast_slice(buf));
     }
 
-    fn finalize(&mut self, result: *mut usize) {
+    fn finalize(&mut self) {
         let len_words = self.commit_len;
         let len_bytes = len_words * WORD_SIZE;
         let slice: &[u32] =
@@ -174,34 +174,25 @@ impl Env {
         // Write the full data out to the host
         unsafe { sys_commit(slice.as_ptr(), len_bytes) };
 
+        let mut output = Digest::new([0u32; DIGEST_WORDS]);
+
         // If the total proof message is small (<= 32 bytes), return it directly
         // from the proof, otherwise SHA it and return the hash.
         if len_words <= 8 {
+            let output = output.as_mut_slice();
             for i in 0..len_words {
-                unsafe {
-                    result
-                        .add(i)
-                        .write_volatile(*slice.get_unchecked(i) as usize)
-                };
-            }
-            for i in len_words..8 {
-                unsafe { result.add(i).write_volatile(0) };
+                output[i] = slice[i];
             }
         } else {
-            let digest = result as *mut Digest;
-            sha::update_u32(
-                result as *mut Digest,
-                &SHA256_INIT,
-                slice,
-                sha::WithoutTrailer,
-            );
+            let ptr: *mut Digest = &mut output;
+            sha::update_u32(ptr, &SHA256_INIT, slice, sha::WithoutTrailer);
         }
+        let output = output.as_slice();
         unsafe {
-            result.add(8).write_volatile(len_bytes);
-            memory_barrier(result);
-            for i in 0..9 {
-                sys_output(i, (*result.add(i.try_into().unwrap())).try_into().unwrap());
+            for i in 0..DIGEST_WORDS {
+                sys_output(i as u32, output[i]);
             }
+            sys_output(8, len_bytes as u32);
             sys_halt()
         }
     }

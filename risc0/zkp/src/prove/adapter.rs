@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ where
     /// Perform initial 'execution' setting code + data.
     /// Additionally, write any 'results' as needed.
     pub fn execute<S: Sha>(&mut self, iop: &mut WriteIOP<S>) {
-        iop.write_field_elem_slice(&self.exec.output);
+        iop.write_field_elem_slice(&self.exec.io);
         iop.write_u32_slice(&[self.exec.po2 as u32]);
     }
 
@@ -87,7 +87,7 @@ where
         self.accum.resize(self.steps * accum_size, F::Elem::INVALID);
         let mut args: &mut [&mut [F::Elem]] = &mut [
             &mut self.exec.code,
-            &mut self.exec.output,
+            &mut self.exec.io,
             &mut self.exec.data,
             &mut self.mix,
             &mut self.accum,
@@ -139,7 +139,7 @@ where
             );
         });
         // Zero out 'invalid' entries in accum
-        for value in self.accum.iter_mut().chain(self.exec.output.iter_mut()) {
+        for value in self.accum.iter_mut().chain(self.exec.io.iter_mut()) {
             *value = value.valid_or_zero();
         }
         // Add random noise to end of accum and change invalid element to zero
@@ -171,8 +171,8 @@ where
         &self.mix
     }
 
-    pub fn get_output(&self) -> &[F::Elem] {
-        &self.exec.output
+    pub fn get_io(&self) -> &[F::Elem] {
+        &self.exec.io
     }
 
     pub fn get_steps(&self) -> usize {

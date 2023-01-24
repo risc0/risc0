@@ -1,5 +1,5 @@
 /*
-  Copyright 2022 Risc0, Inc.
+  Copyright 2023 Risc0, Inc.
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ EXTERN(__start)
 
 /* Must match risc0/zkvm/platform/src/memory.rs */
 MEMORY {
-  stack        : ORIGIN = 0x00000000, LENGTH =  16M
-  data    (RW) : ORIGIN = 0x01000000, LENGTH =  16M
-  heap         : ORIGIN = 0x02000000, LENGTH =  32M
-  input        : ORIGIN = 0x04000000, LENGTH =  32M
+  stack        : ORIGIN = 0x02000000, LENGTH =  16M
+  data    (RW) : ORIGIN = 0x03000000, LENGTH =  16M
+  heap         : ORIGIN = 0x04000000, LENGTH =  32M
   prog    (X)  : ORIGIN = 0x06000000, LENGTH =  32M
 }
 
@@ -47,7 +46,7 @@ SECTIONS {
 
   . = ALIGN(4);
 
-  .bss (NOLOAD) :  {
+  .bss (NOLOAD) : {
     __bss_begin = .;
     *(.sbss*)
     *(.gnu.linkonce.sb.*)
@@ -55,9 +54,7 @@ SECTIONS {
     *(.gnu.linkonce.b.*)
     *(COMMON)
     . = ALIGN(4);
-    __result = .;
-    /* Result is 9 words * 4 = 36 bytes, 8 words for output, and 1 word for output size*/
-    __bss_end = . + 36;
+    __bss_end = .;
   } >data
 
   __bss_size = __bss_end - __bss_begin;

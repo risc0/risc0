@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
@@ -28,7 +29,7 @@ pub mod prove;
 pub mod taps;
 pub mod verify;
 
-pub const MIN_CYCLES_PO2: usize = 10;
+pub const MIN_CYCLES_PO2: usize = 11;
 pub const MIN_CYCLES: usize = 1 << MIN_CYCLES_PO2; // 1K
 pub const MAX_CYCLES_PO2: usize = 24;
 pub const MAX_CYCLES: usize = 1 << MAX_CYCLES_PO2; // 16M

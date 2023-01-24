@@ -18,7 +18,7 @@ bytemuck = { version = "1.12", features = ["derive"] }
 fil-rustacuda = { version = "0.1", optional = true }
 paste = "1.0"
 rand_core = "0.6"
-risc0-zeroio = { version = "1.0.0-rc.2", path = "../zeroio", default-features = false }
+risc0-zeroio = { workspace = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
@@ -38,7 +38,7 @@ metal = "0.24"
 criterion = "0.4"
 env_logger = "0.10"
 rand = { version = "0.8", features = ["small_rng"] }
-serial_test = "0.10"
+serial_test = "1.0"
 test-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

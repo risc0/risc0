@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@ use alloc::collections::BTreeMap;
 use anyhow::{anyhow, bail, Result};
 use elf::{endian::LittleEndian, file::Class, ElfBytes};
 
+/// A RISC Zero program
 pub struct Program {
+    /// The entrypoint of the program
     pub entry: u32,
+    /// The initial memory image
     pub image: BTreeMap<u32, u32>,
 }
 
 impl Program {
+    /// Initialize a RISC Zero Program from an appropriate ELF file
     pub fn load_elf(input: &[u8], max_mem: u32) -> Result<Program> {
         let mut image: BTreeMap<u32, u32> = BTreeMap::new();
         let elf = ElfBytes::<LittleEndian>::minimal_parse(input)?;

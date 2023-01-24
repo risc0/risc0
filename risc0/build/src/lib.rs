@@ -1,4 +1,4 @@
-// Copyright 2022 RISC Zero, Inc.
+// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,62 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Build RISC Zero zkVM guest code and provide handles to the host side
-//!
-//! In order for the host to execute guest code in the [RISC Zero
-//! zkVM](risc0_zkvm), the host must be provided a compiled RISC-V ELF file and
-//! the corresponding [MethodID](risc0_zkvm::MethodId). This crate
-//! contains the functions needed to take zkVM guest code, build a corresponding
-//! ELF file and MethodID, and make the MethodID and a path to the ELF file
-//! available for the host to use.
-//!
-//! ## Using risc0-build to build guest methods
-//!
-//! Using this crate can be a bit delicate, so we encourage you to follow along
-//! in our [RISC Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter).
-//! In that repository, `risc0-build` is used in the
-//! [`methods` directory](https://github.com/risc0/risc0-rust-starter/tree/main/methods).
-//!
-//! Guest methods are embedded for the host to use by calling [embed_methods]
-//! (or [embed_methods_with_options]) in a [build script](https://doc.rust-lang.org/cargo/reference/build-scripts.html).
-//! An example `build.rs` file would look like
-//! ```no_run
-//! fn main() {
-//!     risc0_build::embed_methods();
-//! }
-//! ```
-//!
-//! This requires including `risc0-build` as a _build_ dependency. You will also
-//! need add a `[package.metadata.risc0]` section to your cargo file. In this
-//! section, put a `methods` field with a list of relative paths containing the
-//! guest code. For example, if your guest code is in the `guest` directory,
-//! then `Cargo.toml` might include
-//! ```toml
-//! [build-dependencies]
-//! risc0-build = "1.0.0-rc.2"
-//!
-//! [package.metadata.risc0]
-//! methods = ["guest"]
-//! ```
-//!
-//! This builds a file `methods.rs` in your cargo output directory which you
-//! must then include for the host to use. For example, you might make a file
-//! `src/lib.rs` containing
-//! ```text
-//! include!(concat!(env!("OUT_DIR"), "/methods.rs"));
-//! ```
-//!
-//! This process will generate a method ID (`*_ID`) and the contents of an ELF
-//! file (`*_ELF`). The names will be derived from the name of the ELF
-//! binary, which will be converted to ALL_CAPS to comply with rust naming
-//! conventions. Thus, if a method binary is named `multiply`, the method ID
-//! will be named `methods::MULTIPLY_ID` and the contents of the ELF file will
-//! be named `methods::MULTIPLY_ELF`. These are included at the beginning
-//! of the host-side code:
-//! ```text
-//! use methods::{MULTIPLY_ELF, MULTIPLY_ID};
-//! ```
-
+#![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
@@ -83,10 +28,10 @@ use std::{
 
 use cargo_metadata::{MetadataCommand, Package};
 use downloader::{Download, Downloader};
-use risc0_zkp::adapter::TapsProvider;
-use risc0_zkvm::{MethodId, DEFAULT_METHOD_ID_LIMIT};
+use risc0_zkvm::{sha::Digest, MemoryImage, Program};
+use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 use serde::Deserialize;
-use sha2::{Digest, Sha256};
+use sha2::{Digest as ShaDigest, Sha256};
 use tempfile::tempdir_in;
 use zip::ZipArchive;
 
@@ -112,7 +57,7 @@ struct Risc0Method {
 }
 
 impl Risc0Method {
-    fn make_method_id(&self, code_limit: usize) -> MethodId {
+    fn make_image_id(&self) -> Digest {
         if !self.elf_path.exists() {
             eprintln!(
                 "RISC-V method was not found at: {:?}",
@@ -121,57 +66,21 @@ impl Risc0Method {
             std::process::exit(-1);
         }
 
-        let method_id_path = self.elf_path.with_extension("id");
-        let elf_sha_path = self.elf_path.with_extension("sha");
-        let elf_contents = std::fs::read(&self.elf_path).unwrap();
-
-        let elf_sha = Sha256::new()
-            // Method ID calculation is slow, so only recalculate it if we
-            // actually get a different ELF file.
-            .chain_update(&elf_contents)
-            // Take into account the current circuit; if the circuit
-            // changes, the Method ID will change as well.
-            .chain_update(format!(
-                "{:?}",
-                risc0_circuit_rv32im::CircuitImpl.get_taps()
-            ))
-            // If the Method ID version changes, we need to recreate the Method ID.
-            .chain_update(format!("{}", MethodId::VERSION))
-            .finalize();
-
-        let elf_sha_hex: String = elf_sha
-            .as_slice()
-            .iter()
-            .map(|x| format!("{:02x}", x))
-            .collect();
-
-        if method_id_path.exists() {
-            if let Ok(cached_sha) = std::fs::read(&elf_sha_path) {
-                if cached_sha == elf_sha.as_slice() {
-                    println!("MethodID for {} ({}) up to date", self.name, elf_sha_hex);
-                    let buf = std::fs::read(&method_id_path).unwrap();
-                    return MethodId::from_slice(&buf).unwrap();
-                }
-            }
-        }
-
-        println!("Computing MethodID for {} ({:})!", self.name, elf_sha_hex);
-        let method_id = MethodId::compute_with_limit(&elf_contents, code_limit).unwrap();
-        std::fs::write(method_id_path, method_id.as_slice()).unwrap();
-        std::fs::write(elf_sha_path, elf_sha).unwrap();
-        method_id
+        let elf = fs::read(&self.elf_path).unwrap();
+        let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+        image.root
     }
 
-    fn rust_def(&self, code_limit: usize) -> String {
+    fn rust_def(&self) -> String {
         let elf_path = self.elf_path.display();
         let upper = self.name.to_uppercase();
-        let method_id = self.make_method_id(code_limit);
-        let method_id = method_id.as_slice();
+        let image_id = self.make_image_id();
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
             r##"
 pub const {upper}_ELF: &'static [u8] = &{elf_contents:?};
-pub const {upper}_ID: &'static [u8] = &{method_id:?};
+pub const {upper}_ID: &'static str = r#"{image_id:?}"#;
 pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
             "##
         )
@@ -497,11 +406,6 @@ fn build_guest_package<P>(
 /// Options defining how to embed a guest package in
 /// [`embed_methods_with_options`].
 pub struct GuestOptions {
-    /// The maximum number of cycles (in units of powers of 2) supported by a
-    /// MethodID. The bigger this value is the longer it takes to compute a
-    /// MethodID.
-    pub code_limit: usize,
-
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
 
@@ -512,7 +416,6 @@ pub struct GuestOptions {
 impl Default for GuestOptions {
     fn default() -> Self {
         GuestOptions {
-            code_limit: DEFAULT_METHOD_ID_LIMIT,
             features: vec![],
             std: true,
         }
@@ -554,7 +457,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 
         for method in guest_methods(&guest_pkg, &out_dir) {
             methods_file
-                .write_all(method.rust_def(guest_options.code_limit).as_bytes())
+                .write_all(method.rust_def().as_bytes())
                 .unwrap();
         }
     }
@@ -575,7 +478,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 /// listing the relative paths that contain riscv guest method
 /// packages.
 ///
-/// To access the generated method IDs and ELF filenames, include the
+/// To access the generated image IDs and ELF filenames, include the
 /// generated methods.rs:
 ///
 /// ```text
@@ -584,7 +487,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 ///
 /// To conform to rust's naming conventions, the constants are mapped
 /// to uppercase.  For instance, if you have a method named
-/// "my_method", the method ID and elf contents will be defined as
+/// "my_method", the image ID and elf contents will be defined as
 /// "MY_METHOD_ID" and "MY_METHOD_ELF" respectively.
 pub fn embed_methods() {
     embed_methods_with_options(HashMap::new())
