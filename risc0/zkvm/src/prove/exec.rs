@@ -23,7 +23,7 @@ use num_traits::FromPrimitive;
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepHandler, PolyExt},
-    core::{log2_ceil, sha::BLOCK_SIZE},
+    core::{log2_ceil, sha::BLOCK_BYTES},
     field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem,
@@ -488,8 +488,8 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                     faults.include(state_in_addr + (i * WORD_SIZE) as u32);
                 }
                 for i in 0..count {
-                    let addr1 = block1_addr + i * BLOCK_SIZE as u32;
-                    let addr2 = block2_addr + i * BLOCK_SIZE as u32;
+                    let addr1 = block1_addr + i * BLOCK_BYTES as u32;
+                    let addr2 = block2_addr + i * BLOCK_BYTES as u32;
                     for j in 0..DIGEST_WORDS {
                         faults.include(addr1 + (j * WORD_SIZE) as u32);
                         faults.include(addr2 + (j * WORD_SIZE) as u32);

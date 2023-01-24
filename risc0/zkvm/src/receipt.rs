@@ -53,14 +53,11 @@ pub struct Receipt {
     pub seal: Vec<u32>,
 }
 
-// TODO(victor): Consider whether using the `Digest: From<D>` is the right
 // constraint here.
-pub fn verify_with_hal<H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u32]) -> Result<()>
+pub fn verify_with_hal<H>(hal: &H, image_id: &Digest, seal: &[u32], journal: &[u32]) -> Result<()>
 where
     H: risc0_zkp::verify::VerifyHal,
-    Digest: From<D>,
 {
-    let image_id: Digest = image_id.into();
     let check_globals = |io: &[u32]| -> Result<(), VerificationError> {
         // verify the image_id
         #[cfg(not(target_os = "zkvm"))]
@@ -70,7 +67,7 @@ where
         let slice = &io[WORD_SIZE..WORD_SIZE + DIGEST_BYTES];
         let bytes: Vec<u8> = slice.iter().map(|x| *x as u8).collect();
         let actual = Digest::try_from(bytes);
-        if !actual.map(|digest| image_id == digest).unwrap_or(false) {
+        if !actual.map(|digest| image_id == &digest).unwrap_or(false) {
             return Err(VerificationError::ImageVerificationError);
         }
 
@@ -143,20 +140,16 @@ impl Receipt {
 
     #[cfg(not(target_os = "zkvm"))]
     /// Verifies a receipt using CPU.
-    pub fn verify<D>(&self, image_id: D) -> Result<()>
-    where
-        Digest: From<D>,
-    {
+    pub fn verify(&self, image_id: &Digest) -> Result<()> {
         let hal = risc0_zkp::verify::CpuVerifyHal::<sha::Impl, _, _>::new(&crate::CIRCUIT);
 
         verify_with_hal(&hal, image_id, &self.seal, &self.journal)
     }
 
     /// Verifies a receipt using the hardware acceleration layer.
-    pub fn verify_with_hal<H, D>(&self, hal: &H, image_id: D) -> Result<()>
+    pub fn verify_with_hal<H>(&self, hal: &H, image_id: &Digest) -> Result<()>
     where
         H: risc0_zkp::verify::VerifyHal,
-        Digest: From<D>,
     {
         verify_with_hal(hal, image_id, &self.seal, &self.journal)
     }

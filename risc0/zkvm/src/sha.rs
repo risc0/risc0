@@ -15,7 +15,7 @@
 //! SHA-256 hashing services
 
 pub use risc0_zkp::core::sha::{
-    Digest, Sha256, BLOCK_SIZE, DIGEST_BYTES, DIGEST_WORDS, DIGEST_WORD_SIZE, SHA256_INIT,
+    Digest, Sha256, BLOCK_BYTES, DIGEST_BYTES, DIGEST_WORDS, SHA256_INIT, WORD_SIZE,
 };
 
 // Pick the appropriate implementation of SHA-256 depending on whether we are

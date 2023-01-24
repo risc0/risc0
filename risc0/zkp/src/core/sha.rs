@@ -26,20 +26,28 @@ use hex::{FromHex, FromHexError};
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 use serde::{Deserialize, Serialize};
 
+/// The size of a word used with the SHA-256 implementation and within
+/// a [Digest] and [Block] representations (32-bits = 4 bytes).
+pub const WORD_SIZE: usize = mem::size_of::<u32>();
+
 /// The number of words in the representation of a [Digest].
-// We represent a SHA-256 digest as 8 32-bit words instead of the
-// traditional 32 8-bit bytes.
 pub const DIGEST_WORDS: usize = 8;
 
-/// The size of a word in bytes within a [Digest] (32-bits = 4 bytes).
-pub const DIGEST_WORD_SIZE: usize = mem::size_of::<u32>();
-
 /// Size of the [Digest] representation in bytes.
+///
 /// Note that digests are stored in memory as words instead of bytes.
-pub const DIGEST_BYTES: usize = DIGEST_WORDS * DIGEST_WORD_SIZE;
+pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
 
-/// The size of a SHA-256 block in bytes.
-pub const BLOCK_SIZE: usize = DIGEST_BYTES * 2;
+/// The number of words in the representation of a [Block].
+///
+/// Note that for SHA-256 the block is twice the size of the [Digest].
+pub const BLOCK_WORDS: usize = DIGEST_WORDS * 2;
+
+/// Size of the [Block] representation in bytes.
+///
+/// Note that blocks are stored in memory as words instead of bytes, and that a
+/// [Block] is twice the size of a [Digest].
+pub const BLOCK_BYTES: usize = DIGEST_BYTES * 2;
 
 /// Standard SHA-256 initialization vector.
 pub static SHA256_INIT: Digest = Digest([
@@ -56,13 +64,8 @@ pub static SHA256_INIT: Digest = Digest([
 /// The result of the SHA-256 hash algorithm.
 ///
 /// Note: Bytes in the [Digest] type are stored in big-endian order regardless
-/// of the host architecture. When interpretted as words, the numerical result
+/// of the host architecture. When interpreted as words, the numerical result
 /// will depend on the architecture.
-// TODO(victor) Removing the Copy trait also means this types cannot be bytemuck::Pod. Is this what
-// we want?
-// TODO(victor) Decide whether or not to make the inner struct pub. It would make things somewhat
-// simpler, but it is also somewhat clean that in the current factoring it is kind of agnostic to
-// whether it is bytes or words internally.
 #[derive(
     Copy,
     Clone,
@@ -79,12 +82,12 @@ pub static SHA256_INIT: Digest = Digest([
 pub struct Digest([u32; DIGEST_WORDS]);
 
 impl Digest {
-    /// Returns a reference to the Digest as a slice of words.
+    /// Returns a reference to the [Digest] as a slice of words.
     pub fn as_words(&self) -> &[u32] {
         &self.0
     }
 
-    /// Returns a reference to the DIgest as a slice of bytes.
+    /// Returns a reference to the [Digest] as a slice of bytes.
     pub fn as_bytes(&self) -> &[u8] {
         bytemuck::cast_slice(&self.0)
     }
@@ -97,12 +100,6 @@ impl Digest {
     /// Returns a mutable slice of bytes.
     pub fn as_mut_bytes(&mut self) -> &mut [u8] {
         bytemuck::cast_slice_mut(&mut self.0)
-    }
-}
-
-impl From<&Digest> for Digest {
-    fn from(digest: &Digest) -> Self {
-        digest.clone()
     }
 }
 
@@ -239,6 +236,194 @@ impl Debug for Digest {
     }
 }
 
+// TODO(victor) Consider using a macro to reduce code duplication.
+/// Input block to the SHA-256 hashing algorithm. SHA-256 consumes blocks in
+/// 512-bit (64-byte) chunks in a [Merkle–Damgård] construction.
+///
+/// TODO(victor): What does the developer need to know about block endianness?
+/// NOTE: Bytes in the [Block] type are stored in big-endian order regardless
+/// of the host architecture. When interpreted as words, the numerical result
+/// will depend on the architecture.
+///
+/// Merkle–Damgård: https://en.wikipedia.org/wiki/Merkle%E2%80%93Damg%C3%A5rd_construction
+#[derive(
+    Copy,
+    Clone,
+    Eq,
+    PartialEq,
+    Pod,
+    Zeroable,
+    Serialize,
+    Deserialize,
+    ZeroioSerialize,
+    ZeroioDeserialize,
+)]
+#[repr(transparent)]
+pub struct Block([u32; BLOCK_WORDS]);
+
+impl Block {
+    /// Returns a reference to the [Block] as a slice of words.
+    pub fn as_words(&self) -> &[u32] {
+        &self.0
+    }
+
+    /// Returns a reference to the [Block] as a slice of bytes.
+    pub fn as_bytes(&self) -> &[u8] {
+        bytemuck::cast_slice(&self.0)
+    }
+
+    /// Returns a mutable slice of words.
+    pub fn as_mut_words(&mut self) -> &mut [u32] {
+        &mut self.0
+    }
+
+    /// Returns the [Block] as references to two half-blocks, with the same size
+    /// are a SHA-256 digest.
+    pub fn as_half_blocks(&self) -> (&Digest, &Digest) {
+        let half_block1: &Digest = bytemuck::from_bytes(&self.as_bytes()[..DIGEST_BYTES]);
+        let half_block2: &Digest = bytemuck::from_bytes(&self.as_bytes()[DIGEST_BYTES..]);
+        (half_block1, half_block2)
+    }
+
+    /// Returns a mutable slice of bytes.
+    pub fn as_mut_bytes(&mut self) -> &mut [u8] {
+        bytemuck::cast_slice_mut(&mut self.0)
+    }
+}
+
+impl Default for Block {
+    fn default() -> Block {
+        Block([0; BLOCK_WORDS])
+    }
+}
+
+/// Create a new [Block] from an array of words.
+impl From<[u32; BLOCK_WORDS]> for Block {
+    fn from(data: [u32; BLOCK_WORDS]) -> Self {
+        Self(data)
+    }
+}
+
+/// Create a new [Block] from an array of bytes.
+impl From<[u8; BLOCK_BYTES]> for Block {
+    fn from(data: [u8; BLOCK_BYTES]) -> Self {
+        Self(bytemuck::cast(data))
+    }
+}
+
+impl FromHex for Block {
+    type Error = FromHexError;
+
+    fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, Self::Error> {
+        Ok(<[u8; BLOCK_BYTES]>::from_hex(hex)?.into())
+    }
+}
+
+impl TryFrom<&[u8]> for Block {
+    type Error = core::array::TryFromSliceError;
+
+    fn try_from(data: &[u8]) -> Result<Self, Self::Error> {
+        Ok(<[u8; BLOCK_BYTES]>::try_from(data)?.into())
+    }
+}
+
+impl TryFrom<&[u32]> for Block {
+    type Error = core::array::TryFromSliceError;
+
+    fn try_from(data: &[u32]) -> Result<Self, Self::Error> {
+        Ok(<[u32; BLOCK_WORDS]>::try_from(data)?.into())
+    }
+}
+
+impl TryFrom<Vec<u8>> for Block {
+    type Error = Vec<u8>;
+
+    fn try_from(data: Vec<u8>) -> Result<Self, Self::Error> {
+        Ok(<[u8; BLOCK_BYTES]>::try_from(data)?.into())
+    }
+}
+
+impl TryFrom<Vec<u32>> for Block {
+    type Error = Vec<u32>;
+
+    fn try_from(data: Vec<u32>) -> Result<Self, Self::Error> {
+        Ok(<[u32; BLOCK_WORDS]>::try_from(data)?.into())
+    }
+}
+
+impl Into<[u8; BLOCK_BYTES]> for Block {
+    fn into(self) -> [u8; BLOCK_BYTES] {
+        bytemuck::cast(self.0)
+    }
+}
+
+impl Into<[u32; BLOCK_WORDS]> for Block {
+    fn into(self) -> [u32; BLOCK_WORDS] {
+        self.0
+    }
+}
+
+impl AsRef<[u8; BLOCK_BYTES]> for Block {
+    fn as_ref(&self) -> &[u8; BLOCK_BYTES] {
+        bytemuck::cast_ref(&self.0)
+    }
+}
+
+impl AsMut<[u8; BLOCK_BYTES]> for Block {
+    fn as_mut(&mut self) -> &mut [u8; BLOCK_BYTES] {
+        bytemuck::cast_mut(&mut self.0)
+    }
+}
+
+impl AsRef<[u32; BLOCK_WORDS]> for Block {
+    fn as_ref(&self) -> &[u32; BLOCK_WORDS] {
+        &self.0
+    }
+}
+
+impl AsMut<[u32; BLOCK_WORDS]> for Block {
+    fn as_mut(&mut self) -> &mut [u32; BLOCK_WORDS] {
+        &mut self.0
+    }
+}
+
+impl AsRef<[u8]> for Block {
+    fn as_ref(&self) -> &[u8] {
+        self.as_bytes()
+    }
+}
+
+impl AsMut<[u8]> for Block {
+    fn as_mut(&mut self) -> &mut [u8] {
+        self.as_mut_bytes()
+    }
+}
+
+impl AsRef<[u32]> for Block {
+    fn as_ref(&self) -> &[u32] {
+        self.as_words()
+    }
+}
+
+impl AsMut<[u32]> for Block {
+    fn as_mut(&mut self) -> &mut [u32] {
+        self.as_mut_words()
+    }
+}
+
+// TODO(victor) Do these formatting definitions result in what a user my expect?
+impl Display for Block {
+    fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
+        f.write_str(&hex::encode(&self))
+    }
+}
+
+impl Debug for Block {
+    fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
+        f.write_str(&hex::encode(&self))
+    }
+}
+
 /// An implementation of the SHA-256 hashing algorithm of [FIPS 180-4].
 ///
 /// [FIPS 180-4] https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
@@ -273,15 +458,21 @@ pub trait Sha256 {
         Self::compress(&SHA256_INIT, a, b)
     }
 
-    /// Execute the SHA-256 compression function.
-    /// The block is specified as two half-blocks.
+    /// Execute the SHA-256 compression function on a single block given as as
+    /// two half-blocks. Note that the half blocks do not need to be adjacent.
     ///
     /// DANGER: This is the low-level SHA-256 compression function. It is a
     /// primitive used to construct SHA-256, but it is NOT the full
     /// algorithm and should be used directly only with extreme caution.
-    // TODO(victor) Expose a way to compress a slice of blocks for use in places
-    // like the rust_crypto wrapper.
     fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr;
+
+    /// Execute the SHA-256 compression function on a slice of blocks following
+    /// the [Merkle–Damgård] construction.
+    ///
+    /// DANGER: This is the low-level SHA-256 compression function. It is a
+    /// primitive used to construct SHA-256, but it is NOT the full
+    /// algorithm and should be used directly only with extreme caution.
+    fn compress_slice(state: &Digest, blocks: &[Block]) -> Self::DigestPtr;
 
     /// Generate a SHA from a slice of anything that can be represented as plain
     /// old data. Pads up to the SHA-256 block boundary, but does not add the
@@ -333,11 +524,11 @@ pub mod rust_crypto {
             AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
             CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
         },
-        typenum::{Unsigned, U32, U64},
+        typenum::{U32, U64},
         HashMarker, InvalidOutputSize, Output,
     };
 
-    use super::{DIGEST_BYTES, SHA256_INIT};
+    use super::{BLOCK_BYTES, SHA256_INIT};
 
     /// Core block-level SHA-256 hasher with variable output size.
     ///
@@ -346,10 +537,9 @@ pub mod rust_crypto {
     pub struct Sha256VarCore<S: super::Sha256> {
         // Current internal state of the SHA-256 hashing operation.
         state: Option<S::DigestPtr>,
-        // Counter of the number of blocks hashed so far.
-        // TODO(victor) Consider using a u32. And see if it saves a few cycles.
-        // A u32 counter can accommodate pre-images of up to 2^26 bytes ~ 64 GB.
-        block_len: u64,
+        // Counter of the number of blocks hashed so far. Note that with blocks of 64 bytes, this
+        // implies that a maximum of 256 GB can be hashed.
+        block_len: u32,
     }
 
     impl<S: super::Sha256> HashMarker for Sha256VarCore<S> {}
@@ -365,20 +555,14 @@ pub mod rust_crypto {
     impl<S: super::Sha256> UpdateCore for Sha256VarCore<S> {
         #[inline]
         fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-            self.block_len += u64::try_from(blocks.len()).unwrap();
-            // TODO(victor): Ensure there are no copies here and see if I can avoid the loop
-            // reasonable.
-            for block in blocks {
-                let half_block1: &super::Digest =
-                    bytemuck::from_bytes(&block.as_slice()[..DIGEST_BYTES]);
-                let half_block2: &super::Digest =
-                    bytemuck::from_bytes(&block.as_slice()[DIGEST_BYTES..]);
-                self.state = Some(S::compress(
-                    self.state.as_deref().unwrap_or(&SHA256_INIT),
-                    half_block1,
-                    half_block2,
-                ));
-            }
+            self.block_len += u32::try_from(blocks.len()).unwrap();
+            self.state = Some(S::compress_slice(
+                self.state.as_deref().unwrap_or(&SHA256_INIT),
+                // TODO(victor): Take another momment to look for a safe way to do this, but since
+                // these two types have exactly the same memory layout, this is almost certainly
+                // safe.
+                unsafe { core::mem::transmute::<&[Block<Self>], &[super::Block]>(blocks) },
+            ));
         }
     }
 
@@ -401,17 +585,15 @@ pub mod rust_crypto {
 
         #[inline]
         fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-            let bs = Self::BlockSize::U64;
-            let bit_len = 8 * (u64::try_from(buffer.get_pos()).unwrap() + bs * self.block_len);
-            buffer.len64_padding_be(bit_len, |block| {
-                let half_block1: &super::Digest =
-                    bytemuck::from_bytes(&block.as_slice()[..DIGEST_BYTES]);
-                let half_block2: &super::Digest =
-                    bytemuck::from_bytes(&block.as_slice()[DIGEST_BYTES..]);
+            let bit_len = 8
+                * (u32::try_from(buffer.get_pos()).unwrap()
+                    + (BLOCK_BYTES as u32) * self.block_len);
+            buffer.len64_padding_be(bit_len as u64, |block| {
+                let block: &super::Block = bytemuck::from_bytes(block.as_slice());
                 self.state = Some(S::compress(
                     self.state.as_deref().unwrap_or(&SHA256_INIT),
-                    half_block1,
-                    half_block2,
+                    block.as_half_blocks().0,
+                    block.as_half_blocks().1,
                 ));
             });
 
@@ -438,6 +620,7 @@ pub mod rust_crypto {
     pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
 }
 
+// TODO(victor): Review test coverage.
 #[cfg(test)]
 mod tests {
     use hex::FromHex;

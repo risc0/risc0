@@ -97,7 +97,7 @@ fn run_prover(
     opts: ProverOpts,
     initial_input: Option<Vec<u8>>,
 ) -> Result<(Receipt, Vec<u8>)> {
-    let mut prover = Prover::new_with_opts(&elf_contents, image_id, opts).unwrap();
+    let mut prover = Prover::new_with_opts(&elf_contents, image_id.clone(), opts).unwrap();
     if let Some(bytes) = initial_input {
         prover.add_input_u8_slice(bytes.as_slice());
     }

@@ -22,7 +22,7 @@ use sha2::{
     Digest as _,
 };
 
-use super::sha::{Digest, Sha256, DIGEST_WORDS, SHA256_INIT};
+use super::sha::{Block, Digest, Sha256, DIGEST_WORDS, SHA256_INIT};
 
 /// A CPU-based [Sha256] implementation.
 #[derive(Default, Clone)]
@@ -155,6 +155,29 @@ impl Sha256 for Impl {
             set_word(block.as_mut_slice(), 8 + i, block_half2.as_words()[i]);
         }
         sha2::compress256(&mut state, slice::from_ref(&block));
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
+        Box::new(Digest::from(state))
+    }
+
+    fn compress_slice(orig_state: &Digest, blocks: &[Block]) -> Self::DigestPtr {
+        // Convert the state from big-endian to native byte order.
+        let mut state: [u32; DIGEST_WORDS] = *orig_state.as_ref();
+        for word in state.iter_mut() {
+            *word = word.to_be();
+        }
+
+        // Clone the input blocks into a slice with the `GenericArray` type.
+        // TODO(victor): Give another few minutes of thought to how this might be
+        // accomplished without copying the data.
+        let blocks: Vec<GenericArray<u8, U64>> = blocks
+            .iter()
+            .map(|b| GenericArray::from_slice(b.as_bytes()).clone())
+            .collect();
+        sha2::compress256(&mut state, &blocks);
+
+        // Convert the native byte order result to big-endian.
         for word in state.iter_mut() {
             *word = word.to_be();
         }
