@@ -432,7 +432,6 @@ pub mod rust_crypto {
         }
     }
 
-    // TODO(victor): Rename this and possible add an Oid.
     /// SHA-256 implementation cross-compatible with `sha2::Sha256`.
     pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
 }
