@@ -11,7 +11,6 @@ repository = { workspace = true }
 cargo_metadata = "0.15"
 downloader = "0.2"
 home = "0.5"
-risc0-circuit-rv32im = { workspace = true }
 risc0-zkp = { workspace = true, features = ["default"] }
 risc0-zkvm = { workspace = true, features = ["default"] }
 risc0-zkvm-platform = { workspace = true }
