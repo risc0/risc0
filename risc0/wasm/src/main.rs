@@ -28,5 +28,5 @@ fn _start() {
     // TODO: use a real receipt and image_id
     let receipt = Receipt::new(&[], &[]);
     let image_id = Digest::from([0; DIGEST_WORDS]);
-    receipt.verify(image_id).unwrap();
+    receipt.verify(&image_id).unwrap();
 }

@@ -151,7 +151,7 @@ fn receipt_serde_with_seal() {
     let de: Receipt = crate::serde::from_slice(&ser).unwrap();
     assert_eq!(de.journal, receipt.journal);
     assert_eq!(de.seal, receipt.seal);
-    de.verify(MULTI_TEST_ID).unwrap();
+    de.verify(&MULTI_TEST_ID).unwrap();
 }
 
 #[test]
@@ -162,7 +162,7 @@ fn receipt_serde_no_seal() {
     let de: Receipt = crate::serde::from_slice(&ser).unwrap();
     assert_eq!(de.journal, receipt.journal);
     assert_eq!(de.seal, receipt.seal);
-    assert!(de.verify(MULTI_TEST_ID).is_err());
+    assert!(de.verify(&MULTI_TEST_ID).is_err());
 }
 
 #[test]
@@ -181,7 +181,7 @@ fn fail() {
 fn check_image_id() {
     let receipt = run_do_nothing(ProverOpts::default()).unwrap();
     receipt
-        .verify(MULTI_TEST_ID)
+        .verify(&MULTI_TEST_ID)
         .expect("Verification should succeed before we corrupt the image_id");
     let mut digest: Digest = MULTI_TEST_ID.into();
     for word in digest.as_mut_words() {
@@ -189,7 +189,7 @@ fn check_image_id() {
     }
     assert_eq!(
         receipt
-            .verify(digest)
+            .verify(&digest)
             .expect_err("Verification should fail with a corrupted image_id")
             .to_string(),
         "Verification failed: image_id mismatch"
@@ -205,7 +205,7 @@ fn commit_hello_world() {
     };
 
     receipt
-        .verify(HELLO_COMMIT_ID)
+        .verify(&HELLO_COMMIT_ID)
         .expect("Could not verify receipt");
 }
 

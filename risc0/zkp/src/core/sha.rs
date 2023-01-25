@@ -28,6 +28,9 @@ use serde::{Deserialize, Serialize};
 
 /// The size of a word used with the SHA-256 implementation and within
 /// a [Digest] and [Block] representations (32-bits = 4 bytes).
+// TODO(victor): Deduplicate the WORD_SIZE const with the platform crate.
+// risc0-zkvm-platform includes this as a constant and has no dependencies on
+// other risc0 crate. As such we can pull it from there.
 pub const WORD_SIZE: usize = mem::size_of::<u32>();
 
 /// The number of words in the representation of a [Digest].
@@ -103,6 +106,9 @@ impl Digest {
     }
 }
 
+// TODO(victor): Deal with the fact that casting from [u8] to [u32] can panic on
+// alignment issues.
+
 impl Default for Digest {
     fn default() -> Digest {
         Digest([0; DIGEST_WORDS])
@@ -120,6 +126,18 @@ impl From<[u32; DIGEST_WORDS]> for Digest {
 impl From<[u8; DIGEST_BYTES]> for Digest {
     fn from(data: [u8; DIGEST_BYTES]) -> Self {
         Self(bytemuck::cast(data))
+    }
+}
+
+impl<'a> From<&'a [u32; DIGEST_WORDS]> for &'a Digest {
+    fn from(data: &'a [u32; DIGEST_WORDS]) -> Self {
+        bytemuck::cast_ref(data)
+    }
+}
+
+impl<'a> From<&'a [u8; DIGEST_BYTES]> for &'a Digest {
+    fn from(data: &'a [u8; DIGEST_BYTES]) -> Self {
+        bytemuck::cast_ref(data)
     }
 }
 
@@ -308,6 +326,18 @@ impl From<[u32; BLOCK_WORDS]> for Block {
 impl From<[u8; BLOCK_BYTES]> for Block {
     fn from(data: [u8; BLOCK_BYTES]) -> Self {
         Self(bytemuck::cast(data))
+    }
+}
+
+impl<'a> From<&'a [u32; BLOCK_WORDS]> for &'a Block {
+    fn from(data: &'a [u32; BLOCK_WORDS]) -> Self {
+        bytemuck::cast_ref(data)
+    }
+}
+
+impl<'a> From<&'a [u8; BLOCK_BYTES]> for &'a Block {
+    fn from(data: &'a [u8; BLOCK_BYTES]) -> Self {
+        bytemuck::cast_ref(data)
     }
 }
 

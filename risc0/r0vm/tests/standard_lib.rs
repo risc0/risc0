@@ -37,7 +37,11 @@ fn stdio_outputs_in_receipt() -> Result<()> {
     let temp = TempDir::new().unwrap();
     let receipt_file = temp.child("receipt.dat");
     let image_id_file = temp.child("image_id.dat");
-    std::fs::write(&image_id_file, risc0_zkvm_methods::STANDARD_LIB_ID).unwrap();
+    std::fs::write(
+        &image_id_file,
+        bytemuck::bytes_of(&risc0_zkvm_methods::STANDARD_LIB_ID),
+    )
+    .unwrap();
 
     let mut cmd = Command::cargo_bin("r0vm")?;
 
@@ -54,7 +58,9 @@ fn stdio_outputs_in_receipt() -> Result<()> {
 
     let receipt = load_receipt(&receipt_file);
     assert!(insecure_skip_seal() || receipt.get_seal_bytes().len() > 0);
-    receipt.verify(risc0_zkvm_methods::STANDARD_LIB_ID).unwrap();
+    receipt
+        .verify(&risc0_zkvm_methods::STANDARD_LIB_ID)
+        .unwrap();
 
     Ok(())
 }
@@ -64,7 +70,11 @@ fn stdio_outputs_in_receipt_without_seal() -> Result<()> {
     let temp = TempDir::new().unwrap();
     let receipt_file = temp.child("receipt.dat");
     let image_id_file = temp.child("image_id.dat");
-    std::fs::write(&image_id_file, risc0_zkvm_methods::STANDARD_LIB_ID).unwrap();
+    std::fs::write(
+        &image_id_file,
+        bytemuck::bytes_of(&risc0_zkvm_methods::STANDARD_LIB_ID),
+    )
+    .unwrap();
 
     let mut cmd = Command::cargo_bin("r0vm")?;
 
@@ -82,7 +92,12 @@ fn stdio_outputs_in_receipt_without_seal() -> Result<()> {
 
     let receipt = load_receipt(&receipt_file);
     assert_eq!(receipt.get_seal_bytes().len(), 0);
-    assert!(insecure_skip_seal() || receipt.verify(risc0_zkvm_methods::STANDARD_LIB_ID).is_err());
+    assert!(
+        insecure_skip_seal()
+            || receipt
+                .verify(&risc0_zkvm_methods::STANDARD_LIB_ID)
+                .is_err()
+    );
 
     Ok(())
 }
