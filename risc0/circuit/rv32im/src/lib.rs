@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! The zkVM circuit
-
+#![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "prove")]
@@ -25,7 +24,7 @@ pub mod cuda;
 #[cfg(feature = "prove")]
 mod ffi;
 mod info;
-#[cfg(target_os = "macos")]
+#[cfg(feature = "metal")]
 pub mod metal;
 pub mod poly_ext;
 mod taps;

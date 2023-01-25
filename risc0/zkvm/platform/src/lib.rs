@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Platform definitions for ZKVM, including IO port addresses, memory
-//! regions, and low-level runtime functions.
-
+#![doc = include_str!("../README.md")]
 #![no_std]
 #![allow(unused_variables)]
 

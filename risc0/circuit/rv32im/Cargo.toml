@@ -23,12 +23,10 @@ rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
+metal = { version = "0.24", optional = true }
 
 [target.'cfg(target_os = "zkvm")'.dependencies]
 risc0-zkvm-platform = { workspace = true }
-
-[target.'cfg(target_os = "macos")'.dependencies]
-metal = "0.24"
 
 [dev-dependencies]
 criterion = "0.4"
@@ -43,6 +41,7 @@ sha2 = "0.10"
 
 [features]
 cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std"]
+metal = ["dep:metal"]
 default = ["prove", "test"]
 prove = ["dep:rand", "dep:rayon", "risc0-zkp/prove", "std"]
 std = ["risc0-zkp/std"]

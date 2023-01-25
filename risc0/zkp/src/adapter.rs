@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Interface between the circuit and prover/verifier
+
 use alloc::vec::Vec;
 
 use anyhow::Result;
