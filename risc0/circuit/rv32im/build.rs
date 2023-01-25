@@ -33,7 +33,7 @@ fn main() {
 
     build_cpu_kernels();
 
-    if env::var("CARGO_CFG_TARGET_OS").unwrap() == "macos" {
+    if env::var("CARGO_FEATURE_METAL").is_ok() {
         build_metal_kernels(&out_dir);
     }
 
