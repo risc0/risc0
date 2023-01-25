@@ -18,7 +18,7 @@ pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
 pub mod dual;
-#[cfg(feature = "macos")]
+#[cfg(feature = "metal")]
 pub mod metal;
 
 use crate::{
