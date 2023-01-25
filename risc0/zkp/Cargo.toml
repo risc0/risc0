@@ -16,6 +16,7 @@ harness = false
 anyhow = { version = "1.0", default-features = false }
 bytemuck = { version = "1.12", features = ["derive"] }
 fil-rustacuda = { version = "0.1", optional = true }
+metal = { version = "0.24", optional = true }
 paste = "1.0"
 rand_core = "0.6"
 risc0-zeroio = { workspace = true }
@@ -31,9 +32,6 @@ rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 
-[target.'cfg(target_os = "macos")'.dependencies]
-metal = "0.24"
-
 [dev-dependencies]
 criterion = "0.4"
 env_logger = "0.10"
@@ -45,6 +43,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [features]
 default = ["prove"]
 cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive"]
+metal = ["dep:metal"]
 prove = [
     "dep:ndarray",
     "dep:rand",
