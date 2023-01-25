@@ -15,13 +15,13 @@ harness = false
 anyhow = { version = "1.0", default-features = false }
 bytemuck = { version = "1.12", features = ["derive"] }
 fil-rustacuda = { version = "0.1", optional = true }
+metal = { version = "0.24", optional = true }
 paste = "1.0"
 rand_core = "0.6"
-risc0-zeroio = { workspace = true }
 risc0-sys = { workspace = true, optional = true }
+risc0-zeroio = { workspace = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
-metal = { version = "0.24", optional = true}
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
