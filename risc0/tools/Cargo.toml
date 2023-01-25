@@ -9,7 +9,7 @@ description = "RISC Zero devtools"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-risc0-zkvm = { version = "1.0.0-rc.2", path = "../zkvm", features = ["profiler"] }
+risc0-zkvm = { workspace = true, features = ["default"] }
 
 [dev-dependencies]
 assert_cmd = "2.0"

@@ -17,8 +17,8 @@ bytemuck = { version = "1.12", features = ["derive"] }
 fil-rustacuda = { version = "0.1", optional = true }
 paste = "1.0"
 rand_core = "0.6"
-risc0-zeroio = { version = "1.0.0-rc.2", path = "../zeroio", default-features = false }
-risc0-sys = { version = "1.0.0-rc.2", path = "../sys", optional = true }
+risc0-zeroio = { workspace = true }
+risc0-sys = { workspace = true, optional = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
 metal = { version = "0.24", optional = true}
