@@ -29,7 +29,7 @@ use crate::{
     FRI_FOLD,
 };
 
-const METAL_LIB: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/kernels.metallib"));
+const METAL_LIB: &[u8] = include_bytes!(env!("ZKP_METAL_PATH"));
 
 const KERNEL_NAMES: &[&str] = &[
     "batch_expand",

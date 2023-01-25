@@ -23,7 +23,7 @@ pub mod cuda;
 #[cfg(feature = "prove")]
 mod ffi;
 mod info;
-#[cfg(target_os = "macos")]
+#[cfg(feature = "macos")]
 pub mod metal;
 pub mod poly_ext;
 mod taps;

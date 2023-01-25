@@ -28,7 +28,7 @@ use risc0_zkp::{
     INV_RATE,
 };
 
-const METAL_LIB: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/kernels.metallib"));
+const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
 
 #[derive(Debug)]
 pub struct MetalEvalCheck {

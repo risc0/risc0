@@ -13,9 +13,9 @@ harness = false
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
-risc0-zkp = { version = "1.0.0-rc.2", path = "../../../risc0/zkp", default-features = false }
+risc0-zkp = { version = "1.0.0-rc.2", path = "../../zkp", default-features = false }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
-risc0-circuit-rv32im-sys = { version = "1.0.0-rc.2", path = "../rv32im-sys", optional = true }
+risc0-sys = { version = "1.0.0-rc.2", path = "../../sys", optional = true }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 fil-rustacuda = { version = "0.1", optional = true }
@@ -24,12 +24,10 @@ rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
+metal = { version = "0.24", optional = true }
 
 [target.'cfg(target_os = "zkvm")'.dependencies]
-risc0-zkvm-platform = { version = "1.0.0-rc.2", path = "../../../risc0/zkvm/platform" }
-
-[target.'cfg(target_os = "macos")'.dependencies]
-metal = "0.24"
+risc0-zkvm-platform = { version = "1.0.0-rc.2", path = "../../zkvm/platform" }
 
 [dev-dependencies]
 criterion = "0.4"
@@ -38,8 +36,9 @@ test-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
-cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std", "risc0-circuit-rv32im-sys/cuda"]
+cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std", "risc0-sys/cuda"]
+metal = ["dep:metal", "risc0-sys/metal"]
 default = ["prove", "test"]
-prove = ["dep:rand", "dep:rayon", "std", "risc0-circuit-rv32im-sys", "risc0-zkp/prove"]
+prove = ["dep:rand", "dep:rayon", "std", "risc0-sys", "risc0-zkp/prove"]
 std = ["risc0-zkp/std"]
 test = []

@@ -34,7 +34,7 @@ use crate::{
     FRI_FOLD,
 };
 
-const KERNELS_FATBIN: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/kernels.fatbin"));
+const KERNELS_FATBIN: &[u8] = include_bytes!(env!("ZKP_CUDA_PATH"));
 
 pub struct CudaHal {
     pub max_threads: u32,

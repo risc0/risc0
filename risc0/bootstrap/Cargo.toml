@@ -5,3 +5,6 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { version = "1.0.0-rc.2", path = "../zkvm" }
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
