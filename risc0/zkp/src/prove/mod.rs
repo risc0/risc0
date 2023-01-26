@@ -40,7 +40,7 @@ use crate::{
     field::Field,
     hal::{EvalCheck, Hal},
     prove::write_iop::WriteIOP,
-    taps::RegisterGroup,
+    taps::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
     MAX_CYCLES_PO2,
 };
 
@@ -80,11 +80,11 @@ where
     let taps = circuit.get_taps();
 
     // The number of columns used for encoding zkvm control instructions.
-    let code_size = taps.group_size(RegisterGroup::Code as usize);
+    let code_size = taps.group_size(REGISTER_GROUP_CODE);
     // The number of columns used for encoding the execution trace.
-    let data_size = taps.group_size(RegisterGroup::Data as usize);
+    let data_size = taps.group_size(REGISTER_GROUP_DATA);
     // The number of columns used for the PLOOKUP argument.
-    let accum_size = taps.group_size(RegisterGroup::Accum as usize);
+    let accum_size = taps.group_size(REGISTER_GROUP_ACCUM);
     debug!(
         "code: {code_size}/{}, data: {data_size}/{}, accum: {accum_size}/{}",
         circuit.get_code().len(),
@@ -104,14 +104,12 @@ where
 
     // Make code + data PolyGroups + commit them
     prover.commit_group(
-        RegisterGroup::Code as usize,
+        REGISTER_GROUP_CODE,
         hal.copy_from_elem("code", circuit.get_code()),
-        "code",
     );
     prover.commit_group(
-        RegisterGroup::Data as usize,
+        REGISTER_GROUP_DATA,
         hal.copy_from_elem("data", circuit.get_data()),
-        "data",
     );
 
     // Generates grand product accumulations for PLONK-style permutation arguments
@@ -121,9 +119,8 @@ where
     debug!("size = {size}, accumSize = {accum_size}");
     debug!("getAccum.size() = {}", circuit.get_accum().len());
     prover.commit_group(
-        RegisterGroup::Accum as usize,
+        REGISTER_GROUP_ACCUM,
         hal.copy_from_elem("accum", circuit.get_accum()),
-        "accum",
     );
 
     let mix = hal.copy_from_elem("mix", circuit.get_mix());

@@ -21,7 +21,7 @@ use rand::thread_rng;
 use crate::{
     adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler},
     field::{Elem, Field},
-    taps::RegisterGroup,
+    taps::{REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
     MIN_PO2, ZK_CYCLES,
 };
 
@@ -71,8 +71,8 @@ where
     ) -> Self {
         let po2 = max(min_po2, MIN_PO2);
         let taps = circuit.get_taps();
-        let code_size = taps.group_size(RegisterGroup::Code as usize);
-        let data_size = taps.group_size(RegisterGroup::Data as usize);
+        let code_size = taps.group_size(REGISTER_GROUP_CODE);
+        let data_size = taps.group_size(REGISTER_GROUP_DATA);
         let steps = 1 << po2;
         debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");
         Executor {

@@ -22,7 +22,7 @@ use crate::{
     field::{Elem, ExtElem, RootsOfUnity},
     hal::{Buffer, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP, EvalCheck},
-    taps::{RegisterGroup, TapSet},
+    taps::{TapSet, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
     INV_RATE,
 };
 
@@ -86,13 +86,14 @@ where
 
     /// Commits a given buffer to the IOP; the values must not subsequently
     /// change.
-    pub fn commit_group(&mut self, tap_group_index: usize, buf: H::BufferElem, name: &str) {
+    pub fn commit_group(&mut self, tap_group_index: usize, buf: H::BufferElem) {
         let group_size = self.taps.group_size(tap_group_index);
         assert_eq!(buf.size() % group_size, 0);
         assert_eq!(buf.size() / group_size, self.cycles);
         assert!(
             self.groups[tap_group_index].is_none(),
-            "Attempted to commit group {name} more than once"
+            "Attempted to commit group {} more than once",
+            self.taps.group_name(tap_group_index)
         );
 
         let coeffs = make_coeffs(self.hal, buf, group_size);
@@ -106,7 +107,11 @@ where
 
         group_ref.merkle.commit(&mut self.iop);
 
-        debug!("{name} group root: {}", group_ref.merkle.root());
+        debug!(
+            "{} group root: {}",
+            self.taps.group_name(tap_group_index),
+            group_ref.merkle.root()
+        );
     }
 
     fn get_group(&self, tap_group_index: usize) -> &PolyGroup<H> {
@@ -133,9 +138,9 @@ where
 
         // TODO: Genericize EvalCheck so we can pass any number of buffers in.
         assert_eq!(self.groups.len(), 3);
-        let code_group = &self.get_group(RegisterGroup::Code as usize).evaluated;
-        let data_group = &self.get_group(RegisterGroup::Data as usize).evaluated;
-        let accum_group = &self.get_group(RegisterGroup::Accum as usize).evaluated;
+        let code_group = &self.get_group(REGISTER_GROUP_CODE).evaluated;
+        let data_group = &self.get_group(REGISTER_GROUP_DATA).evaluated;
+        let accum_group = &self.get_group(REGISTER_GROUP_ACCUM).evaluated;
         assert_eq!(globals.len(), 2);
         let mix = &globals[0];
         let out = &globals[1];

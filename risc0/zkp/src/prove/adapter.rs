@@ -29,7 +29,7 @@ use crate::{
         executor::Executor,
         write_iop::WriteIOP,
     },
-    taps::{RegisterGroup, TapSet},
+    taps::{TapSet, REGISTER_GROUP_ACCUM},
     ZK_CYCLES,
 };
 
@@ -83,7 +83,7 @@ where
             .exec
             .circuit
             .get_taps()
-            .group_size(RegisterGroup::Accum as usize);
+            .group_size(REGISTER_GROUP_ACCUM);
         self.accum.resize(self.steps * accum_size, F::Elem::INVALID);
         let mut args: &mut [&mut [F::Elem]] = &mut [
             &mut self.exec.code,

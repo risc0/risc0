@@ -38,7 +38,7 @@ use crate::{
         sha::{Digest, Sha},
     },
     field::{Elem, ExtElem, RootsOfUnity},
-    taps::{RegisterGroup, TapSet},
+    taps::{TapSet, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     FRI_FOLD, INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
@@ -308,9 +308,9 @@ where
     // debug!("size = {size}, po2 = {po2}");
 
     // Get taps and compute sizes
-    let code_size = taps.group_size(RegisterGroup::Code as usize);
-    let data_size = taps.group_size(RegisterGroup::Data as usize);
-    let accum_size = taps.group_size(RegisterGroup::Accum as usize);
+    let code_size = taps.group_size(REGISTER_GROUP_CODE);
+    let data_size = taps.group_size(REGISTER_GROUP_DATA);
+    let accum_size = taps.group_size(REGISTER_GROUP_ACCUM);
 
     // Get merkle root for the code merkle tree.
     // The code merkle tree contains the control instructions for the zkVM.

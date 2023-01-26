@@ -20,7 +20,7 @@ use anyhow::Result;
 
 use crate::{
     field::{Elem, ExtElem, Field},
-    taps::{RegisterGroup, TapSet},
+    taps::{TapSet, REGISTER_GROUP_CODE},
 };
 
 #[derive(Clone, Copy)]
@@ -108,7 +108,7 @@ pub trait TapsProvider {
     fn get_taps(&self) -> &'static TapSet<'static>;
 
     fn code_size(&self) -> usize {
-        self.get_taps().group_size(RegisterGroup::Code as usize)
+        self.get_taps().group_size(REGISTER_GROUP_CODE)
     }
 }
 

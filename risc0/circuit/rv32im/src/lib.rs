@@ -34,6 +34,10 @@ use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
 
 pub struct CircuitImpl;
 
+pub const REGISTER_GROUP_ACCUM: usize = 0;
+pub const REGISTER_GROUP_CODE: usize = 1;
+pub const REGISTER_GROUP_DATA: usize = 2;
+
 impl CircuitImpl {
     pub const fn new() -> Self {
         CircuitImpl
@@ -102,11 +106,10 @@ pub mod testutil {
             Elem, ExtElem,
         },
         hal::{Buffer, EvalCheck, Hal},
-        taps::RegisterGroup,
         INV_RATE,
     };
 
-    use crate::CircuitImpl;
+    use crate::{CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
 
     pub struct EvalCheckParams {
         pub po2: usize,
@@ -127,9 +130,9 @@ pub mod testutil {
             let domain = steps * INV_RATE;
             let circuit = crate::CircuitImpl::new();
             let taps = circuit.get_taps();
-            let code_size = taps.group_size(RegisterGroup::Code as usize);
-            let data_size = taps.group_size(RegisterGroup::Data as usize);
-            let accum_size = taps.group_size(RegisterGroup::Accum as usize);
+            let code_size = taps.group_size(REGISTER_GROUP_CODE);
+            let data_size = taps.group_size(REGISTER_GROUP_DATA);
+            let accum_size = taps.group_size(REGISTER_GROUP_ACCUM);
             let code = random_fps(&mut rng, code_size * domain);
             let data = random_fps(&mut rng, data_size * domain);
             let accum = random_fps(&mut rng, accum_size * domain);
