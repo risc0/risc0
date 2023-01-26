@@ -24,6 +24,7 @@ pub enum RegisterGroup {
     Data = 2,
 }
 
+// TODO: Make these not a fixed set
 const REGISTER_GROUPS: &[RegisterGroup] = &[
     RegisterGroup::Accum,
     RegisterGroup::Code,
@@ -78,6 +79,10 @@ pub struct TapSet<'a> {
 }
 
 impl<'a> TapSet<'a> {
+    pub fn num_groups(&self) -> usize {
+        self.group_begin.len() - 1
+    }
+
     pub fn tap_size(&self) -> usize {
         self.group_begin[REGISTER_GROUPS.len()]
     }
@@ -98,8 +103,7 @@ impl<'a> TapSet<'a> {
         }
     }
 
-    pub fn group_taps(&self, group: RegisterGroup) -> TapIter {
-        let group_id = group as usize;
+    pub fn group_taps(&self, group_id: usize) -> TapIter {
         TapIter {
             data: &self.taps,
             cursor: self.group_begin[group_id],
@@ -107,8 +111,7 @@ impl<'a> TapSet<'a> {
         }
     }
 
-    pub fn group_regs(&self, group: RegisterGroup) -> RegisterIter {
-        let group_id = group as usize;
+    pub fn group_regs(&self, group_id: usize) -> RegisterIter {
         RegisterIter {
             data: &self.taps,
             cursor: self.group_begin[group_id],
@@ -116,8 +119,7 @@ impl<'a> TapSet<'a> {
         }
     }
 
-    pub fn group_size(&self, group: RegisterGroup) -> usize {
-        let group_id = group as usize;
+    pub fn group_size(&self, group_id: usize) -> usize {
         let idx = self.group_begin[group_id + 1] - 1;
         let last = self.taps[idx].offset as usize;
         last + 1

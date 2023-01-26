@@ -108,7 +108,7 @@ pub trait TapsProvider {
     fn get_taps(&self) -> &'static TapSet<'static>;
 
     fn code_size(&self) -> usize {
-        self.get_taps().group_size(RegisterGroup::Code)
+        self.get_taps().group_size(RegisterGroup::Code as usize)
     }
 }
 

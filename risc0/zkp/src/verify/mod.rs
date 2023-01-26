@@ -308,9 +308,9 @@ where
     // debug!("size = {size}, po2 = {po2}");
 
     // Get taps and compute sizes
-    let code_size = taps.group_size(RegisterGroup::Code);
-    let data_size = taps.group_size(RegisterGroup::Data);
-    let accum_size = taps.group_size(RegisterGroup::Accum);
+    let code_size = taps.group_size(RegisterGroup::Code as usize);
+    let data_size = taps.group_size(RegisterGroup::Data as usize);
+    let accum_size = taps.group_size(RegisterGroup::Accum as usize);
 
     // Get merkle root for the code merkle tree.
     // The code merkle tree contains the control instructions for the zkVM.

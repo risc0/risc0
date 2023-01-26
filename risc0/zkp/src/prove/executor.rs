@@ -71,8 +71,8 @@ where
     ) -> Self {
         let po2 = max(min_po2, MIN_PO2);
         let taps = circuit.get_taps();
-        let code_size = taps.group_size(RegisterGroup::Code);
-        let data_size = taps.group_size(RegisterGroup::Data);
+        let code_size = taps.group_size(RegisterGroup::Code as usize);
+        let data_size = taps.group_size(RegisterGroup::Data as usize);
         let steps = 1 << po2;
         debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");
         Executor {

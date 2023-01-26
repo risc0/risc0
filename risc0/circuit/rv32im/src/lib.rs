@@ -127,9 +127,9 @@ pub mod testutil {
             let domain = steps * INV_RATE;
             let circuit = crate::CircuitImpl::new();
             let taps = circuit.get_taps();
-            let code_size = taps.group_size(RegisterGroup::Code);
-            let data_size = taps.group_size(RegisterGroup::Data);
-            let accum_size = taps.group_size(RegisterGroup::Accum);
+            let code_size = taps.group_size(RegisterGroup::Code as usize);
+            let data_size = taps.group_size(RegisterGroup::Data as usize);
+            let accum_size = taps.group_size(RegisterGroup::Accum as usize);
             let code = random_fps(&mut rng, code_size * domain);
             let data = random_fps(&mut rng, data_size * domain);
             let accum = random_fps(&mut rng, accum_size * domain);

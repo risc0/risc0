@@ -83,7 +83,7 @@ where
             .exec
             .circuit
             .get_taps()
-            .group_size(RegisterGroup::Accum);
+            .group_size(RegisterGroup::Accum as usize);
         self.accum.resize(self.steps * accum_size, F::Elem::INVALID);
         let mut args: &mut [&mut [F::Elem]] = &mut [
             &mut self.exec.code,
