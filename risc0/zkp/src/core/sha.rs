@@ -21,7 +21,7 @@ use core::{
     ops::DerefMut,
 };
 
-use bytemuck::{Pod, Zeroable};
+use bytemuck::{Pod, PodCastError, Zeroable};
 use hex::{FromHex, FromHexError};
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 use serde::{Deserialize, Serialize};
@@ -63,6 +63,64 @@ pub static SHA256_INIT: Digest = Digest([
     0x1f83d9ab_u32.to_be(),
     0x5be0cd19_u32.to_be(),
 ]);
+
+/// An implementation of the SHA-256 hashing algorithm of [FIPS 180-4].
+///
+/// [FIPS 180-4] https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+// TODO(victor): Is there anywhere this function is used when it should really
+// be a PRF?
+pub trait Sha256 {
+    /// A pointer to the digest created as the result of a hashing operation.
+    ///
+    /// This may either be a `Box<Digest>` or some other pointer in case the
+    /// implementation wants to manage its own memory. Semantically, holding the
+    /// `DigestPtr` denotes ownership of the underlying value. (e.g. `DigestPtr`
+    /// does not implement `Copy` and the owner of `DigestPtr` can create a
+    /// mutable reference to the underlying digest).
+    type DigestPtr: DerefMut<Target = Digest> + Debug;
+
+    /// Generate a SHA from a slice of bytes, padding to block size
+    /// and adding the SHA trailer.
+    fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr;
+
+    /// Generate a SHA from a slice of words, padding to block size
+    /// and adding the SHA trailer.
+    fn hash_words(words: &[u32]) -> Self::DigestPtr {
+        Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
+    }
+
+    /// Generate a SHA from a pair of [Digests](Digest).
+    // TODO(victor) This is an efficient way to produce H(a || b), which I am
+    // guessing is designed for use in Merkle trees. Is this the best method to
+    // be exposing here though? It does not use domain separation or added padding
+    // and length.
+    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+        Self::compress(&SHA256_INIT, a, b)
+    }
+
+    /// Execute the SHA-256 compression function on a single block given as as
+    /// two half-blocks. Note that the half blocks do not need to be adjacent.
+    ///
+    /// DANGER: This is the low-level SHA-256 compression function. It is a
+    /// primitive used to construct SHA-256, but it is NOT the full
+    /// algorithm and should be used directly only with extreme caution.
+    fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr;
+
+    /// Execute the SHA-256 compression function on a slice of blocks following
+    /// the [Merkle–Damgård] construction.
+    ///
+    /// DANGER: This is the low-level SHA-256 compression function. It is a
+    /// primitive used to construct SHA-256, but it is NOT the full
+    /// algorithm and should be used directly only with extreme caution.
+    fn compress_slice(state: &Digest, blocks: &[Block]) -> Self::DigestPtr;
+
+    /// Generate a SHA from a slice of anything that can be represented as plain
+    /// old data. Pads up to the SHA-256 block boundary, but does not add the
+    /// standard SHA trailer.
+    // TODO(victor): Look over the usages of this function to understand why it
+    // exists and if it should exist on this trait.
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
+}
 
 /// The result of the SHA-256 hash algorithm.
 ///
@@ -106,9 +164,6 @@ impl Digest {
     }
 }
 
-// TODO(victor): Deal with the fact that casting from [u8] to [u32] can panic on
-// alignment issues.
-
 impl Default for Digest {
     fn default() -> Digest {
         Digest([0; DIGEST_WORDS])
@@ -125,18 +180,19 @@ impl From<[u32; DIGEST_WORDS]> for Digest {
 /// Create a new [Digest] from an array of bytes.
 impl From<[u8; DIGEST_BYTES]> for Digest {
     fn from(data: [u8; DIGEST_BYTES]) -> Self {
-        Self(bytemuck::cast(data))
+        match bytemuck::try_cast(data) {
+            Ok(digest) => digest,
+            Err(PodCastError::TargetAlignmentGreaterAndInputNotAligned) => {
+                // Bytes are not aligned. Copy the byte array into a new digest.
+                bytemuck::pod_read_unaligned(&data)
+            }
+            Err(e) => unreachable!("failed to cast [u8; DIGEST_BYTES] to Digest: {}", e),
+        }
     }
 }
 
 impl<'a> From<&'a [u32; DIGEST_WORDS]> for &'a Digest {
     fn from(data: &'a [u32; DIGEST_WORDS]) -> Self {
-        bytemuck::cast_ref(data)
-    }
-}
-
-impl<'a> From<&'a [u8; DIGEST_BYTES]> for &'a Digest {
-    fn from(data: &'a [u8; DIGEST_BYTES]) -> Self {
         bytemuck::cast_ref(data)
     }
 }
@@ -162,6 +218,19 @@ impl TryFrom<&[u32]> for Digest {
 
     fn try_from(data: &[u32]) -> Result<Self, Self::Error> {
         Ok(<[u32; DIGEST_WORDS]>::try_from(data)?.into())
+    }
+}
+
+// TODO(victor): Should I keep this method? It's a bit niche.
+impl<'a> TryFrom<&'a [u32]> for &'a Digest {
+    type Error = PodCastError;
+
+    fn try_from(data: &'a [u32]) -> Result<Self, Self::Error> {
+        match bytemuck::try_cast_slice(data) {
+            Ok(&[ref digest]) => Ok(digest),
+            Ok(_) => Err(PodCastError::SizeMismatch),
+            Err(e) => Err(e),
+        }
     }
 }
 
@@ -298,9 +367,10 @@ impl Block {
     /// Returns the [Block] as references to two half-blocks, with the same size
     /// are a SHA-256 digest.
     pub fn as_half_blocks(&self) -> (&Digest, &Digest) {
-        let half_block1: &Digest = bytemuck::from_bytes(&self.as_bytes()[..DIGEST_BYTES]);
-        let half_block2: &Digest = bytemuck::from_bytes(&self.as_bytes()[DIGEST_BYTES..]);
-        (half_block1, half_block2)
+        match bytemuck::cast_slice::<_, Digest>(self.as_words()) {
+            &[ref half_block1, ref half_block2] => (half_block1, half_block2),
+            _ => unreachable!("a block can always be decomposed into two digests"),
+        }
     }
 
     /// Returns a mutable slice of bytes.
@@ -325,18 +395,19 @@ impl From<[u32; BLOCK_WORDS]> for Block {
 /// Create a new [Block] from an array of bytes.
 impl From<[u8; BLOCK_BYTES]> for Block {
     fn from(data: [u8; BLOCK_BYTES]) -> Self {
-        Self(bytemuck::cast(data))
+        match bytemuck::try_cast(data) {
+            Ok(block) => block,
+            Err(PodCastError::TargetAlignmentGreaterAndInputNotAligned) => {
+                // Bytes are not aligned. Copy the byte array into a new block.
+                bytemuck::pod_read_unaligned(&data)
+            }
+            Err(e) => unreachable!("failed to cast [u8; BLOCK_BYTES] to Block: {}", e),
+        }
     }
 }
 
 impl<'a> From<&'a [u32; BLOCK_WORDS]> for &'a Block {
     fn from(data: &'a [u32; BLOCK_WORDS]) -> Self {
-        bytemuck::cast_ref(data)
-    }
-}
-
-impl<'a> From<&'a [u8; BLOCK_BYTES]> for &'a Block {
-    fn from(data: &'a [u8; BLOCK_BYTES]) -> Self {
         bytemuck::cast_ref(data)
     }
 }
@@ -454,64 +525,6 @@ impl Debug for Block {
     }
 }
 
-/// An implementation of the SHA-256 hashing algorithm of [FIPS 180-4].
-///
-/// [FIPS 180-4] https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
-// TODO(victor): Is there anywhere this function is used when it should really
-// be a PRF?
-pub trait Sha256 {
-    /// A pointer to the digest created as the result of a hashing operation.
-    ///
-    /// This may either be a `Box<Digest>` or some other pointer in case the
-    /// implementation wants to manage its own memory. Semantically, holding the
-    /// `DigestPtr` denotes ownership of the underlying value. (e.g. `DigestPtr`
-    /// does not implement `Copy` and the owner of `DigestPtr` can create a
-    /// mutable reference to the underlying digest).
-    type DigestPtr: DerefMut<Target = Digest> + Debug;
-
-    /// Generate a SHA from a slice of bytes, padding to block size
-    /// and adding the SHA trailer.
-    fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr;
-
-    /// Generate a SHA from a slice of words, padding to block size
-    /// and adding the SHA trailer.
-    fn hash_words(words: &[u32]) -> Self::DigestPtr {
-        Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
-    }
-
-    /// Generate a SHA from a pair of [Digests](Digest).
-    // TODO(victor) This is an efficient way to produce H(a || b), which I am
-    // guessing is designed for use in Merkle trees. Is this the best method to
-    // be exposing here though? It does not use domain separation or added padding
-    // and length.
-    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
-        Self::compress(&SHA256_INIT, a, b)
-    }
-
-    /// Execute the SHA-256 compression function on a single block given as as
-    /// two half-blocks. Note that the half blocks do not need to be adjacent.
-    ///
-    /// DANGER: This is the low-level SHA-256 compression function. It is a
-    /// primitive used to construct SHA-256, but it is NOT the full
-    /// algorithm and should be used directly only with extreme caution.
-    fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr;
-
-    /// Execute the SHA-256 compression function on a slice of blocks following
-    /// the [Merkle–Damgård] construction.
-    ///
-    /// DANGER: This is the low-level SHA-256 compression function. It is a
-    /// primitive used to construct SHA-256, but it is NOT the full
-    /// algorithm and should be used directly only with extreme caution.
-    fn compress_slice(state: &Digest, blocks: &[Block]) -> Self::DigestPtr;
-
-    /// Generate a SHA from a slice of anything that can be represented as plain
-    /// old data. Pads up to the SHA-256 block boundary, but does not add the
-    /// standard SHA trailer.
-    // TODO(victor): Look over the usages of this function to understand why it
-    // exists and if it should exist on this trait.
-    fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
-}
-
 // TODO(victor): Consider how best to make these functions available with a less
 // verbose path. (i.e. should I expose the Sha256 type alias in the
 // risc0_zkvm::sha module?)
@@ -545,6 +558,7 @@ pub mod rust_crypto {
     //! );
     //! ```
 
+    use alloc::vec::Vec;
     use core::fmt::{Debug, Formatter};
 
     pub use digest::Digest;
@@ -586,13 +600,22 @@ pub mod rust_crypto {
         #[inline]
         fn update_blocks(&mut self, blocks: &[Block<Self>]) {
             self.block_len += u32::try_from(blocks.len()).unwrap();
-            self.state = Some(S::compress_slice(
-                self.state.as_deref().unwrap_or(&SHA256_INIT),
-                // TODO(victor): Take another momment to look for a safe way to do this, but since
-                // these two types have exactly the same memory layout, this is almost certainly
-                // safe.
-                unsafe { core::mem::transmute::<&[Block<Self>], &[super::Block]>(blocks) },
-            ));
+
+            // If aligned, reinterpret the u8 array blocks as u32 array blocks.
+            // If unaligned, the data needs to be copied.
+            // SAFETY: We know that Block (alias for GenericArray<u8, U64>) is
+            // an array of bytes and so is safe to reinterpret as blocks of words.
+            let current_state = self.state.as_deref().unwrap_or(&SHA256_INIT);
+            self.state = Some(match unsafe { blocks.align_to::<super::Block>() } {
+                (&[], aligned_blocks, &[]) => S::compress_slice(current_state, aligned_blocks),
+                _ => S::compress_slice(
+                    current_state,
+                    &blocks
+                        .iter()
+                        .map(|block| bytemuck::pod_read_unaligned::<super::Block>(block.as_slice()))
+                        .collect::<Vec<_>>(),
+                ),
+            });
         }
     }
 
@@ -619,12 +642,20 @@ pub mod rust_crypto {
                 * (u32::try_from(buffer.get_pos()).unwrap()
                     + (BLOCK_BYTES as u32) * self.block_len);
             buffer.len64_padding_be(bit_len as u64, |block| {
-                let block: &super::Block = bytemuck::from_bytes(block.as_slice());
-                self.state = Some(S::compress(
-                    self.state.as_deref().unwrap_or(&SHA256_INIT),
-                    block.as_half_blocks().0,
-                    block.as_half_blocks().1,
-                ));
+                // If aligned, reinterpret the u8 array blocks as a u32 array block.
+                // If unaligned, the data needs to be copied.
+                let current_state = self.state.as_deref().unwrap_or(&SHA256_INIT);
+                self.state = Some(
+                    match bytemuck::try_from_bytes::<super::Block>(block.as_slice()) {
+                        Ok(b) => {
+                            S::compress(current_state, b.as_half_blocks().0, b.as_half_blocks().1)
+                        }
+                        Err(_) => {
+                            let b: super::Block = bytemuck::pod_read_unaligned(block.as_slice());
+                            S::compress(current_state, b.as_half_blocks().0, b.as_half_blocks().1)
+                        }
+                    },
+                );
             });
 
             out.copy_from_slice(self.state.as_deref().unwrap().as_bytes())
