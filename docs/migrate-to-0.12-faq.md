@@ -6,7 +6,7 @@ There are breaking changes between v0.11 and v0.12. We have information about th
 
 **Q:** I’ve updated my `risc0-build` package to a known good version and am seeing the following error:
 
-```jsx
+```
 error: no matching package named `risc0-build` found
 ```
 
@@ -14,7 +14,7 @@ What’s going on?
 
 **A:** If you’re encountering a build error with `risc0-build`, it’s possible that you need to update your `rust-toolchain` to a new version of rust nightly. An example line follows:
 
-```jsx
+```
 channel = "nightly-2022-10-28"
 ```
 
@@ -32,7 +32,7 @@ risc0-zkvm = { version = "0.12", default-features = false, features = [ "std" ] 
 
 **Q:** When building the guest methods crate, I’m getting a link error like this:
 
-```jsx
+```
 cannot find function `link` in crate `risc0_build`
 ```
 
