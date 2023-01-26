@@ -18,12 +18,12 @@ use anyhow::Result;
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
 use risc0_zkvm::{receipt::insecure_skip_seal, Receipt};
+use risc0_zkvm_platform::WORD_SIZE;
 
 static EXPECTED_STDOUT: &str = "Hello world on stdout!\n";
 static EXPECTED_STDERR: &str = "Hello world on stderr!\n";
 
 fn load_receipt(p: &Path) -> Receipt {
-    const WORD_SIZE: usize = std::mem::size_of::<u32>();
     let data = std::fs::read(p).unwrap();
     let as_u32: Vec<u32> = data
         .chunks(WORD_SIZE)

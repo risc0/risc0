@@ -28,3 +28,10 @@ cfg_if::cfg_if! {
         pub use risc0_zkp::core::sha_cpu::Impl;
     }
 }
+
+pub mod rust_crypto {
+    use risc0_zkp::core::sha::rust_crypto;
+    pub use rust_crypto::Digest;
+
+    pub type Sha256 = rust_crypto::Sha256<super::Impl>;
+}

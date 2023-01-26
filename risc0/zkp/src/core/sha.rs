@@ -17,21 +17,14 @@
 use alloc::vec::Vec;
 use core::{
     fmt::{Debug, Display, Formatter},
-    mem,
     ops::DerefMut,
 };
 
 use bytemuck::{Pod, PodCastError, Zeroable};
 use hex::{FromHex, FromHexError};
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
+pub use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
-
-/// The size of a word used with the SHA-256 implementation and within
-/// a [Digest] and [Block] representations (32-bits = 4 bytes).
-// TODO(victor): Deduplicate the WORD_SIZE const with the platform crate.
-// risc0-zkvm-platform includes this as a constant and has no dependencies on
-// other risc0 crate. As such we can pull it from there.
-pub const WORD_SIZE: usize = mem::size_of::<u32>();
 
 /// The number of words in the representation of a [Digest].
 pub const DIGEST_WORDS: usize = 8;
@@ -66,7 +59,7 @@ pub static SHA256_INIT: Digest = Digest([
 
 /// An implementation of the SHA-256 hashing algorithm of [FIPS 180-4].
 ///
-/// [FIPS 180-4] https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+/// [FIPS 180-4]: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
 // TODO(victor): Is there anywhere this function is used when it should really
 // be a PRF?
 pub trait Sha256 {
@@ -332,7 +325,7 @@ impl Debug for Digest {
 /// of the host architecture. When interpreted as words, the numerical result
 /// will depend on the architecture.
 ///
-/// Merkle–Damgård: https://en.wikipedia.org/wiki/Merkle%E2%80%93Damg%C3%A5rd_construction
+/// [Merkle–Damgård]: https://en.wikipedia.org/wiki/Merkle%E2%80%93Damg%C3%A5rd_construction
 #[derive(
     Copy,
     Clone,
@@ -525,9 +518,8 @@ impl Debug for Block {
     }
 }
 
-// TODO(victor): Consider how best to make these functions available with a less
-// verbose path. (i.e. should I expose the Sha256 type alias in the
-// risc0_zkvm::sha module?)
+// TODO(victor): Should this be made available on a path that does not include
+// the words `rust_crypto`?
 pub mod rust_crypto {
     //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
     //!
@@ -536,13 +528,10 @@ pub mod rust_crypto {
     //! # Usage
     //!
     //! ```rust
-    //! use risc0_zkp::core::{
-    //!     sha::rust_crypto::{Sha256, Digest as _},
-    //!     sha_cpu,
-    //! };
+    //! use risc0_zkvm::sha::rust_crypto::{Sha256, Digest as _},
     //!
     //! // create a Sha256 object
-    //! let mut hasher = Sha256::<sha_cpu::Impl>::new();
+    //! let mut hasher = Sha256::new();
     //!
     //! // write input message
     //! hasher.update(b"hello world");
@@ -553,7 +542,7 @@ pub mod rust_crypto {
     //! assert_eq!(hex::encode(result), "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
     //!
     //! // more concise version of the code above.
-    //! assert_eq!(hex::encode(Sha256::<sha_cpu::Impl>::digest(b"hello world")),
+    //! assert_eq!(hex::encode(Sha256::digest(b"hello world")),
     //!     "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
     //! );
     //! ```

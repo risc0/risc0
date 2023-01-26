@@ -116,6 +116,7 @@ impl Sha256 for Impl {
         Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
+    #[inline]
     fn hash_raw_pod_slice<T: bytemuck::Pod>(pod: &[T]) -> Self::DigestPtr {
         let u8s: &[u8] = bytemuck::cast_slice(pod);
         let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
@@ -140,27 +141,34 @@ impl Sha256 for Impl {
     }
 
     // Digest two digest into one
+    #[inline]
     fn compress(
         orig_state: &Digest,
         block_half1: &Digest,
         block_half2: &Digest,
     ) -> Self::DigestPtr {
+        // Convert the state from big-endian to native byte order.
         let mut state: [u32; DIGEST_WORDS] = *orig_state.as_ref();
         for word in state.iter_mut() {
             *word = word.to_be();
         }
+
+        // Half-blocks may not be contiguous so they must be copied here.
         let mut block: GenericArray<u8, U64> = GenericArray::default();
         for i in 0..8 {
             set_word(block.as_mut_slice(), i, block_half1.as_words()[i]);
             set_word(block.as_mut_slice(), 8 + i, block_half2.as_words()[i]);
         }
         sha2::compress256(&mut state, slice::from_ref(&block));
+
+        // Convert the state from big-endian to native byte order.
         for word in state.iter_mut() {
             *word = word.to_be();
         }
         Box::new(Digest::from(state))
     }
 
+    #[inline]
     fn compress_slice(orig_state: &Digest, blocks: &[Block]) -> Self::DigestPtr {
         // Convert the state from big-endian to native byte order.
         let mut state: [u32; DIGEST_WORDS] = *orig_state.as_ref();
@@ -168,14 +176,13 @@ impl Sha256 for Impl {
             *word = word.to_be();
         }
 
-        // Clone the input blocks into a slice with the `GenericArray` type.
-        // TODO(victor): Give another few minutes of thought to how this might be
-        // accomplished without copying the data.
-        let blocks: Vec<GenericArray<u8, U64>> = blocks
-            .iter()
-            .map(|b| GenericArray::from_slice(b.as_bytes()).clone())
-            .collect();
-        sha2::compress256(&mut state, &blocks);
+        // Reinterpret the RISC0 blocks as GenericArray<u8, U64>.
+        // SAFETY: We know that the two types have the same memory layout, so this
+        // conversion is known to be safe.
+        match unsafe { blocks.align_to::<GenericArray<u8, U64>>() } {
+            (&[], aligned_blocks, &[]) => sha2::compress256(&mut state, &aligned_blocks),
+            _ => unreachable!("alignment will always be satisfied for block conversion"),
+        };
 
         // Convert the native byte order result to big-endian.
         for word in state.iter_mut() {

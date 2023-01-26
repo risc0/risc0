@@ -79,8 +79,8 @@ impl Risc0Method {
         let elf_path = self.elf_path.display();
 
         // Quick check for '#' to avoid injection of arbitrary Rust code into the the
-        // method.rs file. This would not be a serious issue since, but it's
-        // good to add a check.
+        // method.rs file. This would not be a serious issue since it would only
+        // affect the user that set the path, but it's good to add a check.
         if let Some(_) = elf_path.to_string().find("#") {
             panic!("method path cannot include #: {}", elf_path);
         }

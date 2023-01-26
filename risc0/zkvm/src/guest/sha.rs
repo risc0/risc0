@@ -224,7 +224,7 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
     }
 }
 
-/// Computes the SHA256 digest of an object, serialized by [risc0_zkvm::serde].
+/// Computes the SHA256 digest of an object, serialized by [crate::serde].
 // TODO(victor): Does this correctly hash values of sizes that are not a whole
 // number of words?
 pub fn digest<T: Serialize>(val: &T) -> &'static mut Digest {

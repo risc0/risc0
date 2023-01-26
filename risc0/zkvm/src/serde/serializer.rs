@@ -14,14 +14,13 @@
 
 use core::mem;
 
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::Serialize;
 
 use super::{
     align_up,
     err::{Error, Result},
 };
-
-const WORD_SIZE: usize = mem::size_of::<u32>();
 
 pub fn to_slice<'a, 'b, T>(value: &'b T, buf: &'a mut [u32]) -> Result<&'a [u32]>
 where
