@@ -22,7 +22,7 @@ use crate::{
     field::{Elem, ExtElem, RootsOfUnity},
     hal::{Buffer, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP, EvalCheck},
-    taps::{TapSet, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    taps::{TapSet},
     INV_RATE,
 };
 
@@ -114,10 +114,6 @@ where
         );
     }
 
-    fn get_group(&self, tap_group_index: usize) -> &PolyGroup<H> {
-        &self.groups[tap_group_index].as_ref().unwrap()
-    }
-
     /// Generates the proof and returns the seal.
     pub fn finalize<E>(mut self, globals: &[&H::BufferElem], eval: &E) -> Vec<u32>
     where
@@ -136,22 +132,11 @@ where
             .hal
             .alloc_elem("check_poly", H::ExtElem::EXT_SIZE * domain);
 
-        // TODO: Genericize EvalCheck so we can pass any number of buffers in.
-        assert_eq!(self.groups.len(), 3);
-        let code_group = &self.get_group(REGISTER_GROUP_CODE).evaluated;
-        let data_group = &self.get_group(REGISTER_GROUP_DATA).evaluated;
-        let accum_group = &self.get_group(REGISTER_GROUP_ACCUM).evaluated;
-        assert_eq!(globals.len(), 2);
-        let mix = &globals[0];
-        let out = &globals[1];
-
+        let groups : Vec<&_> = self.groups.iter().map(|pg| &pg.as_ref().unwrap().evaluated).collect();
         eval.eval_check(
             &check_poly,
-            code_group,
-            data_group,
-            accum_group,
-            &mix,
-            &out,
+            groups.as_slice(),
+            globals,
             poly_mix,
             self.po2,
             self.cycles,

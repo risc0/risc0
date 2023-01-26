@@ -38,6 +38,9 @@ pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
 pub const REGISTER_GROUP_DATA: usize = 2;
 
+pub const GLOBAL_MIX: usize = 0;
+pub const GLOBAL_OUT: usize = 1;
+
 impl CircuitImpl {
     pub const fn new() -> Self {
         CircuitImpl
@@ -193,11 +196,8 @@ pub mod testutil {
         let out = hal.copy_from_elem("out", &params.out);
         eval.eval_check(
             &check,
-            &code,
-            &data,
-            &accum,
-            &mix,
-            &out,
+            &[&accum, &code, &data],
+            &[&mix, &out],
             params.poly_mix,
             params.po2,
             params.steps,
