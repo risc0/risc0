@@ -338,14 +338,26 @@ where
         po2: usize,
         steps: usize,
     ) {
-        let groups1 : Vec<&_> = groups.iter().map(|g| &g.buf1).collect();
-        let groups2 : Vec<&_> = groups.iter().map(|g| &g.buf2).collect();
-        let globals1 : Vec<&_> = globals.iter().map(|g| &g.buf1).collect();
-        let globals2 : Vec<&_> = globals.iter().map(|g| &g.buf2).collect();
-        self.eval1
-            .eval_check(&check.buf1, groups1.as_slice(), globals1.as_slice(), poly_mix, po2, steps);
-        self.eval2
-            .eval_check(&check.buf2, groups2.as_slice(), globals2.as_slice(), bytemuck::cast(poly_mix), po2, steps);
+        let groups1: Vec<&_> = groups.iter().map(|g| &g.buf1).collect();
+        let groups2: Vec<&_> = groups.iter().map(|g| &g.buf2).collect();
+        let globals1: Vec<&_> = globals.iter().map(|g| &g.buf1).collect();
+        let globals2: Vec<&_> = globals.iter().map(|g| &g.buf2).collect();
+        self.eval1.eval_check(
+            &check.buf1,
+            groups1.as_slice(),
+            globals1.as_slice(),
+            poly_mix,
+            po2,
+            steps,
+        );
+        self.eval2.eval_check(
+            &check.buf2,
+            groups2.as_slice(),
+            globals2.as_slice(),
+            bytemuck::cast(poly_mix),
+            po2,
+            steps,
+        );
         check.assert_eq();
     }
 }

@@ -20,9 +20,9 @@ use crate::{
         sha::Sha,
     },
     field::{Elem, ExtElem, RootsOfUnity},
-    hal::{Buffer, Hal},
-    prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP, EvalCheck},
-    taps::{TapSet},
+    hal::{Buffer, EvalCheck, Hal},
+    prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
+    taps::TapSet,
     INV_RATE,
 };
 
@@ -132,7 +132,11 @@ where
             .hal
             .alloc_elem("check_poly", H::ExtElem::EXT_SIZE * domain);
 
-        let groups : Vec<&_> = self.groups.iter().map(|pg| &pg.as_ref().unwrap().evaluated).collect();
+        let groups: Vec<&_> = self
+            .groups
+            .iter()
+            .map(|pg| &pg.as_ref().unwrap().evaluated)
+            .collect();
         eval.eval_check(
             &check_poly,
             groups.as_slice(),
