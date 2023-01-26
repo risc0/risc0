@@ -42,10 +42,10 @@ use risc0_zkvm_platform::{
     PAGE_SIZE, WORD_SIZE,
 };
 
-use super::{
-    elf::Program, image::PageTableInfo, loader::Loader, merge_word8, plonk, split_word8, TraceEvent,
-};
-use crate::{MemoryImage, CIRCUIT};
+use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
+use crate::binfmt::elf::Program;
+use crate::binfmt::image::{MemoryImage, PageTableInfo};
+use crate::CIRCUIT;
 
 const IMM_BITS: usize = 12;
 

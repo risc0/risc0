@@ -19,6 +19,8 @@
 
 extern crate alloc;
 
+#[cfg(feature = "binfmt")]
+pub mod binfmt;
 mod control_id;
 #[cfg(any(target_os = "zkvm", doc))]
 pub mod guest;
@@ -35,8 +37,10 @@ use control_id::CONTROL_ID;
 use risc0_zkp::core::sha::Digest;
 pub use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 
+#[cfg(feature = "binfmt")]
+pub use crate::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(feature = "prove")]
-pub use crate::prove::{elf::Program, image::MemoryImage, loader::Loader, Prover, ProverOpts};
+pub use crate::prove::{loader::Loader, Prover, ProverOpts};
 pub use crate::receipt::Receipt;
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();

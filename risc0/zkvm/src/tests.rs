@@ -280,10 +280,8 @@ fn sha_cycle_count() {
 #[cfg(feature = "profiler")]
 #[test]
 fn profiler() {
-    use crate::prove::{
-        elf::Program,
-        profiler::{Frame, Profiler},
-    };
+    use crate::binfmt::elf::Program;
+    use crate::prove::profiler::{Frame, Profiler};
 
     let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
     {

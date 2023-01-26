@@ -14,9 +14,7 @@
 
 //! Run the zkVM guest and prove its results
 
-pub(crate) mod elf;
 mod exec;
-pub(crate) mod image;
 pub(crate) mod loader;
 mod plonk;
 #[cfg(feature = "profiler")]
@@ -36,7 +34,7 @@ use risc0_zkvm_platform::{
     memory::MEM_SIZE,
 };
 
-use self::elf::Program;
+use crate::binfmt::elf::Program;
 use crate::{
     receipt::{insecure_skip_seal, Receipt},
     sha::sha,
