@@ -15,9 +15,6 @@
 use std::env;
 
 fn main() {
-    for (key, val) in env::vars() {
-        eprintln!("{key} | {val}")
-    }
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
         let cuda_bin = env::var("DEP_RISC0_SYS_CUDA_KERNELS_RV32IM").unwrap();
         println!("cargo:rustc-env=RV32IM_CUDA_PATH={cuda_bin}");
