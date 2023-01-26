@@ -32,13 +32,15 @@ pub use host::CpuVerifyHal;
 
 use self::adapter::VerifyAdapter;
 use crate::{
-    adapter::{CircuitInfo, TapsProvider},
+    adapter::{
+        CircuitInfo, TapsProvider, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    },
     core::{
         log2_ceil,
         sha::{Digest, Sha},
     },
     field::{Elem, ExtElem, RootsOfUnity},
-    taps::{TapSet, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    taps::TapSet,
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     FRI_FOLD, INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };

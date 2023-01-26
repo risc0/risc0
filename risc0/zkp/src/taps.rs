@@ -33,12 +33,6 @@ pub struct TapData {
     pub skip: u8,
 }
 
-// TODO: Remove references to these constants so we don't depend on a
-// fixed number of register groups.
-pub const REGISTER_GROUP_ACCUM: usize = 0;
-pub const REGISTER_GROUP_CODE: usize = 1;
-pub const REGISTER_GROUP_DATA: usize = 2;
-
 impl PartialEq for TapData {
     fn eq(&self, other: &Self) -> bool {
         self.offset == other.offset && self.back == other.back && self.group == other.group

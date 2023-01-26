@@ -20,8 +20,14 @@ use anyhow::Result;
 
 use crate::{
     field::{Elem, ExtElem, Field},
-    taps::{TapSet, REGISTER_GROUP_CODE},
+    taps::TapSet,
 };
+
+// TODO: Remove references to these constants so we don't depend on a
+// fixed set of register groups.
+pub const REGISTER_GROUP_ACCUM: usize = 0;
+pub const REGISTER_GROUP_CODE: usize = 1;
+pub const REGISTER_GROUP_DATA: usize = 2;
 
 #[derive(Clone, Copy)]
 pub struct MixState<EE: ExtElem> {

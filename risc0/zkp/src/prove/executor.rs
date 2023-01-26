@@ -19,9 +19,11 @@ use log::debug;
 use rand::thread_rng;
 
 use crate::{
-    adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler},
+    adapter::{
+        CircuitDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_CODE,
+        REGISTER_GROUP_DATA,
+    },
     field::{Elem, Field},
-    taps::{REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
     MIN_PO2, ZK_CYCLES,
 };
 

@@ -21,7 +21,7 @@ use rand::thread_rng;
 use rayon::prelude::*;
 
 use crate::{
-    adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler},
+    adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
     core::sha::Sha,
     field::{Elem, Field},
     prove::{
@@ -29,7 +29,7 @@ use crate::{
         executor::Executor,
         write_iop::WriteIOP,
     },
-    taps::{TapSet, REGISTER_GROUP_ACCUM},
+    taps::TapSet,
     ZK_CYCLES,
 };
 
