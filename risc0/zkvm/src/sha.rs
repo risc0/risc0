@@ -54,9 +54,32 @@ pub mod rust_crypto {
     //!     "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
     //! );
     //! ```
+    // NOTE: When used on the host, these functions are strictly less efficient,
+    // with the primary loss being passing blocks received through the
+    // RustCrypto interface as [u8] into blocks compatible with the RISC0
+    // interface of [u32] which has stricter alignment and therefore may require
+    // a copy. When on the host, this gets pass _back_ to the RustCrypto [sha2]
+    // crate meaning that copy was wasted. This is the result of prioritizing code
+    // factoring and guest performance over host performance.
 
     use risc0_zkp::core::sha::rust_crypto;
     pub use rust_crypto::Digest;
 
+    /// Sha256 is a [Rust Crypto] wrapper on the RISC Zero SHA-256
+    /// implementations. This type will automatically select the correct
+    /// implementation for usage in the zkVM guest and on the host.
     pub type Sha256 = rust_crypto::Sha256<super::Impl>;
+
+    /// Compress function interface compatible with usage in the RustCrypto
+    /// [sha2] crate.
+    ///
+    /// NOTE: This function is currently provided and exported here for linkage
+    /// with the [RISC Zero fork][1] for the RustCrypto [sha2] crate. You
+    /// probably don't want to use it directly and instead should consider
+    /// the [risc0_zkp::sha::Sha256::compress] function instead.
+    ///
+    /// [1]: https://github.com/risc0/RustCrypto-hashes/tree/master/sha2
+    pub fn compress(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+        risc0_zkp::core::sha::rust_crypto::compress::<super::Impl>(state, blocks);
+    }
 }

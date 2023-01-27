@@ -593,7 +593,7 @@ pub mod rust_crypto {
                     current_state,
                     &blocks
                         .iter()
-                        .map(|block| bytemuck::pod_read_unaligned::<super::Block>(block.as_slice()))
+                        .map(|block| bytemuck::pod_read_unaligned(block.as_slice()))
                         .collect::<Vec<_>>(),
                 ),
             });
@@ -662,6 +662,33 @@ pub mod rust_crypto {
 
     /// SHA-256 implementation cross-compatible with `sha2::Sha256`.
     pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
+
+    /// Compress function interface compatible with usage in the RustCrypto
+    /// [sha2] crate.
+    ///
+    /// NOTE: This function is currently provided and exported here for linkage
+    /// with the [RISC Zero fork][1] for the RustCrypto [sha2] crate. You
+    /// probably don't want to use it directly and instead should consider
+    /// the [risc0_zkp::sha::Sha256::compress] function instead.
+    ///
+    /// [1]: https://github.com/risc0/RustCrypto-hashes/tree/master/sha2
+    pub fn compress<S: super::Sha256>(state: &mut [u32; 8], blocks: &[[u8; 64]]) {
+        // If aligned, reinterpret the u8 array blocks as u32 array blocks.
+        // If unaligned, the data needs to be copied.
+        let compressed = match bytemuck::pod_align_to::<_, super::Block>(blocks) {
+            (&[], aligned_blocks, &[]) => {
+                S::compress_slice((state as &[u32; 8]).into(), aligned_blocks)
+            }
+            _ => S::compress_slice(
+                (state as &[u32; 8]).into(),
+                &blocks
+                    .iter()
+                    .map(|block| bytemuck::pod_read_unaligned(&block[..]))
+                    .collect::<Vec<_>>(),
+            ),
+        };
+        state.copy_from_slice(compressed.as_words());
+    }
 }
 
 // TODO(victor): Review test coverage.
