@@ -30,6 +30,7 @@ pub mod write_iop;
 use alloc::{vec, vec::Vec};
 
 use log::debug;
+use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use self::adapter::ProveAdapter;
 use crate::{
@@ -38,7 +39,6 @@ use crate::{
         poly::{poly_divide, poly_interpolate},
         sha::Sha,
     },
-    field::{Elem, ExtElem, Field, RootsOfUnity},
     hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::RegisterGroup,

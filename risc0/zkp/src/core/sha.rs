@@ -267,8 +267,9 @@ mod tests {
 pub mod testutil {
     use alloc::vec::Vec;
 
+    use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
+
     use super::{Digest, Sha};
-    use crate::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
     // Runs conformance test on a SHA implementation to make sure it properly
     // behaves.

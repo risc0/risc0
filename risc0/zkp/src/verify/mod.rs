@@ -29,6 +29,7 @@ use core::fmt;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use host::CpuVerifyHal;
+use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use self::adapter::VerifyAdapter;
 use crate::{
@@ -37,7 +38,6 @@ use crate::{
         log2_ceil,
         sha::{Digest, Sha},
     },
-    field::{Elem, ExtElem, RootsOfUnity},
     taps::{RegisterGroup, TapSet},
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     FRI_FOLD, INV_RATE, MAX_CYCLES_PO2, QUERIES,
@@ -122,11 +122,12 @@ pub trait VerifyHal {
 mod host {
     use core::{cell::RefCell, iter::zip};
 
+    use risc0_core::field::Field;
+
     use super::*;
     use crate::{
         adapter::PolyExt,
         core::ntt::{bit_reverse, interpolate_ntt},
-        field::Field,
         FRI_FOLD,
     };
 

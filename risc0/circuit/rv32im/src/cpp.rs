@@ -13,10 +13,8 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_zkp::{
-    adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-};
+use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
+use risc0_zkp::adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp};
 
 use crate::{
     ffi::{

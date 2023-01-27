@@ -16,6 +16,10 @@ use std::{cell::RefCell, ffi::CString, marker::PhantomData, rc::Rc};
 
 use bytemuck::Pod;
 use fil_rustacuda as rustacuda;
+use risc0_core::field::{
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem, RootsOfUnity,
+};
 use rustacuda::{
     device::DeviceAttribute,
     function::{BlockSize, GridSize},
@@ -26,10 +30,6 @@ use rustacuda_core::UnifiedPointer;
 
 use crate::{
     core::{log2_ceil, sha::Digest},
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        Elem, ExtElem, RootsOfUnity,
-    },
     hal::{Buffer, Hal},
     FRI_FOLD,
 };

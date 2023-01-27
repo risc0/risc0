@@ -14,10 +14,8 @@
 
 // This code is automatically generated
 
-use risc0_zkp::{
-    adapter::{MixState, PolyExt, PolyExtStep, PolyExtStepDef},
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-};
+use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
+use risc0_zkp::adapter::{MixState, PolyExt, PolyExtStep, PolyExtStepDef};
 
 use super::CircuitImpl;
 

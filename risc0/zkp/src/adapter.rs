@@ -17,11 +17,9 @@
 use alloc::vec::Vec;
 
 use anyhow::Result;
+use risc0_core::field::{Elem, ExtElem, Field};
 
-use crate::{
-    field::{Elem, ExtElem, Field},
-    taps::{RegisterGroup, TapSet},
-};
+use crate::taps::{RegisterGroup, TapSet};
 
 #[derive(Clone, Copy)]
 pub struct MixState<EE: ExtElem> {

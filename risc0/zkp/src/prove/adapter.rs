@@ -19,11 +19,11 @@ use std::sync::{
 
 use rand::thread_rng;
 use rayon::prelude::*;
+use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler},
     core::sha::Sha,
-    field::{Elem, Field},
     prove::{
         accum::{Accum, Handler},
         executor::Executor,

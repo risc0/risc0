@@ -21,13 +21,13 @@ use lazy_regex::{regex, Captures};
 use log::{debug, trace};
 use num_traits::FromPrimitive;
 use risc0_circuit_rv32im::CircuitImpl;
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    Elem,
+};
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepHandler, PolyExt},
     core::{log2_ceil, sha::BLOCK_SIZE},
-    field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        Elem,
-    },
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
 };

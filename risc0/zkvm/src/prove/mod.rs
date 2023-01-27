@@ -23,9 +23,9 @@ pub mod profiler;
 use std::{collections::HashMap, fmt::Debug, io::Write, rc::Rc};
 
 use anyhow::{bail, Result};
+use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     core::sha::Digest,
-    field::baby_bear::{BabyBearElem, BabyBearExtElem},
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };

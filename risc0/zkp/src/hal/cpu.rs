@@ -25,6 +25,10 @@ use std::{cell::RefCell, rc::Rc};
 use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
 use rayon::prelude::*;
+use risc0_core::field::{
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem, RootsOfUnity,
+};
 
 use super::{Buffer, Hal};
 use crate::{
@@ -33,10 +37,6 @@ use crate::{
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
         sha::{Digest, Sha},
         sha_cpu,
-    },
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        Elem, ExtElem, RootsOfUnity,
     },
     FRI_FOLD,
 };

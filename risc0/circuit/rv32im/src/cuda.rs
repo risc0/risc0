@@ -15,12 +15,12 @@
 use std::{ffi::CString, rc::Rc};
 
 use fil_rustacuda as rustacuda;
+use risc0_core::field::{
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    RootsOfUnity,
+};
 use risc0_zkp::{
     core::log2_ceil,
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        RootsOfUnity,
-    },
     hal::{
         cuda::{BufferImpl as CudaBuffer, CudaHal},
         Buffer, EvalCheck,

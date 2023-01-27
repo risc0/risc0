@@ -15,12 +15,12 @@
 use std::rc::Rc;
 
 use metal::ComputePipelineDescriptor;
+use risc0_core::field::{
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    RootsOfUnity,
+};
 use risc0_zkp::{
     core::log2_ceil,
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        RootsOfUnity,
-    },
     hal::{
         metal::{BufferImpl as MetalBuffer, MetalHal},
         EvalCheck,

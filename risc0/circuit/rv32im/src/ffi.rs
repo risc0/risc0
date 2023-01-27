@@ -19,10 +19,8 @@ use std::{
 };
 
 use anyhow::{anyhow, Result};
-use risc0_zkp::{
-    adapter::{CircuitStepContext, CircuitStepHandler},
-    field::baby_bear::{BabyBearElem, BabyBearExtElem},
-};
+use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
+use risc0_zkp::adapter::{CircuitStepContext, CircuitStepHandler};
 
 type Callback = unsafe extern "C" fn(
     ctx: *mut c_void,

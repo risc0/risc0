@@ -18,14 +18,14 @@ use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, MTLResourceOptions,
     MTLSize, NSRange,
 };
+use risc0_core::field::{
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem, RootsOfUnity,
+};
 
 use super::{Buffer, Hal};
 use crate::{
     core::{log2_ceil, sha::Digest},
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        Elem, ExtElem, RootsOfUnity,
-    },
     FRI_FOLD,
 };
 
