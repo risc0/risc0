@@ -194,6 +194,10 @@ __device__ inline ShaDigest shaHashInner(const T* data, size_t size, size_t stri
     compress(state, words);
   }
 
+  for (size_t i = 0; i < 8; i++) {
+    state.words[i] = impl::convertU32(state.words[i]);
+  }
+
   return state;
 }
 
@@ -223,6 +227,10 @@ __device__ inline ShaDigest shaHashPair(ShaDigest x, ShaDigest y) {
   // Initialize state + compress
   ShaDigest state = impl::initState();
   impl::compress(state, words);
+
+  for (size_t i = 0; i < 8; i++) {
+    state.words[i] = impl::convertU32(state.words[i]);
+  }
 
   // Return the results
   return state;

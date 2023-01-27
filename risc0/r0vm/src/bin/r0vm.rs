@@ -102,7 +102,7 @@ fn run_prover(
         prover.add_input_u8_slice(bytes.as_slice());
     }
     let receipt = prover.run()?;
-    let output = prover.get_output();
+    let output = prover.get_output_u8_slice();
     Ok((receipt, output.to_vec()))
 }
 
