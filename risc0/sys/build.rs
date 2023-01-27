@@ -72,18 +72,6 @@ fn main() {
                 println!("cargo:{}={bin_path_str}", kernel.1);
             }
         }
-
-        // check the cache for libcircuit.a, NOTE this changes if we rename the output
-        // for the `cc` .compile() arg.
-        let libcircuit = cache_path.join("libcircuit.a");
-        if !libcircuit.exists() {
-            panic!(
-                "Failed to find {} in RISC0_HAL_CACHE location",
-                libcircuit.display()
-            )
-        }
-        println!("cargo:rustc-link-search=native={}", cache_path.display());
-        println!("cargo:rustc-link-lib=static=circuit");
     } else {
         build_cpu_kernels();
 
