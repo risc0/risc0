@@ -13,6 +13,7 @@ bytemuck = "1.12"
 clap = { version = "4.0", features = ["derive"] }
 env_logger = "0.10.0"
 risc0-zkvm = { workspace = true, features = ["default", "profiler"] }
+risc0-zkvm-platform = { workspace = true }
 
 [dev-dependencies]
 anyhow = "1.0"

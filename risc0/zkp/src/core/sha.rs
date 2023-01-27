@@ -14,6 +14,7 @@
 
 //! Simple SHA-256 wrappers.
 
+use alloc::format;
 use alloc::vec::Vec;
 use core::{
     fmt::{Debug, Display, Formatter},
@@ -72,21 +73,19 @@ pub trait Sha256 {
     /// mutable reference to the underlying digest).
     type DigestPtr: DerefMut<Target = Digest> + Debug;
 
-    /// Generate a SHA from a slice of bytes, padding to block size
-    /// and adding the SHA trailer.
+    /// Generate a SHA-256 hash from a slice of bytes, padding to block size
+    /// and adding the SHA-256 hash trailer, as specified in FIPS 180-4.
     fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr;
 
-    /// Generate a SHA from a slice of words, padding to block size
-    /// and adding the SHA trailer.
+    /// Generate a SHA-256 hash from a slice of words, padding to block size
+    /// and adding the SHA-256 hash trailer, as specified in FIPS 180-4.
     fn hash_words(words: &[u32]) -> Self::DigestPtr {
         Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
-    /// Generate a SHA from a pair of [Digests](Digest).
-    // TODO(victor) This is an efficient way to produce H(a || b), which I am
-    // guessing is designed for use in Merkle trees. Is this the best method to
-    // be exposing here though? It does not use domain separation or added padding
-    // and length.
+    /// Generate a hash from a pair of [Digests] using the SHA-256 compression
+    /// function. Note that the result is not a standard-compliant hash of any
+    /// kwown preimage.
     fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
         Self::compress(&SHA256_INIT, a, b)
     }
@@ -107,9 +106,9 @@ pub trait Sha256 {
     /// algorithm and should be used directly only with extreme caution.
     fn compress_slice(state: &Digest, blocks: &[Block]) -> Self::DigestPtr;
 
-    /// Generate a SHA from a slice of anything that can be represented as plain
-    /// old data. Pads up to the SHA-256 block boundary, but does not add the
-    /// standard SHA trailer.
+    /// Generate a hash from a slice of anything that can be represented as
+    /// plain old data. Pads up to the SHA-256 block boundary, but does not
+    /// add the standard SHA-256 trailer and so is not a standards hash.
     // TODO(victor): Look over the usages of this function to understand why it
     // exists and if it should exist on this trait.
     fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
@@ -214,7 +213,6 @@ impl TryFrom<&[u32]> for Digest {
     }
 }
 
-// TODO(victor): Should I keep this method? It's a bit niche.
 impl<'a> TryFrom<&'a [u32]> for &'a Digest {
     type Error = PodCastError;
 
@@ -303,7 +301,6 @@ impl AsMut<[u32]> for Digest {
     }
 }
 
-// TODO(victor) Do these formatting definitions result in what a user my expect?
 impl Display for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
         f.write_str(&hex::encode(&self))
@@ -312,18 +309,12 @@ impl Display for Digest {
 
 impl Debug for Digest {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&hex::encode(&self))
+        f.write_str(&format!("Digest({})", &hex::encode(&self)))
     }
 }
 
-// TODO(victor) Consider using a macro to reduce code duplication.
 /// Input block to the SHA-256 hashing algorithm. SHA-256 consumes blocks in
 /// 512-bit (64-byte) chunks in a [Merkle–Damgård] construction.
-///
-/// TODO(victor): What does the developer need to know about block endianness?
-/// NOTE: Bytes in the [Block] type are stored in big-endian order regardless
-/// of the host architecture. When interpreted as words, the numerical result
-/// will depend on the architecture.
 ///
 /// [Merkle–Damgård]: https://en.wikipedia.org/wiki/Merkle%E2%80%93Damg%C3%A5rd_construction
 #[derive(
@@ -505,7 +496,6 @@ impl AsMut<[u32]> for Block {
     }
 }
 
-// TODO(victor) Do these formatting definitions result in what a user my expect?
 impl Display for Block {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
         f.write_str(&hex::encode(&self))
@@ -514,12 +504,10 @@ impl Display for Block {
 
 impl Debug for Block {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&hex::encode(&self))
+        f.write_str(&format!("Block({})", &hex::encode(&self)))
     }
 }
 
-// TODO(victor): Should this be made available on a path that does not include
-// the words `rust_crypto`?
 pub mod rust_crypto {
     //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
     //!
@@ -528,10 +516,13 @@ pub mod rust_crypto {
     //! # Usage
     //!
     //! ```rust
-    //! use risc0_zkvm::sha::rust_crypto::{Sha256, Digest as _},
+    //! use risc0_zkp::core::{
+    //!     sha::rust_crypto::{Sha256, Digest as _},
+    //!     sha_cpu,
+    //! };
     //!
     //! // create a Sha256 object
-    //! let mut hasher = Sha256::new();
+    //! let mut hasher = Sha256::<sha_cpu::Impl>::new();
     //!
     //! // write input message
     //! hasher.update(b"hello world");
@@ -542,11 +533,12 @@ pub mod rust_crypto {
     //! assert_eq!(hex::encode(result), "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
     //!
     //! // more concise version of the code above.
-    //! assert_eq!(hex::encode(Sha256::digest(b"hello world")),
+    //! assert_eq!(hex::encode(Sha256::<sha_cpu::Impl>::digest(b"hello world")),
     //!     "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
     //! );
     //! ```
 
+    use alloc::format;
     use alloc::vec::Vec;
     use core::fmt::{Debug, Formatter};
 
@@ -661,8 +653,10 @@ pub mod rust_crypto {
     impl<S: super::Sha256> Debug for Sha256VarCore<S> {
         #[inline]
         fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-            // TODO(victor): Add the type of S to this.
-            f.write_str("Sha256VarCore { ... }")
+            f.write_str(&format!(
+                "Sha256VarCore<{}> {{ ... }}",
+                core::any::type_name::<S>()
+            ))
         }
     }
 

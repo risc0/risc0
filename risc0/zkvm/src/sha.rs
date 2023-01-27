@@ -19,8 +19,7 @@ pub use risc0_zkp::core::sha::{
 };
 
 // Pick the appropriate implementation of SHA-256 depending on whether we are
-// in the zkVM guest.
-// TODO(victor): Should I rename this to something other than Impl?
+// in the zkVM guest. Users can simply `use risc0_zkvm::sha::Impl`.
 cfg_if::cfg_if! {
     if #[cfg(target_os = "zkvm")] {
         pub use crate::guest::sha::Impl;
@@ -30,6 +29,32 @@ cfg_if::cfg_if! {
 }
 
 pub mod rust_crypto {
+    //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
+    //!
+    //! [Rust Crypto]: https://github.com/RustCrypto
+    //!
+    //! # Usage
+    //!
+    //! ```rust
+    //! use risc0_zkvm::sha::rust_crypto::{Sha256, Digest as _};
+    //!
+    //! // create a Sha256 object
+    //! let mut hasher = Sha256::new();
+    //!
+    //! // write input message
+    //! hasher.update(b"hello world");
+    //!
+    //! // read hash digest and consume hasher
+    //! let result = hasher.finalize();
+    //!
+    //! assert_eq!(hex::encode(result), "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
+    //!
+    //! // more concise version of the code above.
+    //! assert_eq!(hex::encode(Sha256::digest(b"hello world")),
+    //!     "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+    //! );
+    //! ```
+
     use risc0_zkp::core::sha::rust_crypto;
     pub use rust_crypto::Digest;
 

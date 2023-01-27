@@ -42,11 +42,6 @@ pub struct MerkleTreeVerifier<'a, H: VerifyHal> {
     rest: Vec<<H::Sha256 as Sha256>::DigestPtr>,
 
     // Support for accelerator operations.
-    // TODO(victor): I removed the concrete Hal reference here, but it's possible we should add it
-    // back so that if we _do_ use method on the Hal trait that requires an object. If we do need
-    // to do something like this in the future, it becomes a breaking change. Is this struct part
-    // of the stable API? If not we might move it into crate visibility (then we don't need to
-    // really worry about breaking changes).
     phantom_hal: PhantomData<H>,
 }
 
