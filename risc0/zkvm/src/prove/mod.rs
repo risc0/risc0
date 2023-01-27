@@ -36,6 +36,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT},
     memory::MEM_SIZE,
+    WORD_SIZE,
 };
 
 use self::elf::Program;
@@ -178,8 +179,20 @@ impl<'a> Prover<'a> {
             .extend_from_slice(bytemuck::cast_slice(slice));
     }
 
-    pub fn get_output(&self) -> &[u8] {
+    pub fn get_output_u8_slice(&self) -> &[u8] {
         &self.inner.output
+    }
+
+    pub fn get_output_u32_vec(&self) -> Result<Vec<u32>> {
+        if self.inner.output.len() % WORD_SIZE != 0 {
+            bail!("Private output must be word-aligned");
+        }
+        Ok(self
+            .inner
+            .output
+            .chunks_exact(WORD_SIZE)
+            .map(|x| u32::from_ne_bytes(x.try_into().unwrap()))
+            .collect())
     }
 
     #[tracing::instrument(skip_all)]
