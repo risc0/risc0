@@ -21,8 +21,6 @@ mod cpp;
 pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
-#[cfg(feature = "prove")]
-mod ffi;
 mod info;
 #[cfg(feature = "metal")]
 pub mod metal;
