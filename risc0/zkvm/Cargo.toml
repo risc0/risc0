@@ -62,7 +62,6 @@ serial_test = "1.0"
 tar = "0.4"
 tempdir = "0.3"
 test-log = { version = "0.2", features = ["trace"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = ["risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
