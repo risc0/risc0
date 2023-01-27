@@ -83,7 +83,7 @@ pub trait Sha256 {
         Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
     }
 
-    /// Generate a hash from a pair of [Digests] using the SHA-256 compression
+    /// Generate a hash from a pair of [Digest] using the SHA-256 compression
     /// function. Note that the result is not a standard-compliant hash of any
     /// kwown preimage.
     fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
