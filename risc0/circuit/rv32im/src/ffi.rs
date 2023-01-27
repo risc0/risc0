@@ -50,7 +50,8 @@ impl Default for RawError {
 }
 
 #[link(name = "circuit")]
-#[link(name = "stdc++")]
+#[cfg_attr(target_os = "macos", link(name = "c++"))]
+#[cfg_attr(not(target_os = "macos"), link(name = "stdc++"))]
 extern "C" {
     pub(crate) fn risc0_circuit_string_ptr(str: *const RawString) -> *const c_char;
 
