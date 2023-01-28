@@ -21,7 +21,7 @@ use rand::thread_rng;
 use rayon::prelude::*;
 
 use crate::{
-    adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler},
+    adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
     core::sha::Sha,
     field::{Elem, Field},
     prove::{
@@ -29,7 +29,7 @@ use crate::{
         executor::Executor,
         write_iop::WriteIOP,
     },
-    taps::{RegisterGroup, TapSet},
+    taps::TapSet,
     ZK_CYCLES,
 };
 
@@ -83,7 +83,7 @@ where
             .exec
             .circuit
             .get_taps()
-            .group_size(RegisterGroup::Accum);
+            .group_size(REGISTER_GROUP_ACCUM);
         self.accum.resize(self.steps * accum_size, F::Elem::INVALID);
         let mut args: &mut [&mut [F::Elem]] = &mut [
             &mut self.exec.code,

@@ -201,7 +201,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   Fp x83(268435454);
   // loc("cirgen/circuit/rv32im/ffpu.cpp":51:20)
   Fp x84(943718400);
-  // loc("cirgen/circuit/rv32im/rv32im.cpp":18:3)
+  // loc("cirgen/circuit/rv32im/rv32im.cpp":19:3)
   MixState x85{Fp4(0), Fp4(1)};
   // loc("Top/Code/OneHot/Reg1"("./cirgen/components/mux.h":37:25))
   auto x86 = args[0][2 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -251,11 +251,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x108{x105.tot + x105.mul * x107, x105.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":103:17)
   MixState x109{x94.tot + x95 * x108.tot * x94.mul, x94.mul * x108.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement1/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement1/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x110 = args[2][12 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x111 = x110 - x90;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement1/Reg1"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement1/Reg1"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x112 = args[2][13 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x113 = x112 - x92;
@@ -277,11 +277,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x121 = x114 * x120;
   // loc("cirgen/components/bytes.cpp":48:7)
   MixState x122{x119.tot + x119.mul * x121, x119.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement2/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement2/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x123 = args[2][14 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x124 = x123 - x110;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement2/Reg1"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement2/Reg1"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x125 = args[2][15 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x126 = x125 - x112;
@@ -303,11 +303,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x134 = x127 * x133;
   // loc("cirgen/components/bytes.cpp":48:7)
   MixState x135{x132.tot + x132.mul * x134, x132.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement3/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement3/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x136 = args[2][16 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x137 = x136 - x123;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement3/Reg1"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement3/Reg1"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x138 = args[2][17 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x139 = x138 - x125;
@@ -329,11 +329,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x147 = x140 * x146;
   // loc("cirgen/components/bytes.cpp":48:7)
   MixState x148{x145.tot + x145.mul * x147, x145.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement4/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement4/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x149 = args[2][18 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x150 = x149 - x136;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement4/Reg1"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement4/Reg1"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x151 = args[2][19 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x152 = x151 - x138;
@@ -355,11 +355,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x160 = x153 * x159;
   // loc("cirgen/components/bytes.cpp":48:7)
   MixState x161{x158.tot + x158.mul * x160, x158.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement5/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement5/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x162 = args[2][20 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x163 = x162 - x149;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement5/Reg1"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement5/Reg1"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x164 = args[2][21 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x165 = x164 - x151;
@@ -381,11 +381,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x173 = x166 * x172;
   // loc("cirgen/components/bytes.cpp":48:7)
   MixState x174{x171.tot + x171.mul * x173, x171.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement6/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement6/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x175 = args[2][22 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x176 = x175 - x162;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement6/Reg1"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement6/Reg1"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x177 = args[2][23 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x178 = x177 - x164;
@@ -407,11 +407,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x186 = x179 * x185;
   // loc("cirgen/components/bytes.cpp":48:7)
   MixState x187{x184.tot + x184.mul * x186, x184.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement7/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement7/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x188 = args[2][24 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x189 = x188 - x175;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement7/Reg1"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement7/Reg1"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x190 = args[2][25 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x191 = x190 - x177;
@@ -1799,7 +1799,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x882 = args[2][169 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":33:21)
   auto x883 = x882 * x31;
-  // loc("Top/Mux/4/Mux/0/ComputeCycle/Decoder/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/Mux/0/ComputeCycle/Decoder/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x884 = args[2][170 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":33:21)
   auto x885 = x883 + x884;
@@ -2137,7 +2137,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1051{x1046.tot + x1049 * x1050.tot * x1046.mul, x1046.mul * x1050.mul};
   // loc("cirgen/components/iszero.cpp":15:19)
   auto x1052 = x0 - x1049;
-  // loc("Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x1053 = args[2][203 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":15:26)
   auto x1054 = x1048 * x1053;
@@ -2163,7 +2163,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1064{x1057.tot + x1062 * x1063.tot * x1057.mul, x1057.mul * x1063.mul};
   // loc("cirgen/components/iszero.cpp":15:19)
   auto x1065 = x0 - x1062;
-  // loc("Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero1/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero1/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x1066 = args[2][205 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":15:26)
   auto x1067 = x1061 * x1066;
@@ -2191,7 +2191,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1078{x1070.tot + x1076 * x1077.tot * x1070.mul, x1070.mul * x1077.mul};
   // loc("cirgen/components/iszero.cpp":15:19)
   auto x1079 = x0 - x1076;
-  // loc("Top/Mux/4/Mux/0/ComputeCycle/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/Mux/0/ComputeCycle/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x1080 = args[2][207 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":15:26)
   auto x1081 = x1075 * x1080;
@@ -14769,39 +14769,39 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7367{x808.tot + x809 * x7366.tot * x808.mul, x808.mul * x7366.mul};
   // loc("Top/Code/OneHot/Reg5"("./cirgen/components/mux.h":37:25))
   auto x7368 = args[0][6 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/4/OneHot/Reg1"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/OneHot/Reg1"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x7369 = args[2][95 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/4/OneHot/Reg2"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/OneHot/Reg2"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x7370 = args[2][96 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":44:19)
   auto x7371 = x7370 * x3;
   // loc("./cirgen/components/onehot.h":44:13)
   auto x7372 = x7369 + x7371;
-  // loc("Top/Mux/4/OneHot/Reg3"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/OneHot/Reg3"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x7373 = args[2][97 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":44:19)
   auto x7374 = x7373 * x18;
   // loc("./cirgen/components/onehot.h":44:13)
   auto x7375 = x7372 + x7374;
-  // loc("Top/Mux/4/OneHot/Reg4"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/OneHot/Reg4"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x7376 = args[2][98 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":44:19)
   auto x7377 = x7376 * x17;
   // loc("./cirgen/components/onehot.h":44:13)
   auto x7378 = x7375 + x7377;
-  // loc("Top/Mux/4/OneHot/Reg5"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/OneHot/Reg5"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x7379 = args[2][99 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":44:19)
   auto x7380 = x7379 * x22;
   // loc("./cirgen/components/onehot.h":44:13)
   auto x7381 = x7378 + x7380;
-  // loc("Top/Mux/4/OneHot/Reg6"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/OneHot/Reg6"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x7382 = args[2][100 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":44:19)
   auto x7383 = x7382 * x23;
   // loc("./cirgen/components/onehot.h":44:13)
   auto x7384 = x7381 + x7383;
-  // loc("Top/Mux/4/OneHot/Reg7"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/OneHot/Reg7"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x7385 = args[2][101 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":44:19)
   auto x7386 = x7385 * x24;
@@ -14823,7 +14823,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7394 = x3686 * x28;
   // loc("./cirgen/components/onehot.h":44:13)
   auto x7395 = x7393 + x7394;
-  // loc("Top/Mux/4/OneHot/Reg12"("./cirgen/compiler/edsl/edsl.h":111:61))
+  // loc("Top/Mux/4/OneHot/Reg12"("./cirgen/compiler/edsl/edsl.h":113:61))
   auto x7396 = args[2][106 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":44:19)
   auto x7397 = x7396 * x29;
