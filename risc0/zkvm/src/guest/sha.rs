@@ -210,7 +210,7 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
 }
 
 // Example in this doc comment is untested because we cannot easily run guest
-// doc in that pipeline.
+// doc in that pipeline. TODO(victor) Add test of this API to guest tests.
 /// Computes the SHA-256 digest of the serialization of the given object.
 ///
 /// NOTE: In the case of hashing bytes-like objects, this does not yield the
