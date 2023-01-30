@@ -74,7 +74,7 @@ pub(crate) use Trailer::*;
 const fn compute_u32s_needed(len_bytes: usize, trailer: Trailer) -> usize {
     match trailer {
         WithoutTrailer => align_up(len_bytes, WORD_SIZE * BLOCK_WORDS) / WORD_SIZE,
-        WithTrailer { total_bits: _ } => {
+        WithTrailer { .. } => {
             // Add one byte for end marker
             let nwords = align_up(len_bytes + 1, WORD_SIZE) / WORD_SIZE;
             // Add two words for length at end (even though we only
@@ -209,7 +209,19 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
     }
 }
 
-/// Computes the SHA256 digest of a serialized object.
+// Example in this doc comment is untested because we cannot easily run guest
+// doc in that pipeline.
+/// Computes the SHA-256 digest of the serialization of the given object.
+///
+/// NOTE: In the case of hashing bytes-like objects, this does not yield the
+/// same results of hashing the data as bytes. Instead it is equivalent to the
+/// following.
+/// ```rust,ignore
+/// use risc0_zkvm::guest::{sha, Sha as _};
+/// use risc0_zkvm::serde::to_vec;
+///
+/// sha::Impl {}.hash_words(&to_vec("string to hash".as_bytes()).unwrap());
+/// ```
 pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     // If the object to be serialized is a plain old structure in memory, this
     // should be a good guess for the allocation needed.
@@ -217,13 +229,14 @@ pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     let cap = compute_u32s_needed(
         approx_len,
         WithTrailer {
-            total_bits: approx_len * 8,
+            // Total bits input is unused in compute_u32s_needed.
+            total_bits: 0,
         },
     );
     let buf = to_vec_with_capacity(val, cap).unwrap();
 
     let trailer = WithTrailer {
-        total_bits: buf.len() * 8,
+        total_bits: buf.len() * WORD_SIZE * 8,
     };
 
     let digest = alloc_uninit_digest();
