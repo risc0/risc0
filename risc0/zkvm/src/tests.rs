@@ -16,9 +16,11 @@ use std::{fmt, sync::Mutex};
 
 use anyhow::Result;
 use risc0_zeroio::{from_slice, to_vec};
-use risc0_zkp::core::sha::Digest;
+use risc0_zkp::core::sha::{Digest, Sha as _};
+use risc0_zkp::core::sha_cpu;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+    multi_test::{MultiTestSpec, TestStruct},
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
 };
 use risc0_zkvm_platform::{
     memory::{COMMIT, HEAP},
@@ -85,11 +87,30 @@ fn sha_basics() {
             0x19db06c1_u32.to_be()
         ])
     );
+
+    // Correctness of the risc0_zkvm::guest::sha::digest methods is defined relative
+    // to the equivalent of serializing and then hashing. One result of this is
+    // that if the serialization changes in the future, so will the hash result.
+    let test_struct = TestStruct {
+        foo: "test".into(),
+        bar: 71,
+    };
+    assert_eq!(
+        run_serialize_sha(test_struct.clone()),
+        *sha_cpu::Impl {}.hash_words(&crate::serde::to_vec(&test_struct).unwrap()),
+    );
 }
 
 fn run_sha(msg: &str) -> Digest {
     let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap());
+    let receipt = prover.run().unwrap();
+    from_slice::<Digest>(&receipt.journal).unwrap().into_orig()
+}
+
+fn run_serialize_sha(data: TestStruct) -> Digest {
+    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaSerializeDigest { data: data }).unwrap());
     let receipt = prover.run().unwrap();
     from_slice::<Digest>(&receipt.journal).unwrap().into_orig()
 }

@@ -21,7 +21,7 @@ use core::arch::asm;
 
 use risc0_zeroio::deserialize::Deserialize;
 use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha};
-use risc0_zkvm::guest::{env, memory_barrier, sha::Impl as ShaImpl};
+use risc0_zkvm::guest::{env, memory_barrier, sha, sha::Impl as ShaImpl};
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef};
 use risc0_zkvm_platform::io::SENDRECV_CHANNEL_INITIAL_INPUT;
 
@@ -66,6 +66,14 @@ pub fn main() {
             // our simulation doesn't run faster.
             assert!(total >= 72, "total: {total}");
         }
+        MultiTestSpecRef::ShaDigest(data) => {
+            let digest = ShaImpl {}.hash_bytes(data.data());
+            env::commit(&*digest);
+        }
+        MultiTestSpecRef::ShaSerializeDigest(data) => {
+            let digest = sha::digest(&data.data().into_orig());
+            env::commit(&*digest);
+        }
         MultiTestSpecRef::EventTrace(_) => unsafe {
             // Execute some instructions with distinctive arguments
             // that are easy to find in the event trace.
@@ -93,10 +101,6 @@ pub fn main() {
                     env::write(&value);
                 }
             }
-        }
-        MultiTestSpecRef::ShaDigest(data) => {
-            let digest = ShaImpl {}.hash_bytes(data.data());
-            env::commit(&digest);
         }
         MultiTestSpecRef::SendRecv(sendrecv) => {
             let mut input: &[u8] = &[];

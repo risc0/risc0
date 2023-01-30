@@ -15,17 +15,27 @@
 // Definitions for test selection codes used by the "multi_test" test.
 extern crate alloc;
 
-use alloc::vec::Vec;
+use alloc::{string::String, vec::Vec};
 
-use risc0_zeroio::{Deserialize, Serialize};
+use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize, ZeroioSerialize, ZeroioDeserialize)]
+pub struct TestStruct {
+    pub foo: String,
+    pub bar: u32,
+}
+
+#[derive(ZeroioSerialize, ZeroioDeserialize, Debug)]
 pub enum MultiTestSpec {
     DoNothing,
     ShaConforms,
     ShaCycleCount,
     ShaDigest {
         data: Vec<u8>,
+    },
+    ShaSerializeDigest {
+        data: TestStruct,
     },
     EventTrace,
     Profiler,

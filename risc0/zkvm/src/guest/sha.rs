@@ -209,8 +209,7 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
     }
 }
 
-// Example in this doc comment is untested because we cannot easily run guest
-// doc in that pipeline. TODO(victor) Add test of this API to guest tests.
+// Example is not tested because it needs to run in the guest.
 /// Computes the SHA-256 digest of the serialization of the given object.
 ///
 /// NOTE: In the case of hashing bytes-like objects, this does not yield the
@@ -220,7 +219,7 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
 /// use risc0_zkvm::guest::{sha, Sha as _};
 /// use risc0_zkvm::serde::to_vec;
 ///
-/// sha::Impl {}.hash_words(&to_vec("string to hash".as_bytes()).unwrap());
+/// sha::Impl {}.hash_words(&to_vec("string to hash").unwrap());
 /// ```
 pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
     // If the object to be serialized is a plain old structure in memory, this
