@@ -109,11 +109,10 @@ pub trait EvalCheck<H: Hal> {
     fn eval_check(
         &self,
         check: &H::BufferElem,
-        code: &H::BufferElem,
-        data: &H::BufferElem,
-        accum: &H::BufferElem,
-        mix: &H::BufferElem,
-        out: &H::BufferElem,
+        // Register groups, e.g. accum, code, data.  These should have one row for each cycle.
+        groups: &[&H::BufferElem],
+        // Globals.  These should have one row total.
+        globals: &[&H::BufferElem],
         poly_mix: H::ExtElem,
         po2: usize,
         steps: usize,

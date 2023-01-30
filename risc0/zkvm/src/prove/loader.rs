@@ -381,7 +381,7 @@ impl Loader {
             hal.batch_interpolate_ntt(&coeffs, code_size);
             hal.zk_shift(&coeffs, code_size);
             // Make the poly-group & extract the root
-            let code_group = PolyGroup::new(&hal, &coeffs, code_size, cycles, "code");
+            let code_group = PolyGroup::new(&hal, coeffs, code_size, cycles, "code");
             table.push(code_group.merkle.root().clone());
         }
 

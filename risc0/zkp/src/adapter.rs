@@ -19,7 +19,13 @@ use alloc::vec::Vec;
 use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use crate::taps::{RegisterGroup, TapSet};
+use crate::taps::TapSet;
+
+// TODO: Remove references to these constants so we don't depend on a
+// fixed set of register groups.
+pub const REGISTER_GROUP_ACCUM: usize = 0;
+pub const REGISTER_GROUP_CODE: usize = 1;
+pub const REGISTER_GROUP_DATA: usize = 2;
 
 #[derive(Clone, Copy)]
 pub struct MixState<EE: ExtElem> {
@@ -106,7 +112,7 @@ pub trait TapsProvider {
     fn get_taps(&self) -> &'static TapSet<'static>;
 
     fn code_size(&self) -> usize {
-        self.get_taps().group_size(RegisterGroup::Code)
+        self.get_taps().group_size(REGISTER_GROUP_CODE)
     }
 }
 
