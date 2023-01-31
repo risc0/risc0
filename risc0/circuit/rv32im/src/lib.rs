@@ -21,8 +21,6 @@ mod cpp;
 pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
-#[cfg(feature = "prove")]
-mod ffi;
 mod info;
 #[cfg(feature = "metal")]
 pub mod metal;
@@ -55,10 +53,8 @@ impl TapsProvider for CircuitImpl {
 
 #[cfg(test)]
 mod tests {
-    use risc0_zkp::{
-        adapter::{CircuitStep, CircuitStepContext, CircuitStepHandler},
-        field::baby_bear::BabyBearElem,
-    };
+    use risc0_core::field::baby_bear::BabyBearElem;
+    use risc0_zkp::adapter::{CircuitStep, CircuitStepContext, CircuitStepHandler};
 
     use crate::CircuitImpl;
 
@@ -102,12 +98,12 @@ mod tests {
 #[cfg(feature = "test")]
 pub mod testutil {
     use rand::{thread_rng, Rng};
+    use risc0_core::field::{
+        baby_bear::{BabyBearElem, BabyBearExtElem},
+        Elem, ExtElem,
+    };
     use risc0_zkp::{
         adapter::{CircuitInfo, TapsProvider},
-        field::{
-            baby_bear::{BabyBearElem, BabyBearExtElem},
-            Elem, ExtElem,
-        },
         hal::{Buffer, EvalCheck, Hal},
         INV_RATE,
     };

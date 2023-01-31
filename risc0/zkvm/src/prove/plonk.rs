@@ -14,10 +14,8 @@
 
 use std::collections::VecDeque;
 
-use risc0_zkp::{
-    field::{self, Elem, ExtElem},
-    MAX_CYCLES,
-};
+use risc0_core::field::{self, Elem, ExtElem};
+use risc0_zkp::MAX_CYCLES;
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 
 // Main RAM plonk rows have the following 7 plonk elements:

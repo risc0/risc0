@@ -4,7 +4,9 @@ members = [
   "risc0/bootstrap",
   "risc0/build",
   "risc0/circuit/rv32im",
+  "risc0/core",
   "risc0/r0vm",
+  "risc0/sys",
   "risc0/tools",
   "risc0/zeroio",
   "risc0/zeroio_derive",
@@ -24,6 +26,8 @@ repository = "https://github.com/risc0/risc0/"
 [workspace.dependencies]
 risc0-build          = { version = "0.12.0", default-features = false, path = "risc0/build" }
 risc0-circuit-rv32im = { version = "0.12.0", default-features = false, path = "risc0/circuit/rv32im" }
+risc0-core           = { version = "0.12.0", default-features = false, path = "risc0/core" }
+risc0-sys            = { version = "0.12.0", default-features = false, path = "risc0/sys" }
 risc0-zeroio         = { version = "0.12.0", default-features = false, path = "risc0/zeroio" }
 risc0-zeroio-derive  = { version = "0.12.0", default-features = false, path = "risc0/zeroio_derive" }
 risc0-zkp            = { version = "0.12.0", default-features = false, path = "risc0/zkp" }

@@ -13,13 +13,13 @@
 // limitations under the License.
 
 use rayon::prelude::*;
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem, RootsOfUnity,
+};
 use risc0_zkp::{
     adapter::PolyFp,
     core::log2_ceil,
-    field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        Elem, ExtElem, RootsOfUnity,
-    },
     hal::{
         cpu::{BabyBearCpuHal, CpuBuffer},
         EvalCheck,

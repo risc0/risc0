@@ -15,11 +15,11 @@
 use alloc::vec::Vec;
 
 use rand_core::RngCore;
+use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use super::VerifyHal;
 use crate::{
     core::{log2_ceil, sha::Sha},
-    field::{Elem, ExtElem, RootsOfUnity},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };

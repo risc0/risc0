@@ -21,10 +21,10 @@ use core::{
 
 use anyhow::Result;
 use log::{debug, trace};
+use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::TapsProvider,
     core::sha::SHA256_INIT,
-    field::{baby_bear::BabyBearElem, Elem},
     hal::{cpu::BabyBearCpuHal, Hal},
     prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,

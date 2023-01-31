@@ -13,13 +13,13 @@
 // limitations under the License.
 
 use log::debug;
+use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use crate::{
     core::{
         poly::{poly_divide, poly_interpolate},
         sha::Sha,
     },
-    field::{Elem, ExtElem, RootsOfUnity},
     hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::TapSet,

@@ -14,9 +14,7 @@
 
 //! Run the zkVM guest and prove its results
 
-pub(crate) mod elf;
 mod exec;
-pub(crate) mod image;
 pub(crate) mod loader;
 mod plonk;
 #[cfg(feature = "profiler")]
@@ -26,10 +24,10 @@ use std::{collections::HashMap, fmt::Debug, io::Write, rc::Rc};
 
 use anyhow::{bail, Result};
 use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
+use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
     core::sha::Digest,
-    field::baby_bear::{BabyBearElem, BabyBearExtElem},
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };
@@ -39,7 +37,7 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use self::elf::Program;
+use crate::binfmt::elf::Program;
 use crate::{
     receipt::{insecure_skip_seal, Receipt},
     sha::sha,

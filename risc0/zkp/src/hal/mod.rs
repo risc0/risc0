@@ -21,11 +21,9 @@ pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
-use crate::{
-    core::sha::Digest,
-    field::{Elem, ExtElem, RootsOfUnity},
-    INV_RATE,
-};
+use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
+
+use crate::{core::sha::Digest, INV_RATE};
 
 pub trait Buffer<T>: Clone {
     fn size(&self) -> usize;
@@ -126,11 +124,11 @@ pub trait EvalCheck<H: Hal> {
 mod testutil {
     use rand::thread_rng;
     use rand::RngCore;
+    use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
 
     use super::{EvalCheck, Hal};
     use crate::{
         core::{log2_ceil, sha::Digest},
-        field::{baby_bear::BabyBearElem, Elem, ExtElem},
         hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
     };

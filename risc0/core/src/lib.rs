@@ -12,16 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
+#![cfg_attr(not(feature = "std"), no_std)]
 
-fn main() {
-    if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        let cuda_bin = env::var("DEP_RISC0_SYS_CUDA_KERNELS_RV32IM").unwrap();
-        println!("cargo:rustc-env=RV32IM_CUDA_PATH={cuda_bin}");
-    }
+extern crate alloc;
 
-    if env::var("CARGO_FEATURE_METAL").is_ok() {
-        let metal_bin = env::var("DEP_RISC0_SYS_METAL_KERNELS_RV32IM").unwrap();
-        println!("cargo:rustc-env=RV32IM_METAL_PATH={metal_bin}");
-    }
-}
+pub mod field;

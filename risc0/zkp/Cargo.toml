@@ -1,6 +1,5 @@
 [package]
 name = "risc0-zkp"
-links = "risc0-zkp"
 description = "RISC Zero zero-knowledge proof system core crate"
 version = { workspace = true }
 edition = { workspace = true }
@@ -19,6 +18,8 @@ fil-rustacuda = { version = "0.1", optional = true }
 metal = { version = "0.24", optional = true }
 paste = "1.0"
 rand_core = "0.6"
+risc0-core = { workspace = true }
+risc0-sys = { workspace = true, optional = true }
 risc0-zeroio = { workspace = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
@@ -42,12 +43,13 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 default = ["prove"]
-cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive"]
-metal = ["dep:metal"]
+cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-sys/cuda"]
+metal = ["dep:metal", "risc0-sys/metal"]
 prove = [
     "dep:ndarray",
     "dep:rand",
     "dep:rayon",
-    "std"
+    "std",
+    "risc0-sys"
 ]
 std = ["anyhow/std", "risc0-zeroio/std"]

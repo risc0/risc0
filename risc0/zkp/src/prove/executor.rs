@@ -17,13 +17,13 @@ use core::cmp::max;
 use anyhow::{bail, Result};
 use log::debug;
 use rand::thread_rng;
+use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{
         CircuitDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_CODE,
         REGISTER_GROUP_DATA,
     },
-    field::{Elem, Field},
     MIN_PO2, ZK_CYCLES,
 };
 
