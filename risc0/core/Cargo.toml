@@ -1,0 +1,18 @@
+[package]
+name = "risc0-core"
+description = "Core types for RISC Zero crates"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+bytemuck = "1.12"
+rand_core = "0.6"
+
+[dev-dependencies]
+rand = { version = "0.8", features = ["small_rng"] }
+
+[features]
+std = []

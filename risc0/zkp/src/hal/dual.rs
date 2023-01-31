@@ -332,33 +332,28 @@ where
     fn eval_check(
         &self,
         check: &<DualHal<H1, H2> as Hal>::BufferElem,
-        code: &<DualHal<H1, H2> as Hal>::BufferElem,
-        data: &<DualHal<H1, H2> as Hal>::BufferElem,
-        accum: &<DualHal<H1, H2> as Hal>::BufferElem,
-        mix: &<DualHal<H1, H2> as Hal>::BufferElem,
-        out: &<DualHal<H1, H2> as Hal>::BufferElem,
+        groups: &[&<DualHal<H1, H2> as Hal>::BufferElem],
+        globals: &[&<DualHal<H1, H2> as Hal>::BufferElem],
         poly_mix: <DualHal<H1, H2> as Hal>::ExtElem,
         po2: usize,
         steps: usize,
     ) {
+        let groups1: Vec<&_> = groups.iter().map(|g| &g.buf1).collect();
+        let groups2: Vec<&_> = groups.iter().map(|g| &g.buf2).collect();
+        let globals1: Vec<&_> = globals.iter().map(|g| &g.buf1).collect();
+        let globals2: Vec<&_> = globals.iter().map(|g| &g.buf2).collect();
         self.eval1.eval_check(
             &check.buf1,
-            &code.buf1,
-            &data.buf1,
-            &accum.buf1,
-            &mix.buf1,
-            &out.buf1,
+            groups1.as_slice(),
+            globals1.as_slice(),
             poly_mix,
             po2,
             steps,
         );
         self.eval2.eval_check(
             &check.buf2,
-            &code.buf2,
-            &data.buf2,
-            &accum.buf2,
-            &mix.buf2,
-            &out.buf2,
+            groups2.as_slice(),
+            globals2.as_slice(),
             bytemuck::cast(poly_mix),
             po2,
             steps,

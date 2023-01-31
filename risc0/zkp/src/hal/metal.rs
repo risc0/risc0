@@ -18,18 +18,18 @@ use metal::{
     Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, MTLResourceOptions,
     MTLSize, NSRange,
 };
+use risc0_core::field::{
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem, RootsOfUnity,
+};
 
 use super::{Buffer, Hal};
 use crate::{
     core::{log2_ceil, sha::Digest},
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        Elem, ExtElem, RootsOfUnity,
-    },
     FRI_FOLD,
 };
 
-const METAL_LIB: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/kernels.metallib"));
+const METAL_LIB: &[u8] = include_bytes!(env!("ZKP_METAL_PATH"));
 
 const KERNEL_NAMES: &[&str] = &[
     "batch_expand",

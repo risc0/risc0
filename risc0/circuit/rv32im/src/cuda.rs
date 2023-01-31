@@ -15,12 +15,12 @@
 use std::{ffi::CString, rc::Rc};
 
 use fil_rustacuda as rustacuda;
+use risc0_core::field::{
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    RootsOfUnity,
+};
 use risc0_zkp::{
     core::log2_ceil,
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        RootsOfUnity,
-    },
     hal::{
         cuda::{BufferImpl as CudaBuffer, CudaHal},
         Buffer, EvalCheck,
@@ -29,7 +29,7 @@ use risc0_zkp::{
 };
 use rustacuda::{launch, prelude::*};
 
-const KERNELS_FATBIN: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/kernels.fatbin"));
+const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_PATH"));
 
 pub struct CudaEvalCheck {
     hal: Rc<CudaHal>, // retain a reference to ensure the context remains valid

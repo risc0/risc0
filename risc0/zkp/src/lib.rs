@@ -20,7 +20,6 @@ extern crate alloc;
 
 pub mod adapter;
 pub mod core;
-pub mod field;
 #[cfg(feature = "prove")]
 pub mod hal;
 mod merkle;

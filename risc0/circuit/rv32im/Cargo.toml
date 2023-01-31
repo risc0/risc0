@@ -13,6 +13,7 @@ harness = false
 
 [dependencies]
 anyhow = { version = "1.0", default-features = false }
+risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
@@ -24,6 +25,7 @@ rayon = { version = "1.5", optional = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
 metal = { version = "0.24", optional = true }
+risc0-sys = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "zkvm")'.dependencies]
 risc0-zkvm-platform = { workspace = true }
@@ -34,15 +36,10 @@ env_logger = "0.10"
 test-log = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
-[build-dependencies]
-cc = { version = "1.0", features = ["parallel"] }
-glob = "0.3"
-sha2 = "0.10"
-
 [features]
-cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std"]
-metal = ["dep:metal"]
-default = ["prove", "test"]
-prove = ["dep:rand", "dep:rayon", "risc0-zkp/prove", "std"]
+cuda = ["dep:fil-rustacuda", "dep:rustacuda_core", "dep:rustacuda_derive", "risc0-zkp/cuda", "std", "risc0-sys/cuda"]
+metal = ["dep:metal", "risc0-sys/metal"]
+default = ["test"]
+prove = ["dep:rand", "dep:rayon", "risc0-zkp/prove", "std", "risc0-sys"]
 std = ["risc0-zkp/std"]
 test = []

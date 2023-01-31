@@ -21,10 +21,10 @@ use core::{
 
 use anyhow::Result;
 use log::{debug, trace};
+use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::TapsProvider,
     core::sha::SHA256_INIT,
-    field::{baby_bear::BabyBearElem, Elem},
     hal::{cpu::BabyBearCpuHal, Hal},
     prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
@@ -381,7 +381,7 @@ impl Loader {
             hal.batch_interpolate_ntt(&coeffs, code_size);
             hal.zk_shift(&coeffs, code_size);
             // Make the poly-group & extract the root
-            let code_group = PolyGroup::new(&hal, &coeffs, code_size, cycles, "code");
+            let code_group = PolyGroup::new(&hal, coeffs, code_size, cycles, "code");
             table.push(code_group.merkle.root().clone());
         }
 

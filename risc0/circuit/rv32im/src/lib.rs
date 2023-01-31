@@ -21,8 +21,6 @@ mod cpp;
 pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
-#[cfg(feature = "prove")]
-mod ffi;
 mod info;
 #[cfg(feature = "metal")]
 pub mod metal;
@@ -33,6 +31,13 @@ pub mod verify_taps_rv32im;
 use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
 
 pub struct CircuitImpl;
+
+pub const REGISTER_GROUP_ACCUM: usize = 0;
+pub const REGISTER_GROUP_CODE: usize = 1;
+pub const REGISTER_GROUP_DATA: usize = 2;
+
+pub const GLOBAL_MIX: usize = 0;
+pub const GLOBAL_OUT: usize = 1;
 
 impl CircuitImpl {
     pub const fn new() -> Self {
@@ -48,10 +53,8 @@ impl TapsProvider for CircuitImpl {
 
 #[cfg(test)]
 mod tests {
-    use risc0_zkp::{
-        adapter::{CircuitStep, CircuitStepContext, CircuitStepHandler},
-        field::baby_bear::BabyBearElem,
-    };
+    use risc0_core::field::baby_bear::BabyBearElem;
+    use risc0_zkp::adapter::{CircuitStep, CircuitStepContext, CircuitStepHandler};
 
     use crate::CircuitImpl;
 
@@ -95,18 +98,17 @@ mod tests {
 #[cfg(feature = "test")]
 pub mod testutil {
     use rand::{thread_rng, Rng};
+    use risc0_core::field::{
+        baby_bear::{BabyBearElem, BabyBearExtElem},
+        Elem, ExtElem,
+    };
     use risc0_zkp::{
         adapter::{CircuitInfo, TapsProvider},
-        field::{
-            baby_bear::{BabyBearElem, BabyBearExtElem},
-            Elem, ExtElem,
-        },
         hal::{Buffer, EvalCheck, Hal},
-        taps::RegisterGroup,
         INV_RATE,
     };
 
-    use crate::CircuitImpl;
+    use crate::{CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
 
     pub struct EvalCheckParams {
         pub po2: usize,
@@ -127,9 +129,9 @@ pub mod testutil {
             let domain = steps * INV_RATE;
             let circuit = crate::CircuitImpl::new();
             let taps = circuit.get_taps();
-            let code_size = taps.group_size(RegisterGroup::Code);
-            let data_size = taps.group_size(RegisterGroup::Data);
-            let accum_size = taps.group_size(RegisterGroup::Accum);
+            let code_size = taps.group_size(REGISTER_GROUP_CODE);
+            let data_size = taps.group_size(REGISTER_GROUP_DATA);
+            let accum_size = taps.group_size(REGISTER_GROUP_ACCUM);
             let code = random_fps(&mut rng, code_size * domain);
             let data = random_fps(&mut rng, data_size * domain);
             let accum = random_fps(&mut rng, accum_size * domain);
@@ -190,11 +192,8 @@ pub mod testutil {
         let out = hal.copy_from_elem("out", &params.out);
         eval.eval_check(
             &check,
-            &code,
-            &data,
-            &accum,
-            &mix,
-            &out,
+            &[&accum, &code, &data],
+            &[&mix, &out],
             params.poly_mix,
             params.po2,
             params.steps,

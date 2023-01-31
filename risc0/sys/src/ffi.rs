@@ -18,13 +18,9 @@ use std::{
     slice,
 };
 
-use anyhow::{anyhow, Result};
-use risc0_zkp::{
-    adapter::{CircuitStepContext, CircuitStepHandler},
-    field::baby_bear::{BabyBearElem, BabyBearExtElem},
-};
+use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
-type Callback = unsafe extern "C" fn(
+pub type Callback = unsafe extern "C" fn(
     ctx: *mut c_void,
     name: *const c_char,
     extra: *const c_char,
@@ -34,11 +30,11 @@ type Callback = unsafe extern "C" fn(
     outs_len: usize,
 ) -> bool;
 
-pub(crate) enum RawString {}
+pub enum RawString {}
 
 #[repr(C)]
-pub(crate) struct RawError {
-    pub(crate) msg: *const RawString,
+pub struct RawError {
+    pub msg: *const RawString,
 }
 
 impl Default for RawError {
@@ -50,11 +46,11 @@ impl Default for RawError {
 }
 
 extern "C" {
-    pub(crate) fn risc0_circuit_string_ptr(str: *const RawString) -> *const c_char;
+    pub fn risc0_circuit_string_ptr(str: *const RawString) -> *const c_char;
 
-    pub(crate) fn risc0_circuit_string_free(str: *const RawString);
+    pub fn risc0_circuit_string_free(str: *const RawString);
 
-    pub(crate) fn risc0_circuit_rv32im_step_compute_accum(
+    pub fn risc0_circuit_rv32im_step_compute_accum(
         err: *mut RawError,
         ctx: *mut c_void,
         cb: Callback,
@@ -64,7 +60,7 @@ extern "C" {
         args_len: usize,
     ) -> BabyBearElem;
 
-    pub(crate) fn risc0_circuit_rv32im_step_verify_accum(
+    pub fn risc0_circuit_rv32im_step_verify_accum(
         err: *mut RawError,
         ctx: *mut c_void,
         cb: Callback,
@@ -74,7 +70,7 @@ extern "C" {
         args_len: usize,
     ) -> BabyBearElem;
 
-    pub(crate) fn risc0_circuit_rv32im_step_exec(
+    pub fn risc0_circuit_rv32im_step_exec(
         err: *mut RawError,
         ctx: *mut c_void,
         cb: Callback,
@@ -84,7 +80,7 @@ extern "C" {
         args_len: usize,
     ) -> BabyBearElem;
 
-    pub(crate) fn risc0_circuit_rv32im_step_verify_bytes(
+    pub fn risc0_circuit_rv32im_step_verify_bytes(
         err: *mut RawError,
         ctx: *mut c_void,
         cb: Callback,
@@ -94,7 +90,7 @@ extern "C" {
         args_len: usize,
     ) -> BabyBearElem;
 
-    pub(crate) fn risc0_circuit_rv32im_step_verify_mem(
+    pub fn risc0_circuit_rv32im_step_verify_mem(
         err: *mut RawError,
         ctx: *mut c_void,
         cb: Callback,
@@ -104,7 +100,7 @@ extern "C" {
         args_len: usize,
     ) -> BabyBearElem;
 
-    pub(crate) fn risc0_circuit_rv32im_poly_fp(
+    pub fn risc0_circuit_rv32im_poly_fp(
         cycle: usize,
         steps: usize,
         poly_mix: *const BabyBearExtElem,
@@ -139,62 +135,5 @@ where
         let outs = slice::from_raw_parts_mut(outs_ptr, outs_len);
         let callback = &mut *(ctx as *mut F);
         callback(name, extra, args, outs)
-    }
-}
-
-pub(crate) fn call_step<S, F>(
-    ctx: &CircuitStepContext,
-    handler: &mut S,
-    args: &mut [&mut [BabyBearElem]],
-    inner: F,
-) -> Result<BabyBearElem>
-where
-    S: CircuitStepHandler<BabyBearElem>,
-    F: FnOnce(
-        *mut RawError,
-        *mut c_void,
-        Callback,
-        usize,
-        usize,
-        *const *mut BabyBearElem,
-        usize,
-    ) -> BabyBearElem,
-{
-    let mut last_err = None;
-    let mut call =
-        |name: &str, extra: &str, args: &[BabyBearElem], outs: &mut [BabyBearElem]| match handler
-            .call(ctx.cycle, name, extra, args, outs)
-        {
-            Ok(()) => true,
-            Err(err) => {
-                last_err = Some(err);
-                false
-            }
-        };
-    let trampoline = get_trampoline(&call);
-    let mut err = RawError::default();
-    let args: Vec<*mut BabyBearElem> = args.iter_mut().map(|x| (*x).as_mut_ptr()).collect();
-    let result = inner(
-        &mut err,
-        &mut call as *mut _ as *mut c_void,
-        trampoline,
-        ctx.size,
-        ctx.cycle,
-        args.as_ptr(),
-        args.len(),
-    );
-    if let Some(err) = last_err {
-        return Err(err);
-    }
-    if err.msg.is_null() {
-        Ok(result)
-    } else {
-        let what = unsafe {
-            let str = risc0_circuit_string_ptr(err.msg);
-            let msg = CStr::from_ptr(str).to_str().unwrap().to_string();
-            risc0_circuit_string_free(err.msg);
-            msg
-        };
-        Err(anyhow!(what))
     }
 }

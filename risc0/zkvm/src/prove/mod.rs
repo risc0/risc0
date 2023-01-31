@@ -14,9 +14,7 @@
 
 //! Run the zkVM guest and prove its results
 
-pub(crate) mod elf;
 mod exec;
-pub(crate) mod image;
 pub(crate) mod loader;
 mod plonk;
 #[cfg(feature = "profiler")]
@@ -25,9 +23,11 @@ pub mod profiler;
 use std::{collections::HashMap, fmt::Debug, io::Write, rc::Rc};
 
 use anyhow::{bail, Result};
+use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
+use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
+    adapter::TapsProvider,
     core::sha::Digest,
-    field::baby_bear::{BabyBearElem, BabyBearExtElem},
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };
@@ -37,7 +37,7 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use self::elf::Program;
+use crate::binfmt::elf::Program;
 use crate::{
     receipt::{insecure_skip_seal, Receipt},
     sha::sha,
@@ -221,13 +221,34 @@ impl<'a> Prover<'a> {
         let mut executor = exec::RV32Executor::new(&CIRCUIT, &self.elf, &mut self.inner);
         self.cycles = executor.run()?;
 
-        let mut prover = ProveAdapter::new(&mut executor.executor);
+        let mut adapter = ProveAdapter::new(&mut executor.executor);
+        let mut prover = risc0_zkp::prove::Prover::new(hal, sha(), CIRCUIT.get_taps());
+
+        adapter.execute(prover.iop());
 
         let seal = if skip_seal {
-            risc0_zkp::prove::prove_without_seal(sha(), &mut prover);
             Vec::new()
         } else {
-            risc0_zkp::prove::prove(hal, sha(), &mut prover, eval)
+            prover.set_po2(adapter.po2() as usize);
+
+            prover.commit_group(
+                REGISTER_GROUP_CODE,
+                hal.copy_from_elem("code", adapter.get_code()),
+            );
+            prover.commit_group(
+                REGISTER_GROUP_DATA,
+                hal.copy_from_elem("data", adapter.get_data()),
+            );
+            adapter.accumulate(prover.iop());
+            prover.commit_group(
+                REGISTER_GROUP_ACCUM,
+                hal.copy_from_elem("accum", adapter.get_accum()),
+            );
+
+            let mix = hal.copy_from_elem("mix", adapter.get_mix());
+            let out = hal.copy_from_elem("out", adapter.get_io());
+
+            prover.finalize(&[&mix, &out], eval)
         };
 
         // Attach the full version of the output journal & construct receipt object

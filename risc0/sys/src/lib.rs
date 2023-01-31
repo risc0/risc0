@@ -12,20 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Cryptographic algorithms for producing a ZK proof of compute
-//!
-//! This module is not typically used directly. Instead, we recommend the
-//! higher-level tools offered in [`risc0_zkvm::prove`].
-//!
-//! [`risc0_zkvm::prove`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/prove/index.html
-
-mod accum;
-pub mod adapter;
-pub mod executor;
-mod fri;
-mod merkle;
-pub mod poly_group;
-pub mod prover;
-pub mod write_iop;
-
-pub use prover::Prover;
+pub mod ffi;

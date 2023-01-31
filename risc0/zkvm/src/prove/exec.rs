@@ -21,13 +21,13 @@ use lazy_regex::{regex, Captures};
 use log::{debug, trace};
 use num_traits::FromPrimitive;
 use risc0_circuit_rv32im::CircuitImpl;
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    Elem,
+};
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepHandler, PolyExt},
     core::{log2_ceil, sha::BLOCK_SIZE},
-    field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        Elem,
-    },
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
 };
@@ -42,10 +42,10 @@ use risc0_zkvm_platform::{
     PAGE_SIZE, WORD_SIZE,
 };
 
-use super::{
-    elf::Program, image::PageTableInfo, loader::Loader, merge_word8, plonk, split_word8, TraceEvent,
-};
-use crate::{MemoryImage, CIRCUIT};
+use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
+use crate::binfmt::elf::Program;
+use crate::binfmt::image::{MemoryImage, PageTableInfo};
+use crate::CIRCUIT;
 
 const IMM_BITS: usize = 12;
 

@@ -14,10 +14,8 @@
 
 // This code is automatically generated
 
-use risc0_zkp::{
-    adapter::{MixState, PolyExt, PolyExtStep, PolyExtStepDef},
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-};
+use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
+use risc0_zkp::adapter::{MixState, PolyExt, PolyExtStep, PolyExtStepDef};
 
 use super::CircuitImpl;
 
@@ -108,7 +106,7 @@ PolyExtStep::Const(67108863), // cirgen/components/ram.cpp:22
 PolyExtStep::Const(33554431), // cirgen/components/ram.cpp:23
 PolyExtStep::Const(268435454), // cirgen/circuit/rv32im/ffpu.cpp:47
 PolyExtStep::Const(943718400), // cirgen/circuit/rv32im/ffpu.cpp:51
-PolyExtStep::True, // cirgen/circuit/rv32im/rv32im.cpp:18
+PolyExtStep::True, // cirgen/circuit/rv32im/rv32im.cpp:19
 PolyExtStep::Get(50), // Top/Code/OneHot/Reg1(./cirgen/components/mux.h:37)
 PolyExtStep::Get(51), // Top/Code/OneHot/Reg1(cirgen/circuit/rv32im/top.cpp:18)
 PolyExtStep::Sub(0, 86), // cirgen/circuit/rv32im/top.cpp:18
@@ -133,9 +131,9 @@ PolyExtStep::Sub(95, 3), // cirgen/components/bytes.cpp:48
 PolyExtStep::Mul(96, 100), // cirgen/components/bytes.cpp:48
 PolyExtStep::AndEqz(5, 101), // cirgen/components/bytes.cpp:48
 PolyExtStep::AndCond(3, 91, 6), // cirgen/components/bytes.cpp:103
-PolyExtStep::Get(88), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement1/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(88), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement1/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(102, 89), // cirgen/components/bytes.cpp:44
-PolyExtStep::Get(90), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement1/Reg1(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(90), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement1/Reg1(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(104, 90), // cirgen/components/bytes.cpp:45
 PolyExtStep::Sub(103, 0), // cirgen/components/bytes.cpp:46
 PolyExtStep::Mul(103, 106), // cirgen/components/bytes.cpp:46
@@ -146,9 +144,9 @@ PolyExtStep::AndEqz(8, 109), // cirgen/components/bytes.cpp:47
 PolyExtStep::Sub(105, 3), // cirgen/components/bytes.cpp:48
 PolyExtStep::Mul(106, 110), // cirgen/components/bytes.cpp:48
 PolyExtStep::AndEqz(9, 111), // cirgen/components/bytes.cpp:48
-PolyExtStep::Get(91), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement2/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(91), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement2/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(112, 102), // cirgen/components/bytes.cpp:44
-PolyExtStep::Get(92), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement2/Reg1(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(92), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement2/Reg1(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(114, 104), // cirgen/components/bytes.cpp:45
 PolyExtStep::Sub(113, 0), // cirgen/components/bytes.cpp:46
 PolyExtStep::Mul(113, 116), // cirgen/components/bytes.cpp:46
@@ -159,9 +157,9 @@ PolyExtStep::AndEqz(11, 119), // cirgen/components/bytes.cpp:47
 PolyExtStep::Sub(115, 3), // cirgen/components/bytes.cpp:48
 PolyExtStep::Mul(116, 120), // cirgen/components/bytes.cpp:48
 PolyExtStep::AndEqz(12, 121), // cirgen/components/bytes.cpp:48
-PolyExtStep::Get(93), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement3/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(93), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement3/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(122, 112), // cirgen/components/bytes.cpp:44
-PolyExtStep::Get(94), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement3/Reg1(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(94), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement3/Reg1(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(124, 114), // cirgen/components/bytes.cpp:45
 PolyExtStep::Sub(123, 0), // cirgen/components/bytes.cpp:46
 PolyExtStep::Mul(123, 126), // cirgen/components/bytes.cpp:46
@@ -172,9 +170,9 @@ PolyExtStep::AndEqz(14, 129), // cirgen/components/bytes.cpp:47
 PolyExtStep::Sub(125, 3), // cirgen/components/bytes.cpp:48
 PolyExtStep::Mul(126, 130), // cirgen/components/bytes.cpp:48
 PolyExtStep::AndEqz(15, 131), // cirgen/components/bytes.cpp:48
-PolyExtStep::Get(95), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement4/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(95), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement4/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(132, 122), // cirgen/components/bytes.cpp:44
-PolyExtStep::Get(96), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement4/Reg1(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(96), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement4/Reg1(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(134, 124), // cirgen/components/bytes.cpp:45
 PolyExtStep::Sub(133, 0), // cirgen/components/bytes.cpp:46
 PolyExtStep::Mul(133, 136), // cirgen/components/bytes.cpp:46
@@ -185,9 +183,9 @@ PolyExtStep::AndEqz(17, 139), // cirgen/components/bytes.cpp:47
 PolyExtStep::Sub(135, 3), // cirgen/components/bytes.cpp:48
 PolyExtStep::Mul(136, 140), // cirgen/components/bytes.cpp:48
 PolyExtStep::AndEqz(18, 141), // cirgen/components/bytes.cpp:48
-PolyExtStep::Get(101), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement5/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(101), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement5/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(142, 132), // cirgen/components/bytes.cpp:44
-PolyExtStep::Get(106), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement5/Reg1(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(106), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement5/Reg1(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(144, 134), // cirgen/components/bytes.cpp:45
 PolyExtStep::Sub(143, 0), // cirgen/components/bytes.cpp:46
 PolyExtStep::Mul(143, 146), // cirgen/components/bytes.cpp:46
@@ -198,9 +196,9 @@ PolyExtStep::AndEqz(20, 149), // cirgen/components/bytes.cpp:47
 PolyExtStep::Sub(145, 3), // cirgen/components/bytes.cpp:48
 PolyExtStep::Mul(146, 150), // cirgen/components/bytes.cpp:48
 PolyExtStep::AndEqz(21, 151), // cirgen/components/bytes.cpp:48
-PolyExtStep::Get(111), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement6/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(111), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement6/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(152, 142), // cirgen/components/bytes.cpp:44
-PolyExtStep::Get(116), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement6/Reg1(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(116), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement6/Reg1(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(154, 144), // cirgen/components/bytes.cpp:45
 PolyExtStep::Sub(153, 0), // cirgen/components/bytes.cpp:46
 PolyExtStep::Mul(153, 156), // cirgen/components/bytes.cpp:46
@@ -211,9 +209,9 @@ PolyExtStep::AndEqz(23, 159), // cirgen/components/bytes.cpp:47
 PolyExtStep::Sub(155, 3), // cirgen/components/bytes.cpp:48
 PolyExtStep::Mul(156, 160), // cirgen/components/bytes.cpp:48
 PolyExtStep::AndEqz(24, 161), // cirgen/components/bytes.cpp:48
-PolyExtStep::Get(121), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement7/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(121), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement7/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(162, 152), // cirgen/components/bytes.cpp:44
-PolyExtStep::Get(126), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement7/Reg1(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(126), // Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement7/Reg1(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Sub(164, 154), // cirgen/components/bytes.cpp:45
 PolyExtStep::Sub(163, 0), // cirgen/components/bytes.cpp:46
 PolyExtStep::Mul(163, 166), // cirgen/components/bytes.cpp:46
@@ -907,7 +905,7 @@ PolyExtStep::Sub(431, 640), // cirgen/circuit/rv32im/decode.cpp:32
 PolyExtStep::AndEqz(238, 641), // cirgen/circuit/rv32im/decode.cpp:32
 PolyExtStep::Get(525), // Top/Mux/4/Mux/0/ComputeCycle/Decoder/Bit8/Reg(./cirgen/compiler/edsl/component.h:85)
 PolyExtStep::Mul(642, 31), // cirgen/circuit/rv32im/decode.cpp:33
-PolyExtStep::Get(531), // Top/Mux/4/Mux/0/ComputeCycle/Decoder/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(531), // Top/Mux/4/Mux/0/ComputeCycle/Decoder/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Add(643, 644), // cirgen/circuit/rv32im/decode.cpp:33
 PolyExtStep::Sub(429, 645), // cirgen/circuit/rv32im/decode.cpp:33
 PolyExtStep::AndEqz(239, 646), // cirgen/circuit/rv32im/decode.cpp:33
@@ -1076,7 +1074,7 @@ PolyExtStep::Get(723), // Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/
 PolyExtStep::AndEqz(0, 782), // cirgen/components/iszero.cpp:14
 PolyExtStep::AndCond(265, 783, 266), // cirgen/components/iszero.cpp:14
 PolyExtStep::Sub(0, 783), // cirgen/components/iszero.cpp:15
-PolyExtStep::Get(729), // Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(729), // Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(782, 785), // cirgen/components/iszero.cpp:15
 PolyExtStep::Sub(786, 0), // cirgen/components/iszero.cpp:15
 PolyExtStep::AndEqz(0, 787), // cirgen/components/iszero.cpp:15
@@ -1089,7 +1087,7 @@ PolyExtStep::Get(735), // Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero1/Bit
 PolyExtStep::AndEqz(0, 791), // cirgen/components/iszero.cpp:14
 PolyExtStep::AndCond(269, 792, 270), // cirgen/components/iszero.cpp:14
 PolyExtStep::Sub(0, 792), // cirgen/components/iszero.cpp:15
-PolyExtStep::Get(741), // Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero1/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(741), // Top/Mux/4/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero1/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(791, 794), // cirgen/components/iszero.cpp:15
 PolyExtStep::Sub(795, 0), // cirgen/components/iszero.cpp:15
 PolyExtStep::AndEqz(0, 796), // cirgen/components/iszero.cpp:15
@@ -1103,7 +1101,7 @@ PolyExtStep::Get(747), // Top/Mux/4/Mux/0/ComputeCycle/IsZero/Bit/Reg(./cirgen/c
 PolyExtStep::AndEqz(0, 801), // cirgen/components/iszero.cpp:14
 PolyExtStep::AndCond(273, 802, 274), // cirgen/components/iszero.cpp:14
 PolyExtStep::Sub(0, 802), // cirgen/components/iszero.cpp:15
-PolyExtStep::Get(753), // Top/Mux/4/Mux/0/ComputeCycle/IsZero/Reg(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(753), // Top/Mux/4/Mux/0/ComputeCycle/IsZero/Reg(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(801, 804), // cirgen/components/iszero.cpp:15
 PolyExtStep::Sub(805, 0), // cirgen/components/iszero.cpp:15
 PolyExtStep::AndEqz(0, 806), // cirgen/components/iszero.cpp:15
@@ -7392,23 +7390,23 @@ PolyExtStep::AndCond(1972, 437, 1975), // cirgen/circuit/rv32im/page_fault.cpp:1
 PolyExtStep::AndCond(1846, 414, 1976), // ./cirgen/components/mux.h:37
 PolyExtStep::AndCond(229, 579, 1977), // ./cirgen/components/mux.h:37
 PolyExtStep::Get(56), // Top/Code/OneHot/Reg5(./cirgen/components/mux.h:37)
-PolyExtStep::Get(317), // Top/Mux/4/OneHot/Reg1(./cirgen/compiler/edsl/edsl.h:111)
-PolyExtStep::Get(319), // Top/Mux/4/OneHot/Reg2(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(317), // Top/Mux/4/OneHot/Reg1(./cirgen/compiler/edsl/edsl.h:113)
+PolyExtStep::Get(319), // Top/Mux/4/OneHot/Reg2(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(5391, 3), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5390, 5392), // ./cirgen/components/onehot.h:44
-PolyExtStep::Get(321), // Top/Mux/4/OneHot/Reg3(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(321), // Top/Mux/4/OneHot/Reg3(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(5394, 18), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5393, 5395), // ./cirgen/components/onehot.h:44
-PolyExtStep::Get(323), // Top/Mux/4/OneHot/Reg4(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(323), // Top/Mux/4/OneHot/Reg4(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(5397, 17), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5396, 5398), // ./cirgen/components/onehot.h:44
-PolyExtStep::Get(325), // Top/Mux/4/OneHot/Reg5(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(325), // Top/Mux/4/OneHot/Reg5(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(5400, 22), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5399, 5401), // ./cirgen/components/onehot.h:44
-PolyExtStep::Get(327), // Top/Mux/4/OneHot/Reg6(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(327), // Top/Mux/4/OneHot/Reg6(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(5403, 23), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5402, 5404), // ./cirgen/components/onehot.h:44
-PolyExtStep::Get(329), // Top/Mux/4/OneHot/Reg7(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(329), // Top/Mux/4/OneHot/Reg7(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(5406, 24), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5405, 5407), // ./cirgen/components/onehot.h:44
 PolyExtStep::Mul(1997, 25), // ./cirgen/components/onehot.h:44
@@ -7419,7 +7417,7 @@ PolyExtStep::Mul(4004, 27), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5412, 5413), // ./cirgen/components/onehot.h:44
 PolyExtStep::Mul(2335, 28), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5414, 5415), // ./cirgen/components/onehot.h:44
-PolyExtStep::Get(339), // Top/Mux/4/OneHot/Reg12(./cirgen/compiler/edsl/edsl.h:111)
+PolyExtStep::Get(339), // Top/Mux/4/OneHot/Reg12(./cirgen/compiler/edsl/edsl.h:113)
 PolyExtStep::Mul(5417, 29), // ./cirgen/components/onehot.h:44
 PolyExtStep::Add(5416, 5418), // ./cirgen/components/onehot.h:44
 PolyExtStep::Mul(1998, 30), // ./cirgen/components/onehot.h:44

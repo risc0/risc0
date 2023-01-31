@@ -13,10 +13,8 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_zkp::{
-    field::baby_bear::{BabyBearElem, BabyBearExtElem},
-    hal::{EvalCheck, Hal},
-};
+use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
+use risc0_zkp::hal::{EvalCheck, Hal};
 use risc0_zkvm::{prove::default_hal, Prover, Receipt};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 use tracing_subscriber::{prelude::*, EnvFilter};

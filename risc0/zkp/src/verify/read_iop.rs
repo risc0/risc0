@@ -13,13 +13,11 @@
 // limitations under the License.
 
 use rand_core::{Error, RngCore};
+use risc0_core::field;
 
-use crate::{
-    core::{
-        sha::{Digest, Sha},
-        sha_rng::ShaRng,
-    },
-    field::{self},
+use crate::core::{
+    sha::{Digest, Sha},
+    sha_rng::ShaRng,
 };
 
 #[derive(Debug)]
