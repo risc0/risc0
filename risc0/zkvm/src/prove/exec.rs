@@ -538,18 +538,18 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
         (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
     ) {
-        let mut numer = merge_word8(numer) as i64;
-        let mut denom = merge_word8(denom) as i64;
+        let mut numer = merge_word8(numer) as u32;
+        let mut denom = merge_word8(denom) as u32;
         let sign: u32 = sign.into();
         // debug!("divide: [{sign}] {numer} / {denom}");
-        let ones_comp = (sign == 2) as i64;
-        let neg_numer = sign != 0 && numer < 0;
-        let neg_denom = sign == 1 && denom < 0;
+        let ones_comp = (sign == 2) as u32;
+        let neg_numer = sign != 0 && (numer as i32) < 0;
+        let neg_denom = sign == 1 && (denom as i32) < 0;
         if neg_numer {
-            numer = -numer - ones_comp;
+            numer = (!numer).overflowing_add(1 - ones_comp).0;
         }
         if neg_denom {
-            denom = -denom - ones_comp;
+            denom = (!denom).overflowing_add(1 - ones_comp).0;
         }
         let (mut quot, mut rem) = if denom == 0 {
             (0xffffffff, numer)
@@ -559,12 +559,12 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         let quot_neg_out =
             (neg_numer as u32 ^ neg_denom as u32) - ((denom == 0) as u32 * neg_numer as u32);
         if quot_neg_out != 0 {
-            quot = -quot - ones_comp;
+            quot = (!quot).overflowing_add(1 - ones_comp).0;
         }
         if neg_numer {
-            rem = -rem - ones_comp;
+            rem = (!rem).overflowing_add(1 - ones_comp).0;
         }
-        // debug!("  {quot}, {rem}");
+        // debug!("  quot: {quot}, rem: {rem}");
         (
             split_word8(quot as i32 as u32),
             split_word8(rem as i32 as u32),
