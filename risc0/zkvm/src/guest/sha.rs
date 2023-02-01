@@ -224,31 +224,6 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
     }
 }
 
-/// Computes the SHA256 digest of an object, serialized by [crate::serde].
-// TODO(victor): Does this correctly hash values of sizes that are not a whole
-// number of words?
-pub fn digest<T: Serialize>(val: &T) -> &'static mut Digest {
-    // If the object to be serialized is a plain old structure in memory, this
-    // should be a good guess for the allocation needed.
-    let approx_len = mem::size_of_val(val);
-    let cap = compute_u32s_needed(
-        approx_len,
-        WithTrailer {
-            total_bits: u32::try_from(approx_len * 8).unwrap(),
-        },
-    );
-    let buf = to_vec_with_capacity(val, cap).unwrap();
-
-    let trailer = WithTrailer {
-        total_bits: u32::try_from(buf.len() * 8).unwrap(),
-    };
-
-    let digest = alloc_uninit_digest();
-    update_u32(digest, &SHA256_INIT, buf.as_slice(), trailer);
-    // Now that digest is initialized, we can convert it to a reference.
-    unsafe { &mut *digest }
-}
-
 /// A guest-side [Sha256] implementation.
 ///
 /// [Sha256]: risc0_zkp::core::sha::Sha256
