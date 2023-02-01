@@ -32,6 +32,7 @@ const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
 }
 
+/// Describes the structure of a MemoryImage.
 pub struct PageTableInfo {
     pub mem_start: u32,
     pub page_size: u32,
@@ -119,8 +120,14 @@ impl PageTableInfo {
 }
 
 pub struct MemoryImage {
+    /// MemoryImage.image stores the initial state from which zkVM execution begins.
+    /// When executing an ELF file, the contents of the ELF are written into MemoryImage.image.
+    /// In the context of continuations, MemoryImage.image is a "boot image" from which execution begins.
     pub image: Vec<u8>,
+    /// MemoryImage.root, also called the ImageID, serves as a cryptographic identifier for the expected zkVM behavior.
+    /// The root is formed by hashing the final page of the image.
     pub root: Digest,
+    /// MemoryImage.info describes the structure of the image, in terms of pages.
     pub info: PageTableInfo,
 }
 
