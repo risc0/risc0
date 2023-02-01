@@ -301,6 +301,10 @@ impl<'a> PageFaults<'a> {
     }
 }
 
+fn setbits(x: u8) -> u32 {
+    u32::MAX >> (32 - x)
+}
+
 impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a, H> {
     fn call(
         &mut self,
@@ -440,23 +444,23 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         faults.include(pc);
 
         if opcode.major == MajorType::MemIo {
-            let rs1 = (inst >> 15) & 0x1f;
+            let rs1 = (inst >> 15) & setbits(5);
             let base = self.memory.load_register(rs1 as usize);
             if opcode.minor < 5 {
                 // load: I-type
-                let imm = (inst >> 20) & 0x7ff;
+                let imm = (inst >> 20) & setbits(12);
                 let imm = sign_extend(imm as i32, IMM_BITS as u32);
                 let addr = base.checked_add_signed(imm).unwrap();
-                // debug!("  load: 0x{inst:08x}, M[x{rs1} + {imm}] -> 0x{addr:08x}");
+                // debug!("  load: 0x{inst:08x}, M[x{rs1} + {imm}], addr: 0x{addr:08x}");
                 faults.include(addr);
             } else {
                 // store: S-type
-                let imm_low = (inst >> 7) & 0x1f;
-                let imm_high = (inst >> 25) & 0x7f;
+                let imm_low = (inst >> 7) & setbits(5);
+                let imm_high = (inst >> 25) & setbits(7);
                 let imm = (imm_high << 5) | imm_low;
                 let imm = sign_extend(imm as i32, IMM_BITS as u32);
                 let addr = base.checked_add_signed(imm).unwrap();
-                debug!("  store: 0x{inst:08x}, M[x{rs1} + {imm}] -> 0x{addr:08x}");
+                // debug!("  store: 0x{inst:08x}, M[x{rs1} + {imm}], addr: 0x{addr:08x}");
                 faults.include(addr);
             }
         } else if opcode.major == MajorType::ECall {
