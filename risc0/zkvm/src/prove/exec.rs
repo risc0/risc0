@@ -565,10 +565,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             rem = (!rem).overflowing_add(1 - ones_comp).0;
         }
         // debug!("  quot: {quot}, rem: {rem}");
-        (
-            split_word8(quot as i32 as u32),
-            split_word8(rem as i32 as u32),
-        )
+        (split_word8(quot), split_word8(rem))
     }
 
     fn extract_trace(&mut self, message: &str, args: &[BabyBearElem]) -> Result<()> {
