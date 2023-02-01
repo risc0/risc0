@@ -70,34 +70,18 @@ pub fn eval_check(c: &mut Criterion) {
 
     #[cfg(feature = "cuda")]
     for po2 in [2, 8, 16, 20, 21].iter() {
-        use risc0_zkp::field::baby_bear::BabyBearExtElem;
-        use risc0_zkp::field::ExtElem;
-        use risc0_zkp::hal::EvalCheck;
-        use risc0_zkp::hal::Hal;
+        use std::rc::Rc;
 
+        use risc0_circuit_rv32im::cuda::CudaEvalCheck;
+        use risc0_zkp::hal::cuda::CudaHal;
+
+        let hal = Rc::new(CudaHal::new());
+        let eval = CudaEvalCheck::new(hal.clone());
         let params = EvalCheckParams::new(*po2);
-        let hal = risc0_zkp::hal::cuda::CudaHal::new();
-        let eval = risc0_circuit_rv32im::cuda::CudaEvalCheck::new(&hal);
-        let check = hal.alloc_elem(BabyBearExtElem::EXT_SIZE * params.domain);
-        let code = hal.copy_from_elem(&params.code);
-        let data = hal.copy_from_elem(&params.data);
-        let accum = hal.copy_from_elem(&params.accum);
-        let mix = hal.copy_from_elem(&params.mix);
-        let out = hal.copy_from_elem(&params.out);
 
         group.bench_function(BenchmarkId::new("cuda", po2), |b| {
             b.iter(|| {
-                eval.eval_check(
-                    &check,
-                    &code,
-                    &data,
-                    &accum,
-                    &mix,
-                    &out,
-                    params.poly_mix,
-                    params.po2,
-                    params.steps,
-                );
+                eval_check_impl(&params, hal.as_ref(), &eval);
             });
         });
     }

@@ -29,6 +29,10 @@ use risc0_zkp::{
 };
 use rustacuda::{launch, prelude::*};
 
+use crate::{
+    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+};
+
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_PATH"));
 
 pub struct CudaEvalCheck {
@@ -44,20 +48,31 @@ impl CudaEvalCheck {
     }
 }
 
-impl<'a> EvalCheck<CudaHal> for CudaEvalCheck {
+impl EvalCheck<CudaHal> for CudaEvalCheck {
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
         check: &CudaBuffer<BabyBearElem>,
-        code: &CudaBuffer<BabyBearElem>,
-        data: &CudaBuffer<BabyBearElem>,
-        accum: &CudaBuffer<BabyBearElem>,
-        mix: &CudaBuffer<BabyBearElem>,
-        out: &CudaBuffer<BabyBearElem>,
+        groups: &[&CudaBuffer<BabyBearElem>],
+        globals: &[&CudaBuffer<BabyBearElem>],
         poly_mix: BabyBearExtElem,
         po2: usize,
         steps: usize,
     ) {
+        const EXP_PO2: usize = log2_ceil(INV_RATE);
+        let domain = steps * INV_RATE;
+        let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
+
+        let poly_mix = CudaBuffer::copy_from("poly_mix", &[poly_mix]);
+        let rou = CudaBuffer::copy_from("rou", &[rou]);
+        let po2 = CudaBuffer::copy_from("po2", &[po2 as u32]);
+        let size = CudaBuffer::copy_from("size", &[domain as u32]);
+        let code = groups[REGISTER_GROUP_CODE];
+        let data = groups[REGISTER_GROUP_DATA];
+        let accum = groups[REGISTER_GROUP_ACCUM];
+        let mix = globals[GLOBAL_MIX];
+        let out = globals[GLOBAL_OUT];
+
         log::debug!(
             "check: {}, code: {}, data: {}, accum: {}, mix: {} out: {}",
             check.size(),
@@ -71,15 +86,6 @@ impl<'a> EvalCheck<CudaHal> for CudaEvalCheck {
             "total: {}",
             (check.size() + code.size() + data.size() + accum.size() + mix.size() + out.size()) * 4
         );
-
-        const EXP_PO2: usize = log2_ceil(INV_RATE);
-        let domain = steps * INV_RATE;
-        let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
-
-        let poly_mix = CudaBuffer::copy_from("poly_mix", &[poly_mix]);
-        let rou = CudaBuffer::copy_from("rou", &[rou]);
-        let po2 = CudaBuffer::copy_from("po2", &[po2 as u32]);
-        let size = CudaBuffer::copy_from("size", &[domain as u32]);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
 

@@ -47,6 +47,8 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir);
 
+    build_cpu_kernels();
+
     // Caching system so we can hold a copy of the CUDA / Metal build artifacts
     // in a local path when they don't change that much.
     if let Ok(cache_path) = env::var("RISC0_HAL_CACHE") {
@@ -73,8 +75,6 @@ fn main() {
             }
         }
     } else {
-        build_cpu_kernels();
-
         if env::var("CARGO_FEATURE_CUDA").is_ok() {
             build_cuda_kernels(out_dir);
         }
