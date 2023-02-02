@@ -116,13 +116,15 @@ pub trait Sha256 {
 
 /// The result of the SHA-256 hash algorithm.
 ///
-/// Note: Bytes in the [Digest] type are stored in big-endian order regardless
+/// NOTE: Bytes in the [Digest] type are stored in big-endian order regardless
 /// of the host architecture. When interpreted as words, the numerical result
 /// will depend on the architecture.
 #[derive(
     Copy,
     Clone,
     Eq,
+    Ord,
+    PartialOrd,
     PartialEq,
     Pod,
     Zeroable,
