@@ -90,8 +90,10 @@ pub trait Sha256 {
         Self::compress(&SHA256_INIT, a, b)
     }
 
-    /// Execute the SHA-256 compression function on a single block given as as
-    /// two half-blocks. Note that the half blocks do not need to be adjacent.
+    /// Execute the SHA-256 compression function on a single block given as
+    /// two half-blocks and return a pointer to the result.
+    ///
+    /// NOTE: The half blocks do not need to be adjacent.
     ///
     /// DANGER: This is the low-level SHA-256 compression function. It is a
     /// primitive used to construct SHA-256, but it is NOT the full
@@ -99,16 +101,19 @@ pub trait Sha256 {
     fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr;
 
     /// Execute the SHA-256 compression function on a slice of blocks following
-    /// the [Merkle–Damgård] construction.
+    /// the [Merkle–Damgård] construction and return a pointer to the result.
     ///
     /// DANGER: This is the low-level SHA-256 compression function. It is a
     /// primitive used to construct SHA-256, but it is NOT the full
     /// algorithm and should be used directly only with extreme caution.
+    ///
+    /// [Merkle–Damgård]: https://en.wikipedia.org/wiki/Merkle%E2%80%93Damg%C3%A5rd_construction
     fn compress_slice(state: &Digest, blocks: &[Block]) -> Self::DigestPtr;
 
     /// Generate a hash from a slice of anything that can be represented as
     /// plain old data. Pads up to the SHA-256 block boundary, but does not
-    /// add the standard SHA-256 trailer and so is not a standards hash.
+    /// add the standard SHA-256 trailer and so is not a standards compliant
+    /// hash.
     // TODO(victor): Look over the usages of this function to understand why it
     // exists and if it should exist on this trait.
     fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
@@ -641,6 +646,10 @@ pub mod rust_crypto {
                 );
             });
 
+            // NOTE: With some work, it would be possible to eliminate the copy here.
+            // However it will require quite a bit of reworking of the APIs
+            // involved and this copy may be optimized out by the compiler
+            // anyway.
             out.copy_from_slice(self.state.as_deref().unwrap().as_bytes())
         }
     }
