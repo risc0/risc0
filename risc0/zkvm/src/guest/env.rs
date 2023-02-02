@@ -202,7 +202,7 @@ impl Env {
             for i in 0..DIGEST_WORDS {
                 sys_output(i as u32, output[i]);
             }
-            sys_output(DIGEST_WORDS, len_bytes as u32);
+            sys_output(DIGEST_WORDS as u32, len_bytes as u32);
             sys_halt()
         }
     }

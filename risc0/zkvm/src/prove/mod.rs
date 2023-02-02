@@ -221,7 +221,7 @@ impl<'a> Prover<'a> {
         self.cycles = executor.run()?;
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, sha(), CIRCUIT.get_taps());
+        let mut prover = risc0_zkp::prove::Prover::<_, sha::Impl>::new(hal, CIRCUIT.get_taps());
 
         adapter.execute(prover.iop());
 
