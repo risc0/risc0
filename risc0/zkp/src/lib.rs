@@ -20,7 +20,6 @@ extern crate alloc;
 
 pub mod adapter;
 pub mod core;
-pub mod field;
 #[cfg(feature = "prove")]
 pub mod hal;
 mod merkle;
@@ -28,6 +27,8 @@ mod merkle;
 pub mod prove;
 pub mod taps;
 pub mod verify;
+
+pub use risc0_core::field;
 
 pub const MIN_CYCLES_PO2: usize = 11;
 pub const MIN_CYCLES: usize = 1 << MIN_CYCLES_PO2; // 1K

@@ -14,10 +14,11 @@
 
 use alloc::vec::Vec;
 
+use risc0_core::field::{baby_bear::BabyBearElem, Elem};
+
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
     core::sha::Sha256,
-    field::{baby_bear::BabyBearElem, Elem},
     taps::TapSet,
     verify::read_iop::ReadIOP,
 };

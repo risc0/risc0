@@ -16,7 +16,7 @@
 
 use alloc::vec;
 
-use crate::field::ExtElem;
+use risc0_core::field::ExtElem;
 
 /// Evaluate a polynomial whose coefficients are in the extension field at a
 /// point.

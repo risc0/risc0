@@ -17,19 +17,6 @@ use core::{
     fmt::{self, Debug},
 };
 
-#[derive(Clone, Copy, PartialEq, PartialOrd, Eq, Hash, Ord, Debug)]
-pub enum RegisterGroup {
-    Accum = 0,
-    Code = 1,
-    Data = 2,
-}
-
-const REGISTER_GROUPS: &[RegisterGroup] = &[
-    RegisterGroup::Accum,
-    RegisterGroup::Code,
-    RegisterGroup::Data,
-];
-
 /// This class is an implementation detail and carefully built to be efficient
 /// on RISC-V for use in recursion.
 #[derive(Debug)]
@@ -39,7 +26,7 @@ pub struct TapData {
     // How many cycles back this tap is
     pub back: u16,
     // Which register group this tap is a part of
-    pub group: RegisterGroup,
+    pub group: usize,
     // Which combo this register is part of
     pub combo: u8,
     // How far to skip to next register
@@ -71,22 +58,27 @@ pub struct TapSet<'a> {
     pub taps: &'a [TapData],
     pub combo_taps: &'a [u16],
     pub combo_begin: &'a [u16],
-    pub group_begin: [usize; REGISTER_GROUPS.len() + 1],
+    pub group_begin: &'a [usize],
     pub combos_count: usize,
     pub reg_count: usize,
     pub tot_combo_backs: usize,
+    pub group_names: &'a [&'a str],
 }
 
 impl<'a> TapSet<'a> {
+    pub fn num_groups(&self) -> usize {
+        self.group_names.len()
+    }
+
     pub fn tap_size(&self) -> usize {
-        self.group_begin[REGISTER_GROUPS.len()]
+        self.group_begin[self.num_groups()]
     }
 
     pub fn taps(&self) -> TapIter {
         TapIter {
             data: &self.taps,
             cursor: 0,
-            end: self.group_begin[REGISTER_GROUPS.len()],
+            end: self.group_begin[self.num_groups()],
         }
     }
 
@@ -94,12 +86,11 @@ impl<'a> TapSet<'a> {
         RegisterIter {
             data: &self.taps,
             cursor: 0,
-            end: self.group_begin[REGISTER_GROUPS.len()],
+            end: self.group_begin[self.num_groups()],
         }
     }
 
-    pub fn group_taps(&self, group: RegisterGroup) -> TapIter {
-        let group_id = group as usize;
+    pub fn group_taps(&self, group_id: usize) -> TapIter {
         TapIter {
             data: &self.taps,
             cursor: self.group_begin[group_id],
@@ -107,8 +98,7 @@ impl<'a> TapSet<'a> {
         }
     }
 
-    pub fn group_regs(&self, group: RegisterGroup) -> RegisterIter {
-        let group_id = group as usize;
+    pub fn group_regs(&self, group_id: usize) -> RegisterIter {
         RegisterIter {
             data: &self.taps,
             cursor: self.group_begin[group_id],
@@ -116,11 +106,14 @@ impl<'a> TapSet<'a> {
         }
     }
 
-    pub fn group_size(&self, group: RegisterGroup) -> usize {
-        let group_id = group as usize;
+    pub fn group_size(&self, group_id: usize) -> usize {
         let idx = self.group_begin[group_id + 1] - 1;
         let last = self.taps[idx].offset as usize;
         last + 1
+    }
+
+    pub fn group_name(&self, group_id: usize) -> &str {
+        self.group_names[group_id]
     }
 
     // size_t combosSize() const { return data_->combos.count; }
@@ -160,7 +153,7 @@ pub struct RegisterRef<'a> {
 }
 
 impl<'a> RegisterRef<'a> {
-    pub fn group(&self) -> RegisterGroup {
+    pub fn group(&self) -> usize {
         self.data[self.cursor].group
     }
 
@@ -238,7 +231,7 @@ pub struct TapRef<'a> {
 }
 
 impl<'a> TapRef<'a> {
-    pub fn group(&self) -> RegisterGroup {
+    pub fn group(&self) -> usize {
         self.data.group
     }
 

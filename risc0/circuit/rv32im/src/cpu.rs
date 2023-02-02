@@ -13,18 +13,22 @@
 // limitations under the License.
 
 use rayon::prelude::*;
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem, RootsOfUnity,
+};
 use risc0_zkp::{
     adapter::PolyFp,
     core::log2_ceil,
-    field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        Elem, ExtElem, RootsOfUnity,
-    },
     hal::{
         cpu::{BabyBearCpuHal, CpuBuffer},
         EvalCheck,
     },
     INV_RATE,
+};
+
+use crate::{
+    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 
 pub struct CpuEvalCheck<'a, C: PolyFp<BabyBear>> {
@@ -42,11 +46,8 @@ impl<'a, C: PolyFp<BabyBear> + Sync> EvalCheck<BabyBearCpuHal> for CpuEvalCheck<
     fn eval_check(
         &self,
         check: &CpuBuffer<BabyBearElem>,
-        code: &CpuBuffer<BabyBearElem>,
-        data: &CpuBuffer<BabyBearElem>,
-        accum: &CpuBuffer<BabyBearElem>,
-        mix: &CpuBuffer<BabyBearElem>,
-        out: &CpuBuffer<BabyBearElem>,
+        groups: &[&CpuBuffer<BabyBearElem>],
+        globals: &[&CpuBuffer<BabyBearElem>],
         poly_mix: BabyBearExtElem,
         po2: usize,
         steps: usize,
@@ -59,15 +60,15 @@ impl<'a, C: PolyFp<BabyBear> + Sync> EvalCheck<BabyBearCpuHal> for CpuEvalCheck<
         // usage is within this function and each thread access will not overlap with
         // each other.
 
-        let code = code.as_slice();
+        let code = groups[REGISTER_GROUP_CODE].as_slice();
         let code = unsafe { std::slice::from_raw_parts(code.as_ptr(), code.len()) };
-        let data = data.as_slice();
+        let data = groups[REGISTER_GROUP_DATA].as_slice();
         let data = unsafe { std::slice::from_raw_parts(data.as_ptr(), data.len()) };
-        let accum = accum.as_slice();
+        let accum = groups[REGISTER_GROUP_ACCUM].as_slice();
         let accum = unsafe { std::slice::from_raw_parts(accum.as_ptr(), accum.len()) };
-        let mix = mix.as_slice();
+        let mix = globals[GLOBAL_MIX].as_slice();
         let mix = unsafe { std::slice::from_raw_parts(mix.as_ptr(), mix.len()) };
-        let out = out.as_slice();
+        let out = globals[GLOBAL_OUT].as_slice();
         let out = unsafe { std::slice::from_raw_parts(out.as_ptr(), out.len()) };
         let check = check.as_slice();
         let check = unsafe { std::slice::from_raw_parts(check.as_ptr(), check.len()) };

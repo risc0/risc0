@@ -25,6 +25,7 @@ bytemuck = "1.12"
 cfg-if = "1.0"
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-circuit-rv32im = { workspace = true }
+risc0-core = { workspace = true }
 risc0-zeroio = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
@@ -57,15 +58,16 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 env_logger = "0.10"
+flate2 = "1.0"
 lazy_static = "1.4"
 risc0-zkvm-methods = { path = "methods" }
 serial_test = "1.0"
 tar = "0.4"
 tempdir = "0.3"
 test-log = { version = "0.2", features = ["trace"] }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
+binfmt = ["dep:elf", "std"]
 cuda = ["risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
 metal = ["risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["prove"]
@@ -73,13 +75,13 @@ dual = []
 insecure_skip_seal = []
 profiler = ["dep:addr2line", "dep:gimli", "dep:prost", "dep:prost-build", "dep:protobuf-src"]
 prove = [
-    "dep:elf",
+    "binfmt",
     "dep:lazy-regex",
     "dep:rand",
     "dep:rayon",
     "dep:sha2",
     "risc0-circuit-rv32im/prove",
     "risc0-zkp/prove",
-    "std"
+    "std",
 ]
 std = ["anyhow/std", "risc0-circuit-rv32im/std", "risc0-zeroio/std", "risc0-zkp/std", "serde/std"]

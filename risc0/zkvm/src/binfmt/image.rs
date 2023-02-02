@@ -20,7 +20,7 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use crate::{prove::elf::Program, sha};
+use crate::{binfmt::elf::Program, sha};
 
 /// Compute `ceil(a / b)` via truncated integer division.
 const fn div_ceil(a: u32, b: u32) -> u32 {
@@ -210,7 +210,7 @@ mod tests {
     use test_log::test;
 
     use super::MemoryImage;
-    use crate::prove::{elf::Program, image::PageTableInfo};
+    use crate::binfmt::{elf::Program, image::PageTableInfo};
 
     fn page_table_size(max_mem: u32, page_size: u32) -> u32 {
         PageTableInfo::new(0, max_mem, page_size)._page_table_size

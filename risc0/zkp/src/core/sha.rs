@@ -713,10 +713,10 @@ pub mod testutil {
     use core::ops::Deref;
 
     use hex::FromHex;
+    use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
     use super::rust_crypto::Digest as _;
     use super::{rust_crypto, Digest, Sha256};
-    use crate::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
     // Runs conformance test on a SHA-256 implementation to make sure it properly
     // behaves.

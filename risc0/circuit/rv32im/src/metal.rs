@@ -15,12 +15,12 @@
 use std::rc::Rc;
 
 use metal::ComputePipelineDescriptor;
+use risc0_core::field::{
+    baby_bear::{BabyBearElem, BabyBearExtElem},
+    RootsOfUnity,
+};
 use risc0_zkp::{
     core::log2_ceil,
-    field::{
-        baby_bear::{BabyBearElem, BabyBearExtElem},
-        RootsOfUnity,
-    },
     hal::{
         metal::{BufferImpl as MetalBuffer, MetalHal},
         EvalCheck,
@@ -28,7 +28,7 @@ use risc0_zkp::{
     INV_RATE,
 };
 
-const METAL_LIB: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/kernels.metallib"));
+const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
 
 #[derive(Debug)]
 pub struct MetalEvalCheck {

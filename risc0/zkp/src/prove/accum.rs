@@ -15,11 +15,9 @@
 use std::{collections::BTreeMap, sync::Mutex};
 
 use anyhow::Result;
+use risc0_core::field::{Elem, ExtElem, Field};
 
-use crate::{
-    adapter::CircuitStepHandler,
-    field::{Elem, ExtElem, Field},
-};
+use crate::adapter::CircuitStepHandler;
 
 /// Tracks grand product accumulations for PLONK-style permutation arguments.
 pub struct Accum<E: Elem> {

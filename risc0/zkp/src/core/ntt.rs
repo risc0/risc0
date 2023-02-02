@@ -17,9 +17,9 @@
 use core::ops::{Add, Mul, Sub};
 
 use paste::paste;
+use risc0_core::field::{Elem, RootsOfUnity};
 
 use super::log2_ceil;
-use crate::field::{Elem, RootsOfUnity};
 
 /// Reverses the bits in a 32-bit number.
 /// # Example
@@ -344,11 +344,11 @@ where
 #[cfg(test)]
 mod tests {
     use rand::thread_rng;
-
-    use crate::{
-        core::ntt::{bit_reverse, evaluate_ntt, interpolate_ntt},
-        field::{baby_bear::BabyBearElem, goldilocks::GoldilocksElem, Elem, RootsOfUnity},
+    use risc0_core::field::{
+        baby_bear::BabyBearElem, goldilocks::GoldilocksElem, Elem, RootsOfUnity,
     };
+
+    use crate::core::ntt::{bit_reverse, evaluate_ntt, interpolate_ntt};
 
     // Compare the complex version to the naive version
     #[test]

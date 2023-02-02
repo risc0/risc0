@@ -1,0 +1,22 @@
+[package]
+name = "risc0-sys"
+description = "Generated / Native / HAL code for RISC Zero"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+links = "risc0-sys"
+
+[dependencies]
+risc0-core = { workspace = true }
+
+[build-dependencies]
+cc = { version = "1.0", features = ["parallel"] }
+glob = "0.3"
+sha2 = "0.10"
+
+[features]
+default = []
+cuda = []
+metal = []

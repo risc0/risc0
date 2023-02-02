@@ -49,18 +49,18 @@ use crate::{
 /// which means that the normal NTT evaluation domain does not reveal anything
 /// about the original datapoints (i.e. is zero knowledge) so long as the number
 /// of queries is less than the randomized padding.
-pub struct PolyGroup<'a, H: Hal> {
-    pub coeffs: &'a H::BufferElem,
+pub struct PolyGroup<H: Hal> {
+    pub coeffs: H::BufferElem,
     pub count: usize,
     pub evaluated: H::BufferElem,
     pub merkle: MerkleTreeProver<H>,
 }
 
-impl<'a, H: Hal> PolyGroup<'a, H> {
+impl<'a, H: Hal> PolyGroup<H> {
     #[tracing::instrument(name = "PolyGroup", skip_all, fields(name = _name))]
     pub fn new(
         hal: &H,
-        coeffs: &'a H::BufferElem,
+        coeffs: H::BufferElem,
         count: usize,
         size: usize,
         _name: &'static str,

@@ -121,16 +121,16 @@ impl<H: Hal> MerkleTreeProver<H> {
 #[cfg(test)]
 mod tests {
     use rand::{Rng, RngCore};
+    use risc0_core::field::{
+        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+        Elem,
+    };
 
     use super::*;
     use crate::verify::VerifyHal;
     use crate::{
         adapter::{MixState, PolyExt},
         core::sha_cpu,
-        field::{
-            baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-            Elem,
-        },
         hal::cpu::{BabyBearCpuHal, CpuHal},
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, CpuVerifyHal, VerificationError},
     };

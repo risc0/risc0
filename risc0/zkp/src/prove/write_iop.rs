@@ -14,12 +14,11 @@
 
 use alloc::vec::Vec;
 
-use crate::{
-    core::{
-        sha::{Digest, Sha256},
-        sha_rng::ShaRng,
-    },
-    field::{self},
+use risc0_core::field;
+
+use crate::core::{
+    sha::{Digest, Sha256},
+    sha_rng::ShaRng,
 };
 
 pub struct WriteIOP<S: Sha256> {

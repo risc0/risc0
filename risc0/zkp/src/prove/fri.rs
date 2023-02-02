@@ -16,10 +16,10 @@ use alloc::vec::Vec;
 
 use log::debug;
 use rand::RngCore;
+use risc0_core::field::{Elem, ExtElem};
 
 use crate::{
     core::{log2_ceil, sha::Sha256},
-    field::{Elem, ExtElem},
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,

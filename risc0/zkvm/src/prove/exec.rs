@@ -21,13 +21,13 @@ use lazy_regex::{regex, Captures};
 use log::{debug, trace};
 use num_traits::FromPrimitive;
 use risc0_circuit_rv32im::CircuitImpl;
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    Elem,
+};
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepHandler, PolyExt},
     core::{log2_ceil, sha::BLOCK_BYTES},
-    field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-        Elem,
-    },
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
 };
@@ -42,10 +42,10 @@ use risc0_zkvm_platform::{
     PAGE_SIZE, WORD_SIZE,
 };
 
-use super::{
-    elf::Program, image::PageTableInfo, loader::Loader, merge_word8, plonk, split_word8, TraceEvent,
-};
-use crate::{MemoryImage, CIRCUIT};
+use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
+use crate::binfmt::elf::Program;
+use crate::binfmt::image::{MemoryImage, PageTableInfo};
+use crate::CIRCUIT;
 
 const IMM_BITS: usize = 12;
 
@@ -301,6 +301,10 @@ impl<'a> PageFaults<'a> {
     }
 }
 
+fn setbits(x: u8) -> u32 {
+    u32::MAX >> (32 - x)
+}
+
 impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a, H> {
     fn call(
         &mut self,
@@ -440,23 +444,23 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         faults.include(pc);
 
         if opcode.major == MajorType::MemIo {
-            let rs1 = (inst >> 15) & 0x1f;
+            let rs1 = (inst >> 15) & setbits(5);
             let base = self.memory.load_register(rs1 as usize);
             if opcode.minor < 5 {
                 // load: I-type
-                let imm = (inst >> 20) & 0x7ff;
+                let imm = (inst >> 20) & setbits(12);
                 let imm = sign_extend(imm as i32, IMM_BITS as u32);
                 let addr = base.checked_add_signed(imm).unwrap();
-                // debug!("  load: 0x{inst:08x}, M[x{rs1} + {imm}] -> 0x{addr:08x}");
+                // debug!("  load: 0x{inst:08x}, M[x{rs1} + {imm}], addr: 0x{addr:08x}");
                 faults.include(addr);
             } else {
                 // store: S-type
-                let imm_low = (inst >> 7) & 0x1f;
-                let imm_high = (inst >> 25) & 0x7f;
+                let imm_low = (inst >> 7) & setbits(5);
+                let imm_high = (inst >> 25) & setbits(7);
                 let imm = (imm_high << 5) | imm_low;
                 let imm = sign_extend(imm as i32, IMM_BITS as u32);
                 let addr = base.checked_add_signed(imm).unwrap();
-                debug!("  store: 0x{inst:08x}, M[x{rs1} + {imm}] -> 0x{addr:08x}");
+                // debug!("  store: 0x{inst:08x}, M[x{rs1} + {imm}], addr: 0x{addr:08x}");
                 faults.include(addr);
             }
         } else if opcode.major == MajorType::ECall {
@@ -538,18 +542,18 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
         (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
     ) {
-        let mut numer = merge_word8(numer) as i64;
-        let mut denom = merge_word8(denom) as i64;
+        let mut numer = merge_word8(numer) as u32;
+        let mut denom = merge_word8(denom) as u32;
         let sign: u32 = sign.into();
         // debug!("divide: [{sign}] {numer} / {denom}");
-        let ones_comp = (sign == 2) as i64;
-        let neg_numer = sign != 0 && numer < 0;
-        let neg_denom = sign == 1 && denom < 0;
+        let ones_comp = (sign == 2) as u32;
+        let neg_numer = sign != 0 && (numer as i32) < 0;
+        let neg_denom = sign == 1 && (denom as i32) < 0;
         if neg_numer {
-            numer = -numer - ones_comp;
+            numer = (!numer).overflowing_add(1 - ones_comp).0;
         }
         if neg_denom {
-            denom = -denom - ones_comp;
+            denom = (!denom).overflowing_add(1 - ones_comp).0;
         }
         let (mut quot, mut rem) = if denom == 0 {
             (0xffffffff, numer)
@@ -559,16 +563,13 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         let quot_neg_out =
             (neg_numer as u32 ^ neg_denom as u32) - ((denom == 0) as u32 * neg_numer as u32);
         if quot_neg_out != 0 {
-            quot = -quot - ones_comp;
+            quot = (!quot).overflowing_add(1 - ones_comp).0;
         }
         if neg_numer {
-            rem = -rem - ones_comp;
+            rem = (!rem).overflowing_add(1 - ones_comp).0;
         }
-        // debug!("  {quot}, {rem}");
-        (
-            split_word8(quot as i32 as u32),
-            split_word8(rem as i32 as u32),
-        )
+        // debug!("  quot: {quot}, rem: {rem}");
+        (split_word8(quot), split_word8(rem))
     }
 
     fn extract_trace(&mut self, message: &str, args: &[BabyBearElem]) -> Result<()> {

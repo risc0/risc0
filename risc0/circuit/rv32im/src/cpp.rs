@@ -12,20 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::Result;
-use risc0_zkp::{
-    adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
-};
+use std::{ffi::CStr, os::raw::c_void};
 
-use crate::{
-    ffi::{
-        call_step, risc0_circuit_rv32im_poly_fp, risc0_circuit_rv32im_step_compute_accum,
-        risc0_circuit_rv32im_step_exec, risc0_circuit_rv32im_step_verify_accum,
-        risc0_circuit_rv32im_step_verify_bytes, risc0_circuit_rv32im_step_verify_mem,
-    },
-    CircuitImpl,
+use anyhow::{anyhow, Result};
+use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
+use risc0_sys::ffi::{
+    get_trampoline, risc0_circuit_rv32im_poly_fp, risc0_circuit_rv32im_step_compute_accum,
+    risc0_circuit_rv32im_step_exec, risc0_circuit_rv32im_step_verify_accum,
+    risc0_circuit_rv32im_step_verify_bytes, risc0_circuit_rv32im_step_verify_mem,
+    risc0_circuit_string_free, risc0_circuit_string_ptr, Callback, RawError,
 };
+use risc0_zkp::adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp};
+
+use crate::CircuitImpl;
 
 impl CircuitStep<BabyBearElem> for CircuitImpl {
     fn step_compute_accum<S: CircuitStepHandler<BabyBearElem>>(
@@ -141,3 +140,60 @@ impl PolyFp<BabyBear> for CircuitImpl {
 }
 
 impl<'a> CircuitDef<BabyBear> for CircuitImpl {}
+
+pub(crate) fn call_step<S, F>(
+    ctx: &CircuitStepContext,
+    handler: &mut S,
+    args: &mut [&mut [BabyBearElem]],
+    inner: F,
+) -> Result<BabyBearElem>
+where
+    S: CircuitStepHandler<BabyBearElem>,
+    F: FnOnce(
+        *mut RawError,
+        *mut c_void,
+        Callback,
+        usize,
+        usize,
+        *const *mut BabyBearElem,
+        usize,
+    ) -> BabyBearElem,
+{
+    let mut last_err = None;
+    let mut call =
+        |name: &str, extra: &str, args: &[BabyBearElem], outs: &mut [BabyBearElem]| match handler
+            .call(ctx.cycle, name, extra, args, outs)
+        {
+            Ok(()) => true,
+            Err(err) => {
+                last_err = Some(err);
+                false
+            }
+        };
+    let trampoline = get_trampoline(&call);
+    let mut err = RawError::default();
+    let args: Vec<*mut BabyBearElem> = args.iter_mut().map(|x| (*x).as_mut_ptr()).collect();
+    let result = inner(
+        &mut err,
+        &mut call as *mut _ as *mut c_void,
+        trampoline,
+        ctx.size,
+        ctx.cycle,
+        args.as_ptr(),
+        args.len(),
+    );
+    if let Some(err) = last_err {
+        return Err(err);
+    }
+    if err.msg.is_null() {
+        Ok(result)
+    } else {
+        let what = unsafe {
+            let str = risc0_circuit_string_ptr(err.msg);
+            let msg = CStr::from_ptr(str).to_str().unwrap().to_string();
+            risc0_circuit_string_free(err.msg);
+            msg
+        };
+        Err(anyhow!(what))
+    }
+}
