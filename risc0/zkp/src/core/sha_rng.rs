@@ -31,17 +31,6 @@ pub struct ShaRng<S: Sha256> {
     phantom_sha: PhantomData<S>,
 }
 
-// TODO(victor) Examine the usages of this type to understand it better. Is this
-// something someone from the public might use, or should it be crate-scoped?
-// It might be possible to improve on this with inspiration from rand_chacha.
-// https://docs.rs/rand_chacha/0.3.1/rand_chacha/struct.ChaCha12Rng.html#impl-RngCore
-// Might also read the NIST-800 recomendations to see if there are any
-// improvements or issues we need to watch out for.
-// Should new _require_ a seed such that we ensure no unseeded usage occurs?
-// https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf
-//
-// NOTE: This is used in the IOP as a transcript hashing primitve. Are there any
-// lessons about transcript hashing that we need to think about?
 impl<S: Sha256> ShaRng<S> {
     /// Create a new [ShaRng] from a given [Sha256].
     pub fn new() -> ShaRng<S> {
