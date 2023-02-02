@@ -172,6 +172,9 @@ impl Env {
             unsafe { slice::from_raw_parts(memory::COMMIT.start() as _, len_words) };
 
         // Write the full data out to the host
+        // NOTE: This is somewhat redundant with the sending of the committed data to
+        // the STDOUT channel. We should consider eliminating the write of commit data
+        // to STDOUT and instead only commit it via the sys_commit call.
         unsafe { sys_commit(slice.as_ptr(), len_bytes) };
 
         let mut output = Digest::from([0u32; DIGEST_WORDS]);
@@ -185,8 +188,13 @@ impl Env {
             }
         } else {
             let ptr: *mut Digest = &mut output;
-            // TODO(victor) Why is the trailer not included here and is it possible for this
-            // to create any issues?
+            // NOTE: Hashing here without the standard SHA-256 trailer, instead only padding
+            // with zeroes up to the next block boundary saves a copy when the
+            // data length is within 9 bytes of the block boundary. As a
+            // drawback, it creates an ambiguity of what was committed among messages with
+            // some number of trailing zeros. (e.g. between the byte string 0xda7a and
+            // 0xda7a0000) Adding (and checking in the verifier) the length of the committed
+            // data resolves this issue.
             sha::update_u32(ptr, &SHA256_INIT, slice, sha::WithoutTrailer);
         }
         let output = output.as_words();
@@ -194,7 +202,7 @@ impl Env {
             for i in 0..DIGEST_WORDS {
                 sys_output(i as u32, output[i]);
             }
-            sys_output(8, len_bytes as u32);
+            sys_output(DIGEST_WORDS, len_bytes as u32);
             sys_halt()
         }
     }
