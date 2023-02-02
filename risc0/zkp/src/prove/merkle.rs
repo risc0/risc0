@@ -148,8 +148,6 @@ mod tests {
         }
     }
 
-    // TODO(victor): Move the generic parameter F on PolyExt into an associated
-    // type.
     type TestVerifyHal<'a> = CpuVerifyHal<'a, sha_cpu::Impl, BabyBear, MockCircuit>;
 
     fn init_prover<H: Hal>(
