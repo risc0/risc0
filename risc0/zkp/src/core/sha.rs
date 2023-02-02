@@ -248,15 +248,15 @@ impl TryFrom<Vec<u32>> for Digest {
     }
 }
 
-impl Into<[u8; DIGEST_BYTES]> for Digest {
-    fn into(self) -> [u8; DIGEST_BYTES] {
-        bytemuck::cast(self.0)
+impl From<Digest> for [u8; DIGEST_BYTES] {
+    fn from(digest: Digest) -> Self {
+        bytemuck::cast(digest)
     }
 }
 
-impl Into<[u32; DIGEST_WORDS]> for Digest {
-    fn into(self) -> [u32; DIGEST_WORDS] {
-        self.0
+impl From<Digest> for [u32; DIGEST_WORDS] {
+    fn from(digest: Digest) -> Self {
+        digest.0
     }
 }
 
@@ -443,15 +443,15 @@ impl TryFrom<Vec<u32>> for Block {
     }
 }
 
-impl Into<[u8; BLOCK_BYTES]> for Block {
-    fn into(self) -> [u8; BLOCK_BYTES] {
-        bytemuck::cast(self.0)
+impl From<Block> for [u8; BLOCK_BYTES] {
+    fn from(digest: Block) -> Self {
+        bytemuck::cast(digest)
     }
 }
 
-impl Into<[u32; BLOCK_WORDS]> for Block {
-    fn into(self) -> [u32; BLOCK_WORDS] {
-        self.0
+impl From<Block> for [u32; BLOCK_WORDS] {
+    fn from(digest: Block) -> Self {
+        digest.0
     }
 }
 
