@@ -546,7 +546,7 @@ impl Hal for CudaHal {
     }
 
     #[tracing::instrument(skip_all)]
-    fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
@@ -567,7 +567,7 @@ impl Hal for CudaHal {
         stream.synchronize().unwrap();
     }
 
-    fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
@@ -634,13 +634,13 @@ mod tests {
     #[test]
     #[serial]
     fn sha_rows() {
-        testutil::sha_rows(CudaHal::new());
+        testutil::hash_rows(CudaHal::new());
     }
 
     #[test]
     #[serial]
     fn sha_fold() {
-        testutil::sha_fold(CudaHal::new());
+        testutil::hash_fold(CudaHal::new());
     }
 
     #[test]

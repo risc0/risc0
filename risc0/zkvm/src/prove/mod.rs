@@ -132,14 +132,14 @@ cfg_if::cfg_if! {
         }
     } else {
         use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
-        use risc0_zkp::hal::cpu::BabyBearCpuHal;
+        use risc0_zkp::hal::cpu::BabyBearSha256CpuHal;
 
         thread_local! {
-            static HAL: (Rc<BabyBearCpuHal>, CpuEvalCheck<'static, CircuitImpl>) = default_hal();
+            static HAL: (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) = default_hal();
         }
 
-        pub fn default_hal() -> (Rc<BabyBearCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
-            let hal = Rc::new(BabyBearCpuHal::new());
+        pub fn default_hal() -> (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
+            let hal = Rc::new(BabyBearSha256CpuHal::new());
             let eval = CpuEvalCheck::new(&CIRCUIT);
             (hal, eval)
         }
