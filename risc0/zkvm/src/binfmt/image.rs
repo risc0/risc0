@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::{bail, Result};
-use risc0_zkp::core::sha::{Digest, Sha, BLOCK_SIZE, SHA256_INIT};
+use risc0_zkp::core::sha::{Digest, Sha256, BLOCK_BYTES, SHA256_INIT};
 use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE, STACK},
     syscall::DIGEST_BYTES,
@@ -62,7 +62,7 @@ impl PageTableInfo {
         }
         let max_mem = max_mem + page_table_size;
         let num_pages = max_mem / page_size;
-        let page_table_size = round_up(page_table_size, BLOCK_SIZE as u32);
+        let page_table_size = round_up(page_table_size, BLOCK_BYTES as u32);
         let root_addr = page_table_addr + page_table_size;
         let root_idx = (root_addr - mem_start) / page_size;
         let raw_root_idx = root_addr / page_size;
@@ -166,7 +166,7 @@ impl MemoryImage {
             let expected = hash_page(page);
             let entry_addr = self.info.get_page_entry_addr(page_idx);
             let entry = &self.image[entry_addr as usize..entry_addr as usize + DIGEST_BYTES];
-            let actual = Digest::from_bytes(entry);
+            let actual = Digest::try_from(entry)?;
             log::debug!(
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
             );
@@ -190,13 +190,12 @@ impl MemoryImage {
 }
 
 fn hash_page(page: &[u8]) -> Digest {
-    let sha = sha::sha();
     let mut state = SHA256_INIT;
-    assert!(page.len() % BLOCK_SIZE == 0);
-    for block in page.chunks_exact(BLOCK_SIZE) {
-        let block1 = Digest::from_bytes(&block[0..DIGEST_BYTES]);
-        let block2 = Digest::from_bytes(&block[DIGEST_BYTES..BLOCK_SIZE]);
-        state = *sha.compress(&state, &block1, &block2);
+    assert!(page.len() % BLOCK_BYTES == 0);
+    for block in page.chunks_exact(BLOCK_BYTES) {
+        let block1 = Digest::try_from(&block[0..DIGEST_BYTES]).unwrap();
+        let block2 = Digest::try_from(&block[DIGEST_BYTES..BLOCK_BYTES]).unwrap();
+        state = *sha::Impl::compress(&state, &block1, &block2);
     }
     state
 }

@@ -12,6 +12,7 @@ bytemuck = "1.12"
 impl-trait-for-tuples = "0.2"
 log = "0.4"
 risc0-zeroio-derive = { workspace = true }
+risc0-zkvm-platform = { workspace = true }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]

@@ -13,10 +13,11 @@
 // limitations under the License.
 
 use alloc::vec::Vec;
+use core::marker::PhantomData;
 
 use super::VerifyHal;
 use crate::{
-    core::sha::{Digest, Sha},
+    core::sha::{Digest, Sha256},
     merkle::MerkleTreeParams,
     verify::read_iop::ReadIOP,
     verify::VerificationError,
@@ -38,10 +39,10 @@ pub struct MerkleTreeVerifier<'a, H: VerifyHal> {
     top: &'a [Digest],
 
     // These are the rest of the tree.  These have the virtual indexes [1, top_size).
-    rest: Vec<<H::Sha as Sha>::DigestPtr>,
+    rest: Vec<<H::Sha256 as Sha256>::DigestPtr>,
 
     // Support for accelerator operations.
-    hal: &'a H,
+    phantom_hal: PhantomData<H>,
 }
 
 // Translates from virtual indexes to indexes in the "top" and "rest" arrays.
@@ -84,8 +85,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
     /// Constructs a new MerkleTreeVerifier by making the params, and then
     /// computing the root hashes from the top level hashes.
     pub fn new(
-        hal: &'a H,
-        iop: &mut ReadIOP<'a, H::Sha>,
+        iop: &mut ReadIOP<'a, H::Sha256>,
         row_size: usize,
         col_size: usize,
         queries: usize,
@@ -95,7 +95,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
         // Fill top vector with digests from IOP.
         let top = iop.read_pod_slice(params.top_size);
         // Populate hashes up to the root of the tree.
-        let mut rest = Vec::<<H::Sha as Sha>::DigestPtr>::with_capacity(params.top_size - 1);
+        let mut rest = Vec::<<H::Sha256 as Sha256>::DigestPtr>::with_capacity(params.top_size - 1);
 
         let fill_rest = rest.spare_capacity_mut();
 
@@ -103,14 +103,14 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
             for i in (params.top_size / 2..params.top_size).rev() {
                 let top_idx = params.idx_to_top(2 * i);
                 fill_rest[params.idx_to_rest(i)]
-                    .write(iop.get_sha().hash_pair(&top[top_idx], &top[top_idx + 1]));
+                    .write(H::Sha256::hash_pair(&top[top_idx], &top[top_idx + 1]));
             }
         }
         for i in (1..params.top_size / 2).rev() {
             // SAFETY: We're working from the top down, so we will
             // have already filled elements at upper_rest_idx.
             let upper_rest_idx = params.idx_to_rest(i * 2);
-            fill_rest[params.idx_to_rest(i)].write(iop.get_sha().hash_pair(
+            fill_rest[params.idx_to_rest(i)].write(H::Sha256::hash_pair(
                 unsafe { fill_rest[upper_rest_idx].assume_init_ref() },
                 unsafe { fill_rest[upper_rest_idx + 1].assume_init_ref() },
             ));
@@ -127,7 +127,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
             params,
             top,
             rest,
-            hal,
+            phantom_hal: PhantomData,
         };
         iop.commit(verifier.root());
         verifier
@@ -145,7 +145,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
     /// Verifies a branch provided by an IOP.
     pub fn verify(
         &self,
-        iop: &mut ReadIOP<'a, H::Sha>,
+        iop: &mut ReadIOP<'a, H::Sha256>,
         mut idx: usize,
     ) -> Result<&'a [H::Elem], VerificationError> {
         if idx >= self.params.row_size {
@@ -157,7 +157,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
         // Initialize a vector to hold field elements.
         let out: &[H::Elem] = iop.read_field_elem_slice(self.params.col_size);
         // Get the hash at the leaf of the tree by hashing these field elements.
-        let mut cur = self.hal.sha().hash_raw_pod_slice(out);
+        let mut cur = H::Sha256::hash_raw_pod_slice(out);
         // Shift idx to start of the row
         idx += self.params.row_size;
         while idx >= 2 * self.params.top_size {
@@ -172,9 +172,9 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
             // Now ascend to the parent index, and compute the hash there.
             idx /= 2;
             if low_bit == 1 {
-                cur = self.hal.sha().hash_pair(&other, &cur);
+                cur = H::Sha256::hash_pair(&other, &cur);
             } else {
-                cur = self.hal.sha().hash_pair(&cur, &other);
+                cur = H::Sha256::hash_pair(&cur, &other);
             }
         }
         // Once we reduce to an index for which we have the hash, check that it's

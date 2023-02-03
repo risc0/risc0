@@ -19,7 +19,7 @@ use alloc::vec::Vec;
 use anyhow::{anyhow, Result};
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 use risc0_zkp::{
-    core::sha::{Digest, Sha},
+    core::sha::{Digest, Sha256},
     verify::VerificationError,
     MIN_CYCLES_PO2,
 };
@@ -53,13 +53,12 @@ pub struct Receipt {
     pub seal: Vec<u32>,
 }
 
-pub fn verify_with_hal<H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u32]) -> Result<()>
+pub fn verify_with_hal<'a, H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u32]) -> Result<()>
 where
     H: risc0_zkp::verify::VerifyHal,
-    Digest: From<D>,
+    &'a Digest: From<D>,
 {
-    let image_id: Digest = image_id.into();
-    let sha = sha::sha();
+    let image_id: &Digest = image_id.into();
     let check_globals = |io: &[u32]| -> Result<(), VerificationError> {
         // verify the image_id
         #[cfg(not(target_os = "zkvm"))]
@@ -68,8 +67,8 @@ where
         }
         let slice = &io[WORD_SIZE..WORD_SIZE + DIGEST_BYTES];
         let bytes: Vec<u8> = slice.iter().map(|x| *x as u8).collect();
-        let actual = Digest::from_bytes(&bytes);
-        if image_id != actual {
+        let actual = Digest::try_from(bytes);
+        if !actual.map(|digest| image_id == &digest).unwrap_or(false) {
             return Err(VerificationError::ImageVerificationError);
         }
 
@@ -98,8 +97,8 @@ where
                 }
             }
         } else {
-            let digest = sha.hash_raw_pod_slice(journal);
-            let digest = digest.as_slice();
+            let digest = sha::Impl::hash_raw_pod_slice(journal);
+            let digest = digest.as_words();
             for i in 0..DIGEST_WORDS {
                 if digest[i] != outputs[i] {
                     return Err(VerificationError::JournalSealRootMismatch);
@@ -142,21 +141,20 @@ impl Receipt {
 
     #[cfg(not(target_os = "zkvm"))]
     /// Verifies a receipt using CPU.
-    pub fn verify<D>(&self, image_id: D) -> Result<()>
+    pub fn verify<'a, D>(&self, image_id: D) -> Result<()>
     where
-        Digest: From<D>,
+        &'a Digest: From<D>,
     {
-        let sha = crate::sha::sha();
-        let hal = risc0_zkp::verify::CpuVerifyHal::new(sha, &crate::CIRCUIT);
+        let hal = risc0_zkp::verify::CpuVerifyHal::<sha::Impl, _, _>::new(&crate::CIRCUIT);
 
         verify_with_hal(&hal, image_id, &self.seal, &self.journal)
     }
 
     /// Verifies a receipt using the hardware acceleration layer.
-    pub fn verify_with_hal<H, D>(&self, hal: &H, image_id: D) -> Result<()>
+    pub fn verify_with_hal<'a, H, D>(&self, hal: &H, image_id: D) -> Result<()>
     where
         H: risc0_zkp::verify::VerifyHal,
-        Digest: From<D>,
+        &'a Digest: From<D>,
     {
         verify_with_hal(hal, image_id, &self.seal, &self.journal)
     }

@@ -335,7 +335,7 @@ impl Loader {
         }
 
         // Setup SHA-256 Init
-        for (i, word) in SHA256_INIT.as_slice().iter().enumerate() {
+        for (i, word) in SHA256_INIT.as_words().iter().enumerate() {
             image.insert((SHA_INIT_OFFSET + i * WORD_SIZE) as u32, *word);
         }
 

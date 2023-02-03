@@ -19,7 +19,7 @@ use rand::RngCore;
 use risc0_core::field::{Elem, ExtElem};
 
 use crate::{
-    core::{log2_ceil, sha::Sha},
+    core::{log2_ceil, sha::Sha256},
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
@@ -37,7 +37,7 @@ impl<H: Hal> ProveRoundInfo<H> {
     /// produce the evaluations of the polynomial, the merkle tree
     /// committing to the evaluation, and the coefficients of the folded
     /// polynomial.
-    pub fn new<S: Sha>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &H::BufferElem) -> Self {
+    pub fn new<S: Sha256>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &H::BufferElem) -> Self {
         debug!("Doing FRI folding");
         let ext_size = H::ExtElem::EXT_SIZE;
         // Get the number of coefficients of the polynomial over the extension field.
@@ -75,7 +75,7 @@ impl<H: Hal> ProveRoundInfo<H> {
         }
     }
 
-    pub fn prove_query<S: Sha>(&mut self, iop: &mut WriteIOP<S>, pos: &mut usize) {
+    pub fn prove_query<S: Sha256>(&mut self, iop: &mut WriteIOP<S>, pos: &mut usize) {
         // Compute which group we are in
         let group = *pos % (self.domain / FRI_FOLD);
         // Generate the proof
@@ -86,7 +86,7 @@ impl<H: Hal> ProveRoundInfo<H> {
 }
 
 #[tracing::instrument(skip_all)]
-pub fn fri_prove<H: Hal, S: Sha, F>(
+pub fn fri_prove<H: Hal, S: Sha256, F>(
     hal: &H,
     iop: &mut WriteIOP<S>,
     coeffs: &H::BufferElem,
@@ -110,7 +110,7 @@ pub fn fri_prove<H: Hal, S: Sha, F>(
     // Dump final polynomial + commit
     final_coeffs.view(|view| {
         iop.write_field_elem_slice::<H::Elem>(view);
-        let digest = iop.get_sha().hash_raw_pod_slice(view);
+        let digest = S::hash_raw_pod_slice(view);
         iop.commit(&digest);
     });
     // Do queries

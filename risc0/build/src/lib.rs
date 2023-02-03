@@ -28,7 +28,10 @@ use std::{
 
 use cargo_metadata::{MetadataCommand, Package};
 use downloader::{Download, Downloader};
-use risc0_zkvm::{sha::Digest, MemoryImage, Program};
+use risc0_zkvm::{
+    sha::{Digest, DIGEST_WORDS},
+    MemoryImage, Program,
+};
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};
@@ -74,13 +77,21 @@ impl Risc0Method {
 
     fn rust_def(&self) -> String {
         let elf_path = self.elf_path.display();
+
+        // Quick check for '#' to avoid injection of arbitrary Rust code into the the
+        // method.rs file. This would not be a serious issue since it would only
+        // affect the user that set the path, but it's good to add a check.
+        if let Some(_) = elf_path.to_string().find("#") {
+            panic!("method path cannot include #: {}", elf_path);
+        }
+
         let upper = self.name.to_uppercase();
-        let image_id = self.make_image_id();
+        let image_id: [u32; DIGEST_WORDS] = self.make_image_id().into();
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
             r##"
 pub const {upper}_ELF: &'static [u8] = &{elf_contents:?};
-pub const {upper}_ID: &'static str = r#"{image_id:?}"#;
+pub const {upper}_ID: [u32; 8] = {image_id:?};
 pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
             "##
         )

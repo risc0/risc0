@@ -19,7 +19,7 @@ use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use super::VerifyHal;
 use crate::{
-    core::{log2_ceil, sha::Sha},
+    core::{log2_ceil, sha::Sha256},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
@@ -34,17 +34,11 @@ struct VerifyRoundInfo<'a, H: VerifyHal> {
 }
 
 impl<'a, H: VerifyHal> VerifyRoundInfo<'a, H> {
-    pub fn new(hal: &'a H, iop: &mut ReadIOP<'a, H::Sha>, in_domain: usize) -> Self {
+    pub fn new(iop: &mut ReadIOP<'a, H::Sha256>, in_domain: usize) -> Self {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
-            merkle: MerkleTreeVerifier::new(
-                hal,
-                iop,
-                domain,
-                FRI_FOLD * H::ExtElem::EXT_SIZE,
-                QUERIES,
-            ),
+            merkle: MerkleTreeVerifier::new(iop, domain, FRI_FOLD * H::ExtElem::EXT_SIZE, QUERIES),
             mix: H::ExtElem::random(iop),
         }
     }
@@ -52,7 +46,7 @@ impl<'a, H: VerifyHal> VerifyRoundInfo<'a, H> {
     pub fn verify_query(
         &mut self,
         hal: &H,
-        iop: &mut ReadIOP<'a, H::Sha>,
+        iop: &mut ReadIOP<'a, H::Sha256>,
         pos: &mut usize,
         goal: &mut H::ExtElem,
     ) -> Result<(), VerificationError> {
@@ -84,12 +78,12 @@ impl<'a, H: VerifyHal> VerifyRoundInfo<'a, H> {
 
 pub fn fri_verify<'a, H: VerifyHal + 'a, F>(
     hal: &'a H,
-    iop: &mut ReadIOP<'a, H::Sha>,
+    iop: &mut ReadIOP<'a, H::Sha256>,
     mut degree: usize,
     mut inner: F,
 ) -> Result<(), VerificationError>
 where
-    F: FnMut(&mut ReadIOP<'a, H::Sha>, usize) -> Result<H::ExtElem, VerificationError>,
+    F: FnMut(&mut ReadIOP<'a, H::Sha256>, usize) -> Result<H::ExtElem, VerificationError>,
 {
     let orig_domain = INV_RATE * degree;
     let mut domain = orig_domain;
@@ -98,7 +92,7 @@ where
         (log2_ceil((degree + FRI_FOLD - 1) / FRI_FOLD) + FRI_FOLD_PO2 - 1) / FRI_FOLD_PO2;
     let mut rounds = Vec::with_capacity(rounds_capacity);
     while degree > FRI_MIN_DEGREE {
-        rounds.push(VerifyRoundInfo::new(hal, iop, domain));
+        rounds.push(VerifyRoundInfo::new(iop, domain));
         domain /= FRI_FOLD;
         degree /= FRI_FOLD;
     }
@@ -113,7 +107,7 @@ where
     );
     // Grab the final coeffs + commit
     let final_coeffs = iop.read_field_elem_slice(H::ExtElem::EXT_SIZE * degree);
-    let final_digest = iop.get_sha().hash_raw_pod_slice(final_coeffs);
+    let final_digest = H::Sha256::hash_raw_pod_slice(final_coeffs);
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
     let gen = <H::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
