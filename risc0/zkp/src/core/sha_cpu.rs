@@ -63,6 +63,11 @@ impl Impl {
             .copied()
             .fuse();
 
+        // TODO(victor): It looks like this function _does not_ implement canonical
+        // SHA-256. In particular, it zero-pads the last block instead of
+        // including the trailing 1 bit and length. In fact, this leads to a trivial
+        // collision issue in that a message with any number of trailing zeros
+        // are indistinguishable.
         let mut off = 0;
         while let Some(b1) = bytes.next() {
             let b2 = bytes.next().unwrap_or(0);

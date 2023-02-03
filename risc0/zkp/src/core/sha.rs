@@ -61,6 +61,8 @@ pub static SHA256_INIT: Digest = Digest([
 /// An implementation of the SHA-256 hashing algorithm of [FIPS 180-4].
 ///
 /// [FIPS 180-4]: https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.180-4.pdf
+// TODO(victor): Is there anywhere this function is used when it should really
+// be a PRF?
 pub trait Sha256 {
     /// A pointer to the digest created as the result of a hashing operation.
     ///
@@ -112,6 +114,8 @@ pub trait Sha256 {
     /// plain old data. Pads up to the SHA-256 block boundary, but does not
     /// add the standard SHA-256 trailer and so is not a standards compliant
     /// hash.
+    // TODO(victor): Look over the usages of this function to understand why it
+    // exists and if it should exist on this trait.
     fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr;
 }
 
@@ -671,6 +675,7 @@ pub mod rust_crypto {
     pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
 }
 
+// TODO(victor): Review test coverage.
 #[cfg(test)]
 mod tests {
     use hex::FromHex;
