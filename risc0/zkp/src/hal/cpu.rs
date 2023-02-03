@@ -18,7 +18,7 @@ use core::{
     cell::{Ref, RefMut},
     marker::PhantomData,
     ops::Range,
-    slice::{from_raw_parts, from_raw_parts_mut}
+    slice::{from_raw_parts, from_raw_parts_mut},
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -46,11 +46,17 @@ pub trait CpuHashImpl<E: Elem> {
     fn hash_fold(io: &CpuBuffer<Digest>, input_size: usize, output_size: usize);
 }
 
-pub struct CpuHal<E: Elem, EE: ExtElem, HI> where HI : CpuHashImpl<E> {
+pub struct CpuHal<E: Elem, EE: ExtElem, HI>
+where
+    HI: CpuHashImpl<E>,
+{
     phantom: PhantomData<(E, EE, HI)>,
 }
 
-impl<E: Elem, EE: ExtElem, HI> CpuHal<E, EE, HI>  where HI : CpuHashImpl<E> {
+impl<E: Elem, EE: ExtElem, HI> CpuHal<E, EE, HI>
+where
+    HI: CpuHashImpl<E>,
+{
     pub fn new() -> Self {
         CpuHal {
             phantom: PhantomData,
@@ -435,11 +441,11 @@ where
     }
 }
 
-pub struct CpuSha256HashImpl<E : Elem> {
+pub struct CpuSha256HashImpl<E: Elem> {
     phantom: PhantomData<E>,
 }
 
-impl<E : Elem> CpuHashImpl<E> for CpuSha256HashImpl<E> {
+impl<E: Elem> CpuHashImpl<E> for CpuSha256HashImpl<E> {
     fn hash_rows(output: &CpuBuffer<Digest>, matrix: &CpuBuffer<E>) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
