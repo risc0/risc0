@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::marker::PhantomData;
+
 use log::debug;
 use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use crate::{
     core::{
         poly::{poly_divide, poly_interpolate},
-        sha::Sha,
+        sha::Sha256,
     },
     hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
@@ -30,15 +32,15 @@ use crate::{
 pub struct Prover<'a, H, S>
 where
     H: Hal,
-    S: Sha,
+    S: Sha256,
 {
     hal: &'a H,
-    sha: &'a S,
     taps: &'a TapSet<'a>,
     iop: WriteIOP<S>,
     groups: Vec<Option<PolyGroup<H>>>,
     cycles: usize,
     po2: usize,
+    phantom_sha: PhantomData<S>,
 }
 
 fn make_coeffs<H: Hal>(hal: &H, buf: H::BufferElem, count: usize) -> H::BufferElem {
@@ -53,20 +55,20 @@ fn make_coeffs<H: Hal>(hal: &H, buf: H::BufferElem, count: usize) -> H::BufferEl
 impl<'a, H, S> Prover<'a, H, S>
 where
     H: Hal,
-    S: Sha,
+    S: Sha256,
 {
     /// Creates a new prover.
-    pub fn new(hal: &'a H, sha: &'a S, taps: &'a TapSet) -> Self {
+    pub fn new(hal: &'a H, taps: &'a TapSet) -> Self {
         Self {
             hal,
-            sha,
             taps,
-            iop: WriteIOP::new(sha),
+            iop: WriteIOP::new(),
             groups: std::iter::repeat_with(|| None)
                 .take(taps.num_groups())
                 .collect(),
             cycles: 0,
             po2: usize::MAX,
+            phantom_sha: PhantomData,
         }
     }
 
@@ -249,7 +251,7 @@ where
 
         debug!("Size of U = {}", coeff_u.len());
         self.iop.write_field_elem_slice(&coeff_u);
-        let hash_u = self.sha.hash_raw_pod_slice(coeff_u.as_slice());
+        let hash_u = S::hash_raw_pod_slice(coeff_u.as_slice());
         self.iop.commit(&hash_u);
 
         // Set the mix mix value, which is used for FRI batching.

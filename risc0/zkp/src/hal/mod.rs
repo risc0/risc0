@@ -516,7 +516,7 @@ mod testutil {
         gpu_io.view_mut(|g| {
             cpu_io.view_mut(|c| {
                 for i in 0..INPUTS {
-                    let digest = Digest::new([
+                    let digest = Digest::from([
                         rng.next_u32(),
                         rng.next_u32(),
                         rng.next_u32(),

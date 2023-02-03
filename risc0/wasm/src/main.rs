@@ -27,6 +27,6 @@ use risc0_zkvm::{
 fn _start() {
     // TODO: use a real receipt and image_id
     let receipt = Receipt::new(&[], &[]);
-    let image_id = Digest::new([0; DIGEST_WORDS]);
-    receipt.verify(image_id).unwrap();
+    let image_id = Digest::from([0; DIGEST_WORDS]);
+    receipt.verify(&image_id).unwrap();
 }

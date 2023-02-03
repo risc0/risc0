@@ -14,7 +14,7 @@
 
 #![no_main]
 
-use risc0_zkp::core::sha::Sha;
+use risc0_zkp::core::sha::Sha256;
 use risc0_zkvm::guest::{env, memory_barrier, sha};
 use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
 
@@ -29,15 +29,8 @@ pub fn main() {
             }
         }
         BenchmarkSpec::HashBytes { buf } => {
-            let sha = sha::Impl {};
             for _ in 0..iters {
-                memory_barrier(&sha.hash_bytes(&buf));
-            }
-        }
-        BenchmarkSpec::HashRawWords { buf } => {
-            let sha = sha::Impl {};
-            for _ in 0..iters {
-                memory_barrier(&sha.hash_raw_words(&buf));
+                memory_barrier(&sha::Impl::hash_bytes(&buf));
             }
         }
         BenchmarkSpec::Memcpy {

@@ -23,6 +23,7 @@ protobuf-src = { version = "1.1", optional = true }
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.12"
 cfg-if = "1.0"
+hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
 risc0-zeroio = { workspace = true }

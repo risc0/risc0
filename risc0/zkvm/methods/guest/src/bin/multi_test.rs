@@ -20,8 +20,8 @@
 use core::arch::asm;
 
 use risc0_zeroio::deserialize::Deserialize;
-use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha};
-use risc0_zkvm::guest::{env, memory_barrier, sha::Impl as ShaImpl};
+use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
+use risc0_zkvm::guest::{env, memory_barrier, sha};
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef};
 use risc0_zkvm_platform::io::SENDRECV_CHANNEL_INITIAL_INPUT;
 
@@ -44,17 +44,17 @@ pub fn main() {
     let impl_select = MultiTestSpec::deserialize_from(bytemuck::cast_slice(initial_input));
     match impl_select {
         MultiTestSpecRef::DoNothing(_) => {}
-        MultiTestSpecRef::ShaConforms(_) => test_sha_impl(&ShaImpl {}),
+        MultiTestSpecRef::ShaConforms(_) => test_sha_impl::<sha::Impl>(),
         MultiTestSpecRef::ShaCycleCount(_) => {
             // Time the simulated sha so that it estimates what we'd
             // see when it's a custom circuit.
-            let a: &Digest = &Digest::new([1, 2, 3, 4, 5, 6, 7, 8]);
+            let a: &Digest = &Digest::from([1, 2, 3, 4, 5, 6, 7, 8]);
 
             let count1 = env::get_cycle_count();
             memory_barrier(&count1);
             let count2 = env::get_cycle_count();
             memory_barrier(&count2);
-            let result = ShaImpl {}.hash_pair(a, a);
+            let result = sha::Impl::hash_pair(a, a);
             memory_barrier(&result);
             let count3 = env::get_cycle_count();
             memory_barrier(&count3);
@@ -95,7 +95,7 @@ pub fn main() {
             }
         }
         MultiTestSpecRef::ShaDigest(data) => {
-            let digest = ShaImpl {}.hash_bytes(data.data());
+            let digest = sha::Impl::hash_bytes(data.data());
             env::commit(&digest);
         }
         MultiTestSpecRef::SendRecv(sendrecv) => {

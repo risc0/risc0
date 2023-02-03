@@ -25,9 +25,6 @@ pub enum BenchmarkSpec {
     HashBytes {
         buf: Vec<u8>,
     },
-    HashRawWords {
-        buf: Vec<u32>,
-    },
     Memcpy {
         src: Vec<u8>,
         src_align: usize,

@@ -27,7 +27,7 @@ use risc0_core::field::{
 };
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepHandler, PolyExt},
-    core::{log2_ceil, sha::BLOCK_SIZE},
+    core::{log2_ceil, sha::BLOCK_BYTES},
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
 };
@@ -492,8 +492,8 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                     faults.include(state_in_addr + (i * WORD_SIZE) as u32);
                 }
                 for i in 0..count {
-                    let addr1 = block1_addr + i * BLOCK_SIZE as u32;
-                    let addr2 = block2_addr + i * BLOCK_SIZE as u32;
+                    let addr1 = block1_addr + i * BLOCK_BYTES as u32;
+                    let addr2 = block2_addr + i * BLOCK_BYTES as u32;
                     for j in 0..DIGEST_WORDS {
                         faults.include(addr1 + (j * WORD_SIZE) as u32);
                         faults.include(addr2 + (j * WORD_SIZE) as u32);
@@ -957,7 +957,7 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         }
 
         // initialize ImageID
-        let image_id = image.root.as_slice();
+        let image_id = image.root.as_words();
         for i in 0..DIGEST_WORDS {
             let bytes = image_id[i].to_le_bytes();
             for j in 0..WORD_SIZE {

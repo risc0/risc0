@@ -27,10 +27,10 @@ mod util;
 
 pub use deserialize::{Deserialize, DeserializeOwned};
 pub use risc0_zeroio_derive::{Deserialize, Serialize};
+pub use risc0_zkvm_platform::WORD_SIZE;
 pub use serialize::{serialize, Alloc, AllocBuf, Serialize};
 use util::as_words_padded;
 
-pub const WORD_SIZE: usize = 4;
 pub const PAD_WORDS: usize = 8;
 
 pub type Result<T> = core::result::Result<T, ZeroioError>;

@@ -40,8 +40,7 @@ use risc0_zkvm_platform::{
 use crate::binfmt::elf::Program;
 use crate::{
     receipt::{insecure_skip_seal, Receipt},
-    sha::sha,
-    CIRCUIT,
+    sha, CIRCUIT,
 };
 
 /// Options available to modify the prover's behavior.
@@ -222,7 +221,7 @@ impl<'a> Prover<'a> {
         self.cycles = executor.run()?;
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, sha(), CIRCUIT.get_taps());
+        let mut prover = risc0_zkp::prove::Prover::<_, sha::Impl>::new(hal, CIRCUIT.get_taps());
 
         adapter.execute(prover.iop());
 

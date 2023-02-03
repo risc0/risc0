@@ -21,7 +21,7 @@ use core::{
     mem::{self, MaybeUninit},
 };
 
-use risc0_zkp::core::sha::{Digest, DIGEST_WORDS, SHA256_INIT};
+use risc0_zkp::core::sha::{Block, Digest, BLOCK_WORDS, DIGEST_WORDS, SHA256_INIT};
 use risc0_zkvm_platform::{
     syscall::{sys_sha_buffer, sys_sha_compress},
     WORD_SIZE,
@@ -31,14 +31,9 @@ use serde::Serialize;
 use crate::guest::align_up;
 use crate::serde::to_vec_with_capacity;
 
+// FIP 180-4 specifies that the bit-string being hashed should have a `1`
+// appended to it before padding.
 const END_MARKER: u8 = 0x80;
-
-// Chunk size in words for optimized SHA to operate on; all SHA
-// requests must be a multiple of this size.
-const BLOCK_WORDS: usize = 16;
-const HALFBLOCK_WORDS: usize = BLOCK_WORDS / 2;
-type HalfBlock = [u32; HALFBLOCK_WORDS];
-type Block = [HalfBlock; 2];
 
 fn alloc_uninit_digest() -> *mut Digest {
     extern crate alloc;
@@ -49,15 +44,35 @@ fn alloc_uninit_digest() -> *mut Digest {
 fn compress(
     out_state: *mut Digest,
     in_state: *const Digest,
-    block_half1: &HalfBlock,
-    block_half2: &HalfBlock,
+    block_half1: &Digest,
+    block_half2: &Digest,
 ) {
     // SAFETY: This is only called from this crate.  It's perfectly fine
     // for in_state and out_state to point at the same place, and for
     // out_state to be uninitialized memory, and those preclude us
     // from using references.
     unsafe {
-        sys_sha_compress(out_state.cast(), in_state.cast(), block_half1, block_half2);
+        sys_sha_compress(
+            out_state.cast(),
+            in_state.cast(),
+            block_half1.as_ref(),
+            block_half2.as_ref(),
+        );
+    }
+}
+
+fn compress_slice(out_state: *mut Digest, in_state: *const Digest, blocks: &[Block]) {
+    // SAFETY: This is only called from this crate. It's perfectly fine
+    // for in_state and out_state to point at the same place, and for
+    // out_state to be uninitialized memory, and those preclude us
+    // from using references.
+    unsafe {
+        sys_sha_buffer(
+            out_state.cast(),
+            in_state.cast(),
+            bytemuck::cast_slice(blocks).as_ptr(),
+            blocks.len() as u32,
+        );
     }
 }
 
@@ -65,7 +80,7 @@ fn compress(
 pub(crate) enum Trailer {
     /// Add a SHA-standard trailer with an end marker and the given number of
     /// bits
-    WithTrailer { total_bits: usize },
+    WithTrailer { total_bits: u32 },
     /// Only zero-pad; don't add markers or length.
     WithoutTrailer,
 }
@@ -120,7 +135,7 @@ fn copy_and_update(
 
     if let WithTrailer { total_bits } = trailer {
         assert_eq!(padbuf[padlen - 1], 0);
-        padbuf[padlen - 1] = (total_bits as u32).to_be();
+        padbuf[padlen - 1] = total_bits.to_be();
     }
 
     match bytemuck::pod_align_to::<u32, Block>(padbuf.as_slice()) {
@@ -209,89 +224,62 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
     }
 }
 
-/// Computes the SHA256 digest of a serialized object.
-pub fn digest<T: Serialize>(val: &T) -> &'static Digest {
-    // If the object to be serialized is a plain old structure in memory, this
-    // should be a good guess for the allocation needed.
-    let approx_len = mem::size_of_val(val);
-    let cap = compute_u32s_needed(
-        approx_len,
-        WithTrailer {
-            total_bits: approx_len * 8,
-        },
-    );
-    let buf = to_vec_with_capacity(val, cap).unwrap();
-
-    let trailer = WithTrailer {
-        total_bits: buf.len() * 8,
-    };
-
-    let digest = alloc_uninit_digest();
-    update_u32(digest, &SHA256_INIT, buf.as_slice(), trailer);
-    // Now that digest is initialized, we can convert it to a reference.
-    unsafe { &*digest }
-}
-
-/// A guest-side [Sha] implementation.
+/// A guest-side [Sha256] implementation.
 ///
-/// [Sha]: risc0_zkp::core::sha::Sha
+/// [Sha256]: risc0_zkp::core::sha::Sha256
 #[derive(Debug, Clone)]
 pub struct Impl {}
 
-impl risc0_zkp::core::sha::Sha for Impl {
-    type DigestPtr = &'static Digest;
+impl risc0_zkp::core::sha::Sha256 for Impl {
+    type DigestPtr = &'static mut Digest;
 
-    fn hash_bytes(&self, bytes: &[u8]) -> Self::DigestPtr {
+    fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
         update_u8(
             digest,
             &SHA256_INIT,
             bytes,
             WithTrailer {
-                total_bits: bytes.len() * 8,
+                total_bits: bytes.len() as u32 * 8,
             },
         );
         // Now that digest is initialized, we can convert it to a reference.
-        unsafe { &*digest }
+        unsafe { &mut *digest }
     }
 
-    fn hash_raw_words(&self, words: &[u32]) -> Self::DigestPtr {
+    fn hash_words(words: &[u32]) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
-        update_u32(digest, &SHA256_INIT, words, WithoutTrailer);
+        update_u32(
+            digest,
+            &SHA256_INIT,
+            words,
+            WithTrailer {
+                total_bits: words.len() as u32 * 32,
+            },
+        );
         // Now that digest is initialized, we can convert it to a reference.
-        unsafe { &*digest }
+        unsafe { &mut *digest }
     }
 
-    fn hash_raw_pod_slice<T: bytemuck::Pod>(&self, pod: &[T]) -> Self::DigestPtr {
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(pod: &[T]) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
         let words: &[u32] = bytemuck::cast_slice(pod);
         update_u32(digest, &SHA256_INIT, words, WithoutTrailer);
         // Now that digest is initialized, we can convert it to a reference.
-        unsafe { &*digest }
+        unsafe { &mut *digest }
     }
 
-    // Generate a new digest by mixing two digests together via XOR,
-    // and storing into the first digest.
-    fn mix(&self, pool: &mut Self::DigestPtr, val: &Digest) {
-        let mut digest = Box::<Digest>::new(Digest::default());
-        for i in 0..DIGEST_WORDS {
-            digest.get_mut()[i] = pool.get()[i] ^ val.get()[i];
-        }
-        unsafe {
-            let ptr: *const Digest = &*digest;
-            *pool = &*ptr
-        }
-    }
-
-    fn compress(
-        &self,
-        state: &Digest,
-        block_half1: &Digest,
-        block_half2: &Digest,
-    ) -> &'static Digest {
+    fn compress(state: &Digest, block_half1: &Digest, block_half2: &Digest) -> Self::DigestPtr {
         let digest = alloc_uninit_digest();
-        compress(digest, state, &block_half1.get(), &block_half2.get());
+        compress(digest, state, block_half1, block_half2);
         // Now that digest is initialized, we can convert it to a reference.
-        unsafe { &*digest }
+        unsafe { &mut *digest }
+    }
+
+    fn compress_slice(state: &Digest, blocks: &[Block]) -> Self::DigestPtr {
+        let digest = alloc_uninit_digest();
+        compress_slice(digest, state, blocks);
+        // Now that digest is initialized, we can convert it to a reference.
+        unsafe { &mut *digest }
     }
 }
