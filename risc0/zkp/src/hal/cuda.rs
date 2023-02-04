@@ -546,13 +546,13 @@ impl Hal for CudaHal {
     }
 
     #[tracing::instrument(skip_all)]
-    fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("sha_rows").unwrap();
+        let kernel_name = CString::new("hash_rows").unwrap();
         let kernel = self.module.get_function(&kernel_name).unwrap();
         let params = self.compute_simple_params(row_size);
         unsafe {
@@ -567,7 +567,7 @@ impl Hal for CudaHal {
         stream.synchronize().unwrap();
     }
 
-    fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
@@ -633,14 +633,14 @@ mod tests {
 
     #[test]
     #[serial]
-    fn sha_rows() {
+    fn hash_rows() {
         testutil::sha_rows(CudaHal::new());
     }
 
     #[test]
     #[serial]
-    fn sha_fold() {
-        testutil::sha_fold(CudaHal::new());
+    fn hash_fold() {
+        testutil::hash_fold(CudaHal::new());
     }
 
     #[test]

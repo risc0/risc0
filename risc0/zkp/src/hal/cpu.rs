@@ -423,7 +423,7 @@ where
     }
 
     #[tracing::instrument(skip_all)]
-    fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
@@ -434,7 +434,7 @@ where
         });
     }
 
-    fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
         let mut io = io.as_slice_mut();
         let (output, input) = unsafe {
@@ -510,12 +510,12 @@ mod tests {
         });
     }
 
-    fn do_sha_rows(rows: usize, cols: usize, expected: &[&str]) {
+    fn do_hash_rows(rows: usize, cols: usize, expected: &[&str]) {
         let hal: BabyBearCpuHal = CpuHal::new();
         let matrix_size = rows * cols;
         let matrix = hal.alloc_elem("matrix", matrix_size);
         let output = hal.alloc_digest("output", rows);
-        hal.sha_rows(&output, &matrix);
+        hal.hash_rows(&output, &matrix);
         output.view(|view| {
             assert_eq!(expected.len(), view.len());
             for (expected, actual) in expected.iter().zip(view) {
@@ -525,8 +525,8 @@ mod tests {
     }
 
     #[test]
-    fn sha_rows() {
-        do_sha_rows(
+    fn hash_rows() {
+        do_hash_rows(
             1,
             16,
             &["da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8"],

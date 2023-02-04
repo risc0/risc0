@@ -488,7 +488,7 @@ impl Hal for MetalHal {
         self.dispatch_by_name("mix_poly_coeffs", args, count as u64);
     }
 
-    fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
         let args = &[
             io.as_arg_with_offset(output_size),
@@ -498,7 +498,7 @@ impl Hal for MetalHal {
     }
 
     #[tracing::instrument(skip_all)]
-    fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
@@ -619,13 +619,13 @@ mod tests {
     }
 
     #[test]
-    fn sha_fold() {
-        testutil::sha_fold(MetalHal::new());
+    fn hash_fold() {
+        testutil::hash_fold(MetalHal::new());
     }
 
     #[test]
-    fn sha_rows() {
-        testutil::sha_rows(MetalHal::new());
+    fn hash_rows() {
+        testutil::hash_rows(MetalHal::new());
     }
 
     #[test]

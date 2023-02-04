@@ -284,15 +284,15 @@ where
         output.assert_eq();
     }
 
-    fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
-        self.hal1.sha_rows(&output.buf1, &matrix.buf1);
-        self.hal2.sha_rows(&output.buf2, &matrix.buf2);
+    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+        self.hal1.hash_rows(&output.buf1, &matrix.buf1);
+        self.hal2.hash_rows(&output.buf2, &matrix.buf2);
         output.assert_eq();
     }
 
-    fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
-        self.hal1.sha_fold(&io.buf1, input_size, output_size);
-        self.hal2.sha_fold(&io.buf2, input_size, output_size);
+    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+        self.hal1.hash_fold(&io.buf1, input_size, output_size);
+        self.hal2.hash_fold(&io.buf2, input_size, output_size);
         io.assert_eq();
     }
 }

@@ -56,12 +56,12 @@ impl<H: Hal> MerkleTreeProver<H> {
         // Allocate nodes
         let nodes = hal.alloc_digest("nodes", rows * 2);
         // SHA-256 hash each column
-        hal.sha_rows(&nodes.slice(rows, rows), matrix);
+        hal.hash_rows(&nodes.slice(rows, rows), matrix);
         // For each layer, sha up the layer below
-        tracing::info_span!("sha_fold").in_scope(|| {
+        tracing::info_span!("hash_fold").in_scope(|| {
             for i in (0..params.layers).rev() {
                 let layer_size = 1 << i;
-                hal.sha_fold(&nodes, layer_size * 2, layer_size);
+                hal.hash_fold(&nodes, layer_size * 2, layer_size);
             }
         });
         let mut nodes_host = Vec::with_capacity(nodes.size());
