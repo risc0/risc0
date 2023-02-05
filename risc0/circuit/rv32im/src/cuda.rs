@@ -109,7 +109,7 @@ impl<'a> EvalCheck<CudaHal> for CudaEvalCheck {
 mod tests {
     use std::rc::Rc;
 
-    use risc0_zkp::hal::{cpu::BabyBearCpuHal, cuda::CudaHal};
+    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, cuda::CudaHal};
     use test_log::test;
 
     use crate::cpu::CpuEvalCheck;
@@ -118,7 +118,7 @@ mod tests {
     fn eval_check() {
         const PO2: usize = 4;
         let circuit = crate::CircuitImpl::new();
-        let cpu_hal = BabyBearCpuHal::new();
+        let cpu_hal = BabyBearSha256CpuHal::new();
         let cpu_eval = CpuEvalCheck::new(&circuit);
         let gpu_hal = Rc::new(CudaHal::new());
         let gpu_eval = super::CudaEvalCheck::new(gpu_hal.clone());

@@ -94,7 +94,7 @@ impl EvalCheck<MetalHal> for MetalEvalCheck {
 mod tests {
     use std::rc::Rc;
 
-    use risc0_zkp::hal::{cpu::BabyBearCpuHal, metal::MetalHal};
+    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, metal::MetalHal};
     use test_log::test;
 
     use crate::cpu::CpuEvalCheck;
@@ -106,7 +106,7 @@ mod tests {
         // The number of cycles, choose a number that doesn't make tests take too long.
         const PO2: usize = 4;
         let circuit = crate::CircuitImpl::new();
-        let cpu_hal = BabyBearCpuHal::new();
+        let cpu_hal = BabyBearSha256CpuHal::new();
         let cpu_eval = CpuEvalCheck::new(&circuit);
         let gpu_hal = Rc::new(MetalHal::new());
         let gpu_eval = super::MetalEvalCheck::new(gpu_hal.clone());
