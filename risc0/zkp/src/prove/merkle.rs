@@ -130,7 +130,7 @@ mod tests {
     use crate::verify::VerifyHal;
     use crate::{
         adapter::{MixState, PolyExt},
-        core::{sha_cpu, config::HashSuiteSha256},
+        core::{config::HashSuiteSha256, sha_cpu},
         hal::cpu::{BabyBearSha256CpuHal, CpuHal},
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, CpuVerifyHal, VerificationError},
     };
@@ -148,7 +148,8 @@ mod tests {
         }
     }
 
-    type TestVerifyHal<'a> = CpuVerifyHal<'a, BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>, MockCircuit>;
+    type TestVerifyHal<'a> =
+        CpuVerifyHal<'a, BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>, MockCircuit>;
 
     fn init_prover<H: Hal>(
         hal: &H,

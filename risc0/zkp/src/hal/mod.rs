@@ -136,7 +136,7 @@ mod testutil {
 
     use super::{EvalCheck, Hal};
     use crate::{
-        core::{log2_ceil, sha::Digest, config::HashSuiteSha256, sha_cpu},
+        core::{config::HashSuiteSha256, log2_ceil, sha::Digest, sha_cpu},
         hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
     };

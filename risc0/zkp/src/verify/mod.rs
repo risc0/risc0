@@ -39,7 +39,7 @@ use crate::{
         CircuitInfo, TapsProvider, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
     },
     core::{
-        config::{HashSuite, ConfigHash, ConfigRng},
+        config::{ConfigHash, ConfigRng, HashSuite},
         digest::Digest,
         log2_ceil,
     },
@@ -159,9 +159,7 @@ mod host {
         }
     }
 
-    impl<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> VerifyHal
-        for CpuVerifyHal<'a, F, HS, C>
-    {
+    impl<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> VerifyHal for CpuVerifyHal<'a, F, HS, C> {
         type Hash = HS::Hash;
         type Rng = HS::Rng;
         type Elem = F::Elem;
