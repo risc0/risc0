@@ -14,24 +14,23 @@
 
 use alloc::vec::Vec;
 
-use risc0_core::field::{baby_bear::BabyBearElem, Elem};
+use risc0_core::field::Field;
 
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
-    core::sha::Sha256,
     taps::TapSet,
-    verify::read_iop::ReadIOP,
+    verify::{read_iop::ReadIOP, ConfigRNG},
 };
 
-pub struct VerifyAdapter<'a, C: CircuitInfo + TapsProvider> {
+pub struct VerifyAdapter<'a, F: Field, C: CircuitInfo + TapsProvider> {
     circuit: &'a C,
     po2: u32,
     steps: usize,
-    pub out: Option<&'a [BabyBearElem]>,
-    pub mix: Vec<BabyBearElem>,
+    pub out: Option<&'a [F::Elem]>,
+    pub mix: Vec<F::Elem>,
 }
 
-impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
+impl<'a, F: Field, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, F, C> {
     pub fn new(circuit: &'a C) -> Self {
         VerifyAdapter {
             circuit,
@@ -46,7 +45,7 @@ impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
         self.circuit.get_taps()
     }
 
-    pub fn execute<S: Sha256>(&mut self, iop: &mut ReadIOP<'a, S>) {
+    pub fn execute<R: ConfigRNG<F>>(&mut self, iop: &mut ReadIOP<'a, F, R>) {
         // Read the outputs + size
         self.out = Some(iop.read_field_elem_slice(C::OUTPUT_SIZE));
         self.po2 = match iop.read_u32s(1) {
@@ -56,11 +55,9 @@ impl<'a, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, C> {
         self.steps = 1 << self.po2;
     }
 
-    pub fn accumulate<S: Sha256>(&mut self, iop: &mut ReadIOP<'a, S>) {
+    pub fn accumulate<R: ConfigRNG<F>>(&mut self, iop: &mut ReadIOP<'a, F, R>) {
         // Fill in accum mix
-        self.mix = (0..C::MIX_SIZE)
-            .map(|_| BabyBearElem::random(iop))
-            .collect();
+        self.mix = (0..C::MIX_SIZE).map(|_| iop.random_elem()).collect();
     }
 
     pub fn po2(&self) -> u32 {
