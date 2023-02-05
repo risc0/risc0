@@ -19,13 +19,13 @@ use metal::{
     MTLSize, NSRange,
 };
 use risc0_core::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem, RootsOfUnity,
 };
 
 use super::{Buffer, Hal};
 use crate::{
-    core::{log2_ceil, sha::Digest},
+    core::{config::ConfigHashSha256, log2_ceil, sha::Digest, sha_cpu, sha_rng::ShaRng},
     FRI_FOLD,
 };
 
@@ -242,11 +242,15 @@ impl MetalHal {
 impl Hal for MetalHal {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
+    type Field = BabyBear;
 
     type BufferDigest = BufferImpl<Digest>;
     type BufferElem = BufferImpl<Self::Elem>;
     type BufferExtElem = BufferImpl<Self::ExtElem>;
     type BufferU32 = BufferImpl<u32>;
+
+    type Hash = ConfigHashSha256<sha_cpu::Impl>;
+    type Rng = ShaRng<sha_cpu::Impl>;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::BufferElem {
         BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
