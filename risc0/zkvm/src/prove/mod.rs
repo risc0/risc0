@@ -24,7 +24,7 @@ use std::{collections::HashMap, fmt::Debug, io::Write, rc::Rc};
 
 use anyhow::{bail, Result};
 use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
-use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
+use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
     core::sha::Digest,
@@ -40,7 +40,7 @@ use risc0_zkvm_platform::{
 use crate::binfmt::elf::Program;
 use crate::{
     receipt::{insecure_skip_seal, Receipt},
-    sha, CIRCUIT,
+    CIRCUIT,
 };
 
 /// Options available to modify the prover's behavior.
@@ -132,14 +132,14 @@ cfg_if::cfg_if! {
         }
     } else {
         use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
-        use risc0_zkp::hal::cpu::BabyBearCpuHal;
+        use risc0_zkp::hal::cpu::BabyBearSha256CpuHal;
 
         thread_local! {
-            static HAL: (Rc<BabyBearCpuHal>, CpuEvalCheck<'static, CircuitImpl>) = default_hal();
+            static HAL: (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) = default_hal();
         }
 
-        pub fn default_hal() -> (Rc<BabyBearCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
-            let hal = Rc::new(BabyBearCpuHal::new());
+        pub fn default_hal() -> (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
+            let hal = Rc::new(BabyBearSha256CpuHal::new());
             let eval = CpuEvalCheck::new(&CIRCUIT);
             (hal, eval)
         }
@@ -197,7 +197,7 @@ impl<'a> Prover<'a> {
         HAL.with(|(hal, eval)| {
             cfg_if::cfg_if! {
                 if #[cfg(feature = "dual")] {
-                    let cpu_hal = risc0_zkp::hal::cpu::BabyBearCpuHal::new();
+                    let cpu_hal = risc0_zkp::hal::cpu::BabyBearSha256CpuHal::new();
                     let cpu_eval = risc0_circuit_rv32im::cpu::CpuEvalCheck::new(&CIRCUIT);
                     let hal = risc0_zkp::hal::dual::DualHal::new(hal.as_ref(), &cpu_hal);
                     let eval = risc0_zkp::hal::dual::DualEvalCheck::new(eval, &cpu_eval);
@@ -212,7 +212,7 @@ impl<'a> Prover<'a> {
     #[tracing::instrument(skip_all)]
     pub fn run_with_hal<H, E>(&mut self, hal: &H, eval: &E) -> Result<Receipt>
     where
-        H: Hal<Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+        H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
         E: EvalCheck<H>,
     {
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
@@ -221,7 +221,7 @@ impl<'a> Prover<'a> {
         self.cycles = executor.run()?;
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
-        let mut prover = risc0_zkp::prove::Prover::<_, sha::Impl>::new(hal, CIRCUIT.get_taps());
+        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
 
         adapter.execute(prover.iop());
 

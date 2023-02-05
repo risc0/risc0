@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::Parser;
-use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
+use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::hal::{EvalCheck, Hal};
 use risc0_zkvm::{prove::default_hal, Prover, Receipt};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
@@ -50,7 +50,7 @@ fn main() {
 #[tracing::instrument(skip_all)]
 fn top<H, E>(hal: &H, eval: &E, iterations: u32) -> Receipt
 where
-    H: Hal<Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+    H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
     E: EvalCheck<H>,
 {
     let mut prover = Prover::new(FIB_ELF, FIB_ID).unwrap();

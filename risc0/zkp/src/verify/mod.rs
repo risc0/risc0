@@ -34,12 +34,14 @@ pub use host::CpuVerifyHal;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use self::adapter::VerifyAdapter;
+#[cfg(not(target_os = "zkvm"))]
+pub use crate::core::config::HashSuite;
 use crate::{
     adapter::{
         CircuitInfo, TapsProvider, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
     },
     core::{
-        config::{ConfigHash, ConfigRng, HashSuite},
+        config::{ConfigHash, ConfigRng},
         digest::Digest,
         log2_ceil,
     },

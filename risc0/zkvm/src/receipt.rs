@@ -17,7 +17,12 @@
 use alloc::vec::Vec;
 
 use anyhow::{anyhow, Result};
+#[cfg(not(target_os = "zkvm"))]
+use risc0_core::field::baby_bear::BabyBear;
+use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
+#[cfg(not(target_os = "zkvm"))]
+use risc0_zkp::core::config::HashSuiteSha256;
 use risc0_zkp::{
     core::sha::{Digest, Sha256},
     verify::VerificationError,
@@ -55,12 +60,14 @@ pub struct Receipt {
 
 pub fn verify_with_hal<'a, H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u32]) -> Result<()>
 where
-    H: risc0_zkp::verify::VerifyHal,
+    H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
     &'a Digest: From<D>,
 {
     let image_id: &Digest = image_id.into();
-    let check_globals = |io: &[u32]| -> Result<(), VerificationError> {
+    let check_globals = |io: &[BabyBearElem]| -> Result<(), VerificationError> {
         // verify the image_id
+        // Convert to u32 first
+        let io: Vec<u32> = io.iter().map(|x| u32::from(*x)).collect();
         #[cfg(not(target_os = "zkvm"))]
         for (i, word) in io.iter().enumerate() {
             log::debug!("io: 0x{i:02x} -> 0x{word:08x}");
@@ -145,7 +152,11 @@ impl Receipt {
     where
         &'a Digest: From<D>,
     {
-        let hal = risc0_zkp::verify::CpuVerifyHal::<sha::Impl, _, _>::new(&crate::CIRCUIT);
+        let hal = risc0_zkp::verify::CpuVerifyHal::<
+            BabyBear,
+            HashSuiteSha256<BabyBear, sha::Impl>,
+            _,
+        >::new(&crate::CIRCUIT);
 
         verify_with_hal(&hal, image_id, &self.seal, &self.journal)
     }
@@ -153,7 +164,7 @@ impl Receipt {
     /// Verifies a receipt using the hardware acceleration layer.
     pub fn verify_with_hal<'a, H, D>(&self, hal: &H, image_id: D) -> Result<()>
     where
-        H: risc0_zkp::verify::VerifyHal,
+        H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
         &'a Digest: From<D>,
     {
         verify_with_hal(hal, image_id, &self.seal, &self.journal)

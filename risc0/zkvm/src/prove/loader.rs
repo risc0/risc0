@@ -25,7 +25,7 @@ use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::TapsProvider,
     core::sha::SHA256_INIT,
-    hal::{cpu::BabyBearCpuHal, Hal},
+    hal::{cpu::BabyBearSha256CpuHal, Hal},
     prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
@@ -363,7 +363,7 @@ impl Loader {
 
     pub fn compute_control_id(&self) -> ControlId {
         let code_size = CIRCUIT.code_size();
-        let hal = BabyBearCpuHal::new();
+        let hal = BabyBearSha256CpuHal::new();
 
         // Start with an empty table
         let mut table = Vec::new();
