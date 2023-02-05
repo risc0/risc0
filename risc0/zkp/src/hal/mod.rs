@@ -21,9 +21,13 @@ pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
-use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
+use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
-use crate::{core::sha::Digest, INV_RATE};
+use crate::{
+    core::config::{ConfigHash, ConfigRng},
+    core::digest::Digest,
+    INV_RATE,
+};
 
 pub trait Buffer<T>: Clone {
     fn size(&self) -> usize;
@@ -38,10 +42,13 @@ pub trait Buffer<T>: Clone {
 pub trait Hal {
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
+    type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type BufferDigest: Buffer<Digest>;
     type BufferElem: Buffer<Self::Elem>;
     type BufferExtElem: Buffer<Self::ExtElem>;
     type BufferU32: Buffer<u32>;
+    type Hash: ConfigHash;
+    type Rng: ConfigRng<Self::Field>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 

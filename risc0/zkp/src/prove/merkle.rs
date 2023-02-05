@@ -18,7 +18,7 @@ use alloc::vec::Vec;
 use log::debug;
 
 use crate::{
-    core::sha::{Digest, Sha256},
+    core::digest::Digest,
     hal::{Buffer, Hal},
     merkle::MerkleTreeParams,
     prove::write_iop::WriteIOP,
@@ -78,7 +78,7 @@ impl<H: Hal> MerkleTreeProver<H> {
     }
 
     /// Write the 'top' of the merkle tree and commit to the root.
-    pub fn commit<S: Sha256>(&self, iop: &mut WriteIOP<S>) {
+    pub fn commit(&self, iop: &mut WriteIOP<H::Field, H::Rng>) {
         let top_size = self.params.top_size;
         iop.write_pod_slice(&self.nodes[top_size..top_size * 2]);
         iop.commit(self.root());
@@ -98,7 +98,7 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
-    pub fn prove<S: Sha256>(&self, iop: &mut WriteIOP<S>, idx: usize) -> Vec<H::Elem> {
+    pub fn prove(&self, iop: &mut WriteIOP<H::Field, H::Rng>, idx: usize) -> Vec<H::Elem> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);
         self.matrix.view(|view| {
@@ -167,9 +167,9 @@ mod tests {
         MerkleTreeProver::new(hal, &matrix, rows, cols, queries)
     }
 
-    fn bad_row_access<H: Hal, S: Sha256>(hal: &H, rows: usize, cols: usize, queries: usize) {
+    fn bad_row_access<H: Hal>(hal: &H, rows: usize, cols: usize, queries: usize) {
         let prover = init_prover(hal, rows, cols, queries);
-        let mut iop = WriteIOP::<S>::new();
+        let mut iop = WriteIOP::<H::Field, H::Rng>::new();
         prover.prove(&mut iop, rows);
     }
 

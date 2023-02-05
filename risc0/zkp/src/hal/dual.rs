@@ -99,10 +99,13 @@ where
 {
     type Elem = U::Elem;
     type ExtElem = U::ExtElem;
+    type Field = U::Field;
     type BufferDigest = BufferImpl<Digest, U::BufferDigest, V::BufferDigest>;
     type BufferElem = BufferImpl<Self::Elem, U::BufferElem, V::BufferElem>;
     type BufferExtElem = BufferImpl<Self::ExtElem, U::BufferExtElem, V::BufferExtElem>;
     type BufferU32 = BufferImpl<u32, U::BufferU32, V::BufferU32>;
+    type Hash = U::Hash;
+    type Rng = U::Rng;
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::BufferDigest {
         let buf1 = self.hal1.alloc_digest(name, size);

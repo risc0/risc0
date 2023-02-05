@@ -15,11 +15,10 @@
 use alloc::vec::Vec;
 
 use log::debug;
-use rand::RngCore;
-use risc0_core::field::{Elem, ExtElem};
+use risc0_core::field::ExtElem;
 
 use crate::{
-    core::{log2_ceil, sha::Sha256},
+    core::{config::ConfigHash, log2_ceil},
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
@@ -37,7 +36,7 @@ impl<H: Hal> ProveRoundInfo<H> {
     /// produce the evaluations of the polynomial, the merkle tree
     /// committing to the evaluation, and the coefficients of the folded
     /// polynomial.
-    pub fn new<S: Sha256>(hal: &H, iop: &mut WriteIOP<S>, coeffs: &H::BufferElem) -> Self {
+    pub fn new(hal: &H, iop: &mut WriteIOP<H::Field, H::Rng>, coeffs: &H::BufferElem) -> Self {
         debug!("Doing FRI folding");
         let ext_size = H::ExtElem::EXT_SIZE;
         // Get the number of coefficients of the polynomial over the extension field.
@@ -63,7 +62,7 @@ impl<H: Hal> ProveRoundInfo<H> {
         // Send the merkle tree (as a commitment) to the virtual IOP verifier
         merkle.commit(iop);
         // Retrieve from the IOP verifier a random value to mix the polynomial slices.
-        let fold_mix = H::ExtElem::random(&mut iop.rng);
+        let fold_mix = iop.random_ext_elem();
         // Create a buffer to hold the mixture of slices.
         let out_coeffs = hal.alloc_elem("out_coeffs", size / FRI_FOLD * ext_size);
         // Compute the folded polynomial
@@ -75,7 +74,7 @@ impl<H: Hal> ProveRoundInfo<H> {
         }
     }
 
-    pub fn prove_query<S: Sha256>(&mut self, iop: &mut WriteIOP<S>, pos: &mut usize) {
+    pub fn prove_query(&mut self, iop: &mut WriteIOP<H::Field, H::Rng>, pos: &mut usize) {
         // Compute which group we are in
         let group = *pos % (self.domain / FRI_FOLD);
         // Generate the proof
@@ -86,13 +85,13 @@ impl<H: Hal> ProveRoundInfo<H> {
 }
 
 #[tracing::instrument(skip_all)]
-pub fn fri_prove<H: Hal, S: Sha256, F>(
+pub fn fri_prove<H: Hal, F>(
     hal: &H,
-    iop: &mut WriteIOP<S>,
+    iop: &mut WriteIOP<H::Field, H::Rng>,
     coeffs: &H::BufferElem,
     mut f: F,
 ) where
-    F: FnMut(&mut WriteIOP<S>, usize),
+    F: FnMut(&mut WriteIOP<H::Field, H::Rng>, usize),
 {
     let ext_size = H::ExtElem::EXT_SIZE;
     let orig_domain = coeffs.size() / ext_size * INV_RATE;
@@ -110,14 +109,14 @@ pub fn fri_prove<H: Hal, S: Sha256, F>(
     // Dump final polynomial + commit
     final_coeffs.view(|view| {
         iop.write_field_elem_slice::<H::Elem>(view);
-        let digest = S::hash_raw_pod_slice(view);
+        let digest = H::Hash::hash_raw_pod_slice(view);
         iop.commit(&digest);
     });
     // Do queries
     debug!("Doing Queries");
     for _ in 0..QUERIES {
         // Get a 'random' index.
-        let rng = iop.rng.next_u32() as usize;
+        let rng = iop.random_u32() as usize;
         let mut pos = rng % orig_domain;
         // Do the 'inner' proof for this index
         f(iop, pos);

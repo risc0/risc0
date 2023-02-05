@@ -14,11 +14,11 @@
 
 //! Traits to configure which cryptographic primitives the ZKP uses
 
-use core::{fmt::Debug, ops::DerefMut};
+use core::{fmt::Debug, marker::PhantomData, ops::DerefMut};
 
 use risc0_core::field::Field;
 
-use super::digest::Digest;
+use super::{digest::Digest, sha::Sha256, sha_rng::ShaRng};
 
 /// A trait that sets the hashes and encodings used by the ZKP.
 pub trait ConfigHash {
@@ -53,4 +53,37 @@ pub trait ConfigRng<F: Field> {
     fn random_elem(&mut self) -> F::Elem;
     /// Get a cryptographically uniform extension field element
     fn random_ext_elem(&mut self) -> F::ExtElem;
+}
+
+/// Wrap a Sha256 trait as a ConfigHash trait
+pub struct ConfigHashSha256<S: Sha256> {
+    phantom: PhantomData<S>,
+}
+
+impl<S: Sha256> ConfigHash for ConfigHashSha256<S> {
+    type DigestPtr = S::DigestPtr;
+    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+        S::hash_pair(a, b)
+    }
+    fn hash_raw_pod_slice<T: bytemuck::Pod>(slice: &[T]) -> Self::DigestPtr {
+        S::hash_raw_pod_slice(slice)
+    }
+}
+
+/// Make it easy compute both hash related traits from a single source
+pub trait HashSuite<F: Field> {
+    /// Define the hash used by the HashSuite
+    type Hash: ConfigHash;
+    /// Define the random mixer used by the HashSuite
+    type Rng: ConfigRng<F>;
+}
+
+/// Make a hash suite from a Sha256 trait
+pub struct HashSuiteSha256<F: Field, S: Sha256> {
+    phantom: PhantomData<(F, S)>,
+}
+
+impl<F: Field, S: Sha256> HashSuite<F> for HashSuiteSha256<F, S> {
+    type Hash = ConfigHashSha256<S>;
+    type Rng = ShaRng<S>;
 }

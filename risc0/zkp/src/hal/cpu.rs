@@ -25,14 +25,12 @@ use std::{cell::RefCell, rc::Rc};
 use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
 use rayon::prelude::*;
-use risc0_core::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem, RootsOfUnity,
-};
+use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
 
 use super::{Buffer, Hal};
 use crate::{
     core::{
+        config::{HashSuite, HashSuiteSha256},
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
         sha::{Digest, Sha256},
@@ -41,13 +39,13 @@ use crate::{
     FRI_FOLD,
 };
 
-pub type BabyBearCpuHal = CpuHal<BabyBearElem, BabyBearExtElem>;
-
-pub struct CpuHal<E: Elem, EE: ExtElem> {
-    phantom: PhantomData<(E, EE)>,
+pub struct CpuHal<F: Field, HS: HashSuite<F>> {
+    phantom: PhantomData<(F, HS)>,
 }
 
-impl<E: Elem, EE: ExtElem> CpuHal<E, EE> {
+pub type BabyBearSha256CpuHal = CpuHal<BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>>;
+
+impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
     pub fn new() -> Self {
         CpuHal {
             phantom: PhantomData,
@@ -142,18 +140,16 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
     }
 }
 
-impl<E, EE> Hal for CpuHal<E, EE>
-where
-    E: Elem + RootsOfUnity,
-    EE: ExtElem<SubElem = E>,
-{
-    type Elem = E;
-    type ExtElem = EE;
-
+impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
+    type Elem = F::Elem;
+    type ExtElem = F::ExtElem;
+    type Field = F;
     type BufferElem = CpuBuffer<Self::Elem>;
     type BufferExtElem = CpuBuffer<Self::ExtElem>;
     type BufferDigest = CpuBuffer<Digest>;
     type BufferU32 = CpuBuffer<u32>;
+    type Hash = HS::Hash;
+    type Rng = HS::Rng;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::BufferElem {
         CpuBuffer::new(size)
