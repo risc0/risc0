@@ -16,16 +16,16 @@ use core::marker::PhantomData;
 
 use risc0_core::field::{Elem, Field};
 
-use crate::core::{config::ConfigRNG, sha::Digest};
+use crate::core::{config::ConfigRng, sha::Digest};
 
 #[derive(Debug)]
-pub struct ReadIOP<'a, F: Field, R: ConfigRNG<F>> {
+pub struct ReadIOP<'a, F: Field, R: ConfigRng<F>> {
     proof: &'a [u32],
     rng: R,
     phantom: PhantomData<F>,
 }
 
-impl<'a, F: Field, R: ConfigRNG<F>> ReadIOP<'a, F, R> {
+impl<'a, F: Field, R: ConfigRng<F>> ReadIOP<'a, F, R> {
     pub fn new(proof: &'a [u32]) -> Self {
         ReadIOP {
             proof,
@@ -69,16 +69,16 @@ impl<'a, F: Field, R: ConfigRNG<F>> ReadIOP<'a, F, R> {
 
     /// Get a cryptographically uniform u32
     pub fn random_u32(&mut self) -> u32 {
-        self.rng.next_u32()
+        self.rng.random_u32()
     }
 
     /// Get a cryptographically uniform field element
     pub fn random_elem(&mut self) -> F::Elem {
-        self.rng.next_elem()
+        self.rng.random_elem()
     }
 
     /// Get a cryptographically uniform extension field element
     pub fn random_ext_elem(&mut self) -> F::ExtElem {
-        self.rng.next_ext_elem()
+        self.rng.random_ext_elem()
     }
 }

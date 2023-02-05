@@ -42,15 +42,15 @@ pub trait ConfigHash {
 /// A trait that sets the PRNG used by Fiat-Shamir.  We allow specialization at
 /// this level rather than at RngCore because some hashes such as Posidon have
 /// elements distributed uniformly over the field natively.
-pub trait ConfigRNG<F: Field> {
+pub trait ConfigRng<F: Field> {
     /// Create a new RNG is a standard state, mix before using!
     fn new() -> Self;
     /// Mix in randomness from a Fiat-Shamir commitment.
     fn mix(&mut self, val: &Digest);
     /// Get a cryptographically uniform u32
-    fn next_u32(&mut self) -> u32;
+    fn random_u32(&mut self) -> u32;
     /// Get a cryptographically uniform field element
-    fn next_elem(&mut self) -> F::Elem;
+    fn random_elem(&mut self) -> F::Elem;
     /// Get a cryptographically uniform extension field element
-    fn next_ext_elem(&mut self) -> F::ExtElem;
+    fn random_ext_elem(&mut self) -> F::ExtElem;
 }

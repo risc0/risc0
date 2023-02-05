@@ -39,7 +39,7 @@ use crate::{
         CircuitInfo, TapsProvider, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
     },
     core::{
-        config::{ConfigHash, ConfigRNG},
+        config::{ConfigHash, ConfigRng},
         digest::Digest,
         log2_ceil,
     },
@@ -86,7 +86,7 @@ impl fmt::Display for VerificationError {
 
 pub trait VerifyHal {
     type Hash: ConfigHash;
-    type Rng: ConfigRNG<Self::Field>;
+    type Rng: ConfigRng<Self::Field>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
@@ -143,13 +143,13 @@ mod host {
         check_mix_pows: Vec<F::ExtElem>,
     }
 
-    pub struct CpuVerifyHal<'a, F: Field, H: ConfigHash, R: ConfigRNG<F>, C: PolyExt<F>> {
+    pub struct CpuVerifyHal<'a, F: Field, H: ConfigHash, R: ConfigRng<F>, C: PolyExt<F>> {
         circuit: &'a C,
         tap_cache: RefCell<Option<TapCache<F>>>,
         phantom: PhantomData<(H, R)>,
     }
 
-    impl<'a, F: Field, H: ConfigHash, R: ConfigRNG<F>, C: PolyExt<F>> CpuVerifyHal<'a, F, H, R, C> {
+    impl<'a, F: Field, H: ConfigHash, R: ConfigRng<F>, C: PolyExt<F>> CpuVerifyHal<'a, F, H, R, C> {
         pub fn new(circuit: &'a C) -> Self {
             Self {
                 circuit,
@@ -159,7 +159,7 @@ mod host {
         }
     }
 
-    impl<'a, F: Field, H: ConfigHash, R: ConfigRNG<F>, C: PolyExt<F>> VerifyHal
+    impl<'a, F: Field, H: ConfigHash, R: ConfigRng<F>, C: PolyExt<F>> VerifyHal
         for CpuVerifyHal<'a, F, H, R, C>
     {
         type Hash = H;

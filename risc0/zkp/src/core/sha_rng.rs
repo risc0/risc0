@@ -17,8 +17,10 @@
 use core::marker::PhantomData;
 
 use rand_core::{impls, Error, RngCore};
+//use risc0_core::field::{Field};
 
 use super::sha::{Digest, Sha256, DIGEST_WORDS};
+//use super::config::ConfigRNG;
 
 /// A random number generator driven by a [Sha256].
 #[derive(Clone, Debug)]
@@ -80,6 +82,11 @@ impl<S: Sha256> RngCore for ShaRng<S> {
         Ok(self.fill_bytes(dest))
     }
 }
+
+/*
+impl<S: Sha256, F: Field> ConfigRNG<F> for ShaRng<S> {
+}
+*/
 
 #[allow(missing_docs)]
 pub mod testutil {

@@ -19,7 +19,7 @@ use risc0_core::field::Field;
 use crate::{
     adapter::{CircuitInfo, TapsProvider},
     taps::TapSet,
-    verify::{read_iop::ReadIOP, ConfigRNG},
+    verify::{read_iop::ReadIOP, ConfigRng},
 };
 
 pub struct VerifyAdapter<'a, F: Field, C: CircuitInfo + TapsProvider> {
@@ -45,7 +45,7 @@ impl<'a, F: Field, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, F, C> {
         self.circuit.get_taps()
     }
 
-    pub fn execute<R: ConfigRNG<F>>(&mut self, iop: &mut ReadIOP<'a, F, R>) {
+    pub fn execute<R: ConfigRng<F>>(&mut self, iop: &mut ReadIOP<'a, F, R>) {
         // Read the outputs + size
         self.out = Some(iop.read_field_elem_slice(C::OUTPUT_SIZE));
         self.po2 = match iop.read_u32s(1) {
@@ -55,7 +55,7 @@ impl<'a, F: Field, C: CircuitInfo + TapsProvider> VerifyAdapter<'a, F, C> {
         self.steps = 1 << self.po2;
     }
 
-    pub fn accumulate<R: ConfigRNG<F>>(&mut self, iop: &mut ReadIOP<'a, F, R>) {
+    pub fn accumulate<R: ConfigRng<F>>(&mut self, iop: &mut ReadIOP<'a, F, R>) {
         // Fill in accum mix
         self.mix = (0..C::MIX_SIZE).map(|_| iop.random_elem()).collect();
     }
