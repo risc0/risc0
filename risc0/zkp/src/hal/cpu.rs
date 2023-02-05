@@ -458,7 +458,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_req() {
-        let hal = BabyBearCpuHal::new();
+        let hal = BabyBearSha256CpuHal::new();
         let a = hal.alloc_elem("a", 10);
         let b = hal.alloc_elem("b", 20);
         hal.eltwise_add_elem(&a, &b, &b);
@@ -466,7 +466,7 @@ mod tests {
 
     #[test]
     fn fp() {
-        let hal: BabyBearCpuHal = CpuHal::new();
+        let hal: BabyBearSha256CpuHal = CpuHal::new();
         const COUNT: usize = 1024 * 1024;
         test_binary(
             &hal,
@@ -507,7 +507,7 @@ mod tests {
     }
 
     fn do_hash_rows(rows: usize, cols: usize, expected: &[&str]) {
-        let hal: BabyBearCpuHal = CpuHal::new();
+        let hal: BabyBearSha256CpuHal = CpuHal::new();
         let matrix_size = rows * cols;
         let matrix = hal.alloc_elem("matrix", matrix_size);
         let output = hal.alloc_digest("output", rows);

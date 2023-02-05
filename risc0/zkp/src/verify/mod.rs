@@ -39,7 +39,7 @@ use crate::{
         CircuitInfo, TapsProvider, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
     },
     core::{
-        config::{ConfigHash, ConfigRng},
+        config::{HashSuite, ConfigHash, ConfigRng},
         digest::Digest,
         log2_ceil,
     },
@@ -143,13 +143,13 @@ mod host {
         check_mix_pows: Vec<F::ExtElem>,
     }
 
-    pub struct CpuVerifyHal<'a, F: Field, H: ConfigHash, R: ConfigRng<F>, C: PolyExt<F>> {
+    pub struct CpuVerifyHal<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> {
         circuit: &'a C,
         tap_cache: RefCell<Option<TapCache<F>>>,
-        phantom: PhantomData<(H, R)>,
+        phantom: PhantomData<HS>,
     }
 
-    impl<'a, F: Field, H: ConfigHash, R: ConfigRng<F>, C: PolyExt<F>> CpuVerifyHal<'a, F, H, R, C> {
+    impl<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> CpuVerifyHal<'a, F, HS, C> {
         pub fn new(circuit: &'a C) -> Self {
             Self {
                 circuit,
@@ -159,11 +159,11 @@ mod host {
         }
     }
 
-    impl<'a, F: Field, H: ConfigHash, R: ConfigRng<F>, C: PolyExt<F>> VerifyHal
-        for CpuVerifyHal<'a, F, H, R, C>
+    impl<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> VerifyHal
+        for CpuVerifyHal<'a, F, HS, C>
     {
-        type Hash = H;
-        type Rng = R;
+        type Hash = HS::Hash;
+        type Rng = HS::Rng;
         type Elem = F::Elem;
         type ExtElem = F::ExtElem;
         type Field = F;
