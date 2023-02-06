@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::marker::PhantomData;
-
 use log::debug;
 use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use crate::{
     core::{
+        config::ConfigHash,
         poly::{poly_divide, poly_interpolate},
-        sha::Sha256,
     },
     hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
@@ -29,18 +27,13 @@ use crate::{
 };
 
 /// Object to generate a zero-knowledge proof of the execution of some circuit.
-pub struct Prover<'a, H, S>
-where
-    H: Hal,
-    S: Sha256,
-{
+pub struct Prover<'a, H: Hal> {
     hal: &'a H,
     taps: &'a TapSet<'a>,
-    iop: WriteIOP<S>,
+    iop: WriteIOP<H::Field, H::Rng>,
     groups: Vec<Option<PolyGroup<H>>>,
     cycles: usize,
     po2: usize,
-    phantom_sha: PhantomData<S>,
 }
 
 fn make_coeffs<H: Hal>(hal: &H, buf: H::BufferElem, count: usize) -> H::BufferElem {
@@ -52,11 +45,7 @@ fn make_coeffs<H: Hal>(hal: &H, buf: H::BufferElem, count: usize) -> H::BufferEl
     buf
 }
 
-impl<'a, H, S> Prover<'a, H, S>
-where
-    H: Hal,
-    S: Sha256,
-{
+impl<'a, H: Hal> Prover<'a, H> {
     /// Creates a new prover.
     pub fn new(hal: &'a H, taps: &'a TapSet) -> Self {
         Self {
@@ -68,12 +57,11 @@ where
                 .collect(),
             cycles: 0,
             po2: usize::MAX,
-            phantom_sha: PhantomData,
         }
     }
 
     /// Accesses the prover's IOP to commit or read random data.
-    pub fn iop(&mut self) -> &mut WriteIOP<S> {
+    pub fn iop(&mut self) -> &mut WriteIOP<H::Field, H::Rng> {
         &mut self.iop
     }
 
@@ -123,7 +111,7 @@ where
     {
         // Set the poly mix value, which is used for constraint compression in the
         // DEEP-ALI protocol.
-        let poly_mix = H::ExtElem::random(&mut self.iop.rng);
+        let poly_mix = self.iop.random_ext_elem();
         let domain = self.cycles * INV_RATE;
 
         // Now generate the check polynomial.
@@ -182,7 +170,7 @@ where
         debug!("checkGroup: {}", check_group.merkle.root());
 
         // Now pick a value for Z, which is used as the DEEP-ALI query point.
-        let z = H::ExtElem::random(&mut self.iop.rng);
+        let z = self.iop.random_ext_elem();
         // #ifdef CIRCUIT_DEBUG
         //   if (badZ != Fp4(0)) {
         //     Z = badZ;
@@ -251,11 +239,11 @@ where
 
         debug!("Size of U = {}", coeff_u.len());
         self.iop.write_field_elem_slice(&coeff_u);
-        let hash_u = S::hash_raw_pod_slice(coeff_u.as_slice());
+        let hash_u = H::Hash::hash_raw_pod_slice(coeff_u.as_slice());
         self.iop.commit(&hash_u);
 
         // Set the mix mix value, which is used for FRI batching.
-        let mix = H::ExtElem::random(&mut self.iop.rng);
+        let mix = self.iop.random_ext_elem();
         debug!("Mix = {mix:?}");
 
         // Do the coefficent mixing

@@ -24,6 +24,8 @@
 
 extern crate alloc;
 
+pub mod config;
+pub mod digest;
 pub mod ntt;
 pub mod poly;
 pub mod sha;

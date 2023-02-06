@@ -13,25 +13,25 @@
 // limitations under the License.
 
 use alloc::vec::Vec;
+use core::marker::PhantomData;
 
-use risc0_core::field;
+use risc0_core::field::{Elem, Field};
 
-use crate::core::{
-    sha::{Digest, Sha256},
-    sha_rng::ShaRng,
-};
+use crate::core::{config::ConfigRng, sha::Digest};
 
-pub struct WriteIOP<S: Sha256> {
+pub struct WriteIOP<F: Field, R: ConfigRng<F>> {
     pub proof: Vec<u32>,
-    pub rng: ShaRng<S>,
+    pub rng: R,
+    phantom: PhantomData<F>,
 }
 
-impl<S: Sha256> WriteIOP<S> {
+impl<F: Field, R: ConfigRng<F>> WriteIOP<F, R> {
     /// Create a new empty proof
     pub fn new() -> Self {
         Self {
             proof: Vec::new(),
-            rng: ShaRng::<S>::new(),
+            rng: R::new(),
+            phantom: PhantomData,
         }
     }
 
@@ -44,8 +44,8 @@ impl<S: Sha256> WriteIOP<S> {
     }
 
     /// Write some field elements to this IOP.
-    pub fn write_field_elem_slice<T: field::Elem>(&mut self, slice: &[T]) {
-        self.proof.extend(field::Elem::as_u32_slice(slice))
+    pub fn write_field_elem_slice<T: Elem>(&mut self, slice: &[T]) {
+        self.proof.extend(Elem::as_u32_slice(slice))
     }
 
     /// Write some plain old data to this IOP.
@@ -57,5 +57,20 @@ impl<S: Sha256> WriteIOP<S> {
     /// earlier or a Merkle root).
     pub fn commit(&mut self, message: &Digest) {
         self.rng.mix(message);
+    }
+
+    /// Get a cryptographically uniform u32
+    pub fn random_u32(&mut self) -> u32 {
+        self.rng.random_u32()
+    }
+
+    /// Get a cryptographically uniform field element
+    pub fn random_elem(&mut self) -> F::Elem {
+        self.rng.random_elem()
+    }
+
+    /// Get a cryptographically uniform extension field element
+    pub fn random_ext_elem(&mut self) -> F::ExtElem {
+        self.rng.random_ext_elem()
     }
 }
