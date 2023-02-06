@@ -30,10 +30,10 @@ use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
 use super::{Buffer, Hal};
 use crate::{
     core::{
-        config::{HashSuite, HashSuiteSha256},
+        config::{ConfigHash, HashSuite, HashSuiteSha256},
+        digest::Digest,
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
-        sha::{Digest, Sha256},
         sha_cpu,
     },
     FRI_FOLD,
@@ -426,7 +426,9 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         let mut output = output.as_slice_mut();
         let matrix = matrix.as_slice().to_vec(); // TODO: avoid copy
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            *output = *sha_cpu::Impl::hash_pod_stride(matrix.as_slice(), idx, col_size, row_size);
+            let column: Vec<Self::Elem> =
+                (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
+            *output = *Self::Hash::hash_raw_pod_slice(column.as_slice());
         });
     }
 
@@ -443,7 +445,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
             .par_iter_mut()
             .zip(input.par_chunks_exact(2))
             .for_each(|(output, input)| {
-                *output = *sha_cpu::Impl::hash_pair(&input[0], &input[1]);
+                *output = *Self::Hash::hash_pair(&input[0], &input[1]);
             });
     }
 }
