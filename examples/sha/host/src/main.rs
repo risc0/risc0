@@ -60,6 +60,7 @@ mod tests {
     #[test]
     fn main() {
         let receipt = provably_hash(TEST_STRING);
+        receipt.verify(HASH_ID).expect("Proven code should verify");
         receipt.verify(&HASH_ID).expect("Proven code should verify");
 
         let digest = from_slice::<Digest>(receipt.journal.as_slice())
