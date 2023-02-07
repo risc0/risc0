@@ -31,9 +31,8 @@ use risc0_zkp::{
 const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
 
 use crate::{
-        GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
-
 
 #[derive(Debug)]
 pub struct MetalEvalCheck {
