@@ -6,8 +6,8 @@ edition = "2021"
 [dependencies]
 clap = "4.0"
 methods = { path = "../methods" }
-risc0-zkp = { git = "https://github.com/risc0/risc0.git", rev = "c44f5a9be1c301de24962916c70a5dea98fe0aa1" }
-risc0-zkvm = { git = "https://github.com/risc0/risc0.git", rev = "c44f5a9be1c301de24962916c70a5dea98fe0aa1" }
+risc0-zkp = { path = "../../../risc0/zkp" }
+risc0-zkvm = { path = "../../../risc0/zkvm" }
 serde = "1.0"
 
 [dev-dependencies]
