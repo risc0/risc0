@@ -704,8 +704,11 @@ mod tests {
 
     use super::*;
 
+    // Includes test cases for all the types in the serde data model.
+    // https://docs.rs/serde/latest/serde/trait.Serializer.html
+
     #[test]
-    fn test_struct() {
+    fn test_primitives() {
         #[derive(Serialize, PartialEq, Debug)]
         struct Test {
             bool: bool,
@@ -744,8 +747,10 @@ mod tests {
             i64: -7,
             u64: 7,
         };
+
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
     }
 
     #[test]
@@ -754,14 +759,273 @@ mod tests {
         struct Test {
             first: String,
             second: String,
+            third: String,
         }
 
-        let expected = [1, 0x00000061, 3, 0x00636261];
+        let expected = [1, 0x00000061, 3, 0x00636261, 5, 0x64636261, 0x00000065];
         let input = Test {
             first: "a".into(),
             second: "abc".into(),
+            third: "abcde".into(),
         };
+
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_bytes() {
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            first: &'static [u8],
+            second: &'static [u8],
+            third: &'static [u8],
+        }
+
+        let expected = [
+            1, 0x61, 3, 0x61, 0x62, 0x63, 5, 0x61, 0x62, 0x63, 0x64, 0x65,
+        ];
+        let input = Test {
+            first: "a".as_bytes(),
+            second: "abc".as_bytes(),
+            third: "abcde".as_bytes(),
+        };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_option() {
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            some: Option<u32>,
+            none: Option<u32>,
+        }
+
+        let expected = [1, 7, 0];
+        let input = Test {
+            some: Some(7),
+            none: None,
+        };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_unit() {
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            unit: (),
+        }
+
+        let expected: [u32; 0] = [];
+        let input = Test { unit: () };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_unit_variant() {
+        #[derive(Serialize, PartialEq, Debug)]
+        enum TestEnum {
+            A,
+            B,
+            C,
+        }
+
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            a: TestEnum,
+            b: TestEnum,
+            c: TestEnum,
+        }
+
+        let expected = [0, 1, 2];
+        let input = Test {
+            a: TestEnum::A,
+            b: TestEnum::B,
+            c: TestEnum::C,
+        };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_newtype_struct() {
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test(u32);
+
+        let expected = [7];
+        let input = Test(7);
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_newtype_variant() {
+        #[derive(Serialize, PartialEq, Debug)]
+        enum TestEnum {
+            A(u32),
+            B(u64),
+            C,
+        }
+
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            a: TestEnum,
+            b: TestEnum,
+            c: TestEnum,
+        }
+
+        let expected = [0, 7, 1, 83, 0, 2];
+        let input = Test {
+            a: TestEnum::A(7),
+            b: TestEnum::B(83),
+            c: TestEnum::C,
+        };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_seq() {
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            first: Vec<u32>,
+            second: Vec<u32>,
+            third: Vec<u32>,
+        }
+
+        let expected = [4, 86, 52, 19, 28, 3, 52, 28, 93, 0];
+        let input = Test {
+            first: vec![86, 52, 19, 28],
+            second: vec![52, 28, 93],
+            third: vec![],
+        };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_tuple() {
+        let expected = [7, 17, 45];
+        let input = (7, 17, 45);
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_tuple_struct() {
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test(u32, u32, u32);
+
+        let expected = [7, 17, 45];
+        let input = Test(7, 17, 45);
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_tuple_variant() {
+        #[derive(Serialize, PartialEq, Debug)]
+        enum TestEnum {
+            A(u32, u32),
+            B(u64, u64),
+            C,
+        }
+
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            a: TestEnum,
+            b: TestEnum,
+            c: TestEnum,
+        }
+
+        let expected = [0, 7, 53, 1, 83, 0, 28, 0, 2];
+        let input = Test {
+            a: TestEnum::A(7, 53),
+            b: TestEnum::B(83, 28),
+            c: TestEnum::C,
+        };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_map() {
+        use std::collections::BTreeMap as Map;
+
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            first: Map<String, u32>,
+            second: Map<u32, String>,
+            third: Map<u32, u32>,
+        }
+
+        let expected = [
+            3, 1, 0x61, 17, 1, 0x62, 53, 1, 0x63, 84, 1, 26, 3, 0x636261, 0,
+        ];
+        let input = Test {
+            first: Map::from([
+                ("a".to_string(), 17),
+                ("b".to_string(), 53),
+                ("c".to_string(), 84),
+            ]),
+            second: Map::from([(26, "abc".to_string())]),
+            third: Map::from([]),
+        };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+    }
+
+    #[test]
+    fn test_struct_variant() {
+        #[derive(Serialize, PartialEq, Debug)]
+        enum TestEnum {
+            A { a: u32, b: u32 },
+            B { a: u64, b: u64 },
+            C,
+        }
+
+        #[derive(Serialize, PartialEq, Debug)]
+        struct Test {
+            a: TestEnum,
+            b: TestEnum,
+            c: TestEnum,
+        }
+
+        let expected = [0, 7, 53, 1, 83, 0, 28, 0, 2];
+        let input = Test {
+            a: TestEnum::A { a: 7, b: 53 },
+            b: TestEnum::B { a: 83, b: 28 },
+            c: TestEnum::C,
+        };
+
+        let buf: &mut [u32] = &mut [0; 256];
+        assert_eq!(expected, to_slice(&input, buf).unwrap());
+        assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
     }
 }
