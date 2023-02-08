@@ -530,7 +530,14 @@ impl Committer for SyscallCommitter {
     }
 }
 
-pub struct CommitHasher<S: Sha256, C: Committer> {
+#[derive(Default, Debug)]
+pub struct NoopCommiter {}
+
+impl Committer for NoopCommiter {
+    fn commit(&mut self, _data: &[u32]) {}
+}
+
+pub struct CommitHasher<S: Sha256, C: Committer = NoopCommiter> {
     state: Option<S::DigestPtr>,
     buffer: Block,
     buffer_pos: usize,
@@ -581,7 +588,33 @@ impl<S: Sha256, C: Committer> CommitHasher<S, C> {
     /// is additionally reset to a usable state.
     #[inline]
     fn finalize(&mut self) -> S::DigestPtr {
-        unimplemented!();
+        if self.buffer_pos == BLOCK_WORDS {
+            self.compress();
+        }
+        assert!(self.buffer_pos < BLOCK_WORDS);
+
+        let bit_len = u32::try_from(
+            (self.block_len.checked_mul(BLOCK_WORDS).unwrap() + self.buffer_pos) * WORD_SIZE * 8,
+        )
+        .unwrap();
+
+        // Add a 1 bit end marker to the end of the buffered data.
+        self.buffer.as_mut_words()[self.buffer_pos] = 0x80000000;
+        self.buffer_pos += 1;
+
+        // Write the big-endian u64 length field at the end of the buffer.
+        // TODO(victor) only commit the data and not padding or trailer.
+        if self.buffer_pos >= BLOCK_WORDS - 1 {
+            self.buffer_pos = BLOCK_WORDS;
+            self.compress();
+        }
+        self.buffer.as_mut_words()[BLOCK_WORDS - 1] = bit_len.to_be();
+
+        // Final compress and reset of the struct.
+        self.buffer_pos = BLOCK_WORDS;
+        self.compress();
+        self.block_len = 0;
+        self.state.take().unwrap()
     }
 }
 
@@ -659,7 +692,7 @@ impl<S: Sha256, C: Committer> StreamWriter for CommitHasher<S, C> {
     }
 
     fn release(&mut self) -> Result<Self::Output> {
-        unimplemented!();
+        Ok(self.finalize())
     }
 }
 
