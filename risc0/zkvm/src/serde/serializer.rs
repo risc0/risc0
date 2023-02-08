@@ -588,31 +588,59 @@ impl<S: Sha256, C: Committer> CommitHasher<S, C> {
     /// is additionally reset to a usable state.
     #[inline]
     fn finalize(&mut self) -> S::DigestPtr {
-        if self.buffer_pos == BLOCK_WORDS {
-            self.compress();
+        // Establish the final count of the number of bits in the stream. Using a u32,
+        // the maximum message length is 500 MB.
+        let bit_len =
+            u32::try_from((self.block_len * BLOCK_WORDS + self.buffer_pos) * WORD_SIZE * 8)
+                .unwrap();
+
+        // Send the remaining data to the commiter before writing the trailers.
+        if self.buffer_pos != 0 {
+            self.committer
+                .commit(&self.buffer.as_words()[..self.buffer_pos]);
         }
-        assert!(self.buffer_pos < BLOCK_WORDS);
 
-        let bit_len = u32::try_from(
-            (self.block_len.checked_mul(BLOCK_WORDS).unwrap() + self.buffer_pos) * WORD_SIZE * 8,
-        )
-        .unwrap();
-
-        // Add a 1 bit end marker to the end of the buffered data.
-        self.buffer.as_mut_words()[self.buffer_pos] = 0x80000000;
-        self.buffer_pos += 1;
-
-        // Write the big-endian u64 length field at the end of the buffer.
-        // TODO(victor) only commit the data and not padding or trailer.
-        if self.buffer_pos >= BLOCK_WORDS - 1 {
-            self.buffer_pos = BLOCK_WORDS;
-            self.compress();
-        }
-        self.buffer.as_mut_words()[BLOCK_WORDS - 1] = bit_len.to_be();
+        // Write the SHA-256 trailer including end marker, padding, and length.
+        // If the buffer is nearly full, a compression may be required.
+        // NOTE: BLOCK_WORDS is equal to 16. Named consts are not valid in match
+        // expressions, so this block uses the the values as literals.
+        match self.buffer_pos {
+            0..=13 => {
+                self.buffer.as_mut_words()[self.buffer_pos] = 0x80000000;
+                self.buffer.as_mut_words()[self.buffer_pos + 1..BLOCK_WORDS - 1].fill(0);
+                self.buffer.as_mut_words()[BLOCK_WORDS - 1] = bit_len.to_be();
+            }
+            14..=15 => {
+                self.buffer.as_mut_words()[self.buffer_pos] = 0x80000000;
+                self.buffer.as_mut_words()[self.buffer_pos + 1..BLOCK_WORDS].fill(0);
+                self.state = Some(S::compress(
+                    self.state.as_deref().unwrap_or(&SHA256_INIT),
+                    self.buffer.as_half_blocks().0,
+                    self.buffer.as_half_blocks().1,
+                ));
+                self.buffer.as_mut_words()[..BLOCK_WORDS - 1].fill(0);
+                self.buffer.as_mut_words()[BLOCK_WORDS - 1] = bit_len.to_be();
+            }
+            16 => {
+                self.state = Some(S::compress(
+                    self.state.as_deref().unwrap_or(&SHA256_INIT),
+                    self.buffer.as_half_blocks().0,
+                    self.buffer.as_half_blocks().1,
+                ));
+                self.buffer.as_mut_words()[0] = 0x80000000;
+                self.buffer.as_mut_words()[1..(BLOCK_WORDS - 1)].fill(0);
+                self.buffer.as_mut_words()[BLOCK_WORDS - 1] = bit_len.to_be();
+            }
+            _ => unreachable!("buffer_pos never exceeds BLOCK_WORDS"),
+        };
 
         // Final compress and reset of the struct.
-        self.buffer_pos = BLOCK_WORDS;
-        self.compress();
+        self.state = Some(S::compress(
+            self.state.as_deref().unwrap_or(&SHA256_INIT),
+            self.buffer.as_half_blocks().0,
+            self.buffer.as_half_blocks().1,
+        ));
+        self.buffer_pos = 0;
         self.block_len = 0;
         self.state.take().unwrap()
     }
