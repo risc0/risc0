@@ -14,6 +14,9 @@
 
 use core::mem;
 
+use bytemuck::PodCastError;
+#[cfg(target_os = "zkvm")]
+use risc0_zkvm_platform::syscall::sys_commit;
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::Serialize;
 
@@ -21,6 +24,7 @@ use super::{
     align_up,
     err::{Error, Result},
 };
+use crate::sha::{Block, Sha256, BLOCK_BYTES, BLOCK_WORDS, SHA256_INIT};
 
 pub fn to_slice<'a, 'b, T>(value: &'b T, buf: &'a mut [u32]) -> Result<&'a [u32]>
 where
@@ -37,6 +41,10 @@ where
 {
     // Use the in-memory size of the value as a guess for the length
     // of the serialized value.
+    // TODO(victor): We could probably create a better rule. Due to the fact that A)
+    // any sequences will be serialized with a length value and therefore expand
+    // by at least one word and B) It is not clear what mem::size_of_val returns
+    // when T = Vec, this is likely to be too small.
     let vec = AllocVec::with_capacity(mem::size_of_val(value));
     let mut serializer = Serializer::new(vec);
     value.serialize(&mut serializer)?;
@@ -101,7 +109,7 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
     where
         T: core::fmt::Display + ?Sized,
     {
-        panic!("collect_str")
+        unimplemented!("collect_str")
     }
 
     fn serialize_bool(self, v: bool) -> Result<()> {
@@ -393,6 +401,7 @@ impl<'a, W: StreamWriter> serde::ser::SerializeStructVariant for &'a mut Seriali
     }
 }
 
+#[derive(Default, Debug)]
 pub struct Slice<'a> {
     slice: &'a mut [u32],
     idx: usize,
@@ -447,6 +456,7 @@ impl<'a> Slice<'a> {
     }
 }
 
+#[derive(Default, Debug)]
 pub struct AllocVec(pub alloc::vec::Vec<u32>);
 
 impl AllocVec {
@@ -468,29 +478,188 @@ impl StreamWriter for AllocVec {
     }
 
     fn try_extend(&mut self, data: &[u8]) -> Result<()> {
-        let mut chunks = data.chunks_exact(WORD_SIZE);
-        for chunk in &mut chunks {
-            let word = chunk[0] as u32
-                | (chunk[1] as u32) << 8
-                | (chunk[2] as u32) << 16
-                | (chunk[3] as u32) << 24;
-            self.0.push(word);
-        }
-        let remainder = chunks.remainder();
-        if remainder.len() > 0 {
-            let mut word = 0;
-            for i in 0..remainder.len() {
-                word |= (remainder[i] as u32) << (8 * i);
+        // Interpret the bytes as native-endian u32 values and push them into the
+        // serialization buffer. If not aligned, this is less efficient.
+        // TODO(victor): Check host-guest communication to see that the host interprets
+        // words received from the guest correctly, even if they have different
+        // endianess. (i.e. that a big-endian host will receive the words
+        // correctly.)
+        let (chunks, remainder) = data.as_chunks::<WORD_SIZE>();
+        match bytemuck::try_cast_slice::<_, u32>(chunks) {
+            Ok(words) => self.0.extend_from_slice(words),
+            Err(PodCastError::TargetAlignmentGreaterAndInputNotAligned) => {
+                self.0.extend(
+                    chunks
+                        .iter()
+                        .map(|chunk| bytemuck::pod_read_unaligned::<u32>(chunk)),
+                );
             }
-            self.0.push(word);
+            Err(e) => unreachable!("failed to cast &[[u8; 4]] to &[u32]: {}", e),
+        };
+
+        // Pad the remainder with zeros when the data is not a whole number of words.
+        if remainder.len() > 0 {
+            let mut word = [0; WORD_SIZE];
+            word[..remainder.len()].copy_from_slice(remainder);
+            self.0.push(u32::from_ne_bytes(word));
         }
         Ok(())
     }
 
     fn release(&mut self) -> Result<Self::Output> {
-        let ret = self.0.clone();
-        self.0 = alloc::vec::Vec::new();
-        Ok(ret)
+        Ok(mem::take(&mut self.0))
+    }
+}
+
+/// An implementation of Committer provides a way to "commit" the given data. It
+/// abstracts the sys_commit functionality, which sends the data from the guest
+/// to the host by way of passing a pointer to an ecall. In testing, it may be
+/// implemented using a write buffer.
+pub trait Committer {
+    fn commit(&mut self, data: &[u32]);
+}
+
+#[cfg(target_os = "zkvm")]
+#[derive(Default, Debug)]
+pub struct SyscallCommitter {}
+
+#[cfg(target_os = "zkvm")]
+impl Committer for SyscallCommitter {
+    fn commit(&mut self, data: &[u32]) {
+        unsafe { sys_commit(data.as_ptr(), data.len() * WORD_SIZE) };
+    }
+}
+
+pub struct CommitHasher<S: Sha256, C: Committer> {
+    state: Option<S::DigestPtr>,
+    buffer: Block,
+    buffer_pos: usize,
+    block_len: usize,
+    committer: C,
+}
+
+impl<S: Sha256, C: Committer> CommitHasher<S, C> {
+    /// Compress the buffer into the hasher state. Must only be called when the
+    /// buffer is full. Resets the buffer position to zero.
+    #[inline]
+    fn compress(&mut self) {
+        assert_eq!(self.buffer_pos, BLOCK_WORDS);
+
+        // Send the full data via the committer before compressing the buffer.
+        self.committer.commit(self.buffer.as_words());
+
+        // Compress the buffer and reset the buffer position.
+        self.state = Some(S::compress(
+            self.state.as_deref().unwrap_or(&SHA256_INIT),
+            self.buffer.as_half_blocks().0,
+            self.buffer.as_half_blocks().1,
+        ));
+        self.buffer_pos = 0;
+        self.block_len += 1;
+    }
+
+    /// Compress a slice of blocks into the hasher state without copying. Must
+    /// only be called when the buffer is empty. Does not alter the buffer
+    /// or buffer position.
+    #[inline]
+    fn compress_slice(&mut self, blocks: &[Block]) {
+        assert_eq!(self.buffer_pos, 0);
+
+        // Send the full data via the committer before compressing the buffer.
+        self.committer.commit(bytemuck::cast_slice(blocks));
+
+        // Compress the provided blocks into the hasher state.
+        self.state = Some(S::compress_slice(
+            self.state.as_deref().unwrap_or(&SHA256_INIT),
+            blocks,
+        ));
+        self.block_len += blocks.len();
+    }
+
+    /// Finalizes the hasher, adding the standard SHA-256 padding and trailer
+    /// the compressing and returning the finalized hasher state. The hasher
+    /// is additionally reset to a usable state.
+    #[inline]
+    fn finalize(&mut self) -> S::DigestPtr {
+        unimplemented!();
+    }
+}
+
+impl<S: Sha256, C: Committer> StreamWriter for CommitHasher<S, C> {
+    type Output = S::DigestPtr;
+
+    fn try_push_word(&mut self, data: u32) -> Result<()> {
+        if self.buffer_pos == BLOCK_WORDS {
+            self.compress();
+        }
+        assert!(self.buffer_pos < BLOCK_WORDS);
+
+        self.buffer.as_mut_words()[self.buffer_pos] = data;
+        Ok(())
+    }
+
+    fn try_extend(&mut self, data: &[u8]) -> Result<()> {
+        // Divide the data into the head, middle, and tail where middle is the set of
+        // whole blocks that can be processed without copying into the buffer.
+        // If the buffer is partially full at the start, it must be filled and
+        // compressed before processing the remainder.
+        let remainder: &[u8] = match (
+            self.buffer_pos == 0,
+            data.len() < BLOCK_BYTES - (self.buffer_pos * WORD_SIZE),
+        ) {
+            (_, true) => {
+                // When there is not enough data to fill the buffer, just copy it into the
+                // buffer.
+                self.buffer.as_mut_bytes()[self.buffer_pos * WORD_SIZE..][..data.len()]
+                    .copy_from_slice(data);
+                self.buffer_pos += data.len();
+                return Ok(());
+            }
+            (false, false) => {
+                // When the buffer is non-empty, and we can fill it, split off a head large
+                // enough to fill the buffer, copy it in and compress then
+                // return the remainder.
+                let (head, remainder) = data.split_at(BLOCK_BYTES - (self.buffer_pos * WORD_SIZE));
+                self.buffer.as_mut_bytes()[self.buffer_pos * WORD_SIZE..].copy_from_slice(head);
+                self.buffer_pos = BLOCK_WORDS;
+                self.compress();
+                remainder
+            }
+            (true, false) => {
+                // When there is at least one block and the buffer is empty, head is empty.
+                data
+            }
+        };
+        assert_eq!(self.buffer_pos, 0);
+
+        // Compress the whole blocks into the hasher state, without copying if data is
+        // aligned.
+        let (middle, tail) = remainder.as_chunks::<BLOCK_BYTES>();
+        match bytemuck::try_cast_slice::<_, Block>(middle) {
+            Ok(blocks) => self.compress_slice(blocks),
+            Err(PodCastError::TargetAlignmentGreaterAndInputNotAligned) => {
+                self.compress_slice(
+                    &middle
+                        .iter()
+                        .map(|chunk| bytemuck::pod_read_unaligned(chunk))
+                        .collect::<alloc::vec::Vec<_>>(),
+                );
+            }
+            Err(e) => unreachable!("failed to cast &[[u8; BLOCK_BYTES]] to &[Block]: {}", e),
+        };
+
+        // Write the remaining data, which is less than a block, into the buffer.
+        let tail_bytes = tail.len();
+        let tail_words = align_up(tail_bytes, WORD_SIZE) / WORD_SIZE;
+
+        self.buffer.as_mut_bytes()[..tail_bytes].copy_from_slice(tail);
+        self.buffer_pos += tail_words;
+
+        Ok(())
+    }
+
+    fn release(&mut self) -> Result<Self::Output> {
+        unimplemented!();
     }
 }
 

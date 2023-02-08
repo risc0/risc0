@@ -127,10 +127,17 @@ pub unsafe fn sys_log(msg_ptr: *const u8, msg_len: usize) {
 pub unsafe fn sys_io(channel: u32, buf_ptr: *const u8, buf_len: usize) -> &'static [u8] {
     #[cfg(target_os = "zkvm")]
     {
+        // Get the current position of the READ_PTR within the INPUT region and round
+        // the value to the next page boundary (i.e. to the next uninitialized
+        // location in the INPUT region). This is where the host will write to.
         let read_ptr: &mut usize = &mut *READ_PTR.get();
         *read_ptr = round_up(*read_ptr as u32, crate::PAGE_SIZE as u32) as usize;
+
         let out_ptr = *read_ptr as *const u8;
         let out_nbytes: usize;
+
+        // ECALL to the host. Host with read buf_len bytes from buf_ptr and write
+        // out_nbytes to the location specified in out_ptr.
         asm!(
             "ecall",
             in("t0") ecall::SOFTWARE,
@@ -140,8 +147,13 @@ pub unsafe fn sys_io(channel: u32, buf_ptr: *const u8, buf_len: usize) -> &'stat
             in("a2") buf_len,
             in("a3") out_ptr,
         );
+
+        // Set the READ_PTR to the end of the returned data, rounded to the next word.
         let out_nwords = (out_nbytes + WORD_SIZE - 1) / WORD_SIZE;
         let read_end = read_ptr.checked_add(out_nwords * WORD_SIZE).unwrap();
+        // NOTE: If this ever overruns the INPUT region, it would correct memory with an
+        // unrecorded write, similar to if the host simply modifies guest memory
+        // in an illegal way. This will result in a proof failure.
         // if read_end > memory::INPUT.end() {
         //     panic!("host_recv overran input buffer with {nwords} word read");
         // }
@@ -152,6 +164,7 @@ pub unsafe fn sys_io(channel: u32, buf_ptr: *const u8, buf_len: usize) -> &'stat
     unimplemented!()
 }
 
+// NOTE: buf_len is the length of the data pointed to by buf_ptr in bytes.
 #[inline(always)]
 pub unsafe fn sys_commit(buf_ptr: *const u32, buf_len: usize) {
     #[cfg(target_os = "zkvm")]
