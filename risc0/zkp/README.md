@@ -7,4 +7,4 @@ utilities that are more commonly used directly from this crate: Developers
 looking to construct (or verify) a zero-knowledge proof with RISC Zero are
 advised to use the [risc0_zkvm] crate instead.
 
-[risc0_zkvm]: https://docs.rs/risc0-zkvm
+[risc0_zkvm]: https://crates.io/crates/risc0-zkvm
