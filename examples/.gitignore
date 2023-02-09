@@ -1,4 +1,4 @@
 !factors/Cargo.lock
-!factors/methods/guest/Cargo.lock
+!methods/factors/guest/Cargo.lock
 !sha/Cargo.lock
-!sha/methods/guest/Cargo.lock
+!methods/sha/guest/Cargo.lock

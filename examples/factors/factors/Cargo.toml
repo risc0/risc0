@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-factors-methods = { path = "../methods" }
+factors-methods = { path = "../../methods/factors" }
 risc0-zkvm = { path = "../../../risc0/zkvm" }
 serde = "1.0"

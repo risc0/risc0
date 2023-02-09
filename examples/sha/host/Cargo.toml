@@ -8,7 +8,7 @@ clap = "4.0"
 risc0-zkp = { path = "../../../risc0/zkp" }
 risc0-zkvm = { path = "../../../risc0/zkvm" }
 serde = "1.0"
-sha-methods = { path = "../methods" }
+sha-methods = { path = "../../methods/sha" }
 
 [dev-dependencies]
 hex = "0.4"
