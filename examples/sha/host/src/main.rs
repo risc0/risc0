@@ -13,10 +13,10 @@
 // limitations under the License.
 
 use clap::{Arg, Command};
-use sha_methods::{HASH_ELF, HASH_ID};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{from_slice, to_vec};
 use risc0_zkvm::{Prover, Receipt};
+use sha_methods::{HASH_ELF, HASH_ID};
 
 fn provably_hash(input: &str) -> Receipt {
     // Make the prover.
@@ -49,9 +49,9 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use sha_methods::HASH_ID;
     use risc0_zkp::core::sha::Digest;
     use risc0_zkvm::serde::from_slice;
+    use sha_methods::HASH_ID;
 
     use crate::provably_hash;
 

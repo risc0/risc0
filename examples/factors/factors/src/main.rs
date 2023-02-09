@@ -31,7 +31,8 @@ fn main() {
     prover.add_input_u32_slice(&to_vec(&a).expect("should be serializable"));
     prover.add_input_u32_slice(&to_vec(&b).expect("should be serializable"));
     // Run prover & generate receipt
-    let receipt = prover.run()
+    let receipt = prover
+        .run()
         .expect("Should be able to prove valid code that fits in the cycle count.");
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
@@ -69,11 +70,17 @@ mod tests {
         prover.add_input_u32_slice(&to_vec(&TEST_FACTOR_TWO).expect("should be serializable"));
 
         let receipt = prover.run().expect("Should be able to prove valid code");
-        receipt.verify(&MULTIPLY_ID).expect("Proven code should verify");
+        receipt
+            .verify(&MULTIPLY_ID)
+            .expect("Proven code should verify");
 
         let result: u64 = from_slice(&receipt.journal).expect(
             "Journal output should deserialize into the same types (& order) that it was written",
         );
-        assert_eq!(result, TEST_FACTOR_ONE * TEST_FACTOR_TWO, "We expect the zkVM output to be the product of the inputs")
+        assert_eq!(
+            result,
+            TEST_FACTOR_ONE * TEST_FACTOR_TWO,
+            "We expect the zkVM output to be the product of the inputs"
+        )
     }
 }
