@@ -6,7 +6,7 @@ edition = "2021"
 [workspace]
 
 [build-dependencies]
-risc0-build = "0.12"
+risc0-build = { path = "../../../../risc0/build" }
 
 [dependencies]
-risc0-zkvm = { version = "0.12", default-features = false }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false }
