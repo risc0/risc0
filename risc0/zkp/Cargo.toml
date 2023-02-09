@@ -35,6 +35,7 @@ ndarray = { version = "0.15", features = ["rayon"], optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
+lazy_static = "1.4.0"
 
 [dev-dependencies]
 criterion = "0.4"
