@@ -13,7 +13,7 @@ First, make sure [rustup](https://rustup.rs) is installed. This project uses a [
 To build all methods and execute the method within the zkVM, run the following command:
 
 ```
-cargo run
+cargo run --bin factors
 ```
 
 ## Video Tutorial
