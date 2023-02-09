@@ -428,7 +428,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
             let column: Vec<Self::Elem> =
                 (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
-            *output = *Self::Hash::hash_raw_pod_slice(column.as_slice());
+            *output = *Self::Hash::hash_elem_slice(column.as_slice());
         });
     }
 

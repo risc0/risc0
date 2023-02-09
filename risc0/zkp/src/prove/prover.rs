@@ -239,7 +239,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         debug!("Size of U = {}", coeff_u.len());
         self.iop.write_field_elem_slice(&coeff_u);
-        let hash_u = H::Hash::hash_raw_pod_slice(coeff_u.as_slice());
+        let hash_u = H::Hash::hash_ext_elem_slice(coeff_u.as_slice());
         self.iop.commit(&hash_u);
 
         // Set the mix mix value, which is used for FRI batching.

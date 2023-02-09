@@ -47,7 +47,7 @@ pub trait Hal {
     type BufferElem: Buffer<Self::Elem>;
     type BufferExtElem: Buffer<Self::ExtElem>;
     type BufferU32: Buffer<u32>;
-    type Hash: ConfigHash;
+    type Hash: ConfigHash<Self::Field>;
     type Rng: ConfigRng<Self::Field>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
