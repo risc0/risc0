@@ -15,8 +15,6 @@
 use core::mem;
 
 use bytemuck::PodCastError;
-#[cfg(target_os = "zkvm")]
-use risc0_zkvm_platform::syscall::sys_commit;
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::Serialize;
 
@@ -531,17 +529,6 @@ pub trait Committer {
     /// commit a new stream of data. Implementaion is optional and the default
     /// implementation is a no-op.
     fn reset(&mut self) {}
-}
-
-#[cfg(target_os = "zkvm")]
-#[derive(Default, Debug)]
-pub struct SyscallCommitter {}
-
-#[cfg(target_os = "zkvm")]
-impl Committer for SyscallCommitter {
-    fn commit(&mut self, data: &[u32]) {
-        unsafe { sys_commit(data.as_ptr(), data.len() * WORD_SIZE) };
-    }
 }
 
 #[derive(Default, Debug)]
@@ -1243,4 +1230,7 @@ mod tests {
             test_commit(&input)
         );
     }
+
+    // TODO(victor): Add some tests to excersize more of the code paths in
+    // CommitHasher.
 }

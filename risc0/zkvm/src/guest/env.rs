@@ -27,14 +27,22 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     guest::{memory_barrier, sha},
-    serde::{Deserializer, Serializer, Slice},
+    serde::{CommitHasher, Committer, Deserializer, Serializer, Slice},
 };
 
 struct Env {
     output: Serializer<Slice<'static>>,
-    commit: Serializer<Slice<'static>>,
-    commit_len: usize,
+    commit: Serializer<CommitHasher<sha::Impl, SyscallCommitter>>,
     initial_input_reader: Option<Reader>,
+}
+
+#[derive(Default, Debug)]
+struct SyscallCommitter {}
+
+impl Committer for SyscallCommitter {
+    fn commit(&mut self, data: &[u32]) {
+        unsafe { sys_commit(data.as_ptr(), data.len() * WORD_SIZE) };
+    }
 }
 
 struct Once<T> {
@@ -126,14 +134,11 @@ pub fn log(msg: &str) {
 impl Env {
     fn new() -> Self {
         Env {
-            commit: Serializer::new(Slice::new(unsafe {
-                slice::from_raw_parts_mut(memory::COMMIT.start() as _, memory::COMMIT.len_words())
-            })),
+            commit: Serializer::new(CommitHasher::<sha::Impl, SyscallCommitter>::default()),
             output: Serializer::new(Slice::new(unsafe {
                 slice::from_raw_parts_mut(memory::OUTPUT.start() as _, memory::OUTPUT.len_words())
             })),
 
-            commit_len: 0,
             initial_input_reader: None,
         }
     }
@@ -158,51 +163,24 @@ impl Env {
     }
 
     fn commit<T: Serialize>(&mut self, data: &T) {
+        // NOTE TO REVIEWERS: This removes the send to the STDOUT channel. It will break
+        // anybody who what relying on that. It's possible send the data to
+        // STDOUT in chunks from the commit hasher if this is important.
         data.serialize(&mut self.commit).unwrap();
-        let buf = self.commit.release().unwrap();
-        self.commit_len += buf.len();
-        // Copy to stdout
-        send_recv(SENDRECV_CHANNEL_STDOUT, bytemuck::cast_slice(buf));
     }
 
     fn finalize(&mut self) {
-        let len_words = self.commit_len;
-        let len_bytes = len_words * WORD_SIZE;
-        let slice: &[u32] =
-            unsafe { slice::from_raw_parts(memory::COMMIT.start() as _, len_words) };
-
-        // Write the full data out to the host
-        // NOTE: This is somewhat redundant with the sending of the committed data to
-        // the STDOUT channel. We should consider eliminating the write of commit data
-        // to STDOUT and instead only commit it via the sys_commit call.
-        unsafe { sys_commit(slice.as_ptr(), len_bytes) };
-
-        let mut output = Digest::from([0u32; DIGEST_WORDS]);
-
-        // If the total proof message is small (<= 32 bytes), return it directly
-        // from the proof, otherwise SHA it and return the hash.
-        if len_words <= 8 {
-            let output = output.as_mut_words();
-            for i in 0..len_words {
-                output[i] = slice[i];
-            }
-        } else {
-            let ptr: *mut Digest = &mut output;
-            // NOTE: Hashing here without the standard SHA-256 trailer, instead only padding
-            // with zeroes up to the next block boundary saves a copy when the
-            // data length is within 9 bytes of the block boundary. As a
-            // drawback, it creates an ambiguity of what was committed among messages with
-            // some number of trailing zeros. (e.g. between the byte string 0xda7a and
-            // 0xda7a0000) Adding (and checking in the verifier) the length of the committed
-            // data resolves this issue.
-            sha::update_u32(ptr, &SHA256_INIT, slice, sha::WithoutTrailer);
-        }
-        let output = output.as_words();
+        // NOTE TO REVIEWERS: This changes the digest in two ways. It included a
+        // standard SHA-256 trailer where the previous version was only
+        // zero-padding. It also hashes the data even if it is less than a
+        // Digest in length.
+        // TODO(victor) Remove the length field.
+        let output = self.commit.release().unwrap();
         unsafe {
             for i in 0..DIGEST_WORDS {
-                sys_output(i as u32, output[i]);
+                sys_output(i as u32, output.as_words()[i]);
             }
-            sys_output(DIGEST_WORDS as u32, len_bytes as u32);
+            sys_output(DIGEST_WORDS as u32, DIGEST_WORDS as u32);
             sys_halt()
         }
     }

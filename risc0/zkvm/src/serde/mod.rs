@@ -46,7 +46,10 @@ mod err;
 mod serializer;
 
 pub use deserializer::{from_slice, Deserializer};
-pub use serializer::{to_slice, to_vec, to_vec_with_capacity, AllocVec, Serializer, Slice};
+pub use serializer::{
+    to_slice, to_vec, to_vec_with_capacity, AllocVec, CommitHasher, Committer, NoopCommitter,
+    Serializer, Slice,
+};
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///
