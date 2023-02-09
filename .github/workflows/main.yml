@@ -46,6 +46,9 @@ jobs:
       - run: cargo test --tests -- --ignored
         env:
           RUST_BACKTRACE: "1"
+      - run: cargo test --manifest-path examples/Cargo.toml
+        env:
+          RUST_BACKTRACE: "1"
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
       - run: cargo check --benches
 
