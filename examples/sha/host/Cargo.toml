@@ -1,14 +1,14 @@
 [package]
-name = "sha-example"
+name = "sha"
 version = "0.12.0"
 edition = "2021"
 
 [dependencies]
 clap = "4.0"
-methods = { path = "../methods" }
 risc0-zkp = { path = "../../../risc0/zkp" }
 risc0-zkvm = { path = "../../../risc0/zkvm" }
 serde = "1.0"
+sha-methods = { path = "../methods" }
 
 [dev-dependencies]
 hex = "0.4"

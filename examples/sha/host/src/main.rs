@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::{Arg, Command};
-use methods::{HASH_ELF, HASH_ID};
+use sha_methods::{HASH_ELF, HASH_ID};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{from_slice, to_vec};
 use risc0_zkvm::{Prover, Receipt};
@@ -49,7 +49,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use methods::HASH_ID;
+    use sha_methods::HASH_ID;
     use risc0_zkp::core::sha::Digest;
     use risc0_zkvm::serde::from_slice;
 

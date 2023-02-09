@@ -834,13 +834,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
-]
-
-[[package]]
 name = "mime"
 version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1454,15 +1447,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "sha-example"
+name = "sha"
 version = "0.12.0"
 dependencies = [
  "clap",
  "hex",
- "methods",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
+ "sha-methods",
+]
+
+[[package]]
+name = "sha-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
