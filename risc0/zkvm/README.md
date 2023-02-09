@@ -1,12 +1,12 @@
 The RISC Zero zkVM is a RISC-V virtual machine that produces
 [zero-knowledge proofs](https://en.wikipedia.org/wiki/Zero-knowledge_proof)
 of code it executes. By using the zkVM, a cryptographic
-[Receipt](Receipt) is produced which anyone can [verify](Receipt::verify)
+[receipt](receipt::Receipt) is produced which anyone can [verify](Receipt::verify)
 was produced by the zkVM's guest code. No additional information about the
 code execution (such as, for example, the inputs provided) is revealed by
-publishing the [Receipt](Receipt).
+publishing the [receipt](receipt::Receipt).
 
-This is the reference documentation for the RISC Zero zkVM. We have
+In addition to [our reference documentation on docs.rs](https://docs.rs/risc0-zkvm), we have
 additional (non-reference) resources for using our zkVM that you may also
 find helpful, especially if you're new to the RISC Zero zkVM. These include:
 

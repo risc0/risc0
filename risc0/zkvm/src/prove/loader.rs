@@ -203,6 +203,11 @@ where
         debug!("RESET");
         self.start();
         self.code[ControlIndex::Reset] = BabyBearElem::ONE;
+        self.code[ControlIndex::Info] = BabyBearElem::ONE;
+        self.next()?;
+
+        self.start();
+        self.code[ControlIndex::Reset] = BabyBearElem::ONE;
         self.next()
     }
 

@@ -2,7 +2,7 @@
 Build RISC Zero zkVM guest code and provide handles to the host side.
 
 In order for the host to execute guest code in the [RISC Zero
-zkVM](risc0_zkvm), the host must be provided a compiled RISC-V ELF file and
+zkVM](https://docs.rs/risc0-zkvm), the host must be provided a compiled RISC-V ELF file and
 the corresponding ImageID. This crate
 contains the functions needed to take zkVM guest code, build a corresponding
 ELF file and ImageID, and make the ImageID and a path to the ELF file
@@ -15,8 +15,8 @@ in our [RISC Zero Rust Starter repository](https://github.com/risc0/risc0-rust-s
 In that repository, `risc0-build` is used in the
 [`methods` directory](https://github.com/risc0/risc0-rust-starter/tree/main/methods).
 
-Guest methods are embedded for the host to use by calling [embed_methods]
-(or [embed_methods_with_options]) in a [build script](https://doc.rust-lang.org/cargo/reference/build-scripts.html).
+Guest methods are embedded for the host to use by calling [embed_methods](crate::embed_methods)
+(or [embed_methods_with_options](crate::embed_methods_with_options)) in a [build script](https://doc.rust-lang.org/cargo/reference/build-scripts.html).
 An example `build.rs` file would look like
 ```no_run
 fn main() {
