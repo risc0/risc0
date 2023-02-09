@@ -24,7 +24,7 @@ use super::{
     align_up,
     err::{Error, Result},
 };
-use crate::sha::{Block, Sha256, BLOCK_BYTES, BLOCK_WORDS, SHA256_INIT};
+use crate::sha::{self, Block, Sha256, BLOCK_BYTES, BLOCK_WORDS, SHA256_INIT};
 
 pub fn to_slice<'a, 'b, T>(value: &'b T, buf: &'a mut [u32]) -> Result<&'a [u32]>
 where
@@ -168,6 +168,15 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
         Ok(())
     }
 
+    // NOTE: Serializing byte slices _does not_ currently call serialize_bytes. This
+    // is because the default collect_seq implementation handles all [T] with
+    // `collect_seq` which does not differentiate. Two options for enabling more
+    // efficient serialization (or commit) of bytes values and
+    // bytes-interpretable slices (e.g. [u32]) are:
+    //   A) Implement collect_seq and check at runtime whether a type could be
+    // serialized as bytes.
+    //   B) Use the experimental Rust specialization
+    // features.
     fn serialize_bytes(self, v: &[u8]) -> Result<()> {
         self.stream.try_push_word(v.len() as u32)?;
         self.stream.try_extend(v)
@@ -517,6 +526,11 @@ impl StreamWriter for AllocVec {
 /// implemented using a write buffer.
 pub trait Committer {
     fn commit(&mut self, data: &[u32]);
+
+    /// Reset the internal state of this committer such that it can be used to
+    /// commit a new stream of data. Implementaion is optional and the default
+    /// implementation is a no-op.
+    fn reset(&mut self) {}
 }
 
 #[cfg(target_os = "zkvm")]
@@ -531,13 +545,13 @@ impl Committer for SyscallCommitter {
 }
 
 #[derive(Default, Debug)]
-pub struct NoopCommiter {}
+pub struct NoopCommitter {}
 
-impl Committer for NoopCommiter {
+impl Committer for NoopCommitter {
     fn commit(&mut self, _data: &[u32]) {}
 }
 
-pub struct CommitHasher<S: Sha256, C: Committer = NoopCommiter> {
+pub struct CommitHasher<S: Sha256 = sha::Impl, C: Committer = NoopCommitter> {
     state: Option<S::DigestPtr>,
     buffer: Block,
     buffer_pos: usize,
@@ -546,6 +560,16 @@ pub struct CommitHasher<S: Sha256, C: Committer = NoopCommiter> {
 }
 
 impl<S: Sha256, C: Committer> CommitHasher<S, C> {
+    fn new(committer: C) -> Self {
+        Self {
+            state: None,
+            buffer: Block::default(),
+            buffer_pos: 0,
+            block_len: 0,
+            committer: committer,
+        }
+    }
+
     /// Compress the buffer into the hasher state. Must only be called when the
     /// buffer is full. Resets the buffer position to zero.
     #[inline]
@@ -584,17 +608,18 @@ impl<S: Sha256, C: Committer> CommitHasher<S, C> {
     }
 
     /// Finalizes the hasher, adding the standard SHA-256 padding and trailer
-    /// the compressing and returning the finalized hasher state. The hasher
-    /// is additionally reset to a usable state.
+    /// then compressing and returning the finalized hasher state.
+    ///
+    /// DANGER: At the end of this method, the hasher is left in a dirty state.
     #[inline]
-    fn finalize(&mut self) -> S::DigestPtr {
+    fn finalize_internal(&mut self) -> S::DigestPtr {
         // Establish the final count of the number of bits in the stream. Using a u32,
         // the maximum message length is 500 MB.
         let bit_len =
             u32::try_from((self.block_len * BLOCK_WORDS + self.buffer_pos) * WORD_SIZE * 8)
                 .unwrap();
 
-        // Send the remaining data to the commiter before writing the trailers.
+        // Send the remaining data to the committer before writing the trailers.
         if self.buffer_pos != 0 {
             self.committer
                 .commit(&self.buffer.as_words()[..self.buffer_pos]);
@@ -606,12 +631,12 @@ impl<S: Sha256, C: Committer> CommitHasher<S, C> {
         // expressions, so this block uses the the values as literals.
         match self.buffer_pos {
             0..=13 => {
-                self.buffer.as_mut_words()[self.buffer_pos] = 0x80000000;
+                self.buffer.as_mut_words()[self.buffer_pos] = 0x80000000_u32.to_be();
                 self.buffer.as_mut_words()[self.buffer_pos + 1..BLOCK_WORDS - 1].fill(0);
                 self.buffer.as_mut_words()[BLOCK_WORDS - 1] = bit_len.to_be();
             }
             14..=15 => {
-                self.buffer.as_mut_words()[self.buffer_pos] = 0x80000000;
+                self.buffer.as_mut_words()[self.buffer_pos] = 0x80000000_u32.to_be();
                 self.buffer.as_mut_words()[self.buffer_pos + 1..BLOCK_WORDS].fill(0);
                 self.state = Some(S::compress(
                     self.state.as_deref().unwrap_or(&SHA256_INIT),
@@ -627,22 +652,51 @@ impl<S: Sha256, C: Committer> CommitHasher<S, C> {
                     self.buffer.as_half_blocks().0,
                     self.buffer.as_half_blocks().1,
                 ));
-                self.buffer.as_mut_words()[0] = 0x80000000;
+                self.buffer.as_mut_words()[0] = 0x80000000_u32.to_be();
                 self.buffer.as_mut_words()[1..(BLOCK_WORDS - 1)].fill(0);
                 self.buffer.as_mut_words()[BLOCK_WORDS - 1] = bit_len.to_be();
             }
             _ => unreachable!("buffer_pos never exceeds BLOCK_WORDS"),
         };
 
-        // Final compress and reset of the struct.
-        self.state = Some(S::compress(
+        // Final compress.
+        S::compress(
             self.state.as_deref().unwrap_or(&SHA256_INIT),
             self.buffer.as_half_blocks().0,
             self.buffer.as_half_blocks().1,
-        ));
+        )
+    }
+
+    /// Finalizes the hasher, adding the standard SHA-256 padding and trailer
+    /// then compressing and returning the finalized hasher state. This method
+    /// consumes the hasher.
+    pub fn finalize(mut self) -> S::DigestPtr {
+        self.finalize_internal()
+    }
+}
+
+impl<S: Sha256, C: Committer> CommitHasher<S, C> {
+    pub fn reset(&mut self) {
+        // NOTE: The buffer does need to be replaced.
+        self.state = None;
         self.buffer_pos = 0;
         self.block_len = 0;
-        self.state.take().unwrap()
+        self.committer.reset();
+    }
+
+    /// Finalizes the hasher, adding the standard SHA-256 padding and trailer
+    /// then compressing and returning the finalized hasher state. This method
+    /// consumes the hasher.
+    pub fn finalize_reset(&mut self) -> S::DigestPtr {
+        let digest = self.finalize_internal();
+        self.reset();
+        digest
+    }
+}
+
+impl<S: Sha256, C: Committer + Default> Default for CommitHasher<S, C> {
+    fn default() -> Self {
+        Self::new(C::default())
     }
 }
 
@@ -656,6 +710,7 @@ impl<S: Sha256, C: Committer> StreamWriter for CommitHasher<S, C> {
         assert!(self.buffer_pos < BLOCK_WORDS);
 
         self.buffer.as_mut_words()[self.buffer_pos] = data;
+        self.buffer_pos += 1;
         Ok(())
     }
 
@@ -669,11 +724,10 @@ impl<S: Sha256, C: Committer> StreamWriter for CommitHasher<S, C> {
             data.len() < BLOCK_BYTES - (self.buffer_pos * WORD_SIZE),
         ) {
             (_, true) => {
-                // When there is not enough data to fill the buffer, just copy it into the
-                // buffer.
+                // When the data does not fill the buffer, just copy it into the buffer.
                 self.buffer.as_mut_bytes()[self.buffer_pos * WORD_SIZE..][..data.len()]
                     .copy_from_slice(data);
-                self.buffer_pos += data.len();
+                self.buffer_pos += align_up(data.len(), WORD_SIZE) / WORD_SIZE;
                 return Ok(());
             }
             (false, false) => {
@@ -712,6 +766,7 @@ impl<S: Sha256, C: Committer> StreamWriter for CommitHasher<S, C> {
         // Write the remaining data, which is less than a block, into the buffer.
         let tail_bytes = tail.len();
         let tail_words = align_up(tail_bytes, WORD_SIZE) / WORD_SIZE;
+        assert!(tail_words <= BLOCK_WORDS);
 
         self.buffer.as_mut_bytes()[..tail_bytes].copy_from_slice(tail);
         self.buffer_pos += tail_words;
@@ -720,13 +775,15 @@ impl<S: Sha256, C: Committer> StreamWriter for CommitHasher<S, C> {
     }
 
     fn release(&mut self) -> Result<Self::Output> {
-        Ok(self.finalize())
+        Ok(self.finalize_reset())
     }
 }
 
 #[cfg(test)]
 mod tests {
     use alloc::string::String;
+    use std::cell::RefCell;
+    use std::rc::Rc;
 
     use serde::Serialize;
 
@@ -734,6 +791,38 @@ mod tests {
 
     // Includes test cases for all the types in the serde data model.
     // https://docs.rs/serde/latest/serde/trait.Serializer.html
+
+    #[derive(Debug)]
+    pub struct DebugCommitter {
+        buffer: std::rc::Rc<RefCell<Vec<u32>>>,
+    }
+
+    impl DebugCommitter {
+        fn new(buffer: Rc<RefCell<Vec<u32>>>) -> Self {
+            Self { buffer }
+        }
+    }
+
+    impl Committer for DebugCommitter {
+        fn commit(&mut self, data: &[u32]) {
+            std::println!("commit: {:?}", data);
+            self.buffer.borrow_mut().extend_from_slice(data);
+        }
+    }
+
+    fn test_commit<T>(value: &T) -> (<sha::Impl as Sha256>::DigestPtr, Vec<u32>)
+    where
+        T: Serialize + ?Sized,
+    {
+        let commit_buffer = Rc::new(RefCell::new(Vec::<u32>::new()));
+        let mut hasher = Serializer::new(CommitHasher::<sha::Impl, _>::new(DebugCommitter::new(
+            commit_buffer.clone(),
+        )));
+        value.serialize(&mut hasher).unwrap();
+        let digest = hasher.stream.finalize();
+        let committed_data: Vec<u32> = commit_buffer.take();
+        (digest, committed_data)
+    }
 
     #[test]
     fn test_primitives() {
@@ -779,6 +868,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -800,6 +896,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -823,6 +926,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -842,6 +952,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -857,6 +974,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -885,6 +1009,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -898,6 +1029,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -926,6 +1064,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -947,6 +1092,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -957,6 +1109,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -970,6 +1129,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -998,6 +1164,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -1027,6 +1200,13 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 
     #[test]
@@ -1055,5 +1235,12 @@ mod tests {
         let buf: &mut [u32] = &mut [0; 256];
         assert_eq!(expected, to_slice(&input, buf).unwrap());
         assert_eq!(expected.as_slice(), &to_vec(&input).unwrap());
+        assert_eq!(
+            (
+                sha::Impl::hash_words(expected.as_slice()),
+                expected.as_slice().to_vec()
+            ),
+            test_commit(&input)
+        );
     }
 }
