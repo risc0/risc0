@@ -1,7 +1,6 @@
 [workspace]
 members = [
     "factors/factors",
-    "methods/factors",
-    "methods/sha",
+    "methods",
     "sha/host",
 ]
