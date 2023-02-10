@@ -5,10 +5,10 @@ edition = "2021"
 
 [dependencies]
 clap = "4.0"
-risc0-zkp = { path = "../../../risc0/zkp" }
-risc0-zkvm = { path = "../../../risc0/zkvm" }
+risc0-zkp = { path = "../../risc0/zkp" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
-methods = { path = "../../methods" }
+methods = { path = "../methods" }
 
 [dev-dependencies]
 hex = "0.4"
