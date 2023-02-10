@@ -1,2 +1,3 @@
-!factors/Cargo.lock
-!sha/Cargo.lock
+!Cargo.lock
+!methods/factors/Cargo.lock
+!methods/sha/Cargo.lock
