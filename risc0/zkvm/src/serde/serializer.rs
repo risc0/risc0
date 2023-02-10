@@ -600,17 +600,17 @@ impl<S: Sha256, C: Committer> CommitHasher<S, C> {
     /// DANGER: At the end of this method, the hasher is left in a dirty state.
     #[inline]
     fn finalize_internal(&mut self) -> S::DigestPtr {
-        // Establish the final count of the number of bits in the stream. Using a u32,
-        // the maximum message length is 500 MB.
-        let bit_len =
-            u32::try_from((self.block_len * BLOCK_WORDS + self.buffer_pos) * WORD_SIZE * 8)
-                .unwrap();
-
         // Send the remaining data to the committer before writing the trailers.
         if self.buffer_pos != 0 {
             self.committer
                 .commit(&self.buffer.as_words()[..self.buffer_pos]);
         }
+
+        // Establish the final count of the number of bits in the stream. Using a u32,
+        // the maximum message length is 500 MB.
+        let bit_len =
+            u32::try_from((self.block_len * BLOCK_WORDS + self.buffer_pos) * WORD_SIZE * 8)
+                .unwrap();
 
         // Write the SHA-256 trailer including end marker, padding, and length.
         // If the buffer is nearly full, a compression may be required.

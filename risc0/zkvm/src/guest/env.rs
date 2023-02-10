@@ -16,7 +16,7 @@
 
 use core::{cell::UnsafeCell, mem::MaybeUninit, ptr, slice};
 
-use risc0_zkp::core::sha::{Digest, DIGEST_WORDS, SHA256_INIT};
+use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS, SHA256_INIT};
 use risc0_zkvm_platform::{
     io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT},
     memory,
@@ -180,7 +180,7 @@ impl Env {
             for i in 0..DIGEST_WORDS {
                 sys_output(i as u32, output.as_words()[i]);
             }
-            sys_output(DIGEST_WORDS as u32, DIGEST_WORDS as u32);
+            sys_output(DIGEST_WORDS as u32, DIGEST_BYTES as u32);
             sys_halt()
         }
     }

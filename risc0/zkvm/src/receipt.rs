@@ -81,29 +81,10 @@ where
 
         let slice = &io[WORD_SIZE + DIGEST_BYTES..];
         let outputs: Vec<u32> = slice.chunks_exact(2).map(|x| x[0] | x[1] << 16).collect();
-        let output_len = outputs[8] as usize;
 
-        if journal.len() * WORD_SIZE != output_len {
-            return Err(VerificationError::SealJournalLengthMismatch {
-                seal_len: output_len,
-                journal_len: journal.len() * WORD_SIZE,
-            });
-        }
-
-        if journal.len() <= DIGEST_WORDS {
-            for i in 0..journal.len() {
-                if journal[i] != outputs[i] {
-                    return Err(VerificationError::JournalSealRootMismatch);
-                }
-            }
-        } else {
-            let digest = sha::Impl::hash_raw_pod_slice(journal);
-            let digest = digest.as_words();
-            for i in 0..DIGEST_WORDS {
-                if digest[i] != outputs[i] {
-                    return Err(VerificationError::JournalSealRootMismatch);
-                }
-            }
+        let digest = sha::Impl::hash_words(journal);
+        if digest.as_words() != &outputs[..DIGEST_WORDS] {
+            return Err(VerificationError::JournalSealRootMismatch);
         }
 
         Ok(())
