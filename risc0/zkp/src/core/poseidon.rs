@@ -6,7 +6,8 @@
 //! An implementation of Poseidon targeting the Baby Bear field with a security
 //! of 128 bits.
 
-const CELLS: usize = 24;
+/// How many cells are in the sponge
+pub const CELLS: usize = 24;
 const ROUNDS_FULL: usize = 8;
 const ROUNDS_HALF_FULL: usize = ROUNDS_FULL / 2;
 const ROUNDS_PARTIAL: usize = 21;
@@ -305,7 +306,8 @@ fn full_round(cells: &mut [Elem; CELLS], round: usize) {
     multiply_by_mds(cells);
 }
 
-fn poseidon_mix(cells: &mut [Elem; CELLS]) {
+/// The raw sponge mixing function
+pub fn poseidon_mix(cells: &mut [Elem; CELLS]) {
     const ROW_SIZE: usize = CELLS + ROUNDS_PARTIAL;
     let mut round = 0;
     // Do initial full rounds
@@ -347,11 +349,11 @@ fn poseidon_mix(cells: &mut [Elem; CELLS]) {
     }
 }
 
-// The 'rate' of the sponge, i.e. how much we can safely add/remove per mixing.
-const CELLS_RATE: usize = 16;
+/// The 'rate' of the sponge, i.e. how much we can safely add/remove per mixing.
+pub const CELLS_RATE: usize = 16;
 
-// The size of the hash output in cells (~ 248 bits)
-const CELLS_OUT: usize = 8;
+/// The size of the hash output in cells (~ 248 bits)
+pub const CELLS_OUT: usize = 8;
 
 /// Perform a unpadded hash of a vector of elements.  Because this is unpadded
 /// collision resistance is only true for vectors of the same size.  If the size

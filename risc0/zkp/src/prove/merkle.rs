@@ -120,18 +120,20 @@ impl<H: Hal> MerkleTreeProver<H> {
 
 #[cfg(test)]
 mod tests {
-    use rand::{Rng, RngCore};
+    use rand::Rng;
     use risc0_core::field::{
         baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
         Elem,
     };
 
     use super::*;
-    use crate::verify::VerifyHal;
     use crate::{
         adapter::{MixState, PolyExt},
-        core::{config::HashSuiteSha256, sha_cpu},
-        hal::cpu::{BabyBearSha256CpuHal, CpuHal},
+        core::{
+            config::{ConfigRng, HashSuite, HashSuitePoseidon, HashSuiteSha256},
+            sha_cpu,
+        },
+        hal::cpu::CpuHal,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, CpuVerifyHal, VerificationError},
     };
 
@@ -148,8 +150,9 @@ mod tests {
         }
     }
 
-    type TestVerifyHal<'a> =
-        CpuVerifyHal<'a, BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>, MockCircuit>;
+    type ShaSuite = HashSuiteSha256<BabyBear, sha_cpu::Impl>;
+    type PoseidonSuite = HashSuitePoseidon;
+    type VerifierHal<'a, HS> = CpuVerifyHal<'a, BabyBear, HS, MockCircuit>;
 
     fn init_prover<H: Hal>(
         hal: &H,
@@ -168,26 +171,32 @@ mod tests {
         MerkleTreeProver::new(hal, &matrix, rows, cols, queries)
     }
 
-    fn bad_row_access<H: Hal>(hal: &H, rows: usize, cols: usize, queries: usize) {
-        let prover = init_prover(hal, rows, cols, queries);
-        let mut iop = WriteIOP::<H::Field, H::Rng>::new();
+    fn bad_row_access<HS: HashSuite<BabyBear>>(rows: usize, cols: usize, queries: usize) {
+        let hal = CpuHal::<BabyBear, HS>::new();
+        let prover = init_prover(&hal, rows, cols, queries);
+        let mut iop = WriteIOP::<BabyBear, HS::Rng>::new();
         prover.prove(&mut iop, rows);
     }
 
-    fn possibly_bad_verify<H: VerifyHal<Elem = BabyBearElem>>(
-        hal: &BabyBearSha256CpuHal,
+    fn bad_row_access_all(rows: usize, cols: usize, queries: usize) {
+        bad_row_access::<ShaSuite>(rows, cols, queries);
+        bad_row_access::<PoseidonSuite>(rows, cols, queries);
+    }
+
+    fn possibly_bad_verify<HS: HashSuite<BabyBear>>(
         rows: usize,
         cols: usize,
         queries: usize,
         bad_query: usize,
         manipulate_proof: bool,
     ) {
-        let prover = init_prover(hal, rows, cols, queries);
+        let hal = CpuHal::<BabyBear, HS>::new();
+        let prover = init_prover(&hal, rows, cols, queries);
 
-        let mut iop = WriteIOP::<BabyBear, <BabyBearSha256CpuHal as Hal>::Rng>::new();
+        let mut iop = WriteIOP::<BabyBear, HS::Rng>::new();
         prover.commit(&mut iop);
         for _query in 0..queries {
-            let r_idx = (iop.rng.next_u32() as usize) % rows;
+            let r_idx = (iop.rng.random_u32() as usize) % rows;
             let col = prover.prove(&mut iop, r_idx);
             for c_idx in 0..cols {
                 assert_eq!(
@@ -196,50 +205,59 @@ mod tests {
                 );
             }
         }
-        {
-            if manipulate_proof {
-                let mut rng = rand::thread_rng();
-                let manip_idx = rng.gen::<usize>() % iop.proof.len();
-                iop.proof[manip_idx] ^= 1;
-            }
-            let mut r_iop = ReadIOP::<H::Field, H::Rng>::new(&iop.proof);
-            let verifier = MerkleTreeVerifier::<H>::new(&mut r_iop, rows, cols, queries);
-            assert_eq!(verifier.root(), prover.root());
-            let mut err = false;
-            for query in 0..queries {
-                let r_idx = (r_iop.random_u32() as usize) % rows;
-                if query == bad_query {
-                    if rows == 1 {
-                        assert!(false, "Cannot test for bad query if there is only one row");
-                    }
-                    let r_idx = (r_idx + 1) % rows;
-                    let verification = verifier.verify(&mut r_iop, r_idx);
-                    match verification {
-                        Ok(_) => assert!(
-                            false,
-                            "Merkle tree wrongly passed verify when tested on the wrong row"
-                        ),
-                        Err(VerificationError::InvalidProof) => {}
-                        Err(_) => assert!(
-                            false,
-                            "Merkle tree failed validation for an unexpected reason"
-                        ),
-                    }
-                    err = true;
-                    break;
+        if manipulate_proof {
+            let mut rng = rand::thread_rng();
+            let manip_idx = rng.gen::<usize>() % iop.proof.len();
+            iop.proof[manip_idx] ^= 1;
+        }
+        let mut r_iop = ReadIOP::<BabyBear, HS::Rng>::new(&iop.proof);
+        let verifier = MerkleTreeVerifier::<VerifierHal<HS>>::new(&mut r_iop, rows, cols, queries);
+        assert_eq!(verifier.root(), prover.root());
+        let mut err = false;
+        for query in 0..queries {
+            let r_idx = (r_iop.random_u32() as usize) % rows;
+            if query == bad_query {
+                if rows == 1 {
+                    assert!(false, "Cannot test for bad query if there is only one row");
                 }
-                let col = verifier.verify(&mut r_iop, r_idx).unwrap();
-                for c_idx in 0..cols {
-                    assert_eq!(
-                        col[c_idx],
-                        BabyBearElem::from((u32::MAX / 2) - ((r_idx + c_idx * rows) as u32))
-                    );
+                let r_idx = (r_idx + 1) % rows;
+                let verification = verifier.verify(&mut r_iop, r_idx);
+                match verification {
+                    Ok(_) => assert!(
+                        false,
+                        "Merkle tree wrongly passed verify when tested on the wrong row"
+                    ),
+                    Err(VerificationError::InvalidProof) => {}
+                    Err(_) => assert!(
+                        false,
+                        "Merkle tree failed validation for an unexpected reason"
+                    ),
                 }
+                err = true;
+                break;
             }
-            if !err {
-                r_iop.verify_complete();
+            let col = verifier.verify(&mut r_iop, r_idx).unwrap();
+            for c_idx in 0..cols {
+                assert_eq!(
+                    col[c_idx],
+                    BabyBearElem::from((u32::MAX / 2) - ((r_idx + c_idx * rows) as u32))
+                );
             }
         }
+        if !err {
+            r_iop.verify_complete();
+        }
+    }
+
+    fn possibly_bad_verify_all(
+        rows: usize,
+        cols: usize,
+        queries: usize,
+        bad_query: usize,
+        manipulate_proof: bool,
+    ) {
+        possibly_bad_verify::<ShaSuite>(rows, cols, queries, bad_query, manipulate_proof);
+        possibly_bad_verify::<PoseidonSuite>(rows, cols, queries, bad_query, manipulate_proof);
     }
 
     fn randomize_sizes() -> (usize, usize, usize) {
@@ -256,50 +274,43 @@ mod tests {
     #[test]
     #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
     fn merkle_cpu_1_1_1_bad_row_access() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
-        bad_row_access(&hal, 1, 1, 1);
+        bad_row_access_all(1, 1, 1);
     }
 
     #[test]
     #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
     fn merkle_cpu_4_4_2_bad_row_access() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
-        bad_row_access(&hal, 4, 4, 2);
+        bad_row_access_all(4, 4, 2);
     }
 
     #[test]
     #[should_panic(expected = "assertion failed: idx < self.params.row_size")]
     fn merkle_cpu_randomized_bad_row_access() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
         let (rows, cols, queries) = randomize_sizes();
-        bad_row_access(&hal, rows, cols, queries);
+        bad_row_access_all(rows, cols, queries);
     }
 
     #[test]
     fn merkle_cpu_1_1_1_verify() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
-
         // Test a complete verification with no bad queries (by setting bad_query out of
         // range)
-        possibly_bad_verify::<TestVerifyHal>(&hal, 1, 1, 1, 4, false);
+        possibly_bad_verify_all(1, 1, 1, 4, false);
     }
 
     #[test]
     fn merkle_cpu_4_4_2_verify() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
         // Test a complete verification with no bad queries (by setting bad_query out of
         // range)
-        possibly_bad_verify::<TestVerifyHal>(&hal, 4, 4, 2, 4, false);
+        possibly_bad_verify_all(4, 4, 2, 4, false);
     }
 
     #[test]
     fn merkle_cpu_randomized_verify() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
         for _rep in 0..100 {
             let (rows, cols, queries) = randomize_sizes();
             // Test a complete verification with no bad queries (by setting bad_query out of
             // range)
-            possibly_bad_verify::<TestVerifyHal>(&hal, rows, cols, queries, queries + 1, false);
+            possibly_bad_verify_all(rows, cols, queries, queries + 1, false);
         }
     }
 
@@ -307,66 +318,60 @@ mod tests {
     fn merkle_cpu_2_1_1_bad_query() {
         // n.b. since we test bad queries by incrementing the row, we can't test for a
         // bad query with rows == 1
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
-        possibly_bad_verify::<TestVerifyHal>(&hal, 2, 1, 1, 0, false);
+        possibly_bad_verify_all(2, 1, 1, 0, false);
     }
 
     #[test]
     fn merkle_cpu_4_4_2_bad_query() {
         let mut rng = rand::thread_rng();
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
         let queries = 2;
         // Test a complete verification with a bad query
         let bad_query = rng.gen::<usize>() % queries;
-        possibly_bad_verify::<TestVerifyHal>(&hal, 4, 4, queries, bad_query, false);
+        possibly_bad_verify_all(4, 4, queries, bad_query, false);
     }
 
     #[test]
     fn merkle_cpu_randomized_bad_query() {
         let mut rng = rand::thread_rng();
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
         let (rows, cols, queries) = randomize_sizes();
         // At least two rows are required to test querying an incorrect row
         let rows = if rows == 1 { 2 } else { rows };
         // Test a complete verification with a bad query
         let bad_query = rng.gen::<usize>() % queries;
-        possibly_bad_verify::<TestVerifyHal>(&hal, rows, cols, queries, bad_query, false);
+        possibly_bad_verify_all(rows, cols, queries, bad_query, false);
     }
 
     #[test]
     #[should_panic]
     fn merkle_cpu_1_1_1_verify_manipulated() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
         for _rep in 0..50 {
             // Test a verification with a manipulated proof but no bad queries (by setting
             // bad_query out of range) Do this multiple times as the
             // manipulation location is random
-            possibly_bad_verify::<TestVerifyHal>(&hal, 1, 1, 1, 2, true);
+            possibly_bad_verify_all(1, 1, 1, 2, true);
         }
     }
 
     #[test]
     #[should_panic]
     fn merkle_cpu_4_4_2_verify_manipulated() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
         for _rep in 0..50 {
             // Test a verification with a manipulated proof but no bad queries (by setting
             // bad_query out of range) Do this multiple times as the
             // manipulation location is random
-            possibly_bad_verify::<TestVerifyHal>(&hal, 4, 4, 2, 4, true);
+            possibly_bad_verify_all(4, 4, 2, 4, true);
         }
     }
 
     #[test]
     #[should_panic]
     fn merkle_cpu_randomized_verify_manipulated() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
         for _rep in 0..50 {
             let (rows, cols, queries) = randomize_sizes();
             // Test a verification with a manipulated proof but no bad queries (by setting
             // bad_query out of range) Do this multiple times as the
             // manipulation location is random
-            possibly_bad_verify::<TestVerifyHal>(&hal, rows, cols, queries, queries + 1, true);
+            possibly_bad_verify_all(rows, cols, queries, queries + 1, true);
         }
     }
 }

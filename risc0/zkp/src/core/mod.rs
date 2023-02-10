@@ -30,6 +30,8 @@ pub mod ntt;
 pub mod poly;
 #[cfg(not(target_os = "zkvm"))]
 pub mod poseidon;
+#[cfg(not(target_os = "zkvm"))]
+pub mod poseidon_rng;
 pub mod sha;
 #[cfg(not(target_os = "zkvm"))]
 pub mod sha_cpu;

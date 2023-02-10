@@ -16,9 +16,11 @@
 
 use core::{fmt::Debug, marker::PhantomData, ops::DerefMut};
 
-use risc0_core::field::Field;
+use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
+use risc0_core::field::{ExtElem, Field};
 
-use super::{digest::Digest, sha::Sha256, sha_rng::ShaRng};
+use super::{digest::Digest, digest::DIGEST_WORDS, sha::Sha256, sha_rng::ShaRng};
+use super::{poseidon::unpadded_hash, poseidon::CELLS_OUT, poseidon_rng::PoseidonRng};
 
 /// A trait that sets the hashes and encodings used by the ZKP.
 pub trait ConfigHash<F: Field> {
@@ -34,12 +36,12 @@ pub trait ConfigHash<F: Field> {
     /// Generate a hash from a pair of [Digest].   
     fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr;
 
-    /// Generate a hash from a slice of field elements.  This may be unpadded so this
-    /// is only safe to used when the size is known.
+    /// Generate a hash from a slice of field elements.  This may be unpadded so
+    /// this is only safe to used when the size is known.
     fn hash_elem_slice(slice: &[F::Elem]) -> Self::DigestPtr;
 
-    /// Generate a hash from a slice of extension field element.  This may be unpadded so this
-    /// is only safe to used when the size is known.
+    /// Generate a hash from a slice of extension field element.  This may be
+    /// unpadded so this is only safe to used when the size is known.
     fn hash_ext_elem_slice(slice: &[F::ExtElem]) -> Self::DigestPtr;
 }
 
@@ -80,6 +82,41 @@ impl<S: Sha256, F: Field> ConfigHash<F> for ConfigHashSha256<S> {
     }
 }
 
+fn to_digest(elems: [BabyBearElem; CELLS_OUT]) -> Box<Digest> {
+    let mut state: [u32; DIGEST_WORDS] = [0; DIGEST_WORDS];
+    for i in 0..DIGEST_WORDS {
+        state[i] = elems[i].as_u32_montgomery();
+    }
+    Box::new(Digest::from(state))
+}
+
+/// A hash implemention for Poseidon
+pub struct ConfigHashPoseidon {}
+
+impl ConfigHash<BabyBear> for ConfigHashPoseidon {
+    type DigestPtr = Box<Digest>;
+
+    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+        let both: Vec<BabyBearElem> = a
+            .as_words()
+            .iter()
+            .chain(b.as_words())
+            .map(|w| BabyBearElem::new_raw(*w))
+            .collect();
+        to_digest(unpadded_hash(both.iter()))
+    }
+
+    fn hash_elem_slice(slice: &[BabyBearElem]) -> Self::DigestPtr {
+        to_digest(unpadded_hash(slice.iter()))
+    }
+
+    fn hash_ext_elem_slice(slice: &[BabyBearExtElem]) -> Self::DigestPtr {
+        to_digest(unpadded_hash(
+            slice.iter().map(|ee| ee.subelems().iter()).flatten(),
+        ))
+    }
+}
+
 /// Make it easy compute both hash related traits from a single source
 pub trait HashSuite<F: Field> {
     /// Define the hash used by the HashSuite
@@ -96,4 +133,12 @@ pub struct HashSuiteSha256<F: Field, S: Sha256> {
 impl<F: Field, S: Sha256> HashSuite<F> for HashSuiteSha256<F, S> {
     type Hash = ConfigHashSha256<S>;
     type Rng = ShaRng<S>;
+}
+
+/// A hash suite using Poseidon for both MT hashes and RNG
+pub struct HashSuitePoseidon {}
+
+impl HashSuite<BabyBear> for HashSuitePoseidon {
+    type Hash = ConfigHashPoseidon;
+    type Rng = PoseidonRng;
 }
