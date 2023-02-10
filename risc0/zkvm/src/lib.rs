@@ -14,7 +14,10 @@
 
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(not(feature = "std"), feature(alloc_error_handler))]
+#![cfg_attr(
+    all(not(feature = "std"), feature = "alloc_error_handler"),
+    feature(alloc_error_handler)
+)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
 extern crate alloc;

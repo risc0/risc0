@@ -85,3 +85,5 @@ prove = [
     "std",
 ]
 std = ["anyhow/std", "risc0-circuit-rv32im/std", "risc0-zeroio/std", "risc0-zkp/std", "serde/std"]
+alloc_error_handler = []
+panic_handler = []
