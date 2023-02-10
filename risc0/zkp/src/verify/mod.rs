@@ -31,16 +31,19 @@ use core::marker::PhantomData;
 
 #[cfg(not(target_os = "zkvm"))]
 pub use host::CpuVerifyHal;
-use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
+use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use self::adapter::VerifyAdapter;
+#[cfg(not(target_os = "zkvm"))]
+pub use crate::core::config::HashSuite;
 use crate::{
     adapter::{
         CircuitInfo, TapsProvider, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
     },
     core::{
+        config::{ConfigHash, ConfigRng},
+        digest::Digest,
         log2_ceil,
-        sha::{Digest, Sha256},
     },
     taps::TapSet,
     verify::{fri::fri_verify, merkle::MerkleTreeVerifier, read_iop::ReadIOP},
@@ -84,9 +87,11 @@ impl fmt::Display for VerificationError {
 }
 
 pub trait VerifyHal {
-    type Sha256: Sha256;
+    type Hash: ConfigHash;
+    type Rng: ConfigRng<Self::Field>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
+    type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 
@@ -140,26 +145,28 @@ mod host {
         check_mix_pows: Vec<F::ExtElem>,
     }
 
-    pub struct CpuVerifyHal<'a, S: Sha256, F: Field, C: PolyExt<F>> {
+    pub struct CpuVerifyHal<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> {
         circuit: &'a C,
         tap_cache: RefCell<Option<TapCache<F>>>,
-        phantom_sha: PhantomData<S>,
+        phantom: PhantomData<HS>,
     }
 
-    impl<'a, S: Sha256, F: Field, C: PolyExt<F>> CpuVerifyHal<'a, S, F, C> {
+    impl<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> CpuVerifyHal<'a, F, HS, C> {
         pub fn new(circuit: &'a C) -> Self {
             Self {
                 circuit,
                 tap_cache: RefCell::new(None),
-                phantom_sha: PhantomData,
+                phantom: PhantomData,
             }
         }
     }
 
-    impl<'a, S: Sha256, F: Field, C: PolyExt<F>> VerifyHal for CpuVerifyHal<'a, S, F, C> {
-        type Sha256 = S;
+    impl<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> VerifyHal for CpuVerifyHal<'a, F, HS, C> {
+        type Hash = HS::Hash;
+        type Rng = HS::Rng;
         type Elem = F::Elem;
         type ExtElem = F::ExtElem;
+        type Field = F;
 
         fn debug(&self, msg: &str) {
             log::debug!("{}", msg);
@@ -280,7 +287,7 @@ where
     H: VerifyHal,
     C: CircuitInfo + TapsProvider,
     CheckCode: Fn(u32, &Digest) -> Result<(), VerificationError>,
-    CheckGlobals: Fn(&[u32]) -> Result<(), VerificationError>,
+    CheckGlobals: Fn(&[H::Elem]) -> Result<(), VerificationError>,
 {
     if seal.len() == 0 {
         return Err(VerificationError::ReceiptFormatError);
@@ -290,13 +297,12 @@ where
     let taps = adapter.taps();
 
     // Make IOP
-    let mut iop = ReadIOP::<H::Sha256>::new(seal);
+    let mut iop = ReadIOP::<H::Field, H::Rng>::new(seal);
 
     // Read any execution state
     adapter.execute(&mut iop);
 
     let io = adapter.out.ok_or(VerificationError::ReceiptFormatError)?;
-    let io: Vec<u32> = io.iter().map(|x| x.into()).collect();
     check_globals(&io)?;
 
     // Get the size
@@ -345,7 +351,7 @@ where
 
     // Get a pseudorandom value with which to mix the constraint polynomials.
     // See DEEP-ALI protocol from DEEP-FRI paper for details on constraint mixing.
-    let poly_mix = H::ExtElem::random(&mut iop);
+    let poly_mix = iop.random_ext_elem();
 
     hal.debug("check_merkle");
     let check_merkle = MerkleTreeVerifier::<H>::new(&mut iop, domain, H::CHECK_SIZE, QUERIES);
@@ -353,14 +359,14 @@ where
 
     // Get a pseudorandom DEEP query point
     // See DEEP-ALI protocol from DEEP-FRI paper for details on DEEP query.
-    let z = H::ExtElem::random(&mut iop);
+    let z = iop.random_ext_elem();
     // debug!("Z = {z:?}");
     let back_one = <H::Elem as RootsOfUnity>::ROU_REV[po2 as usize];
 
     // Read the U coeffs (the interpolations of the taps) + commit their hash.
     let num_taps = taps.tap_size();
     let coeff_u = iop.read_field_elem_slice(num_taps + H::CHECK_SIZE);
-    let hash_u = *H::Sha256::hash_raw_pod_slice(coeff_u);
+    let hash_u = *H::Hash::hash_raw_pod_slice(coeff_u);
     iop.commit(&hash_u);
 
     // Now, convert U polynomials from coefficient form to evaluation form
@@ -421,7 +427,7 @@ where
     }
 
     // Set the mix mix value, pseudorandom value used for FRI batching
-    let mix = H::ExtElem::random(&mut iop);
+    let mix = iop.random_ext_elem();
     // debug!("mix = {mix:?}");
 
     // Make the mixed U polynomials.
@@ -469,7 +475,7 @@ where
         hal,
         &mut iop,
         size,
-        |iop: &mut ReadIOP<_>, idx: usize| -> Result<H::ExtElem, VerificationError> {
+        |iop: &mut ReadIOP<H::Field, _>, idx: usize| -> Result<H::ExtElem, VerificationError> {
             hal.debug("fri_verify");
             let x = gen.pow(idx);
             let rows = [

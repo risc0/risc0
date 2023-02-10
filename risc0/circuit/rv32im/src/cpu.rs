@@ -21,7 +21,7 @@ use risc0_zkp::{
     adapter::PolyFp,
     core::log2_ceil,
     hal::{
-        cpu::{BabyBearCpuHal, CpuBuffer},
+        cpu::{BabyBearSha256CpuHal, CpuBuffer},
         EvalCheck,
     },
     INV_RATE,
@@ -41,7 +41,7 @@ impl<'a, C: PolyFp<BabyBear>> CpuEvalCheck<'a, C> {
     }
 }
 
-impl<'a, C: PolyFp<BabyBear> + Sync> EvalCheck<BabyBearCpuHal> for CpuEvalCheck<'a, C> {
+impl<'a, C: PolyFp<BabyBear> + Sync> EvalCheck<BabyBearSha256CpuHal> for CpuEvalCheck<'a, C> {
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,

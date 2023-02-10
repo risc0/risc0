@@ -17,7 +17,9 @@
 use core::marker::PhantomData;
 
 use rand_core::{impls, Error, RngCore};
+use risc0_core::field::{Elem, Field};
 
+use super::config::ConfigRng;
 use super::sha::{Digest, Sha256, DIGEST_WORDS};
 
 /// A random number generator driven by a [Sha256].
@@ -44,7 +46,7 @@ pub struct ShaRng<S: Sha256> {
 // lessons about transcript hashing that we need to think about?
 impl<S: Sha256> ShaRng<S> {
     /// Create a new [ShaRng] from a given [Sha256].
-    pub fn new() -> ShaRng<S> {
+    pub fn inner_new() -> ShaRng<S> {
         Self {
             pool0: S::hash_bytes(b"Hello"),
             pool1: S::hash_bytes(b"World"),
@@ -54,7 +56,7 @@ impl<S: Sha256> ShaRng<S> {
     }
 
     /// Mix the pool with a specified [Digest].
-    pub fn mix(&mut self, val: &Digest) {
+    pub fn inner_mix(&mut self, val: &Digest) {
         for i in 0..DIGEST_WORDS {
             self.pool0.as_mut_words()[i] = self.pool0.as_words()[i] ^ val.as_words()[i];
         }
@@ -92,6 +94,24 @@ impl<S: Sha256> RngCore for ShaRng<S> {
     }
 }
 
+impl<S: Sha256, F: Field> ConfigRng<F> for ShaRng<S> {
+    fn new() -> Self {
+        Self::inner_new()
+    }
+    fn mix(&mut self, val: &Digest) {
+        self.inner_mix(val);
+    }
+    fn random_u32(&mut self) -> u32 {
+        self.next_u32()
+    }
+    fn random_elem(&mut self) -> F::Elem {
+        F::Elem::random(self)
+    }
+    fn random_ext_elem(&mut self) -> F::ExtElem {
+        F::ExtElem::random(self)
+    }
+}
+
 #[allow(missing_docs)]
 pub mod testutil {
     use rand_core::RngCore;
@@ -102,12 +122,12 @@ pub mod testutil {
     // Runs conformance test on a SHA implementation to make sure it
     // properly behaves for generating pseudo-random numbers.
     pub fn test_sha_rng_impl<S: Sha256>() {
-        let mut x = ShaRng::<S>::new();
+        let mut x = ShaRng::<S>::inner_new();
         for _ in 0..10 {
             x.next_u32();
         }
         assert_eq!(x.next_u32(), 785921476);
-        x.mix(&*S::hash_bytes(b"foo"));
+        x.inner_mix(&*S::hash_bytes(b"foo"));
         assert_eq!(x.next_u32(), 4167871101);
     }
 }

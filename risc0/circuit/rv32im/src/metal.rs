@@ -30,6 +30,10 @@ use risc0_zkp::{
 
 const METAL_LIB: &[u8] = include_bytes!(env!("RV32IM_METAL_PATH"));
 
+use crate::{
+    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+};
+
 #[derive(Debug)]
 pub struct MetalEvalCheck {
     hal: Rc<MetalHal>,
@@ -51,11 +55,8 @@ impl EvalCheck<MetalHal> for MetalEvalCheck {
     fn eval_check(
         &self,
         check: &MetalBuffer<BabyBearElem>,
-        code: &MetalBuffer<BabyBearElem>,
-        data: &MetalBuffer<BabyBearElem>,
-        accum: &MetalBuffer<BabyBearElem>,
-        mix: &MetalBuffer<BabyBearElem>,
-        out: &MetalBuffer<BabyBearElem>,
+        groups: &[&MetalBuffer<BabyBearElem>],
+        globals: &[&MetalBuffer<BabyBearElem>],
         poly_mix: BabyBearExtElem,
         po2: usize,
         steps: usize,
@@ -75,11 +76,11 @@ impl EvalCheck<MetalHal> for MetalEvalCheck {
         );
         let buffers = &[
             check.as_arg(),
-            code.as_arg(),
-            data.as_arg(),
-            accum.as_arg(),
-            mix.as_arg(),
-            out.as_arg(),
+            groups[REGISTER_GROUP_CODE].as_arg(),
+            groups[REGISTER_GROUP_DATA].as_arg(),
+            groups[REGISTER_GROUP_ACCUM].as_arg(),
+            globals[GLOBAL_MIX].as_arg(),
+            globals[GLOBAL_OUT].as_arg(),
             poly_mix.as_arg(),
             rou.as_arg(),
             po2.as_arg(),
@@ -94,7 +95,7 @@ impl EvalCheck<MetalHal> for MetalEvalCheck {
 mod tests {
     use std::rc::Rc;
 
-    use risc0_zkp::hal::{cpu::BabyBearCpuHal, metal::MetalHal};
+    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, metal::MetalHal};
     use test_log::test;
 
     use crate::cpu::CpuEvalCheck;
@@ -106,7 +107,7 @@ mod tests {
         // The number of cycles, choose a number that doesn't make tests take too long.
         const PO2: usize = 4;
         let circuit = crate::CircuitImpl::new();
-        let cpu_hal = BabyBearCpuHal::new();
+        let cpu_hal = BabyBearSha256CpuHal::new();
         let cpu_eval = CpuEvalCheck::new(&circuit);
         let gpu_hal = Rc::new(MetalHal::new());
         let gpu_eval = super::MetalEvalCheck::new(gpu_hal.clone());

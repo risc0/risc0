@@ -19,13 +19,13 @@ use metal::{
     MTLSize, NSRange,
 };
 use risc0_core::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem, RootsOfUnity,
 };
 
 use super::{Buffer, Hal};
 use crate::{
-    core::{log2_ceil, sha::Digest},
+    core::{config::ConfigHashSha256, log2_ceil, sha::Digest, sha_cpu, sha_rng::ShaRng},
     FRI_FOLD,
 };
 
@@ -242,11 +242,15 @@ impl MetalHal {
 impl Hal for MetalHal {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
+    type Field = BabyBear;
 
     type BufferDigest = BufferImpl<Digest>;
     type BufferElem = BufferImpl<Self::Elem>;
     type BufferExtElem = BufferImpl<Self::ExtElem>;
     type BufferU32 = BufferImpl<u32>;
+
+    type Hash = ConfigHashSha256<sha_cpu::Impl>;
+    type Rng = ShaRng<sha_cpu::Impl>;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::BufferElem {
         BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
@@ -488,7 +492,7 @@ impl Hal for MetalHal {
         self.dispatch_by_name("mix_poly_coeffs", args, count as u64);
     }
 
-    fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
         let args = &[
             io.as_arg_with_offset(output_size),
@@ -498,7 +502,7 @@ impl Hal for MetalHal {
     }
 
     #[tracing::instrument(skip_all)]
-    fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
@@ -619,13 +623,13 @@ mod tests {
     }
 
     #[test]
-    fn sha_fold() {
-        testutil::sha_fold(MetalHal::new());
+    fn hash_fold() {
+        testutil::hash_fold(MetalHal::new());
     }
 
     #[test]
-    fn sha_rows() {
-        testutil::sha_rows(MetalHal::new());
+    fn hash_rows() {
+        testutil::hash_rows(MetalHal::new());
     }
 
     #[test]

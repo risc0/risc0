@@ -25,29 +25,27 @@ use std::{cell::RefCell, rc::Rc};
 use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
 use rayon::prelude::*;
-use risc0_core::field::{
-    baby_bear::{BabyBearElem, BabyBearExtElem},
-    Elem, ExtElem, RootsOfUnity,
-};
+use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
 
 use super::{Buffer, Hal};
 use crate::{
     core::{
+        config::{ConfigHash, HashSuite, HashSuiteSha256},
+        digest::Digest,
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
-        sha::{Digest, Sha256},
         sha_cpu,
     },
     FRI_FOLD,
 };
 
-pub type BabyBearCpuHal = CpuHal<BabyBearElem, BabyBearExtElem>;
-
-pub struct CpuHal<E: Elem, EE: ExtElem> {
-    phantom: PhantomData<(E, EE)>,
+pub struct CpuHal<F: Field, HS: HashSuite<F>> {
+    phantom: PhantomData<(F, HS)>,
 }
 
-impl<E: Elem, EE: ExtElem> CpuHal<E, EE> {
+pub type BabyBearSha256CpuHal = CpuHal<BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>>;
+
+impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
     pub fn new() -> Self {
         CpuHal {
             phantom: PhantomData,
@@ -142,18 +140,16 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
     }
 }
 
-impl<E, EE> Hal for CpuHal<E, EE>
-where
-    E: Elem + RootsOfUnity,
-    EE: ExtElem<SubElem = E>,
-{
-    type Elem = E;
-    type ExtElem = EE;
-
+impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
+    type Elem = F::Elem;
+    type ExtElem = F::ExtElem;
+    type Field = F;
     type BufferElem = CpuBuffer<Self::Elem>;
     type BufferExtElem = CpuBuffer<Self::ExtElem>;
     type BufferDigest = CpuBuffer<Digest>;
     type BufferU32 = CpuBuffer<u32>;
+    type Hash = HS::Hash;
+    type Rng = HS::Rng;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::BufferElem {
         CpuBuffer::new(size)
@@ -423,18 +419,20 @@ where
     }
 
     #[tracing::instrument(skip_all)]
-    fn sha_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
         let mut output = output.as_slice_mut();
         let matrix = matrix.as_slice().to_vec(); // TODO: avoid copy
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
-            *output = *sha_cpu::Impl::hash_pod_stride(matrix.as_slice(), idx, col_size, row_size);
+            let column: Vec<Self::Elem> =
+                (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
+            *output = *Self::Hash::hash_raw_pod_slice(column.as_slice());
         });
     }
 
-    fn sha_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
         let mut io = io.as_slice_mut();
         let (output, input) = unsafe {
@@ -447,7 +445,7 @@ where
             .par_iter_mut()
             .zip(input.par_chunks_exact(2))
             .for_each(|(output, input)| {
-                *output = *sha_cpu::Impl::hash_pair(&input[0], &input[1]);
+                *output = *Self::Hash::hash_pair(&input[0], &input[1]);
             });
     }
 }
@@ -462,7 +460,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_req() {
-        let hal = BabyBearCpuHal::new();
+        let hal = BabyBearSha256CpuHal::new();
         let a = hal.alloc_elem("a", 10);
         let b = hal.alloc_elem("b", 20);
         hal.eltwise_add_elem(&a, &b, &b);
@@ -470,7 +468,7 @@ mod tests {
 
     #[test]
     fn fp() {
-        let hal: BabyBearCpuHal = CpuHal::new();
+        let hal: BabyBearSha256CpuHal = CpuHal::new();
         const COUNT: usize = 1024 * 1024;
         test_binary(
             &hal,
@@ -510,12 +508,12 @@ mod tests {
         });
     }
 
-    fn do_sha_rows(rows: usize, cols: usize, expected: &[&str]) {
-        let hal: BabyBearCpuHal = CpuHal::new();
+    fn do_hash_rows(rows: usize, cols: usize, expected: &[&str]) {
+        let hal: BabyBearSha256CpuHal = CpuHal::new();
         let matrix_size = rows * cols;
         let matrix = hal.alloc_elem("matrix", matrix_size);
         let output = hal.alloc_digest("output", rows);
-        hal.sha_rows(&output, &matrix);
+        hal.hash_rows(&output, &matrix);
         output.view(|view| {
             assert_eq!(expected.len(), view.len());
             for (expected, actual) in expected.iter().zip(view) {
@@ -525,8 +523,8 @@ mod tests {
     }
 
     #[test]
-    fn sha_rows() {
-        do_sha_rows(
+    fn hash_rows() {
+        do_hash_rows(
             1,
             16,
             &["da5698be17b9b46962335799779fbeca8ce5d491c0d26243bafef9ea1837a9d8"],
