@@ -38,11 +38,8 @@ where
     T: Serialize + ?Sized,
 {
     // Use the in-memory size of the value as a guess for the length
-    // of the serialized value.
-    // TODO(victor): We could probably create a better rule. Due to the fact that A)
-    // any sequences will be serialized with a length value and therefore expand
-    // by at least one word and B) It is not clear what mem::size_of_val returns
-    // when T = Vec, this is likely to be too small.
+    // of the serialized value. Allocates a word for every byte in the
+    // mem::size_of_val, so the allocated Vec 4x the memory representation size.
     let vec = AllocVec::with_capacity(mem::size_of_val(value));
     let mut serializer = Serializer::new(vec);
     value.serialize(&mut serializer)?;
@@ -487,10 +484,6 @@ impl StreamWriter for AllocVec {
     fn try_extend(&mut self, data: &[u8]) -> Result<()> {
         // Interpret the bytes as native-endian u32 values and push them into the
         // serialization buffer. If not aligned, this is less efficient.
-        // TODO(victor): Check host-guest communication to see that the host interprets
-        // words received from the guest correctly, even if they have different
-        // endianess. (i.e. that a big-endian host will receive the words
-        // correctly.)
         let (chunks, remainder) = data.as_chunks::<WORD_SIZE>();
         match bytemuck::try_cast_slice::<_, u32>(chunks) {
             Ok(words) => self.0.extend_from_slice(words),
