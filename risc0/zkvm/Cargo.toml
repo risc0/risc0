@@ -75,13 +75,13 @@ dual = []
 insecure_skip_seal = []
 profiler = ["dep:addr2line", "dep:gimli", "dep:prost", "dep:prost-build", "dep:protobuf-src"]
 prove = [
-    "binfmt",
-    "dep:lazy-regex",
-    "dep:rand",
-    "dep:rayon",
-    "dep:sha2",
-    "risc0-circuit-rv32im/prove",
-    "risc0-zkp/prove",
-    "std",
+  "binfmt",
+  "dep:lazy-regex",
+  "dep:rand",
+  "dep:rayon",
+  "dep:sha2",
+  "risc0-circuit-rv32im/prove",
+  "risc0-zkp/prove",
+  "std",
 ]
 std = ["anyhow/std", "risc0-circuit-rv32im/std", "risc0-zeroio/std", "risc0-zkp/std", "serde/std"]
