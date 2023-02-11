@@ -556,7 +556,7 @@ impl Hal for CudaHal {
         assert_eq!(matrix.size(), col_size * row_size);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("hash_rows").unwrap();
+        let kernel_name = CString::new("sha_rows").unwrap();
         let kernel = self.module.get_function(&kernel_name).unwrap();
         let params = self.compute_simple_params(row_size);
         unsafe {
