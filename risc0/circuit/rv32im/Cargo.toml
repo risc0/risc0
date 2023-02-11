@@ -38,6 +38,9 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = [
+  "dep:fil-rustacuda",
+  "dep:rustacuda_core",
+  "dep:rustacuda_derive",
   "prove",
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
@@ -51,11 +54,8 @@ metal = [
 ]
 default = ["prove"]
 prove = [
-  "dep:fil-rustacuda",
   "dep:rand",
   "dep:rayon",
-  "dep:rustacuda_core",
-  "dep:rustacuda_derive",
   "risc0-zkp/prove",
   "risc0-sys",
   "std"

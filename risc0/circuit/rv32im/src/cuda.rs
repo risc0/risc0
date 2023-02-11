@@ -33,10 +33,7 @@ use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
 
-#[cfg(feature = "cuda")]
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_PATH"));
-#[cfg(not(feature = "cuda"))]
-const KERNELS_FATBIN: &[u8] = &[0; 0];
 
 pub struct CudaEvalCheck {
     hal: Rc<CudaHal>, // retain a reference to ensure the context remains valid
