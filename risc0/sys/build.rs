@@ -85,7 +85,7 @@ fn build_cpu_kernels() {
     }
 }
 
-fn build_cuda_kernels(out_path: &Path) {
+fn build_cuda_kernels(out_dir: &Path) {
     let srcs: Vec<PathBuf> = glob::glob("kernels/*/cuda/*")
         .unwrap()
         .map(|x| x.unwrap())
@@ -105,13 +105,13 @@ fn build_cuda_kernels(out_path: &Path) {
     let temp_dir = tempdir_in(risc0_root).unwrap();
 
     for (src, out, cache) in CUDA_KERNELS {
-        let out_name = out_path.join(out).with_extension("fatbin");
-        let nvcc = |out: &Path| {
+        let out_path = out_dir.join(out).with_extension("fatbin");
+        let nvcc = |out_path: &PathBuf| {
             let status = Command::new("nvcc")
                 .arg("--fatbin")
                 .arg(src)
                 .arg("-o")
-                .arg(&out)
+                .arg(out_path)
                 .arg("-I")
                 .arg(&inc_path)
                 .status()
@@ -119,7 +119,7 @@ fn build_cuda_kernels(out_path: &Path) {
                     "Failed to run 'nvcc' executable, do you have the 'cuda' package installed?",
                 );
             if !status.success() {
-                panic!("Failed to build CUDA kernel: {}", out.display());
+                panic!("Failed to build CUDA kernel: {}", src);
             }
         };
         if *cache {
@@ -131,20 +131,20 @@ fn build_cuda_kernels(out_path: &Path) {
             let cache_path = cache_dir.join(digest).with_extension("fatbin");
             if !cache_path.is_file() {
                 let tmp_path = temp_dir.path().join(out).with_extension("fatbin");
-                nvcc(tmp_path.as_path());
+                nvcc(&tmp_path);
                 fs::rename(tmp_path, &cache_path).unwrap();
             }
-            fs::copy(cache_path, &out_name).unwrap();
+            fs::copy(cache_path, &out_path).unwrap();
         } else {
-            nvcc(out_name.as_path());
+            nvcc(&out_path);
         }
 
         // Emit the cargo DEP_* variable location of the fatbin
-        println!("cargo:{}={}", src, out_name.display());
+        println!("cargo:{}={}", out, out_path.display());
     }
 }
 
-fn build_metal_kernels(out_path: &Path) {
+fn build_metal_kernels(out_dir: &Path) {
     let srcs: Vec<PathBuf> = glob::glob("kernels/*/metal/*")
         .unwrap()
         .map(|x| x.unwrap())
@@ -172,23 +172,23 @@ fn build_metal_kernels(out_path: &Path) {
 
         for src in kernel.2 {
             let in_path = Path::new(kernel.0).join(src);
-            let out_name = out_path.join(src).with_extension("").with_extension("air");
+            let out_path = out_dir.join(src).with_extension("").with_extension("air");
             let result = Command::new(compiler)
                 .arg("-c")
                 .arg(in_path)
                 .arg("-I")
                 .arg(&inc_path)
                 .arg("-o")
-                .arg(&out_name)
+                .arg(&out_path)
                 .status()
                 .unwrap();
             if !result.success() {
                 panic!("Could not build metal kernels");
             }
-            air_paths.push(out_name);
+            air_paths.push(out_path);
         }
 
-        let out_path = out_path.join(kernel.1).with_extension("metallib");
+        let out_path = out_dir.join(kernel.1).with_extension("metallib");
         let result = Command::new("xcrun")
             .args(["--sdk", "macosx"])
             .arg("metallib")
