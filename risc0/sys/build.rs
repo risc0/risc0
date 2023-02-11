@@ -118,7 +118,14 @@ fn build_cuda_kernels(out_path: &Path) {
 
     for kernel in CUDA_KERNELS {
         let out_name = out_path.join(kernel.1).with_extension("fatbin");
-        let status = Command::new("nvcc")
+        let mut cmd = if env::var("RUSTC_WRAPPER").unwrap_or_default() == "sccache" {
+            let mut cmd = Command::new("sccache");
+            cmd.arg("nvcc");
+            cmd
+        } else {
+            Command::new("nvcc")
+        };
+        let status = cmd
             .arg("--fatbin")
             .arg(kernel.0)
             .arg("-o")
