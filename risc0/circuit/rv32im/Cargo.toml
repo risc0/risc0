@@ -52,7 +52,7 @@ metal = [
   "risc0-sys/metal",
   "risc0-zkp/metal"
 ]
-default = ["prove", "test"]
+default = ["prove"]
 prove = [
   "dep:rand",
   "dep:rayon",
@@ -61,4 +61,3 @@ prove = [
   "std"
 ]
 std = ["risc0-zkp/std"]
-test = []

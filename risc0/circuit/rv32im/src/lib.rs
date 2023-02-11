@@ -95,7 +95,7 @@ mod tests {
     }
 }
 
-#[cfg(feature = "test")]
+#[cfg(feature = "prove")]
 pub mod testutil {
     use rand::{thread_rng, Rng};
     use risc0_core::field::{

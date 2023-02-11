@@ -638,7 +638,7 @@ mod tests {
     #[test]
     #[serial]
     fn hash_rows() {
-        testutil::sha_rows(CudaHal::new());
+        testutil::hash_rows(CudaHal::new());
     }
 
     #[test]
