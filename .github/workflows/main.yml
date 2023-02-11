@@ -54,20 +54,15 @@ jobs:
       - uses: risc0/actions-rs-toolchain@v1
         with:
           toolchain: stable
-      - name: Install sccache (Linux)
+      - name: Prepare environment (Linux)
         if: matrix.os == 'Linux'
-        env:
-          SCCACHE_ARCH: x86_64-unknown-linux-musl
         run: |
-          SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
-          curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
-          mkdir -p $HOME/.local/bin
-          mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Install sccache (macOS)
+          echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+      - name: Prepare environment (macOS)
         if: matrix.os == 'macOS'
-        env:
-          SCCACHE_ARCH: x86_64-apple-darwin
+        run: |
+          echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
+      - name: Install sccache
         run: |
           SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
           curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
