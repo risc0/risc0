@@ -54,7 +54,7 @@ jobs:
       - run: cargo test -F $FEATURE
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
-        if: ${{ matrix.device == "cpu" }}
+        if: ${{ matrix.device == 'cpu' }}
       - run: cargo check -F $FEATURE --benches
       - run: cargo check -p bootstrap
       - run: cargo check -p risc0-build
