@@ -29,25 +29,43 @@ jobs:
       - run: npx @kt3k/license-checker
 
   test:
-    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.arch }}", "${{ matrix.device }}"]
     strategy:
       fail-fast: false
       matrix:
         os: [Linux, macOS]
         arch: [X64]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: intel_uhd_630
+          # - os: macOS
+          #   feature: metal
+          #   device: apple_m2_max
+    env:
+      FEATURE: ${{ matrix.feature }}
+      RUST_BACKTRACE: "1"
     steps:
       - uses: actions/checkout@v3
       - uses: risc0/actions-rs-toolchain@v1
         with:
           toolchain: stable
-      - run: cargo test
-        env:
-          RUST_BACKTRACE: "1"
-      - run: cargo test --tests -- --ignored
-        env:
-          RUST_BACKTRACE: "1"
+      - run: cargo test -F $FEATURE
+      - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
-      - run: cargo check --benches
+        if: ${{ matrix.device }} == "cpu"
+      - run: cargo check -F $FEATURE --benches
+      - run: cargo check -F $FEATURE -p risc0-build
+      - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
+      - run: cargo check -F $FEATURE -p risc0-r0vm
+      - run: cargo check -F $FEATURE -p risc0-sys
+      - run: cargo check -F $FEATURE -p risc0-zkp
+      - run: cargo check -F $FEATURE -p risc0-zkvm
 
   doc:
     runs-on: [self-hosted, Linux]
