@@ -66,7 +66,7 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-zkvm
 
   doc:
-    runs-on: [self-hosted, Linux]
+    runs-on: [self-hosted, Linux, cpu]
     steps:
       - uses: actions/checkout@v3
       - uses: risc0/actions-rs-toolchain@v1
