@@ -45,7 +45,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: risc0/criterion-compare-action@v3
         with:
-          benchName: "example-bench-target"
+          benchName: "fib"
+          branchName: ${{ github.base_ref }}
           features: ${{ matrix.feature }}
 
       # - uses: actions/checkout@v3
