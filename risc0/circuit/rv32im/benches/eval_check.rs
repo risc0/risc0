@@ -38,7 +38,7 @@ pub fn eval_check(c: &mut Criterion) {
     #[cfg(feature = "cuda")]
     for po2 in [2, 8, 16, 20, 21].iter() {
         let params = EvalCheckParams::new(*po2);
-        let hal = std::rc::Rc(risc0_zkp::hal::cuda::CudaHal::new());
+        let hal = std::rc::Rc::new(risc0_zkp::hal::cuda::CudaHal::new());
         let eval = risc0_circuit_rv32im::cuda::CudaEvalCheck::new(hal.clone());
         group.bench_function(BenchmarkId::new("cuda", po2), |b| {
             b.iter(|| {
