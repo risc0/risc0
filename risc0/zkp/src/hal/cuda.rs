@@ -39,9 +39,7 @@ const KERNELS_FATBIN: &[u8] = include_bytes!(env!("ZKP_CUDA_PATH"));
 pub struct CudaHal {
     pub max_threads: u32,
     pub module: Module,
-    // This is marked ManuallyDrop because otherwise we get errors like
-    // 'Failed to unload CUDA module: ContextIsDestroyed'
-    _context: core::mem::ManuallyDrop<Context>,
+    _context: Context,
 }
 
 struct RawBuffer {
@@ -153,7 +151,7 @@ impl CudaHal {
         Self {
             max_threads: max_threads as u32,
             module,
-            _context: core::mem::ManuallyDrop::new(context),
+            _context: context,
         }
     }
 

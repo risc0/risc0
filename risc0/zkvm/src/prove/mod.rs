@@ -108,10 +108,6 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::cuda::CudaEvalCheck;
         use risc0_zkp::hal::cuda::CudaHal;
 
-        thread_local! {
-            static HAL: (Rc<CudaHal>, CudaEvalCheck) = default_hal();
-        }
-
         pub fn default_hal() -> (Rc<CudaHal>, CudaEvalCheck) {
             let hal = Rc::new(CudaHal::new());
             let eval = CudaEvalCheck::new(hal.clone());
@@ -121,10 +117,6 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::metal::MetalEvalCheck;
         use risc0_zkp::hal::metal::MetalHal;
 
-        thread_local! {
-            static HAL: (Rc<MetalHal>, MetalEvalCheck) = default_hal();
-        }
-
         pub fn default_hal() -> (Rc<MetalHal>, MetalEvalCheck) {
             let hal = Rc::new(MetalHal::new());
             let eval = MetalEvalCheck::new(hal.clone());
@@ -133,10 +125,6 @@ cfg_if::cfg_if! {
     } else {
         use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
         use risc0_zkp::hal::cpu::BabyBearSha256CpuHal;
-
-        thread_local! {
-            static HAL: (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) = default_hal();
-        }
 
         pub fn default_hal() -> (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
             let hal = Rc::new(BabyBearSha256CpuHal::new());
@@ -194,19 +182,18 @@ impl<'a> Prover<'a> {
 
     #[tracing::instrument(skip_all)]
     pub fn run(&mut self) -> Result<Receipt> {
-        HAL.with(|(hal, eval)| {
-            cfg_if::cfg_if! {
-                if #[cfg(feature = "dual")] {
-                    let cpu_hal = risc0_zkp::hal::cpu::BabyBearSha256CpuHal::new();
-                    let cpu_eval = risc0_circuit_rv32im::cpu::CpuEvalCheck::new(&CIRCUIT);
-                    let hal = risc0_zkp::hal::dual::DualHal::new(hal.as_ref(), &cpu_hal);
-                    let eval = risc0_zkp::hal::dual::DualEvalCheck::new(eval, &cpu_eval);
-                    self.run_with_hal(&hal, &eval)
-                } else {
-                    self.run_with_hal(hal.as_ref(), eval)
-                }
+        let (hal, eval) = default_hal();
+        cfg_if::cfg_if! {
+            if #[cfg(feature = "dual")] {
+                let cpu_hal = risc0_zkp::hal::cpu::BabyBearSha256CpuHal::new();
+                let cpu_eval = risc0_circuit_rv32im::cpu::CpuEvalCheck::new(&CIRCUIT);
+                let hal = risc0_zkp::hal::dual::DualHal::new(hal.as_ref(), &cpu_hal);
+                let eval = risc0_zkp::hal::dual::DualEvalCheck::new(eval, &cpu_eval);
+                self.run_with_hal(&hal, &eval)
+            } else {
+                self.run_with_hal(hal.as_ref(), &eval)
             }
-        })
+        }
     }
 
     #[tracing::instrument(skip_all)]
