@@ -36,9 +36,9 @@ pub use anyhow::Result;
 use control_id::CONTROL_ID;
 use control_id::POSEIDON_CONTROL_ID;
 use hex::FromHex;
+use risc0_zkp::core::config::{ConfigHashPoseidon, ConfigHashSha256};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::core::sha::Sha256;
-use risc0_zkp::core::config::{ConfigHashPoseidon, ConfigHashSha256};
 pub use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
@@ -77,4 +77,3 @@ impl ControlIdLocator for ConfigHashPoseidon {
         ControlId { table }
     }
 }
-

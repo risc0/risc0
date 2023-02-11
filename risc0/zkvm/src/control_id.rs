@@ -28,7 +28,8 @@ pub const CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_
     "29260d269d38036082e666aa221d3b977881eab8accdaa1ff5fd8b30b0b06e5d", //
 ];
 
-pub const POSEIDON_CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+pub const POSEIDON_CONTROL_ID: [&'static str;
+    risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
     "5c836f57798f110a16f9cf4c698a7503d3360404cd0c5853581067201832cb54", //
     "ffe3567178f68d5b9feec90cb772852f2030b85563fd51240b1635215fb74921", //
     "9983743f036f104b1d06471ef679e74967d44c083fe37974e2fe7502f212790b", //
@@ -43,4 +44,3 @@ pub const POSEIDON_CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_
     "61c9ea4e60f1276b6d28db11ba3438200a41a256358d4d1d86caa90886288475", //
     "d0286431d057fa42df74b572dd1c6870818d2a7094e4ef6d4b7ae44c4b4dd56a", //
 ];
-

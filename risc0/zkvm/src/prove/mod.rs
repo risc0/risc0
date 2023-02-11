@@ -67,7 +67,10 @@ impl<'a> ProverOpts<'a> {
     /// is useful if you wish to use a non-standard verifier for
     /// example.
     pub fn with_skip_verify(self, skip_verify: bool) -> Self {
-        Self { skip_verify, ..self }
+        Self {
+            skip_verify,
+            ..self
+        }
     }
 
     /// Add a callback handler for sendrecv ports, indexed by channel

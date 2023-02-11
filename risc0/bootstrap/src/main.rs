@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
 use risc0_zkvm::Loader;
-use risc0_zkp::hal::cpu::{BabyBearSha256CpuHal, BabyBearPoseidonCpuHal};
-//use risc0_zkp::hal::Hal;
+// use risc0_zkp::hal::Hal;
 
 fn main() {
     let loader = Loader::new();

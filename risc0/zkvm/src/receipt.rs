@@ -61,7 +61,7 @@ pub struct Receipt {
 pub fn verify_with_hal<'a, H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u32]) -> Result<()>
 where
     H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
-    H::Hash : ControlIdLocator,
+    H::Hash: ControlIdLocator,
     &'a Digest: From<D>,
 {
     let image_id: &Digest = image_id.into();
@@ -131,7 +131,8 @@ where
         }
         if control_id.table[which] != *merkle_root {
             return Err(VerificationError::ControlVerificationError);
-        } Ok(())
+        }
+        Ok(())
     };
 
     risc0_zkp::verify::verify(hal, &CIRCUIT, seal, check_code, check_globals)
@@ -159,23 +160,19 @@ impl Receipt {
     pub fn verify_with_hash<'a, HS, D>(&self, image_id: D) -> Result<()>
     where
         HS: HashSuite<BabyBear>,
-        HS::Hash : ControlIdLocator,
+        HS::Hash: ControlIdLocator,
         &'a Digest: From<D>,
     {
-        let hal = risc0_zkp::verify::CpuVerifyHal::<
-            BabyBear, HS,
-            _,
-        >::new(&crate::CIRCUIT);
+        let hal = risc0_zkp::verify::CpuVerifyHal::<BabyBear, HS, _>::new(&crate::CIRCUIT);
 
         self.verify_with_hal(&hal, image_id)
     }
-
 
     /// Verifies a receipt using the hardware acceleration layer.
     pub fn verify_with_hal<'a, H, D>(&self, hal: &H, image_id: D) -> Result<()>
     where
         H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
-        H::Hash : ControlIdLocator,
+        H::Hash: ControlIdLocator,
         &'a Digest: From<D>,
     {
         verify_with_hal(hal, image_id, &self.seal, &self.journal)

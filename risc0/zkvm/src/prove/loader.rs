@@ -23,10 +23,7 @@ use anyhow::Result;
 use log::{debug, trace};
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
-    adapter::TapsProvider,
-    core::sha::SHA256_INIT,
-    hal::Hal,
-    prove::poly_group::PolyGroup,
+    adapter::TapsProvider, core::sha::SHA256_INIT, hal::Hal, prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
@@ -366,7 +363,7 @@ impl Loader {
         Ok(loader.cycle)
     }
 
-    pub fn compute_control_id<H : Hal<Elem=BabyBearElem>>(&self, hal: &H) -> ControlId {
+    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> ControlId {
         let code_size = CIRCUIT.code_size();
 
         // Start with an empty table

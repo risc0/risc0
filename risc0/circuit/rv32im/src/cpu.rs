@@ -20,11 +20,7 @@ use risc0_core::field::{
 use risc0_zkp::{
     adapter::PolyFp,
     core::log2_ceil,
-    hal::{
-        Hal,
-        cpu::CpuBuffer,
-        EvalCheck,
-    },
+    hal::{cpu::CpuBuffer, EvalCheck, Hal},
     INV_RATE,
 };
 
@@ -42,7 +38,12 @@ impl<'a, C: PolyFp<BabyBear>> CpuEvalCheck<'a, C> {
     }
 }
 
-impl<'a, C: PolyFp<BabyBear> + Sync, H: Hal<BufferElem = CpuBuffer<BabyBearElem>, ExtElem = BabyBearExtElem>> EvalCheck<H> for CpuEvalCheck<'a, C> {
+impl<
+        'a,
+        C: PolyFp<BabyBear> + Sync,
+        H: Hal<BufferElem = CpuBuffer<BabyBearElem>, ExtElem = BabyBearExtElem>,
+    > EvalCheck<H> for CpuEvalCheck<'a, C>
+{
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
