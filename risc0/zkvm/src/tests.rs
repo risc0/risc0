@@ -277,6 +277,23 @@ fn sha_cycle_count() {
     prover.run().unwrap();
 }
 
+#[test]
+fn test_poseidon_proof() {
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_zkp::core::config::HashSuitePoseidon;
+    use risc0_zkp::hal::cpu::CpuHal;
+    use crate::CIRCUIT;
+    use risc0_circuit_rv32im::cpu::CpuEvalCheck;
+
+    let hal = CpuHal::<BabyBear, HashSuitePoseidon>::new(); 
+    let eval = CpuEvalCheck::new(&CIRCUIT);
+    let opts = ProverOpts::default().with_skip_verify(true);
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
+    let receipt = prover.run_with_hal(&hal, &eval).unwrap();
+    receipt.verify_with_hash::<HashSuitePoseidon, _>(&MULTI_TEST_ID).unwrap();
+}
+
 #[cfg(feature = "profiler")]
 #[test]
 fn profiler() {

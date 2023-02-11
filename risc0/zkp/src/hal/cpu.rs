@@ -30,7 +30,7 @@ use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
 use super::{Buffer, Hal};
 use crate::{
     core::{
-        config::{ConfigHash, HashSuite, HashSuiteSha256},
+        config::{ConfigHash, HashSuite, HashSuitePoseidon, HashSuiteSha256},
         digest::Digest,
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
@@ -44,6 +44,7 @@ pub struct CpuHal<F: Field, HS: HashSuite<F>> {
 }
 
 pub type BabyBearSha256CpuHal = CpuHal<BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>>;
+pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, HashSuitePoseidon>;
 
 impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
     pub fn new() -> Self {

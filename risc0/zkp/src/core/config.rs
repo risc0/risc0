@@ -15,6 +15,8 @@
 //! Traits to configure which cryptographic primitives the ZKP uses
 
 use core::{fmt::Debug, marker::PhantomData, ops::DerefMut};
+use alloc::boxed::Box;
+use alloc::vec::Vec;
 
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_core::field::{ExtElem, Field};

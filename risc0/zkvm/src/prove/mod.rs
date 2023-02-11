@@ -47,6 +47,8 @@ use crate::{
 pub struct ProverOpts<'a> {
     pub(crate) skip_seal: bool,
 
+    pub(crate) skip_verify: bool,
+
     pub(crate) sendrecv_callbacks: HashMap<u32, Box<dyn Fn(u32, &[u8]) -> Vec<u8> + 'a + Sync>>,
 
     pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
@@ -59,6 +61,13 @@ impl<'a> ProverOpts<'a> {
     /// verify the execution.
     pub fn with_skip_seal(self, skip_seal: bool) -> Self {
         Self { skip_seal, ..self }
+    }
+
+    /// If true, don't verify the seal after creating it.  This
+    /// is useful if you wish to use a non-standard verifier for
+    /// example.
+    pub fn with_skip_verify(self, skip_verify: bool) -> Self {
+        Self { skip_verify, ..self }
     }
 
     /// Add a callback handler for sendrecv ports, indexed by channel
@@ -89,6 +98,7 @@ impl<'a> Default for ProverOpts<'a> {
     fn default() -> ProverOpts<'a> {
         ProverOpts {
             skip_seal: false,
+            skip_verify: false,
             sendrecv_callbacks: HashMap::new(),
             trace_callback: None,
         }
@@ -256,7 +266,7 @@ impl<'a> Prover<'a> {
             seal,
         };
 
-        if !skip_seal {
+        if !skip_seal && !self.inner.opts.skip_verify {
             // Verify receipt to make sure it works
             receipt.verify(&self.image_id)?;
         }
