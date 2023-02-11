@@ -29,7 +29,14 @@ use risc0_zkp::{
 };
 use rustacuda::{launch, prelude::*};
 
+use crate::{
+    GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+};
+
+#[cfg(feature = "cuda")]
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_PATH"));
+#[cfg(not(feature = "cuda"))]
+const KERNELS_FATBIN: &[u8] = &[0; 0];
 
 pub struct CudaEvalCheck {
     hal: Rc<CudaHal>, // retain a reference to ensure the context remains valid
@@ -49,15 +56,17 @@ impl<'a> EvalCheck<CudaHal> for CudaEvalCheck {
     fn eval_check(
         &self,
         check: &CudaBuffer<BabyBearElem>,
-        code: &CudaBuffer<BabyBearElem>,
-        data: &CudaBuffer<BabyBearElem>,
-        accum: &CudaBuffer<BabyBearElem>,
-        mix: &CudaBuffer<BabyBearElem>,
-        out: &CudaBuffer<BabyBearElem>,
+        groups: &[&CudaBuffer<BabyBearElem>],
+        globals: &[&CudaBuffer<BabyBearElem>],
         poly_mix: BabyBearExtElem,
         po2: usize,
         steps: usize,
     ) {
+        let code = groups[REGISTER_GROUP_CODE];
+        let data = groups[REGISTER_GROUP_DATA];
+        let accum = groups[REGISTER_GROUP_ACCUM];
+        let mix = globals[GLOBAL_MIX];
+        let out = globals[GLOBAL_OUT];
         log::debug!(
             "check: {}, code: {}, data: {}, accum: {}, mix: {} out: {}",
             check.size(),

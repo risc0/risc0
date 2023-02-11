@@ -34,7 +34,10 @@ use crate::{
     FRI_FOLD,
 };
 
+#[cfg(feature = "cuda")]
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("ZKP_CUDA_PATH"));
+#[cfg(not(feature = "cuda"))]
+const KERNELS_FATBIN: &[u8] = &[0; 0];
 
 pub struct CudaHal {
     pub max_threads: u32,
