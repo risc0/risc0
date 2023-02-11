@@ -13,14 +13,21 @@
 // limitations under the License.
 
 use std::{
-    env,
+    env, fs,
     path::{Path, PathBuf},
     process::Command,
 };
 
-const CUDA_KERNELS: &[(&str, &str)] = &[
-    ("kernels/rv32im/cuda/eval_check.cu", "cuda_kernels_rv32im"),
-    ("kernels/zkp/cuda/all.cu", "cuda_kernels_zkp"),
+use sha2::{Digest, Sha256};
+use tempfile::tempdir_in;
+
+const CUDA_KERNELS: &[(&str, &str, bool)] = &[
+    (
+        "kernels/rv32im/cuda/eval_check.cu",
+        "cuda_kernels_rv32im",
+        true,
+    ),
+    ("kernels/zkp/cuda/all.cu", "cuda_kernels_zkp", false),
 ];
 
 const METAL_KERNELS: &[(&str, &str, &[&str])] = &[
@@ -49,38 +56,12 @@ fn main() {
 
     build_cpu_kernels();
 
-    // Caching system so we can hold a copy of the CUDA / Metal build artifacts
-    // in a local path when they don't change that much.
-    if let Ok(cache_path) = env::var("RISC0_HAL_CACHE") {
-        let cache_path = Path::new(&cache_path);
-        if env::var("CARGO_FEATURE_CUDA").is_ok() {
-            for kernel in CUDA_KERNELS {
-                let bin_path = cache_path.join(kernel.1).with_extension("fatbin");
-                let bin_path_str = bin_path.display();
-                if !bin_path.exists() {
-                    panic!("Failed to find {bin_path_str} in RISC0_HAL_CACHE location");
-                }
-                println!("cargo:{}={bin_path_str}", kernel.1);
-            }
-        }
+    if env::var("CARGO_FEATURE_CUDA").is_ok() {
+        build_cuda_kernels(out_dir);
+    }
 
-        if env::var("CARGO_FEATURE_METAL").is_ok() {
-            for kernel in METAL_KERNELS {
-                let bin_path = cache_path.join(kernel.1).with_extension("metallib");
-                let bin_path_str = bin_path.display();
-                if !bin_path.exists() {
-                    panic!("Failed to find {bin_path_str} in RISC0_HAL_CACHE location");
-                }
-                println!("cargo:{}={bin_path_str}", kernel.1);
-            }
-        }
-    } else {
-        if env::var("CARGO_FEATURE_CUDA").is_ok() {
-            build_cuda_kernels(out_dir);
-        }
-        if env::var("CARGO_FEATURE_METAL").is_ok() {
-            build_metal_kernels(out_dir);
-        }
+    if env::var("CARGO_FEATURE_METAL").is_ok() {
+        build_metal_kernels(out_dir);
     }
 }
 
@@ -116,30 +97,50 @@ fn build_cuda_kernels(out_path: &Path) {
 
     let inc_path = Path::new("kernels").join("zkp").join("cuda");
 
-    for kernel in CUDA_KERNELS {
-        let out_name = out_path.join(kernel.1).with_extension("fatbin");
-        let mut cmd = if env::var("RUSTC_WRAPPER").unwrap_or_default() == "sccache" {
-            let mut cmd = Command::new("sccache");
-            cmd.arg("nvcc");
-            cmd
-        } else {
-            Command::new("nvcc")
+    let risc0_root = risc0_root();
+    let cache_dir = risc0_root.join("cache");
+    if !cache_dir.is_dir() {
+        fs::create_dir_all(&cache_dir).unwrap();
+    }
+    let temp_dir = tempdir_in(risc0_root).unwrap();
+
+    for (src, out, cache) in CUDA_KERNELS {
+        let out_name = out_path.join(out).with_extension("fatbin");
+        let nvcc = |out: &Path| {
+            let status = Command::new("nvcc")
+                .arg("--fatbin")
+                .arg(src)
+                .arg("-o")
+                .arg(&out)
+                .arg("-I")
+                .arg(&inc_path)
+                .status()
+                .expect(
+                    "Failed to run 'nvcc' executable, do you have the 'cuda' package installed?",
+                );
+            if !status.success() {
+                panic!("Failed to build CUDA kernel: {}", out.display());
+            }
         };
-        let status = cmd
-            .arg("--fatbin")
-            .arg(kernel.0)
-            .arg("-o")
-            .arg(&out_name)
-            .arg("-I")
-            .arg(&inc_path)
-            .status()
-            .expect("Failed to run 'nvcc' executable, do you have the 'cuda' package installed?");
-        if !status.success() {
-            panic!("Failed to build CUDA kernel: {}", kernel.0);
+        if *cache {
+            let mut hasher = Hasher::new();
+            hasher.add_file(src);
+            hasher.add_file(inc_path.join("fp.h"));
+            hasher.add_file(inc_path.join("fp4.h"));
+            let digest = hasher.finalize();
+            let cache_path = cache_dir.join(digest).with_extension("fatbin");
+            if !cache_path.is_file() {
+                let tmp_path = temp_dir.path().join(out).with_extension("fatbin");
+                nvcc(tmp_path.as_path());
+                fs::rename(tmp_path, &cache_path).unwrap();
+            }
+            fs::copy(cache_path, &out_name).unwrap();
+        } else {
+            nvcc(out_name.as_path());
         }
 
         // Emit the cargo DEP_* variable location of the fatbin
-        println!("cargo:{}={}", kernel.1, out_name.display());
+        println!("cargo:{}={}", src, out_name.display());
     }
 }
 
@@ -201,5 +202,28 @@ fn build_metal_kernels(out_path: &Path) {
         }
 
         println!("cargo:{}={}", kernel.1, out_path.display());
+    }
+}
+
+fn risc0_root() -> PathBuf {
+    home::home_dir().unwrap().join(".risc0").into()
+}
+
+struct Hasher {
+    sha: Sha256,
+}
+
+impl Hasher {
+    pub fn new() -> Self {
+        Self { sha: Sha256::new() }
+    }
+
+    pub fn add_file<P: AsRef<Path>>(&mut self, path: P) {
+        let bytes = fs::read(path).unwrap();
+        self.sha.update(bytes);
+    }
+
+    pub fn finalize(self) -> String {
+        hex::encode(self.sha.finalize())
     }
 }
