@@ -39,9 +39,7 @@ const KERNELS_FATBIN: &[u8] = include_bytes!(env!("ZKP_CUDA_PATH"));
 pub struct CudaHal {
     pub max_threads: u32,
     pub module: Module,
-    // This is marked ManuallyDrop because otherwise we get errors like
-    // 'Failed to unload CUDA module: ContextIsDestroyed'
-    _context: core::mem::ManuallyDrop<Context>,
+    _context: Context,
 }
 
 struct RawBuffer {
@@ -153,7 +151,7 @@ impl CudaHal {
         Self {
             max_threads: max_threads as u32,
             module,
-            _context: core::mem::ManuallyDrop::new(context),
+            _context: context,
         }
     }
 
@@ -556,7 +554,7 @@ impl Hal for CudaHal {
         assert_eq!(matrix.size(), col_size * row_size);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("hash_rows").unwrap();
+        let kernel_name = CString::new("sha_rows").unwrap();
         let kernel = self.module.get_function(&kernel_name).unwrap();
         let params = self.compute_simple_params(row_size);
         unsafe {
@@ -638,7 +636,7 @@ mod tests {
     #[test]
     #[serial]
     fn hash_rows() {
-        testutil::sha_rows(CudaHal::new());
+        testutil::hash_rows(CudaHal::new());
     }
 
     #[test]
