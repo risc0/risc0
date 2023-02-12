@@ -149,6 +149,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     type BufferExtElem = CpuBuffer<Self::ExtElem>;
     type BufferDigest = CpuBuffer<Digest>;
     type BufferU32 = CpuBuffer<u32>;
+    type HashSuite = HS;
     type Hash = HS::Hash;
     type Rng = HS::Rng;
 

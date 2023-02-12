@@ -131,16 +131,16 @@ cfg_if::cfg_if! {
             (hal, eval)
         }
     } else if #[cfg(feature = "metal")] {
-        use risc0_circuit_rv32im::metal::MetalEvalCheck;
-        use risc0_zkp::hal::metal::MetalHal;
+        use risc0_circuit_rv32im::metal::MetalEvalCheckSha256;
+        use risc0_zkp::hal::metal::MetalHalSha256;
 
         thread_local! {
-            static HAL: (Rc<MetalHal>, MetalEvalCheck) = default_hal();
+            static HAL: (Rc<MetalHalSha256>, MetalEvalCheckSha256) = default_hal();
         }
 
-        pub fn default_hal() -> (Rc<MetalHal>, MetalEvalCheck) {
-            let hal = Rc::new(MetalHal::new());
-            let eval = MetalEvalCheck::new(hal.clone());
+        pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
+            let hal = Rc::new(MetalHalSha256::new());
+            let eval = MetalEvalCheckSha256::new(hal.clone());
             (hal, eval)
         }
     } else {

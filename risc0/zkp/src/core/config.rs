@@ -105,6 +105,7 @@ impl ConfigHash<BabyBear> for ConfigHashPoseidon {
             .chain(b.as_words())
             .map(|w| BabyBearElem::new_raw(*w))
             .collect();
+        assert!(both.len() == 16);
         to_digest(unpadded_hash(both.iter()))
     }
 
