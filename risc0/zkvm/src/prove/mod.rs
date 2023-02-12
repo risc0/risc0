@@ -130,7 +130,7 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::metal::MetalEvalCheckSha256;
         use risc0_zkp::hal::metal::MetalHalSha256;
 
-        pub fn default_hal() -> (Rc<MetalHal>, MetalEvalCheck) {
+        pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
             let hal = Rc::new(MetalHalSha256::new());
             let eval = MetalEvalCheckSha256::new(hal.clone());
             (hal, eval)

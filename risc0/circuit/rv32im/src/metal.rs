@@ -97,7 +97,7 @@ impl<MH: MetalHash> EvalCheck<MetalHal<MH>> for MetalEvalCheck<MH> {
 mod tests {
     use std::rc::Rc;
 
-    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, metal::MetalHal};
+    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, metal::MetalHalSha256};
     use test_log::test;
 
     use crate::cpu::CpuEvalCheck;
