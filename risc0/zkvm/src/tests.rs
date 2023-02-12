@@ -145,6 +145,7 @@ fn run_do_nothing(opts: ProverOpts) -> Result<Receipt> {
 }
 
 #[test]
+#[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde_with_seal() {
     let receipt = run_do_nothing(ProverOpts::default()).unwrap();
     let ser: Vec<u32> = crate::serde::to_vec(&receipt).unwrap();
@@ -166,6 +167,7 @@ fn receipt_serde_no_seal() {
 }
 
 #[test]
+#[cfg_attr(feature = "cuda", serial)]
 fn fail() {
     // Check that a compliant host will fault.
     let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
@@ -178,6 +180,7 @@ fn fail() {
 
 #[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
     let receipt = run_do_nothing(ProverOpts::default()).unwrap();
     receipt
@@ -198,6 +201,7 @@ fn check_image_id() {
 
 #[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
 fn commit_hello_world() {
     let receipt = {
         let mut prover = Prover::new(HELLO_COMMIT_ELF, HELLO_COMMIT_ID).unwrap();
@@ -434,6 +438,7 @@ mod riscv_tests {
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
+            #[cfg_attr(feature = "cuda", serial_test::serial)]
             fn $func_name() {
                 use std::io::Read;
 
