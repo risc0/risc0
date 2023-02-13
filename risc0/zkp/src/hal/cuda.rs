@@ -29,7 +29,13 @@ use rustacuda::{
 use rustacuda_core::UnifiedPointer;
 
 use crate::{
-    core::{config::ConfigHashSha256, log2_ceil, sha::Digest, sha_cpu, sha_rng::ShaRng},
+    core::{
+        config::{ConfigHashSha256, HashSuiteSha256},
+        log2_ceil,
+        sha::Digest,
+        sha_cpu,
+        sha_rng::ShaRng,
+    },
     hal::{Buffer, Hal},
     FRI_FOLD,
 };
@@ -205,6 +211,7 @@ impl Hal for CudaHal {
     type BufferExtElem = BufferImpl<Self::ExtElem>;
     type BufferU32 = BufferImpl<u32>;
 
+    type HashSuite = HashSuiteSha256<BabyBear, sha_cpu::Impl>;
     type Hash = ConfigHashSha256<sha_cpu::Impl>;
     type Rng = ShaRng<sha_cpu::Impl>;
 

@@ -5,6 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
+risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["default"] }
 
 [package.metadata.release]

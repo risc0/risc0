@@ -44,6 +44,7 @@ const METAL_KERNELS: &[(&str, &str, &[&str])] = &[
             "fri.metal",
             "mix.metal",
             "ntt.metal",
+            "poseidon.metal",
             "sha.metal",
             "zk.metal",
         ],

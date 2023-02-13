@@ -87,7 +87,7 @@ impl fmt::Display for VerificationError {
 }
 
 pub trait VerifyHal {
-    type Hash: ConfigHash;
+    type Hash: ConfigHash<Self::Field>;
     type Rng: ConfigRng<Self::Field>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
@@ -366,7 +366,7 @@ where
     // Read the U coeffs (the interpolations of the taps) + commit their hash.
     let num_taps = taps.tap_size();
     let coeff_u = iop.read_field_elem_slice(num_taps + H::CHECK_SIZE);
-    let hash_u = *H::Hash::hash_raw_pod_slice(coeff_u);
+    let hash_u = *H::Hash::hash_ext_elem_slice(coeff_u);
     iop.commit(&hash_u);
 
     // Now, convert U polynomials from coefficient form to evaluation form

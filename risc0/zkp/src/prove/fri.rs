@@ -109,7 +109,7 @@ pub fn fri_prove<H: Hal, F>(
     // Dump final polynomial + commit
     final_coeffs.view(|view| {
         iop.write_field_elem_slice::<H::Elem>(view);
-        let digest = H::Hash::hash_raw_pod_slice(view);
+        let digest = H::Hash::hash_elem_slice(view);
         iop.commit(&digest);
     });
     // Do queries
