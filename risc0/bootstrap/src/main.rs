@@ -14,7 +14,6 @@
 
 use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
 use risc0_zkvm::Loader;
-// use risc0_zkp::hal::Hal;
 
 fn main() {
     let loader = Loader::new();

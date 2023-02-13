@@ -173,7 +173,7 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub device: Device,
     pub cmd_queue: CommandQueue,
     kernels: HashMap<String, ComputePipelineDescriptor>,
-    pub library: Library,
+    library: Library,
     hash: Option<Box<Hash>>,
 }
 
