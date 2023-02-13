@@ -173,7 +173,6 @@ pub struct MetalHal<Hash: MetalHash + ?Sized> {
     pub device: Device,
     pub cmd_queue: CommandQueue,
     kernels: HashMap<String, ComputePipelineDescriptor>,
-    library: Library,
     hash: Option<Box<Hash>>,
 }
 
@@ -304,7 +303,6 @@ impl<MH: MetalHash> MetalHal<MH> {
             device,
             cmd_queue,
             kernels,
-            library,
             hash: None,
         };
         let hash = Box::new(MH::new(&hal));
