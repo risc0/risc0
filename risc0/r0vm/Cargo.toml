@@ -20,3 +20,8 @@ assert_cmd = "2.0"
 assert_fs = "1.0"
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 risc0-zkvm-platform = { workspace = true }
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]

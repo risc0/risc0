@@ -34,8 +34,11 @@ mod tests;
 
 pub use anyhow::Result;
 use control_id::CONTROL_ID;
+use control_id::POSEIDON_CONTROL_ID;
 use hex::FromHex;
-use risc0_zkp::core::sha::Digest;
+use risc0_zkp::core::config::{ConfigHashPoseidon, ConfigHashSha256};
+use risc0_zkp::core::digest::Digest;
+use risc0_zkp::core::sha::Sha256;
 pub use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
@@ -51,10 +54,24 @@ pub struct ControlId {
     pub table: alloc::vec::Vec<Digest>,
 }
 
-impl ControlId {
-    pub fn new() -> Self {
+pub trait ControlIdLocator {
+    fn get_control_id() -> ControlId;
+}
+
+impl<S: Sha256> ControlIdLocator for ConfigHashSha256<S> {
+    fn get_control_id() -> ControlId {
         let mut table = alloc::vec::Vec::new();
         for entry in CONTROL_ID {
+            table.push(Digest::from_hex(entry).unwrap());
+        }
+        ControlId { table }
+    }
+}
+
+impl ControlIdLocator for ConfigHashPoseidon {
+    fn get_control_id() -> ControlId {
+        let mut table = alloc::vec::Vec::new();
+        for entry in POSEIDON_CONTROL_ID {
             table.push(Digest::from_hex(entry).unwrap());
         }
         ControlId { table }

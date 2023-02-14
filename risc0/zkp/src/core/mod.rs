@@ -28,6 +28,8 @@ pub mod config;
 pub mod digest;
 pub mod ntt;
 pub mod poly;
+pub mod poseidon;
+pub mod poseidon_rng;
 pub mod sha;
 #[cfg(not(target_os = "zkvm"))]
 pub mod sha_cpu;

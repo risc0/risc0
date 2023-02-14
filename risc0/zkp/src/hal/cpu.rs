@@ -30,7 +30,7 @@ use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
 use super::{Buffer, Hal};
 use crate::{
     core::{
-        config::{ConfigHash, HashSuite, HashSuiteSha256},
+        config::{ConfigHash, HashSuite, HashSuitePoseidon, HashSuiteSha256},
         digest::Digest,
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
@@ -44,6 +44,7 @@ pub struct CpuHal<F: Field, HS: HashSuite<F>> {
 }
 
 pub type BabyBearSha256CpuHal = CpuHal<BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>>;
+pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, HashSuitePoseidon>;
 
 impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
     pub fn new() -> Self {
@@ -148,6 +149,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     type BufferExtElem = CpuBuffer<Self::ExtElem>;
     type BufferDigest = CpuBuffer<Digest>;
     type BufferU32 = CpuBuffer<u32>;
+    type HashSuite = HS;
     type Hash = HS::Hash;
     type Rng = HS::Rng;
 
@@ -428,7 +430,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
             let column: Vec<Self::Elem> =
                 (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
-            *output = *Self::Hash::hash_raw_pod_slice(column.as_slice());
+            *output = *Self::Hash::hash_elem_slice(column.as_slice());
         });
     }
 
