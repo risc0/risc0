@@ -7,4 +7,4 @@ edition = "2021"
 risc0-build = { path = "../../risc0/build" }
 
 [package.metadata.risc0]
-methods = ["factors", "sha"]
+methods = ["chess", "factors", "sha"]
