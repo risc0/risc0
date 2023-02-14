@@ -793,6 +793,9 @@ name = "lazy_static"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
+dependencies = [
+ "spin",
+]
 
 [[package]]
 name = "libc"
@@ -1231,7 +1234,6 @@ dependencies = [
  "cargo_metadata",
  "downloader",
  "home",
- "miniz_oxide",
  "risc0-zkvm",
  "risc0-zkvm-platform",
  "serde",
@@ -1270,8 +1272,11 @@ version = "0.12.0"
 dependencies = [
  "cc",
  "glob",
+ "hex",
+ "home",
  "risc0-core",
  "sha2",
+ "tempfile",
 ]
 
 [[package]]
@@ -1303,6 +1308,7 @@ dependencies = [
  "bytemuck",
  "digest",
  "hex",
+ "lazy_static",
  "log",
  "ndarray",
  "paste",
@@ -1509,6 +1515,12 @@ dependencies = [
  "libc",
  "winapi",
 ]
+
+[[package]]
+name = "spin"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e63cff320ae2c57904679ba7cb63280a3dc4613885beafb148ee7bf9aa9042d"
 
 [[package]]
 name = "strsim"
