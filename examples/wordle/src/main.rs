@@ -25,8 +25,8 @@ mod wordlist;
 
 // The "server" is an agent in the Wordle game that checks the player's guesses.
 struct Server<'a> {
-    // The server chooses the secret word, and remembers it until the end of the game. It is private
-    // because the player shouldn't know the word until the game is over.
+    // The server chooses the secret word, and remembers it until the end of the game. It is
+    // private because the player shouldn't know the word until the game is over.
     secret_word: &'a str,
 }
 
@@ -53,7 +53,8 @@ impl Server<'_> {
     }
 }
 
-// The "player" is an agent in the Wordle game that tries to guess the server's secret word.
+// The "player" is an agent in the Wordle game that tries to guess the server's
+// secret word.
 struct Player {
     // The player remembers the hash of the secret word that the server commits to at the beginning
     // of the game. By comparing the hash after each guess, the player knows if the server cheated

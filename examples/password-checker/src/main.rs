@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use password_checker_core::PasswordRequest;
 use methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
+use password_checker_core::PasswordRequest;
 use rand::prelude::*;
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{from_slice, to_vec};
@@ -41,6 +41,7 @@ fn main() {
     println!("Password hash is: {}", &password_hash);
 
     // In most scenarios, we would serialize and send the receipt to a verifier here
-    // The verifier checks the receipt with the following call, which panics if the receipt is wrong
+    // The verifier checks the receipt with the following call, which panics if the
+    // receipt is wrong
     receipt.verify(&PW_CHECKER_ID).unwrap();
 }
