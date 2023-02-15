@@ -18,7 +18,6 @@ use core::{
     cell::{Ref, RefMut},
     marker::PhantomData,
     ops::Range,
-    slice::{from_raw_parts, from_raw_parts_mut},
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -80,6 +79,64 @@ pub struct CpuBuffer<T> {
     region: Region,
 }
 
+enum SyncSliceRef<'a, T: Default + Clone + Pod> {
+    FromBuf(RefMut<'a, [T]>),
+    FromSlice(&'a SyncSlice<'a, T>),
+}
+
+// A buffer which can be used across multiple threads.
+pub struct SyncSlice<'a, T: Default + Clone + Pod> {
+    _buf: SyncSliceRef<'a, T>,
+    ptr: *mut T,
+    size: usize,
+}
+
+unsafe impl<'a, T: Default + Clone + Pod> Sync for SyncSlice<'a, T> {}
+
+impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
+    pub fn new(mut buf: RefMut<'a, [T]>) -> Self {
+        let ptr = buf.as_mut_ptr();
+        let size = buf.len();
+        SyncSlice {
+            ptr,
+            size,
+            _buf: SyncSliceRef::FromBuf(buf),
+        }
+    }
+
+    pub fn get_ptr(&self) -> *mut T {
+        self.ptr
+    }
+
+    pub fn get(&self, offset: usize) -> T {
+        assert!(offset < self.size);
+        unsafe { self.ptr.add(offset).read() }
+    }
+
+    pub fn set(&self, offset: usize, val: &T) {
+        assert!(offset < self.size);
+        unsafe { self.ptr.add(offset).write(*val) }
+    }
+
+    pub fn slice(&self, offset: usize, size: usize) -> SyncSlice<'_, T> {
+        assert!(
+            offset + size <= self.size,
+            "Attempting to slice [{offset}, {offset} + {size} = {}) from a slice of length {}",
+            offset + size,
+            self.size
+        );
+        SyncSlice {
+            _buf: SyncSliceRef::FromSlice(self),
+            ptr: unsafe { self.ptr.add(offset) },
+            size: size,
+        }
+    }
+
+    pub fn size(&self) -> usize {
+        self.size
+    }
+}
+
 impl<T: Default + Clone + Pod> CpuBuffer<T> {
     fn new(size: usize) -> Self {
         let buf = vec![T::default(); size];
@@ -111,6 +168,10 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
             let slice = bytemuck::cast_slice_mut(vec);
             &mut slice[self.region.range()]
         })
+    }
+
+    pub fn as_slice_sync<'a>(&'a self) -> SyncSlice<'a, T> {
+        SyncSlice::new(self.as_slice_mut())
     }
 }
 
@@ -435,20 +496,16 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+        assert!(io.size() >= 2 * input_size);
         assert_eq!(input_size, 2 * output_size);
-        let mut io = io.as_slice_mut();
-        let (output, input) = unsafe {
-            (
-                from_raw_parts_mut(io.as_mut_ptr().add(output_size), output_size),
-                from_raw_parts(io.as_ptr().add(input_size), input_size),
-            )
-        };
-        output
-            .par_iter_mut()
-            .zip(input.par_chunks_exact(2))
-            .for_each(|(output, input)| {
-                *output = *Self::Hash::hash_pair(&input[0], &input[1]);
-            });
+        let io = io.as_slice_sync();
+        let output = io.slice(output_size, output_size);
+        let input = io.slice(input_size, input_size);
+        (0..output.size()).into_par_iter().for_each(|idx| {
+            let in1 = input.get(2 * idx + 0);
+            let in2 = input.get(2 * idx + 1);
+            output.set(idx, &*Self::Hash::hash_pair(&in1, &in2));
+        });
     }
 }
 
