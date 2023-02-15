@@ -1,0 +1,8 @@
+[package]
+name = "json-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkp = { path = "../../../risc0/zkp", default-features = false }
+serde = "1.0"

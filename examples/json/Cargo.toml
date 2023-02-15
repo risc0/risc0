@@ -1,0 +1,16 @@
+[package]
+name = "json-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+json = "0.12"
+json-core = { path = "core" }
+methods = { path = "../methods" }
+risc0-zkp = { path = "../../risc0/zkp" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
+serde = "1.0"
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+metal = ["risc0-zkvm/metal"]

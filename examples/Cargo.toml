@@ -3,6 +3,7 @@ members = [
     "chess",
     "digital-signature",
     "factors",
+    "json",
     "methods",
     "sha",
 ]
