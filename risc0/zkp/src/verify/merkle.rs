@@ -37,7 +37,7 @@ pub struct MerkleTreeVerifier<'a, H: VerifyHal> {
     top: &'a [Digest],
 
     // These are the rest of the tree.  These have the virtual indexes [1, top_size).
-    rest: Vec<<H::Hash as ConfigHash>::DigestPtr>,
+    rest: Vec<<H::Hash as ConfigHash<H::Field>>::DigestPtr>,
 
     // Support for accelerator operations.
     phantom_hal: PhantomData<H>,
@@ -94,7 +94,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
         let top = iop.read_pod_slice(params.top_size);
         // Populate hashes up to the root of the tree.
         let mut rest =
-            Vec::<<H::Hash as ConfigHash>::DigestPtr>::with_capacity(params.top_size - 1);
+            Vec::<<H::Hash as ConfigHash<H::Field>>::DigestPtr>::with_capacity(params.top_size - 1);
 
         let fill_rest = rest.spare_capacity_mut();
 
@@ -156,7 +156,7 @@ impl<'a, H: VerifyHal> MerkleTreeVerifier<'a, H> {
         // Initialize a vector to hold field elements.
         let out: &[H::Elem] = iop.read_field_elem_slice(self.params.col_size);
         // Get the hash at the leaf of the tree by hashing these field elements.
-        let mut cur = H::Hash::hash_raw_pod_slice(out);
+        let mut cur = H::Hash::hash_elem_slice(out);
         // Shift idx to start of the row
         idx += self.params.row_size;
         while idx >= 2 * self.params.top_size {

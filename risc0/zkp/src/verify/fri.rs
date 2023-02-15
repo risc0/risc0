@@ -106,7 +106,7 @@ where
     );
     // Grab the final coeffs + commit
     let final_coeffs = iop.read_field_elem_slice(H::ExtElem::EXT_SIZE * degree);
-    let final_digest = H::Hash::hash_raw_pod_slice(final_coeffs);
+    let final_digest = H::Hash::hash_elem_slice(final_coeffs);
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
     let gen = <H::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];

@@ -22,7 +22,7 @@ use risc0_core::field::baby_bear::BabyBear;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 #[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::core::config::HashSuiteSha256;
+use risc0_zkp::core::config::{HashSuite, HashSuiteSha256};
 use risc0_zkp::{
     core::sha::{Digest, Sha256},
     verify::VerificationError,
@@ -34,7 +34,7 @@ use risc0_zkvm_platform::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{sha, ControlId, CIRCUIT};
+use crate::{sha, ControlIdLocator, CIRCUIT};
 
 #[cfg(all(feature = "std", not(target_os = "zkvm")))]
 pub fn insecure_skip_seal() -> bool {
@@ -61,6 +61,7 @@ pub struct Receipt {
 pub fn verify_with_hal<'a, H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u32]) -> Result<()>
 where
     H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
+    H::Hash: ControlIdLocator,
     &'a Digest: From<D>,
 {
     let image_id: &Digest = image_id.into();
@@ -102,7 +103,7 @@ where
         return Ok(());
     }
 
-    let control_id = ControlId::new();
+    let control_id = H::Hash::get_control_id();
     let check_code = |po2: u32, merkle_root: &Digest| -> Result<(), VerificationError> {
         let po2 = po2 as usize;
         let which = po2 - MIN_CYCLES_PO2;
@@ -133,19 +134,26 @@ impl Receipt {
     where
         &'a Digest: From<D>,
     {
-        let hal = risc0_zkp::verify::CpuVerifyHal::<
-            BabyBear,
-            HashSuiteSha256<BabyBear, sha::Impl>,
-            _,
-        >::new(&crate::CIRCUIT);
+        self.verify_with_hash::<HashSuiteSha256<BabyBear, sha::Impl>, _>(image_id)
+    }
 
-        verify_with_hal(&hal, image_id, &self.seal, &self.journal)
+    #[cfg(not(target_os = "zkvm"))]
+    pub fn verify_with_hash<'a, HS, D>(&self, image_id: D) -> Result<()>
+    where
+        HS: HashSuite<BabyBear>,
+        HS::Hash: ControlIdLocator,
+        &'a Digest: From<D>,
+    {
+        let hal = risc0_zkp::verify::CpuVerifyHal::<BabyBear, HS, _>::new(&crate::CIRCUIT);
+
+        self.verify_with_hal(&hal, image_id)
     }
 
     /// Verifies a receipt using the hardware acceleration layer.
     pub fn verify_with_hal<'a, H, D>(&self, hal: &H, image_id: D) -> Result<()>
     where
         H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
+        H::Hash: ControlIdLocator,
         &'a Digest: From<D>,
     {
         verify_with_hal(hal, image_id, &self.seal, &self.journal)

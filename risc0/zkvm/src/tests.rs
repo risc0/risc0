@@ -145,6 +145,7 @@ fn run_do_nothing(opts: ProverOpts) -> Result<Receipt> {
 }
 
 #[test]
+#[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde_with_seal() {
     let receipt = run_do_nothing(ProverOpts::default()).unwrap();
     let ser: Vec<u32> = crate::serde::to_vec(&receipt).unwrap();
@@ -166,6 +167,7 @@ fn receipt_serde_no_seal() {
 }
 
 #[test]
+#[cfg_attr(feature = "cuda", serial)]
 fn fail() {
     // Check that a compliant host will fault.
     let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
@@ -178,6 +180,7 @@ fn fail() {
 
 #[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
     let receipt = run_do_nothing(ProverOpts::default()).unwrap();
     receipt
@@ -198,6 +201,7 @@ fn check_image_id() {
 
 #[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
 fn commit_hello_world() {
     let receipt = {
         let mut prover = Prover::new(HELLO_COMMIT_ELF, HELLO_COMMIT_ID).unwrap();
@@ -275,6 +279,26 @@ fn sha_cycle_count() {
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaCycleCount).unwrap());
     prover.run().unwrap();
+}
+
+#[test]
+fn test_poseidon_proof() {
+    use risc0_circuit_rv32im::cpu::CpuEvalCheck;
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_zkp::core::config::HashSuitePoseidon;
+    use risc0_zkp::hal::cpu::CpuHal;
+
+    use crate::CIRCUIT;
+
+    let hal = CpuHal::<BabyBear, HashSuitePoseidon>::new();
+    let eval = CpuEvalCheck::new(&CIRCUIT);
+    let opts = ProverOpts::default().with_skip_verify(true);
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
+    let receipt = prover.run_with_hal(&hal, &eval).unwrap();
+    receipt
+        .verify_with_hash::<HashSuitePoseidon, _>(&MULTI_TEST_ID)
+        .unwrap();
 }
 
 #[cfg(feature = "profiler")]
@@ -414,6 +438,7 @@ mod riscv_tests {
     macro_rules! test_case {
         ($func_name:ident) => {
             #[test_log::test]
+            #[cfg_attr(feature = "cuda", serial_test::serial)]
             fn $func_name() {
                 use std::io::Read;
 

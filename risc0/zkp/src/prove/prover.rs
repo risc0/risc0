@@ -76,6 +76,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
     /// Commits a given buffer to the IOP; the values must not subsequently
     /// change.
+    #[tracing::instrument(skip_all)]
     pub fn commit_group(&mut self, tap_group_index: usize, buf: H::BufferElem) {
         let group_size = self.taps.group_size(tap_group_index);
         assert_eq!(buf.size() % group_size, 0);
@@ -105,6 +106,7 @@ impl<'a, H: Hal> Prover<'a, H> {
     }
 
     /// Generates the proof and returns the seal.
+    #[tracing::instrument(skip_all)]
     pub fn finalize<E>(mut self, globals: &[&H::BufferElem], eval: &E) -> Vec<u32>
     where
         E: EvalCheck<H>,
@@ -239,7 +241,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         debug!("Size of U = {}", coeff_u.len());
         self.iop.write_field_elem_slice(&coeff_u);
-        let hash_u = H::Hash::hash_raw_pod_slice(coeff_u.as_slice());
+        let hash_u = H::Hash::hash_ext_elem_slice(coeff_u.as_slice());
         self.iop.commit(&hash_u);
 
         // Set the mix mix value, which is used for FRI batching.

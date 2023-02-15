@@ -24,7 +24,7 @@ pub mod metal;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    core::config::{ConfigHash, ConfigRng},
+    core::config::{ConfigHash, ConfigRng, HashSuite},
     core::digest::Digest,
     INV_RATE,
 };
@@ -47,7 +47,8 @@ pub trait Hal {
     type BufferElem: Buffer<Self::Elem>;
     type BufferExtElem: Buffer<Self::ExtElem>;
     type BufferU32: Buffer<u32>;
-    type Hash: ConfigHash;
+    type HashSuite: HashSuite<Self::Field>;
+    type Hash: ConfigHash<Self::Field>;
     type Rng: ConfigRng<Self::Field>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
@@ -145,7 +146,7 @@ mod testutil {
 
     pub(crate) fn batch_bit_reverse<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
 
         let steps = 1 << 12;
         let count = 203; // data_size
@@ -179,7 +180,7 @@ mod testutil {
 
     pub(crate) fn batch_evaluate_any<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
 
         let steps = 1 << 12;
         let domain = steps * INV_RATE;
@@ -226,7 +227,7 @@ mod testutil {
 
     pub(crate) fn batch_evaluate_ntt<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
 
         let count = 203; // data_size
         let expand_bits = 2;
@@ -261,7 +262,7 @@ mod testutil {
 
     pub(crate) fn batch_expand<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
 
         let poly_count = 203; // data_size
         let steps = 1 << 16;
@@ -299,7 +300,7 @@ mod testutil {
 
     pub(crate) fn batch_interpolate_ntt<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
 
         let count = 203; // data_size
         let steps = 1 << 16;
@@ -389,7 +390,7 @@ mod testutil {
     pub(crate) fn eltwise_sum_extelem<H: Hal>(hal_gpu: H) {
         const COUNT: usize = 1024 * 1024;
 
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
 
         let hal_in = hal_gpu.alloc_extelem("in", COUNT);
         let cpu_in = hal_cpu.alloc_extelem("in", COUNT);
@@ -423,7 +424,7 @@ mod testutil {
 
     pub(crate) fn fri_fold<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
         for count in COUNTS {
             let output_size = count * H::ExtElem::EXT_SIZE;
             let input_size = output_size * FRI_FOLD;
@@ -458,7 +459,7 @@ mod testutil {
 
     pub(crate) fn mix_poly_coeffs<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
 
         let combo_count = 100;
         let steps = 1 << 12;
@@ -515,9 +516,9 @@ mod testutil {
     }
 
     pub(crate) fn hash_fold<H: Hal>(hal_gpu: H) {
-        const INPUTS: usize = 16;
+        const INPUTS: usize = 1024;
         const OUTPUTS: usize = INPUTS / 2;
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
         let mut rng = thread_rng();
         let gpu_io = hal_gpu.alloc_digest("io", INPUTS * 2);
         let cpu_io = hal_cpu.alloc_digest("io", INPUTS * 2);
@@ -525,14 +526,14 @@ mod testutil {
             cpu_io.view_mut(|c| {
                 for i in 0..INPUTS {
                     let digest = Digest::from([
-                        rng.next_u32(),
-                        rng.next_u32(),
-                        rng.next_u32(),
-                        rng.next_u32(),
-                        rng.next_u32(),
-                        rng.next_u32(),
-                        rng.next_u32(),
-                        rng.next_u32(),
+                        rng.next_u32() / 3,
+                        rng.next_u32() / 3,
+                        rng.next_u32() / 3,
+                        rng.next_u32() / 3,
+                        rng.next_u32() / 3,
+                        rng.next_u32() / 3,
+                        rng.next_u32() / 3,
+                        rng.next_u32() / 3,
                     ]);
                     c[i + INPUTS] = digest;
                     g[i + INPUTS] = digest;
@@ -553,7 +554,7 @@ mod testutil {
 
     pub(crate) fn hash_rows<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
         let rows = [1, 2, 3, 4, 10];
         let cols = [16, 32, 64, 128];
         for row_count in rows {
@@ -587,7 +588,7 @@ mod testutil {
 
     pub(crate) fn slice<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
 
         let rows = 4096;
         let cols = 256;
@@ -623,7 +624,7 @@ mod testutil {
 
     pub(crate) fn zk_shift<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu: CpuHal<H::Field, HashSuiteSha256<H::Field, sha_cpu::Impl>> = CpuHal::new();
+        let hal_cpu: CpuHal<H::Field, H::HashSuite> = CpuHal::new();
         let counts = [(1000, (1 << 8)), (900, (1 << 12))];
         for (poly_count, steps) in counts {
             let count = poly_count * steps;

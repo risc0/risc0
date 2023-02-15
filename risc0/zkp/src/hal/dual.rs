@@ -104,6 +104,7 @@ where
     type BufferElem = BufferImpl<Self::Elem, U::BufferElem, V::BufferElem>;
     type BufferExtElem = BufferImpl<Self::ExtElem, U::BufferExtElem, V::BufferExtElem>;
     type BufferU32 = BufferImpl<u32, U::BufferU32, V::BufferU32>;
+    type HashSuite = U::HashSuite;
     type Hash = U::Hash;
     type Rng = U::Rng;
 
