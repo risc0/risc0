@@ -469,6 +469,8 @@ impl StreamWriter for AllocVec {
 
     fn try_extend(&mut self, data: &[u8]) -> Result<()> {
         let mut chunks = data.chunks_exact(WORD_SIZE);
+        self.0
+            .reserve(chunks.len() + (!chunks.remainder().is_empty() as usize));
         for chunk in &mut chunks {
             let word = chunk[0] as u32
                 | (chunk[1] as u32) << 8
