@@ -16,7 +16,6 @@
 
 use json::parse;
 use json_core::Outputs;
-// use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
 
@@ -25,7 +24,6 @@ risc0_zkvm::guest::entry!(main);
 pub fn main() {
     let data: String = env::read();
     let sha = *Impl::hash_bytes(&data.as_bytes());
-    // let sha: Digest = *Impl::hash_bytes(&data.as_bytes());
     let data = parse(&data).unwrap();
     let proven_val = data["critical_data"].as_u32().unwrap();
     let out = Outputs {
