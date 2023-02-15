@@ -19,10 +19,9 @@ use risc0_zkvm::serde::to_vec;
 use risc0_zkvm::{Prover, Receipt};
 use wordle_core::WORD_LENGTH;
 
-use crate::wordlist::words::pick_word;
-
 #[cfg(test)]
 use crate::wordlist::words::pick_fixed_word;
+use crate::wordlist::words::pick_word;
 
 mod wordlist;
 
@@ -168,7 +167,10 @@ mod tests {
         let guess_word = TEST_GUESS_WRONG;
         let receipt = server.check_round(&guess_word);
         let score = player.check_receipt(receipt);
-        assert!(!game_is_won(score), "Incorrect guess should not win the game");
+        assert!(
+            !game_is_won(score),
+            "Incorrect guess should not win the game"
+        );
         let guess_word = TEST_GUESS_RIGHT;
         let receipt = server.check_round(&guess_word);
         let score = player.check_receipt(receipt);
