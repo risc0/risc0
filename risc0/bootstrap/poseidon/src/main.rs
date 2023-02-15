@@ -16,8 +16,7 @@
 
 extern crate tempdir;
 
-const RUST_HEADER: &str = r#"
-// Copyright 2023 RISC Zero, Inc.
+const RUST_HEADER: &str = r#"// Copyright 2023 RISC Zero, Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,8 +43,7 @@ macro_rules! baby_bear_array {
 
 "#;
 
-const CPP_HEADER: &str = r#"
-// Copyright (c) 2023 RISC Zero, Inc.
+const CPP_HEADER: &str = r#"// Copyright (c) 2023 RISC Zero, Inc.
 // 
 // All rights reserved.
 
