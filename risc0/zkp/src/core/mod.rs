@@ -29,6 +29,8 @@ pub mod digest;
 pub mod ntt;
 pub mod poly;
 pub mod poseidon;
+#[allow(dead_code)]
+pub(crate) mod poseidon_consts;
 pub mod poseidon_rng;
 pub mod sha;
 #[cfg(not(target_os = "zkvm"))]

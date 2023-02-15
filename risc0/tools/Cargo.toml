@@ -9,7 +9,11 @@ description = "RISC Zero devtools"
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
+log = "0.4.7"
+risc0-core = { workspace = true }
 risc0-zkvm = { workspace = true, features = ["default"] }
+regex = "1"
+tempdir = "0.3"
 
 [dev-dependencies]
 assert_cmd = "2.0"
