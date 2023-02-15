@@ -7,4 +7,5 @@ members = [
     "methods",
     "password-checker",
     "sha",
+    "wordle",
 ]

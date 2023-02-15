@@ -1,0 +1,8 @@
+[package]
+name = "wordle-core"
+version = "1.0.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkp = { path = "../../../risc0/zkp", default-features = false }
+serde = "1.0"
