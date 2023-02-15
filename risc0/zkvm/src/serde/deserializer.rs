@@ -25,7 +25,7 @@ pub fn from_slice<'a, T: Deserialize<'a>>(slice: &'a [u32]) -> Result<T> {
 }
 
 pub struct Deserializer<'de> {
-    slice: &'de [u32],
+    pub slice: &'de [u32],
 }
 
 struct SeqAccess<'a, 'de> {
@@ -125,7 +125,8 @@ impl<'de> Deserializer<'de> {
         Deserializer { slice }
     }
 
-    fn try_take_word(&mut self) -> Result<u32> {
+    // TODO(victor): Reconsider making these public.
+    pub fn try_take_word(&mut self) -> Result<u32> {
         if self.slice.len() >= 1 {
             let (head, tail) = self.slice.split_first().unwrap();
             self.slice = tail;
@@ -135,7 +136,7 @@ impl<'de> Deserializer<'de> {
         }
     }
 
-    fn try_take_dword(&mut self) -> Result<u64> {
+    pub fn try_take_dword(&mut self) -> Result<u64> {
         if self.slice.len() >= 2 {
             let (head, tail) = self.slice.split_at(2);
             self.slice = tail;
@@ -147,7 +148,7 @@ impl<'de> Deserializer<'de> {
         }
     }
 
-    fn try_take_n(&mut self, len: usize) -> Result<&'de [u32]> {
+    pub fn try_take_n(&mut self, len: usize) -> Result<&'de [u32]> {
         if self.slice.len() >= len {
             let (head, tail) = self.slice.split_at(len);
             self.slice = tail;
@@ -157,7 +158,7 @@ impl<'de> Deserializer<'de> {
         }
     }
 
-    fn try_take_n_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
+    pub fn try_take_n_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
         let len_words = align_up(len, 4) / 4;
         let words: &'de [u32] = self.try_take_n(len_words)?;
         Ok(&bytemuck::cast_slice(words)[..len])

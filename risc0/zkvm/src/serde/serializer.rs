@@ -71,8 +71,9 @@ pub trait StreamWriter {
     fn release(&mut self) -> Result<Self::Output>;
 }
 
+// TODO(victor): Reconsider making stream public.
 pub struct Serializer<W: StreamWriter> {
-    stream: W,
+    pub stream: W,
 }
 
 impl<W: StreamWriter> Serializer<W> {
@@ -531,6 +532,9 @@ impl Committer for NoopCommitter {
     fn commit(&mut self, _data: &[u32]) {}
 }
 
+/// CommitHasher is a serialization target that supported incremental hashing of
+/// the data as it's being serialized. It uses only a fixed width buffer and
+/// avoids copying the source data when possible.
 pub struct CommitHasher<S: Sha256 = sha::Impl, C: Committer = NoopCommitter> {
     state: Option<S::DigestPtr>,
     buffer: Block,

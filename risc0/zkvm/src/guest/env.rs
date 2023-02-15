@@ -26,8 +26,8 @@ use risc0_zkvm_platform::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    guest::{memory_barrier, sha},
-    serde::{CommitHasher, Committer, Deserializer, Serializer, Slice},
+    guest::{align_up, memory_barrier, sha},
+    serde::{serializer::StreamWriter, CommitHasher, Committer, Deserializer, Serializer, Slice},
 };
 
 struct Env {
@@ -58,6 +58,26 @@ impl Reader {
     /// Read private data from the host.
     pub fn read<T: Deserialize<'static>>(&mut self) -> T {
         T::deserialize(&mut self.0).unwrap()
+    }
+
+    /// TODO(victor) Add doc string.
+    pub fn bytes_remaining(&mut self) -> usize {
+        self.0.slice.len() * WORD_SIZE
+    }
+
+    /// TODO(victor) Add doc string.
+    pub fn words_remaining(&mut self) -> usize {
+        self.0.slice.len()
+    }
+
+    /// TODO(victor) Add doc string.
+    pub fn read_bytes(&mut self, len: usize) -> crate::serde::err::Result<&'static [u8]> {
+        self.0.try_take_n_bytes(len)
+    }
+
+    /// TODO(victor) Add doc string.
+    pub fn read_words(&mut self, len: usize) -> crate::serde::err::Result<&'static [u32]> {
+        self.0.try_take_n(len)
     }
 }
 
@@ -110,14 +130,75 @@ pub fn read<T: Deserialize<'static>>() -> T {
     ENV.get().read()
 }
 
-/// Write private data to the host.
-pub fn write<T: Serialize>(data: &T) {
-    ENV.get().write(data);
+/// TODO(victor) Add doc string.
+pub fn read_bytes(len: usize) -> crate::serde::err::Result<&'static [u8]> {
+    ENV.get().read_bytes(len)
 }
 
-/// Commit public data to the journal.
+/// TODO(victor) Add doc string.
+pub fn read_words(len: usize) -> crate::serde::err::Result<&'static [u32]> {
+    ENV.get().read_words(len)
+}
+
+/// TODO(victor) Add doc string.
+pub fn input_bytes_remaining() -> usize {
+    ENV.get().input_bytes_remaining()
+}
+
+/// TODO(victor) Add doc string.
+pub fn input_words_remaining() -> usize {
+    ENV.get().input_words_remaining()
+}
+
+/// Writes the serialization of the data to the STDOUT channel of the zkVM.
+///
+/// This is availble to the host as the private output on the prover.
+/// Some hosts, such that the [risc0-r0vm] will also write the data to
+/// the stdout file descriptor. It is not included in the receipt.
+pub fn write<T: Serialize>(data: &T) {
+    ENV.get().write(data)
+}
+
+/// Writes given data bytes to the STDOUT channel of the zkVM.
+///
+/// This is availble to the host as the private output on the prover.
+/// Some hosts, such that the [risc0-r0vm] will also write the data to
+/// the stdout file descriptor. It is not included in the receipt.
+pub fn write_bytes(data: &[u8]) {
+    ENV.get().write_bytes(data)
+}
+
+/// Writes given data words to the STDOUT channel of the zkVM.
+///
+/// This is availble to the host as the private output on the prover.
+/// Some hosts, such that the [risc0-r0vm] will also write the data to
+/// the stdout file descriptor. It is not included in the receipt.
+pub fn write_words(data: &[u32]) {
+    ENV.get().write_words(data)
+}
+
+/// Commits the serialization of the data to the journal.
+///
+/// Data in the journal is included in the receipt and is available to the
+/// verifier. It is condiered "public" data.
 pub fn commit<T: Serialize>(data: &T) {
-    ENV.get().commit(data);
+    ENV.get().commit(data)
+}
+
+/// Commits the given data bytes to the journal.
+///
+/// Data in the journal is included in the receipt and is available to the
+/// verifier. It is condiered "public" data.
+pub fn commit_bytes(data: &[u8]) {
+    ENV.get().commit_bytes(data)
+}
+
+/// Commits the given data words to the journal.
+///
+/// Data in the journal is included in the receipt and is available to the
+/// verifier. It is condiered "public" data.
+pub fn commit_words(data: &[u32]) {
+    ENV.get().commit_words(data)
 }
 
 /// Returns the number of processor cycles that have occured since the guest
@@ -132,7 +213,7 @@ pub fn log(msg: &str) {
 }
 
 impl Env {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Env {
             commit: Serializer::new(CommitHasher::<sha::Impl, SyscallCommitter>::default()),
             output: Serializer::new(Slice::new(unsafe {
@@ -156,24 +237,52 @@ impl Env {
         self.initial_input().read()
     }
 
-    fn write<T: Serialize>(&mut self, data: &T) {
+    pub fn read_bytes(&mut self, len: usize) -> crate::serde::err::Result<&'static [u8]> {
+        self.initial_input().read_bytes(len)
+    }
+
+    pub fn read_words(&mut self, len: usize) -> crate::serde::err::Result<&'static [u32]> {
+        self.initial_input().read_words(len)
+    }
+
+    pub fn input_bytes_remaining(&mut self) -> usize {
+        self.initial_input().bytes_remaining()
+    }
+
+    pub fn input_words_remaining(&mut self) -> usize {
+        self.initial_input().words_remaining()
+    }
+
+    pub fn write<T: Serialize>(&mut self, data: &T) {
         data.serialize(&mut self.output).unwrap();
         let buf = self.output.release().unwrap();
         send_recv(SENDRECV_CHANNEL_STDOUT, bytemuck::cast_slice(buf));
     }
 
-    fn commit<T: Serialize>(&mut self, data: &T) {
-        // NOTE TO REVIEWERS: This removes the send to the STDOUT channel. It will break
-        // anybody who what relying on that. It's possible send the data to
-        // STDOUT in chunks from the commit hasher if this is important.
+    pub fn write_bytes(&mut self, data: &[u8]) {
+        send_recv(SENDRECV_CHANNEL_STDOUT, data);
+    }
+
+    pub fn write_words(&mut self, data: &[u32]) {
+        send_recv(SENDRECV_CHANNEL_STDOUT, bytemuck::cast_slice(data));
+    }
+
+    pub fn commit<T: Serialize>(&mut self, data: &T) {
         data.serialize(&mut self.commit).unwrap();
     }
 
-    fn finalize(&mut self) {
-        // NOTE TO REVIEWERS: This changes the digest in two ways. It included a
-        // standard SHA-256 trailer where the previous version was only
-        // zero-padding. It also hashes the data even if it is less than a
-        // Digest in length.
+    pub fn commit_bytes(&mut self, data: &[u8]) {
+        self.commit.stream.try_extend(data).unwrap();
+    }
+
+    pub fn commit_words(&mut self, data: &[u32]) {
+        self.commit
+            .stream
+            .try_extend(bytemuck::cast_slice(data))
+            .unwrap();
+    }
+
+    pub fn finalize(&mut self) {
         // TODO(victor) Remove the length field.
         let output = self.commit.release().unwrap();
         unsafe {

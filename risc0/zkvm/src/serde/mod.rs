@@ -41,9 +41,9 @@
 //! [`env::commit`]: ../guest/env/fn.commit.html
 //! [`env::read`]: ../guest/env/fn.read.html
 
-mod deserializer;
-mod err;
-mod serializer;
+pub(crate) mod deserializer;
+pub(crate) mod err;
+pub(crate) mod serializer;
 
 pub use deserializer::{from_slice, Deserializer};
 pub use serializer::{
