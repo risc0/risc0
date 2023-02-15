@@ -62,12 +62,11 @@ fn main() {
     );
 }
 
-
 #[cfg(test)]
 mod tests {
     use chess_core::Inputs;
     use methods::{CHECKMATE_ELF, CHECKMATE_ID};
-    use risc0_zkvm::{Prover, serde::to_vec};
+    use risc0_zkvm::{serde::to_vec, Prover};
 
     const TEST_BOARD: &str = "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
     const TEST_MOVE: &str = "Qxf7";

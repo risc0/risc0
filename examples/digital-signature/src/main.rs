@@ -58,11 +58,10 @@ fn main() {
     log::info!("\treceipt: valid");
 }
 
-
 #[cfg(test)]
 mod tests {
-    use sha2::{Digest, Sha256};
     use digital_signature::sign;
+    use sha2::{Digest, Sha256};
 
     const MESSAGE: &str = "This is a signed message";
     const PASSPHRASE: &str = "passw0rd";
@@ -72,7 +71,15 @@ mod tests {
         let signing_receipt = sign(&PASSPHRASE, &MESSAGE).unwrap();
         let message_hash = &signing_receipt.get_message().unwrap().msg;
         let expected_message_hash = Sha256::digest(MESSAGE);
-        assert_eq!(message_hash, expected_message_hash.as_slice(), "Message commitment does not match given message!");
-        assert!(signing_receipt.verify().is_ok(), "Receipt is invalid! {}", signing_receipt.verify().unwrap_err());
+        assert_eq!(
+            message_hash,
+            expected_message_hash.as_slice(),
+            "Message commitment does not match given message!"
+        );
+        assert!(
+            signing_receipt.verify().is_ok(),
+            "Receipt is invalid! {}",
+            signing_receipt.verify().unwrap_err()
+        );
     }
 }

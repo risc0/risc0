@@ -63,7 +63,11 @@ mod tests {
             .expect("Proven code should verify");
 
         let journal = &receipt.journal;
-        let outputs: Outputs = from_slice(&journal).expect("Journal should contain an Outputs object");
-        assert_eq!(outputs.data, 47, "Did not find the expected value in the critical_data field");
+        let outputs: Outputs =
+            from_slice(&journal).expect("Journal should contain an Outputs object");
+        assert_eq!(
+            outputs.data, 47,
+            "Did not find the expected value in the critical_data field"
+        );
     }
 }
