@@ -50,8 +50,7 @@ fn main() {
 mod tests {
     use methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
     use password_checker_core::PasswordRequest;
-    use risc0_zkp::core::sha::Digest;
-    use risc0_zkvm::serde::{from_slice, to_vec};
+    use risc0_zkvm::serde::to_vec;
     use risc0_zkvm::Prover;
 
     const TEST_SALT: [u8; 32] = [0u8; 32];
