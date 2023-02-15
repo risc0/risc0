@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 //! An implementation of Poseidon targeting the Baby Bear field with a security
 //! of 128 bits.
 
-pub(crate) use super::poseidon_consts::*;
 use risc0_core::field::baby_bear::Elem;
+
+pub(crate) use super::poseidon_consts::*;
 
 fn add_round_constants(cells: &mut [Elem; CELLS], round: usize) {
     for i in 0..CELLS {

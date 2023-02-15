@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
   "risc0/bootstrap",
+  "risc0/bootstrap/poseidon",
   "risc0/build",
   "risc0/circuit/rv32im",
   "risc0/core",
