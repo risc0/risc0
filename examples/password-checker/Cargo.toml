@@ -1,0 +1,11 @@
+[package]
+name = "password-checker"
+version = "0.12.0"
+edition = "2021"
+
+[dependencies]
+password-checker-core = { path = "core" }
+methods = { path = "../methods" }
+rand = "0.8"
+risc0-zkp = { path = "../../risc0/zkp" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
