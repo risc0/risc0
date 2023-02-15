@@ -18,6 +18,7 @@ use std::{
     process::Command,
 };
 
+use risc0_build_kernel::{KernelBuild, KernelType};
 use sha2::{Digest, Sha256};
 use tempfile::tempdir_in;
 
@@ -151,59 +152,62 @@ fn build_metal_kernels(out_dir: &Path) {
         .map(|x| x.unwrap())
         .collect();
 
-    for src in srcs {
-        println!("cargo:rerun-if-changed={}", src.display())
-    }
+    // KernelBuild::new(KernelType::Metal).compile(output);
 
-    let compiler = String::from_utf8(
-        Command::new("xcrun")
-            .args(["--find", "--sdk", "macosx", "metal"])
-            .output()
-            .unwrap()
-            .stdout,
-    )
-    .unwrap();
-    let compiler = compiler.trim_end();
-    // eprintln!("compiler: {compiler}");
+    // for src in srcs {
+    //     println!("cargo:rerun-if-changed={}", src.display())
+    // }
 
-    let inc_path = Path::new("kernels").join("zkp").join("metal");
+    // let compiler = String::from_utf8(
+    //     Command::new("xcrun")
+    //         .args(["--find", "--sdk", "macosx", "metal"])
+    //         .output()
+    //         .unwrap()
+    //         .stdout,
+    // )
+    // .unwrap();
+    // let compiler = compiler.trim_end();
+    // // eprintln!("compiler: {compiler}");
 
-    for kernel in METAL_KERNELS {
-        let mut air_paths = vec![];
+    // let inc_path = Path::new("kernels").join("zkp").join("metal");
 
-        for src in kernel.2 {
-            let in_path = Path::new(kernel.0).join(src);
-            let out_path = out_dir.join(src).with_extension("").with_extension("air");
-            let result = Command::new(compiler)
-                .arg("-c")
-                .arg(in_path)
-                .arg("-I")
-                .arg(&inc_path)
-                .arg("-o")
-                .arg(&out_path)
-                .status()
-                .unwrap();
-            if !result.success() {
-                panic!("Could not build metal kernels");
-            }
-            air_paths.push(out_path);
-        }
+    // for kernel in METAL_KERNELS {
+    //     let mut air_paths = vec![];
 
-        let out_path = out_dir.join(kernel.1).with_extension("metallib");
-        let result = Command::new("xcrun")
-            .args(["--sdk", "macosx"])
-            .arg("metallib")
-            .args(air_paths)
-            .arg("-o")
-            .arg(&out_path)
-            .status()
-            .unwrap();
-        if !result.success() {
-            panic!("Could not build metal kernels");
-        }
+    //     for src in kernel.2 {
+    //         let in_path = Path::new(kernel.0).join(src);
+    //         let out_path =
+    // out_dir.join(src).with_extension("").with_extension("air");
+    //         let result = Command::new(compiler)
+    //             .arg("-c")
+    //             .arg(in_path)
+    //             .arg("-I")
+    //             .arg(&inc_path)
+    //             .arg("-o")
+    //             .arg(&out_path)
+    //             .status()
+    //             .unwrap();
+    //         if !result.success() {
+    //             panic!("Could not build metal kernels");
+    //         }
+    //         air_paths.push(out_path);
+    //     }
 
-        println!("cargo:{}={}", kernel.1, out_path.display());
-    }
+    //     let out_path = out_dir.join(kernel.1).with_extension("metallib");
+    //     let result = Command::new("xcrun")
+    //         .args(["--sdk", "macosx"])
+    //         .arg("metallib")
+    //         .args(air_paths)
+    //         .arg("-o")
+    //         .arg(&out_path)
+    //         .status()
+    //         .unwrap();
+    //     if !result.success() {
+    //         panic!("Could not build metal kernels");
+    //     }
+
+    //     println!("cargo:{}={}", kernel.1, out_path.display());
+    // }
 }
 
 fn risc0_root() -> PathBuf {
