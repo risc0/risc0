@@ -12,3 +12,7 @@ methods = { path = "../methods" }
 
 [dev-dependencies]
 hex = "0.4"
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+metal = ["risc0-zkvm/metal"]

@@ -1,15 +1,21 @@
 [package]
-name = "chess"
+name = "digital-signature"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-chess-core = { path = "core" }
-clap = "4.0"
+clap = "3.1"
+digital-signature-core = { path = "core" }
+env_logger = "0.9"
+log = "0.4"
 methods = { path = "../methods" }
+risc0-zkp = { path = "../../risc0/zkp" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
-shakmaty = "0.22"
+sha2 = "0.10"
+
+[dev-dependencies]
+ctor = "0.1"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]

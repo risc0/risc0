@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "chess",
+    "digital-signature",
     "factors",
     "methods",
     "sha",
