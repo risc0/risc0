@@ -100,4 +100,9 @@ pub mod words {
     pub fn pick_word() -> &'static str {
         return WORDS.choose(&mut rand::thread_rng()).unwrap();
     }
+
+    #[cfg(test)]
+    pub fn pick_fixed_word() -> &'static str {
+        return "proof";
+    }
 }

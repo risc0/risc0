@@ -38,3 +38,36 @@ fn main() {
 
     println!("\nThe JSON file with hash\n  {:?}\nprovably contains a field 'critical_data' with value {}\n", outputs.hash, outputs.data);
 }
+
+#[cfg(test)]
+mod tests {
+    use json_core::Outputs;
+    use methods::{SEARCH_JSON_ELF, SEARCH_JSON_ID};
+    use risc0_zkvm::serde::{from_slice, to_vec};
+    use risc0_zkvm::Prover;
+
+    #[test]
+    fn main() {
+        let data = include_str!("../res/example.json");
+
+        // Make the prover.
+        let mut prover = Prover::new(SEARCH_JSON_ELF, SEARCH_JSON_ID)
+            .expect("Prover should be constructed from matching method code & ID");
+        prover.add_input_u32_slice(&to_vec(&data).expect("should be serializable"));
+
+        // Run prover & generate receipt
+        let receipt = prover.run().expect("Code should be provable");
+
+        receipt
+            .verify(&SEARCH_JSON_ID)
+            .expect("Proven code should verify");
+
+        let journal = &receipt.journal;
+        let outputs: Outputs =
+            from_slice(&journal).expect("Journal should contain an Outputs object");
+        assert_eq!(
+            outputs.data, 47,
+            "Did not find the expected value in the critical_data field"
+        );
+    }
+}

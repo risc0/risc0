@@ -18,5 +18,6 @@ sha2 = "0.10"
 ctor = "0.1"
 
 [features]
-cuda = ["risc0-zkvm/cuda"]
-metal = ["risc0-zkvm/metal"]
+cuda = ["risc0-zkp/cuda", "risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkp/metal", "risc0-zkvm/metal"]

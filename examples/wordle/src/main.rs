@@ -19,6 +19,8 @@ use risc0_zkvm::serde::to_vec;
 use risc0_zkvm::{Prover, Receipt};
 use wordle_core::WORD_LENGTH;
 
+#[cfg(test)]
+use crate::wordlist::words::pick_fixed_word;
 use crate::wordlist::words::pick_word;
 
 mod wordlist;
@@ -50,6 +52,13 @@ impl Server<'_> {
         prover.add_input_u32_slice(to_vec(&guess_word).unwrap().as_slice());
 
         return prover.run().unwrap();
+    }
+
+    #[cfg(test)]
+    pub fn new_for_testing() -> Self {
+        Self {
+            secret_word: pick_fixed_word(),
+        }
     }
 }
 
@@ -137,5 +146,34 @@ fn main() {
         println!("You won!");
     } else {
         println!("Game over");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::{game_is_won, Player, Server};
+
+    const TEST_GUESS_WRONG: &str = "roofs";
+    const TEST_GUESS_RIGHT: &str = "proof";
+
+    #[test]
+    fn main() {
+        let server = Server::new_for_testing();
+        let player = Player {
+            hash: server.get_secret_word_hash(),
+        };
+
+        let guess_word = TEST_GUESS_WRONG;
+        let receipt = server.check_round(&guess_word);
+        let score = player.check_receipt(receipt);
+        assert!(
+            !game_is_won(score),
+            "Incorrect guess should not win the game"
+        );
+        let guess_word = TEST_GUESS_RIGHT;
+        let receipt = server.check_round(&guess_word);
+        let score = player.check_receipt(receipt);
+        assert!(game_is_won(score), "Correct guess should win the game");
     }
 }

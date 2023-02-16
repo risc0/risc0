@@ -61,3 +61,33 @@ fn main() {
         pos.board()
     );
 }
+
+#[cfg(test)]
+mod tests {
+    use chess_core::Inputs;
+    use methods::{CHECKMATE_ELF, CHECKMATE_ID};
+    use risc0_zkvm::{serde::to_vec, Prover};
+
+    const TEST_BOARD: &str = "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
+    const TEST_MOVE: &str = "Qxf7";
+
+    #[test]
+    fn main() {
+        let inputs = Inputs {
+            board: String::from(TEST_BOARD),
+            mv: String::from(TEST_MOVE),
+        };
+
+        // Make the prover.
+        let mut prover = Prover::new(CHECKMATE_ELF, CHECKMATE_ID).unwrap();
+        prover.add_input_u32_slice(&to_vec(&inputs).expect("Should be serializable"));
+
+        // Run prover & generate receipt
+        let receipt = prover
+            .run()
+            .expect("Legal board state and checkmating move expected");
+
+        // Verify receipt and parse it for committed data
+        receipt.verify(&CHECKMATE_ID).unwrap();
+    }
+}
