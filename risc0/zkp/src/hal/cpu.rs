@@ -84,13 +84,20 @@ enum SyncSliceRef<'a, T: Default + Clone + Pod> {
     FromSlice(&'a SyncSlice<'a, T>),
 }
 
-// A buffer which can be used across multiple threads.
+/// A buffer which can be used across multiple threads.  Users are
+/// responsible for ensuring that no two threads access the same
+/// element at the same time.
 pub struct SyncSlice<'a, T: Default + Clone + Pod> {
     _buf: SyncSliceRef<'a, T>,
     ptr: *mut T,
     size: usize,
 }
 
+// SAFETY: SyncSlice keeps a RefMut to the original CpuBuffer, so
+// no other as_slice or as_slice_muts can be active at the same time.
+//
+// The user of the SyncSlice is responsible for ensuring that no
+// two threads access the same elements at the same time.
 unsafe impl<'a, T: Default + Clone + Pod> Sync for SyncSlice<'a, T> {}
 
 impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
@@ -113,9 +120,9 @@ impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
         unsafe { self.ptr.add(offset).read() }
     }
 
-    pub fn set(&self, offset: usize, val: &T) {
+    pub fn set(&self, offset: usize, val: T) {
         assert!(offset < self.size);
-        unsafe { self.ptr.add(offset).write(*val) }
+        unsafe { self.ptr.add(offset).write(val) }
     }
 
     pub fn slice(&self, offset: usize, size: usize) -> SyncSlice<'_, T> {
@@ -146,11 +153,25 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         }
     }
 
+    pub fn get_ptr(&self) -> *mut T {
+        self.as_slice_sync().get_ptr()
+    }
+
     fn copy_from(slice: &[T]) -> Self {
         let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
             buf: Rc::new(RefCell::new(Vec::from(bytes))),
             region: Region(0, slice.len()),
+        }
+    }
+
+    pub fn from_fn<F>(size: usize, f: F) -> Self
+    where
+        F: FnMut(usize) -> T,
+    {
+        CpuBuffer {
+            buf: Rc::new(RefCell::new((0..size).map(f).collect())),
+            region: Region(0, size),
         }
     }
 
@@ -172,6 +193,16 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
 
     pub fn as_slice_sync<'a>(&'a self) -> SyncSlice<'a, T> {
         SyncSlice::new(self.as_slice_mut())
+    }
+}
+
+impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
+    fn from(vec: Vec<T>) -> CpuBuffer<T> {
+        let size = vec.len();
+        CpuBuffer {
+            buf: Rc::new(RefCell::new(vec)),
+            region: Region(0, size),
+        }
     }
 }
 
@@ -504,7 +535,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         (0..output.size()).into_par_iter().for_each(|idx| {
             let in1 = input.get(2 * idx + 0);
             let in2 = input.get(2 * idx + 1);
-            output.set(idx, &*Self::Hash::hash_pair(&in1, &in2));
+            output.set(idx, *Self::Hash::hash_pair(&in1, &in2));
         });
     }
 }

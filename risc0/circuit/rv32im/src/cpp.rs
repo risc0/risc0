@@ -22,7 +22,10 @@ use risc0_sys::ffi::{
     risc0_circuit_rv32im_step_verify_bytes, risc0_circuit_rv32im_step_verify_mem,
     risc0_circuit_string_free, risc0_circuit_string_ptr, Callback, RawError,
 };
-use risc0_zkp::adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp};
+use risc0_zkp::{
+    adapter::{CircuitDef, CircuitStep, CircuitStepContext, CircuitStepHandler, PolyFp},
+    hal::cpu::SyncSlice,
+};
 
 use crate::CircuitImpl;
 
@@ -31,7 +34,7 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
         &self,
         ctx: &CircuitStepContext,
         handler: &mut S,
-        args: &mut [&mut [BabyBearElem]],
+        args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
         call_step(
             ctx,
@@ -49,7 +52,7 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
         &self,
         ctx: &CircuitStepContext,
         handler: &mut S,
-        args: &mut [&mut [BabyBearElem]],
+        args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
         call_step(
             ctx,
@@ -67,7 +70,7 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
         &self,
         ctx: &CircuitStepContext,
         handler: &mut S,
-        args: &mut [&mut [BabyBearElem]],
+        args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
         call_step(
             ctx,
@@ -85,7 +88,7 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
         &self,
         ctx: &CircuitStepContext,
         handler: &mut S,
-        args: &mut [&mut [BabyBearElem]],
+        args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
         call_step(
             ctx,
@@ -103,7 +106,7 @@ impl CircuitStep<BabyBearElem> for CircuitImpl {
         &self,
         ctx: &CircuitStepContext,
         handler: &mut S,
-        args: &mut [&mut [BabyBearElem]],
+        args: &[SyncSlice<BabyBearElem>],
     ) -> Result<BabyBearElem> {
         call_step(
             ctx,
@@ -144,7 +147,7 @@ impl<'a> CircuitDef<BabyBear> for CircuitImpl {}
 pub(crate) fn call_step<S, F>(
     ctx: &CircuitStepContext,
     handler: &mut S,
-    args: &mut [&mut [BabyBearElem]],
+    args: &[SyncSlice<BabyBearElem>],
     inner: F,
 ) -> Result<BabyBearElem>
 where
@@ -172,7 +175,7 @@ where
         };
     let trampoline = get_trampoline(&call);
     let mut err = RawError::default();
-    let args: Vec<*mut BabyBearElem> = args.iter_mut().map(|x| (*x).as_mut_ptr()).collect();
+    let args: Vec<*mut BabyBearElem> = args.iter().map(SyncSlice::get_ptr).collect();
     let result = inner(
         &mut err,
         &mut call as *mut _ as *mut c_void,
