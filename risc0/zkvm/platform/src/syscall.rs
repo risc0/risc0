@@ -30,6 +30,7 @@ pub mod nr {
     pub const SYS_LOG: u32 = 1;
     pub const SYS_IO: u32 = 2;
     pub const SYS_CYCLE_COUNT: u32 = 3;
+    pub const SYS_RAND: u32 = 4;
 }
 
 pub mod reg_abi {
@@ -258,6 +259,22 @@ pub unsafe fn sys_sha_buffer(
             in("a2") buf,
             in("a3") buf.add(DIGEST_BYTES),
             in("a4") count,
+        );
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+#[inline(always)]
+pub unsafe fn sys_rand(buf_ptr: *const u8, buf_len: usize) {
+    #[cfg(target_os = "zkvm")]
+    {
+        asm!(
+            "ecall",
+            in("t0") ecall::SOFTWARE,
+            in("a7") nr::SYS_RAND,
+            inout("a0") buf_ptr => _,
+            in("a1") buf_len,
         );
     }
     #[cfg(not(target_os = "zkvm"))]

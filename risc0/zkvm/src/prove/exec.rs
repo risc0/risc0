@@ -33,7 +33,7 @@ use risc0_zkvm_platform::{
     memory::{FFPU, SYSTEM},
     syscall::{
         ecall,
-        nr::{SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
+        nr::{SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC, SYS_RAND},
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5, REG_T0},
         DIGEST_WORDS,
     },
@@ -805,6 +805,18 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 debug!("SYS_CYCLE_COUNT[{cycle}]> cycle = {cycle}");
                 self.syscall_out_regs = (cycle as u32, 0);
                 Ok(())
+            }
+            SYS_RAND => {
+                let buf_ptr = self.memory.load_register(REG_A0);
+                let buf_len = self.memory.load_register(REG_A1);
+                debug!("SYS_RAND[{cycle}]");
+
+                let mut buf = self.memory.load_region(buf_ptr, buf_len);
+                getrandom::getrandom(buf.as_mut_slice())?;
+
+                self.memory.store_region(buf_ptr, &buf);
+
+                Ok((split_word8(buf_ptr as u32), split_word8(0)))
             }
             _ => bail!("Unsupported syscall: {nr}"),
         }
