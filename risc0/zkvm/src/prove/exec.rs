@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::BTreeSet;
-use std::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use core::cmp::min;
 
 use anyhow::{bail, Result};
-use bytemuck::Pod;
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
 use num_traits::FromPrimitive;
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    baby_bear::{BabyBear, BabyBearElem},
     Elem,
 };
 use risc0_zkp::{
-    adapter::{CircuitInfo, CircuitStepHandler, PolyExt},
+    adapter::{CircuitInfo, CircuitStepHandler},
     core::{log2_ceil, sha::BLOCK_BYTES},
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
@@ -35,9 +34,9 @@ use risc0_zkvm_platform::{
     memory::{FFPU, SYSTEM},
     syscall::{
         ecall,
-        nr::{SYS_COMPUTE_POLY, SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A7, REG_T0},
-        DIGEST_WORDS,
+        nr::{SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
+        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5, REG_T0},
+        DIGEST_WORDS, IO_CHUNK_WORDS,
     },
     PAGE_SIZE, WORD_SIZE,
 };
@@ -45,7 +44,6 @@ use risc0_zkvm_platform::{
 use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
 use crate::binfmt::elf::Program;
 use crate::binfmt::image::{MemoryImage, PageTableInfo};
-use crate::CIRCUIT;
 
 const IMM_BITS: usize = 12;
 
@@ -67,7 +65,12 @@ impl MemoryOp {
 pub trait HostHandler {
     fn is_trace_enabled(&self) -> bool;
     fn on_panic(&mut self, msg: &str) -> Result<()>;
-    fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>>;
+    fn on_txrx(
+        &mut self,
+        channel: u32,
+        from_guest_buf: &[u8],
+        from_host_buf: &mut [u32],
+    ) -> Result<(u32, u32)>;
     fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
 }
 
@@ -137,13 +140,6 @@ impl MemoryState {
     }
 
     #[track_caller]
-    fn store_u32(&mut self, addr: u32, value: u32) {
-        // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
-        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
-        self.store_region(addr, &value.to_le_bytes());
-    }
-
-    #[track_caller]
     fn store_region(&mut self, addr: u32, slice: &[u8]) {
         // trace!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
         for i in 0..slice.len() {
@@ -152,42 +148,10 @@ impl MemoryState {
     }
 
     #[track_caller]
-    fn store_region_u32(&mut self, addr: u32, slice: &[u32]) {
-        assert!(addr % WORD_SIZE as u32 == 0);
-        for (i, word) in slice.iter().enumerate() {
-            let offset = i * WORD_SIZE;
-            self.store_u32(addr + offset as u32, *word);
-        }
-    }
-
-    // Reads a slice of data from the guest's memory and interprets it
-    // as the given type, which must be plain old data..  The address
-    // provided is the guest's address of a SliceDescriptor structure.
-    fn read_slice<T: Pod>(&self, desc_addr: u32) -> Vec<T> {
-        let desc_bytes = self.load_region(desc_addr, 8);
-        let size: u32 = *bytemuck::from_bytes(&desc_bytes[..4]);
-        let addr: u32 = *bytemuck::from_bytes(&desc_bytes[4..]);
-        let elt_size = core::mem::size_of::<T>();
-        assert_eq!(elt_size % WORD_SIZE, 0, "T should be word aligned");
-        assert_eq!(
-            size as usize % elt_size,
-            0,
-            "slice does not end on a boundary of T; size={size}, elt_size={elt_size}"
-        );
-        let bytes = self.load_region(addr, size);
-        bytes
-            .chunks_exact(elt_size)
-            .map(|chunk| *bytemuck::from_bytes(chunk))
-            .collect()
-    }
-
-    // Reads words from guest's memory and transmutes it into the given value,
-    // which should be repr(C) and plain old data.
-    fn read_value<T: Pod>(&self, addr: u32) -> T {
-        let size = core::mem::size_of::<T>();
-        assert_eq!(size % WORD_SIZE, 0, "T should be word aligned");
-        let bytes = self.load_region(addr, size as u32);
-        *bytemuck::from_bytes(&bytes)
+    fn store_u32(&mut self, addr: u32, value: u32) {
+        // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
+        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
+        self.store_region(addr, &value.to_le_bytes());
     }
 }
 
@@ -197,6 +161,9 @@ pub struct MachineContext<'a, H: HostHandler> {
     trace_enabled: bool,
     halted: bool,
     pc: u32,
+
+    syscall_out_data: VecDeque<u32>,
+    syscall_out_regs: (u32, u32),
 }
 
 #[allow(dead_code)]
@@ -367,11 +334,26 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 self.log(extra, args);
                 Ok(())
             }
-            "syscall" => {
-                (
-                    (outs[0], outs[1], outs[2], outs[3]),
-                    (outs[4], outs[5], outs[6], outs[7]),
-                ) = self.syscall(cycle)?;
+            "syscall-init" => {
+                self.syscall_init(cycle)?;
+                Ok(())
+            }
+            "syscall-body" => {
+                let out_bytes: Vec<_> = self
+                    .syscall_body()?
+                    .iter()
+                    .flat_map(|val| {
+                        let (a, b, c, d) = split_word8(*val);
+                        [a, b, c, d]
+                    })
+                    .collect();
+                outs.clone_from_slice(out_bytes.as_slice());
+                Ok(())
+            }
+            "syscall-fini" => {
+                let (a0, a1) = self.syscall_fini()?;
+                (outs[0], outs[1], outs[2], outs[3]) = split_word8(a0);
+                (outs[4], outs[5], outs[6], outs[7]) = split_word8(a1);
                 Ok(())
             }
             "isResident" => {
@@ -409,6 +391,8 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             handler: io,
             halted: false,
             pc: 0x00000000,
+            syscall_out_data: VecDeque::new(),
+            syscall_out_regs: (0, 0),
         }
     }
 
@@ -489,6 +473,22 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                         faults.include(addr1 + (j * WORD_SIZE) as u32);
                         faults.include(addr2 + (j * WORD_SIZE) as u32);
                     }
+                }
+            } else if minor == ecall::SOFTWARE {
+                let out_addr = self.memory.load_register(REG_A0);
+                let out_chunks = self.memory.load_register(REG_A1);
+                let out_words = out_chunks * IO_CHUNK_WORDS as u32;
+                let out_bytes = out_words * WORD_SIZE as u32;
+
+                for i in (out_addr..(out_addr + out_bytes)).step_by(WORD_SIZE) {
+                    faults.include(i);
+                }
+
+                let in_addr = self.memory.load_register(REG_A3);
+                let in_bytes = self.memory.load_register(REG_A4);
+
+                for i in (in_addr..(in_addr + in_bytes)).step_by(WORD_SIZE) {
+                    faults.include(i)
                 }
             }
         }
@@ -769,71 +769,73 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         }
     }
 
-    fn syscall(
-        &mut self,
-        cycle: usize,
-    ) -> Result<(
-        (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
-        (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
-    )> {
-        let nr = self.memory.load_register(REG_A7);
+    fn syscall_init(&mut self, cycle: usize) -> Result<()> {
+        let nr = self.memory.load_register(REG_A2);
+        assert!(self.syscall_out_data.is_empty());
         match nr {
             SYS_PANIC => {
-                let msg_ptr = self.memory.load_register(REG_A0);
-                let msg_len = self.memory.load_register(REG_A1);
+                let msg_ptr = self.memory.load_register(REG_A3);
+                let msg_len = self.memory.load_register(REG_A4);
                 let buf = self.memory.load_region(msg_ptr, msg_len);
                 let str = String::from_utf8(buf).unwrap();
                 debug!("SYS_PANIC[{cycle}]> {str}");
                 self.handler.on_panic(&str)?;
-                Ok((split_word8(0), split_word8(0)))
+                self.syscall_out_regs = (0, 0);
+                Ok(())
             }
             SYS_LOG => {
-                let msg_ptr = self.memory.load_register(REG_A0);
-                let msg_len = self.memory.load_register(REG_A1);
+                let msg_ptr = self.memory.load_register(REG_A3);
+                let msg_len = self.memory.load_register(REG_A4);
                 let buf = self.memory.load_region(msg_ptr, msg_len);
                 let str = String::from_utf8(buf).unwrap();
                 println!("R0VM[{cycle}] {}", str);
-                Ok((split_word8(0), split_word8(0)))
+                self.syscall_out_regs = (0, 0);
+                Ok(())
             }
             SYS_IO => {
-                let channel = self.memory.load_register(REG_A0);
-                let buf_ptr = self.memory.load_register(REG_A1);
-                let buf_len = self.memory.load_register(REG_A2);
-                let out_ptr = self.memory.load_register(REG_A3);
-                debug!("SYS_IO[{cycle}]");
+                let to_guest_chunks = self.memory.load_register(REG_A1);
 
-                let buf = self.memory.load_region(buf_ptr, buf_len);
-                let result = self.handler.on_txrx(channel, &buf)?;
-                self.memory.store_region(out_ptr, &result);
+                let buf_ptr = self.memory.load_register(REG_A3);
+                let buf_len = self.memory.load_register(REG_A4);
+                let channel = self.memory.load_register(REG_A5);
 
-                Ok((split_word8(result.len() as u32), split_word8(0)))
+                let from_guest_buf = self.memory.load_region(buf_ptr, buf_len);
+                debug!("SYS_IO[{cycle}] Guest sends {buf_len} bytes, requests {to_guest_chunks} * {IO_CHUNK_WORDS} words back");
+                trace!("SYS_IO[{cycle}] Guest sends data: {:?}", from_guest_buf);
+                let mut from_host_buf = vec![0u32; to_guest_chunks as usize * IO_CHUNK_WORDS];
+                self.syscall_out_regs =
+                    self.handler
+                        .on_txrx(channel, &from_guest_buf, &mut from_host_buf)?;
+                trace!("SYS_IO[{cycle}] (a0, a1): {:?}", self.syscall_out_regs);
+                trace!("SYS_IO[{cycle}] data sent to guest: {from_host_buf:?}");
+                self.syscall_out_data = from_host_buf.into();
+                Ok(())
             }
             SYS_CYCLE_COUNT => {
                 debug!("SYS_CYCLE_COUNT[{cycle}]> cycle = {cycle}");
-                Ok((split_word8(cycle as u32), split_word8(0)))
-            }
-            SYS_COMPUTE_POLY => {
-                let eval_u_ptr = self.memory.load_register(REG_A0);
-                let poly_mix_ptr = self.memory.load_register(REG_A1);
-                let out_ptr = self.memory.load_register(REG_A2);
-                let mix_ptr = self.memory.load_register(REG_A3);
-                let result_ptr = self.memory.load_register(REG_A4);
-                debug!("SYS_COMPUTE_POLY[{cycle}]>");
-
-                let eval_u: Vec<BabyBearExtElem> = self.memory.read_slice(eval_u_ptr);
-                let poly_mix = self.memory.read_value(poly_mix_ptr);
-                let out: Vec<BabyBearElem> = self.memory.read_slice(out_ptr);
-                let mix: Vec<BabyBearElem> = self.memory.read_slice(mix_ptr);
-
-                let args: &[&[BabyBearElem]] = &[&out, &mix];
-                let result = CIRCUIT.poly_ext(&poly_mix, &eval_u, args);
-
-                let words = result.tot.to_u32_words();
-                self.memory.store_region_u32(result_ptr, &words);
-                Ok((split_word8(words.len() as u32), split_word8(0)))
+                self.syscall_out_regs = (cycle as u32, 0);
+                Ok(())
             }
             _ => bail!("Unsupported syscall: {nr}"),
         }
+    }
+
+    fn syscall_body(&mut self) -> Result<[u32; IO_CHUNK_WORDS]> {
+        let mut result = [0; IO_CHUNK_WORDS];
+        let ncopy = min(result.len(), self.syscall_out_data.len());
+        result[..ncopy]
+            .iter_mut()
+            .zip(self.syscall_out_data.drain(..ncopy))
+            .for_each(|(res, out)| *res = out);
+        Ok(result)
+    }
+
+    fn syscall_fini(&mut self) -> Result<(u32, u32)> {
+        debug!(
+            "Syscall complete, output registers: {:?}",
+            self.syscall_out_regs
+        );
+        Ok(self.syscall_out_regs)
     }
 
     fn decode(&self, word: u32) -> OpCode {

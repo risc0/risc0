@@ -223,7 +223,7 @@ fn slice_io() {
 }
 
 #[test]
-fn host_sendrecv() {
+fn host_sendrecv_hello() {
     let expected: Vec<Vec<u8>> = vec![
         "".into(),
         "H".into(),
@@ -235,11 +235,20 @@ fn host_sendrecv() {
     let actual: Mutex<Vec<Vec<u8>>> = Vec::new().into();
     let opts = ProverOpts::default()
         .with_skip_seal(true)
-        .with_sendrecv_callback(5, |channel_id, buf| -> Vec<u8> {
+        .with_sendrecv_callback(5, |channel_id, inbuf, outbuf| -> (u32, u32) {
             assert_eq!(channel_id, 5);
             let mut act = actual.lock().unwrap();
-            act.push(buf.into());
-            expected[act.len()].clone()
+            act.push(inbuf.into());
+            let out = expected[act.len()].as_slice();
+            let outbuf: &mut [u8] = bytemuck::cast_slice_mut(outbuf);
+            if outbuf.len() < out.len() {
+                // Not enough buffer space.  Don't save this one.
+                act.pop();
+            } else {
+                outbuf[..out.len()].clone_from_slice(&out);
+            }
+
+            (out.len() as u32, 0)
         });
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(
@@ -260,7 +269,7 @@ fn host_sendrecv() {
 fn host_sendrecv_callback_panic() {
     let opts = ProverOpts::default()
         .with_skip_seal(true)
-        .with_sendrecv_callback(5, |_channel_id, _buf| -> Vec<u8> {
+        .with_sendrecv_callback(5, |_channel_id, _inbuf, _outbuf| -> (u32, u32) {
             panic!("I am panicking from here!");
         });
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();

@@ -19,9 +19,10 @@ use core::{cell::UnsafeCell, default::Default, mem::MaybeUninit, ptr, slice};
 use bytemuck::Pod;
 use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
+    abi::zkvm_abi_alloc_words,
     io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_JOURNAL, SENDRECV_CHANNEL_STDOUT},
     memory,
-    syscall::{sys_cycle_count, sys_halt, sys_io, sys_log, sys_output},
+    syscall::{sys_cycle_count, sys_halt, sys_io, sys_log, sys_output, IO_CHUNK_WORDS},
     WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
@@ -96,16 +97,42 @@ pub(crate) fn finalize() {
     }
 }
 
-/// Exchange data with the host, returning the data from the host
-/// as a slice of bytes.
-pub fn send_recv(channel: u32, buf: &[u8]) -> &'static [u8] {
-    unsafe { sys_io(channel, buf.as_ptr(), buf.len()) }
+/// Send data to the host.  The host may return two words back.
+pub fn send_host(channel: u32, buf: &[u8]) -> (u32, u32) {
+    unsafe { sys_io(&mut [] as _, 0, buf.as_ptr(), buf.len(), channel) }
 }
 
-/// Exchange data with the host, returning the data from the host as
-/// a slice of words and the length in bytes.
-pub fn send_recv_as_u32(channel: u32, buf: &[u8]) -> &'static [u32] {
-    bytemuck::cast_slice(send_recv(channel, buf))
+/// Exchange data with the host.
+pub fn send_recv_sized(
+    channel: u32,
+    to_host_buf: &[u8],
+    from_host_bytes: usize,
+) -> (u32, u32, &'static [u8]) {
+    unsafe {
+        let nwords = (from_host_bytes + WORD_SIZE - 1) / WORD_SIZE;
+        let nchunks = (nwords + IO_CHUNK_WORDS - 1) / IO_CHUNK_WORDS;
+        let from_host_buf = zkvm_abi_alloc_words(nchunks * IO_CHUNK_WORDS);
+        let (a0, a1) = sys_io(
+            from_host_buf,
+            nchunks,
+            to_host_buf.as_ptr(),
+            to_host_buf.len(),
+            channel,
+        );
+        (
+            a0,
+            a1,
+            slice::from_raw_parts(from_host_buf.cast(), from_host_bytes),
+        )
+    }
+}
+
+/// Exchange data with host.  The channel should return the length of
+/// the data to read when presented with an empty output buffer.
+pub fn send_recv(channel: u32, to_host_buf: &[u8]) -> &'static [u8] {
+    let (nbytes, _) = send_host(channel, to_host_buf);
+    let (_, _, bytes) = send_recv_sized(channel, to_host_buf, nbytes as usize);
+    bytes
 }
 
 /// Read private data from the host and deserializes it.
@@ -228,14 +255,14 @@ impl<F: Fn(&[u8])> StreamWriter for OutputStreamWriter<F> {
 
     fn write_u32(&mut self, data: u32) -> SerdeResult<()> {
         let bytes = data.to_ne_bytes();
-        unsafe { sys_io(self.channel, bytes.as_ptr(), bytes.len()) };
+        send_host(self.channel, bytes.as_slice());
         (self.hook)(&bytes);
         Ok(())
     }
 
     fn write_slice<T: Pod>(&mut self, slice: &[T]) -> SerdeResult<()> {
         let bytes: &[u8] = bytemuck::cast_slice(slice);
-        unsafe { sys_io(self.channel, bytes.as_ptr(), bytes.len()) };
+        send_host(self.channel, bytes);
         (self.hook)(bytes);
         Ok(())
     }
