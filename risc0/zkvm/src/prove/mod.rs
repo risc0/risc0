@@ -232,20 +232,20 @@ impl<'a> Prover<'a> {
 
             prover.commit_group(
                 REGISTER_GROUP_CODE,
-                hal.copy_from_elem("code", adapter.get_code()),
+                hal.copy_from_elem("code", &adapter.get_code().as_slice()),
             );
             prover.commit_group(
                 REGISTER_GROUP_DATA,
-                hal.copy_from_elem("data", adapter.get_data()),
+                hal.copy_from_elem("data", &adapter.get_data().as_slice()),
             );
             adapter.accumulate(prover.iop());
             prover.commit_group(
                 REGISTER_GROUP_ACCUM,
-                hal.copy_from_elem("accum", adapter.get_accum()),
+                hal.copy_from_elem("accum", &adapter.get_accum().as_slice()),
             );
 
-            let mix = hal.copy_from_elem("mix", adapter.get_mix());
-            let out = hal.copy_from_elem("out", adapter.get_io());
+            let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
+            let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
 
             prover.finalize(&[&mix, &out], eval)
         };
