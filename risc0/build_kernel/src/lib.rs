@@ -19,7 +19,7 @@ use std::{
 };
 
 use sha2::{Digest, Sha256};
-use tempfile::tempdir_in;
+use tempfile::tempdir;
 
 const CUDA_INCS: &[(&str, &str)] = &[
     ("fp.h", include_str!("../kernels/cuda/fp.h")),
@@ -216,12 +216,12 @@ impl KernelBuild {
         let out_path = out_dir.join(output).with_extension(extension);
         let sys_inc_dir = out_dir.join("_sys_");
 
-        let risc0_root = risc0_root();
-        let cache_dir = risc0_root.join("cache");
+        let cache_dir = risc0_cache();
         if !cache_dir.is_dir() {
             fs::create_dir_all(&cache_dir).unwrap();
         }
-        let temp_dir = tempdir_in(risc0_root).unwrap();
+
+        let temp_dir = tempdir().unwrap();
         let mut hasher = Hasher::new();
         for src in self.files.iter() {
             hasher.add_file(src);
@@ -251,8 +251,11 @@ impl KernelBuild {
     }
 }
 
-fn risc0_root() -> PathBuf {
-    home::home_dir().unwrap().join(".risc0").into()
+fn risc0_cache() -> PathBuf {
+    directories::ProjectDirs::from("com.risczero", "RISC Zero", "risc0")
+        .unwrap()
+        .cache_dir()
+        .into()
 }
 
 struct Hasher {
