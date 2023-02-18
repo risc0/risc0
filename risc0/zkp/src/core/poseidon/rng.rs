@@ -16,9 +16,8 @@
 
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 
-use super::config::ConfigRng;
-use super::digest::Digest;
-use super::poseidon::{poseidon_mix, CELLS, CELLS_OUT, CELLS_RATE};
+use super::{consts::CELLS, poseidon_mix, CELLS_OUT, CELLS_RATE};
+use crate::core::{config::ConfigRng, sha::Digest};
 
 /// A random number generator driven by Poseidon
 #[derive(Clone, Debug)]

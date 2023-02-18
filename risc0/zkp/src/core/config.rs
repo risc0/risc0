@@ -14,15 +14,20 @@
 
 //! Traits to configure which cryptographic primitives the ZKP uses
 
-use alloc::boxed::Box;
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::{fmt::Debug, marker::PhantomData, ops::DerefMut};
 
-use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_core::field::{ExtElem, Field};
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    ExtElem, Field,
+};
 
-use super::{digest::Digest, digest::DIGEST_WORDS, sha::Sha256, sha_rng::ShaRng};
-use super::{poseidon::unpadded_hash, poseidon::CELLS_OUT, poseidon_rng::PoseidonRng};
+use super::{
+    digest::{Digest, DIGEST_WORDS},
+    poseidon::{unpadded_hash, PoseidonRng, CELLS_OUT},
+    sha::Sha256,
+    sha_rng::ShaRng,
+};
 
 /// A trait that sets the hashes and encodings used by the ZKP.
 pub trait ConfigHash<F: Field> {
@@ -35,7 +40,7 @@ pub trait ConfigHash<F: Field> {
     /// mutable reference to the underlying digest).
     type DigestPtr: DerefMut<Target = Digest> + Debug;
 
-    /// Generate a hash from a pair of [Digest].   
+    /// Generate a hash from a pair of [Digest].
     fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr;
 
     /// Generate a hash from a slice of field elements.  This may be unpadded so
@@ -53,12 +58,16 @@ pub trait ConfigHash<F: Field> {
 pub trait ConfigRng<F: Field> {
     /// Create a new RNG is a standard state, mix before using!
     fn new() -> Self;
+
     /// Mix in randomness from a Fiat-Shamir commitment.
     fn mix(&mut self, val: &Digest);
+
     /// Get a cryptographically uniform u32
     fn random_u32(&mut self) -> u32;
+
     /// Get a cryptographically uniform field element
     fn random_elem(&mut self) -> F::Elem;
+
     /// Get a cryptographically uniform extension field element
     fn random_ext_elem(&mut self) -> F::ExtElem;
 }
@@ -124,6 +133,7 @@ impl ConfigHash<BabyBear> for ConfigHashPoseidon {
 pub trait HashSuite<F: Field> {
     /// Define the hash used by the HashSuite
     type Hash: ConfigHash<F>;
+
     /// Define the random mixer used by the HashSuite
     type Rng: ConfigRng<F>;
 }
