@@ -12,24 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Standard ZKVM channels; must match zkvm/platform/io.h.
-pub const SENDRECV_CHANNEL_INITIAL_INPUT: u32 = 0;
-pub const SENDRECV_CHANNEL_STDOUT: u32 = 1;
-pub const SENDRECV_CHANNEL_STDERR: u32 = 2;
-pub const SENDRECV_CHANNEL_JOURNAL: u32 = 3;
+#![no_std]
+#![no_main]
 
-#[repr(C)]
-pub struct SliceDescriptor {
-    pub size: u32,
-    pub addr: u32,
-}
+use risc0_zkvm::guest::env;
 
-impl SliceDescriptor {
-    pub fn new<T>(slice: &[T]) -> Self {
-        let size = slice.len() * core::mem::size_of::<T>();
-        Self {
-            size: size as u32,
-            addr: slice.as_ptr() as u32,
-        }
-    }
+risc0_zkvm::entry!(main);
+
+pub fn main() {
+    let len: &[u32] = env::read_slice(1);
+    let slice: &[u8] = env::read_slice(len[0] as usize);
+    env::commit_slice(slice);
 }

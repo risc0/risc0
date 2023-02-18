@@ -12,18 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod wordlist;
+
 use std::io;
 
 use methods::{WORDLE_ELF, WORDLE_ID};
-use risc0_zkvm::serde::to_vec;
-use risc0_zkvm::{Prover, Receipt};
-use wordle_core::WORD_LENGTH;
-
-#[cfg(test)]
-use crate::wordlist::words::pick_fixed_word;
-use crate::wordlist::words::pick_word;
-
-mod wordlist;
+use risc0_zkp::core::sha::Digest;
+use risc0_zkvm::serde::from_slice;
+use risc0_zkvm::{serde::to_vec, Prover, Receipt};
+use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
 
 // The "server" is an agent in the Wordle game that checks the player's guesses.
 struct Server<'a> {
@@ -32,17 +29,15 @@ struct Server<'a> {
     secret_word: &'a str,
 }
 
-impl Server<'_> {
-    pub fn new() -> Self {
-        Self {
-            secret_word: pick_word(),
-        }
+impl<'a> Server<'a> {
+    pub fn new(secret_word: &'a str) -> Self {
+        Self { secret_word }
     }
 
-    pub fn get_secret_word_hash(&self) -> Vec<u32> {
+    pub fn get_secret_word_hash(&self) -> Digest {
         let receipt = self.check_round("_____");
-        let journal = receipt.journal;
-        journal[..16].to_owned()
+        let game_state: GameState = from_slice(&receipt.journal).unwrap();
+        game_state.correct_word_hash
     }
 
     pub fn check_round(&self, guess_word: &str) -> Receipt {
@@ -51,14 +46,7 @@ impl Server<'_> {
         prover.add_input_u32_slice(to_vec(self.secret_word).unwrap().as_slice());
         prover.add_input_u32_slice(to_vec(&guess_word).unwrap().as_slice());
 
-        return prover.run().unwrap();
-    }
-
-    #[cfg(test)]
-    pub fn new_for_testing() -> Self {
-        Self {
-            secret_word: pick_fixed_word(),
-        }
+        prover.run().unwrap()
     }
 }
 
@@ -68,24 +56,20 @@ struct Player {
     // The player remembers the hash of the secret word that the server commits to at the beginning
     // of the game. By comparing the hash after each guess, the player knows if the server cheated
     // by changing the word.
-    pub hash: Vec<u32>,
+    pub hash: Digest,
 }
 
 impl Player {
-    pub fn check_receipt(&self, receipt: Receipt) -> Vec<u32> {
+    pub fn check_receipt(&self, receipt: Receipt) -> WordFeedback {
         receipt
             .verify(&WORDLE_ID)
             .expect("receipt verification failed");
 
-        let journal = receipt.journal;
-        let hash = &journal[..16];
-
-        if hash != self.hash {
+        let game_state: GameState = from_slice(&receipt.journal).unwrap();
+        if game_state.correct_word_hash != self.hash {
             panic!("The hash mismatched, so the server cheated!");
         }
-
-        let score = &journal[16..];
-        return score.to_owned();
+        game_state.feedback
     }
 }
 
@@ -105,44 +89,28 @@ fn read_stdin_guess() -> String {
     guess
 }
 
-fn print_wordle_feedback(guess_word: &str, score: &Vec<u32>) {
-    for i in 0..WORD_LENGTH {
-        match score[i] {
-            0 => print!("\x1b[41m"), // correct: green
-            1 => print!("\x1b[43m"), // present: yellow
-            _ => print!("\x1b[40m"), // miss: black
+fn play_rounds(server: Server, player: Player, rounds: usize) -> bool {
+    for _ in 0..rounds {
+        let guess_word = read_stdin_guess();
+        let receipt = server.check_round(guess_word.as_str());
+        let score = player.check_receipt(receipt);
+        score.print(guess_word.as_str());
+        if score.game_is_won() {
+            return true;
         }
-        print!("{:}", guess_word.chars().nth(i).unwrap());
     }
-    println!("\x1b[0m");
-}
-
-fn game_is_won(score: Vec<u32>) -> bool {
-    return score.iter().all(|x| *x == 0u32);
+    false
 }
 
 fn main() {
     println!("Welcome to fair wordle!");
 
-    let server = Server::new();
+    let server = Server::new(wordlist::pick_word());
     let player = Player {
         hash: server.get_secret_word_hash(),
     };
 
-    let mut game_won = false;
-
-    for _ in 0..6 {
-        let guess_word = read_stdin_guess();
-        let receipt = server.check_round(guess_word.as_str());
-        let score = player.check_receipt(receipt);
-        print_wordle_feedback(guess_word.as_str(), &score);
-        if game_is_won(score) {
-            game_won = true;
-            break;
-        }
-    }
-
-    if game_won {
+    if play_rounds(server, player, 6) {
         println!("You won!");
     } else {
         println!("Game over");
@@ -151,15 +119,14 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-
-    use crate::{game_is_won, Player, Server};
+    use crate::{Player, Server};
 
     const TEST_GUESS_WRONG: &str = "roofs";
     const TEST_GUESS_RIGHT: &str = "proof";
 
     #[test]
     fn main() {
-        let server = Server::new_for_testing();
+        let server = Server::new("proof");
         let player = Player {
             hash: server.get_secret_word_hash(),
         };
@@ -168,12 +135,12 @@ mod tests {
         let receipt = server.check_round(&guess_word);
         let score = player.check_receipt(receipt);
         assert!(
-            !game_is_won(score),
+            !score.game_is_won(),
             "Incorrect guess should not win the game"
         );
         let guess_word = TEST_GUESS_RIGHT;
         let receipt = server.check_round(&guess_word);
         let score = player.check_receipt(receipt);
-        assert!(game_is_won(score), "Correct guess should win the game");
+        assert!(score.game_is_won(), "Correct guess should win the game");
     }
 }
