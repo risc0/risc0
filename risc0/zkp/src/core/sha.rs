@@ -338,7 +338,6 @@ pub mod rust_crypto {
     use alloc::vec::Vec;
     use core::fmt::{Debug, Formatter};
 
-    pub use digest::Digest;
     use digest::{
         block_buffer::Eager,
         core_api::{
@@ -346,8 +345,9 @@ pub mod rust_crypto {
             CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
         },
         typenum::{U32, U64},
-        HashMarker, InvalidOutputSize, Output,
+        HashMarker, InvalidOutputSize,
     };
+    pub use digest::{Digest, Output};
 
     use super::{BLOCK_BYTES, SHA256_INIT};
 

@@ -14,36 +14,23 @@
 
 //! Functions for interacting with the host environment.
 
-use core::{cell::UnsafeCell, mem::MaybeUninit, ptr, slice};
+use core::{cell::UnsafeCell, default::Default, mem::MaybeUninit, ptr, slice};
 
-use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS, SHA256_INIT};
+use bytemuck::Pod;
+use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
-    io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_STDOUT},
+    io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_JOURNAL, SENDRECV_CHANNEL_STDOUT},
     memory,
-    syscall::{sys_commit, sys_cycle_count, sys_halt, sys_io, sys_log, sys_output},
+    syscall::{sys_cycle_count, sys_halt, sys_io, sys_log, sys_output},
     WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::{
     guest::{align_up, memory_barrier, sha},
-    serde::{serializer::StreamWriter, CommitHasher, Committer, Deserializer, Serializer, Slice},
+    serde::{Deserializer, Result as SerdeResult, Serializer, StreamWriter},
+    sha::rust_crypto::{Digest as _, Output, Sha256},
 };
-
-struct Env {
-    output: Serializer<Slice<'static>>,
-    commit: Serializer<CommitHasher<sha::Impl, SyscallCommitter>>,
-    initial_input_reader: Option<Reader>,
-}
-
-#[derive(Default, Debug)]
-struct SyscallCommitter {}
-
-impl Committer for SyscallCommitter {
-    fn commit(&mut self, data: &[u32]) {
-        unsafe { sys_commit(data.as_ptr(), data.len() * WORD_SIZE) };
-    }
-}
 
 struct Once<T> {
     data: UnsafeCell<MaybeUninit<T>>,
@@ -51,37 +38,7 @@ struct Once<T> {
 
 unsafe impl<T: Send + Sync> Sync for Once<T> {}
 
-/// Reads and deserializes objects from a section of memory.
-pub struct Reader(Deserializer<'static>);
-
-impl Reader {
-    /// Read private data from the host.
-    pub fn read<T: Deserialize<'static>>(&mut self) -> T {
-        T::deserialize(&mut self.0).unwrap()
-    }
-
-    /// TODO(victor) Add doc string.
-    pub fn bytes_remaining(&mut self) -> usize {
-        self.0.slice.len() * WORD_SIZE
-    }
-
-    /// TODO(victor) Add doc string.
-    pub fn words_remaining(&mut self) -> usize {
-        self.0.slice.len()
-    }
-
-    /// TODO(victor) Add doc string.
-    pub fn read_bytes(&mut self, len: usize) -> crate::serde::err::Result<&'static [u8]> {
-        self.0.try_take_n_bytes(len)
-    }
-
-    /// TODO(victor) Add doc string.
-    pub fn read_words(&mut self, len: usize) -> crate::serde::err::Result<&'static [u32]> {
-        self.0.try_take_n(len)
-    }
-}
-
-impl<T> Once<T> {
+impl<T: Default> Once<T> {
     const fn new() -> Self {
         Once {
             data: UnsafeCell::new(MaybeUninit::uninit()),
@@ -104,104 +61,100 @@ impl<T> Once<T> {
 }
 
 static ENV: Once<Env> = Once::new();
+static mut HASHER: Option<Sha256> = None;
+
+/// Reads and deserializes objects from a section of memory.
+struct Reader(Deserializer<'static>);
+
+impl Reader {
+    /// Read private data from the host.
+    pub fn read<T: Deserialize<'static>>(&mut self) -> T {
+        T::deserialize(&mut self.0).unwrap()
+    }
+
+    /// Read raw private data from the host.
+    pub fn read_slice<T: Pod>(&mut self, len: usize) -> &'static [T] {
+        bytemuck::cast_slice(self.0.read_bytes(core::mem::size_of::<T>() * len).unwrap())
+    }
+}
 
 pub(crate) fn init() {
     ENV.init(Env::new());
+    unsafe { HASHER = Some(Sha256::new()) };
 }
 
 pub(crate) fn finalize() {
-    ENV.get().finalize();
+    unsafe {
+        let hasher = core::mem::take(&mut HASHER);
+        let output = hasher.unwrap_unchecked().finalize();
+        let words = bytemuck::cast_slice(output.as_slice());
+        for i in 0..DIGEST_WORDS {
+            sys_output(i as u32, words[i]);
+        }
+        sys_output(DIGEST_WORDS as u32, DIGEST_BYTES as u32);
+        sys_halt()
+    }
 }
 
-/// Exchanges data with the host, returning the data from the host
+/// Exchange data with the host, returning the data from the host
 /// as a slice of bytes.
 pub fn send_recv(channel: u32, buf: &[u8]) -> &'static [u8] {
     unsafe { sys_io(channel, buf.as_ptr(), buf.len()) }
 }
 
-/// Exchanges data with the host, returning the data from the host as
+/// Exchange data with the host, returning the data from the host as
 /// a slice of words and the length in bytes.
 pub fn send_recv_as_u32(channel: u32, buf: &[u8]) -> &'static [u32] {
     bytemuck::cast_slice(send_recv(channel, buf))
 }
 
-/// Read private data from the host.
+/// Read private data from the host and deserializes it.
 pub fn read<T: Deserialize<'static>>() -> T {
     ENV.get().read()
 }
 
-/// TODO(victor) Add doc string.
-pub fn read_bytes(len: usize) -> crate::serde::err::Result<&'static [u8]> {
-    ENV.get().read_bytes(len)
+/// Read a slice from the host.
+pub fn read_slice<T: Pod>(len: usize) -> &'static [T] {
+    ENV.get().read_slice(len)
 }
 
-/// TODO(victor) Add doc string.
-pub fn read_words(len: usize) -> crate::serde::err::Result<&'static [u32]> {
-    ENV.get().read_words(len)
-}
-
-/// TODO(victor) Add doc string.
-pub fn input_bytes_remaining() -> usize {
-    ENV.get().input_bytes_remaining()
-}
-
-/// TODO(victor) Add doc string.
-pub fn input_words_remaining() -> usize {
-    ENV.get().input_words_remaining()
-}
-
-/// Writes the serialization of the data to the STDOUT channel of the zkVM.
+/// Serialize the given data and write it to the STDOUT channel of the zkVM.
 ///
-/// This is availble to the host as the private output on the prover.
-/// Some hosts, such that the [risc0-r0vm] will also write the data to
-/// the stdout file descriptor. It is not included in the receipt.
+/// This is available to the host as the private output on the prover.
+/// Some implementations, such as [risc0-r0vm] will also write the data to
+/// the host's stdout file descriptor. It is not included in the receipt.
 pub fn write<T: Serialize>(data: &T) {
-    ENV.get().write(data)
+    let mut serializer = Serializer::new(stdout());
+    data.serialize(&mut serializer).unwrap();
 }
 
-/// Writes given data bytes to the STDOUT channel of the zkVM.
+/// Write the given slice to the STDOUT channel of the zkVM.
 ///
-/// This is availble to the host as the private output on the prover.
-/// Some hosts, such that the [risc0-r0vm] will also write the data to
-/// the stdout file descriptor. It is not included in the receipt.
-pub fn write_bytes(data: &[u8]) {
-    ENV.get().write_bytes(data)
+/// This is available to the host as the private output on the prover.
+/// Some implementations, such as [risc0-r0vm] will also write the data to
+/// the host's stdout file descriptor. It is not included in the receipt.
+pub fn write_slice<T: Pod>(slice: &[T]) {
+    stdout().write_slice(slice);
 }
 
-/// Writes given data words to the STDOUT channel of the zkVM.
-///
-/// This is availble to the host as the private output on the prover.
-/// Some hosts, such that the [risc0-r0vm] will also write the data to
-/// the stdout file descriptor. It is not included in the receipt.
-pub fn write_words(data: &[u32]) {
-    ENV.get().write_words(data)
-}
-
-/// Commits the serialization of the data to the journal.
+/// Serialize the given data and commit it to the journal.
 ///
 /// Data in the journal is included in the receipt and is available to the
-/// verifier. It is condiered "public" data.
+/// verifier. It is considered "public" data.
 pub fn commit<T: Serialize>(data: &T) {
-    ENV.get().commit(data)
+    let mut serializer = Serializer::new(journal());
+    data.serialize(&mut serializer).unwrap();
 }
 
-/// Commits the given data bytes to the journal.
+/// Commit the given slice to the journal.
 ///
 /// Data in the journal is included in the receipt and is available to the
-/// verifier. It is condiered "public" data.
-pub fn commit_bytes(data: &[u8]) {
-    ENV.get().commit_bytes(data)
+/// verifier. It is considered "public" data.
+pub fn commit_slice<T: Pod>(slice: &[T]) {
+    journal().write_slice(slice);
 }
 
-/// Commits the given data words to the journal.
-///
-/// Data in the journal is included in the receipt and is available to the
-/// verifier. It is condiered "public" data.
-pub fn commit_words(data: &[u32]) {
-    ENV.get().commit_words(data)
-}
-
-/// Returns the number of processor cycles that have occured since the guest
+/// Return the number of processor cycles that have occured since the guest
 /// began.
 pub fn get_cycle_count() -> usize {
     unsafe { sys_cycle_count() }
@@ -212,14 +165,31 @@ pub fn log(msg: &str) {
     unsafe { sys_log(msg.as_ptr(), msg.len()) };
 }
 
+/// Return a StreamWriter on the specified channel.
+pub fn get_writer<F: Fn(&[u8])>(channel: u32, hook: F) -> impl StreamWriter {
+    OutputStreamWriter::new(channel, hook)
+}
+
+/// Return the STDOUT channel.
+pub fn stdout() -> impl StreamWriter {
+    get_writer(SENDRECV_CHANNEL_STDOUT, |_| {})
+}
+
+/// Return the JOURNAL channel.
+pub fn journal() -> impl StreamWriter {
+    get_writer(SENDRECV_CHANNEL_JOURNAL, |bytes| {
+        unsafe { HASHER.as_mut().unwrap_unchecked().update(bytes) };
+    })
+}
+
+#[derive(Default)]
+struct Env {
+    initial_input_reader: Option<Reader>,
+}
+
 impl Env {
     pub fn new() -> Self {
         Env {
-            commit: Serializer::new(CommitHasher::<sha::Impl, SyscallCommitter>::default()),
-            output: Serializer::new(Slice::new(unsafe {
-                slice::from_raw_parts_mut(memory::OUTPUT.start() as _, memory::OUTPUT.len_words())
-            })),
-
             initial_input_reader: None,
         }
     }
@@ -237,60 +207,40 @@ impl Env {
         self.initial_input().read()
     }
 
-    pub fn read_bytes(&mut self, len: usize) -> crate::serde::err::Result<&'static [u8]> {
-        self.initial_input().read_bytes(len)
+    pub fn read_slice<T: Pod>(&mut self, len: usize) -> &'static [T] {
+        self.initial_input().read_slice(len)
+    }
+}
+
+struct OutputStreamWriter<F: Fn(&[u8])> {
+    channel: u32,
+    hook: F,
+}
+
+impl<F: Fn(&[u8])> OutputStreamWriter<F> {
+    pub fn new(channel: u32, hook: F) -> Self {
+        Self { channel, hook }
+    }
+}
+
+impl<F: Fn(&[u8])> StreamWriter for OutputStreamWriter<F> {
+    type Output = ();
+
+    fn write_u32(&mut self, data: u32) -> SerdeResult<()> {
+        let bytes = data.to_ne_bytes();
+        unsafe { sys_io(self.channel, bytes.as_ptr(), bytes.len()) };
+        (self.hook)(&bytes);
+        Ok(())
     }
 
-    pub fn read_words(&mut self, len: usize) -> crate::serde::err::Result<&'static [u32]> {
-        self.initial_input().read_words(len)
+    fn write_slice<T: Pod>(&mut self, slice: &[T]) -> SerdeResult<()> {
+        let bytes: &[u8] = bytemuck::cast_slice(slice);
+        unsafe { sys_io(self.channel, bytes.as_ptr(), bytes.len()) };
+        (self.hook)(bytes);
+        Ok(())
     }
 
-    pub fn input_bytes_remaining(&mut self) -> usize {
-        self.initial_input().bytes_remaining()
-    }
-
-    pub fn input_words_remaining(&mut self) -> usize {
-        self.initial_input().words_remaining()
-    }
-
-    pub fn write<T: Serialize>(&mut self, data: &T) {
-        data.serialize(&mut self.output).unwrap();
-        let buf = self.output.release().unwrap();
-        send_recv(SENDRECV_CHANNEL_STDOUT, bytemuck::cast_slice(buf));
-    }
-
-    pub fn write_bytes(&mut self, data: &[u8]) {
-        send_recv(SENDRECV_CHANNEL_STDOUT, data);
-    }
-
-    pub fn write_words(&mut self, data: &[u32]) {
-        send_recv(SENDRECV_CHANNEL_STDOUT, bytemuck::cast_slice(data));
-    }
-
-    pub fn commit<T: Serialize>(&mut self, data: &T) {
-        data.serialize(&mut self.commit).unwrap();
-    }
-
-    pub fn commit_bytes(&mut self, data: &[u8]) {
-        self.commit.stream.try_extend(data).unwrap();
-    }
-
-    pub fn commit_words(&mut self, data: &[u32]) {
-        self.commit
-            .stream
-            .try_extend(bytemuck::cast_slice(data))
-            .unwrap();
-    }
-
-    pub fn finalize(&mut self) {
-        // TODO(victor) Remove the length field.
-        let output = self.commit.release().unwrap();
-        unsafe {
-            for i in 0..DIGEST_WORDS {
-                sys_output(i as u32, output.as_words()[i]);
-            }
-            sys_output(DIGEST_WORDS as u32, DIGEST_BYTES as u32);
-            sys_halt()
-        }
+    fn release(&mut self) -> SerdeResult<Self::Output> {
+        Ok(())
     }
 }

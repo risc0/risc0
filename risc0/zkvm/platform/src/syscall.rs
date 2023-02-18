@@ -31,9 +31,8 @@ pub mod nr {
     pub const SYS_PANIC: u32 = 0;
     pub const SYS_LOG: u32 = 1;
     pub const SYS_IO: u32 = 2;
-    pub const SYS_COMMIT: u32 = 3;
-    pub const SYS_CYCLE_COUNT: u32 = 4;
-    pub const SYS_COMPUTE_POLY: u32 = 5;
+    pub const SYS_CYCLE_COUNT: u32 = 3;
+    pub const SYS_COMPUTE_POLY: u32 = 4;
 }
 
 pub mod reg_abi {
@@ -159,23 +158,6 @@ pub unsafe fn sys_io(channel: u32, buf_ptr: *const u8, buf_len: usize) -> &'stat
         // }
         *read_ptr = read_end;
         core::slice::from_raw_parts(out_ptr, out_nbytes)
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
-}
-
-// NOTE: buf_len is the length of the data pointed to by buf_ptr in bytes.
-#[inline(always)]
-pub unsafe fn sys_commit(buf_ptr: *const u32, buf_len: usize) {
-    #[cfg(target_os = "zkvm")]
-    {
-        asm!(
-            "ecall",
-            in("t0") ecall::SOFTWARE,
-            in("a7") nr::SYS_COMMIT,
-            inout("a0") buf_ptr => _,
-            inout("a1") buf_len => _,
-        );
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()

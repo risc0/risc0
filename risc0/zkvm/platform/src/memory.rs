@@ -57,11 +57,8 @@ impl Region {
 pub const INPUT: Region = Region::new(0x0000_0400, mb(32) - kb(1));
 pub const STACK: Region = Region::new(0x0200_0000, mb(16));
 pub const DATA: Region = Region::new(0x0300_0000, mb(16));
-pub const HEAP: Region = Region::new(0x0400_0000, mb(32));
-pub const TEXT: Region = Region::new(0x0600_0000, mb(32));
-pub const OUTPUT: Region = Region::new(0x0800_0000, mb(32));
-// TODO(victor): Remove the COMMIT region.
-pub const COMMIT: Region = Region::new(0x0A00_0000, mb(32));
+pub const HEAP: Region = Region::new(0x0400_0000, mb(64));
+pub const TEXT: Region = Region::new(0x0800_0000, mb(64));
 pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(16));
 pub const PAGE_TABLE: Region = Region::new(0x0D00_0000, mb(16));
 pub const PRE_LOAD: Region = Region::new(0x0D70_0000, mb(9));

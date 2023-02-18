@@ -64,7 +64,7 @@ pub mod rust_crypto {
     // factoring and guest performance over host performance.
 
     use risc0_zkp::core::sha::rust_crypto;
-    pub use rust_crypto::Digest;
+    pub use rust_crypto::{Digest, Output};
 
     /// Sha256 is a [Rust Crypto] wrapper on the RISC Zero SHA-256
     /// implementations. This type will automatically select the correct
