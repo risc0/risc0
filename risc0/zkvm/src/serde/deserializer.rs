@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use bytemuck::Pod;
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::de::{Deserialize, DeserializeSeed, IntoDeserializer, Visitor};
 
 use super::{
@@ -19,13 +21,13 @@ use super::{
     err::{Error, Result},
 };
 
-pub fn from_slice<'a, T: Deserialize<'a>>(slice: &'a [u32]) -> Result<T> {
-    let mut deserializer = Deserializer::new(slice);
+pub fn from_slice<'a, T: Deserialize<'a>, P: Pod>(slice: &'a [P]) -> Result<T> {
+    let mut deserializer = Deserializer::new(bytemuck::cast_slice(slice));
     T::deserialize(&mut deserializer)
 }
 
 pub struct Deserializer<'de> {
-    slice: &'de [u32],
+    slice: &'de [u8],
 }
 
 struct SeqAccess<'a, 'de> {
@@ -121,33 +123,37 @@ impl<'a, 'de: 'a> serde::de::MapAccess<'de> for MapAccess<'a, 'de> {
 }
 
 impl<'de> Deserializer<'de> {
-    pub fn new(slice: &'de [u32]) -> Self {
+    pub fn new(slice: &'de [u8]) -> Self {
         Deserializer { slice }
     }
 
     fn try_take_word(&mut self) -> Result<u32> {
-        if self.slice.len() >= 1 {
-            let (head, tail) = self.slice.split_first().unwrap();
+        if self.slice.len() >= 4 {
+            let (head, tail) = self.slice.split_at(4);
             self.slice = tail;
-            Ok(*head)
+            Ok(bytemuck::cast_slice(head)[0])
         } else {
             Err(Error::DeserializeUnexpectedEnd)
         }
     }
 
     fn try_take_dword(&mut self) -> Result<u64> {
-        if self.slice.len() >= 2 {
-            let (head, tail) = self.slice.split_at(2);
-            self.slice = tail;
-            let low: u64 = head[0].into();
-            let high: u64 = head[1].into();
+        if self.slice.len() >= 8 {
+            let low = self.try_take_word()? as u64;
+            let high = self.try_take_word()? as u64;
             Ok(low | high << 32)
         } else {
             Err(Error::DeserializeUnexpectedEnd)
         }
     }
 
-    fn try_take_n(&mut self, len: usize) -> Result<&'de [u32]> {
+    fn try_take_n_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
+        let padded_len = align_up(len, WORD_SIZE);
+        let bytes = self.read_bytes(padded_len)?;
+        Ok(&bytes[..len])
+    }
+
+    pub fn read_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
         if self.slice.len() >= len {
             let (head, tail) = self.slice.split_at(len);
             self.slice = tail;
@@ -155,12 +161,6 @@ impl<'de> Deserializer<'de> {
         } else {
             Err(Error::DeserializeUnexpectedEnd)
         }
-    }
-
-    fn try_take_n_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
-        let len_words = align_up(len, 4) / 4;
-        let words: &'de [u32] = self.try_take_n(len_words)?;
-        Ok(&bytemuck::cast_slice(words)[..len])
     }
 }
 

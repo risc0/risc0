@@ -15,8 +15,10 @@
 use clap::{Arg, Command};
 use methods::{HASH_ELF, HASH_ID};
 use risc0_zkp::core::sha::Digest;
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::{Prover, Receipt};
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    Prover, Receipt,
+};
 
 fn provably_hash(input: &str) -> Receipt {
     // Make the prover.
@@ -40,9 +42,7 @@ fn main() {
     let receipt = provably_hash(message);
     receipt.verify(&HASH_ID).expect("Proven code should verify");
 
-    let journal = receipt.journal;
-    let digest =
-        from_slice::<Digest>(journal.as_slice()).expect("Journal should contain SHA Digest");
+    let digest: Digest = from_slice(&receipt.journal).expect("Journal should contain SHA Digest");
 
     println!("I provably know data whose SHA-256 hash is {}", digest);
 }
@@ -62,8 +62,8 @@ mod tests {
         let receipt = provably_hash(TEST_STRING);
         receipt.verify(&HASH_ID).expect("Proven code should verify");
 
-        let digest = from_slice::<Digest>(receipt.journal.as_slice())
-            .expect("Journal should contain SHA Digest");
+        let digest: Digest =
+            from_slice(&receipt.journal).expect("Journal should contain SHA Digest");
         assert_eq!(
             hex::encode(digest.as_bytes()),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",

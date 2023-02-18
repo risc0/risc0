@@ -16,38 +16,41 @@
 
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
-use wordle_core::{WORD_LENGTH, WordFeedback, LetterFeedback, GameState};
+use wordle_core::{GameState, LetterFeedback, WordFeedback, WORD_LENGTH};
 
 risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
-    let word: String = env::read();
+    let secret: String = env::read();
     let guess: String = env::read();
 
-    if word.chars().count() != WORD_LENGTH {
-        panic!("secret word must have length 5!")
-    }
+    assert_eq!(
+        secret.chars().count(),
+        WORD_LENGTH,
+        "secret must have length 5!"
+    );
 
-    if guess.chars().count() != WORD_LENGTH {
-        panic!("guess must have length 5!")
-    }
+    assert_eq!(
+        guess.chars().count(),
+        WORD_LENGTH,
+        "guess must have length 5!"
+    );
 
-    let correct_word_hash = *Impl::hash_bytes(&word.as_bytes());
-    env::commit(&correct_word_hash);
-
-    let mut score: WordFeedback = WordFeedback::default();
+    let mut feedback: WordFeedback = WordFeedback::default();
     for i in 0..WORD_LENGTH {
-        score[i] = if word.as_bytes()[i] == guess.as_bytes()[i] {
-            LetterFeedback::LetterCorrect
-        } else if word.as_bytes().contains(&guess.as_bytes()[i]) {
-            LetterFeedback::LetterPresent
+        feedback.0[i] = if secret.as_bytes()[i] == guess.as_bytes()[i] {
+            LetterFeedback::Correct
+        } else if secret.as_bytes().contains(&guess.as_bytes()[i]) {
+            LetterFeedback::Present
         } else {
-            LetterFeedback::LetterMiss
+            LetterFeedback::Miss
         }
     }
+
+    let correct_word_hash = *Impl::hash_bytes(&secret.as_bytes());
     let game_state = GameState {
-        correct_word_hash: correct_word_hash,
-        feedback: score,
+        correct_word_hash,
+        feedback,
     };
     env::commit(&game_state);
 }
