@@ -21,29 +21,33 @@ use wordle_core::{GameState, LetterFeedback, WordFeedback, WORD_LENGTH};
 risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
-    let word: String = env::read();
+    let secret: String = env::read();
     let guess: String = env::read();
 
-    if word.chars().count() != WORD_LENGTH {
-        panic!("secret word must have length 5!")
-    }
+    assert_eq!(
+        secret.chars().count(),
+        WORD_LENGTH,
+        "secret must have length 5!"
+    );
 
-    if guess.chars().count() != WORD_LENGTH {
-        panic!("guess must have length 5!")
-    }
+    assert_eq!(
+        guess.chars().count(),
+        WORD_LENGTH,
+        "guess must have length 5!"
+    );
 
     let mut feedback: WordFeedback = WordFeedback::default();
     for i in 0..WORD_LENGTH {
-        feedback.0[i] = if word.as_bytes()[i] == guess.as_bytes()[i] {
+        feedback.0[i] = if secret.as_bytes()[i] == guess.as_bytes()[i] {
             LetterFeedback::Correct
-        } else if word.as_bytes().contains(&guess.as_bytes()[i]) {
+        } else if secret.as_bytes().contains(&guess.as_bytes()[i]) {
             LetterFeedback::Present
         } else {
             LetterFeedback::Miss
         }
     }
 
-    let correct_word_hash = *Impl::hash_bytes(&word.as_bytes());
+    let correct_word_hash = *Impl::hash_bytes(&secret.as_bytes());
     let game_state = GameState {
         correct_word_hash,
         feedback,

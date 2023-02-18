@@ -95,5 +95,5 @@ pub static WORDS: [&str; 775] = [
 
 pub fn pick_word() -> &'static str {
     use rand::seq::SliceRandom;
-    return WORDS.choose(&mut rand::thread_rng()).unwrap();
+    WORDS.choose(&mut rand::thread_rng()).unwrap()
 }

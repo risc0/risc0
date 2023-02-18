@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+mod wordlist;
+
 use std::io;
 
 use methods::{WORDLE_ELF, WORDLE_ID};
@@ -19,8 +21,6 @@ use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::from_slice;
 use risc0_zkvm::{serde::to_vec, Prover, Receipt};
 use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
-
-mod wordlist;
 
 // The "server" is an agent in the Wordle game that checks the player's guesses.
 struct Server<'a> {
@@ -46,7 +46,7 @@ impl<'a> Server<'a> {
         prover.add_input_u32_slice(to_vec(self.secret_word).unwrap().as_slice());
         prover.add_input_u32_slice(to_vec(&guess_word).unwrap().as_slice());
 
-        return prover.run().unwrap();
+        prover.run().unwrap()
     }
 }
 
