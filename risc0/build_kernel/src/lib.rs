@@ -21,11 +21,23 @@ use std::{
 use sha2::{Digest, Sha256};
 use tempfile::tempdir_in;
 
+const CUDA_INCS: &[(&str, &str)] = &[
+    ("fp.h", include_str!("../kernels/cuda/fp.h")),
+    ("fp4.h", include_str!("../kernels/cuda/fp4.h")),
+];
+
+const METAL_INCS: &[(&str, &str)] = &[
+    ("fp.h", include_str!("../kernels/metal/fp.h")),
+    ("fp4.h", include_str!("../kernels/metal/fp4.h")),
+];
+
+#[derive(Eq, PartialEq, Hash)]
 pub enum KernelType {
     Cpp,
     Cuda,
     Metal,
 }
+
 pub struct KernelBuild {
     kernel_type: KernelType,
     flags: Vec<String>,
@@ -93,7 +105,7 @@ impl KernelBuild {
         self
     }
 
-    pub fn compile(self, output: &str) {
+    pub fn compile(&mut self, output: &str) {
         for src in self.files.iter() {
             println!("cargo:rerun-if-changed={}", src.display());
         }
@@ -104,7 +116,7 @@ impl KernelBuild {
         }
     }
 
-    fn compile_cpp(self, output: &str) {
+    fn compile_cpp(&mut self, output: &str) {
         // TODO: figure out how to use cached_compile
         // self.cached_compile(output, "a", |out_dir, _out_path| {
         cc::Build::new()
@@ -125,69 +137,84 @@ impl KernelBuild {
         // println!("cargo:rustc-link-search=native={}", dst.display());
     }
 
-    fn compile_cuda(self, output: &str) {
-        self.cached_compile(output, "fatbin", |_out_dir, out_path| {
-            let mut cmd = Command::new("nvcc");
-            cmd.arg("--fatbin");
-            cmd.arg("-o").arg(&out_path);
-            cmd.args(self.files.iter());
-            for inc_dir in self.inc_dirs.iter() {
-                cmd.arg("-I").arg(inc_dir);
-            }
-            let status = cmd
-                .status()
-                .expect("Failed to run 'nvcc', do you have the CUDA toolkit installed?");
-            if !status.success() {
-                panic!("Failed to build CUDA kernel: {}", output);
-            }
-        });
-    }
-
-    fn compile_metal(self, output: &str) {
-        self.cached_compile(output, "metallib", |out_dir, out_path| {
-            let compiler = String::from_utf8(
-                Command::new("xcrun")
-                    .args(["--find", "--sdk", "macosx", "metal"])
-                    .output()
-                    .unwrap()
-                    .stdout,
-            )
-            .unwrap();
-            let compiler = compiler.trim_end();
-
-            let mut air_paths = vec![];
-            for src in self.files.iter() {
-                let out_path = out_dir.join(&src).with_extension("").with_extension("air");
-                let mut cmd = Command::new(compiler);
+    fn compile_cuda(&mut self, output: &str) {
+        self.cached_compile(
+            output,
+            "fatbin",
+            CUDA_INCS,
+            |_out_dir, out_path, sys_inc_dir| {
+                let mut cmd = Command::new("nvcc");
+                cmd.arg("--fatbin");
                 cmd.arg("-o").arg(&out_path);
-                cmd.arg("-c").arg(src);
+                cmd.args(self.files.iter());
+                cmd.arg("-I").arg(sys_inc_dir);
                 for inc_dir in self.inc_dirs.iter() {
                     cmd.arg("-I").arg(inc_dir);
                 }
-                let status = cmd.status().unwrap();
+                let status = cmd
+                    .status()
+                    .expect("Failed to run 'nvcc', do you have the CUDA toolkit installed?");
                 if !status.success() {
-                    panic!("Could not build metal kernels");
+                    panic!("Failed to build CUDA kernel: {}", output);
                 }
-                air_paths.push(out_path);
-            }
-
-            let result = Command::new("xcrun")
-                .args(["--sdk", "macosx"])
-                .arg("metallib")
-                .args(air_paths)
-                .arg("-o")
-                .arg(&out_path)
-                .status()
-                .unwrap();
-            if !result.success() {
-                panic!("Could not build metal kernels");
-            }
-        });
+            },
+        );
     }
 
-    fn cached_compile<F: Fn(&Path, &Path)>(&self, output: &str, extension: &str, inner: F) {
+    fn compile_metal(&mut self, output: &str) {
+        self.cached_compile(
+            output,
+            "metallib",
+            METAL_INCS,
+            |out_dir, out_path, sys_inc_dir| {
+                let mut air_paths = vec![];
+                for src in self.files.iter() {
+                    let out_path = out_dir.join(&src).with_extension("").with_extension("air");
+                    if let Some(parent) = out_path.parent() {
+                        fs::create_dir_all(parent).unwrap();
+                    }
+                    let mut cmd = Command::new("xcrun");
+                    cmd.args(["--sdk", "macosx"]);
+                    cmd.arg("metal");
+                    cmd.arg("-o").arg(&out_path);
+                    cmd.arg("-c").arg(src);
+                    cmd.arg("-I").arg(sys_inc_dir);
+                    for inc_dir in self.inc_dirs.iter() {
+                        cmd.arg("-I").arg(inc_dir);
+                    }
+                    println!("Running: {:?}", cmd);
+                    let status = cmd.status().unwrap();
+                    if !status.success() {
+                        panic!("Could not build metal kernels");
+                    }
+                    air_paths.push(out_path);
+                }
+
+                let result = Command::new("xcrun")
+                    .args(["--sdk", "macosx"])
+                    .arg("metallib")
+                    .args(air_paths)
+                    .arg("-o")
+                    .arg(&out_path)
+                    .status()
+                    .unwrap();
+                if !result.success() {
+                    panic!("Could not build metal kernels");
+                }
+            },
+        );
+    }
+
+    fn cached_compile<F: Fn(&Path, &Path, &Path)>(
+        &self,
+        output: &str,
+        extension: &str,
+        assets: &[(&str, &str)],
+        inner: F,
+    ) {
         let out_dir = env::var("OUT_DIR").map(PathBuf::from).unwrap();
         let out_path = out_dir.join(output).with_extension(extension);
+        let sys_inc_dir = out_dir.join("_sys_");
 
         let risc0_root = risc0_root();
         let cache_dir = risc0_root.join("cache");
@@ -199,6 +226,14 @@ impl KernelBuild {
         for src in self.files.iter() {
             hasher.add_file(src);
         }
+        for (name, contents) in assets {
+            let path = sys_inc_dir.join(name);
+            if let Some(parent) = path.parent() {
+                fs::create_dir_all(parent).unwrap();
+            }
+            fs::write(&path, contents).unwrap();
+            hasher.add_file(path);
+        }
         for dep in self.deps.iter() {
             hasher.add_file(dep);
         }
@@ -207,7 +242,7 @@ impl KernelBuild {
         if !cache_path.is_file() {
             let tmp_dir = temp_dir.path();
             let tmp_path = tmp_dir.join(output).with_extension(extension);
-            inner(tmp_dir, &tmp_path);
+            inner(tmp_dir, &tmp_path, &sys_inc_dir);
             fs::rename(tmp_path, &cache_path).unwrap();
         }
         fs::copy(cache_path, &out_path).unwrap();
