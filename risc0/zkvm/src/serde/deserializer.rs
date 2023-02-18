@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use bytemuck::Pod;
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::de::{Deserialize, DeserializeSeed, IntoDeserializer, Visitor};
 
@@ -20,7 +21,7 @@ use super::{
     err::{Error, Result},
 };
 
-pub fn from_slice<'a, T: Deserialize<'a>>(slice: &'a [u32]) -> Result<T> {
+pub fn from_slice<'a, T: Deserialize<'a>, P: Pod>(slice: &'a [P]) -> Result<T> {
     let mut deserializer = Deserializer::new(bytemuck::cast_slice(slice));
     T::deserialize(&mut deserializer)
 }
