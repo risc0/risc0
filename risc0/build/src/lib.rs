@@ -35,7 +35,7 @@ use risc0_zkvm::{
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};
-use tempfile::tempdir_in;
+use tempfile::tempdir;
 use zip::ZipArchive;
 
 const LINKER_SCRIPT: &str = include_str!("../risc0.ld");
@@ -250,21 +250,23 @@ where
     }
 }
 
-fn risc0_root() -> PathBuf {
-    home::home_dir().unwrap().join(".risc0").into()
+fn risc0_cache() -> PathBuf {
+    directories::ProjectDirs::from("com.risczero", "RISC Zero", "risc0")
+        .unwrap()
+        .cache_dir()
+        .into()
 }
 
 fn download_zip_map<P>(zip_map: &[ZipMapEntry], dest_base: P)
 where
     P: AsRef<Path>,
 {
-    let risc0_root = risc0_root();
-    let cache_dir = risc0_root.join("cache");
+    let cache_dir = risc0_cache();
     if !cache_dir.is_dir() {
         fs::create_dir_all(&cache_dir).unwrap();
     }
 
-    let temp_dir = tempdir_in(risc0_root).unwrap();
+    let temp_dir = tempdir().unwrap();
     let mut downloader = Downloader::builder()
         .download_folder(&temp_dir.path())
         .build()

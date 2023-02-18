@@ -9,8 +9,8 @@ repository = { workspace = true }
 
 [dependencies]
 cargo_metadata = "0.15"
+directories = "4.0"
 downloader = "0.2"
-home = "0.5"
 risc0-zkvm = { workspace = true, features = ["binfmt"] }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
