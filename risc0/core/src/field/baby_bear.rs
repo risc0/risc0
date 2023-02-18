@@ -63,12 +63,6 @@ pub struct Elem(u32);
 
 pub type BabyBearElem = Elem;
 
-// SAFETY: Elem simply holds a u32 primitive data type.
-unsafe impl Send for Elem {}
-
-// SAFETY: Elem simply holds a u32 primitive data type.
-unsafe impl Sync for Elem {}
-
 impl Default for Elem {
     fn default() -> Self {
         Self::ZERO
