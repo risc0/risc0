@@ -15,7 +15,8 @@
 //! SHA-256 hashing services
 
 pub use risc0_zkp::core::sha::{
-    Digest, Sha256, BLOCK_BYTES, DIGEST_BYTES, DIGEST_WORDS, SHA256_INIT, WORD_SIZE,
+    Block, Digest, Sha256, BLOCK_BYTES, BLOCK_WORDS, DIGEST_BYTES, DIGEST_WORDS, SHA256_INIT,
+    WORD_SIZE,
 };
 
 // Pick the appropriate implementation of SHA-256 depending on whether we are
@@ -63,7 +64,7 @@ pub mod rust_crypto {
     // factoring and guest performance over host performance.
 
     use risc0_zkp::core::sha::rust_crypto;
-    pub use rust_crypto::Digest;
+    pub use rust_crypto::{Digest, Output};
 
     /// Sha256 is a [Rust Crypto] wrapper on the RISC Zero SHA-256
     /// implementations. This type will automatically select the correct

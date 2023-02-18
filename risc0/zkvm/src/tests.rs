@@ -15,15 +15,13 @@
 use std::{fmt, sync::Mutex};
 
 use anyhow::Result;
-use risc0_zeroio::{from_slice, to_vec};
+use risc0_zeroio::to_vec;
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
+    SLICE_IO_ELF, SLICE_IO_ID,
 };
-use risc0_zkvm_platform::{
-    memory::{COMMIT, HEAP},
-    WORD_SIZE,
-};
+use risc0_zkvm_platform::{memory::HEAP, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
@@ -91,7 +89,7 @@ fn run_sha(msg: &str) -> Digest {
     let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap());
     let receipt = prover.run().unwrap();
-    from_slice::<Digest>(&receipt.journal).unwrap().into_orig()
+    Digest::try_from(receipt.journal.as_slice()).unwrap()
 }
 
 fn unwrap_err<T, E: fmt::Debug>(result: Result<T, E>) -> String {
@@ -105,10 +103,10 @@ fn unwrap_err<T, E: fmt::Debug>(result: Result<T, E>) -> String {
 #[serial]
 fn memory_io() {
     // Double writes are fine
-    run_memio(&[(COMMIT.start(), 1), (COMMIT.start(), 1)]).unwrap();
+    run_memio(&[(HEAP.start(), 1), (HEAP.start(), 1)]).unwrap();
 
     // Writes at different addresses are fine
-    run_memio(&[(COMMIT.start(), 1), (COMMIT.start() + 4, 2)]).unwrap();
+    run_memio(&[(HEAP.start(), 1), (HEAP.start() + 4, 2)]).unwrap();
 
     // Aligned write is fine
     run_memio(&[(HEAP.start(), 1)]).unwrap();
@@ -203,14 +201,25 @@ fn check_image_id() {
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
 #[cfg_attr(feature = "cuda", serial)]
 fn commit_hello_world() {
-    let receipt = {
-        let mut prover = Prover::new(HELLO_COMMIT_ELF, HELLO_COMMIT_ID).unwrap();
-        prover.run().expect("Could not get receipt")
+    let mut prover = Prover::new(HELLO_COMMIT_ELF, HELLO_COMMIT_ID).unwrap();
+    prover.run().expect("Could not get receipt");
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn slice_io() {
+    let run = |slice: &[u8]| {
+        let mut prover = Prover::new(SLICE_IO_ELF, SLICE_IO_ID).unwrap();
+        prover.add_input_u32_slice(&[slice.len() as u32]);
+        prover.add_input_u8_slice(slice);
+        let receipt = prover.run().expect("Could not get receipt");
+        assert_eq!(receipt.journal, slice);
     };
 
-    receipt
-        .verify(&HELLO_COMMIT_ID)
-        .expect("Could not verify receipt");
+    run(b"");
+    run(b"xyz");
+    run(b"0000");
 }
 
 #[test]

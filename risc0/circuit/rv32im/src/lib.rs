@@ -54,7 +54,10 @@ impl TapsProvider for CircuitImpl {
 #[cfg(test)]
 mod tests {
     use risc0_core::field::baby_bear::BabyBearElem;
-    use risc0_zkp::adapter::{CircuitStep, CircuitStepContext, CircuitStepHandler};
+    use risc0_zkp::{
+        adapter::{CircuitStep, CircuitStepContext, CircuitStepHandler},
+        hal::cpu::CpuBuffer,
+    };
 
     use crate::CircuitImpl;
 
@@ -87,11 +90,13 @@ mod tests {
         let circuit = CircuitImpl::new();
         let mut custom = CustomStepMock {};
         let ctx = CircuitStepContext { size: 0, cycle: 0 };
-        let mut args0 = vec![BabyBearElem::default(); 20];
-        let mut args2 = vec![BabyBearElem::default(); 20];
-        let args: &mut [&mut [BabyBearElem]] =
-            &mut [&mut args0, &mut [], &mut args2, &mut [], &mut []];
-        circuit.step_exec(&ctx, &mut custom, args).unwrap();
+        let args0 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
+        let args1 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
+        let args2 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
+        let args = [&args0, &args1, &args2].map(CpuBuffer::as_slice_sync);
+        circuit
+            .step_exec(&ctx, &mut custom, args.as_slice())
+            .unwrap();
     }
 }
 

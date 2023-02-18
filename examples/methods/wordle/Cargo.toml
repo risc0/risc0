@@ -1,0 +1,13 @@
+[package]
+name = "wordle"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[build-dependencies]
+risc0-build = { path = "../../../risc0/build" }
+
+[dependencies]
+risc0-zkvm = { path = "../../../risc0/zkvm", default-features = false, features = ["std"] }
+wordle-core = { path = "../../wordle/core" }

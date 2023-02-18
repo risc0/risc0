@@ -23,18 +23,17 @@ use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 #[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::core::config::{HashSuite, HashSuiteSha256};
-use risc0_zkp::{
-    core::sha::{Digest, Sha256},
-    verify::VerificationError,
-    MIN_CYCLES_PO2,
-};
+use risc0_zkp::{core::sha::Digest, verify::VerificationError, MIN_CYCLES_PO2};
 use risc0_zkvm_platform::{
     syscall::{DIGEST_BYTES, DIGEST_WORDS},
     WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{sha, ControlIdLocator, CIRCUIT};
+use crate::{
+    sha::rust_crypto::{Digest as _, Sha256},
+    ControlIdLocator, CIRCUIT,
+};
 
 #[cfg(all(feature = "std", not(target_os = "zkvm")))]
 pub fn insecure_skip_seal() -> bool {
@@ -51,14 +50,15 @@ pub fn insecure_skip_seal() -> bool {
 #[derive(Deserialize, Serialize, ZeroioSerialize, ZeroioDeserialize, Clone, Debug)]
 pub struct Receipt {
     /// The journal contains the public outputs of the computation.
-    pub journal: Vec<u32>,
+    pub journal: Vec<u8>,
+
     /// The seal is an opaque cryptographic blob that attests to the integrity
     /// of the computation. It consists of merkle commitments and query data for
     /// an AIR-FRI STARK that includes a PLONK-based permutation argument.
     pub seal: Vec<u32>,
 }
 
-pub fn verify_with_hal<'a, H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u32]) -> Result<()>
+pub fn verify_with_hal<'a, H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u8]) -> Result<()>
 where
     H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
     H::Hash: ControlIdLocator,
@@ -89,29 +89,22 @@ where
 
         let slice = &io[WORD_SIZE + DIGEST_BYTES..];
         let outputs: Vec<u32> = slice.chunks_exact(2).map(|x| x[0] | x[1] << 16).collect();
-        let output_len = outputs[8] as usize;
 
-        if journal.len() * WORD_SIZE != output_len {
-            return Err(VerificationError::SealJournalLengthMismatch {
-                seal_len: output_len,
-                journal_len: journal.len() * WORD_SIZE,
-            });
-        }
-
-        if journal.len() <= DIGEST_WORDS {
-            for i in 0..journal.len() {
-                if journal[i] != outputs[i] {
-                    return Err(VerificationError::JournalSealRootMismatch);
-                }
-            }
-        } else {
-            let digest = sha::Impl::hash_raw_pod_slice(journal);
-            let digest = digest.as_words();
-            for i in 0..DIGEST_WORDS {
-                if digest[i] != outputs[i] {
-                    return Err(VerificationError::JournalSealRootMismatch);
-                }
-            }
+        let digest = Sha256::digest(journal);
+        let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
+        let seal_words = &outputs[..DIGEST_WORDS];
+        let is_journal_valid = || {
+            (journal.is_empty() && seal_words.iter().all(|x| *x == 0)) || digest_words == seal_words
+        };
+        if !is_journal_valid() {
+            #[cfg(not(target_os = "zkvm"))]
+            log::debug!(
+                "journal: \"{}\", digest: 0x{}, seal: 0x{}",
+                hex::encode(journal),
+                hex::encode(bytemuck::cast_slice(digest_words)),
+                hex::encode(bytemuck::cast_slice(seal_words))
+            );
+            return Err(VerificationError::JournalSealRootMismatch);
         }
 
         Ok(())
@@ -140,7 +133,7 @@ where
 }
 
 impl Receipt {
-    pub fn new(journal: &[u32], seal: &[u32]) -> Self {
+    pub fn new(journal: &[u8], seal: &[u32]) -> Self {
         Self {
             journal: Vec::from(journal),
             seal: Vec::from(seal),
@@ -153,7 +146,7 @@ impl Receipt {
     where
         &'a Digest: From<D>,
     {
-        self.verify_with_hash::<HashSuiteSha256<BabyBear, sha::Impl>, _>(image_id)
+        self.verify_with_hash::<HashSuiteSha256<BabyBear, crate::sha::Impl>, _>(image_id)
     }
 
     #[cfg(not(target_os = "zkvm"))]
