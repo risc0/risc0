@@ -1,0 +1,13 @@
+[workspace]
+
+[package]
+name = "sign"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+digital-signature-core = { path = "../../digital-signature/core" }
+risc0-zkvm = { path = "../../../risc0/zkvm", default-features = false }
+
+[build-dependencies]
+risc0-build = { path = "../../../risc0/build" }
