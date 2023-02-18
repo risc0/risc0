@@ -396,6 +396,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use test_log::test;
+
     use super::*;
 
     fn do_partial_sboxes(cells: &mut [Elem; CELLS]) {
@@ -427,7 +429,6 @@ mod tests {
 
     #[test]
     fn compare_naive() {
-        env_logger::init();
         // Make a fixed input
         let mut test_in_1 = [Elem::new(1); CELLS];
         // Copy it
