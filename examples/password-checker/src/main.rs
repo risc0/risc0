@@ -45,3 +45,32 @@ fn main() {
     // receipt is wrong
     receipt.verify(&PW_CHECKER_ID).unwrap();
 }
+
+#[cfg(test)]
+mod tests {
+    use methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
+    use password_checker_core::PasswordRequest;
+    use risc0_zkvm::serde::to_vec;
+    use risc0_zkvm::Prover;
+
+    const TEST_SALT: [u8; 32] = [0u8; 32];
+    const TEST_PASSWORD: &str = "S00perSecr1t!!!";
+
+    #[test]
+    fn main() {
+        let request = PasswordRequest {
+            password: TEST_PASSWORD.into(),
+            salt: TEST_SALT,
+        };
+
+        // a new prover is created to run the pw_checker method
+        let mut prover = Prover::new(PW_CHECKER_ELF, PW_CHECKER_ID).unwrap();
+
+        // Adding input to the prover makes it readable by the guest
+        let vec = to_vec(&request).unwrap();
+        prover.add_input_u32_slice(&vec);
+
+        let receipt = prover.run().unwrap();
+        assert!(receipt.verify(&PW_CHECKER_ID).is_ok());
+    }
+}

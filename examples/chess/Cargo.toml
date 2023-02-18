@@ -13,4 +13,5 @@ shakmaty = "0.22"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
+default = []
 metal = ["risc0-zkvm/metal"]

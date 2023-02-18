@@ -9,3 +9,8 @@ methods = { path = "../methods" }
 rand = "0.8"
 risc0-zkp = { path = "../../risc0/zkp" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
+
+[features]
+cuda = ["risc0-zkp/cuda", "risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkp/metal", "risc0-zkvm/metal"]

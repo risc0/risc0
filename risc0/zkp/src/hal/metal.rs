@@ -15,8 +15,8 @@
 use std::{collections::HashMap, ffi::c_void, marker::PhantomData, mem, slice};
 
 use metal::{
-    Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, Library,
-    MTLResourceOptions, MTLSize, NSRange,
+    Buffer as MetalBuffer, CommandQueue, ComputePipelineDescriptor, Device, MTLResourceOptions,
+    MTLSize, NSRange,
 };
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
