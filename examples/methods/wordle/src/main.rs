@@ -16,7 +16,7 @@
 
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
-use wordle_core::{WORD_LENGTH, WordFeedback, LetterFeedback, GameState};
+use wordle_core::{GameState, LetterFeedback, WordFeedback, WORD_LENGTH};
 
 risc0_zkvm::guest::entry!(main);
 
@@ -32,22 +32,21 @@ pub fn main() {
         panic!("guess must have length 5!")
     }
 
-    let correct_word_hash = *Impl::hash_bytes(&word.as_bytes());
-    env::commit(&correct_word_hash);
-
-    let mut score: WordFeedback = WordFeedback::default();
+    let mut feedback: WordFeedback = WordFeedback::default();
     for i in 0..WORD_LENGTH {
-        score[i] = if word.as_bytes()[i] == guess.as_bytes()[i] {
-            LetterFeedback::LetterCorrect
+        feedback.0[i] = if word.as_bytes()[i] == guess.as_bytes()[i] {
+            LetterFeedback::Correct
         } else if word.as_bytes().contains(&guess.as_bytes()[i]) {
-            LetterFeedback::LetterPresent
+            LetterFeedback::Present
         } else {
-            LetterFeedback::LetterMiss
+            LetterFeedback::Miss
         }
     }
+
+    let correct_word_hash = *Impl::hash_bytes(&word.as_bytes());
     let game_state = GameState {
-        correct_word_hash: correct_word_hash,
-        feedback: score,
+        correct_word_hash,
+        feedback,
     };
     env::commit(&game_state);
 }
