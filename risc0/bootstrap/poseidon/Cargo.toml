@@ -7,8 +7,8 @@ publish = false
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
 log = "0.4"
-risc0-core = { workspace = true }
 regex = "1"
+risc0-core = { workspace = true }
 tempfile = "3"
 
 [package.metadata.release]
