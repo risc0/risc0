@@ -13,27 +13,29 @@
 // limitations under the License.
 
 //! SHA-256 hashing services
-//! 
-//! Support for SHA-256 hashing compatible with the on-circuit SHA acceleration available in the guest.
-//! This module can be used from both the host and the guest -- it will detect the build environment and select the appropriate implementation.
-//! 
+//!
+//! Support for SHA-256 hashing compatible with the on-circuit SHA acceleration
+//! available in the guest. This module can be used from both the host and the
+//! guest -- it will detect the build environment and select the appropriate
+//! implementation.
+//!
 //! # Usage
-//! 
+//!
 //! We provide two interfaces for SHA hashing.
 //! The first interface is based on [Rust Crypto](https://github.com/RustCrypto) wrappers and can be found in the [rust_crypto] module, along with documentation and usage notes.
-//! 
-//! The other interface is to directly use an implementation of the [Sha256] trait defined in this module:
-//! ```
+//!
+//! The other interface is to directly use an implementation of the [Sha256]
+//! trait defined in this module: ```
 //! use risc0_zkvm::sha::{Impl, Sha256};
-//! 
+//!
 //! // Hash a u8 array
 //! let data: [u8; 4] = [1, 2, 5, 14];
 //! let hash = Impl::hash_bytes(&data);
-//! 
+//!
 //! // Hash a String
 //! let abc = String::from("abc");
 //! let abc_hash = Impl::hash_bytes(&abc.as_bytes());
-//! 
+//!
 //! // Hash a Digest
 //! let hash_hash = Impl::hash_bytes(&hash.as_bytes());
 //! // Hashing can also be done with 32-bit words (matching the zkVM word size)
