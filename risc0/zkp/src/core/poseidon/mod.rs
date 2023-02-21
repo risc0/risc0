@@ -16,7 +16,8 @@
 //! of 128 bits.
 
 #[allow(dead_code)]
-mod consts;
+#[allow(missing_docs)]
+pub mod consts;
 mod rng;
 
 use risc0_core::field::baby_bear::Elem;
