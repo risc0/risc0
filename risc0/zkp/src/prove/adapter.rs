@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::{
-    atomic::{AtomicPtr, Ordering},
-    Mutex,
-};
+use std::sync::Mutex;
 
 use rand::thread_rng;
 use rayon::prelude::*;
@@ -24,6 +21,7 @@ use risc0_core::field::{Elem, Field};
 use crate::{
     adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
     core::config::ConfigRng,
+    hal::cpu::CpuBuffer,
     prove::{
         accum::{Accum, Handler},
         executor::Executor,
@@ -40,8 +38,8 @@ where
     S: CircuitStepHandler<F::Elem>,
 {
     exec: &'a mut Executor<F, C, S>,
-    mix: Vec<F::Elem>,
-    accum: Vec<F::Elem>,
+    mix: CpuBuffer<F::Elem>,
+    accum: CpuBuffer<F::Elem>,
     steps: usize,
 }
 
@@ -55,8 +53,8 @@ where
         let steps = exec.steps;
         ProveAdapter {
             exec,
-            mix: Vec::new(),
-            accum: Vec::new(),
+            mix: CpuBuffer::from(Vec::new()),
+            accum: CpuBuffer::from(Vec::new()),
             steps,
         }
     }
@@ -68,41 +66,25 @@ where
     /// Perform initial 'execution' setting code + data.
     /// Additionally, write any 'results' as needed.
     pub fn execute<R: ConfigRng<F>>(&mut self, iop: &mut WriteIOP<F, R>) {
-        iop.write_field_elem_slice(&self.exec.io);
+        iop.write_field_elem_slice(&*self.exec.io.as_slice());
         iop.write_u32_slice(&[self.exec.po2 as u32]);
     }
 
-    /// Perform 'accumulate' stage, using the iop for any RNG state.
-    #[tracing::instrument(skip_all)]
-    pub fn accumulate<R: ConfigRng<F>>(&mut self, iop: &mut WriteIOP<F, R>) {
-        // Make the mixing values
-        self.mix.resize_with(C::MIX_SIZE, || iop.random_elem());
-        // Make and compute accum data
-        let accum_size = self
-            .exec
-            .circuit
-            .get_taps()
-            .group_size(REGISTER_GROUP_ACCUM);
-        self.accum.resize(self.steps * accum_size, F::Elem::INVALID);
-        let mut args: &mut [&mut [F::Elem]] = &mut [
-            &mut self.exec.code,
-            &mut self.exec.io,
-            &mut self.exec.data,
-            &mut self.mix,
-            &mut self.accum,
+    fn compute_accum(&mut self) {
+        let args = &[
+            self.exec.code.as_slice_sync(),
+            self.exec.io.as_slice_sync(),
+            self.exec.data.as_slice_sync(),
+            self.mix.as_slice_sync(),
+            self.accum.as_slice_sync(),
         ];
         let accum: Mutex<Accum<F::ExtElem>> = Mutex::new(Accum::new(self.steps));
         tracing::info_span!("step_compute_accum").in_scope(|| {
-            // TODO: Add an abstraction layer for this so we can run
-            // it on cuda, etc.
-            // TODO: Figure out a safer way to pass args to this parallelization.
-            let args_ptr: AtomicPtr<&mut [&mut [F::Elem]]> = AtomicPtr::new(&mut args);
+            // TODO: Add an way to be able to run this on cuda, metal, etc.
             let c = &self.exec.circuit;
             (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
                 || Handler::<F>::new(&accum),
                 |accum_handler, cycle| {
-                    let args: &mut [&mut [F::Elem]] =
-                        unsafe { &mut *args_ptr.load(Ordering::Relaxed) };
                     c.step_compute_accum(
                         &CircuitStepContext {
                             size: self.steps,
@@ -119,12 +101,10 @@ where
             accum.lock().unwrap().calc_prefix_products();
         });
         tracing::info_span!("step_verify_accum").in_scope(|| {
-            let args_ptr: AtomicPtr<&mut [&mut [F::Elem]]> = AtomicPtr::new(&mut args);
             let c = &self.exec.circuit;
             (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
                 || Handler::<F>::new(&accum),
                 |accum_handler, cycle| {
-                    let args = unsafe { &mut *args_ptr.load(Ordering::Relaxed) };
                     c.step_verify_accum(
                         &CircuitStepContext {
                             size: self.steps,
@@ -137,15 +117,34 @@ where
                 },
             );
         });
-        // Zero out 'invalid' entries in accum
-        for value in self.accum.iter_mut().chain(self.exec.io.iter_mut()) {
+    }
+
+    /// Perform 'accumulate' stage, using the iop for any RNG state.
+    #[tracing::instrument(skip_all)]
+    pub fn accumulate<R: ConfigRng<F>>(&mut self, iop: &mut WriteIOP<F, R>) {
+        // Make the mixing values
+        self.mix = CpuBuffer::from_fn(C::MIX_SIZE, |_| iop.random_elem());
+        // Make and compute accum data
+        let accum_size = self
+            .exec
+            .circuit
+            .get_taps()
+            .group_size(REGISTER_GROUP_ACCUM);
+        self.accum = CpuBuffer::from_fn(self.steps * accum_size, |_| F::Elem::INVALID);
+
+        self.compute_accum();
+
+        // Zero out 'invalid' entries in accum and io
+        let mut accum = self.accum.as_slice_mut();
+        let mut io = self.exec.io.as_slice_mut();
+        for value in accum.iter_mut().chain(io.iter_mut()) {
             *value = value.valid_or_zero();
         }
         // Add random noise to end of accum and change invalid element to zero
         let mut rng = thread_rng();
         for i in self.steps - ZK_CYCLES..self.steps {
             for j in 0..accum_size {
-                self.accum[j * self.steps + i] = F::Elem::random(&mut rng);
+                accum[j * self.steps + i] = F::Elem::random(&mut rng);
             }
         }
     }
@@ -154,23 +153,23 @@ where
         self.exec.po2 as u32
     }
 
-    pub fn get_code(&self) -> &[F::Elem] {
+    pub fn get_code(&self) -> &CpuBuffer<F::Elem> {
         &self.exec.code
     }
 
-    pub fn get_data(&self) -> &[F::Elem] {
+    pub fn get_data(&self) -> &CpuBuffer<F::Elem> {
         &self.exec.data
     }
 
-    pub fn get_accum(&self) -> &[F::Elem] {
+    pub fn get_accum(&self) -> &CpuBuffer<F::Elem> {
         &self.accum
     }
 
-    pub fn get_mix(&self) -> &[F::Elem] {
+    pub fn get_mix(&self) -> &CpuBuffer<F::Elem> {
         &self.mix
     }
 
-    pub fn get_io(&self) -> &[F::Elem] {
+    pub fn get_io(&self) -> &CpuBuffer<F::Elem> {
         &self.exec.io
     }
 

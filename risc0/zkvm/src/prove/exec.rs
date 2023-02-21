@@ -35,7 +35,7 @@ use risc0_zkvm_platform::{
     memory::{FFPU, SYSTEM},
     syscall::{
         ecall,
-        nr::{SYS_COMMIT, SYS_COMPUTE_POLY, SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
+        nr::{SYS_COMPUTE_POLY, SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A7, REG_T0},
         DIGEST_WORDS,
     },
@@ -66,7 +66,6 @@ impl MemoryOp {
 
 pub trait HostHandler {
     fn is_trace_enabled(&self) -> bool;
-    fn on_commit(&mut self, buf: &[u32]) -> Result<()>;
     fn on_panic(&mut self, msg: &str) -> Result<()>;
     fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>>;
     fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
@@ -120,14 +119,6 @@ impl MemoryState {
 
     fn load_register(&self, num: usize) -> u32 {
         self.load_u32((SYSTEM.start() + num * WORD_SIZE) as u32)
-    }
-
-    #[track_caller]
-    fn load_region_u32(&self, start: u32, size: u32) -> Vec<u32> {
-        (start..start + size)
-            .step_by(WORD_SIZE)
-            .map(|addr| self.load_u32(addr))
-            .collect()
     }
 
     #[track_caller]
@@ -816,14 +807,6 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 self.memory.store_region(out_ptr, &result);
 
                 Ok((split_word8(result.len() as u32), split_word8(0)))
-            }
-            SYS_COMMIT => {
-                let buf_ptr = self.memory.load_register(REG_A0);
-                let buf_len = self.memory.load_register(REG_A1);
-                debug!("SYS_COMMIT[{cycle}]> 0x{buf_ptr:08X} : {buf_len}");
-                let buf = self.memory.load_region_u32(buf_ptr, buf_len);
-                self.handler.on_commit(buf.as_slice())?;
-                Ok((split_word8(0), split_word8(0)))
             }
             SYS_CYCLE_COUNT => {
                 debug!("SYS_CYCLE_COUNT[{cycle}]> cycle = {cycle}");

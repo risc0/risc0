@@ -19,16 +19,36 @@ pub const WORD_LENGTH: usize = 5;
 
 #[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
 pub enum LetterFeedback {
-    LetterCorrect,
-    LetterPresent,
+    Correct,
+    Present,
     #[default]
-    LetterMiss,
+    Miss,
 }
 
-pub type WordFeedback = [LetterFeedback; WORD_LENGTH];
+#[derive(Clone, Debug, Default, Deserialize, Eq, PartialEq, Serialize)]
+pub struct WordFeedback(pub [LetterFeedback; WORD_LENGTH]);
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct GameState {
     pub correct_word_hash: Digest,
     pub feedback: WordFeedback,
+}
+
+impl WordFeedback {
+    pub fn game_is_won(&self) -> bool {
+        self.0.iter().all(|x| *x == LetterFeedback::Correct)
+    }
+
+    #[cfg(not(target_os = "zkvm"))]
+    pub fn print(&self, guess_word: &str) {
+        for i in 0..WORD_LENGTH {
+            match self.0[i] {
+                LetterFeedback::Correct => print!("\x1b[41m"), // green
+                LetterFeedback::Present => print!("\x1b[43m"), // yellow
+                LetterFeedback::Miss => print!("\x1b[40m"),    // black
+            }
+            print!("{:}", guess_word.chars().nth(i).unwrap());
+        }
+        println!("\x1b[0m");
+    }
 }

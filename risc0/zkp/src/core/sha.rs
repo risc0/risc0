@@ -338,7 +338,6 @@ pub mod rust_crypto {
     use alloc::vec::Vec;
     use core::fmt::{Debug, Formatter};
 
-    pub use digest::Digest;
     use digest::{
         block_buffer::Eager,
         core_api::{
@@ -346,8 +345,9 @@ pub mod rust_crypto {
             CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
         },
         typenum::{U32, U64},
-        HashMarker, InvalidOutputSize, Output,
+        HashMarker, InvalidOutputSize,
     };
+    pub use digest::{Digest, Output};
 
     use super::{BLOCK_BYTES, SHA256_INIT};
 
@@ -380,8 +380,13 @@ pub mod rust_crypto {
 
             // If aligned, reinterpret the u8 array blocks as u32 array blocks.
             // If unaligned, the data needs to be copied.
-            // SAFETY: We know that Block (alias for GenericArray<u8, U64>) is
-            // an array of bytes and so is safe to reinterpret as blocks of words.
+            // NOTE: The current implementation makes a full-copy of the blocks on the heap
+            // when the input is not word-aligned. Although a copy is needed,
+            // this could be done (slightly less efficiently in the zkVM) by
+            // copying to a fixed width buffer and incrementally hashing.
+            // SAFETY: We know that Block (alias for
+            // GenericArray<u8, U64>) is an array of bytes and so is safe to
+            // reinterpret as blocks of words.
             let current_state = self.state.as_deref().unwrap_or(&SHA256_INIT);
             self.state = Some(match unsafe { blocks.align_to::<super::Block>() } {
                 (&[], aligned_blocks, &[]) => S::compress_slice(current_state, aligned_blocks),

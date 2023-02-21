@@ -31,9 +31,8 @@ pub mod nr {
     pub const SYS_PANIC: u32 = 0;
     pub const SYS_LOG: u32 = 1;
     pub const SYS_IO: u32 = 2;
-    pub const SYS_COMMIT: u32 = 3;
-    pub const SYS_CYCLE_COUNT: u32 = 4;
-    pub const SYS_COMPUTE_POLY: u32 = 5;
+    pub const SYS_CYCLE_COUNT: u32 = 3;
+    pub const SYS_COMPUTE_POLY: u32 = 4;
 }
 
 pub mod reg_abi {
@@ -127,10 +126,17 @@ pub unsafe fn sys_log(msg_ptr: *const u8, msg_len: usize) {
 pub unsafe fn sys_io(channel: u32, buf_ptr: *const u8, buf_len: usize) -> &'static [u8] {
     #[cfg(target_os = "zkvm")]
     {
+        // Get the current position of the READ_PTR within the INPUT region and round
+        // the value to the next page boundary (i.e. to the next uninitialized
+        // location in the INPUT region). This is where the host will write to.
         let read_ptr: &mut usize = &mut *READ_PTR.get();
         *read_ptr = round_up(*read_ptr as u32, crate::PAGE_SIZE as u32) as usize;
+
         let out_ptr = *read_ptr as *const u8;
         let out_nbytes: usize;
+
+        // ECALL to the host. Host with read buf_len bytes from buf_ptr and write
+        // out_nbytes to the location specified in out_ptr.
         asm!(
             "ecall",
             in("t0") ecall::SOFTWARE,
@@ -140,29 +146,18 @@ pub unsafe fn sys_io(channel: u32, buf_ptr: *const u8, buf_len: usize) -> &'stat
             in("a2") buf_len,
             in("a3") out_ptr,
         );
+
+        // Set the READ_PTR to the end of the returned data, rounded to the next word.
         let out_nwords = (out_nbytes + WORD_SIZE - 1) / WORD_SIZE;
         let read_end = read_ptr.checked_add(out_nwords * WORD_SIZE).unwrap();
+        // NOTE: If this ever overruns the INPUT region, it would correct memory with an
+        // unrecorded write, similar to if the host simply modifies guest memory
+        // in an illegal way. This will result in a proof failure.
         // if read_end > memory::INPUT.end() {
         //     panic!("host_recv overran input buffer with {nwords} word read");
         // }
         *read_ptr = read_end;
         core::slice::from_raw_parts(out_ptr, out_nbytes)
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
-}
-
-#[inline(always)]
-pub unsafe fn sys_commit(buf_ptr: *const u32, buf_len: usize) {
-    #[cfg(target_os = "zkvm")]
-    {
-        asm!(
-            "ecall",
-            in("t0") ecall::SOFTWARE,
-            in("a7") nr::SYS_COMMIT,
-            inout("a0") buf_ptr => _,
-            inout("a1") buf_len => _,
-        );
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()

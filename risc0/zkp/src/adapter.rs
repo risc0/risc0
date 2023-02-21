@@ -19,6 +19,7 @@ use alloc::vec::Vec;
 use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
 
+use crate::hal::cpu::SyncSlice;
 use crate::taps::TapSet;
 
 // TODO: Remove references to these constants so we don't depend on a
@@ -57,35 +58,35 @@ pub trait CircuitStep<E: Elem> {
         &self,
         ctx: &CircuitStepContext,
         custom: &mut S,
-        args: &mut [&mut [E]],
+        args: &[SyncSlice<E>],
     ) -> Result<E>;
 
     fn step_verify_bytes<S: CircuitStepHandler<E>>(
         &self,
         ctx: &CircuitStepContext,
         custom: &mut S,
-        args: &mut [&mut [E]],
+        args: &[SyncSlice<E>],
     ) -> Result<E>;
 
     fn step_verify_mem<S: CircuitStepHandler<E>>(
         &self,
         ctx: &CircuitStepContext,
         custom: &mut S,
-        args: &mut [&mut [E]],
+        args: &[SyncSlice<E>],
     ) -> Result<E>;
 
     fn step_compute_accum<S: CircuitStepHandler<E>>(
         &self,
         ctx: &CircuitStepContext,
         custom: &mut S,
-        args: &mut [&mut [E]],
+        args: &[SyncSlice<E>],
     ) -> Result<E>;
 
     fn step_verify_accum<S: CircuitStepHandler<E>>(
         &self,
         ctx: &CircuitStepContext,
         custom: &mut S,
-        args: &mut [&mut [E]],
+        args: &[SyncSlice<E>],
     ) -> Result<E>;
 }
 

@@ -6,10 +6,10 @@ publish = false
 
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
-log = "0.4.7"
+log = "0.4"
 risc0-core = { workspace = true }
 regex = "1"
-tempdir = "0.3"
+tempfile = "3"
 
 [package.metadata.release]
 release = false

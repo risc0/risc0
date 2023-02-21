@@ -15,9 +15,23 @@
 //! An implementation of Poseidon targeting the Baby Bear field with a security
 //! of 128 bits.
 
+#[allow(dead_code)]
+mod consts;
+mod rng;
+
 use risc0_core::field::baby_bear::Elem;
 
-pub(crate) use super::poseidon_consts::*;
+use self::consts::{
+    CELLS, MDS, PARTIAL_COMP_MATRIX, PARTIAL_COMP_OFFSET, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
+    ROUND_CONSTANTS,
+};
+pub use self::rng::PoseidonRng;
+
+/// The 'rate' of the sponge, i.e. how much we can safely add/remove per mixing.
+pub const CELLS_RATE: usize = 16;
+
+/// The size of the hash output in cells (~ 248 bits)
+pub const CELLS_OUT: usize = 8;
 
 fn add_round_constants(cells: &mut [Elem; CELLS], round: usize) {
     for i in 0..CELLS {
@@ -98,12 +112,6 @@ pub fn poseidon_mix(cells: &mut [Elem; CELLS]) {
     }
 }
 
-/// The 'rate' of the sponge, i.e. how much we can safely add/remove per mixing.
-pub const CELLS_RATE: usize = 16;
-
-/// The size of the hash output in cells (~ 248 bits)
-pub const CELLS_OUT: usize = 8;
-
 /// Perform a unpadded hash of a vector of elements.  Because this is unpadded
 /// collision resistance is only true for vectors of the same size.  If the size
 /// is variable, this is subject to length extension attacks.
@@ -131,6 +139,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use test_log::test;
+
     use super::*;
 
     fn do_partial_sboxes(cells: &mut [Elem; CELLS]) {
@@ -162,7 +172,6 @@ mod tests {
 
     #[test]
     fn compare_naive() {
-        env_logger::init();
         // Make a fixed input
         let mut test_in_1 = [Elem::new(1); CELLS];
         // Copy it
