@@ -175,4 +175,25 @@ mod tests {
         // Verify they are the same
         assert_eq!(test_in_1, test_in_2);
     }
+
+    #[test]
+    fn poseidon_test_vectors() {
+        let mut buf = [Elem::new(0); CELLS];
+        for i in 0..CELLS_RATE {
+            buf[i] = Elem::new(i as u32);
+        }
+        log::debug!("input: {:?}", buf);
+        poseidon_mix(&mut buf);
+        let goal: [u32; CELLS] = [
+            165799421, 446443103, 1242624592, 791266679, 1939888497, 1437820613, 893076101,
+            95764709, 1434530905, 195638616, 675024579, 1565573909, 1879881326, 928451642,
+            561767828, 606077402, 900584440, 1751476, 1531697037, 1331228609, 740083969,
+            1133219554, 1660666218, 952852770,
+        ];
+        for i in 0..CELLS {
+            assert_eq!(buf[i].as_u32(), goal[i]);
+        }
+
+        log::debug!("output: {:?}", buf);
+    }
 }
