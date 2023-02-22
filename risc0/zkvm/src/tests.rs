@@ -20,7 +20,7 @@ use risc0_zkp::core::blake2b::{Blake2bCpuImpl, HashSuiteBlake2bCpu};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm_methods::{
     multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
-    SLICE_IO_ELF, SLICE_IO_ID,
+    RANDOM_NUMBER_ELF, RANDOM_NUMBER_ID, SLICE_IO_ELF, SLICE_IO_ID,
 };
 use risc0_zkvm_platform::{memory::HEAP, WORD_SIZE};
 use serial_test::serial;
@@ -203,6 +203,14 @@ fn check_image_id() {
 #[cfg_attr(feature = "cuda", serial)]
 fn commit_hello_world() {
     let mut prover = Prover::new(HELLO_COMMIT_ELF, HELLO_COMMIT_ID).unwrap();
+    prover.run().expect("Could not get receipt");
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn do_random() {
+    let mut prover = Prover::new(RANDOM_NUMBER_ELF, RANDOM_NUMBER_ID).unwrap();
     prover.run().expect("Could not get receipt");
 }
 
