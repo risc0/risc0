@@ -13,9 +13,11 @@
 // limitations under the License.
 
 pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
-use methods::{SIGN_ELF, SIGN_ID};
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::{Prover, Receipt, Result};
+use digital_signature_methods::{SIGN_ELF, SIGN_ID};
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    Prover, Receipt, Result,
+};
 use sha2::{Digest, Sha256};
 
 pub struct SignatureWithReceipt {
@@ -28,7 +30,7 @@ impl SignatureWithReceipt {
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
-    pub fn get_identity(&self) -> Result<risc0_zkp::core::sha::Digest> {
+    pub fn get_identity(&self) -> Result<risc0_zkvm::sha::Digest> {
         let commit = self.get_commit()?;
         Ok(commit.identity)
     }
@@ -72,14 +74,9 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
 
 #[cfg(test)]
 mod tests {
-    use log::LevelFilter;
+    use test_log::test;
 
     use super::*;
-
-    #[ctor::ctor]
-    fn init() {
-        env_logger::builder().filter_level(LevelFilter::Info).init();
-    }
 
     #[test]
     fn protocol() {

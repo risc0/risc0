@@ -13,9 +13,11 @@
 // limitations under the License.
 
 use json_core::Outputs;
-use methods::{SEARCH_JSON_ELF, SEARCH_JSON_ID};
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::Prover;
+use json_methods::{SEARCH_JSON_ELF, SEARCH_JSON_ID};
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    Prover,
+};
 
 fn main() {
     let data = include_str!("../res/example.json");
@@ -42,9 +44,11 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use json_core::Outputs;
-    use methods::{SEARCH_JSON_ELF, SEARCH_JSON_ID};
-    use risc0_zkvm::serde::{from_slice, to_vec};
-    use risc0_zkvm::Prover;
+    use json_methods::{SEARCH_JSON_ELF, SEARCH_JSON_ID};
+    use risc0_zkvm::{
+        serde::{from_slice, to_vec},
+        Prover,
+    };
 
     #[test]
     fn main() {

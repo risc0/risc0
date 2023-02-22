@@ -5,15 +5,14 @@ edition = "2021"
 
 [dependencies]
 clap = "4.0"
-risc0-zkp = { path = "../../risc0/zkp" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
-methods = { path = "../methods" }
+sha-methods = { path = "methods" }
 
 [dev-dependencies]
 hex = "0.4"
 
 [features]
-cuda = ["risc0-zkp/cuda", "risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda"]
 default = []
-metal = ["risc0-zkp/metal", "risc0-zkvm/metal"]
+metal = ["risc0-zkvm/metal"]

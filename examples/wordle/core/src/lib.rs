@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::core::sha::Digest;
+use risc0_zkvm::sha::Digest;
 use serde::{Deserialize, Serialize};
 
 pub const WORD_LENGTH: usize = 5;

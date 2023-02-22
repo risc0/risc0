@@ -24,8 +24,10 @@ jobs:
         with:
           crate: cargo-sort
           version: "1.0"
-      - run: cargo fmt --all -- --check
+      - run: cargo fmt --all --check
+      - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo sort --workspace --check
+      - run: cargo sort --workspace --check examples
       - run: npx @kt3k/license-checker
 
   test:
