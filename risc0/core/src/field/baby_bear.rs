@@ -189,6 +189,10 @@ impl Elem {
         Self(x)
     }
 
+    pub const fn as_u32(&self) -> u32 {
+        decode(self.0)
+    }
+
     /// Return the Montgomery form representation used for byte-based
     /// hashes of slices of [BabyBear]s.
     pub const fn as_u32_montgomery(&self) -> u32 {
