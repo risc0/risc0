@@ -40,7 +40,7 @@
 //! // Hash a Digest
 //! let hash_hash = Impl::hash_bytes(&hash.as_bytes());
 //! // Hashing can also be done with 32-bit words (matching the zkVM word size)
-//! let hash_hash_words = Impl::hash_words(&abc_hash.as_words());
+//! let hash_hash_words = Impl::hash_words(&hash.as_words());
 //! // Hashing with bytes or words should not change the result
 //! assert_eq!(hash_hash, hash_hash_words);
 //! ```
