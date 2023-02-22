@@ -16,7 +16,7 @@
 
 use core::fmt::{Debug, Display, Formatter};
 
-use risc0_zkp::core::sha::Digest;
+use risc0_zkvm::sha::Digest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Deserialize, Eq, PartialEq, Serialize)]
