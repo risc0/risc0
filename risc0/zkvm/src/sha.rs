@@ -25,7 +25,8 @@
 //! The first interface is based on [Rust Crypto](https://github.com/RustCrypto) wrappers and can be found in the [rust_crypto] module, along with documentation and usage notes.
 //!
 //! The other interface is to directly use an implementation of the [Sha256]
-//! trait defined in this module: ```
+//! trait defined in this module:
+//! ```
 //! use risc0_zkvm::sha::{Impl, Sha256};
 //!
 //! // Hash a u8 array
