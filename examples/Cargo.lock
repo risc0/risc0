@@ -211,8 +211,8 @@ name = "chess"
 version = "0.1.0"
 dependencies = [
  "chess-core",
+ "chess-methods",
  "clap 4.1.4",
- "methods",
  "risc0-zkvm",
  "serde",
  "shakmaty",
@@ -222,8 +222,14 @@ dependencies = [
 name = "chess-core"
 version = "0.1.0"
 dependencies = [
- "risc0-zkp",
  "serde",
+]
+
+[[package]]
+name = "chess-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
@@ -387,16 +393,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ctor"
-version = "0.1.26"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d2301688392eb071b0bf1a37be05c469d3cc4dbbd95df672fe28ab021e6a096"
-dependencies = [
- "quote",
- "syn",
-]
-
-[[package]]
 name = "cuda-config"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -430,23 +426,49 @@ name = "digital-signature"
 version = "0.1.0"
 dependencies = [
  "clap 3.2.23",
- "ctor",
  "digital-signature-core",
+ "digital-signature-methods",
  "env_logger",
  "log",
- "methods",
- "risc0-zkp",
  "risc0-zkvm",
  "serde",
  "sha2",
+ "test-log",
 ]
 
 [[package]]
 name = "digital-signature-core"
 version = "0.1.0"
 dependencies = [
- "risc0-zkp",
+ "risc0-zkvm",
  "serde",
+]
+
+[[package]]
+name = "digital-signature-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
+name = "directories"
+version = "4.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f51c5d4ddabd36886dd3e1438cb358cdcb0d7c499cb99cb4ac2e38e18b5cb210"
+dependencies = [
+ "dirs-sys",
+]
+
+[[package]]
+name = "dirs-sys"
+version = "0.3.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1b1d1d91c932ef41c0f2663aa8b0ca0342d444d842c06914aa0a7e352d0bada6"
+dependencies = [
+ "libc",
+ "redox_users",
+ "winapi",
 ]
 
 [[package]]
@@ -521,9 +543,16 @@ dependencies = [
 name = "factors"
 version = "0.1.0"
 dependencies = [
- "methods",
+ "factors-methods",
  "risc0-zkvm",
  "serde",
+]
+
+[[package]]
+name = "factors-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
@@ -768,15 +797,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "home"
-version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "747309b4b440c06d57b0b25f2aee03ee9b5e5397d288c60e21fc709bb98a7408"
-dependencies = [
- "winapi",
-]
-
-[[package]]
 name = "http"
 version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -955,7 +975,7 @@ checksum = "078e285eafdfb6c4b434e0d31e8cfcb5115b651496faca5749b88fafd4f23bfd"
 name = "json-core"
 version = "0.1.0"
 dependencies = [
- "risc0-zkp",
+ "risc0-zkvm",
  "serde",
 ]
 
@@ -965,10 +985,16 @@ version = "0.1.0"
 dependencies = [
  "json",
  "json-core",
- "methods",
- "risc0-zkp",
+ "json-methods",
  "risc0-zkvm",
  "serde",
+]
+
+[[package]]
+name = "json-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
@@ -1069,13 +1095,6 @@ dependencies = [
  "foreign-types",
  "log",
  "objc",
-]
-
-[[package]]
-name = "methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
 ]
 
 [[package]]
@@ -1272,10 +1291,9 @@ checksum = "9b7820b9daea5457c9f21c69448905d723fbd21136ccf521748f23fd49e723ee"
 name = "password-checker"
 version = "0.12.0"
 dependencies = [
- "methods",
  "password-checker-core",
+ "password-checker-methods",
  "rand",
- "risc0-zkp",
  "risc0-zkvm",
 ]
 
@@ -1284,6 +1302,13 @@ name = "password-checker-core"
 version = "0.12.0"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "password-checker-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
@@ -1431,6 +1456,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "redox_users"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b033d837a7cf162d7993aded9304e30a83213c648b6e389db233191f891e5c2b"
+dependencies = [
+ "getrandom",
+ "redox_syscall",
+ "thiserror",
+]
+
+[[package]]
 name = "regex"
 version = "1.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1495,11 +1531,11 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "cargo_metadata",
+ "directories",
  "downloader",
- "home",
  "risc0-zkvm",
  "risc0-zkvm-platform",
  "serde",
@@ -1510,8 +1546,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-build-kernel"
+version = "0.13.0"
+dependencies = [
+ "cc",
+ "directories",
+ "glob",
+ "hex",
+ "sha2",
+ "tempfile",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "fil-rustacuda",
@@ -1530,7 +1578,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -1538,20 +1586,17 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "cc",
  "glob",
- "hex",
- "home",
+ "risc0-build-kernel",
  "risc0-core",
- "sha2",
- "tempfile",
 ]
 
 [[package]]
 name = "risc0-zeroio"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "bytemuck",
  "impl-trait-for-tuples",
@@ -1563,7 +1608,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zeroio-derive"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1572,7 +1617,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1600,7 +1645,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.12.0"
+version = "0.13.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -1625,7 +1670,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.12.0"
+version = "0.13.0"
 
 [[package]]
 name = "rustacuda_core"
@@ -1760,10 +1805,16 @@ version = "0.12.0"
 dependencies = [
  "clap 4.1.4",
  "hex",
- "methods",
- "risc0-zkp",
  "risc0-zkvm",
  "serde",
+ "sha-methods",
+]
+
+[[package]]
+name = "sha-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
@@ -1868,6 +1919,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6"
 dependencies = [
  "winapi-util",
+]
+
+[[package]]
+name = "test-log"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38f0c854faeb68a048f0f2dc410c5ddae3bf83854ef0e4977d58306a5edef50e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -2279,20 +2341,26 @@ dependencies = [
 name = "wordle"
 version = "0.1.0"
 dependencies = [
- "methods",
  "rand",
- "risc0-zkp",
  "risc0-zkvm",
  "serde",
  "wordle-core",
+ "wordle-methods",
 ]
 
 [[package]]
 name = "wordle-core"
 version = "1.0.0"
 dependencies = [
- "risc0-zkp",
+ "risc0-zkvm",
  "serde",
+]
+
+[[package]]
+name = "wordle-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]

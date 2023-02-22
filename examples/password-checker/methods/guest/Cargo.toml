@@ -1,0 +1,13 @@
+[package]
+name = "pw_checker"
+version = "0.12.0"
+edition = "2021"
+
+[workspace]
+
+[build-dependencies]
+risc0-build = { path = "../../../../risc0/build" }
+
+[dependencies]
+password-checker-core = { path = "../../core" }
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [ "std" ] }

@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
 use password_checker_core::PasswordRequest;
+use password_checker_methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
 use rand::prelude::*;
-use risc0_zkp::core::sha::Digest;
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::Prover;
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    sha::Digest,
+    Prover,
+};
 
 fn main() {
     let mut rng = StdRng::from_entropy();
@@ -48,10 +50,9 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
     use password_checker_core::PasswordRequest;
-    use risc0_zkvm::serde::to_vec;
-    use risc0_zkvm::Prover;
+    use password_checker_methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
+    use risc0_zkvm::{serde::to_vec, Prover};
 
     const TEST_SALT: [u8; 32] = [0u8; 32];
     const TEST_PASSWORD: &str = "S00perSecr1t!!!";
