@@ -36,5 +36,6 @@ jobs:
       - uses: risc0/criterion-compare-action@risc0
         with:
           benchName: "example-bench-target"
+          branchName: main
           features: ${{ matrix.feature }}
           prettyName: "${{ matrix.os }}-${{ matrix.feature }}}"
