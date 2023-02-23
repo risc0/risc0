@@ -1,0 +1,54 @@
+name: Benchmarks
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  bench:
+    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.arch }}"]
+
+    permissions:
+      contents: write
+      deployments: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: intel_uhd_630
+
+    env:
+      FEATURE: ${{ matrix.feature }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: risc0/actions-rs-toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
+      - name: Store benchmark result
+        uses: risc0/github-action-benchmark@7eeba8924d4ed651010d72d7319b064fc0c10355
+        with:
+          name: "${{ matrix.os }}-${{ matrix.arch }}"
+          tool: 'cargo'
+          github-token: ${{ secrets.BENCHMARK_TOKEN }}
+          gh-repository: 'github.com/risc0/risc0-benchmarks'
+          gh-pages-branch: main
+          output-file-path: output.txt
+          alert-threshold: '120%'
+          comment-always: true
+          comment-on-alert: true
+          auto-push: true
