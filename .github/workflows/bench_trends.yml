@@ -1,11 +1,10 @@
-name: Benchmarks
+name: Benchmark Trends
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
+  # TODO: remove after testing
   workflow_dispatch:
 
 jobs:
@@ -44,7 +43,6 @@ jobs:
           gh-repository: 'github.com/risc0/benchmarks'
           gh-pages-branch: main
           output-file-path: output.txt
-          alert-threshold: '120%'
-          comment-always: true
-          comment-on-alert: true
+          comment-always: false
+          comment-on-alert: false
           auto-push: true
