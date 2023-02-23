@@ -12,10 +12,6 @@ jobs:
   bench:
     runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.device }}"]
 
-    permissions:
-      contents: write
-      deployments: write
-
     strategy:
       fail-fast: false
       matrix:
@@ -40,7 +36,7 @@ jobs:
           toolchain: stable
       - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
       - name: Store benchmark result
-        uses: risc0/github-action-benchmark@7eeba8924d4ed651010d72d7319b064fc0c10355
+        uses: risc0/github-action-benchmark@v1
         with:
           name: "${{ matrix.os }}-${{ matrix.device }}"
           tool: 'cargo'
