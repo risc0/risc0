@@ -128,7 +128,9 @@ impl<const N: u32> ImageMerkleTree<N> {
     }
 
     #[cfg(not(target_os = "zkvm"))]
-    pub fn vector_oracle_callback<'a>(&'a self) -> impl Fn(u32, &[u8]) -> Vec<u8> + 'a {
+    pub fn vector_oracle_callback<'a>(
+        &'a self,
+    ) -> impl Fn(u32, &[u8], &mut [u32]) -> (u32, u32) + 'a {
         self.0.vector_oracle_callback()
     }
 }

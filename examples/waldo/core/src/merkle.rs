@@ -67,8 +67,10 @@ impl<Element> MerkleTree<Element>
 where
     Element: Hashable<ShaHasher> + Serialize,
 {
-    pub fn vector_oracle_callback<'a>(&'a self) -> impl Fn(u32, &[u8]) -> Vec<u8> + 'a {
-        |channel_id, data| {
+    pub fn vector_oracle_callback<'a>(
+        &'a self,
+    ) -> impl Fn(u32, &[u8], &mut [u32]) -> (u32, u32) + 'a {
+        |channel_id, data, output| {
             // Callback function must only be registered as a callback for the
             // VECTOR_ORACLE_CHANNEL.
             assert_eq!(channel_id, VECTOR_ORACLE_CHANNEL);
@@ -84,7 +86,11 @@ where
             let proof = self.prove(index);
 
             assert!(proof.verify(&self.root(), &value));
-            bincode::serialize(&(value, proof)).unwrap()
+            let result = bincode::serialize(&(value, proof)).unwrap();
+            let copy_len = std::cmp::min(output.len(), result.len());
+            output[..copy_len].clone_from_slice(bytemuck::cast_slice(&result[..copy_len]));
+
+            (result.len() as u32, 0)
         }
     }
 }
