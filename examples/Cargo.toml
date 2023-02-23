@@ -6,6 +6,7 @@ members = [
     "json",
     "password-checker",
     "sha",
+    "waldo",
     "wordle",
 ]
 
