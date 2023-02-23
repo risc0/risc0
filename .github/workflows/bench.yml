@@ -10,7 +10,7 @@ on:
 
 jobs:
   bench:
-    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.arch }}"]
+    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.device }}"]
 
     permissions:
       contents: write
@@ -42,7 +42,7 @@ jobs:
       - name: Store benchmark result
         uses: risc0/github-action-benchmark@7eeba8924d4ed651010d72d7319b064fc0c10355
         with:
-          name: "${{ matrix.os }}-${{ matrix.arch }}"
+          name: "${{ matrix.os }}-${{ matrix.device }}"
           tool: 'cargo'
           github-token: ${{ secrets.BENCHMARK_TOKEN }}
           gh-repository: 'github.com/risc0/risc0-benchmarks'
