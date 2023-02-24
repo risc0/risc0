@@ -84,7 +84,7 @@ fn read_stdin_guess() -> String {
         if guess.chars().count() == WORD_LENGTH {
             break;
         } else {
-            println!("Your guess must have 5 letters!");
+            println!("Your guess must have 5 letters. Try again :)");
             guess.clear();
         }
     }
@@ -92,10 +92,19 @@ fn read_stdin_guess() -> String {
 }
 
 fn play_rounds(server: Server, player: Player, rounds: usize) -> bool {
-    for _ in 0..rounds {
+    for turn_index in 0..rounds {
+        let remaining_guesses = rounds - turn_index;
         let guess_word = read_stdin_guess();
         let receipt = server.check_round(guess_word.as_str());
         let score = player.check_receipt(receipt);
+
+        if remaining_guesses == rounds {
+            println!("Good guess! Our server has calculated your results.");
+            println!("You'll have 6 chances to get the word right.");
+        } else {
+            println!("You have {} guesses remaining.", remaining_guesses);
+        }
+
         score.print(guess_word.as_str());
         if score.game_is_won() {
             return true;
@@ -105,7 +114,7 @@ fn play_rounds(server: Server, player: Player, rounds: usize) -> bool {
 }
 
 fn main() {
-    println!("Welcome to fair wordle!");
+    println!("Welcome to fair Wordle! Enter a five-letter word.");
 
     let server = Server::new(wordlist::pick_word());
     let player = Player {
@@ -113,9 +122,9 @@ fn main() {
     };
 
     if play_rounds(server, player, 6) {
-        println!("You won!");
+        println!("You won!\n");
     } else {
-        println!("Game over");
+        println!("Game over!\n");
     }
 }
 

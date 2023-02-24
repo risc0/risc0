@@ -41,6 +41,7 @@ impl WordFeedback {
 
     #[cfg(not(target_os = "zkvm"))]
     pub fn print(&self, guess_word: &str) {
+        print!("Your results: ");
         for i in 0..WORD_LENGTH {
             match self.0[i] {
                 LetterFeedback::Correct => print!("\x1b[41m"), // green
@@ -49,6 +50,6 @@ impl WordFeedback {
             }
             print!("{:}", guess_word.chars().nth(i).unwrap());
         }
-        println!("\x1b[0m");
+        println!("\x1b[0m\n");
     }
 }
