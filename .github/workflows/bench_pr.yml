@@ -38,4 +38,4 @@ jobs:
           benchName: fib
           branchName: main
           features: ${{ matrix.feature }}
-          prettyName: "${{ matrix.os }}-${{ matrix.feature }}}"
+          prettyName: "${{ matrix.os }}-${{ matrix.feature }}"
