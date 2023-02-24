@@ -30,7 +30,6 @@
 //! Once you have a Receipt, you can use the verify function to
 //! cryptographically verify that it was generated faithfully and is associated
 //! with the expected image ID. You can also read the contents of the journal.
-//! TODO: Something about serializing (serde/zeroio/please-don't-use-raw-bytes)?
 //! ```
 //! # #![feature(slice_flatten)]
 //! use risc0_zkvm::Receipt;
@@ -54,8 +53,11 @@
 //!     .expect("Deserialization should succeed if the types match the committed types");
 //! assert_eq!("test", committed_value);
 //! ```
-
-// journal: String::from("test").as_bytes().to_vec()
+//! Directly using the raw bytes of the journal is not recommended. Instead, we
+//! recommend using serialization tools from the zkVM [serde](crate::serde)
+//! module for general use, as shown above. We also have a crate
+//! [zeroio](https://docs.rs/risc0-zeroio/latest/risc0_zeroio/) offering an
+//! alternative serialization approach that is better for some use cases.
 
 use alloc::vec::Vec;
 
