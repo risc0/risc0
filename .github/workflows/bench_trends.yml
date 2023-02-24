@@ -3,6 +3,7 @@ name: Benchmark Trends
 on:
   push:
     branches: [ main ]
+
   # uncomment for only for testing changes to this workflow while in a PR
   # pull_request:
   #   branches: [ main ]
