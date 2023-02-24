@@ -1,0 +1,41 @@
+name: 'Benchmark Check'
+
+on:
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+jobs:
+  bench:
+    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.device }}"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: intel_uhd_630
+
+    env:
+      FEATURE: ${{ matrix.feature }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: risc0/actions-rs-toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/checkout@v3
+      - uses: risc0/criterion-compare-action@risc0
+        with:
+          benchName: fib
+          branchName: main
+          features: ${{ matrix.feature }}
+          prettyName: "${{ matrix.os }}-${{ matrix.feature }}"
