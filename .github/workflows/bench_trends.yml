@@ -3,6 +3,8 @@ name: Benchmark Trends
 on:
   push:
     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   bench:
