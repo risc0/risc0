@@ -73,9 +73,6 @@ pub mod reg_abi {
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
-/// Number of words in a chunk sent to the guest from SYS_IO.
-pub const IO_CHUNK_WORDS: usize = 4;
-
 /// Compute `ceil(a / b)` via truncated integer division.
 #[allow(dead_code)]
 const fn div_ceil(a: u32, b: u32) -> u32 {
@@ -125,7 +122,7 @@ pub unsafe fn sys_log(msg_ptr: *const u8, msg_len: usize) {
 
 pub unsafe fn sys_io(
     recv_buf: *mut u32,
-    recv_chunks: usize,
+    recv_words: usize,
     send_buf: *const u8,
     send_bytes: usize,
     channel: u32,
@@ -138,7 +135,7 @@ pub unsafe fn sys_io(
             "ecall",
             in("t0") ecall::SOFTWARE,
             inout("a0") recv_buf => a0,
-            inout("a1") recv_chunks => a1,
+            inout("a1") recv_words => a1,
             in("a2") nr::SYS_IO,
             in("a3") send_buf,
             in("a4") send_bytes,

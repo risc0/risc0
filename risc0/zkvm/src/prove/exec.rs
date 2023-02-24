@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
-use core::cmp::min;
 
 use anyhow::{bail, Result};
 use lazy_regex::{regex, Captures};
@@ -36,7 +35,7 @@ use risc0_zkvm_platform::{
         ecall,
         nr::{SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5, REG_T0},
-        DIGEST_WORDS, IO_CHUNK_WORDS,
+        DIGEST_WORDS,
     },
     PAGE_SIZE, WORD_SIZE,
 };
@@ -339,15 +338,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 Ok(())
             }
             "syscall-body" => {
-                let out_bytes: Vec<_> = self
-                    .syscall_body()?
-                    .iter()
-                    .flat_map(|val| {
-                        let (a, b, c, d) = split_word8(*val);
-                        [a, b, c, d]
-                    })
-                    .collect();
-                outs.clone_from_slice(out_bytes.as_slice());
+                (outs[0], outs[1], outs[2], outs[3]) = split_word8(self.syscall_body()?);
                 Ok(())
             }
             "syscall-fini" => {
@@ -476,19 +467,18 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 }
             } else if minor == ecall::SOFTWARE {
                 let out_addr = self.memory.load_register(REG_A0);
-                let out_chunks = self.memory.load_register(REG_A1);
-                let out_words = out_chunks * IO_CHUNK_WORDS as u32;
+                let out_words = self.memory.load_register(REG_A1);
                 let out_bytes = out_words * WORD_SIZE as u32;
 
-                for i in (out_addr..(out_addr + out_bytes)).step_by(WORD_SIZE) {
-                    faults.include(i);
+                for addr in (out_addr..(out_addr + out_bytes)).step_by(WORD_SIZE) {
+                    faults.include(addr);
                 }
 
                 let in_addr = self.memory.load_register(REG_A3);
                 let in_bytes = self.memory.load_register(REG_A4);
 
-                for i in (in_addr..(in_addr + in_bytes)).step_by(WORD_SIZE) {
-                    faults.include(i)
+                for addr in (in_addr..(in_addr + in_bytes)).step_by(WORD_SIZE) {
+                    faults.include(addr)
                 }
             }
         }
@@ -793,16 +783,16 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 Ok(())
             }
             SYS_IO => {
-                let to_guest_chunks = self.memory.load_register(REG_A1);
+                let to_guest_words = self.memory.load_register(REG_A1);
 
                 let buf_ptr = self.memory.load_register(REG_A3);
                 let buf_len = self.memory.load_register(REG_A4);
                 let channel = self.memory.load_register(REG_A5);
 
                 let from_guest_buf = self.memory.load_region(buf_ptr, buf_len);
-                debug!("SYS_IO[{cycle}] Guest sends {buf_len} bytes, requests {to_guest_chunks} * {IO_CHUNK_WORDS} words back");
+                debug!("SYS_IO[{cycle}] Guest sends {buf_len} bytes, requests {to_guest_words} words back");
                 trace!("SYS_IO[{cycle}] Guest sends data: {:?}", from_guest_buf);
-                let mut from_host_buf = vec![0u32; to_guest_chunks as usize * IO_CHUNK_WORDS];
+                let mut from_host_buf = vec![0u32; to_guest_words as usize];
                 self.syscall_out_regs =
                     self.handler
                         .on_txrx(channel, &from_guest_buf, &mut from_host_buf)?;
@@ -820,14 +810,8 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         }
     }
 
-    fn syscall_body(&mut self) -> Result<[u32; IO_CHUNK_WORDS]> {
-        let mut result = [0; IO_CHUNK_WORDS];
-        let ncopy = min(result.len(), self.syscall_out_data.len());
-        result[..ncopy]
-            .iter_mut()
-            .zip(self.syscall_out_data.drain(..ncopy))
-            .for_each(|(res, out)| *res = out);
-        Ok(result)
+    fn syscall_body(&mut self) -> Result<u32> {
+        Ok(self.syscall_out_data.pop_front().unwrap_or_default())
     }
 
     fn syscall_fini(&mut self) -> Result<(u32, u32)> {

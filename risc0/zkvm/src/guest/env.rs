@@ -22,7 +22,7 @@ use risc0_zkvm_platform::{
     abi::zkvm_abi_alloc_words,
     io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_JOURNAL, SENDRECV_CHANNEL_STDOUT},
     memory,
-    syscall::{sys_cycle_count, sys_halt, sys_io, sys_log, sys_output, IO_CHUNK_WORDS},
+    syscall::{sys_cycle_count, sys_halt, sys_io, sys_log, sys_output},
     WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
@@ -110,11 +110,10 @@ pub fn send_recv_sized(
 ) -> (u32, u32, &'static [u8]) {
     unsafe {
         let nwords = (from_host_bytes + WORD_SIZE - 1) / WORD_SIZE;
-        let nchunks = (nwords + IO_CHUNK_WORDS - 1) / IO_CHUNK_WORDS;
-        let from_host_buf = zkvm_abi_alloc_words(nchunks * IO_CHUNK_WORDS);
+        let from_host_buf = zkvm_abi_alloc_words(nwords);
         let (a0, a1) = sys_io(
             from_host_buf,
-            nchunks,
+            nwords,
             to_host_buf.as_ptr(),
             to_host_buf.len(),
             channel,
