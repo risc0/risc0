@@ -1,0 +1,21 @@
+[package]
+name = "hello-bonsai-methods-guest"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[build-dependencies]
+# Must match RISC Zero version specified in the project root.
+risc0-build = { version = "0.13" }
+
+[dependencies]
+# NOTE: ethabi is used here instead of ethers becasue ethers requires getrandopm support.
+# RISC Zero will support getrandom in an upcoming release.
+ethabi = { version = "18.0", default-features = false }
+# Must match RISC Zero version specified in the project root.
+risc0-zkvm = { version = "0.13", default-features = false }
+
+[profile.release]
+lto = true
+opt-level = 3

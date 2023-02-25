@@ -1,0 +1,18 @@
+# Editor files
+.idea
+.vscode
+**/*.rs.bk
+.DS_Store
+*~
+*.swp
+*.swo
+
+# Build artifacts
+target/
+tmp/
+node_modules/
+contracts/artifacts
+contracts/cache
+
+# Logs
+yarn-error.log
