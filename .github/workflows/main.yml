@@ -30,6 +30,11 @@ jobs:
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check templates/bonsai
+      - name: Install npm dependencies (Bonsai template)
+        run: |
+          cd templates/bonsai
+          npm install
+      - run: cd templates/bonsai && npm run ci
       - run: npx @kt3k/license-checker
 
   test:
@@ -73,10 +78,14 @@ jobs:
           mkdir -p $HOME/.local/bin
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Install npm dependencies (Bonsai template)
+        run: |
+          cd templates/bonsai
+          npm install
       - run: cargo test -F $FEATURE
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
-      - run: cargo test -F $FEATURE --manifest-path templates/bonsai/Cargo.toml
+      - run: PATH=$(npm bin):$PATH cargo test -F $FEATURE --manifest-path templates/bonsai/Cargo.toml
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
