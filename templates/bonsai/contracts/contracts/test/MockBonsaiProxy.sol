@@ -20,26 +20,26 @@ import {IBonsaiProxy} from "../IBonsaiProxy.sol";
 import {IBonsaiApp} from "../IBonsaiApp.sol";
 
 contract MockBonsaiProxy is IBonsaiProxy {
-    event SubmitRequest(
-        bytes32 indexed image_id,
-        bytes input,
-        address callback_address
-    );
+  event SubmitRequest(
+    bytes32 indexed image_id,
+    bytes input,
+    address callback_address
+  );
 
-    function submit_request(
-        bytes32 image_id,
-        bytes calldata input,
-        address callback_address
-    ) external {
-        emit SubmitRequest(image_id, input, callback_address);
-    }
+  function submit_request(
+    bytes32 image_id,
+    bytes calldata input,
+    address callback_address
+  ) external {
+    emit SubmitRequest(image_id, input, callback_address);
+  }
 
-    // Function called by the mock Bonsai service to send a callback to the application contract.
-    function send_callback(
-        address callback_address,
-        bytes32 image_id,
-        bytes calldata journal
-    ) external {
-        IBonsaiApp(callback_address).callback(image_id, journal);
-    }
+  // Function called by the mock Bonsai service to send a callback to the application contract.
+  function send_callback(
+    address callback_address,
+    bytes32 image_id,
+    bytes calldata journal
+  ) external {
+    IBonsaiApp(callback_address).callback(image_id, journal);
+  }
 }
