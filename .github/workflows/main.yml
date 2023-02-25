@@ -26,8 +26,10 @@ jobs:
           version: "1.0"
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
+      - run: cargo fmt --all --check --manifest-path templates/bonsai/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
+      - run: cargo sort --workspace --check templates/bonsai
       - run: npx @kt3k/license-checker
 
   test:
@@ -74,6 +76,7 @@ jobs:
       - run: cargo test -F $FEATURE
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
+      - run: cargo test -F $FEATURE --manifest-path templates/bonsai/Cargo.toml
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
