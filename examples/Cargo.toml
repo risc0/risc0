@@ -4,9 +4,9 @@ members = [
     "digital-signature",
     "factors",
     "json",
-    "methods",
     "password-checker",
     "sha",
+    "waldo",
     "wordle",
 ]
 

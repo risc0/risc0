@@ -6,18 +6,17 @@ edition = "2021"
 [dependencies]
 clap = "3.1"
 digital-signature-core = { path = "core" }
+digital-signature-methods = { path = "methods" }
 env_logger = "0.9"
 log = "0.4"
-methods = { path = "../methods" }
-risc0-zkp = { path = "../../risc0/zkp" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 sha2 = "0.10"
 
 [dev-dependencies]
-ctor = "0.1"
+test-log = "0.2"
 
 [features]
-cuda = ["risc0-zkp/cuda", "risc0-zkvm/cuda"]
+cuda = ["risc0-zkvm/cuda"]
 default = []
-metal = ["risc0-zkp/metal", "risc0-zkvm/metal"]
+metal = ["risc0-zkvm/metal"]

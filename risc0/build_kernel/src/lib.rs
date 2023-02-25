@@ -19,7 +19,7 @@ use std::{
 };
 
 use sha2::{Digest, Sha256};
-use tempfile::tempdir;
+use tempfile::tempdir_in;
 
 const CUDA_INCS: &[(&str, &str)] = &[
     ("fp.h", include_str!("../kernels/cuda/fp.h")),
@@ -221,7 +221,7 @@ impl KernelBuild {
             fs::create_dir_all(&cache_dir).unwrap();
         }
 
-        let temp_dir = tempdir().unwrap();
+        let temp_dir = tempdir_in(&cache_dir).unwrap();
         let mut hasher = Hasher::new();
         for src in self.files.iter() {
             hasher.add_file(src);

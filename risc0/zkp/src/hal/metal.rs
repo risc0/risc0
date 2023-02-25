@@ -119,12 +119,17 @@ impl MetalHash for MetalHashPoseidon {
 
     fn new(hal: &MetalHal<Self>) -> Self {
         use crate::core::poseidon;
-        let round_constants = hal.copy_from_elem("round_constants", poseidon::ROUND_CONSTANTS);
-        let mds = hal.copy_from_elem("mds", poseidon::MDS);
-        let partial_comp_matrix =
-            hal.copy_from_elem("partial_comp_matrix", &*poseidon::PARTIAL_COMP_MATRIX);
-        let partial_comp_offset =
-            hal.copy_from_elem("partial_comp_offset", &*poseidon::PARTIAL_COMP_OFFSET);
+        let round_constants =
+            hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
+        let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
+        let partial_comp_matrix = hal.copy_from_elem(
+            "partial_comp_matrix",
+            &*poseidon::consts::PARTIAL_COMP_MATRIX,
+        );
+        let partial_comp_offset = hal.copy_from_elem(
+            "partial_comp_offset",
+            &*poseidon::consts::PARTIAL_COMP_OFFSET,
+        );
         MetalHashPoseidon {
             round_constants,
             mds,

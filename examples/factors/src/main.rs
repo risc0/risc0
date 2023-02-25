@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use methods::{MULTIPLY_ELF, MULTIPLY_ID};
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::Prover;
+use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    Prover,
+};
 
 fn main() {
     // Pick two numbers
@@ -53,9 +55,11 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use methods::{MULTIPLY_ELF, MULTIPLY_ID};
-    use risc0_zkvm::serde::{from_slice, to_vec};
-    use risc0_zkvm::Prover;
+    use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use risc0_zkvm::{
+        serde::{from_slice, to_vec},
+        Prover,
+    };
 
     const TEST_FACTOR_ONE: u64 = 17;
     const TEST_FACTOR_TWO: u64 = 23;
