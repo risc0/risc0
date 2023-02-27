@@ -33,9 +33,43 @@ jobs:
         with:
           toolchain: stable
       - uses: actions/checkout@v3
-      - uses: risc0/criterion-compare-action@risc0
+
+      # Commit just for testing with pending PR, replace with `@risc0`
+      - uses: risc0/criterion-compare-action@8c88cf94b7c9ee16b19ebaa16049930502b448bd
+        id: criterion-cmp
         with:
           benchName: fib
           branchName: main
           features: ${{ matrix.feature }}
           prettyName: "${{ matrix.os }}-${{ matrix.feature }}"
+          outputMarkdown: true
+
+      - name: Write compare markdown to file
+        run: echo "${{steps.criterion-cmp.output.markdown}}" > output.md
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ hashFiles('matrix') || 'none' }}
+          path: output.md
+          if-no-files-found: error
+
+  create-comment:
+    runs-on:  ubuntu-22.04
+    needs: [ bench ]
+    steps:
+      - uses: actions/download-artifact@v3
+      - run: |
+          matrix="$(cat */output.md)"
+          echo "::set-output name=matrix::$matrix"
+        id: download
+
+      - uses: actions/github-script@v3
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: ${{ steps.download.matrix }}
+            })
