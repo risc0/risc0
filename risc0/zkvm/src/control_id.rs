@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Values of the control ID were calculated using the
+// risc0/bootstrap/src/main.rs script.
 pub const CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
     "26aaf5e87e2df3a5b2ba1c07764a9755b8fa5221b5f0bfd96a129427d016ece1", //
     "f9ec28d3b9cea704a33a130529ef1e75cb5f510ca1de612acc78846f359c6238", //
@@ -43,4 +45,21 @@ pub const POSEIDON_CONTROL_ID: [&'static str;
     "1a9d8a06a5d4ed0dc6bbfa6c3d06e7140ff9a3051d64c37456c0171286281211", //
     "61c9ea4e60f1276b6d28db11ba3438200a41a256358d4d1d86caa90886288475", //
     "d0286431d057fa42df74b572dd1c6870818d2a7094e4ef6d4b7ae44c4b4dd56a", //
+];
+
+pub const BLAKE2B_CONTROL_ID: [&'static str;
+    risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+    "51265ccd3158b166191ebc9d6851c2bc1719d9dcff42bde84669ec6d1d1033b1", //
+    "c452124fb40f79255cd1b6508d2fa528fe842c5157721eb0f51b236c5479aa4d", //
+    "90b8aa518f2795a68dd98715d22040a883fcc48827231d20a02b60aed5aa9c6c", //
+    "110045267c6de55c5c6ece41fb9643a40e2f50242f7becc434751e6a080eac56", //
+    "6a87fceae16dc30a090dcbf78b416c3cabc0ff473ec374ee4d6dbfa2ad1b2caa", //
+    "07134a794a282ca9181d758193eb06792cff6b9a019a93631805a0d624604536", //
+    "94291ff35262bef14b38af3057748e8c2f5cb1bafc9b761a86a11b8e05dd4972", //
+    "ebaf330b59e48e72c1551c23d4947dbd2ef0a6740fbb0f24ce806d6abdc1d123", //
+    "ee59bbe1ac9902297b684a41df66a15d47da93b6f7b647c25d2f0df2c4c0eefb", //
+    "be13930445d9097cb20841c3afcd0a63c9d9673429acecd58a3cf0e762cc3ab6", //
+    "b2323de771f4d31035aae557346e6aa84023b5bcef77ec9c4e39f01aba11b567", //
+    "db6584f5b284b622f3ad08afaea9ab669fd493f460a11f999d285301214ee595", //
+    "2a9517ab4454868bb07d4d39043512f46f1df2b623722507b3346ee69c7d4cbc", //
 ];
