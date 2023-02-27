@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v3
 
       # Commit just for testing with pending PR, replace with `@risc0`
-      - uses: risc0/criterion-compare-action@abf647a39a97434d64eb76dec7eaef71321f1983
+      - uses: risc0/criterion-compare-action@de006b5bf8b7707003f3da38f5256a19c7651867
         id: criterion-cmp
         with:
           benchName: fib
