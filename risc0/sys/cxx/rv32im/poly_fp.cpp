@@ -143,15 +143,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   Fp x54(131072);
   // loc("cirgen/components/u32.cpp":238:19)
   Fp x55(131070);
-  // loc("cirgen/circuit/rv32im/ecall.cpp":146:21)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":149:21)
   Fp x56(115);
-  // loc("cirgen/circuit/rv32im/ecall.cpp":151:49)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":154:49)
   Fp x57(50331653);
   // loc("cirgen/circuit/rv32im/ecall.cpp":36:43)
   Fp x58(50331658);
   // loc("cirgen/circuit/rv32im/ecall.cpp":38:45)
   Fp x59(50331659);
-  // loc("cirgen/circuit/rv32im/ecall.cpp":112:25)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":115:25)
   Fp x60(50331662);
   // loc("cirgen/circuit/rv32im/sha.cpp":195:24)
   Fp x61(50331660);
@@ -5995,15 +5995,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2980{x2680.tot + x2681 * x2979.tot * x2680.mul, x2680.mul * x2979.mul};
   // loc("Top/Mux/4/OneHot/hot[8](Reg)"("./cirgen/components/mux.h":39:25))
   auto x2981 = args[2][102 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/circuit/rv32im/ecall.cpp":146:6)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":149:6)
   auto x2982 = x415 - x56;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":146:6)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":149:6)
   MixState x2983{x756.tot + x756.mul * x2982, x756.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":147:7)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":150:7)
   MixState x2984{x2983.tot + x2983.mul * x418, x2983.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":148:7)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":151:7)
   MixState x2985{x2984.tot + x2984.mul * x421, x2984.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":149:7)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":152:7)
   MixState x2986{x2985.tot + x2985.mul * x463, x2985.mul * (*mix)};
   // loc("cirgen/components/ram.cpp":130:3)
   auto x2987 = x466 - x57;
@@ -6265,31 +6265,31 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3115 = x1054 * x17;
   // loc("./cirgen/components/u32.h":24:12)
   auto x3116 = x3114 + x3115;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":91:7)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":94:7)
   auto x3117 = x843 - x0;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":91:6)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":94:6)
   auto x3118 = x3117 * x18;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":91:44)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":94:44)
   auto x3119 = x759 + x0;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":91:6)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":94:6)
   auto x3120 = x3118 + x3119;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":90:6)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":93:6)
   auto x3121 = x3116 - x3120;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":90:6)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":93:6)
   MixState x3122{x3024.tot + x3024.mul * x3121, x3024.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":94:31)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":97:31)
   auto x3123 = x493 * x20;
   // loc("cirgen/components/bytes.cpp":90:11)
   auto x3124 = x3123 - x205;
   // loc("cirgen/components/bytes.cpp":90:10)
   auto x3125 = x3124 * x6;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":94:7)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":97:7)
   MixState x3126{x3122.tot + x3122.mul * x3125, x3122.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":90:11)
   auto x3127 = x3123 - x207;
   // loc("cirgen/components/bytes.cpp":90:10)
   auto x3128 = x3127 * x6;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":95:7)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":98:7)
   MixState x3129{x3126.tot + x3126.mul * x3128, x3126.mul * (*mix)};
   // loc("./cirgen/components/bits.h":61:23)
   MixState x3130{x3129.tot + x3129.mul * x2675, x3129.mul * (*mix)};
@@ -6297,9 +6297,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3131{x3130.tot + x3130.mul * x723, x3130.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":23:7)
   MixState x3132{x3131.tot + x3131.mul * x726, x3131.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":100:3)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":103:3)
   auto x3133 = x694 - x31;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":100:3)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":103:3)
   MixState x3134{x3132.tot + x3132.mul * x3133, x3132.mul * (*mix)};
   // loc("./cirgen/components/mux.h":39:25)
   MixState x3135{x3112.tot + x1233 * x3134.tot * x3112.mul, x3112.mul * x3134.mul};
@@ -6325,15 +6325,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3145{x3144.tot + x3144.mul * x723, x3144.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":23:7)
   MixState x3146{x3145.tot + x3145.mul * x726, x3145.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":115:3)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":118:3)
   auto x3147 = x694 - x26;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":115:3)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":118:3)
   MixState x3148{x3146.tot + x3146.mul * x3147, x3146.mul * (*mix)};
   // loc("./cirgen/components/mux.h":39:25)
   MixState x3149{x3135.tot + x841 * x3148.tot * x3135.mul, x3135.mul * x3148.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":124:3)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":127:3)
   auto x3150 = x843 - x743;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":124:3)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":127:3)
   MixState x3151{x85.tot + x85.mul * x3150, x85.mul * (*mix)};
   // loc("cirgen/components/ram.cpp":130:3)
   MixState x3152{x3151.tot + x3151.mul * x3009, x3151.mul * (*mix)};
@@ -6375,7 +6375,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3170 = x596 * x17;
   // loc("./cirgen/components/u32.h":24:12)
   auto x3171 = x3169 + x3170;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":133:17)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":136:17)
   auto x3172 = x3171 - x18;
   // loc("cirgen/circuit/rv32im/body.cpp":14:23)
   auto x3173 = x3172 + x18;
@@ -6403,9 +6403,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3184{x3183.tot + x3183.mul * x723, x3183.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":23:7)
   MixState x3185{x3184.tot + x3184.mul * x726, x3184.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":134:3)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":137:3)
   auto x3186 = x694 - x29;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":134:3)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":137:3)
   MixState x3187{x3185.tot + x3185.mul * x3186, x3185.mul * (*mix)};
   // loc("./cirgen/components/mux.h":39:25)
   MixState x3188{x3149.tot + x842 * x3187.tot * x3149.mul, x3149.mul * x3187.mul};
@@ -14607,35 +14607,35 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7286{x7099.tot + x3243 * x7285.tot * x7099.mul, x7099.mul * x7285.mul};
   // loc("Top/Mux/4/Mux/8/Mux/2/Twit/Reg"("./cirgen/compiler/edsl/component.h":151:27))
   auto x7287 = args[2][79 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/circuit/rv32im/ecall.cpp":179:141)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":182:98)
   auto x7288 = x7287 + x0;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":179:141)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":182:98)
   auto x7289 = x3280 + x7288;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":179:141)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":182:98)
   auto x7290 = x7289 - x18;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":179:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":180:5)
   auto x7291 = x761 - x7290;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":179:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":180:5)
   MixState x7292{x85.tot + x85.mul * x7291, x85.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":180:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":183:5)
   auto x7293 = x764 - x3756;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":180:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":183:5)
   MixState x7294{x7292.tot + x7292.mul * x7293, x7292.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":172:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":173:18)
   MixState x7295{x85.tot + x3191 * x7294.tot * x85.mul, x85.mul * x7294.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":184:56)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":187:56)
   auto x7296 = x3740 - x0;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":184:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":187:5)
   auto x7297 = x764 - x7296;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":184:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":187:5)
   MixState x7298{x85.tot + x85.mul * x7297, x85.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":185:46)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":188:46)
   auto x7299 = x3338 + x18;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":185:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":188:5)
   auto x7300 = x761 - x7299;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":185:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":188:5)
   MixState x7301{x7298.tot + x7298.mul * x7300, x7298.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":183:22)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":186:22)
   MixState x7302{x7295.tot + x3198 * x7301.tot * x7295.mul, x7295.mul * x7301.mul};
   // loc("cirgen/components/iszero.cpp":16:15)
   MixState x7303{x7302.tot + x792 * x7105.tot * x7302.mul, x7302.mul * x7105.mul};
@@ -14647,7 +14647,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7306{x85.tot + x85.mul * x7305, x85.mul * (*mix)};
   // loc("cirgen/components/iszero.cpp":18:19)
   MixState x7307{x7303.tot + x7119 * x7306.tot * x7303.mul, x7303.mul * x7306.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":193:80)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":196:80)
   auto x7308 = x7288 * x7119;
   // loc("./cirgen/components/onehot.h":46:19)
   auto x7309 = x771 * x19;
@@ -14661,27 +14661,27 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7313 = x7312 - x7308;
   // loc("./cirgen/components/onehot.h":40:8)
   MixState x7314{x85.tot + x85.mul * x7313, x85.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":190:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":193:18)
   MixState x7315{x7307.tot + x3191 * x7314.tot * x7307.mul, x7307.mul * x7314.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":198:22)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":204:43)
   auto x7316 = x7119 * x18;
   // loc("./cirgen/components/onehot.h":40:8)
   auto x7317 = x7312 - x7316;
   // loc("./cirgen/components/onehot.h":40:8)
   MixState x7318{x85.tot + x85.mul * x7317, x85.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":197:20)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":204:22)
   MixState x7319{x7315.tot + x3198 * x7318.tot * x7315.mul, x7315.mul * x7318.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":212:8)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":215:8)
   MixState x7320{x85.tot + x85.mul * x748, x85.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":213:8)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":216:8)
   MixState x7321{x7320.tot + x7320.mul * x818, x7320.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":215:8)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":218:8)
   auto x7322 = x427 - x58;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":215:8)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":218:8)
   MixState x7323{x7321.tot + x7321.mul * x7322, x7321.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":216:8)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":219:8)
   auto x7324 = x466 - x59;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":216:8)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":219:8)
   MixState x7325{x7323.tot + x7323.mul * x7324, x7323.mul * (*mix)};
   // loc("cirgen/components/ram.cpp":43:3)
   MixState x7326{x7325.tot + x7325.mul * x505, x7325.mul * (*mix)};
@@ -14717,53 +14717,53 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7341{x7340.tot + x7340.mul * x723, x7340.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":23:7)
   MixState x7342{x7341.tot + x7341.mul * x726, x7341.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":224:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":227:5)
   MixState x7343{x7342.tot + x7342.mul * x695, x7342.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":203:25)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":206:24)
   MixState x7344{x7319.tot + x757 * x7343.tot * x7319.mul, x7319.mul * x7343.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":226:26)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":229:28)
   auto x7345 = x0 - x757;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":228:5)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":231:5)
   MixState x7346{x3005.tot + x3005.mul * x3133, x3005.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":226:26)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":229:28)
   MixState x7347{x7344.tot + x7345 * x7346.tot * x7344.mul, x7344.mul * x7346.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":238:22)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":241:22)
   auto x7348 = x780 + x775;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":238:22)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":241:22)
   auto x7349 = x7348 + x771;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":256:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":254:10)
   auto x7350 = x427 - x761;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":256:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":254:10)
   MixState x7351{x7320.tot + x7320.mul * x7350, x7320.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":242:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":245:18)
   MixState x7352{x7347.tot + x790 * x7351.tot * x7347.mul, x7347.mul * x7351.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":258:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":256:18)
   MixState x7353{x7352.tot + x7349 * x3330.tot * x7352.mul, x7352.mul * x3330.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":236:22)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":239:22)
   auto x7354 = x771 + x790;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":243:23)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":246:23)
   auto x7355 = x761 + x0;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":256:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":254:10)
   auto x7356 = x466 - x7355;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":256:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":254:10)
   MixState x7357{x6835.tot + x6835.mul * x7356, x6835.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":242:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":245:18)
   MixState x7358{x7353.tot + x7354 * x7357.tot * x7353.mul, x7353.mul * x7357.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":258:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":256:18)
   MixState x7359{x7358.tot + x7348 * x6565.tot * x7358.mul, x7358.mul * x6565.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":236:22)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":239:22)
   auto x7360 = x775 + x771;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":236:22)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":239:22)
   auto x7361 = x7360 + x790;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":243:23)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":246:23)
   auto x7362 = x761 + x3;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":255:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":253:10)
   MixState x7363{x85.tot + x85.mul * x832, x85.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":256:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":254:10)
   auto x7364 = x505 - x7362;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":256:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":254:10)
   MixState x7365{x7363.tot + x7363.mul * x7364, x7363.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":242:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":245:18)
   MixState x7366{x7359.tot + x7361 * x7365.tot * x7359.mul, x7359.mul * x7365.mul};
   // loc("cirgen/components/ram.cpp":43:3)
   MixState x7367{x85.tot + x85.mul * x505, x85.mul * (*mix)};
@@ -14779,21 +14779,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7372{x7371.tot + x7371.mul * x499, x7371.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":28:5)
   MixState x7373{x7372.tot + x7372.mul * x596, x7372.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":258:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":256:18)
   MixState x7374{x7366.tot + x780 * x7373.tot * x7366.mul, x7366.mul * x7373.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":236:22)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":239:22)
   auto x7375 = x7349 + x790;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":243:23)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":246:23)
   auto x7376 = x761 + x19;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":255:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":253:10)
   MixState x7377{x85.tot + x85.mul * x1059, x85.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":256:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":254:10)
   auto x7378 = x599 - x7376;
-  // loc("cirgen/circuit/rv32im/ecall.cpp":256:10)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":254:10)
   MixState x7379{x7377.tot + x7377.mul * x7378, x7377.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":242:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":245:18)
   MixState x7380{x7374.tot + x7375 * x7379.tot * x7374.mul, x7374.mul * x7379.mul};
-  // loc("cirgen/circuit/rv32im/ecall.cpp":258:18)
+  // loc("cirgen/circuit/rv32im/ecall.cpp":256:18)
   MixState x7381{x7380.tot + x1 * x1076.tot * x7380.mul, x7380.mul * x1076.mul};
   // loc("./cirgen/components/mux.h":39:25)
   MixState x7382{x7286.tot + x424 * x7381.tot * x7286.mul, x7286.mul * x7381.mul};

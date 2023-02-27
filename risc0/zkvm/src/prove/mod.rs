@@ -15,6 +15,7 @@
 //! Run the zkVM guest and prove its results
 
 mod exec;
+pub mod io;
 pub(crate) mod loader;
 mod plonk;
 #[cfg(feature = "profiler")]
@@ -23,6 +24,7 @@ pub mod profiler;
 use std::{cmp::min, collections::HashMap, fmt::Debug, io::Write, rc::Rc};
 
 use anyhow::{bail, Result};
+use io::{RawIoHandler, SliceIoHandler};
 use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
@@ -52,8 +54,7 @@ pub struct ProverOpts<'a> {
 
     pub(crate) skip_verify: bool,
 
-    pub(crate) sendrecv_callbacks:
-        HashMap<u32, Box<dyn Fn(u32, &[u8], &mut [u32]) -> (u32, u32) + 'a + Sync>>,
+    pub(crate) io_handlers: HashMap<u32, Box<dyn RawIoHandler + 'a>>,
 
     pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
 }
@@ -77,16 +78,29 @@ impl<'a> ProverOpts<'a> {
         }
     }
 
-    /// Add a callback handler for sendrecv ports, indexed by channel
-    /// numbers.  The guest can call these callbacks by invoking
-    /// `risc0_zkvm::guest::env::send_recv`.
+    /// Add a handler for sendrecv ports which is just a callback.
+    /// The guest can call these callbacks by invoking
+    /// `risc0_zkvm::guest::env::send_recv_slice`.
     pub fn with_sendrecv_callback(
-        mut self,
+        self,
         channel_id: u32,
-        callback: impl Fn(u32, &[u8], &mut [u32]) -> (u32, u32) + 'a + Sync,
+        f: impl Fn(&[u8]) -> Vec<u8> + 'a,
     ) -> Self {
-        self.sendrecv_callbacks
-            .insert(channel_id, Box::new(callback));
+        self.with_raw_io_handler(channel_id, io::handler_from_fn(f))
+    }
+
+    /// Add a handler for sendrecv ports, indexed by channel numbers.
+    /// The guest can call these callbacks by invoking
+    /// `risc0_zkvm::guest::env::send_recv_slice`
+    pub fn with_slice_io_handler(self, channel_id: u32, handler: impl SliceIoHandler + 'a) -> Self {
+        self.with_raw_io_handler(channel_id, io::handler_from_slice_handler(handler))
+    }
+
+    /// Add a handler for sendrecv channels that handles its own
+    /// allocation and sizing.  The guets can call these callbacks by
+    /// invoking `risc0_zkvm_guest::env::send_recv_raw'.
+    pub fn with_raw_io_handler(mut self, channel_id: u32, handler: impl RawIoHandler + 'a) -> Self {
+        self.io_handlers.insert(channel_id, Box::new(handler));
         self
     }
 
@@ -106,7 +120,7 @@ impl<'a> Default for ProverOpts<'a> {
         ProverOpts {
             skip_seal: false,
             skip_verify: false,
-            sendrecv_callbacks: HashMap::new(),
+            io_handlers: HashMap::new(),
             trace_callback: None,
         }
     }
@@ -296,8 +310,8 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
         from_guest_buf: &[u8],
         from_host_buf: &mut [u32],
     ) -> Result<(u32, u32)> {
-        if let Some(cb) = self.opts.sendrecv_callbacks.get(&channel) {
-            return Ok(cb(channel, from_guest_buf, from_host_buf));
+        if let Some(cb) = self.opts.io_handlers.get(&channel) {
+            return Ok(cb.handle_raw_io(from_guest_buf, from_host_buf));
         }
         match channel {
             SENDRECV_CHANNEL_INITIAL_INPUT => {

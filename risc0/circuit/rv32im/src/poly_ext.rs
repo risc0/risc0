@@ -79,11 +79,11 @@ PolyExtStep::Const(16384), // cirgen/circuit/rv32im/memio.cpp:80
 PolyExtStep::Const(35), // circuit/rv32im/rv32im.inl:81
 PolyExtStep::Const(131072), // cirgen/components/u32.cpp:234
 PolyExtStep::Const(131070), // cirgen/components/u32.cpp:238
-PolyExtStep::Const(115), // cirgen/circuit/rv32im/ecall.cpp:146
-PolyExtStep::Const(50331653), // cirgen/circuit/rv32im/ecall.cpp:151
+PolyExtStep::Const(115), // cirgen/circuit/rv32im/ecall.cpp:149
+PolyExtStep::Const(50331653), // cirgen/circuit/rv32im/ecall.cpp:154
 PolyExtStep::Const(50331658), // cirgen/circuit/rv32im/ecall.cpp:36
 PolyExtStep::Const(50331659), // cirgen/circuit/rv32im/ecall.cpp:38
-PolyExtStep::Const(50331662), // cirgen/circuit/rv32im/ecall.cpp:112
+PolyExtStep::Const(50331662), // cirgen/circuit/rv32im/ecall.cpp:115
 PolyExtStep::Const(50331660), // cirgen/circuit/rv32im/sha.cpp:195
 PolyExtStep::Const(50331661), // cirgen/circuit/rv32im/sha.cpp:196
 PolyExtStep::Const(1024), // cirgen/circuit/rv32im/page_fault.cpp:54
@@ -3005,11 +3005,11 @@ PolyExtStep::AndEqz(1140, 496), // cirgen/circuit/rv32im/body.cpp:23
 PolyExtStep::AndEqz(1141, 468), // cirgen/circuit/rv32im/divide.cpp:164
 PolyExtStep::AndCond(1101, 1579, 1142), // components/mux.h:39
 PolyExtStep::Get(327), // Top/Mux/4/OneHot/hot[8](Reg)(components/mux.h:39)
-PolyExtStep::Sub(315, 56), // cirgen/circuit/rv32im/ecall.cpp:146
-PolyExtStep::AndEqz(238, 1838), // cirgen/circuit/rv32im/ecall.cpp:146
-PolyExtStep::AndEqz(1144, 317), // cirgen/circuit/rv32im/ecall.cpp:147
-PolyExtStep::AndEqz(1145, 319), // cirgen/circuit/rv32im/ecall.cpp:148
-PolyExtStep::AndEqz(1146, 347), // cirgen/circuit/rv32im/ecall.cpp:149
+PolyExtStep::Sub(315, 56), // cirgen/circuit/rv32im/ecall.cpp:149
+PolyExtStep::AndEqz(238, 1838), // cirgen/circuit/rv32im/ecall.cpp:149
+PolyExtStep::AndEqz(1144, 317), // cirgen/circuit/rv32im/ecall.cpp:150
+PolyExtStep::AndEqz(1145, 319), // cirgen/circuit/rv32im/ecall.cpp:151
+PolyExtStep::AndEqz(1146, 347), // cirgen/circuit/rv32im/ecall.cpp:152
 PolyExtStep::Sub(349, 57), // cirgen/components/ram.cpp:130
 PolyExtStep::AndEqz(1147, 1839), // cirgen/components/ram.cpp:130
 PolyExtStep::AndEqz(1148, 574), // cirgen/components/ram.cpp:131
@@ -3140,24 +3140,24 @@ PolyExtStep::Mul(420, 16), // components/u32.h:26
 PolyExtStep::Add(1866, 1905), // components/u32.h:24
 PolyExtStep::Mul(754, 17), // components/u32.h:27
 PolyExtStep::Add(1906, 1907), // components/u32.h:24
-PolyExtStep::Sub(586, 0), // cirgen/circuit/rv32im/ecall.cpp:91
-PolyExtStep::Mul(1909, 18), // cirgen/circuit/rv32im/ecall.cpp:91
-PolyExtStep::Add(520, 0), // cirgen/circuit/rv32im/ecall.cpp:91
-PolyExtStep::Add(1910, 1911), // cirgen/circuit/rv32im/ecall.cpp:91
-PolyExtStep::Sub(1908, 1912), // cirgen/circuit/rv32im/ecall.cpp:90
-PolyExtStep::AndEqz(1174, 1913), // cirgen/circuit/rv32im/ecall.cpp:90
-PolyExtStep::Mul(367, 20), // cirgen/circuit/rv32im/ecall.cpp:94
+PolyExtStep::Sub(586, 0), // cirgen/circuit/rv32im/ecall.cpp:94
+PolyExtStep::Mul(1909, 18), // cirgen/circuit/rv32im/ecall.cpp:94
+PolyExtStep::Add(520, 0), // cirgen/circuit/rv32im/ecall.cpp:94
+PolyExtStep::Add(1910, 1911), // cirgen/circuit/rv32im/ecall.cpp:94
+PolyExtStep::Sub(1908, 1912), // cirgen/circuit/rv32im/ecall.cpp:93
+PolyExtStep::AndEqz(1174, 1913), // cirgen/circuit/rv32im/ecall.cpp:93
+PolyExtStep::Mul(367, 20), // cirgen/circuit/rv32im/ecall.cpp:97
 PolyExtStep::Sub(1914, 174), // cirgen/components/bytes.cpp:90
 PolyExtStep::Mul(1915, 6), // cirgen/components/bytes.cpp:90
-PolyExtStep::AndEqz(1208, 1916), // cirgen/circuit/rv32im/ecall.cpp:94
+PolyExtStep::AndEqz(1208, 1916), // cirgen/circuit/rv32im/ecall.cpp:97
 PolyExtStep::Sub(1914, 175), // cirgen/components/bytes.cpp:90
 PolyExtStep::Mul(1917, 6), // cirgen/components/bytes.cpp:90
-PolyExtStep::AndEqz(1209, 1918), // cirgen/circuit/rv32im/ecall.cpp:95
+PolyExtStep::AndEqz(1209, 1918), // cirgen/circuit/rv32im/ecall.cpp:98
 PolyExtStep::AndEqz(1210, 1578), // components/bits.h:61
 PolyExtStep::AndEqz(1211, 494), // cirgen/circuit/rv32im/body.cpp:22
 PolyExtStep::AndEqz(1212, 496), // cirgen/circuit/rv32im/body.cpp:23
-PolyExtStep::Sub(467, 31), // cirgen/circuit/rv32im/ecall.cpp:100
-PolyExtStep::AndEqz(1213, 1919), // cirgen/circuit/rv32im/ecall.cpp:100
+PolyExtStep::Sub(467, 31), // cirgen/circuit/rv32im/ecall.cpp:103
+PolyExtStep::AndEqz(1213, 1919), // cirgen/circuit/rv32im/ecall.cpp:103
 PolyExtStep::AndCond(1207, 780, 1214), // components/mux.h:39
 PolyExtStep::Sub(1064, 60), // cirgen/components/ram.cpp:130
 PolyExtStep::AndEqz(1174, 1920), // cirgen/components/ram.cpp:130
@@ -3170,11 +3170,11 @@ PolyExtStep::AndEqz(1221, 1073), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1222, 748), // components/bits.h:61
 PolyExtStep::AndEqz(1223, 494), // cirgen/circuit/rv32im/body.cpp:22
 PolyExtStep::AndEqz(1224, 496), // cirgen/circuit/rv32im/body.cpp:23
-PolyExtStep::Sub(467, 26), // cirgen/circuit/rv32im/ecall.cpp:115
-PolyExtStep::AndEqz(1225, 1921), // cirgen/circuit/rv32im/ecall.cpp:115
+PolyExtStep::Sub(467, 26), // cirgen/circuit/rv32im/ecall.cpp:118
+PolyExtStep::AndEqz(1225, 1921), // cirgen/circuit/rv32im/ecall.cpp:118
 PolyExtStep::AndCond(1215, 584, 1226), // components/mux.h:39
-PolyExtStep::Sub(586, 511), // cirgen/circuit/rv32im/ecall.cpp:124
-PolyExtStep::AndEqz(0, 1922), // cirgen/circuit/rv32im/ecall.cpp:124
+PolyExtStep::Sub(586, 511), // cirgen/circuit/rv32im/ecall.cpp:127
+PolyExtStep::AndEqz(0, 1922), // cirgen/circuit/rv32im/ecall.cpp:127
 PolyExtStep::AndEqz(1228, 1848), // cirgen/components/ram.cpp:130
 PolyExtStep::AndEqz(1229, 581), // cirgen/components/ram.cpp:131
 PolyExtStep::AndEqz(1230, 582), // cirgen/components/ram.cpp:132
@@ -3195,7 +3195,7 @@ PolyExtStep::Mul(371, 16), // components/u32.h:26
 PolyExtStep::Add(1924, 1925), // components/u32.h:24
 PolyExtStep::Mul(422, 17), // components/u32.h:27
 PolyExtStep::Add(1926, 1927), // components/u32.h:24
-PolyExtStep::Sub(1928, 18), // cirgen/circuit/rv32im/ecall.cpp:133
+PolyExtStep::Sub(1928, 18), // cirgen/circuit/rv32im/ecall.cpp:136
 PolyExtStep::Add(1929, 18), // cirgen/circuit/rv32im/body.cpp:14
 PolyExtStep::Sub(1930, 89), // cirgen/components/bytes.cpp:90
 PolyExtStep::Mul(1931, 6), // cirgen/components/bytes.cpp:90
@@ -3209,8 +3209,8 @@ PolyExtStep::Sub(489, 1938), // components/bits.h:61
 PolyExtStep::AndEqz(1242, 1939), // components/bits.h:61
 PolyExtStep::AndEqz(1243, 494), // cirgen/circuit/rv32im/body.cpp:22
 PolyExtStep::AndEqz(1244, 496), // cirgen/circuit/rv32im/body.cpp:23
-PolyExtStep::Sub(467, 29), // cirgen/circuit/rv32im/ecall.cpp:134
-PolyExtStep::AndEqz(1245, 1940), // cirgen/circuit/rv32im/ecall.cpp:134
+PolyExtStep::Sub(467, 29), // cirgen/circuit/rv32im/ecall.cpp:137
+PolyExtStep::AndEqz(1245, 1940), // cirgen/circuit/rv32im/ecall.cpp:137
 PolyExtStep::AndCond(1227, 585, 1246), // components/mux.h:39
 PolyExtStep::AndCond(1143, 1837, 1247), // components/mux.h:39
 PolyExtStep::Get(329), // Top/Mux/4/OneHot/hot[9](Reg)(components/mux.h:39)
@@ -7311,44 +7311,44 @@ PolyExtStep::AndCond(1964, 5315, 1965), // cirgen/circuit/rv32im/page_fault.cpp:
 PolyExtStep::AndCond(1963, 525, 1966), // cirgen/circuit/rv32im/page_fault.cpp:162
 PolyExtStep::AndCond(1836, 1982, 1967), // components/mux.h:39
 PolyExtStep::Get(257), // Top/Mux/4/Mux/8/Mux/2/Twit/Reg(compiler/edsl/component.h:151)
-PolyExtStep::Add(5318, 0), // cirgen/circuit/rv32im/ecall.cpp:179
-PolyExtStep::Add(2000, 5319), // cirgen/circuit/rv32im/ecall.cpp:179
-PolyExtStep::Sub(5320, 18), // cirgen/circuit/rv32im/ecall.cpp:179
-PolyExtStep::Sub(522, 5321), // cirgen/circuit/rv32im/ecall.cpp:179
-PolyExtStep::AndEqz(0, 5322), // cirgen/circuit/rv32im/ecall.cpp:179
-PolyExtStep::Sub(525, 2343), // cirgen/circuit/rv32im/ecall.cpp:180
-PolyExtStep::AndEqz(1969, 5323), // cirgen/circuit/rv32im/ecall.cpp:180
-PolyExtStep::AndCond(0, 1942, 1970), // cirgen/circuit/rv32im/ecall.cpp:172
-PolyExtStep::Sub(2327, 0), // cirgen/circuit/rv32im/ecall.cpp:184
-PolyExtStep::Sub(525, 5324), // cirgen/circuit/rv32im/ecall.cpp:184
-PolyExtStep::AndEqz(0, 5325), // cirgen/circuit/rv32im/ecall.cpp:184
-PolyExtStep::Add(2037, 18), // cirgen/circuit/rv32im/ecall.cpp:185
-PolyExtStep::Sub(522, 5326), // cirgen/circuit/rv32im/ecall.cpp:185
-PolyExtStep::AndEqz(1972, 5327), // cirgen/circuit/rv32im/ecall.cpp:185
-PolyExtStep::AndCond(1971, 1946, 1973), // cirgen/circuit/rv32im/ecall.cpp:183
+PolyExtStep::Add(5318, 0), // cirgen/circuit/rv32im/ecall.cpp:182
+PolyExtStep::Add(2000, 5319), // cirgen/circuit/rv32im/ecall.cpp:182
+PolyExtStep::Sub(5320, 18), // cirgen/circuit/rv32im/ecall.cpp:182
+PolyExtStep::Sub(522, 5321), // cirgen/circuit/rv32im/ecall.cpp:180
+PolyExtStep::AndEqz(0, 5322), // cirgen/circuit/rv32im/ecall.cpp:180
+PolyExtStep::Sub(525, 2343), // cirgen/circuit/rv32im/ecall.cpp:183
+PolyExtStep::AndEqz(1969, 5323), // cirgen/circuit/rv32im/ecall.cpp:183
+PolyExtStep::AndCond(0, 1942, 1970), // cirgen/circuit/rv32im/ecall.cpp:173
+PolyExtStep::Sub(2327, 0), // cirgen/circuit/rv32im/ecall.cpp:187
+PolyExtStep::Sub(525, 5324), // cirgen/circuit/rv32im/ecall.cpp:187
+PolyExtStep::AndEqz(0, 5325), // cirgen/circuit/rv32im/ecall.cpp:187
+PolyExtStep::Add(2037, 18), // cirgen/circuit/rv32im/ecall.cpp:188
+PolyExtStep::Sub(522, 5326), // cirgen/circuit/rv32im/ecall.cpp:188
+PolyExtStep::AndEqz(1972, 5327), // cirgen/circuit/rv32im/ecall.cpp:188
+PolyExtStep::AndCond(1971, 1946, 1973), // cirgen/circuit/rv32im/ecall.cpp:186
 PolyExtStep::AndCond(1974, 551, 1839), // cirgen/components/iszero.cpp:16
 PolyExtStep::Mul(525, 563), // cirgen/components/iszero.cpp:18
 PolyExtStep::Sub(5328, 0), // cirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(0, 5329), // cirgen/components/iszero.cpp:18
 PolyExtStep::AndCond(1975, 5270, 1976), // cirgen/components/iszero.cpp:18
-PolyExtStep::Mul(5319, 5270), // cirgen/circuit/rv32im/ecall.cpp:193
+PolyExtStep::Mul(5319, 5270), // cirgen/circuit/rv32im/ecall.cpp:196
 PolyExtStep::Mul(532, 19), // components/onehot.h:46
 PolyExtStep::Add(1512, 5331), // components/onehot.h:46
 PolyExtStep::Mul(549, 18), // components/onehot.h:46
 PolyExtStep::Add(5332, 5333), // components/onehot.h:46
 PolyExtStep::Sub(5334, 5330), // components/onehot.h:40
 PolyExtStep::AndEqz(0, 5335), // components/onehot.h:40
-PolyExtStep::AndCond(1977, 1942, 1978), // cirgen/circuit/rv32im/ecall.cpp:190
-PolyExtStep::Mul(5270, 18), // cirgen/circuit/rv32im/ecall.cpp:198
+PolyExtStep::AndCond(1977, 1942, 1978), // cirgen/circuit/rv32im/ecall.cpp:193
+PolyExtStep::Mul(5270, 18), // cirgen/circuit/rv32im/ecall.cpp:204
 PolyExtStep::Sub(5334, 5336), // components/onehot.h:40
 PolyExtStep::AndEqz(0, 5337), // components/onehot.h:40
-PolyExtStep::AndCond(1979, 1946, 1980), // cirgen/circuit/rv32im/ecall.cpp:197
-PolyExtStep::AndEqz(0, 515), // cirgen/circuit/rv32im/ecall.cpp:212
-PolyExtStep::AndEqz(1982, 574), // cirgen/circuit/rv32im/ecall.cpp:213
-PolyExtStep::Sub(323, 58), // cirgen/circuit/rv32im/ecall.cpp:215
-PolyExtStep::AndEqz(1983, 5338), // cirgen/circuit/rv32im/ecall.cpp:215
-PolyExtStep::Sub(349, 59), // cirgen/circuit/rv32im/ecall.cpp:216
-PolyExtStep::AndEqz(1984, 5339), // cirgen/circuit/rv32im/ecall.cpp:216
+PolyExtStep::AndCond(1979, 1946, 1980), // cirgen/circuit/rv32im/ecall.cpp:204
+PolyExtStep::AndEqz(0, 515), // cirgen/circuit/rv32im/ecall.cpp:215
+PolyExtStep::AndEqz(1982, 574), // cirgen/circuit/rv32im/ecall.cpp:216
+PolyExtStep::Sub(323, 58), // cirgen/circuit/rv32im/ecall.cpp:218
+PolyExtStep::AndEqz(1983, 5338), // cirgen/circuit/rv32im/ecall.cpp:218
+PolyExtStep::Sub(349, 59), // cirgen/circuit/rv32im/ecall.cpp:219
+PolyExtStep::AndEqz(1984, 5339), // cirgen/circuit/rv32im/ecall.cpp:219
 PolyExtStep::AndEqz(1985, 375), // cirgen/components/ram.cpp:43
 PolyExtStep::AndEqz(1986, 377), // cirgen/components/ram.cpp:44
 PolyExtStep::AndEqz(1987, 582), // cirgen/components/ram.cpp:45
@@ -7366,30 +7366,30 @@ PolyExtStep::AndEqz(1998, 754), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1999, 748), // components/bits.h:61
 PolyExtStep::AndEqz(2000, 494), // cirgen/circuit/rv32im/body.cpp:22
 PolyExtStep::AndEqz(2001, 496), // cirgen/circuit/rv32im/body.cpp:23
-PolyExtStep::AndEqz(2002, 468), // cirgen/circuit/rv32im/ecall.cpp:224
-PolyExtStep::AndCond(1981, 518, 2003), // cirgen/circuit/rv32im/ecall.cpp:203
-PolyExtStep::Sub(0, 518), // cirgen/circuit/rv32im/ecall.cpp:226
-PolyExtStep::AndEqz(1158, 1919), // cirgen/circuit/rv32im/ecall.cpp:228
-PolyExtStep::AndCond(2004, 5340, 2005), // cirgen/circuit/rv32im/ecall.cpp:226
-PolyExtStep::Add(540, 535), // cirgen/circuit/rv32im/ecall.cpp:238
-PolyExtStep::Add(5341, 532), // cirgen/circuit/rv32im/ecall.cpp:238
-PolyExtStep::Sub(323, 522), // cirgen/circuit/rv32im/ecall.cpp:256
-PolyExtStep::AndEqz(1982, 5343), // cirgen/circuit/rv32im/ecall.cpp:256
-PolyExtStep::AndCond(2006, 549, 2007), // cirgen/circuit/rv32im/ecall.cpp:242
-PolyExtStep::AndCond(2008, 5342, 1293), // cirgen/circuit/rv32im/ecall.cpp:258
-PolyExtStep::Add(532, 549), // cirgen/circuit/rv32im/ecall.cpp:236
-PolyExtStep::Add(522, 0), // cirgen/circuit/rv32im/ecall.cpp:243
-PolyExtStep::Sub(349, 5345), // cirgen/circuit/rv32im/ecall.cpp:256
-PolyExtStep::AndEqz(1674, 5346), // cirgen/circuit/rv32im/ecall.cpp:256
-PolyExtStep::AndCond(2009, 5344, 2010), // cirgen/circuit/rv32im/ecall.cpp:242
-PolyExtStep::AndCond(2011, 5341, 1515), // cirgen/circuit/rv32im/ecall.cpp:258
-PolyExtStep::Add(535, 532), // cirgen/circuit/rv32im/ecall.cpp:236
-PolyExtStep::Add(5347, 549), // cirgen/circuit/rv32im/ecall.cpp:236
-PolyExtStep::Add(522, 3), // cirgen/circuit/rv32im/ecall.cpp:243
-PolyExtStep::AndEqz(0, 581), // cirgen/circuit/rv32im/ecall.cpp:255
-PolyExtStep::Sub(375, 5349), // cirgen/circuit/rv32im/ecall.cpp:256
-PolyExtStep::AndEqz(2013, 5350), // cirgen/circuit/rv32im/ecall.cpp:256
-PolyExtStep::AndCond(2012, 5348, 2014), // cirgen/circuit/rv32im/ecall.cpp:242
+PolyExtStep::AndEqz(2002, 468), // cirgen/circuit/rv32im/ecall.cpp:227
+PolyExtStep::AndCond(1981, 518, 2003), // cirgen/circuit/rv32im/ecall.cpp:206
+PolyExtStep::Sub(0, 518), // cirgen/circuit/rv32im/ecall.cpp:229
+PolyExtStep::AndEqz(1158, 1919), // cirgen/circuit/rv32im/ecall.cpp:231
+PolyExtStep::AndCond(2004, 5340, 2005), // cirgen/circuit/rv32im/ecall.cpp:229
+PolyExtStep::Add(540, 535), // cirgen/circuit/rv32im/ecall.cpp:241
+PolyExtStep::Add(5341, 532), // cirgen/circuit/rv32im/ecall.cpp:241
+PolyExtStep::Sub(323, 522), // cirgen/circuit/rv32im/ecall.cpp:254
+PolyExtStep::AndEqz(1982, 5343), // cirgen/circuit/rv32im/ecall.cpp:254
+PolyExtStep::AndCond(2006, 549, 2007), // cirgen/circuit/rv32im/ecall.cpp:245
+PolyExtStep::AndCond(2008, 5342, 1293), // cirgen/circuit/rv32im/ecall.cpp:256
+PolyExtStep::Add(532, 549), // cirgen/circuit/rv32im/ecall.cpp:239
+PolyExtStep::Add(522, 0), // cirgen/circuit/rv32im/ecall.cpp:246
+PolyExtStep::Sub(349, 5345), // cirgen/circuit/rv32im/ecall.cpp:254
+PolyExtStep::AndEqz(1674, 5346), // cirgen/circuit/rv32im/ecall.cpp:254
+PolyExtStep::AndCond(2009, 5344, 2010), // cirgen/circuit/rv32im/ecall.cpp:245
+PolyExtStep::AndCond(2011, 5341, 1515), // cirgen/circuit/rv32im/ecall.cpp:256
+PolyExtStep::Add(535, 532), // cirgen/circuit/rv32im/ecall.cpp:239
+PolyExtStep::Add(5347, 549), // cirgen/circuit/rv32im/ecall.cpp:239
+PolyExtStep::Add(522, 3), // cirgen/circuit/rv32im/ecall.cpp:246
+PolyExtStep::AndEqz(0, 581), // cirgen/circuit/rv32im/ecall.cpp:253
+PolyExtStep::Sub(375, 5349), // cirgen/circuit/rv32im/ecall.cpp:254
+PolyExtStep::AndEqz(2013, 5350), // cirgen/circuit/rv32im/ecall.cpp:254
+PolyExtStep::AndCond(2012, 5348, 2014), // cirgen/circuit/rv32im/ecall.cpp:245
 PolyExtStep::AndEqz(0, 375), // cirgen/components/ram.cpp:43
 PolyExtStep::AndEqz(2016, 377), // cirgen/components/ram.cpp:44
 PolyExtStep::AndEqz(2017, 582), // cirgen/components/ram.cpp:45
@@ -7397,14 +7397,14 @@ PolyExtStep::AndEqz(2018, 367), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(2019, 369), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(2020, 371), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(2021, 422), // cirgen/components/u32.cpp:28
-PolyExtStep::AndCond(2015, 540, 2022), // cirgen/circuit/rv32im/ecall.cpp:258
-PolyExtStep::Add(5342, 549), // cirgen/circuit/rv32im/ecall.cpp:236
-PolyExtStep::Add(522, 19), // cirgen/circuit/rv32im/ecall.cpp:243
-PolyExtStep::AndEqz(0, 757), // cirgen/circuit/rv32im/ecall.cpp:255
-PolyExtStep::Sub(424, 5352), // cirgen/circuit/rv32im/ecall.cpp:256
-PolyExtStep::AndEqz(2024, 5353), // cirgen/circuit/rv32im/ecall.cpp:256
-PolyExtStep::AndCond(2023, 5351, 2025), // cirgen/circuit/rv32im/ecall.cpp:242
-PolyExtStep::AndCond(2026, 1, 315), // cirgen/circuit/rv32im/ecall.cpp:258
+PolyExtStep::AndCond(2015, 540, 2022), // cirgen/circuit/rv32im/ecall.cpp:256
+PolyExtStep::Add(5342, 549), // cirgen/circuit/rv32im/ecall.cpp:239
+PolyExtStep::Add(522, 19), // cirgen/circuit/rv32im/ecall.cpp:246
+PolyExtStep::AndEqz(0, 757), // cirgen/circuit/rv32im/ecall.cpp:253
+PolyExtStep::Sub(424, 5352), // cirgen/circuit/rv32im/ecall.cpp:254
+PolyExtStep::AndEqz(2024, 5353), // cirgen/circuit/rv32im/ecall.cpp:254
+PolyExtStep::AndCond(2023, 5351, 2025), // cirgen/circuit/rv32im/ecall.cpp:245
+PolyExtStep::AndCond(2026, 1, 315), // cirgen/circuit/rv32im/ecall.cpp:256
 PolyExtStep::AndCond(1968, 321, 2027), // components/mux.h:39
 PolyExtStep::AndCond(231, 497, 2028), // components/mux.h:39
 PolyExtStep::Get(52), // Top/Code/OneHot/hot[5](Reg)(components/mux.h:39)

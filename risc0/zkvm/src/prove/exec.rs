@@ -68,7 +68,7 @@ pub trait HostHandler {
         &mut self,
         channel: u32,
         from_guest_buf: &[u8],
-        from_host_buf: &mut [u32],
+        to_guest_buf: &mut [u32],
     ) -> Result<(u32, u32)>;
     fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
 }
@@ -333,15 +333,15 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 self.log(extra, args);
                 Ok(())
             }
-            "syscall-init" => {
+            "syscallInit" => {
                 self.syscall_init(cycle)?;
                 Ok(())
             }
-            "syscall-body" => {
+            "syscallBody" => {
                 (outs[0], outs[1], outs[2], outs[3]) = split_word8(self.syscall_body()?);
                 Ok(())
             }
-            "syscall-fini" => {
+            "syscallFini" => {
                 let (a0, a1) = self.syscall_fini()?;
                 (outs[0], outs[1], outs[2], outs[3]) = split_word8(a0);
                 (outs[4], outs[5], outs[6], outs[7]) = split_word8(a1);
@@ -792,13 +792,13 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 let from_guest_buf = self.memory.load_region(buf_ptr, buf_len);
                 debug!("SYS_IO[{cycle}] Guest sends {buf_len} bytes, requests {to_guest_words} words back");
                 trace!("SYS_IO[{cycle}] Guest sends data: {:?}", from_guest_buf);
-                let mut from_host_buf = vec![0u32; to_guest_words as usize];
+                let mut to_guest_buf = vec![0u32; to_guest_words as usize];
                 self.syscall_out_regs =
                     self.handler
-                        .on_txrx(channel, &from_guest_buf, &mut from_host_buf)?;
+                        .on_txrx(channel, &from_guest_buf, &mut to_guest_buf)?;
                 trace!("SYS_IO[{cycle}] (a0, a1): {:?}", self.syscall_out_regs);
-                trace!("SYS_IO[{cycle}] data sent to guest: {from_host_buf:?}");
-                self.syscall_out_data = from_host_buf.into();
+                trace!("SYS_IO[{cycle}] data sent to guest: {to_guest_buf:?}");
+                self.syscall_out_data = to_guest_buf.into();
                 Ok(())
             }
             SYS_CYCLE_COUNT => {
