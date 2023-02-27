@@ -24,17 +24,19 @@ jobs:
         with:
           crate: cargo-sort
           version: "1.0"
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path templates/bonsai/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check templates/bonsai
-      - name: Install npm dependencies (Bonsai template)
-        run: |
-          cd templates/bonsai
-          npm install
-      - run: cd templates/bonsai && npm run ci
+      - run: npm install
+        working-directory: templates/bonsai
+      - run: npm run ci
+        working-directory: templates/bonsai
       - run: npx @kt3k/license-checker
 
   test:
@@ -63,6 +65,9 @@ jobs:
       - uses: risc0/actions-rs-toolchain@v1
         with:
           toolchain: stable
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts
       - name: Prepare environment (Linux)
         if: matrix.os == 'Linux'
         run: |
@@ -78,14 +83,12 @@ jobs:
           mkdir -p $HOME/.local/bin
           mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
           echo "$HOME/.local/bin" >> $GITHUB_PATH
-      - name: Install npm dependencies (Bonsai template)
-        run: |
-          cd templates/bonsai
-          npm install
+      - run: npm install
+        working-directory: templates/bonsai
       - run: cargo test -F $FEATURE
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
-      - run: PATH=$(npm bin):$PATH cargo test -F $FEATURE --manifest-path templates/bonsai/Cargo.toml
+      - run: cargo test -F $FEATURE --manifest-path templates/bonsai/Cargo.toml
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
