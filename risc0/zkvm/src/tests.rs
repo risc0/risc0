@@ -236,8 +236,7 @@ fn host_sendrecv() {
     let actual: Mutex<Vec<Vec<u8>>> = Vec::new().into();
     let opts = ProverOpts::default()
         .with_skip_seal(true)
-        .with_sendrecv_callback(5, |channel_id, buf| -> Vec<u8> {
-            assert_eq!(channel_id, 5);
+        .with_sendrecv_callback(5, |buf: &[u8]| -> Vec<u8> {
             let mut act = actual.lock().unwrap();
             act.push(buf.into());
             expected[act.len()].clone()
@@ -261,7 +260,7 @@ fn host_sendrecv() {
 fn host_sendrecv_callback_panic() {
     let opts = ProverOpts::default()
         .with_skip_seal(true)
-        .with_sendrecv_callback(5, |_channel_id, _buf| -> Vec<u8> {
+        .with_sendrecv_callback(5, |_buf: &[u8]| -> Vec<u8> {
             panic!("I am panicking from here!");
         });
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();

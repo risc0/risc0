@@ -40,8 +40,8 @@ fn profile_test_func2() {
 }
 
 pub fn main() {
-    let initial_input = env::send_recv(SENDRECV_CHANNEL_INITIAL_INPUT, &[]);
-    let impl_select = MultiTestSpec::deserialize_from(bytemuck::cast_slice(initial_input));
+    let initial_bytes = env::send_recv_slice::<u8, u8>(SENDRECV_CHANNEL_INITIAL_INPUT, &[]);
+    let impl_select = MultiTestSpec::deserialize_from(bytemuck::cast_slice(initial_bytes));
     match impl_select {
         MultiTestSpecRef::DoNothing(_) => {}
         MultiTestSpecRef::ShaConforms(_) => test_sha_impl::<sha::Impl>(),
@@ -103,7 +103,8 @@ pub fn main() {
             let mut input_len: usize = 0;
 
             for _ in 0..sendrecv.count() {
-                let host_data = env::send_recv(sendrecv.channel_id(), &input[..input_len]);
+                let host_data =
+                    env::send_recv_slice::<u8, u8>(sendrecv.channel_id(), &input[..input_len]);
 
                 input = bytemuck::cast_slice(host_data);
                 input_len = input.len();
