@@ -17,19 +17,4 @@ pub const SENDRECV_CHANNEL_INITIAL_INPUT: u32 = 0;
 pub const SENDRECV_CHANNEL_STDOUT: u32 = 1;
 pub const SENDRECV_CHANNEL_STDERR: u32 = 2;
 pub const SENDRECV_CHANNEL_JOURNAL: u32 = 3;
-
-#[repr(C)]
-pub struct SliceDescriptor {
-    pub size: u32,
-    pub addr: u32,
-}
-
-impl SliceDescriptor {
-    pub fn new<T>(slice: &[T]) -> Self {
-        let size = slice.len() * core::mem::size_of::<T>();
-        Self {
-            size: size as u32,
-            addr: slice.as_ptr() as u32,
-        }
-    }
-}
+pub const SENDRECV_CHANNEL_COMPUTE_POLY: u32 = 4;
