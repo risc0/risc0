@@ -14,8 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          # Fetch the merge commit and origin/HEAD.
-          fetch-depth: 2
+          # Full history is required by license-check.py
+          fetch-depth: 0
       - uses: risc0/actions-rs-toolchain@v1
         with:
           toolchain: stable
@@ -28,7 +28,7 @@ jobs:
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
-      - run: npx @kt3k/license-checker
+      - run: python license-check.py
 
   test:
     runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.device }}"]
