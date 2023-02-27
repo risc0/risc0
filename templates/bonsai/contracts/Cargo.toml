@@ -13,3 +13,8 @@ ethers-solc = { version = "1.0", features = ["full"] }
 hello-bonsai-methods = { workspace = true }
 risc0-zkvm = { workspace = true }
 tokio = "1.24"
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]

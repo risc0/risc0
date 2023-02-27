@@ -16,3 +16,6 @@ contracts/cache
 
 # Logs
 yarn-error.log
+
+# Lock files
+package-lock.json

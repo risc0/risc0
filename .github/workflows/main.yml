@@ -88,7 +88,8 @@ jobs:
       - run: cargo test -F $FEATURE
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
-      - run: cargo test -F $FEATURE --manifest-path templates/bonsai/Cargo.toml
+      - run: PATH=$PWD/node_modules/.bin:$PATH cargo test -F $FEATURE
+        working-directory: templates/bonsai
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
