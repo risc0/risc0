@@ -31,19 +31,23 @@
 //! cryptographically verify that it was generated faithfully and is associated
 //! with the expected image ID. You can also read the contents of the journal.
 //! ```
-//! # #![feature(slice_flatten)]
 //! use risc0_zkvm::Receipt;
 //!
 //! # // Need to awkwardly set up a fake Receipt since we can't use the guest in docs
-//! # let receipt = Receipt {
-//! #    seal: vec!(),
-//! #    journal: risc0_zkvm::serde::to_vec(&String::from("test"))
+//! # let journal_words = risc0_zkvm::serde::to_vec(&String::from("test"))
 //! #        .unwrap()
 //! #        .iter()
 //! #        .map(|&x| x.to_le_bytes())
-//! #        .collect::<Vec<[u8; 4]>>()
-//! #        .flatten()
-//! #        .to_vec()
+//! #        .collect::<Vec<[u8; 4]>>();
+//! # let mut journal: Vec<u8> = vec!();
+//! # for word in journal_words.iter() {
+//! #    for byte in word.iter() {
+//! #        journal.push(*byte);
+//! #    }
+//! # }
+//! # let receipt = Receipt {
+//! #    seal: vec!(),
+//! #    journal: journal,
 //! # };
 //! # use crate::risc0_zkvm::sha::Sha256;
 //! # let IMAGE_ID: [u32; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
