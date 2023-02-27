@@ -35,13 +35,25 @@ pub fn zkvm_abi_alloc_words(nwords: usize) -> *mut u32 {
 #[no_mangle]
 pub fn zkvm_abi_write_stdout(buf: &[u8]) {
     unsafe {
-        syscall::sys_io(io::SENDRECV_CHANNEL_STDOUT, buf.as_ptr(), buf.len());
+        syscall::sys_io(
+            &mut [] as _,
+            0,
+            buf.as_ptr(),
+            buf.len(),
+            io::SENDRECV_CHANNEL_STDOUT,
+        );
     }
 }
 
 #[no_mangle]
 pub fn zkvm_abi_write_stderr(buf: &[u8]) {
     unsafe {
-        syscall::sys_io(io::SENDRECV_CHANNEL_STDERR, buf.as_ptr(), buf.len());
+        syscall::sys_io(
+            &mut [] as _,
+            0,
+            buf.as_ptr(),
+            buf.len(),
+            io::SENDRECV_CHANNEL_STDERR,
+        );
     }
 }
