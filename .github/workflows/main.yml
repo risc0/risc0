@@ -25,8 +25,6 @@ jobs:
           crate: cargo-sort
           version: "1.0"
       - uses: actions/setup-node@v3
-        with:
-          node-version: lts
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path templates/bonsai/Cargo.toml
@@ -66,8 +64,6 @@ jobs:
         with:
           toolchain: stable
       - uses: actions/setup-node@v3
-        with:
-          node-version: lts
       - name: Prepare environment (Linux)
         if: matrix.os == 'Linux'
         run: |
