@@ -10,7 +10,7 @@ on:
 
 jobs:
   bench:
-    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
