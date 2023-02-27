@@ -130,6 +130,8 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    use wordle_core::LetterFeedback;
+
     use crate::{Player, Server};
 
     const TEST_GUESS_WRONG: &str = "roofs";
@@ -154,4 +156,23 @@ mod tests {
         let score = player.check_receipt(receipt);
         assert!(score.game_is_won(), "Correct guess should win the game");
     }
+
+    /// If a guessed letter is present in every position where it ought to appear,
+    /// and also in an incorrect position, the 'bonus' letter shouldn't flag yellow
+    #[test]
+    fn avoid_excessive_yellows() {
+        let server = Server::new("spurn");
+        let player = Player {
+            hash: server.get_secret_word_hash(),
+        };
+
+        let guess_word = "apple";
+        let receipt = server.check_round(&guess_word);
+        let score = player.check_receipt(receipt);
+        assert!(
+            score.0[2] == LetterFeedback::Miss,
+            "Excessive instances of letter should not flag yellow"
+        );
+    }
+
 }

@@ -52,4 +52,6 @@ impl WordFeedback {
         }
         println!("\x1b[0m\n");
     }
+
+
 }
