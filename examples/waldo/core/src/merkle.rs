@@ -67,13 +67,8 @@ impl<Element> MerkleTree<Element>
 where
     Element: Hashable<ShaHasher> + Serialize,
 {
-    pub fn vector_oracle_callback<'a>(
-        &'a self,
-    ) -> impl Fn(u32, &[u8], &mut [u32]) -> (u32, u32) + 'a {
-        |channel_id, data, output| {
-            // Callback function must only be registered as a callback for the
-            // VECTOR_ORACLE_CHANNEL.
-            assert_eq!(channel_id, VECTOR_ORACLE_CHANNEL);
+    pub fn vector_oracle_callback<'a>(&'a self) -> impl Fn(&[u8]) -> Vec<u8> + 'a {
+        |data| {
             // TODO: Using bincode here, but it would likely be better on the guest side to
             // use the risc0 zeroio or serde crates. I should try to use one of
             // those (again).
@@ -86,11 +81,7 @@ where
             let proof = self.prove(index);
 
             assert!(proof.verify(&self.root(), &value));
-            let result = bincode::serialize(&(value, proof)).unwrap();
-            let copy_len = std::cmp::min(output.len(), result.len());
-            output[..copy_len].clone_from_slice(bytemuck::cast_slice(&result[..copy_len]));
-
-            (result.len() as u32, 0)
+            bincode::serialize(&(value, proof)).unwrap()
         }
     }
 }
@@ -325,7 +316,7 @@ where
     // efficient in) the guest.
     pub fn get(&self, index: usize) -> Element {
         let (value, proof): (Element, Proof<Element>) =
-            bincode::deserialize(guest::env::send_recv(
+            bincode::deserialize(guest::env::send_recv_slice(
                 VECTOR_ORACLE_CHANNEL,
                 // Cast the index to u32 since usize is an architecture dependent type.
                 &bincode::serialize(&(u32::try_from(index).unwrap())).unwrap(),
