@@ -5,8 +5,6 @@ import os
 from pathlib import Path
 import subprocess
 
-CWD = Path('.').absolute()
-
 PUBLIC_HEADER = '''
 // Copyright {YEAR} RISC Zero, Inc.
 //
@@ -22,13 +20,6 @@ PUBLIC_HEADER = '''
 // See the License for the specific language governing permissions and
 // limitations under the License.
 '''.strip().splitlines()
-
-IGNORED_DIRS = [
-    '.git',
-    'target',
-]
-
-IGNORED_FILES = []
 
 EXTENSIONS = [
     '.cpp',
@@ -48,7 +39,7 @@ def check_header(expected_year, lines_actual):
 def check_file(file):
     cmd = ['git', 'log', '-1', '--format=%ad', '--date=format:%Y', file]
     expected_year = subprocess.check_output(cmd, encoding='UTF-8').strip()
-    rel_path = file.relative_to(CWD)
+    rel_path = file.relative_to(repo_root())
     lines = file.read_text().splitlines()
     result = check_header(expected_year, lines)
     if result:
@@ -58,17 +49,29 @@ def check_file(file):
         return 1
     return 0
 
+REPO_ROOT = None
+
+def repo_root():
+    """Return an absolute Path to the repo root"""
+    global REPO_ROOT
+    if REPO_ROOT is None:
+        cmd = ["git", "rev-parse", "--show-toplevel"]
+        REPO_ROOT = Path(subprocess.check_output(cmd, encoding='UTF-8').strip())
+
+    return REPO_ROOT
+
+
+def tracked_files():
+    """Yield all file paths tracked by git"""
+    cmd = ["git", "ls-tree", "--full-tree", "--name-only", "-r", "HEAD"]
+    for path in subprocess.check_output(cmd, encoding='UTF-8').strip().splitlines():
+        yield (repo_root() / Path(path)).absolute()
 
 def main():
     ret = 0
-    for root, dirs, files in os.walk('.'):
-        root = Path(root).absolute()
-        dirs[:] = [x for x in dirs if x not in IGNORED_DIRS]
-        for file in files:
-            file = Path(file)
-            path = root / file
-            if path not in IGNORED_FILES and file.suffix in EXTENSIONS:
-                ret |= check_file(root / file)
+    for path in tracked_files():
+        if path.suffix in EXTENSIONS:
+            ret |= check_file(path)
     sys.exit(ret)
 
 
