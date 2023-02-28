@@ -67,11 +67,8 @@ impl<Element> MerkleTree<Element>
 where
     Element: Hashable<ShaHasher> + Serialize,
 {
-    pub fn vector_oracle_callback<'a>(&'a self) -> impl Fn(u32, &[u8]) -> Vec<u8> + 'a {
-        |channel_id, data| {
-            // Callback function must only be registered as a callback for the
-            // VECTOR_ORACLE_CHANNEL.
-            assert_eq!(channel_id, VECTOR_ORACLE_CHANNEL);
+    pub fn vector_oracle_callback<'a>(&'a self) -> impl Fn(&[u8]) -> Vec<u8> + 'a {
+        |data| {
             // TODO: Using bincode here, but it would likely be better on the guest side to
             // use the risc0 zeroio or serde crates. I should try to use one of
             // those (again).
@@ -319,7 +316,7 @@ where
     // efficient in) the guest.
     pub fn get(&self, index: usize) -> Element {
         let (value, proof): (Element, Proof<Element>) =
-            bincode::deserialize(guest::env::send_recv(
+            bincode::deserialize(guest::env::send_recv_slice(
                 VECTOR_ORACLE_CHANNEL,
                 // Cast the index to u32 since usize is an architecture dependent type.
                 &bincode::serialize(&(u32::try_from(index).unwrap())).unwrap(),
