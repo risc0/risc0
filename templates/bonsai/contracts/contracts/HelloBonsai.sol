@@ -27,7 +27,10 @@ contract HelloBonsai is BonsaiApp {
   mapping(uint256 => uint256) public fibonnaci_cache;
 
   // Initialize the contract, binding it to a specified Bonsai proxy and RISC Zero guest image.
-  constructor(IBonsaiProxy _bonsai_proxy, bytes32 _image_id) BonsaiApp(_bonsai_proxy, _image_id) {}
+  constructor(
+    IBonsaiProxy _bonsai_proxy,
+    bytes32 _image_id
+  ) BonsaiApp(_bonsai_proxy, _image_id) {}
 
   event CalculateFibonacciCallback(uint256 indexed n, uint256 result);
 
