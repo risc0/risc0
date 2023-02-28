@@ -59,8 +59,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
       - run: |
-          matrix="$(cat */output.md)"
-          echo "::set-output name=matrix::$matrix"
+          file_data="$(cat */output.md)"
+          echo "all_md=$file_data" >> $GITHUB_OUTPUT
         id: download
 
       - uses: actions/github-script@v3
@@ -71,5 +71,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: '${{ steps.download.matrix }}'
+              body: `${{ steps.download.output.all_md }}`
             })
