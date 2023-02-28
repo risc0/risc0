@@ -322,9 +322,10 @@ impl<'a> Prover<'a> {
         }
     }
 
-    /// Run the guest code. Like [Prover::run], but you can select a different
-    /// HAL. You may want to consider instead changing the default HAL using
-    /// feature flags.
+    /// Run the guest code. Like [Prover::run], but with parameters for
+    /// selecting a HAL, allowing the use of HALs other than [default_hal].
+    /// People creating or using a third-party HAL can use this function to run
+    /// the Prover with that HAL.
     #[tracing::instrument(skip_all)]
     pub fn run_with_hal<H, E>(&mut self, hal: &H, eval: &E) -> Result<Receipt>
     where
