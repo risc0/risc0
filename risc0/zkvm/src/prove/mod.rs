@@ -265,7 +265,8 @@ impl<'a> Prover<'a> {
     /// guest reads them in the same order they are added by the [Prover].
     /// However, to reduce maintenance burden and the chance of mistakes, we
     /// recommend instead using a single `struct` to hold all the inputs and
-    /// calling [Prover::add_input_u8_slice] just once (on the serialized representation of the input.
+    /// calling [Prover::add_input_u8_slice] just once (on the serialized
+    /// representation of that input).
     pub fn add_input_u8_slice(&mut self, slice: &[u8]) {
         self.inner.input.extend_from_slice(slice);
     }
@@ -277,8 +278,8 @@ impl<'a> Prover<'a> {
     /// guest reads them in the same order they are added by the [Prover].
     /// However, to reduce maintenance burden and the chance of mistakes, we
     /// recommend instead using a single `struct` to hold all the inputs and
-    /// calling [Prover::add_input_u32_slice] just once (on that input
-    /// `struct`).
+    /// calling [Prover::add_input_u32_slice] just once (on the serialized
+    /// representation of that input).
     pub fn add_input_u32_slice(&mut self, slice: &[u32]) {
         self.inner
             .input
