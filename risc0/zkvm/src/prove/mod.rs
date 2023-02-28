@@ -183,6 +183,11 @@ pub struct Prover<'a> {
     elf: Program,
     inner: ProverImpl<'a>,
     image_id: Digest,
+    /// How many cycles executing the guest took.
+    ///
+    /// Initialized to 0 by [Prover::new], then computed when [Prover::run] is
+    /// called. Note that this is privately shared with the host; it is not
+    /// present in the [Receipt].
     pub cycles: usize,
 }
 
