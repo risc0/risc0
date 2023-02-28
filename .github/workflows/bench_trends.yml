@@ -35,8 +35,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: ./actions/rustup
-      - uses: ./actions/sccache
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
       - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
       - name: Store benchmark result
         uses: risc0/github-action-benchmark@v1

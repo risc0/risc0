@@ -33,8 +33,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: ./actions/rustup
-      - uses: ./actions/sccache
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
       - uses: risc0/criterion-compare-action@risc0
         with:
           benchName: fib

@@ -16,7 +16,7 @@ jobs:
         with:
           # Full history is required by license-check.py
           fetch-depth: 0
-      - uses: ./actions/rustup
+      - uses: ./.github/actions/rustup
       - name: Install cargo-sort
         uses: risc0/cargo-install@v1
         with:
@@ -58,11 +58,11 @@ jobs:
       RUSTC_WRAPPER: sccache
     steps:
       - uses: actions/checkout@v3
-      - uses: ./actions/rustup
+      - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: ./actions/sccache
+      - uses: ./.github/actions/sccache
       - run: npm install
         working-directory: templates/bonsai
       - run: cargo test -F $FEATURE
@@ -90,5 +90,5 @@ jobs:
     runs-on: [self-hosted, Linux, cpu]
     steps:
       - uses: actions/checkout@v3
-      - uses: ./actions/rustup
+      - uses: ./.github/actions/rustup
       - run: cargo doc
