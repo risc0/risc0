@@ -167,7 +167,7 @@ impl<'a> Default for ProverOpts<'a> {
 /// [Prover::run] to execute the guest code and produce a [Receipt] proving
 /// execution.
 /// ```ignore
-/// prover.add_input_u32_slice(&to_vec(&input)?);
+/// prover.add_input_u32_slice(&risc0_zkvm::serde::to_vec(&input)?);
 /// let receipt = prover.run()?;
 /// ```
 /// After running the prover, publicly proven results can be accessed from the
