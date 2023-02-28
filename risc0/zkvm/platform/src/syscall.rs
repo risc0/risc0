@@ -266,27 +266,18 @@ pub unsafe fn sys_sha_buffer(
 }
 
 #[inline(always)]
-pub unsafe fn sys_rand(buf_len: usize) -> &'static [u8] {
+pub unsafe fn sys_rand(recv_buf: *mut u32, recv_words: usize) {
     #[cfg(target_os = "zkvm")]
     {
-        let write_ptr: &mut usize = &mut *READ_PTR.get();
-        *write_ptr = round_up(*write_ptr as u32, crate::PAGE_SIZE as u32) as usize;
-
-        let out_ptr = *write_ptr as *const u8;
+        let a0: u32;
+        let a1: u32;
         asm!(
             "ecall",
             in("t0") ecall::SOFTWARE,
-            in("a7") nr::SYS_RAND,
-            inout("a0") out_ptr => _,
-            in("a1") buf_len,
+            inout("a0") recv_buf => _,
+            inout("a1") recv_words => _,
+            in("a2") nr::SYS_RAND,
         );
-
-        // Set the READ_PTR to the end of the returned data, rounded to the next
-        // word.
-        let out_nwords = (buf_len + WORD_SIZE - 1) / WORD_SIZE;
-        let write_end = write_ptr.checked_add(out_nwords * WORD_SIZE).unwrap();
-        *write_ptr = write_end;
-        core::slice::from_raw_parts(out_ptr, buf_len)
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()

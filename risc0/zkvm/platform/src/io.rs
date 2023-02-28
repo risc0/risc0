@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Standard ZKVM channels; must match zkvm/platform/io.h.
+// Standard ZKVM channels
 pub const SENDRECV_CHANNEL_INITIAL_INPUT: u32 = 0;
 pub const SENDRECV_CHANNEL_STDOUT: u32 = 1;
 pub const SENDRECV_CHANNEL_STDERR: u32 = 2;
 pub const SENDRECV_CHANNEL_JOURNAL: u32 = 3;
 pub const SENDRECV_CHANNEL_COMPUTE_POLY: u32 = 4;
+pub const SENDRECV_CHANNEL_RANDOM: u32 = 5;

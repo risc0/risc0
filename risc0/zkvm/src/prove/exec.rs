@@ -30,6 +30,7 @@ use risc0_zkp::{
     MAX_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{
+    io::SENDRECV_CHANNEL_RANDOM,
     memory::{FFPU, SYSTEM},
     syscall::{
         ecall,
@@ -808,15 +809,23 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             }
             SYS_RAND => {
                 let buf_ptr = self.memory.load_register(REG_A0);
-                let buf_len = self.memory.load_register(REG_A1);
+                let buf_words = self.memory.load_register(REG_A1);
                 debug!("SYS_RAND[{cycle}]");
 
-                let mut buf = self.memory.load_region(buf_ptr, buf_len);
-                getrandom::getrandom(buf.as_mut_slice())?;
+                let from_guest_buf = self
+                    .memory
+                    .load_region(buf_ptr, buf_words * WORD_SIZE as u32);
+                let mut to_guest_buf = vec![0u32; buf_words as usize];
+                self.syscall_out_regs = self.handler.on_txrx(
+                    SENDRECV_CHANNEL_RANDOM,
+                    &from_guest_buf,
+                    &mut to_guest_buf,
+                )?;
+                trace!("SYS_RAND[{cycle}] data sent to guest: {to_guest_buf:?}");
+                trace!("SYS_RAND[{cycle}] (a0, a1): {:?}", self.syscall_out_regs);
+                self.syscall_out_data = to_guest_buf.into();
 
-                self.memory.store_region(buf_ptr, &buf);
-
-                Ok((split_word8(buf_ptr as u32), split_word8(0)))
+                Ok(())
             }
             _ => bail!("Unsupported syscall: {nr}"),
         }
