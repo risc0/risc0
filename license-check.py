@@ -36,10 +36,10 @@ def check_header(expected_year, lines_actual):
     return None
 
 
-def check_file(file):
+def check_file(root, file):
     cmd = ['git', 'log', '-1', '--format=%ad', '--date=format:%Y', file]
     expected_year = subprocess.check_output(cmd, encoding='UTF-8').strip()
-    rel_path = file.relative_to(repo_root())
+    rel_path = file.relative_to(root)
     lines = file.read_text().splitlines()
     result = check_header(expected_year, lines)
     if result:
@@ -49,29 +49,27 @@ def check_file(file):
         return 1
     return 0
 
-REPO_ROOT = None
 
 def repo_root():
     """Return an absolute Path to the repo root"""
-    global REPO_ROOT
-    if REPO_ROOT is None:
-        cmd = ["git", "rev-parse", "--show-toplevel"]
-        REPO_ROOT = Path(subprocess.check_output(cmd, encoding='UTF-8').strip())
-
-    return REPO_ROOT
+    cmd = ["git", "rev-parse", "--show-toplevel"]
+    return Path(subprocess.check_output(cmd, encoding='UTF-8').strip())
 
 
 def tracked_files():
     """Yield all file paths tracked by git"""
     cmd = ["git", "ls-tree", "--full-tree", "--name-only", "-r", "HEAD"]
-    for path in subprocess.check_output(cmd, encoding='UTF-8').strip().splitlines():
+    tree = subprocess.check_output(cmd, encoding='UTF-8').strip()
+    for path in tree.splitlines():
         yield (repo_root() / Path(path)).absolute()
 
+
 def main():
+    root = repo_root()
     ret = 0
     for path in tracked_files():
         if path.suffix in EXTENSIONS:
-            ret |= check_file(path)
+            ret |= check_file(root, path)
     sys.exit(ret)
 
 
