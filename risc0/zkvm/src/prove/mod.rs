@@ -214,6 +214,20 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
         use risc0_zkp::hal::cpu::BabyBearSha256CpuHal;
 
+        /// Returns the default HAL for the RISC Zero circuit
+        ///
+        /// RISC Zero uses a
+        /// [HAL](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/index.html)
+        /// (Hardware Abstraction Layer) to interface with the zkVM circuit.
+        /// This function returns the default HAL for the selected `risc0-zkvm`
+        /// features. It also returns the associated
+        /// [EvalCheck](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/trait.EvalCheck.html)
+        /// used for computing the cryptographic check polynomial.
+        ///
+        /// Note that this function will return different types when
+        /// `risc0-zkvm` is built with features that select different the target
+        /// hardware. The version documented here is used when no special
+        /// hardware features are selected.
         pub fn default_hal() -> (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
             let hal = Rc::new(BabyBearSha256CpuHal::new());
             let eval = CpuEvalCheck::new(&CIRCUIT);
