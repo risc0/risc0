@@ -30,7 +30,7 @@
 //! use risc0_zkvm::sha::{Impl, Sha256};
 //!
 //! // Hash a u8 array
-//! let data: [u8; 4] = [1, 2, 5, 14];
+//! let data = [1_u8, 2, 5, 14];
 //! let hash = Impl::hash_bytes(&data);
 //!
 //! // Hash a String
