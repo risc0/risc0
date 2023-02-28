@@ -313,7 +313,7 @@ impl<'a> Prover<'a> {
     }
 
     /// Run the guest code. If the guest exits successfully, this returns a
-    /// [Receipt] that proves execution. If the guest crashes, this instead
+    /// [Receipt] that proves execution. If the execution of the guest fails for any reason, this instead
     /// returns an `Err`.
     ///
     /// This function uses the default HAL (Hardware Abstraction Layer) to
