@@ -3,6 +3,9 @@ name: 'Benchmark Check'
 on:
   pull_request:
     branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
 
   workflow_dispatch:
 
