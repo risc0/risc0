@@ -1,0 +1,30 @@
+name: sccache install
+description: Install sccache
+runs:
+  using: composite
+  steps:
+    - if: runner.os == 'Linux' && runner.arch == 'X64'
+      run: |
+        echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+      shell: bash
+
+    - if: runner.os == 'macOS' && runner.arch == 'X64'
+      run: |
+        echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
+      shell: bash
+
+    - if: runner.os == 'macOS' && runner.arch == 'ARM64'
+      run: |
+        echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
+      shell: bash
+
+    - env:
+        SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
+        SCCACHE_VERSION: v0.3.3
+      run: |
+        SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
+        curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
+        mkdir -p $HOME/.local/bin
+        mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+      shell: bash
