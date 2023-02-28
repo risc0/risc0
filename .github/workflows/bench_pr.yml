@@ -6,6 +6,7 @@ on:
     # Only run benchmarks on changes to following paths:
     paths:
       - 'risc0/**'
+      - '.github/workflows/bench_*'
 
   workflow_dispatch:
 
