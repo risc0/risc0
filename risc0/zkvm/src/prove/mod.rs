@@ -25,7 +25,7 @@
 //! use risc0_zkvm::Prover;
 //!
 //! let mut prover = Prover::new(&EXAMPLE_ELF, EXAMPLE_ID)
-//!     .expect("Prover should be constructed from an ELF file and matching Image ID");
+//!     .expect("Specified ELF is invalid");
 //! prover.add_input_u32_slice(&to_vec(&input).expect("should be serializable"));
 //! let receipt = prover
 //!     .run()
