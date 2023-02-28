@@ -1,4 +1,4 @@
-name: 'Benchmark Check'
+name: Benchmark Check
 
 on:
   pull_request:
@@ -29,13 +29,12 @@ jobs:
 
     env:
       FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
 
     steps:
       - uses: actions/checkout@v3
-      - uses: risc0/actions-rs-toolchain@v1
-        with:
-          toolchain: stable
-      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
       - uses: risc0/criterion-compare-action@risc0
         with:
           benchName: fib

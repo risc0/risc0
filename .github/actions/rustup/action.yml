@@ -1,0 +1,20 @@
+name: rustup toolchain install
+description: Install the Rust toolchain
+runs:
+  using: composite
+  steps:
+    - run: |
+        if ! command -v rustup &>/dev/null; then
+          curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL "https://sh.rustup.rs" | sh -s -- -y
+          echo "${CARGO_HOME:-$HOME/.cargo}/bin" >> $GITHUB_PATH
+        fi
+      shell: bash
+
+    - run: rustup default stable
+      shell: bash
+
+    - run: echo CARGO_TERM_COLOR=always >> $GITHUB_ENV
+      shell: bash
+
+    - run: rustc --version --verbose
+      shell: bash

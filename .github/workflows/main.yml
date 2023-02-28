@@ -16,9 +16,7 @@ jobs:
         with:
           # Full history is required by license-check.py
           fetch-depth: 0
-      - uses: risc0/actions-rs-toolchain@v1
-        with:
-          toolchain: stable
+      - uses: ./.github/actions/rustup
       - name: Install cargo-sort
         uses: risc0/cargo-install@v1
         with:
@@ -58,31 +56,13 @@ jobs:
       FEATURE: ${{ matrix.feature }}
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
-      SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
-      SCCACHE_VERSION: v0.3.3
     steps:
       - uses: actions/checkout@v3
-      - uses: risc0/actions-rs-toolchain@v1
-        with:
-          toolchain: stable
+      - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - name: Prepare environment (Linux)
-        if: matrix.os == 'Linux'
-        run: |
-          echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
-      - name: Prepare environment (macOS)
-        if: matrix.os == 'macOS'
-        run: |
-          echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
-      - name: Install sccache
-        run: |
-          SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
-          curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
-          mkdir -p $HOME/.local/bin
-          mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - uses: ./.github/actions/sccache
       - run: npm install
         working-directory: templates/bonsai
       - run: cargo test -F $FEATURE
@@ -110,7 +90,5 @@ jobs:
     runs-on: [self-hosted, Linux, cpu]
     steps:
       - uses: actions/checkout@v3
-      - uses: risc0/actions-rs-toolchain@v1
-        with:
-          toolchain: stable
+      - uses: ./.github/actions/rustup
       - run: cargo doc
