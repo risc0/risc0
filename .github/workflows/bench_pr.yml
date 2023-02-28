@@ -49,7 +49,7 @@ jobs:
           outputMarkdown: true
 
       - name: Write compare markdown to file
-        run: echo "${{steps.criterion-cmp.output.markdown}}" > output.md
+        run: echo "${{ steps.criterion-cmp.outputs.markdown }}" > output.md
 
       - uses: actions/upload-artifact@v3
         with:
