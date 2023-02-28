@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v3
 
       # Commit just for testing with pending PR, replace with `@risc0`
-      - uses: risc0/criterion-compare-action@de006b5bf8b7707003f3da38f5256a19c7651867
+      - uses: risc0/criterion-compare-action@parker/md-output-mode
         id: criterion-cmp
         with:
           benchName: fib
@@ -71,5 +71,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: ${{ steps.download.matrix }}
+              body: '${{ steps.download.matrix }}'
             })
