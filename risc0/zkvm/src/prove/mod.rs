@@ -288,7 +288,8 @@ impl<'a> Prover<'a> {
     }
 
     /// Read _private_ output data from the guest. This reads data written by
-    /// [crate::guest::env::write] in the guest.
+    /// [crate::guest::env::write] or [crate::guest::env::write_slice] in the
+    /// guest.
     ///
     /// The proven result data from [crate::guest::env::commit] is not accessed
     /// with this function. Instead read the [Receipt::journal].
@@ -297,7 +298,9 @@ impl<'a> Prover<'a> {
     }
 
     /// Read _private_ output data from the guest. This reads data written by
-    /// [crate::guest::env::write] in the guest.
+    /// [crate::guest::env::write] or [crate::guest::env::write_slice] in the
+    /// guest. The data is read as 32-bit words, and an `Err` will be returned
+    /// if the data is not word-aligned.
     ///
     /// The proven result data from [crate::guest::env::commit] is not accessed
     /// with this function. Instead read the [Receipt::journal].
