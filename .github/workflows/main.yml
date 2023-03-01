@@ -94,4 +94,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
-      - run: cargo doc
+      - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps
