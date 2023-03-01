@@ -35,6 +35,9 @@ jobs:
         working-directory: templates/bonsai
       - run: npm run ci
         working-directory: templates/bonsai
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
       - run: python license-check.py
 
   test:

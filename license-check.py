@@ -25,6 +25,7 @@ EXTENSIONS = [
     '.cpp',
     '.h',
     '.rs',
+    '.sol',
 ]
 
 
