@@ -235,7 +235,7 @@ cfg_if::cfg_if! {
 
 impl<'a> Prover<'a> {
     /// Construct a new prover using the default options
-    /// 
+    ///
     /// This will return an `Err` if `elf` is not a valid ELF file
     pub fn new<D>(elf: &[u8], image_id: D) -> Result<Self>
     where
@@ -245,7 +245,7 @@ impl<'a> Prover<'a> {
     }
 
     /// Construct a new prover using custom [ProverOpts]
-    /// 
+    ///
     /// This will return an `Err` if `elf` is not a valid ELF file
     pub fn new_with_opts<D>(elf: &[u8], image_id: D, opts: ProverOpts<'a>) -> Result<Self>
     where
