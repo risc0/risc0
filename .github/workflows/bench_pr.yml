@@ -61,6 +61,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
       - name: Merge output files
+        shell: bash
         run: sed h ./*-output.md > merged.md
         id: download
 
