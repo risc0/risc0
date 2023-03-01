@@ -49,7 +49,7 @@ jobs:
         run: |
           output_name=${{ matrix.os }}-${{ matrix.feature }}-output.md
           echo "${{ steps.criterion-cmp.outputs.markdown }}" > $output_name
-          echo "output_name=$output_name" >> $GITHUB_OUTPUT
+          echo "output_name=$output_name" >> $GITHUB_ENV
 
       - uses: actions/upload-artifact@v3
         with:
