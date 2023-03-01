@@ -24,12 +24,9 @@
 //! use methods::{EXAMPLE_ELF, EXAMPLE_ID};
 //! use risc0_zkvm::Prover;
 //!
-//! let mut prover = Prover::new(&EXAMPLE_ELF, EXAMPLE_ID)
-//!     .expect("Specified ELF is invalid");
-//! prover.add_input_u32_slice(&to_vec(&input).expect("should be serializable"));
-//! let receipt = prover
-//!     .run()
-//!     .expect("Prover should run guest code that doesn't crash to generate a receipt");
+//! let mut prover = Prover::new(&EXAMPLE_ELF, EXAMPLE_ID)?;
+//! prover.add_input_u32_slice(&to_vec(&input)?);
+//! let receipt = prover.run()?;
 //! ```
 
 mod exec;
@@ -238,6 +235,8 @@ cfg_if::cfg_if! {
 
 impl<'a> Prover<'a> {
     /// Construct a new prover using the default options
+    /// 
+    /// This will return an `Err` if `elf` is not a valid ELF file
     pub fn new<D>(elf: &[u8], image_id: D) -> Result<Self>
     where
         Digest: From<D>,
@@ -246,6 +245,8 @@ impl<'a> Prover<'a> {
     }
 
     /// Construct a new prover using custom [ProverOpts]
+    /// 
+    /// This will return an `Err` if `elf` is not a valid ELF file
     pub fn new_with_opts<D>(elf: &[u8], image_id: D, opts: ProverOpts<'a>) -> Result<Self>
     where
         Digest: From<D>,
