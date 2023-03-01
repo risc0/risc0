@@ -37,6 +37,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - uses: risc0/criterion-compare-action@parker/md-output-mode
+        id: criterion-cmp
         with:
           benchName: fib
           branchName: main
