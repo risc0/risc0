@@ -51,7 +51,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ hashFiles('${{ matrix.os }}-${{ matrix.feature }}-output.md') || 'none' }}
+          name: 'md-output'
           path: ${{ matrix.os }}-${{ matrix.feature }}-output.md
           if-no-files-found: error
 
@@ -60,6 +60,8 @@ jobs:
     needs: [ bench ]
     steps:
       - uses: actions/download-artifact@v3
+      - name: unzip markdown artifacts
+        run: unzip md-output.zip
       - name: Merge output files
         shell: bash
         run: sed h ./*-output.md > merged.md
