@@ -60,13 +60,11 @@ jobs:
     needs: [ bench ]
     steps:
       - uses: actions/download-artifact@v3
-      - name: unzip markdown artifacts
-        run: |
-          mv md-output md-output.zip
-          unzip md-output.zip
+      - name: DELETE ME
+        run: ls -R
       - name: Merge output files
         shell: bash
-        run: sed h ./*-output.md > merged.md
+        run: sed h ./md-output/*-output.md > merged.md
         id: download
 
       - uses: actions/github-script@v3
