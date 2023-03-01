@@ -30,10 +30,9 @@ fn fibonacci(n: U256) -> U256 {
 }
 
 pub fn main() {
-    // NOTE: Currently env::read_slice requires a length argument. Bonsai passes the length at the
-    // start of the input. https://github.com/risc0/risc0/issues/402
-    let input_len = env::read_slice::<u32>(1)[0] as usize;
-    let input = ethabi::decode_whole(&[ParamType::Uint(256)], env::read_slice(input_len)).unwrap();
+    // NOTE: env::read_slice requires a length argument. Reads must be of known
+    // length. https://github.com/risc0/risc0/issues/402
+    let input = ethabi::decode_whole(&[ParamType::Uint(256)], env::read_slice(32)).unwrap();
     let n: U256 = input[0].clone().into_uint().unwrap();
 
     // Run the computation.

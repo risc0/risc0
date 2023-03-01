@@ -50,7 +50,7 @@ abstract contract BonsaiApp is IBonsaiApp {
   function callback(bytes32 _image_id, bytes calldata journal) external {
     // Require that caller is the trusted proxy contract and guest program.
     require(msg.sender == address(bonsai_proxy), "calls must come from Bonsai");
-    require(_image_id == image_id, "journal must be expected guest");
+    require(_image_id == image_id, "call must be from expected guest");
 
     // Now pass the jounral to the user-defined bonsai_callback function.
     bonsai_callback(journal);
