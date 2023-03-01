@@ -47,8 +47,9 @@ jobs:
 
       - name: Write compare markdown to file
         run: |
-          echo "output_name=${{ matrix.os }}-${{ matrix.feature }}-output.md" >> $GITHUB_OUTPUT
+          output_name=${{ matrix.os }}-${{ matrix.feature }}-output.md
           echo "${{ steps.criterion-cmp.outputs.markdown }}" > $output_name
+          echo "output_name=$output_name" >> $GITHUB_OUTPUT
 
       - uses: actions/upload-artifact@v3
         with:
