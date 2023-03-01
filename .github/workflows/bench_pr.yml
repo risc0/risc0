@@ -60,10 +60,10 @@ jobs:
     needs: [ bench ]
     steps:
       - uses: actions/download-artifact@v3
-        with:
-          path: md-output.zip
       - name: unzip markdown artifacts
-        run: unzip md-output.zip
+        run: |
+          mv md-output md-output.zip
+          unzip md-output.zip
       - name: Merge output files
         shell: bash
         run: sed h ./*-output.md > merged.md
