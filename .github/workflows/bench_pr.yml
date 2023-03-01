@@ -47,14 +47,12 @@ jobs:
 
       - name: Write compare markdown to file
         run: |
-          output_name=${{ matrix.os }}-${{ matrix.feature }}-output.md
-          echo "${{ steps.criterion-cmp.outputs.markdown }}" > $output_name
-          echo "output_name=$output_name" >> $GITHUB_ENV
+          echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ matrix.os }}-${{ matrix.feature }}-output.md
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ hashFiles('${{ output_name }}') || 'none' }}
-          path: ${{ output_name }}
+          name: ${{ hashFiles('${{ matrix.os }}-${{ matrix.feature }}-output.md') || 'none' }}
+          path: ${{ matrix.os }}-${{ matrix.feature }}-output.md
           if-no-files-found: error
 
   create-comment:
