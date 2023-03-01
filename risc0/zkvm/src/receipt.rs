@@ -14,6 +14,14 @@
 
 //! Manages the output and cryptographic data for a proven computation
 //!
+//! The primary component of this module is the [Receipt]. A [Receipt] contains
+//! the result of a zkVM guest execution and cryptographic proof of how it was
+//! generated. The prover can provide a [Receipt] to an untrusting party to
+//! convince them that the results contained within the [Receipt] came from
+//! running specific code. Conversely, a verifier can inspect a [Receipt] to
+//! confirm that its results must have been generated from the expected code,
+//! even when this code was run by an untrused source.
+//!
 //! # Usage
 //! Receipts are typically constructed as the output of the prover
 //! ```ignore
