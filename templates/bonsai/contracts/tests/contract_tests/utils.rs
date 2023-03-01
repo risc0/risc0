@@ -25,6 +25,7 @@ use std::sync::Arc;
 use ethers::core::k256::ecdsa::SigningKey;
 use ethers::prelude::*;
 use ethers::utils::{Ganache, GanacheInstance};
+use risc0_zkvm::sha::Digest;
 use risc0_zkvm::{Prover, ProverOpts};
 use tokio::sync::oneshot;
 use tokio::task::JoinHandle;
@@ -61,9 +62,9 @@ pub struct BonsaiMock {
 }
 
 impl BonsaiMock {
-    pub async fn spawn(
+    pub async fn spawn<Bytes: AsRef<[u8]> + Send + 'static>(
         client: Client,
-        registry: HashMap<[u8; 32], &'static [u8]>,
+        registry: HashMap<Digest, Bytes>,
     ) -> Result<Self, Box<dyn Error>> {
         let (tx, rx) = oneshot::channel();
 
@@ -83,10 +84,12 @@ impl BonsaiMock {
                 let submit_request_log =
                     event.expect("error in getting next event from subscription");
                 let receipt = {
-                    let elf = registry.get(&submit_request_log.image_id).expect(&format!(
-                        "image ID not found in registry: {:x?}",
-                        submit_request_log.image_id
-                    ));
+                    let elf = registry
+                        .get(&Digest::from(submit_request_log.image_id))
+                        .expect(&format!(
+                            "image ID not found in registry: {:x?}",
+                            submit_request_log.image_id
+                        ));
                     let mut prover = Prover::new_with_opts(
                         elf.as_ref(),
                         submit_request_log.image_id,
@@ -120,12 +123,13 @@ impl BonsaiMock {
     }
 }
 
-pub async fn bonsai_test<F>(
-    registry: HashMap<[u8; 32], &'static [u8]>,
+pub async fn bonsai_test<F, Bytes>(
+    registry: HashMap<Digest, Bytes>,
     test: impl FnOnce(Client, Address) -> F,
 ) -> Result<(), Box<dyn Error>>
 where
     F: Future<Output = Result<(), Box<dyn Error>>>,
+    Bytes: AsRef<[u8]> + Send + 'static,
 {
     // Instantiate client as wallet on network
     let (_ganache, client) = get_ganache_client().await?;

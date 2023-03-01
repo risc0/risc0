@@ -45,6 +45,7 @@ pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
     Ord,
     PartialOrd,
     PartialEq,
+    Hash,
     Pod,
     Zeroable,
     Serialize,
