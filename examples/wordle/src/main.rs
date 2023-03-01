@@ -130,7 +130,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use wordle_core::LetterFeedback;
+    use wordle_core::{LetterFeedback, WordFeedback};
 
     use crate::{Player, Server};
 
@@ -160,8 +160,8 @@ mod tests {
     /// If a guessed letter is present in every position where it ought to appear,
     /// and also in an incorrect position, the 'bonus' letter shouldn't flag yellow
     #[test]
-    fn avoid_excessive_yellows() {
-        let server = Server::new("spurn");
+    fn test_partial_match_false_positives() {
+        let server = Server::new("spare");
         let player = Player {
             hash: server.get_secret_word_hash(),
         };
@@ -169,10 +169,33 @@ mod tests {
         let guess_word = "apple";
         let receipt = server.check_round(&guess_word);
         let score = player.check_receipt(receipt);
+        score.print(guess_word);
+
+        assert!(
+            score.0[0] == LetterFeedback::Present,
+            "Other partials should be yellow"
+        );
+
+        assert!(
+            score.0[1] == LetterFeedback::Correct,
+            "Consumed exact matches should be green"
+        );
+
         assert!(
             score.0[2] == LetterFeedback::Miss,
             "Excessive instances of letter should not flag yellow"
         );
+
+        assert!(
+            score.0[1] == LetterFeedback::Correct,
+            "Misses should still miss"
+        );
+
+        assert!(
+            score.0[1] == LetterFeedback::Correct,
+            "Unconsumed matches should be green"
+        );
+
     }
 
 }
