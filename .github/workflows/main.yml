@@ -10,7 +10,7 @@ on:
 
 jobs:
   check:
-    runs-on: [self-hosted, ubuntu-latest, test, cpu, Linux, X64]
+    runs-on: [self-hosted, test, cpu, Linux, X64]
     steps:
       - uses: actions/checkout@v3
         with:
