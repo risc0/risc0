@@ -46,12 +46,14 @@ jobs:
           outputMarkdown: true
 
       - name: Write compare markdown to file
-        run: echo "${{ steps.criterion-cmp.outputs.markdown }}" > output.md
+        run: |
+          echo "output_name=${{ matrix.os }}-${{ matrix.feature }}-output.md" >> $GITHUB_OUTPUT
+          echo "${{ steps.criterion-cmp.outputs.markdown }}" > $output_name
 
       - uses: actions/upload-artifact@v3
         with:
-          name: ${{ hashFiles('matrix') || 'none' }}
-          path: output.md
+          name: ${{ hashFiles('${{ output_name }}') || 'none' }}
+          path: ${{ output_name }}
           if-no-files-found: error
 
   create-comment:
@@ -59,18 +61,20 @@ jobs:
     needs: [ bench ]
     steps:
       - uses: actions/download-artifact@v3
-      - run: |
-          file_data="$(cat */output.md)"
-          echo "all_md=$file_data" >> $GITHUB_OUTPUT
+      - name: Merge output files
+        run: sed h ./*-output.md > merged.md
         id: download
 
       - uses: actions/github-script@v3
+        name: Create PR comment
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
+            var fs = require('fs');
+            var body = fs.readFileSync("./merged.md")
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `${{ steps.download.output.all_md }}`
+              body: body
             })
