@@ -87,7 +87,7 @@ jobs:
       - run: sccache --show-stats
 
   doc:
-    runs-on: [self-hosted, Linux, cpu]
+    runs-on: [self-hosted, Linux, cpu, test]
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
