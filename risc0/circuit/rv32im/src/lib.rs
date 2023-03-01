@@ -26,7 +26,6 @@ mod info;
 pub mod metal;
 pub mod poly_ext;
 mod taps;
-pub mod verify_taps_rv32im;
 
 use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
 

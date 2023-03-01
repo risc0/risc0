@@ -16,7 +16,6 @@ use std::collections::VecDeque;
 
 use risc0_core::field::{self, Elem, ExtElem};
 use risc0_zkp::MAX_CYCLES;
-use risc0_zkvm_platform::{memory, WORD_SIZE};
 
 // Main RAM plonk rows have the following 7 plonk elements:
 // addr, cycle, isWrite, byte0, byte1, byte2, byte3
@@ -28,19 +27,8 @@ struct MainRamPlonkRow {
     val: u32,
 }
 
-// FFPU RAM is similar, but the "byte" fields may contain values larger than
-// 255.
-#[derive(Ord, PartialOrd, Eq, PartialEq)]
-struct FfpuRamPlonkRow {
-    addr: u32,
-    // (cycle << 2) | mem_op
-    cycle_and_write_flag: u32,
-    val: [u32; 4],
-}
-
 pub struct RamPlonk {
     main_ram: Vec<MainRamPlonkRow>,
-    ffpu_ram: Vec<FfpuRamPlonkRow>,
 }
 
 impl RamPlonk {
@@ -50,7 +38,6 @@ impl RamPlonk {
 
         RamPlonk {
             main_ram: Vec::new(),
-            ffpu_ram: Vec::new(),
         }
     }
 
@@ -64,31 +51,22 @@ impl RamPlonk {
         debug_assert!(mem_op < 4);
         let cycle_and_write_flag = (cycle << 2) + mem_op;
 
-        if addr < (memory::FFPU.start() / WORD_SIZE) as u32 {
-            for elem in &elems[3..] {
-                debug_assert!(u32::from(*elem) < 256);
-            }
-            self.main_ram.push(MainRamPlonkRow {
-                addr,
-                cycle_and_write_flag,
-                val: (u32::from(elems[3]) << 0)
-                    + (u32::from(elems[4]) << 8)
-                    + (u32::from(elems[5]) << 16)
-                    + (u32::from(elems[6]) << 24),
-            });
-        } else {
-            self.ffpu_ram.push(FfpuRamPlonkRow {
-                addr,
-                cycle_and_write_flag,
-                val: core::array::from_fn(|i| u32::from(elems[3 + i])),
-            });
+        for elem in &elems[3..] {
+            debug_assert!(u32::from(*elem) < 256);
         }
+        self.main_ram.push(MainRamPlonkRow {
+            addr,
+            cycle_and_write_flag,
+            val: (u32::from(elems[3]) << 0)
+                + (u32::from(elems[4]) << 8)
+                + (u32::from(elems[5]) << 16)
+                + (u32::from(elems[6]) << 24),
+        });
     }
 
     pub fn sort(&mut self) {
         // Reverse sort all plonk rows so we can pop them off the back in order.
         self.main_ram.sort_unstable_by(|a, b| b.cmp(a));
-        self.ffpu_ram.sort_unstable_by(|a, b| b.cmp(a));
     }
 
     pub fn read<E: field::Elem>(&mut self, elems: &mut [E; 7])
@@ -98,24 +76,14 @@ impl RamPlonk {
         let mut set_elem = |idx, val: u32| {
             elems[idx] = E::from_u64(val as u64);
         };
-        if let Some(row) = self.main_ram.pop() {
-            set_elem(0, row.addr);
-            set_elem(1, row.cycle_and_write_flag >> 2);
-            set_elem(2, row.cycle_and_write_flag & 3);
-            set_elem(3, (row.val >> 0) & 0xFF);
-            set_elem(4, (row.val >> 8) & 0xFF);
-            set_elem(5, (row.val >> 16) & 0xFF);
-            set_elem(6, (row.val >> 24) & 0xFF);
-        } else {
-            let row = self.ffpu_ram.pop().unwrap();
-            set_elem(0, row.addr);
-            set_elem(1, row.cycle_and_write_flag >> 2);
-            set_elem(2, row.cycle_and_write_flag & 3);
-            set_elem(3, row.val[0]);
-            set_elem(4, row.val[1]);
-            set_elem(5, row.val[2]);
-            set_elem(6, row.val[3]);
-        }
+        let row = self.main_ram.pop().unwrap();
+        set_elem(0, row.addr);
+        set_elem(1, row.cycle_and_write_flag >> 2);
+        set_elem(2, row.cycle_and_write_flag & 3);
+        set_elem(3, (row.val >> 0) & 0xFF);
+        set_elem(4, (row.val >> 8) & 0xFF);
+        set_elem(5, (row.val >> 16) & 0xFF);
+        set_elem(6, (row.val >> 24) & 0xFF);
     }
 }
 
