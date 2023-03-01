@@ -21,9 +21,9 @@ use risc0_zkvm_platform::syscall::sys_rand;
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    let mut buf = [0u32; 32];
     unsafe {
-        sys_rand(buf.as_mut_ptr(), 32);
-        env::commit_slice(&buf);
+        let rbuf = sys_rand(5);
+        env::commit_slice(&rbuf);
+        // assert_eq!(rbuf, [0u8; 10])
     }
 }
