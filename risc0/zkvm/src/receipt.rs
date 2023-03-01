@@ -29,18 +29,17 @@
 //! use methods::{EXAMPLE_ELF, EXAMPLE_ID};
 //! use risc0_zkvm::Prover;
 //!
-//! let mut prover = Prover::new(&EXAMPLE_ELF, EXAMPLE_ID)
-//!     .expect("Prover should be constructed from an ELF file and matching Image ID");
-//! let receipt = prover
-//!     .run()
-//!     .expect("Prover should run guest code that doesn't crash to generate a receipt");
+//! let mut prover = Prover::new(&EXAMPLE_ELF, EXAMPLE_ID)?;
+//! let receipt = prover.run()?;
 //! ```
 //! Once you have a Receipt, you can use the verify function to
 //! cryptographically verify that it was generated faithfully and is associated
 //! with the expected image ID. You can also read the contents of the journal.
 //! ```
 //! use risc0_zkvm::Receipt;
+//! # use risc0_zkvm::serde::Result;
 //!
+//! # fn main() -> Result<()> {
 //! # // Need to awkwardly set up a fake Receipt since we can't use the guest in docs
 //! # let journal_words = risc0_zkvm::serde::to_vec(&String::from("test"))
 //! #        .unwrap()
@@ -61,9 +60,10 @@
 //! # let IMAGE_ID: [u32; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
 //! // Here `receipt` is a Receipt whose journal contains the String "test"
 //! receipt.verify(&IMAGE_ID);
-//! let committed_value: String = risc0_zkvm::serde::from_slice(&receipt.journal)
-//!     .expect("Deserialization should succeed if the types match the committed types");
+//! let committed_value: String = risc0_zkvm::serde::from_slice(&receipt.journal)?;
 //! assert_eq!("test", committed_value);
+//! # Ok(())
+//! # }
 //! ```
 //! Directly using the raw bytes of the journal is not recommended. Instead, we
 //! recommend using serialization tools from the zkVM [serde](crate::serde)
