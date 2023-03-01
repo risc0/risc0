@@ -60,6 +60,8 @@ jobs:
     needs: [ bench ]
     steps:
       - uses: actions/download-artifact@v3
+        with:
+          name: md-output.zip
       - name: unzip markdown artifacts
         run: unzip md-output.zip
       - name: Merge output files
