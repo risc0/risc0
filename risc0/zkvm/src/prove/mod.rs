@@ -28,15 +28,15 @@ use io::{RawIoHandler, SliceIoHandler};
 use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
-    adapter::{PolyExt, TapsProvider},
+    adapter::TapsProvider,
     core::sha::Digest,
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };
 use risc0_zkvm_platform::{
     io::{
-        SENDRECV_CHANNEL_COMPUTE_POLY, SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_JOURNAL,
-        SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT,
+        SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_JOURNAL, SENDRECV_CHANNEL_STDERR,
+        SENDRECV_CHANNEL_STDOUT,
     },
     memory::MEM_SIZE,
     WORD_SIZE,
@@ -288,7 +288,6 @@ struct ProverImpl<'a> {
     pub output: Vec<u8>,
     pub journal: Vec<u8>,
     pub opts: ProverOpts<'a>,
-    pub compute_poly_data: Vec<Vec<u32>>,
 }
 
 impl<'a> ProverImpl<'a> {
@@ -298,7 +297,6 @@ impl<'a> ProverImpl<'a> {
             output: Vec::new(),
             journal: Vec::new(),
             opts,
-            compute_poly_data: Vec::new(),
         }
     }
 }
@@ -329,30 +327,6 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
             SENDRECV_CHANNEL_STDERR => {
                 log::debug!("SENDRECV_CHANNEL_STDERR: {}", from_guest_buf.len());
                 std::io::stderr().lock().write_all(from_guest_buf).unwrap();
-                Ok((0, 0))
-            }
-            // TODO: Convert this to FFPU at some point so we can get secure verifies in the guest
-            SENDRECV_CHANNEL_COMPUTE_POLY => {
-                log::debug!("SENDRECV_CHANNEL_COMPUTE_POLY: {}", from_guest_buf.len());
-                assert!(from_guest_buf.len() % WORD_SIZE == 0);
-                let nwords = from_guest_buf.len() / WORD_SIZE;
-                let mut data: Vec<u32> = Vec::new();
-                data.resize(nwords, 0);
-                bytemuck::cast_slice_mut(&mut data).clone_from_slice(from_guest_buf);
-                self.compute_poly_data.push(data);
-
-                if !from_host_buf.is_empty() {
-                    assert_eq!(self.compute_poly_data.len(), 4);
-                    let eval_u = bytemuck::cast_slice(self.compute_poly_data[0].as_slice());
-                    let poly_mix = bytemuck::cast_slice(self.compute_poly_data[1].as_slice());
-                    let out = bytemuck::cast_slice(&self.compute_poly_data[2].as_slice());
-                    let mix = bytemuck::cast_slice(&self.compute_poly_data[3].as_slice());
-
-                    let result = CIRCUIT.poly_ext(&poly_mix[0], &eval_u, &[&out, &mix]);
-                    from_host_buf.clone_from_slice(bytemuck::cast_slice(&[result.tot]));
-
-                    self.compute_poly_data.clear()
-                }
                 Ok((0, 0))
             }
             SENDRECV_CHANNEL_JOURNAL => {
