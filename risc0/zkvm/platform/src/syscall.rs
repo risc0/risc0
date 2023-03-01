@@ -270,7 +270,8 @@ pub unsafe fn sys_sha_buffer(
 }
 
 #[inline(always)]
-pub unsafe fn sys_rand(recv_bytes: usize) -> &'static [u8] {
+pub unsafe fn sys_rand(recv_buf: *mut u32, recv_bytes: usize) {
+    //-> &'static [u8] {
     #[cfg(target_os = "zkvm")]
     {
         let words = (recv_bytes + WORD_SIZE - 1) / WORD_SIZE;
@@ -281,11 +282,10 @@ pub unsafe fn sys_rand(recv_bytes: usize) -> &'static [u8] {
         asm!(
             "ecall",
             in("t0") ecall::SOFTWARE,
-            inout("a0") input.as_ptr() => _,
-            in("a1") words,
+            inout("a0") recv_buf  => _,
+            inout("a1") words => _,
             in("a2") nr::SYS_RAND,
         );
-        core::slice::from_raw_parts(input.as_ptr() as *const u8, recv_bytes)
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()

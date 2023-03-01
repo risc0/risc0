@@ -15,15 +15,27 @@
 #![no_std]
 #![no_main]
 
+extern crate alloc;
+use alloc::vec;
+
 use risc0_zkvm::guest::env;
 use risc0_zkvm_platform::syscall::sys_rand;
 
 risc0_zkvm::entry!(main);
 
 pub fn main() {
+    let mut buf = [0u32; 32];
     unsafe {
-        let rbuf = sys_rand(5);
-        env::commit_slice(&rbuf);
+        // rbuf = sys_rand(5);
+        sys_rand(buf.as_mut_ptr(), 5);
+        env::commit_slice(&buf);
         // assert_eq!(rbuf, [0u8; 10])
     }
+    let mut rbuf = vec![0u8; 5];
+    rbuf.clone_from_slice(&bytemuck::cast_slice(buf.as_slice())[..5]);
+    env::commit_slice(&rbuf);
+    //    let mut rand_buff = vec![0u8; from_guest_buf.len()];
+    //    getrandom::getrandom(rand_buff.as_mut_slice())?;
+    //    from_host_buf.clone_from_slice(bytemuck::cast_slice(rand_buff.
+    // as_slice()));
 }
