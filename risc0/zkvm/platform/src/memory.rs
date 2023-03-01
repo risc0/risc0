@@ -62,4 +62,3 @@ pub const TEXT: Region = Region::new(0x0800_0000, mb(64));
 pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(16));
 pub const PAGE_TABLE: Region = Region::new(0x0D00_0000, mb(16));
 pub const PRE_LOAD: Region = Region::new(0x0D70_0000, mb(9));
-pub const FFPU: Region = Region::new(0x0F00_0000, mb(16));
