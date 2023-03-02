@@ -215,7 +215,7 @@ mod tests {
         assert_eq!(verifier.root(), prover.root());
         let mut err = false;
         for query in 0..queries {
-            let r_idx = iop.rng.random_bits(log2_ceil(rows)) as usize;
+            let r_idx = r_iop.random_bits(log2_ceil(rows)) as usize;
             if query == bad_query {
                 if rows == 1 {
                     assert!(false, "Cannot test for bad query if there is only one row");

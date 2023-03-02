@@ -55,7 +55,7 @@ impl ConfigRng<BabyBear> for PoseidonRng {
                 val = new_val;
             }
         }
-        return ((1 << bits) - 1) & val;
+        ((1 << bits) - 1) & val
     }
     fn random_elem(&mut self) -> Elem {
         if self.pool_used == CELLS_RATE {
