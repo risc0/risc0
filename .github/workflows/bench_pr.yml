@@ -60,8 +60,6 @@ jobs:
     needs: [ bench ]
     steps:
       - uses: actions/download-artifact@v3
-      - name: DELETE ME
-        run: ls -R
       - name: Merge output files
         shell: bash
         run: sed h ./md-output/*-output.md > merged.md
