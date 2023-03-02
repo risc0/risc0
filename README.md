@@ -1,6 +1,6 @@
 <p align="center">
-  <a href="https://risczero.com/#gh-dark-mode-only"><img src="docs/assets/Risc0-Logo_Horizontal.svg" height="100"></a>
-  <a href="https://risczero.com/#gh-light-mode-only"><img src="docs/assets/Risc0-Logo_Horizontal_Inverted.svg" height="100"></a>
+  <a href="https://risczero.com/#gh-dark-mode-only"><img src="docs/assets/RISC_Zero_Logo_darkmode.png" height="100"></a>
+  <a href="https://risczero.com/#gh-light-mode-only"><img src="docs/assets/RISC_Zero_Logo_lightmode.png" height="100"></a>
 </p>
 
 <h1 align="center"><a href="https://risczero.com">RISC Zero</a></h1>

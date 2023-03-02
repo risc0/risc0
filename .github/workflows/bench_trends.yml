@@ -3,6 +3,9 @@ name: Benchmark Trends
 on:
   push:
     branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
 
   # uncomment for only for testing changes to this workflow while in a PR
   # pull_request:
@@ -28,12 +31,12 @@ jobs:
 
     env:
       FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
 
     steps:
       - uses: actions/checkout@v3
-      - uses: risc0/actions-rs-toolchain@v1
-        with:
-          toolchain: stable
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
       - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
       - name: Store benchmark result
         uses: risc0/github-action-benchmark@v1

@@ -118,6 +118,7 @@ pub trait Sha256 {
     Clone,
     Eq,
     PartialEq,
+    Hash,
     Pod,
     Zeroable,
     Serialize,
