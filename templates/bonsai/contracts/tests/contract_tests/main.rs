@@ -29,7 +29,7 @@ use crate::utils::bonsai_test;
 #[tokio::test]
 pub async fn test_successful_contract_usage() -> Result<(), Box<dyn Error>> {
     let image_id = Digest::from(FIBONACCI_ID);
-    let registry = HashMap::from([(image_id.into(), FIBONACCI_ELF)]);
+    let registry = HashMap::from([(image_id, FIBONACCI_ELF)]);
 
     bonsai_test(registry, |client, bonsai_mock_address| async move {
         // Deploy the HelloBonsai contract.
