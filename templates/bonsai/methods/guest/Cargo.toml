@@ -5,10 +5,6 @@ edition = "2021"
 
 [workspace]
 
-[build-dependencies]
-# Must match RISC Zero version specified in the project root.
-risc0-build = { version = "0.13" }
-
 [dependencies]
 # NOTE: ethabi is used here instead of ethers because ethers requires getrandom support.
 ethabi = { version = "18.0", default-features = false }
