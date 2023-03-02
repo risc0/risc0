@@ -21,11 +21,17 @@ use super::{
     err::{Error, Result},
 };
 
+/// Deserialize a slice into the specified type.
+///
+/// Deserialize `slice` into type `T`. Returns an `Err` if deserialization isn't
+/// possible, such as if `slice` is not the serialized form of an object of type
+/// `T`.
 pub fn from_slice<'a, T: Deserialize<'a>, P: Pod>(slice: &'a [P]) -> Result<T> {
     let mut deserializer = Deserializer::new(bytemuck::cast_slice(slice));
     T::deserialize(&mut deserializer)
 }
 
+/// Interface for deserializing from bytes
 pub struct Deserializer<'de> {
     slice: &'de [u8],
 }
@@ -123,6 +129,9 @@ impl<'a, 'de: 'a> serde::de::MapAccess<'de> for MapAccess<'a, 'de> {
 }
 
 impl<'de> Deserializer<'de> {
+    /// Construct a Deserializer
+    ///
+    /// Creates a deserializer for deserializing the contents of `slice`
     pub fn new(slice: &'de [u8]) -> Self {
         Deserializer { slice }
     }
@@ -153,6 +162,11 @@ impl<'de> Deserializer<'de> {
         Ok(&bytes[..len])
     }
 
+    /// Read bytes, removing them from the Deserializer and returning them
+    ///
+    /// Returns the first `len` bytes and remove them from the Deserializer.
+    /// If there are fewer than `len` bytes in the Deserializer, return an
+    /// `Err`.
     pub fn read_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
         if self.slice.len() >= len {
             let (head, tail) = self.slice.split_at(len);
