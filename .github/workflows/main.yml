@@ -53,11 +53,15 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+          - os: Linux
             sccache_dir: ~/.cache/sccache/
+
           - os: macOS
             feature: metal
             device: intel_uhd_630
+          - os: macOS
             sccache_dir: ~/Library/Caches/Mozilla.sccache
+
     env:
       FEATURE: ${{ matrix.feature }}
       RUST_BACKTRACE: full
