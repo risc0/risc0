@@ -47,14 +47,15 @@ impl ConfigRng<BabyBear> for PoseidonRng {
         // Mix
         poseidon_mix(&mut self.cells);
     }
-    fn random_u32(&mut self) -> u32 {
-        let mut val: u64 = 0;
-        for _ in 0..6 {
-            val *= 15 * 2 ^ 27 + 1; // TODO: Export P from BabyBear?
-            val += self.random_elem().as_u32_montgomery() as u64;
-            val &= 0xffffffff;
+    fn random_bits(&mut self, bits: usize) -> u32 {
+        let mut val = self.random_elem().as_u32();
+        for _ in 0..3 {
+            let new_val = self.random_elem().as_u32();
+            if val == 0 {
+                val = new_val;
+            }
         }
-        val as u32
+        return ((1 << bits) - 1) & val;
     }
     fn random_elem(&mut self) -> Elem {
         if self.pool_used == CELLS_RATE {

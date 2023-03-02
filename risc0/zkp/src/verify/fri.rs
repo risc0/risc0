@@ -113,8 +113,7 @@ where
     // Do queries
     let mut poly_buf: Vec<H::ExtElem> = Vec::with_capacity(degree);
     for _ in 0..QUERIES {
-        let rng = iop.random_u32();
-        let mut pos = rng as usize % orig_domain;
+        let mut pos = iop.random_bits(log2_ceil(orig_domain)) as usize;
         // Do the 'inner' verification for this index
         let mut goal = inner(iop, pos)?;
         // Verify the per-round proofs

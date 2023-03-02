@@ -117,14 +117,8 @@ impl<T: Blake2b> ConfigRng<BabyBear> for Blake2bRng<T> {
         self.current = T::blake2b(concat);
     }
 
-    fn random_u32(&mut self) -> u32 {
-        let next = T::blake2b(self.current);
-        self.current = next;
-
-        ((next[0] as u32) << 24)
-            + ((next[1] as u32) << 16)
-            + ((next[2] as u32) << 8)
-            + ((next[3] as u32) << 0)
+    fn random_bits(&mut self, bits: usize) -> u32 {
+        ((1 << bits) - 1) & self.next_u32()
     }
 
     fn random_elem(&mut self) -> BabyBearElem {
@@ -138,7 +132,12 @@ impl<T: Blake2b> ConfigRng<BabyBear> for Blake2bRng<T> {
 
 impl<T: Blake2b> RngCore for Blake2bRng<T> {
     fn next_u32(&mut self) -> u32 {
-        self.random_u32()
+        let next = T::blake2b(self.current);
+        self.current = next;
+        ((next[0] as u32) << 24)
+            + ((next[1] as u32) << 16)
+            + ((next[2] as u32) << 8)
+            + ((next[3] as u32) << 0)
     }
 
     fn next_u64(&mut self) -> u64 {
