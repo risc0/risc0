@@ -73,7 +73,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             var fs = require('fs');
-            var body = fs.readFileSync("./merged.md")
+            var body = fs.readFileSync("./merged.md", 'utf8')
             github.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
