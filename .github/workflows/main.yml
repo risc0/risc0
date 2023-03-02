@@ -25,6 +25,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo fmt --all --check --manifest-path templates/bonsai/Cargo.toml
@@ -52,9 +53,11 @@ jobs:
           - os: Linux
             feature: cuda
             device: nvidia_rtx_a5000
+            sccache_dir: ~/.cache/sccache/
           - os: macOS
             feature: metal
             device: intel_uhd_630
+            sccache_dir: ~/Library/Caches/Mozilla.sccache
     env:
       FEATURE: ${{ matrix.feature }}
       RUST_BACKTRACE: full
@@ -66,6 +69,25 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
+
+      - name: Save sccache
+        uses: actions/cache@v2
+        continue-on-error: false
+        with:
+          path: ${{ matrix.sccache_dir }}
+          key: ${{ runner.os }}-sccache-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-sccache-
+
+      - name: Cache cargo registry
+        uses: actions/cache@v2
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
+
       - run: npm install
         working-directory: templates/bonsai
       - run: cargo test -F $FEATURE
