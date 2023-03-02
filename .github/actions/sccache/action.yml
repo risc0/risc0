@@ -6,17 +6,38 @@ runs:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
         echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+        echo "SCCACHE_CACHE_DIR=~/.cache/sccache/" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
       run: |
         echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
+        echo "SCCACHE_CACHE_DIR=~/Library/Caches/Mozilla.sccache" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'ARM64'
       run: |
         echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
+        echo "SCCACHE_CACHE_DIR=~/Library/Caches/Mozilla.sccache" >> $GITHUB_ENV
       shell: bash
+
+    - name: Save sccache
+      uses: actions/cache@v3
+      continue-on-error: false
+      with:
+        path: ${{ SCCACHE_CACHE_DIR }}
+        key: ${{ runner.os }}-sccache-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-sccache-
+
+    - name: Cache cargo registry
+      uses: actions/cache@v3
+      continue-on-error: false
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: ${{ runner.os }}-cargo-
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
@@ -28,3 +49,10 @@ runs:
         mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
+
+    # - uses: risc0/rust-cache@v2
+    #   id: rust-cache
+    #   with:
+    #     key: ${{ runner.os }}-${{ matrix.feature }}
+    # - name: rust-cache hits
+    #   run: echo ${{ steps.rust-cache.outputs.cache-hit }}
