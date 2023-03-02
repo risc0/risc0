@@ -71,7 +71,7 @@ jobs:
       - uses: ./.github/actions/sccache
 
       - name: Save sccache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         continue-on-error: false
         with:
           path: ${{ matrix.sccache_dir }}
@@ -79,7 +79,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sccache-
 
       - name: Cache cargo registry
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         continue-on-error: false
         with:
           path: |
