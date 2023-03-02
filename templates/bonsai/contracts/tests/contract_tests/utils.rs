@@ -96,9 +96,7 @@ impl BonsaiMock {
                         ProverOpts::default().with_skip_seal(true),
                     )
                     .expect("failed to create prover");
-                    let input: &[u8] = submit_request_log.input.deref();
-                    prover.add_input_u32_slice(&[input.len() as u32]);
-                    prover.add_input_u8_slice(input);
+                    prover.add_input_u8_slice(submit_request_log.input.deref());
                     prover.run().expect("failed to run guest")
                 };
 
