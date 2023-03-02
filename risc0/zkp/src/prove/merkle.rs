@@ -131,7 +131,7 @@ mod tests {
         adapter::{MixState, PolyExt},
         core::{
             config::{ConfigRng, HashSuite, HashSuitePoseidon, HashSuiteSha256},
-            sha_cpu,
+            log2_ceil, sha_cpu,
         },
         hal::cpu::CpuHal,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, CpuVerifyHal, VerificationError},
@@ -196,7 +196,7 @@ mod tests {
         let mut iop = WriteIOP::<BabyBear, HS::Rng>::new();
         prover.commit(&mut iop);
         for _query in 0..queries {
-            let r_idx = (iop.rng.random_u32() as usize) % rows;
+            let r_idx = iop.rng.random_bits(log2_ceil(rows)) as usize;
             let col = prover.prove(&mut iop, r_idx);
             for c_idx in 0..cols {
                 assert_eq!(
@@ -215,7 +215,7 @@ mod tests {
         assert_eq!(verifier.root(), prover.root());
         let mut err = false;
         for query in 0..queries {
-            let r_idx = (r_iop.random_u32() as usize) % rows;
+            let r_idx = iop.rng.random_bits(log2_ceil(rows)) as usize;
             if query == bad_query {
                 if rows == 1 {
                     assert!(false, "Cannot test for bad query if there is only one row");
