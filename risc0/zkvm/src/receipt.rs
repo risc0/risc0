@@ -239,6 +239,12 @@ where
 }
 
 impl Receipt {
+    /// Constructs a Receipt from a journal and a seal
+    ///
+    /// A Receipt is more commonly constructed as the output of
+    /// [crate::prove::Prover::run], but since it has no data beyond its
+    /// [journal](Receipt::journal) and [seal](Receipt::seal) it can be
+    /// directly constructed from them.
     pub fn new(journal: &[u8], seal: &[u32]) -> Self {
         Self {
             journal: Vec::from(journal),
