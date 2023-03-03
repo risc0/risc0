@@ -26,8 +26,11 @@ runs:
       continue-on-error: false
       with:
         path: $SCCACHE_CACHE_DIR
-        key: ${{ runner.os }}-sccache-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: ${{ runner.os }}-sccache-
+        # NOTE: this key/restore key allows us to name the cache with the cargo lock hash
+        #       but then use the restore-key as a matching prefix to search for. So if we miss
+        #       the cache on `key` we can hit on the restore key.
+        key: sccache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: sccache-${{ runner.os }}-${{ runner.arch }}
 
     - name: Cache cargo registry
       uses: actions/cache@v3
@@ -36,8 +39,8 @@ runs:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: ${{ runner.os }}-cargo-
+        key: cargo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: cargo-${{ runner.os }}-${{ runner.arch }}
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
@@ -53,6 +56,6 @@ runs:
     # - uses: risc0/rust-cache@v2
     #   id: rust-cache
     #   with:
-    #     key: ${{ runner.os }}-${{ matrix.feature }}
+    #     key: rust-cache-${{ runner.os }}-${{ runner.arch }}
     # - name: rust-cache hits
     #   run: echo ${{ steps.rust-cache.outputs.cache-hit }}
