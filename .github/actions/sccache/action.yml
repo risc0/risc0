@@ -25,7 +25,7 @@ runs:
       uses: actions/cache@v3
       continue-on-error: false
       with:
-        path: ${{ SCCACHE_CACHE_DIR }}
+        path: $SCCACHE_CACHE_DIR
         key: ${{ runner.os }}-sccache-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: ${{ runner.os }}-sccache-
 
