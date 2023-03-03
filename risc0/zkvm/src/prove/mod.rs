@@ -217,7 +217,7 @@ cfg_if::cfg_if! {
         }
     } else {
         use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
-        use risc0_zkp::hal::cpu::BabyBearSha256CpuHal;
+        use risc0_zkp::hal::cpu::{BabyBearSha256CpuHal, BabyBearPoseidonCpuHal};
 
         /// Returns the default HAL for the RISC Zero circuit
         ///
