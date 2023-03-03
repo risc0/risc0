@@ -51,12 +51,16 @@ pub use crate::receipt::Receipt;
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
+/// A collection of hashes attesting to the circuit architecture
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ControlId {
+    /// The hashes comprising the [ControlId]
     pub table: alloc::vec::Vec<Digest>,
 }
 
+/// A trait for objects with an associated [ControlId]
 pub trait ControlIdLocator {
+    /// Get the [ControlId] associated with this object
     fn get_control_id() -> ControlId;
 }
 
