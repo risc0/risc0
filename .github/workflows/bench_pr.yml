@@ -26,7 +26,7 @@ jobs:
             device: nvidia_rtx_a5000
           - os: macOS
             feature: metal
-            device: intel_uhd_630
+            device: apple_m2_pro
 
     env:
       FEATURE: ${{ matrix.feature }}
@@ -56,7 +56,7 @@ jobs:
           if-no-files-found: error
 
   create-comment:
-    runs-on:  ubuntu-22.04
+    runs-on: ubuntu-22.04
     needs: [ bench ]
     steps:
       - uses: actions/download-artifact@v3
