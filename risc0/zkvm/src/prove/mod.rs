@@ -198,18 +198,26 @@ cfg_if::cfg_if! {
             let eval = CudaEvalCheck::new(hal.clone());
             (hal, eval)
         }
+
+        // TODO: default_poseidon_hal
     } else if #[cfg(feature = "metal")] {
-        use risc0_circuit_rv32im::metal::MetalEvalCheckSha256;
-        use risc0_zkp::hal::metal::MetalHalSha256;
+        use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
+        use risc0_zkp::hal::metal::{MetalHalSha256, MetalHalPoseidon, MetalHashPoseidon};
 
         pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
             let hal = Rc::new(MetalHalSha256::new());
             let eval = MetalEvalCheckSha256::new(hal.clone());
             (hal, eval)
         }
+
+        pub fn default_poseidon_hal() -> (Rc<MetalHalPoseidon>, MetalEvalCheck<MetalHashPoseidon>) {
+            let hal = Rc::new(MetalHalPoseidon::new());
+            let eval = MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone());
+            (hal, eval)
+        }
     } else {
         use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
-        use risc0_zkp::hal::cpu::BabyBearSha256CpuHal;
+        use risc0_zkp::hal::cpu::{BabyBearSha256CpuHal, BabyBearPoseidonCpuHal};
 
         /// Returns the default HAL for the RISC Zero circuit
         ///
@@ -230,6 +238,13 @@ cfg_if::cfg_if! {
             let eval = CpuEvalCheck::new(&CIRCUIT);
             (hal, eval)
         }
+
+        pub fn default_poseidon_hal() -> (Rc<BabyBearPoseidonCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
+            let hal = Rc::new(BabyBearPoseidonCpuHal::new());
+            let eval = CpuEvalCheck::new(&CIRCUIT);
+            (hal, eval)
+        }
+
     }
 }
 

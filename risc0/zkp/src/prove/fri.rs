@@ -116,8 +116,7 @@ pub fn fri_prove<H: Hal, F>(
     debug!("Doing Queries");
     for _ in 0..QUERIES {
         // Get a 'random' index.
-        let rng = iop.random_u32() as usize;
-        let mut pos = rng % orig_domain;
+        let mut pos = iop.random_bits(log2_ceil(orig_domain)) as usize;
         // Do the 'inner' proof for this index
         f(iop, pos);
         // Write the per-round proofs
