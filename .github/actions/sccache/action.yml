@@ -57,6 +57,3 @@ runs:
       id: rust-cache
       with:
         key: rust-cache-${{ runner.os }}-${{ runner.arch }}
-    - name: rust-cache hits
-      run: echo ${{ steps.rust-cache.outputs.cache-hit }}
-      shell: bash
