@@ -68,8 +68,8 @@ impl<'a, F: Field, R: ConfigRng<F>> ReadIOP<'a, F, R> {
     }
 
     /// Get a cryptographically uniform u32
-    pub fn random_u32(&mut self) -> u32 {
-        self.rng.random_u32()
+    pub fn random_bits(&mut self, bits: usize) -> u32 {
+        self.rng.random_bits(bits)
     }
 
     /// Get a cryptographically uniform field element
