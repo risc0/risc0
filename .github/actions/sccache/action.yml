@@ -30,7 +30,7 @@ runs:
       shell: bash
 
     - if: runner.os != 'macOS'
-      Name: Cache rust target + HAL_CACHE
+      name: Cache rust target + HAL_CACHE
       uses: risc0/rust-cache@v2
       id: rust-cache
       with:
