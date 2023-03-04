@@ -29,17 +29,6 @@ runs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
-    # Cache the cargo registry data
-    - if: runner.os != 'macOS'
-      name: Cache cargo registry
-      uses: actions/cache@v3
-      continue-on-error: false
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-        key: cargo-${{ runner.os }}-${{ runner.arch }}
-
     - if: runner.os != 'macOS'
       Name: Cache rust target + HAL_CACHE
       uses: risc0/rust-cache@v2
