@@ -13,10 +13,6 @@
 // limitations under the License.
 
 #[cfg(target_os = "zkvm")]
-extern crate alloc;
-#[cfg(target_os = "zkvm")]
-use alloc::vec::Vec;
-#[cfg(target_os = "zkvm")]
 use core::arch::asm;
 
 use crate::WORD_SIZE;
@@ -270,15 +266,9 @@ pub unsafe fn sys_sha_buffer(
 }
 
 #[inline(always)]
-pub unsafe fn sys_rand(recv_buf: *mut u32, recv_bytes: usize) {
-    //-> &'static [u8] {
+pub unsafe fn sys_rand(recv_buf: *mut u32, words: usize) {
     #[cfg(target_os = "zkvm")]
     {
-        let words = (recv_bytes + WORD_SIZE - 1) / WORD_SIZE;
-        let mut input: Vec<u32> = Vec::new();
-        for i in 0..words {
-            input.push(0u32);
-        }
         asm!(
             "ecall",
             in("t0") ecall::SOFTWARE,
