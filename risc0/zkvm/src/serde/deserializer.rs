@@ -31,7 +31,7 @@ pub fn from_slice<'a, T: Deserialize<'a>, P: Pod>(slice: &'a [P]) -> Result<T> {
     T::deserialize(&mut deserializer)
 }
 
-/// Interface for deserializing
+/// Enables deserializing from a slice
 pub struct Deserializer<'de> {
     slice: &'de [u8],
 }

@@ -82,7 +82,7 @@ pub trait StreamWriter {
     fn release(&mut self) -> Result<Self::Output>;
 }
 
-/// Interface for serializing
+/// Enables serializing to a stream
 pub struct Serializer<W: StreamWriter> {
     stream: W,
 }
