@@ -634,7 +634,6 @@ impl ops::Mul<ExtElem> for Elem {
 // some `if`s and hope it gets unrolled properly, but it's small
 // enough to just hand write.
 impl ops::MulAssign for ExtElem {
-    #[cfg(not(target_os = "zkvm"))]
     #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
         // Rename the element arrays to something small for readability.
@@ -646,21 +645,6 @@ impl ops::MulAssign for ExtElem {
             a[0] * b[2] + a[1] * b[1] + a[2] * b[0] + NBETA * (a[3] * b[3]),
             a[0] * b[3] + a[1] * b[2] + a[2] * b[1] + a[3] * b[0],
         ];
-    }
-
-    // If we're on the ZKVM, use the FFPU to accelerate some operations.
-    #[cfg(target_os = "zkvm")]
-    #[inline(always)]
-    fn mul_assign(&mut self, rhs: Self) {
-        extern "Rust" {
-            fn ffpu_mul_assign(lhs: &mut [u32; 1 * EXT_SIZE], rhs: &[u32; 1 * EXT_SIZE]);
-        }
-        unsafe {
-            ffpu_mul_assign(
-                bytemuck::cast_slice_mut(&mut self.0).try_into().unwrap(),
-                bytemuck::cast_slice(&rhs.0).try_into().unwrap(),
-            );
-        }
     }
 }
 

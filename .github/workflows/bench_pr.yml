@@ -1,14 +1,18 @@
-name: 'Benchmark Check'
+name: Benchmark Check
 
 on:
   pull_request:
     branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
 
   workflow_dispatch:
 
 jobs:
   bench:
-    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
@@ -22,20 +26,55 @@ jobs:
             device: nvidia_rtx_a5000
           - os: macOS
             feature: metal
-            device: intel_uhd_630
+            device: apple_m2_pro
 
     env:
       FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
 
     steps:
       - uses: actions/checkout@v3
-      - uses: risc0/actions-rs-toolchain@v1
-        with:
-          toolchain: stable
-      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
       - uses: risc0/criterion-compare-action@risc0
+        id: criterion-cmp
         with:
           benchName: fib
           branchName: main
           features: ${{ matrix.feature }}
           prettyName: "${{ matrix.os }}-${{ matrix.feature }}"
+          outputMarkdown: true
+
+      - name: Write compare markdown to file
+        run: |
+          echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ matrix.os }}-${{ matrix.feature }}-output.md
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: 'md-output'
+          path: ${{ matrix.os }}-${{ matrix.feature }}-output.md
+          if-no-files-found: error
+
+  create-comment:
+    runs-on: ubuntu-22.04
+    needs: [ bench ]
+    steps:
+      - uses: actions/download-artifact@v3
+      - name: Merge output files
+        shell: bash
+        run: sed h ./md-output/*-output.md > merged.md
+        id: download
+
+      - uses: actions/github-script@v3
+        name: Create PR comment
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            var fs = require('fs');
+            var body = fs.readFileSync("./merged.md", 'utf8')
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            })

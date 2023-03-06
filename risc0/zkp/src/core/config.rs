@@ -62,8 +62,9 @@ pub trait ConfigRng<F: Field> {
     /// Mix in randomness from a Fiat-Shamir commitment.
     fn mix(&mut self, val: &Digest);
 
-    /// Get a cryptographically uniform u32
-    fn random_u32(&mut self) -> u32;
+    /// Get a cryptographically uniform set of bits, as the low order bits of a
+    /// u32
+    fn random_bits(&mut self, bits: usize) -> u32;
 
     /// Get a cryptographically uniform field element
     fn random_elem(&mut self) -> F::Elem;

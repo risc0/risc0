@@ -3,6 +3,10 @@ name: Benchmark Trends
 on:
   push:
     branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
 
   # uncomment for only for testing changes to this workflow while in a PR
   # pull_request:
@@ -10,7 +14,7 @@ on:
 
 jobs:
   bench:
-    runs-on: [self-hosted, "${{ matrix.os }}", "${{ matrix.device }}"]
+    runs-on: [self-hosted, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
 
     strategy:
       fail-fast: false
@@ -24,16 +28,16 @@ jobs:
             device: nvidia_rtx_a5000
           - os: macOS
             feature: metal
-            device: intel_uhd_630
+            device: apple_m2_pro
 
     env:
       FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
 
     steps:
       - uses: actions/checkout@v3
-      - uses: risc0/actions-rs-toolchain@v1
-        with:
-          toolchain: stable
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
       - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
       - name: Store benchmark result
         uses: risc0/github-action-benchmark@v1

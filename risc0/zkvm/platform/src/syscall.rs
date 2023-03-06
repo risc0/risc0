@@ -22,7 +22,6 @@ pub mod ecall {
     pub const OUTPUT: u32 = 1;
     pub const SOFTWARE: u32 = 2;
     pub const SHA: u32 = 3;
-    pub const FFPU: u32 = 4;
 }
 
 pub mod nr {
@@ -161,26 +160,6 @@ pub unsafe fn sys_cycle_count() -> usize {
             in("a2") nr::SYS_CYCLE_COUNT,
         );
         cycle
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
-}
-
-#[inline(always)]
-pub unsafe fn sys_ffpu(code: &[u32], args: &[*mut u32]) {
-    #[cfg(target_os = "zkvm")]
-    {
-        let code_start: *const u32 = code.as_ptr();
-        let code_end: *const u32 = code_start.add(code.len());
-
-        let args_ptr: *const *mut u32 = args.as_ptr();
-        asm!(
-            "ecall",
-            in("t0") ecall::FFPU,
-            in("a0") code_start,
-            in("a1") args_ptr,
-            in("a2") code_end,
-        );
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()

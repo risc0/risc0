@@ -31,7 +31,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{
     io::SENDRECV_CHANNEL_RANDOM,
-    memory::{FFPU, SYSTEM},
+    memory::SYSTEM,
     syscall::{
         ecall,
         nr::{SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC, SYS_RAND},
@@ -79,9 +79,6 @@ struct MemoryState {
     pub pages: BTreeSet<u32>,
     resident: BTreeSet<u32>,
 
-    // Ram in the FFPU section of memory; these RAM slots store four Fps instead of one u32.
-    pub ffpu_ram: Vec<(BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem)>,
-
     // Plonk tables for sorting plonks in proper order
     pub ram_plonk: plonk::RamPlonk,
     pub bytes_plonk: plonk::BytesPlonk,
@@ -96,7 +93,6 @@ impl MemoryState {
             ram: image,
             pages: BTreeSet::new(),
             resident: BTreeSet::new(),
-            ffpu_ram: Vec::new(),
             ram_plonk: plonk::RamPlonk::new(),
             bytes_plonk: plonk::BytesPlonk::new(),
             plonk_accum: BTreeMap::new(),
@@ -182,7 +178,6 @@ enum MajorType {
     ShaInit,
     ShaLoad,
     ShaMain,
-    Ffpu,
     PageFault,
     MuxSize,
 }
@@ -432,21 +427,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             }
         } else if opcode.major == MajorType::ECall {
             let minor = self.memory.load_register(REG_T0);
-            if minor == ecall::FFPU {
-                let code_addr = self.memory.load_register(REG_A0);
-                let args_addr = self.memory.load_register(REG_A1);
-                let code_end = self.memory.load_register(REG_A2);
-                let const_addr = self.memory.load_u32(args_addr + (0 * WORD_SIZE) as u32);
-                let input_addr = self.memory.load_u32(args_addr + (1 * WORD_SIZE) as u32);
-                let output_addr = self.memory.load_u32(args_addr + (2 * WORD_SIZE) as u32);
-                for addr in (code_addr..code_end).step_by(WORD_SIZE) {
-                    faults.include(addr);
-                }
-                faults.include(args_addr);
-                faults.include(const_addr);
-                faults.include(input_addr);
-                faults.include(output_addr);
-            } else if minor == ecall::SHA {
+            if minor == ecall::SHA {
                 let state_out_addr = self.memory.load_register(REG_A0);
                 let state_in_addr = self.memory.load_register(REG_A1);
                 let block1_addr = self.memory.load_register(REG_A2);
@@ -653,18 +634,10 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 panic!("Memory read before page in: 0x{addr:08x}");
             }
         }
-        if addr as usize * WORD_SIZE >= FFPU.start() {
-            let ffpu_addr = addr as usize - FFPU.start() / WORD_SIZE;
-            if ffpu_addr >= self.memory.ffpu_ram.len() {
-                return split_word8(0);
-            }
-            self.memory.ffpu_ram[ffpu_addr]
-        } else {
-            let addr = addr * WORD_SIZE as u32;
-            let word = self.memory.load_u32(addr);
-            // debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
-            split_word8(word)
-        }
+        let addr = addr * WORD_SIZE as u32;
+        let word = self.memory.load_u32(addr);
+        // debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
+        split_word8(word)
     }
 
     fn ram_write(
@@ -686,31 +659,22 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             );
         }
 
-        if addr as usize * WORD_SIZE >= FFPU.start() {
-            let ffpu_addr = addr as usize - FFPU.start() / WORD_SIZE;
-            if self.memory.ffpu_ram.len() <= ffpu_addr {
-                let z = BabyBearElem::ZERO;
-                self.memory.ffpu_ram.resize(ffpu_addr + 1, (z, z, z, z));
-            }
-            self.memory.ffpu_ram[ffpu_addr] = data
-        } else {
-            let data = merge_word8(data);
-            let addr = addr * WORD_SIZE as u32;
-            // debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
-            self.memory.store_u32(addr, data);
-            if self.trace_enabled {
-                let addr = addr as usize;
-                if addr >= SYSTEM.start() && addr < SYSTEM.end() {
-                    self.handler.on_trace(TraceEvent::RegisterSet {
-                        reg: (addr - SYSTEM.start()) / WORD_SIZE,
-                        value: data,
-                    })?
-                } else {
-                    self.handler.on_trace(TraceEvent::MemorySet {
-                        addr: addr as u32,
-                        value: data,
-                    })?
-                }
+        let data = merge_word8(data);
+        let addr = addr * WORD_SIZE as u32;
+        // debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
+        self.memory.store_u32(addr, data);
+        if self.trace_enabled {
+            let addr = addr as usize;
+            if addr >= SYSTEM.start() && addr < SYSTEM.end() {
+                self.handler.on_trace(TraceEvent::RegisterSet {
+                    reg: (addr - SYSTEM.start()) / WORD_SIZE,
+                    value: data,
+                })?
+            } else {
+                self.handler.on_trace(TraceEvent::MemorySet {
+                    addr: addr as u32,
+                    value: data,
+                })?
             }
         }
 
