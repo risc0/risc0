@@ -41,6 +41,11 @@ pub trait SliceIoHandler {
     type FromGuest: Pod;
     /// Type for data sent to guest
     type ToGuest: Pod;
+    /// Host side IO handling
+    ///
+    /// Whatever data the guest sent is received by this function in
+    /// `from_guest`, and this function is to return the data the host is
+    /// sending to the guest.
     fn handle_io(&self, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest>;
 }
 
@@ -50,6 +55,11 @@ pub trait SliceIoHandler {
 ///
 /// Users may find SliceIoHandler more friendly to use.
 pub trait RawIoHandler {
+    /// Host side IO handling
+    ///
+    /// Whatever data the guest sent is received by this function in
+    /// `from_guest`, and the data the host is sending is written in `to_guest`.
+    /// This returns the words in the guest's `a0` and `a1` registers.
     fn handle_raw_io(&self, from_guest: &[u8], to_guest: &mut [u32]) -> (u32, u32);
 }
 
