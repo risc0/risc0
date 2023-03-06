@@ -219,7 +219,7 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
         use risc0_zkp::hal::cpu::{BabyBearSha256CpuHal, BabyBearPoseidonCpuHal};
 
-        /// Returns the default HAL for the RISC Zero circuit
+        /// Returns the default SHA-256 HAL for the RISC Zero circuit
         ///
         /// RISC Zero uses a
         /// [HAL](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/index.html)
@@ -239,6 +239,10 @@ cfg_if::cfg_if! {
             (hal, eval)
         }
 
+        /// Returns the default Poseidon HAL for the RISC Zero circuit
+        ///
+        /// The same as [default_hal] except it gives the default HAL for
+        /// securing the circuit using Poseidon (instead of SHA-256).
         pub fn default_poseidon_hal() -> (Rc<BabyBearPoseidonCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
             let hal = Rc::new(BabyBearPoseidonCpuHal::new());
             let eval = CpuEvalCheck::new(&CIRCUIT);
