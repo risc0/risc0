@@ -41,7 +41,7 @@ pub trait SliceIoHandler {
     type FromGuest: Pod;
     /// Type for data sent to guest
     type ToGuest: Pod;
-    /// Host side IO handling
+    /// Host side I/O handling
     ///
     /// Whatever data the guest sent is received by this function in
     /// `from_guest`, and this function is to return the data the host is
@@ -55,7 +55,7 @@ pub trait SliceIoHandler {
 ///
 /// Users may find SliceIoHandler more friendly to use.
 pub trait RawIoHandler {
-    /// Host side IO handling
+    /// Host side I/O handling
     ///
     /// Whatever data the guest sent is received by this function in
     /// `from_guest`, and the data the host is sending is written in `to_guest`.
