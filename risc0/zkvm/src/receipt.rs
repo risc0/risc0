@@ -122,6 +122,24 @@ pub fn insecure_skip_seal() -> bool {
         && std::env::var("RISC0_INSECURE_SKIP_SEAL").unwrap_or_default() == "1"
 }
 
+/// Reports whether the zkVM is in the insecure seal skipping mode
+///
+/// Returns `true` when in the insecure seal skipping mode. Returns `false` when
+/// in normal secure mode.
+///
+/// When `insecure_skip_seal` is `false`, [crate::prove::Prover::run] will
+/// generate a seal when run that proves faithful execution, and
+/// [Receipt::verify] will check the seal and return an `Err` if the seal is
+/// missing or invalid.
+///
+/// When `insecure_skip_seal` is `true`, [crate::prove::Prover::run] will not
+/// generate a seal and the Receipt does not contain a proof of execution, and
+/// [Receipt::verify] will not check the seal and will return an `Ok` even if
+/// the seal is missing or invalid.
+///
+/// In particular, if [Receipt::verify] is run with `insecure_skip_seal` being
+/// `false`, it will always return an `Err` for any [Receipt] generated while
+/// `insecure_skip_seal` was `true`.
 #[cfg(target_os = "zkvm")]
 pub fn insecure_skip_seal() -> bool {
     cfg!(feature = "insecure_skip_seal")
