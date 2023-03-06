@@ -21,27 +21,6 @@ runs:
         echo "SCCACHE_CACHE_DIR=~/Library/Caches/Mozilla.sccache" >> $GITHUB_ENV
       shell: bash
 
-    # - name: Save sccache
-    #   uses: actions/cache@v3
-    #   continue-on-error: false
-    #   with:
-    #     path: $SCCACHE_CACHE_DIR
-    #     # NOTE: this key/restore key allows us to name the cache with the cargo lock hash
-    #     #       but then use the restore-key as a matching prefix to search for. So if we miss
-    #     #       the cache on `key` we can hit on the restore key.
-    #     key: sccache-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/Cargo.lock') }}
-    #     restore-keys: sccache-${{ runner.os }}-${{ runner.arch }}
-
-    - name: Cache cargo registry
-      uses: actions/cache@v3
-      continue-on-error: false
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-        key: cargo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: cargo-${{ runner.os }}-${{ runner.arch }}
-
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
         SCCACHE_VERSION: v0.3.3
@@ -53,7 +32,11 @@ runs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
-    - uses: risc0/rust-cache@v2
+    - if: runner.os != 'macOS'
+      name: Cache rust target + HAL_CACHE
+      uses: risc0/rust-cache@v2
       id: rust-cache
       with:
         key: rust-cache-${{ runner.os }}-${{ runner.arch }}
+        # TODO: this path will not work on windows.
+        cache-directories: ~/.cache/risc0
