@@ -193,6 +193,9 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::cuda::CudaEvalCheck;
         use risc0_zkp::hal::cuda::CudaHal;
 
+        /// Returns the default SHA-256 HAL for the RISC Zero circuit
+        ///
+        /// See the non-cuda version of this documentation for details
         pub fn default_hal() -> (Rc<CudaHal>, CudaEvalCheck) {
             let hal = Rc::new(CudaHal::new());
             let eval = CudaEvalCheck::new(hal.clone());
@@ -204,12 +207,18 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
         use risc0_zkp::hal::metal::{MetalHalSha256, MetalHalPoseidon, MetalHashPoseidon};
 
+        /// Returns the default SHA-256 HAL for the RISC Zero circuit
+        ///
+        /// See the non-metal version of this documentation for details
         pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
             let hal = Rc::new(MetalHalSha256::new());
             let eval = MetalEvalCheckSha256::new(hal.clone());
             (hal, eval)
         }
 
+        /// Returns the default Poseidon HAL for the RISC Zero circuit
+        ///
+        /// See the non-metal version of this documentation for details
         pub fn default_poseidon_hal() -> (Rc<MetalHalPoseidon>, MetalEvalCheck<MetalHashPoseidon>) {
             let hal = Rc::new(MetalHalPoseidon::new());
             let eval = MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone());
