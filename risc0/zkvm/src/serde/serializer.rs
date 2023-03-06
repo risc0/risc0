@@ -429,6 +429,8 @@ impl<'a, W: StreamWriter> serde::ser::SerializeStructVariant for &'a mut Seriali
 }
 
 /// A vector of bytes that can be written to with a stream interface
+///
+/// This is designed for host-side use and is not intended for use in the guest.
 pub struct AllocVec(pub Vec<u8>);
 
 impl AllocVec {
