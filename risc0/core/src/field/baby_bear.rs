@@ -13,7 +13,10 @@
 // limitations under the License.
 
 //! Baby bear field.
-//! Support for the base finite field modulo `15 * 2^27 + 1`.
+//!
+//! Support for the finite field of order `15 * 2^27 + 1`, and its degree 4
+//! extension field. This field choice allows for 32-bit addition without
+//! overflow.
 
 use alloc::{fmt, vec::Vec};
 use core::{
@@ -61,6 +64,7 @@ const R2: u32 = 1172168163;
 #[repr(transparent)]
 pub struct Elem(u32);
 
+/// Alias for the Baby Bear [Elem]
 pub type BabyBearElem = Elem;
 
 impl Default for Elem {
@@ -185,10 +189,14 @@ impl Elem {
         Self(encode(x % P))
     }
 
+    /// Create a new [BabyBear] from a Montgomery form representation
+    ///
+    /// Requires that `x` comes pre-encoded in Montegomery form.
     pub const fn new_raw(x: u32) -> Self {
         Self(x)
     }
 
+    /// Cast a [BabyBear] to an integer
     pub const fn as_u32(&self) -> u32 {
         decode(self.0)
     }
@@ -360,6 +368,7 @@ const EXT_SIZE: usize = 4;
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
 
+/// Alias for the Baby Bear [ExtElem]
 pub type BabyBearExtElem = ExtElem;
 
 impl Default for ExtElem {

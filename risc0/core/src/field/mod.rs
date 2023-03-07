@@ -20,12 +20,7 @@
 use alloc::vec::Vec;
 use core::{cmp, fmt::Debug, ops};
 
-/// The field extension whose subfield is order `15*2^27 + 1`;
-/// this field choice allows 32-bit addition without overflow.
 pub mod baby_bear;
-
-/// The field extension whose subfield is order `2^64 - 2^32 + 1`;
-/// this field choice allows for fast reduction.
 pub mod goldilocks;
 
 /// A pair of fields, one of which is an extension field of the other.
