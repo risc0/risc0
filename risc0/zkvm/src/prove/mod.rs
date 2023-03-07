@@ -467,8 +467,8 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
                 Ok((0, 0))
             }
             SENDRECV_CHANNEL_RANDOM => {
-                log::debug!("SENDRECV_CHANNEL_RANDOM: {}", from_guest_buf.len());
-                let mut rand_buff = vec![0u8; from_guest_buf.len()];
+                log::debug!("SENDRECV_CHANNEL_RANDOM: {}", from_host_buf.len());
+                let mut rand_buff = vec![0u8; from_host_buf.len() * WORD_SIZE];
                 getrandom::getrandom(rand_buff.as_mut_slice())?;
                 from_host_buf.clone_from_slice(bytemuck::cast_slice(rand_buff.as_slice()));
                 Ok((0, 0))

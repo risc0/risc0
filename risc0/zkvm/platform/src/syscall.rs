@@ -13,8 +13,10 @@
 // limitations under the License.
 
 #[cfg(target_os = "zkvm")]
-use core::arch::asm;
+use core::{arch::asm, ptr};
 
+#[cfg(target_os = "zkvm")]
+use crate::io::SENDRECV_CHANNEL_RANDOM;
 use crate::WORD_SIZE;
 
 pub mod ecall {
@@ -29,7 +31,6 @@ pub mod nr {
     pub const SYS_LOG: u32 = 1;
     pub const SYS_IO: u32 = 2;
     pub const SYS_CYCLE_COUNT: u32 = 3;
-    pub const SYS_RAND: u32 = 4;
 }
 
 pub mod reg_abi {
@@ -248,13 +249,7 @@ pub unsafe fn sys_sha_buffer(
 pub unsafe fn sys_rand(recv_buf: *mut u32, words: usize) {
     #[cfg(target_os = "zkvm")]
     {
-        asm!(
-            "ecall",
-            in("t0") ecall::SOFTWARE,
-            inout("a0") recv_buf  => _,
-            inout("a1") words => _,
-            in("a2") nr::SYS_RAND,
-        );
+        sys_io(recv_buf, words, ptr::null_mut(), 0, SENDRECV_CHANNEL_RANDOM);
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()
