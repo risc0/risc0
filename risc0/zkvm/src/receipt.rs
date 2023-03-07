@@ -122,6 +122,9 @@ pub fn insecure_skip_seal() -> bool {
         && std::env::var("RISC0_INSECURE_SKIP_SEAL").unwrap_or_default() == "1"
 }
 
+/// Reports whether the zkVM is in the insecure seal skipping mode
+///
+/// See the non-zkvm version of this documentation for details.
 #[cfg(target_os = "zkvm")]
 pub fn insecure_skip_seal() -> bool {
     cfg!(feature = "insecure_skip_seal")

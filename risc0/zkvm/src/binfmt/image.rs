@@ -118,13 +118,29 @@ impl PageTableInfo {
     }
 }
 
+/// An image of a zkVM guest's memory
+///
+/// This is an image of the full memory state of the zkVM, including the data,
+/// text, inputs, page table, and system memory. In addition to the memory image
+/// proper, this includes some metadata about the page table.
 pub struct MemoryImage {
+    /// The memory image as a vector of bytes
     pub image: Vec<u8>,
+    /// The page table root
+    ///
+    /// The zkVM page table is structured as a Merkle tree, and this is the root
+    /// of that Merkle tree.
     pub root: Digest,
+    /// Metadata about the structure of the page table
     pub info: PageTableInfo,
 }
 
 impl MemoryImage {
+    /// Construct the initial memory image for `program`
+    ///
+    /// The result is a MemoryImage with the ELF of `program` loaded (but
+    /// execution not yet begun), and with the page table Merkle tree
+    /// constructed.
     pub fn new(program: &Program, page_size: u32) -> Self {
         let mut image = vec![0_u8; MEM_SIZE];
 
@@ -157,6 +173,15 @@ impl MemoryImage {
         Self { image, root, info }
     }
 
+    /// Verify the integrity of the MemoryImage
+    ///
+    /// Confirms that the page table is a valid Merkle tree with root
+    /// [MemoryImage::root], and that the data from each page in the
+    /// [MemoryImage::image] hashes to the same hash as given for that page in
+    /// the page table.
+    ///
+    /// Returns `Ok(())` if all of the above conditions are met, and returns an
+    /// `Err` if any are not met.
     pub fn check(&self, addr: u32) -> Result<()> {
         let mut page_idx = self.info.get_page_index(addr);
         while page_idx < self.info.root_idx {

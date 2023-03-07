@@ -12,6 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Handlers for two-way private I/O between host and guest
+//!
+//! These handlers can be enabled for a zkVM by setting them when a
+//! [crate::prove::Prover] is created using [crate::prove::ProverOpts].
+//! Specifically, the [ProverOpts](crate::prove::ProverOpts) functions
+//! [with_sendrecv_callback](crate::prove::ProverOpts::with_sendrecv_callback),
+//! [with_slice_io_handler](crate::prove::ProverOpts::with_slice_io_handler),
+//! and [with_raw_io_handler](crate::prove::ProverOpts::with_raw_io_handler) can
+//! be used to enable the handlers provided in this module.
+
 use core::{cell::RefCell, marker::PhantomData, mem::take};
 use std::ops::DerefMut;
 
@@ -27,8 +37,15 @@ use risc0_zkvm_platform::WORD_SIZE;
 /// elements are to be sent back to the guest, and the second call
 /// actually returns the elements after the guest allocates space.
 pub trait SliceIoHandler {
+    /// Type for data received from guest
     type FromGuest: Pod;
+    /// Type for data sent to guest
     type ToGuest: Pod;
+    /// Host side I/O handling
+    ///
+    /// Whatever data the guest sent is received by this function in
+    /// `from_guest`, and this function is to return the data the host is
+    /// sending to the guest.
     fn handle_io(&self, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest>;
 }
 
@@ -38,6 +55,11 @@ pub trait SliceIoHandler {
 ///
 /// Users may find SliceIoHandler more friendly to use.
 pub trait RawIoHandler {
+    /// Host side I/O handling
+    ///
+    /// Whatever data the guest sent is received by this function in
+    /// `from_guest`, and the data the host is sending is written in `to_guest`.
+    /// This returns the words in the guest's `a0` and `a1` registers.
     fn handle_raw_io(&self, from_guest: &[u8], to_guest: &mut [u32]) -> (u32, u32);
 }
 
