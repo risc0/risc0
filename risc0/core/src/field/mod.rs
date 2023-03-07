@@ -30,7 +30,9 @@ pub mod goldilocks;
 
 /// A pair of fields, one of which is an extension field of the other.
 pub trait Field {
+    /// An element of the base field
     type Elem: Elem + RootsOfUnity;
+    /// An element of the extension field
     type ExtElem: ExtElem<SubElem = Self::Elem>;
 }
 
@@ -162,6 +164,10 @@ pub trait Elem:
 }
 
 /// A field extension which can be constructed from a subfield element [Elem]
+///
+/// Represents an element of an extension field. This extension field is
+/// associated with a base field (sometimes called "subfield") whose element
+/// type is given by the generic type parameter.
 pub trait ExtElem:
     Elem
     + ops::Add<Output = Self>
@@ -176,15 +182,36 @@ pub trait ExtElem:
     + cmp::PartialEq
     + cmp::Eq
 {
+    /// An element of the base field
+    ///
+    /// This type represents an element of the base field (sometimes called
+    /// "subfield") of this extension field.
     type SubElem: Elem;
 
+    /// The degree of the field extension
+    ///
+    /// This the degree of the extension field when interpreted as a vector
+    /// space over the base field. Thus, an [ExtElem] can be represented as
+    /// `EXT_SIZE` [SubElem](ExtElem::SubElem)s.
     const EXT_SIZE: usize;
 
-    /// Construct a field element
+    /// Interpret a base field element as an extension field element
+    ///
+    /// Every [SubElem](ExtElem::SubElem) is (mathematically) an [ExtElem]. This
+    /// constructs the [ExtElem] equal to the given [SubElem](ExtElem::SubElem).
     fn from_subfield(elem: &Self::SubElem) -> Self;
 
+    /// Construct an extension field element
+    ///
+    /// Construct an extension field element from a (mathematical) vector of
+    /// [SubElem](ExtElem::SubElem)s. This vector is length
+    /// [EXT_SIZE](ExtElem::EXT_SIZE).
     fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self;
 
+    /// Express an extension field element in terms of base field elements
+    ///
+    /// Returns the (mathematical) vector of [SubElem](ExtElem::SubElem)s equal
+    /// to the [ExtElem]. This vector is length [EXT_SIZE](ExtElem::EXT_SIZE).
     fn subelems(&self) -> &[Self::SubElem];
 }
 
