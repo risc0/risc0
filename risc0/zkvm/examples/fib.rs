@@ -36,11 +36,12 @@ fn main() {
     let args = Args::parse();
     let (hal, eval) = default_hal();
 
-    let receipt = top(hal.as_ref(), &eval, args.iterations);
+    let (receipt, cycles) = top(hal.as_ref(), &eval, args.iterations);
     let seal = receipt.get_seal_bytes().len();
     let journal = receipt.get_journal_bytes().len();
     println!(
-        "Seal: {} bytes, Journal: {} bytes, Total: {} bytes",
+        "Cycles: {}, Seal: {} bytes, Journal: {} bytes, Total: {} bytes",
+        cycles,
         seal,
         journal,
         seal + journal
@@ -48,12 +49,12 @@ fn main() {
 }
 
 #[tracing::instrument(skip_all)]
-fn top<H, E>(hal: &H, eval: &E, iterations: u32) -> Receipt
+fn top<H, E>(hal: &H, eval: &E, iterations: u32) -> (Receipt, usize)
 where
     H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
     E: EvalCheck<H>,
 {
     let mut prover = Prover::new(FIB_ELF, FIB_ID).unwrap();
     prover.add_input_u32_slice(&[iterations]);
-    prover.run_with_hal(hal, eval).unwrap()
+    (prover.run_with_hal(hal, eval).unwrap(), prover.cycles)
 }
