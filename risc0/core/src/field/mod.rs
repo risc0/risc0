@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: Document better
-
-//! Defines field extension (and base fields) used for finite field-based
+//! Finite field types and operations
+//!
+//! Defines base fields and extension fields used for finite field-based
 //! operations across the RISC Zero zkVM architecture
 
 use alloc::vec::Vec;
