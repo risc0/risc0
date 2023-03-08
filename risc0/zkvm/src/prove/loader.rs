@@ -321,6 +321,10 @@ impl<'a> Iterator for TripleWordIter<'a> {
     }
 }
 
+/// Loads data into the zkVM image
+///
+/// Handles both loading the initial zkVM data and also loading updated data for
+/// each time step.
 pub struct Loader {
     system: Vec<TripleWord>,
 }
@@ -328,6 +332,9 @@ pub struct Loader {
 impl Loader {
     const SETUP_CYCLES: usize = setup_count(SETUP_STEP_REGS);
 
+    /// Construct a Loader
+    ///
+    /// Loads the common setup data used by all zkVMs
     pub fn new() -> Self {
         let mut image: BTreeMap<u32, u32> = BTreeMap::new();
 
@@ -346,6 +353,11 @@ impl Loader {
         }
     }
 
+    /// Load data specific to this zkVM instance
+    ///
+    /// Starting from the initialized image created by [Loader::new], use the
+    /// function `step` to repeatedly update the image, thereby creating an
+    /// execution trace.
     #[tracing::instrument(skip_all)]
     pub fn load<F>(&self, step: F) -> Result<usize>
     where
@@ -363,6 +375,7 @@ impl Loader {
         Ok(loader.cycle)
     }
 
+    /// Compute the [ControlId] associated with the given HAL
     pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> ControlId {
         let code_size = CIRCUIT.code_size();
 

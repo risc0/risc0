@@ -28,6 +28,7 @@ pub enum Error {
     SerializeBufferFull,
 }
 
+/// A Result type for `risc0_zkvm::serde` operations that can fail
 pub type Result<T> = core::result::Result<T, Error>;
 
 impl Display for Error {
