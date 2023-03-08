@@ -15,7 +15,7 @@
 use anyhow::{bail, Result};
 use risc0_zkp::core::sha::{Digest, Sha256, BLOCK_BYTES, SHA256_INIT};
 use risc0_zkvm_platform::{
-    memory::{MEM_SIZE, PAGE_TABLE, STACK},
+    memory::{MEM_SIZE, PAGE_TABLE},
     syscall::DIGEST_BYTES,
     WORD_SIZE,
 };
@@ -33,13 +33,11 @@ const fn round_up(a: u32, b: u32) -> u32 {
 }
 
 pub struct PageTableInfo {
-    pub mem_start: u32,
     pub page_size: u32,
     page_table_addr: u32,
     _page_table_size: u32,
     root_addr: u32,
     pub root_idx: u32,
-    pub raw_root_idx: u32,
     root_page_addr: u32,
     num_pages: u32,
     num_root_entries: u32,
@@ -47,8 +45,8 @@ pub struct PageTableInfo {
 }
 
 impl PageTableInfo {
-    pub fn new(mem_start: u32, page_table_addr: u32, page_size: u32) -> Self {
-        let max_mem = page_table_addr - mem_start;
+    pub fn new(page_table_addr: u32, page_size: u32) -> Self {
+        let max_mem = page_table_addr;
         assert!(max_mem >= page_size);
 
         let mut layers = Vec::new();
@@ -64,22 +62,19 @@ impl PageTableInfo {
         let num_pages = max_mem / page_size;
         let page_table_size = round_up(page_table_size, BLOCK_BYTES as u32);
         let root_addr = page_table_addr + page_table_size;
-        let root_idx = (root_addr - mem_start) / page_size;
-        let raw_root_idx = root_addr / page_size;
-        let root_page_addr = root_idx * page_size + mem_start;
+        let root_idx = root_addr / page_size;
+        let root_page_addr = root_idx * page_size;
         let num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
         assert_eq!(root_idx, num_pages);
 
         log::debug!("root_page_addr: 0x{root_page_addr:08x}, root_addr: 0x{root_addr:08x}");
 
         Self {
-            mem_start,
             page_size,
             page_table_addr,
             _page_table_size: page_table_size,
             root_addr,
             root_idx,
-            raw_root_idx,
             root_page_addr,
             num_pages,
             num_root_entries,
@@ -87,30 +82,12 @@ impl PageTableInfo {
         }
     }
 
-    pub fn is_nondet(&self, page_idx: u32) -> u32 {
-        let first_idx = self.mem_start / self.page_size;
-        if page_idx < first_idx {
-            1u32
-        } else {
-            0u32
-        }
-    }
-
     pub fn get_page_addr(&self, page_idx: u32) -> u32 {
-        page_idx * self.page_size + self.mem_start
-    }
-
-    pub fn get_page_index_nondet(&self, addr: u32) -> u32 {
-        addr / self.page_size
+        page_idx * self.page_size
     }
 
     pub fn get_page_index(&self, addr: u32) -> u32 {
-        assert!(
-            addr >= self.mem_start,
-            "0x{addr:08x} >= 0x{:08x}",
-            self.mem_start
-        );
-        (addr - self.mem_start) / self.page_size
+        addr / self.page_size
     }
 
     pub fn get_page_entry_addr(&self, page_idx: u32) -> u32 {
@@ -138,7 +115,7 @@ impl MemoryImage {
         }
 
         // Compute the page table hashes except for the very last root hash.
-        let info = PageTableInfo::new(STACK.start() as u32, PAGE_TABLE.start() as u32, page_size);
+        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
         for i in 0..info.num_pages {
             let page_addr = info.get_page_addr(i as u32);
             let page = &image[page_addr as usize..page_addr as usize + page_size as usize];
@@ -213,7 +190,7 @@ mod tests {
     use crate::binfmt::{elf::Program, image::PageTableInfo};
 
     fn page_table_size(max_mem: u32, page_size: u32) -> u32 {
-        PageTableInfo::new(0, max_mem, page_size)._page_table_size
+        PageTableInfo::new(max_mem, page_size)._page_table_size
     }
 
     #[test]
@@ -234,19 +211,15 @@ mod tests {
     #[test]
     fn page_table_info() {
         const PAGE_SIZE_1K: u32 = 1024;
-        let info = PageTableInfo::new(
-            STACK.start() as u32,
-            PAGE_TABLE.start() as u32,
-            PAGE_SIZE_1K,
-        );
-        assert_eq!(info._page_table_size, 5953216);
-        assert_eq!(info._page_table_size / PAGE_SIZE_1K, 5813);
-        assert_eq!(info._page_table_size / PAGE_SIZE_1K * PAGE_SIZE_1K, 5952512);
-        assert_eq!(info._layers, vec![5767168, 180224, 5632, 160]);
-        assert_eq!(info.root_addr, 0xd5ad6c0);
-        assert_eq!(info.root_page_addr, 0xd5ad400);
+        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, PAGE_SIZE_1K);
+        assert_eq!(info._page_table_size, 7035584);
+        assert_eq!(info._page_table_size / PAGE_SIZE_1K, 6870);
+        assert_eq!(info._page_table_size / PAGE_SIZE_1K * PAGE_SIZE_1K, 7034880);
+        assert_eq!(info._layers, vec![6815744, 212992, 6656, 192]);
+        assert_eq!(info.root_addr, 0xd6b5ac0);
+        assert_eq!(info.root_page_addr, 0xd6b5800);
         assert_eq!(info.num_root_entries, 22);
-        assert_eq!(info.root_idx, 186037);
+        assert_eq!(info.root_idx, 219862);
     }
 
     #[test]
@@ -269,7 +242,7 @@ mod tests {
         // Layer 2:   8M / 1K =   8K pages =>   8K * 32 = 256K
         // Layer 3: 256K / 1K =  256 pages =>  256 * 32 =   8K
         // Layer 4:   8K / 1K =    8 pages =>    8 * 32 =  256
-        let info = PageTableInfo::new(0, 256 * 1024 * 1024, PAGE_SIZE_1K);
+        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_1K);
         assert_eq!(
             info._layers,
             vec![8 * 1024 * 1024, 256 * 1024, 8 * 1024, 256]
@@ -299,7 +272,7 @@ mod tests {
         // Layer 1: 256M / 4K =  64K pages =>  64K * 32 =   2M
         // Layer 2:   2M / 4K =  512 pages =>  512 * 32 =  16K
         // Layer 3:  16K / 4K =    4 pages =>    4 * 32 =  128
-        let info = PageTableInfo::new(0, 256 * 1024 * 1024, PAGE_SIZE_4K);
+        let info = PageTableInfo::new(256 * 1024 * 1024, PAGE_SIZE_4K);
         assert_eq!(info._layers, vec![2 * 1024 * 1024, 16 * 1024, 128]);
         assert_eq!(info._page_table_size, 2 * 1024 * 1024 + 16 * 1024 + 128);
     }
@@ -327,7 +300,7 @@ mod tests {
         // 0x1AA0: P5
         // 0x1AC0: Root
 
-        let info = PageTableInfo::new(0, 0x1A00, PAGE_SIZE_1K);
+        let info = PageTableInfo::new(0x1A00, PAGE_SIZE_1K);
         assert_eq!(info._layers, vec![192]);
         assert_eq!(info._page_table_size, 192);
         assert_eq!(info.root_addr, 0x1AC0);
