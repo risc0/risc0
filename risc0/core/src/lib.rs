@@ -12,7 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! Core RISC Zero functionality shared across multiple crates
+//!
+//! This crate contains fundamental code that multiple RISC Zero crates rely on,
+//! most notably representing finite field elements and enabling finite field
+//! arithmetic.
+
 #![cfg_attr(not(feature = "std"), no_std)]
+#![deny(missing_docs)]
 
 extern crate alloc;
 
