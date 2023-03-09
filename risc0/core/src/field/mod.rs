@@ -12,25 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// TODO: Document better
-
-//! Defines field extension (and base fields) used for finite field-based
+//! Finite field types and operations
+//!
+//! Defines base fields and extension fields used for finite field-based
 //! operations across the RISC Zero zkVM architecture
 
 use alloc::vec::Vec;
 use core::{cmp, fmt::Debug, ops};
 
-/// The field extension whose subfield is order `15*2^27 + 1`;
-/// this field choice allows 32-bit addition without overflow.
 pub mod baby_bear;
-
-/// The field extension whose subfield is order `2^64 - 2^32 + 1`;
-/// this field choice allows for fast reduction.
 pub mod goldilocks;
 
 /// A pair of fields, one of which is an extension field of the other.
 pub trait Field {
+    /// An element of the base field
     type Elem: Elem + RootsOfUnity;
+    /// An element of the extension field
     type ExtElem: ExtElem<SubElem = Self::Elem>;
 }
 
@@ -162,6 +159,10 @@ pub trait Elem:
 }
 
 /// A field extension which can be constructed from a subfield element [Elem]
+///
+/// Represents an element of an extension field. This extension field is
+/// associated with a base field (sometimes called "subfield") whose element
+/// type is given by the generic type parameter.
 pub trait ExtElem:
     Elem
     + ops::Add<Output = Self>
@@ -176,15 +177,36 @@ pub trait ExtElem:
     + cmp::PartialEq
     + cmp::Eq
 {
+    /// An element of the base field
+    ///
+    /// This type represents an element of the base field (sometimes called
+    /// "subfield") of this extension field.
     type SubElem: Elem;
 
+    /// The degree of the field extension
+    ///
+    /// This the degree of the extension field when interpreted as a vector
+    /// space over the base field. Thus, an [ExtElem] can be represented as
+    /// `EXT_SIZE` [SubElem](ExtElem::SubElem)s.
     const EXT_SIZE: usize;
 
-    /// Construct a field element
+    /// Interpret a base field element as an extension field element
+    ///
+    /// Every [SubElem](ExtElem::SubElem) is (mathematically) an [ExtElem]. This
+    /// constructs the [ExtElem] equal to the given [SubElem](ExtElem::SubElem).
     fn from_subfield(elem: &Self::SubElem) -> Self;
 
+    /// Construct an extension field element
+    ///
+    /// Construct an extension field element from a (mathematical) vector of
+    /// [SubElem](ExtElem::SubElem)s. This vector is length
+    /// [EXT_SIZE](ExtElem::EXT_SIZE).
     fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self;
 
+    /// Express an extension field element in terms of base field elements
+    ///
+    /// Returns the (mathematical) vector of [SubElem](ExtElem::SubElem)s equal
+    /// to the [ExtElem]. This vector is length [EXT_SIZE](ExtElem::EXT_SIZE).
     fn subelems(&self) -> &[Self::SubElem];
 }
 
