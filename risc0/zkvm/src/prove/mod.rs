@@ -36,10 +36,10 @@ mod plonk;
 #[cfg(feature = "profiler")]
 pub mod profiler;
 
-use std::{cmp::min, collections::HashMap, fmt::Debug, io::Write, rc::Rc};
+use std::{cmp::min, collections::HashMap, fmt::Debug, io::Write, rc::Rc, str::from_utf8};
 
 use anyhow::{bail, Result};
-use io::{RawIoHandler, SliceIoHandler};
+use io::{SliceIo, Syscall};
 use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
@@ -49,16 +49,17 @@ use risc0_zkp::{
     prove::adapter::ProveAdapter,
 };
 use risc0_zkvm_platform::{
-    io::{
-        SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_JOURNAL, SENDRECV_CHANNEL_RANDOM,
-        SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT,
-    },
     memory::MEM_SIZE,
+    syscall::{
+        reg_abi::{REG_A3, REG_A4},
+        SyscallName,
+    },
     WORD_SIZE,
 };
 
 use crate::binfmt::elf::Program;
 use crate::{
+    prove::exec::MemoryState,
     receipt::{insecure_skip_seal, Receipt},
     CIRCUIT,
 };
@@ -69,7 +70,7 @@ pub struct ProverOpts<'a> {
 
     pub(crate) skip_verify: bool,
 
-    pub(crate) io_handlers: HashMap<u32, Box<dyn RawIoHandler + 'a>>,
+    pub(crate) io_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
 
     pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
 }
@@ -93,29 +94,29 @@ impl<'a> ProverOpts<'a> {
         }
     }
 
-    /// Add a handler for sendrecv ports which is just a callback.
-    /// The guest can call these callbacks by invoking
-    /// `risc0_zkvm::guest::env::send_recv_slice`.
+    /// Add a handler for a syscall which inputs and outputs a slice
+    /// of plain old data..  The guest can call these by invoking
+    /// `risc0_zkvm::guest::env::send_recv_slice`
+    pub fn with_slice_io(self, syscall: SyscallName, handler: impl SliceIo + 'a) -> Self {
+        self.with_syscall(syscall, handler.to_syscall())
+    }
+
+    /// Add a handler for a syscall which inputs and outputs a slice
+    /// of plain old data.  The guest can call these callbacks by
+    /// invoking `risc0_zkvm::guest::env::send_recv_slice`.
     pub fn with_sendrecv_callback(
         self,
-        channel_id: u32,
+        syscall: SyscallName,
         f: impl Fn(&[u8]) -> Vec<u8> + 'a,
     ) -> Self {
-        self.with_raw_io_handler(channel_id, io::handler_from_fn(f))
+        self.with_slice_io(syscall, io::slice_io_from_fn(f))
     }
 
-    /// Add a handler for sendrecv ports, indexed by channel numbers.
-    /// The guest can call these callbacks by invoking
-    /// `risc0_zkvm::guest::env::send_recv_slice`
-    pub fn with_slice_io_handler(self, channel_id: u32, handler: impl SliceIoHandler + 'a) -> Self {
-        self.with_raw_io_handler(channel_id, io::handler_from_slice_handler(handler))
-    }
-
-    /// Add a handler for sendrecv channels that handles its own
-    /// allocation and sizing.  The guets can call these callbacks by
-    /// invoking `risc0_zkvm_guest::env::send_recv_raw'.
-    pub fn with_raw_io_handler(mut self, channel_id: u32, handler: impl RawIoHandler + 'a) -> Self {
-        self.io_handlers.insert(channel_id, Box::new(handler));
+    /// Add a handler for a raw syscall implementation.  The guest can
+    /// invoke these using the risc0_zkvm_platform::syscall!  macro.
+    pub fn with_syscall(mut self, syscall: SyscallName, handler: impl Syscall + 'a) -> Self {
+        self.io_handlers
+            .insert(syscall.as_str().to_string(), Box::new(handler));
         self
     }
 
@@ -248,7 +249,7 @@ cfg_if::cfg_if! {
             (hal, eval)
         }
 
-        /// Returns the default Poseidon HAL for the RISC Zero circuit
+                /// Returns the default Poseidon HAL for the RISC Zero circuit
         ///
         /// The same as [default_hal] except it gives the default HAL for
         /// securing the circuit using Poseidon (instead of SHA-256).
@@ -449,44 +450,63 @@ impl<'a> ProverImpl<'a> {
 impl<'a> exec::HostHandler for ProverImpl<'a> {
     fn on_txrx(
         &mut self,
-        channel: u32,
-        from_guest_buf: &[u8],
-        from_host_buf: &mut [u32],
+        mem: &MemoryState,
+        syscall: &str,
+        cycle: usize,
+        to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        if let Some(cb) = self.opts.io_handlers.get(&channel) {
-            return Ok(cb.handle_raw_io(from_guest_buf, from_host_buf));
+        if let Some(cb) = self.opts.io_handlers.get(syscall) {
+            return Ok(cb.syscall(syscall, mem, to_guest));
         }
-        match channel {
-            SENDRECV_CHANNEL_INITIAL_INPUT => {
-                log::debug!("SENDRECV_CHANNEL_INITIAL_INPUT: {}", from_guest_buf.len());
-                let copy_bytes = min(from_host_buf.len() * WORD_SIZE, self.input.len());
-                bytemuck::cast_slice_mut(from_host_buf)[..copy_bytes]
+        // TODO: Use the standard syscall handler framework for this instead of matching
+        // on name.
+        let buf_ptr = mem.load_register(REG_A3);
+        let buf_len = mem.load_register(REG_A4);
+        let from_guest = mem.load_region(buf_ptr, buf_len);
+        match syscall
+            .strip_prefix("risc0_zkvm_platform::syscall::nr::")
+            .unwrap_or(syscall)
+        {
+            "SYS_PANIC" => {
+                let msg = from_utf8(&from_guest)?;
+                bail!("{}", msg)
+            }
+            "SYS_LOG" => {
+                let msg = from_utf8(&from_guest)?;
+                println!("R0VM[{cycle}] {}", msg);
+                Ok((0, 0))
+            }
+            "SYS_CYCLE_COUNT" => Ok((cycle as u32, 0)),
+            "SYS_INITIAL_INPUT" => {
+                log::debug!("SYS_INITIAL_INPUT: {}", from_guest.len());
+                let copy_bytes = min(to_guest.len() * WORD_SIZE, self.input.len());
+                bytemuck::cast_slice_mut(to_guest)[..copy_bytes]
                     .clone_from_slice(&self.input[..copy_bytes]);
                 Ok((self.input.len() as u32, 0))
             }
-            SENDRECV_CHANNEL_STDOUT => {
-                log::debug!("SENDRECV_CHANNEL_STDOUT: {}", from_guest_buf.len());
-                self.output.extend(from_guest_buf);
+            "SYS_STDOUT" => {
+                log::debug!("SYS_STDOUT: {}", from_guest.len());
+                self.output.extend(&from_guest);
                 Ok((0, 0))
             }
-            SENDRECV_CHANNEL_STDERR => {
-                log::debug!("SENDRECV_CHANNEL_STDERR: {}", from_guest_buf.len());
-                std::io::stderr().lock().write_all(from_guest_buf).unwrap();
+            "SYS_STDERR" => {
+                log::debug!("SYS_STDERR: {}", from_guest.len());
+                std::io::stderr().lock().write_all(&from_guest).unwrap();
                 Ok((0, 0))
             }
-            SENDRECV_CHANNEL_JOURNAL => {
-                log::debug!("SENDRECV_CHANNEL_JOURNAL: {}", from_guest_buf.len());
-                self.journal.extend_from_slice(from_guest_buf);
+            "SYS_RANDOM" => {
+                log::debug!("SYS_RANDOM: {}", to_guest.len());
+                let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
+                getrandom::getrandom(rand_buf.as_mut_slice())?;
+                bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
                 Ok((0, 0))
             }
-            SENDRECV_CHANNEL_RANDOM => {
-                log::debug!("SENDRECV_CHANNEL_RANDOM: {}", from_host_buf.len());
-                let mut rand_buff = vec![0u8; from_host_buf.len() * WORD_SIZE];
-                getrandom::getrandom(rand_buff.as_mut_slice())?;
-                from_host_buf.clone_from_slice(bytemuck::cast_slice(rand_buff.as_slice()));
+            "SYS_JOURNAL" => {
+                log::debug!("SYS_JOURNAL: {}", from_guest.len());
+                self.journal.extend_from_slice(&from_guest);
                 Ok((0, 0))
             }
-            _ => bail!("Unknown channel: {channel}"),
+            _ => bail!("Unknown syscall: {syscall}"),
         }
     }
 
@@ -500,10 +520,6 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
         } else {
             Ok(())
         }
-    }
-
-    fn on_panic(&mut self, msg: &str) -> Result<()> {
-        bail!("{}", msg)
     }
 }
 

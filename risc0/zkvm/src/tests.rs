@@ -19,8 +19,8 @@ use risc0_zeroio::to_vec;
 use risc0_zkp::core::blake2b::{Blake2bCpuImpl, HashSuiteBlake2bCpu};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
-    SLICE_IO_ELF, SLICE_IO_ID,
+    multi_test::{MultiTestSpec, SYS_MULTI_TEST},
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, SLICE_IO_ELF, SLICE_IO_ID,
 };
 use risc0_zkvm_platform::{memory::HEAP, WORD_SIZE};
 use serial_test::serial;
@@ -233,7 +233,7 @@ fn slice_io() {
 }
 
 #[test]
-fn host_sendrecv() {
+fn host_syscall() {
     let expected: Vec<Vec<u8>> = vec![
         "".into(),
         "H".into(),
@@ -245,15 +245,14 @@ fn host_sendrecv() {
     let actual: Mutex<Vec<Vec<u8>>> = Vec::new().into();
     let opts = ProverOpts::default()
         .with_skip_seal(true)
-        .with_sendrecv_callback(5, |buf: &[u8]| -> Vec<u8> {
+        .with_sendrecv_callback(SYS_MULTI_TEST, |buf: &[u8]| -> Vec<u8> {
             let mut act = actual.lock().unwrap();
             act.push(buf.into());
             expected[act.len()].clone()
         });
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(
-        &to_vec(&MultiTestSpec::SendRecv {
-            channel_id: 5,
+        &to_vec(&MultiTestSpec::Syscall {
             count: expected.len() as u32 - 1,
         })
         .unwrap(),
@@ -266,20 +265,14 @@ fn host_sendrecv() {
 // Make sure panics in the callback get propagated correctly.
 #[test]
 #[should_panic(expected = "I am panicking from here!")]
-fn host_sendrecv_callback_panic() {
+fn host_syscall_callback_panic() {
     let opts = ProverOpts::default()
         .with_skip_seal(true)
-        .with_sendrecv_callback(5, |_buf: &[u8]| -> Vec<u8> {
+        .with_sendrecv_callback(SYS_MULTI_TEST, |_buf: &[u8]| -> Vec<u8> {
             panic!("I am panicking from here!");
         });
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
-    prover.add_input_u32_slice(
-        &to_vec(&MultiTestSpec::SendRecv {
-            channel_id: 5,
-            count: 5,
-        })
-        .unwrap(),
-    );
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap());
     prover.run().unwrap();
 }
 

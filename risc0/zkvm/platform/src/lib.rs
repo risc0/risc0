@@ -17,8 +17,8 @@
 #![allow(unused_variables)]
 
 pub mod abi;
-pub mod io;
 pub mod memory;
+#[macro_use]
 pub mod syscall;
 
 pub const WORD_SIZE: usize = core::mem::size_of::<u32>();

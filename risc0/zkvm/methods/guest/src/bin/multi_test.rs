@@ -24,9 +24,8 @@ use core::arch::asm;
 use risc0_zeroio::deserialize::Deserialize;
 use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
 use risc0_zkvm::guest::{env, memory_barrier, sha};
-use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef};
-use risc0_zkvm_platform::io::SENDRECV_CHANNEL_INITIAL_INPUT;
-use risc0_zkvm_platform::syscall::sys_rand;
+use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef, SYS_MULTI_TEST};
+use risc0_zkvm_platform::syscall::{nr::SYS_INITIAL_INPUT, sys_rand};
 
 risc0_zkvm::entry!(main);
 
@@ -43,7 +42,7 @@ fn profile_test_func2() {
 }
 
 pub fn main() {
-    let initial_bytes = env::send_recv_slice::<u8, u8>(SENDRECV_CHANNEL_INITIAL_INPUT, &[]);
+    let initial_bytes = env::send_recv_slice::<u8, u8>(SYS_INITIAL_INPUT, &[]);
     let impl_select = MultiTestSpec::deserialize_from(bytemuck::cast_slice(initial_bytes));
     match impl_select {
         MultiTestSpecRef::DoNothing(_) => {}
@@ -73,6 +72,11 @@ pub fn main() {
             // Execute some instructions with distinctive arguments
             // that are easy to find in the event trace.
             asm!(r"
+      // Dry run first to make sure all regions are paged in
+      li x5, 1336
+      li x6, 0x08000000
+      sw x5, 548(x6)
+      // Now, run what we're actually looking for.
       li x5, 1337
       li x6, 0x08000000
       sw x5, 548(x6)
@@ -101,13 +105,12 @@ pub fn main() {
             let digest = sha::Impl::hash_bytes(data.data());
             env::commit(&digest);
         }
-        MultiTestSpecRef::SendRecv(sendrecv) => {
+        MultiTestSpecRef::Syscall(sendrecv) => {
             let mut input: &[u8] = &[];
             let mut input_len: usize = 0;
 
             for _ in 0..sendrecv.count() {
-                let host_data =
-                    env::send_recv_slice::<u8, u8>(sendrecv.channel_id(), &input[..input_len]);
+                let host_data = env::send_recv_slice::<u8, u8>(SYS_MULTI_TEST, &input[..input_len]);
 
                 input = bytemuck::cast_slice(host_data);
                 input_len = input.len();

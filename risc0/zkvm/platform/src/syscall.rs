@@ -13,10 +13,9 @@
 // limitations under the License.
 
 #[cfg(target_os = "zkvm")]
-use core::{arch::asm, ptr};
+use core::arch::asm;
+use core::ptr::null_mut;
 
-#[cfg(target_os = "zkvm")]
-use crate::io::SENDRECV_CHANNEL_RANDOM;
 use crate::WORD_SIZE;
 
 pub mod ecall {
@@ -24,13 +23,6 @@ pub mod ecall {
     pub const OUTPUT: u32 = 1;
     pub const SOFTWARE: u32 = 2;
     pub const SHA: u32 = 3;
-}
-
-pub mod nr {
-    pub const SYS_PANIC: u32 = 0;
-    pub const SYS_LOG: u32 = 1;
-    pub const SYS_IO: u32 = 2;
-    pub const SYS_CYCLE_COUNT: u32 = 3;
 }
 
 pub mod reg_abi {
@@ -86,85 +78,130 @@ const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
 }
 
-#[inline(always)]
-pub unsafe fn sys_panic(msg_ptr: *const u8, msg_len: usize) -> ! {
-    #[cfg(target_os = "zkvm")]
-    {
-        asm!(
-            "ecall",
-            in("t0") ecall::SOFTWARE,
-            out("a0") _,
-            inout("a1") 0 => _,
-            in("a2") nr::SYS_PANIC,
-            in("a3") msg_ptr,
-            in("a4") msg_len,
-        );
-        unreachable!();
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
+// TODO: We can probably use ffi::CStr::from_bytes_with_nul once it's
+// const-stablized instead of rolling our own structure:
+// https://github.com/rust-lang/rust/issues/101719
+
+/// A NUL-terminated name of a syscall with static lifetime.
+#[derive(Clone, Copy, Debug)]
+#[repr(transparent)]
+pub struct SyscallName(*const u8);
+
+/// Construct a SyscallName declaration at compile time.
+///
+/// ```
+/// use risc0_zkvm_platform::declare_syscall;
+///
+/// declare_syscall!(SYS_MY_SYSTEM_CALL);
+/// ```
+#[macro_export]
+macro_rules! declare_syscall {
+    ($(#[$meta:meta])*
+     $vis:vis $name:ident) => {
+            $(#[$meta])*
+            $vis const $name: $crate::syscall::SyscallName
+                = unsafe{
+                    $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
+                        module_path!(),
+                        "::",
+                        stringify!($name),
+                        "\0").as_ptr())
+                };
+    };
 }
 
-#[inline(always)]
-pub unsafe fn sys_log(msg_ptr: *const u8, msg_len: usize) {
-    #[cfg(target_os = "zkvm")]
-    asm!(
-        "ecall",
-        in("t0") ecall::SOFTWARE,
-        out("a0") _,
-        inout("a1") 0 => _,
-        in("a2") nr::SYS_LOG,
-        in("a3") msg_ptr,
-        in("a4") msg_len,
-    );
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
+pub mod nr {
+    declare_syscall!(pub SYS_PANIC);
+    declare_syscall!(pub SYS_LOG);
+    declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_INITIAL_INPUT);
+    declare_syscall!(pub SYS_JOURNAL);
+    declare_syscall!(pub SYS_STDERR);
+    declare_syscall!(pub SYS_STDOUT);
+    declare_syscall!(pub SYS_RANDOM);
 }
 
-pub unsafe fn sys_io(
-    recv_buf: *mut u32,
-    recv_words: usize,
-    send_buf: *const u8,
-    send_bytes: usize,
-    channel: u32,
-) -> (u32, u32) {
-    #[cfg(target_os = "zkvm")]
-    {
-        let a0: u32;
-        let a1: u32;
-        asm!(
-            "ecall",
-            in("t0") ecall::SOFTWARE,
-            inout("a0") recv_buf => a0,
-            inout("a1") recv_words => a1,
-            in("a2") nr::SYS_IO,
-            in("a3") send_buf,
-            in("a4") send_bytes,
-            in("a5") channel,
-        );
-        (a0, a1)
+impl SyscallName {
+    pub const unsafe fn from_bytes_with_nul(ptr: *const u8) -> Self {
+        Self(ptr)
     }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
+
+    pub fn as_ptr(&self) -> *const u8 {
+        self.0
+    }
+
+    pub fn as_str(&self) -> &str {
+        core::str::from_utf8(unsafe { core::ffi::CStr::from_ptr(self.as_ptr().cast()).to_bytes() })
+            .unwrap()
+    }
 }
 
-#[inline(always)]
-pub unsafe fn sys_cycle_count() -> usize {
-    #[cfg(target_os = "zkvm")]
-    {
-        let cycle: usize;
-        asm!(
-            "ecall",
-            in("t0") ecall::SOFTWARE,
-            out("a0")  cycle,
-            inout("a1") 0 => _,
-            in("a2") nr::SYS_CYCLE_COUNT,
-        );
-        cycle
+#[repr(C)]
+/// Returned registers (a0, a1) from a syscall invocation.
+pub struct Return(pub u32, pub u32);
+
+macro_rules! impl_syscall {
+    ($func_name:ident
+     // Ugh, unfortunately we can't make this a regular macro list since the asm macro
+     // doesn't expand register names so in($register) doesn't work.
+     $(, $a0:ident
+       $(, $a1:ident
+         $(, $a2: ident
+           $(, $a3: ident
+             $(, $a4: ident
+             )?
+           )?
+         )?
+       )?
+     )?) => {
+        /// Invoke a raw system call
+        pub unsafe extern "C" fn $func_name(syscall: SyscallName,
+                                 from_host: *mut u32,
+                                 from_host_words: usize
+                                 $(,$a0: u32
+                                   $(,$a1: u32
+                                     $(,$a2: u32
+                                       $(,$a3: u32
+                                         $(,$a4: u32
+                                         )?
+                                       )?
+                                     )?
+                                   )?
+                                 )?
+        ) -> Return {
+            #[cfg(target_os = "zkvm")] {
+                let a0: u32;
+                let a1: u32;
+                ::core::arch::asm!(
+                    "ecall",
+                    in("t0") $crate::syscall::ecall::SOFTWARE,
+                    inout("a0") from_host => a0,
+                    inout("a1") from_host_words => a1,
+                    in("a2") syscall.as_ptr()
+                        $(,in("a3") $a0
+                          $(,in("a4") $a1
+                            $(,in("a5") $a2
+                              $(,in("a6") $a3
+                                $(,in("a7") $a4
+                                )?
+                              )?
+                            )?
+                          )?
+                        )?);
+                Return(a0, a1)
+            }
+            #[cfg(not(target_os = "zkvm"))]
+            unimplemented!()
+        }
     }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
 }
+
+impl_syscall!(syscall_0);
+impl_syscall!(syscall_1, a3);
+impl_syscall!(syscall_2, a3, a4);
+impl_syscall!(syscall_3, a3, a4, a5);
+impl_syscall!(syscall_4, a3, a4, a5, a6);
+impl_syscall!(syscall_5, a3, a4, a5, a6, a7);
 
 #[inline(always)]
 pub unsafe fn sys_halt() {
@@ -245,12 +282,22 @@ pub unsafe fn sys_sha_buffer(
     unimplemented!()
 }
 
-#[inline(always)]
-pub unsafe fn sys_rand(recv_buf: *mut u32, words: usize) {
-    #[cfg(target_os = "zkvm")]
-    {
-        sys_io(recv_buf, words, ptr::null_mut(), 0, SENDRECV_CHANNEL_RANDOM);
+pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
+    syscall_0(nr::SYS_RANDOM, recv_buf, words);
+}
+
+pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
+    syscall_2(nr::SYS_PANIC, null_mut(), 0, msg_ptr as u32, len as u32);
+    unreachable!()
+}
+
+pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
+    syscall_2(nr::SYS_LOG, null_mut(), 0, msg_ptr as u32, len as u32);
+}
+
+pub extern "C" fn sys_cycle_count() -> usize {
+    unsafe {
+        let Return(a0, _) = syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0);
+        a0 as usize
     }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
 }

@@ -18,25 +18,30 @@
 //! [crate::prove::Prover] is created using [crate::prove::ProverOpts].
 //! Specifically, the [ProverOpts](crate::prove::ProverOpts) functions
 //! [with_sendrecv_callback](crate::prove::ProverOpts::with_sendrecv_callback),
-//! [with_slice_io_handler](crate::prove::ProverOpts::with_slice_io_handler),
-//! and [with_raw_io_handler](crate::prove::ProverOpts::with_raw_io_handler) can
+//! [with_syscall](crate::prove::ProverOpts::with_syscall),
+//! and [with_slice_io](crate::prove::ProverOpts::with_slice_io) can
 //! be used to enable the handlers provided in this module.
 
 use core::{cell::RefCell, marker::PhantomData, mem::take};
 use std::ops::DerefMut;
 
 use bytemuck::Pod;
-use risc0_zkvm_platform::WORD_SIZE;
+use risc0_zkvm_platform::{
+    syscall::reg_abi::{REG_A3, REG_A4},
+    WORD_SIZE,
+};
+
+use crate::prove::exec::MemoryState;
 
 /// An IO handler that returns arbitrary data to the guest.  On the
 /// guest side, use env::send_slice, env::recv_slice, or
 /// end::send_recv_slice.
 ///
-/// When activated as a RawIoHandler, the RawIoHandler expects two
+/// When activated as a SyscallHandler, the SyscallHandler expects two
 /// calls.  The first call returns (nelem, _) indicating how many
 /// elements are to be sent back to the guest, and the second call
 /// actually returns the elements after the guest allocates space.
-pub trait SliceIoHandler {
+pub trait SliceIo: Sized {
     /// Type for data received from guest
     type FromGuest: Pod;
     /// Type for data sent to guest
@@ -46,60 +51,51 @@ pub trait SliceIoHandler {
     /// Whatever data the guest sent is received by this function in
     /// `from_guest`, and this function is to return the data the host is
     /// sending to the guest.
-    fn handle_io(&self, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest>;
-}
 
-/// An IO handler that returns raw data to a SYS_IO invocation from the guest.
-/// In addition to filling the buffer provided by the guest, it can
-/// return two words to be returned in the a0 and a1 registers.
-///
-/// Users may find SliceIoHandler more friendly to use.
-pub trait RawIoHandler {
-    /// Host side I/O handling
-    ///
-    /// Whatever data the guest sent is received by this function in
-    /// `from_guest`, and the data the host is sending is written in `to_guest`.
-    /// This returns the words in the guest's `a0` and `a1` registers.
-    fn handle_raw_io(&self, from_guest: &[u8], to_guest: &mut [u32]) -> (u32, u32);
-}
+    fn handle_io(&self, syscall: &str, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest>;
 
-/// Generates a RawIoHandler from a simple slice function
-pub fn handler_from_fn<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>>(f: F) -> impl RawIoHandler {
-    handler_from_slice_handler(FnWrapper {
-        f,
-        phantom: PhantomData,
-    })
-}
-
-/// Wraps a SliceIoHandler and makes it available as a RawIoHandler.
-pub fn handler_from_slice_handler(handler: impl SliceIoHandler) -> impl RawIoHandler {
-    SliceIoWrapper {
-        handler,
-        stored_result: RefCell::new(None),
+    /// Makes a Syscall handler for this SliceIo definition.g
+    fn to_syscall(self) -> SliceIoSyscall<Self> {
+        SliceIoSyscall::new(self)
     }
 }
 
-// Wraps a SliceIoHandler and exposes it as a RawIoHandler.
-//
-// SliceIoWrapper is always invoked from the guest in pairs; the first
-// call sends data to the host and receives the length of the reply.
-// The second call actually transfers the data from the host to the
-// guest once the guest allocates a buffer.
-struct SliceIoWrapper<H: SliceIoHandler> {
-    stored_result: RefCell<Option<Vec<H::ToGuest>>>,
+/// A wrapper around a SliceIo that exposes it as a Syscall handler.
+pub struct SliceIoSyscall<H: SliceIo> {
     handler: H,
+    stored_result: RefCell<Option<Vec<H::ToGuest>>>,
 }
 
-impl<H: SliceIoHandler> RawIoHandler for SliceIoWrapper<H> {
-    fn handle_raw_io(&self, from_guest: &[u8], to_guest: &mut [u32]) -> (u32, u32) {
+/// A host-side implementation of a system call.
+pub trait Syscall {
+    /// Invokes the system call
+    fn syscall(&self, syscall: &str, ctx: &MemoryState, to_guest: &mut [u32]) -> (u32, u32);
+}
+
+impl<H: SliceIo> SliceIoSyscall<H> {
+    /// Wraps the given SliceIo into a SliceIoSyscall.
+    pub fn new(handler: H) -> Self {
+        Self {
+            handler,
+            stored_result: RefCell::new(None),
+        }
+    }
+}
+
+impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
+    fn syscall(&self, syscall: &str, ctx: &MemoryState, to_guest: &mut [u32]) -> (u32, u32) {
         let mut stored_result = self.stored_result.borrow_mut();
+        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_len = ctx.load_register(REG_A4);
+        let from_guest_bytes = ctx.load_region(buf_ptr, buf_len);
+        let from_guest: &[H::FromGuest] = bytemuck::cast_slice(from_guest_bytes.as_slice());
         match take(stored_result.deref_mut()) {
             None => {
-                // First call of pair.  Send the data from the guest to the SliceIoHandler
+                // First call of pair.  Send the data from the guest to the SliceIo
                 // and save what it returns.
                 assert_eq!(to_guest.len(), 0);
                 let from_guest: &[H::FromGuest] = bytemuck::cast_slice(from_guest);
-                let result = self.handler.handle_io(from_guest);
+                let result = self.handler.handle_io(syscall, from_guest);
                 let len = result.len();
                 *stored_result = Some(result);
                 (len as u32, 0)
@@ -123,16 +119,24 @@ impl<H: SliceIoHandler> RawIoHandler for SliceIoWrapper<H> {
     }
 }
 
+/// Generates a Syscall from a simple slice function
+pub fn slice_io_from_fn<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>>(f: F) -> impl SliceIo {
+    FnWrapper {
+        f,
+        phantom: PhantomData,
+    }
+}
+
 struct FnWrapper<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>> {
     f: F,
     phantom: PhantomData<(T, U)>,
 }
 
-impl<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>> SliceIoHandler for FnWrapper<T, U, F> {
+impl<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>> SliceIo for FnWrapper<T, U, F> {
     type FromGuest = T;
     type ToGuest = U;
 
-    fn handle_io(&self, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest> {
+    fn handle_io(&self, _syscall: &str, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest> {
         (self.f)(from_guest)
     }
 }
