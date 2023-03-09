@@ -24,6 +24,7 @@ use super::{
     err::{Error, Result},
 };
 
+/// Serialize to a vector of u32 words
 pub fn to_vec<'a, T>(value: &'a T) -> Result<Vec<u32>>
 where
     T: Serialize + ?Sized,
@@ -36,6 +37,10 @@ where
     serializer.stream.release()
 }
 
+/// Serialize to a vector of u32 words with size hinting
+///
+/// Includes a caller-provided hint `cap` giving the capacity of u32 words
+/// necessary to serialize `value`.
 pub fn to_vec_with_capacity<'a, T>(value: &'a T, cap: usize) -> Result<Vec<u32>>
 where
     T: Serialize + ?Sized,
@@ -46,30 +51,51 @@ where
     serializer.stream.release()
 }
 
+/// `StreamWriter`s can have data written to them in a streamed manner
+///
+/// The various `write` functions can be called repeatedly to add data to the
+/// `StreamWriter`. Then [StreamWriter::release] can be called to return a
+/// [StreamWriter::Output] containing the written data.
 pub trait StreamWriter {
+    /// The type to be written into
+    ///
+    /// This is the type that will be returned when [StreamWriter::release]
+    /// is called.
     type Output;
 
+    /// Write a u32 word
     fn write_u32(&mut self, data: u32) -> Result<()>;
 
+    /// Write a u64
+    ///
+    /// Equivalent to writing first the least significant 32 bits and then the
+    /// most significant 32 bits with [StreamWriter::write_u32].
     fn write_u64(&mut self, data: u64) -> Result<()> {
         self.write_u32((data & 0xffffffff) as u32)?;
         self.write_u32((data >> 32) as u32)
     }
 
+    /// Write a slice
     fn write_slice<T: Pod>(&mut self, slice: &[T]) -> Result<()>;
 
+    /// Return the written data as a [StreamWriter::Output]
     fn release(&mut self) -> Result<Self::Output>;
 }
 
+/// Enables serializing to a stream
 pub struct Serializer<W: StreamWriter> {
     stream: W,
 }
 
 impl<W: StreamWriter> Serializer<W> {
+    /// Construct a Serializer
+    ///
+    /// Creates a serializer that writes to `stream`.
     pub fn new(stream: W) -> Self {
         Serializer { stream }
     }
 
+    /// Returns the contents of the Serializer stream.
     pub fn release(&mut self) -> Result<W::Output> {
         self.stream.release()
     }
@@ -402,13 +428,20 @@ impl<'a, W: StreamWriter> serde::ser::SerializeStructVariant for &'a mut Seriali
     }
 }
 
+/// A vector of bytes that can be written to with a stream interface
+///
+/// This is designed for host-side use and is not intended for use in the guest.
 pub struct AllocVec(pub Vec<u8>);
 
 impl AllocVec {
+    /// Construct an empty AllocVec
     pub fn new() -> Self {
         AllocVec(Vec::new())
     }
 
+    /// Construct an empty AllocVec with preallocated capacity
+    ///
+    /// The `capacity` parameter gives how many bytes are preallocated.
     pub fn with_capacity(capacity: usize) -> Self {
         AllocVec(Vec::with_capacity(capacity))
     }

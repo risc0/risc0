@@ -39,6 +39,7 @@ impl ConfigRng<BabyBear> for PoseidonRng {
         // if switching from squeezing, do a mix
         if self.pool_used != 0 {
             poseidon_mix(&mut self.cells);
+            self.pool_used = 0;
         }
         // Add in CELLS_OUT elements (also # of digest words)
         for i in 0..CELLS_OUT {

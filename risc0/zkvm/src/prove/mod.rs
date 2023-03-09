@@ -193,6 +193,7 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::cuda::CudaEvalCheck;
         use risc0_zkp::hal::cuda::CudaHal;
 
+        /// Returns the default SHA-256 HAL for the RISC Zero circuit
         pub fn default_hal() -> (Rc<CudaHal>, CudaEvalCheck) {
             let hal = Rc::new(CudaHal::new());
             let eval = CudaEvalCheck::new(hal.clone());
@@ -204,12 +205,14 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
         use risc0_zkp::hal::metal::{MetalHalSha256, MetalHalPoseidon, MetalHashPoseidon};
 
+        /// Returns the default SHA-256 HAL for the RISC Zero circuit
         pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
             let hal = Rc::new(MetalHalSha256::new());
             let eval = MetalEvalCheckSha256::new(hal.clone());
             (hal, eval)
         }
 
+        /// Returns the default Poseidon HAL for the RISC Zero circuit
         pub fn default_poseidon_hal() -> (Rc<MetalHalPoseidon>, MetalEvalCheck<MetalHashPoseidon>) {
             let hal = Rc::new(MetalHalPoseidon::new());
             let eval = MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone());
@@ -219,7 +222,7 @@ cfg_if::cfg_if! {
         use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
         use risc0_zkp::hal::cpu::{BabyBearSha256CpuHal, BabyBearPoseidonCpuHal};
 
-        /// Returns the default HAL for the RISC Zero circuit
+        /// Returns the default SHA-256 HAL for the RISC Zero circuit
         ///
         /// RISC Zero uses a
         /// [HAL](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/index.html)
@@ -239,6 +242,10 @@ cfg_if::cfg_if! {
             (hal, eval)
         }
 
+        /// Returns the default Poseidon HAL for the RISC Zero circuit
+        ///
+        /// The same as [default_hal] except it gives the default HAL for
+        /// securing the circuit using Poseidon (instead of SHA-256).
         pub fn default_poseidon_hal() -> (Rc<BabyBearPoseidonCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
             let hal = Rc::new(BabyBearPoseidonCpuHal::new());
             let eval = CpuEvalCheck::new(&CIRCUIT);
