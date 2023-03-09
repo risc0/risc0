@@ -209,6 +209,15 @@ fn commit_hello_world() {
 #[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
 #[cfg_attr(feature = "cuda", serial)]
+fn do_random() {
+    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoRandom).unwrap());
+    prover.run().expect("Could not get receipt");
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
 fn slice_io() {
     let run = |slice: &[u8]| {
         let mut prover = Prover::new(SLICE_IO_ELF, SLICE_IO_ID).unwrap();
