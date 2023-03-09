@@ -145,6 +145,9 @@ pub fn insecure_skip_seal() -> bool {
 #[derive(Deserialize, Serialize, ZeroioSerialize, ZeroioDeserialize, Clone, Debug)]
 pub struct Receipt {
     /// The journal contains the public outputs of the computation.
+    ///
+    /// Specifically, the journal contains the data explicitly written to it by
+    /// the guest with [crate::guest::env::commit]
     pub journal: Vec<u8>,
 
     /// The seal is an opaque cryptographic blob that attests to the integrity

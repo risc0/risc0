@@ -39,4 +39,5 @@ pub enum MultiTestSpec {
         channel_id: u32,
         count: u32,
     },
+    DoRandom,
 }

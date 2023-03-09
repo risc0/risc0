@@ -48,6 +48,7 @@ prost = { version = "0.11", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", optional = true }
+getrandom = { version = "0.2", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
@@ -73,6 +74,7 @@ insecure_skip_seal = []
 profiler = ["dep:addr2line", "dep:gimli", "dep:prost", "dep:prost-build", "dep:protobuf-src"]
 prove = [
   "binfmt",
+  "dep:getrandom",
   "dep:lazy-regex",
   "dep:rand",
   "dep:rayon",

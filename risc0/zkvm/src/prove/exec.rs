@@ -41,8 +41,10 @@ use risc0_zkvm_platform::{
 };
 
 use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
-use crate::binfmt::elf::Program;
-use crate::binfmt::image::{MemoryImage, PageTableInfo};
+use crate::binfmt::{
+    elf::Program,
+    image::{MemoryImage, PageTableInfo},
+};
 
 const IMM_BITS: usize = 12;
 
@@ -226,21 +228,15 @@ impl<'a> PageFaults<'a> {
     }
 
     pub fn include(&mut self, addr: u32) {
-        if addr < self.info.mem_start {
-            let page_idx = self.info.get_page_index_nondet(addr);
+        let mut addr = addr;
+        loop {
+            let page_idx = self.info.get_page_index(addr);
+            let entry_addr = self.info.get_page_entry_addr(page_idx);
             self.reads.insert(page_idx);
-        } else {
-            let mut addr = addr;
-            loop {
-                let raw_page_idx = self.info.get_page_index_nondet(addr);
-                let page_idx = self.info.get_page_index(addr);
-                let entry_addr = self.info.get_page_entry_addr(page_idx);
-                self.reads.insert(raw_page_idx);
-                if raw_page_idx == self.info.raw_root_idx {
-                    break;
-                }
-                addr = entry_addr;
+            if page_idx == self.info.root_idx {
+                break;
             }
+            addr = entry_addr;
         }
     }
 
@@ -297,7 +293,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 Ok(())
             }
             "pageRead" => {
-                (outs[0], outs[1]) = self.page_read(args[0]);
+                (outs[0]) = self.page_read(args[0]);
                 Ok(())
             }
             "ramWrite" => {
@@ -467,7 +463,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         faults
     }
 
-    fn page_read(&mut self, pc: BabyBearElem) -> (BabyBearElem, BabyBearElem) {
+    fn page_read(&mut self, pc: BabyBearElem) -> BabyBearElem {
         let pc: u32 = pc.into();
         let inst = self.memory.load_u32(pc);
         let opcode = self.decode(inst);
@@ -476,12 +472,11 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             if !self.memory.pages.contains(page_idx) {
                 self.memory.pages.insert(*page_idx);
                 // debug!("page_idx: 0x{page_idx:08X}");
-                let is_nondet = self.memory.ram.info.is_nondet(*page_idx);
-                return ((*page_idx).into(), is_nondet.into());
+                return (*page_idx).into();
             }
         }
 
-        (BabyBearElem::ZERO, BabyBearElem::ZERO)
+        BabyBearElem::ZERO
     }
 
     fn trace(&mut self, cycle: usize, pc: BabyBearElem) -> Result<()> {
@@ -625,11 +620,9 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         } else {
             if !self.memory.resident.contains(&addr) {
                 let addr = addr * WORD_SIZE as u32;
-                if addr >= self.memory.ram.info.mem_start {
-                    let page_idx = self.memory.ram.info.get_page_index(addr);
-                    let entry_addr = self.memory.ram.info.get_page_entry_addr(page_idx);
-                    debug!("  ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}");
-                }
+                let page_idx = self.memory.ram.info.get_page_index(addr);
+                let entry_addr = self.memory.ram.info.get_page_entry_addr(page_idx);
+                debug!("  ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}");
                 panic!("Memory read before page in: 0x{addr:08x}");
             }
         }

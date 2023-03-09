@@ -13,7 +13,9 @@
 // limitations under the License.
 
 //! Goldilocks field.
-//! Support for the base finite field modulo `2^64 - 2^32 + 1`.
+//!
+//! Support for the finite field of order `2^64 - 2^32 + 1`, and its degree 2
+//! extension field. This field choice allows for fast reduction.
 
 use alloc::vec::Vec;
 use core::ops;
@@ -40,6 +42,7 @@ use crate::field::{self, Elem as FieldElem};
 #[repr(transparent)]
 pub struct Elem(u64);
 
+/// Alias for the Goldilocks [Elem]
 pub type GoldilocksElem = Elem;
 
 impl Default for Elem {
@@ -329,6 +332,7 @@ const EXT_SIZE: usize = 2;
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
 
+/// Alias for the Goldilocks [ExtElem]
 pub type GoldilocksExtElem = ExtElem;
 
 impl Default for ExtElem {
