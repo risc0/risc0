@@ -190,8 +190,9 @@ pub struct Prover<'a> {
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "cuda")] {
-        use risc0_circuit_rv32im::cuda::CudaEvalCheck;
+        use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck, cuda::CudaEvalCheck};
         use risc0_zkp::hal::cuda::CudaHal;
+        use risc0_zkp::hal::cpu::BabyBearPoseidonCpuHal;
 
         /// Returns the default SHA-256 HAL for the RISC Zero circuit
         pub fn default_hal() -> (Rc<CudaHal>, CudaEvalCheck) {
@@ -200,7 +201,12 @@ cfg_if::cfg_if! {
             (hal, eval)
         }
 
-        // TODO: default_poseidon_hal
+        /// Falls back to the CPU for Poseidon for now
+        pub fn default_poseidon_hal() -> (Rc<BabyBearPoseidonCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
+            let hal = Rc::new(BabyBearPoseidonCpuHal::new());
+            let eval = CpuEvalCheck::new(&CIRCUIT);
+            (hal, eval)
+        }
     } else if #[cfg(feature = "metal")] {
         use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
         use risc0_zkp::hal::metal::{MetalHalSha256, MetalHalPoseidon, MetalHashPoseidon};
