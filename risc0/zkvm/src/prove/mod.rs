@@ -190,7 +190,7 @@ pub struct Prover<'a> {
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "cuda")] {
-        use risc0_circuit_rv32im::cuda::CudaEvalCheck;
+        use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck, cuda::CudaEvalCheck};
         use risc0_zkp::hal::cuda::CudaHal;
         use risc0_zkp::hal::cpu::BabyBearPoseidonCpuHal;
 
