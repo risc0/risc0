@@ -62,7 +62,6 @@ fn build_cuda_kernels() {
                 "fri.cu",
                 "mix.cu",
                 "ntt.cu",
-                "poseidon.cu",
                 "sha.cu",
                 "zk.cu",
                 "sha256.h",
