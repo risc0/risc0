@@ -463,13 +463,6 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 for addr in (out_addr..(out_addr + out_bytes)).step_by(WORD_SIZE) {
                     faults.include(addr);
                 }
-
-                let in_addr = self.memory.load_register(REG_A3);
-                let in_bytes = self.memory.load_register(REG_A4);
-
-                for addr in (in_addr..(in_addr + in_bytes)).step_by(WORD_SIZE) {
-                    faults.include(addr)
-                }
             }
         }
 

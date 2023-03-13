@@ -161,10 +161,9 @@ fn main() {
         })
     };
 
+    let mut guest_prof: Option<Profiler> = None;
     let opts: ProverOpts =
         ProverOpts::default().with_skip_seal(args.skip_seal || args.receipt.is_none());
-
-    let mut guest_prof: Option<Profiler> = None;
 
     if args.pprof_out.is_some() {
         guest_prof = Some(Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());

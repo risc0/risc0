@@ -14,7 +14,7 @@
 
 #[cfg(target_os = "zkvm")]
 use core::arch::asm;
-use core::ptr::null_mut;
+use core::{cmp::min, ptr::null_mut};
 
 use crate::WORD_SIZE;
 
@@ -119,6 +119,9 @@ pub mod nr {
     declare_syscall!(pub SYS_STDERR);
     declare_syscall!(pub SYS_STDOUT);
     declare_syscall!(pub SYS_RANDOM);
+    declare_syscall!(pub SYS_READ_AVAIL);
+    declare_syscall!(pub SYS_READ);
+    declare_syscall!(pub SYS_WRITE);
 }
 
 impl SyscallName {
@@ -300,4 +303,98 @@ pub extern "C" fn sys_cycle_count() -> usize {
         let Return(a0, _) = syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0);
         a0 as usize
     }
+}
+
+/// Returns the number of bytes currently available for reading on the
+/// given file descriptor.
+pub unsafe extern "C" fn sys_read_avail(fd: u32) -> usize {
+    let Return(navail, _) = syscall_1(nr::SYS_READ_AVAIL, null_mut(), 0, fd);
+    navail as usize
+}
+
+/// Reads the given number of bytes into the given buffer, posix-style.  Returns
+/// the number of bytes actually read.  On end of file, returns 0.
+pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize) -> usize {
+    // The SYS_READ system call can do a given number of word-aligned reads
+    // efficiently. The semantics of the system call are:
+    //
+    //   (nread, word) = syscall_2(nr::SYS_READ, outbuf, outwords, fd, nbytes);
+    //
+    // This reads exactly nbytes from the file descriptor, and fills the words
+    // in outbuf, followed by up to 4 bytes returned in "word", and fills
+    // the rest with NULs.  It returns the number of bytes read.
+    //
+    // sys_read exposes this as a byte-aligned read by:
+    //   * Uses sys_read_avail to determine how many bytes actually need to be read
+    //     to avoid having to null-pad the whole buffer if we're not reading very
+    //     much
+    //   * Copies any unaligned bytes at the start or end of the region.
+
+    // Fills 0-3 bytes from a u32 into memory, returning the pointer afterwards.
+    unsafe fn fill_from_word(mut ptr: *mut u8, mut word: u32, nfill: usize) -> *mut u8 {
+        debug_assert!(nfill < 4, "nfill={nfill}");
+        for _ in 0..nfill {
+            *ptr = (word & 0xFF) as u8;
+            word = word >> 8;
+            ptr = ptr.add(1);
+        }
+        ptr
+    }
+
+    // Find out how many bytes to actually read, given how many we requested.
+    let Return(navail, _) = syscall_1(nr::SYS_READ_AVAIL, null_mut(), 0, fd);
+    let nread = min(nrequested, navail as usize);
+
+    // Determine how many bytes at the beginning of the buffer we have
+    // to read in order to become word-aligned.
+    let ptr_offset = (recv_buf as usize) & (WORD_SIZE - 1);
+    let unaligned_at_start = if ptr_offset == 0 {
+        0
+    } else {
+        min(nread, WORD_SIZE - ptr_offset)
+    };
+
+    // Read unaligned bytes into "firstword".
+    let Return(nread_first, firstword) =
+        syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
+    debug_assert_eq!(nread_first as usize, unaligned_at_start);
+
+    // Align up to a word boundry to do the main copy.
+    let main_ptr = fill_from_word(recv_buf, firstword, unaligned_at_start);
+    if nread == unaligned_at_start {
+        // We only read part of a word, and don't have to read any full words.
+        return nread;
+    }
+    // Copy in all of the word-aligned data
+    let main_requested = nread - unaligned_at_start;
+    let main_words = main_requested / WORD_SIZE;
+    let Return(nread_main, lastword) = syscall_2(
+        nr::SYS_READ,
+        main_ptr as *mut u32,
+        main_words,
+        fd,
+        main_requested as u32,
+    );
+    debug_assert_eq!(nread_main as usize, main_requested);
+
+    // Copy in individual bytes after the word-aligned section.
+    let unaligned_at_end = (main_requested as usize) % WORD_SIZE;
+    fill_from_word(
+        main_ptr.add(main_words * WORD_SIZE),
+        lastword,
+        unaligned_at_end,
+    );
+
+    nread
+}
+
+pub unsafe extern "C" fn sys_write(fd: u32, write_buf: *const u8, nbytes: usize) {
+    syscall_3(
+        nr::SYS_WRITE,
+        null_mut(),
+        0,
+        fd,
+        write_buf as u32,
+        nbytes as u32,
+    );
 }

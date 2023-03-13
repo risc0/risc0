@@ -551,3 +551,90 @@ mod riscv_tests {
     test_case!(xor);
     test_case!(xori);
 }
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn posix_style_read() {
+    // Tests sys_read into a buffer of bytes that may not be word
+    // aligned.  To make sure we don't miss any edge cases, this tries
+    // all permutations of start alignment, end alignment, and 0, 1,
+    // or 2 whole words.
+
+    // Initial buffer to read bytes on top of.
+    let orig: Vec<u8> = (b'a'..b'z')
+        .chain(b'0'..b'9')
+        .chain(b"!@#$%^&*()".iter().cloned())
+        .collect();
+    // Input to read bytes from.
+    let readbuf: Vec<u8> = (b'A'..b'Z').collect();
+
+    let run = |pos_and_len: Vec<(u32, u32)>| {
+        let mut expected = orig.to_vec();
+
+        let mut expected_readbuf = readbuf.as_slice();
+        for (pos, len) in pos_and_len.iter() {
+            let pos = *pos as usize;
+            let len = *len as usize;
+
+            let this_read;
+            (this_read, expected_readbuf) = expected_readbuf.split_at(len);
+            expected[pos..pos + len].clone_from_slice(this_read);
+        }
+
+        let opts = ProverOpts::default()
+            .with_skip_seal(true)
+            .with_fd_reader(123, readbuf.as_slice());
+
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+        prover.add_input_u32_slice(
+            &to_vec(&MultiTestSpec::SysRead {
+                fd: 123,
+                orig: orig.to_vec(),
+                pos_and_len: pos_and_len.clone(),
+            })
+            .unwrap(),
+        );
+        let receipt = prover.run().expect("Could not get receipt");
+
+        use risc0_zeroio::Deserialize;
+        let actual = Vec::<u8>::deserialize_from(bytemuck::cast_slice(receipt.journal.as_slice()));
+        assert_eq!(
+            std::str::from_utf8(&actual).unwrap(),
+            std::str::from_utf8(&expected).unwrap(),
+            "pos and lens: {pos_and_len:?}"
+        );
+    };
+
+    fn next_offset(mut pos: u32, offset: u32) -> u32 {
+        while (pos % WORD_SIZE as u32) != offset {
+            pos += 1;
+        }
+        pos
+    }
+
+    for start_offset in 0..WORD_SIZE as u32 {
+        for end_offset in 0..WORD_SIZE as u32 {
+            let mut pos = 0;
+            let mut pos_and_len: Vec<(u32, u32)> = Vec::new();
+
+            // Make up a bunch of reads to overwrite parts of the buffer.
+            for nwords in 0..3 {
+                pos = next_offset(pos, start_offset);
+                let start = pos;
+                pos += nwords * WORD_SIZE as u32;
+                pos = next_offset(pos, end_offset);
+                let len = pos - start;
+                pos_and_len.push((pos, len));
+                assert!(
+                    pos + len < orig.len() as u32,
+                    "Ran out of space to test writes. pos: {pos} len: {len} end: {end_offset} start = {start_offset}"
+                );
+                // Make sure there's at least one non-overwritten character between reads.
+                pos += 1;
+            }
+
+            run(pos_and_len);
+        }
+    }
+}

@@ -36,10 +36,18 @@ mod plonk;
 #[cfg(feature = "profiler")]
 pub mod profiler;
 
-use std::{cmp::min, collections::HashMap, fmt::Debug, io::Write, rc::Rc, str::from_utf8};
+use std::{
+    cmp::min,
+    collections::HashMap,
+    fmt::Debug,
+    io::{BufRead, Write},
+    mem::take,
+    rc::Rc,
+    str::from_utf8,
+};
 
 use anyhow::{bail, Result};
-use io::{SliceIo, Syscall};
+use io::{PosixIo, SliceIo, Syscall};
 use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
@@ -51,6 +59,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     memory::MEM_SIZE,
     syscall::{
+        nr::{SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
         reg_abi::{REG_A3, REG_A4},
         SyscallName,
     },
@@ -70,8 +79,9 @@ pub struct ProverOpts<'a> {
 
     pub(crate) skip_verify: bool,
 
-    pub(crate) io_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
+    pub(crate) syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
 
+    pub(crate) io: Option<PosixIo<'a>>,
     pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
 }
 
@@ -115,7 +125,7 @@ impl<'a> ProverOpts<'a> {
     /// Add a handler for a raw syscall implementation.  The guest can
     /// invoke these using the risc0_zkvm_platform::syscall!  macro.
     pub fn with_syscall(mut self, syscall: SyscallName, handler: impl Syscall + 'a) -> Self {
-        self.io_handlers
+        self.syscall_handlers
             .insert(syscall.as_str().to_string(), Box::new(handler));
         self
     }
@@ -129,14 +139,29 @@ impl<'a> ProverOpts<'a> {
         self.trace_callback = Some(Box::new(callback));
         self
     }
+
+    /// Add a posix-style file descriptor for reading
+    pub fn with_fd_reader(mut self, fd: u32, reader: impl BufRead + 'a) -> Self {
+        let io = self.io.unwrap_or_default();
+        self.io = Some(io.with_fd_reader(fd, reader));
+        self
+    }
+
+    /// Add a posix-style file descriptor for writing
+    pub fn with_fd_writer(mut self, fd: u32, writer: impl Write + 'a) -> Self {
+        let io = self.io.unwrap_or_default();
+        self.io = Some(io.with_fd_writer(fd, writer));
+        self
+    }
 }
 
 impl<'a> Default for ProverOpts<'a> {
     fn default() -> ProverOpts<'a> {
         ProverOpts {
+            io: None,
             skip_seal: false,
             skip_verify: false,
-            io_handlers: HashMap::new(),
+            syscall_handlers: HashMap::new(),
             trace_callback: None,
         }
     }
@@ -379,6 +404,14 @@ impl<'a> Prover<'a> {
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
         E: EvalCheck<H>,
     {
+        if let Some(io) = take(&mut self.inner.opts.io) {
+            let io = Rc::new(io);
+            let opts = take(&mut self.inner.opts);
+            self.inner.opts = opts
+                .with_syscall(SYS_READ, io.clone())
+                .with_syscall(SYS_READ_AVAIL, io.clone())
+                .with_syscall(SYS_WRITE, io);
+        }
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
 
         let mut executor = exec::RV32Executor::new(&CIRCUIT, &self.elf, &mut self.inner);
@@ -455,7 +488,8 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
         cycle: usize,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        if let Some(cb) = self.opts.io_handlers.get(syscall) {
+        log::debug!("syscall {syscall}, {} words to guest", to_guest.len());
+        if let Some(cb) = self.opts.syscall_handlers.get(syscall) {
             return Ok(cb.syscall(syscall, mem, to_guest));
         }
         // TODO: Use the standard syscall handler framework for this instead of matching

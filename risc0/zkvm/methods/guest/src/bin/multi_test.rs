@@ -25,7 +25,7 @@ use risc0_zeroio::deserialize::Deserialize;
 use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
 use risc0_zkvm::guest::{env, memory_barrier, sha};
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef, SYS_MULTI_TEST};
-use risc0_zkvm_platform::syscall::{nr::SYS_INITIAL_INPUT, sys_rand};
+use risc0_zkvm_platform::syscall::{nr::SYS_INITIAL_INPUT, sys_rand, sys_read};
 
 risc0_zkvm::entry!(main);
 
@@ -127,6 +127,22 @@ pub fn main() {
             assert_ne!(result_buf, vec![0u8; result_buf.len()]);
 
             env::commit_slice(&result_buf);
+        }
+        MultiTestSpecRef::SysRead(sysread) => {
+            let mut orig = sysread.orig().to_vec();
+
+            for (pos, len) in sysread.pos_and_len() {
+                let num_read = unsafe {
+                    sys_read(
+                        sysread.fd(),
+                        orig.as_mut_ptr().add(pos as usize),
+                        len as usize,
+                    )
+                };
+                assert_eq!(num_read, len as usize);
+            }
+
+            env::commit_slice(&risc0_zeroio::to_vec(&orig).unwrap());
         }
     }
 }

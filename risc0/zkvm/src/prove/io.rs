@@ -23,11 +23,14 @@
 //! be used to enable the handlers provided in this module.
 
 use core::{cell::RefCell, marker::PhantomData, mem::take};
-use std::ops::DerefMut;
+use std::{collections::BTreeMap, io::BufRead, io::Write, ops::DerefMut, rc::Rc};
 
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
-    syscall::reg_abi::{REG_A3, REG_A4},
+    syscall::{
+        nr,
+        reg_abi::{REG_A3, REG_A4},
+    },
     WORD_SIZE,
 };
 
@@ -138,5 +141,108 @@ impl<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>> SliceIo for FnWrapper<T, U, F> {
 
     fn handle_io(&self, _syscall: &str, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest> {
         (self.f)(from_guest)
+    }
+}
+
+/// Posix-style IO
+pub(crate) struct PosixIo<'a> {
+    read_fds: RefCell<BTreeMap<u32, Box<dyn BufRead + 'a>>>,
+    write_fds: RefCell<BTreeMap<u32, Box<dyn Write + 'a>>>,
+}
+
+impl<'a> PosixIo<'a> {
+    pub fn new() -> Self {
+        Self {
+            read_fds: RefCell::new(BTreeMap::new()),
+            write_fds: RefCell::new(BTreeMap::new()),
+        }
+    }
+
+    pub fn with_fd_reader(self, fd: u32, reader: impl BufRead + 'a) -> Self {
+        self.read_fds.borrow_mut().insert(fd, Box::new(reader));
+        self
+    }
+
+    pub fn with_fd_writer(self, fd: u32, writer: impl Write + 'a) -> Self {
+        self.write_fds.borrow_mut().insert(fd, Box::new(writer));
+
+        self
+    }
+}
+
+impl<'a> Syscall for PosixIo<'a> {
+    fn syscall(&self, syscall: &str, ctx: &MemoryState, to_guest: &mut [u32]) -> (u32, u32) {
+        // TODO: Is there a way to use "match" here instead of if statements?
+        if syscall == nr::SYS_READ_AVAIL.as_str() {
+            let fd = ctx.load_register(REG_A3);
+            let mut read_fds = self.read_fds.borrow_mut();
+            let reader = read_fds.get_mut(&fd).unwrap();
+
+            (reader.fill_buf().unwrap().len() as u32, 0)
+        } else if syscall == nr::SYS_READ.as_str() {
+            let fd = ctx.load_register(REG_A3);
+            let nbytes = ctx.load_register(REG_A4) as usize;
+
+            log::debug!("sys_read, attempting to read {nbytes} bytes from fd {fd}");
+
+            assert!(
+                nbytes >= to_guest.len() * WORD_SIZE,
+                "Word-aligned read buffer must be fully filled"
+            );
+
+            let mut read_fds = self.read_fds.borrow_mut();
+            let reader = read_fds.get_mut(&fd).unwrap();
+
+            let to_guest_u8: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
+            let nread_main = reader.read(to_guest_u8).unwrap();
+            assert_eq!(
+                nread_main,
+                to_guest_u8.len(),
+                "Guest requested more data than was available"
+            );
+
+            log::debug!(
+                "Main read got {nread_main} bytes out of requested {}",
+                to_guest_u8.len()
+            );
+            let unaligned_end = nbytes - nread_main;
+            assert!(
+                unaligned_end <= WORD_SIZE,
+                "{unaligned_end} must be <= {WORD_SIZE}"
+            );
+
+            // Fill unaligned word out.
+            let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
+            let nread_end = reader.read(&mut to_guest_end[0..unaligned_end]).unwrap();
+
+            (
+                (nread_main + nread_end) as u32,
+                u32::from_le_bytes(to_guest_end),
+            )
+        } else if syscall == nr::SYS_WRITE.as_str() {
+            let fd = ctx.load_register(REG_A3);
+            let buf_ptr = ctx.load_register(REG_A3);
+            let buf_len = ctx.load_register(REG_A4);
+            let from_guest_bytes = ctx.load_region(buf_ptr, buf_len);
+            let mut write_fds = self.write_fds.borrow_mut();
+            let writer = write_fds.get_mut(&fd).unwrap();
+
+            writer.write_all(from_guest_bytes.as_slice()).unwrap();
+            (0, 0)
+        } else {
+            panic!("Unknown syscall {syscall}")
+        }
+    }
+}
+
+impl<'a> Syscall for Rc<PosixIo<'a>> {
+    fn syscall(&self, syscall: &str, ctx: &MemoryState, to_guest: &mut [u32]) -> (u32, u32) {
+        (**self).syscall(syscall, ctx, to_guest)
+    }
+}
+
+impl<'a> Default for PosixIo<'a> {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -40,6 +40,13 @@ pub enum MultiTestSpec {
         count: u32,
     },
     DoRandom,
+    SysRead {
+        // Buffer to read to
+        orig: Vec<u8>,
+        fd: u32,
+        // Position and length to do reads
+        pos_and_len: Vec<(u32, u32)>,
+    },
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);
