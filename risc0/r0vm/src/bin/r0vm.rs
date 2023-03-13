@@ -96,14 +96,14 @@ fn run_prover(
     image_id: &Digest,
     opts: ProverOpts,
     initial_input: Option<Vec<u8>>,
-) -> Result<(Receipt, Vec<u8>)> {
+) -> Result<Receipt> {
     let mut prover = Prover::new_with_opts(&elf_contents, image_id.clone(), opts).unwrap();
     if let Some(bytes) = initial_input {
         prover.add_input_u8_slice(bytes.as_slice());
     }
     let receipt = prover.run()?;
-    let output = prover.get_output_u8_slice();
-    Ok((receipt, output.to_vec()))
+
+    Ok(receipt)
 }
 
 fn encode_receipt(receipt: &Receipt, image_id: &[u8], args: &Args) -> Vec<u8> {
@@ -193,8 +193,7 @@ fn main() {
         fs::write(args.pprof_out.as_ref().unwrap(), &report)
             .expect("Unable to write profiling output");
     }
-    let (receipt, output) = proof.expect("Run failed");
-
+    let receipt = proof.expect("Run failed");
     let receipt_data = encode_receipt(&receipt, image_id.as_bytes(), &args);
 
     if args.skip_seal || args.receipt.is_none() {
@@ -218,9 +217,4 @@ fn main() {
             );
         }
     }
-
-    if args.verbose > 0 {
-        eprintln!("Writing {} bytes of output to stdout", output.len());
-    }
-    std::io::stdout().write_all(output.as_slice()).unwrap();
 }

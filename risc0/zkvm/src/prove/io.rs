@@ -29,7 +29,7 @@ use bytemuck::Pod;
 use risc0_zkvm_platform::{
     syscall::{
         nr,
-        reg_abi::{REG_A3, REG_A4},
+        reg_abi::{REG_A3, REG_A4, REG_A5},
     },
     WORD_SIZE,
 };
@@ -146,8 +146,8 @@ impl<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>> SliceIo for FnWrapper<T, U, F> {
 
 /// Posix-style IO
 pub(crate) struct PosixIo<'a> {
-    read_fds: RefCell<BTreeMap<u32, Box<dyn BufRead + 'a>>>,
-    write_fds: RefCell<BTreeMap<u32, Box<dyn Write + 'a>>>,
+    read_fds: RefCell<BTreeMap<u32, Rc<RefCell<dyn BufRead + 'a>>>>,
+    write_fds: RefCell<BTreeMap<u32, Rc<RefCell<dyn Write + 'a>>>>,
 }
 
 impl<'a> PosixIo<'a> {
@@ -158,13 +158,13 @@ impl<'a> PosixIo<'a> {
         }
     }
 
-    pub fn with_fd_reader(self, fd: u32, reader: impl BufRead + 'a) -> Self {
-        self.read_fds.borrow_mut().insert(fd, Box::new(reader));
+    pub fn with_read_fd(self, fd: u32, reader: Rc<RefCell<impl BufRead + 'a>>) -> Self {
+        self.read_fds.borrow_mut().insert(fd, reader);
         self
     }
 
-    pub fn with_fd_writer(self, fd: u32, writer: impl Write + 'a) -> Self {
-        self.write_fds.borrow_mut().insert(fd, Box::new(writer));
+    pub fn with_write_fd(self, fd: u32, writer: Rc<RefCell<impl Write + 'a>>) -> Self {
+        self.write_fds.borrow_mut().insert(fd, writer);
 
         self
     }
@@ -176,9 +176,12 @@ impl<'a> Syscall for PosixIo<'a> {
         if syscall == nr::SYS_READ_AVAIL.as_str() {
             let fd = ctx.load_register(REG_A3);
             let mut read_fds = self.read_fds.borrow_mut();
-            let reader = read_fds.get_mut(&fd).unwrap();
+            let reader = read_fds
+                .get_mut(&fd)
+                .expect(&format!("Bad read file descriptor {fd}"));
 
-            (reader.fill_buf().unwrap().len() as u32, 0)
+            let navail = reader.borrow_mut().fill_buf().unwrap().len() as u32;
+            (navail, 0)
         } else if syscall == nr::SYS_READ.as_str() {
             let fd = ctx.load_register(REG_A3);
             let nbytes = ctx.load_register(REG_A4) as usize;
@@ -191,10 +194,12 @@ impl<'a> Syscall for PosixIo<'a> {
             );
 
             let mut read_fds = self.read_fds.borrow_mut();
-            let reader = read_fds.get_mut(&fd).unwrap();
+            let reader = read_fds
+                .get_mut(&fd)
+                .expect(&format!("Bad read file descriptor {fd}"));
 
             let to_guest_u8: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-            let nread_main = reader.read(to_guest_u8).unwrap();
+            let nread_main = reader.borrow_mut().read(to_guest_u8).unwrap();
             assert_eq!(
                 nread_main,
                 to_guest_u8.len(),
@@ -213,7 +218,10 @@ impl<'a> Syscall for PosixIo<'a> {
 
             // Fill unaligned word out.
             let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
-            let nread_end = reader.read(&mut to_guest_end[0..unaligned_end]).unwrap();
+            let nread_end = reader
+                .borrow_mut()
+                .read(&mut to_guest_end[0..unaligned_end])
+                .unwrap();
 
             (
                 (nread_main + nread_end) as u32,
@@ -221,13 +229,20 @@ impl<'a> Syscall for PosixIo<'a> {
             )
         } else if syscall == nr::SYS_WRITE.as_str() {
             let fd = ctx.load_register(REG_A3);
-            let buf_ptr = ctx.load_register(REG_A3);
-            let buf_len = ctx.load_register(REG_A4);
+            let buf_ptr = ctx.load_register(REG_A4);
+            let buf_len = ctx.load_register(REG_A5);
             let from_guest_bytes = ctx.load_region(buf_ptr, buf_len);
             let mut write_fds = self.write_fds.borrow_mut();
-            let writer = write_fds.get_mut(&fd).unwrap();
+            let writer = write_fds
+                .get_mut(&fd)
+                .expect(&format!("Bad write file descriptor {fd}"));
 
-            writer.write_all(from_guest_bytes.as_slice()).unwrap();
+            log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
+
+            writer
+                .borrow_mut()
+                .write_all(from_guest_bytes.as_slice())
+                .unwrap();
             (0, 0)
         } else {
             panic!("Unknown syscall {syscall}")

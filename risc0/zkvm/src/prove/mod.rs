@@ -37,10 +37,11 @@ mod plonk;
 pub mod profiler;
 
 use std::{
+    cell::RefCell,
     cmp::min,
     collections::HashMap,
     fmt::Debug,
-    io::{BufRead, Write},
+    io::{stderr, stdout, BufRead, Write},
     mem::take,
     rc::Rc,
     str::from_utf8,
@@ -63,7 +64,7 @@ use risc0_zkvm_platform::{
         reg_abi::{REG_A3, REG_A4},
         SyscallName,
     },
-    WORD_SIZE,
+    JOURNAL_FILENO, STDERR_FILENO, STDOUT_FILENO, WORD_SIZE,
 };
 
 use crate::binfmt::elf::Program;
@@ -141,17 +142,27 @@ impl<'a> ProverOpts<'a> {
     }
 
     /// Add a posix-style file descriptor for reading
-    pub fn with_fd_reader(mut self, fd: u32, reader: impl BufRead + 'a) -> Self {
+    pub fn with_read_fd_ref(mut self, fd: u32, reader: Rc<RefCell<impl BufRead + 'a>>) -> Self {
         let io = self.io.unwrap_or_default();
-        self.io = Some(io.with_fd_reader(fd, reader));
+        self.io = Some(io.with_read_fd(fd, reader));
+        self
+    }
+
+    /// Add a posix-style file descriptor for reading
+    pub fn with_read_fd(self, fd: u32, reader: impl BufRead + 'a) -> Self {
+        self.with_read_fd_ref(fd, Rc::new(RefCell::new(reader)))
+    }
+
+    /// Add a posix-style file descriptor for writing
+    pub fn with_write_fd_ref(mut self, fd: u32, writer: Rc<RefCell<impl Write + 'a>>) -> Self {
+        let io = self.io.unwrap_or_default();
+        self.io = Some(io.with_write_fd(fd, writer));
         self
     }
 
     /// Add a posix-style file descriptor for writing
-    pub fn with_fd_writer(mut self, fd: u32, writer: impl Write + 'a) -> Self {
-        let io = self.io.unwrap_or_default();
-        self.io = Some(io.with_fd_writer(fd, writer));
-        self
+    pub fn with_write_fd(self, fd: u32, writer: impl Write + 'a) -> Self {
+        self.with_write_fd_ref(fd, Rc::new(RefCell::new(writer)))
     }
 }
 
@@ -164,6 +175,8 @@ impl<'a> Default for ProverOpts<'a> {
             syscall_handlers: HashMap::new(),
             trace_callback: None,
         }
+        .with_write_fd(STDOUT_FILENO, stdout())
+        .with_write_fd(STDERR_FILENO, stderr())
     }
 }
 
@@ -194,12 +207,9 @@ impl<'a> Default for ProverOpts<'a> {
 /// let receipt = prover.run()?;
 /// ```
 /// After running the prover, publicly proven results can be accessed from the
-/// [Receipt], while private outputs can be accessed using
-/// [Prover::get_output_u32_vec] (or [Prover::get_output_u8_slice]):
+/// [Receipt].
 /// ```ignore
 /// let receipt = prover.run()?;
-/// let slice = prover.get_output_u32_vec()?;
-/// let private_output: OutputType = risc0_zkvm::serde::from_slice(&slice)?;
 /// let proven_result: ResultType = risc0_zkvm::serde::from_slice(&receipt.journal)?;
 /// ```
 pub struct Prover<'a> {
@@ -341,35 +351,6 @@ impl<'a> Prover<'a> {
             .extend_from_slice(bytemuck::cast_slice(slice));
     }
 
-    /// Read _private_ output data from the guest. This reads data written by
-    /// [crate::guest::env::write] or [crate::guest::env::write_slice] in the
-    /// guest.
-    ///
-    /// The proven result data from [crate::guest::env::commit] is not accessed
-    /// with this function. Instead read the [Receipt::journal].
-    pub fn get_output_u8_slice(&self) -> &[u8] {
-        &self.inner.output
-    }
-
-    /// Read _private_ output data from the guest. This reads data written by
-    /// [crate::guest::env::write] or [crate::guest::env::write_slice] in the
-    /// guest. The data is read as 32-bit words, and an `Err` will be returned
-    /// if the data is not word-aligned.
-    ///
-    /// The proven result data from [crate::guest::env::commit] is not accessed
-    /// with this function. Instead read the [Receipt::journal].
-    pub fn get_output_u32_vec(&self) -> Result<Vec<u32>> {
-        if self.inner.output.len() % WORD_SIZE != 0 {
-            bail!("Private output must be word-aligned");
-        }
-        Ok(self
-            .inner
-            .output
-            .chunks_exact(WORD_SIZE)
-            .map(|x| u32::from_ne_bytes(x.try_into().unwrap()))
-            .collect())
-    }
-
     /// Run the guest code. If the guest exits successfully, this returns a
     /// [Receipt] that proves execution. If the execution of the guest fails for
     /// any reason, this instead returns an `Err`.
@@ -449,7 +430,7 @@ impl<'a> Prover<'a> {
 
         // Attach the full version of the output journal & construct receipt object
         let receipt = Receipt {
-            journal: self.inner.journal.clone(),
+            journal: self.inner.journal.borrow().clone(),
             seal,
         };
 
@@ -464,17 +445,17 @@ impl<'a> Prover<'a> {
 
 struct ProverImpl<'a> {
     pub input: Vec<u8>,
-    pub output: Vec<u8>,
-    pub journal: Vec<u8>,
+    pub journal: Rc<RefCell<Vec<u8>>>,
     pub opts: ProverOpts<'a>,
 }
 
 impl<'a> ProverImpl<'a> {
     fn new(opts: ProverOpts<'a>) -> Self {
+        let journal = Rc::new(RefCell::new(Vec::new()));
+        let opts = opts.with_write_fd_ref(JOURNAL_FILENO, journal.clone());
         Self {
             input: Vec::new(),
-            output: Vec::new(),
-            journal: Vec::new(),
+            journal,
             opts,
         }
     }
@@ -518,26 +499,11 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
                     .clone_from_slice(&self.input[..copy_bytes]);
                 Ok((self.input.len() as u32, 0))
             }
-            "SYS_STDOUT" => {
-                log::debug!("SYS_STDOUT: {}", from_guest.len());
-                self.output.extend(&from_guest);
-                Ok((0, 0))
-            }
-            "SYS_STDERR" => {
-                log::debug!("SYS_STDERR: {}", from_guest.len());
-                std::io::stderr().lock().write_all(&from_guest).unwrap();
-                Ok((0, 0))
-            }
             "SYS_RANDOM" => {
                 log::debug!("SYS_RANDOM: {}", to_guest.len());
                 let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
                 getrandom::getrandom(rand_buf.as_mut_slice())?;
                 bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
-                Ok((0, 0))
-            }
-            "SYS_JOURNAL" => {
-                log::debug!("SYS_JOURNAL: {}", from_guest.len());
-                self.journal.extend_from_slice(&from_guest);
                 Ok((0, 0))
             }
             _ => bail!("Unknown syscall: {syscall}"),

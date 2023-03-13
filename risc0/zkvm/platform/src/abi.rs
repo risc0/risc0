@@ -12,13 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::ptr::null_mut;
-
-use crate::memory;
-use crate::syscall::{
-    nr::{SYS_STDERR, SYS_STDOUT},
-    syscall_2,
-};
+use crate::{memory, syscall::sys_write, STDERR_FILENO, STDOUT_FILENO};
 
 // Number of words remaining in the heap that haven't yet been allocated.
 static mut HEAP_WORDS_REMAINING: usize = memory::HEAP.len_words();
@@ -39,29 +33,11 @@ pub fn zkvm_abi_alloc_words(nwords: usize) -> *mut u32 {
 }
 
 #[no_mangle]
-// TODO: Change this to use a file descriptor with standard posix semantics.
 pub fn zkvm_abi_write_stdout(buf: &[u8]) {
-    unsafe {
-        syscall_2(
-            SYS_STDOUT,
-            null_mut(),
-            0,
-            buf.as_ptr() as u32,
-            buf.len() as u32,
-        );
-    }
+    unsafe { sys_write(STDOUT_FILENO, buf.as_ptr(), buf.len()) };
 }
 
 #[no_mangle]
-// TODO: Change this to use a file descriptor with standard posix semantics.
 pub fn zkvm_abi_write_stderr(buf: &[u8]) {
-    unsafe {
-        syscall_2(
-            SYS_STDERR,
-            null_mut(),
-            0,
-            buf.as_ptr() as u32,
-            buf.len() as u32,
-        );
-    }
+    unsafe { sys_write(STDERR_FILENO, buf.as_ptr(), buf.len()) };
 }

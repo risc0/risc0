@@ -584,7 +584,7 @@ fn posix_style_read() {
 
         let opts = ProverOpts::default()
             .with_skip_seal(true)
-            .with_fd_reader(123, readbuf.as_slice());
+            .with_read_fd(123, readbuf.as_slice());
 
         let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
         prover.add_input_u32_slice(

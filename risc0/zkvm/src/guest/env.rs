@@ -22,10 +22,11 @@ use risc0_zkvm_platform::{
     abi::zkvm_abi_alloc_words,
     memory, syscall,
     syscall::{
-        nr::{SYS_INITIAL_INPUT, SYS_JOURNAL, SYS_LOG, SYS_STDERR, SYS_STDOUT},
-        sys_cycle_count, sys_halt, sys_output, syscall_0, syscall_2, SyscallName,
+        nr::{SYS_INITIAL_INPUT, SYS_LOG},
+        sys_cycle_count, sys_halt, sys_log, sys_output, sys_write, syscall_0, syscall_2,
+        SyscallName,
     },
-    WORD_SIZE,
+    JOURNAL_FILENO, STDERR_FILENO, STDOUT_FILENO, WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
@@ -185,23 +186,26 @@ pub fn get_cycle_count() -> usize {
 
 /// Print a message to the debug console.
 pub fn log(msg: &str) {
-    get_writer(SYS_LOG, |_| {}).write_slice(msg.as_bytes());
+    let msg = msg.as_bytes();
+    unsafe {
+        sys_log(msg.as_ptr(), msg.len());
+    }
 }
 
 /// Return a StreamWriter writing data using the specified syscall, which must
 /// accept a buffer and byte count as its arguments.
-pub fn get_writer<F: Fn(&[u8])>(syscall: SyscallName, hook: F) -> impl StreamWriter {
-    OutputStreamWriter::new(syscall, hook)
+pub fn get_writer<F: Fn(&[u8])>(fd: u32, hook: F) -> impl StreamWriter {
+    OutputStreamWriter::new(fd, hook)
 }
 
 /// Return a writer for STDOUT.
 pub fn stdout() -> impl StreamWriter {
-    get_writer(SYS_STDOUT, |_| {})
+    get_writer(STDOUT_FILENO, |_| {})
 }
 
 /// Return a writer for the JOURNAL.
 pub fn journal() -> impl StreamWriter {
-    get_writer(SYS_JOURNAL, |bytes| {
+    get_writer(JOURNAL_FILENO, |bytes| {
         unsafe { HASHER.as_mut().unwrap_unchecked().update(bytes) };
     })
 }
@@ -240,14 +244,13 @@ impl Env {
 /// output syscalls (STDOUT, STDERR, JOURNAL, LOG) or any other
 /// syscall which accepts slices of bytes.
 struct OutputStreamWriter<F: Fn(&[u8])> {
-    // TODO: Change this to write to a file descriptor once we have SYS_WRITE
-    syscall: SyscallName,
+    fd: u32,
     hook: F,
 }
 
 impl<F: Fn(&[u8])> OutputStreamWriter<F> {
-    pub fn new(syscall: SyscallName, hook: F) -> Self {
-        Self { syscall, hook }
+    pub fn new(fd: u32, hook: F) -> Self {
+        Self { fd, hook }
     }
 }
 
@@ -256,30 +259,14 @@ impl<F: Fn(&[u8])> StreamWriter for OutputStreamWriter<F> {
 
     fn write_u32(&mut self, data: u32) -> SerdeResult<()> {
         let bytes = data.to_ne_bytes();
-        unsafe {
-            syscall_2(
-                self.syscall,
-                core::ptr::null_mut(),
-                0,
-                bytes.as_ptr() as u32,
-                bytes.len() as u32,
-            )
-        };
+        unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
         (self.hook)(&bytes);
         Ok(())
     }
 
     fn write_slice<T: Pod>(&mut self, slice: &[T]) -> SerdeResult<()> {
         let bytes: &[u8] = bytemuck::cast_slice(slice);
-        unsafe {
-            syscall_2(
-                self.syscall,
-                core::ptr::null_mut(),
-                0,
-                bytes.as_ptr() as u32,
-                bytes.len() as u32,
-            )
-        };
+        unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
         (self.hook)(bytes);
         Ok(())
     }

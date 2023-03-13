@@ -115,9 +115,6 @@ pub mod nr {
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_CYCLE_COUNT);
     declare_syscall!(pub SYS_INITIAL_INPUT);
-    declare_syscall!(pub SYS_JOURNAL);
-    declare_syscall!(pub SYS_STDERR);
-    declare_syscall!(pub SYS_STDOUT);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ_AVAIL);
     declare_syscall!(pub SYS_READ);

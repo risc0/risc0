@@ -23,3 +23,8 @@ pub mod syscall;
 
 pub const WORD_SIZE: usize = core::mem::size_of::<u32>();
 pub const PAGE_SIZE: usize = 1024;
+
+pub const STDIN_FILENO: u32 = 0;
+pub const STDOUT_FILENO: u32 = 1;
+pub const STDERR_FILENO: u32 = 2;
+pub const JOURNAL_FILENO: u32 = 3;
