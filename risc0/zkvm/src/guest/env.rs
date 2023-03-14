@@ -20,13 +20,13 @@ use bytemuck::Pod;
 use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
     abi::zkvm_abi_alloc_words,
-    memory, syscall,
+    fileno, memory, syscall,
     syscall::{
         nr::{SYS_INITIAL_INPUT, SYS_LOG},
         sys_cycle_count, sys_halt, sys_log, sys_output, sys_write, syscall_0, syscall_2,
         SyscallName,
     },
-    JOURNAL_FILENO, STDERR_FILENO, STDOUT_FILENO, WORD_SIZE,
+    WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
@@ -181,7 +181,7 @@ pub fn commit_slice<T: Pod>(slice: &[T]) {
 /// Return the number of processor cycles that have occured since the guest
 /// began.
 pub fn get_cycle_count() -> usize {
-    sys_cycle_count()
+    unsafe { sys_cycle_count() }
 }
 
 /// Print a message to the debug console.
@@ -200,12 +200,12 @@ pub fn get_writer<F: Fn(&[u8])>(fd: u32, hook: F) -> impl StreamWriter {
 
 /// Return a writer for STDOUT.
 pub fn stdout() -> impl StreamWriter {
-    get_writer(STDOUT_FILENO, |_| {})
+    get_writer(fileno::STDOUT, |_| {})
 }
 
 /// Return a writer for the JOURNAL.
 pub fn journal() -> impl StreamWriter {
-    get_writer(JOURNAL_FILENO, |bytes| {
+    get_writer(fileno::JOURNAL, |bytes| {
         unsafe { HASHER.as_mut().unwrap_unchecked().update(bytes) };
     })
 }

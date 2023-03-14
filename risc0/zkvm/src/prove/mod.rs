@@ -58,13 +58,14 @@ use risc0_zkp::{
     prove::adapter::ProveAdapter,
 };
 use risc0_zkvm_platform::{
+    fileno,
     memory::MEM_SIZE,
     syscall::{
         nr::{SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
         reg_abi::{REG_A3, REG_A4},
         SyscallName,
     },
-    JOURNAL_FILENO, STDERR_FILENO, STDOUT_FILENO, WORD_SIZE,
+    WORD_SIZE,
 };
 
 use crate::binfmt::elf::Program;
@@ -175,8 +176,8 @@ impl<'a> Default for ProverOpts<'a> {
             syscall_handlers: HashMap::new(),
             trace_callback: None,
         }
-        .with_write_fd(STDOUT_FILENO, stdout())
-        .with_write_fd(STDERR_FILENO, stderr())
+        .with_write_fd(fileno::STDOUT, stdout())
+        .with_write_fd(fileno::STDERR, stderr())
     }
 }
 
@@ -452,7 +453,7 @@ struct ProverImpl<'a> {
 impl<'a> ProverImpl<'a> {
     fn new(opts: ProverOpts<'a>) -> Self {
         let journal = Rc::new(RefCell::new(Vec::new()));
-        let opts = opts.with_write_fd_ref(JOURNAL_FILENO, journal.clone());
+        let opts = opts.with_write_fd_ref(fileno::JOURNAL, journal.clone());
         Self {
             input: Vec::new(),
             journal,

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::{memory, syscall::sys_write, STDERR_FILENO, STDOUT_FILENO};
+use crate::{fileno, memory, syscall::sys_write};
 
 // Number of words remaining in the heap that haven't yet been allocated.
 static mut HEAP_WORDS_REMAINING: usize = memory::HEAP.len_words();
@@ -34,10 +34,10 @@ pub fn zkvm_abi_alloc_words(nwords: usize) -> *mut u32 {
 
 #[no_mangle]
 pub fn zkvm_abi_write_stdout(buf: &[u8]) {
-    unsafe { sys_write(STDOUT_FILENO, buf.as_ptr(), buf.len()) };
+    unsafe { sys_write(fileno::STDOUT, buf.as_ptr(), buf.len()) };
 }
 
 #[no_mangle]
 pub fn zkvm_abi_write_stderr(buf: &[u8]) {
-    unsafe { sys_write(STDERR_FILENO, buf.as_ptr(), buf.len()) };
+    unsafe { sys_write(fileno::STDERR, buf.as_ptr(), buf.len()) };
 }

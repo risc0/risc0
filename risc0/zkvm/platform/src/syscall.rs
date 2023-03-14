@@ -295,27 +295,27 @@ pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
     syscall_2(nr::SYS_LOG, null_mut(), 0, msg_ptr as u32, len as u32);
 }
 
-pub extern "C" fn sys_cycle_count() -> usize {
+pub unsafe extern "C" fn sys_cycle_count() -> usize {
     unsafe {
         let Return(a0, _) = syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0);
         a0 as usize
     }
 }
 
-/// Returns the number of bytes currently available for reading on the
-/// given file descriptor.
-pub unsafe extern "C" fn sys_read_avail(fd: u32) -> usize {
-    let Return(navail, _) = syscall_1(nr::SYS_READ_AVAIL, null_mut(), 0, fd);
-    navail as usize
-}
-
 /// Reads the given number of bytes into the given buffer, posix-style.  Returns
 /// the number of bytes actually read.  On end of file, returns 0.
+///
+/// Like POSIX read, this is not guaranteed to read all bytes
+/// requested.  If we haven't reached EOF, it is however guaranteed to
+/// read at least one byte.
+///
+/// Users should prefer a higher-level abstraction.
 pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize) -> usize {
     // The SYS_READ system call can do a given number of word-aligned reads
     // efficiently. The semantics of the system call are:
     //
-    //   (nread, word) = syscall_2(nr::SYS_READ, outbuf, outwords, fd, nbytes);
+    //   (nread, word) = syscall_2(nr::SYS_READ, outbuf,
+    //                             num_words_in_outbuf, fd, nbytes);
     //
     // This reads exactly nbytes from the file descriptor, and fills the words
     // in outbuf, followed by up to 4 bytes returned in "word", and fills
