@@ -16,6 +16,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(not(feature = "std"), feature(alloc_error_handler))]
 #![deny(rustdoc::broken_intra_doc_links)]
+#![deny(missing_docs)]
 
 extern crate alloc;
 
@@ -36,25 +37,32 @@ pub use anyhow::Result;
 use control_id::CONTROL_ID;
 use control_id::POSEIDON_CONTROL_ID;
 use hex::FromHex;
+use risc0_zkp::core::blake2b::{Blake2b, ConfigHashBlake2b};
 use risc0_zkp::core::config::{ConfigHashPoseidon, ConfigHashSha256};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::core::sha::Sha256;
+pub use risc0_zkvm_platform::declare_syscall;
 pub use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
 pub use crate::binfmt::{elf::Program, image::MemoryImage};
+use crate::control_id::BLAKE2B_CONTROL_ID;
 #[cfg(feature = "prove")]
 pub use crate::prove::{loader::Loader, Prover, ProverOpts};
 pub use crate::receipt::Receipt;
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
+/// A collection of hashes attesting to the circuit architecture
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ControlId {
+    /// The hashes comprising the [ControlId]
     pub table: alloc::vec::Vec<Digest>,
 }
 
+/// A trait for objects with an associated [ControlId]
 pub trait ControlIdLocator {
+    /// Get the [ControlId] associated with this object
     fn get_control_id() -> ControlId;
 }
 
@@ -72,6 +80,16 @@ impl ControlIdLocator for ConfigHashPoseidon {
     fn get_control_id() -> ControlId {
         let mut table = alloc::vec::Vec::new();
         for entry in POSEIDON_CONTROL_ID {
+            table.push(Digest::from_hex(entry).unwrap());
+        }
+        ControlId { table }
+    }
+}
+
+impl<T: Blake2b> ControlIdLocator for ConfigHashBlake2b<T> {
+    fn get_control_id() -> ControlId {
+        let mut table = alloc::vec::Vec::new();
+        for entry in BLAKE2B_CONTROL_ID {
             table.push(Digest::from_hex(entry).unwrap());
         }
         ControlId { table }

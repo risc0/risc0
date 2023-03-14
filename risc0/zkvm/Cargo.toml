@@ -48,22 +48,20 @@ prost = { version = "0.11", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", optional = true }
+getrandom = { version = "0.2", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
 criterion = { version = "0.4", features = ["html_reports"] }
-tempfile = "3.3"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dev-dependencies]
 env_logger = "0.10"
 flate2 = "1.0"
-lazy_static = "1.4"
 risc0-zkvm-methods = { path = "methods" }
 serial_test = "1.0"
 tar = "0.4"
-tempdir = "0.3"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
@@ -76,6 +74,7 @@ insecure_skip_seal = []
 profiler = ["dep:addr2line", "dep:gimli", "dep:prost", "dep:prost-build", "dep:protobuf-src"]
 prove = [
   "binfmt",
+  "dep:getrandom",
   "dep:lazy-regex",
   "dep:rand",
   "dep:rayon",

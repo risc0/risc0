@@ -17,9 +17,17 @@
 #![allow(unused_variables)]
 
 pub mod abi;
-pub mod io;
 pub mod memory;
+#[macro_use]
 pub mod syscall;
 
 pub const WORD_SIZE: usize = core::mem::size_of::<u32>();
 pub const PAGE_SIZE: usize = 1024;
+
+/// Standard IO file descriptors for use with sys_read and sys_write.
+pub mod fileno {
+    pub const STDIN: u32 = 0;
+    pub const STDOUT: u32 = 1;
+    pub const STDERR: u32 = 2;
+    pub const JOURNAL: u32 = 3;
+}

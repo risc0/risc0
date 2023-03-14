@@ -29,4 +29,4 @@ This is example code meant to illustrate the fundamentals of programming with th
 
 ## Video Tutorial
 
-For a walk-through of the fundamentals of this example, check out this [excerpt from our workshop at ZK HACK III](https://www.youtube.com/watch?v=vxqxRiTXGBI&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=5).
+For a walk-through of the fundamentals of this example, check out this [excerpt from our workshop at ZK HACK III](https://www.youtube.com/watch?v=Yg_BGqj_6lg&list=PLcPzhUaCxlCgig7ofeARMPwQ8vbuD6hC5&index=5).

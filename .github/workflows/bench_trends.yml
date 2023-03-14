@@ -1,0 +1,53 @@
+name: Benchmark Trends
+
+on:
+  push:
+    branches: [ main ]
+    # Only run benchmarks on changes to following paths:
+    paths:
+      - 'risc0/**'
+      - '.github/workflows/bench_*'
+
+  # uncomment for only for testing changes to this workflow while in a PR
+  # pull_request:
+  #   branches: [ main ]
+
+jobs:
+  bench:
+    runs-on: [self-hosted, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+
+    env:
+      FEATURE: ${{ matrix.feature }}
+      RUSTC_WRAPPER: sccache
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
+      - name: Store benchmark result
+        uses: risc0/github-action-benchmark@v1
+        with:
+          name: "${{ matrix.os }}-${{ matrix.device }}"
+          tool: 'cargo'
+          github-token: ${{ secrets.BENCHMARK_TOKEN }}
+          gh-repository: 'github.com/risc0/benchmarks'
+          gh-pages-branch: main
+          output-file-path: output.txt
+          comment-always: false
+          comment-on-alert: false
+          auto-push: true

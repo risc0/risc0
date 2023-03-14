@@ -24,6 +24,7 @@
 
 extern crate alloc;
 
+pub mod blake2b;
 pub mod config;
 pub mod digest;
 pub mod ntt;

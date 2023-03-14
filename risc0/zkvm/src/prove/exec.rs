@@ -12,40 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::BTreeSet;
-use std::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 
-use anyhow::{bail, Result};
-use bytemuck::Pod;
+use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
 use num_traits::FromPrimitive;
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
-    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    baby_bear::{BabyBear, BabyBearElem},
     Elem,
 };
 use risc0_zkp::{
-    adapter::{CircuitInfo, CircuitStepHandler, PolyExt},
+    adapter::{CircuitInfo, CircuitStepHandler},
     core::{log2_ceil, sha::BLOCK_BYTES},
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{
-    memory::{FFPU, SYSTEM},
+    memory::SYSTEM,
     syscall::{
         ecall,
-        nr::{SYS_COMPUTE_POLY, SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A7, REG_T0},
+        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
         DIGEST_WORDS,
     },
     PAGE_SIZE, WORD_SIZE,
 };
 
 use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
-use crate::binfmt::elf::Program;
-use crate::binfmt::image::{MemoryImage, PageTableInfo};
-use crate::CIRCUIT;
+use crate::binfmt::{
+    elf::Program,
+    image::{MemoryImage, PageTableInfo},
+};
 
 const IMM_BITS: usize = 12;
 
@@ -66,18 +64,20 @@ impl MemoryOp {
 
 pub trait HostHandler {
     fn is_trace_enabled(&self) -> bool;
-    fn on_panic(&mut self, msg: &str) -> Result<()>;
-    fn on_txrx(&mut self, channel: u32, buf: &[u8]) -> Result<Vec<u8>>;
+    fn on_txrx(
+        &mut self,
+        mem: &MemoryState,
+        syscall_name: &str,
+        cycle: usize,
+        to_guest_buf: &mut [u32],
+    ) -> Result<(u32, u32)>;
     fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
 }
 
-struct MemoryState {
+pub struct MemoryState {
     pub ram: MemoryImage,
     pub pages: BTreeSet<u32>,
     resident: BTreeSet<u32>,
-
-    // Ram in the FFPU section of memory; these RAM slots store four Fps instead of one u32.
-    pub ffpu_ram: Vec<(BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem)>,
 
     // Plonk tables for sorting plonks in proper order
     pub ram_plonk: plonk::RamPlonk,
@@ -93,7 +93,6 @@ impl MemoryState {
             ram: image,
             pages: BTreeSet::new(),
             resident: BTreeSet::new(),
-            ffpu_ram: Vec::new(),
             ram_plonk: plonk::RamPlonk::new(),
             bytes_plonk: plonk::BytesPlonk::new(),
             plonk_accum: BTreeMap::new(),
@@ -117,12 +116,12 @@ impl MemoryState {
         u32::from_le_bytes(bytes)
     }
 
-    fn load_register(&self, num: usize) -> u32 {
+    pub fn load_register(&self, num: usize) -> u32 {
         self.load_u32((SYSTEM.start() + num * WORD_SIZE) as u32)
     }
 
     #[track_caller]
-    fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
+    pub fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
         let mut region = Vec::new();
         for addr in addr..addr + size {
             region.push(self.load_u8(addr));
@@ -130,17 +129,24 @@ impl MemoryState {
         region
     }
 
+    // Loads a null-termintaed string from memory
+    pub fn load_string(&self, mut addr: u32) -> Result<String> {
+        let mut s: Vec<u8> = Vec::new();
+        loop {
+            let b = self.load_u8(addr);
+            if b == 0 {
+                break;
+            }
+            s.push(b);
+            addr += 1;
+        }
+        String::from_utf8(s).map_err(anyhow::Error::msg)
+    }
+
     #[track_caller]
     fn store_u8(&mut self, addr: u32, value: u8) {
         // debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
         self.ram.image[addr as usize] = value;
-    }
-
-    #[track_caller]
-    fn store_u32(&mut self, addr: u32, value: u32) {
-        // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
-        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
-        self.store_region(addr, &value.to_le_bytes());
     }
 
     #[track_caller]
@@ -152,42 +158,10 @@ impl MemoryState {
     }
 
     #[track_caller]
-    fn store_region_u32(&mut self, addr: u32, slice: &[u32]) {
-        assert!(addr % WORD_SIZE as u32 == 0);
-        for (i, word) in slice.iter().enumerate() {
-            let offset = i * WORD_SIZE;
-            self.store_u32(addr + offset as u32, *word);
-        }
-    }
-
-    // Reads a slice of data from the guest's memory and interprets it
-    // as the given type, which must be plain old data..  The address
-    // provided is the guest's address of a SliceDescriptor structure.
-    fn read_slice<T: Pod>(&self, desc_addr: u32) -> Vec<T> {
-        let desc_bytes = self.load_region(desc_addr, 8);
-        let size: u32 = *bytemuck::from_bytes(&desc_bytes[..4]);
-        let addr: u32 = *bytemuck::from_bytes(&desc_bytes[4..]);
-        let elt_size = core::mem::size_of::<T>();
-        assert_eq!(elt_size % WORD_SIZE, 0, "T should be word aligned");
-        assert_eq!(
-            size as usize % elt_size,
-            0,
-            "slice does not end on a boundary of T; size={size}, elt_size={elt_size}"
-        );
-        let bytes = self.load_region(addr, size);
-        bytes
-            .chunks_exact(elt_size)
-            .map(|chunk| *bytemuck::from_bytes(chunk))
-            .collect()
-    }
-
-    // Reads words from guest's memory and transmutes it into the given value,
-    // which should be repr(C) and plain old data.
-    fn read_value<T: Pod>(&self, addr: u32) -> T {
-        let size = core::mem::size_of::<T>();
-        assert_eq!(size % WORD_SIZE, 0, "T should be word aligned");
-        let bytes = self.load_region(addr, size as u32);
-        *bytemuck::from_bytes(&bytes)
+    fn store_u32(&mut self, addr: u32, value: u32) {
+        // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
+        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
+        self.store_region(addr, &value.to_le_bytes());
     }
 }
 
@@ -197,6 +171,9 @@ pub struct MachineContext<'a, H: HostHandler> {
     trace_enabled: bool,
     halted: bool,
     pc: u32,
+
+    syscall_out_data: VecDeque<u32>,
+    syscall_out_regs: (u32, u32),
 }
 
 #[allow(dead_code)]
@@ -215,7 +192,6 @@ enum MajorType {
     ShaInit,
     ShaLoad,
     ShaMain,
-    Ffpu,
     PageFault,
     MuxSize,
 }
@@ -265,21 +241,15 @@ impl<'a> PageFaults<'a> {
     }
 
     pub fn include(&mut self, addr: u32) {
-        if addr < self.info.mem_start {
-            let page_idx = self.info.get_page_index_nondet(addr);
+        let mut addr = addr;
+        loop {
+            let page_idx = self.info.get_page_index(addr);
+            let entry_addr = self.info.get_page_entry_addr(page_idx);
             self.reads.insert(page_idx);
-        } else {
-            let mut addr = addr;
-            loop {
-                let raw_page_idx = self.info.get_page_index_nondet(addr);
-                let page_idx = self.info.get_page_index(addr);
-                let entry_addr = self.info.get_page_entry_addr(page_idx);
-                self.reads.insert(raw_page_idx);
-                if raw_page_idx == self.info.raw_root_idx {
-                    break;
-                }
-                addr = entry_addr;
+            if page_idx == self.info.root_idx {
+                break;
             }
+            addr = entry_addr;
         }
     }
 
@@ -336,7 +306,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 Ok(())
             }
             "pageRead" => {
-                (outs[0], outs[1]) = self.page_read(args[0]);
+                (outs[0]) = self.page_read(args[0]);
                 Ok(())
             }
             "ramWrite" => {
@@ -367,11 +337,18 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 self.log(extra, args);
                 Ok(())
             }
-            "syscall" => {
-                (
-                    (outs[0], outs[1], outs[2], outs[3]),
-                    (outs[4], outs[5], outs[6], outs[7]),
-                ) = self.syscall(cycle)?;
+            "syscallInit" => {
+                self.syscall_init(cycle)?;
+                Ok(())
+            }
+            "syscallBody" => {
+                (outs[0], outs[1], outs[2], outs[3]) = split_word8(self.syscall_body()?);
+                Ok(())
+            }
+            "syscallFini" => {
+                let (a0, a1) = self.syscall_fini()?;
+                (outs[0], outs[1], outs[2], outs[3]) = split_word8(a0);
+                (outs[4], outs[5], outs[6], outs[7]) = split_word8(a1);
                 Ok(())
             }
             "isResident" => {
@@ -409,6 +386,8 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             handler: io,
             halted: false,
             pc: 0x00000000,
+            syscall_out_data: VecDeque::new(),
+            syscall_out_regs: (0, 0),
         }
     }
 
@@ -456,21 +435,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             }
         } else if opcode.major == MajorType::ECall {
             let minor = self.memory.load_register(REG_T0);
-            if minor == ecall::FFPU {
-                let code_addr = self.memory.load_register(REG_A0);
-                let args_addr = self.memory.load_register(REG_A1);
-                let code_end = self.memory.load_register(REG_A2);
-                let const_addr = self.memory.load_u32(args_addr + (0 * WORD_SIZE) as u32);
-                let input_addr = self.memory.load_u32(args_addr + (1 * WORD_SIZE) as u32);
-                let output_addr = self.memory.load_u32(args_addr + (2 * WORD_SIZE) as u32);
-                for addr in (code_addr..code_end).step_by(WORD_SIZE) {
-                    faults.include(addr);
-                }
-                faults.include(args_addr);
-                faults.include(const_addr);
-                faults.include(input_addr);
-                faults.include(output_addr);
-            } else if minor == ecall::SHA {
+            if minor == ecall::SHA {
                 let state_out_addr = self.memory.load_register(REG_A0);
                 let state_in_addr = self.memory.load_register(REG_A1);
                 let block1_addr = self.memory.load_register(REG_A2);
@@ -490,13 +455,21 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                         faults.include(addr2 + (j * WORD_SIZE) as u32);
                     }
                 }
+            } else if minor == ecall::SOFTWARE {
+                let out_addr = self.memory.load_register(REG_A0);
+                let out_words = self.memory.load_register(REG_A1);
+                let out_bytes = out_words * WORD_SIZE as u32;
+
+                for addr in (out_addr..(out_addr + out_bytes)).step_by(WORD_SIZE) {
+                    faults.include(addr);
+                }
             }
         }
 
         faults
     }
 
-    fn page_read(&mut self, pc: BabyBearElem) -> (BabyBearElem, BabyBearElem) {
+    fn page_read(&mut self, pc: BabyBearElem) -> BabyBearElem {
         let pc: u32 = pc.into();
         let inst = self.memory.load_u32(pc);
         let opcode = self.decode(inst);
@@ -505,12 +478,11 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             if !self.memory.pages.contains(page_idx) {
                 self.memory.pages.insert(*page_idx);
                 // debug!("page_idx: 0x{page_idx:08X}");
-                let is_nondet = self.memory.ram.info.is_nondet(*page_idx);
-                return ((*page_idx).into(), is_nondet.into());
+                return (*page_idx).into();
             }
         }
 
-        (BabyBearElem::ZERO, BabyBearElem::ZERO)
+        BabyBearElem::ZERO
     }
 
     fn trace(&mut self, cycle: usize, pc: BabyBearElem) -> Result<()> {
@@ -654,26 +626,16 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         } else {
             if !self.memory.resident.contains(&addr) {
                 let addr = addr * WORD_SIZE as u32;
-                if addr >= self.memory.ram.info.mem_start {
-                    let page_idx = self.memory.ram.info.get_page_index(addr);
-                    let entry_addr = self.memory.ram.info.get_page_entry_addr(page_idx);
-                    debug!("  ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}");
-                }
+                let page_idx = self.memory.ram.info.get_page_index(addr);
+                let entry_addr = self.memory.ram.info.get_page_entry_addr(page_idx);
+                debug!("  ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}");
                 panic!("Memory read before page in: 0x{addr:08x}");
             }
         }
-        if addr as usize * WORD_SIZE >= FFPU.start() {
-            let ffpu_addr = addr as usize - FFPU.start() / WORD_SIZE;
-            if ffpu_addr >= self.memory.ffpu_ram.len() {
-                return split_word8(0);
-            }
-            self.memory.ffpu_ram[ffpu_addr]
-        } else {
-            let addr = addr * WORD_SIZE as u32;
-            let word = self.memory.load_u32(addr);
-            // debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
-            split_word8(word)
-        }
+        let addr = addr * WORD_SIZE as u32;
+        let word = self.memory.load_u32(addr);
+        // debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
+        split_word8(word)
     }
 
     fn ram_write(
@@ -695,31 +657,22 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             );
         }
 
-        if addr as usize * WORD_SIZE >= FFPU.start() {
-            let ffpu_addr = addr as usize - FFPU.start() / WORD_SIZE;
-            if self.memory.ffpu_ram.len() <= ffpu_addr {
-                let z = BabyBearElem::ZERO;
-                self.memory.ffpu_ram.resize(ffpu_addr + 1, (z, z, z, z));
-            }
-            self.memory.ffpu_ram[ffpu_addr] = data
-        } else {
-            let data = merge_word8(data);
-            let addr = addr * WORD_SIZE as u32;
-            // debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
-            self.memory.store_u32(addr, data);
-            if self.trace_enabled {
-                let addr = addr as usize;
-                if addr >= SYSTEM.start() && addr < SYSTEM.end() {
-                    self.handler.on_trace(TraceEvent::RegisterSet {
-                        reg: (addr - SYSTEM.start()) / WORD_SIZE,
-                        value: data,
-                    })?
-                } else {
-                    self.handler.on_trace(TraceEvent::MemorySet {
-                        addr: addr as u32,
-                        value: data,
-                    })?
-                }
+        let data = merge_word8(data);
+        let addr = addr * WORD_SIZE as u32;
+        // debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
+        self.memory.store_u32(addr, data);
+        if self.trace_enabled {
+            let addr = addr as usize;
+            if addr >= SYSTEM.start() && addr < SYSTEM.end() {
+                self.handler.on_trace(TraceEvent::RegisterSet {
+                    reg: (addr - SYSTEM.start()) / WORD_SIZE,
+                    value: data,
+                })?
+            } else {
+                self.handler.on_trace(TraceEvent::MemorySet {
+                    addr: addr as u32,
+                    value: data,
+                })?
             }
         }
 
@@ -769,71 +722,35 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         }
     }
 
-    fn syscall(
-        &mut self,
-        cycle: usize,
-    ) -> Result<(
-        (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
-        (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem),
-    )> {
-        let nr = self.memory.load_register(REG_A7);
-        match nr {
-            SYS_PANIC => {
-                let msg_ptr = self.memory.load_register(REG_A0);
-                let msg_len = self.memory.load_register(REG_A1);
-                let buf = self.memory.load_region(msg_ptr, msg_len);
-                let str = String::from_utf8(buf).unwrap();
-                debug!("SYS_PANIC[{cycle}]> {str}");
-                self.handler.on_panic(&str)?;
-                Ok((split_word8(0), split_word8(0)))
-            }
-            SYS_LOG => {
-                let msg_ptr = self.memory.load_register(REG_A0);
-                let msg_len = self.memory.load_register(REG_A1);
-                let buf = self.memory.load_region(msg_ptr, msg_len);
-                let str = String::from_utf8(buf).unwrap();
-                println!("R0VM[{cycle}] {}", str);
-                Ok((split_word8(0), split_word8(0)))
-            }
-            SYS_IO => {
-                let channel = self.memory.load_register(REG_A0);
-                let buf_ptr = self.memory.load_register(REG_A1);
-                let buf_len = self.memory.load_register(REG_A2);
-                let out_ptr = self.memory.load_register(REG_A3);
-                debug!("SYS_IO[{cycle}]");
+    fn syscall_init(&mut self, cycle: usize) -> Result<()> {
+        assert!(self.syscall_out_data.is_empty());
+        let to_guest_words = self.memory.load_register(REG_A1);
 
-                let buf = self.memory.load_region(buf_ptr, buf_len);
-                let result = self.handler.on_txrx(channel, &buf)?;
-                self.memory.store_region(out_ptr, &result);
+        let name_ptr = self.memory.load_register(REG_A2);
 
-                Ok((split_word8(result.len() as u32), split_word8(0)))
-            }
-            SYS_CYCLE_COUNT => {
-                debug!("SYS_CYCLE_COUNT[{cycle}]> cycle = {cycle}");
-                Ok((split_word8(cycle as u32), split_word8(0)))
-            }
-            SYS_COMPUTE_POLY => {
-                let eval_u_ptr = self.memory.load_register(REG_A0);
-                let poly_mix_ptr = self.memory.load_register(REG_A1);
-                let out_ptr = self.memory.load_register(REG_A2);
-                let mix_ptr = self.memory.load_register(REG_A3);
-                let result_ptr = self.memory.load_register(REG_A4);
-                debug!("SYS_COMPUTE_POLY[{cycle}]>");
+        let name = self.memory.load_string(name_ptr)?;
+        debug!("SYS_IO[{cycle}] Guest requests {to_guest_words} words back");
+        let mut to_guest_buf = vec![0u32; to_guest_words as usize];
 
-                let eval_u: Vec<BabyBearExtElem> = self.memory.read_slice(eval_u_ptr);
-                let poly_mix = self.memory.read_value(poly_mix_ptr);
-                let out: Vec<BabyBearElem> = self.memory.read_slice(out_ptr);
-                let mix: Vec<BabyBearElem> = self.memory.read_slice(mix_ptr);
+        self.syscall_out_regs =
+            self.handler
+                .on_txrx(&self.memory, &name, cycle, &mut to_guest_buf)?;
+        trace!("SYS_IO[{cycle}] (a0, a1): {:?}", self.syscall_out_regs);
+        trace!("SYS_IO[{cycle}] data sent to guest: {to_guest_buf:?}");
+        self.syscall_out_data = to_guest_buf.into();
+        Ok(())
+    }
 
-                let args: &[&[BabyBearElem]] = &[&out, &mix];
-                let result = CIRCUIT.poly_ext(&poly_mix, &eval_u, args);
+    fn syscall_body(&mut self) -> Result<u32> {
+        Ok(self.syscall_out_data.pop_front().unwrap_or_default())
+    }
 
-                let words = result.tot.to_u32_words();
-                self.memory.store_region_u32(result_ptr, &words);
-                Ok((split_word8(words.len() as u32), split_word8(0)))
-            }
-            _ => bail!("Unsupported syscall: {nr}"),
-        }
+    fn syscall_fini(&mut self) -> Result<(u32, u32)> {
+        debug!(
+            "Syscall complete, output registers: {:?}",
+            self.syscall_out_regs
+        );
+        Ok(self.syscall_out_regs)
     }
 
     fn decode(&self, word: u32) -> OpCode {

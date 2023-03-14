@@ -16,10 +16,11 @@ use std::{fmt, sync::Mutex};
 
 use anyhow::Result;
 use risc0_zeroio::to_vec;
+use risc0_zkp::core::blake2b::{Blake2bCpuImpl, HashSuiteBlake2bCpu};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm_methods::{
-    multi_test::MultiTestSpec, HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID,
-    SLICE_IO_ELF, SLICE_IO_ID,
+    multi_test::{MultiTestSpec, SYS_MULTI_TEST},
+    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, SLICE_IO_ELF, SLICE_IO_ID,
 };
 use risc0_zkvm_platform::{memory::HEAP, WORD_SIZE};
 use serial_test::serial;
@@ -208,6 +209,15 @@ fn commit_hello_world() {
 #[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
 #[cfg_attr(feature = "cuda", serial)]
+fn do_random() {
+    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoRandom).unwrap());
+    prover.run().expect("Could not get receipt");
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
 fn slice_io() {
     let run = |slice: &[u8]| {
         let mut prover = Prover::new(SLICE_IO_ELF, SLICE_IO_ID).unwrap();
@@ -223,7 +233,7 @@ fn slice_io() {
 }
 
 #[test]
-fn host_sendrecv() {
+fn host_syscall() {
     let expected: Vec<Vec<u8>> = vec![
         "".into(),
         "H".into(),
@@ -235,16 +245,14 @@ fn host_sendrecv() {
     let actual: Mutex<Vec<Vec<u8>>> = Vec::new().into();
     let opts = ProverOpts::default()
         .with_skip_seal(true)
-        .with_sendrecv_callback(5, |channel_id, buf| -> Vec<u8> {
-            assert_eq!(channel_id, 5);
+        .with_sendrecv_callback(SYS_MULTI_TEST, |buf: &[u8]| -> Vec<u8> {
             let mut act = actual.lock().unwrap();
             act.push(buf.into());
             expected[act.len()].clone()
         });
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(
-        &to_vec(&MultiTestSpec::SendRecv {
-            channel_id: 5,
+        &to_vec(&MultiTestSpec::Syscall {
             count: expected.len() as u32 - 1,
         })
         .unwrap(),
@@ -257,20 +265,14 @@ fn host_sendrecv() {
 // Make sure panics in the callback get propagated correctly.
 #[test]
 #[should_panic(expected = "I am panicking from here!")]
-fn host_sendrecv_callback_panic() {
+fn host_syscall_callback_panic() {
     let opts = ProverOpts::default()
         .with_skip_seal(true)
-        .with_sendrecv_callback(5, |_channel_id, _buf| -> Vec<u8> {
+        .with_sendrecv_callback(SYS_MULTI_TEST, |_buf: &[u8]| -> Vec<u8> {
             panic!("I am panicking from here!");
         });
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
-    prover.add_input_u32_slice(
-        &to_vec(&MultiTestSpec::SendRecv {
-            channel_id: 5,
-            count: 5,
-        })
-        .unwrap(),
-    );
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap());
     prover.run().unwrap();
 }
 
@@ -307,6 +309,26 @@ fn test_poseidon_proof() {
     let receipt = prover.run_with_hal(&hal, &eval).unwrap();
     receipt
         .verify_with_hash::<HashSuitePoseidon, _>(&MULTI_TEST_ID)
+        .unwrap();
+}
+
+#[test]
+fn test_blake2b_proof() {
+    use risc0_circuit_rv32im::cpu::CpuEvalCheck;
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_zkp::core::blake2b::HashSuiteBlake2b;
+    use risc0_zkp::hal::cpu::CpuHal;
+
+    use crate::CIRCUIT;
+
+    let hal = CpuHal::<BabyBear, HashSuiteBlake2bCpu>::new();
+    let eval = CpuEvalCheck::new(&CIRCUIT);
+    let opts = ProverOpts::default().with_skip_verify(true);
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
+    let receipt = prover.run_with_hal(&hal, &eval).unwrap();
+    receipt
+        .verify_with_hash::<HashSuiteBlake2b<Blake2bCpuImpl>, _>(&MULTI_TEST_ID)
         .unwrap();
 }
 
@@ -528,4 +550,91 @@ mod riscv_tests {
     test_case!(sw);
     test_case!(xor);
     test_case!(xori);
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn posix_style_read() {
+    // Tests sys_read into a buffer of bytes that may not be word
+    // aligned.  To make sure we don't miss any edge cases, this tries
+    // all permutations of start alignment, end alignment, and 0, 1,
+    // or 2 whole words.
+
+    // Initial buffer to read bytes on top of.
+    let orig: Vec<u8> = (b'a'..b'z')
+        .chain(b'0'..b'9')
+        .chain(b"!@#$%^&*()".iter().cloned())
+        .collect();
+    // Input to read bytes from.
+    let readbuf: Vec<u8> = (b'A'..b'Z').collect();
+
+    let run = |pos_and_len: Vec<(u32, u32)>| {
+        let mut expected = orig.to_vec();
+
+        let mut expected_readbuf = readbuf.as_slice();
+        for (pos, len) in pos_and_len.iter() {
+            let pos = *pos as usize;
+            let len = *len as usize;
+
+            let this_read;
+            (this_read, expected_readbuf) = expected_readbuf.split_at(len);
+            expected[pos..pos + len].clone_from_slice(this_read);
+        }
+
+        let opts = ProverOpts::default()
+            .with_skip_seal(true)
+            .with_read_fd(123, readbuf.as_slice());
+
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+        prover.add_input_u32_slice(
+            &to_vec(&MultiTestSpec::SysRead {
+                fd: 123,
+                orig: orig.to_vec(),
+                pos_and_len: pos_and_len.clone(),
+            })
+            .unwrap(),
+        );
+        let receipt = prover.run().expect("Could not get receipt");
+
+        use risc0_zeroio::Deserialize;
+        let actual = Vec::<u8>::deserialize_from(bytemuck::cast_slice(receipt.journal.as_slice()));
+        assert_eq!(
+            std::str::from_utf8(&actual).unwrap(),
+            std::str::from_utf8(&expected).unwrap(),
+            "pos and lens: {pos_and_len:?}"
+        );
+    };
+
+    fn next_offset(mut pos: u32, offset: u32) -> u32 {
+        while (pos % WORD_SIZE as u32) != offset {
+            pos += 1;
+        }
+        pos
+    }
+
+    for start_offset in 0..WORD_SIZE as u32 {
+        for end_offset in 0..WORD_SIZE as u32 {
+            let mut pos = 0;
+            let mut pos_and_len: Vec<(u32, u32)> = Vec::new();
+
+            // Make up a bunch of reads to overwrite parts of the buffer.
+            for nwords in 0..3 {
+                pos = next_offset(pos, start_offset);
+                let start = pos;
+                pos += nwords * WORD_SIZE as u32;
+                pos = next_offset(pos, end_offset);
+                let len = pos - start;
+                pos_and_len.push((pos, len));
+                assert!(
+                    pos + len < orig.len() as u32,
+                    "Ran out of space to test writes. pos: {pos} len: {len} end: {end_offset} start = {start_offset}"
+                );
+                // Make sure there's at least one non-overwritten character between reads.
+                pos += 1;
+            }
+
+            run(pos_and_len);
+        }
+    }
 }

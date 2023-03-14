@@ -90,8 +90,8 @@ impl<S: Sha256, F: Field> ConfigRng<F> for ShaRng<S> {
     fn mix(&mut self, val: &Digest) {
         self.inner_mix(val);
     }
-    fn random_u32(&mut self) -> u32 {
-        self.next_u32()
+    fn random_bits(&mut self, bits: usize) -> u32 {
+        ((1 << bits) - 1) & self.next_u32()
     }
     fn random_elem(&mut self) -> F::Elem {
         F::Elem::random(self)

@@ -18,6 +18,7 @@ extern crate alloc;
 use alloc::vec::Vec;
 
 use risc0_zeroio::{Deserialize, Serialize};
+use risc0_zkvm::declare_syscall;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MultiTestSpec {
@@ -35,8 +36,17 @@ pub enum MultiTestSpec {
         /// output it; nonzero means write that value.
         values: Vec<(u32, u32)>,
     },
-    SendRecv {
-        channel_id: u32,
+    Syscall {
         count: u32,
     },
+    DoRandom,
+    SysRead {
+        // Buffer to read to
+        orig: Vec<u8>,
+        fd: u32,
+        // Position and length to do reads
+        pos_and_len: Vec<(u32, u32)>,
+    },
 }
+
+declare_syscall!(pub SYS_MULTI_TEST);

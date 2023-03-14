@@ -58,7 +58,7 @@ pub mod sha;
 
 use core::{arch::asm, mem, ptr};
 
-use risc0_zkvm_platform::syscall::sys_panic;
+use risc0_zkvm_platform::{syscall::nr::SYS_PANIC, syscall::sys_panic};
 
 pub use crate::entry;
 
@@ -78,7 +78,9 @@ fn _fault() -> ! {
 /// Aborts the guest with the given message.
 pub fn abort(msg: &str) -> ! {
     // A compliant host should fault when it receives this syscall.
-    unsafe { sys_panic(msg.as_ptr(), msg.len()) };
+    unsafe {
+        sys_panic(msg.as_ptr(), msg.len());
+    }
 
     // As a fallback for non-compliant hosts, issue an illegal instruction.
     _fault()

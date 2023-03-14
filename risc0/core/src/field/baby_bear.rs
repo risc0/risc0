@@ -13,7 +13,10 @@
 // limitations under the License.
 
 //! Baby bear field.
-//! Support for the base finite field modulo `15 * 2^27 + 1`.
+//!
+//! Support for the finite field of order `15 * 2^27 + 1`, and its degree 4
+//! extension field. This field choice allows for 32-bit addition without
+//! overflow.
 
 use alloc::{fmt, vec::Vec};
 use core::{
@@ -61,6 +64,7 @@ const R2: u32 = 1172168163;
 #[repr(transparent)]
 pub struct Elem(u32);
 
+/// Alias for the Baby Bear [Elem]
 pub type BabyBearElem = Elem;
 
 impl Default for Elem {
@@ -185,10 +189,14 @@ impl Elem {
         Self(encode(x % P))
     }
 
+    /// Create a new [BabyBear] from a Montgomery form representation
+    ///
+    /// Requires that `x` comes pre-encoded in Montegomery form.
     pub const fn new_raw(x: u32) -> Self {
         Self(x)
     }
 
+    /// Cast a [BabyBear] to an integer
     pub const fn as_u32(&self) -> u32 {
         decode(self.0)
     }
@@ -360,6 +368,7 @@ const EXT_SIZE: usize = 4;
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
 
+/// Alias for the Baby Bear [ExtElem]
 pub type BabyBearExtElem = ExtElem;
 
 impl Default for ExtElem {
@@ -634,7 +643,6 @@ impl ops::Mul<ExtElem> for Elem {
 // some `if`s and hope it gets unrolled properly, but it's small
 // enough to just hand write.
 impl ops::MulAssign for ExtElem {
-    #[cfg(not(target_os = "zkvm"))]
     #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
         // Rename the element arrays to something small for readability.
@@ -646,21 +654,6 @@ impl ops::MulAssign for ExtElem {
             a[0] * b[2] + a[1] * b[1] + a[2] * b[0] + NBETA * (a[3] * b[3]),
             a[0] * b[3] + a[1] * b[2] + a[2] * b[1] + a[3] * b[0],
         ];
-    }
-
-    // If we're on the ZKVM, use the FFPU to accelerate some operations.
-    #[cfg(target_os = "zkvm")]
-    #[inline(always)]
-    fn mul_assign(&mut self, rhs: Self) {
-        extern "Rust" {
-            fn ffpu_mul_assign(lhs: &mut [u32; 1 * EXT_SIZE], rhs: &[u32; 1 * EXT_SIZE]);
-        }
-        unsafe {
-            ffpu_mul_assign(
-                bytemuck::cast_slice_mut(&mut self.0).try_into().unwrap(),
-                bytemuck::cast_slice(&rhs.0).try_into().unwrap(),
-            );
-        }
     }
 }
 
