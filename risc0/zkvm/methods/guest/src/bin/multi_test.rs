@@ -23,6 +23,7 @@ use core::arch::asm;
 
 use risc0_zeroio::deserialize::Deserialize;
 use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
+use risc0_zkvm::getrandom::getrandom;
 use risc0_zkvm::guest::{env, memory_barrier, sha};
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef};
 use risc0_zkvm_platform::io::SENDRECV_CHANNEL_INITIAL_INPUT;
@@ -124,6 +125,12 @@ pub fn main() {
             assert_ne!(result_buf, vec![0u8; result_buf.len()]);
 
             env::commit_slice(&result_buf);
+
+            // Test random number generation in the zkvm
+            let mut rand_buf = [0u8; 7];
+            getrandom(rand_buf.as_mut_slice()).expect("random number generation failed");
+            env::commit_slice(&rand_buf);
+            assert_ne!(rand_buf, vec![0u8; rand_buf.len()].as_slice());
         }
     }
 }

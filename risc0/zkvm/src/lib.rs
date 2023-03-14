@@ -23,6 +23,9 @@ extern crate alloc;
 #[cfg(feature = "binfmt")]
 pub mod binfmt;
 mod control_id;
+/// The getrandom module in the zkvm is provides the guest with a way to call
+/// `getrandom` without using the getrandom crate.
+pub mod getrandom;
 #[cfg(any(target_os = "zkvm", doc))]
 pub mod guest;
 #[cfg(feature = "prove")]
