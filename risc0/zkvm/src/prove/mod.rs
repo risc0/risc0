@@ -421,7 +421,7 @@ impl<'a> Prover<'a> {
 
         // Attach the full version of the output journal & construct receipt object
         let receipt = Receipt {
-            journal: take(&mut self.inner.journal.buf.borrow_mut()),
+            journal: self.inner.journal.buf.take(),
             seal,
         };
 
