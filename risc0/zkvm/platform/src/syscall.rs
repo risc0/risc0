@@ -296,10 +296,8 @@ pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
 }
 
 pub unsafe extern "C" fn sys_cycle_count() -> usize {
-    unsafe {
-        let Return(a0, _) = syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0);
-        a0 as usize
-    }
+    let Return(a0, _) = syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0);
+    a0 as usize
 }
 
 /// Reads the given number of bytes into the given buffer, posix-style.  Returns
