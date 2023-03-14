@@ -136,8 +136,8 @@ impl SyscallName {
     }
 }
 
-#[repr(C)]
 /// Returned registers (a0, a1) from a syscall invocation.
+#[repr(C)]
 pub struct Return(pub u32, pub u32);
 
 macro_rules! impl_syscall {

@@ -100,12 +100,8 @@ pub(crate) fn finalize() {
     }
 }
 
-/// Exchange data with the host
-pub fn send_recv_raw(
-    syscall: SyscallName,
-    to_host: &[u8],
-    from_host: &mut [u32],
-) -> syscall::Return {
+/// Exchange data with the host.
+pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> syscall::Return {
     unsafe {
         syscall_2(
             syscall,
@@ -124,11 +120,11 @@ pub fn send_recv_raw(
 /// receives the return data.
 ///
 /// On the host side, implement SliceIo to provide a handler for this call.
-pub fn send_recv_slice<T: Pod, U: Pod>(syscall: SyscallName, to_host: &[T]) -> &'static [U] {
-    let syscall::Return(nelem, _) = send_recv_raw(syscall, bytemuck::cast_slice(to_host), &mut []);
+pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
+    let syscall::Return(nelem, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
     let nwords = align_up(core::mem::size_of::<T>() * nelem as usize, WORD_SIZE) / WORD_SIZE;
     let from_host_buf = unsafe { slice::from_raw_parts_mut(zkvm_abi_alloc_words(nwords), nwords) };
-    send_recv_raw(syscall, &[], from_host_buf);
+    syscall(syscall_name, &[], from_host_buf);
     &bytemuck::cast_slice(from_host_buf)[..nelem as usize]
 }
 
