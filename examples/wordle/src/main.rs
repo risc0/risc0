@@ -157,8 +157,9 @@ mod tests {
         assert!(score.game_is_won(), "Correct guess should win the game");
     }
 
-    /// If a guessed letter is present in every position where it ought to appear,
-    /// and also in an incorrect position, the 'bonus' letter shouldn't flag yellow
+    /// If a guessed letter is present in every position where it ought to
+    /// appear, and also in an incorrect position, the 'bonus' letter
+    /// shouldn't flag yellow
     #[test]
     fn test_partial_match_false_positives() {
         let server = Server::new("spare");
@@ -195,7 +196,5 @@ mod tests {
             score.0[1] == LetterFeedback::Correct,
             "Unconsumed matches should be green"
         );
-
     }
-
 }
