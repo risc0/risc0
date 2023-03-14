@@ -143,27 +143,17 @@ impl<'a> ProverOpts<'a> {
     }
 
     /// Add a posix-style file descriptor for reading
-    pub fn with_read_fd_ref(mut self, fd: u32, reader: Rc<RefCell<impl BufRead + 'a>>) -> Self {
+    pub fn with_read_fd(mut self, fd: u32, reader: impl BufRead + 'a) -> Self {
         let io = self.io.unwrap_or_default();
-        self.io = Some(io.with_read_fd(fd, reader));
-        self
-    }
-
-    /// Add a posix-style file descriptor for reading
-    pub fn with_read_fd(self, fd: u32, reader: impl BufRead + 'a) -> Self {
-        self.with_read_fd_ref(fd, Rc::new(RefCell::new(reader)))
-    }
-
-    /// Add a posix-style file descriptor for writing
-    pub fn with_write_fd_ref(mut self, fd: u32, writer: Rc<RefCell<impl Write + 'a>>) -> Self {
-        let io = self.io.unwrap_or_default();
-        self.io = Some(io.with_write_fd(fd, writer));
+        self.io = Some(io.with_read_fd(fd, Box::new(reader)));
         self
     }
 
     /// Add a posix-style file descriptor for writing
-    pub fn with_write_fd(self, fd: u32, writer: impl Write + 'a) -> Self {
-        self.with_write_fd_ref(fd, Rc::new(RefCell::new(writer)))
+    pub fn with_write_fd(mut self, fd: u32, writer: impl Write + 'a) -> Self {
+        let io = self.io.unwrap_or_default();
+        self.io = Some(io.with_write_fd(fd, Box::new(writer)));
+        self
     }
 }
 
@@ -431,7 +421,7 @@ impl<'a> Prover<'a> {
 
         // Attach the full version of the output journal & construct receipt object
         let receipt = Receipt {
-            journal: self.inner.journal.borrow().clone(),
+            journal: take(&mut self.inner.journal.buf.borrow_mut()),
             seal,
         };
 
@@ -444,16 +434,31 @@ impl<'a> Prover<'a> {
     }
 }
 
+// Capture the journal output in a buffer that we can access afterwards.
+#[derive(Clone, Default)]
+struct Journal {
+    buf: Rc<RefCell<Vec<u8>>>,
+}
+
+impl Write for Journal {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        self.buf.borrow_mut().write(bytes)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.buf.borrow_mut().flush()
+    }
+}
+
 struct ProverImpl<'a> {
     pub input: Vec<u8>,
-    pub journal: Rc<RefCell<Vec<u8>>>,
+    pub journal: Journal,
     pub opts: ProverOpts<'a>,
 }
 
 impl<'a> ProverImpl<'a> {
     fn new(opts: ProverOpts<'a>) -> Self {
-        let journal = Rc::new(RefCell::new(Vec::new()));
-        let opts = opts.with_write_fd_ref(fileno::JOURNAL, journal.clone());
+        let journal = Journal::default();
+        let opts = opts.with_write_fd(fileno::JOURNAL, journal.clone());
         Self {
             input: Vec::new(),
             journal,

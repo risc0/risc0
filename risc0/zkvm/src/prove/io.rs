@@ -146,8 +146,8 @@ impl<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>> SliceIo for FnWrapper<T, U, F> {
 
 /// Posix-style IO
 pub(crate) struct PosixIo<'a> {
-    read_fds: RefCell<BTreeMap<u32, Rc<RefCell<dyn BufRead + 'a>>>>,
-    write_fds: RefCell<BTreeMap<u32, Rc<RefCell<dyn Write + 'a>>>>,
+    read_fds: RefCell<BTreeMap<u32, Box<dyn BufRead + 'a>>>,
+    write_fds: RefCell<BTreeMap<u32, Box<dyn Write + 'a>>>,
 }
 
 impl<'a> PosixIo<'a> {
@@ -158,13 +158,13 @@ impl<'a> PosixIo<'a> {
         }
     }
 
-    pub fn with_read_fd(self, fd: u32, reader: Rc<RefCell<impl BufRead + 'a>>) -> Self {
-        self.read_fds.borrow_mut().insert(fd, reader);
+    pub fn with_read_fd(self, fd: u32, reader: impl BufRead + 'a) -> Self {
+        self.read_fds.borrow_mut().insert(fd, Box::new(reader));
         self
     }
 
-    pub fn with_write_fd(self, fd: u32, writer: Rc<RefCell<impl Write + 'a>>) -> Self {
-        self.write_fds.borrow_mut().insert(fd, writer);
+    pub fn with_write_fd(self, fd: u32, writer: impl Write + 'a) -> Self {
+        self.write_fds.borrow_mut().insert(fd, Box::new(writer));
 
         self
     }
@@ -180,7 +180,7 @@ impl<'a> Syscall for PosixIo<'a> {
                 .get_mut(&fd)
                 .expect(&format!("Bad read file descriptor {fd}"));
 
-            let navail = reader.borrow_mut().fill_buf().unwrap().len() as u32;
+            let navail = reader.fill_buf().unwrap().len() as u32;
             (navail, 0)
         } else if syscall == nr::SYS_READ.as_str() {
             let fd = ctx.load_register(REG_A3);
@@ -199,7 +199,7 @@ impl<'a> Syscall for PosixIo<'a> {
                 .expect(&format!("Bad read file descriptor {fd}"));
 
             let to_guest_u8: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-            let nread_main = reader.borrow_mut().read(to_guest_u8).unwrap();
+            let nread_main = reader.read(to_guest_u8).unwrap();
             assert_eq!(
                 nread_main,
                 to_guest_u8.len(),
@@ -218,10 +218,7 @@ impl<'a> Syscall for PosixIo<'a> {
 
             // Fill unaligned word out.
             let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
-            let nread_end = reader
-                .borrow_mut()
-                .read(&mut to_guest_end[0..unaligned_end])
-                .unwrap();
+            let nread_end = reader.read(&mut to_guest_end[0..unaligned_end]).unwrap();
 
             (
                 (nread_main + nread_end) as u32,
@@ -239,10 +236,7 @@ impl<'a> Syscall for PosixIo<'a> {
 
             log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
 
-            writer
-                .borrow_mut()
-                .write_all(from_guest_bytes.as_slice())
-                .unwrap();
+            writer.write_all(from_guest_bytes.as_slice()).unwrap();
             (0, 0)
         } else {
             panic!("Unknown syscall {syscall}")
