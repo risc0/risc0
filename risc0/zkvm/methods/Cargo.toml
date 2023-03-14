@@ -15,4 +15,5 @@ methods = ["guest", "std"]
 
 [dependencies]
 risc0-zeroio = { workspace = true }
+risc0-zkvm = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }

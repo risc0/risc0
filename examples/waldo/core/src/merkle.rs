@@ -21,12 +21,16 @@ use merkle_light::{
 };
 #[cfg(target_os = "zkvm")]
 use risc0_zkvm::guest;
-use risc0_zkvm::sha::{Digest, Impl, Sha256};
+use risc0_zkvm::{
+    declare_syscall,
+    sha::{Digest, Impl, Sha256},
+};
 use serde::{Deserialize, Serialize};
 
-/// RISC0 channel identifier for providing oracle access to a vector to the
-/// guest from the host.
-pub const VECTOR_ORACLE_CHANNEL: u32 = 0x09ac1e00;
+declare_syscall!(
+    /// RISC0 syscall for providing oracle access to a vector to the
+    /// guest from the host.
+    pub SYS_VECTOR_ORACLE);
 
 /// Merkle tree for use as a vector commitment over elements of the specified
 /// type.
@@ -317,7 +321,7 @@ where
     pub fn get(&self, index: usize) -> Element {
         let (value, proof): (Element, Proof<Element>) =
             bincode::deserialize(guest::env::send_recv_slice(
-                VECTOR_ORACLE_CHANNEL,
+                SYS_VECTOR_ORACLE,
                 // Cast the index to u32 since usize is an architecture dependent type.
                 &bincode::serialize(&(u32::try_from(index).unwrap())).unwrap(),
             ))

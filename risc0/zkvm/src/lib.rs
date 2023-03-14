@@ -41,6 +41,7 @@ use risc0_zkp::core::blake2b::{Blake2b, ConfigHashBlake2b};
 use risc0_zkp::core::config::{ConfigHashPoseidon, ConfigHashSha256};
 use risc0_zkp::core::digest::Digest;
 use risc0_zkp::core::sha::Sha256;
+pub use risc0_zkvm_platform::declare_syscall;
 pub use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
