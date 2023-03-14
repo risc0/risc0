@@ -28,3 +28,12 @@ runs:
         mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
+
+    - if: runner.os != 'macOS'
+      name: Cache rust target + HAL_CACHE
+      uses: risc0/rust-cache@v2
+      id: rust-cache
+      with:
+        key: rust-cache-${{ runner.os }}-${{ runner.arch }}
+        # TODO: this path will not work on windows.
+        cache-directories: ~/.cache/risc0
