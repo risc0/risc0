@@ -59,6 +59,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [ bench ]
     permissions:
+      issues: write
       pull-requests: write
 
     steps:
