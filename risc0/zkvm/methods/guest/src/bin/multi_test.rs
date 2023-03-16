@@ -21,13 +21,12 @@ extern crate alloc;
 use alloc::vec;
 use core::arch::asm;
 
+use getrandom::getrandom;
 use risc0_zeroio::deserialize::Deserialize;
 use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
-use risc0_zkvm::getrandom::getrandom;
 use risc0_zkvm::guest::{env, memory_barrier, sha};
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef};
 use risc0_zkvm_platform::io::SENDRECV_CHANNEL_INITIAL_INPUT;
-use risc0_zkvm_platform::syscall::sys_rand;
 
 risc0_zkvm::entry!(main);
 
@@ -115,17 +114,6 @@ pub fn main() {
             }
         }
         MultiTestSpecRef::DoRandom(_) => {
-            // TODO: replace this code with getrandom after merging code to getrandom crate
-            let mut buf = [0u32; 6];
-            unsafe {
-                sys_rand(buf.as_mut_ptr(), buf.len());
-            }
-            let mut result_buf = vec![0u8; 5];
-            result_buf.clone_from_slice(&bytemuck::cast_slice(buf.as_slice())[..5]);
-            assert_ne!(result_buf, vec![0u8; result_buf.len()]);
-
-            env::commit_slice(&result_buf);
-
             // Test random number generation in the zkvm
             let mut rand_buf = [0u8; 7];
             getrandom(rand_buf.as_mut_slice()).expect("random number generation failed");

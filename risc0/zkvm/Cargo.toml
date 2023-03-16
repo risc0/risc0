@@ -31,6 +31,7 @@ risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+getrandom = { version = "0.2", features = ["custom"] }
 
 # TODO(nils): Change these `target_os` checks to `target_vendor` checks when we
 # have a real target triple.
