@@ -40,9 +40,12 @@ use risc0_zkvm_platform::{
 };
 
 use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
-use crate::binfmt::{
-    elf::Program,
-    image::{MemoryImage, PageTableInfo},
+use crate::{
+    binfmt::{
+        elf::Program,
+        image::{MemoryImage, PageTableInfo},
+    },
+    prove::SyscallContext,
 };
 
 const IMM_BITS: usize = 12;
@@ -66,9 +69,8 @@ pub trait HostHandler {
     fn is_trace_enabled(&self) -> bool;
     fn on_txrx(
         &mut self,
-        mem: &MemoryState,
+        ctx: &dyn SyscallContext,
         syscall_name: &str,
-        cycle: usize,
         to_guest_buf: &mut [u32],
     ) -> Result<(u32, u32)>;
     fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
@@ -85,20 +87,12 @@ pub struct MemoryState {
 
     // Plonk accumulations for compute_accum and verify_accum phases
     pub plonk_accum: BTreeMap<String, plonk::PlonkAccum<BabyBear>>,
+
+    // Current cycle being run.
+    cur_cycle: usize,
 }
 
-impl MemoryState {
-    fn new(image: MemoryImage) -> Self {
-        Self {
-            ram: image,
-            pages: BTreeSet::new(),
-            resident: BTreeSet::new(),
-            ram_plonk: plonk::RamPlonk::new(),
-            bytes_plonk: plonk::BytesPlonk::new(),
-            plonk_accum: BTreeMap::new(),
-        }
-    }
-
+impl SyscallContext for MemoryState {
     #[track_caller]
     fn load_u8(&self, addr: u32) -> u8 {
         // debug!("load_u8: 0x{addr:08X}");
@@ -116,31 +110,22 @@ impl MemoryState {
         u32::from_le_bytes(bytes)
     }
 
-    pub fn load_register(&self, num: usize) -> u32 {
-        self.load_u32((SYSTEM.start() + num * WORD_SIZE) as u32)
+    fn get_cycle(&self) -> usize {
+        self.cur_cycle
     }
+}
 
-    #[track_caller]
-    pub fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
-        let mut region = Vec::new();
-        for addr in addr..addr + size {
-            region.push(self.load_u8(addr));
+impl MemoryState {
+    pub(crate) fn new(image: MemoryImage) -> Self {
+        Self {
+            ram: image,
+            pages: BTreeSet::new(),
+            resident: BTreeSet::new(),
+            ram_plonk: plonk::RamPlonk::new(),
+            bytes_plonk: plonk::BytesPlonk::new(),
+            plonk_accum: BTreeMap::new(),
+            cur_cycle: 0,
         }
-        region
-    }
-
-    // Loads a null-termintaed string from memory
-    pub fn load_string(&self, mut addr: u32) -> Result<String> {
-        let mut s: Vec<u8> = Vec::new();
-        loop {
-            let b = self.load_u8(addr);
-            if b == 0 {
-                break;
-            }
-            s.push(b);
-            addr += 1;
-        }
-        String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 
     #[track_caller]
@@ -732,9 +717,10 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         debug!("SYS_IO[{cycle}] Guest requests {to_guest_words} words back");
         let mut to_guest_buf = vec![0u32; to_guest_words as usize];
 
-        self.syscall_out_regs =
-            self.handler
-                .on_txrx(&self.memory, &name, cycle, &mut to_guest_buf)?;
+        self.memory.cur_cycle = cycle;
+        self.syscall_out_regs = self
+            .handler
+            .on_txrx(&self.memory, &name, &mut to_guest_buf)?;
         trace!("SYS_IO[{cycle}] (a0, a1): {:?}", self.syscall_out_regs);
         trace!("SYS_IO[{cycle}] data sent to guest: {to_guest_buf:?}");
         self.syscall_out_data = to_guest_buf.into();
