@@ -36,10 +36,19 @@ mod plonk;
 #[cfg(feature = "profiler")]
 pub mod profiler;
 
-use std::{cmp::min, collections::HashMap, fmt::Debug, io::Write, rc::Rc};
+use std::{
+    cell::RefCell,
+    cmp::min,
+    collections::HashMap,
+    fmt::Debug,
+    io::{stderr, stdout, BufRead, Write},
+    mem::take,
+    rc::Rc,
+    str::from_utf8,
+};
 
 use anyhow::{bail, Result};
-use io::{RawIoHandler, SliceIoHandler};
+use io::{PosixIo, SliceIo, Syscall};
 use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
@@ -49,16 +58,19 @@ use risc0_zkp::{
     prove::adapter::ProveAdapter,
 };
 use risc0_zkvm_platform::{
-    io::{
-        SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_JOURNAL, SENDRECV_CHANNEL_RANDOM,
-        SENDRECV_CHANNEL_STDERR, SENDRECV_CHANNEL_STDOUT,
-    },
+    fileno,
     memory::MEM_SIZE,
+    syscall::{
+        nr::{SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
+        reg_abi::{REG_A3, REG_A4},
+        SyscallName,
+    },
     WORD_SIZE,
 };
 
 use crate::binfmt::elf::Program;
 use crate::{
+    prove::exec::MemoryState,
     receipt::{insecure_skip_seal, Receipt},
     CIRCUIT,
 };
@@ -69,8 +81,9 @@ pub struct ProverOpts<'a> {
 
     pub(crate) skip_verify: bool,
 
-    pub(crate) io_handlers: HashMap<u32, Box<dyn RawIoHandler + 'a>>,
+    pub(crate) syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
 
+    pub(crate) io: Option<PosixIo<'a>>,
     pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
 }
 
@@ -93,29 +106,29 @@ impl<'a> ProverOpts<'a> {
         }
     }
 
-    /// Add a handler for sendrecv ports which is just a callback.
-    /// The guest can call these callbacks by invoking
-    /// `risc0_zkvm::guest::env::send_recv_slice`.
+    /// Add a handler for a syscall which inputs and outputs a slice
+    /// of plain old data..  The guest can call these by invoking
+    /// `risc0_zkvm::guest::env::send_recv_slice`
+    pub fn with_slice_io(self, syscall: SyscallName, handler: impl SliceIo + 'a) -> Self {
+        self.with_syscall(syscall, handler.to_syscall())
+    }
+
+    /// Add a handler for a syscall which inputs and outputs a slice
+    /// of plain old data.  The guest can call these callbacks by
+    /// invoking `risc0_zkvm::guest::env::send_recv_slice`.
     pub fn with_sendrecv_callback(
         self,
-        channel_id: u32,
+        syscall: SyscallName,
         f: impl Fn(&[u8]) -> Vec<u8> + 'a,
     ) -> Self {
-        self.with_raw_io_handler(channel_id, io::handler_from_fn(f))
+        self.with_slice_io(syscall, io::slice_io_from_fn(f))
     }
 
-    /// Add a handler for sendrecv ports, indexed by channel numbers.
-    /// The guest can call these callbacks by invoking
-    /// `risc0_zkvm::guest::env::send_recv_slice`
-    pub fn with_slice_io_handler(self, channel_id: u32, handler: impl SliceIoHandler + 'a) -> Self {
-        self.with_raw_io_handler(channel_id, io::handler_from_slice_handler(handler))
-    }
-
-    /// Add a handler for sendrecv channels that handles its own
-    /// allocation and sizing.  The guets can call these callbacks by
-    /// invoking `risc0_zkvm_guest::env::send_recv_raw'.
-    pub fn with_raw_io_handler(mut self, channel_id: u32, handler: impl RawIoHandler + 'a) -> Self {
-        self.io_handlers.insert(channel_id, Box::new(handler));
+    /// Add a handler for a raw syscall implementation.  The guest can
+    /// invoke these using the risc0_zkvm_platform::syscall!  macro.
+    pub fn with_syscall(mut self, syscall: SyscallName, handler: impl Syscall + 'a) -> Self {
+        self.syscall_handlers
+            .insert(syscall.as_str().to_string(), Box::new(handler));
         self
     }
 
@@ -128,16 +141,33 @@ impl<'a> ProverOpts<'a> {
         self.trace_callback = Some(Box::new(callback));
         self
     }
+
+    /// Add a posix-style file descriptor for reading
+    pub fn with_read_fd(mut self, fd: u32, reader: impl BufRead + 'a) -> Self {
+        let io = self.io.unwrap_or_default();
+        self.io = Some(io.with_read_fd(fd, Box::new(reader)));
+        self
+    }
+
+    /// Add a posix-style file descriptor for writing
+    pub fn with_write_fd(mut self, fd: u32, writer: impl Write + 'a) -> Self {
+        let io = self.io.unwrap_or_default();
+        self.io = Some(io.with_write_fd(fd, Box::new(writer)));
+        self
+    }
 }
 
 impl<'a> Default for ProverOpts<'a> {
     fn default() -> ProverOpts<'a> {
         ProverOpts {
+            io: None,
             skip_seal: false,
             skip_verify: false,
-            io_handlers: HashMap::new(),
+            syscall_handlers: HashMap::new(),
             trace_callback: None,
         }
+        .with_write_fd(fileno::STDOUT, stdout())
+        .with_write_fd(fileno::STDERR, stderr())
     }
 }
 
@@ -168,12 +198,9 @@ impl<'a> Default for ProverOpts<'a> {
 /// let receipt = prover.run()?;
 /// ```
 /// After running the prover, publicly proven results can be accessed from the
-/// [Receipt], while private outputs can be accessed using
-/// [Prover::get_output_u32_vec] (or [Prover::get_output_u8_slice]):
+/// [Receipt].
 /// ```ignore
 /// let receipt = prover.run()?;
-/// let slice = prover.get_output_u32_vec()?;
-/// let private_output: OutputType = risc0_zkvm::serde::from_slice(&slice)?;
 /// let proven_result: ResultType = risc0_zkvm::serde::from_slice(&receipt.journal)?;
 /// ```
 pub struct Prover<'a> {
@@ -248,7 +275,7 @@ cfg_if::cfg_if! {
             (hal, eval)
         }
 
-        /// Returns the default Poseidon HAL for the RISC Zero circuit
+                /// Returns the default Poseidon HAL for the RISC Zero circuit
         ///
         /// The same as [default_hal] except it gives the default HAL for
         /// securing the circuit using Poseidon (instead of SHA-256).
@@ -315,35 +342,6 @@ impl<'a> Prover<'a> {
             .extend_from_slice(bytemuck::cast_slice(slice));
     }
 
-    /// Read _private_ output data from the guest. This reads data written by
-    /// [crate::guest::env::write] or [crate::guest::env::write_slice] in the
-    /// guest.
-    ///
-    /// The proven result data from [crate::guest::env::commit] is not accessed
-    /// with this function. Instead read the [Receipt::journal].
-    pub fn get_output_u8_slice(&self) -> &[u8] {
-        &self.inner.output
-    }
-
-    /// Read _private_ output data from the guest. This reads data written by
-    /// [crate::guest::env::write] or [crate::guest::env::write_slice] in the
-    /// guest. The data is read as 32-bit words, and an `Err` will be returned
-    /// if the data is not word-aligned.
-    ///
-    /// The proven result data from [crate::guest::env::commit] is not accessed
-    /// with this function. Instead read the [Receipt::journal].
-    pub fn get_output_u32_vec(&self) -> Result<Vec<u32>> {
-        if self.inner.output.len() % WORD_SIZE != 0 {
-            bail!("Private output must be word-aligned");
-        }
-        Ok(self
-            .inner
-            .output
-            .chunks_exact(WORD_SIZE)
-            .map(|x| u32::from_ne_bytes(x.try_into().unwrap()))
-            .collect())
-    }
-
     /// Run the guest code. If the guest exits successfully, this returns a
     /// [Receipt] that proves execution. If the execution of the guest fails for
     /// any reason, this instead returns an `Err`.
@@ -378,6 +376,14 @@ impl<'a> Prover<'a> {
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
         E: EvalCheck<H>,
     {
+        if let Some(io) = take(&mut self.inner.opts.io) {
+            let io = Rc::new(io);
+            let opts = take(&mut self.inner.opts);
+            self.inner.opts = opts
+                .with_syscall(SYS_READ, io.clone())
+                .with_syscall(SYS_READ_AVAIL, io.clone())
+                .with_syscall(SYS_WRITE, io);
+        }
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
 
         let mut executor = exec::RV32Executor::new(&CIRCUIT, &self.elf, &mut self.inner);
@@ -415,7 +421,7 @@ impl<'a> Prover<'a> {
 
         // Attach the full version of the output journal & construct receipt object
         let receipt = Receipt {
-            journal: self.inner.journal.clone(),
+            journal: self.inner.journal.buf.take(),
             seal,
         };
 
@@ -428,19 +434,34 @@ impl<'a> Prover<'a> {
     }
 }
 
+// Capture the journal output in a buffer that we can access afterwards.
+#[derive(Clone, Default)]
+struct Journal {
+    buf: Rc<RefCell<Vec<u8>>>,
+}
+
+impl Write for Journal {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        self.buf.borrow_mut().write(bytes)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.buf.borrow_mut().flush()
+    }
+}
+
 struct ProverImpl<'a> {
     pub input: Vec<u8>,
-    pub output: Vec<u8>,
-    pub journal: Vec<u8>,
+    pub journal: Journal,
     pub opts: ProverOpts<'a>,
 }
 
 impl<'a> ProverImpl<'a> {
     fn new(opts: ProverOpts<'a>) -> Self {
+        let journal = Journal::default();
+        let opts = opts.with_write_fd(fileno::JOURNAL, journal.clone());
         Self {
             input: Vec::new(),
-            output: Vec::new(),
-            journal: Vec::new(),
+            journal,
             opts,
         }
     }
@@ -449,44 +470,49 @@ impl<'a> ProverImpl<'a> {
 impl<'a> exec::HostHandler for ProverImpl<'a> {
     fn on_txrx(
         &mut self,
-        channel: u32,
-        from_guest_buf: &[u8],
-        from_host_buf: &mut [u32],
+        mem: &MemoryState,
+        syscall: &str,
+        cycle: usize,
+        to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
-        if let Some(cb) = self.opts.io_handlers.get(&channel) {
-            return Ok(cb.handle_raw_io(from_guest_buf, from_host_buf));
+        log::debug!("syscall {syscall}, {} words to guest", to_guest.len());
+        if let Some(cb) = self.opts.syscall_handlers.get(syscall) {
+            return Ok(cb.syscall(syscall, mem, to_guest));
         }
-        match channel {
-            SENDRECV_CHANNEL_INITIAL_INPUT => {
-                log::debug!("SENDRECV_CHANNEL_INITIAL_INPUT: {}", from_guest_buf.len());
-                let copy_bytes = min(from_host_buf.len() * WORD_SIZE, self.input.len());
-                bytemuck::cast_slice_mut(from_host_buf)[..copy_bytes]
+        // TODO: Use the standard syscall handler framework for this instead of matching
+        // on name.
+        let buf_ptr = mem.load_register(REG_A3);
+        let buf_len = mem.load_register(REG_A4);
+        let from_guest = mem.load_region(buf_ptr, buf_len);
+        match syscall
+            .strip_prefix("risc0_zkvm_platform::syscall::nr::")
+            .unwrap_or(syscall)
+        {
+            "SYS_PANIC" => {
+                let msg = from_utf8(&from_guest)?;
+                bail!("{}", msg)
+            }
+            "SYS_LOG" => {
+                let msg = from_utf8(&from_guest)?;
+                println!("R0VM[{cycle}] {}", msg);
+                Ok((0, 0))
+            }
+            "SYS_CYCLE_COUNT" => Ok((cycle as u32, 0)),
+            "SYS_INITIAL_INPUT" => {
+                log::debug!("SYS_INITIAL_INPUT: {}", from_guest.len());
+                let copy_bytes = min(to_guest.len() * WORD_SIZE, self.input.len());
+                bytemuck::cast_slice_mut(to_guest)[..copy_bytes]
                     .clone_from_slice(&self.input[..copy_bytes]);
                 Ok((self.input.len() as u32, 0))
             }
-            SENDRECV_CHANNEL_STDOUT => {
-                log::debug!("SENDRECV_CHANNEL_STDOUT: {}", from_guest_buf.len());
-                self.output.extend(from_guest_buf);
+            "SYS_RANDOM" => {
+                log::debug!("SYS_RANDOM: {}", to_guest.len());
+                let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
+                getrandom::getrandom(rand_buf.as_mut_slice())?;
+                bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
                 Ok((0, 0))
             }
-            SENDRECV_CHANNEL_STDERR => {
-                log::debug!("SENDRECV_CHANNEL_STDERR: {}", from_guest_buf.len());
-                std::io::stderr().lock().write_all(from_guest_buf).unwrap();
-                Ok((0, 0))
-            }
-            SENDRECV_CHANNEL_JOURNAL => {
-                log::debug!("SENDRECV_CHANNEL_JOURNAL: {}", from_guest_buf.len());
-                self.journal.extend_from_slice(from_guest_buf);
-                Ok((0, 0))
-            }
-            SENDRECV_CHANNEL_RANDOM => {
-                log::debug!("SENDRECV_CHANNEL_RANDOM: {}", from_host_buf.len());
-                let mut rand_buff = vec![0u8; from_host_buf.len() * WORD_SIZE];
-                getrandom::getrandom(rand_buff.as_mut_slice())?;
-                from_host_buf.clone_from_slice(bytemuck::cast_slice(rand_buff.as_slice()));
-                Ok((0, 0))
-            }
-            _ => bail!("Unknown channel: {channel}"),
+            _ => bail!("Unknown syscall: {syscall}"),
         }
     }
 
@@ -500,10 +526,6 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
         } else {
             Ok(())
         }
-    }
-
-    fn on_panic(&mut self, msg: &str) -> Result<()> {
-        bail!("{}", msg)
     }
 }
 

@@ -58,6 +58,10 @@ jobs:
   create-comment:
     runs-on: ubuntu-22.04
     needs: [ bench ]
+    permissions:
+      issues: write
+      pull-requests: write
+
     steps:
       - uses: actions/download-artifact@v3
       - name: Merge output files

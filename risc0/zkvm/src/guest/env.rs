@@ -14,15 +14,18 @@
 
 //! Functions for interacting with the host environment.
 
-use core::{cell::UnsafeCell, default::Default, mem::MaybeUninit, ptr, slice};
+use core::{cell::UnsafeCell, default::Default, mem::MaybeUninit, ptr, ptr::null_mut, slice};
 
 use bytemuck::Pod;
 use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
     abi::zkvm_abi_alloc_words,
-    io::{SENDRECV_CHANNEL_INITIAL_INPUT, SENDRECV_CHANNEL_JOURNAL, SENDRECV_CHANNEL_STDOUT},
-    memory,
-    syscall::{sys_cycle_count, sys_halt, sys_io, sys_log, sys_output},
+    fileno, memory, syscall,
+    syscall::{
+        nr::{SYS_INITIAL_INPUT, SYS_LOG},
+        sys_cycle_count, sys_halt, sys_log, sys_output, sys_write, syscall_0, syscall_2,
+        SyscallName,
+    },
     WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
@@ -98,42 +101,31 @@ pub(crate) fn finalize() {
 }
 
 /// Exchange data with the host.
-pub fn send_recv_raw(channel: u32, to_host: &[u8], from_host: &mut [u32]) -> (u32, u32) {
+pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> syscall::Return {
     unsafe {
-        sys_io(
+        syscall_2(
+            syscall,
             from_host.as_mut_ptr(),
             from_host.len(),
-            to_host.as_ptr(),
-            to_host.len(),
-            channel,
+            to_host.as_ptr() as u32,
+            to_host.len() as u32,
         )
     }
 }
 
 /// Exhanges slices of plain old data with the host.
 ///
-/// This makes two SYS_IO calls; the first gets the length of the
+/// This makes two calls to the given syscall; the first gets the length of the
 /// buffer to allocate for the return data, and the second actually
 /// receives the return data.
 ///
-/// On the host side, prefer to implement prove::io::SliceIoHandler than to
-/// reimplement this protocol with RawIoHandler.
-pub fn send_recv_slice<T: Pod, U: Pod>(channel: u32, to_host: &[T]) -> &'static [U] {
-    let (nelem, _) = send_recv_raw(channel, bytemuck::cast_slice(to_host), &mut []);
+/// On the host side, implement SliceIo to provide a handler for this call.
+pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
+    let syscall::Return(nelem, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
     let nwords = align_up(core::mem::size_of::<T>() * nelem as usize, WORD_SIZE) / WORD_SIZE;
     let from_host_buf = unsafe { slice::from_raw_parts_mut(zkvm_abi_alloc_words(nwords), nwords) };
-    send_recv_raw(channel, &[], from_host_buf);
+    syscall(syscall_name, &[], from_host_buf);
     &bytemuck::cast_slice(from_host_buf)[..nelem as usize]
-}
-
-/// Sends a slice of plain old data to the host.
-pub fn send_slice<T: Pod>(channel: u32, buf: &[T]) {
-    send_recv_slice(channel, buf) as &[u32];
-}
-
-/// Receives a slice of plain old data from the host.
-pub fn recv_slice<T: Pod>(channel: u32) -> &'static [T] {
-    send_recv_slice(channel, &[] as &[u8])
 }
 
 /// Read private data from the host and deserializes it.
@@ -146,7 +138,7 @@ pub fn read_slice<T: Pod>(len: usize) -> &'static [T] {
     ENV.get().read_slice(len)
 }
 
-/// Serialize the given data and write it to the STDOUT channel of the zkVM.
+/// Serialize the given data and write it to the STDOUT of the zkVM.
 ///
 /// This is available to the host as the private output on the prover.
 /// Some implementations, such as [risc0-r0vm] will also write the data to
@@ -156,7 +148,7 @@ pub fn write<T: Serialize>(data: &T) {
     data.serialize(&mut serializer).unwrap();
 }
 
-/// Write the given slice to the STDOUT channel of the zkVM.
+/// Write the given slice to the STDOUT of the zkVM.
 ///
 /// This is available to the host as the private output on the prover.
 /// Some implementations, such as [risc0-r0vm] will also write the data to
@@ -190,22 +182,26 @@ pub fn get_cycle_count() -> usize {
 
 /// Print a message to the debug console.
 pub fn log(msg: &str) {
-    unsafe { sys_log(msg.as_ptr(), msg.len()) };
+    let msg = msg.as_bytes();
+    unsafe {
+        sys_log(msg.as_ptr(), msg.len());
+    }
 }
 
-/// Return a StreamWriter on the specified channel.
-pub fn get_writer<F: Fn(&[u8])>(channel: u32, hook: F) -> impl StreamWriter {
-    OutputStreamWriter::new(channel, hook)
+/// Return a StreamWriter writing data using the specified syscall, which must
+/// accept a buffer and byte count as its arguments.
+pub fn get_writer<F: Fn(&[u8])>(fd: u32, hook: F) -> impl StreamWriter {
+    OutputStreamWriter::new(fd, hook)
 }
 
-/// Return the STDOUT channel.
+/// Return a writer for STDOUT.
 pub fn stdout() -> impl StreamWriter {
-    get_writer(SENDRECV_CHANNEL_STDOUT, |_| {})
+    get_writer(fileno::STDOUT, |_| {})
 }
 
-/// Return the JOURNAL channel.
+/// Return a writer for the JOURNAL.
 pub fn journal() -> impl StreamWriter {
-    get_writer(SENDRECV_CHANNEL_JOURNAL, |bytes| {
+    get_writer(fileno::JOURNAL, |bytes| {
         unsafe { HASHER.as_mut().unwrap_unchecked().update(bytes) };
     })
 }
@@ -224,7 +220,7 @@ impl Env {
 
     fn initial_input(&mut self) -> &mut Reader {
         if !self.initial_input_reader.is_some() {
-            let bytes = send_recv_slice::<u8, u8>(SENDRECV_CHANNEL_INITIAL_INPUT, &[]);
+            let bytes = send_recv_slice::<u8, u8>(SYS_INITIAL_INPUT, &[]);
             let words = bytemuck::cast_slice(bytes);
             self.initial_input_reader = Some(Reader(Deserializer::new(words)))
         }
@@ -240,14 +236,17 @@ impl Env {
     }
 }
 
+/// Provides a StreamWriter which can write to one of the standard
+/// output syscalls (STDOUT, STDERR, JOURNAL, LOG) or any other
+/// syscall which accepts slices of bytes.
 struct OutputStreamWriter<F: Fn(&[u8])> {
-    channel: u32,
+    fd: u32,
     hook: F,
 }
 
 impl<F: Fn(&[u8])> OutputStreamWriter<F> {
-    pub fn new(channel: u32, hook: F) -> Self {
-        Self { channel, hook }
+    pub fn new(fd: u32, hook: F) -> Self {
+        Self { fd, hook }
     }
 }
 
@@ -256,30 +255,14 @@ impl<F: Fn(&[u8])> StreamWriter for OutputStreamWriter<F> {
 
     fn write_u32(&mut self, data: u32) -> SerdeResult<()> {
         let bytes = data.to_ne_bytes();
-        unsafe {
-            sys_io(
-                ptr::null_mut(),
-                0,
-                bytes.as_ptr(),
-                bytes.len(),
-                self.channel,
-            )
-        };
+        unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
         (self.hook)(&bytes);
         Ok(())
     }
 
     fn write_slice<T: Pod>(&mut self, slice: &[T]) -> SerdeResult<()> {
         let bytes: &[u8] = bytemuck::cast_slice(slice);
-        unsafe {
-            sys_io(
-                ptr::null_mut(),
-                0,
-                bytes.as_ptr(),
-                bytes.len(),
-                self.channel,
-            )
-        };
+        unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
         (self.hook)(bytes);
         Ok(())
     }

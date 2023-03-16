@@ -14,7 +14,7 @@
 
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
 use num_traits::FromPrimitive;
@@ -33,8 +33,7 @@ use risc0_zkvm_platform::{
     memory::SYSTEM,
     syscall::{
         ecall,
-        nr::{SYS_CYCLE_COUNT, SYS_IO, SYS_LOG, SYS_PANIC},
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_A5, REG_T0},
+        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
         DIGEST_WORDS,
     },
     PAGE_SIZE, WORD_SIZE,
@@ -65,17 +64,17 @@ impl MemoryOp {
 
 pub trait HostHandler {
     fn is_trace_enabled(&self) -> bool;
-    fn on_panic(&mut self, msg: &str) -> Result<()>;
     fn on_txrx(
         &mut self,
-        channel: u32,
-        from_guest_buf: &[u8],
+        mem: &MemoryState,
+        syscall_name: &str,
+        cycle: usize,
         to_guest_buf: &mut [u32],
     ) -> Result<(u32, u32)>;
     fn on_trace(&mut self, event: TraceEvent) -> Result<()>;
 }
 
-struct MemoryState {
+pub struct MemoryState {
     pub ram: MemoryImage,
     pub pages: BTreeSet<u32>,
     resident: BTreeSet<u32>,
@@ -117,17 +116,31 @@ impl MemoryState {
         u32::from_le_bytes(bytes)
     }
 
-    fn load_register(&self, num: usize) -> u32 {
+    pub fn load_register(&self, num: usize) -> u32 {
         self.load_u32((SYSTEM.start() + num * WORD_SIZE) as u32)
     }
 
     #[track_caller]
-    fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
+    pub fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
         let mut region = Vec::new();
         for addr in addr..addr + size {
             region.push(self.load_u8(addr));
         }
         region
+    }
+
+    // Loads a null-termintaed string from memory
+    pub fn load_string(&self, mut addr: u32) -> Result<String> {
+        let mut s: Vec<u8> = Vec::new();
+        loop {
+            let b = self.load_u8(addr);
+            if b == 0 {
+                break;
+            }
+            s.push(b);
+            addr += 1;
+        }
+        String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 
     #[track_caller]
@@ -450,13 +463,6 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 for addr in (out_addr..(out_addr + out_bytes)).step_by(WORD_SIZE) {
                     faults.include(addr);
                 }
-
-                let in_addr = self.memory.load_register(REG_A3);
-                let in_bytes = self.memory.load_register(REG_A4);
-
-                for addr in (in_addr..(in_addr + in_bytes)).step_by(WORD_SIZE) {
-                    faults.include(addr)
-                }
             }
         }
 
@@ -717,54 +723,22 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     }
 
     fn syscall_init(&mut self, cycle: usize) -> Result<()> {
-        let nr = self.memory.load_register(REG_A2);
         assert!(self.syscall_out_data.is_empty());
-        match nr {
-            SYS_PANIC => {
-                let msg_ptr = self.memory.load_register(REG_A3);
-                let msg_len = self.memory.load_register(REG_A4);
-                let buf = self.memory.load_region(msg_ptr, msg_len);
-                let str = String::from_utf8(buf).unwrap();
-                debug!("SYS_PANIC[{cycle}]> {str}");
-                self.handler.on_panic(&str)?;
-                self.syscall_out_regs = (0, 0);
-                Ok(())
-            }
-            SYS_LOG => {
-                let msg_ptr = self.memory.load_register(REG_A3);
-                let msg_len = self.memory.load_register(REG_A4);
-                let buf = self.memory.load_region(msg_ptr, msg_len);
-                let str = String::from_utf8(buf).unwrap();
-                println!("R0VM[{cycle}] {}", str);
-                self.syscall_out_regs = (0, 0);
-                Ok(())
-            }
-            SYS_IO => {
-                let to_guest_words = self.memory.load_register(REG_A1);
+        let to_guest_words = self.memory.load_register(REG_A1);
 
-                let buf_ptr = self.memory.load_register(REG_A3);
-                let buf_len = self.memory.load_register(REG_A4);
-                let channel = self.memory.load_register(REG_A5);
+        let name_ptr = self.memory.load_register(REG_A2);
 
-                let from_guest_buf = self.memory.load_region(buf_ptr, buf_len);
-                debug!("SYS_IO[{cycle}] Guest sends {buf_len} bytes, requests {to_guest_words} words back");
-                trace!("SYS_IO[{cycle}] Guest sends data: {:?}", from_guest_buf);
-                let mut to_guest_buf = vec![0u32; to_guest_words as usize];
-                self.syscall_out_regs =
-                    self.handler
-                        .on_txrx(channel, &from_guest_buf, &mut to_guest_buf)?;
-                trace!("SYS_IO[{cycle}] (a0, a1): {:?}", self.syscall_out_regs);
-                trace!("SYS_IO[{cycle}] data sent to guest: {to_guest_buf:?}");
-                self.syscall_out_data = to_guest_buf.into();
-                Ok(())
-            }
-            SYS_CYCLE_COUNT => {
-                debug!("SYS_CYCLE_COUNT[{cycle}]> cycle = {cycle}");
-                self.syscall_out_regs = (cycle as u32, 0);
-                Ok(())
-            }
-            _ => bail!("Unsupported syscall: {nr}"),
-        }
+        let name = self.memory.load_string(name_ptr)?;
+        debug!("SYS_IO[{cycle}] Guest requests {to_guest_words} words back");
+        let mut to_guest_buf = vec![0u32; to_guest_words as usize];
+
+        self.syscall_out_regs =
+            self.handler
+                .on_txrx(&self.memory, &name, cycle, &mut to_guest_buf)?;
+        trace!("SYS_IO[{cycle}] (a0, a1): {:?}", self.syscall_out_regs);
+        trace!("SYS_IO[{cycle}] data sent to guest: {to_guest_buf:?}");
+        self.syscall_out_data = to_guest_buf.into();
+        Ok(())
     }
 
     fn syscall_body(&mut self) -> Result<u32> {
