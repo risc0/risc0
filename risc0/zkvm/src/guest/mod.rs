@@ -58,9 +58,33 @@ pub mod sha;
 
 use core::{arch::asm, mem, ptr};
 
-use risc0_zkvm_platform::{syscall::nr::SYS_PANIC, syscall::sys_panic};
+use getrandom::register_custom_getrandom;
+use getrandom::Error;
+use risc0_zkvm_platform::WORD_SIZE;
+use risc0_zkvm_platform::{
+    syscall::nr::SYS_PANIC,
+    syscall::{sys_panic, sys_rand},
+};
 
 pub use crate::entry;
+
+/// This is a getrandom handler for the zkvm. It's intended to hook into a
+/// getrandom crate or a depdent of the getrandom crate used by the guest code.
+pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
+    if dest.is_empty() {
+        return Ok(());
+    }
+
+    let words = (dest.len() + WORD_SIZE - 1) / WORD_SIZE;
+    let mut buf = ::alloc::vec![0u32; words];
+    unsafe {
+        sys_rand(buf.as_mut_ptr(), words);
+    }
+    dest.clone_from_slice(&bytemuck::cast_slice(buf.as_slice())[..dest.len()]);
+    Ok(())
+}
+
+register_custom_getrandom!(zkvm_getrandom);
 
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(include_str!("memset.s"));
