@@ -33,6 +33,7 @@ mod exec;
 pub mod io;
 pub(crate) mod loader;
 mod plonk;
+mod preflight;
 #[cfg(feature = "profiler")]
 pub mod profiler;
 
@@ -48,7 +49,7 @@ use std::{
 };
 
 use anyhow::{bail, Result};
-use io::{PosixIo, SliceIo, Syscall};
+use io::{PosixIo, SliceIo, Syscall, SyscallContext};
 use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
@@ -61,18 +62,18 @@ use risc0_zkvm_platform::{
     fileno,
     memory::MEM_SIZE,
     syscall::{
-        nr::{SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
+        nr::{SYS_CYCLE_COUNT, SYS_LOG, SYS_PANIC, SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
         reg_abi::{REG_A3, REG_A4},
         SyscallName,
     },
     WORD_SIZE,
 };
 
-use crate::binfmt::elf::Program;
 use crate::{
-    prove::exec::MemoryState,
+    binfmt::elf::Program,
+    prove::preflight::Preflight,
     receipt::{insecure_skip_seal, Receipt},
-    CIRCUIT,
+    MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
 /// Options available to modify the prover's behavior.
@@ -85,6 +86,8 @@ pub struct ProverOpts<'a> {
 
     pub(crate) io: Option<PosixIo<'a>>,
     pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
+
+    pub(crate) preflight: bool,
 }
 
 impl<'a> ProverOpts<'a> {
@@ -104,6 +107,14 @@ impl<'a> ProverOpts<'a> {
             skip_verify,
             ..self
         }
+    }
+
+    /// EXPERIMENTAL: If this and skip_seal are both true, run using
+    /// preflight instead of with the circuit.  This feature is not
+    /// yet complete.  Alternatively, enable preflight by setting the
+    /// RISC0_EXPERIMENTAL_PREFLIGHT environment variable.
+    pub fn with_preflight(self, preflight: bool) -> Self {
+        Self { preflight, ..self }
     }
 
     /// Add a handler for a syscall which inputs and outputs a slice
@@ -157,6 +168,37 @@ impl<'a> ProverOpts<'a> {
     }
 }
 
+struct DefaultSyscall;
+
+impl Syscall for DefaultSyscall {
+    fn syscall(
+        &self,
+        syscall: &str,
+        ctx: &dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        if syscall == SYS_PANIC.as_str() || syscall == SYS_LOG.as_str() {
+            let buf_ptr = ctx.load_register(REG_A3);
+            let buf_len = ctx.load_register(REG_A4);
+            let from_guest = ctx.load_region(buf_ptr, buf_len);
+            let msg = from_utf8(&from_guest)?;
+
+            if syscall == SYS_PANIC.as_str() {
+                bail!("Guest panicked: {msg}");
+            } else if syscall == SYS_LOG.as_str() {
+                println!("R0VM[{}] {}", ctx.get_cycle(), msg);
+            } else {
+                unreachable!()
+            }
+            Ok((0, 0))
+        } else if syscall == SYS_CYCLE_COUNT.as_str() {
+            Ok((ctx.get_cycle() as u32, 0))
+        } else {
+            bail!("Unknown syscall: {syscall}")
+        }
+    }
+}
+
 impl<'a> Default for ProverOpts<'a> {
     fn default() -> ProverOpts<'a> {
         ProverOpts {
@@ -165,9 +207,13 @@ impl<'a> Default for ProverOpts<'a> {
             skip_verify: false,
             syscall_handlers: HashMap::new(),
             trace_callback: None,
+            preflight: std::env::var("RISC0_EXPERIMENTAL_PREFLIGHT").is_ok(),
         }
         .with_write_fd(fileno::STDOUT, stdout())
         .with_write_fd(fileno::STDERR, stderr())
+        .with_syscall(SYS_PANIC, DefaultSyscall)
+        .with_syscall(SYS_LOG, DefaultSyscall)
+        .with_syscall(SYS_CYCLE_COUNT, DefaultSyscall)
     }
 }
 
@@ -386,6 +432,27 @@ impl<'a> Prover<'a> {
         }
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
 
+        if self.inner.opts.preflight {
+            if skip_seal {
+                let image = MemoryImage::new(&self.elf, PAGE_SIZE as u32);
+                let mut preflight = Preflight::new(
+                    self.elf.entry,
+                    image,
+                    take(&mut self.inner.opts),
+                    self.inner.input.clone(),
+                );
+                while !preflight.is_halted() {
+                    preflight.step().unwrap()
+                }
+                return Ok(Receipt {
+                    journal: self.inner.journal.buf.take(),
+                    seal: Vec::new(),
+                });
+            } else {
+                eprintln!("WARNING: Experimental preflight not yet compatible with generating a seal; not running preflight.");
+            }
+        }
+
         let mut executor = exec::RV32Executor::new(&CIRCUIT, &self.elf, &mut self.inner);
         self.cycles = executor.run()?;
 
@@ -436,7 +503,7 @@ impl<'a> Prover<'a> {
 
 // Capture the journal output in a buffer that we can access afterwards.
 #[derive(Clone, Default)]
-struct Journal {
+pub(crate) struct Journal {
     buf: Rc<RefCell<Vec<u8>>>,
 }
 
@@ -470,34 +537,23 @@ impl<'a> ProverImpl<'a> {
 impl<'a> exec::HostHandler for ProverImpl<'a> {
     fn on_txrx(
         &mut self,
-        mem: &MemoryState,
+        ctx: &dyn SyscallContext,
         syscall: &str,
-        cycle: usize,
         to_guest: &mut [u32],
     ) -> Result<(u32, u32)> {
         log::debug!("syscall {syscall}, {} words to guest", to_guest.len());
         if let Some(cb) = self.opts.syscall_handlers.get(syscall) {
-            return Ok(cb.syscall(syscall, mem, to_guest));
+            return cb.syscall(syscall, ctx, to_guest);
         }
         // TODO: Use the standard syscall handler framework for this instead of matching
         // on name.
-        let buf_ptr = mem.load_register(REG_A3);
-        let buf_len = mem.load_register(REG_A4);
-        let from_guest = mem.load_region(buf_ptr, buf_len);
+        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_len = ctx.load_register(REG_A4);
+        let from_guest = ctx.load_region(buf_ptr, buf_len);
         match syscall
             .strip_prefix("risc0_zkvm_platform::syscall::nr::")
             .unwrap_or(syscall)
         {
-            "SYS_PANIC" => {
-                let msg = from_utf8(&from_guest)?;
-                bail!("{}", msg)
-            }
-            "SYS_LOG" => {
-                let msg = from_utf8(&from_guest)?;
-                println!("R0VM[{cycle}] {}", msg);
-                Ok((0, 0))
-            }
-            "SYS_CYCLE_COUNT" => Ok((cycle as u32, 0)),
             "SYS_INITIAL_INPUT" => {
                 log::debug!("SYS_INITIAL_INPUT: {}", from_guest.len());
                 let copy_bytes = min(to_guest.len() * WORD_SIZE, self.input.len());
