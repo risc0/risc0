@@ -60,6 +60,7 @@ prove = [
   "dep:rand",
   "dep:rayon",
   "risc0-zkp/prove",
+  "risc0-circuit-rv32im-sys",
   "risc0-sys",
   "std"
 ]
