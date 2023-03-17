@@ -119,6 +119,7 @@ pub mod nr {
     declare_syscall!(pub SYS_READ_AVAIL);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_WRITE);
+    declare_syscall!(pub SYS_GETENV);
 }
 
 impl SyscallName {
@@ -155,6 +156,7 @@ macro_rules! impl_syscall {
        )?
      )?) => {
         /// Invoke a raw system call
+        #[no_mangle]
         pub unsafe extern "C" fn $func_name(syscall: SyscallName,
                                  from_host: *mut u32,
                                  from_host_words: usize
@@ -204,7 +206,8 @@ impl_syscall!(syscall_4, a3, a4, a5, a6);
 impl_syscall!(syscall_5, a3, a4, a5, a6, a7);
 
 #[inline(always)]
-pub unsafe fn sys_halt() {
+#[no_mangle]
+pub unsafe extern "C" fn sys_halt() {
     #[cfg(target_os = "zkvm")]
     {
         asm!(
@@ -218,7 +221,8 @@ pub unsafe fn sys_halt() {
 }
 
 #[inline(always)]
-pub unsafe fn sys_output(output_id: u32, output_value: u32) {
+#[no_mangle]
+pub unsafe extern "C" fn sys_output(output_id: u32, output_value: u32) {
     assert!(
         output_id < 9,
         "Invalid output ID. Expected: 0 - 8. Actual {output_id}"
@@ -237,7 +241,8 @@ pub unsafe fn sys_output(output_id: u32, output_value: u32) {
 }
 
 #[inline(always)]
-pub unsafe fn sys_sha_compress(
+#[no_mangle]
+pub unsafe extern "C" fn sys_sha_compress(
     out_state: *mut [u32; DIGEST_WORDS],
     in_state: *const [u32; DIGEST_WORDS],
     block1_ptr: *const [u32; DIGEST_WORDS],
@@ -282,19 +287,23 @@ pub unsafe fn sys_sha_buffer(
     unimplemented!()
 }
 
+#[no_mangle]
 pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
     syscall_0(nr::SYS_RANDOM, recv_buf, words);
 }
 
+#[no_mangle]
 pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
     syscall_2(nr::SYS_PANIC, null_mut(), 0, msg_ptr as u32, len as u32);
     unreachable!()
 }
 
+#[no_mangle]
 pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
     syscall_2(nr::SYS_LOG, null_mut(), 0, msg_ptr as u32, len as u32);
 }
 
+#[no_mangle]
 pub unsafe extern "C" fn sys_cycle_count() -> usize {
     let Return(a0, _) = syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0);
     a0 as usize
@@ -308,6 +317,7 @@ pub unsafe extern "C" fn sys_cycle_count() -> usize {
 /// read at least one byte.
 ///
 /// Users should prefer a higher-level abstraction.
+#[no_mangle]
 pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize) -> usize {
     // The SYS_READ system call can do a given number of word-aligned reads
     // efficiently. The semantics of the system call are:
@@ -383,6 +393,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize)
     nread
 }
 
+#[no_mangle]
 pub unsafe extern "C" fn sys_write(fd: u32, write_buf: *const u8, nbytes: usize) {
     syscall_3(
         nr::SYS_WRITE,
@@ -392,4 +403,50 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_buf: *const u8, nbytes: usize)
         write_buf as u32,
         nbytes as u32,
     );
+}
+
+/// Retrieves the value of an environment variable, and stores as much
+/// of it as it can it in the memory at [out_words, out_words +
+/// out_nwords).  Returns the length of the value.
+///
+/// This is normally called twice to read an environment variable:
+/// Once to get the length of the value, and once to fill in allocated
+/// memory.
+#[no_mangle]
+pub unsafe extern "C" fn sys_getenv(
+    out_words: *mut u32,
+    out_nwords: usize,
+    varname: *const u8,
+    varname_len: usize,
+) -> usize {
+    let Return(a0, _) = syscall_2(
+        nr::SYS_GETENV,
+        out_words,
+        out_nwords,
+        varname as u32,
+        varname_len as u32,
+    );
+    if a0 == u32::MAX {
+        usize::MAX
+    } else {
+        a0 as usize
+    }
+}
+
+// Number of words remaining in the heap that haven't yet been allocated.
+static mut HEAP_WORDS_REMAINING: usize = crate::memory::HEAP.len_words();
+
+#[no_mangle]
+pub unsafe extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
+    // SAFETY: Single threaded, so nothing else can touch this while we're working.
+    let heap_words_remaining: &mut usize = unsafe { &mut HEAP_WORDS_REMAINING };
+    let new_words_remaining = heap_words_remaining
+        .checked_sub(nwords)
+        .expect("Out of memory!");
+    // SAFETY: We've already checked to make sure we haven't
+    // overflowed the heap, so the pointer arithmetic here should not
+    // cause any undefined behavior.
+    let ptr = unsafe { (crate::memory::HEAP.end() as *mut u32).sub(*heap_words_remaining) };
+    *heap_words_remaining = new_words_remaining;
+    ptr
 }
