@@ -47,6 +47,11 @@
 //! entrypoint, [env::read] is used to load the two factors, and [env::commit]
 //! is used to make their composite product publically available.
 //!
+//! If you encounter problems building zkVM guest code, you can see if we have a
+//! known workaround for your issue by looking in our
+//! [rust guest workarounds](https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22)
+//! tag on GitHub.
+//!
 //! [^starter-ex]: The example is based on the [RISC Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter).
 
 #![allow(unused)]
