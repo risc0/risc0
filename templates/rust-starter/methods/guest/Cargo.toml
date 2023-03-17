@@ -6,8 +6,8 @@ edition = "2021"
 [workspace]
 
 [build-dependencies]
-risc0-build = "0.12"
+risc0-build = "{{ risc0_version }}"
 
 [dependencies]
 # If you want to try (experimental) std support, add `features = [ "std" ]` to risc0-zkvm
-risc0-zkvm = { version = "0.12", default-features = false }
+risc0-zkvm = { version = "{{ risc0_version }}", default-features = false }

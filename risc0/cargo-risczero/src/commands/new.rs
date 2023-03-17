@@ -86,6 +86,8 @@ impl NewCommand {
             template_path.tag = None;
         }
 
+        let risc0_version = std::env::var("CARGO_PKG_VERSION").expect("Missing env var");
+
         cargo_generate::generate(GenerateArgs {
             template_path,
             list_favorites: false,
@@ -103,7 +105,7 @@ impl NewCommand {
             lib: false,
             bin: false,
             ssh_identity: None,
-            define: vec![],
+            define: vec![format!("risc0_version={risc0_version}")],
             init: false,
             destination: Some(dest_dir),
             force_git_init: false,

@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 methods = { path = "../methods" }
-risc0-zkvm = "0.12"
+risc0-zkvm = "{{ risc0_version }}"
 serde = "1.0"

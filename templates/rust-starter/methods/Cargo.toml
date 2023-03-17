@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-risc0-build = "0.12"
+risc0-build = "{{ risc0_version }}"
 
 [package.metadata.risc0]
 methods = ["guest"]
