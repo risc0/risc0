@@ -5,6 +5,7 @@ members = [
   "risc0/bootstrap/poseidon",
   "risc0/build",
   "risc0/build_kernel",
+  "risc0/cargo-risczero",
   "risc0/circuit/rv32im",
   "risc0/core",
   "risc0/r0vm",
@@ -16,7 +17,6 @@ members = [
   "risc0/zkvm",
   "risc0/zkvm/methods",
   "risc0/zkvm/platform",
-  "risc0/cargo-risczero",
 ]
 
 [workspace.package]
