@@ -7,16 +7,15 @@ homepage = { workspace = true }
 repository = { workspace = true }
 description = "RISC Zero CLI tools"
 
-
 [dependencies]
-tracing = { version = "0.1", default-features = false}
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-clap = { version = "4.0", features = ["derive"] }
 # Note, due to tempfile = 3.3.0 in cargo-generate
 # we have to downgrade all uses of tempfile to 3.3 in our workspace due to:
 # https://github.com/rust-lang/cargo/issues/7880
 cargo-generate = "0.18"
+clap = { version = "4.0", features = ["derive"] }
 convert_case = "0.6"
+tracing = { version = "0.1", default-features = false }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [[bin]]
 path = "src/bin/main.rs"
