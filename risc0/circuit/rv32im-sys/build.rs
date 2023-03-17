@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    env,
-    path::PathBuf,
-};
+use std::{env, path::PathBuf};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -52,14 +49,13 @@ fn build_cpu_kernels() {
 }
 
 fn build_metal_kernels() {
-        KernelBuild::new(KernelType::Metal)
-                    .file("kernels/metal/eval_check.metal")
-                    .compile("metal_kernel");
+    KernelBuild::new(KernelType::Metal)
+        .file("kernels/metal/eval_check.metal")
+        .compile("metal_kernel");
 }
 
 fn build_cuda_kernels() {
-        KernelBuild::new(KernelType::Cuda)
-                    .file("kernels/cuda/eval_check.cu")
-                    .compile("cuda_kernel");
+    KernelBuild::new(KernelType::Cuda)
+        .file("kernels/cuda/eval_check.cu")
+        .compile("cuda_kernel");
 }
-

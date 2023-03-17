@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    env,
-    path::Path,
-};
+use std::{env, path::Path};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
@@ -30,21 +27,19 @@ fn main() {
 }
 
 fn build_cuda_kernels() {
-    const CUDA_KERNELS: &[(&str, &str, &[&str])] = &[
-        (
-            "zkp",
-            "all.cu",
-            &[
-                "eltwise.cu",
-                "fri.cu",
-                "mix.cu",
-                "ntt.cu",
-                "sha.cu",
-                "zk.cu",
-                "sha256.h",
-            ],
-        ),
-    ];
+    const CUDA_KERNELS: &[(&str, &str, &[&str])] = &[(
+        "zkp",
+        "all.cu",
+        &[
+            "eltwise.cu",
+            "fri.cu",
+            "mix.cu",
+            "ntt.cu",
+            "sha.cu",
+            "zk.cu",
+            "sha256.h",
+        ],
+    )];
 
     let inc_path = Path::new("kernels/zkp/cuda");
     for (name, src, deps) in CUDA_KERNELS {
@@ -60,20 +55,18 @@ fn build_cuda_kernels() {
 }
 
 fn build_metal_kernels() {
-    const METAL_KERNELS: &[(&str, &[&str])] = &[
-        (
-            "zkp",
-            &[
-                "eltwise.metal",
-                "fri.metal",
-                "mix.metal",
-                "ntt.metal",
-                "poseidon.metal",
-                "sha.metal",
-                "zk.metal",
-            ],
-        ),
-    ];
+    const METAL_KERNELS: &[(&str, &[&str])] = &[(
+        "zkp",
+        &[
+            "eltwise.metal",
+            "fri.metal",
+            "mix.metal",
+            "ntt.metal",
+            "poseidon.metal",
+            "sha.metal",
+            "zk.metal",
+        ],
+    )];
 
     let inc_path = Path::new("kernels/zkp/metal");
     for (name, srcs) in METAL_KERNELS {
