@@ -16,12 +16,12 @@ use std::env;
 
 fn main() {
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        let cuda_bin = env::var("DEP_RISC0_SYS_CUDA_KERNELS_RV32IM").unwrap();
+        let cuda_bin = env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_CUDA_KERNEL").unwrap();
         println!("cargo:rustc-env=RV32IM_CUDA_PATH={cuda_bin}");
     }
 
     if env::var("CARGO_FEATURE_METAL").is_ok() {
-        let metal_bin = env::var("DEP_RISC0_SYS_METAL_KERNELS_RV32IM").unwrap();
+        let metal_bin = env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_METAL_KERNEL").unwrap();
         println!("cargo:rustc-env=RV32IM_METAL_PATH={metal_bin}");
     }
 }
