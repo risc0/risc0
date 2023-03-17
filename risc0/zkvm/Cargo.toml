@@ -40,6 +40,8 @@ tracing = { version = "0.1", default-features = false, features = ["attributes"]
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 addr2line = { version = "0.19", optional = true }
 elf = { version = "0.7", optional = true }
+generic-array = { version = "0.14", default-features = false, optional = true }
+getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.27", optional = true }
 lazy-regex = { version = "2.3", optional = true }
 log = "0.4"
@@ -48,8 +50,8 @@ num-traits = "0.2"
 prost = { version = "0.11", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
+rrs-lib = { version = "0.1", optional = true }
 sha2 = { version = "0.10", optional = true }
-getrandom = { version = "0.2", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
@@ -75,10 +77,12 @@ insecure_skip_seal = []
 profiler = ["dep:addr2line", "dep:gimli", "dep:prost", "dep:prost-build", "dep:protobuf-src"]
 prove = [
   "binfmt",
+  "dep:generic-array",
   "dep:getrandom",
   "dep:lazy-regex",
   "dep:rand",
   "dep:rayon",
+  "dep:rrs-lib",
   "dep:sha2",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",
