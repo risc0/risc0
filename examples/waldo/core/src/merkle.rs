@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cmp::Ordering, hash::Hasher, marker::PhantomData, ops::Deref};
+use std::{hash::Hasher, marker::PhantomData, ops::Deref};
 
-use bytemuck::{Pod, Zeroable};
 use merkle_light::{
     hash::{Algorithm, Hashable},
     merkle, proof,
@@ -23,14 +22,19 @@ use merkle_light::{
 use risc0_zkvm::guest;
 use risc0_zkvm::{
     declare_syscall,
-    sha::{Digest, Impl, Sha256},
+    sha::{
+        rust_crypto::{Digest as _, Sha256},
+        Digest,
+    },
 };
 use serde::{Deserialize, Serialize};
 
 declare_syscall!(
-    /// RISC0 syscall for providing oracle access to a vector to the
-    /// guest from the host.
+    /// RISC0 syscall for providing oracle access to a vector committed to by the host.
     pub SYS_VECTOR_ORACLE);
+
+/// Node type used in the Merkle tree. Simply an alias for a SHA-256  digest.
+pub type Node = Digest;
 
 /// Merkle tree for use as a vector commitment over elements of the specified
 /// type.
@@ -215,58 +219,17 @@ where
     }
 }
 
-/// Wrapper on the RISC0 Digest type to allow it to act as a merkle_light
-/// Element.
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Pod, Zeroable, Deserialize, Serialize)]
-#[repr(transparent)]
-pub struct Node(Digest);
-
-impl AsRef<[u8]> for Node {
-    fn as_ref(&self) -> &[u8] {
-        self.0.as_bytes()
-    }
-}
-
-impl Ord for Node {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.0.cmp(&other.0)
-    }
-}
-
-impl PartialOrd for Node {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl From<Digest> for Node {
-    fn from(digest: Digest) -> Self {
-        Self(digest)
-    }
-}
-
-impl Into<Digest> for Node {
-    fn into(self) -> Digest {
-        self.0
-    }
-}
-
 /// ShaHasher is a wrapper around the RISC0 SHA2-256 implementations that
 /// implements the Algorithm trait for use with the merkle_light package.
 #[derive(Default)]
-pub struct ShaHasher {
-    data: Vec<u8>,
-}
+pub struct ShaHasher(Sha256);
 
 // NOTE: The Hasher trait is really designed for use with hashmaps and is quite
 // ill-suited as an interface for use by merkle_light. This is one of the design
-// weaknesses of this package.
+// weaknesses of the merkle_light library.
 impl Hasher for ShaHasher {
-    // NOTE: RISC0 Sha trait currently only provides clean ways to hash data in one
-    // shot. To accommodate this, we append the data to an array here and only
-    // compress at the end.
     fn write(&mut self, bytes: &[u8]) {
-        self.data.extend_from_slice(bytes);
+        self.0.update(bytes);
     }
 
     fn finish(&self) -> u64 {
@@ -276,7 +239,7 @@ impl Hasher for ShaHasher {
 
 impl Algorithm<Node> for ShaHasher {
     fn hash(&mut self) -> Node {
-        Node::from(*Impl::hash_bytes(&self.data))
+        Node::try_from(self.0.finalize_reset().as_slice()).unwrap()
     }
 }
 
@@ -309,13 +272,14 @@ where
     // NOTE: VectorOracle does not attempt to verify the length of the committed
     // vector, or that there is a valid, known element at every index. Any out
     // of bounds access or access to an index for which there is no element will
-    // not return since no valid proof can be generated. NOTE: This
-    // implementation deserializes proof and element values, which copies them from
-    // the address returned by send_recv onto the heap. This is fairly
+    // not return since no valid proof can be generated.
+    //
+    // NOTE: This implementation deserializes proof and element values, which copies
+    // them from the address returned by send_recv onto the heap. This is fairly
     // inefficient and could be improved on with an implementation of Merkle
     // proofs that can be verified without deserialization, and by returning
     // references to the underlying element, which points to the
-    // memory initialized by send_recv. Additionally note that this implementation
+    // memory written by the syscall. Additionally note that this implementation
     // uses bincode instead of any serializer that is more native to (and
     // efficient in) the guest.
     pub fn get(&self, index: usize) -> Element {

@@ -51,12 +51,12 @@ addresses, or that a user is in the set of authorized users.
 
 ### zkVM Communication Channels
 
-In the RISC0 zkVM system, the guest and host can communicate over using channels
-at runtime. These channels are currently used to implement the `env::read` and
-`env::commit` functions in the guest, and the developer can create new channels
-for their own needs. In this example, a channel is used to allow the guest to
+In the RISC0 zkVM system, the guest and host can communicate over using syscalls
+at runtime. These syscalls are currently used to implement the `env::read` and
+`env::commit` functions in the guest, and the developer can create new syscalls
+for their own needs. In this example, a syscall is used to allow the guest to
 request chunks of the Where's Waldo image on demand as a part of the
-`MerkleTree` and `VectorOracle` types. Using these channels allows us to write
+`MerkleTree` and `VectorOracle` types. Using these syscalls allows us to write
 more flexible code that is more readable and follows familiar paradigms.
 
 ### Image Manipulation
