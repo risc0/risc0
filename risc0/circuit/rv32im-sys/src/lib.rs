@@ -20,7 +20,7 @@ fn eval_check_size() {
     // size unexpectedly.  This can sometimes happen when the layout
     // of registers in the circuit changes, so we want to guard against that here.
 
-    let generated = include_str!("../cxx/rv32im/poly_fp.cpp");
+    let generated = include_str!("../cxx/poly_fp.cpp");
     let lines = generated.lines().count();
 
     const LINE_LIMIT: usize = 28100;
