@@ -19,6 +19,7 @@ risc0-zkvm = { path = "../..", default-features = false }
 risc0-zkvm-methods = { path = "..", default-features = false }
 risc0-zkvm-platform = { path = "../../platform" }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
+getrandom = "0.2"
 
 [profile.release]
 lto = true
