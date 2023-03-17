@@ -581,6 +581,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "69dde51e8fef5e12c1d65e0929b03d66e4c0c18282bc30ed2ca050ad6f44dd82"
 
 [[package]]
+name = "downcast-rs"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
+
+[[package]]
 name = "downloader"
 version = "0.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2007,6 +2013,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "elf",
+ "generic-array",
  "getrandom",
  "hex",
  "lazy-regex",
@@ -2020,6 +2027,7 @@ dependencies = [
  "risc0-zeroio",
  "risc0-zkp",
  "risc0-zkvm-platform",
+ "rrs-lib",
  "serde",
  "sha2",
  "tracing",
@@ -2028,6 +2036,16 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "0.13.0"
+
+[[package]]
+name = "rrs-lib"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b4382d3af3a4ebdae7f64ba6edd9114fff92c89808004c4943b393377a25d001"
+dependencies = [
+ "downcast-rs",
+ "paste",
+]
 
 [[package]]
 name = "rustacuda_core"
