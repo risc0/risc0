@@ -16,7 +16,7 @@ use std::{ffi::CStr, os::raw::c_void};
 
 use anyhow::{anyhow, Result};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_sys::ffi::{
+use risc0_circuit_rv32im_sys::ffi::{
     get_trampoline, risc0_circuit_rv32im_poly_fp, risc0_circuit_rv32im_step_compute_accum,
     risc0_circuit_rv32im_step_exec, risc0_circuit_rv32im_step_verify_accum,
     risc0_circuit_rv32im_step_verify_bytes, risc0_circuit_rv32im_step_verify_mem,

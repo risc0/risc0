@@ -12,19 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::env;
+pub mod ffi;
 
-fn main() {
-for (key, value) in env::vars() {
-    eprintln!("{key}: {value}");
-}
-    if env::var("CARGO_FEATURE_CUDA").is_ok() {
-        let cuda_bin = env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_CUDA_KERNEL").unwrap();
-        println!("cargo:rustc-env=RV32IM_CUDA_PATH={cuda_bin}");
-    }
+#[test]
+fn eval_check_size() {
+    // Make sure the generated eval check/poly fp doesn't increase in
+    // size unexpectedly.  This can sometimes happen when the layout
+    // of registers in the circuit changes, so we want to guard against that here.
 
-    if env::var("CARGO_FEATURE_METAL").is_ok() {
-        let metal_bin = env::var("DEP_RISC0_CIRCUIT_RV32IM_SYS_METAL_KERNEL").unwrap();
-        println!("cargo:rustc-env=RV32IM_METAL_PATH={metal_bin}");
-    }
+    let generated = include_str!("../cxx/rv32im/poly_fp.cpp");
+    let lines = generated.lines().count();
+
+    const LINE_LIMIT: usize = 28100;
+
+    assert!(
+        lines < LINE_LIMIT,
+        "poly_fp.cpp is expected to be under {LINE_LIMIT} lines but has {lines} lines"
+    );
 }
