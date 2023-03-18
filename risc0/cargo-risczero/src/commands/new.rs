@@ -52,6 +52,12 @@ pub struct NewCommand {
     /// Disable init'ing a git repo in the dest project
     #[clap(value_parser, long, global = true)]
     pub no_git: bool,
+
+    /// Toggles templates to use crates from github
+    ///
+    /// Sets the value of the arg to be the cargo `branch` variable
+    #[clap(value_parser, long)]
+    pub use_git_branch: Option<String>,
 }
 
 impl NewCommand {
@@ -88,6 +94,11 @@ impl NewCommand {
 
         let risc0_version = std::env::var("CARGO_PKG_VERSION").expect("Missing env var");
 
+        let mut template_variables = vec![format!("risc0_version={risc0_version}")];
+        if let Some(branch) = self.use_git_branch.as_ref() {
+            template_variables.push(format!("risc0_crate_branch={branch}"))
+        }
+
         cargo_generate::generate(GenerateArgs {
             template_path,
             list_favorites: false,
@@ -105,7 +116,7 @@ impl NewCommand {
             lib: false,
             bin: false,
             ssh_identity: None,
-            define: vec![format!("risc0_version={risc0_version}")],
+            define: template_variables,
             init: false,
             destination: Some(dest_dir),
             force_git_init: false,
