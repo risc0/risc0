@@ -54,7 +54,7 @@ use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_G
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
-    core::sha::Digest,
+    core::{config::HashSuite, sha::Digest},
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };
@@ -75,6 +75,7 @@ use crate::{
     binfmt::elf::Program,
     prove::preflight::Preflight,
     receipt::{insecure_skip_seal, Receipt},
+    ControlIdLocator,
     MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
@@ -307,21 +308,20 @@ pub struct Prover<'a> {
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "cuda")] {
-        use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck, cuda::CudaEvalCheck};
-        use risc0_zkp::hal::cuda::CudaHal;
-        use risc0_zkp::hal::cpu::BabyBearPoseidonCpuHal;
+        use risc0_circuit_rv32im::cuda::{CudaEvalCheckSha256, CudaEvalCheckPoseidon};
+        use risc0_zkp::hal::cuda::{CudaHalSha256, CudaHalPoseidon};
 
         /// Returns the default SHA-256 HAL for the RISC Zero circuit
-        pub fn default_hal() -> (Rc<CudaHal>, CudaEvalCheck) {
-            let hal = Rc::new(CudaHal::new());
-            let eval = CudaEvalCheck::new(hal.clone());
+        pub fn default_hal() -> (Rc<CudaHalSha256>, CudaEvalCheckSha256) {
+            let hal = Rc::new(CudaHalSha256::new());
+            let eval = CudaEvalCheckSha256::new(hal.clone());
             (hal, eval)
         }
 
-        /// Falls back to the CPU for Poseidon for now
-        pub fn default_poseidon_hal() -> (Rc<BabyBearPoseidonCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
-            let hal = Rc::new(BabyBearPoseidonCpuHal::new());
-            let eval = CpuEvalCheck::new(&CIRCUIT);
+        /// Returns the default Poseidon HAL for the RISC Zero circuit
+        pub fn default_poseidon_hal() -> (Rc<CudaHalPoseidon>, CudaEvalCheckPoseidon) {
+            let hal = Rc::new(CudaHalPoseidon::new());
+            let eval = CudaEvalCheckPoseidon::new(hal.clone());
             (hal, eval)
         }
     } else if #[cfg(feature = "metal")] {
@@ -464,6 +464,7 @@ impl<'a> Prover<'a> {
     pub fn run_with_hal<H, E>(&mut self, hal: &H, eval: &E) -> Result<Receipt>
     where
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
         E: EvalCheck<H>,
     {
         self.inner.opts = take(&mut self.inner.opts).finalize();
@@ -531,7 +532,7 @@ impl<'a> Prover<'a> {
 
         if !skip_seal && !self.inner.opts.skip_verify {
             // Verify receipt to make sure it works
-            receipt.verify(&self.image_id)?;
+            receipt.verify_with_hash::<H::HashSuite, _>(&self.image_id)?;
         }
 
         Ok(receipt)
