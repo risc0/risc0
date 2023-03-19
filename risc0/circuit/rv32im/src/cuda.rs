@@ -128,7 +128,7 @@ mod tests {
         const PO2: usize = 4;
         let circuit = crate::CircuitImpl::new();
         let cpu_hal = BabyBearSha256CpuHal::new();
-        let cpu_eval = CpuEvalCheckSha256::new(&circuit);
+        let cpu_eval = CpuEvalCheck::new(&circuit);
         let gpu_hal = Rc::new(CudaHalSha256::new());
         let gpu_eval = super::CudaEvalCheck::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
