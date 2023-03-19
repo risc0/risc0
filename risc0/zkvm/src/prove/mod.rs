@@ -75,8 +75,7 @@ use crate::{
     binfmt::elf::Program,
     prove::preflight::Preflight,
     receipt::{insecure_skip_seal, Receipt},
-    ControlIdLocator,
-    MemoryImage, CIRCUIT, PAGE_SIZE,
+    ControlIdLocator, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
 /// Options available to modify the prover's behavior.

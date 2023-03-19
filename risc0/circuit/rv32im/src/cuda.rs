@@ -22,7 +22,7 @@ use risc0_core::field::{
 use risc0_zkp::{
     core::log2_ceil,
     hal::{
-        cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashSha256, CudaHashPoseidon},
+        cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon, CudaHashSha256},
         Buffer, EvalCheck,
     },
     INV_RATE,

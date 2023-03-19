@@ -42,14 +42,19 @@ use crate::{
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("ZKP_CUDA_PATH"));
 
 pub trait CudaHash {
-  /// Which hash suite should the CPU use
-  type HashSuite: HashSuite<BabyBear>;
-  /// Create a hash implemention
-  fn new(hal: &CudaHal<Self>) -> Self;
-  /// Run the hash_fold function
-  fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize);
-  /// Run the hash_rows function
-  fn hash_rows(&self, hal: &CudaHal<Self>, output: &BufferImpl<Digest>, matrix: &BufferImpl<BabyBearElem>);
+    /// Which hash suite should the CPU use
+    type HashSuite: HashSuite<BabyBear>;
+    /// Create a hash implemention
+    fn new(hal: &CudaHal<Self>) -> Self;
+    /// Run the hash_fold function
+    fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize);
+    /// Run the hash_rows function
+    fn hash_rows(
+        &self,
+        hal: &CudaHal<Self>,
+        output: &BufferImpl<Digest>,
+        matrix: &BufferImpl<BabyBearElem>,
+    );
 }
 
 pub struct CudaHashSha256 {}
@@ -746,7 +751,7 @@ mod tests {
     use serial_test::serial;
     use test_log::test;
 
-    use super::{CudaHalSha256, CudaHalPoseidon};
+    use super::{CudaHalPoseidon, CudaHalSha256};
     use crate::hal::testutil;
 
     #[test]

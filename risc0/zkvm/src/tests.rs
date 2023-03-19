@@ -295,8 +295,9 @@ fn sha_cycle_count() {
 
 #[test]
 fn test_poseidon_proof() {
-    use crate::prove::default_poseidon_hal;
     use risc0_zkp::core::config::HashSuitePoseidon;
+
+    use crate::prove::default_poseidon_hal;
     let (hal, eval) = default_poseidon_hal();
     let opts = ProverOpts::default().with_skip_verify(true);
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();

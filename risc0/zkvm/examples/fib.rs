@@ -14,8 +14,11 @@
 
 use clap::Parser;
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_zkp::{core::config::HashSuite, hal::{EvalCheck, Hal}};
-use risc0_zkvm::{ControlIdLocator, prove::default_hal, Prover, Receipt};
+use risc0_zkp::{
+    core::config::HashSuite,
+    hal::{EvalCheck, Hal},
+};
+use risc0_zkvm::{prove::default_hal, ControlIdLocator, Prover, Receipt};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 use tracing_subscriber::{prelude::*, EnvFilter};
 
