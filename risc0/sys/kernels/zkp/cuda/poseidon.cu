@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "fp.h"
-#include "sha256.h"
 
 #define CELLS 24
 #define ROUNDS_FULL 8
