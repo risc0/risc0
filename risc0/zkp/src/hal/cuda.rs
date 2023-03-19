@@ -114,35 +114,17 @@ impl CudaHash for CudaHashSha256 {
 }
 
 pub struct CudaHashPoseidon {
-    /*
     round_constants: BufferImpl<BabyBearElem>,
     mds: BufferImpl<BabyBearElem>,
     partial_comp_matrix: BufferImpl<BabyBearElem>,
     partial_comp_offset: BufferImpl<BabyBearElem>,
-    */
 }
 
 impl CudaHash for CudaHashPoseidon {
     type HashSuite = HashSuitePoseidon;
 
-    fn new(_hal: &CudaHal<Self>) -> Self {
-        //use crate::core::poseidon;
-        CudaHashPoseidon {
-            /*
-            round_constants,
-            mds,
-            partial_comp_matrix,
-            partial_comp_offset,
-            */
-        }
-    }
-
-    fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
+    fn new(hal: &CudaHal<Self>) -> Self {
         use crate::core::poseidon;
-        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("poseidon_fold").unwrap();
-        let kernel = hal.module.get_function(&kernel_name).unwrap();
-        let params = hal.compute_simple_params(output_size);
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
@@ -154,6 +136,19 @@ impl CudaHash for CudaHashPoseidon {
             "partial_comp_offset",
             &*poseidon::consts::PARTIAL_COMP_OFFSET,
         );
+        CudaHashPoseidon {
+            round_constants,
+            mds,
+            partial_comp_matrix,
+            partial_comp_offset,
+        }
+    }
+
+    fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let kernel_name = CString::new("poseidon_fold").unwrap();
+        let kernel = hal.module.get_function(&kernel_name).unwrap();
+        let params = hal.compute_simple_params(output_size);
         unsafe {
             // DevicePointers require that the underlying type of the pointer implements the
             // DeviceCopy trait. core::Digest does not implement this trait.
@@ -165,10 +160,10 @@ impl CudaHash for CudaHashPoseidon {
             let input = io.as_device_ptr_with_offset(2 * output_size);
             let output = io.as_device_ptr_with_offset(output_size);
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                round_constants.as_device_ptr(),
-                mds.as_device_ptr(),
-                partial_comp_matrix.as_device_ptr(),
-                partial_comp_offset.as_device_ptr(),
+                self.round_constants.as_device_ptr(),
+                self.mds.as_device_ptr(),
+                self.partial_comp_matrix.as_device_ptr(),
+                self.partial_comp_offset.as_device_ptr(),
                 output,
                 input,
                 output_size
@@ -184,7 +179,6 @@ impl CudaHash for CudaHashPoseidon {
         output: &BufferImpl<Digest>,
         matrix: &BufferImpl<BabyBearElem>,
     ) {
-        use crate::core::poseidon;
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
@@ -193,23 +187,12 @@ impl CudaHash for CudaHashPoseidon {
         let kernel_name = CString::new("poseidon_rows").unwrap();
         let kernel = hal.module.get_function(&kernel_name).unwrap();
         let params = hal.compute_simple_params(row_size);
-        let round_constants =
-            hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
-        let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
-        let partial_comp_matrix = hal.copy_from_elem(
-            "partial_comp_matrix",
-            &*poseidon::consts::PARTIAL_COMP_MATRIX,
-        );
-        let partial_comp_offset = hal.copy_from_elem(
-            "partial_comp_offset",
-            &*poseidon::consts::PARTIAL_COMP_OFFSET,
-        );
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
-                round_constants.as_device_ptr(),
-                mds.as_device_ptr(),
-                partial_comp_matrix.as_device_ptr(),
-                partial_comp_offset.as_device_ptr(),
+                self.round_constants.as_device_ptr(),
+                self.mds.as_device_ptr(),
+                self.partial_comp_matrix.as_device_ptr(),
+                self.partial_comp_offset.as_device_ptr(),
                 output.as_device_ptr(),
                 matrix.as_device_ptr(),
                 row_size,
@@ -224,8 +207,9 @@ impl CudaHash for CudaHashPoseidon {
 pub struct CudaHal<Hash: CudaHash + ?Sized> {
     pub max_threads: u32,
     pub module: Module,
-    _context: Context,
     hash: Option<Box<Hash>>,
+    // _context must come last so that it is destroyed last
+    _context: Context,
 }
 
 pub type CudaHalSha256 = CudaHal<CudaHashSha256>;
@@ -810,10 +794,8 @@ mod tests {
     #[test]
     #[serial]
     fn hash_fold_poseidon() {
-        println!("hey");
         let hal = CudaHalPoseidon::new();
         testutil::hash_fold(hal);
-        println!("ho");
     }
 
     #[test]
