@@ -46,7 +46,7 @@ jobs:
           script: |
             var fs = require('fs');
             var body = fs.readFileSync("./merged.md", 'utf8');
-            var issue_number = Number(fs.readFileSync("./pr-output/NR"));
+            var issue_number = Number(fs.readFileSync("./NR"));
             github.issues.createComment({
               issue_number: issue_number,
               owner: context.repo.owner,
