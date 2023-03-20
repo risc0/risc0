@@ -12,6 +12,44 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use clap::{Parser, Subcommand};
+
+use crate::commands::new::NewCommand;
+
 pub mod commands {
     pub mod new;
+}
+
+#[derive(Parser)]
+#[command(name = "cargo", bin_name = "cargo")]
+/// Main cargo command
+pub enum Cargo {
+    Risczero(Risczero),
+}
+
+#[derive(clap::Args)]
+#[command(author, version, about, long_about = None)]
+/// `cargo risczero`
+pub struct Risczero {
+    #[clap(subcommand)]
+    pub command: RisczeroCmd,
+}
+
+#[derive(Subcommand)]
+/// Primary commands  of `cargo risczero`.
+pub enum RisczeroCmd {
+    /// Creates a new risczero starter project.
+    New(NewCommand),
+}
+
+#[cfg(test)]
+mod tests {
+    use clap::CommandFactory;
+
+    use super::*;
+
+    #[test]
+    fn verify_app() {
+        Cargo::command().debug_assert();
+    }
 }

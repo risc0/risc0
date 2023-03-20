@@ -12,32 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo_risczero::commands::new::NewCommand;
-use clap::{Parser, Subcommand};
+use cargo_risczero::{Cargo, RisczeroCmd};
+use clap::Parser;
 use tracing_subscriber::EnvFilter;
-
-#[derive(Parser)]
-#[clap(name = "cargo")]
-#[clap(bin_name = "cargo")]
-/// Main cargo command
-pub enum Cargo {
-    Risczero(Risczero),
-}
-
-#[derive(clap::Args)]
-#[clap(author, version, about, long_about = None)]
-/// `cargo risczero`
-pub struct Risczero {
-    #[clap(subcommand)]
-    command: RisczeroCmd,
-}
-
-#[derive(Subcommand)]
-/// Primary commands  of `cargo risczero`.
-pub enum RisczeroCmd {
-    /// Creates a new risczero starter project.
-    New(NewCommand),
-}
 
 fn main() {
     tracing_subscriber::fmt()

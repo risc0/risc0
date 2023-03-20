@@ -15,13 +15,14 @@
 use std::path::PathBuf;
 
 use cargo_generate::{GenerateArgs, TemplatePath, Vcs};
+use clap::Parser;
 use convert_case::{Case, Casing};
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
 const RICS0_TEMPLATE_DIR: &str = "templates/rust-stater";
 const RISC0_RELEASE_TAG: &str = "v0.13.0";
 
-#[derive(clap::Args)]
+#[derive(Parser)]
 /// `cargo risczero new`
 pub struct NewCommand {
     /// Name which will be used as the output project name.
@@ -125,5 +126,16 @@ impl NewCommand {
             other_args: None,
         })
         .expect("Failed to generate project");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn basic_new() {
+        let new = NewCommand::parse_from(["new", "my_project"]);
+        assert_eq!(new.name, "my_project");
     }
 }
