@@ -1,14 +1,21 @@
 [workspace]
 members = [
     "chess",
+    "chess/core",
     "digital-signature",
+    "digital-signature/core",
     "evm",
+    "evm/core",
     "factors",
     "json",
+    "json/core",
     "password-checker",
+    "password-checker/core",
     "sha",
     "waldo",
+    "waldo/core",
     "wordle",
+    "wordle/core",
 ]
 
 # Always optimize; otherwise tests take excessively long.

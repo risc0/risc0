@@ -436,22 +436,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3d7b894f5411737b7867f4827955924d7c254fc9f4d91a6aad6b097804b1018b"
 
 [[package]]
-name = "common"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "ethers-core",
- "ethers-providers",
- "futures",
- "getrandom",
- "hashbrown 0.13.2",
- "primitive-types",
- "revm",
- "serde",
- "tokio",
-]
-
-[[package]]
 name = "console"
 version = "0.15.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -972,14 +956,30 @@ name = "evm"
 version = "0.1.0"
 dependencies = [
  "clap 4.1.8",
- "common",
  "env_logger 0.10.0",
  "ethers-core",
  "ethers-providers",
+ "evm-core",
  "log",
  "methods",
  "risc0-build",
  "risc0-zkvm",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "evm-core"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "ethers-core",
+ "ethers-providers",
+ "futures",
+ "getrandom",
+ "hashbrown 0.13.2",
+ "primitive-types",
+ "revm",
  "serde",
  "tokio",
 ]

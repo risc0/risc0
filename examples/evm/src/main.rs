@@ -16,8 +16,8 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use clap::Parser;
-use common::ether_trace::{Http, Provider};
-use common::{Env, EvmResult, EVM};
+use evm_core::ether_trace::{Http, Provider};
+use evm_core::{Env, EvmResult, EVM};
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
 use log::info;
@@ -49,8 +49,8 @@ async fn main() {
 
     let mut env = Env::default();
     env.block.number = U256::from(block_numb.as_u64());
-    env.tx = common::ether_trace::txenv_from_tx(tx);
-    let trace_db = common::ether_trace::TraceTx::new(client, Some(block_numb.as_u64())).unwrap();
+    env.tx = evm_core::ether_trace::txenv_from_tx(tx);
+    let trace_db = evm_core::ether_trace::TraceTx::new(client, Some(block_numb.as_u64())).unwrap();
 
     let mut evm = EVM::new();
     evm.database(trace_db);
@@ -61,7 +61,7 @@ async fn main() {
             .await
             .unwrap();
 
-    if res.exit_reason != common::Return::Return {
+    if res.exit_reason != evm_core::Return::Return {
         println!("TX failed in pre-flight");
         return;
     }

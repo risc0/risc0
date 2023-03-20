@@ -243,18 +243,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "common"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "getrandom",
- "hashbrown 0.13.2",
- "primitive-types",
- "revm",
- "serde",
-]
-
-[[package]]
 name = "const-oid"
 version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -455,6 +443,18 @@ checksum = "aa68f1b12764fab894d2755d2518754e71b4fd80ecfb822714a1206c2aab39bf"
 dependencies = [
  "cc",
  "libc",
+]
+
+[[package]]
+name = "evm-core"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "getrandom",
+ "hashbrown 0.13.2",
+ "primitive-types",
+ "revm",
+ "serde",
 ]
 
 [[package]]
@@ -978,7 +978,7 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 name = "methods-guest"
 version = "0.1.0"
 dependencies = [
- "common",
+ "evm-core",
  "externc-libm",
  "risc0-build",
  "risc0-zkvm",
