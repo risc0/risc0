@@ -60,6 +60,10 @@ struct Args {
     #[clap(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
 
+    /// Add environment vairables in the form of NAME=value.
+    #[clap(long, action = clap::ArgAction::Append)]
+    env: Vec<String>,
+
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
     /// to read it.
@@ -162,8 +166,15 @@ fn main() {
     };
 
     let mut guest_prof: Option<Profiler> = None;
-    let opts: ProverOpts =
+    let mut opts: ProverOpts =
         ProverOpts::default().with_skip_seal(args.skip_seal || args.receipt.is_none());
+
+    for var in args.env.iter() {
+        let (varname, val) = var
+            .split_once('=')
+            .expect("Environment variables should be of the form NAME=value");
+        opts = opts.with_env_var(varname, val);
+    }
 
     if args.pprof_out.is_some() {
         guest_prof = Some(Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());

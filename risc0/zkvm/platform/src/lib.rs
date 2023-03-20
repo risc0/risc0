@@ -16,7 +16,6 @@
 #![no_std]
 #![allow(unused_variables)]
 
-pub mod abi;
 pub mod memory;
 #[macro_use]
 pub mod syscall;
