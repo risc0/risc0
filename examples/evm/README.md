@@ -21,9 +21,9 @@ cargo build --release -F cuda
 ## Running
 
 ```bash
-RUST_LOG=info cargo run --release -p host -- -t 0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7 -r <RPC_URL_HERE>
+RUST_LOG=info cargo run --release -- -t 0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7 -r <RPC_URL_HERE>
 # With GPU:
-RUST_LOG=info cargo run --release -p host -F cuda -- -t 0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7 -r <RPC_URL_HERE>
+RUST_LOG=info cargo run --release -F cuda -- -t 0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7 -r <RPC_URL_HERE>
 ```
 
 ## Testing
