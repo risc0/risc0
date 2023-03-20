@@ -16,10 +16,10 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use clap::Parser;
-use evm_core::ether_trace::{Http, Provider};
-use evm_core::{Env, EvmResult, EVM};
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
+use evm_core::ether_trace::{Http, Provider};
+use evm_core::{Env, EvmResult, EVM};
 use log::info;
 use methods::{EVM_ELF, EVM_ID};
 use risc0_zkvm::serde::{from_slice, to_vec};
