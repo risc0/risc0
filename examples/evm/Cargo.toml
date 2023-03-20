@@ -1,0 +1,20 @@
+[package]
+name = "evm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+common = { path = "common", features = ["ethers"] }
+env_logger = "0.10.0"
+ethers-core = "1.0.2"
+ethers-providers = "1.0.2"
+log = "0.4.17"
+methods = { path = "methods" }
+risc0-build = { path = "../../risc0/build" }
+risc0-zkvm = { path = "../../risc0/zkvm" }
+serde = "1.0"
+tokio = "1.23"
+
+[features]
+cuda = ["risc0-zkvm/cuda"]

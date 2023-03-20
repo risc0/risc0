@@ -2,6 +2,7 @@
 members = [
     "chess",
     "digital-signature",
+    "evm",
     "factors",
     "json",
     "password-checker",
