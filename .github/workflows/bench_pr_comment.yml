@@ -32,11 +32,11 @@ jobs:
             var fs = require('fs');
             fs.writeFileSync('${{github.workspace}}/md-output.zip', Buffer.from(download.data));
 
-      - run: unzip md-output.zip
+      - run: unzip -o md-output.zip
 
       - name: Merge output files
         shell: bash
-        run: sed h ./md-output/*-output.md > merged.md
+        run: sed h ./*-output.md > merged.md
         id: download
 
       - uses: actions/github-script@v3
