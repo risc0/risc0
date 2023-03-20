@@ -42,7 +42,7 @@ use std::{
     cmp::min,
     collections::HashMap,
     fmt::Debug,
-    io::{stderr, stdout, BufRead, Write},
+    io::{stderr, stdin, stdout, BufRead, BufReader, Write},
     mem::take,
     rc::Rc,
     str::from_utf8,
@@ -54,7 +54,7 @@ use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_G
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
-    core::sha::Digest,
+    core::{config::HashSuite, sha::Digest},
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };
@@ -62,7 +62,9 @@ use risc0_zkvm_platform::{
     fileno,
     memory::MEM_SIZE,
     syscall::{
-        nr::{SYS_CYCLE_COUNT, SYS_LOG, SYS_PANIC, SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
+        nr::{
+            SYS_CYCLE_COUNT, SYS_GETENV, SYS_LOG, SYS_PANIC, SYS_READ, SYS_READ_AVAIL, SYS_WRITE,
+        },
         reg_abi::{REG_A3, REG_A4},
         SyscallName,
     },
@@ -73,7 +75,7 @@ use crate::{
     binfmt::elf::Program,
     prove::preflight::Preflight,
     receipt::{insecure_skip_seal, Receipt},
-    MemoryImage, CIRCUIT, PAGE_SIZE,
+    ControlIdLocator, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
 /// Options available to modify the prover's behavior.
@@ -84,7 +86,8 @@ pub struct ProverOpts<'a> {
 
     pub(crate) syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
 
-    pub(crate) io: Option<PosixIo<'a>>,
+    pub(crate) io: PosixIo<'a>,
+    pub(crate) env_vars: HashMap<String, String>,
     pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
 
     pub(crate) preflight: bool,
@@ -155,16 +158,30 @@ impl<'a> ProverOpts<'a> {
 
     /// Add a posix-style file descriptor for reading
     pub fn with_read_fd(mut self, fd: u32, reader: impl BufRead + 'a) -> Self {
-        let io = self.io.unwrap_or_default();
-        self.io = Some(io.with_read_fd(fd, Box::new(reader)));
+        self.io = self.io.with_read_fd(fd, Box::new(reader));
         self
     }
 
     /// Add a posix-style file descriptor for writing
     pub fn with_write_fd(mut self, fd: u32, writer: impl Write + 'a) -> Self {
-        let io = self.io.unwrap_or_default();
-        self.io = Some(io.with_write_fd(fd, Box::new(writer)));
+        self.io = self.io.with_write_fd(fd, Box::new(writer));
         self
+    }
+
+    /// Add an environment variable to the guest environment
+    pub fn with_env_var(mut self, name: &str, val: &str) -> Self {
+        self.env_vars.insert(name.to_string(), val.to_string());
+        self
+    }
+
+    /// Add late-binding handlers for constructed environment.
+    pub(crate) fn finalize(mut self) -> Self {
+        let io = Rc::new(take(&mut self.io));
+        let getenv = Getenv(take(&mut self.env_vars));
+        self.with_syscall(SYS_READ, io.clone())
+            .with_syscall(SYS_READ_AVAIL, io.clone())
+            .with_syscall(SYS_WRITE, io)
+            .with_syscall(SYS_GETENV, getenv)
     }
 }
 
@@ -199,16 +216,43 @@ impl Syscall for DefaultSyscall {
     }
 }
 
+struct Getenv(HashMap<String, String>);
+impl Syscall for Getenv {
+    fn syscall(
+        &self,
+        _syscall: &str,
+        ctx: &dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_len = ctx.load_register(REG_A4);
+        let from_guest = ctx.load_region(buf_ptr, buf_len);
+        let msg = from_utf8(&from_guest)?;
+
+        match self.0.get(msg) {
+            None => Ok((u32::MAX, 0)),
+            Some(val) => {
+                let nbytes = min(to_guest.len() * WORD_SIZE, val.as_bytes().len());
+                let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
+                to_guest_u8s[0..nbytes].clone_from_slice(&val.as_bytes()[0..nbytes]);
+                Ok((val.as_bytes().len() as u32, 0))
+            }
+        }
+    }
+}
+
 impl<'a> Default for ProverOpts<'a> {
     fn default() -> ProverOpts<'a> {
         ProverOpts {
-            io: None,
+            io: PosixIo::new(),
             skip_seal: false,
             skip_verify: false,
             syscall_handlers: HashMap::new(),
+            env_vars: HashMap::new(),
             trace_callback: None,
             preflight: std::env::var("RISC0_EXPERIMENTAL_PREFLIGHT").is_ok(),
         }
+        .with_read_fd(fileno::STDIN, BufReader::new(stdin()))
         .with_write_fd(fileno::STDOUT, stdout())
         .with_write_fd(fileno::STDERR, stderr())
         .with_syscall(SYS_PANIC, DefaultSyscall)
@@ -263,21 +307,20 @@ pub struct Prover<'a> {
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "cuda")] {
-        use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck, cuda::CudaEvalCheck};
-        use risc0_zkp::hal::cuda::CudaHal;
-        use risc0_zkp::hal::cpu::BabyBearPoseidonCpuHal;
+        use risc0_circuit_rv32im::cuda::{CudaEvalCheckSha256, CudaEvalCheckPoseidon};
+        use risc0_zkp::hal::cuda::{CudaHalSha256, CudaHalPoseidon};
 
         /// Returns the default SHA-256 HAL for the RISC Zero circuit
-        pub fn default_hal() -> (Rc<CudaHal>, CudaEvalCheck) {
-            let hal = Rc::new(CudaHal::new());
-            let eval = CudaEvalCheck::new(hal.clone());
+        pub fn default_hal() -> (Rc<CudaHalSha256>, CudaEvalCheckSha256) {
+            let hal = Rc::new(CudaHalSha256::new());
+            let eval = CudaEvalCheckSha256::new(hal.clone());
             (hal, eval)
         }
 
-        /// Falls back to the CPU for Poseidon for now
-        pub fn default_poseidon_hal() -> (Rc<BabyBearPoseidonCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
-            let hal = Rc::new(BabyBearPoseidonCpuHal::new());
-            let eval = CpuEvalCheck::new(&CIRCUIT);
+        /// Returns the default Poseidon HAL for the RISC Zero circuit
+        pub fn default_poseidon_hal() -> (Rc<CudaHalPoseidon>, CudaEvalCheckPoseidon) {
+            let hal = Rc::new(CudaHalPoseidon::new());
+            let eval = CudaEvalCheckPoseidon::new(hal.clone());
             (hal, eval)
         }
     } else if #[cfg(feature = "metal")] {
@@ -420,16 +463,10 @@ impl<'a> Prover<'a> {
     pub fn run_with_hal<H, E>(&mut self, hal: &H, eval: &E) -> Result<Receipt>
     where
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
         E: EvalCheck<H>,
     {
-        if let Some(io) = take(&mut self.inner.opts.io) {
-            let io = Rc::new(io);
-            let opts = take(&mut self.inner.opts);
-            self.inner.opts = opts
-                .with_syscall(SYS_READ, io.clone())
-                .with_syscall(SYS_READ_AVAIL, io.clone())
-                .with_syscall(SYS_WRITE, io);
-        }
+        self.inner.opts = take(&mut self.inner.opts).finalize();
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
 
         if self.inner.opts.preflight {
@@ -494,7 +531,7 @@ impl<'a> Prover<'a> {
 
         if !skip_seal && !self.inner.opts.skip_verify {
             // Verify receipt to make sure it works
-            receipt.verify(&self.image_id)?;
+            receipt.verify_with_hash::<H::HashSuite, _>(&self.image_id)?;
         }
 
         Ok(receipt)

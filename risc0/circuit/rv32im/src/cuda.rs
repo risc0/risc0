@@ -22,7 +22,7 @@ use risc0_core::field::{
 use risc0_zkp::{
     core::log2_ceil,
     hal::{
-        cuda::{BufferImpl as CudaBuffer, CudaHal},
+        cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon, CudaHashSha256},
         Buffer, EvalCheck,
     },
     INV_RATE,
@@ -35,20 +35,20 @@ use crate::{
 
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_PATH"));
 
-pub struct CudaEvalCheck {
-    hal: Rc<CudaHal>, // retain a reference to ensure the context remains valid
+pub struct CudaEvalCheck<CH: CudaHash> {
+    hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
     module: Module,
 }
 
-impl CudaEvalCheck {
+impl<CH: CudaHash> CudaEvalCheck<CH> {
     #[tracing::instrument(name = "CudaEvalCheck::new", skip_all)]
-    pub fn new(hal: Rc<CudaHal>) -> Self {
+    pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
         let module = Module::load_from_bytes(KERNELS_FATBIN).unwrap();
         Self { hal, module }
     }
 }
 
-impl<'a> EvalCheck<CudaHal> for CudaEvalCheck {
+impl<'a, CH: CudaHash> EvalCheck<CudaHal<CH>> for CudaEvalCheck<CH> {
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
@@ -111,11 +111,14 @@ impl<'a> EvalCheck<CudaHal> for CudaEvalCheck {
     }
 }
 
+pub type CudaEvalCheckSha256 = CudaEvalCheck<CudaHashSha256>;
+pub type CudaEvalCheckPoseidon = CudaEvalCheck<CudaHashPoseidon>;
+
 #[cfg(test)]
 mod tests {
     use std::rc::Rc;
 
-    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, cuda::CudaHal};
+    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, cuda::CudaHalSha256};
     use test_log::test;
 
     use crate::cpu::CpuEvalCheck;
@@ -126,7 +129,7 @@ mod tests {
         let circuit = crate::CircuitImpl::new();
         let cpu_hal = BabyBearSha256CpuHal::new();
         let cpu_eval = CpuEvalCheck::new(&circuit);
-        let gpu_hal = Rc::new(CudaHal::new());
+        let gpu_hal = Rc::new(CudaHalSha256::new());
         let gpu_eval = super::CudaEvalCheck::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
     }
