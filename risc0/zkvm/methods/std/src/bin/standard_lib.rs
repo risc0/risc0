@@ -12,9 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::io::{stdin, stdout, Read, Write};
+
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    println!("Hello world on stdout!");
-    eprintln!("Hello world on stderr!");
+    let test_mode = std::env::var("TEST_MODE").unwrap();
+
+    match test_mode.as_str() {
+        "STDIO" => {
+            // Test stdin, stdout, stderr
+            println!("Hello world on stdout!");
+            eprintln!("Hello world on stderr!");
+            let mut from_stdin = Vec::new();
+            stdin().read_to_end(&mut from_stdin).unwrap();
+            stdout().write_all(&from_stdin).unwrap();
+        }
+        "ENV_VARS" => {
+            // Read environment variables from standard input and print them to the journal.
+            for var_name in stdin().lines() {
+                let var_name = var_name.unwrap();
+                let msg = match std::env::var(&var_name) {
+                    Err(_) => format!("!{var_name}\n"),
+                    Ok(val) => format!("{var_name}={val}\n"),
+                };
+                risc0_zkvm::guest::env::commit_slice(msg.as_bytes());
+            }
+        }
+        _ => {
+            panic!("Unknown test mode {test_mode}");
+        }
+    }
 }

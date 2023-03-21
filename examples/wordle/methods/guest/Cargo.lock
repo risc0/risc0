@@ -1095,6 +1095,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "elf",
+ "getrandom",
  "hex",
  "log",
  "num-derive",

@@ -25,16 +25,16 @@
 use core::{cell::RefCell, marker::PhantomData, mem::take};
 use std::{collections::BTreeMap, io::BufRead, io::Write, ops::DerefMut, rc::Rc};
 
+use anyhow::{bail, Result};
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
+    memory,
     syscall::{
         nr,
         reg_abi::{REG_A3, REG_A4, REG_A5},
     },
     WORD_SIZE,
 };
-
-use crate::prove::exec::MemoryState;
 
 /// An IO handler that returns arbitrary data to the guest.  On the
 /// guest side, use env::send_slice, env::recv_slice, or
@@ -72,7 +72,52 @@ pub struct SliceIoSyscall<H: SliceIo> {
 /// A host-side implementation of a system call.
 pub trait Syscall {
     /// Invokes the system call
-    fn syscall(&self, syscall: &str, ctx: &MemoryState, to_guest: &mut [u32]) -> (u32, u32);
+    fn syscall(
+        &self,
+        syscall: &str,
+        ctx: &dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)>;
+}
+
+/// Access to memory and machine state for syscalls.
+pub trait SyscallContext {
+    /// Returns the current cycle being executed
+    fn get_cycle(&self) -> usize;
+
+    /// Loads the value of the given register, e.g. REG_A0
+    fn load_register(&self, num: usize) -> u32 {
+        self.load_u32((memory::SYSTEM.start() + num * WORD_SIZE) as u32)
+    }
+
+    /// Loads bytes from the given region of memory
+    fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
+        let mut region = Vec::new();
+        for addr in addr..addr + size {
+            region.push(self.load_u8(addr));
+        }
+        region
+    }
+
+    /// Loads an individual word from memory.
+    fn load_u32(&self, addr: u32) -> u32;
+
+    /// Loads an individual byte from memory.
+    fn load_u8(&self, addr: u32) -> u8;
+
+    /// Loads a null-termintaed string from memory
+    fn load_string(&self, mut addr: u32) -> Result<String> {
+        let mut s: Vec<u8> = Vec::new();
+        loop {
+            let b = self.load_u8(addr);
+            if b == 0 {
+                break;
+            }
+            s.push(b);
+            addr += 1;
+        }
+        String::from_utf8(s).map_err(anyhow::Error::msg)
+    }
 }
 
 impl<H: SliceIo> SliceIoSyscall<H> {
@@ -86,7 +131,12 @@ impl<H: SliceIo> SliceIoSyscall<H> {
 }
 
 impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
-    fn syscall(&self, syscall: &str, ctx: &MemoryState, to_guest: &mut [u32]) -> (u32, u32) {
+    fn syscall(
+        &self,
+        syscall: &str,
+        ctx: &dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
         let mut stored_result = self.stored_result.borrow_mut();
         let buf_ptr = ctx.load_register(REG_A3);
         let buf_len = ctx.load_register(REG_A4);
@@ -101,7 +151,7 @@ impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
                 let result = self.handler.handle_io(syscall, from_guest);
                 let len = result.len();
                 *stored_result = Some(result);
-                (len as u32, 0)
+                Ok((len as u32, 0))
             }
             Some(stored) => {
                 // Second call of pair.  We already have data to send
@@ -116,7 +166,7 @@ impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
                     assert!(to_guest_bytes.len() >= stored_bytes.len());
                 }
                 to_guest_bytes[..stored_bytes.len()].clone_from_slice(stored_bytes);
-                (0, 0)
+                Ok((0, 0))
             }
         }
     }
@@ -171,7 +221,12 @@ impl<'a> PosixIo<'a> {
 }
 
 impl<'a> Syscall for PosixIo<'a> {
-    fn syscall(&self, syscall: &str, ctx: &MemoryState, to_guest: &mut [u32]) -> (u32, u32) {
+    fn syscall(
+        &self,
+        syscall: &str,
+        ctx: &dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
         // TODO: Is there a way to use "match" here instead of if statements?
         if syscall == nr::SYS_READ_AVAIL.as_str() {
             let fd = ctx.load_register(REG_A3);
@@ -181,7 +236,7 @@ impl<'a> Syscall for PosixIo<'a> {
                 .expect(&format!("Bad read file descriptor {fd}"));
 
             let navail = reader.fill_buf().unwrap().len() as u32;
-            (navail, 0)
+            Ok((navail, 0))
         } else if syscall == nr::SYS_READ.as_str() {
             let fd = ctx.load_register(REG_A3);
             let nbytes = ctx.load_register(REG_A4) as usize;
@@ -220,10 +275,10 @@ impl<'a> Syscall for PosixIo<'a> {
             let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
             let nread_end = reader.read(&mut to_guest_end[0..unaligned_end]).unwrap();
 
-            (
+            Ok((
                 (nread_main + nread_end) as u32,
                 u32::from_le_bytes(to_guest_end),
-            )
+            ))
         } else if syscall == nr::SYS_WRITE.as_str() {
             let fd = ctx.load_register(REG_A3);
             let buf_ptr = ctx.load_register(REG_A4);
@@ -237,15 +292,20 @@ impl<'a> Syscall for PosixIo<'a> {
             log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
 
             writer.write_all(from_guest_bytes.as_slice()).unwrap();
-            (0, 0)
+            Ok((0, 0))
         } else {
-            panic!("Unknown syscall {syscall}")
+            bail!("Unknown syscall {syscall}")
         }
     }
 }
 
 impl<'a> Syscall for Rc<PosixIo<'a>> {
-    fn syscall(&self, syscall: &str, ctx: &MemoryState, to_guest: &mut [u32]) -> (u32, u32) {
+    fn syscall(
+        &self,
+        syscall: &str,
+        ctx: &dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
         (**self).syscall(syscall, ctx, to_guest)
     }
 }

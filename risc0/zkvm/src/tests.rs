@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fmt, sync::Mutex};
+use std::{fmt, io::Cursor, str::from_utf8, sync::Mutex};
 
 use anyhow::Result;
 use risc0_zeroio::to_vec;
@@ -21,8 +21,9 @@ use risc0_zkp::core::sha::Digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, SLICE_IO_ELF, SLICE_IO_ID,
+    STANDARD_LIB_ELF, STANDARD_LIB_ID,
 };
-use risc0_zkvm_platform::{memory::HEAP, WORD_SIZE};
+use risc0_zkvm_platform::{fileno, memory::HEAP, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
@@ -294,19 +295,14 @@ fn sha_cycle_count() {
 
 #[test]
 fn test_poseidon_proof() {
-    use risc0_circuit_rv32im::cpu::CpuEvalCheck;
-    use risc0_core::field::baby_bear::BabyBear;
     use risc0_zkp::core::config::HashSuitePoseidon;
-    use risc0_zkp::hal::cpu::CpuHal;
 
-    use crate::CIRCUIT;
-
-    let hal = CpuHal::<BabyBear, HashSuitePoseidon>::new();
-    let eval = CpuEvalCheck::new(&CIRCUIT);
+    use crate::prove::default_poseidon_hal;
+    let (hal, eval) = default_poseidon_hal();
     let opts = ProverOpts::default().with_skip_verify(true);
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
-    let receipt = prover.run_with_hal(&hal, &eval).unwrap();
+    let receipt = prover.run_with_hal(hal.as_ref(), &eval).unwrap();
     receipt
         .verify_with_hash::<HashSuitePoseidon, _>(&MULTI_TEST_ID)
         .unwrap();
@@ -598,7 +594,14 @@ fn posix_style_read() {
         let receipt = prover.run().expect("Could not get receipt");
 
         use risc0_zeroio::Deserialize;
-        let actual = Vec::<u8>::deserialize_from(bytemuck::cast_slice(receipt.journal.as_slice()));
+        // Ugh, journal is of u8s which might not be u32-aligned,
+        // causing bytemuck::cast_slice to fail.
+        let journal_copy: Vec<u32> = receipt
+            .journal
+            .chunks(WORD_SIZE)
+            .map(|word| u32::from_le_bytes(word.try_into().unwrap()))
+            .collect();
+        let actual = Vec::<u8>::deserialize_from(&journal_copy);
         assert_eq!(
             std::str::from_utf8(&actual).unwrap(),
             std::str::from_utf8(&expected).unwrap(),
@@ -637,4 +640,32 @@ fn posix_style_read() {
             run(pos_and_len);
         }
     }
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn environment() {
+    let opts = ProverOpts::default()
+        .with_env_var("TEST_MODE", "ENV_VARS")
+        .with_env_var("ENV_VAR1", "val1")
+        .with_env_var("ENV_VAR2", "")
+        .with_read_fd(
+            fileno::STDIN,
+            Cursor::new(
+                r"ENV_VAR1
+ENV_VAR2
+ENV_VAR3",
+            ),
+        );
+    let mut prover = Prover::new_with_opts(STANDARD_LIB_ELF, STANDARD_LIB_ID, opts).unwrap();
+    let receipt = prover.run().unwrap();
+    let actual = receipt.journal.as_slice();
+    assert_eq!(
+        from_utf8(actual).unwrap(),
+        r"ENV_VAR1=val1
+ENV_VAR2=
+!ENV_VAR3
+"
+    );
 }

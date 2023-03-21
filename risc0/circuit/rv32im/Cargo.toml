@@ -25,6 +25,7 @@ rayon = { version = "1.5", optional = true }
 rustacuda_core = { version = "0.1", optional = true }
 rustacuda_derive = { version = "0.1", optional = true }
 metal = { version = "0.24", optional = true }
+risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "zkvm")'.dependencies]
@@ -42,6 +43,7 @@ cuda = [
   "dep:rustacuda_core",
   "dep:rustacuda_derive",
   "prove",
+  "risc0-circuit-rv32im-sys/cuda",
   "risc0-sys/cuda",
   "risc0-zkp/cuda",
   "std",
@@ -49,6 +51,7 @@ cuda = [
 metal = [
   "dep:metal",
   "prove",
+  "risc0-circuit-rv32im-sys/metal",
   "risc0-sys/metal",
   "risc0-zkp/metal"
 ]
@@ -57,6 +60,7 @@ prove = [
   "dep:rand",
   "dep:rayon",
   "risc0-zkp/prove",
+  "risc0-circuit-rv32im-sys",
   "risc0-sys",
   "std"
 ]
