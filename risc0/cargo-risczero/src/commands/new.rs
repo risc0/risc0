@@ -20,6 +20,7 @@ use convert_case::{Case, Casing};
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
 const RICS0_TEMPLATE_DIR: &str = "templates/rust-stater";
+const RISC0_DEFAULT_VERSION: &str = "0.13.0";
 const RISC0_RELEASE_TAG: &str = "v0.13.0";
 
 #[derive(Parser)]
@@ -93,7 +94,8 @@ impl NewCommand {
             template_path.tag = None;
         }
 
-        let risc0_version = std::env::var("CARGO_PKG_VERSION").expect("Missing env var");
+        let risc0_version = std::env::var("CARGO_PKG_VERSION")
+            .unwrap_or_else(|_| RISC0_DEFAULT_VERSION.to_string());
 
         let mut template_variables = vec![format!("risc0_version={risc0_version}")];
         if let Some(branch) = self.use_git_branch.as_ref() {
@@ -131,11 +133,35 @@ impl NewCommand {
 
 #[cfg(test)]
 mod tests {
+    use std::fs::File;
+    use std::io::{BufRead, BufReader};
     use std::path::Path;
 
-    use tempfile::tempdir;
+    use tempfile::{tempdir, TempDir};
 
     use super::*;
+
+    fn make_test_env() -> (TempDir, PathBuf, &'static str) {
+        let tmpdir = tempdir().expect("Failed to create tempdir");
+        let manifest_path =
+            std::env::var("CARGO_MANIFEST_DIR").expect("Missing CARGO_MANIFEST_DIR var");
+        // NOTE: cargo run and cargo test have a slightly different idea of what the
+        // manifest_dir is. https://github.com/rust-lang/cargo/issues/3946
+        let template_path = Path::new(&manifest_path).join("../../");
+        (tmpdir, template_path, "my_project")
+    }
+
+    fn find_in_file(needle: &str, file: &Path) -> bool {
+        let file = File::open(file).unwrap();
+        let reader = BufReader::new(file);
+        for line in reader.lines() {
+            let line_data = line.expect("Failed to readline");
+            if line_data.contains(needle) {
+                return true;
+            }
+        }
+        false
+    }
 
     #[test]
     fn basic_new() {
@@ -145,13 +171,8 @@ mod tests {
 
     #[test]
     fn basic_generate() {
-        let tmpdir = tempdir().expect("Failed to create tempdir");
-        let manifest_path =
-            std::env::var("CARGO_MANIFEST_DIR").expect("Missing CARGO_MANIFEST_DIR var");
-        // NOTE: cargo run and cargo test have a slightly different idea of what the
-        // manifest_dir is. https://github.com/rust-lang/cargo/issues/3946
-        let template_path = Path::new(&manifest_path).join("../../");
-        let proj_name = "my_project";
+        let (tmpdir, template_path, proj_name) = make_test_env();
+
         let new = NewCommand::parse_from([
             "new",
             "--template",
@@ -169,5 +190,39 @@ mod tests {
 
         assert!(proj_path.exists());
         assert!(proj_path.join(".git").exists());
+        assert!(find_in_file(
+            &format!("risc0-zkvm = \"{RISC0_DEFAULT_VERSION}\""),
+            &proj_path.join("host/Cargo.toml")
+        ));
+    }
+
+    #[test]
+    fn generate_no_git_branch() {
+        let (tmpdir, template_path, proj_name) = make_test_env();
+
+        let new = NewCommand::parse_from([
+            "new",
+            "--template",
+            &template_path
+                .join("templates/rust-starter")
+                .to_string_lossy(),
+            "--dest",
+            &tmpdir.path().to_string_lossy(),
+            "--no-git",
+            "--use-git-branch",
+            "main",
+            proj_name,
+        ]);
+
+        new.run();
+
+        let proj_path = tmpdir.path().join(proj_name);
+
+        assert!(proj_path.exists());
+        assert!(!proj_path.join(".git").exists());
+        assert!(find_in_file(
+            "risc0-zkvm = { git = \"https://github.com/risc0/risc0.git\", branch = \"main\"",
+            &proj_path.join("host/Cargo.toml")
+        ));
     }
 }
