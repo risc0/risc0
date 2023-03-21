@@ -17,6 +17,9 @@ convert_case = "0.6"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
+[dev-dependencies]
+tempfile = "3.3"
+
 [[bin]]
 path = "src/bin/main.rs"
 name = "cargo-risczero"

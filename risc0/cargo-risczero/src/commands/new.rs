@@ -29,7 +29,7 @@ pub struct NewCommand {
     #[arg()]
     pub name: String,
 
-    /// GH repository name.
+    /// GH repository URL.
     #[clap(value_parser, long, short, default_value = RISC0_GH_REPO)]
     pub template: String,
 
@@ -131,11 +131,43 @@ impl NewCommand {
 
 #[cfg(test)]
 mod tests {
+    use std::path::Path;
+
+    use tempfile::tempdir;
+
     use super::*;
 
     #[test]
     fn basic_new() {
         let new = NewCommand::parse_from(["new", "my_project"]);
         assert_eq!(new.name, "my_project");
+    }
+
+    #[test]
+    fn basic_generate() {
+        let tmpdir = tempdir().expect("Failed to create tempdir");
+        let manifest_path =
+            std::env::var("CARGO_MANIFEST_DIR").expect("Missing CARGO_MANIFEST_DIR var");
+        // NOTE: cargo run and cargo test have a slightly different idea of what the
+        // manifest_dir is. https://github.com/rust-lang/cargo/issues/3946
+        let template_path = Path::new(&manifest_path).join("../../");
+        let proj_name = "my_project";
+        let new = NewCommand::parse_from([
+            "new",
+            "--template",
+            &template_path
+                .join("templates/rust-starter")
+                .to_string_lossy(),
+            "--dest",
+            &tmpdir.path().to_string_lossy(),
+            proj_name,
+        ]);
+
+        new.run();
+
+        let proj_path = tmpdir.path().join(proj_name);
+
+        assert!(proj_path.exists());
+        assert!(proj_path.join(".git").exists());
     }
 }
