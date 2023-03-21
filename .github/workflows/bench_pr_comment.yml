@@ -10,6 +10,8 @@ on:
 jobs:
   create-comment:
     runs-on: ubuntu-latest
+    # Only run if the upstream workflow was successful.
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: 'Download artifact'
         uses: actions/github-script@v3.1.0
@@ -30,13 +32,16 @@ jobs:
                archive_format: 'zip',
             });
             var fs = require('fs');
-            fs.writeFileSync('${{github.workspace}}/md-output.zip', Buffer.from(download.data));
+            fs.writeFileSync('${{ runner.temp }}/md-output.zip', Buffer.from(download.data));
 
-      - run: unzip -o md-output.zip
+      - name: unzip benchmark markdown files
+        run: |
+          mkdir -p ${{ runner.temp }}/pr-output/
+          unzip -o ${{ runner.temp }}/md-output.zip -d ${{ runner.temp }}/pr-output/
 
       - name: Merge output files
         shell: bash
-        run: sed h ./pr-output/*-output.md > merged.md
+        run: sed h ${{ runner.temp }}/pr-output/*-output.md > ${{ runner.temp }}/pr-output/merged.md
         id: download
 
       - uses: actions/github-script@v3
@@ -45,8 +50,8 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             var fs = require('fs');
-            var body = fs.readFileSync("./merged.md", 'utf8');
-            var issue_number = Number(fs.readFileSync("./NR"));
+            var body = fs.readFileSync("${{ runner.temp }}/pr-output/merged.md", 'utf8');
+            var issue_number = Number(fs.readFileSync("${{ runner.temp }}/pr-output/NR"));
             github.issues.createComment({
               issue_number: issue_number,
               owner: context.repo.owner,
