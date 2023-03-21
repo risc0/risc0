@@ -73,9 +73,7 @@ impl NewCommand {
         let dest_dir = if let Some(dest_dir) = self.dest.clone() {
             dest_dir
         } else {
-            std::env::current_dir()
-                .expect("Failed to fetch cwd")
-                .join(self.name.clone())
+            std::env::current_dir().expect("Failed to fetch cwd")
         };
 
         let mut template_path = TemplatePath {
