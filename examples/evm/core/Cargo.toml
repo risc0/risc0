@@ -1,0 +1,23 @@
+[package]
+name = "evm-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytes = { version = "1.1", default-features = false }
+ethers-core = { version = "1.0.2", optional = true }
+ethers-providers = { version = "1.0.2", optional = true }
+futures = { version = "0.3.24", optional = true }
+getrandom = { version = "0.2", features = ["custom"] }
+hashbrown = "0.13"
+primitive-types = "0.12.1"
+revm = { version = "2.3.1", default-features = false, features = ["std", "k256", "with-serde"] }
+serde = "1.0"
+tokio = { version = "1.23", features = [
+    "rt-multi-thread",
+    "macros",
+], optional = true }
+
+[features]
+default = ["ethers"]
+ethers = ["tokio", "ethers-providers", "ethers-core", "futures"]
