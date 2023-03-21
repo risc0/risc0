@@ -78,6 +78,104 @@ use crate::{
     ControlIdLocator, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
+#[cfg(feature = "cuda")]
+mod cuda {
+    use risc0_circuit_rv32im::cuda::{CudaEvalCheckPoseidon, CudaEvalCheckSha256};
+    use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
+
+    /// Returns the default SHA-256 HAL for the rv32im circuit
+    pub fn default_hal() -> (Rc<CudaHalSha256>, CudaEvalCheckSha256) {
+        let hal = Rc::new(CudaHalSha256::new());
+        let eval = CudaEvalCheckSha256::new(hal.clone());
+        (hal, eval)
+    }
+
+    /// Returns the default Poseidon HAL for the rv32im circuit
+    pub fn default_poseidon_hal() -> (Rc<CudaHalPoseidon>, CudaEvalCheckPoseidon) {
+        let hal = Rc::new(CudaHalPoseidon::new());
+        let eval = CudaEvalCheckPoseidon::new(hal.clone());
+        (hal, eval)
+    }
+}
+
+#[cfg(feature = "cuda")]
+pub use cuda::{default_hal, default_poseidon_hal};
+
+#[cfg(feature = "metal")]
+mod metal {
+    use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
+    use risc0_zkp::hal::metal::{MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon};
+
+    /// Returns the default SHA-256 HAL for the rv32im circuit
+    pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
+        let hal = Rc::new(MetalHalSha256::new());
+        let eval = MetalEvalCheckSha256::new(hal.clone());
+        (hal, eval)
+    }
+
+    /// Returns the default Poseidon HAL for the rv32im circuit
+    pub fn default_poseidon_hal() -> (Rc<MetalHalPoseidon>, MetalEvalCheck<MetalHashPoseidon>) {
+        let hal = Rc::new(MetalHalPoseidon::new());
+        let eval = MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone());
+        (hal, eval)
+    }
+}
+
+#[cfg(feature = "metal")]
+pub use metal::{default_hal, default_poseidon_hal};
+
+mod cpu {
+    use alloc::rc::Rc;
+
+    use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitImpl};
+    use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
+
+    use crate::CIRCUIT;
+
+    /// Returns the default SHA-256 HAL for the rv32im circuit
+    ///
+    /// RISC Zero uses a
+    /// [HAL](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/index.html)
+    /// (Hardware Abstraction Layer) to interface with the zkVM circuit.
+    /// This function returns the default HAL for the selected `risc0-zkvm`
+    /// features. It also returns the associated
+    /// [EvalCheck](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/trait.EvalCheck.html)
+    /// used for computing the cryptographic check polynomial.
+    ///
+    /// Note that this function will return different types when
+    /// `risc0-zkvm` is built with features that select different the target
+    /// hardware. The version documented here is used when no special
+    /// hardware features are selected.
+    pub fn default_hal() -> (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
+        let hal = Rc::new(BabyBearSha256CpuHal::new());
+        let eval = CpuEvalCheck::new(&CIRCUIT);
+        (hal, eval)
+    }
+
+    /// Returns the default Poseidon HAL for the rv32im circuit
+    ///
+    /// The same as [default_hal] except it gives the default HAL for
+    /// securing the circuit using Poseidon (instead of SHA-256).
+    pub fn default_poseidon_hal() -> (
+        Rc<BabyBearPoseidonCpuHal>,
+        CpuEvalCheck<'static, CircuitImpl>,
+    ) {
+        let hal = Rc::new(BabyBearPoseidonCpuHal::new());
+        let eval = CpuEvalCheck::new(&CIRCUIT);
+        (hal, eval)
+    }
+}
+
+cfg_if::cfg_if! {
+    if #[cfg(feature = "cuda")] {
+        pub use cuda::{default_hal, default_poseidon_hal};
+    } else if #[cfg(feature = "metal")] {
+        pub use metal::{default_hal, default_poseidon_hal};
+    } else {
+        pub use cpu::{default_hal, default_poseidon_hal};
+    }
+}
+
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
     pub(crate) skip_seal: bool,
@@ -156,19 +254,19 @@ impl<'a> ProverOpts<'a> {
         self
     }
 
-    /// Add a posix-style file descriptor for reading
+    /// Add a posix-style file descriptor for reading.
     pub fn with_read_fd(mut self, fd: u32, reader: impl BufRead + 'a) -> Self {
         self.io = self.io.with_read_fd(fd, Box::new(reader));
         self
     }
 
-    /// Add a posix-style file descriptor for writing
+    /// Add a posix-style file descriptor for writing.
     pub fn with_write_fd(mut self, fd: u32, writer: impl Write + 'a) -> Self {
         self.io = self.io.with_write_fd(fd, Box::new(writer));
         self
     }
 
-    /// Add an environment variable to the guest environment
+    /// Add an environment variable to the guest environment.
     pub fn with_env_var(mut self, name: &str, val: &str) -> Self {
         self.env_vars.insert(name.to_string(), val.to_string());
         self
@@ -217,6 +315,7 @@ impl Syscall for DefaultSyscall {
 }
 
 struct Getenv(HashMap<String, String>);
+
 impl Syscall for Getenv {
     fn syscall(
         &self,
@@ -305,82 +404,10 @@ pub struct Prover<'a> {
     pub cycles: usize,
 }
 
-cfg_if::cfg_if! {
-    if #[cfg(feature = "cuda")] {
-        use risc0_circuit_rv32im::cuda::{CudaEvalCheckSha256, CudaEvalCheckPoseidon};
-        use risc0_zkp::hal::cuda::{CudaHalSha256, CudaHalPoseidon};
-
-        /// Returns the default SHA-256 HAL for the RISC Zero circuit
-        pub fn default_hal() -> (Rc<CudaHalSha256>, CudaEvalCheckSha256) {
-            let hal = Rc::new(CudaHalSha256::new());
-            let eval = CudaEvalCheckSha256::new(hal.clone());
-            (hal, eval)
-        }
-
-        /// Returns the default Poseidon HAL for the RISC Zero circuit
-        pub fn default_poseidon_hal() -> (Rc<CudaHalPoseidon>, CudaEvalCheckPoseidon) {
-            let hal = Rc::new(CudaHalPoseidon::new());
-            let eval = CudaEvalCheckPoseidon::new(hal.clone());
-            (hal, eval)
-        }
-    } else if #[cfg(feature = "metal")] {
-        use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
-        use risc0_zkp::hal::metal::{MetalHalSha256, MetalHalPoseidon, MetalHashPoseidon};
-
-        /// Returns the default SHA-256 HAL for the RISC Zero circuit
-        pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
-            let hal = Rc::new(MetalHalSha256::new());
-            let eval = MetalEvalCheckSha256::new(hal.clone());
-            (hal, eval)
-        }
-
-        /// Returns the default Poseidon HAL for the RISC Zero circuit
-        pub fn default_poseidon_hal() -> (Rc<MetalHalPoseidon>, MetalEvalCheck<MetalHashPoseidon>) {
-            let hal = Rc::new(MetalHalPoseidon::new());
-            let eval = MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone());
-            (hal, eval)
-        }
-    } else {
-        use risc0_circuit_rv32im::{CircuitImpl, cpu::CpuEvalCheck};
-        use risc0_zkp::hal::cpu::{BabyBearSha256CpuHal, BabyBearPoseidonCpuHal};
-
-        /// Returns the default SHA-256 HAL for the RISC Zero circuit
-        ///
-        /// RISC Zero uses a
-        /// [HAL](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/index.html)
-        /// (Hardware Abstraction Layer) to interface with the zkVM circuit.
-        /// This function returns the default HAL for the selected `risc0-zkvm`
-        /// features. It also returns the associated
-        /// [EvalCheck](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/trait.EvalCheck.html)
-        /// used for computing the cryptographic check polynomial.
-        ///
-        /// Note that this function will return different types when
-        /// `risc0-zkvm` is built with features that select different the target
-        /// hardware. The version documented here is used when no special
-        /// hardware features are selected.
-        pub fn default_hal() -> (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
-            let hal = Rc::new(BabyBearSha256CpuHal::new());
-            let eval = CpuEvalCheck::new(&CIRCUIT);
-            (hal, eval)
-        }
-
-                /// Returns the default Poseidon HAL for the RISC Zero circuit
-        ///
-        /// The same as [default_hal] except it gives the default HAL for
-        /// securing the circuit using Poseidon (instead of SHA-256).
-        pub fn default_poseidon_hal() -> (Rc<BabyBearPoseidonCpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
-            let hal = Rc::new(BabyBearPoseidonCpuHal::new());
-            let eval = CpuEvalCheck::new(&CIRCUIT);
-            (hal, eval)
-        }
-
-    }
-}
-
 impl<'a> Prover<'a> {
-    /// Construct a new prover using the default options
+    /// Construct a new prover using the default options.
     ///
-    /// This will return an `Err` if `elf` is not a valid ELF file
+    /// This will return an `Err` if `elf` is not a valid ELF file.
     pub fn new<D>(elf: &[u8], image_id: D) -> Result<Self>
     where
         Digest: From<D>,
@@ -388,9 +415,9 @@ impl<'a> Prover<'a> {
         Self::new_with_opts(elf, image_id, ProverOpts::default())
     }
 
-    /// Construct a new prover using custom [ProverOpts]
+    /// Construct a new prover using custom [ProverOpts].
     ///
-    /// This will return an `Err` if `elf` is not a valid ELF file
+    /// This will return an `Err` if `elf` is not a valid ELF file.
     pub fn new_with_opts<D>(elf: &[u8], image_id: D, opts: ProverOpts<'a>) -> Result<Self>
     where
         Digest: From<D>,
@@ -620,30 +647,6 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
             Ok(())
         }
     }
-}
-
-fn split_word8(value: u32) -> (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem) {
-    (
-        BabyBearElem::new(value & 0xff),
-        BabyBearElem::new(value >> 8 & 0xff),
-        BabyBearElem::new(value >> 16 & 0xff),
-        BabyBearElem::new(value >> 24 & 0xff),
-    )
-}
-
-fn split_word16(value: u32) -> (BabyBearElem, BabyBearElem) {
-    (
-        BabyBearElem::new(value & 0xffff),
-        BabyBearElem::new(value >> 16),
-    )
-}
-
-fn merge_word8((x0, x1, x2, x3): (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem)) -> u32 {
-    let x0: u32 = x0.into();
-    let x1: u32 = x1.into();
-    let x2: u32 = x2.into();
-    let x3: u32 = x3.into();
-    x0 | x1 << 8 | x2 << 16 | x3 << 24
 }
 
 /// An event traced from the running VM.

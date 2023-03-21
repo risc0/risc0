@@ -39,7 +39,7 @@ use risc0_zkvm_platform::{
     PAGE_SIZE, WORD_SIZE,
 };
 
-use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
+use super::{loader::Loader, plonk, TraceEvent};
 use crate::{
     binfmt::{
         elf::Program,
@@ -53,10 +53,9 @@ const IMM_BITS: usize = 12;
 #[allow(dead_code)]
 #[derive(Debug)]
 enum MemoryOp {
-    PageIn,
+    PageIo,
     Read,
     Write,
-    PageOut,
 }
 
 impl MemoryOp {
@@ -78,8 +77,15 @@ pub trait HostHandler {
 
 pub struct MemoryState {
     pub ram: MemoryImage,
-    pub pages: BTreeSet<u32>,
-    resident: BTreeSet<u32>,
+
+    // Tracks pages that have already been paged in.
+    pub finished_page_reads: BTreeSet<u32>,
+
+    // Tracks which pages are dirty and need to be paged out in a subsquent flush
+    // dirty_pages: BTreeSet<u32>,
+
+    // This is just for diagnostics: tracks which words have been paged in.
+    resident_words: BTreeSet<u32>,
 
     // Plonk tables for sorting plonks in proper order
     pub ram_plonk: plonk::RamPlonk,
@@ -119,8 +125,9 @@ impl MemoryState {
     pub(crate) fn new(image: MemoryImage) -> Self {
         Self {
             ram: image,
-            pages: BTreeSet::new(),
-            resident: BTreeSet::new(),
+            finished_page_reads: BTreeSet::new(),
+            // dirty_pages: BTreeSet::new(),
+            resident_words: BTreeSet::new(),
             ram_plonk: plonk::RamPlonk::new(),
             bytes_plonk: plonk::BytesPlonk::new(),
             plonk_accum: BTreeMap::new(),
@@ -270,7 +277,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
             }
             "trace" => self.trace(cycle, args[0]),
             "getMajor" => {
-                outs[0] = self.get_major(args[0])?;
+                outs[0] = self.get_major(args[0], args[1])?;
                 Ok(())
             }
             "getMinor" => {
@@ -290,8 +297,8 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 );
                 Ok(())
             }
-            "pageRead" => {
-                (outs[0]) = self.page_read(args[0]);
+            "pageInfo" => {
+                (outs[0], outs[1]) = self.page_info(args[0]);
                 Ok(())
             }
             "ramWrite" => {
@@ -336,10 +343,6 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 (outs[4], outs[5], outs[6], outs[7]) = split_word8(a1);
                 Ok(())
             }
-            "isResident" => {
-                outs[0] = self.is_resident(args[0]);
-                Ok(())
-            }
             _ => unimplemented!("Unsupported extern: {name}"),
         }
     }
@@ -356,6 +359,23 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
             accum.1.calc_prefix_products()
         }
     }
+}
+
+fn split_word8(value: u32) -> (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem) {
+    (
+        BabyBearElem::new(value & 0xff),
+        BabyBearElem::new(value >> 8 & 0xff),
+        BabyBearElem::new(value >> 16 & 0xff),
+        BabyBearElem::new(value >> 24 & 0xff),
+    )
+}
+
+fn merge_word8((x0, x1, x2, x3): (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem)) -> u32 {
+    let x0: u32 = x0.into();
+    let x1: u32 = x1.into();
+    let x2: u32 = x2.into();
+    let x3: u32 = x3.into();
+    x0 | x1 << 8 | x2 << 16 | x3 << 24
 }
 
 fn sign_extend(x: i32, bits: u32) -> i32 {
@@ -376,7 +396,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         }
     }
 
-    fn get_major(&self, pc: BabyBearElem) -> Result<BabyBearElem> {
+    fn get_major(&self, _cycle: BabyBearElem, pc: BabyBearElem) -> Result<BabyBearElem> {
         let pc: u32 = pc.into();
         let inst = self.memory.load_u32(pc);
         let opcode = self.decode(inst);
@@ -385,7 +405,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         let faults = self.get_page_faults(pc, inst, &opcode);
         // faults.dump();
         for page_idx in faults.reads {
-            if !self.memory.pages.contains(&page_idx) {
+            if !self.memory.finished_page_reads.contains(&page_idx) {
                 return Ok(MajorType::PageFault.as_u32().into());
             }
         }
@@ -454,20 +474,20 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         faults
     }
 
-    fn page_read(&mut self, pc: BabyBearElem) -> BabyBearElem {
+    fn page_info(&mut self, pc: BabyBearElem) -> (BabyBearElem, BabyBearElem) {
         let pc: u32 = pc.into();
         let inst = self.memory.load_u32(pc);
         let opcode = self.decode(inst);
         let info = self.get_page_faults(pc, inst, &opcode);
         for page_idx in info.reads.iter().rev() {
-            if !self.memory.pages.contains(page_idx) {
-                self.memory.pages.insert(*page_idx);
+            if !self.memory.finished_page_reads.contains(page_idx) {
+                self.memory.finished_page_reads.insert(*page_idx);
                 // debug!("page_idx: 0x{page_idx:08X}");
-                return (*page_idx).into();
+                return (BabyBearElem::ONE, (*page_idx).into());
             }
         }
 
-        BabyBearElem::ZERO
+        (BabyBearElem::ZERO, BabyBearElem::ZERO)
     }
 
     fn trace(&mut self, cycle: usize, pc: BabyBearElem) -> Result<()> {
@@ -604,12 +624,10 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     ) -> (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem) {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
-        if op == MemoryOp::PageIn.as_u32() {
-            if self.memory.resident.replace(addr).is_some() {
-                panic!("Memory read already marked for page in: 0x{addr:08x}");
-            }
+        if op == MemoryOp::PageIo.as_u32() {
+            self.memory.resident_words.insert(addr);
         } else {
-            if !self.memory.resident.contains(&addr) {
+            if !self.memory.resident_words.contains(&addr) {
                 let addr = addr * WORD_SIZE as u32;
                 let page_idx = self.memory.ram.info.get_page_index(addr);
                 let entry_addr = self.memory.ram.info.get_page_entry_addr(page_idx);
@@ -631,13 +649,11 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     ) -> Result<()> {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
-        if op == MemoryOp::PageIn.as_u32() {
-            if self.memory.resident.replace(addr).is_some() {
-                panic!("Memory write already marked for page in: 0x{addr:08x}");
-            }
+        if op == MemoryOp::PageIo.as_u32() {
+            self.memory.resident_words.insert(addr);
         } else {
             assert!(
-                self.memory.resident.contains(&addr),
+                self.memory.resident_words.contains(&addr),
                 "Memory write before page in: 0x{addr:08x}"
             );
         }
@@ -662,15 +678,6 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         }
 
         Ok(())
-    }
-
-    fn is_resident(&self, addr: BabyBearElem) -> BabyBearElem {
-        let addr: u32 = addr.into();
-        if self.memory.resident.contains(&addr) {
-            1u32.into()
-        } else {
-            0u32.into()
-        }
     }
 
     fn plonk_read(&mut self, name: &str, outs: &mut [BabyBearElem]) {

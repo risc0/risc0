@@ -25,6 +25,11 @@ pub mod ecall {
     pub const SHA: u32 = 3;
 }
 
+pub mod halt {
+    pub const NORMAL: u32 = 0;
+    pub const PAUSE: u32 = 1;
+}
+
 pub mod reg_abi {
     pub const REG_ZERO: usize = 0; // zero constant
     pub const REG_RA: usize = 1; // return address
@@ -98,28 +103,27 @@ pub struct SyscallName(*const u8);
 macro_rules! declare_syscall {
     ($(#[$meta:meta])*
      $vis:vis $name:ident) => {
-            $(#[$meta])*
-            $vis const $name: $crate::syscall::SyscallName
-                = unsafe{
-                    $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
-                        module_path!(),
-                        "::",
-                        stringify!($name),
-                        "\0").as_ptr())
-                };
+        $(#[$meta])*
+        $vis const $name: $crate::syscall::SyscallName = unsafe {
+            $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
+                module_path!(),
+                "::",
+                stringify!($name),
+                "\0").as_ptr())
+        };
     };
 }
 
 pub mod nr {
-    declare_syscall!(pub SYS_PANIC);
-    declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_INITIAL_INPUT);
+    declare_syscall!(pub SYS_LOG);
+    declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ_AVAIL);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_WRITE);
-    declare_syscall!(pub SYS_GETENV);
 }
 
 impl SyscallName {
@@ -141,80 +145,206 @@ impl SyscallName {
 #[repr(C)]
 pub struct Return(pub u32, pub u32);
 
-macro_rules! impl_syscall {
-    ($func_name:ident
-     // Ugh, unfortunately we can't make this a regular macro list since the asm macro
-     // doesn't expand register names so in($register) doesn't work.
-     $(, $a0:ident
-       $(, $a1:ident
-         $(, $a2: ident
-           $(, $a3: ident
-             $(, $a4: ident
-             )?
-           )?
-         )?
-       )?
-     )?) => {
-        /// Invoke a raw system call
-        #[no_mangle]
-        pub unsafe extern "C" fn $func_name(syscall: SyscallName,
-                                 from_host: *mut u32,
-                                 from_host_words: usize
-                                 $(,$a0: u32
-                                   $(,$a1: u32
-                                     $(,$a2: u32
-                                       $(,$a3: u32
-                                         $(,$a4: u32
-                                         )?
-                                       )?
-                                     )?
-                                   )?
-                                 )?
-        ) -> Return {
-            #[cfg(target_os = "zkvm")] {
-                let a0: u32;
-                let a1: u32;
-                ::core::arch::asm!(
-                    "ecall",
-                    in("t0") $crate::syscall::ecall::SOFTWARE,
-                    inout("a0") from_host => a0,
-                    inout("a1") from_host_words => a1,
-                    in("a2") syscall.as_ptr()
-                        $(,in("a3") $a0
-                          $(,in("a4") $a1
-                            $(,in("a5") $a2
-                              $(,in("a6") $a3
-                                $(,in("a7") $a4
-                                )?
-                              )?
-                            )?
-                          )?
-                        )?);
-                Return(a0, a1)
-            }
-            #[cfg(not(target_os = "zkvm"))]
-            unimplemented!()
-        }
+/// Invoke a raw system call
+#[no_mangle]
+pub unsafe extern "C" fn syscall_0(
+    syscall: SyscallName,
+    from_host: *mut u32,
+    from_host_words: usize,
+) -> Return {
+    #[cfg(target_os = "zkvm")]
+    {
+        let a0: u32;
+        let a1: u32;
+        asm!(
+            "ecall",
+            in("t0") ecall::SOFTWARE,
+            inout("a0") from_host => a0,
+            inout("a1") from_host_words => a1,
+            in("a2") syscall.as_ptr()
+        );
+        Return(a0, a1)
     }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
 }
 
-impl_syscall!(syscall_0);
-impl_syscall!(syscall_1, a3);
-impl_syscall!(syscall_2, a3, a4);
-impl_syscall!(syscall_3, a3, a4, a5);
-impl_syscall!(syscall_4, a3, a4, a5, a6);
-impl_syscall!(syscall_5, a3, a4, a5, a6, a7);
+/// Invoke a raw system call
+#[no_mangle]
+pub unsafe extern "C" fn syscall_1(
+    syscall: SyscallName,
+    from_host: *mut u32,
+    from_host_words: usize,
+    a3: u32,
+) -> Return {
+    #[cfg(target_os = "zkvm")]
+    {
+        let a0: u32;
+        let a1: u32;
+        asm!(
+            "ecall",
+            in("t0") ecall::SOFTWARE,
+            inout("a0") from_host => a0,
+            inout("a1") from_host_words => a1,
+            in("a2") syscall.as_ptr(),
+            in("a3") a3
+        );
+        Return(a0, a1)
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+/// Invoke a raw system call
+#[no_mangle]
+pub unsafe extern "C" fn syscall_2(
+    syscall: SyscallName,
+    from_host: *mut u32,
+    from_host_words: usize,
+    a3: u32,
+    a4: u32,
+) -> Return {
+    #[cfg(target_os = "zkvm")]
+    {
+        let a0: u32;
+        let a1: u32;
+        asm!(
+            "ecall",
+            in("t0") ecall::SOFTWARE,
+            inout("a0") from_host => a0,
+            inout("a1") from_host_words => a1,
+            in("a2") syscall.as_ptr(),
+            in("a3") a3,
+            in("a4") a4,
+        );
+        Return(a0, a1)
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+/// Invoke a raw system call
+#[no_mangle]
+pub unsafe extern "C" fn syscall_3(
+    syscall: SyscallName,
+    from_host: *mut u32,
+    from_host_words: usize,
+    a3: u32,
+    a4: u32,
+    a5: u32,
+) -> Return {
+    #[cfg(target_os = "zkvm")]
+    {
+        let a0: u32;
+        let a1: u32;
+        asm!(
+            "ecall",
+            in("t0") ecall::SOFTWARE,
+            inout("a0") from_host => a0,
+            inout("a1") from_host_words => a1,
+            in("a2") syscall.as_ptr(),
+            in("a3") a3,
+            in("a4") a4,
+            in("a5") a5,
+        );
+        Return(a0, a1)
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+/// Invoke a raw system call
+#[no_mangle]
+pub unsafe extern "C" fn syscall_4(
+    syscall: SyscallName,
+    from_host: *mut u32,
+    from_host_words: usize,
+    a3: u32,
+    a4: u32,
+    a5: u32,
+    a6: u32,
+) -> Return {
+    #[cfg(target_os = "zkvm")]
+    {
+        let a0: u32;
+        let a1: u32;
+        asm!(
+            "ecall",
+            in("t0") ecall::SOFTWARE,
+            inout("a0") from_host => a0,
+            inout("a1") from_host_words => a1,
+            in("a2") syscall.as_ptr(),
+            in("a3") a3,
+            in("a4") a4,
+            in("a5") a5,
+            in("a6") a6,
+        );
+        Return(a0, a1)
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+/// Invoke a raw system call
+#[no_mangle]
+pub unsafe extern "C" fn syscall_5(
+    syscall: SyscallName,
+    from_host: *mut u32,
+    from_host_words: usize,
+    a3: u32,
+    a4: u32,
+    a5: u32,
+    a6: u32,
+    a7: u32,
+) -> Return {
+    #[cfg(target_os = "zkvm")]
+    {
+        let a0: u32;
+        let a1: u32;
+        asm!(
+            "ecall",
+            in("t0") ecall::SOFTWARE,
+            inout("a0") from_host => a0,
+            inout("a1") from_host_words => a1,
+            in("a2") syscall.as_ptr(),
+            in("a3") a3,
+            in("a4") a4,
+            in("a5") a5,
+            in("a6") a6,
+            in("a7") a7,
+        );
+        Return(a0, a1)
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
 
 #[inline(always)]
 #[no_mangle]
-pub unsafe extern "C" fn sys_halt() {
+pub unsafe extern "C" fn sys_halt() -> ! {
     #[cfg(target_os = "zkvm")]
     {
         asm!(
             "ecall",
             in("t0") ecall::HALT,
+            in("a0") halt::NORMAL,
         );
         unreachable!();
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn sys_pause() {
+    #[cfg(target_os = "zkvm")]
+    {
+        asm!(
+            "ecall",
+            in("t0") ecall::HALT,
+            in("a0") halt::PAUSE,
+        );
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()

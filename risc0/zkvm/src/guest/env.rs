@@ -94,7 +94,6 @@ pub(crate) fn finalize() {
         for i in 0..DIGEST_WORDS {
             sys_output(i as u32, words[i]);
         }
-        sys_output(DIGEST_WORDS as u32, DIGEST_BYTES as u32);
         sys_halt()
     }
 }
