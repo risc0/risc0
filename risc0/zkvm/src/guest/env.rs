@@ -19,12 +19,11 @@ use core::{cell::UnsafeCell, default::Default, mem::MaybeUninit, ptr, ptr::null_
 use bytemuck::Pod;
 use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
-    abi::zkvm_abi_alloc_words,
     fileno, memory, syscall,
     syscall::{
         nr::{SYS_INITIAL_INPUT, SYS_LOG},
-        sys_cycle_count, sys_halt, sys_log, sys_output, sys_write, syscall_0, syscall_2,
-        SyscallName,
+        sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_output, sys_write, syscall_0,
+        syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -123,7 +122,7 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
     let syscall::Return(nelem, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
     let nwords = align_up(core::mem::size_of::<T>() * nelem as usize, WORD_SIZE) / WORD_SIZE;
-    let from_host_buf = unsafe { slice::from_raw_parts_mut(zkvm_abi_alloc_words(nwords), nwords) };
+    let from_host_buf = unsafe { slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
     syscall(syscall_name, &[], from_host_buf);
     &bytemuck::cast_slice(from_host_buf)[..nelem as usize]
 }

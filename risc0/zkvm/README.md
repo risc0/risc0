@@ -22,4 +22,5 @@ which contains various examples using our zkVM.
 III gives an overview of the RISC Zero zkVM.
 [Our YouTube channel](https://www.youtube.com/@risczero) has many more
 videos as well.
+* We track zkVM issues with known workarounds using the [rust guest workarounds](https://github.com/risc0/risc0/issues?q=is%3Aissue+is%3Aopen+label%3A%22rust+guest+workarounds%22) GitHub tag. If you're having problems running your code in the zkVM, you can see if there's a workaround, and if you're using a workaround, you can track when it gets resolved to a permanent solution.
 * And more on [the RISC Zero website](https://www.risczero.com/)!

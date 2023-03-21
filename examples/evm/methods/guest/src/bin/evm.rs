@@ -11,3 +11,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+#![no_main]
+#![allow(unused_imports)]
+use evm_core::{Env, EvmResult, ZkDb, EVM};
+use externc_libm::math::fmod;
+use risc0_zkvm::guest::env;
+
+risc0_zkvm::guest::entry!(main);
+
+pub fn main() {
+    let env: Env = env::read();
+    let db: ZkDb = env::read();
+
+    let mut evm = EVM::new();
+    evm.database(db);
+    evm.env = env;
+    let (res, state) = evm.transact();
+    env::commit(&EvmResult {
+        exit_reason: res.exit_reason,
+        state,
+    });
+    env::log("");
+}
