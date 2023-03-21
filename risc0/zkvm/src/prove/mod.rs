@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Run the zkVM guest and prove its results
+//! Run the zkVM guest and prove its results.
 //!
 //! # Usage
 //! The primary use of this module is to provably run a zkVM guest by use of a
@@ -78,19 +78,22 @@ use crate::{
     ControlIdLocator, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
+/// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
-mod cuda {
+pub mod cuda {
+    use std::rc::Rc;
+
     use risc0_circuit_rv32im::cuda::{CudaEvalCheckPoseidon, CudaEvalCheckSha256};
     use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
 
-    /// Returns the default SHA-256 HAL for the rv32im circuit
+    /// Returns the default SHA-256 HAL for the rv32im circuit.
     pub fn default_hal() -> (Rc<CudaHalSha256>, CudaEvalCheckSha256) {
         let hal = Rc::new(CudaHalSha256::new());
         let eval = CudaEvalCheckSha256::new(hal.clone());
         (hal, eval)
     }
 
-    /// Returns the default Poseidon HAL for the rv32im circuit
+    /// Returns the default Poseidon HAL for the rv32im circuit.
     pub fn default_poseidon_hal() -> (Rc<CudaHalPoseidon>, CudaEvalCheckPoseidon) {
         let hal = Rc::new(CudaHalPoseidon::new());
         let eval = CudaEvalCheckPoseidon::new(hal.clone());
@@ -98,22 +101,22 @@ mod cuda {
     }
 }
 
-#[cfg(feature = "cuda")]
-pub use cuda::{default_hal, default_poseidon_hal};
-
+/// HAL creation functions for Metal.
 #[cfg(feature = "metal")]
-mod metal {
+pub mod metal {
+    use std::rc::Rc;
+
     use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
     use risc0_zkp::hal::metal::{MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon};
 
-    /// Returns the default SHA-256 HAL for the rv32im circuit
+    /// Returns the default SHA-256 HAL for the rv32im circuit.
     pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
         let hal = Rc::new(MetalHalSha256::new());
         let eval = MetalEvalCheckSha256::new(hal.clone());
         (hal, eval)
     }
 
-    /// Returns the default Poseidon HAL for the rv32im circuit
+    /// Returns the default Poseidon HAL for the rv32im circuit.
     pub fn default_poseidon_hal() -> (Rc<MetalHalPoseidon>, MetalEvalCheck<MetalHashPoseidon>) {
         let hal = Rc::new(MetalHalPoseidon::new());
         let eval = MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone());
@@ -121,18 +124,16 @@ mod metal {
     }
 }
 
-#[cfg(feature = "metal")]
-pub use metal::{default_hal, default_poseidon_hal};
-
-mod cpu {
-    use alloc::rc::Rc;
+/// HAL creation functions for the CPU.
+pub mod cpu {
+    use std::rc::Rc;
 
     use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitImpl};
     use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
 
     use crate::CIRCUIT;
 
-    /// Returns the default SHA-256 HAL for the rv32im circuit
+    /// Returns the default SHA-256 HAL for the rv32im circuit.
     ///
     /// RISC Zero uses a
     /// [HAL](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/index.html)
@@ -152,7 +153,7 @@ mod cpu {
         (hal, eval)
     }
 
-    /// Returns the default Poseidon HAL for the rv32im circuit
+    /// Returns the default Poseidon HAL for the rv32im circuit.
     ///
     /// The same as [default_hal] except it gives the default HAL for
     /// securing the circuit using Poseidon (instead of SHA-256).
