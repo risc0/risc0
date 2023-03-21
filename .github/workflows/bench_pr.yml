@@ -45,14 +45,20 @@ jobs:
           prettyName: "${{ matrix.os }}-${{ matrix.feature }}"
           outputMarkdown: true
 
+      - name: Create output dir
+        run: |
+          mkdir -p ./pr-output/
+          echo ${{ github.event.number }} > ./pr-output/NR
+
       - name: Write compare markdown to file
         run: |
-          echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ matrix.os }}-${{ matrix.feature }}-output.md
+          echo "${{ steps.criterion-cmp.outputs.markdown }}" > pr-output/${{ matrix.os }}-${{ matrix.feature }}-output.md
+
 
       - uses: actions/upload-artifact@v3
         with:
           name: 'md-output'
-          path: ${{ matrix.os }}-${{ matrix.feature }}-output.md
+          path: pr-output/
           if-no-files-found: error
 
       # Note: we just push the comment data into artifacts, here

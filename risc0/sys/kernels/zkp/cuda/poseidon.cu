@@ -114,6 +114,7 @@ extern "C" __global__ void poseidon_fold(const Fp* ROUND_CONSTANTS,
                      const Fp* input,
                      uint32_t output_size) {
   uint32_t gid = blockDim.x * blockIdx.x + threadIdx.x;
+  if (gid >= output_size) { return; }
   Fp cells[CELLS];
   for (size_t i = 0; i < CELLS_OUT; i++) {
     cells[i] = input[2 * gid * CELLS_OUT + i];
@@ -134,6 +135,7 @@ extern "C" __global__ void poseidon_rows(const Fp* ROUND_CONSTANTS,
                      uint32_t count,
                      uint32_t col_size) { 
   uint32_t gid = blockDim.x * blockIdx.x + threadIdx.x;
+  if (gid >= count) { return; }
   Fp cells[CELLS];
   uint used = 0;
   for (uint i = 0; i < col_size; i++) {
