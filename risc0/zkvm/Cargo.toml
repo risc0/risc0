@@ -23,7 +23,7 @@ protobuf-src = { version = "1.1", optional = true }
 anyhow = { version = "1.0", default-features = false }
 bytemuck = "1.12"
 cfg-if = "1.0"
-externc-libm = { git = "https://github.com/HaruxOS/externc-libm", rev = "873e2ee"}
+externc-libm = { git = "https://github.com/HaruxOS/externc-libm", rev = "873e2ee" }
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-circuit-rv32im = { workspace = true }
