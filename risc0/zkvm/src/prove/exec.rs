@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use core::cmp;
 
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
@@ -49,6 +50,7 @@ use crate::{
 };
 
 const IMM_BITS: usize = 12;
+const BIGINT_BYTE_WIDTH: usize = 32;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -518,6 +520,128 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         }
         // debug!("  quot: {quot}, rem: {rem}");
         (split_word8(quot), split_word8(rem))
+    }
+
+    // Division of two little-endian positive byte-limbed bigints. a = q * b + r.
+    // Assumes a and b are both normalized with limbs in range [0, 255].
+    fn bigint_divide(
+        &self,
+        a_elems: &[BabyBearElem; BIGINT_BYTE_WIDTH * 2],
+        b_elems: &[BabyBearElem; BIGINT_BYTE_WIDTH],
+        out: &mut [BabyBearElem; BIGINT_BYTE_WIDTH * 3],
+    ) -> Result<()> {
+        // This is a variant of school-book multiplication.
+        // Reference the Handbook of Elliptic and Hyper-elliptic Cryptography alg.
+        // 10.5.1
+
+        // Setup working buffers of u64 elements. We use u64 values here because this
+        // implementation does a lot of non-field opperations and so we need to take the
+        // inputs out of Montgomery form.
+        let mut a = [0u64; BIGINT_BYTE_WIDTH * 2];
+        for (i, ai) in a_elems.iter().copied().enumerate() {
+            a[i] = u64::from(ai)
+        }
+        let mut b = [0u64; BIGINT_BYTE_WIDTH + 1];
+        for (i, bi) in b_elems.iter().copied().enumerate() {
+            b[i] = u64::from(bi)
+        }
+        let mut q = [0u64; BIGINT_BYTE_WIDTH * 2];
+
+        // Determine n, the width of the denominator, and check for divide by zero.
+        let mut n = BIGINT_BYTE_WIDTH;
+        while n > 0 && b[n - 1] == 0 {
+            n -= 1;
+        }
+        if n == 0 {
+            anyhow::bail!("bigint divide: divide by zero");
+        }
+        if n < 2 {
+            // FIXME: This routine should be updated to lift this restriction.
+            anyhow::bail!("bigint divide: denominator must be at least 9 bits");
+        }
+        let m = a.len() - n;
+
+        // Shift (i.e. multiply by two) the inputs until the leading bit is 1.
+        let mut shift_bits = 0u64;
+        while (b[n - 1] & (0x80 >> shift_bits)) == 0 {
+            shift_bits += 1;
+        }
+        let mut carry = 0u64;
+        for i in 0..n {
+            let tmp = (b[i] << shift_bits) + carry;
+            b[i] = tmp & 0xFF;
+            carry = tmp >> 8;
+        }
+        if carry != 0 {
+            panic!("bigint divide: final carry in input shift");
+        }
+        for i in 0..(a.len() - 1) {
+            let tmp = (a[i] << shift_bits) + carry;
+            a[i] = tmp & 0xFF;
+            carry = tmp >> 8;
+        }
+        a[a.len() - 1] = carry;
+
+        for i in (0..=m).rev() {
+            // Approximate how many multiples of b can be subtracted. May overestimate by up
+            // to one.
+            let mut q_approx = cmp::min(((a[i + n] << 8) + a[i + n - 1]) / b[n - 1], 255);
+            while (q_approx * ((b[n - 1] << 8) + b[n - 2]))
+                > ((a[i + n] << 16) + (a[i + n - 1] << 8) + a[i + n - 2])
+            {
+                q_approx -= 1;
+            }
+
+            // Subtract from a multiples of the denominator.
+            let mut borrow = 0u64;
+            for j in 0..=n {
+                let sub = q_approx * b[j] + borrow;
+                if a[i + j] < (sub & 0xFF) {
+                    a[i + j] += 0x100 - (sub & 0xFF);
+                    borrow = (sub >> 8) + 1;
+                } else {
+                    a[i + j] -= sub & 0xFF;
+                    borrow = sub >> 8;
+                }
+            }
+            if borrow > 0 {
+                // Oops, went negative. Add back one multiple of b.
+                q_approx -= 1;
+                let mut carry = 0u64;
+                for j in 0..=n {
+                    let tmp = a[i + j] + b[j] + carry;
+                    a[i + j] = tmp & 0xFF;
+                    carry = tmp >> 8;
+                }
+                // Adding back one multiple of b should go from negative back to positive.
+                if borrow - carry != 0 {
+                    panic!("bigint divide: underflow in bigint division");
+                }
+            }
+
+            q[i] = q_approx;
+        }
+
+        // Undo the shift done in preprocessing the inputs.
+        // Shift has no effect on the quotient, but the remainder needs to be adjusted.
+        // Note that everthing past the first n limbs will be dropped.
+        if (a[0] & ((1 << shift_bits) - 1)) != 0 {
+            panic!("bigint divide: remainder has non-zero bits to be shifted out");
+        }
+        for i in 0..n {
+            a[i] =
+                (a[i] >> shift_bits) + ((((1 << shift_bits) - 1) & a[i + 1]) << (8 - shift_bits));
+        }
+
+        // Write q and r into the out buffer, converting back to Montgomery form.
+        // First BIGINT_BYTE_WIDTH*2 limbs are q, latter BIGINT_BYTE_WIDTH limbs are r.
+        for i in 0..q.len() {
+            out[i] = a[i].into();
+        }
+        for i in 0..n {
+            out[q.len() + i] = a[i].into();
+        }
+        Ok(())
     }
 
     fn extract_trace(&mut self, message: &str, args: &[BabyBearElem]) -> Result<()> {
