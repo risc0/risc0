@@ -13,9 +13,7 @@
 // limitations under the License.
 
 #![no_main]
-#![allow(unused_imports)]
 use evm_core::{Env, EvmResult, ZkDb, EVM};
-use externc_libm::math::fmod;
 use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);

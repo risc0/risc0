@@ -460,7 +460,7 @@ dependencies = [
 [[package]]
 name = "externc-libm"
 version = "0.1.0"
-source = "git+https://github.com/HaruxOS/externc-libm#873e2ee216f59f20521599adf7669ccc9014b60d"
+source = "git+https://github.com/HaruxOS/externc-libm?rev=873e2ee#873e2ee216f59f20521599adf7669ccc9014b60d"
 dependencies = [
  "libm",
 ]
@@ -979,7 +979,6 @@ name = "methods-guest"
 version = "0.1.0"
 dependencies = [
  "evm-core",
- "externc-libm",
  "risc0-build",
  "risc0-zkvm",
 ]
@@ -1589,6 +1588,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "elf",
+ "externc-libm",
  "getrandom",
  "hex",
  "log",
