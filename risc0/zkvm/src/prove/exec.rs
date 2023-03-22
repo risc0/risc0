@@ -935,9 +935,7 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         }
 
         let machine = MachineContext::new(host, Rc::clone(&image));
-        // let min_po2 = log2_ceil(1570 + program.image.len() / 3 + ZK_CYCLES);
-        let min_po2 = 10; // TODO
-        let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2, &io);
+        let executor = Executor::new(circuit, machine, 13, MAX_CYCLES_PO2, &io);
         Self { executor }
     }
 
