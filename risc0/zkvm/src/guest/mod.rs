@@ -63,7 +63,7 @@ pub mod sha;
 
 use core::{arch::asm, mem, ptr};
 
-// Empty import to get the extern_libm symbols linked into the final linker run.
+// Empty import to get the externc_libm symbols linked into the final linker run.
 use externc_libm::math::fminf;
 use getrandom::register_custom_getrandom;
 use getrandom::Error;
