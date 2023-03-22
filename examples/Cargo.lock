@@ -1929,6 +1929,7 @@ dependencies = [
  "metal",
  "rand",
  "rayon",
+ "risc0-circuit-rv32im-sys",
  "risc0-core",
  "risc0-sys",
  "risc0-zkp",
@@ -1936,6 +1937,17 @@ dependencies = [
  "rustacuda_core",
  "rustacuda_derive",
  "tracing",
+]
+
+[[package]]
+name = "risc0-circuit-rv32im-sys"
+version = "0.13.0"
+dependencies = [
+ "cc",
+ "glob",
+ "risc0-build-kernel",
+ "risc0-core",
+ "risc0-sys",
 ]
 
 [[package]]

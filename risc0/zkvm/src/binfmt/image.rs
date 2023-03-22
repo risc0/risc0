@@ -32,6 +32,7 @@ const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
 }
 
+#[derive(Clone)]
 pub struct PageTableInfo {
     pub page_size: u32,
     page_table_addr: u32,
@@ -100,14 +101,17 @@ impl PageTableInfo {
 /// This is an image of the full memory state of the zkVM, including the data,
 /// text, inputs, page table, and system memory. In addition to the memory image
 /// proper, this includes some metadata about the page table.
+#[derive(Clone)]
 pub struct MemoryImage {
     /// The memory image as a vector of bytes
     pub image: Vec<u8>,
+
     /// The page table root
     ///
     /// The zkVM page table is structured as a Merkle tree, and this is the root
     /// of that Merkle tree.
     pub root: Digest,
+
     /// Metadata about the structure of the page table
     pub info: PageTableInfo,
 }

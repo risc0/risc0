@@ -83,11 +83,11 @@ use anyhow::{anyhow, Result};
 #[cfg(not(target_os = "zkvm"))]
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize, WORD_SIZE};
+use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 #[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::core::config::{HashSuite, HashSuiteSha256};
 use risc0_zkp::{core::sha::Digest, verify::VerificationError, MIN_CYCLES_PO2};
-use risc0_zkvm_platform::syscall::DIGEST_BYTES;
+use risc0_zkvm_platform::{syscall::DIGEST_BYTES, WORD_SIZE};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -95,7 +95,7 @@ use crate::{
     ControlIdLocator, CIRCUIT,
 };
 
-/// Reports whether the zkVM is in the insecure seal skipping mode
+/// Reports whether the zkVM is in the insecure seal skipping mode.
 ///
 /// Returns `true` when in the insecure seal skipping mode. Returns `false` when
 /// in normal secure mode.
@@ -144,7 +144,7 @@ pub struct Receipt {
     /// The journal contains the public outputs of the computation.
     ///
     /// Specifically, the journal contains the data explicitly written to it by
-    /// the guest with [crate::guest::env::commit]
+    /// the guest with [crate::guest::env::commit].
     pub journal: Vec<u8>,
 
     /// The seal is an opaque cryptographic blob that attests to the integrity

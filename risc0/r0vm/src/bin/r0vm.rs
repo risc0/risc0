@@ -97,11 +97,10 @@ fn read_image_id(verbose: u8, elf_file: &Path, image_id_file: Option<&Path>) -> 
 
 fn run_prover(
     elf_contents: &[u8],
-    image_id: &Digest,
     opts: ProverOpts,
     initial_input: Option<Vec<u8>>,
 ) -> Result<Receipt> {
-    let mut prover = Prover::new_with_opts(&elf_contents, image_id.clone(), opts).unwrap();
+    let mut prover = Prover::new_with_opts(&elf_contents, opts).unwrap();
     if let Some(bytes) = initial_input {
         prover.add_input_u8_slice(bytes.as_slice());
     }
@@ -182,7 +181,6 @@ fn main() {
 
     let proof = run_prover(
         &elf_contents,
-        &image_id,
         if let Some(ref mut profiler) = guest_prof {
             opts.with_trace_callback(profiler.make_trace_callback())
         } else {

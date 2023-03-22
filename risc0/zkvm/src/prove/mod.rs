@@ -54,7 +54,7 @@ use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_G
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
-    core::{config::HashSuite, sha::Digest},
+    core::config::HashSuite,
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };
@@ -71,9 +71,12 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
+use self::{
+    exec::{HostHandler, RV32Executor},
+    preflight::Preflight,
+};
 use crate::{
     binfmt::elf::Program,
-    prove::preflight::Preflight,
     receipt::{insecure_skip_seal, Receipt},
     ControlIdLocator, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
@@ -193,15 +196,15 @@ pub struct ProverOpts<'a> {
 }
 
 impl<'a> ProverOpts<'a> {
-    /// If true, skip generating the seal in receipt.  This should
-    /// only be used for testing.  In this case, performace will be
+    /// If true, skip generating the seal in receipt. This should
+    /// only be used for testing. In this case, performace will be
     /// much better but we will not be able to cryptographically
     /// verify the execution.
     pub fn with_skip_seal(self, skip_seal: bool) -> Self {
         Self { skip_seal, ..self }
     }
 
-    /// If true, don't verify the seal after creating it.  This
+    /// If true, don't verify the seal after creating it. This
     /// is useful if you wish to use a non-standard verifier for
     /// example.
     pub fn with_skip_verify(self, skip_verify: bool) -> Self {
@@ -212,22 +215,22 @@ impl<'a> ProverOpts<'a> {
     }
 
     /// EXPERIMENTAL: If this and skip_seal are both true, run using
-    /// preflight instead of with the circuit.  This feature is not
-    /// yet complete.  Alternatively, enable preflight by setting the
-    /// RISC0_EXPERIMENTAL_PREFLIGHT environment variable.
+    /// preflight instead of with the circuit. This feature is not
+    /// yet complete. Alternatively, enable preflight by setting the
+    /// `RISC0_EXPERIMENTAL_PREFLIGHT` environment variable.
     pub fn with_preflight(self, preflight: bool) -> Self {
         Self { preflight, ..self }
     }
 
     /// Add a handler for a syscall which inputs and outputs a slice
-    /// of plain old data..  The guest can call these by invoking
+    /// of plain old data. The guest can call these by invoking
     /// `risc0_zkvm::guest::env::send_recv_slice`
     pub fn with_slice_io(self, syscall: SyscallName, handler: impl SliceIo + 'a) -> Self {
         self.with_syscall(syscall, handler.to_syscall())
     }
 
     /// Add a handler for a syscall which inputs and outputs a slice
-    /// of plain old data.  The guest can call these callbacks by
+    /// of plain old data. The guest can call these callbacks by
     /// invoking `risc0_zkvm::guest::env::send_recv_slice`.
     pub fn with_sendrecv_callback(
         self,
@@ -237,8 +240,8 @@ impl<'a> ProverOpts<'a> {
         self.with_slice_io(syscall, io::slice_io_from_fn(f))
     }
 
-    /// Add a handler for a raw syscall implementation.  The guest can
-    /// invoke these using the risc0_zkvm_platform::syscall!  macro.
+    /// Add a handler for a raw syscall implementation. The guest can
+    /// invoke these using the `risc0_zkvm_platform::syscall!` macro.
     pub fn with_syscall(mut self, syscall: SyscallName, handler: impl Syscall + 'a) -> Self {
         self.syscall_handlers
             .insert(syscall.as_str().to_string(), Box::new(handler));
@@ -394,9 +397,10 @@ impl<'a> Default for ProverOpts<'a> {
 /// let proven_result: ResultType = risc0_zkvm::serde::from_slice(&receipt.journal)?;
 /// ```
 pub struct Prover<'a> {
-    elf: Program,
     inner: ProverImpl<'a>,
-    image_id: Digest,
+    image: MemoryImage,
+    pc: u32,
+
     /// How many cycles executing the guest took.
     ///
     /// Initialized to 0 by [Prover::new], then computed when [Prover::run] is
@@ -409,24 +413,29 @@ impl<'a> Prover<'a> {
     /// Construct a new prover using the default options.
     ///
     /// This will return an `Err` if `elf` is not a valid ELF file.
-    pub fn new<D>(elf: &[u8], image_id: D) -> Result<Self>
-    where
-        Digest: From<D>,
-    {
-        Self::new_with_opts(elf, image_id, ProverOpts::default())
+    pub fn new(elf: &[u8]) -> Result<Self> {
+        Self::new_with_opts(elf, ProverOpts::default())
     }
 
     /// Construct a new prover using custom [ProverOpts].
     ///
     /// This will return an `Err` if `elf` is not a valid ELF file.
-    pub fn new_with_opts<D>(elf: &[u8], image_id: D, opts: ProverOpts<'a>) -> Result<Self>
-    where
-        Digest: From<D>,
-    {
+    pub fn new_with_opts(elf: &[u8], opts: ProverOpts<'a>) -> Result<Self> {
+        let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
         Ok(Prover {
-            elf: Program::load_elf(&elf, MEM_SIZE as u32)?,
             inner: ProverImpl::new(opts),
-            image_id: image_id.into(),
+            image: MemoryImage::new(&program, PAGE_SIZE as u32),
+            pc: program.entry,
+            cycles: 0,
+        })
+    }
+
+    /// Construct a prover from a memory image.
+    pub fn from_image(image: MemoryImage, pc: u32, opts: ProverOpts<'a>) -> Result<Self> {
+        Ok(Prover {
+            inner: ProverImpl::new(opts),
+            image,
+            pc,
             cycles: 0,
         })
     }
@@ -496,13 +505,13 @@ impl<'a> Prover<'a> {
     {
         self.inner.opts = take(&mut self.inner.opts).finalize();
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
+        let journal = self.inner.journal.buf.take();
 
         if self.inner.opts.preflight {
             if skip_seal {
-                let image = MemoryImage::new(&self.elf, PAGE_SIZE as u32);
                 let mut preflight = Preflight::new(
-                    self.elf.entry,
-                    image,
+                    self.pc,
+                    self.image.clone(),
                     take(&mut self.inner.opts),
                     self.inner.input.clone(),
                 );
@@ -510,7 +519,7 @@ impl<'a> Prover<'a> {
                     preflight.step().unwrap()
                 }
                 return Ok(Receipt {
-                    journal: self.inner.journal.buf.take(),
+                    journal,
                     seal: Vec::new(),
                 });
             } else {
@@ -518,8 +527,14 @@ impl<'a> Prover<'a> {
             }
         }
 
-        let mut executor = exec::RV32Executor::new(&CIRCUIT, &self.elf, &mut self.inner);
-        self.cycles = executor.run()?;
+        // TODO: avoid image clone
+        let image_id = self.image.root.clone();
+        let mut executor =
+            RV32Executor::new(&CIRCUIT, self.image.clone(), self.pc, &mut self.inner);
+        let (cycles, image, pc) = executor.run()?;
+        self.cycles = cycles;
+        self.image = image;
+        self.pc = pc;
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
         let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
@@ -552,14 +567,12 @@ impl<'a> Prover<'a> {
         };
 
         // Attach the full version of the output journal & construct receipt object
-        let receipt = Receipt {
-            journal: self.inner.journal.buf.take(),
-            seal,
-        };
+        let journal = self.inner.journal.buf.take();
+        let receipt = Receipt { journal, seal };
 
         if !skip_seal && !self.inner.opts.skip_verify {
             // Verify receipt to make sure it works
-            receipt.verify_with_hash::<H::HashSuite, _>(&self.image_id)?;
+            receipt.verify_with_hash::<H::HashSuite, _>(&image_id)?;
         }
 
         Ok(receipt)
@@ -576,6 +589,7 @@ impl Write for Journal {
     fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
         self.buf.borrow_mut().write(bytes)
     }
+
     fn flush(&mut self) -> std::io::Result<()> {
         self.buf.borrow_mut().flush()
     }
@@ -599,7 +613,7 @@ impl<'a> ProverImpl<'a> {
     }
 }
 
-impl<'a> exec::HostHandler for ProverImpl<'a> {
+impl<'a> HostHandler for ProverImpl<'a> {
     fn on_txrx(
         &mut self,
         ctx: &dyn SyscallContext,
