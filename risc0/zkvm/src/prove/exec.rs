@@ -37,7 +37,7 @@ use risc0_zkvm_platform::{
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
         DIGEST_WORDS,
     },
-    PAGE_SIZE, WORD_SIZE,
+    BIGINT_BYTE_WIDTH, PAGE_SIZE, WORD_SIZE,
 };
 
 use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
@@ -50,7 +50,6 @@ use crate::{
 };
 
 const IMM_BITS: usize = 12;
-const BIGINT_BYTE_WIDTH: usize = 32;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -292,6 +291,13 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 );
                 Ok(())
             }
+            "bigintDivide" => {
+                let (a, b) = args.split_at(BIGINT_BYTE_WIDTH * 2);
+                let (q, r) = self.bigint_divide(a.try_into()?, b.try_into()?)?;
+                outs[..BIGINT_BYTE_WIDTH * 2].copy_from_slice(&q[..]);
+                outs[BIGINT_BYTE_WIDTH * 2..].copy_from_slice(&r[..]);
+                Ok(())
+            }
             "pageRead" => {
                 (outs[0]) = self.page_read(args[0]);
                 Ok(())
@@ -522,14 +528,28 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         (split_word8(quot), split_word8(rem))
     }
 
-    // Division of two little-endian positive byte-limbed bigints. a = q * b + r.
-    // Assumes a and b are both normalized with limbs in range [0, 255].
+    /// Division of two little-endian positive byte-limbed bigints. a = q * b +
+    /// r.
+    ///
+    /// Assumes a and b are both normalized with limbs in range [0, 255].
+    /// Returns q and r as arrays of BabyBearElems.
+    /// Returns an error when:
+    /// * Input denominator b is 0.
+    /// * Input denominator b is less than 9 bits.
+    /// * Quotient result q is greater than BIGINT_BYTE_WIDTH limbs TODO(victor)
+    ///   make this true. In general a quotient can be up to as large as the
+    ///   numerator (e.g. divide by 1), but the circuit only supports divisions
+    ///   that fit within a normal-width (i.e. not a multiplicaition result)
+    ///   bigint. When b is a modulus and a is a multiplication result of two
+    ///   numbers less than the modulus, this restriction is always satisfied.
     fn bigint_divide(
         &self,
         a_elems: &[BabyBearElem; BIGINT_BYTE_WIDTH * 2],
         b_elems: &[BabyBearElem; BIGINT_BYTE_WIDTH],
-        out: &mut [BabyBearElem; BIGINT_BYTE_WIDTH * 3],
-    ) -> Result<()> {
+    ) -> Result<(
+        [BabyBearElem; BIGINT_BYTE_WIDTH * 2],
+        [BabyBearElem; BIGINT_BYTE_WIDTH],
+    )> {
         // This is a variant of school-book multiplication.
         // Reference the Handbook of Elliptic and Hyper-elliptic Cryptography alg.
         // 10.5.1
@@ -625,23 +645,25 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         // Undo the shift done in preprocessing the inputs.
         // Shift has no effect on the quotient, but the remainder needs to be adjusted.
         // Note that everthing past the first n limbs will be dropped.
-        if (a[0] & ((1 << shift_bits) - 1)) != 0 {
+        let mask = (1 << shift_bits) - 1;
+        if a[0] & mask != 0 {
             panic!("bigint divide: remainder has non-zero bits to be shifted out");
         }
         for i in 0..n {
-            a[i] =
-                (a[i] >> shift_bits) + ((((1 << shift_bits) - 1) & a[i + 1]) << (8 - shift_bits));
+            a[i] = (a[i] >> shift_bits) + ((mask & a[i + 1]) << (8 - shift_bits));
         }
 
         // Write q and r into the out buffer, converting back to Montgomery form.
         // First BIGINT_BYTE_WIDTH*2 limbs are q, latter BIGINT_BYTE_WIDTH limbs are r.
-        for i in 0..q.len() {
-            out[i] = a[i].into();
+        let mut q_elems = [BabyBearElem::ZERO; BIGINT_BYTE_WIDTH * 2];
+        for i in 0..BIGINT_BYTE_WIDTH * 2 {
+            q_elems[i] = q[i].into();
         }
+        let mut r_elems = [BabyBearElem::ZERO; BIGINT_BYTE_WIDTH];
         for i in 0..n {
-            out[q.len() + i] = a[i].into();
+            r_elems[i] = a[i].into();
         }
-        Ok(())
+        Ok((q_elems, r_elems))
     }
 
     fn extract_trace(&mut self, message: &str, args: &[BabyBearElem]) -> Result<()> {

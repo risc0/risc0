@@ -16,13 +16,14 @@
 use core::arch::asm;
 use core::{cmp::min, ptr::null_mut};
 
-use crate::WORD_SIZE;
+use crate::{BIGINT_WORD_WIDTH, WORD_SIZE};
 
 pub mod ecall {
     pub const HALT: u32 = 0;
     pub const OUTPUT: u32 = 1;
     pub const SOFTWARE: u32 = 2;
     pub const SHA: u32 = 3;
+    pub const BIGINT: u32 = 4;
 }
 
 pub mod reg_abi {
@@ -65,6 +66,10 @@ pub mod reg_abi {
 
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
+
+pub mod bigint {
+    pub const OP_MULTIPLY: u32 = 0;
+}
 
 /// Compute `ceil(a / b)` via truncated integer division.
 #[allow(dead_code)]
@@ -281,6 +286,31 @@ pub unsafe fn sys_sha_buffer(
             in("a2") buf,
             in("a3") buf.add(DIGEST_BYTES),
             in("a4") count,
+        );
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn sys_bigint(
+    result: *mut [u32; BIGINT_WORD_WIDTH],
+    op: u32,
+    x: *const [u32; BIGINT_WORD_WIDTH],
+    y: *const [u32; BIGINT_WORD_WIDTH],
+    modulus: *const [u32; BIGINT_WORD_WIDTH],
+) {
+    #[cfg(target_os = "zkvm")]
+    {
+        asm!(
+            "ecall",
+            in("t0") ecall::BIGINT,
+            in("a0") result,
+            in("a1") op,
+            in("a2") x,
+            in("a3") y,
+            in("a4") modulus,
         );
     }
     #[cfg(not(target_os = "zkvm"))]
