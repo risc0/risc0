@@ -234,6 +234,15 @@ fn slice_io() {
 }
 
 #[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn libm_build() {
+    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::LibM).unwrap());
+    prover.run().expect("Could not get receipt");
+}
+
+#[test]
 fn host_syscall() {
     let expected: Vec<Vec<u8>> = vec![
         "".into(),
