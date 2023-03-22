@@ -23,4 +23,3 @@ tempfile = "3.3"
 [[bin]]
 path = "src/bin/main.rs"
 name = "cargo-risczero"
-

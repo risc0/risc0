@@ -60,6 +60,13 @@ pub struct NewCommand {
     /// Sets the value of the arg to be the cargo `branch` variable
     #[clap(value_parser, long)]
     pub use_git_branch: Option<String>,
+
+    /// Toggles `std` feature flag for guest code
+    ///
+    /// Toggles the `#![no_std]` in the guest main() and the `std` feature flag
+    /// on the `risc0_zkvm` crate.
+    #[clap(value_parser, long, global = true)]
+    pub std: bool,
 }
 
 impl NewCommand {
@@ -100,12 +107,16 @@ impl NewCommand {
             template_variables.push(format!("risc0_crate_branch={branch}"))
         }
 
+        if self.std {
+            template_variables.push(format!("risc0_std={}", self.std));
+        }
+
         cargo_generate::generate(GenerateArgs {
             template_path,
             list_favorites: false,
             name: Some(self.name.to_case(Case::Snake)),
             force: true,
-            verbose: false,
+            verbose: true,
             template_values_file: None,
             silent: false,
             config: None,
@@ -192,6 +203,11 @@ mod tests {
             &format!("risc0-zkvm = \"{RISC0_DEFAULT_VERSION}\""),
             &proj_path.join("host/Cargo.toml")
         ));
+
+        assert!(find_in_file(
+            "#![no_std]",
+            &proj_path.join("methods/guest/src/bin/method_name.rs")
+        ));
     }
 
     #[test]
@@ -221,6 +237,36 @@ mod tests {
         assert!(find_in_file(
             "risc0-zkvm = { git = \"https://github.com/risc0/risc0.git\", branch = \"main\"",
             &proj_path.join("host/Cargo.toml")
+        ));
+    }
+
+    #[test]
+    fn generate_std() {
+        let (tmpdir, template_path, proj_name) = make_test_env();
+
+        let new = NewCommand::parse_from([
+            "new",
+            "--template",
+            &template_path
+                .join("templates/rust-starter")
+                .to_string_lossy(),
+            "--dest",
+            &tmpdir.path().to_string_lossy(),
+            "--std",
+            proj_name,
+        ]);
+
+        new.run();
+
+        let proj_path = tmpdir.path().join(proj_name);
+
+        assert!(!find_in_file(
+            "#![no_std]",
+            &proj_path.join("methods/guest/src/bin/method_name.rs")
+        ));
+        assert!(!find_in_file(
+            "feature = ['std']",
+            &proj_path.join("methods/guest/Cargo.toml")
         ));
     }
 }
