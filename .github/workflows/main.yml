@@ -18,7 +18,7 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/rustup
       - name: Install cargo-sort
-        uses: risc0/cargo-install@v1
+        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
           crate: cargo-sort
           version: "1.0"
