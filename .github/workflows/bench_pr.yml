@@ -10,6 +10,10 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   bench:
     runs-on: [self-hosted, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
@@ -47,18 +51,17 @@ jobs:
 
       - name: Create output dir
         run: |
-          mkdir -p ./pr-output/
-          echo ${{ github.event.number }} > ./pr-output/NR
+          mkdir -p ${{ runner.temp }}/pr-output/
+          echo ${{ github.event.number }} > ${{ runner.temp }}/pr-output/NR
 
       - name: Write compare markdown to file
         run: |
-          echo "${{ steps.criterion-cmp.outputs.markdown }}" > pr-output/${{ matrix.os }}-${{ matrix.feature }}-output.md
-
+          echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ runner.temp }}/pr-output/${{ matrix.os }}-${{ matrix.feature }}-output.md
 
       - uses: actions/upload-artifact@v3
         with:
           name: 'md-output'
-          path: pr-output/
+          path: ${{ runner.temp }}/pr-output/
           if-no-files-found: error
 
       # Note: we just push the comment data into artifacts, here
