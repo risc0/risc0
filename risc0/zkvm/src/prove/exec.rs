@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use alloc::{
+    collections::{BTreeMap, BTreeSet, VecDeque},
+    rc::Rc,
+};
+use core::cell::RefCell;
 
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
@@ -70,7 +74,7 @@ pub trait HostHandler {
 }
 
 pub struct MemoryState {
-    pub ram: MemoryImage,
+    pub ram: Rc<RefCell<MemoryImage>>,
 
     // Plonk tables for sorting plonks in proper order
     pub ram_plonk: plonk::RamPlonk,
@@ -87,7 +91,7 @@ impl SyscallContext for MemoryState {
     #[track_caller]
     fn load_u8(&self, addr: u32) -> u8 {
         // debug!("load_u8: 0x{addr:08X}");
-        self.ram.image[addr as usize]
+        self.ram.borrow().image[addr as usize]
     }
 
     #[track_caller]
@@ -107,7 +111,7 @@ impl SyscallContext for MemoryState {
 }
 
 impl MemoryState {
-    pub(crate) fn new(image: MemoryImage) -> Self {
+    pub(crate) fn new(image: Rc<RefCell<MemoryImage>>) -> Self {
         Self {
             ram: image,
             ram_plonk: plonk::RamPlonk::new(),
@@ -120,7 +124,7 @@ impl MemoryState {
     #[track_caller]
     fn store_u8(&mut self, addr: u32, value: u8) {
         // debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
-        self.ram.image[addr as usize] = value;
+        self.ram.borrow_mut().image[addr as usize] = value;
     }
 
     #[track_caller]
@@ -198,36 +202,34 @@ enum IncludeDir {
     Both = 0b11,
 }
 
-struct PageFaults<'a> {
+struct PageFaults {
     reads: BTreeSet<u32>,
     writes: BTreeSet<u32>,
-    info: &'a PageTableInfo,
     force_flush: bool,
 }
 
-impl<'a> PageFaults<'a> {
-    pub fn new(info: &'a PageTableInfo) -> Self {
+impl PageFaults {
+    pub fn new() -> Self {
         Self {
             reads: BTreeSet::new(),
             writes: BTreeSet::new(),
-            info,
             force_flush: false,
         }
     }
 
-    pub fn include(&mut self, addr: u32, dir: IncludeDir) {
+    pub fn include(&mut self, info: &PageTableInfo, addr: u32, dir: IncludeDir) {
         let dir = dir as u32;
         let mut addr = addr;
         loop {
-            let page_idx = self.info.get_page_index(addr);
-            let entry_addr = self.info.get_page_entry_addr(page_idx);
+            let page_idx = info.get_page_index(addr);
+            let entry_addr = info.get_page_entry_addr(page_idx);
             if dir & IncludeDir::Read as u32 != 0 {
                 self.reads.insert(page_idx);
             }
             if dir & IncludeDir::Write as u32 != 0 {
                 self.writes.insert(page_idx);
             }
-            if page_idx == self.info.root_idx {
+            if page_idx == info.root_idx {
                 break;
             }
             addr = entry_addr;
@@ -411,7 +413,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
 }
 
 impl<'a, H: HostHandler> MachineContext<'a, H> {
-    pub fn new(io: &'a mut H, image: MemoryImage) -> Self {
+    pub fn new(io: &'a mut H, image: Rc<RefCell<MemoryImage>>) -> Self {
         MachineContext {
             memory: MemoryState::new(image),
             trace_enabled: io.is_trace_enabled(),
@@ -463,10 +465,10 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     }
 
     fn get_page_faults(&self, pc: u32, inst: u32, opcode: &OpCode) -> PageFaults {
-        let info = &self.memory.ram.info;
-        let mut faults = PageFaults::new(info);
-        faults.include(SYSTEM.start() as u32, IncludeDir::Both);
-        faults.include(pc, IncludeDir::Read);
+        let info = &self.memory.ram.borrow().info;
+        let mut faults = PageFaults::new();
+        faults.include(info, SYSTEM.start() as u32, IncludeDir::Both);
+        faults.include(info, pc, IncludeDir::Read);
 
         if opcode.major == MajorType::MemIo {
             let rs1 = (inst >> 15) & setbits(5);
@@ -477,7 +479,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 let imm = sign_extend(imm as i32, IMM_BITS as u32);
                 let addr = base.checked_add_signed(imm).unwrap();
                 // debug!("  load: 0x{inst:08x}, M[x{rs1} + {imm}], addr: 0x{addr:08x}");
-                faults.include(addr, IncludeDir::Read);
+                faults.include(info, addr, IncludeDir::Read);
             } else {
                 // store: S-type
                 let imm_low = (inst >> 7) & setbits(5);
@@ -486,7 +488,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 let imm = sign_extend(imm as i32, IMM_BITS as u32);
                 let addr = base.checked_add_signed(imm).unwrap();
                 // debug!("  store: 0x{inst:08x}, M[x{rs1} + {imm}], addr: 0x{addr:08x}");
-                faults.include(addr, IncludeDir::Read);
+                faults.include(info, addr, IncludeDir::Read);
             }
         } else if opcode.major == MajorType::ECall {
             let minor = self.memory.load_register(REG_T0);
@@ -497,17 +499,25 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 let block2_addr = self.memory.load_register(REG_A3);
                 let count = self.memory.load_register(REG_A4);
                 for i in 0..DIGEST_WORDS {
-                    faults.include(state_out_addr + (i * WORD_SIZE) as u32, IncludeDir::Read);
+                    faults.include(
+                        info,
+                        state_out_addr + (i * WORD_SIZE) as u32,
+                        IncludeDir::Read,
+                    );
                 }
                 for i in 0..DIGEST_WORDS {
-                    faults.include(state_in_addr + (i * WORD_SIZE) as u32, IncludeDir::Read);
+                    faults.include(
+                        info,
+                        state_in_addr + (i * WORD_SIZE) as u32,
+                        IncludeDir::Read,
+                    );
                 }
                 for i in 0..count {
                     let addr1 = block1_addr + i * BLOCK_BYTES as u32;
                     let addr2 = block2_addr + i * BLOCK_BYTES as u32;
                     for j in 0..DIGEST_WORDS {
-                        faults.include(addr1 + (j * WORD_SIZE) as u32, IncludeDir::Read);
-                        faults.include(addr2 + (j * WORD_SIZE) as u32, IncludeDir::Read);
+                        faults.include(info, addr1 + (j * WORD_SIZE) as u32, IncludeDir::Read);
+                        faults.include(info, addr2 + (j * WORD_SIZE) as u32, IncludeDir::Read);
                     }
                 }
             } else if minor == ecall::SOFTWARE {
@@ -516,7 +526,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 let out_bytes = out_words * WORD_SIZE as u32;
 
                 for addr in (out_addr..(out_addr + out_bytes)).step_by(WORD_SIZE) {
-                    faults.include(addr, IncludeDir::Both);
+                    faults.include(info, addr, IncludeDir::Both);
                 }
             } else if minor == ecall::HALT {
                 let mode = self.memory.load_register(REG_A0);
@@ -685,13 +695,14 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     ) -> (BabyBearElem, BabyBearElem, BabyBearElem, BabyBearElem) {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
+        let info = &self.memory.ram.borrow().info;
         if op == MemoryOp::PageIo.as_u32() {
             self.resident_words.insert(addr);
         } else {
             if !self.resident_words.contains(&addr) {
                 let addr = addr * WORD_SIZE as u32;
-                let page_idx = self.memory.ram.info.get_page_index(addr);
-                let entry_addr = self.memory.ram.info.get_page_entry_addr(page_idx);
+                let page_idx = info.get_page_index(addr);
+                let entry_addr = info.get_page_entry_addr(page_idx);
                 debug!("  ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}");
                 panic!("Memory read before page in: 0x{addr:08x}");
             }
@@ -901,7 +912,7 @@ pub struct RV32Executor<'a, H: HostHandler> {
 impl<'a, H: HostHandler> RV32Executor<'a, H> {
     pub fn new(
         circuit: &'static CircuitImpl,
-        image: MemoryImage,
+        image: Rc<RefCell<MemoryImage>>,
         pc: u32,
         host: &'a mut H,
     ) -> Self {
@@ -914,7 +925,8 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         }
 
         // initialize ImageID
-        let image_id = image.root.as_words();
+        let binding = image.borrow();
+        let image_id = binding.root.as_words();
         for i in 0..DIGEST_WORDS {
             let bytes = image_id[i].to_le_bytes();
             for j in 0..WORD_SIZE {
@@ -922,7 +934,7 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
             }
         }
 
-        let machine = MachineContext::new(host, image);
+        let machine = MachineContext::new(host, Rc::clone(&image));
         // let min_po2 = log2_ceil(1570 + program.image.len() / 3 + ZK_CYCLES);
         let min_po2 = 10; // TODO
         let executor = Executor::new(circuit, machine, min_po2, MAX_CYCLES_PO2, &io);
@@ -930,13 +942,11 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
     }
 
     #[tracing::instrument(skip_all)]
-    pub fn run(&mut self) -> Result<(usize, MemoryImage, u32)> {
+    pub fn run(&mut self) -> Result<(usize, u32)> {
         let loader = Loader::new();
         let cycles = loader.load(|chunk, fini| self.executor.step(chunk, fini))?;
         self.executor.finalize();
-        // TODO: avoid this clone
-        let image = self.executor.handler.memory.ram.clone();
         let last_pc = 0; // TODO
-        Ok((cycles, image, last_pc))
+        Ok((cycles, last_pc))
     }
 }

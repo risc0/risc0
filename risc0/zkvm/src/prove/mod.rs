@@ -398,7 +398,7 @@ impl<'a> Default for ProverOpts<'a> {
 /// ```
 pub struct Prover<'a> {
     inner: ProverImpl<'a>,
-    image: MemoryImage,
+    image: Rc<RefCell<MemoryImage>>,
     pc: u32,
 
     /// How many cycles executing the guest took.
@@ -424,14 +424,18 @@ impl<'a> Prover<'a> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
         Ok(Prover {
             inner: ProverImpl::new(opts),
-            image: MemoryImage::new(&program, PAGE_SIZE as u32),
+            image: Rc::new(RefCell::new(MemoryImage::new(&program, PAGE_SIZE as u32))),
             pc: program.entry,
             cycles: 0,
         })
     }
 
     /// Construct a prover from a memory image.
-    pub fn from_image(image: MemoryImage, pc: u32, opts: ProverOpts<'a>) -> Result<Self> {
+    pub fn from_image(
+        image: Rc<RefCell<MemoryImage>>,
+        pc: u32,
+        opts: ProverOpts<'a>,
+    ) -> Result<Self> {
         Ok(Prover {
             inner: ProverImpl::new(opts),
             image,
@@ -509,9 +513,10 @@ impl<'a> Prover<'a> {
 
         if self.inner.opts.preflight {
             if skip_seal {
+                // TODO: avoid image clone
                 let mut preflight = Preflight::new(
                     self.pc,
-                    self.image.clone(),
+                    self.image.borrow().clone(),
                     take(&mut self.inner.opts),
                     self.inner.input.clone(),
                 );
@@ -527,13 +532,11 @@ impl<'a> Prover<'a> {
             }
         }
 
-        // TODO: avoid image clone
-        let image_id = self.image.root.clone();
+        let image_id = self.image.borrow().root.clone();
         let mut executor =
-            RV32Executor::new(&CIRCUIT, self.image.clone(), self.pc, &mut self.inner);
-        let (cycles, image, pc) = executor.run()?;
+            RV32Executor::new(&CIRCUIT, Rc::clone(&self.image), self.pc, &mut self.inner);
+        let (cycles, pc) = executor.run()?;
         self.cycles = cycles;
-        self.image = image;
         self.pc = pc;
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
