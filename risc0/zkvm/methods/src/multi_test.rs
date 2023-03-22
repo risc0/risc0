@@ -19,6 +19,7 @@ use alloc::vec::Vec;
 
 use risc0_zeroio::{Deserialize, Serialize};
 use risc0_zkvm::declare_syscall;
+use risc0_zkvm_platform::syscall::bigint;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MultiTestSpec {
@@ -46,6 +47,11 @@ pub enum MultiTestSpec {
         fd: u32,
         // Position and length to do reads
         pos_and_len: Vec<(u32, u32)>,
+    },
+    BigInt {
+        x: [u32; bigint::WIDTH_WORDS],
+        y: [u32; bigint::WIDTH_WORDS],
+        modulus: [u32; bigint::WIDTH_WORDS],
     },
 }
 

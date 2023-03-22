@@ -27,12 +27,6 @@ pub const WORD_SIZE: usize = core::mem::size_of::<u32>();
 /// Size of a zkVM memory page.
 pub const PAGE_SIZE: usize = 1024;
 
-/// BigInt width, in bytes, handled by the BigInt accelerator circuit.
-pub const BIGINT_BYTE_WIDTH: usize = 32;
-
-/// BigInt width, in words, handled by the BigInt accelerator circuit.
-pub const BIGINT_WORD_WIDTH: usize = BIGINT_BYTE_WIDTH / WORD_SIZE;
-
 /// Standard IO file descriptors for use with sys_read and sys_write.
 pub mod fileno {
     pub const STDIN: u32 = 0;

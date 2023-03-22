@@ -33,11 +33,11 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     memory::SYSTEM,
     syscall::{
-        ecall,
+        bigint, ecall,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
         DIGEST_WORDS,
     },
-    BIGINT_BYTE_WIDTH, PAGE_SIZE, WORD_SIZE,
+    PAGE_SIZE, WORD_SIZE,
 };
 
 use super::{loader::Loader, merge_word8, plonk, split_word8, TraceEvent};
@@ -292,10 +292,11 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 Ok(())
             }
             "bigintDivide" => {
-                let (a, b) = args.split_at(BIGINT_BYTE_WIDTH * 2);
+                panic!("args: {args:?}, outs: {outs:?}");
+                let (a, b) = args.split_at(bigint::WIDTH_BYTES * 2);
                 let (q, r) = self.bigint_divide(a.try_into()?, b.try_into()?)?;
-                outs[..BIGINT_BYTE_WIDTH * 2].copy_from_slice(&q[..]);
-                outs[BIGINT_BYTE_WIDTH * 2..].copy_from_slice(&r[..]);
+                outs[..bigint::WIDTH_BYTES * 2].copy_from_slice(&q[..]);
+                outs[bigint::WIDTH_BYTES * 2..].copy_from_slice(&r[..]);
                 Ok(())
             }
             "pageRead" => {
@@ -536,19 +537,20 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     /// Returns an error when:
     /// * Input denominator b is 0.
     /// * Input denominator b is less than 9 bits.
-    /// * Quotient result q is greater than BIGINT_BYTE_WIDTH limbs TODO(victor)
-    ///   make this true. In general a quotient can be up to as large as the
-    ///   numerator (e.g. divide by 1), but the circuit only supports divisions
-    ///   that fit within a normal-width (i.e. not a multiplicaition result)
-    ///   bigint. When b is a modulus and a is a multiplication result of two
-    ///   numbers less than the modulus, this restriction is always satisfied.
+    /// * Quotient result q is greater than [bigint::WIDTH_BYTES] limbs
+    ///   TODO(victor) make this true. In general a quotient can be up to as
+    ///   large as the numerator (e.g. divide by 1), but the circuit only
+    ///   supports divisions that fit within a normal-width (i.e. not a
+    ///   multiplicaition result) bigint. When b is a modulus and a is a
+    ///   multiplication result of two numbers less than the modulus, this
+    ///   restriction is always satisfied.
     fn bigint_divide(
         &self,
-        a_elems: &[BabyBearElem; BIGINT_BYTE_WIDTH * 2],
-        b_elems: &[BabyBearElem; BIGINT_BYTE_WIDTH],
+        a_elems: &[BabyBearElem; bigint::WIDTH_BYTES * 2],
+        b_elems: &[BabyBearElem; bigint::WIDTH_BYTES],
     ) -> Result<(
-        [BabyBearElem; BIGINT_BYTE_WIDTH * 2],
-        [BabyBearElem; BIGINT_BYTE_WIDTH],
+        [BabyBearElem; bigint::WIDTH_BYTES],
+        [BabyBearElem; bigint::WIDTH_BYTES],
     )> {
         // This is a variant of school-book multiplication.
         // Reference the Handbook of Elliptic and Hyper-elliptic Cryptography alg.
@@ -557,18 +559,18 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         // Setup working buffers of u64 elements. We use u64 values here because this
         // implementation does a lot of non-field opperations and so we need to take the
         // inputs out of Montgomery form.
-        let mut a = [0u64; BIGINT_BYTE_WIDTH * 2];
+        let mut a = [0u64; bigint::WIDTH_BYTES * 2];
         for (i, ai) in a_elems.iter().copied().enumerate() {
             a[i] = u64::from(ai)
         }
-        let mut b = [0u64; BIGINT_BYTE_WIDTH + 1];
+        let mut b = [0u64; bigint::WIDTH_BYTES + 1];
         for (i, bi) in b_elems.iter().copied().enumerate() {
             b[i] = u64::from(bi)
         }
-        let mut q = [0u64; BIGINT_BYTE_WIDTH * 2];
+        let mut q = [0u64; bigint::WIDTH_BYTES];
 
         // Determine n, the width of the denominator, and check for divide by zero.
-        let mut n = BIGINT_BYTE_WIDTH;
+        let mut n = bigint::WIDTH_BYTES;
         while n > 0 && b[n - 1] == 0 {
             n -= 1;
         }
@@ -639,7 +641,11 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 }
             }
 
-            q[i] = q_approx;
+            if i < q.len() {
+                q[i] = q_approx;
+            } else if (q_approx != 0) {
+                bail!("bigint divide: quotient exceeds allowed size");
+            }
         }
 
         // Undo the shift done in preprocessing the inputs.
@@ -653,13 +659,12 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             a[i] = (a[i] >> shift_bits) + ((mask & a[i + 1]) << (8 - shift_bits));
         }
 
-        // Write q and r into the out buffer, converting back to Montgomery form.
-        // First BIGINT_BYTE_WIDTH*2 limbs are q, latter BIGINT_BYTE_WIDTH limbs are r.
-        let mut q_elems = [BabyBearElem::ZERO; BIGINT_BYTE_WIDTH * 2];
-        for i in 0..BIGINT_BYTE_WIDTH * 2 {
+        // Write q and r into output arrays, converting back to field representation.
+        let mut q_elems = [BabyBearElem::ZERO; bigint::WIDTH_BYTES];
+        for i in 0..bigint::WIDTH_BYTES {
             q_elems[i] = q[i].into();
         }
-        let mut r_elems = [BabyBearElem::ZERO; BIGINT_BYTE_WIDTH];
+        let mut r_elems = [BabyBearElem::ZERO; bigint::WIDTH_BYTES];
         for i in 0..n {
             r_elems[i] = a[i].into();
         }

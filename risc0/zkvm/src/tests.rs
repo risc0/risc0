@@ -23,7 +23,7 @@ use risc0_zkvm_methods::{
     HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, SLICE_IO_ELF, SLICE_IO_ID,
     STANDARD_LIB_ELF, STANDARD_LIB_ID,
 };
-use risc0_zkvm_platform::{fileno, memory::HEAP, WORD_SIZE};
+use risc0_zkvm_platform::{fileno, memory::HEAP, syscall::bigint, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
@@ -283,6 +283,35 @@ fn sha_accel() {
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaConforms).unwrap());
     prover.run().unwrap();
+}
+
+#[test]
+fn bigint_accel() {
+    let opts = ProverOpts::default().with_skip_seal(true);
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+
+    let x = [1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 8u32];
+    let y = [9u32, 10u32, 11u32, 12u32, 13u32, 14u32, 15u32, 16u32];
+    // let zero = [0, 0, 0, 0, 0, 0, 0, 0];
+    // let one = [1, 0, 0, 0, 0, 0, 0, 0];
+    let modulus = [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32];
+    let expected = [
+        725175305u32,
+        3727701367u32,
+        3590724717u32,
+        3360403226u32,
+        4071262838u32,
+        2077883780u32,
+        2470597663u32,
+        13u32,
+    ];
+
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::BigInt { x, y, modulus }).unwrap());
+    let receipt = prover.run().unwrap();
+    assert_eq!(
+        receipt.journal.as_slice(),
+        bytemuck::cast_slice(expected.as_slice())
+    );
 }
 
 #[test]

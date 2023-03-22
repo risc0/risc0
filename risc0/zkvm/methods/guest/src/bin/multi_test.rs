@@ -26,7 +26,7 @@ use risc0_zeroio::deserialize::Deserialize;
 use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
 use risc0_zkvm::guest::{env, memory_barrier, sha};
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef, SYS_MULTI_TEST};
-use risc0_zkvm_platform::syscall::{nr::SYS_INITIAL_INPUT, sys_read};
+use risc0_zkvm_platform::syscall::{bigint, nr::SYS_INITIAL_INPUT, sys_bigint, sys_read};
 
 risc0_zkvm::entry!(main);
 
@@ -139,6 +139,17 @@ pub fn main() {
             }
 
             env::commit_slice(&risc0_zeroio::to_vec(&orig).unwrap());
+        }
+        MultiTestSpecRef::BigInt(inputs) => {
+            let mut result = [0u32; bigint::WIDTH_WORDS];
+            let x = Deserialize::from_ref(&inputs.x());
+            let y = Deserialize::from_ref(&inputs.y());
+            let modulus = Deserialize::from_ref(&inputs.modulus());
+
+            unsafe {
+                sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus);
+            }
+            env::commit_slice(&result);
         }
     }
 }

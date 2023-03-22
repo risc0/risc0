@@ -16,7 +16,7 @@
 use core::arch::asm;
 use core::{cmp::min, ptr::null_mut};
 
-use crate::{BIGINT_WORD_WIDTH, WORD_SIZE};
+use crate::WORD_SIZE;
 
 pub mod ecall {
     pub const HALT: u32 = 0;
@@ -69,6 +69,15 @@ pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
 pub mod bigint {
     pub const OP_MULTIPLY: u32 = 0;
+
+    /// BigInt width, in bits, handled by the BigInt accelerator circuit.
+    pub const WIDTH_BITS: usize = 256;
+
+    /// BigInt width, in bytes, handled by the BigInt accelerator circuit.
+    pub const WIDTH_BYTES: usize = WIDTH_BITS / 8;
+
+    /// BigInt width, in words, handled by the BigInt accelerator circuit.
+    pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
 }
 
 /// Compute `ceil(a / b)` via truncated integer division.
@@ -295,11 +304,11 @@ pub unsafe fn sys_sha_buffer(
 #[inline(always)]
 #[no_mangle]
 pub unsafe extern "C" fn sys_bigint(
-    result: *mut [u32; BIGINT_WORD_WIDTH],
+    result: *mut [u32; bigint::WIDTH_WORDS],
     op: u32,
-    x: *const [u32; BIGINT_WORD_WIDTH],
-    y: *const [u32; BIGINT_WORD_WIDTH],
-    modulus: *const [u32; BIGINT_WORD_WIDTH],
+    x: *const [u32; bigint::WIDTH_WORDS],
+    y: *const [u32; bigint::WIDTH_WORDS],
+    modulus: *const [u32; bigint::WIDTH_WORDS],
 ) {
     #[cfg(target_os = "zkvm")]
     {
