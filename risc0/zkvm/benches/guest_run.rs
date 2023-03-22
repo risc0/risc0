@@ -32,18 +32,14 @@ use rand::{
 use risc0_zkvm::{serde::to_vec, Prover, ProverOpts};
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
-    BENCH_ELF, BENCH_ID,
+    BENCH_ELF,
 };
 
 fn run_guest(spec: SpecWithIters) -> Duration {
     let input_data: Vec<u32> = to_vec(&spec).unwrap();
 
-    let mut prover = Prover::new_with_opts(
-        BENCH_ELF,
-        BENCH_ID,
-        ProverOpts::default().with_skip_seal(true),
-    )
-    .unwrap();
+    let mut prover =
+        Prover::new_with_opts(BENCH_ELF, ProverOpts::default().with_skip_seal(true)).unwrap();
     prover.add_input_u32_slice(input_data.as_slice());
 
     let start = Instant::now();
