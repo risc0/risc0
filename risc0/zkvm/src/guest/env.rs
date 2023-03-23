@@ -22,8 +22,8 @@ use risc0_zkvm_platform::{
     fileno, memory, syscall,
     syscall::{
         nr::{SYS_INITIAL_INPUT, SYS_LOG},
-        sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_output, sys_write, syscall_0,
-        syscall_2, SyscallName,
+        sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_output, sys_pause, sys_write,
+        syscall_0, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -202,6 +202,14 @@ pub fn journal() -> impl StreamWriter {
     get_writer(fileno::JOURNAL, |bytes| {
         unsafe { HASHER.as_mut().unwrap_unchecked().update(bytes) };
     })
+}
+
+/// Pause the execution of the zkvm.
+///
+/// Execution may be continued at a later time.
+pub fn pause() {
+    // SAFETY: This should be safe to call.
+    unsafe { sys_pause() };
 }
 
 #[derive(Default)]

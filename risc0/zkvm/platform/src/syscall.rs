@@ -26,8 +26,9 @@ pub mod ecall {
 }
 
 pub mod halt {
-    pub const NORMAL: u32 = 0;
+    pub const TERMINATE: u32 = 0;
     pub const PAUSE: u32 = 1;
+    pub const SPLIT: u32 = 2;
 }
 
 pub mod reg_abi {
@@ -327,7 +328,7 @@ pub unsafe extern "C" fn sys_halt() -> ! {
         asm!(
             "ecall",
             in("t0") ecall::HALT,
-            in("a0") halt::NORMAL,
+            in("a0") halt::TERMINATE,
         );
         unreachable!();
     }

@@ -106,12 +106,6 @@ pub struct MemoryImage {
     /// The memory image as a vector of bytes
     pub image: Vec<u8>,
 
-    /// The page table root
-    ///
-    /// The zkVM page table is structured as a Merkle tree, and this is the root
-    /// of that Merkle tree.
-    pub root: Digest,
-
     /// Metadata about the structure of the page table
     pub info: PageTableInfo,
 }
@@ -145,13 +139,7 @@ impl MemoryImage {
                 .copy_from_slice(digest.as_bytes());
         }
 
-        // Now compute the final root hash.
-        let root_page_addr = info.root_page_addr;
-        let root_page = &image[root_page_addr as usize..info.root_addr as usize];
-        let root = hash_page(root_page);
-        log::debug!("image_id: {root:?}");
-
-        Self { image, root, info }
+        Self { image, info }
     }
 
     /// Verify the integrity of the MemoryImage
@@ -187,11 +175,19 @@ impl MemoryImage {
         let root_page = &self.image
             [root_page_addr as usize..root_page_addr as usize + root_page_bytes as usize];
         let expected = hash_page(root_page);
-        if expected != self.root {
-            bail!("Invalid root hash: {} != {}", expected, self.root);
+        let root = self.get_root();
+        if expected != root {
+            bail!("Invalid root hash: {} != {}", expected, root);
         }
 
         Ok(())
+    }
+
+    /// Compute and return the root entry of the merkle tree.
+    pub fn get_root(&self) -> Digest {
+        let root_page_addr = self.info.root_page_addr;
+        let root_page = &self.image[root_page_addr as usize..self.info.root_addr as usize];
+        hash_page(root_page)
     }
 }
 

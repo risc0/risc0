@@ -532,7 +532,7 @@ impl<'a> Prover<'a> {
             }
         }
 
-        let image_id = self.image.borrow().root.clone();
+        let image_id = self.image.borrow().get_root();
         let mut executor =
             RV32Executor::new(&CIRCUIT, Rc::clone(&self.image), self.pc, &mut self.inner);
         let (cycles, pc) = executor.run()?;

@@ -296,6 +296,8 @@ pub struct MachineContext<'a, H: HostHandler> {
     // Tracks which pages are dirty and need to be paged out in a subsquent flush
     dirty_pages: BTreeSet<u32>,
 
+    last_pc: u32,
+
     syscall_out_data: VecDeque<u32>,
     syscall_out_regs: (u32, u32),
 }
@@ -311,19 +313,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
     ) -> Result<()> {
         match name {
             "halt" => {
-                if !self.is_halted {
-                    let mode = self.memory.load_register(REG_A0);
-                    match mode {
-                        halt::NORMAL => {
-                            debug!("HALT: {cycle}");
-                        }
-                        halt::PAUSE => {
-                            debug!("PAUSE: {cycle}");
-                        }
-                        _ => unimplemented!("Unsupported halt mode: {mode}"),
-                    }
-                    self.is_halted = true;
-                }
+                self.halt(args[0], args[1]);
                 Ok(())
             }
             "trace" => self.trace(cycle, args[0]),
@@ -349,7 +339,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 Ok(())
             }
             "pageInfo" => {
-                (outs[0], outs[1]) = self.page_info(args[0]);
+                (outs[0], outs[1], outs[2]) = self.page_info(args[0]);
                 Ok(())
             }
             "ramWrite" => {
@@ -425,6 +415,28 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             resident_words: BTreeSet::new(),
             finished_page_reads: BTreeSet::new(),
             dirty_pages: BTreeSet::new(),
+            last_pc: 0,
+        }
+    }
+
+    fn halt(&mut self, exit_code: BabyBearElem, pc: BabyBearElem) {
+        if !self.is_halted {
+            let exit_code: u32 = exit_code.into();
+            self.last_pc = pc.into();
+            match exit_code {
+                halt::TERMINATE => {
+                    debug!("TERMINATE: 0x{:08x}", self.last_pc);
+                }
+                halt::PAUSE => {
+                    self.last_pc += 4;
+                    debug!("PAUSE: 0x{:08x}", self.last_pc);
+                }
+                halt::SPLIT => {
+                    debug!("SPLIT: 0x{:08x}", self.last_pc);
+                }
+                _ => unimplemented!("Unsupported halt mode: {exit_code}"),
+            }
+            self.is_halted = true;
         }
     }
 
@@ -433,28 +445,30 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         let inst = self.memory.load_u32(pc);
         let opcode = self.decode(inst);
         trace!("decode: {}", opcode.mnemonic);
+
         // determine if PageFaults are needed
         let faults = self.get_page_faults(pc, inst, &opcode);
         // faults.dump();
+
         for page_idx in faults.reads {
             if !self.finished_page_reads.contains(&page_idx) {
                 return Ok(MajorType::PageFault.as_u32().into());
             }
         }
+
+        let force_flush = faults.force_flush;
         if self.is_flushing {
-            if self.dirty_pages.is_empty() {
-                return Ok(MajorType::Halt.as_u32().into());
-            } else {
+            if !force_flush || !self.dirty_pages.is_empty() {
                 return Ok(MajorType::PageFault.as_u32().into());
             }
         } else {
-            let force_flush = faults.force_flush;
             self.dirty_pages.extend(faults.writes.iter());
             if force_flush || self.needs_flush() {
                 self.is_flushing = true;
                 return Ok(MajorType::PageFault.as_u32().into());
             }
         }
+
         Ok(opcode.major.as_u32().into())
     }
 
@@ -488,7 +502,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 let imm = sign_extend(imm as i32, IMM_BITS as u32);
                 let addr = base.checked_add_signed(imm).unwrap();
                 // debug!("  store: 0x{inst:08x}, M[x{rs1} + {imm}], addr: 0x{addr:08x}");
-                faults.include(info, addr, IncludeDir::Read);
+                faults.include(info, addr, IncludeDir::Both);
             }
         } else if opcode.major == MajorType::ECall {
             let minor = self.memory.load_register(REG_T0);
@@ -539,7 +553,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         faults
     }
 
-    fn page_info(&mut self, pc: BabyBearElem) -> (BabyBearElem, BabyBearElem) {
+    fn page_info(&mut self, pc: BabyBearElem) -> (BabyBearElem, BabyBearElem, BabyBearElem) {
         let pc: u32 = pc.into();
         let inst = self.memory.load_u32(pc);
         let opcode = self.decode(inst);
@@ -548,18 +562,23 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         for page_idx in info.reads.iter().rev() {
             if !self.finished_page_reads.contains(page_idx) {
                 self.finished_page_reads.insert(*page_idx);
-                // debug!("page_idx: 0x{page_idx:08X}");
-                return (BabyBearElem::ONE, (*page_idx).into());
+                // debug!("read> page_idx: 0x{page_idx:08X}");
+                return (BabyBearElem::ONE, (*page_idx).into(), BabyBearElem::ZERO);
             }
         }
 
         if self.is_flushing {
             if let Some(page_idx) = self.dirty_pages.pop_first() {
-                return (BabyBearElem::ONE, page_idx.into());
+                // let info = &self.memory.ram.borrow().info;
+                // debug!(
+                //     "dirty> page_idx: 0x{page_idx:08X}, page_addr: {:08X}",
+                //     info.get_page_addr(page_idx)
+                // );
+                return (BabyBearElem::ZERO, page_idx.into(), BabyBearElem::ZERO);
             }
         }
 
-        (BabyBearElem::ZERO, BabyBearElem::ZERO)
+        (BabyBearElem::ZERO, BabyBearElem::ZERO, BabyBearElem::ONE)
     }
 
     fn trace(&mut self, cycle: usize, pc: BabyBearElem) -> Result<()> {
@@ -925,8 +944,8 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         }
 
         // initialize ImageID
-        let binding = image.borrow();
-        let image_id = binding.root.as_words();
+        let image_id = image.borrow().get_root();
+        let image_id = image_id.as_words();
         for i in 0..DIGEST_WORDS {
             let bytes = image_id[i].to_le_bytes();
             for j in 0..WORD_SIZE {
@@ -944,7 +963,6 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         let loader = Loader::new();
         let cycles = loader.load(|chunk, fini| self.executor.step(chunk, fini))?;
         self.executor.finalize();
-        let last_pc = 0; // TODO
-        Ok((cycles, last_pc))
+        Ok((cycles, self.executor.handler.last_pc))
     }
 }

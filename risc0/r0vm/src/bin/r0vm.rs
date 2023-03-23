@@ -154,13 +154,14 @@ fn main() {
             }
             let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
             let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+            let image_id = image.get_root();
             if let Some(image_id_file) = args.image_id.as_ref() {
-                std::fs::write(&image_id_file, image.root.as_bytes()).unwrap();
+                std::fs::write(&image_id_file, image_id.as_bytes()).unwrap();
                 if args.verbose > 0 {
                     eprintln!("Saved image id to {}", image_id_file.display());
                 }
             }
-            image.root
+            image_id
         })
     };
 

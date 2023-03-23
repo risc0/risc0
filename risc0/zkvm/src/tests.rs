@@ -666,3 +666,17 @@ ENV_VAR2=
 "
     );
 }
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn pause_continue() {
+    let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::PauseContinue).unwrap());
+
+    // Run until sys_pause
+    prover.run().unwrap();
+
+    // Run until sys_halt
+    prover.run().unwrap();
+}
