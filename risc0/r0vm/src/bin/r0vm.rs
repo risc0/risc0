@@ -95,16 +95,8 @@ fn read_image_id(verbose: u8, elf_file: &Path, image_id_file: Option<&Path>) -> 
     Some(id)
 }
 
-fn run_prover(
-    elf_contents: &[u8],
-    image_id: &Digest,
-    opts: ProverOpts,
-    initial_input: Option<Vec<u8>>,
-) -> Result<Receipt> {
+fn run_prover(elf_contents: &[u8], image_id: &Digest, opts: ProverOpts) -> Result<Receipt> {
     let mut prover = Prover::new_with_opts(&elf_contents, image_id.clone(), opts).unwrap();
-    if let Some(bytes) = initial_input {
-        prover.add_input_u8_slice(bytes.as_slice());
-    }
     let receipt = prover.run()?;
 
     Ok(receipt)
@@ -180,6 +172,10 @@ fn main() {
         guest_prof = Some(Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());
     }
 
+    if let Some(input) = args.initial_input.as_ref() {
+        opts = opts.with_stdin(fs::File::open(input).unwrap());
+    }
+
     let proof = run_prover(
         &elf_contents,
         &image_id,
@@ -188,13 +184,6 @@ fn main() {
         } else {
             opts
         },
-        args.initial_input.as_ref().map(|input| {
-            let input_bytes = fs::read(input).unwrap();
-            if args.verbose > 0 {
-                eprintln!("Supplying {} bytes of initial input", input_bytes.len());
-            }
-            input_bytes
-        }),
     );
 
     // Now that we're done with the prover, we can collect the guest profiling data.

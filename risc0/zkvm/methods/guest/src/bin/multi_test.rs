@@ -26,7 +26,7 @@ use risc0_zeroio::deserialize::Deserialize;
 use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
 use risc0_zkvm::guest::{env, memory_barrier, sha};
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef, SYS_MULTI_TEST};
-use risc0_zkvm_platform::syscall::{nr::SYS_INITIAL_INPUT, sys_read};
+use risc0_zkvm_platform::syscall::sys_read;
 
 risc0_zkvm::entry!(main);
 
@@ -43,8 +43,10 @@ fn profile_test_func2() {
 }
 
 pub fn main() {
-    let initial_bytes = env::send_recv_slice::<u8, u8>(SYS_INITIAL_INPUT, &[]);
-    let impl_select = MultiTestSpec::deserialize_from(bytemuck::cast_slice(initial_bytes));
+    // TODO: Either make zeroio work well with env::stdin, or convert to serde.
+    let mut words: vec::Vec<u32> = vec::Vec::with_capacity(1024);
+    env::stdin().read_words_to_end(&mut words);
+    let impl_select = MultiTestSpec::deserialize_from(&words);
     match impl_select {
         MultiTestSpecRef::DoNothing(_) => {}
         MultiTestSpecRef::ShaConforms(_) => test_sha_impl::<sha::Impl>(),

@@ -21,17 +21,16 @@ use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
     fileno, memory, syscall,
     syscall::{
-        nr::{SYS_INITIAL_INPUT, SYS_LOG},
-        sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_output, sys_write, syscall_0,
-        syscall_2, SyscallName,
+        nr::SYS_LOG, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_output, sys_read,
+        sys_read_words, sys_write, syscall_0, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
-use serde::{Deserialize, Serialize};
+use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
     guest::{align_up, memory_barrier, sha},
-    serde::{Deserializer, Result as SerdeResult, Serializer, StreamWriter},
+    serde::{Deserializer, Result as SerdeResult, Serializer, WordRead, WordWrite},
     sha::rust_crypto::{Digest as _, Output, Sha256},
 };
 
@@ -63,26 +62,9 @@ impl<T: Default> Once<T> {
     }
 }
 
-static ENV: Once<Env> = Once::new();
 static mut HASHER: Option<Sha256> = None;
 
-/// Reads and deserializes objects from a section of memory.
-struct Reader(Deserializer<'static>);
-
-impl Reader {
-    /// Read private data from the host.
-    pub fn read<T: Deserialize<'static>>(&mut self) -> T {
-        T::deserialize(&mut self.0).unwrap()
-    }
-
-    /// Read raw private data from the host.
-    pub fn read_slice<T: Pod>(&mut self, len: usize) -> &'static [T] {
-        bytemuck::cast_slice(self.0.read_bytes(core::mem::size_of::<T>() * len).unwrap())
-    }
-}
-
 pub(crate) fn init() {
-    ENV.init(Env::new());
     unsafe { HASHER = Some(Sha256::new()) };
 }
 
@@ -128,13 +110,13 @@ pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T])
 }
 
 /// Read private data from the host and deserializes it.
-pub fn read<T: Deserialize<'static>>() -> T {
-    ENV.get().read()
+pub fn read<T: DeserializeOwned>() -> T {
+    stdin().read()
 }
 
 /// Read a slice from the host.
-pub fn read_slice<T: Pod>(len: usize) -> &'static [T] {
-    ENV.get().read_slice(len)
+pub fn read_slice<T: Pod>(slice: &mut [T]) {
+    stdin().read_slice(slice)
 }
 
 /// Serialize the given data and write it to the STDOUT of the zkVM.
@@ -143,8 +125,7 @@ pub fn read_slice<T: Pod>(len: usize) -> &'static [T] {
 /// Some implementations, such as [risc0-r0vm] will also write the data to
 /// the host's stdout file descriptor. It is not included in the receipt.
 pub fn write<T: Serialize>(data: &T) {
-    let mut serializer = Serializer::new(stdout());
-    data.serialize(&mut serializer).unwrap();
+    stdout().write(data)
 }
 
 /// Write the given slice to the STDOUT of the zkVM.
@@ -161,8 +142,7 @@ pub fn write_slice<T: Pod>(slice: &[T]) {
 /// Data in the journal is included in the receipt and is available to the
 /// verifier. It is considered "public" data.
 pub fn commit<T: Serialize>(data: &T) {
-    let mut serializer = Serializer::new(journal());
-    data.serialize(&mut serializer).unwrap();
+    journal().write(data)
 }
 
 /// Commit the given slice to the journal.
@@ -187,86 +167,217 @@ pub fn log(msg: &str) {
     }
 }
 
-/// Return a StreamWriter writing data using the specified syscall, which must
-/// accept a buffer and byte count as its arguments.
-pub fn get_writer<F: Fn(&[u8])>(fd: u32, hook: F) -> impl StreamWriter {
-    OutputStreamWriter::new(fd, hook)
+/// Return a writer for STDOUT.
+pub fn stdout() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
+    FdWriter::new(fileno::STDOUT, |_| {})
 }
 
-/// Return a writer for STDOUT.
-pub fn stdout() -> impl StreamWriter {
-    get_writer(fileno::STDOUT, |_| {})
+/// Return a writer for STDERR.
+pub fn stderr() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
+    FdWriter::new(fileno::STDERR, |_| {})
 }
 
 /// Return a writer for the JOURNAL.
-pub fn journal() -> impl StreamWriter {
-    get_writer(fileno::JOURNAL, |bytes| {
+pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
+    FdWriter::new(fileno::JOURNAL, |bytes| {
         unsafe { HASHER.as_mut().unwrap_unchecked().update(bytes) };
     })
 }
 
-#[derive(Default)]
-struct Env {
-    initial_input_reader: Option<Reader>,
+/// Reaturn a reader for the standard input
+pub fn stdin() -> FdReader {
+    FdReader::new(fileno::STDIN)
 }
 
-impl Env {
-    pub fn new() -> Self {
-        Env {
-            initial_input_reader: None,
-        }
-    }
+/// Reads and deserializes objects
+pub trait Read {
+    /// Read data from the host.
+    fn read<T: DeserializeOwned>(&mut self) -> T;
 
-    fn initial_input(&mut self) -> &mut Reader {
-        if !self.initial_input_reader.is_some() {
-            let bytes = send_recv_slice::<u8, u8>(SYS_INITIAL_INPUT, &[]);
-            let words = bytemuck::cast_slice(bytes);
-            self.initial_input_reader = Some(Reader(Deserializer::new(words)))
-        }
-        self.initial_input_reader.as_mut().unwrap()
-    }
+    /// Read raw data from the host.
+    fn read_slice<T: Pod>(&mut self, buf: &mut [T]);
+}
 
-    pub fn read<T: Deserialize<'static>>(&mut self) -> T {
-        self.initial_input().read()
+impl<R: Read + ?Sized> Read for &mut R {
+    fn read<T: DeserializeOwned>(&mut self) -> T {
+        (**self).read()
     }
-
-    pub fn read_slice<T: Pod>(&mut self, len: usize) -> &'static [T] {
-        self.initial_input().read_slice(len)
+    fn read_slice<T: Pod>(&mut self, buf: &mut [T]) {
+        (**self).read_slice(buf)
     }
 }
 
-/// Provides a StreamWriter which can write to one of the standard
-/// output syscalls (STDOUT, STDERR, JOURNAL, LOG) or any other
-/// syscall which accepts slices of bytes.
-struct OutputStreamWriter<F: Fn(&[u8])> {
+/// Provides a FdReader which can read from any file descriptor
+pub struct FdReader {
+    fd: u32,
+}
+
+impl FdReader {
+    /// Creates a new FdReader reading from the given file descriptor.
+    pub fn new(fd: u32) -> FdReader {
+        FdReader { fd }
+    }
+
+    #[must_use = "read_bytes can potentially do a short read; this case should be handled."]
+    fn read_bytes(&mut self, buf: &mut [u8]) -> usize {
+        unsafe { sys_read(self.fd, buf.as_mut_ptr(), buf.len()) }
+    }
+
+    // Like read_bytes, but fills the buffer completely or until EOF occurs.
+    #[must_use = "read_bytes_all can potentially return EOF; this case should be handled."]
+    fn read_bytes_all(&mut self, mut buf: &mut [u8]) -> usize {
+        let mut tot_read = 0;
+        while !buf.is_empty() {
+            let nread = self.read_bytes(buf);
+            if nread == 0 {
+                break;
+            }
+            tot_read += nread;
+            (_, buf) = buf.split_at_mut(nread);
+        }
+
+        tot_read
+    }
+
+    /// Read the entire stream as words.
+    ///
+    /// TODO: This is not a very efficient interface, and is only
+    /// needed for zeroio; we should evaluate zeroio and either
+    /// optimize this or remove zeroio.
+    pub fn read_words_to_end(&mut self, buf: &mut alloc::vec::Vec<u32>) {
+        const BUF_WORDS: usize = 1024;
+        loop {
+            let start = buf.len();
+            buf.resize(start + BUF_WORDS, 0);
+            let nread = self.read_bytes_all(bytemuck::cast_slice_mut(&mut buf[start..]));
+            if nread != BUF_WORDS * WORD_SIZE {
+                buf.truncate(start + nread / WORD_SIZE);
+                return;
+            }
+        }
+    }
+}
+
+impl Read for FdReader {
+    fn read<T: DeserializeOwned>(&mut self) -> T {
+        T::deserialize(&mut Deserializer::new(self)).unwrap()
+    }
+
+    fn read_slice<T: Pod>(&mut self, buf: &mut [T]) {
+        if let Ok(words) = bytemuck::try_cast_slice_mut(buf) {
+            // Reading words performs significantly better if we're word aligned.
+            self.read_words(words);
+        } else {
+            self.read_bytes_all(bytemuck::cast_slice_mut(buf));
+        }
+    }
+}
+
+impl WordRead for FdReader {
+    fn read_words(&mut self, words: &mut [u32]) -> SerdeResult<()> {
+        let nread_bytes = unsafe { sys_read_words(self.fd, words.as_mut_ptr(), words.len()) };
+        if nread_bytes == words.len() * WORD_SIZE {
+            Ok(())
+        } else {
+            Err(crate::serde::Error::DeserializeUnexpectedEnd)
+        }
+    }
+
+    fn read_padded_bytes(&mut self, bytes: &mut [u8]) -> SerdeResult<()> {
+        if self.read_bytes_all(bytes) != bytes.len() {
+            return Err(crate::serde::Error::DeserializeUnexpectedEnd);
+        }
+
+        let unaligned = bytes.len() % WORD_SIZE;
+        if unaligned != 0 {
+            let pad_bytes = WORD_SIZE - unaligned;
+            let mut padding = [0u8; WORD_SIZE];
+            if self.read_bytes_all(&mut padding[..pad_bytes]) != pad_bytes {
+                return Err(crate::serde::Error::DeserializeUnexpectedEnd);
+            }
+        }
+        Ok(())
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::io::Read for FdReader {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        Ok(self.read_bytes(buf))
+    }
+}
+
+/// Serializes and writes objects.
+pub trait Write {
+    /// Write a serialized object.
+    fn write<T: Serialize>(&mut self, val: T);
+
+    /// Write raw data.
+    fn write_slice<T: Pod>(&mut self, buf: &[T]);
+}
+
+impl<W: Write + ?Sized> Write for &mut W {
+    fn write<T: Serialize>(&mut self, val: T) {
+        (**self).write(val)
+    }
+
+    fn write_slice<T: Pod>(&mut self, buf: &[T]) {
+        (**self).write_slice(buf)
+    }
+}
+
+/// Provides a FdWriter which can write to any file descriptor.
+pub struct FdWriter<F: Fn(&[u8])> {
     fd: u32,
     hook: F,
 }
 
-impl<F: Fn(&[u8])> OutputStreamWriter<F> {
-    pub fn new(fd: u32, hook: F) -> Self {
-        Self { fd, hook }
+impl<F: Fn(&[u8])> FdWriter<F> {
+    fn new(fd: u32, hook: F) -> Self {
+        FdWriter { fd, hook }
+    }
+
+    fn write_bytes(&mut self, bytes: &[u8]) {
+        unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
+        (self.hook)(bytes);
     }
 }
 
-impl<F: Fn(&[u8])> StreamWriter for OutputStreamWriter<F> {
-    type Output = ();
+impl<F: Fn(&[u8])> Write for FdWriter<F> {
+    fn write<T: Serialize>(&mut self, val: T) {
+        val.serialize(&mut Serializer::new(self)).unwrap();
+    }
 
-    fn write_u32(&mut self, data: u32) -> SerdeResult<()> {
-        let bytes = data.to_ne_bytes();
-        unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
-        (self.hook)(&bytes);
+    fn write_slice<T: Pod>(&mut self, buf: &[T]) {
+        self.write_bytes(bytemuck::cast_slice(buf));
+    }
+}
+
+impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
+    fn write_words(&mut self, words: &[u32]) -> SerdeResult<()> {
+        self.write_bytes(bytemuck::cast_slice(words));
         Ok(())
     }
 
-    fn write_slice<T: Pod>(&mut self, slice: &[T]) -> SerdeResult<()> {
-        let bytes: &[u8] = bytemuck::cast_slice(slice);
-        unsafe { sys_write(self.fd, bytes.as_ptr(), bytes.len()) }
-        (self.hook)(bytes);
+    fn write_padded_bytes(&mut self, bytes: &[u8]) -> SerdeResult<()> {
+        self.write_bytes(bytes);
+        let unaligned = bytes.len() % WORD_SIZE;
+        if unaligned != 0 {
+            let pad_bytes = WORD_SIZE - unaligned;
+            self.write_bytes(&[0u8; WORD_SIZE][..pad_bytes]);
+        }
         Ok(())
     }
+}
 
-    fn release(&mut self) -> SerdeResult<Self::Output> {
+#[cfg(feature = "std")]
+impl<F: Fn(&[u8])> std::io::Write for FdWriter<F> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<(usize)> {
+        self.write_bytes(buf);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
         Ok(())
     }
 }

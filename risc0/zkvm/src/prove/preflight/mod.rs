@@ -16,7 +16,6 @@
 //! evaluating the circuit.  Experimental.
 
 use std::{
-    cmp::min,
     collections::{BTreeMap, VecDeque},
     vec::Vec,
 };
@@ -24,7 +23,7 @@ use std::{
 use anyhow::{anyhow, bail, Result};
 use risc0_zkvm_platform::{
     memory::SYSTEM,
-    syscall::{ecall, nr::SYS_INITIAL_INPUT, reg_abi::*},
+    syscall::{ecall, reg_abi::*},
     WORD_SIZE,
 };
 use rrs_lib::{
@@ -80,7 +79,6 @@ pub struct Preflight<'a> {
 
     // Prover options
     opts: ProverOpts<'a>,
-    initial_input: Vec<u8>,
 
     // Cycle information for each cycle we've executed
     cycles: Vec<Cycle>,
@@ -97,12 +95,7 @@ pub struct Preflight<'a> {
 
 impl<'a> Preflight<'a> {
     /// Creates a new preflight from the given memory image
-    pub fn new(
-        entry: u32,
-        mem_init: MemoryImage,
-        opts: ProverOpts<'a>,
-        initial_input: Vec<u8>,
-    ) -> Self {
+    pub fn new(entry: u32, mem_init: MemoryImage, opts: ProverOpts<'a>) -> Self {
         let mut hart_state = HartState::new();
         hart_state.pc = entry;
         Self {
@@ -112,7 +105,6 @@ impl<'a> Preflight<'a> {
             hart_state,
             halted: false,
             opts,
-            initial_input,
         }
     }
 
@@ -271,14 +263,6 @@ impl<'a> Preflight<'a> {
                     (a0, a1) = cb.syscall(&syscall_name, &self.mem, &mut to_guest)?;
                     self.mem
                         .store_region(to_guest_ptr, bytemuck::cast_slice(&to_guest));
-                } else if syscall_name == SYS_INITIAL_INPUT.as_str() {
-                    let nwords = min(to_guest.len(), self.initial_input.len());
-                    bytemuck::cast_slice_mut(&mut to_guest[..nwords])
-                        .clone_from_slice(&self.initial_input[..nwords * WORD_SIZE]);
-                    self.mem
-                        .store_region(to_guest_ptr, bytemuck::cast_slice(&to_guest));
-                    a0 = self.initial_input.len() as u32;
-                    a1 = 0;
                 } else {
                     bail!("Unknown syscall {syscall_name}");
                 }
@@ -448,8 +432,7 @@ mod riscv_tests {
                     let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
                     let image = MemoryImage::new(&program, PAGE_SIZE as u32);
 
-                    let mut preflight =
-                        Preflight::new(program.entry, image, ProverOpts::default(), Vec::new());
+                    let mut preflight = Preflight::new(program.entry, image, ProverOpts::default());
                     while !preflight.is_halted() {
                         preflight.step().unwrap()
                     }

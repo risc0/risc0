@@ -24,8 +24,9 @@
 //! use methods::{EXAMPLE_ELF, EXAMPLE_ID};
 //! use risc0_zkvm::Prover;
 //!
-//! let mut prover = Prover::new(&EXAMPLE_ELF, EXAMPLE_ID)?;
-//! prover.add_input_u32_slice(&to_vec(&input)?);
+//! let input = to_vec(&input);
+//! let mut prover = Prover::new_with_opts(&EXAMPLE_ELF, EXAMPLE_ID,
+//!                                        ProverOpts::defaults().with_stdin(input))?;
 //! let receipt = prover.run()?;
 //! ```
 
@@ -42,7 +43,7 @@ use std::{
     cmp::min,
     collections::HashMap,
     fmt::Debug,
-    io::{stderr, stdin, stdout, BufRead, BufReader, Write},
+    io::{stderr, stdin, stdout, BufRead, BufReader, Cursor, Read, Write},
     mem::take,
     rc::Rc,
     str::from_utf8,
@@ -153,6 +154,14 @@ impl<'a> ProverOpts<'a> {
     ) -> Self {
         assert!(!self.trace_callback.is_some(), "Duplicate trace callback");
         self.trace_callback = Some(Box::new(callback));
+        self
+    }
+
+    /// Add a posix-style file descriptor for reading
+    pub fn with_stdin(mut self, reader: impl Read + 'a) -> Self {
+        self.io = self
+            .io
+            .with_read_fd(fileno::STDIN, Box::new(BufReader::new(reader)));
         self
     }
 
@@ -466,18 +475,21 @@ impl<'a> Prover<'a> {
         <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
         E: EvalCheck<H>,
     {
-        self.inner.opts = take(&mut self.inner.opts).finalize();
+        let mut opts = take(&mut self.inner.opts);
+        if !self.inner.input.is_empty() {
+            // TODO: Remove add_input_*_slice in favor of with_stdin,
+            // and eliminate this "input" field.
+            opts = opts.with_stdin(Cursor::new(take(&mut self.inner.input)))
+        }
+        self.inner.opts = opts.finalize();
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
 
         if self.inner.opts.preflight {
             if skip_seal {
                 let image = MemoryImage::new(&self.elf, PAGE_SIZE as u32);
-                let mut preflight = Preflight::new(
-                    self.elf.entry,
-                    image,
-                    take(&mut self.inner.opts),
-                    self.inner.input.clone(),
-                );
+                let opts = take(&mut self.inner.opts);
+
+                let mut preflight = Preflight::new(self.elf.entry, image, opts);
                 while !preflight.is_halted() {
                     preflight.step().unwrap()
                 }
@@ -584,20 +596,10 @@ impl<'a> exec::HostHandler for ProverImpl<'a> {
         }
         // TODO: Use the standard syscall handler framework for this instead of matching
         // on name.
-        let buf_ptr = ctx.load_register(REG_A3);
-        let buf_len = ctx.load_register(REG_A4);
-        let from_guest = ctx.load_region(buf_ptr, buf_len);
         match syscall
             .strip_prefix("risc0_zkvm_platform::syscall::nr::")
             .unwrap_or(syscall)
         {
-            "SYS_INITIAL_INPUT" => {
-                log::debug!("SYS_INITIAL_INPUT: {}", from_guest.len());
-                let copy_bytes = min(to_guest.len() * WORD_SIZE, self.input.len());
-                bytemuck::cast_slice_mut(to_guest)[..copy_bytes]
-                    .clone_from_slice(&self.input[..copy_bytes]);
-                Ok((self.input.len() as u32, 0))
-            }
             "SYS_RANDOM" => {
                 log::debug!("SYS_RANDOM: {}", to_guest.len());
                 let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
