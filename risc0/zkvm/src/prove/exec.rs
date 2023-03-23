@@ -292,7 +292,6 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 Ok(())
             }
             "bigintDivide" => {
-                panic!("args: {args:?}, outs: {outs:?}");
                 let (a, b) = args.split_at(bigint::WIDTH_BYTES * 2);
                 let (q, r) = self.bigint_divide(a.try_into()?, b.try_into()?)?;
                 outs[..bigint::WIDTH_BYTES * 2].copy_from_slice(&q[..]);
@@ -643,8 +642,8 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
 
             if i < q.len() {
                 q[i] = q_approx;
-            } else if (q_approx != 0) {
-                bail!("bigint divide: quotient exceeds allowed size");
+            } else if q_approx != 0 {
+                anyhow::bail!("bigint divide: quotient exceeds allowed size");
             }
         }
 
