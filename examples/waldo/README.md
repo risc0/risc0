@@ -87,3 +87,5 @@ cargo run --release --bin prove -- -i waldo.webp -x 1150 -y 291 -w 58 -h 70 -m w
 # Verify that the prover actually found Waldo.
 cargo run --release --bin verify -- -i waldo.webp -r receipt.bin
 ```
+
+Warning: This example is memory-intensive; we recommend using a machine with at least 64GB of RAM. 
