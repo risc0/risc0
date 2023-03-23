@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
 use risc0_zkp::core::sha::{Digest, Sha256, BLOCK_BYTES, SHA256_INIT};
 use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE},
@@ -41,7 +40,7 @@ pub struct PageTableInfo {
     pub root_idx: u32,
     root_page_addr: u32,
     num_pages: u32,
-    num_root_entries: u32,
+    _num_root_entries: u32,
     _layers: Vec<u32>,
 }
 
@@ -65,7 +64,7 @@ impl PageTableInfo {
         let root_addr = page_table_addr + page_table_size;
         let root_idx = root_addr / page_size;
         let root_page_addr = root_idx * page_size;
-        let num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
+        let _num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
         assert_eq!(root_idx, num_pages);
 
         log::debug!("root_page_addr: 0x{root_page_addr:08x}, root_addr: 0x{root_addr:08x}");
@@ -78,7 +77,7 @@ impl PageTableInfo {
             root_idx,
             root_page_addr,
             num_pages,
-            num_root_entries,
+            _num_root_entries,
             _layers: layers,
         }
     }
@@ -142,16 +141,13 @@ impl MemoryImage {
         Self { image, info }
     }
 
-    /// Verify the integrity of the MemoryImage
+    /// Verify the integrity of the MemoryImage.
     ///
-    /// Confirms that the page table is a valid Merkle tree with root
-    /// [MemoryImage::root], and that the data from each page in the
-    /// [MemoryImage::image] hashes to the same hash as given for that page in
-    /// the page table.
-    ///
-    /// Returns `Ok(())` if all of the above conditions are met, and returns an
-    /// `Err` if any are not met.
-    pub fn check(&self, addr: u32) -> Result<()> {
+    /// Confirms that the page table is a valid Merkle tree with the expected
+    /// root and that the data from each page hashes to the expected page table
+    /// entry.
+    #[cfg(test)]
+    fn check(&self, addr: u32) -> anyhow::Result<()> {
         let mut page_idx = self.info.get_page_index(addr);
         while page_idx < self.info.root_idx {
             let page_addr = self.info.get_page_addr(page_idx);
@@ -165,19 +161,19 @@ impl MemoryImage {
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
             );
             if expected != actual {
-                bail!("Invalid page table entry: {} != {}", expected, actual);
+                anyhow::bail!("Invalid page table entry: {} != {}", expected, actual);
             }
             page_idx = self.info.get_page_index(entry_addr);
         }
 
         let root_page_addr = self.info.root_page_addr;
-        let root_page_bytes = self.info.num_root_entries * DIGEST_BYTES as u32;
+        let root_page_bytes = self.info._num_root_entries * DIGEST_BYTES as u32;
         let root_page = &self.image
             [root_page_addr as usize..root_page_addr as usize + root_page_bytes as usize];
         let expected = hash_page(root_page);
         let root = self.get_root();
         if expected != root {
-            bail!("Invalid root hash: {} != {}", expected, root);
+            anyhow::bail!("Invalid root hash: {} != {}", expected, root);
         }
 
         Ok(())
@@ -243,7 +239,7 @@ mod tests {
         assert_eq!(info._layers, vec![6815744, 212992, 6656, 192]);
         assert_eq!(info.root_addr, 0xd6b5ac0);
         assert_eq!(info.root_page_addr, 0xd6b5800);
-        assert_eq!(info.num_root_entries, 22);
+        assert_eq!(info._num_root_entries, 22);
         assert_eq!(info.root_idx, 219862);
     }
 
@@ -331,7 +327,7 @@ mod tests {
         assert_eq!(info.root_addr, 0x1AC0);
         assert_eq!(info.root_page_addr, 0x1800);
         assert_eq!(
-            info.num_root_entries,
+            info._num_root_entries,
             (0x1A00 - 0x1800) / DIGEST_BYTES as u32 + 6
         );
     }
