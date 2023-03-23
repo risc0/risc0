@@ -472,15 +472,23 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         Ok(opcode.major.as_u32().into())
     }
 
+    // Determine if a flush is required because there won't be enough cycles to
+    // complete the current instruction assuming that paging out all dirty pages
+    // up to this point require a certain amount of cycles.
     fn needs_flush(&self) -> bool {
-        // It takes 1152 cycles to compute a SHA-256 digest for a 1024-byte page.
         // TODO
+        // It takes 1152 cycles to compute a SHA-256 digest for a 1024-byte page.
         false
     }
 
     fn get_page_faults(&self, pc: u32, inst: u32, opcode: &OpCode) -> PageFaults {
         let info = &self.memory.ram.borrow().info;
         let mut faults = PageFaults::new();
+        // While it's not technically true that all instructions cause writes to at
+        // least one system register, it's safe to do this because the only cost
+        // is doing an extra hash of a page that isn't actually dirty. The
+        // benefit is that we don't have to identity instructions that don't
+        // have any system register mutations.
         faults.include(info, SYSTEM.start() as u32, IncludeDir::Both);
         faults.include(info, pc, IncludeDir::Read);
 
