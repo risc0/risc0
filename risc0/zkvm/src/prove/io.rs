@@ -252,9 +252,24 @@ impl<'a> Syscall for PosixIo<'a> {
             let reader = read_fds
                 .get_mut(&fd)
                 .expect(&format!("Bad read file descriptor {fd}"));
+            // So that we don't have to deal with short reads, keep
+            // reading until we get EOF or fill the buffer.
+            let mut read_all = |mut buf: &mut [u8]| -> usize {
+                let mut tot_nread = 0;
+                while !buf.is_empty() {
+                    let nread = reader.read(buf).unwrap();
+                    if nread == 0 {
+                        break;
+                    }
+                    tot_nread += nread;
+                    (_, buf) = buf.split_at_mut(nread);
+                }
+
+                tot_nread
+            };
 
             let to_guest_u8: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-            let nread_main = reader.read(to_guest_u8).unwrap();
+            let nread_main = read_all(to_guest_u8);
             assert_eq!(
                 nread_main,
                 to_guest_u8.len(),
@@ -273,7 +288,7 @@ impl<'a> Syscall for PosixIo<'a> {
 
             // Fill unaligned word out.
             let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
-            let nread_end = reader.read(&mut to_guest_end[0..unaligned_end]).unwrap();
+            let nread_end = read_all(&mut to_guest_end[0..unaligned_end]);
 
             Ok((
                 (nread_main + nread_end) as u32,

@@ -118,7 +118,6 @@ macro_rules! declare_syscall {
 pub mod nr {
     declare_syscall!(pub SYS_CYCLE_COUNT);
     declare_syscall!(pub SYS_GETENV);
-    declare_syscall!(pub SYS_INITIAL_INPUT);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
@@ -412,6 +411,39 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize)
     );
 
     nread
+}
+
+/// Reads up to the given number of words into the buffer [recv_buf,
+/// recv_buf + nwords).  Returns the number of bytes actually read.
+/// sys_read_words is a more efficient interface than sys_read, but
+/// varies from POSIX semantics.  Notably:
+///
+/// * The read length is specified in words, not bytes.  (The output
+/// length is still returned in bytes)
+///
+/// * If not all data is available, sys_read_words will block on the
+/// input stream instead of returning a short read.
+///
+/// * recv_buf must be word-aligned.
+///
+/// * All of the buffer is overwritten, even in the case of EOF
+/// mid-way through.
+///
+/// # Safety
+///
+/// `recv_buf' must be a word-aligned pointer and point to a region of
+/// `nwords' size.
+pub unsafe extern "C" fn sys_read_words(fd: u32, recv_buf: *mut u32, nwords: usize) -> usize {
+    let nbytes_requested = nwords * WORD_SIZE;
+    let Return(nread, _) = syscall_2(
+        nr::SYS_READ,
+        recv_buf,
+        nwords,
+        fd,
+        (nwords * WORD_SIZE) as u32,
+    );
+    assert!(nread as usize <= nbytes_requested);
+    nread as usize
 }
 
 #[no_mangle]
