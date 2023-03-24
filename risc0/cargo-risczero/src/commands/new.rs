@@ -19,7 +19,7 @@ use clap::Parser;
 use convert_case::{Case, Casing};
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
-const RICS0_TEMPLATE_DIR: &str = "templates/rust-stater";
+const RISC0_TEMPLATE_DIR: &str = "templates/rust-stater";
 const RISC0_DEFAULT_VERSION: &str = "0.13.0";
 const RISC0_RELEASE_TAG: &str = "v0.13.0";
 
@@ -70,9 +70,10 @@ pub struct NewCommand {
 }
 
 impl NewCommand {
+    /// Execute this command
     pub fn run(&self) {
         let subfolder = if self.template == RISC0_GH_REPO {
-            Some(RICS0_TEMPLATE_DIR.to_string())
+            Some(RISC0_TEMPLATE_DIR.to_string())
         } else {
             None
         };

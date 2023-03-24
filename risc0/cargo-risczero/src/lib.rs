@@ -12,11 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![deny(missing_docs)]
+
+//! Tools for developing RISC Zero projects in Rust
+//! 
+//! ## Install
+//! ```
+//! cargo install cargo-risczero
+//! ```
+//! 
+//! ## Run
+//! ```
+//! cargo risczero
+//! ```
+
 use clap::{Parser, Subcommand};
 
 use crate::commands::new::NewCommand;
 
+/// Implementations of the commands
 pub mod commands {
+    /// Create a new RISC Zero project
     pub mod new;
 }
 
@@ -24,6 +40,7 @@ pub mod commands {
 #[command(name = "cargo", bin_name = "cargo")]
 /// Main cargo command
 pub enum Cargo {
+    /// The `risczero` command
     Risczero(Risczero),
 }
 
@@ -32,6 +49,7 @@ pub enum Cargo {
 /// `cargo risczero`
 pub struct Risczero {
     #[clap(subcommand)]
+    /// Which `risczero` command to run
     pub command: RisczeroCmd,
 }
 
