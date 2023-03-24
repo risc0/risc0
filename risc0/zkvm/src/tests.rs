@@ -680,3 +680,22 @@ fn pause_continue() {
     // Run until sys_halt
     prover.run().unwrap();
 }
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn continuation() {
+    let segment_limit_po2 = 15; // 32K
+    let opts = ProverOpts::default().with_segment_limit_po2(segment_limit_po2);
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
+
+    let mut count = 0;
+    for _ in 0..10 {
+        count += 1;
+        prover.run().unwrap();
+        if prover.exit_code == 0 {
+            break;
+        }
+    }
+}

@@ -81,6 +81,8 @@ use crate::{
     ControlIdLocator, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
+const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20; // 1M cycles
+
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
 pub mod cuda {
@@ -182,20 +184,33 @@ cfg_if::cfg_if! {
 
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
-    pub(crate) skip_seal: bool,
+    skip_seal: bool,
 
-    pub(crate) skip_verify: bool,
+    skip_verify: bool,
 
-    pub(crate) syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
+    syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
 
-    pub(crate) io: PosixIo<'a>,
-    pub(crate) env_vars: HashMap<String, String>,
-    pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
+    io: PosixIo<'a>,
+    env_vars: HashMap<String, String>,
+    trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
 
-    pub(crate) preflight: bool,
+    preflight: bool,
+
+    segment_limit_po2: usize,
 }
 
 impl<'a> ProverOpts<'a> {
+    /// Set the segment limit specified as a power of 2.
+    ///
+    /// When running a large program, this limit specifies the max cycles
+    /// allowed for a particular segment.
+    pub fn with_segment_limit_po2(self, segment_limit_po2: usize) -> Self {
+        Self {
+            segment_limit_po2,
+            ..self
+        }
+    }
+
     /// If true, skip generating the seal in receipt. This should
     /// only be used for testing. In this case, performace will be
     /// much better but we will not be able to cryptographically
@@ -277,7 +292,7 @@ impl<'a> ProverOpts<'a> {
     }
 
     /// Add late-binding handlers for constructed environment.
-    pub(crate) fn finalize(mut self) -> Self {
+    fn finalize(mut self) -> Self {
         let io = Rc::new(take(&mut self.io));
         let getenv = Getenv(take(&mut self.env_vars));
         self.with_syscall(SYS_READ, io.clone())
@@ -354,6 +369,7 @@ impl<'a> Default for ProverOpts<'a> {
             env_vars: HashMap::new(),
             trace_callback: None,
             preflight: std::env::var("RISC0_EXPERIMENTAL_PREFLIGHT").is_ok(),
+            segment_limit_po2: DEFAULT_SEGMENT_LIMIT_PO2,
         }
         .with_read_fd(fileno::STDIN, BufReader::new(stdin()))
         .with_write_fd(fileno::STDOUT, stdout())
@@ -407,6 +423,13 @@ pub struct Prover<'a> {
     /// called. Note that this is privately shared with the host; it is not
     /// present in the [Receipt].
     pub cycles: usize,
+
+    /// The exit code reported by the latest segment execution. The possible
+    /// values are:
+    /// - 0: Halted normally
+    /// - 1: User-initiated pause
+    /// - 2: System-initiated split
+    pub exit_code: u32,
 }
 
 impl<'a> Prover<'a> {
@@ -427,21 +450,19 @@ impl<'a> Prover<'a> {
             image: Rc::new(RefCell::new(MemoryImage::new(&program, PAGE_SIZE as u32))),
             pc: program.entry,
             cycles: 0,
+            exit_code: 0,
         })
     }
 
     /// Construct a prover from a memory image.
-    pub fn from_image(
-        image: Rc<RefCell<MemoryImage>>,
-        pc: u32,
-        opts: ProverOpts<'a>,
-    ) -> Result<Self> {
-        Ok(Prover {
+    pub fn from_image(image: Rc<RefCell<MemoryImage>>, pc: u32, opts: ProverOpts<'a>) -> Self {
+        Prover {
             inner: ProverImpl::new(opts),
             image,
             pc,
             cycles: 0,
-        })
+            exit_code: 0,
+        }
     }
 
     /// Provide input data to the guest. This data can be read by the guest
@@ -508,6 +529,7 @@ impl<'a> Prover<'a> {
         E: EvalCheck<H>,
     {
         self.inner.opts = take(&mut self.inner.opts).finalize();
+        let segment_limit_po2 = self.inner.opts.segment_limit_po2;
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
         let journal = self.inner.journal.buf.take();
 
@@ -533,10 +555,16 @@ impl<'a> Prover<'a> {
         }
 
         let image_id = self.image.borrow().get_root();
-        let mut executor =
-            RV32Executor::new(&CIRCUIT, Rc::clone(&self.image), self.pc, &mut self.inner);
-        let (cycles, pc) = executor.run()?;
+        let mut executor = RV32Executor::new(
+            &CIRCUIT,
+            Rc::clone(&self.image),
+            self.pc,
+            &mut self.inner,
+            segment_limit_po2,
+        );
+        let (cycles, exit_code, pc) = executor.run()?;
         self.cycles = cycles;
+        self.exit_code = exit_code;
         self.pc = pc;
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);

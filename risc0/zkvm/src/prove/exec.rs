@@ -31,7 +31,7 @@ use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepHandler},
     core::sha::BLOCK_BYTES,
     prove::executor::Executor,
-    MAX_CYCLES_PO2,
+    MAX_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{
     memory::SYSTEM,
@@ -40,13 +40,22 @@ use risc0_zkvm_platform::{
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
         DIGEST_WORDS,
     },
-    WORD_SIZE,
+    PAGE_SIZE, WORD_SIZE,
 };
 
 use super::{loader::Loader, plonk, SyscallContext, TraceEvent};
 use crate::binfmt::image::{MemoryImage, PageTableInfo};
 
 const IMM_BITS: usize = 12;
+
+// The number of cycles required to compress a SHA-256 block.
+const SHA_CYCLES: usize = 72;
+
+// The number of blocks that fit within a single page.
+const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
+
+// The number of cycles required to compute a SHA-256 digest of a page.
+const CYCLES_PER_PAGE: usize = SHA_CYCLES * BLOCKS_PER_PAGE;
 
 #[allow(dead_code)]
 #[derive(Debug)]
@@ -297,6 +306,8 @@ pub struct MachineContext<'a, H: HostHandler> {
     dirty_pages: BTreeSet<u32>,
 
     last_pc: u32,
+    exit_code: u32,
+    segment_limit: usize,
 
     syscall_out_data: VecDeque<u32>,
     syscall_out_regs: (u32, u32),
@@ -313,7 +324,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
     ) -> Result<()> {
         match name {
             "halt" => {
-                self.halt(args[0], args[1]);
+                self.halt(cycle, args[0], args[1]);
                 Ok(())
             }
             "trace" => self.trace(cycle, args[0]),
@@ -403,7 +414,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
 }
 
 impl<'a, H: HostHandler> MachineContext<'a, H> {
-    pub fn new(io: &'a mut H, image: Rc<RefCell<MemoryImage>>) -> Self {
+    pub fn new(io: &'a mut H, image: Rc<RefCell<MemoryImage>>, segment_limit: usize) -> Self {
         MachineContext {
             memory: MemoryState::new(image),
             trace_enabled: io.is_trace_enabled(),
@@ -416,31 +427,34 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             finished_page_reads: BTreeSet::new(),
             dirty_pages: BTreeSet::new(),
             last_pc: 0,
+            exit_code: 0,
+            segment_limit,
         }
     }
 
-    fn halt(&mut self, exit_code: BabyBearElem, pc: BabyBearElem) {
+    fn halt(&mut self, cycle: usize, exit_code: BabyBearElem, pc: BabyBearElem) {
         if !self.is_halted {
-            let exit_code: u32 = exit_code.into();
+            self.exit_code = exit_code.into();
             self.last_pc = pc.into();
-            match exit_code {
+            match self.exit_code {
                 halt::TERMINATE => {
-                    debug!("TERMINATE: 0x{:08x}", self.last_pc);
+                    debug!("TERM[{cycle}]> pc: 0x{:08x}", self.last_pc);
                 }
                 halt::PAUSE => {
                     self.last_pc += 4;
-                    debug!("PAUSE: 0x{:08x}", self.last_pc);
+                    debug!("PAUSE[{cycle}]> pc: 0x{:08x}", self.last_pc);
                 }
                 halt::SPLIT => {
-                    debug!("SPLIT: 0x{:08x}", self.last_pc);
+                    self.last_pc += 4;
+                    debug!("SPLIT[{cycle}]> pc: 0x{:08x}", self.last_pc);
                 }
-                _ => unimplemented!("Unsupported halt mode: {exit_code}"),
+                _ => unimplemented!("Unsupported halt mode: {}", self.exit_code),
             }
             self.is_halted = true;
         }
     }
 
-    fn get_major(&mut self, _cycle: BabyBearElem, pc: BabyBearElem) -> Result<BabyBearElem> {
+    fn get_major(&mut self, cycle: BabyBearElem, pc: BabyBearElem) -> Result<BabyBearElem> {
         let pc: u32 = pc.into();
         let inst = self.memory.load_u32(pc);
         let opcode = self.decode(inst);
@@ -450,21 +464,28 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         let faults = self.get_page_faults(pc, inst, &opcode);
         // faults.dump();
 
-        for page_idx in faults.reads {
-            if !self.finished_page_reads.contains(&page_idx) {
-                return Ok(MajorType::PageFault.as_u32().into());
-            }
-        }
-
         let force_flush = faults.force_flush;
         if self.is_flushing {
             if !force_flush || !self.dirty_pages.is_empty() {
                 return Ok(MajorType::PageFault.as_u32().into());
             }
-        } else {
-            self.dirty_pages.extend(faults.writes.iter());
-            if force_flush || self.needs_flush() {
-                self.is_flushing = true;
+            return Ok(opcode.major.as_u32().into());
+        }
+
+        if force_flush || self.needs_flush(cycle.into(), &faults) {
+            self.is_flushing = true;
+            debug!(
+                "flush> {} pages, required_cycles: {}",
+                self.dirty_pages.len(),
+                self.dirty_pages.len() * (1 + CYCLES_PER_PAGE)
+            );
+            return Ok(MajorType::PageFault.as_u32().into());
+        }
+
+        self.dirty_pages.extend(faults.writes.iter());
+
+        for page_idx in faults.reads {
+            if !self.finished_page_reads.contains(&page_idx) {
                 return Ok(MajorType::PageFault.as_u32().into());
             }
         }
@@ -475,10 +496,30 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     // Determine if a flush is required because there won't be enough cycles to
     // complete the current instruction assuming that paging out all dirty pages
     // up to this point require a certain amount of cycles.
-    fn needs_flush(&self) -> bool {
-        // TODO
-        // It takes 1152 cycles to compute a SHA-256 digest for a 1024-byte page.
-        false
+    fn needs_flush(&self, cycle: u32, faults: &PageFaults) -> bool {
+        let cycle = cycle as usize;
+        assert!(self.segment_limit > cycle);
+        // How many cycles remain in the current segment?
+        let remaining_cycles = self.segment_limit - cycle;
+        let reads = faults.reads.difference(&self.finished_page_reads).count();
+        let writes = self.dirty_pages.union(&faults.writes).count();
+        // How many cycles are required to execute the next instruction?
+        // This sum is based on:
+        // - ensure we don't split in the middle of a SHA compress
+        // - each page_in requires 1 PageFault cycle + CYCLES_PER_PAGE cycles
+        // - each page_out requires 1 PageFault cycle + CYCLES_PER_PAGE cycles
+        // - leave room for 2 Reset, BytesFini, and RamFini cycles
+        // - leave room for ZK cycles
+        let required_cycles = SHA_CYCLES
+            + reads * (1 + CYCLES_PER_PAGE)
+            + writes * (1 + CYCLES_PER_PAGE)
+            + 4
+            + ZK_CYCLES;
+        debug!(
+            "segment_limit: {}, cycle: {}, remaining_cycles: {}, required_cycles: {}, reads: {}, writes: {}",
+            self.segment_limit, cycle, remaining_cycles, required_cycles, reads, writes
+        );
+        required_cycles > remaining_cycles
     }
 
     fn get_page_faults(&self, pc: u32, inst: u32, opcode: &OpCode) -> PageFaults {
@@ -567,14 +608,6 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
         let opcode = self.decode(inst);
         let info = self.get_page_faults(pc, inst, &opcode);
 
-        for page_idx in info.reads.iter().rev() {
-            if !self.finished_page_reads.contains(page_idx) {
-                self.finished_page_reads.insert(*page_idx);
-                // debug!("read> page_idx: 0x{page_idx:08X}");
-                return (BabyBearElem::ONE, (*page_idx).into(), BabyBearElem::ZERO);
-            }
-        }
-
         if self.is_flushing {
             if let Some(page_idx) = self.dirty_pages.pop_first() {
                 // let info = &self.memory.ram.borrow().info;
@@ -583,6 +616,14 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                 //     info.get_page_addr(page_idx)
                 // );
                 return (BabyBearElem::ZERO, page_idx.into(), BabyBearElem::ZERO);
+            }
+        } else {
+            for page_idx in info.reads.iter().rev() {
+                if !self.finished_page_reads.contains(page_idx) {
+                    self.finished_page_reads.insert(*page_idx);
+                    // debug!("read> page_idx: 0x{page_idx:08X}");
+                    return (BabyBearElem::ONE, (*page_idx).into(), BabyBearElem::ZERO);
+                }
             }
         }
 
@@ -942,6 +983,7 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         image: Rc<RefCell<MemoryImage>>,
         pc: u32,
         host: &'a mut H,
+        segment_limit_po2: usize,
     ) -> Self {
         let mut io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
 
@@ -961,16 +1003,21 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
             }
         }
 
-        let machine = MachineContext::new(host, Rc::clone(&image));
+        let segment_limit = 2_usize.pow(segment_limit_po2 as u32);
+        let machine = MachineContext::new(host, Rc::clone(&image), segment_limit);
         let executor = Executor::new(circuit, machine, 13, MAX_CYCLES_PO2, &io);
         Self { executor }
     }
 
     #[tracing::instrument(skip_all)]
-    pub fn run(&mut self) -> Result<(usize, u32)> {
+    pub fn run(&mut self) -> Result<(usize, u32, u32)> {
         let loader = Loader::new();
         let cycles = loader.load(|chunk, fini| self.executor.step(chunk, fini))?;
         self.executor.finalize();
-        Ok((cycles, self.executor.handler.last_pc))
+        Ok((
+            cycles,
+            self.executor.handler.exit_code,
+            self.executor.handler.last_pc,
+        ))
     }
 }

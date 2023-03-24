@@ -442,14 +442,14 @@ PolyExtStep::AndEqz(100, 313), // cirgen/components/u32.cpp:34
 PolyExtStep::Get(359), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(314, 159), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(101, 315), // cirgen/components/u32.cpp:34
-PolyExtStep::Get(348), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(316, 83), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(102, 317), // cirgen/components/ram.cpp:169
-PolyExtStep::Get(350), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(318, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(103, 319), // cirgen/components/ram.cpp:170
-PolyExtStep::Get(352), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(104, 320), // cirgen/components/ram.cpp:171
+PolyExtStep::Get(348), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(316, 83), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(102, 317), // cirgen/components/ram.cpp:168
+PolyExtStep::Get(350), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(318, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(103, 319), // cirgen/components/ram.cpp:169
+PolyExtStep::Get(352), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(104, 320), // cirgen/components/ram.cpp:170
 PolyExtStep::Sub(308, 308), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(105, 321), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(310, 310), // cirgen/components/u32.cpp:34
@@ -481,14 +481,14 @@ PolyExtStep::AndEqz(113, 339), // cirgen/components/u32.cpp:34
 PolyExtStep::Get(369), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(340, 170), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(114, 341), // cirgen/components/u32.cpp:34
-PolyExtStep::Get(361), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(342, 333), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(115, 343), // cirgen/components/ram.cpp:169
-PolyExtStep::Get(362), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(344, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(116, 345), // cirgen/components/ram.cpp:170
-PolyExtStep::Get(363), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(117, 346), // cirgen/components/ram.cpp:171
+PolyExtStep::Get(361), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(342, 333), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(115, 343), // cirgen/components/ram.cpp:168
+PolyExtStep::Get(362), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(344, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(116, 345), // cirgen/components/ram.cpp:169
+PolyExtStep::Get(363), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(117, 346), // cirgen/components/ram.cpp:170
 PolyExtStep::Sub(334, 334), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(118, 347), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(336, 336), // cirgen/components/u32.cpp:34
@@ -520,14 +520,14 @@ PolyExtStep::AndEqz(126, 365), // cirgen/components/u32.cpp:34
 PolyExtStep::Get(380), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(366, 174), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(127, 367), // cirgen/components/u32.cpp:34
-PolyExtStep::Get(371), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(368, 359), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(128, 369), // cirgen/components/ram.cpp:169
-PolyExtStep::Get(373), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(370, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(129, 371), // cirgen/components/ram.cpp:170
-PolyExtStep::Get(374), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(130, 372), // cirgen/components/ram.cpp:171
+PolyExtStep::Get(371), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(368, 359), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(128, 369), // cirgen/components/ram.cpp:168
+PolyExtStep::Get(373), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(370, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(129, 371), // cirgen/components/ram.cpp:169
+PolyExtStep::Get(374), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(130, 372), // cirgen/components/ram.cpp:170
 PolyExtStep::Sub(360, 360), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(131, 373), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(362, 362), // cirgen/components/u32.cpp:34
@@ -550,10 +550,10 @@ PolyExtStep::Sub(312, 380), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(138, 384), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(314, 381), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(139, 385), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(316, 7), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(140, 386), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(141, 319), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(142, 320), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(316, 7), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(140, 386), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(141, 319), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(142, 320), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(143, 321), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(144, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(145, 323), // cirgen/components/u32.cpp:34
@@ -570,10 +570,10 @@ PolyExtStep::Sub(338, 389), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(149, 393), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(340, 390), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(150, 394), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(342, 8), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(151, 395), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(152, 345), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(153, 346), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(342, 8), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(151, 395), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(152, 345), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(153, 346), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(154, 347), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(155, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(156, 349), // cirgen/components/u32.cpp:34
@@ -590,10 +590,10 @@ PolyExtStep::Sub(364, 398), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(160, 402), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(366, 399), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(161, 403), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(368, 9), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(162, 404), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(163, 371), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(164, 372), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(368, 9), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(162, 404), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(163, 371), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(164, 372), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(165, 373), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(166, 374), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(167, 375), // cirgen/components/u32.cpp:34
@@ -614,14 +614,14 @@ PolyExtStep::AndEqz(171, 414), // cirgen/components/u32.cpp:34
 PolyExtStep::Get(392), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(415, 408), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(172, 416), // cirgen/components/u32.cpp:34
-PolyExtStep::Get(382), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(417, 10), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(173, 418), // cirgen/components/ram.cpp:169
-PolyExtStep::Get(384), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(419, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(174, 420), // cirgen/components/ram.cpp:170
-PolyExtStep::Get(385), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(175, 421), // cirgen/components/ram.cpp:171
+PolyExtStep::Get(382), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(417, 10), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(173, 418), // cirgen/components/ram.cpp:168
+PolyExtStep::Get(384), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(419, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(174, 420), // cirgen/components/ram.cpp:169
+PolyExtStep::Get(385), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(175, 421), // cirgen/components/ram.cpp:170
 PolyExtStep::Sub(409, 409), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(176, 422), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(411, 411), // cirgen/components/u32.cpp:34
@@ -643,10 +643,10 @@ PolyExtStep::Sub(312, 428), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(183, 432), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(314, 429), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(184, 433), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(316, 11), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(185, 434), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(186, 319), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(187, 320), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(316, 11), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(185, 434), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(186, 319), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(187, 320), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(188, 321), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(189, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(190, 323), // cirgen/components/u32.cpp:34
@@ -663,10 +663,10 @@ PolyExtStep::Sub(338, 437), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(194, 441), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(340, 438), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(195, 442), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(342, 12), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(196, 443), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(197, 345), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(198, 346), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(342, 12), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(196, 443), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(197, 345), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(198, 346), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(199, 347), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(200, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(201, 349), // cirgen/components/u32.cpp:34
@@ -683,10 +683,10 @@ PolyExtStep::Sub(364, 446), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(205, 450), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(366, 447), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(206, 451), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(368, 13), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(207, 452), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(208, 371), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(209, 372), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(368, 13), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(207, 452), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(208, 371), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(209, 372), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(210, 373), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(211, 374), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(212, 375), // cirgen/components/u32.cpp:34
@@ -703,10 +703,10 @@ PolyExtStep::Sub(413, 455), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(216, 459), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(415, 456), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(217, 460), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(417, 14), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(218, 461), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(219, 420), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(220, 421), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(417, 14), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(218, 461), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(219, 420), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(220, 421), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(221, 422), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(222, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(223, 424), // cirgen/components/u32.cpp:34
@@ -814,9 +814,9 @@ PolyExtStep::Mul(552, 30), // components/onehot.h:46
 PolyExtStep::Add(551, 553), // components/onehot.h:46
 PolyExtStep::Sub(554, 30), // cirgen/circuit/rv32im/body.cpp:68
 PolyExtStep::AndEqz(0, 555), // cirgen/circuit/rv32im/body.cpp:68
-PolyExtStep::AndEqz(234, 386), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(235, 319), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(236, 320), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(234, 386), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(235, 319), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(236, 320), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(237, 321), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(238, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(239, 323), // cirgen/components/u32.cpp:34
@@ -833,9 +833,9 @@ PolyExtStep::AndEqz(243, 561), // cirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 43), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(562, 314), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(244, 563), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(245, 395), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(246, 345), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(247, 346), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(245, 395), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(246, 345), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(247, 346), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(248, 347), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(249, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(250, 349), // cirgen/components/u32.cpp:34
@@ -852,9 +852,9 @@ PolyExtStep::AndEqz(254, 569), // cirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 47), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(570, 340), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(255, 571), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(256, 404), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(257, 371), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(258, 372), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(256, 404), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(257, 371), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(258, 372), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(259, 373), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(260, 374), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(261, 375), // cirgen/components/u32.cpp:34
@@ -871,9 +871,9 @@ PolyExtStep::AndEqz(265, 577), // cirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 51), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(578, 366), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(266, 579), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(267, 418), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(268, 420), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(269, 421), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(267, 418), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(268, 420), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(269, 421), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(270, 422), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(271, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(272, 424), // cirgen/components/u32.cpp:34
@@ -905,9 +905,9 @@ PolyExtStep::GetGlobal(0, 39), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(596, 589), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(281, 597), // cirgen/components/u32.cpp:34
 PolyExtStep::AndCond(233, 83, 282), // cirgen/circuit/rv32im/body.cpp:65
-PolyExtStep::AndEqz(0, 434), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(284, 319), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(285, 320), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(0, 434), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(284, 319), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(285, 320), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(286, 321), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(287, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(288, 323), // cirgen/components/u32.cpp:34
@@ -924,9 +924,9 @@ PolyExtStep::AndEqz(292, 603), // cirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 59), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(604, 314), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(293, 605), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(294, 443), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(295, 345), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(296, 346), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(294, 443), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(295, 345), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(296, 346), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(297, 347), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(298, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(299, 349), // cirgen/components/u32.cpp:34
@@ -943,9 +943,9 @@ PolyExtStep::AndEqz(303, 611), // cirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 63), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(612, 340), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(304, 613), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(305, 452), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(306, 371), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(307, 372), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(305, 452), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(306, 371), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(307, 372), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(308, 373), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(309, 374), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(310, 375), // cirgen/components/u32.cpp:34
@@ -962,9 +962,9 @@ PolyExtStep::AndEqz(314, 619), // cirgen/components/u32.cpp:34
 PolyExtStep::GetGlobal(0, 67), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(620, 366), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(315, 621), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(316, 461), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(317, 420), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(318, 421), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(316, 461), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(317, 420), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(318, 421), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(319, 422), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(320, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(321, 424), // cirgen/components/u32.cpp:34
@@ -990,12 +990,12 @@ PolyExtStep::AndCond(136, 377, 330), // components/mux.h:39
 PolyExtStep::Get(51), // Top/Code/OneHot/hot[5](Reg)(components/mux.h:39)
 PolyExtStep::Get(321), // Top/Mux/5/OneHot/hot[0](Reg)(components/mux.h:39)
 PolyExtStep::Mul(504, 19), // cirgen/circuit/rv32im/compute.cpp:112
-PolyExtStep::Sub(318, 634), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(0, 635), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(320, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(332, 636), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(308, 0), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(333, 637), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(318, 634), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(0, 635), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(320, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(332, 636), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(308, 0), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(333, 637), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(334, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(335, 323), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(336, 324), // cirgen/components/u32.cpp:34
@@ -1060,12 +1060,12 @@ PolyExtStep::Mul(667, 3), // cirgen/circuit/rv32im/decode.cpp:37
 PolyExtStep::Add(689, 690), // cirgen/circuit/rv32im/decode.cpp:37
 PolyExtStep::Add(691, 670), // cirgen/circuit/rv32im/decode.cpp:37
 PolyExtStep::Add(692, 40), // cirgen/circuit/rv32im/compute.cpp:134
-PolyExtStep::Sub(344, 693), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(342, 694), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(346, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(343, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(334, 0), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(344, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 693), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(342, 694), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(346, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(343, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(334, 0), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(344, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(345, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(346, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(347, 350), // cirgen/components/u32.cpp:34
@@ -1074,12 +1074,12 @@ PolyExtStep::AndEqz(348, 697), // cirgen/components/u32.cpp:34
 PolyExtStep::Mul(653, 34), // cirgen/circuit/rv32im/decode.cpp:41
 PolyExtStep::Add(698, 662), // cirgen/circuit/rv32im/decode.cpp:41
 PolyExtStep::Add(699, 40), // cirgen/circuit/rv32im/compute.cpp:135
-PolyExtStep::Sub(370, 700), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(349, 701), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(372, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(350, 702), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(360, 0), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(351, 703), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(370, 700), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(349, 701), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(372, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(350, 702), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(360, 0), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(351, 703), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(352, 374), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(353, 375), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(354, 376), // cirgen/components/u32.cpp:34
@@ -1300,12 +1300,12 @@ PolyExtStep::AndEqz(398, 873), // cirgen/components/u32.cpp:34
 PolyExtStep::Get(394), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(874, 171), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(399, 875), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(419, 870), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(400, 876), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(421, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(401, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(409, 3), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(402, 878), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(419, 870), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(400, 876), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(421, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(401, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(409, 3), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(402, 878), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(403, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(404, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(405, 425), // cirgen/components/u32.cpp:34
@@ -1433,9 +1433,9 @@ PolyExtStep::AndEqz(0, 896), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(509, 413), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(510, 415), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(511, 874), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(512, 876), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(513, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(514, 878), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(512, 876), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(513, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(514, 878), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(515, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(516, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(517, 425), // cirgen/components/u32.cpp:34
@@ -1466,9 +1466,9 @@ PolyExtStep::AndEqz(0, 899), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(539, 413), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(540, 415), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(541, 874), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(542, 876), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(543, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(544, 878), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(542, 876), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(543, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(544, 878), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(545, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(546, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(547, 425), // cirgen/components/u32.cpp:34
@@ -1863,9 +1863,9 @@ PolyExtStep::Sub(415, 495), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(789, 1046), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(874, 712), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(790, 1047), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(791, 876), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(792, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(793, 878), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(791, 876), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(792, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(793, 878), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(794, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(795, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(796, 425), // cirgen/components/u32.cpp:34
@@ -1987,10 +1987,10 @@ PolyExtStep::Mul(664, 3), // cirgen/circuit/rv32im/decode.cpp:37
 PolyExtStep::Add(1097, 1098), // cirgen/circuit/rv32im/decode.cpp:37
 PolyExtStep::Add(1099, 705), // cirgen/circuit/rv32im/decode.cpp:37
 PolyExtStep::Add(1100, 40), // cirgen/circuit/rv32im/memio.cpp:38
-PolyExtStep::Sub(344, 1101), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(861, 1102), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(862, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(863, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 1101), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(861, 1102), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(862, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(863, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(864, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(865, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(866, 350), // cirgen/components/u32.cpp:34
@@ -1998,10 +1998,10 @@ PolyExtStep::AndEqz(867, 697), // cirgen/components/u32.cpp:34
 PolyExtStep::Mul(731, 34), // cirgen/circuit/rv32im/decode.cpp:41
 PolyExtStep::Add(1103, 1079), // cirgen/circuit/rv32im/decode.cpp:41
 PolyExtStep::Add(1104, 40), // cirgen/circuit/rv32im/memio.cpp:39
-PolyExtStep::Sub(370, 1105), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(868, 1106), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(869, 702), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(870, 703), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(370, 1105), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(868, 1106), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(869, 702), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(870, 703), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(871, 374), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(872, 375), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(873, 376), // cirgen/components/u32.cpp:34
@@ -2061,10 +2061,10 @@ PolyExtStep::Add(1146, 1147), // cirgen/circuit/rv32im/memio.cpp:79
 PolyExtStep::Mul(174, 36), // cirgen/circuit/rv32im/memio.cpp:80
 PolyExtStep::Add(1148, 1149), // cirgen/circuit/rv32im/memio.cpp:79
 PolyExtStep::Add(1150, 176), // cirgen/circuit/rv32im/memio.cpp:79
-PolyExtStep::Sub(419, 1151), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(885, 1152), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(886, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(887, 880), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(419, 1151), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(885, 1152), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(886, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(887, 880), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(888, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(889, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(890, 425), // cirgen/components/u32.cpp:34
@@ -2122,15 +2122,15 @@ PolyExtStep::AndEqz(912, 1181), // cirgen/components/u32.cpp:34
 PolyExtStep::Get(407), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(1182, 1173), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(913, 1183), // cirgen/components/u32.cpp:34
-PolyExtStep::Get(396), // cirgen/components/ram.cpp:169
-PolyExtStep::Sub(1184, 1175), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(914, 1185), // cirgen/components/ram.cpp:169
-PolyExtStep::Get(398), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(1186, 307), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(915, 1187), // cirgen/components/ram.cpp:170
-PolyExtStep::Get(399), // cirgen/components/ram.cpp:171
-PolyExtStep::Sub(1188, 3), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(916, 1189), // cirgen/components/ram.cpp:171
+PolyExtStep::Get(396), // cirgen/components/ram.cpp:168
+PolyExtStep::Sub(1184, 1175), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(914, 1185), // cirgen/components/ram.cpp:168
+PolyExtStep::Get(398), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(1186, 307), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(915, 1187), // cirgen/components/ram.cpp:169
+PolyExtStep::Get(399), // cirgen/components/ram.cpp:170
+PolyExtStep::Sub(1188, 3), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(916, 1189), // cirgen/components/ram.cpp:170
 PolyExtStep::Sub(1176, 1176), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(917, 1190), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(1178, 1178), // cirgen/components/u32.cpp:34
@@ -2268,10 +2268,10 @@ PolyExtStep::Sub(1180, 1233), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1001, 1239), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(1182, 1236), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1002, 1240), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(1184, 1151), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1003, 1241), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1004, 1187), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1005, 1189), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(1184, 1151), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1003, 1241), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1004, 1187), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1005, 1189), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1006, 1190), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1007, 1191), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1008, 1192), // cirgen/components/u32.cpp:34
@@ -2301,9 +2301,9 @@ PolyExtStep::AndEqz(1021, 1251), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1022, 1239), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(1182, 1250), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1023, 1252), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1024, 1241), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1025, 1187), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1026, 1189), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1024, 1241), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1025, 1187), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1026, 1189), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1027, 1190), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1028, 1191), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1029, 1192), // cirgen/components/u32.cpp:34
@@ -2330,9 +2330,9 @@ PolyExtStep::Sub(1180, 1255), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1043, 1259), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(1182, 1258), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1044, 1260), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1045, 1241), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1046, 1187), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1047, 1189), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1045, 1241), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1046, 1187), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1047, 1189), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1048, 1190), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1049, 1191), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1050, 1192), // cirgen/components/u32.cpp:34
@@ -2499,9 +2499,9 @@ PolyExtStep::Sub(415, 177), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1078, 1393), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(874, 178), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1079, 1394), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1080, 876), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1081, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1082, 878), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1080, 876), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1081, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1082, 878), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1083, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1084, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1085, 425), // cirgen/components/u32.cpp:34
@@ -2513,9 +2513,9 @@ PolyExtStep::Sub(415, 171), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(398, 1397), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(874, 172), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1089, 1398), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1090, 876), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1091, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1092, 878), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1090, 876), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1091, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1092, 878), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1093, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1094, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1095, 425), // cirgen/components/u32.cpp:34
@@ -2551,16 +2551,16 @@ PolyExtStep::Sub(740, 1407), // cirgen/circuit/rv32im/divide.cpp:46
 PolyExtStep::AndEqz(342, 1409), // cirgen/circuit/rv32im/divide.cpp:46
 PolyExtStep::Sub(745, 1408), // cirgen/circuit/rv32im/divide.cpp:47
 PolyExtStep::AndEqz(1115, 1410), // cirgen/circuit/rv32im/divide.cpp:47
-PolyExtStep::AndEqz(1116, 694), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1117, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1118, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1116, 694), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1117, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1118, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1119, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1120, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1121, 350), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1122, 697), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1123, 701), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1124, 702), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1125, 703), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1123, 701), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1124, 702), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1125, 703), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1126, 374), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1127, 375), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1128, 376), // cirgen/components/u32.cpp:34
@@ -2603,9 +2603,9 @@ PolyExtStep::Sub(415, 176), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1078, 1437), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(874, 177), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1139, 1438), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1140, 876), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1141, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1142, 878), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1140, 876), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1141, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1142, 878), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1143, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1144, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1145, 425), // cirgen/components/u32.cpp:34
@@ -2621,9 +2621,9 @@ PolyExtStep::Sub(415, 172), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1150, 1443), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(874, 173), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1151, 1444), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1152, 876), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1153, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1154, 878), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1152, 876), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1153, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1154, 878), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1155, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1156, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1157, 425), // cirgen/components/u32.cpp:34
@@ -3217,10 +3217,10 @@ PolyExtStep::AndEqz(338, 1945), // cirgen/circuit/rv32im/ecall.cpp:122
 PolyExtStep::AndEqz(1244, 312), // cirgen/circuit/rv32im/ecall.cpp:123
 PolyExtStep::AndEqz(1245, 314), // cirgen/circuit/rv32im/ecall.cpp:124
 PolyExtStep::AndEqz(1246, 342), // cirgen/circuit/rv32im/ecall.cpp:125
-PolyExtStep::Sub(344, 57), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1247, 1946), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1248, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1249, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 57), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1247, 1946), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1248, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1249, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1250, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1251, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1252, 350), // cirgen/components/u32.cpp:34
@@ -3231,10 +3231,10 @@ PolyExtStep::Mul(729, 18), // components/onehot.h:46
 PolyExtStep::Add(1948, 1949), // components/onehot.h:46
 PolyExtStep::Sub(1950, 336), // components/onehot.h:40
 PolyExtStep::AndEqz(1254, 1951), // components/onehot.h:40
-PolyExtStep::Sub(370, 58), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(0, 1952), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1256, 702), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1257, 703), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(370, 58), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(0, 1952), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1256, 702), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1257, 703), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1258, 374), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1259, 375), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1260, 376), // cirgen/components/u32.cpp:34
@@ -3245,10 +3245,10 @@ PolyExtStep::AndEqz(1264, 489), // cirgen/circuit/rv32im/body.cpp:23
 PolyExtStep::Sub(630, 30), // cirgen/circuit/rv32im/ecall.cpp:19
 PolyExtStep::AndEqz(1265, 1953), // cirgen/circuit/rv32im/ecall.cpp:19
 PolyExtStep::AndCond(1255, 897, 1266), // components/mux.h:39
-PolyExtStep::Sub(419, 59), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1262, 1954), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1268, 877), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1269, 880), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(419, 59), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1262, 1954), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1268, 877), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1269, 880), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1270, 423), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1271, 424), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1272, 425), // cirgen/components/u32.cpp:34
@@ -3401,10 +3401,10 @@ PolyExtStep::AndEqz(1325, 489), // cirgen/circuit/rv32im/body.cpp:23
 PolyExtStep::Sub(630, 29), // cirgen/circuit/rv32im/ecall.cpp:95
 PolyExtStep::AndEqz(1326, 2048), // cirgen/circuit/rv32im/ecall.cpp:95
 PolyExtStep::AndCond(1320, 728, 1327), // components/mux.h:39
-PolyExtStep::Sub(1184, 60), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1274, 2049), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1329, 1187), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1330, 1194), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(1184, 60), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1274, 2049), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1329, 1187), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1330, 1194), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1331, 1190), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1332, 1191), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1333, 1192), // cirgen/components/u32.cpp:34
@@ -3478,18 +3478,18 @@ PolyExtStep::AndCond(1353, 2061, 1354), // cirgen/circuit/rv32im/sha.cpp:188
 PolyExtStep::AndEqz(1355, 514), // components/bits.h:61
 PolyExtStep::AndEqz(1356, 487), // cirgen/circuit/rv32im/body.cpp:22
 PolyExtStep::AndEqz(1357, 489), // cirgen/circuit/rv32im/body.cpp:23
-PolyExtStep::Sub(318, 61), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(0, 2096), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1359, 636), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1360, 637), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(318, 61), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(0, 2096), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1359, 636), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1360, 637), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1361, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1362, 323), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1363, 324), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1364, 638), // cirgen/components/u32.cpp:34
-PolyExtStep::Sub(344, 62), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1365, 2097), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1366, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1367, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 62), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1365, 2097), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1366, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1367, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1368, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1369, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1370, 350), // cirgen/components/u32.cpp:34
@@ -3605,19 +3605,19 @@ PolyExtStep::Get(412), // Top/Mux/5/Mux/9/ShaCycle/Reg(cirgen/circuit/rv32im/sha
 PolyExtStep::Sub(1482, 2169), // cirgen/circuit/rv32im/sha.cpp:236
 PolyExtStep::AndEqz(1408, 2170), // cirgen/circuit/rv32im/sha.cpp:236
 PolyExtStep::Add(411, 874), // cirgen/circuit/rv32im/sha.cpp:239
-PolyExtStep::Sub(318, 2171), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1409, 2172), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1410, 636), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1411, 637), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(318, 2171), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1409, 2172), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1410, 636), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1411, 637), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1412, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1413, 323), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1414, 324), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1415, 638), // cirgen/components/u32.cpp:34
 PolyExtStep::Add(2171, 17), // cirgen/circuit/rv32im/sha.cpp:240
-PolyExtStep::Sub(344, 2173), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1416, 2174), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1417, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1418, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 2173), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1416, 2174), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1417, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1418, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1419, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1420, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1421, 350), // cirgen/components/u32.cpp:34
@@ -3900,20 +3900,20 @@ PolyExtStep::AndCond(1461, 2175, 1428), // cirgen/components/iszero.cpp:18
 PolyExtStep::AndEqz(1462, 1182), // components/bits.h:20
 PolyExtStep::Add(413, 23), // cirgen/circuit/rv32im/sha.cpp:311
 PolyExtStep::Sub(2411, 874), // cirgen/circuit/rv32im/sha.cpp:311
-PolyExtStep::Sub(318, 2412), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(0, 2413), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1464, 636), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(308, 1482), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(1465, 2414), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(318, 2412), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(0, 2413), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1464, 636), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(308, 1482), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(1465, 2414), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1466, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1467, 323), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1468, 324), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1469, 638), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(70, 874), // cirgen/circuit/rv32im/sha.cpp:312
-PolyExtStep::Sub(344, 2415), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1470, 2416), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1471, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1472, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 2415), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1470, 2416), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1471, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1472, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1473, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1474, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1475, 350), // cirgen/components/u32.cpp:34
@@ -3921,19 +3921,19 @@ PolyExtStep::AndEqz(1476, 697), // cirgen/components/u32.cpp:34
 PolyExtStep::AndCond(1463, 2409, 1477), // cirgen/circuit/rv32im/sha.cpp:310
 PolyExtStep::Add(415, 23), // cirgen/circuit/rv32im/sha.cpp:315
 PolyExtStep::Sub(2417, 874), // cirgen/circuit/rv32im/sha.cpp:315
-PolyExtStep::Sub(318, 2418), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(0, 2419), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1479, 636), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1480, 2414), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(318, 2418), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(0, 2419), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1479, 636), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1480, 2414), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1481, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1482, 323), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1483, 324), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1484, 638), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(71, 874), // cirgen/circuit/rv32im/sha.cpp:316
-PolyExtStep::Sub(344, 2420), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1485, 2421), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1486, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1487, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 2420), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1485, 2421), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1486, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1487, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1488, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1489, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1490, 350), // cirgen/components/u32.cpp:34
@@ -5631,10 +5631,10 @@ PolyExtStep::AndEqz(1527, 514), // components/bits.h:61
 PolyExtStep::AndEqz(1528, 487), // cirgen/circuit/rv32im/body.cpp:22
 PolyExtStep::AndEqz(1529, 489), // cirgen/circuit/rv32im/body.cpp:23
 PolyExtStep::Sub(73, 874), // cirgen/circuit/rv32im/sha.cpp:384
-PolyExtStep::Sub(344, 4076), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(0, 4077), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1531, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1532, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 4076), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(0, 4077), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1531, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1532, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1533, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1534, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1535, 350), // cirgen/components/u32.cpp:34
@@ -6661,20 +6661,20 @@ PolyExtStep::AndEqz(1549, 5083), // cirgen/circuit/rv32im/sha.cpp:128
 PolyExtStep::AndCond(1546, 1180, 1550), // cirgen/circuit/rv32im/sha.cpp:396
 PolyExtStep::Sub(0, 1474), // cirgen/circuit/rv32im/sha.cpp:402
 PolyExtStep::Add(409, 874), // cirgen/circuit/rv32im/sha.cpp:406
-PolyExtStep::Sub(318, 5085), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(0, 5086), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1552, 636), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1553, 637), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(318, 5085), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(0, 5086), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1552, 636), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1553, 637), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1554, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1555, 323), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1556, 324), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1557, 638), // cirgen/components/u32.cpp:34
 PolyExtStep::Add(409, 17), // cirgen/circuit/rv32im/sha.cpp:407
 PolyExtStep::Add(5087, 874), // cirgen/circuit/rv32im/sha.cpp:407
-PolyExtStep::Sub(344, 5088), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1558, 5089), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1559, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::AndEqz(1560, 696), // cirgen/components/ram.cpp:171
+PolyExtStep::Sub(344, 5088), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1558, 5089), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1559, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::AndEqz(1560, 696), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1561, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1562, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1563, 350), // cirgen/components/u32.cpp:34
@@ -6758,10 +6758,10 @@ PolyExtStep::Sub(314, 5113), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1570, 5160), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(342, 2261), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1571, 5161), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1572, 5086), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1573, 636), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(308, 3), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(1574, 5162), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1572, 5086), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1573, 636), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(308, 3), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(1574, 5162), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1575, 322), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1576, 323), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1577, 324), // cirgen/components/u32.cpp:34
@@ -6774,10 +6774,10 @@ PolyExtStep::Sub(340, 5141), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1581, 5165), // cirgen/components/u32.cpp:34
 PolyExtStep::Sub(368, 2338), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1582, 5166), // cirgen/components/u32.cpp:34
-PolyExtStep::AndEqz(1583, 5089), // cirgen/components/ram.cpp:169
-PolyExtStep::AndEqz(1584, 695), // cirgen/components/ram.cpp:170
-PolyExtStep::Sub(334, 3), // cirgen/components/ram.cpp:171
-PolyExtStep::AndEqz(1585, 5167), // cirgen/components/ram.cpp:171
+PolyExtStep::AndEqz(1583, 5089), // cirgen/components/ram.cpp:168
+PolyExtStep::AndEqz(1584, 695), // cirgen/components/ram.cpp:169
+PolyExtStep::Sub(334, 3), // cirgen/components/ram.cpp:170
+PolyExtStep::AndEqz(1585, 5167), // cirgen/components/ram.cpp:170
 PolyExtStep::AndEqz(1586, 348), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1587, 349), // cirgen/components/u32.cpp:34
 PolyExtStep::AndEqz(1588, 350), // cirgen/components/u32.cpp:34
@@ -7059,10 +7059,10 @@ PolyExtStep::Get(311), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1763, 5268), // cirgen/components/u32.cpp:28
 PolyExtStep::Get(313), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(1764, 5269), // cirgen/components/u32.cpp:28
-PolyExtStep::Get(315), // cirgen/components/ram.cpp:116
-PolyExtStep::AndEqz(1765, 5270), // cirgen/components/ram.cpp:116
-PolyExtStep::Get(317), // cirgen/components/ram.cpp:117
-PolyExtStep::AndEqz(1766, 5271), // cirgen/components/ram.cpp:117
+PolyExtStep::Get(315), // cirgen/components/ram.cpp:115
+PolyExtStep::AndEqz(1765, 5270), // cirgen/components/ram.cpp:115
+PolyExtStep::Get(317), // cirgen/components/ram.cpp:116
+PolyExtStep::AndEqz(1766, 5271), // cirgen/components/ram.cpp:116
 PolyExtStep::Get(237), // components/bits.h:61
 PolyExtStep::AndEqz(1767, 5272), // components/bits.h:61
 PolyExtStep::AndCond(1758, 5253, 1768), // cirgen/compiler/edsl/component.cpp:39
@@ -7074,10 +7074,10 @@ PolyExtStep::Get(310), // Top/Mux/3/RamHeader/RamPlonkElement/U32Reg/Reg(compile
 PolyExtStep::Get(312), // Top/Mux/3/RamHeader/RamPlonkElement/U32Reg/Reg(compiler/edsl/component.h:153)
 PolyExtStep::Get(314), // Top/Mux/3/RamHeader/RamPlonkElement/U32Reg/Reg(compiler/edsl/component.h:153)
 PolyExtStep::Get(318), // Top/Mux/3/RamHeader/RamPlonkVerifier/Reg(cirgen/components/ram.cpp:60)
-PolyExtStep::Sub(1, 1186), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5281), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(874, 5273), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5282, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(1, 1186), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5281), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(874, 5273), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5282, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5283, 99), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5284, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5285, 107), // cirgen/components/bytes.cpp:97
@@ -7086,17 +7086,17 @@ PolyExtStep::Sub(5287, 109), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5288, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(479, 5289), // components/bits.h:61
 PolyExtStep::AndEqz(1770, 5290), // components/bits.h:61
-PolyExtStep::Mul(5245, 5280), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1771, 5291), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(0, 1572, 1772), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 1572), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(5273, 874), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5293), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(1184, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5294, 1186), // cirgen/components/ram.cpp:100
-PolyExtStep::Mul(5274, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5295, 5296), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5297, 5275), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 5280), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1771, 5291), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(0, 1572, 1772), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 1572), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(5273, 874), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5293), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(1184, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5294, 1186), // cirgen/components/ram.cpp:99
+PolyExtStep::Mul(5274, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5295, 5296), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5297, 5275), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5298, 99), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5299, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5300, 107), // cirgen/components/bytes.cpp:97
@@ -7105,33 +7105,33 @@ PolyExtStep::Sub(5302, 109), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5303, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(479, 5304), // components/bits.h:61
 PolyExtStep::AndEqz(1774, 5305), // components/bits.h:61
-PolyExtStep::Sub(3, 1186), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5276, 1188), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5307), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5277, 1176), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1776, 5308), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5278, 1178), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1777, 5309), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5279, 1180), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1778, 5310), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1775, 5306, 1779), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1773, 5292, 1780), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 1186), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5311, 5281), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5281, 5306), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5311, 5306), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 1574), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1781, 5314, 1782), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(1574, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5315), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1783, 5312, 1784), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(1574, 5280), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5316), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1785, 5313, 1786), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(1, 1482), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5317), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(1182, 874), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5318, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 1186), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5276, 1188), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5307), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5277, 1176), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1776, 5308), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5278, 1178), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1777, 5309), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5279, 1180), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1778, 5310), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1775, 5306, 1779), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1773, 5292, 1780), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 1186), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5311, 5281), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5281, 5306), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5311, 5306), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 1574), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1781, 5314, 1782), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(1574, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5315), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1783, 5312, 1784), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(1574, 5280), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5316), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1785, 5313, 1786), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(1, 1482), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5317), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(1182, 874), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5318, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5319, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5320, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5321, 119), // cirgen/components/bytes.cpp:97
@@ -7140,16 +7140,16 @@ PolyExtStep::Sub(5323, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5324, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(482, 5325), // components/bits.h:61
 PolyExtStep::AndEqz(1788, 5326), // components/bits.h:61
-PolyExtStep::Mul(5245, 1574), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1789, 5327), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1787, 1582, 1790), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 1582), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(874, 1182), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5329), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(1474, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5330, 1482), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5331, 5294), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5332, 1186), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 1574), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1789, 5327), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1787, 1582, 1790), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 1582), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(874, 1182), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5329), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(1474, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5330, 1482), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5331, 5294), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5332, 1186), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5333, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5334, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5335, 119), // cirgen/components/bytes.cpp:97
@@ -7158,33 +7158,33 @@ PolyExtStep::Sub(5337, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5338, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(482, 5339), // components/bits.h:61
 PolyExtStep::AndEqz(1792, 5340), // components/bits.h:61
-PolyExtStep::Sub(3, 1482), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1188, 1490), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5342), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1176, 1498), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1794, 5343), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1178, 1506), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1795, 5344), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1180, 1514), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1796, 5345), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1793, 5341, 1797), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1791, 5328, 1798), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 1482), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5346, 5317), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5317, 5341), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5346, 5341), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 1590), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1799, 5349, 1800), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(1590, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5350), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1801, 5347, 1802), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(1590, 1574), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5351), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1803, 5348, 1804), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(1, 1532), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5352), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(1516, 1182), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5353, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 1482), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1188, 1490), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5342), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1176, 1498), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1794, 5343), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1178, 1506), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1795, 5344), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1180, 1514), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1796, 5345), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1793, 5341, 1797), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1791, 5328, 1798), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 1482), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5346, 5317), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5317, 5341), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5346, 5341), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 1590), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1799, 5349, 1800), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(1590, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5350), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1801, 5347, 1802), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(1590, 1574), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5351), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1803, 5348, 1804), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(1, 1532), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5352), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(1516, 1182), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5353, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5354, 129), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5355, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5356, 137), // cirgen/components/bytes.cpp:97
@@ -7193,16 +7193,16 @@ PolyExtStep::Sub(5358, 139), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5359, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5360), // components/bits.h:61
 PolyExtStep::AndEqz(1806, 5361), // components/bits.h:61
-PolyExtStep::Mul(5245, 1590), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1807, 5362), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1805, 1598, 1808), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 1598), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(1182, 1516), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5364), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(1524, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5365, 1532), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5366, 5330), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5367, 1482), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 1590), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1807, 5362), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1805, 1598, 1808), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 1598), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(1182, 1516), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5364), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(1524, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5365, 1532), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5366, 5330), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5367, 1482), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5368, 129), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5369, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5370, 137), // cirgen/components/bytes.cpp:97
@@ -7211,33 +7211,33 @@ PolyExtStep::Sub(5372, 139), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5373, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5374), // components/bits.h:61
 PolyExtStep::AndEqz(1810, 5375), // components/bits.h:61
-PolyExtStep::Sub(3, 1532), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1490, 1540), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5377), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1498, 1548), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1812, 5378), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1506, 1556), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1813, 5379), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1514, 1564), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1814, 5380), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1811, 5376, 1815), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1809, 5363, 1816), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 1532), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5381, 5352), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5352, 5376), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5381, 5376), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 1606), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1817, 5384, 1818), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(1606, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5385), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1819, 5382, 1820), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(1606, 1590), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5386), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1821, 5383, 1822), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(1, 5265), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5387), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(5263, 1516), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5388, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 1532), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1490, 1540), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5377), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1498, 1548), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1812, 5378), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1506, 1556), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1813, 5379), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1514, 1564), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1814, 5380), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1811, 5376, 1815), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1809, 5363, 1816), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 1532), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5381, 5352), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5352, 5376), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5381, 5376), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 1606), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1817, 5384, 1818), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(1606, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5385), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1819, 5382, 1820), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(1606, 1590), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5386), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1821, 5383, 1822), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(1, 5265), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5387), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(5263, 1516), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5388, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5389, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5390, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5391, 85), // cirgen/components/bytes.cpp:97
@@ -7246,16 +7246,16 @@ PolyExtStep::Sub(5393, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5394, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5395), // components/bits.h:61
 PolyExtStep::AndEqz(1824, 5396), // components/bits.h:61
-PolyExtStep::Mul(5245, 1606), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1825, 5397), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1823, 5270, 1826), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 5270), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(1516, 5263), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5399), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(5264, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5400, 5265), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5401, 5365), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5402, 1532), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 1606), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1825, 5397), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1823, 5270, 1826), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 5270), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(1516, 5263), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5399), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(5264, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5400, 5265), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5401, 5365), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5402, 1532), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5403, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5404, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5405, 85), // cirgen/components/bytes.cpp:97
@@ -7264,29 +7264,29 @@ PolyExtStep::Sub(5407, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5408, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5409), // components/bits.h:61
 PolyExtStep::AndEqz(1828, 5410), // components/bits.h:61
-PolyExtStep::Sub(3, 5265), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1540, 5266), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5412), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1548, 5267), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1830, 5413), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1556, 5268), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1831, 5414), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1564, 5269), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1832, 5415), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1829, 5411, 1833), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1827, 5398, 1834), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 5265), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5416, 5387), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5387, 5411), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5416, 5411), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 5271), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1835, 5419, 1836), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(5271, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5420), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1837, 5417, 1838), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(5271, 1606), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5421), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1839, 5418, 1840), // cirgen/components/ram.cpp:112
+PolyExtStep::Sub(3, 5265), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1540, 5266), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5412), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1548, 5267), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1830, 5413), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1556, 5268), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1831, 5414), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1564, 5269), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1832, 5415), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1829, 5411, 1833), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1827, 5398, 1834), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 5265), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5416, 5387), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5387, 5411), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5416, 5411), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 5271), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1835, 5419, 1836), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(5271, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5420), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1837, 5417, 1838), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(5271, 1606), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5421), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1839, 5418, 1840), // cirgen/components/ram.cpp:111
 PolyExtStep::AndCond(1769, 298, 1841), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::Sub(5283, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5422, 6), // cirgen/components/bytes.cpp:97
@@ -7296,8 +7296,8 @@ PolyExtStep::Sub(5425, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5426, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5427), // components/bits.h:61
 PolyExtStep::AndEqz(1770, 5428), // components/bits.h:61
-PolyExtStep::AndEqz(1843, 5291), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(0, 1572, 1844), // cirgen/components/ram.cpp:86
+PolyExtStep::AndEqz(1843, 5291), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(0, 1572, 1844), // cirgen/components/ram.cpp:85
 PolyExtStep::Sub(5298, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5429, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5430, 119), // cirgen/components/bytes.cpp:97
@@ -7306,11 +7306,11 @@ PolyExtStep::Sub(5432, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5433, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5434), // components/bits.h:61
 PolyExtStep::AndEqz(1774, 5435), // components/bits.h:61
-PolyExtStep::AndCond(1846, 5306, 1779), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1845, 5292, 1847), // cirgen/components/ram.cpp:96
-PolyExtStep::AndCond(1848, 5314, 1782), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1849, 5312, 1784), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1850, 5313, 1786), // cirgen/components/ram.cpp:112
+PolyExtStep::AndCond(1846, 5306, 1779), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1845, 5292, 1847), // cirgen/components/ram.cpp:95
+PolyExtStep::AndCond(1848, 5314, 1782), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1849, 5312, 1784), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1850, 5313, 1786), // cirgen/components/ram.cpp:111
 PolyExtStep::Sub(5319, 129), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5436, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5437, 137), // cirgen/components/bytes.cpp:97
@@ -7319,8 +7319,8 @@ PolyExtStep::Sub(5439, 139), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5440, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1750, 5441), // components/bits.h:61
 PolyExtStep::AndEqz(1788, 5442), // components/bits.h:61
-PolyExtStep::AndEqz(1852, 5327), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1851, 1582, 1853), // cirgen/components/ram.cpp:86
+PolyExtStep::AndEqz(1852, 5327), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1851, 1582, 1853), // cirgen/components/ram.cpp:85
 PolyExtStep::Sub(5333, 129), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5443, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5444, 137), // cirgen/components/bytes.cpp:97
@@ -7329,11 +7329,11 @@ PolyExtStep::Sub(5446, 139), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5447, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1750, 5448), // components/bits.h:61
 PolyExtStep::AndEqz(1792, 5449), // components/bits.h:61
-PolyExtStep::AndCond(1855, 5341, 1797), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1854, 5328, 1856), // cirgen/components/ram.cpp:96
-PolyExtStep::AndCond(1857, 5349, 1800), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1858, 5347, 1802), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1859, 5348, 1804), // cirgen/components/ram.cpp:112
+PolyExtStep::AndCond(1855, 5341, 1797), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1854, 5328, 1856), // cirgen/components/ram.cpp:95
+PolyExtStep::AndCond(1857, 5349, 1800), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1858, 5347, 1802), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1859, 5348, 1804), // cirgen/components/ram.cpp:111
 PolyExtStep::Sub(5354, 147), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5450, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5451, 149), // cirgen/components/bytes.cpp:97
@@ -7342,8 +7342,8 @@ PolyExtStep::Sub(5453, 157), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5454, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1777, 5455), // components/bits.h:61
 PolyExtStep::AndEqz(1806, 5456), // components/bits.h:61
-PolyExtStep::AndEqz(1861, 5362), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1860, 1598, 1862), // cirgen/components/ram.cpp:86
+PolyExtStep::AndEqz(1861, 5362), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1860, 1598, 1862), // cirgen/components/ram.cpp:85
 PolyExtStep::Sub(5368, 147), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5457, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5458, 149), // cirgen/components/bytes.cpp:97
@@ -7352,21 +7352,21 @@ PolyExtStep::Sub(5460, 157), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5461, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1777, 5462), // components/bits.h:61
 PolyExtStep::AndEqz(1810, 5463), // components/bits.h:61
-PolyExtStep::AndCond(1864, 5376, 1815), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1863, 5363, 1865), // cirgen/components/ram.cpp:96
-PolyExtStep::AndCond(1866, 5384, 1818), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1867, 5382, 1820), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1868, 5383, 1822), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1869, 5270, 1826), // cirgen/components/ram.cpp:86
-PolyExtStep::AndCond(1870, 5398, 1834), // cirgen/components/ram.cpp:96
-PolyExtStep::AndCond(1871, 5419, 1836), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1872, 5417, 1838), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1873, 5418, 1840), // cirgen/components/ram.cpp:112
+PolyExtStep::AndCond(1864, 5376, 1815), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1863, 5363, 1865), // cirgen/components/ram.cpp:95
+PolyExtStep::AndCond(1866, 5384, 1818), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1867, 5382, 1820), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1868, 5383, 1822), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1869, 5270, 1826), // cirgen/components/ram.cpp:85
+PolyExtStep::AndCond(1870, 5398, 1834), // cirgen/components/ram.cpp:95
+PolyExtStep::AndCond(1871, 5419, 1836), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1872, 5417, 1838), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1873, 5418, 1840), // cirgen/components/ram.cpp:111
 PolyExtStep::AndCond(1842, 377, 1874), // cirgen/compiler/edsl/component.cpp:39
-PolyExtStep::Sub(1, 1188), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5464), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(1184, 5273), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5465, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(1, 1188), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5464), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(1184, 5273), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5465, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5466, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5467, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5468, 119), // cirgen/components/bytes.cpp:97
@@ -7375,15 +7375,15 @@ PolyExtStep::Sub(5470, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5471, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5472), // components/bits.h:61
 PolyExtStep::AndEqz(1876, 5473), // components/bits.h:61
-PolyExtStep::AndEqz(1877, 5291), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(0, 1574, 1878), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 1574), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(5273, 1184), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5475), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(1186, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5476, 1188), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5477, 5296), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5478, 5275), // cirgen/components/ram.cpp:100
+PolyExtStep::AndEqz(1877, 5291), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(0, 1574, 1878), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 1574), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(5273, 1184), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5475), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(1186, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5476, 1188), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5477, 5296), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5478, 5275), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5479, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5480, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5481, 119), // cirgen/components/bytes.cpp:97
@@ -7392,33 +7392,33 @@ PolyExtStep::Sub(5483, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5484, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5485), // components/bits.h:61
 PolyExtStep::AndEqz(1880, 5486), // components/bits.h:61
-PolyExtStep::Sub(3, 1188), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5276, 1176), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5488), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5277, 1178), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1882, 5489), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5278, 1180), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1883, 5490), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5279, 1182), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1884, 5491), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1881, 5487, 1885), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1879, 5474, 1886), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 1188), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5492, 5464), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5464, 5487), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5492, 5487), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 1582), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1887, 5495, 1888), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(1582, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5496), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1889, 5493, 1890), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(1582, 5280), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5497), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1891, 5494, 1892), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(1, 1490), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5498), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(1474, 1184), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5499, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 1188), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5276, 1176), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5488), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5277, 1178), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1882, 5489), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5278, 1180), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1883, 5490), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5279, 1182), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1884, 5491), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1881, 5487, 1885), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1879, 5474, 1886), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 1188), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5492, 5464), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5464, 5487), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5492, 5487), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 1582), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1887, 5495, 1888), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(1582, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5496), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1889, 5493, 1890), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(1582, 5280), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5497), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1891, 5494, 1892), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(1, 1490), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5498), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(1474, 1184), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5499, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5500, 129), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5501, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5502, 137), // cirgen/components/bytes.cpp:97
@@ -7427,16 +7427,16 @@ PolyExtStep::Sub(5504, 139), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5505, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1750, 5506), // components/bits.h:61
 PolyExtStep::AndEqz(1894, 5507), // components/bits.h:61
-PolyExtStep::Mul(5245, 1582), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1895, 5508), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1893, 1590, 1896), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 1590), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(1184, 1474), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5510), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(1482, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5511, 1490), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5512, 5476), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5513, 1188), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 1582), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1895, 5508), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1893, 1590, 1896), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 1590), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(1184, 1474), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5510), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(1482, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5511, 1490), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5512, 5476), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5513, 1188), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5514, 129), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5515, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5516, 137), // cirgen/components/bytes.cpp:97
@@ -7445,29 +7445,29 @@ PolyExtStep::Sub(5518, 139), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5519, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1750, 5520), // components/bits.h:61
 PolyExtStep::AndEqz(1898, 5521), // components/bits.h:61
-PolyExtStep::Sub(3, 1490), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5343), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1900, 5344), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1901, 5345), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1902, 5364), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1899, 5522, 1903), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1897, 5509, 1904), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 1490), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5523, 5498), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5498, 5522), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5523, 5522), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 1598), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1905, 5526, 1906), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(1598, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5527), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1907, 5524, 1908), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(1598, 1582), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5528), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1909, 5525, 1910), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(1, 1540), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5529), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(1524, 1474), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5530, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 1490), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5343), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1900, 5344), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1901, 5345), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1902, 5364), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1899, 5522, 1903), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1897, 5509, 1904), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 1490), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5523, 5498), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5498, 5522), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5523, 5522), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 1598), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1905, 5526, 1906), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(1598, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5527), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1907, 5524, 1908), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(1598, 1582), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5528), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1909, 5525, 1910), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(1, 1540), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5529), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(1524, 1474), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5530, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5531, 147), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5532, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5533, 149), // cirgen/components/bytes.cpp:97
@@ -7476,16 +7476,16 @@ PolyExtStep::Sub(5535, 157), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5536, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1777, 5537), // components/bits.h:61
 PolyExtStep::AndEqz(1912, 5538), // components/bits.h:61
-PolyExtStep::Mul(5245, 1598), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1913, 5539), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1911, 1606, 1914), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 1606), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(1474, 1524), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5541), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(1532, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5542, 1540), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5543, 5511), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5544, 1490), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 1598), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1913, 5539), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1911, 1606, 1914), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 1606), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(1474, 1524), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5541), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(1532, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5542, 1540), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5543, 5511), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5544, 1490), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5545, 147), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5546, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5547, 149), // cirgen/components/bytes.cpp:97
@@ -7494,28 +7494,28 @@ PolyExtStep::Sub(5549, 157), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5550, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1777, 5551), // components/bits.h:61
 PolyExtStep::AndEqz(1916, 5552), // components/bits.h:61
-PolyExtStep::Sub(3, 1540), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5378), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1918, 5379), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1919, 5380), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1516, 1572), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1920, 5554), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1917, 5553, 1921), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1915, 5540, 1922), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 1540), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5555, 5529), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5529, 5553), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5555, 5553), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 1614), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1923, 5558, 1924), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(1614, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5559), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1925, 5556, 1926), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(1614, 1598), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5560), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1927, 5557, 1928), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(5263, 1524), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5561, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 1540), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5378), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1918, 5379), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1919, 5380), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1516, 1572), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1920, 5554), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1917, 5553, 1921), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1915, 5540, 1922), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 1540), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5555, 5529), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5529, 5553), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5555, 5553), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 1614), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1923, 5558, 1924), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(1614, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5559), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1925, 5556, 1926), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(1614, 1598), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5560), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1927, 5557, 1928), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(5263, 1524), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5561, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5562, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5563, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5564, 85), // cirgen/components/bytes.cpp:97
@@ -7524,13 +7524,13 @@ PolyExtStep::Sub(5566, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5567, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5568), // components/bits.h:61
 PolyExtStep::AndEqz(1824, 5569), // components/bits.h:61
-PolyExtStep::Mul(5245, 1614), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1930, 5570), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1929, 5270, 1931), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(1524, 5263), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5571), // cirgen/components/ram.cpp:98
-PolyExtStep::Sub(5401, 5542), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5572, 1540), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 1614), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1930, 5570), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1929, 5270, 1931), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(1524, 5263), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5571), // cirgen/components/ram.cpp:97
+PolyExtStep::Sub(5401, 5542), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5572, 1540), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5573, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5574, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5575, 85), // cirgen/components/bytes.cpp:97
@@ -7539,26 +7539,26 @@ PolyExtStep::Sub(5577, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5578, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5579), // components/bits.h:61
 PolyExtStep::AndEqz(1933, 5580), // components/bits.h:61
-PolyExtStep::Sub(1548, 5266), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5581), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1556, 5267), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1935, 5582), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1564, 5268), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1936, 5583), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1572, 5269), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1937, 5584), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1934, 5411, 1938), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1932, 5398, 1939), // cirgen/components/ram.cpp:96
-PolyExtStep::AndCond(1940, 5419, 1836), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1941, 5417, 1838), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(5271, 1614), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5585), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1942, 5418, 1943), // cirgen/components/ram.cpp:112
+PolyExtStep::Sub(1548, 5266), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5581), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1556, 5267), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1935, 5582), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1564, 5268), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1936, 5583), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1572, 5269), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1937, 5584), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1934, 5411, 1938), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1932, 5398, 1939), // cirgen/components/ram.cpp:95
+PolyExtStep::AndCond(1940, 5419, 1836), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1941, 5417, 1838), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(5271, 1614), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5585), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1942, 5418, 1943), // cirgen/components/ram.cpp:111
 PolyExtStep::AndCond(0, 633, 1944), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(1945, 916, 1944), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(1946, 977, 1944), // cirgen/compiler/edsl/component.cpp:39
-PolyExtStep::Sub(1474, 5273), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5586, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(1474, 5273), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5586, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5587, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5588, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5589, 119), // cirgen/components/bytes.cpp:97
@@ -7567,13 +7567,13 @@ PolyExtStep::Sub(5591, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5592, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5593), // components/bits.h:61
 PolyExtStep::AndEqz(1894, 5594), // components/bits.h:61
-PolyExtStep::AndEqz(1948, 5291), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(0, 684, 1949), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 684), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(5273, 1474), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5596), // cirgen/components/ram.cpp:98
-PolyExtStep::Sub(5512, 5296), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5597, 5275), // cirgen/components/ram.cpp:100
+PolyExtStep::AndEqz(1948, 5291), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(0, 684, 1949), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 684), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(5273, 1474), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5596), // cirgen/components/ram.cpp:97
+PolyExtStep::Sub(5512, 5296), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5597, 5275), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5598, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5599, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5600, 119), // cirgen/components/bytes.cpp:97
@@ -7582,24 +7582,24 @@ PolyExtStep::Sub(5602, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5603, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5604), // components/bits.h:61
 PolyExtStep::AndEqz(1951, 5605), // components/bits.h:61
-PolyExtStep::Sub(5276, 1498), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5606), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5277, 1506), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1953, 5607), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5278, 1514), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1954, 5608), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5279, 1516), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1955, 5609), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1952, 5522, 1956), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1950, 5595, 1957), // cirgen/components/ram.cpp:96
-PolyExtStep::AndEqz(0, 686), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1958, 5526, 1959), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(686, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5610), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1960, 5524, 1961), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(686, 5280), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5611), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1962, 5525, 1963), // cirgen/components/ram.cpp:112
+PolyExtStep::Sub(5276, 1498), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5606), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5277, 1506), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1953, 5607), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5278, 1514), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1954, 5608), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5279, 1516), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1955, 5609), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1952, 5522, 1956), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1950, 5595, 1957), // cirgen/components/ram.cpp:95
+PolyExtStep::AndEqz(0, 686), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1958, 5526, 1959), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(686, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5610), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1960, 5524, 1961), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(686, 5280), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5611), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1962, 5525, 1963), // cirgen/components/ram.cpp:111
 PolyExtStep::Sub(5531, 129), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5612, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5613, 137), // cirgen/components/bytes.cpp:97
@@ -7608,10 +7608,10 @@ PolyExtStep::Sub(5615, 139), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5616, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1750, 5617), // components/bits.h:61
 PolyExtStep::AndEqz(1912, 5618), // components/bits.h:61
-PolyExtStep::Mul(5245, 686), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1965, 5619), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1964, 853, 1966), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 853), // cirgen/components/ram.cpp:96
+PolyExtStep::Mul(5245, 686), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1965, 5619), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1964, 853, 1966), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 853), // cirgen/components/ram.cpp:95
 PolyExtStep::Sub(5545, 129), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5621, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5622, 137), // cirgen/components/bytes.cpp:97
@@ -7620,20 +7620,20 @@ PolyExtStep::Sub(5624, 139), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5625, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1750, 5626), // components/bits.h:61
 PolyExtStep::AndEqz(1916, 5627), // components/bits.h:61
-PolyExtStep::AndCond(1968, 5553, 1921), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1967, 5620, 1969), // cirgen/components/ram.cpp:96
-PolyExtStep::AndEqz(0, 881), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1970, 5558, 1971), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(881, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5628), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1972, 5556, 1973), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(881, 686), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5629), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1974, 5557, 1975), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(1, 1590), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5630), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(1574, 1524), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5631, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::AndCond(1968, 5553, 1921), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1967, 5620, 1969), // cirgen/components/ram.cpp:95
+PolyExtStep::AndEqz(0, 881), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1970, 5558, 1971), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(881, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5628), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1972, 5556, 1973), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(881, 686), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5629), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1974, 5557, 1975), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(1, 1590), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5630), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(1574, 1524), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5631, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5632, 147), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5633, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5634, 149), // cirgen/components/bytes.cpp:97
@@ -7642,16 +7642,16 @@ PolyExtStep::Sub(5636, 157), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5637, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1777, 5638), // components/bits.h:61
 PolyExtStep::AndEqz(1977, 5639), // components/bits.h:61
-PolyExtStep::Mul(5245, 881), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1978, 5640), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1976, 884, 1979), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 884), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(1524, 1574), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5642), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(1582, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5643, 1590), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5644, 5542), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5645, 1540), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 881), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1978, 5640), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1976, 884, 1979), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 884), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(1524, 1574), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5642), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(1582, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5643, 1590), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5644, 5542), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5645, 1540), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5646, 147), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5647, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5648, 149), // cirgen/components/bytes.cpp:97
@@ -7660,32 +7660,32 @@ PolyExtStep::Sub(5650, 157), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5651, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1777, 5652), // components/bits.h:61
 PolyExtStep::AndEqz(1981, 5653), // components/bits.h:61
-PolyExtStep::Sub(3, 1590), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1548, 1598), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5655), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1556, 1606), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1983, 5656), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1564, 1614), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1984, 5657), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1572, 646), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(1985, 5658), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1982, 5654, 1986), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1980, 5641, 1987), // cirgen/components/ram.cpp:96
-PolyExtStep::Mul(5509, 5630), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5630, 5654), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5509, 5654), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 888), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(1988, 5661, 1989), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(888, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5662), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(1990, 5659, 1991), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(888, 881), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5663), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(1992, 5660, 1993), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(1, 661), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5664), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(643, 1574), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5665, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 1590), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1548, 1598), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5655), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1556, 1606), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1983, 5656), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1564, 1614), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1984, 5657), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1572, 646), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(1985, 5658), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1982, 5654, 1986), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1980, 5641, 1987), // cirgen/components/ram.cpp:95
+PolyExtStep::Mul(5509, 5630), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5630, 5654), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5509, 5654), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 888), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(1988, 5661, 1989), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(888, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5662), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(1990, 5659, 1991), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(888, 881), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5663), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(1992, 5660, 1993), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(1, 661), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5664), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(643, 1574), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5665, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5666, 159), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5667, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5668, 167), // cirgen/components/bytes.cpp:97
@@ -7694,16 +7694,16 @@ PolyExtStep::Sub(5670, 168), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5671, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(649, 5672), // components/bits.h:61
 PolyExtStep::AndEqz(1995, 5673), // components/bits.h:61
-PolyExtStep::Mul(5245, 888), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(1996, 5674), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(1994, 891, 1997), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 891), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(1574, 643), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5676), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(639, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5677, 661), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5678, 5643), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5679, 1590), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 888), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(1996, 5674), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(1994, 891, 1997), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 891), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(1574, 643), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5676), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(639, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5677, 661), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5678, 5643), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5679, 1590), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5680, 159), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5681, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5682, 167), // cirgen/components/bytes.cpp:97
@@ -7712,31 +7712,31 @@ PolyExtStep::Sub(5684, 168), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5685, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(649, 5686), // components/bits.h:61
 PolyExtStep::AndEqz(1999, 5687), // components/bits.h:61
-PolyExtStep::Sub(3, 661), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1598, 656), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5689), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1606, 653), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2001, 5690), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(1614, 670), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2002, 5691), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(646, 672), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2003, 5692), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2000, 5688, 2004), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(1998, 5675, 2005), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 661), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5693, 5664), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5664, 5688), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5693, 5688), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 894), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(2006, 5696, 2007), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(894, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5697), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(2008, 5694, 2009), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(894, 888), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5698), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(2010, 5695, 2011), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(5263, 643), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5699, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 661), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1598, 656), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5689), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1606, 653), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2001, 5690), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(1614, 670), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2002, 5691), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(646, 672), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2003, 5692), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2000, 5688, 2004), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(1998, 5675, 2005), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 661), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5693, 5664), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5664, 5688), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5693, 5688), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 894), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(2006, 5696, 2007), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(894, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5697), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(2008, 5694, 2009), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(894, 888), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5698), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(2010, 5695, 2011), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(5263, 643), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5699, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5700, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5701, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5702, 85), // cirgen/components/bytes.cpp:97
@@ -7745,13 +7745,13 @@ PolyExtStep::Sub(5704, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5705, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5706), // components/bits.h:61
 PolyExtStep::AndEqz(1824, 5707), // components/bits.h:61
-PolyExtStep::Mul(5245, 894), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(2013, 5708), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(2012, 5270, 2014), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(643, 5263), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5709), // cirgen/components/ram.cpp:98
-PolyExtStep::Sub(5401, 5677), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5710, 661), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 894), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(2013, 5708), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(2012, 5270, 2014), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(643, 5263), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5709), // cirgen/components/ram.cpp:97
+PolyExtStep::Sub(5401, 5677), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5710, 661), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5711, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5712, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5713, 85), // cirgen/components/bytes.cpp:97
@@ -7760,21 +7760,21 @@ PolyExtStep::Sub(5715, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5716, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5717), // components/bits.h:61
 PolyExtStep::AndEqz(2016, 5718), // components/bits.h:61
-PolyExtStep::Sub(656, 5266), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5719), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(653, 5267), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2018, 5720), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(670, 5268), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2019, 5721), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(672, 5269), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2020, 5722), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2017, 5411, 2021), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2015, 5398, 2022), // cirgen/components/ram.cpp:96
-PolyExtStep::AndCond(2023, 5419, 1836), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(2024, 5417, 1838), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(5271, 894), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5723), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(2025, 5418, 2026), // cirgen/components/ram.cpp:112
+PolyExtStep::Sub(656, 5266), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5719), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(653, 5267), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2018, 5720), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(670, 5268), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2019, 5721), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(672, 5269), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2020, 5722), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2017, 5411, 2021), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2015, 5398, 2022), // cirgen/components/ram.cpp:95
+PolyExtStep::AndCond(2023, 5419, 1836), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(2024, 5417, 1838), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(5271, 894), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5723), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(2025, 5418, 2026), // cirgen/components/ram.cpp:111
 PolyExtStep::AndCond(1947, 1065, 2027), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(2028, 1261, 1944), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(2029, 1400, 1944), // cirgen/compiler/edsl/component.cpp:39
@@ -7794,19 +7794,19 @@ PolyExtStep::Sub(5269, 5279), // cirgen/components/u32.cpp:82
 PolyExtStep::AndEqz(2036, 5730), // cirgen/components/u32.cpp:82
 PolyExtStep::Get(316), // Top/Mux/5/RamHeader/RamPlonkVerifier/Reg(compiler/edsl/component.h:153)
 PolyExtStep::Get(238), // Top/Mux/5/RamHeader/RamPlonkVerifier/Twit/Reg(compiler/edsl/component.h:153)
-PolyExtStep::Sub(5270, 5731), // cirgen/components/ram.cpp:129
-PolyExtStep::AndEqz(2037, 5733), // cirgen/components/ram.cpp:129
-PolyExtStep::Sub(5271, 5280), // cirgen/components/ram.cpp:130
-PolyExtStep::AndEqz(2038, 5734), // cirgen/components/ram.cpp:130
+PolyExtStep::Sub(5270, 5731), // cirgen/components/ram.cpp:128
+PolyExtStep::AndEqz(2037, 5733), // cirgen/components/ram.cpp:128
+PolyExtStep::Sub(5271, 5280), // cirgen/components/ram.cpp:129
+PolyExtStep::AndEqz(2038, 5734), // cirgen/components/ram.cpp:129
 PolyExtStep::Sub(5272, 5732), // components/bits.h:61
 PolyExtStep::AndEqz(2039, 5735), // components/bits.h:61
 PolyExtStep::AndCond(2030, 1446, 2040), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(2041, 1687, 2040), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(2042, 1944, 2027), // cirgen/compiler/edsl/component.cpp:39
-PolyExtStep::Sub(1, 360), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5736), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(370, 5273), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5737, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(1, 360), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5736), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(370, 5273), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5737, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5738, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5739, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5740, 119), // cirgen/components/bytes.cpp:97
@@ -7815,15 +7815,15 @@ PolyExtStep::Sub(5742, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5743, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5744), // components/bits.h:61
 PolyExtStep::AndEqz(2044, 5745), // components/bits.h:61
-PolyExtStep::AndEqz(2045, 5291), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(0, 419, 2046), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(0, 419), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(5273, 370), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5747), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(372, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5748, 360), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5749, 5296), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5750, 5275), // cirgen/components/ram.cpp:100
+PolyExtStep::AndEqz(2045, 5291), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(0, 419, 2046), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(0, 419), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(5273, 370), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5747), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(372, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5748, 360), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5749, 5296), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5750, 5275), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5751, 117), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5752, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5753, 119), // cirgen/components/bytes.cpp:97
@@ -7832,31 +7832,31 @@ PolyExtStep::Sub(5755, 127), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5756, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(1741, 5757), // components/bits.h:61
 PolyExtStep::AndEqz(2048, 5758), // components/bits.h:61
-PolyExtStep::Sub(3, 360), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5276, 362), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5760), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5277, 364), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2050, 5761), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5278, 366), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2051, 5762), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5279, 417), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2052, 5763), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2049, 5759, 2053), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2047, 5746, 2054), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 360), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5764, 5736), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5736, 5759), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5764, 5759), // cirgen/components/ram.cpp:107
-PolyExtStep::AndEqz(0, 421), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(2055, 5767, 2056), // cirgen/components/ram.cpp:110
-PolyExtStep::Sub(421, 0), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5768), // cirgen/components/ram.cpp:111
-PolyExtStep::AndCond(2057, 5765, 2058), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(421, 5280), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5769), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(2059, 5766, 2060), // cirgen/components/ram.cpp:112
-PolyExtStep::Sub(5263, 370), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5770, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(3, 360), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5276, 362), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5760), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5277, 364), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2050, 5761), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5278, 366), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2051, 5762), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5279, 417), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2052, 5763), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2049, 5759, 2053), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2047, 5746, 2054), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 360), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5764, 5736), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5736, 5759), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5764, 5759), // cirgen/components/ram.cpp:106
+PolyExtStep::AndEqz(0, 421), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(2055, 5767, 2056), // cirgen/components/ram.cpp:109
+PolyExtStep::Sub(421, 0), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5768), // cirgen/components/ram.cpp:110
+PolyExtStep::AndCond(2057, 5765, 2058), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(421, 5280), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5769), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(2059, 5766, 2060), // cirgen/components/ram.cpp:111
+PolyExtStep::Sub(5263, 370), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5770, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5771, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5772, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5773, 85), // cirgen/components/bytes.cpp:97
@@ -7865,13 +7865,13 @@ PolyExtStep::Sub(5775, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5776, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5777), // components/bits.h:61
 PolyExtStep::AndEqz(1824, 5778), // components/bits.h:61
-PolyExtStep::Mul(5245, 421), // cirgen/components/ram.cpp:92
-PolyExtStep::AndEqz(2062, 5779), // cirgen/components/ram.cpp:92
-PolyExtStep::AndCond(2061, 5270, 2063), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(370, 5263), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5780), // cirgen/components/ram.cpp:98
-PolyExtStep::Sub(5401, 5748), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5781, 360), // cirgen/components/ram.cpp:100
+PolyExtStep::Mul(5245, 421), // cirgen/components/ram.cpp:91
+PolyExtStep::AndEqz(2062, 5779), // cirgen/components/ram.cpp:91
+PolyExtStep::AndCond(2061, 5270, 2063), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(370, 5263), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5780), // cirgen/components/ram.cpp:97
+PolyExtStep::Sub(5401, 5748), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5781, 360), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5782, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5783, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5784, 85), // cirgen/components/bytes.cpp:97
@@ -7880,21 +7880,21 @@ PolyExtStep::Sub(5786, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5787, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5788), // components/bits.h:61
 PolyExtStep::AndEqz(2065, 5789), // components/bits.h:61
-PolyExtStep::Sub(362, 5266), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5790), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(364, 5267), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2067, 5791), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(366, 5268), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2068, 5792), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(417, 5269), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2069, 5793), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2066, 5411, 2070), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2064, 5398, 2071), // cirgen/components/ram.cpp:96
-PolyExtStep::AndCond(2072, 5419, 1836), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(2073, 5417, 1838), // cirgen/components/ram.cpp:111
-PolyExtStep::Sub(5271, 421), // cirgen/components/ram.cpp:112
-PolyExtStep::AndEqz(0, 5794), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(2074, 5418, 2075), // cirgen/components/ram.cpp:112
+PolyExtStep::Sub(362, 5266), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5790), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(364, 5267), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2067, 5791), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(366, 5268), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2068, 5792), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(417, 5269), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2069, 5793), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2066, 5411, 2070), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2064, 5398, 2071), // cirgen/components/ram.cpp:95
+PolyExtStep::AndCond(2072, 5419, 1836), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(2073, 5417, 1838), // cirgen/components/ram.cpp:110
+PolyExtStep::Sub(5271, 421), // cirgen/components/ram.cpp:111
+PolyExtStep::AndEqz(0, 5794), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(2074, 5418, 2075), // cirgen/components/ram.cpp:111
 PolyExtStep::AndCond(2043, 2051, 2076), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(2077, 2081, 2076), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(2078, 2084, 2076), // cirgen/compiler/edsl/component.cpp:39
@@ -7911,10 +7911,10 @@ PolyExtStep::AndEqz(2086, 916), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(2087, 977), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(2088, 1065), // cirgen/components/u32.cpp:28
 PolyExtStep::AndEqz(2089, 1261), // cirgen/components/u32.cpp:28
-PolyExtStep::Sub(1, 633), // cirgen/components/ram.cpp:88
-PolyExtStep::AndEqz(0, 5797), // cirgen/components/ram.cpp:88
-PolyExtStep::Sub(486, 5273), // cirgen/components/ram.cpp:90
-PolyExtStep::Sub(5798, 0), // cirgen/components/ram.cpp:90
+PolyExtStep::Sub(1, 633), // cirgen/components/ram.cpp:87
+PolyExtStep::AndEqz(0, 5797), // cirgen/components/ram.cpp:87
+PolyExtStep::Sub(486, 5273), // cirgen/components/ram.cpp:89
+PolyExtStep::Sub(5798, 0), // cirgen/components/ram.cpp:89
 PolyExtStep::Sub(5799, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5800, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5801, 85), // cirgen/components/bytes.cpp:97
@@ -7923,13 +7923,13 @@ PolyExtStep::Sub(5803, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5804, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5805), // components/bits.h:61
 PolyExtStep::AndEqz(2091, 5806), // components/bits.h:61
-PolyExtStep::AndCond(2090, 5270, 2092), // cirgen/components/ram.cpp:86
-PolyExtStep::Sub(5273, 486), // cirgen/components/ram.cpp:98
-PolyExtStep::AndEqz(0, 5807), // cirgen/components/ram.cpp:98
-PolyExtStep::Mul(630, 18), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5808, 633), // cirgen/components/ram.cpp:100
-PolyExtStep::Sub(5809, 5296), // cirgen/components/ram.cpp:100
-PolyExtStep::Add(5810, 5275), // cirgen/components/ram.cpp:100
+PolyExtStep::AndCond(2090, 5270, 2092), // cirgen/components/ram.cpp:85
+PolyExtStep::Sub(5273, 486), // cirgen/components/ram.cpp:97
+PolyExtStep::AndEqz(0, 5807), // cirgen/components/ram.cpp:97
+PolyExtStep::Mul(630, 18), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5808, 633), // cirgen/components/ram.cpp:99
+PolyExtStep::Sub(5809, 5296), // cirgen/components/ram.cpp:99
+PolyExtStep::Add(5810, 5275), // cirgen/components/ram.cpp:99
 PolyExtStep::Sub(5811, 84), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5812, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5813, 85), // cirgen/components/bytes.cpp:97
@@ -7938,25 +7938,25 @@ PolyExtStep::Sub(5815, 97), // cirgen/components/bytes.cpp:97
 PolyExtStep::Mul(5816, 6), // cirgen/components/bytes.cpp:97
 PolyExtStep::Sub(5272, 5817), // components/bits.h:61
 PolyExtStep::AndEqz(2094, 5818), // components/bits.h:61
-PolyExtStep::Sub(3, 633), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5276, 916), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(0, 5820), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5277, 977), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2096, 5821), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5278, 1065), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2097, 5822), // cirgen/components/ram.cpp:102
-PolyExtStep::Sub(5279, 1261), // cirgen/components/ram.cpp:102
-PolyExtStep::AndEqz(2098, 5823), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2095, 5819, 2099), // cirgen/components/ram.cpp:102
-PolyExtStep::AndCond(2093, 5398, 2100), // cirgen/components/ram.cpp:96
-PolyExtStep::Sub(0, 633), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5824, 5797), // cirgen/components/ram.cpp:105
-PolyExtStep::Mul(5797, 5819), // cirgen/components/ram.cpp:106
-PolyExtStep::Mul(5824, 5819), // cirgen/components/ram.cpp:107
-PolyExtStep::AndCond(2101, 5827, 1836), // cirgen/components/ram.cpp:110
-PolyExtStep::AndCond(2102, 5825, 1838), // cirgen/components/ram.cpp:111
-PolyExtStep::AndEqz(0, 5734), // cirgen/components/ram.cpp:112
-PolyExtStep::AndCond(2103, 5826, 2104), // cirgen/components/ram.cpp:112
+PolyExtStep::Sub(3, 633), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5276, 916), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(0, 5820), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5277, 977), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2096, 5821), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5278, 1065), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2097, 5822), // cirgen/components/ram.cpp:101
+PolyExtStep::Sub(5279, 1261), // cirgen/components/ram.cpp:101
+PolyExtStep::AndEqz(2098, 5823), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2095, 5819, 2099), // cirgen/components/ram.cpp:101
+PolyExtStep::AndCond(2093, 5398, 2100), // cirgen/components/ram.cpp:95
+PolyExtStep::Sub(0, 633), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5824, 5797), // cirgen/components/ram.cpp:104
+PolyExtStep::Mul(5797, 5819), // cirgen/components/ram.cpp:105
+PolyExtStep::Mul(5824, 5819), // cirgen/components/ram.cpp:106
+PolyExtStep::AndCond(2101, 5827, 1836), // cirgen/components/ram.cpp:109
+PolyExtStep::AndCond(2102, 5825, 1838), // cirgen/components/ram.cpp:110
+PolyExtStep::AndEqz(0, 5734), // cirgen/components/ram.cpp:111
+PolyExtStep::AndCond(2103, 5826, 2104), // cirgen/components/ram.cpp:111
 PolyExtStep::AndCond(2083, 5249, 2105), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(2106, 80, 0), // cirgen/compiler/edsl/component.cpp:39
 PolyExtStep::AndCond(2107, 5253, 0), // cirgen/compiler/edsl/component.cpp:39
