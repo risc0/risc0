@@ -25,6 +25,12 @@ pub mod ecall {
     pub const SHA: u32 = 3;
 }
 
+pub mod halt {
+    pub const TERMINATE: u32 = 0;
+    pub const PAUSE: u32 = 1;
+    pub const SPLIT: u32 = 2;
+}
+
 pub mod reg_abi {
     pub const REG_ZERO: usize = 0; // zero constant
     pub const REG_RA: usize = 1; // return address
@@ -98,28 +104,27 @@ pub struct SyscallName(*const u8);
 macro_rules! declare_syscall {
     ($(#[$meta:meta])*
      $vis:vis $name:ident) => {
-            $(#[$meta])*
-            $vis const $name: $crate::syscall::SyscallName
-                = unsafe{
-                    $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
-                        module_path!(),
-                        "::",
-                        stringify!($name),
-                        "\0").as_ptr())
-                };
+        $(#[$meta])*
+        $vis const $name: $crate::syscall::SyscallName = unsafe {
+            $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
+                module_path!(),
+                "::",
+                stringify!($name),
+                "\0").as_ptr())
+        };
     };
 }
 
 pub mod nr {
-    declare_syscall!(pub SYS_PANIC);
-    declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_CYCLE_COUNT);
+    declare_syscall!(pub SYS_GETENV);
     declare_syscall!(pub SYS_INITIAL_INPUT);
+    declare_syscall!(pub SYS_LOG);
+    declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ_AVAIL);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_WRITE);
-    declare_syscall!(pub SYS_GETENV);
 }
 
 impl SyscallName {
@@ -207,14 +212,30 @@ impl_syscall!(syscall_5, a3, a4, a5, a6, a7);
 
 #[inline(always)]
 #[no_mangle]
-pub unsafe extern "C" fn sys_halt() {
+pub unsafe extern "C" fn sys_halt() -> ! {
     #[cfg(target_os = "zkvm")]
     {
         asm!(
             "ecall",
             in("t0") ecall::HALT,
+            in("a0") halt::TERMINATE,
         );
         unreachable!();
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn sys_pause() {
+    #[cfg(target_os = "zkvm")]
+    {
+        asm!(
+            "ecall",
+            in("t0") ecall::HALT,
+            in("a0") halt::PAUSE,
+        );
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()
