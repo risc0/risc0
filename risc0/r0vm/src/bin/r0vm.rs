@@ -95,8 +95,8 @@ fn read_image_id(verbose: u8, elf_file: &Path, image_id_file: Option<&Path>) -> 
     Some(id)
 }
 
-fn run_prover(elf_contents: &[u8], image_id: &Digest, opts: ProverOpts) -> Result<Receipt> {
-    let mut prover = Prover::new_with_opts(&elf_contents, image_id.clone(), opts).unwrap();
+fn run_prover(elf_contents: &[u8], opts: ProverOpts) -> Result<Receipt> {
+    let mut prover = Prover::new_with_opts(&elf_contents, opts).unwrap();
     let receipt = prover.run()?;
 
     Ok(receipt)
@@ -147,13 +147,14 @@ fn main() {
             }
             let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
             let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+            let image_id = image.get_root();
             if let Some(image_id_file) = args.image_id.as_ref() {
-                std::fs::write(&image_id_file, image.root.as_bytes()).unwrap();
+                std::fs::write(&image_id_file, image_id.as_bytes()).unwrap();
                 if args.verbose > 0 {
                     eprintln!("Saved image id to {}", image_id_file.display());
                 }
             }
-            image.root
+            image_id
         })
     };
 
@@ -178,7 +179,6 @@ fn main() {
 
     let proof = run_prover(
         &elf_contents,
-        &image_id,
         if let Some(ref mut profiler) = guest_prof {
             opts.with_trace_callback(profiler.make_trace_callback())
         } else {

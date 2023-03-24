@@ -25,7 +25,7 @@ fn main() {
 
     // Multiply them inside the ZKP
     // First, we make the prover, loading the 'multiply' method
-    let mut prover = Prover::new(MULTIPLY_ELF, MULTIPLY_ID).expect(
+    let mut prover = Prover::new(MULTIPLY_ELF).expect(
         "Prover should be constructed from valid method source code and corresponding method ID",
     );
 
@@ -66,7 +66,7 @@ mod tests {
 
     #[test]
     fn run_factors() {
-        let mut prover = Prover::new(MULTIPLY_ELF, MULTIPLY_ID).expect(
+        let mut prover = Prover::new(MULTIPLY_ELF).expect(
             "Prover should be constructed from valid method source code and corresponding method ID",
         );
 

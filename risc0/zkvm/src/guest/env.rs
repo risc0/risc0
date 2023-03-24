@@ -21,8 +21,8 @@ use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
     fileno, memory, syscall,
     syscall::{
-        nr::SYS_LOG, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_output, sys_read,
-        sys_read_words, sys_write, syscall_0, syscall_2, SyscallName,
+        nr::SYS_LOG, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_output, sys_pause,
+        sys_read, sys_read_words, sys_write, syscall_0, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -76,7 +76,6 @@ pub(crate) fn finalize() {
         for i in 0..DIGEST_WORDS {
             sys_output(i as u32, words[i]);
         }
-        sys_output(DIGEST_WORDS as u32, DIGEST_BYTES as u32);
         sys_halt()
     }
 }
@@ -187,6 +186,14 @@ pub fn journal() -> FdWriter<impl for<'a> Fn(&'a [u8])> {
 /// Reaturn a reader for the standard input
 pub fn stdin() -> FdReader {
     FdReader::new(fileno::STDIN)
+}
+
+/// Pause the execution of the zkvm.
+///
+/// Execution may be continued at a later time.
+pub fn pause() {
+    // SAFETY: This should be safe to call.
+    unsafe { sys_pause() };
 }
 
 /// Reads and deserializes objects

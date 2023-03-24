@@ -142,5 +142,10 @@ pub fn main() {
 
             env::commit_slice(&risc0_zeroio::to_vec(&orig).unwrap());
         }
+        MultiTestSpecRef::PauseContinue(_) => {
+            env::log("before");
+            env::pause();
+            env::log("after");
+        }
     }
 }
