@@ -468,7 +468,7 @@ where
         &mut iop,
         size,
         |iop: &mut ReadIOP<H::Field, _>, idx: usize| -> Result<H::ExtElem, VerificationError> {
-            hal.debug("fri_verify");
+            // hal.debug("fri_verify");
             let x = gen.pow(idx);
             let rows = [
                 accum_merkle.verify(iop, idx)?,

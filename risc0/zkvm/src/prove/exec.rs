@@ -515,10 +515,10 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             + writes * (1 + CYCLES_PER_PAGE)
             + 4
             + ZK_CYCLES;
-        debug!(
-            "segment_limit: {}, cycle: {}, remaining_cycles: {}, required_cycles: {}, reads: {}, writes: {}",
-            self.segment_limit, cycle, remaining_cycles, required_cycles, reads, writes
-        );
+        // debug!(
+        //     "segment_limit: {}, cycle: {}, remaining_cycles: {}, required_cycles: {},
+        // reads: {}, writes: {}",     self.segment_limit, cycle,
+        // remaining_cycles, required_cycles, reads, writes );
         required_cycles > remaining_cycles
     }
 
@@ -986,6 +986,7 @@ impl<'a, H: HostHandler> RV32Executor<'a, H> {
         segment_limit_po2: usize,
     ) -> Self {
         let mut io = vec![BabyBearElem::INVALID; CircuitImpl::OUTPUT_SIZE];
+        debug!("run> pc: 0x{:08x}", pc);
 
         // initialize PC
         let pc_bytes = pc.to_le_bytes();
