@@ -116,7 +116,6 @@ impl<'a> TapSet<'a> {
         self.group_names[group_id]
     }
 
-    // size_t combosSize() const { return data_->combos.count; }
     pub fn combos_size(&self) -> usize {
         self.combos_count
     }

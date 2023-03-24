@@ -57,8 +57,7 @@ pub enum VerificationError {
     ImageVerificationError,
     MerkleQueryOutOfRange { idx: usize, rows: usize },
     InvalidProof,
-    JournalSealRootMismatch,
-    SealJournalLengthMismatch { seal_len: usize, journal_len: usize },
+    JournalDigestMismatch,
 }
 
 impl fmt::Display for VerificationError {
@@ -72,16 +71,9 @@ impl fmt::Display for VerificationError {
                 "Requested Merkle validation on row {idx}, but only {rows} rows exist",
             ),
             VerificationError::InvalidProof => write!(f, "Verification indicates proof is invalid"),
-            VerificationError::JournalSealRootMismatch => {
-                write!(f, "Journal and seal root mismatch detected")
+            VerificationError::JournalDigestMismatch => {
+                write!(f, "Journal digest mismatch detected")
             }
-            VerificationError::SealJournalLengthMismatch {
-                seal_len,
-                journal_len,
-            } => write!(
-                f,
-                "Seal's output length ({seal_len}) does not match journal length ({journal_len})"
-            ),
         }
     }
 }

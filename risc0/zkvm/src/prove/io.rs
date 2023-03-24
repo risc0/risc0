@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Handlers for two-way private I/O between host and guest
+//! Handlers for two-way private I/O between host and guest.
 //!
 //! These handlers can be enabled for a zkVM by setting them when a
 //! [crate::prove::Prover] is created using [crate::prove::ProverOpts].
@@ -36,12 +36,12 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-/// An IO handler that returns arbitrary data to the guest.  On the
-/// guest side, use env::send_slice, env::recv_slice, or
-/// end::send_recv_slice.
+/// An I/O handler that returns arbitrary data to the guest. On the
+/// guest side, use `env::send_slice`, `env::recv_slice`, or
+/// `end::send_recv_slice`.
 ///
 /// When activated as a SyscallHandler, the SyscallHandler expects two
-/// calls.  The first call returns (nelem, _) indicating how many
+/// calls. The first call returns (nelem, _) indicating how many
 /// elements are to be sent back to the guest, and the second call
 /// actually returns the elements after the guest allocates space.
 pub trait SliceIo: Sized {
@@ -71,7 +71,7 @@ pub struct SliceIoSyscall<H: SliceIo> {
 
 /// A host-side implementation of a system call.
 pub trait Syscall {
-    /// Invokes the system call
+    /// Invokes the system call.
     fn syscall(
         &self,
         syscall: &str,
@@ -82,15 +82,15 @@ pub trait Syscall {
 
 /// Access to memory and machine state for syscalls.
 pub trait SyscallContext {
-    /// Returns the current cycle being executed
+    /// Returns the current cycle being executed.
     fn get_cycle(&self) -> usize;
 
-    /// Loads the value of the given register, e.g. REG_A0
+    /// Loads the value of the given register, e.g. REG_A0.
     fn load_register(&self, num: usize) -> u32 {
         self.load_u32((memory::SYSTEM.start() + num * WORD_SIZE) as u32)
     }
 
-    /// Loads bytes from the given region of memory
+    /// Loads bytes from the given region of memory.
     fn load_region(&self, addr: u32, size: u32) -> Vec<u8> {
         let mut region = Vec::new();
         for addr in addr..addr + size {
@@ -105,7 +105,7 @@ pub trait SyscallContext {
     /// Loads an individual byte from memory.
     fn load_u8(&self, addr: u32) -> u8;
 
-    /// Loads a null-termintaed string from memory
+    /// Loads a null-terminated string from memory.
     fn load_string(&self, mut addr: u32) -> Result<String> {
         let mut s: Vec<u8> = Vec::new();
         loop {
@@ -252,9 +252,24 @@ impl<'a> Syscall for PosixIo<'a> {
             let reader = read_fds
                 .get_mut(&fd)
                 .expect(&format!("Bad read file descriptor {fd}"));
+            // So that we don't have to deal with short reads, keep
+            // reading until we get EOF or fill the buffer.
+            let mut read_all = |mut buf: &mut [u8]| -> usize {
+                let mut tot_nread = 0;
+                while !buf.is_empty() {
+                    let nread = reader.read(buf).unwrap();
+                    if nread == 0 {
+                        break;
+                    }
+                    tot_nread += nread;
+                    (_, buf) = buf.split_at_mut(nread);
+                }
+
+                tot_nread
+            };
 
             let to_guest_u8: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
-            let nread_main = reader.read(to_guest_u8).unwrap();
+            let nread_main = read_all(to_guest_u8);
             assert_eq!(
                 nread_main,
                 to_guest_u8.len(),
@@ -273,7 +288,7 @@ impl<'a> Syscall for PosixIo<'a> {
 
             // Fill unaligned word out.
             let mut to_guest_end: [u8; WORD_SIZE] = [0; WORD_SIZE];
-            let nread_end = reader.read(&mut to_guest_end[0..unaligned_end]).unwrap();
+            let nread_end = read_all(&mut to_guest_end[0..unaligned_end]);
 
             Ok((
                 (nread_main + nread_end) as u32,

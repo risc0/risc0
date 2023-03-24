@@ -15,12 +15,17 @@
 #![no_std]
 #![no_main]
 
-use risc0_zkvm::guest::env;
+extern crate alloc;
+use alloc::vec;
+
+use risc0_zkvm::guest::{env, env::Read};
 
 risc0_zkvm::entry!(main);
 
 pub fn main() {
-    let len: &[u32] = env::read_slice(1);
-    let slice: &[u8] = env::read_slice(len[0] as usize);
-    env::commit_slice(slice);
+    let mut len: u32 = 0;
+    env::stdin().read_slice(core::slice::from_mut(&mut len));
+    let mut slice = vec![0u8; len as usize];
+    env::stdin().read_slice(&mut slice);
+    env::commit_slice(&slice);
 }

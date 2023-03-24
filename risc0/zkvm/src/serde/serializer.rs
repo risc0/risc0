@@ -13,28 +13,68 @@
 // limitations under the License.
 
 use alloc::vec::Vec;
-use core::mem;
 
-use bytemuck::Pod;
 use risc0_zkvm_platform::WORD_SIZE;
-use serde::Serialize;
 
-use super::{
-    align_up,
-    err::{Error, Result},
-};
+use super::err::{Error, Result};
+
+/// A writer for writing streams preferring word-based data.
+pub trait WordWrite {
+    /// Write the given words to the stream.
+    fn write_words(&mut self, words: &[u32]) -> Result<()>;
+
+    /// Write the given bytes to the stream, padding up to the next word
+    /// boundary.
+    // TODO: Do we still want to to pad the bytes now that we have
+    // posix-style I/O that can read things into buffers right where
+    // we want them to be?  If we don't, we could change the
+    // serialization buffers to use Vec<u8> instead of Vec<u32>,
+    fn write_padded_bytes(&mut self, bytes: &[u8]) -> Result<()>;
+}
+
+impl WordWrite for Vec<u32> {
+    fn write_words(&mut self, words: &[u32]) -> Result<()> {
+        self.extend_from_slice(words);
+        Ok(())
+    }
+
+    fn write_padded_bytes(&mut self, bytes: &[u8]) -> Result<()> {
+        let chunks = bytes.chunks_exact(WORD_SIZE);
+        let last_word = chunks.remainder();
+        self.extend(chunks.map(|word_bytes| u32::from_le_bytes(word_bytes.try_into().unwrap())));
+        if !last_word.is_empty() {
+            let mut last_word_bytes = [0u8; WORD_SIZE];
+            last_word_bytes[..last_word.len()].clone_from_slice(last_word);
+            self.push(u32::from_le_bytes(last_word_bytes));
+        }
+        Ok(())
+    }
+}
+
+// Allow borrowed WordWrites to work transparently.
+impl<W: WordWrite + ?Sized> WordWrite for &mut W {
+    #[inline]
+    fn write_words(&mut self, words: &[u32]) -> Result<()> {
+        (**self).write_words(words)
+    }
+
+    #[inline]
+    fn write_padded_bytes(&mut self, bytes: &[u8]) -> Result<()> {
+        (**self).write_padded_bytes(bytes)
+    }
+}
 
 /// Serialize to a vector of u32 words
 pub fn to_vec<'a, T>(value: &'a T) -> Result<Vec<u32>>
 where
-    T: Serialize + ?Sized,
+    T: serde::Serialize + ?Sized,
 {
     // Use the in-memory size of the value as a guess for the length
     // of the serialized value.
-    let vec = AllocVec::with_capacity(mem::size_of_val(value));
-    let mut serializer = Serializer::new(vec);
+    let mut vec: Vec<u32> = Vec::with_capacity(core::mem::size_of_val(value));
+    let mut serializer = Serializer::new(&mut vec);
     value.serialize(&mut serializer)?;
-    serializer.stream.release()
+    Ok(vec)
 }
 
 /// Serialize to a vector of u32 words with size hinting
@@ -43,72 +83,29 @@ where
 /// necessary to serialize `value`.
 pub fn to_vec_with_capacity<'a, T>(value: &'a T, cap: usize) -> Result<Vec<u32>>
 where
-    T: Serialize + ?Sized,
+    T: serde::Serialize + ?Sized,
 {
-    let vec = AllocVec::with_capacity(cap);
-    let mut serializer = Serializer::new(vec);
+    let mut vec: Vec<u32> = Vec::with_capacity(cap);
+    let mut serializer = Serializer::new(&mut vec);
     value.serialize(&mut serializer)?;
-    serializer.stream.release()
-}
-
-/// `StreamWriter`s can have data written to them in a streamed manner
-///
-/// The various `write` functions can be called repeatedly to add data to the
-/// `StreamWriter`. Then [StreamWriter::release] can be called to return a
-/// [StreamWriter::Output] containing the written data.
-pub trait StreamWriter {
-    /// The type to be written into
-    ///
-    /// This is the type that will be returned when [StreamWriter::release]
-    /// is called.
-    type Output;
-
-    /// Write a u32 word
-    fn write_u32(&mut self, data: u32) -> Result<()>;
-
-    /// Write a u64
-    ///
-    /// Equivalent to writing first the least significant 32 bits and then the
-    /// most significant 32 bits with [StreamWriter::write_u32].
-    fn write_u64(&mut self, data: u64) -> Result<()> {
-        self.write_u32((data & 0xffffffff) as u32)?;
-        self.write_u32((data >> 32) as u32)
-    }
-
-    /// Write a slice
-    fn write_slice<T: Pod>(&mut self, slice: &[T]) -> Result<()>;
-
-    /// Return the written data as a [StreamWriter::Output]
-    fn release(&mut self) -> Result<Self::Output>;
+    Ok(vec)
 }
 
 /// Enables serializing to a stream
-pub struct Serializer<W: StreamWriter> {
+pub struct Serializer<W: WordWrite> {
     stream: W,
 }
 
-impl<W: StreamWriter> Serializer<W> {
+impl<W: WordWrite> Serializer<W> {
     /// Construct a Serializer
     ///
     /// Creates a serializer that writes to `stream`.
     pub fn new(stream: W) -> Self {
         Serializer { stream }
     }
-
-    /// Returns the contents of the Serializer stream.
-    pub fn release(&mut self) -> Result<W::Output> {
-        self.stream.release()
-    }
-
-    fn write_bytes(&mut self, bytes: &[u8]) -> Result<()> {
-        static ZEROS: [u8; WORD_SIZE] = [0, 0, 0, 0];
-        self.stream.write_slice(bytes)?;
-        let padding = align_up(bytes.len(), WORD_SIZE) - bytes.len();
-        self.stream.write_slice(&ZEROS[..padding])
-    }
 }
 
-impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
+impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
     type Ok = ();
     type Error = Error;
     type SerializeSeq = Self;
@@ -143,11 +140,11 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_i32(self, v: i32) -> Result<()> {
-        self.stream.write_u32(v as u32)
+        self.serialize_u32(v as u32)
     }
 
     fn serialize_i64(self, v: i64) -> Result<()> {
-        self.stream.write_u64(v as u64)
+        self.serialize_u64(v as u64)
     }
 
     fn serialize_u8(self, v: u8) -> Result<()> {
@@ -159,11 +156,12 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_u32(self, v: u32) -> Result<()> {
-        self.stream.write_u32(v)
+        self.stream.write_words(&[v])
     }
 
     fn serialize_u64(self, v: u64) -> Result<()> {
-        self.stream.write_u64(v)
+        self.serialize_u32((v & 0xFFFFFFFF) as u32)?;
+        self.serialize_u32(((v >> 32) & 0xFFFFFFFF) as u32)
     }
 
     fn serialize_f32(self, _v: f32) -> Result<()> {
@@ -175,15 +173,13 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
     }
 
     fn serialize_char(self, v: char) -> Result<()> {
-        let mut buf = [0u8; WORD_SIZE];
-        let str = v.encode_utf8(&mut buf);
-        str.serialize(self)
+        self.serialize_u32(v as u32)
     }
 
     fn serialize_str(self, v: &str) -> Result<()> {
-        self.stream.write_u32(v.len() as u32)?;
-        self.write_bytes(v.as_bytes())?;
-        Ok(())
+        let bytes = v.as_bytes();
+        self.serialize_u32(bytes.len() as u32)?;
+        self.stream.write_padded_bytes(bytes)
     }
 
     // NOTE: Serializing byte slices _does not_ currently call serialize_bytes. This
@@ -196,8 +192,8 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
     // B) Use the experimental Rust specialization
     //    features.
     fn serialize_bytes(self, v: &[u8]) -> Result<()> {
-        self.stream.write_u32(v.len() as u32)?;
-        self.write_bytes(v)
+        self.serialize_u32(v.len() as u32)?;
+        self.stream.write_padded_bytes(v)
     }
 
     fn serialize_none(self) -> Result<()> {
@@ -226,7 +222,7 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
         variant_index: u32,
         _variant: &'static str,
     ) -> Result<()> {
-        self.stream.write_u32(variant_index)
+        self.serialize_u32(variant_index)
     }
 
     fn serialize_newtype_struct<T>(self, _name: &'static str, value: &T) -> Result<()>
@@ -246,14 +242,14 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
     where
         T: serde::Serialize + ?Sized,
     {
-        self.stream.write_u32(variant_index)?;
+        self.serialize_u32(variant_index)?;
         value.serialize(self)
     }
 
     fn serialize_seq(self, len: Option<usize>) -> Result<Self::SerializeSeq> {
         match len {
             Some(val) => {
-                self.stream.write_u32(val.try_into().unwrap())?;
+                self.serialize_u32(val.try_into().unwrap())?;
                 Ok(self)
             }
             None => Err(Error::NotSupported),
@@ -279,14 +275,14 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeTupleVariant> {
-        self.stream.write_u32(variant_index)?;
+        self.serialize_u32(variant_index)?;
         Ok(self)
     }
 
     fn serialize_map(self, len: Option<usize>) -> Result<Self::SerializeMap> {
         match len {
             Some(val) => {
-                self.stream.write_u32(val.try_into().unwrap())?;
+                self.serialize_u32(val.try_into().unwrap())?;
                 Ok(self)
             }
             None => Err(Error::NotSupported),
@@ -304,12 +300,12 @@ impl<'a, W: StreamWriter> serde::ser::Serializer for &'a mut Serializer<W> {
         _variant: &'static str,
         _len: usize,
     ) -> Result<Self::SerializeStructVariant> {
-        self.stream.write_u32(variant_index)?;
+        self.serialize_u32(variant_index)?;
         Ok(self)
     }
 }
 
-impl<'a, W: StreamWriter> serde::ser::SerializeSeq for &'a mut Serializer<W> {
+impl<'a, W: WordWrite> serde::ser::SerializeSeq for &'a mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -325,7 +321,7 @@ impl<'a, W: StreamWriter> serde::ser::SerializeSeq for &'a mut Serializer<W> {
     }
 }
 
-impl<'a, W: StreamWriter> serde::ser::SerializeTuple for &'a mut Serializer<W> {
+impl<'a, W: WordWrite> serde::ser::SerializeTuple for &'a mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -341,7 +337,7 @@ impl<'a, W: StreamWriter> serde::ser::SerializeTuple for &'a mut Serializer<W> {
     }
 }
 
-impl<'a, W: StreamWriter> serde::ser::SerializeTupleStruct for &'a mut Serializer<W> {
+impl<'a, W: WordWrite> serde::ser::SerializeTupleStruct for &'a mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -357,7 +353,7 @@ impl<'a, W: StreamWriter> serde::ser::SerializeTupleStruct for &'a mut Serialize
     }
 }
 
-impl<'a, W: StreamWriter> serde::ser::SerializeTupleVariant for &'a mut Serializer<W> {
+impl<'a, W: WordWrite> serde::ser::SerializeTupleVariant for &'a mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -373,7 +369,7 @@ impl<'a, W: StreamWriter> serde::ser::SerializeTupleVariant for &'a mut Serializ
     }
 }
 
-impl<'a, W: StreamWriter> serde::ser::SerializeMap for &'a mut Serializer<W> {
+impl<'a, W: WordWrite> serde::ser::SerializeMap for &'a mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -396,7 +392,7 @@ impl<'a, W: StreamWriter> serde::ser::SerializeMap for &'a mut Serializer<W> {
     }
 }
 
-impl<'a, W: StreamWriter> serde::ser::SerializeStruct for &'a mut Serializer<W> {
+impl<'a, W: WordWrite> serde::ser::SerializeStruct for &'a mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -412,7 +408,7 @@ impl<'a, W: StreamWriter> serde::ser::SerializeStruct for &'a mut Serializer<W> 
     }
 }
 
-impl<'a, W: StreamWriter> serde::ser::SerializeStructVariant for &'a mut Serializer<W> {
+impl<'a, W: WordWrite> serde::ser::SerializeStructVariant for &'a mut Serializer<W> {
     type Ok = ();
     type Error = Error;
 
@@ -425,44 +421,6 @@ impl<'a, W: StreamWriter> serde::ser::SerializeStructVariant for &'a mut Seriali
 
     fn end(self) -> Result<()> {
         Ok(())
-    }
-}
-
-/// A vector of bytes that can be written to with a stream interface
-///
-/// This is designed for host-side use and is not intended for use in the guest.
-pub struct AllocVec(pub Vec<u8>);
-
-impl AllocVec {
-    /// Construct an empty AllocVec
-    pub fn new() -> Self {
-        AllocVec(Vec::new())
-    }
-
-    /// Construct an empty AllocVec with preallocated capacity
-    ///
-    /// The `capacity` parameter gives how many bytes are preallocated.
-    pub fn with_capacity(capacity: usize) -> Self {
-        AllocVec(Vec::with_capacity(capacity))
-    }
-}
-
-impl StreamWriter for AllocVec {
-    type Output = Vec<u32>;
-
-    fn write_u32(&mut self, data: u32) -> Result<()> {
-        self.write_slice(data.to_ne_bytes().as_slice())
-    }
-
-    fn write_slice<T: Pod>(&mut self, slice: &[T]) -> Result<()> {
-        self.0.extend_from_slice(bytemuck::cast_slice(slice));
-        Ok(())
-    }
-
-    fn release(&mut self) -> Result<Self::Output> {
-        let mut out = Vec::new();
-        out.extend_from_slice(bytemuck::cast_slice(self.0.as_slice()));
-        Ok(out)
     }
 }
 
