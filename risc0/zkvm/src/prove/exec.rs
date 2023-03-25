@@ -445,7 +445,6 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
                     debug!("PAUSE[{cycle}]> pc: 0x{:08x}", self.last_pc);
                 }
                 halt::SPLIT => {
-                    self.last_pc += 4;
                     debug!("SPLIT[{cycle}]> pc: 0x{:08x}", self.last_pc);
                 }
                 _ => unimplemented!("Unsupported halt mode: {}", self.exit_code),

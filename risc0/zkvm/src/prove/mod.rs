@@ -537,13 +537,20 @@ impl<'a> Prover<'a> {
         <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
         E: EvalCheck<H>,
     {
-        let mut opts = take(&mut self.inner.opts);
-        if !self.inner.input.is_empty() {
-            // TODO: Remove add_input_*_slice in favor of with_stdin,
-            // and eliminate this "input" field.
-            opts = opts.with_stdin(Cursor::new(take(&mut self.inner.input)))
+        if !self.inner.opts_finalized {
+            let mut opts = take(&mut self.inner.opts);
+            if !self.inner.input.is_empty() {
+                // TODO: Remove add_input_*_slice in favor of with_stdin,
+                // and eliminate this "input" field.
+                opts = opts.with_stdin(Cursor::new(take(&mut self.inner.input)))
+            }
+            self.inner.opts = opts.finalize();
+            self.inner.opts_finalized = true;
+        } else {
+            // Continuation; opts was finalized the previous run.  Make sure we didn't get
+            // any more input.
+            assert!(self.inner.input.is_empty(), "Input may not be added after the prover starts proving using the add_input_* calls");
         }
-        self.inner.opts = opts.finalize();
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
         let journal = self.inner.journal.buf.take();
         let segment_limit_po2 = self.inner.opts.segment_limit_po2;
@@ -643,6 +650,10 @@ struct ProverImpl<'a> {
     pub input: Vec<u8>,
     pub journal: Journal,
     pub opts: ProverOpts<'a>,
+
+    // True if we've already called finalize() on the ProverOpts.
+    // TODO: If we get rid of the add_input* calls, this should be unnecessary.
+    opts_finalized: bool,
 }
 
 impl<'a> ProverImpl<'a> {
@@ -653,6 +664,7 @@ impl<'a> ProverImpl<'a> {
             input: Vec::new(),
             journal,
             opts,
+            opts_finalized: false,
         }
     }
 }
