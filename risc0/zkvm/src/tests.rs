@@ -706,7 +706,11 @@ fn continuation() {
         if count == COUNT - 1 {
             assert_eq!(prover.exit_code, halt::TERMINATE);
         } else {
-            assert_eq!(prover.exit_code, halt::SPLIT, "expected a split at part {count}");
+            assert_eq!(
+                prover.exit_code,
+                halt::SPLIT,
+                "expected a split at part {count}"
+            );
         }
     }
 }
