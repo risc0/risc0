@@ -1,0 +1,13 @@
+[package]
+name = "merkle-core"
+version = "0.1.0"
+edition = "2021"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bytemuck = "1.12"
+merkle_light = "0.4"
+merkle_light_derive = "0.4"
+risc0-zkp = { version = "0.12", default-features = false }
+risc0-zkvm = { version = "0.12", default-features = false, features = ["std"] }
+serde = "1.0"

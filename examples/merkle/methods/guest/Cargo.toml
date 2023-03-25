@@ -1,0 +1,23 @@
+[package]
+name = "merkle-methods-guest"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[build-dependencies]
+risc0-build = "0.12"
+
+[dependencies]
+risc0-zkvm = { version = "0.12", default-features = false, features = ["std"] }
+merkle-core = { path = "../../core" }
+
+[profile.release]
+lto = true
+opt-level = 3
+
+[patch.crates-io]
+# TODO(victor): Remove these patch definitions when 8bd948b is included in a release.
+risc0-zkp = { git = "https://github.com/risc0/risc0", rev = "8bd948be64d6084d1f01b37d60073f920c9beaed" }
+risc0-zkvm = { git = "https://github.com/risc0/risc0", rev = "8bd948be64d6084d1f01b37d60073f920c9beaed" }
+risc0-build = { git = "https://github.com/risc0/risc0", rev = "8bd948be64d6084d1f01b37d60073f920c9beaed" }

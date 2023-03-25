@@ -1,0 +1,12 @@
+[package]
+name = "merkle-host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.10"
+risc0-zkp = "0.12"
+risc0-zkvm = "0.12"
+serde = "1.0"
+merkle-core = { path = "../core" }
+merkle-methods = { path = "../methods" }
