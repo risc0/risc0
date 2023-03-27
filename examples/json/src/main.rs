@@ -23,7 +23,7 @@ fn main() {
     let data = include_str!("../res/example.json");
 
     // Make the prover.
-    let mut prover = Prover::new(SEARCH_JSON_ELF, SEARCH_JSON_ID)
+    let mut prover = Prover::new(SEARCH_JSON_ELF)
         .expect("Prover should be constructed from matching method code & ID");
 
     prover.add_input_u32_slice(&to_vec(&data).expect("should be serializable"));
@@ -55,7 +55,7 @@ mod tests {
         let data = include_str!("../res/example.json");
 
         // Make the prover.
-        let mut prover = Prover::new(SEARCH_JSON_ELF, SEARCH_JSON_ID)
+        let mut prover = Prover::new(SEARCH_JSON_ELF)
             .expect("Prover should be constructed from matching method code & ID");
         prover.add_input_u32_slice(&to_vec(&data).expect("should be serializable"));
 

@@ -21,6 +21,7 @@ use elf::{endian::LittleEndian, file::Class, ElfBytes};
 pub struct Program {
     /// The entrypoint of the program
     pub entry: u32,
+
     /// The initial memory image
     pub image: BTreeMap<u32, u32>,
 }

@@ -37,7 +37,7 @@ fn main() {
     };
 
     // Make the prover.
-    let mut prover = Prover::new(CHECKMATE_ELF, CHECKMATE_ID).unwrap();
+    let mut prover = Prover::new(CHECKMATE_ELF).unwrap();
 
     prover.add_input_u32_slice(&to_vec(&inputs).expect("Should be serializable"));
 
@@ -79,7 +79,7 @@ mod tests {
         };
 
         // Make the prover.
-        let mut prover = Prover::new(CHECKMATE_ELF, CHECKMATE_ID).unwrap();
+        let mut prover = Prover::new(CHECKMATE_ELF).unwrap();
         prover.add_input_u32_slice(&to_vec(&inputs).expect("Should be serializable"));
 
         // Run prover & generate receipt

@@ -47,6 +47,7 @@ pub enum MultiTestSpec {
         // Position and length to do reads
         pos_and_len: Vec<(u32, u32)>,
     },
+    PauseContinue,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

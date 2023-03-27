@@ -33,20 +33,21 @@ pub mod sha;
 #[cfg(test)]
 mod tests;
 
+use alloc::vec::Vec;
+
 pub use anyhow::Result;
-use control_id::CONTROL_ID;
-use control_id::POSEIDON_CONTROL_ID;
 use hex::FromHex;
-use risc0_zkp::core::blake2b::{Blake2b, ConfigHashBlake2b};
-use risc0_zkp::core::config::{ConfigHashPoseidon, ConfigHashSha256};
-use risc0_zkp::core::digest::Digest;
-use risc0_zkp::core::sha::Sha256;
-pub use risc0_zkvm_platform::declare_syscall;
-pub use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+use risc0_zkp::core::{
+    blake2b::{Blake2b, ConfigHashBlake2b},
+    config::{ConfigHashPoseidon, ConfigHashSha256},
+    digest::Digest,
+    sha::Sha256,
+};
+pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
 pub use crate::binfmt::{elf::Program, image::MemoryImage};
-use crate::control_id::BLAKE2B_CONTROL_ID;
+use crate::control_id::{BLAKE2B_CONTROL_ID, CONTROL_ID, POSEIDON_CONTROL_ID};
 #[cfg(feature = "prove")]
 pub use crate::prove::{loader::Loader, Prover, ProverOpts};
 pub use crate::receipt::Receipt;
@@ -57,7 +58,7 @@ const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::Circuit
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct ControlId {
     /// The hashes comprising the [ControlId]
-    pub table: alloc::vec::Vec<Digest>,
+    pub table: Vec<Digest>,
 }
 
 /// A trait for objects with an associated [ControlId]
@@ -68,7 +69,7 @@ pub trait ControlIdLocator {
 
 impl<S: Sha256> ControlIdLocator for ConfigHashSha256<S> {
     fn get_control_id() -> ControlId {
-        let mut table = alloc::vec::Vec::new();
+        let mut table = Vec::new();
         for entry in CONTROL_ID {
             table.push(Digest::from_hex(entry).unwrap());
         }
@@ -78,7 +79,7 @@ impl<S: Sha256> ControlIdLocator for ConfigHashSha256<S> {
 
 impl ControlIdLocator for ConfigHashPoseidon {
     fn get_control_id() -> ControlId {
-        let mut table = alloc::vec::Vec::new();
+        let mut table = Vec::new();
         for entry in POSEIDON_CONTROL_ID {
             table.push(Digest::from_hex(entry).unwrap());
         }
@@ -88,7 +89,7 @@ impl ControlIdLocator for ConfigHashPoseidon {
 
 impl<T: Blake2b> ControlIdLocator for ConfigHashBlake2b<T> {
     fn get_control_id() -> ControlId {
-        let mut table = alloc::vec::Vec::new();
+        let mut table = Vec::new();
         for entry in BLAKE2B_CONTROL_ID {
             table.push(Digest::from_hex(entry).unwrap());
         }

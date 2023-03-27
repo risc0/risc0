@@ -92,7 +92,6 @@ impl BonsaiMock {
                         ));
                     let mut prover = Prover::new_with_opts(
                         elf.as_ref(),
-                        submit_request_log.image_id,
                         ProverOpts::default().with_skip_seal(true),
                     )
                     .expect("failed to create prover");

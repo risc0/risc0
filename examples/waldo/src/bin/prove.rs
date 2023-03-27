@@ -22,7 +22,7 @@ use waldo_core::{
     merkle::SYS_VECTOR_ORACLE,
     PrivateInput,
 };
-use waldo_methods::{IMAGE_CROP_ELF, IMAGE_CROP_ID};
+use waldo_methods::IMAGE_CROP_ELF;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -107,7 +107,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // the Merkle tree.
     let prover_opts = ProverOpts::default()
         .with_sendrecv_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback());
-    let mut prover = Prover::new_with_opts(IMAGE_CROP_ELF, IMAGE_CROP_ID, prover_opts)?;
+    let mut prover = Prover::new_with_opts(IMAGE_CROP_ELF, prover_opts)?;
 
     // Give the private input to the guest, including Waldo's location.
     let input = PrivateInput {

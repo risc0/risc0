@@ -22,7 +22,7 @@ use sha_methods::{HASH_ELF, HASH_ID};
 
 fn provably_hash(input: &str) -> Receipt {
     // Make the prover.
-    let mut prover = Prover::new(HASH_ELF, HASH_ID)
+    let mut prover = Prover::new(HASH_ELF)
         .expect("Prover should be constructed from matching code and method ID");
 
     prover.add_input_u32_slice(&to_vec(input).expect("input string should serialize"));
