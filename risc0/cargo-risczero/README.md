@@ -1,6 +1,6 @@
 # Cargo-risczero
 
-Cargo extension to help create, manage, and test [risc0](https://github.com/risc0/risc0) projects.
+Cargo extension to help create, manage, and test [RISC Zero](https://github.com/risc0/risc0) projects.
 
 ## Install
 
@@ -13,7 +13,7 @@ cargo install --path risc0/cargo-risczero
 
 ## New
 
-The `new` command will create a new project for a existing template. It defaults to the template at [rust-starter](https://github.com/risc0/risc0/tree/main/)templates/rust-starter but can be used with other templates locally or hosted on github.
+The `new` command will create a new project for an existing template. It defaults to the template at [rust-starter](https://github.com/risc0/risc0/tree/main/templates/rust-starter) but can be used with other templates locally or hosted on github.
 
 ### Examples
 

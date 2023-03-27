@@ -205,9 +205,9 @@ fn main() {
 | risc0-zkvm           | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-zkvm)           | [![](https://img.shields.io/docsrs/risc0-zkvm)](https://docs.rs/risc0-zkvm)                     |
 | risc0-zkvm-platform  | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-zkvm-platform)  | [![](https://img.shields.io/docsrs/risc0-zkvm-platform)](https://docs.rs/risc0-zkvm-platform)   |
 
-## Cargo Risczero tool
+## `cargo risczero` tool
 
-Included is a tool to manage risczero project directories
+Included is a tool to manage RISC Zero project directories.
 
 ```bash
 # Installing from local source
