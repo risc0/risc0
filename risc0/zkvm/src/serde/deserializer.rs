@@ -12,36 +12,85 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use alloc::{string::String, vec::Vec};
+
 use bytemuck::Pod;
 use risc0_zkvm_platform::WORD_SIZE;
-use serde::de::{Deserialize, DeserializeSeed, IntoDeserializer, Visitor};
+use serde::de::{DeserializeOwned, DeserializeSeed, IntoDeserializer, Visitor};
 
 use super::{
     align_up,
     err::{Error, Result},
 };
 
+/// A reader for reading streams with serialized word-based data
+pub trait WordRead {
+    /// Fill the given buffer with words from input.  Returns an error if EOF
+    /// was encountered.
+    fn read_words(&mut self, words: &mut [u32]) -> Result<()>;
+
+    /// Fill the given buffer with bytes from input, and discard the
+    /// padding up to the next word boundary.  Returns an error if EOF was
+    /// encountered.
+    fn read_padded_bytes(&mut self, bytes: &mut [u8]) -> Result<()>;
+}
+
+// Allow borrowed WordReads to work transparently
+impl<R: WordRead + ?Sized> WordRead for &mut R {
+    fn read_words(&mut self, words: &mut [u32]) -> Result<()> {
+        (**self).read_words(words)
+    }
+
+    fn read_padded_bytes(&mut self, bytes: &mut [u8]) -> Result<()> {
+        (**self).read_padded_bytes(bytes)
+    }
+}
+
+impl WordRead for &[u32] {
+    fn read_words(&mut self, out: &mut [u32]) -> Result<()> {
+        if out.len() > self.len() {
+            Err(Error::DeserializeUnexpectedEnd)
+        } else {
+            out.clone_from_slice(&self[..out.len()]);
+            (_, *self) = self.split_at(out.len());
+            Ok(())
+        }
+    }
+
+    fn read_padded_bytes(&mut self, out: &mut [u8]) -> Result<()> {
+        let bytes: &[u8] = bytemuck::cast_slice(*self);
+        if out.len() > bytes.len() {
+            Err(Error::DeserializeUnexpectedEnd)
+        } else {
+            out.clone_from_slice(&bytes[..out.len()]);
+            (_, *self) = self.split_at(align_up(out.len(), WORD_SIZE) / WORD_SIZE);
+            Ok(())
+        }
+    }
+}
+
 /// Deserialize a slice into the specified type.
 ///
 /// Deserialize `slice` into type `T`. Returns an `Err` if deserialization isn't
 /// possible, such as if `slice` is not the serialized form of an object of type
 /// `T`.
-pub fn from_slice<'a, T: Deserialize<'a>, P: Pod>(slice: &'a [P]) -> Result<T> {
+pub fn from_slice<T: DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T> {
     let mut deserializer = Deserializer::new(bytemuck::cast_slice(slice));
     T::deserialize(&mut deserializer)
 }
 
-/// Enables deserializing from a slice
-pub struct Deserializer<'de> {
-    slice: &'de [u8],
+/// Enables deserializing from a WordRead
+pub struct Deserializer<'de, R: WordRead + 'de> {
+    reader: R,
+    phantom: core::marker::PhantomData<&'de ()>,
 }
 
-struct SeqAccess<'a, 'de> {
-    deserializer: &'a mut Deserializer<'de>,
+struct SeqAccess<'a, 'de, R: WordRead + 'de> {
+    deserializer: &'a mut Deserializer<'de, R>,
     len: usize,
 }
 
-impl<'de, 'a> serde::de::SeqAccess<'de> for SeqAccess<'a, 'de> {
+impl<'de, 'a, R: WordRead + 'de> serde::de::SeqAccess<'de> for SeqAccess<'a, 'de, R> {
     type Error = Error;
 
     fn next_element_seed<T>(&mut self, seed: T) -> Result<Option<T::Value>>
@@ -64,7 +113,7 @@ impl<'de, 'a> serde::de::SeqAccess<'de> for SeqAccess<'a, 'de> {
     }
 }
 
-impl<'de, 'a> serde::de::VariantAccess<'de> for &'a mut Deserializer<'de> {
+impl<'de, 'a, R: WordRead + 'de> serde::de::VariantAccess<'de> for &'a mut Deserializer<'de, R> {
     type Error = Error;
 
     fn unit_variant(self) -> Result<()> {
@@ -88,7 +137,7 @@ impl<'de, 'a> serde::de::VariantAccess<'de> for &'a mut Deserializer<'de> {
     }
 }
 
-impl<'de, 'a> serde::de::EnumAccess<'de> for &'a mut Deserializer<'de> {
+impl<'de, 'a, R: WordRead + 'de> serde::de::EnumAccess<'de> for &'a mut Deserializer<'de, R> {
     type Error = Error;
     type Variant = Self;
 
@@ -99,12 +148,12 @@ impl<'de, 'a> serde::de::EnumAccess<'de> for &'a mut Deserializer<'de> {
     }
 }
 
-struct MapAccess<'a, 'de> {
-    deserializer: &'a mut Deserializer<'de>,
+struct MapAccess<'a, 'de, R: WordRead + 'de> {
+    deserializer: &'a mut Deserializer<'de, R>,
     len: usize,
 }
 
-impl<'a, 'de: 'a> serde::de::MapAccess<'de> for MapAccess<'a, 'de> {
+impl<'a, 'de: 'a, R: WordRead + 'de> serde::de::MapAccess<'de> for MapAccess<'a, 'de, R> {
     type Error = Error;
 
     fn next_key_seed<K: DeserializeSeed<'de>>(&mut self, seed: K) -> Result<Option<K::Value>> {
@@ -128,57 +177,31 @@ impl<'a, 'de: 'a> serde::de::MapAccess<'de> for MapAccess<'a, 'de> {
     }
 }
 
-impl<'de> Deserializer<'de> {
+impl<'de, R: WordRead + 'de> Deserializer<'de, R> {
     /// Construct a Deserializer
     ///
-    /// Creates a deserializer for deserializing the contents of `slice`
-    pub fn new(slice: &'de [u8]) -> Self {
-        Deserializer { slice }
+    /// Creates a deserializer for deserializing from the given WordWred
+    pub fn new(reader: R) -> Self {
+        Deserializer {
+            reader,
+            phantom: core::marker::PhantomData,
+        }
     }
 
     fn try_take_word(&mut self) -> Result<u32> {
-        if self.slice.len() >= 4 {
-            let (head, tail) = self.slice.split_at(4);
-            self.slice = tail;
-            Ok(bytemuck::cast_slice(head)[0])
-        } else {
-            Err(Error::DeserializeUnexpectedEnd)
-        }
+        let mut val = 0u32;
+        self.reader.read_words(core::slice::from_mut(&mut val))?;
+        Ok(val)
     }
 
     fn try_take_dword(&mut self) -> Result<u64> {
-        if self.slice.len() >= 8 {
-            let low = self.try_take_word()? as u64;
-            let high = self.try_take_word()? as u64;
-            Ok(low | high << 32)
-        } else {
-            Err(Error::DeserializeUnexpectedEnd)
-        }
-    }
-
-    fn try_take_n_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
-        let padded_len = align_up(len, WORD_SIZE);
-        let bytes = self.read_bytes(padded_len)?;
-        Ok(&bytes[..len])
-    }
-
-    /// Read bytes, removing them from the Deserializer and returning them
-    ///
-    /// Returns the first `len` bytes and remove them from the Deserializer.
-    /// If there are fewer than `len` bytes in the Deserializer, return an
-    /// `Err`.
-    pub fn read_bytes(&mut self, len: usize) -> Result<&'de [u8]> {
-        if self.slice.len() >= len {
-            let (head, tail) = self.slice.split_at(len);
-            self.slice = tail;
-            Ok(head)
-        } else {
-            Err(Error::DeserializeUnexpectedEnd)
-        }
+        let low = self.try_take_word()? as u64;
+        let high = self.try_take_word()? as u64;
+        Ok(low | high << 32)
     }
 }
 
-impl<'de, 'a> serde::Deserializer<'de> for &'a mut Deserializer<'de> {
+impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializer<'de, R> {
     type Error = Error;
 
     fn is_human_readable(&self) -> bool {
@@ -278,21 +301,8 @@ impl<'de, 'a> serde::Deserializer<'de> for &'a mut Deserializer<'de> {
     where
         V: Visitor<'de>,
     {
-        let len_bytes = self.try_take_word()? as usize;
-        if len_bytes > 4 {
-            return Err(Error::DeserializeBadChar);
-        }
-        let bytes: &'de [u8] = self.try_take_n_bytes(len_bytes)?;
-        // we pass the character through string conversion because
-        // this handles transforming the array of code units to a
-        // codepoint. we can't use char::from_u32() because it expects
-        // an already-processed codepoint.
-        let character = core::str::from_utf8(&bytes)
-            .map_err(|_| Error::DeserializeBadChar)?
-            .chars()
-            .next()
-            .ok_or(Error::DeserializeBadChar)?;
-        visitor.visit_char(character)
+        let c = char::from_u32(self.try_take_word()?).ok_or(Error::DeserializeBadChar)?;
+        visitor.visit_char(c)
     }
 
     fn deserialize_str<V>(self, visitor: V) -> Result<V::Value>
@@ -300,9 +310,13 @@ impl<'de, 'a> serde::Deserializer<'de> for &'a mut Deserializer<'de> {
         V: Visitor<'de>,
     {
         let len_bytes = self.try_take_word()? as usize;
-        let bytes = self.try_take_n_bytes(len_bytes)?;
-        let str = core::str::from_utf8(bytes).map_err(|_| Error::DeserializeBadUtf8)?;
-        visitor.visit_borrowed_str(str)
+        let mut bytes: Vec<u8> = Vec::with_capacity(len_bytes);
+        // TODO: Can we use MaybeUninit here instead of zeroing out?
+        // The documentation for sys::io::Read implies that it's not
+        // safe; is there another way to not do double writes here?
+        bytes.resize(len_bytes, 0);
+        self.reader.read_padded_bytes(&mut bytes)?;
+        visitor.visit_string(String::from_utf8(bytes).map_err(|_| Error::DeserializeBadChar)?)
     }
 
     fn deserialize_string<V>(self, visitor: V) -> Result<V::Value>
@@ -317,8 +331,13 @@ impl<'de, 'a> serde::Deserializer<'de> for &'a mut Deserializer<'de> {
         V: Visitor<'de>,
     {
         let len_bytes = self.try_take_word()? as usize;
-        let bytes = self.try_take_n_bytes(len_bytes)?;
-        visitor.visit_borrowed_bytes(bytes)
+        let mut bytes: Vec<u8> = Vec::with_capacity(len_bytes);
+        // TODO: Can we use MaybeUninit here instead of zeroing out?
+        // The documentation for sys::io::Read implies that it's not
+        // safe; is there another way to not do double writes here?
+        bytes.resize(len_bytes, 0);
+        self.reader.read_padded_bytes(&mut bytes)?;
+        visitor.visit_byte_buf(bytes)
     }
 
     fn deserialize_byte_buf<V>(self, visitor: V) -> Result<V::Value>

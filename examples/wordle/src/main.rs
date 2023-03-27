@@ -43,7 +43,7 @@ impl<'a> Server<'a> {
     }
 
     pub fn check_round(&self, guess_word: &str) -> Receipt {
-        let mut prover = Prover::new(WORDLE_ELF, WORDLE_ID).expect("failed to construct prover");
+        let mut prover = Prover::new(WORDLE_ELF).expect("failed to construct prover");
 
         prover.add_input_u32_slice(to_vec(self.secret_word).unwrap().as_slice());
         prover.add_input_u32_slice(to_vec(&guess_word).unwrap().as_slice());
