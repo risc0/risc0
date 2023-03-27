@@ -12,19 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
-
-//! Tools for developing RISC Zero projects in Rust
-//! 
-//! ## Install
-//! ```
-//! cargo install cargo-risczero
-//! ```
-//! 
-//! ## Run
-//! ```
-//! cargo risczero
-//! ```
 
 use clap::{Parser, Subcommand};
 
