@@ -38,5 +38,5 @@ runs:
         # TODO: this path will not work on windows.
         cache-directories: ~/.cache/risc0
 
-    - run: rm $HOME/.cargo/config
+    - run: rm -f $HOME/.cargo/config
       shell: bash
