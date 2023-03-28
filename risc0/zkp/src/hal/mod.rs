@@ -154,7 +154,7 @@ impl MemoryTracker {
     }
 
     pub fn free(&mut self, size: usize) {
-        self.total -= size;
+        self.total = self.total.saturating_sub(size);
     }
 }
 
