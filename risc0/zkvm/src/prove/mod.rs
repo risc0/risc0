@@ -51,12 +51,16 @@ use std::{
 
 use anyhow::{bail, Result};
 use io::{PosixIo, SliceIo, Syscall, SyscallContext};
-use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA};
+use risc0_circuit_rv32im::{
+    layout::{OutBuffer, LAYOUT},
+    REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
     core::config::HashSuite,
     hal::{EvalCheck, Hal},
+    layout::Buffer,
     prove::adapter::ProveAdapter,
 };
 use risc0_zkvm_platform::{
@@ -577,6 +581,10 @@ impl<'a> Prover<'a> {
             );
 
             let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
+            let out_slice = &adapter.get_io().as_slice();
+
+            log::debug!("Globals: {:?}", OutBuffer(out_slice).tree(&LAYOUT));
+
             let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
 
             prover.finalize(&[&mix, &out], eval)

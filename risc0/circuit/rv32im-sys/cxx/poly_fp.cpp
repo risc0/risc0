@@ -193,13 +193,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   Fp x79(2013265910);
   // loc("cirgen/circuit/rv32im/rv32im.cpp":20:3)
   MixState x80{Fp4(0), Fp4(1)};
-  // loc("Top/Code/OneHot/hot[1](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[1](Reg)"("./cirgen/components/mux.h":41:25))
   auto x81 = args[0][2 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("Top/Code/OneHot/hot[1](Reg)"("cirgen/circuit/rv32im/top.cpp":17:75))
   auto x82 = args[0][2 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/top.cpp":17:17)
   auto x83 = x0 - x82;
-  // loc("Top/Code/Mux/1/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/Code/Mux/1(SetupInfo)/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x84 = args[0][9 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":21:3)
   auto x85 = args[2][3 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -213,9 +213,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x89{x80.tot + x83 * x88.tot * x80.mul, x80.mul * x88.mul};
   // loc("cirgen/components/bytes.cpp":117:17)
   auto x90 = x0 - x83;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x91 = args[2][43 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x92 = args[2][44 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x93 = x85 - x91;
@@ -241,11 +241,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x103{x100.tot + x100.mul * x102, x100.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":117:17)
   MixState x104{x89.tot + x90 * x103.tot * x89.mul, x89.mul * x103.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x105 = args[2][5 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x106 = x105 - x85;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x107 = args[2][6 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x108 = x107 - x87;
@@ -267,11 +267,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x116 = x109 * x115;
   // loc("cirgen/components/bytes.cpp":54:7)
   MixState x117{x114.tot + x114.mul * x116, x114.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x118 = args[2][7 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x119 = x118 - x105;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x120 = args[2][8 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x121 = x120 - x107;
@@ -293,11 +293,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x129 = x122 * x128;
   // loc("cirgen/components/bytes.cpp":54:7)
   MixState x130{x127.tot + x127.mul * x129, x127.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x131 = args[2][9 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x132 = x131 - x118;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x133 = args[2][10 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x134 = x133 - x120;
@@ -319,11 +319,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x142 = x135 * x141;
   // loc("cirgen/components/bytes.cpp":54:7)
   MixState x143{x140.tot + x140.mul * x142, x140.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x144 = args[2][11 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x145 = x144 - x131;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x146 = args[2][12 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x147 = x146 - x133;
@@ -345,11 +345,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x155 = x148 * x154;
   // loc("cirgen/components/bytes.cpp":54:7)
   MixState x156{x153.tot + x153.mul * x155, x153.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x157 = args[2][13 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x158 = x157 - x144;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x159 = args[2][14 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x160 = x159 - x146;
@@ -371,11 +371,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x168 = x161 * x167;
   // loc("cirgen/components/bytes.cpp":54:7)
   MixState x169{x166.tot + x166.mul * x168, x166.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x170 = args[2][15 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x171 = x170 - x157;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x172 = args[2][16 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x173 = x172 - x159;
@@ -397,11 +397,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x181 = x174 * x180;
   // loc("cirgen/components/bytes.cpp":54:7)
   MixState x182{x179.tot + x179.mul * x181, x179.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x183 = args[2][17 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":44:18)
   auto x184 = x183 - x170;
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x185 = args[2][18 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":45:17)
   auto x186 = x185 - x172;
@@ -819,11 +819,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x392{x389.tot + x389.mul * x391, x389.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":130:16)
   MixState x393{x248.tot + x249 * x392.tot * x248.mul, x248.mul * x392.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x394{x80.tot + x81 * x393.tot * x80.mul, x80.mul * x393.mul};
-  // loc("Top/Code/OneHot/hot[3](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[3](Reg)"("./cirgen/components/mux.h":41:25))
   auto x395 = args[0][4 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Code/Mux/3/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/Code/Mux/3(RamLoadInfo)/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x396 = args[0][10 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x397 = x396 - x170;
@@ -833,7 +833,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x399 = x172 - x398;
   // loc("cirgen/components/bytes.cpp":101:3)
   MixState x400{x80.tot + x80.mul * x399, x80.mul * (*mix)};
-  // loc("Top/Code/Mux/3/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/Code/Mux/3(RamLoadInfo)/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x401 = args[0][11 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x402 = x401 - x183;
@@ -869,21 +869,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x417 = x416 - x185;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x418{x415.tot + x415.mul * x417, x415.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x419 = args[2][114 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x420 = x419 - x84;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x421{x418.tot + x418.mul * x420, x418.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x422 = args[2][115 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x423 = x422 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x424{x421.tot + x421.mul * x423, x421.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x425 = args[2][116 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x426{x424.tot + x424.mul * x425, x424.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x427 = x407 - x407;
@@ -901,7 +901,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x433 = x416 - x416;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x434{x432.tot + x432.mul * x433, x432.mul * (*mix)};
-  // loc("Top/Code/Mux/3/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/Code/Mux/3(RamLoadInfo)/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x435 = args[0][12 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x436 = x435 - x196;
@@ -911,7 +911,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x438 = x198 - x437;
   // loc("cirgen/components/bytes.cpp":101:3)
   MixState x439{x434.tot + x434.mul * x438, x434.mul * (*mix)};
-  // loc("Top/Code/Mux/3/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/Code/Mux/3(RamLoadInfo)/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x440 = args[0][13 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x441 = x440 - x200;
@@ -947,21 +947,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x456 = x455 - x202;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x457{x454.tot + x454.mul * x456, x454.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x458 = args[2][121 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x459 = x458 - x445;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x460{x457.tot + x457.mul * x459, x457.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x461 = args[2][122 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x462 = x461 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x463{x460.tot + x460.mul * x462, x460.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x464 = args[2][123 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x465{x463.tot + x463.mul * x464, x463.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x466 = x446 - x446;
@@ -979,7 +979,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x472 = x455 - x455;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x473{x471.tot + x471.mul * x472, x471.mul * (*mix)};
-  // loc("Top/Code/Mux/3/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/Code/Mux/3(RamLoadInfo)/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x474 = args[0][14 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x475 = x474 - x204;
@@ -989,7 +989,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x477 = x206 - x476;
   // loc("cirgen/components/bytes.cpp":101:3)
   MixState x478{x473.tot + x473.mul * x477, x473.mul * (*mix)};
-  // loc("Top/Code/Mux/3/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/Code/Mux/3(RamLoadInfo)/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x479 = args[0][15 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x480 = x479 - x208;
@@ -1025,21 +1025,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x495 = x494 - x210;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x496{x493.tot + x493.mul * x495, x493.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x497 = args[2][128 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x498 = x497 - x484;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x499{x496.tot + x496.mul * x498, x496.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x500 = args[2][129 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x501 = x500 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x502{x499.tot + x499.mul * x501, x499.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x503 = args[2][130 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x504{x502.tot + x502.mul * x503, x502.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x505 = x485 - x485;
@@ -1057,17 +1057,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x511 = x494 - x494;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x512{x510.tot + x510.mul * x511, x510.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x513{x394.tot + x395 * x512.tot * x394.mul, x394.mul * x512.mul};
-  // loc("Top/Code/OneHot/hot[4](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[4](Reg)"("./cirgen/components/mux.h":41:25))
   auto x514 = args[0][5 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[0](U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x515 = args[1][4];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[0](U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x516 = args[1][5];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[0](U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x517 = args[1][6];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[0](U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x518 = args[1][7];
   // loc("cirgen/components/u32.cpp":34:5)
   auto x519 = x407 - x515;
@@ -1085,13 +1085,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x525 = x416 - x518;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x526{x524.tot + x524.mul * x525, x524.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x527 = x419 - x7;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x528{x526.tot + x526.mul * x527, x526.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x529{x528.tot + x528.mul * x423, x528.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x530{x529.tot + x529.mul * x425, x529.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x531{x530.tot + x530.mul * x427, x530.mul * (*mix)};
@@ -1101,13 +1101,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x533{x532.tot + x532.mul * x431, x532.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x534{x533.tot + x533.mul * x433, x533.mul * (*mix)};
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[1](U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x535 = args[1][8];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[1](U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x536 = args[1][9];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[1](U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x537 = args[1][10];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[1](U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x538 = args[1][11];
   // loc("cirgen/components/u32.cpp":34:5)
   auto x539 = x446 - x535;
@@ -1125,13 +1125,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x545 = x455 - x538;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x546{x544.tot + x544.mul * x545, x544.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x547 = x458 - x8;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x548{x546.tot + x546.mul * x547, x546.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x549{x548.tot + x548.mul * x462, x548.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x550{x549.tot + x549.mul * x464, x549.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x551{x550.tot + x550.mul * x466, x550.mul * (*mix)};
@@ -1141,13 +1141,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x553{x552.tot + x552.mul * x470, x552.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x554{x553.tot + x553.mul * x472, x553.mul * (*mix)};
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[2](U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x555 = args[1][12];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[2](U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x556 = args[1][13];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[2](U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x557 = args[1][14];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[2](U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x558 = args[1][15];
   // loc("cirgen/components/u32.cpp":34:5)
   auto x559 = x485 - x555;
@@ -1165,13 +1165,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x565 = x494 - x558;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x566{x564.tot + x564.mul * x565, x564.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x567 = x497 - x9;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x568{x566.tot + x566.mul * x567, x566.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x569{x568.tot + x568.mul * x501, x568.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x570{x569.tot + x569.mul * x503, x569.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x571{x570.tot + x570.mul * x505, x570.mul * (*mix)};
@@ -1181,13 +1181,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x573{x572.tot + x572.mul * x509, x572.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x574{x573.tot + x573.mul * x511, x573.mul * (*mix)};
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[3](U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x575 = args[1][16];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[3](U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x576 = args[1][17];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[3](U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x577 = args[1][18];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[3](U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x578 = args[1][19];
   // loc("cirgen/components/u32.cpp":34:5)
   auto x579 = args[2][138 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -1213,21 +1213,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x589 = x588 - x578;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x590{x587.tot + x587.mul * x589, x587.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x591 = args[2][135 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x592 = x591 - x10;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x593{x590.tot + x590.mul * x592, x590.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x594 = args[2][136 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x595 = x594 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x596{x593.tot + x593.mul * x595, x593.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x597 = args[2][137 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x598{x596.tot + x596.mul * x597, x596.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x599 = x579 - x579;
@@ -1247,13 +1247,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x606{x604.tot + x604.mul * x605, x604.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":49:13)
   MixState x607{x80.tot + x84 * x606.tot * x80.mul, x80.mul * x606.mul};
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[4](U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x608 = args[1][20];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[4](U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x609 = args[1][21];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[4](U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x610 = args[1][22];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[4](U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x611 = args[1][23];
   // loc("cirgen/components/u32.cpp":34:5)
   auto x612 = x407 - x608;
@@ -1271,13 +1271,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x618 = x416 - x611;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x619{x617.tot + x617.mul * x618, x617.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x620 = x419 - x11;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x621{x619.tot + x619.mul * x620, x619.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x622{x621.tot + x621.mul * x423, x621.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x623{x622.tot + x622.mul * x425, x622.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x624{x623.tot + x623.mul * x427, x623.mul * (*mix)};
@@ -1287,13 +1287,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x626{x625.tot + x625.mul * x431, x625.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x627{x626.tot + x626.mul * x433, x626.mul * (*mix)};
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[5](U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x628 = args[1][24];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[5](U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x629 = args[1][25];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[5](U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x630 = args[1][26];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[5](U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x631 = args[1][27];
   // loc("cirgen/components/u32.cpp":34:5)
   auto x632 = x446 - x628;
@@ -1311,13 +1311,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x638 = x455 - x631;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x639{x637.tot + x637.mul * x638, x637.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x640 = x458 - x12;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x641{x639.tot + x639.mul * x640, x639.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x642{x641.tot + x641.mul * x462, x641.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x643{x642.tot + x642.mul * x464, x642.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x644{x643.tot + x643.mul * x466, x643.mul * (*mix)};
@@ -1327,13 +1327,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x646{x645.tot + x645.mul * x470, x645.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x647{x646.tot + x646.mul * x472, x646.mul * (*mix)};
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[6](U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x648 = args[1][28];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[6](U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x649 = args[1][29];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[6](U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x650 = args[1][30];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[6](U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x651 = args[1][31];
   // loc("cirgen/components/u32.cpp":34:5)
   auto x652 = x485 - x648;
@@ -1351,13 +1351,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x658 = x494 - x651;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x659{x657.tot + x657.mul * x658, x657.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x660 = x497 - x13;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x661{x659.tot + x659.mul * x660, x659.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x662{x661.tot + x661.mul * x501, x661.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x663{x662.tot + x662.mul * x503, x662.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x664{x663.tot + x663.mul * x505, x663.mul * (*mix)};
@@ -1367,13 +1367,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x666{x665.tot + x665.mul * x509, x665.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x667{x666.tot + x666.mul * x511, x666.mul * (*mix)};
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[7](U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x668 = args[1][32];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[7](U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x669 = args[1][33];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[7](U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x670 = args[1][34];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/image_id[7](U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x671 = args[1][35];
   // loc("cirgen/components/u32.cpp":34:5)
   auto x672 = x579 - x668;
@@ -1391,13 +1391,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x678 = x588 - x671;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x679{x677.tot + x677.mul * x678, x677.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x680 = x591 - x14;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x681{x679.tot + x679.mul * x680, x679.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x682{x681.tot + x681.mul * x595, x681.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x683{x682.tot + x682.mul * x597, x682.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x684{x683.tot + x683.mul * x599, x683.mul * (*mix)};
@@ -1409,13 +1409,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x687{x686.tot + x686.mul * x605, x686.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":54:17)
   MixState x688{x607.tot + x249 * x687.tot * x607.mul, x607.mul * x687.mul};
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/pc(U32Reg)/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x689 = args[1][0];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/pc(U32Reg)/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x690 = args[1][1];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/pc(U32Reg)/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x691 = args[1][2];
-  // loc("Top/Mux/4/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/pre(SystemState)/pc(U32Reg)/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x692 = args[1][3];
   // loc("./cirgen/components/u32.h":25:12)
   auto x693 = x690 * x5;
@@ -1443,17 +1443,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x704 = x703 - x120;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x705 = x704 * x6;
-  // loc("Top/Mux/4/PCReg/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x706 = args[2][70 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/body.cpp":18:18)
   auto x707 = x705 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x708 = x707 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x709 = args[2][71 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x710 = x709 - x708;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x711{x688.tot + x688.mul * x710, x688.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:23)
   auto x712 = x0 - x709;
@@ -1475,27 +1475,27 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x720{x80.tot + x396 * x719.tot * x80.mul, x80.mul * x719.mul};
   // loc("cirgen/circuit/rv32im/body.cpp":63:16)
   auto x721 = x0 - x396;
-  // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x722 = args[2][6 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x723 = args[2][7 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/body.cpp":28:10)
   auto x724 = x723 * x5;
   // loc("cirgen/circuit/rv32im/body.cpp":27:10)
   auto x725 = x722 + x724;
-  // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x726 = args[2][8 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/body.cpp":29:10)
   auto x727 = x726 * x15;
   // loc("cirgen/circuit/rv32im/body.cpp":27:10)
   auto x728 = x725 + x727;
-  // loc("Top/Mux/4/PCReg/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x729 = args[2][70 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/body.cpp":30:10)
   auto x730 = x729 * x16;
   // loc("cirgen/circuit/rv32im/body.cpp":27:10)
   auto x731 = x728 + x730;
-  // loc("Top/Mux/4/PCReg/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/reset(ResetStep)/PCReg/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x732 = args[2][71 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/body.cpp":31:10)
   auto x733 = x732 * x20;
@@ -1521,89 +1521,89 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x743 = x742 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x744 = x743 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x745 = x709 - x744;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x746{x80.tot + x80.mul * x745, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x747{x746.tot + x746.mul * x715, x746.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":23:7)
   MixState x748{x747.tot + x747.mul * x718, x747.mul * (*mix)};
-  // loc("Top/Mux/5/OneHot/hot[1](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x749 = args[2][101 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/OneHot/hot[2](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x750 = args[2][102 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x751 = x750 * x3;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x752 = x749 + x751;
-  // loc("Top/Mux/5/OneHot/hot[3](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x753 = args[2][103 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x754 = x753 * x18;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x755 = x752 + x754;
-  // loc("Top/Mux/5/OneHot/hot[4](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x756 = args[2][104 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x757 = x756 * x17;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x758 = x755 + x757;
-  // loc("Top/Mux/5/OneHot/hot[5](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x759 = args[2][105 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x760 = x759 * x21;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x761 = x758 + x760;
-  // loc("Top/Mux/5/OneHot/hot[6](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x762 = args[2][106 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x763 = x762 * x22;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x764 = x761 + x763;
-  // loc("Top/Mux/5/OneHot/hot[7](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x765 = args[2][107 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x766 = x765 * x23;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x767 = x764 + x766;
-  // loc("Top/Mux/5/OneHot/hot[8](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x768 = args[2][108 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x769 = x768 * x24;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x770 = x767 + x769;
-  // loc("Top/Mux/5/OneHot/hot[9](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x771 = args[2][109 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x772 = x771 * x25;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x773 = x770 + x772;
-  // loc("Top/Mux/5/OneHot/hot[10](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x774 = args[2][110 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x775 = x774 * x26;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x776 = x773 + x775;
-  // loc("Top/Mux/5/OneHot/hot[11](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x777 = args[2][111 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x778 = x777 * x27;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x779 = x776 + x778;
-  // loc("Top/Mux/5/OneHot/hot[12](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x780 = args[2][112 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x781 = x780 * x28;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x782 = x779 + x781;
-  // loc("Top/Mux/5/OneHot/hot[13](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x783 = args[2][113 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x784 = x783 * x29;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x785 = x782 + x784;
-  // loc("Top/Mux/5/OneHot/hot[14](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[14](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x786 = args[2][114 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x787 = x786 * x30;
@@ -1613,11 +1613,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x789 = x788 - x30;
   // loc("cirgen/circuit/rv32im/body.cpp":68:42)
   MixState x790{x80.tot + x80.mul * x789, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x791{x790.tot + x790.mul * x527, x790.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x792{x791.tot + x791.mul * x423, x791.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x793{x792.tot + x792.mul * x425, x792.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x794{x793.tot + x793.mul * x427, x793.mul * (*mix)};
@@ -1651,11 +1651,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x808 = x807 - x416;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x809{x806.tot + x806.mul * x808, x806.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x810{x809.tot + x809.mul * x547, x809.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x811{x810.tot + x810.mul * x462, x810.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x812{x811.tot + x811.mul * x464, x811.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x813{x812.tot + x812.mul * x466, x812.mul * (*mix)};
@@ -1689,11 +1689,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x827 = x826 - x455;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x828{x825.tot + x825.mul * x827, x825.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x829{x828.tot + x828.mul * x567, x828.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x830{x829.tot + x829.mul * x501, x829.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x831{x830.tot + x830.mul * x503, x830.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x832{x831.tot + x831.mul * x505, x831.mul * (*mix)};
@@ -1727,11 +1727,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x846 = x845 - x494;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x847{x844.tot + x844.mul * x846, x844.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x848{x847.tot + x847.mul * x592, x847.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x849{x848.tot + x848.mul * x595, x848.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x850{x849.tot + x849.mul * x597, x849.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x851{x850.tot + x850.mul * x599, x850.mul * (*mix)};
@@ -1795,11 +1795,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x880{x877.tot + x877.mul * x879, x877.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":65:13)
   MixState x881{x748.tot + x84 * x880.tot * x748.mul, x748.mul * x880.mul};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x882{x80.tot + x80.mul * x620, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x883{x882.tot + x882.mul * x423, x882.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x884{x883.tot + x883.mul * x425, x883.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x885{x884.tot + x884.mul * x427, x884.mul * (*mix)};
@@ -1833,11 +1833,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x899 = x898 - x416;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x900{x897.tot + x897.mul * x899, x897.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x901{x900.tot + x900.mul * x640, x900.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x902{x901.tot + x901.mul * x462, x901.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x903{x902.tot + x902.mul * x464, x902.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x904{x903.tot + x903.mul * x466, x903.mul * (*mix)};
@@ -1871,11 +1871,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x918 = x917 - x455;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x919{x916.tot + x916.mul * x918, x916.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x920{x919.tot + x919.mul * x660, x919.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x921{x920.tot + x920.mul * x501, x920.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x922{x921.tot + x921.mul * x503, x921.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x923{x922.tot + x922.mul * x505, x922.mul * (*mix)};
@@ -1909,11 +1909,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x937 = x936 - x494;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x938{x935.tot + x935.mul * x937, x935.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x939{x938.tot + x938.mul * x680, x938.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x940{x939.tot + x939.mul * x595, x939.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x941{x940.tot + x940.mul * x597, x940.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x942{x941.tot + x941.mul * x599, x941.mul * (*mix)};
@@ -1957,25 +1957,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x961 = x960 - x31;
   // loc("cirgen/circuit/rv32im/body.cpp":84:3)
   MixState x962{x959.tot + x959.mul * x961, x959.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x963{x513.tot + x514 * x962.tot * x513.mul, x513.mul * x962.mul};
-  // loc("Top/Code/OneHot/hot[5](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[5](Reg)"("./cirgen/components/mux.h":41:25))
   auto x964 = args[0][6 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/OneHot/hot[0](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[0](Reg)"("./cirgen/components/mux.h":41:25))
   auto x965 = args[2][100 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":112:41)
   auto x966 = x735 * x19;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x967 = x422 - x966;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x968{x80.tot + x80.mul * x967, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x969 = x425 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x970{x968.tot + x968.mul * x969, x968.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x971 = x407 - x0;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x972{x970.tot + x970.mul * x971, x970.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x973{x972.tot + x972.mul * x429, x972.mul * (*mix)};
@@ -1987,27 +1987,27 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x976 = x458 - x458;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x977{x975.tot + x975.mul * x976, x975.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x978 = args[2][172 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":53:10)
   auto x979 = x978 * x36;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x980 = args[2][76 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":57:10)
   auto x981 = x980 * x34;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x982 = args[2][171 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":57:25)
   auto x983 = x982 * x24;
   // loc("cirgen/circuit/rv32im/decode.cpp":57:10)
   auto x984 = x981 + x983;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x985 = args[2][170 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":57:39)
   auto x986 = x985 * x17;
   // loc("cirgen/circuit/rv32im/decode.cpp":57:10)
   auto x987 = x984 + x986;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x988 = args[2][75 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":57:10)
   auto x989 = x987 + x988;
@@ -2015,7 +2015,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x990 = x979 + x989;
   // loc("cirgen/circuit/rv32im/decode.cpp":30:21)
   auto x991 = x990 * x3;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x992 = args[2][175 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":30:21)
   auto x993 = x991 + x992;
@@ -2023,29 +2023,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x994 = x458 - x993;
   // loc("cirgen/circuit/rv32im/decode.cpp":30:6)
   MixState x995{x977.tot + x977.mul * x994, x977.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x996 = args[2][174 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":31:22)
   auto x997 = x996 * x24;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x998 = args[2][77 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":31:37)
   auto x999 = x998 * x3;
   // loc("cirgen/circuit/rv32im/decode.cpp":31:22)
   auto x1000 = x997 + x999;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1001 = args[2][173 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":31:22)
   auto x1002 = x1000 + x1001;
   // loc("cirgen/circuit/rv32im/decode.cpp":31:21)
   auto x1003 = x1002 * x34;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1004 = args[2][79 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":31:69)
   auto x1005 = x1004 * x17;
   // loc("cirgen/circuit/rv32im/decode.cpp":31:21)
   auto x1006 = x1003 + x1005;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1007 = args[2][78 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":31:21)
   auto x1008 = x1006 + x1007;
@@ -2053,15 +2053,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1009 = x416 - x1008;
   // loc("cirgen/circuit/rv32im/decode.cpp":31:6)
   MixState x1010{x995.tot + x995.mul * x1009, x995.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1011 = args[2][176 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":32:21)
   auto x1012 = x1011 * x32;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1013 = args[2][177 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":49:10)
   auto x1014 = x1013 * x17;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1015 = args[2][80 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":49:10)
   auto x1016 = x1014 + x1015;
@@ -2069,13 +2069,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1017 = x1016 * x34;
   // loc("cirgen/circuit/rv32im/decode.cpp":32:21)
   auto x1018 = x1012 + x1017;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1019 = args[2][82 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":32:53)
   auto x1020 = x1019 * x17;
   // loc("cirgen/circuit/rv32im/decode.cpp":32:21)
   auto x1021 = x1018 + x1020;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1022 = args[2][81 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":32:21)
   auto x1023 = x1021 + x1022;
@@ -2083,11 +2083,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1024 = x413 - x1023;
   // loc("cirgen/circuit/rv32im/decode.cpp":32:6)
   MixState x1025{x1010.tot + x1010.mul * x1024, x1010.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1026 = args[2][178 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":33:21)
   auto x1027 = x1026 * x32;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/Decoder/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/Decoder/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x1028 = args[2][179 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":33:21)
   auto x1029 = x1027 + x1028;
@@ -2105,17 +2105,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1035 = x1034 + x1011;
   // loc("cirgen/circuit/rv32im/compute.cpp":134:39)
   auto x1036 = x1035 + x40;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1037 = x461 - x1036;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1038{x1031.tot + x1031.mul * x1037, x1031.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x1039 = x464 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1040{x1038.tot + x1038.mul * x1039, x1038.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x1041 = x446 - x0;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1042{x1040.tot + x1040.mul * x1041, x1040.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1043{x1042.tot + x1042.mul * x468, x1042.mul * (*mix)};
@@ -2133,17 +2133,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1049 = x1048 + x1002;
   // loc("cirgen/circuit/rv32im/compute.cpp":135:39)
   auto x1050 = x1049 + x40;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1051 = x500 - x1050;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1052{x1047.tot + x1047.mul * x1051, x1047.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x1053 = x503 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1054{x1052.tot + x1052.mul * x1053, x1052.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x1055 = x485 - x0;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1056{x1054.tot + x1054.mul * x1055, x1054.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1057{x1056.tot + x1056.mul * x507, x1056.mul * (*mix)};
@@ -2155,7 +2155,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1060 = x591 - x591;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1061{x1059.tot + x1059.mul * x1060, x1059.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1062 = args[2][192 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":139:17)
   auto x1063 = x0 - x1062;
@@ -2189,7 +2189,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1077 = x1066 + x1073;
   // loc("cirgen/components/u32.cpp":89:20)
   auto x1078 = x1067 + x1074;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1079 = args[2][193 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":141:17)
   auto x1080 = x0 - x1079;
@@ -2201,13 +2201,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1083 = x1080 * x494;
   // loc("cirgen/components/u32.cpp":105:20)
   auto x1084 = x1080 * x591;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1085 = args[2][188 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1086 = args[2][189 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1087 = args[2][190 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1088 = args[2][191 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":105:20)
   auto x1089 = x1079 * x1085;
@@ -2225,7 +2225,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1095 = x1083 + x1091;
   // loc("cirgen/components/u32.cpp":89:20)
   auto x1096 = x1084 + x1092;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/TopBit/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1097 = args[2][198 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":123:19)
   auto x1098 = x1097 * x32;
@@ -2237,7 +2237,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1101 = x1078 - x1100;
   // loc("cirgen/components/u32.cpp":123:6)
   MixState x1102{x1061.tot + x1061.mul * x1101, x1061.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/TopBit/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1103 = args[2][199 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":123:19)
   auto x1104 = x1103 * x32;
@@ -2273,7 +2273,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1119 = x1118 - x1096;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1120{x1117.tot + x1117.mul * x1119, x1117.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1121 = args[2][194 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":105:20)
   auto x1122 = x1121 * x1075;
@@ -2291,7 +2291,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1128 = x1124 + x4;
   // loc("cirgen/components/u32.cpp":89:20)
   auto x1129 = x1125 + x4;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1130 = args[2][195 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":105:20)
   auto x1131 = x1130 * x1093;
@@ -2309,15 +2309,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1137 = x1128 + x1133;
   // loc("cirgen/components/u32.cpp":89:20)
   auto x1138 = x1129 + x1134;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ComputeControl/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1139 = args[2][196 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1140 = args[2][204 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1141 = args[2][205 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1142 = args[2][206 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1143 = args[2][207 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":105:20)
   auto x1144 = x1139 * x1140;
@@ -2347,11 +2347,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1156 = x1155 - x200;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x1157 = x1156 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1158 = args[2][83 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1159 = x1158 - x1157;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1160{x1120.tot + x1120.mul * x1159, x1120.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":148:16)
   auto x1161 = x1158 + x1150;
@@ -2367,13 +2367,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1166 = x1165 - x204;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x1167 = x1166 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1168 = args[2][84 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1169 = x1168 - x1167;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1170{x1160.tot + x1160.mul * x1169, x1160.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/TopBit/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/TopBit/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1171 = args[2][208 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":123:19)
   auto x1172 = x1171 * x32;
@@ -2425,7 +2425,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1195 = x200 * x5;
   // loc("cirgen/components/u32.cpp":137:12)
   auto x1196 = x198 + x1195;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1197 = args[2][211 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":16:23)
   MixState x1198{x80.tot + x80.mul * x1196, x80.mul * (*mix)};
@@ -2433,7 +2433,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1199{x1194.tot + x1197 * x1198.tot * x1194.mul, x1194.mul * x1198.mul};
   // loc("cirgen/components/iszero.cpp":18:19)
   auto x1200 = x0 - x1197;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x1201 = args[2][212 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":18:26)
   auto x1202 = x1196 * x1201;
@@ -2451,7 +2451,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1208 = x1200 * x15;
   // loc("cirgen/components/u32.cpp":138:13)
   auto x1209 = x1207 + x1208;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1210 = args[2][213 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":16:23)
   MixState x1211{x80.tot + x80.mul * x1209, x80.mul * (*mix)};
@@ -2459,7 +2459,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1212{x1205.tot + x1210 * x1211.tot * x1205.mul, x1205.mul * x1211.mul};
   // loc("cirgen/components/iszero.cpp":18:19)
   auto x1213 = x0 - x1210;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/IsZeroU32/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x1214 = args[2][214 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":18:26)
   auto x1215 = x1209 * x1214;
@@ -2479,7 +2479,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1222 = x1220 + x1221;
   // loc("cirgen/circuit/rv32im/decode.cpp":45:10)
   auto x1223 = x1222 + x1026;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/IsZero/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/IsZero/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x1224 = args[2][215 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":16:23)
   MixState x1225{x80.tot + x80.mul * x1223, x80.mul * (*mix)};
@@ -2487,7 +2487,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1226{x1218.tot + x1224 * x1225.tot * x1218.mul, x1218.mul * x1225.mul};
   // loc("cirgen/components/iszero.cpp":18:19)
   auto x1227 = x0 - x1224;
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/IsZero/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x1228 = args[2][216 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/iszero.cpp":18:26)
   auto x1229 = x1223 * x1228;
@@ -2497,7 +2497,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1231{x80.tot + x80.mul * x1230, x80.mul * (*mix)};
   // loc("cirgen/components/iszero.cpp":18:19)
   MixState x1232{x1226.tot + x1227 * x1231.tot * x1226.mul, x1226.mul * x1231.mul};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/OneHot/hot[0](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":38:68))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[0](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":38:68))
   auto x1233 = args[2][180 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
   auto x1234 = x1028 - x43;
@@ -2553,9 +2553,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1259 = x1258 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1260 = x1259 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1261 = x709 - x1260;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1262{x1251.tot + x1251.mul * x1261, x1251.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1263{x1262.tot + x1262.mul * x715, x1262.mul * (*mix)};
@@ -2585,17 +2585,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1275 = x1274 - x204;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1276{x1273.tot + x1273.mul * x1275, x1273.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1277 = x594 - x1267;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1278{x1276.tot + x1276.mul * x1277, x1276.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x1279 = x597 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1280{x1278.tot + x1278.mul * x1279, x1278.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x1281 = x579 - x3;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1282{x1280.tot + x1280.mul * x1281, x1280.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1283{x1282.tot + x1282.mul * x601, x1282.mul * (*mix)};
@@ -2629,7 +2629,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1297{x1288.tot + x1224 * x1296.tot * x1288.mul, x1288.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":38:68)
   MixState x1298{x1232.tot + x1233 * x1297.tot * x1232.mul, x1232.mul * x1297.mul};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/OneHot/hot[1](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":39:68))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[1](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":39:68))
   auto x1299 = args[2][181 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":39:68)
   auto x1300 = x990 - x33;
@@ -2657,7 +2657,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1311{x1310.tot + x1310.mul * x1139, x1310.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1312{x1311.tot + x1311.mul * x1250, x1311.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1313{x1312.tot + x1312.mul * x1261, x1312.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1314{x1313.tot + x1313.mul * x715, x1313.mul * (*mix)};
@@ -2671,7 +2671,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1318{x1317.tot + x1224 * x1296.tot * x1317.mul, x1317.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":39:68)
   MixState x1319{x1298.tot + x1299 * x1318.tot * x1298.mul, x1298.mul * x1318.mul};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/OneHot/hot[2](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":40:69))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[2](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":40:69))
   auto x1320 = args[2][182 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
   auto x1321 = x1016 - x17;
@@ -2703,7 +2703,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1334 = x1249 - x22;
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1335{x1333.tot + x1333.mul * x1334, x1333.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1336{x1335.tot + x1335.mul * x1261, x1335.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1337{x1336.tot + x1336.mul * x715, x1336.mul * (*mix)};
@@ -2717,7 +2717,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1341{x1340.tot + x1224 * x1296.tot * x1340.mul, x1340.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":40:69)
   MixState x1342{x1319.tot + x1320 * x1341.tot * x1319.mul, x1319.mul * x1341.mul};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/OneHot/hot[3](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":41:69))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[3](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":41:69))
   auto x1343 = args[2][183 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
   auto x1344 = x1016 - x22;
@@ -2747,7 +2747,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1356{x1354.tot + x1354.mul * x1355, x1354.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1357{x1356.tot + x1356.mul * x1334, x1356.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1358{x1357.tot + x1357.mul * x1261, x1357.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1359{x1358.tot + x1358.mul * x715, x1358.mul * (*mix)};
@@ -2761,7 +2761,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1363{x1362.tot + x1224 * x1296.tot * x1362.mul, x1362.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":41:69)
   MixState x1364{x1342.tot + x1343 * x1363.tot * x1342.mul, x1342.mul * x1363.mul};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/OneHot/hot[4](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":42:69))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[4](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":42:69))
   auto x1365 = args[2][184 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":42:69)
   auto x1366 = x1016 - x23;
@@ -2791,7 +2791,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1378{x1376.tot + x1376.mul * x1377, x1376.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1379{x1378.tot + x1378.mul * x1334, x1378.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1380{x1379.tot + x1379.mul * x1261, x1379.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1381{x1380.tot + x1380.mul * x715, x1380.mul * (*mix)};
@@ -2805,7 +2805,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1385{x1384.tot + x1224 * x1296.tot * x1384.mul, x1384.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":42:69)
   MixState x1386{x1364.tot + x1365 * x1385.tot * x1364.mul, x1364.mul * x1385.mul};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/OneHot/hot[5](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":43:68))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[5](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":43:68))
   auto x1387 = args[2][185 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
   auto x1388 = x1016 - x3;
@@ -2833,7 +2833,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1399{x1398.tot + x1398.mul * x1139, x1398.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1400{x1399.tot + x1399.mul * x1250, x1399.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1401{x1400.tot + x1400.mul * x1261, x1400.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1402{x1401.tot + x1401.mul * x715, x1401.mul * (*mix)};
@@ -2851,11 +2851,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1408{x1407.tot + x1407.mul * x588, x1407.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1409{x1408.tot + x1408.mul * x1274, x1408.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1410{x1409.tot + x1409.mul * x1277, x1409.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1411{x1410.tot + x1410.mul * x1279, x1410.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1412{x1411.tot + x1411.mul * x1281, x1411.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1413{x1412.tot + x1412.mul * x601, x1412.mul * (*mix)};
@@ -2871,7 +2871,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1418{x1417.tot + x1224 * x1296.tot * x1417.mul, x1417.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":43:68)
   MixState x1419{x1386.tot + x1387 * x1418.tot * x1386.mul, x1386.mul * x1418.mul};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/OneHot/hot[6](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":44:68))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[6](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":44:68))
   auto x1420 = args[2][186 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":44:68)
   auto x1421 = x1016 - x18;
@@ -2899,7 +2899,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1432{x1431.tot + x1431.mul * x1139, x1431.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1433{x1432.tot + x1432.mul * x1250, x1432.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1434{x1433.tot + x1433.mul * x1261, x1433.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1435{x1434.tot + x1434.mul * x715, x1434.mul * (*mix)};
@@ -2917,11 +2917,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1441{x1440.tot + x1440.mul * x588, x1440.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1442{x1441.tot + x1441.mul * x1274, x1441.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1443{x1442.tot + x1442.mul * x1277, x1442.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1444{x1443.tot + x1443.mul * x1279, x1443.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1445{x1444.tot + x1444.mul * x1281, x1444.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1446{x1445.tot + x1445.mul * x601, x1445.mul * (*mix)};
@@ -2937,7 +2937,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1451{x1450.tot + x1224 * x1296.tot * x1450.mul, x1450.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":44:68)
   MixState x1452{x1419.tot + x1420 * x1451.tot * x1419.mul, x1419.mul * x1451.mul};
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/OneHot/hot[7](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":45:68))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/OneHot/hot[7](Reg)"("./cirgen/circuit/rv32im/rv32im.inl":45:68))
   auto x1453 = args[2][187 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":45:68)
   auto x1454 = x1028 - x44;
@@ -2993,7 +2993,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1479{x1478.tot + x1478.mul * x1139, x1478.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1480{x1479.tot + x1479.mul * x1250, x1479.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1481{x1480.tot + x1480.mul * x1261, x1480.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1482{x1481.tot + x1481.mul * x715, x1481.mul * (*mix)};
@@ -3007,9 +3007,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1486{x1485.tot + x1224 * x1296.tot * x1485.mul, x1485.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":45:68)
   MixState x1487{x1452.tot + x1453 * x1486.tot * x1452.mul, x1452.mul * x1486.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x1488{x80.tot + x965 * x1487.tot * x80.mul, x80.mul * x1487.mul};
-  // loc("Top/Mux/5/OneHot/hot[1](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[1](Reg)"("./cirgen/components/mux.h":41:25))
   auto x1489 = args[2][101 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":62:25)
   auto x1490 = x1086 * x5;
@@ -3069,7 +3069,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1517{x1516.tot + x1516.mul * x1332, x1516.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1518{x1517.tot + x1517.mul * x1334, x1517.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1519{x1518.tot + x1518.mul * x1261, x1518.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1520{x1519.tot + x1519.mul * x715, x1519.mul * (*mix)};
@@ -3105,7 +3105,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1535{x1534.tot + x1534.mul * x1355, x1534.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1536{x1535.tot + x1535.mul * x1334, x1535.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1537{x1536.tot + x1536.mul * x1261, x1536.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1538{x1537.tot + x1537.mul * x715, x1537.mul * (*mix)};
@@ -3141,7 +3141,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1553{x1552.tot + x1552.mul * x1377, x1552.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1554{x1553.tot + x1553.mul * x1334, x1553.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1555{x1554.tot + x1554.mul * x1261, x1554.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1556{x1555.tot + x1555.mul * x715, x1555.mul * (*mix)};
@@ -3177,7 +3177,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1571{x1570.tot + x1570.mul * x1139, x1570.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1572{x1571.tot + x1571.mul * x1250, x1571.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1573{x1572.tot + x1572.mul * x1261, x1572.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1574{x1573.tot + x1573.mul * x715, x1573.mul * (*mix)};
@@ -3213,7 +3213,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1589{x1588.tot + x1588.mul * x1139, x1588.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1590{x1589.tot + x1589.mul * x1250, x1589.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1591{x1590.tot + x1590.mul * x1261, x1590.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1592{x1591.tot + x1591.mul * x715, x1591.mul * (*mix)};
@@ -3289,9 +3289,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1627 = x1626 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1628 = x1627 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1629 = x709 - x1628;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1630{x1619.tot + x1619.mul * x1629, x1619.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1631{x1630.tot + x1630.mul * x715, x1630.mul * (*mix)};
@@ -3349,9 +3349,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1657 = x1656 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1658 = x1657 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1659 = x709 - x1658;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1660{x1649.tot + x1649.mul * x1659, x1649.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1661{x1660.tot + x1660.mul * x715, x1660.mul * (*mix)};
@@ -3405,9 +3405,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1685 = x1684 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1686 = x1685 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1687 = x709 - x1686;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1688{x1677.tot + x1677.mul * x1687, x1677.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1689{x1688.tot + x1688.mul * x715, x1688.mul * (*mix)};
@@ -3421,9 +3421,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1693{x1692.tot + x1635 * x1296.tot * x1692.mul, x1692.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":53:68)
   MixState x1694{x1666.tot + x1453 * x1693.tot * x1666.mul, x1666.mul * x1693.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x1695{x1488.tot + x1489 * x1694.tot * x1488.mul, x1488.mul * x1694.mul};
-  // loc("Top/Mux/5/OneHot/hot[2](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[2](Reg)"("./cirgen/components/mux.h":41:25))
   auto x1696 = args[2][102 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":167:57)
   auto x1697 = x202 * x15;
@@ -3495,9 +3495,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1730 = x1729 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1731 = x1730 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1732 = x709 - x1731;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1733{x1722.tot + x1722.mul * x1732, x1722.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1734{x1733.tot + x1733.mul * x715, x1733.mul * (*mix)};
@@ -3551,9 +3551,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1758 = x1757 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1759 = x1758 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1760 = x709 - x1759;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1761{x1750.tot + x1750.mul * x1760, x1750.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1762{x1761.tot + x1761.mul * x715, x1761.mul * (*mix)};
@@ -3607,9 +3607,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1786 = x1785 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1787 = x1786 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1788 = x709 - x1787;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1789{x1778.tot + x1778.mul * x1788, x1778.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1790{x1789.tot + x1789.mul * x715, x1789.mul * (*mix)};
@@ -3685,9 +3685,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1825 = x1824 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1826 = x1825 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1827 = x709 - x1826;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1828{x1817.tot + x1817.mul * x1827, x1817.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1829{x1828.tot + x1828.mul * x715, x1828.mul * (*mix)};
@@ -3711,11 +3711,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1838 = x1274 - x1069;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1839{x1837.tot + x1837.mul * x1838, x1837.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1840{x1839.tot + x1839.mul * x1277, x1839.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1841{x1840.tot + x1840.mul * x1279, x1840.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1842{x1841.tot + x1841.mul * x1281, x1841.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1843{x1842.tot + x1842.mul * x601, x1842.mul * (*mix)};
@@ -3775,9 +3775,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1870 = x1869 - x706;
   // loc("cirgen/circuit/rv32im/body.cpp":18:17)
   auto x1871 = x1870 * x19;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x1872 = x709 - x1871;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1873{x1862.tot + x1862.mul * x1872, x1862.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1874{x1873.tot + x1873.mul * x715, x1873.mul * (*mix)};
@@ -3821,7 +3821,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1893{x1892.tot + x1892.mul * x1139, x1892.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1894{x1893.tot + x1893.mul * x1250, x1893.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1895{x1894.tot + x1894.mul * x1261, x1894.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1896{x1895.tot + x1895.mul * x715, x1895.mul * (*mix)};
@@ -3861,7 +3861,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1913{x1912.tot + x1912.mul * x1139, x1912.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":53:3)
   MixState x1914{x1913.tot + x1913.mul * x1250, x1913.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x1915{x1914.tot + x1914.mul * x1261, x1914.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x1916{x1915.tot + x1915.mul * x715, x1915.mul * (*mix)};
@@ -3875,9 +3875,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1920{x1919.tot + x1224 * x1296.tot * x1919.mul, x1919.mul * x1296.mul};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":60:68)
   MixState x1921{x1901.tot + x1420 * x1920.tot * x1901.mul, x1901.mul * x1920.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x1922{x1695.tot + x1696 * x1921.tot * x1695.mul, x1695.mul * x1921.mul};
-  // loc("Top/Mux/5/OneHot/hot[3](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[3](Reg)"("./cirgen/components/mux.h":41:25))
   auto x1923 = args[2][103 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/decode.cpp":53:10)
   auto x1924 = x1085 * x36;
@@ -3959,13 +3959,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1962 = x1961 + x1062;
   // loc("cirgen/circuit/rv32im/memio.cpp":38:39)
   auto x1963 = x1962 + x40;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1964 = x461 - x1963;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1965{x1958.tot + x1958.mul * x1964, x1958.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1966{x1965.tot + x1965.mul * x1039, x1965.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1967{x1966.tot + x1966.mul * x1041, x1966.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1968{x1967.tot + x1967.mul * x468, x1967.mul * (*mix)};
@@ -3981,13 +3981,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1973 = x1972 + x1938;
   // loc("cirgen/circuit/rv32im/memio.cpp":39:39)
   auto x1974 = x1973 + x40;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1975 = x500 - x1974;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1976{x1971.tot + x1971.mul * x1975, x1971.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1977{x1976.tot + x1976.mul * x1053, x1976.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1978{x1977.tot + x1977.mul * x1055, x1977.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1979{x1978.tot + x1978.mul * x507, x1978.mul * (*mix)};
@@ -4069,7 +4069,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2017 = x2016 + x204;
   // loc("cirgen/circuit/rv32im/memio.cpp":73:46)
   auto x2018 = x206 * x5;
-  // loc("Top/Mux/5/Mux/3/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2019 = args[2][85 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/memio.cpp":73:63)
   auto x2020 = x2019 * x17;
@@ -4107,13 +4107,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2036 = x2034 + x2035;
   // loc("cirgen/circuit/rv32im/memio.cpp":79:14)
   auto x2037 = x2036 + x214;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x2038 = x594 - x2037;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2039{x2029.tot + x2029.mul * x2038, x2029.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2040{x2039.tot + x2039.mul * x1279, x2039.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2041{x2040.tot + x2040.mul * x1291, x2040.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2042{x2041.tot + x2041.mul * x601, x2041.mul * (*mix)};
@@ -4123,7 +4123,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2044{x2043.tot + x2043.mul * x605, x2043.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2045{x2044.tot + x2044.mul * x1286, x2044.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2046{x2045.tot + x2045.mul * x1261, x2045.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x2047{x2046.tot + x2046.mul * x715, x2046.mul * (*mix)};
@@ -4229,23 +4229,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2097 = x2096 - x2083;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2098{x2095.tot + x2095.mul * x2097, x2095.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x2099 = args[2][143 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x2100 = x2099 - x2086;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2101{x2098.tot + x2098.mul * x2100, x2098.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x2102 = args[2][144 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x2103 = x2102 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2104{x2101.tot + x2101.mul * x2103, x2101.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x2105 = args[2][145 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x2106 = x2105 - x3;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2107{x2104.tot + x2104.mul * x2106, x2104.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x2108 = x2087 - x2087;
@@ -4521,13 +4521,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2243 = x2096 - x2236;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2244{x2242.tot + x2242.mul * x2243, x2242.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x2245 = x2099 - x2037;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2246{x2244.tot + x2244.mul * x2245, x2244.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2247{x2246.tot + x2246.mul * x2103, x2246.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2248{x2247.tot + x2247.mul * x2106, x2247.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2249{x2248.tot + x2248.mul * x2108, x2248.mul * (*mix)};
@@ -4587,11 +4587,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2276 = x2096 - x2271;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2277{x2275.tot + x2275.mul * x2276, x2275.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2278{x2277.tot + x2277.mul * x2245, x2277.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2279{x2278.tot + x2278.mul * x2103, x2278.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2280{x2279.tot + x2279.mul * x2106, x2279.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2281{x2280.tot + x2280.mul * x2108, x2280.mul * (*mix)};
@@ -4645,11 +4645,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2305 = x2096 - x2300;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2306{x2304.tot + x2304.mul * x2305, x2304.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2307{x2306.tot + x2306.mul * x2245, x2306.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2308{x2307.tot + x2307.mul * x2103, x2307.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2309{x2308.tot + x2308.mul * x2106, x2308.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2310{x2309.tot + x2309.mul * x2108, x2309.mul * (*mix)};
@@ -4673,9 +4673,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2319{x2318.tot + x2318.mul * x2143, x2318.mul * (*mix)};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":83:46)
   MixState x2320{x2291.tot + x1143 * x2319.tot * x2291.mul, x2291.mul * x2319.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x2321{x1922.tot + x1923 * x2320.tot * x1922.mul, x1922.mul * x2320.mul};
-  // loc("Top/Mux/5/OneHot/hot[4](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[4](Reg)"("./cirgen/components/mux.h":41:25))
   auto x2322 = args[2][104 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":103:49)
   auto x2323 = x1299 + x1320;
@@ -4789,9 +4789,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2377 = x2376 - x202;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x2378 = x2377 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2379 = x1168 - x2378;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2380{x2366.tot + x2366.mul * x2379, x2366.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":219:19)
   auto x2381 = x1168 * x5;
@@ -4839,9 +4839,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2402 = x2401 - x208;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x2403 = x2402 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2404 = x2019 - x2403;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2405{x2380.tot + x2380.mul * x2404, x2380.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":219:19)
   auto x2406 = x2019 * x5;
@@ -4899,11 +4899,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2432 = x2431 - x214;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x2433 = x2432 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2434 = args[2][86 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2435 = x2434 - x2433;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2436{x2405.tot + x2405.mul * x2435, x2405.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":219:19)
   auto x2437 = x2434 * x5;
@@ -4939,11 +4939,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2452 = x2451 - x218;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x2453 = x2452 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2454 = args[2][87 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2455 = x2454 - x2453;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2456{x2436.tot + x2436.mul * x2455, x2436.mul * (*mix)};
   // loc("cirgen/components/iszero.cpp":16:15)
   MixState x2457{x2456.tot + x1115 * x1225.tot * x2456.mul, x2456.mul * x1225.mul};
@@ -4957,7 +4957,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2461{x80.tot + x80.mul * x2460, x80.mul * (*mix)};
   // loc("cirgen/components/iszero.cpp":18:19)
   MixState x2462{x2457.tot + x2458 * x2461.tot * x2457.mul, x2457.mul * x2461.mul};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2463{x2462.tot + x2462.mul * x1261, x2462.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x2464{x2463.tot + x2463.mul * x715, x2463.mul * (*mix)};
@@ -4983,11 +4983,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2474 = x1274 - x218;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2475{x2473.tot + x2473.mul * x2474, x2473.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2476{x2475.tot + x2475.mul * x1277, x2475.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2477{x2476.tot + x2476.mul * x1279, x2476.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2478{x2477.tot + x2477.mul * x1281, x2477.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2479{x2478.tot + x2478.mul * x601, x2478.mul * (*mix)};
@@ -5011,11 +5011,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2488 = x1274 - x206;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2489{x2487.tot + x2487.mul * x2488, x2487.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2490{x2489.tot + x2489.mul * x1277, x2489.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2491{x2490.tot + x2490.mul * x1279, x2490.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2492{x2491.tot + x2491.mul * x1281, x2491.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2493{x2492.tot + x2492.mul * x601, x2492.mul * (*mix)};
@@ -5059,9 +5059,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2512{x2511.tot + x2511.mul * x990, x2511.mul * (*mix)};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":106:49)
   MixState x2513{x2510.tot + x1387 * x2512.tot * x2510.mul, x2510.mul * x2512.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x2514{x2321.tot + x2322 * x2513.tot * x2321.mul, x2321.mul * x2513.mul};
-  // loc("Top/Mux/5/OneHot/hot[5](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[5](Reg)"("./cirgen/components/mux.h":41:25))
   auto x2515 = args[2][105 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/circuit/rv32im/rv32im.inl":126:49)
   auto x2516 = x1233 + x1320;
@@ -5087,11 +5087,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2526 = x1103 - x2523;
   // loc("cirgen/circuit/rv32im/divide.cpp":47:3)
   MixState x2527{x2525.tot + x2525.mul * x2526, x2525.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2528{x2527.tot + x2527.mul * x1037, x2527.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2529{x2528.tot + x2528.mul * x1039, x2528.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2530{x2529.tot + x2529.mul * x1041, x2529.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2531{x2530.tot + x2530.mul * x468, x2530.mul * (*mix)};
@@ -5101,11 +5101,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2533{x2532.tot + x2532.mul * x472, x2532.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2534{x2533.tot + x2533.mul * x1046, x2533.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2535{x2534.tot + x2534.mul * x1051, x2534.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2536{x2535.tot + x2535.mul * x1053, x2535.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2537{x2536.tot + x2536.mul * x1055, x2536.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2538{x2537.tot + x2537.mul * x507, x2537.mul * (*mix)};
@@ -5191,11 +5191,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2578 = x1274 - x216;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2579{x2577.tot + x2577.mul * x2578, x2577.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2580{x2579.tot + x2579.mul * x1277, x2579.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2581{x2580.tot + x2580.mul * x1279, x2580.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2582{x2581.tot + x2581.mul * x1281, x2581.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2583{x2582.tot + x2582.mul * x601, x2582.mul * (*mix)};
@@ -5227,11 +5227,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2596 = x1274 - x208;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2597{x2595.tot + x2595.mul * x2596, x2595.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2598{x2597.tot + x2597.mul * x1277, x2597.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2599{x2598.tot + x2598.mul * x1279, x2598.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2600{x2599.tot + x2599.mul * x1281, x2599.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2601{x2600.tot + x2600.mul * x601, x2600.mul * (*mix)};
@@ -5245,7 +5245,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2605{x2587.tot + x2589 * x2604.tot * x2587.mul, x2587.mul * x2604.mul};
   // loc("cirgen/circuit/rv32im/divide.cpp":102:22)
   MixState x2606{x2605.tot + x1109 * x1296.tot * x2605.mul, x2605.mul * x1296.mul};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2607{x2606.tot + x2606.mul * x1261, x2606.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x2608{x2607.tot + x2607.mul * x715, x2607.mul * (*mix)};
@@ -5291,33 +5291,33 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2628{x2625.tot + x2625.mul * x1300, x2625.mul * (*mix)};
   // loc("./cirgen/circuit/rv32im/rv32im.inl":131:49)
   MixState x2629{x2627.tot + x1453 * x2628.tot * x2627.mul, x2627.mul * x2628.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x2630{x2514.tot + x2515 * x2629.tot * x2514.mul, x2514.mul * x2629.mul};
-  // loc("Top/Mux/5/OneHot/hot[6](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[6](Reg)"("./cirgen/components/mux.h":41:25))
   auto x2631 = args[2][106 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2632 = args[2][125 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2633 = args[2][126 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2634 = args[2][127 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2635 = args[2][128 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2636 = args[2][200 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2637 = args[2][201 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2638 = args[2][202 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2639 = args[2][203 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2640 = args[2][204 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2641 = args[2][205 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2642 = args[2][206 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/0/ComputeCycle/ALU/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/0(ComputeWrap)/ComputeCycle/ALU/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2643 = args[2][207 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":225:41)
   auto x2644 = x422 * x2090;
@@ -5349,7 +5349,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2657 = x2656 * x17;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2658 = x2651 + x2657;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2659 = args[2][150 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2660 = x410 * x24;
@@ -5365,7 +5365,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2665 = x2664 * x24;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2666 = x2658 + x2665;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2667 = args[2][151 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2668 = x413 * x34;
@@ -5381,7 +5381,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2673 = x2672 * x34;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2674 = x2666 + x2673;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2675 = args[2][152 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2676 = x416 * x33;
@@ -5397,7 +5397,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2681 = x2680 * x33;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2682 = x2674 + x2681;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2683 = args[2][153 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2684 = x458 * x36;
@@ -5413,7 +5413,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2689 = x2688 * x36;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2690 = x2682 + x2689;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2691 = args[2][154 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2692 = x461 * x32;
@@ -5429,11 +5429,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2697 = x2696 * x32;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2698 = x2690 + x2697;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2699 = args[2][155 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":225:41)
   auto x2700 = x464 * x2699;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2701 = args[2][156 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2702 = x446 * x3;
@@ -5449,7 +5449,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2707 = x2706 * x3;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2708 = x2700 + x2707;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2709 = args[2][157 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2710 = x449 * x17;
@@ -5465,7 +5465,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2715 = x2714 * x17;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2716 = x2708 + x2715;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2717 = args[2][158 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2718 = x452 * x24;
@@ -5481,7 +5481,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2723 = x2722 * x24;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2724 = x2716 + x2723;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2725 = args[2][159 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2726 = x455 * x34;
@@ -5497,7 +5497,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2731 = x2730 * x34;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2732 = x2724 + x2731;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2733 = args[2][160 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2734 = x497 * x33;
@@ -5513,7 +5513,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2739 = x2738 * x33;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2740 = x2732 + x2739;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2741 = args[2][161 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2742 = x500 * x36;
@@ -5529,7 +5529,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2747 = x2746 * x36;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2748 = x2740 + x2747;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2749 = args[2][162 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2750 = x503 * x32;
@@ -5545,11 +5545,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2755 = x2754 * x32;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2756 = x2748 + x2755;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2757 = args[2][163 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":225:41)
   auto x2758 = x485 * x2757;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2759 = args[2][164 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2760 = x488 * x3;
@@ -5565,7 +5565,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2765 = x2764 * x3;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2766 = x2758 + x2765;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2767 = args[2][165 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2768 = x491 * x17;
@@ -5581,7 +5581,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2773 = x2772 * x17;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2774 = x2766 + x2773;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2775 = args[2][166 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2776 = x494 * x24;
@@ -5597,7 +5597,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2781 = x2780 * x24;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2782 = x2774 + x2781;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2783 = args[2][167 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2784 = x591 * x34;
@@ -5613,7 +5613,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2789 = x2788 * x34;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2790 = x2782 + x2789;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2791 = args[2][168 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2792 = x594 * x33;
@@ -5629,7 +5629,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2797 = x2796 * x33;
   // loc("cirgen/circuit/rv32im/compute.cpp":225:24)
   auto x2798 = x2790 + x2797;
-  // loc("Top/Mux/5/Mux/6/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/6(VerifyAndCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x2799 = args[2][169 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":223:41)
   auto x2800 = x597 * x36;
@@ -5799,7 +5799,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2882 = x2643 - x2859;
   // loc("cirgen/circuit/rv32im/compute.cpp":233:3)
   MixState x2883{x2881.tot + x2881.mul * x2882, x2881.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2884{x2883.tot + x2883.mul * x745, x2883.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x2885{x2884.tot + x2884.mul * x715, x2884.mul * (*mix)};
@@ -5807,37 +5807,37 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2886{x2885.tot + x2885.mul * x718, x2885.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/compute.cpp":236:3)
   MixState x2887{x2886.tot + x2886.mul * x961, x2886.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x2888{x2630.tot + x2631 * x2887.tot * x2630.mul, x2630.mul * x2887.mul};
-  // loc("Top/Mux/5/OneHot/hot[7](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[7](Reg)"("./cirgen/components/mux.h":41:25))
   auto x2889 = args[2][107 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2890 = args[2][18 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2891 = args[2][19 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2892 = args[2][20 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2893 = args[2][21 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2894 = args[2][22 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2895 = args[2][23 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2896 = args[2][24 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2897 = args[2][25 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2898 = args[2][26 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2899 = args[2][27 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2900 = args[2][28 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x2901 = args[2][29 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/5/Reg"("cirgen/circuit/rv32im/divide.cpp":135:51))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/Reg"("cirgen/circuit/rv32im/divide.cpp":135:51))
   auto x2902 = args[2][198 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/5/Reg"("cirgen/circuit/rv32im/divide.cpp":136:51))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/5(DivideCycle)/Reg"("cirgen/circuit/rv32im/divide.cpp":136:51))
   auto x2903 = args[2][199 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/components/u32.cpp":123:19)
   auto x2904 = x422 * x32;
@@ -5925,11 +5925,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2945 = x2944 - x146;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x2946 = x2945 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2947 = args[2][72 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2948 = x2947 - x2946;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2949{x2921.tot + x2921.mul * x2948, x2921.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":148:16)
   auto x2950 = x2947 + x2937;
@@ -5945,11 +5945,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2955 = x2954 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x2956 = x2955 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2957 = args[2][73 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2958 = x2957 - x2956;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2959{x2949.tot + x2949.mul * x2958, x2949.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/divide.cpp":145:47)
   auto x2960 = x0 - x410;
@@ -6001,11 +6001,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2983 = x2982 - x172;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x2984 = x2983 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2985 = args[2][74 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2986 = x2985 - x2984;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2987{x2959.tot + x2959.mul * x2986, x2959.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":148:16)
   auto x2988 = x2985 + x2975;
@@ -6021,9 +6021,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2993 = x2992 - x185;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x2994 = x2993 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x2995 = x988 - x2994;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x2996{x2987.tot + x2987.mul * x2995, x2987.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":137:26)
   auto x2997 = x172 * x5;
@@ -6131,9 +6131,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3048 = x3047 - x198;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x3049 = x3048 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3050 = x980 - x3049;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3051{x3024.tot + x3024.mul * x3050, x3024.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":148:16)
   auto x3052 = x980 + x3040;
@@ -6149,9 +6149,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3057 = x3056 - x202;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x3058 = x3057 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3059 = x998 - x3058;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3060{x3051.tot + x3051.mul * x3059, x3051.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":105:20)
   auto x3061 = x2922 * x2898;
@@ -6199,9 +6199,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3082 = x3081 - x206;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x3083 = x3082 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3084 = x1007 - x3083;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3085{x3060.tot + x3060.mul * x3084, x3060.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":148:16)
   auto x3086 = x1007 + x3075;
@@ -6217,9 +6217,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3091 = x3090 - x210;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x3092 = x3091 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3093 = x1004 - x3092;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3094{x3085.tot + x3085.mul * x3093, x3085.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":89:20)
   auto x3095 = x170 + x5;
@@ -6251,9 +6251,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3108 = x3107 - x214;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x3109 = x3108 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3110 = x1015 - x3109;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3111{x3094.tot + x3094.mul * x3110, x3094.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":148:16)
   auto x3112 = x1015 + x3102;
@@ -6269,9 +6269,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3117 = x3116 - x218;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x3118 = x3117 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3119 = x1022 - x3118;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3120{x3111.tot + x3111.mul * x3119, x3111.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":260:14)
   auto x3121 = x196 * x170;
@@ -6301,9 +6301,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3133 = x3132 - x228;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x3134 = x3133 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3135 = x1019 - x3134;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3136{x3120.tot + x3120.mul * x3135, x3120.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":264:15)
   auto x3137 = x1019 * x5;
@@ -6397,7 +6397,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3181{x80.tot + x80.mul * x3180, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/divide.cpp":162:29)
   MixState x3182{x3179.tot + x3012 * x3181.tot * x3179.mul, x3179.mul * x3181.mul};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3183{x3182.tot + x3182.mul * x745, x3182.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x3184{x3183.tot + x3183.mul * x715, x3183.mul * (*mix)};
@@ -6405,9 +6405,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3185{x3184.tot + x3184.mul * x718, x3184.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/divide.cpp":164:3)
   MixState x3186{x3185.tot + x3185.mul * x961, x3185.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x3187{x2888.tot + x2889 * x3186.tot * x2888.mul, x2888.mul * x3186.mul};
-  // loc("Top/Mux/5/OneHot/hot[8](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[8](Reg)"("./cirgen/components/mux.h":41:25))
   auto x3188 = args[2][108 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/ecall.cpp":122:6)
   auto x3189 = x410 - x56;
@@ -6419,13 +6419,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3192{x3191.tot + x3191.mul * x416, x3191.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/ecall.cpp":125:7)
   MixState x3193{x3192.tot + x3192.mul * x458, x3192.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3194 = x461 - x57;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3195{x3193.tot + x3193.mul * x3194, x3193.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3196{x3195.tot + x3195.mul * x1039, x3195.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3197{x3196.tot + x3196.mul * x1041, x3196.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3198{x3197.tot + x3197.mul * x468, x3197.mul * (*mix)};
@@ -6447,13 +6447,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3206 = x3205 - x449;
   // loc("./cirgen/components/onehot.h":40:8)
   MixState x3207{x3201.tot + x3201.mul * x3206, x3201.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3208 = x500 - x58;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3209{x80.tot + x80.mul * x3208, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3210{x3209.tot + x3209.mul * x1053, x3209.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3211{x3210.tot + x3210.mul * x1055, x3210.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3212{x3211.tot + x3211.mul * x507, x3211.mul * (*mix)};
@@ -6463,7 +6463,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3214{x3213.tot + x3213.mul * x511, x3213.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3215{x3214.tot + x3214.mul * x1060, x3214.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3216{x3215.tot + x3215.mul * x745, x3215.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x3217{x3216.tot + x3216.mul * x715, x3216.mul * (*mix)};
@@ -6473,15 +6473,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3219 = x960 - x30;
   // loc("cirgen/circuit/rv32im/ecall.cpp":19:3)
   MixState x3220{x3218.tot + x3218.mul * x3219, x3218.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x3221{x3207.tot + x1420 * x3220.tot * x3207.mul, x3207.mul * x3220.mul};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3222 = x594 - x59;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3223{x3215.tot + x3215.mul * x3222, x3215.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3224{x3223.tot + x3223.mul * x1279, x3223.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3225{x3224.tot + x3224.mul * x1291, x3224.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3226{x3225.tot + x3225.mul * x601, x3225.mul * (*mix)};
@@ -6727,7 +6727,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3346{x3343.tot + x3343.mul * x3345, x3343.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/ecall.cpp":36:24)
   MixState x3347{x3334.tot + x1249 * x3346.tot * x3334.mul, x3334.mul * x3346.mul};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3348{x3347.tot + x3347.mul * x1261, x3347.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x3349{x3348.tot + x3348.mul * x715, x3348.mul * (*mix)};
@@ -6735,7 +6735,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3350{x3349.tot + x3349.mul * x718, x3349.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/ecall.cpp":43:3)
   MixState x3351{x3350.tot + x3350.mul * x961, x3350.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x3352{x3221.tot + x1453 * x3351.tot * x3221.mul, x3221.mul * x3351.mul};
   // loc("./cirgen/components/u32.h":25:12)
   auto x3353 = x585 * x5;
@@ -6775,7 +6775,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3370 = x3369 * x6;
   // loc("cirgen/circuit/rv32im/ecall.cpp":90:7)
   MixState x3371{x3368.tot + x3368.mul * x3370, x3368.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3372{x3371.tot + x3371.mul * x745, x3371.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x3373{x3372.tot + x3372.mul * x715, x3372.mul * (*mix)};
@@ -6785,15 +6785,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3375 = x960 - x29;
   // loc("cirgen/circuit/rv32im/ecall.cpp":95:3)
   MixState x3376{x3374.tot + x3374.mul * x3375, x3374.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x3377{x3352.tot + x1085 * x3376.tot * x3352.mul, x3352.mul * x3376.mul};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3378 = x2099 - x60;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3379{x3229.tot + x3229.mul * x3378, x3229.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3380{x3379.tot + x3379.mul * x2103, x3379.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3381{x3380.tot + x3380.mul * x2119, x3380.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3382{x3381.tot + x3381.mul * x2108, x3381.mul * (*mix)};
@@ -6803,7 +6803,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3384{x3383.tot + x3383.mul * x2112, x3383.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3385{x3384.tot + x3384.mul * x2114, x3384.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3386{x3385.tot + x3385.mul * x1261, x3385.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x3387{x3386.tot + x3386.mul * x715, x3386.mul * (*mix)};
@@ -6813,15 +6813,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3389 = x960 - x25;
   // loc("cirgen/circuit/rv32im/ecall.cpp":110:3)
   MixState x3390{x3388.tot + x3388.mul * x3389, x3388.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x3391{x3377.tot + x1086 * x3390.tot * x3377.mul, x3377.mul * x3390.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x3392{x3187.tot + x3188 * x3391.tot * x3187.mul, x3187.mul * x3391.mul};
-  // loc("Top/Mux/5/OneHot/hot[9](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[9](Reg)"("./cirgen/components/mux.h":41:25))
   auto x3393 = args[2][109 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":176:35)
   auto x3394 = x768 + x780;
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3395{x80.tot + x80.mul * x2093, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":178:5)
   auto x3396 = x1274 - x17;
@@ -6833,13 +6833,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3399 = x0 - x768;
   // loc("cirgen/circuit/rv32im/sha.cpp":180:39)
   auto x3400 = x3399 - x780;
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3401 = args[2][148 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   auto x3402 = x2093 - x3401;
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3403{x80.tot + x80.mul * x3402, x80.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Reg"("cirgen/circuit/rv32im/sha.cpp":183:40))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("cirgen/circuit/rv32im/sha.cpp":183:40))
   auto x3404 = args[2][142 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":183:40)
   auto x3405 = x3404 - x0;
@@ -6901,25 +6901,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3433 = x3393 * x25;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x3434 = x3432 + x3433;
-  // loc("Top/Mux/5/OneHot/hot[10](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[10](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x3435 = args[2][110 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x3436 = x3435 * x26;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x3437 = x3434 + x3436;
-  // loc("Top/Mux/5/OneHot/hot[11](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[11](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x3438 = args[2][111 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x3439 = x3438 * x27;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x3440 = x3437 + x3439;
-  // loc("Top/Mux/5/OneHot/hot[12](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[12](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x3441 = args[2][112 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x3442 = x3441 * x28;
   // loc("./cirgen/components/onehot.h":46:13)
   auto x3443 = x3440 + x3442;
-  // loc("Top/Mux/5/OneHot/hot[13](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
+  // loc("Top/mux(Mux)/body(BodyStep)/OneHot/hot[13](Reg)"("./cirgen/compiler/edsl/edsl.h":116:61))
   auto x3444 = args[2][113 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/onehot.h":46:19)
   auto x3445 = x3444 * x29;
@@ -6935,19 +6935,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3450{x80.tot + x80.mul * x3449, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":188:29)
   MixState x3451{x3418.tot + x3411 * x3450.tot * x3418.mul, x3418.mul * x3450.mul};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3452{x3451.tot + x3451.mul * x745, x3451.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x3453{x3452.tot + x3452.mul * x715, x3452.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":23:7)
   MixState x3454{x3453.tot + x3453.mul * x718, x3453.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3455 = x422 - x61;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3456{x80.tot + x80.mul * x3455, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3457{x3456.tot + x3456.mul * x969, x3456.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3458{x3457.tot + x3457.mul * x971, x3457.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3459{x3458.tot + x3458.mul * x429, x3458.mul * (*mix)};
@@ -6957,13 +6957,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3461{x3460.tot + x3460.mul * x433, x3460.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3462{x3461.tot + x3461.mul * x976, x3461.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3463 = x461 - x62;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3464{x3462.tot + x3462.mul * x3463, x3462.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3465{x3464.tot + x3464.mul * x1039, x3464.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3466{x3465.tot + x3465.mul * x1041, x3465.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3467{x3466.tot + x3466.mul * x468, x3466.mul * (*mix)};
@@ -6973,13 +6973,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3469{x3468.tot + x3468.mul * x472, x3468.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3470{x3469.tot + x3469.mul * x1046, x3469.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3471 = args[2][132 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3472 = args[2][133 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3473 = args[2][134 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3474 = args[2][135 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/u32.h":25:12)
   auto x3475 = x3472 * x5;
@@ -6999,11 +6999,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3482 = x579 - x3481;
   // loc("cirgen/circuit/rv32im/sha.cpp":197:5)
   MixState x3483{x3470.tot + x3470.mul * x3482, x3470.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3484 = args[2][139 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3485 = args[2][140 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3486 = args[2][141 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/u32.h":25:12)
   auto x3487 = x3485 * x5;
@@ -7055,11 +7055,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3510 = x588 - x3509;
   // loc("cirgen/circuit/rv32im/sha.cpp":200:5)
   MixState x3511{x3504.tot + x3504.mul * x3510, x3504.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3512 = args[2][146 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3513 = args[2][147 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/8/RamBody/PlonkBody/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3514 = args[2][149 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("./cirgen/components/u32.h":25:12)
   auto x3515 = x3513 * x5;
@@ -7077,7 +7077,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3521 = x2105 - x3520;
   // loc("cirgen/circuit/rv32im/sha.cpp":201:5)
   MixState x3522{x3511.tot + x3511.mul * x3521, x3511.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3523{x3522.tot + x3522.mul * x2659, x3522.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":203:5)
   auto x3524 = x2667 - x0;
@@ -7113,19 +7113,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3539{x3538.tot + x3538.mul * x455, x3538.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":28:5)
   MixState x3540{x3539.tot + x3539.mul * x497, x3539.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/12/Reg"("cirgen/circuit/rv32im/sha.cpp":215:53))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg"("cirgen/circuit/rv32im/sha.cpp":215:53))
   auto x3541 = args[2][115 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":215:5)
   auto x3542 = x579 - x3541;
   // loc("cirgen/circuit/rv32im/sha.cpp":215:5)
   MixState x3543{x3540.tot + x3540.mul * x3542, x3540.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/12/Reg"("cirgen/circuit/rv32im/sha.cpp":216:51))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg"("cirgen/circuit/rv32im/sha.cpp":216:51))
   auto x3544 = args[2][116 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":216:5)
   auto x3545 = x582 - x3544;
   // loc("cirgen/circuit/rv32im/sha.cpp":216:5)
   MixState x3546{x3543.tot + x3543.mul * x3545, x3543.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/12/Reg"("cirgen/circuit/rv32im/sha.cpp":217:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg"("cirgen/circuit/rv32im/sha.cpp":217:64))
   auto x3547 = args[2][119 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/page_fault.cpp":48:10)
   auto x3548 = x3547 * x63;
@@ -7141,23 +7141,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3553 = x588 - x3552;
   // loc("cirgen/circuit/rv32im/sha.cpp":218:5)
   MixState x3554{x3551.tot + x3551.mul * x3553, x3551.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/12/Reg"("cirgen/circuit/rv32im/sha.cpp":219:49))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Reg"("cirgen/circuit/rv32im/sha.cpp":219:49))
   auto x3555 = args[2][120 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":219:5)
   auto x3556 = x2105 - x3555;
   // loc("cirgen/circuit/rv32im/sha.cpp":219:5)
   MixState x3557{x3554.tot + x3554.mul * x3556, x3554.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/12/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/12(PageFaultCycle)/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3558 = args[2][117 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   auto x3559 = x2659 - x3558;
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3560{x3557.tot + x3557.mul * x3559, x3557.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":221:5)
   MixState x3561{x3560.tot + x3560.mul * x2667, x3560.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":211:21)
   MixState x3562{x3526.tot + x780 * x3561.tot * x3526.mul, x3526.mul * x3561.mul};
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Reg"("cirgen/circuit/rv32im/sha.cpp":230:42))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("cirgen/circuit/rv32im/sha.cpp":230:42))
   auto x3563 = args[2][138 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":230:5)
   auto x3564 = x579 - x3563;
@@ -7175,19 +7175,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3570 = x588 - x3486;
   // loc("cirgen/circuit/rv32im/sha.cpp":233:5)
   MixState x3571{x3569.tot + x3569.mul * x3570, x3569.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Reg"("cirgen/circuit/rv32im/sha.cpp":234:38))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("cirgen/circuit/rv32im/sha.cpp":234:38))
   auto x3572 = args[2][145 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":234:5)
   auto x3573 = x2105 - x3572;
   // loc("cirgen/circuit/rv32im/sha.cpp":234:5)
   MixState x3574{x3571.tot + x3571.mul * x3573, x3571.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3575 = args[2][150 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   auto x3576 = x2659 - x3575;
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3577{x3574.tot + x3574.mul * x3576, x3574.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Reg"("cirgen/circuit/rv32im/sha.cpp":236:38))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Reg"("cirgen/circuit/rv32im/sha.cpp":236:38))
   auto x3578 = args[2][151 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":236:5)
   auto x3579 = x2667 - x3578;
@@ -7195,13 +7195,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3580{x3577.tot + x3577.mul * x3579, x3577.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":239:24)
   auto x3581 = x582 + x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3582 = x422 - x3581;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3583{x3580.tot + x3580.mul * x3582, x3580.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3584{x3583.tot + x3583.mul * x969, x3583.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3585{x3584.tot + x3584.mul * x971, x3584.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3586{x3585.tot + x3585.mul * x429, x3585.mul * (*mix)};
@@ -7213,13 +7213,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3589{x3588.tot + x3588.mul * x976, x3588.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":240:24)
   auto x3590 = x3581 + x17;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3591 = x461 - x3590;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3592{x3589.tot + x3589.mul * x3591, x3589.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3593{x3592.tot + x3592.mul * x1039, x3592.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3594{x3593.tot + x3593.mul * x1041, x3593.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3595{x3594.tot + x3594.mul * x468, x3594.mul * (*mix)};
@@ -7231,7 +7231,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3598{x3597.tot + x3597.mul * x1046, x3597.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":229:39)
   MixState x3599{x3562.tot + x3400 * x3598.tot * x3562.mul, x3562.mul * x3598.mul};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3600{x3599.tot + x3599.mul * x2096, x3599.mul * (*mix)};
   // loc("cirgen/components/iszero.cpp":16:23)
   MixState x3601{x80.tot + x80.mul * x2105, x80.mul * (*mix)};
@@ -7277,7 +7277,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3621 = x2454 * x5;
   // loc("cirgen/circuit/rv32im/sha.cpp":109:13)
   auto x3622 = x3620 + x3621;
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3623 = args[2][88 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":109:21)
   auto x3624 = x3623 * x64;
@@ -7311,9 +7311,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3638 = x1 - x3637;
   // loc("cirgen/circuit/rv32im/sha.cpp":111:15)
   auto x3639 = x3638 * x69;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3640 = x998 - x3639;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3641{x3607.tot + x3607.mul * x3640, x3607.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":109:21)
   auto x3642 = x196 * x3;
@@ -7379,9 +7379,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3672 = x998 - x3671;
   // loc("cirgen/circuit/rv32im/sha.cpp":111:15)
   auto x3673 = x3672 * x69;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3674 = x1007 - x3673;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3675{x3641.tot + x3641.mul * x3674, x3641.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":136:26)
   auto x3676 = x416 * x5;
@@ -7669,25 +7669,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3817 = x2083 * x65;
   // loc("cirgen/circuit/rv32im/sha.cpp":109:13)
   auto x3818 = x3816 + x3817;
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3819 = args[2][218 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":109:21)
   auto x3820 = x3819 * x66;
   // loc("cirgen/circuit/rv32im/sha.cpp":109:13)
   auto x3821 = x3818 + x3820;
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3822 = args[2][219 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":109:21)
   auto x3823 = x3822 * x67;
   // loc("cirgen/circuit/rv32im/sha.cpp":109:13)
   auto x3824 = x3821 + x3823;
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3825 = args[2][220 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":109:21)
   auto x3826 = x3825 * x52;
   // loc("cirgen/circuit/rv32im/sha.cpp":109:13)
   auto x3827 = x3824 + x3826;
-  // loc("Top/Mux/5/Mux/9/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/9(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3828 = args[2][221 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":109:21)
   auto x3829 = x3828 * x68;
@@ -7707,7 +7707,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3836 = x3834 * x3835;
   // loc("cirgen/circuit/rv32im/sha.cpp":128:7)
   MixState x3837{x3795.tot + x3795.mul * x3836, x3795.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x3838{x3392.tot + x3393 * x3837.tot * x3392.mul, x3392.mul * x3837.mul};
   // loc("cirgen/circuit/rv32im/sha.cpp":264:29)
   auto x3839 = x771 + x777;
@@ -7721,11 +7721,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3843 = x0 - x771;
   // loc("cirgen/circuit/rv32im/sha.cpp":268:33)
   auto x3844 = x3843 - x777;
-  // loc("Top/Mux/5/Mux/10/ShaCycle/IsZero/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/IsZero/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3845 = args[2][143 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   auto x3846 = x2093 - x0;
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3847{x80.tot + x80.mul * x3846, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":272:7)
   MixState x3848{x3847.tot + x3847.mul * x3840, x3847.mul * (*mix)};
@@ -7755,7 +7755,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3860{x3854.tot + x2099 * x3859.tot * x3854.mul, x3854.mul * x3859.mul};
   // loc("cirgen/circuit/rv32im/sha.cpp":287:29)
   MixState x3861{x3860.tot + x3411 * x3450.tot * x3860.mul, x3860.mul * x3450.mul};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3862{x3861.tot + x3861.mul * x745, x3861.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x3863{x3862.tot + x3862.mul * x715, x3862.mul * (*mix)};
@@ -7771,7 +7771,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3868{x3867.tot + x3867.mul * x3570, x3867.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":294:3)
   MixState x3869{x3868.tot + x3868.mul * x3573, x3868.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3870{x3869.tot + x3869.mul * x3576, x3869.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":296:3)
   MixState x3871{x3870.tot + x3870.mul * x3579, x3870.mul * (*mix)};
@@ -7779,21 +7779,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3872{x3871.tot + x2087 * x3601.tot * x3871.mul, x3871.mul * x3601.mul};
   // loc("cirgen/components/iszero.cpp":18:19)
   MixState x3873{x3872.tot + x3603 * x3606.tot * x3872.mul, x3872.mul * x3606.mul};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x3874{x3873.tot + x3873.mul * x2096, x3873.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":311:24)
   auto x3875 = x585 + x23;
   // loc("cirgen/circuit/rv32im/sha.cpp":311:24)
   auto x3876 = x3875 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3877 = x422 - x3876;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3878{x80.tot + x80.mul * x3877, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3879{x3878.tot + x3878.mul * x969, x3878.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x3880 = x407 - x2667;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3881{x3879.tot + x3879.mul * x3880, x3879.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3882{x3881.tot + x3881.mul * x429, x3881.mul * (*mix)};
@@ -7805,13 +7805,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3885{x3884.tot + x3884.mul * x976, x3884.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":312:24)
   auto x3886 = x70 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3887 = x461 - x3886;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3888{x3885.tot + x3885.mul * x3887, x3885.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3889{x3888.tot + x3888.mul * x1039, x3888.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3890{x3889.tot + x3889.mul * x1041, x3889.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3891{x3890.tot + x3890.mul * x468, x3890.mul * (*mix)};
@@ -7827,13 +7827,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3896 = x588 + x23;
   // loc("cirgen/circuit/rv32im/sha.cpp":315:24)
   auto x3897 = x3896 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3898 = x422 - x3897;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3899{x80.tot + x80.mul * x3898, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3900{x3899.tot + x3899.mul * x969, x3899.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3901{x3900.tot + x3900.mul * x3880, x3900.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3902{x3901.tot + x3901.mul * x429, x3901.mul * (*mix)};
@@ -7845,13 +7845,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3905{x3904.tot + x3904.mul * x976, x3904.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":316:24)
   auto x3906 = x71 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3907 = x461 - x3906;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3908{x3905.tot + x3905.mul * x3907, x3905.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3909{x3908.tot + x3908.mul * x1039, x3908.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3910{x3909.tot + x3909.mul * x1041, x3909.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3911{x3910.tot + x3910.mul * x468, x3910.mul * (*mix)};
@@ -7867,9 +7867,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3916 = x3677 - x3637;
   // loc("cirgen/circuit/rv32im/sha.cpp":111:15)
   auto x3917 = x3916 * x69;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3918 = x998 - x3917;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3919{x3915.tot + x3915.mul * x3918, x3915.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":117:30)
   auto x3920 = x3679 + x998;
@@ -7877,501 +7877,501 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3921 = x3920 - x3671;
   // loc("cirgen/circuit/rv32im/sha.cpp":111:15)
   auto x3922 = x3921 * x69;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x3923 = x1007 - x3922;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x3924{x3919.tot + x3919.mul * x3923, x3919.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3925 = args[2][158 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3926 = args[2][159 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3927 = args[2][160 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3928 = args[2][161 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3929 = args[2][162 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3930 = args[2][163 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3931 = args[2][164 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3932 = args[2][165 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3933 = args[2][166 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3934 = args[2][167 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3935 = args[2][168 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3936 = args[2][169 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3937 = args[2][170 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3938 = args[2][171 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3939 = args[2][172 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3940 = args[2][173 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3941 = args[2][174 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3942 = args[2][175 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3943 = args[2][176 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3944 = args[2][177 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3945 = args[2][178 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3946 = args[2][179 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3947 = args[2][180 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3948 = args[2][181 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3949 = args[2][182 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3950 = args[2][183 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3951 = args[2][184 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3952 = args[2][185 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3953 = args[2][186 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3954 = args[2][187 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3955 = args[2][188 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3956 = args[2][189 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3957 = args[2][158 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3958 = args[2][159 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3959 = args[2][160 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3960 = args[2][161 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3961 = args[2][162 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3962 = args[2][163 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3963 = args[2][164 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3964 = args[2][165 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3965 = args[2][166 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3966 = args[2][167 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3967 = args[2][168 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3968 = args[2][169 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3969 = args[2][170 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3970 = args[2][171 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3971 = args[2][172 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3972 = args[2][173 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3973 = args[2][174 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3974 = args[2][175 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3975 = args[2][176 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3976 = args[2][177 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3977 = args[2][178 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3978 = args[2][179 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3979 = args[2][180 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3980 = args[2][181 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3981 = args[2][182 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3982 = args[2][183 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3983 = args[2][184 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3984 = args[2][185 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3985 = args[2][186 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3986 = args[2][187 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3987 = args[2][188 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3988 = args[2][189 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3989 = args[2][158 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3990 = args[2][159 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3991 = args[2][160 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3992 = args[2][161 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3993 = args[2][162 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3994 = args[2][163 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3995 = args[2][164 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3996 = args[2][165 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3997 = args[2][166 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3998 = args[2][167 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x3999 = args[2][168 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4000 = args[2][169 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4001 = args[2][170 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4002 = args[2][171 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4003 = args[2][172 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4004 = args[2][173 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4005 = args[2][174 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4006 = args[2][175 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4007 = args[2][176 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4008 = args[2][177 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4009 = args[2][178 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4010 = args[2][179 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4011 = args[2][180 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4012 = args[2][181 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4013 = args[2][182 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4014 = args[2][183 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4015 = args[2][184 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4016 = args[2][185 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4017 = args[2][186 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4018 = args[2][187 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4019 = args[2][188 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4020 = args[2][189 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4021 = args[2][158 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4022 = args[2][159 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4023 = args[2][160 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4024 = args[2][161 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4025 = args[2][162 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4026 = args[2][163 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4027 = args[2][164 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4028 = args[2][165 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4029 = args[2][166 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4030 = args[2][167 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4031 = args[2][168 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4032 = args[2][169 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4033 = args[2][170 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4034 = args[2][171 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4035 = args[2][172 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4036 = args[2][173 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4037 = args[2][174 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4038 = args[2][175 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4039 = args[2][176 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4040 = args[2][177 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4041 = args[2][178 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4042 = args[2][179 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4043 = args[2][180 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4044 = args[2][181 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4045 = args[2][182 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4046 = args[2][183 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4047 = args[2][184 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4048 = args[2][185 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4049 = args[2][186 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4050 = args[2][187 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4051 = args[2][188 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4052 = args[2][189 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4053 = args[2][190 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4054 = args[2][191 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4055 = args[2][192 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4056 = args[2][193 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4057 = args[2][194 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4058 = args[2][195 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4059 = args[2][196 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4060 = args[2][197 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4061 = args[2][208 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4062 = args[2][209 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4063 = args[2][210 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4064 = args[2][211 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4065 = args[2][212 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4066 = args[2][213 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4067 = args[2][214 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4068 = args[2][215 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4069 = args[2][216 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4070 = args[2][217 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4071 = args[2][218 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4072 = args[2][219 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4073 = args[2][220 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4074 = args[2][221 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4075 = args[2][190 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4076 = args[2][191 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4077 = args[2][192 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4078 = args[2][193 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4079 = args[2][194 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4080 = args[2][195 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4081 = args[2][196 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4082 = args[2][197 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4083 = args[2][198 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4084 = args[2][199 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4085 = args[2][200 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4086 = args[2][201 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4087 = args[2][202 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4088 = args[2][203 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4089 = args[2][204 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4090 = args[2][205 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4091 = args[2][206 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4092 = args[2][207 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4093 = args[2][208 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4094 = args[2][209 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4095 = args[2][210 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4096 = args[2][211 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4097 = args[2][212 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4098 = args[2][213 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4099 = args[2][214 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4100 = args[2][215 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4101 = args[2][216 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4102 = args[2][217 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4103 = args[2][218 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4104 = args[2][219 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4105 = args[2][220 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4106 = args[2][221 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4107 = args[2][190 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4108 = args[2][191 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4109 = args[2][192 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4110 = args[2][193 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4111 = args[2][194 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4112 = args[2][195 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4113 = args[2][196 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4114 = args[2][197 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4115 = args[2][198 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4116 = args[2][199 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4117 = args[2][200 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4118 = args[2][201 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4119 = args[2][202 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4120 = args[2][203 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4121 = args[2][204 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4122 = args[2][205 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4123 = args[2][206 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4124 = args[2][207 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4125 = args[2][208 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4126 = args[2][209 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4127 = args[2][210 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4128 = args[2][211 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4129 = args[2][212 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4130 = args[2][213 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4131 = args[2][214 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4132 = args[2][215 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4133 = args[2][216 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4134 = args[2][217 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4135 = args[2][218 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4136 = args[2][219 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4137 = args[2][220 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4138 = args[2][221 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4139 = args[2][190 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4140 = args[2][191 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4141 = args[2][192 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4142 = args[2][193 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4143 = args[2][194 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4144 = args[2][195 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4145 = args[2][196 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4146 = args[2][197 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4147 = args[2][198 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4148 = args[2][199 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4149 = args[2][200 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4150 = args[2][201 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4151 = args[2][202 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4152 = args[2][203 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4153 = args[2][204 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4154 = args[2][205 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4155 = args[2][206 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4156 = args[2][207 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4157 = args[2][208 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4158 = args[2][209 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4159 = args[2][210 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4160 = args[2][211 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4161 = args[2][212 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4162 = args[2][213 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4163 = args[2][214 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4164 = args[2][215 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4165 = args[2][216 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4166 = args[2][217 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4167 = args[2][218 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4168 = args[2][219 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4169 = args[2][220 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("Top/Mux/5/Mux/10/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/10(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x4170 = args[2][221 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":47:14)
   auto x4171 = x3938 + x3947;
@@ -11179,7 +11179,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x5572 = x5570 * x5571;
   // loc("cirgen/circuit/rv32im/sha.cpp":128:7)
   MixState x5573{x5565.tot + x5565.mul * x5572, x5565.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x5574{x3838.tot + x3435 * x5573.tot * x3838.mul, x3838.mul * x5573.mul};
   // loc("cirgen/circuit/rv32im/sha.cpp":344:7)
   auto x5575 = x1274 - x72;
@@ -11213,13 +11213,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x5589{x5588.tot + x2099 * x3409.tot * x5588.mul, x5588.mul * x3409.mul};
   // loc("cirgen/components/iszero.cpp":18:19)
   MixState x5590{x5589.tot + x3411 * x3414.tot * x5589.mul, x5589.mul * x3414.mul};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x5591{x80.tot + x80.mul * x2096, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":366:13)
   MixState x5592{x80.tot + x3855 * x5591.tot * x80.mul, x80.mul * x5591.mul};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   auto x5593 = x2096 - x0;
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x5594{x80.tot + x80.mul * x5593, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":367:14)
   MixState x5595{x5592.tot + x2093 * x5594.tot * x5592.mul, x5592.mul * x5594.mul};
@@ -11231,7 +11231,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x5598{x5597.tot + x5597.mul * x3566, x5597.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":372:3)
   MixState x5599{x5598.tot + x5598.mul * x3564, x5598.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x5600{x5599.tot + x5599.mul * x3576, x5599.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":374:3)
   MixState x5601{x5600.tot + x5600.mul * x3579, x5600.mul * (*mix)};
@@ -11239,7 +11239,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x5602{x5601.tot + x2087 * x3601.tot * x5601.mul, x5601.mul * x3601.mul};
   // loc("cirgen/components/iszero.cpp":18:19)
   MixState x5603{x5602.tot + x3603 * x3606.tot * x5602.mul, x5602.mul * x3606.mul};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x5604{x5603.tot + x5603.mul * x745, x5603.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x5605{x5604.tot + x5604.mul * x715, x5604.mul * (*mix)};
@@ -11247,13 +11247,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x5606{x5605.tot + x5605.mul * x718, x5605.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":384:24)
   auto x5607 = x73 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x5608 = x461 - x5607;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x5609{x80.tot + x80.mul * x5608, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x5610{x5609.tot + x5609.mul * x1039, x5609.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x5611{x5610.tot + x5610.mul * x1041, x5610.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x5612{x5611.tot + x5611.mul * x468, x5611.mul * (*mix)};
@@ -11265,261 +11265,261 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x5615{x5614.tot + x5614.mul * x1046, x5614.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":383:11)
   MixState x5616{x5606.tot + x3855 * x5615.tot * x5606.mul, x5606.mul * x5615.mul};
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5617 = args[2][79 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5618 = args[2][80 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5619 = args[2][81 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5620 = args[2][82 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5621 = args[2][83 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5622 = args[2][84 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5623 = args[2][85 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5624 = args[2][86 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5625 = args[2][87 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5626 = args[2][88 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5627 = args[2][12 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5628 = args[2][13 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5629 = args[2][14 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5630 = args[2][15 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5631 = args[2][16 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5632 = args[2][17 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5633 = args[2][18 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5634 = args[2][19 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5635 = args[2][20 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5636 = args[2][21 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5637 = args[2][22 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5638 = args[2][23 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5639 = args[2][24 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5640 = args[2][25 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5641 = args[2][26 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5642 = args[2][27 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5643 = args[2][28 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5644 = args[2][29 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5645 = args[2][30 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5646 = args[2][31 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5647 = args[2][32 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5648 = args[2][33 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5649 = args[2][79 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5650 = args[2][80 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5651 = args[2][81 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5652 = args[2][82 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5653 = args[2][83 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5654 = args[2][84 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5655 = args[2][85 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5656 = args[2][86 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5657 = args[2][87 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5658 = args[2][88 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5659 = args[2][12 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5660 = args[2][13 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5661 = args[2][14 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5662 = args[2][15 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5663 = args[2][16 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5664 = args[2][17 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5665 = args[2][18 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5666 = args[2][19 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5667 = args[2][20 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5668 = args[2][21 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5669 = args[2][22 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5670 = args[2][23 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5671 = args[2][24 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5672 = args[2][25 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5673 = args[2][26 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5674 = args[2][27 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5675 = args[2][28 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5676 = args[2][29 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5677 = args[2][30 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5678 = args[2][31 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5679 = args[2][32 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5680 = args[2][33 * steps + ((cycle - kInvRate * 7) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5681 = args[2][79 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5682 = args[2][80 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5683 = args[2][81 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5684 = args[2][82 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5685 = args[2][83 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5686 = args[2][84 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5687 = args[2][85 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5688 = args[2][86 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5689 = args[2][87 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5690 = args[2][88 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5691 = args[2][12 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5692 = args[2][13 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5693 = args[2][14 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5694 = args[2][15 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5695 = args[2][16 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5696 = args[2][17 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5697 = args[2][18 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5698 = args[2][19 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5699 = args[2][20 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5700 = args[2][21 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5701 = args[2][22 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5702 = args[2][23 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5703 = args[2][24 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5704 = args[2][25 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5705 = args[2][26 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5706 = args[2][27 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5707 = args[2][28 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5708 = args[2][29 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5709 = args[2][30 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5710 = args[2][31 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5711 = args[2][32 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5712 = args[2][33 * steps + ((cycle - kInvRate * 15) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5713 = args[2][79 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5714 = args[2][80 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5715 = args[2][81 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5716 = args[2][82 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5717 = args[2][83 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5718 = args[2][84 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5719 = args[2][85 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5720 = args[2][86 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5721 = args[2][87 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5722 = args[2][88 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5723 = args[2][12 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5724 = args[2][13 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5725 = args[2][14 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5726 = args[2][15 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5727 = args[2][16 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5728 = args[2][17 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5729 = args[2][18 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5730 = args[2][19 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5731 = args[2][20 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5732 = args[2][21 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5733 = args[2][22 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5734 = args[2][23 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5735 = args[2][24 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5736 = args[2][25 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5737 = args[2][26 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5738 = args[2][27 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5739 = args[2][28 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5740 = args[2][29 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5741 = args[2][30 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5742 = args[2][31 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5743 = args[2][32 * steps + ((cycle - kInvRate * 16) & mask)];
-  // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x5744 = args[2][33 * steps + ((cycle - kInvRate * 16) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":47:14)
   auto x5745 = x5699 + x5684;
@@ -12839,9 +12839,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6402 = x2709 - x6399;
   // loc("cirgen/circuit/rv32im/sha.cpp":460:5)
   MixState x6403{x6401.tot + x6401.mul * x6402, x6401.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6404{x80.tot + x80.mul * x3640, x80.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6405{x6404.tot + x6404.mul * x3674, x6404.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":391:12)
   MixState x6406{x6403.tot + x2093 * x6405.tot * x6403.mul, x6403.mul * x6405.mul};
@@ -12849,9 +12849,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6407 = x2701 - x3637;
   // loc("cirgen/circuit/rv32im/sha.cpp":111:15)
   auto x6408 = x6407 * x69;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x6409 = x998 - x6408;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6410{x80.tot + x80.mul * x6409, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":117:30)
   auto x6411 = x2709 + x998;
@@ -12859,75 +12859,75 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6412 = x6411 - x3671;
   // loc("cirgen/circuit/rv32im/sha.cpp":111:15)
   auto x6413 = x6412 * x69;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x6414 = x1007 - x6413;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6415{x6410.tot + x6410.mul * x6414, x6410.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":392:11)
   MixState x6416{x6406.tot + x3855 * x6415.tot * x6406.mul, x6406.mul * x6415.mul};
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6417 = args[2][158 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6418 = args[2][159 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6419 = args[2][160 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6420 = args[2][161 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6421 = args[2][162 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6422 = args[2][163 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6423 = args[2][164 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6424 = args[2][165 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6425 = args[2][166 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6426 = args[2][167 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6427 = args[2][168 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6428 = args[2][169 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6429 = args[2][170 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6430 = args[2][171 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6431 = args[2][172 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6432 = args[2][173 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6433 = args[2][174 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6434 = args[2][175 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6435 = args[2][176 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6436 = args[2][177 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6437 = args[2][178 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6438 = args[2][179 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6439 = args[2][180 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6440 = args[2][181 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6441 = args[2][182 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6442 = args[2][183 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6443 = args[2][184 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6444 = args[2][185 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6445 = args[2][186 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6446 = args[2][187 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6447 = args[2][188 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6448 = args[2][189 * steps + ((cycle - kInvRate * 68) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":74:25)
   auto x6449 = x6418 * x3;
@@ -13083,69 +13083,69 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6524 = x6522 * x6523;
   // loc("cirgen/circuit/rv32im/sha.cpp":128:7)
   MixState x6525{x6517.tot + x6517.mul * x6524, x6517.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6526 = args[2][190 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6527 = args[2][191 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6528 = args[2][192 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6529 = args[2][193 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6530 = args[2][194 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6531 = args[2][195 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6532 = args[2][196 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6533 = args[2][197 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6534 = args[2][198 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6535 = args[2][199 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6536 = args[2][200 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6537 = args[2][201 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6538 = args[2][202 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6539 = args[2][203 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6540 = args[2][204 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6541 = args[2][205 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6542 = args[2][206 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6543 = args[2][207 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6544 = args[2][208 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6545 = args[2][209 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6546 = args[2][210 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6547 = args[2][211 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6548 = args[2][212 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6549 = args[2][213 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6550 = args[2][214 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6551 = args[2][215 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6552 = args[2][216 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6553 = args[2][217 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6554 = args[2][218 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6555 = args[2][219 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6556 = args[2][220 * steps + ((cycle - kInvRate * 68) & mask)];
-  // loc("Top/Mux/5/Mux/11/ShaCycle/Bit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/11(ShaWrap)/ShaCycle/Bit/bit(Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6557 = args[2][221 * steps + ((cycle - kInvRate * 68) & mask)];
   // loc("cirgen/circuit/rv32im/sha.cpp":74:25)
   auto x6558 = x6527 * x3;
@@ -13307,13 +13307,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6636 = x0 - x2659;
   // loc("cirgen/circuit/rv32im/sha.cpp":406:26)
   auto x6637 = x579 + x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x6638 = x422 - x6637;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x6639{x80.tot + x80.mul * x6638, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x6640{x6639.tot + x6639.mul * x969, x6639.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x6641{x6640.tot + x6640.mul * x971, x6640.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6642{x6641.tot + x6641.mul * x429, x6641.mul * (*mix)};
@@ -13327,13 +13327,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6646 = x579 + x17;
   // loc("cirgen/circuit/rv32im/sha.cpp":407:26)
   auto x6647 = x6646 + x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x6648 = x461 - x6647;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x6649{x6645.tot + x6645.mul * x6648, x6645.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x6650{x6649.tot + x6649.mul * x1039, x6649.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x6651{x6650.tot + x6650.mul * x1041, x6650.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6652{x6651.tot + x6651.mul * x468, x6651.mul * (*mix)};
@@ -13501,13 +13501,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6733 = x458 - x3693;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6734{x6732.tot + x6732.mul * x6733, x6732.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x6735{x6734.tot + x6734.mul * x6638, x6734.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x6736{x6735.tot + x6735.mul * x969, x6735.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x6737 = x407 - x3;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x6738{x6736.tot + x6736.mul * x6737, x6736.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6739{x6738.tot + x6738.mul * x429, x6738.mul * (*mix)};
@@ -13533,13 +13533,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6749 = x497 - x3772;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6750{x6748.tot + x6748.mul * x6749, x6748.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x6751{x6750.tot + x6750.mul * x6648, x6750.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x6752{x6751.tot + x6751.mul * x1039, x6751.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x6753 = x446 - x3;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x6754{x6752.tot + x6752.mul * x6753, x6752.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6755{x6754.tot + x6754.mul * x468, x6754.mul * (*mix)};
@@ -13621,7 +13621,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x6793{x6780.tot + x6780.mul * x3857, x6780.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":444:27)
   MixState x6794{x6791.tot + x6792 * x6793.tot * x6791.mul, x6791.mul * x6793.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x6795{x5574.tot + x3438 * x6794.tot * x5574.mul, x5574.mul * x6794.mul};
   // loc("cirgen/circuit/rv32im/page_fault.cpp":83:20)
   auto x6796 = x413 - x74;
@@ -13677,9 +13677,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6821 = x6820 - x133;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x6822 = x6821 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x6823 = x2947 - x6822;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6824{x80.tot + x80.mul * x6823, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/page_fault.cpp":109:17)
   auto x6825 = x74 - x413;
@@ -13691,9 +13691,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6828 = x6827 - x146;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x6829 = x6828 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x6830 = x2957 - x6829;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6831{x6824.tot + x6824.mul * x6830, x6824.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/page_fault.cpp":111:5)
   MixState x6832{x6831.tot + x6831.mul * x3389, x6831.mul * (*mix)};
@@ -13707,9 +13707,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6836 = x6835 - x133;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x6837 = x6836 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x6838 = x2947 - x6837;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6839{x80.tot + x80.mul * x6838, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x6840 = x1 - x144;
@@ -13719,17 +13719,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6842 = x6841 - x146;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x6843 = x6842 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x6844 = x2957 - x6843;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6845{x6839.tot + x6839.mul * x6844, x6839.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/page_fault.cpp":117:5)
   MixState x6846{x6845.tot + x6845.mul * x3219, x6845.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/page_fault.cpp":114:12)
   MixState x6847{x6833.tot + x410 * x6846.tot * x6833.mul, x6833.mul * x6846.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x6848{x6795.tot + x3441 * x6847.tot * x6795.mul, x6795.mul * x6847.mul};
-  // loc("Top/Mux/5/Mux/8/Mux/2/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/8(ECallCycle)/Mux/2(ECallSoftware)/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x6849 = args[2][76 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("cirgen/circuit/rv32im/ecall.cpp":155:98)
   auto x6850 = x6849 + x0;
@@ -13841,7 +13841,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x6903{x6902.tot + x6902.mul * x588, x6902.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":28:5)
   MixState x6904{x6903.tot + x6903.mul * x1274, x6903.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6905{x6904.tot + x6904.mul * x1261, x6904.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x6906{x6905.tot + x6905.mul * x715, x6905.mul * (*mix)};
@@ -13927,7 +13927,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x6946{x6940.tot + x6941 * x6945.tot * x6940.mul, x6940.mul * x6945.mul};
   // loc("cirgen/circuit/rv32im/ecall.cpp":229:18)
   MixState x6947{x6946.tot + x1 * x1296.tot * x6946.mul, x6946.mul * x1296.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x6948{x6848.tot + x3444 * x6947.tot * x6848.mul, x6848.mul * x6947.mul};
   // loc("cirgen/circuit/rv32im/body.cpp":95:16)
   auto x6949 = x422 - x3541;
@@ -13941,11 +13941,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6953 = x422 - x3471;
   // loc("cirgen/circuit/rv32im/body.cpp":104:5)
   MixState x6954{x6952.tot + x6952.mul * x6953, x6952.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   auto x6955 = args[1][72];
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   auto x6956 = x6955 - x3471;
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x6957{x6954.tot + x6954.mul * x6956, x6954.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":98:17)
   MixState x6958{x6951.tot + x768 * x6957.tot * x6951.mul, x6951.mul * x6957.mul};
@@ -13953,13 +13953,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6959 = x422 - x3;
   // loc("cirgen/circuit/rv32im/body.cpp":114:5)
   MixState x6960{x80.tot + x80.mul * x6959, x80.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   auto x6961 = x6955 - x0;
-  // loc("./cirgen/components/bits.h":20:23)
+  // loc("./cirgen/components/bits.h":27:23)
   MixState x6962{x6960.tot + x6960.mul * x6961, x6960.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":113:21)
   MixState x6963{x6958.tot + x780 * x6962.tot * x6958.mul, x6958.mul * x6962.mul};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x6964{x6963.tot + x6963.mul * x745, x6963.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":22:3)
   MixState x6965{x6964.tot + x6964.mul * x715, x6964.mul * (*mix)};
@@ -13967,49 +13967,49 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x6966{x6965.tot + x6965.mul * x718, x6965.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":123:3)
   MixState x6967{x6966.tot + x6966.mul * x3219, x6966.mul * (*mix)};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x6968{x6948.tot + x419 * x6967.tot * x6948.mul, x6948.mul * x6967.mul};
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x6969{x963.tot + x964 * x6968.tot * x963.mul, x963.mul * x6968.mul};
-  // loc("Top/Code/OneHot/hot[6](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[6](Reg)"("./cirgen/components/mux.h":41:25))
   auto x6970 = args[0][7 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x6971{x6969.tot + x6970 * x80.tot * x6969.mul, x6969.mul * x80.mul};
-  // loc("Top/Code/OneHot/hot[7](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[7](Reg)"("./cirgen/components/mux.h":41:25))
   auto x6972 = args[0][8 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/mux.h":39:25)
+  // loc("./cirgen/components/mux.h":41:25)
   MixState x6973{x6971.tot + x6972 * x80.tot * x6971.mul, x6971.mul * x80.mul};
-  // loc("Top/Code/OneHot/hot[0](Reg)"("cirgen/circuit/rv32im/top.cpp":66:27))
+  // loc("Top/Code/OneHot/hot[0](Reg)"("cirgen/circuit/rv32im/top.cpp":78:27))
   auto x6974 = args[0][1 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/circuit/rv32im/top.cpp":66:16)
+  // loc("cirgen/circuit/rv32im/top.cpp":78:16)
   auto x6975 = x6974 + x81;
-  // loc("Top/Code/OneHot/hot[2](Reg)"("cirgen/circuit/rv32im/top.cpp":66:27))
+  // loc("Top/Code/OneHot/hot[2](Reg)"("cirgen/circuit/rv32im/top.cpp":78:27))
   auto x6976 = args[0][3 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/circuit/rv32im/top.cpp":66:16)
+  // loc("cirgen/circuit/rv32im/top.cpp":78:16)
   auto x6977 = x6975 + x6976;
-  // loc("cirgen/circuit/rv32im/top.cpp":66:16)
+  // loc("cirgen/circuit/rv32im/top.cpp":78:16)
   auto x6978 = x6977 + x395;
-  // loc("cirgen/circuit/rv32im/top.cpp":66:16)
+  // loc("cirgen/circuit/rv32im/top.cpp":78:16)
   auto x6979 = x6978 + x514;
-  // loc("cirgen/circuit/rv32im/top.cpp":66:16)
+  // loc("cirgen/circuit/rv32im/top.cpp":78:16)
   auto x6980 = x6979 + x964;
-  // loc("cirgen/circuit/rv32im/top.cpp":66:16)
+  // loc("cirgen/circuit/rv32im/top.cpp":78:16)
   auto x6981 = x6980 + x6970;
-  // loc("cirgen/circuit/rv32im/top.cpp":66:16)
+  // loc("cirgen/circuit/rv32im/top.cpp":78:16)
   auto x6982 = x6981 + x6972;
-  // loc("cirgen/circuit/rv32im/top.cpp":75:5)
+  // loc("cirgen/circuit/rv32im/top.cpp":87:5)
   auto x6983 = args[2][2 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/circuit/rv32im/top.cpp":75:5)
+  // loc("cirgen/circuit/rv32im/top.cpp":87:5)
   auto x6984 = x6983 - x419;
-  // loc("cirgen/circuit/rv32im/top.cpp":75:5)
+  // loc("cirgen/circuit/rv32im/top.cpp":87:5)
   MixState x6985{x80.tot + x80.mul * x6984, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/top.cpp":72:12)
+  // loc("cirgen/circuit/rv32im/top.cpp":84:12)
   MixState x6986{x6973.tot + x964 * x6985.tot * x6973.mul, x6973.mul * x6985.mul};
-  // loc("cirgen/circuit/rv32im/top.cpp":77:23)
+  // loc("cirgen/circuit/rv32im/top.cpp":89:23)
   auto x6987 = x6982 - x964;
-  // loc("cirgen/circuit/rv32im/top.cpp":77:27)
+  // loc("cirgen/circuit/rv32im/top.cpp":89:27)
   MixState x6988{x80.tot + x80.mul * x6983, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/top.cpp":77:23)
+  // loc("cirgen/circuit/rv32im/top.cpp":89:23)
   MixState x6989{x6986.tot + x6987 * x6988.tot * x6986.mul, x6986.mul * x6988.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x6990{x6989.tot + x6976 * x80.tot * x6989.mul, x6989.mul * x80.mul};
@@ -14103,43 +14103,43 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7034 = args[2][95 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":28:5)
   MixState x7035{x7033.tot + x7033.mul * x7034, x7033.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":116:3)
+  // loc("cirgen/components/ram.cpp":115:3)
   auto x7036 = args[2][96 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":116:3)
+  // loc("cirgen/components/ram.cpp":115:3)
   MixState x7037{x7035.tot + x7035.mul * x7036, x7035.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":117:3)
+  // loc("cirgen/components/ram.cpp":116:3)
   auto x7038 = args[2][97 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":117:3)
+  // loc("cirgen/components/ram.cpp":116:3)
   MixState x7039{x7037.tot + x7037.mul * x7038, x7037.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7040 = args[2][69 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7041{x7039.tot + x7039.mul * x7040, x7039.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7042{x7021.tot + x6976 * x7041.tot * x7021.mul, x7021.mul * x7041.mul};
-  // loc("Top/Mux/3/RamHeader/RamPlonkElement/Reg"("cirgen/components/ram.cpp":55:40))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/RamPlonkElement/Reg"("cirgen/components/ram.cpp":55:40))
   auto x7043 = args[2][89 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/RamPlonkElement/Reg"("cirgen/components/ram.cpp":56:42))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/RamPlonkElement/Reg"("cirgen/components/ram.cpp":56:42))
   auto x7044 = args[2][90 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/RamPlonkElement/Reg"("cirgen/components/ram.cpp":57:42))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/RamPlonkElement/Reg"("cirgen/components/ram.cpp":57:42))
   auto x7045 = args[2][91 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7046 = args[2][92 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7047 = args[2][93 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7048 = args[2][94 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/RamPlonkElement/U32Reg/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7049 = args[2][95 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/RamPlonkVerifier/Reg"("cirgen/components/ram.cpp":60:56))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/RamPlonkVerifier/Reg"("cirgen/components/ram.cpp":60:56))
   auto x7050 = args[2][97 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7051 = x1 - x2102;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7052{x80.tot + x80.mul * x7051, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7053 = x1274 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7054 = x7053 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7055 = x7054 - x107;
@@ -14153,31 +14153,31 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7059 = x7058 - x120;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7060 = x7059 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7061 = x706 - x7060;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7062{x7052.tot + x7052.mul * x7061, x7052.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7063 = x6955 * x7050;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7064{x7062.tot + x7062.mul * x7063, x7062.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7065{x80.tot + x2757 * x7064.tot * x80.mul, x80.mul * x7064.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7066 = x0 - x2757;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7067 = x7043 - x1274;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7068{x80.tot + x80.mul * x7067, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7069 = x2099 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7070 = x7069 + x2102;
-  // loc("cirgen/components/ram.cpp":100:43)
+  // loc("cirgen/components/ram.cpp":99:43)
   auto x7071 = x7044 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7072 = x7070 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7073 = x7072 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7074 = x7073 - x107;
@@ -14191,63 +14191,63 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7078 = x7077 - x120;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7079 = x7078 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7080 = x706 - x7079;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7081{x7068.tot + x7068.mul * x7080, x7068.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7082 = x3 - x2102;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7083 = x7046 - x2105;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7084{x80.tot + x80.mul * x7083, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7085 = x7047 - x2087;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7086{x7084.tot + x7084.mul * x7085, x7084.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7087 = x7048 - x2090;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7088{x7086.tot + x7086.mul * x7087, x7086.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7089 = x7049 - x2093;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7090{x7088.tot + x7088.mul * x7089, x7088.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7091{x7081.tot + x7082 * x7090.tot * x7081.mul, x7081.mul * x7090.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7092{x7065.tot + x7066 * x7091.tot * x7065.mul, x7065.mul * x7091.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7093 = x0 - x2102;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7094 = x7093 * x7051;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7095 = x7051 * x7082;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7096 = x7093 * x7082;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7097{x80.tot + x80.mul * x2759, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7098{x7092.tot + x7096 * x7097.tot * x7092.mul, x7092.mul * x7097.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7099 = x2759 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7100{x80.tot + x80.mul * x7099, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7101{x7098.tot + x7094 * x7100.tot * x7098.mul, x7098.mul * x7100.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7102 = x2759 - x7050;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7103{x80.tot + x80.mul * x7102, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7104{x7101.tot + x7095 * x7103.tot * x7101.mul, x7101.mul * x7103.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7105 = x1 - x2667;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7106{x80.tot + x80.mul * x7105, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7107 = x2096 - x1274;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7108 = x7107 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7109 = x7108 - x131;
@@ -14261,29 +14261,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7113 = x7112 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7114 = x7113 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7115 = x709 - x7114;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7116{x7106.tot + x7106.mul * x7115, x7106.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7117 = x6955 * x2759;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7118{x7116.tot + x7116.mul * x7117, x7116.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7119{x7104.tot + x2767 * x7118.tot * x7104.mul, x7104.mul * x7118.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7120 = x0 - x2767;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7121 = x1274 - x2096;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7122{x80.tot + x80.mul * x7121, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7123 = x2659 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7124 = x7123 + x2667;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7125 = x7124 - x7069;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7126 = x7125 + x2102;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7127 = x7126 - x131;
@@ -14297,63 +14297,63 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7131 = x7130 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7132 = x7131 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7133 = x709 - x7132;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7134{x7122.tot + x7122.mul * x7133, x7122.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7135 = x3 - x2667;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7136 = x2105 - x2675;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7137{x80.tot + x80.mul * x7136, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7138 = x2087 - x2683;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7139{x7137.tot + x7137.mul * x7138, x7137.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7140 = x2090 - x2691;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7141{x7139.tot + x7139.mul * x7140, x7139.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7142 = x2093 - x2699;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7143{x7141.tot + x7141.mul * x7142, x7141.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7144{x7134.tot + x7135 * x7143.tot * x7134.mul, x7134.mul * x7143.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7145{x7119.tot + x7120 * x7144.tot * x7119.mul, x7119.mul * x7144.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7146 = x0 - x2667;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7147 = x7146 * x7105;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7148 = x7105 * x7135;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7149 = x7146 * x7135;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7150{x80.tot + x80.mul * x2775, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7151{x7145.tot + x7149 * x7150.tot * x7145.mul, x7145.mul * x7150.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7152 = x2775 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7153{x80.tot + x80.mul * x7152, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7154{x7151.tot + x7147 * x7153.tot * x7151.mul, x7151.mul * x7153.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7155 = x2775 - x2759;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7156{x80.tot + x80.mul * x7155, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7157{x7154.tot + x7148 * x7156.tot * x7154.mul, x7154.mul * x7156.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7158 = x1 - x2717;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7159{x80.tot + x80.mul * x7158, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7160 = x2701 - x2096;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7161 = x7160 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7162 = x7161 - x146;
@@ -14367,29 +14367,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7166 = x7165 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7167 = x7166 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7168 = x2947 - x7167;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7169{x7159.tot + x7159.mul * x7168, x7159.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7170 = x6955 * x2775;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7171{x7169.tot + x7169.mul * x7170, x7169.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7172{x7157.tot + x2783 * x7171.tot * x7157.mul, x7157.mul * x7171.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7173 = x0 - x2783;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7174 = x2096 - x2701;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7175{x80.tot + x80.mul * x7174, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7176 = x2709 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7177 = x7176 + x2717;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7178 = x7177 - x7123;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7179 = x7178 + x2667;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7180 = x7179 - x146;
@@ -14403,63 +14403,63 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7184 = x7183 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7185 = x7184 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7186 = x2947 - x7185;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7187{x7175.tot + x7175.mul * x7186, x7175.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7188 = x3 - x2717;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7189 = x2675 - x2725;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7190{x80.tot + x80.mul * x7189, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7191 = x2683 - x2733;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7192{x7190.tot + x7190.mul * x7191, x7190.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7193 = x2691 - x2741;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7194{x7192.tot + x7192.mul * x7193, x7192.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7195 = x2699 - x2749;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7196{x7194.tot + x7194.mul * x7195, x7194.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7197{x7187.tot + x7188 * x7196.tot * x7187.mul, x7187.mul * x7196.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7198{x7172.tot + x7173 * x7197.tot * x7172.mul, x7172.mul * x7197.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7199 = x0 - x2717;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7200 = x7199 * x7158;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7201 = x7158 * x7188;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7202 = x7199 * x7188;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7203{x80.tot + x80.mul * x2791, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7204{x7198.tot + x7202 * x7203.tot * x7198.mul, x7198.mul * x7203.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7205 = x2791 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7206{x80.tot + x80.mul * x7205, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7207{x7204.tot + x7200 * x7206.tot * x7204.mul, x7204.mul * x7206.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7208 = x2791 - x2775;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7209{x80.tot + x80.mul * x7208, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7210{x7207.tot + x7201 * x7209.tot * x7207.mul, x7207.mul * x7209.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7211 = x1 - x7026;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7212{x80.tot + x80.mul * x7211, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7213 = x7022 - x2701;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7214 = x7213 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7215 = x7214 - x85;
@@ -14473,29 +14473,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7219 = x7218 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7220 = x7219 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7221 = x7040 - x7220;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7222{x7212.tot + x7212.mul * x7221, x7212.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7223 = x6955 * x2791;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7224{x7222.tot + x7222.mul * x7223, x7222.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7225{x7210.tot + x7036 * x7224.tot * x7210.mul, x7210.mul * x7224.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7226 = x0 - x7036;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7227 = x2701 - x7022;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7228{x80.tot + x80.mul * x7227, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7229 = x7024 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7230 = x7229 + x7026;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7231 = x7230 - x7176;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7232 = x7231 + x2717;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7233 = x7232 - x85;
@@ -14509,55 +14509,55 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7237 = x7236 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7238 = x7237 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7239 = x7040 - x7238;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7240{x7228.tot + x7228.mul * x7239, x7228.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7241 = x3 - x7026;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7242 = x2725 - x7028;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7243{x80.tot + x80.mul * x7242, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7244 = x2733 - x7030;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7245{x7243.tot + x7243.mul * x7244, x7243.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7246 = x2741 - x7032;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7247{x7245.tot + x7245.mul * x7246, x7245.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7248 = x2749 - x7034;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7249{x7247.tot + x7247.mul * x7248, x7247.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7250{x7240.tot + x7241 * x7249.tot * x7240.mul, x7240.mul * x7249.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7251{x7225.tot + x7226 * x7250.tot * x7225.mul, x7225.mul * x7250.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7252 = x0 - x7026;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7253 = x7252 * x7211;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7254 = x7211 * x7241;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7255 = x7252 * x7241;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7256{x80.tot + x80.mul * x7038, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7257{x7251.tot + x7255 * x7256.tot * x7251.mul, x7251.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7258 = x7038 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7259{x80.tot + x80.mul * x7258, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7260{x7257.tot + x7253 * x7259.tot * x7257.mul, x7257.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7261 = x7038 - x2791;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7262{x80.tot + x80.mul * x7261, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7263{x7260.tot + x7254 * x7262.tot * x7260.mul, x7260.mul * x7262.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7264{x7042.tot + x395 * x7263.tot * x7042.mul, x7042.mul * x7263.mul};
@@ -14573,13 +14573,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7269 = x7268 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7270 = x7269 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7271 = x2947 - x7270;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7272{x7052.tot + x7052.mul * x7271, x7052.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7273{x7272.tot + x7272.mul * x7063, x7272.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7274{x80.tot + x2757 * x7273.tot * x80.mul, x80.mul * x7273.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7275 = x7073 - x131;
@@ -14593,19 +14593,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7279 = x7278 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7280 = x7279 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7281 = x2947 - x7280;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7282{x7068.tot + x7068.mul * x7281, x7068.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7283{x7282.tot + x7082 * x7090.tot * x7282.mul, x7282.mul * x7090.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7284{x7274.tot + x7066 * x7283.tot * x7274.mul, x7274.mul * x7283.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7285{x7284.tot + x7096 * x7097.tot * x7284.mul, x7284.mul * x7097.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7286{x7285.tot + x7094 * x7100.tot * x7285.mul, x7285.mul * x7100.mul};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7287{x7286.tot + x7095 * x7103.tot * x7286.mul, x7286.mul * x7103.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7288 = x7108 - x146;
@@ -14619,13 +14619,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7292 = x7291 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7293 = x7292 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7294 = x2957 - x7293;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7295{x7106.tot + x7106.mul * x7294, x7106.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7296{x7295.tot + x7295.mul * x7117, x7295.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7297{x7287.tot + x2767 * x7296.tot * x7287.mul, x7287.mul * x7296.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7298 = x7126 - x146;
@@ -14639,19 +14639,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7302 = x7301 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7303 = x7302 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7304 = x2957 - x7303;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7305{x7122.tot + x7122.mul * x7304, x7122.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7306{x7305.tot + x7135 * x7143.tot * x7305.mul, x7305.mul * x7143.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7307{x7297.tot + x7120 * x7306.tot * x7297.mul, x7297.mul * x7306.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7308{x7307.tot + x7149 * x7150.tot * x7307.mul, x7307.mul * x7150.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7309{x7308.tot + x7147 * x7153.tot * x7308.mul, x7308.mul * x7153.mul};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7310{x7309.tot + x7148 * x7156.tot * x7309.mul, x7309.mul * x7156.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7311 = x7161 - x170;
@@ -14665,13 +14665,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7315 = x7314 - x183;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7316 = x7315 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7317 = x2985 - x7316;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7318{x7159.tot + x7159.mul * x7317, x7159.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7319{x7318.tot + x7318.mul * x7170, x7318.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7320{x7310.tot + x2783 * x7319.tot * x7310.mul, x7310.mul * x7319.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7321 = x7179 - x170;
@@ -14685,39 +14685,39 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7325 = x7324 - x183;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7326 = x7325 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7327 = x2985 - x7326;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7328{x7175.tot + x7175.mul * x7327, x7175.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7329{x7328.tot + x7188 * x7196.tot * x7328.mul, x7328.mul * x7196.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7330{x7320.tot + x7173 * x7329.tot * x7320.mul, x7320.mul * x7329.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7331{x7330.tot + x7202 * x7203.tot * x7330.mul, x7330.mul * x7203.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7332{x7331.tot + x7200 * x7206.tot * x7331.mul, x7331.mul * x7206.mul};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7333{x7332.tot + x7201 * x7209.tot * x7332.mul, x7332.mul * x7209.mul};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7334{x7333.tot + x7036 * x7224.tot * x7333.mul, x7333.mul * x7224.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7335{x7334.tot + x7226 * x7250.tot * x7334.mul, x7334.mul * x7250.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7336{x7335.tot + x7255 * x7256.tot * x7335.mul, x7335.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7337{x7336.tot + x7253 * x7259.tot * x7336.mul, x7336.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7338{x7337.tot + x7254 * x7262.tot * x7337.mul, x7337.mul * x7262.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7339{x7264.tot + x514 * x7338.tot * x7264.mul, x7264.mul * x7338.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7340 = x1 - x2105;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7341{x80.tot + x80.mul * x7340, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7342 = x2099 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7343 = x7342 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7344 = x7343 - x131;
@@ -14731,27 +14731,27 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7348 = x7347 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7349 = x7348 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7350 = x2947 - x7349;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7351{x7341.tot + x7341.mul * x7350, x7341.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7352{x7351.tot + x7351.mul * x7063, x7351.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7353{x80.tot + x2759 * x7352.tot * x80.mul, x80.mul * x7352.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7354 = x0 - x2759;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7355 = x7043 - x2099;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7356{x80.tot + x80.mul * x7355, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7357 = x2102 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7358 = x7357 + x2105;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7359 = x7358 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7360 = x7359 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7361 = x7360 - x131;
@@ -14765,63 +14765,63 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7365 = x7364 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7366 = x7365 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7367 = x2947 - x7366;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7368{x7356.tot + x7356.mul * x7367, x7356.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7369 = x3 - x2105;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7370 = x7046 - x2087;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7371{x80.tot + x80.mul * x7370, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7372 = x7047 - x2090;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7373{x7371.tot + x7371.mul * x7372, x7371.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7374 = x7048 - x2093;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7375{x7373.tot + x7373.mul * x7374, x7373.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7376 = x7049 - x2096;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7377{x7375.tot + x7375.mul * x7376, x7375.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7378{x7368.tot + x7369 * x7377.tot * x7368.mul, x7368.mul * x7377.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7379{x7353.tot + x7354 * x7378.tot * x7353.mul, x7353.mul * x7378.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7380 = x0 - x2105;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7381 = x7380 * x7340;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7382 = x7340 * x7369;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7383 = x7380 * x7369;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7384{x80.tot + x80.mul * x2767, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7385{x7379.tot + x7383 * x7384.tot * x7379.mul, x7379.mul * x7384.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7386 = x2767 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7387{x80.tot + x80.mul * x7386, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7388{x7385.tot + x7381 * x7387.tot * x7385.mul, x7385.mul * x7387.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7389 = x2767 - x7050;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7390{x80.tot + x80.mul * x7389, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7391{x7388.tot + x7382 * x7390.tot * x7388.mul, x7388.mul * x7390.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7392 = x1 - x2675;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7393{x80.tot + x80.mul * x7392, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7394 = x2659 - x2099;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7395 = x7394 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7396 = x7395 - x146;
@@ -14835,29 +14835,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7400 = x7399 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7401 = x7400 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7402 = x2957 - x7401;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7403{x7393.tot + x7393.mul * x7402, x7393.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7404 = x6955 * x2767;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7405{x7403.tot + x7403.mul * x7404, x7403.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7406{x7391.tot + x2775 * x7405.tot * x7391.mul, x7391.mul * x7405.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7407 = x0 - x2775;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7408 = x2099 - x2659;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7409{x80.tot + x80.mul * x7408, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7410 = x2667 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7411 = x7410 + x2675;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7412 = x7411 - x7357;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7413 = x7412 + x2105;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7414 = x7413 - x146;
@@ -14871,55 +14871,55 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7418 = x7417 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7419 = x7418 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7420 = x2957 - x7419;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7421{x7409.tot + x7409.mul * x7420, x7409.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7422 = x3 - x2675;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7423{x80.tot + x80.mul * x7138, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7424{x7423.tot + x7423.mul * x7140, x7423.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7425{x7424.tot + x7424.mul * x7142, x7424.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7426{x7425.tot + x7425.mul * x7174, x7425.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7427{x7421.tot + x7422 * x7426.tot * x7421.mul, x7421.mul * x7426.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7428{x7406.tot + x7407 * x7427.tot * x7406.mul, x7406.mul * x7427.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7429 = x0 - x2675;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7430 = x7429 * x7392;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7431 = x7392 * x7422;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7432 = x7429 * x7422;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7433{x80.tot + x80.mul * x2783, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7434{x7428.tot + x7432 * x7433.tot * x7428.mul, x7428.mul * x7433.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7435 = x2783 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7436{x80.tot + x80.mul * x7435, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7437{x7434.tot + x7430 * x7436.tot * x7434.mul, x7434.mul * x7436.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7438 = x2783 - x2767;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7439{x80.tot + x80.mul * x7438, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7440{x7437.tot + x7431 * x7439.tot * x7437.mul, x7437.mul * x7439.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7441 = x1 - x2725;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7442{x80.tot + x80.mul * x7441, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7443 = x2709 - x2659;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7444 = x7443 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7445 = x7444 - x170;
@@ -14933,29 +14933,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7449 = x7448 - x183;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7450 = x7449 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7451 = x2985 - x7450;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7452{x7442.tot + x7442.mul * x7451, x7442.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7453 = x6955 * x2783;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7454{x7452.tot + x7452.mul * x7453, x7452.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7455{x7440.tot + x2791 * x7454.tot * x7440.mul, x7440.mul * x7454.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7456 = x0 - x2791;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7457 = x2659 - x2709;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7458{x80.tot + x80.mul * x7457, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7459 = x2717 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7460 = x7459 + x2725;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7461 = x7460 - x7410;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7462 = x7461 + x2675;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7463 = x7462 - x170;
@@ -14969,53 +14969,53 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7467 = x7466 - x183;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7468 = x7467 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7469 = x2985 - x7468;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7470{x7458.tot + x7458.mul * x7469, x7458.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7471 = x3 - x2725;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7472{x80.tot + x80.mul * x7191, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7473{x7472.tot + x7472.mul * x7193, x7472.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7474{x7473.tot + x7473.mul * x7195, x7473.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7475 = x2701 - x2757;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7476{x7474.tot + x7474.mul * x7475, x7474.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7477{x7470.tot + x7471 * x7476.tot * x7470.mul, x7470.mul * x7476.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7478{x7455.tot + x7456 * x7477.tot * x7455.mul, x7455.mul * x7477.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7479 = x0 - x2725;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7480 = x7479 * x7441;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7481 = x7441 * x7471;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7482 = x7479 * x7471;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7483{x80.tot + x80.mul * x2799, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7484{x7478.tot + x7482 * x7483.tot * x7478.mul, x7478.mul * x7483.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7485 = x2799 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7486{x80.tot + x80.mul * x7485, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7487{x7484.tot + x7480 * x7486.tot * x7484.mul, x7484.mul * x7486.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7488 = x2799 - x2783;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7489{x80.tot + x80.mul * x7488, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7490{x7487.tot + x7481 * x7489.tot * x7487.mul, x7487.mul * x7489.mul};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7491 = x7022 - x2709;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7492 = x7491 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7493 = x7492 - x85;
@@ -15029,23 +15029,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7497 = x7496 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7498 = x7497 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7499 = x7040 - x7498;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7500{x7212.tot + x7212.mul * x7499, x7212.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7501 = x6955 * x2799;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7502{x7500.tot + x7500.mul * x7501, x7500.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7503{x7490.tot + x7036 * x7502.tot * x7490.mul, x7490.mul * x7502.mul};
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7504 = x2709 - x7022;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7505{x80.tot + x80.mul * x7504, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7506 = x7230 - x7459;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7507 = x7506 + x2725;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7508 = x7507 - x85;
@@ -15059,39 +15059,39 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7512 = x7511 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7513 = x7512 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7514 = x7040 - x7513;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7515{x7505.tot + x7505.mul * x7514, x7505.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7516 = x2733 - x7028;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7517{x80.tot + x80.mul * x7516, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7518 = x2741 - x7030;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7519{x7517.tot + x7517.mul * x7518, x7517.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7520 = x2749 - x7032;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7521{x7519.tot + x7519.mul * x7520, x7519.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7522 = x2757 - x7034;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7523{x7521.tot + x7521.mul * x7522, x7521.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7524{x7515.tot + x7241 * x7523.tot * x7515.mul, x7515.mul * x7523.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7525{x7503.tot + x7226 * x7524.tot * x7503.mul, x7503.mul * x7524.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7526{x7525.tot + x7255 * x7256.tot * x7525.mul, x7525.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7527{x7526.tot + x7253 * x7259.tot * x7526.mul, x7526.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7528 = x7038 - x2799;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7529{x80.tot + x80.mul * x7528, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7530{x7527.tot + x7254 * x7529.tot * x7527.mul, x7527.mul * x7529.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7531{x80.tot + x965 * x7530.tot * x80.mul, x80.mul * x7530.mul};
@@ -15099,9 +15099,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7532{x7531.tot + x1489 * x7530.tot * x7531.mul, x7531.mul * x7530.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7533{x7532.tot + x1696 * x7530.tot * x7532.mul, x7532.mul * x7530.mul};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7534 = x2659 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7535 = x7534 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7536 = x7535 - x131;
@@ -15115,23 +15115,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7540 = x7539 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7541 = x7540 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7542 = x2947 - x7541;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7543{x7393.tot + x7393.mul * x7542, x7393.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7544{x7543.tot + x7543.mul * x7063, x7543.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7545{x80.tot + x1026 * x7544.tot * x80.mul, x80.mul * x7544.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7546 = x0 - x1026;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7547 = x7043 - x2659;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7548{x80.tot + x80.mul * x7547, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7549 = x7411 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7550 = x7549 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7551 = x7550 - x131;
@@ -15145,45 +15145,45 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7555 = x7554 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7556 = x7555 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7557 = x2947 - x7556;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7558{x7548.tot + x7548.mul * x7557, x7548.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7559 = x7046 - x2683;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7560{x80.tot + x80.mul * x7559, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7561 = x7047 - x2691;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7562{x7560.tot + x7560.mul * x7561, x7560.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7563 = x7048 - x2699;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7564{x7562.tot + x7562.mul * x7563, x7562.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7565 = x7049 - x2701;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7566{x7564.tot + x7564.mul * x7565, x7564.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7567{x7558.tot + x7422 * x7566.tot * x7558.mul, x7558.mul * x7566.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7568{x7545.tot + x7546 * x7567.tot * x7545.mul, x7545.mul * x7567.mul};
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7569{x80.tot + x80.mul * x1028, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7570{x7568.tot + x7432 * x7569.tot * x7568.mul, x7568.mul * x7569.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7571 = x1028 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7572{x80.tot + x80.mul * x7571, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7573{x7570.tot + x7430 * x7572.tot * x7570.mul, x7570.mul * x7572.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7574 = x1028 - x7050;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7575{x80.tot + x80.mul * x7574, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7576{x7573.tot + x7431 * x7575.tot * x7573.mul, x7573.mul * x7575.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7577 = x7444 - x146;
@@ -15197,17 +15197,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7581 = x7580 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7582 = x7581 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7583 = x2957 - x7582;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7584{x7442.tot + x7442.mul * x7583, x7442.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7585 = x6955 * x1028;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7586{x7584.tot + x7584.mul * x7585, x7584.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7587{x7576.tot + x1233 * x7586.tot * x7576.mul, x7576.mul * x7586.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7588 = x0 - x1233;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7589 = x7462 - x146;
@@ -15221,37 +15221,37 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7593 = x7592 - x159;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7594 = x7593 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7595 = x2957 - x7594;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7596{x7458.tot + x7458.mul * x7595, x7458.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7597{x7596.tot + x7471 * x7476.tot * x7596.mul, x7596.mul * x7476.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7598{x7587.tot + x7588 * x7597.tot * x7587.mul, x7587.mul * x7597.mul};
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7599{x80.tot + x80.mul * x1299, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7600{x7598.tot + x7482 * x7599.tot * x7598.mul, x7598.mul * x7599.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7601 = x1299 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7602{x80.tot + x80.mul * x7601, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7603{x7600.tot + x7480 * x7602.tot * x7600.mul, x7600.mul * x7602.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7604 = x1299 - x1028;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7605{x80.tot + x80.mul * x7604, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7606{x7603.tot + x7481 * x7605.tot * x7603.mul, x7603.mul * x7605.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7607 = x1 - x2775;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7608{x80.tot + x80.mul * x7607, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7609 = x2759 - x2709;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7610 = x7609 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7611 = x7610 - x170;
@@ -15265,29 +15265,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7615 = x7614 - x183;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7616 = x7615 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7617 = x2985 - x7616;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7618{x7608.tot + x7608.mul * x7617, x7608.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7619 = x6955 * x1299;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7620{x7618.tot + x7618.mul * x7619, x7618.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7621{x7606.tot + x1320 * x7620.tot * x7606.mul, x7606.mul * x7620.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7622 = x0 - x1320;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7623 = x2709 - x2759;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7624{x80.tot + x80.mul * x7623, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7625 = x2767 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7626 = x7625 + x2775;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7627 = x7626 - x7459;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7628 = x7627 + x2725;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7629 = x7628 - x170;
@@ -15301,61 +15301,61 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7633 = x7632 - x183;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7634 = x7633 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7635 = x2985 - x7634;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7636{x7624.tot + x7624.mul * x7635, x7624.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7637 = x3 - x2775;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7638 = x2733 - x2783;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7639{x80.tot + x80.mul * x7638, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7640 = x2741 - x2791;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7641{x7639.tot + x7639.mul * x7640, x7639.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7642 = x2749 - x2799;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7643{x7641.tot + x7641.mul * x7642, x7641.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7644 = x2757 - x985;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7645{x7643.tot + x7643.mul * x7644, x7643.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7646{x7636.tot + x7637 * x7645.tot * x7636.mul, x7636.mul * x7645.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7647{x7621.tot + x7622 * x7646.tot * x7621.mul, x7621.mul * x7646.mul};
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7648 = x7407 * x7607;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7649 = x7607 * x7637;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7650 = x7407 * x7637;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7651{x80.tot + x80.mul * x1343, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7652{x7647.tot + x7650 * x7651.tot * x7647.mul, x7647.mul * x7651.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7653 = x1343 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7654{x80.tot + x80.mul * x7653, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7655{x7652.tot + x7648 * x7654.tot * x7652.mul, x7652.mul * x7654.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7656 = x1343 - x1299;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7657{x80.tot + x80.mul * x7656, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7658{x7655.tot + x7649 * x7657.tot * x7655.mul, x7655.mul * x7657.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7659 = x1 - x1001;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7660{x80.tot + x80.mul * x7659, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7661 = x982 - x2759;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7662 = x7661 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7663 = x7662 - x185;
@@ -15369,29 +15369,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7667 = x7666 - x198;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7668 = x7667 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7669 = x988 - x7668;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7670{x7660.tot + x7660.mul * x7669, x7660.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7671 = x6955 * x1343;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7672{x7670.tot + x7670.mul * x7671, x7670.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7673{x7658.tot + x1365 * x7672.tot * x7658.mul, x7658.mul * x7672.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7674 = x0 - x1365;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7675 = x2759 - x982;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7676{x80.tot + x80.mul * x7675, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7677 = x978 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7678 = x7677 + x1001;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7679 = x7678 - x7625;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7680 = x7679 + x2775;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7681 = x7680 - x185;
@@ -15405,59 +15405,59 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7685 = x7684 - x198;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7686 = x7685 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7687 = x988 - x7686;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7688{x7676.tot + x7676.mul * x7687, x7676.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7689 = x3 - x1001;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7690 = x2783 - x996;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7691{x80.tot + x80.mul * x7690, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7692 = x2791 - x992;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7693{x7691.tot + x7691.mul * x7692, x7691.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7694 = x2799 - x1011;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7695{x7693.tot + x7693.mul * x7694, x7693.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7696 = x985 - x1013;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7697{x7695.tot + x7695.mul * x7696, x7695.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7698{x7688.tot + x7689 * x7697.tot * x7688.mul, x7688.mul * x7697.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7699{x7673.tot + x7674 * x7698.tot * x7673.mul, x7673.mul * x7698.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7700 = x0 - x1001;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7701 = x7700 * x7659;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7702 = x7659 * x7689;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7703 = x7700 * x7689;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7704{x80.tot + x80.mul * x1387, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7705{x7699.tot + x7703 * x7704.tot * x7699.mul, x7699.mul * x7704.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7706 = x1387 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7707{x80.tot + x80.mul * x7706, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7708{x7705.tot + x7701 * x7707.tot * x7705.mul, x7705.mul * x7707.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7709 = x1387 - x1343;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7710{x80.tot + x80.mul * x7709, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7711{x7708.tot + x7702 * x7710.tot * x7708.mul, x7708.mul * x7710.mul};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7712 = x7022 - x982;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7713 = x7712 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7714 = x7713 - x85;
@@ -15471,23 +15471,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7718 = x7717 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7719 = x7718 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7720 = x7040 - x7719;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7721{x7212.tot + x7212.mul * x7720, x7212.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7722 = x6955 * x1387;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7723{x7721.tot + x7721.mul * x7722, x7721.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7724{x7711.tot + x7036 * x7723.tot * x7711.mul, x7711.mul * x7723.mul};
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7725 = x982 - x7022;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7726{x80.tot + x80.mul * x7725, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7727 = x7230 - x7677;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7728 = x7727 + x1001;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7729 = x7728 - x85;
@@ -15501,39 +15501,39 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7733 = x7732 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7734 = x7733 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7735 = x7040 - x7734;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7736{x7726.tot + x7726.mul * x7735, x7726.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7737 = x996 - x7028;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7738{x80.tot + x80.mul * x7737, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7739 = x992 - x7030;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7740{x7738.tot + x7738.mul * x7739, x7738.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7741 = x1011 - x7032;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7742{x7740.tot + x7740.mul * x7741, x7740.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7743 = x1013 - x7034;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7744{x7742.tot + x7742.mul * x7743, x7742.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7745{x7736.tot + x7241 * x7744.tot * x7736.mul, x7736.mul * x7744.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7746{x7724.tot + x7226 * x7745.tot * x7724.mul, x7724.mul * x7745.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7747{x7746.tot + x7255 * x7256.tot * x7746.mul, x7746.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7748{x7747.tot + x7253 * x7259.tot * x7747.mul, x7747.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7749 = x7038 - x1387;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7750{x80.tot + x80.mul * x7749, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7751{x7748.tot + x7254 * x7750.tot * x7748.mul, x7748.mul * x7750.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7752{x7533.tot + x1923 * x7751.tot * x7533.mul, x7533.mul * x7751.mul};
@@ -15569,21 +15569,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7767 = x7034 - x7049;
   // loc("cirgen/components/u32.cpp":82:5)
   MixState x7768{x7766.tot + x7766.mul * x7767, x7766.mul * (*mix)};
-  // loc("Top/Mux/5/RamHeader/RamPlonkVerifier/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/RamHeader/RamPlonkVerifier/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7769 = args[2][96 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/5/RamHeader/RamPlonkVerifier/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/body(BodyStep)/RamHeader/RamPlonkVerifier/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7770 = args[2][69 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/components/ram.cpp":129:3)
+  // loc("cirgen/components/ram.cpp":128:3)
   auto x7771 = x7036 - x7769;
-  // loc("cirgen/components/ram.cpp":129:3)
+  // loc("cirgen/components/ram.cpp":128:3)
   MixState x7772{x7768.tot + x7768.mul * x7771, x7768.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":130:3)
+  // loc("cirgen/components/ram.cpp":129:3)
   auto x7773 = x7038 - x7050;
-  // loc("cirgen/components/ram.cpp":130:3)
+  // loc("cirgen/components/ram.cpp":129:3)
   MixState x7774{x7772.tot + x7772.mul * x7773, x7772.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7775 = x7040 - x7770;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7776{x7774.tot + x7774.mul * x7775, x7774.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7777{x7754.tot + x2631 * x7776.tot * x7754.mul, x7754.mul * x7776.mul};
@@ -15591,13 +15591,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7778{x7777.tot + x2889 * x7776.tot * x7777.mul, x7777.mul * x7776.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7779{x7778.tot + x3188 * x7751.tot * x7778.mul, x7778.mul * x7751.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7780 = x1 - x485;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7781{x80.tot + x80.mul * x7780, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7782 = x500 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7783 = x7782 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7784 = x7783 - x131;
@@ -15611,27 +15611,27 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7788 = x7787 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7789 = x7788 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7790 = x2947 - x7789;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7791{x7781.tot + x7781.mul * x7790, x7781.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7792{x7791.tot + x7791.mul * x7063, x7791.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7793{x80.tot + x594 * x7792.tot * x80.mul, x80.mul * x7792.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7794 = x0 - x594;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7795 = x7043 - x500;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7796{x80.tot + x80.mul * x7795, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7797 = x503 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7798 = x7797 + x485;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7799 = x7798 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7800 = x7799 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7801 = x7800 - x131;
@@ -15645,59 +15645,59 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7805 = x7804 - x144;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7806 = x7805 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7807 = x2947 - x7806;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7808{x7796.tot + x7796.mul * x7807, x7796.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7809 = x3 - x485;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7810 = x7046 - x488;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7811{x80.tot + x80.mul * x7810, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7812 = x7047 - x491;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7813{x7811.tot + x7811.mul * x7812, x7811.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7814 = x7048 - x494;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7815{x7813.tot + x7813.mul * x7814, x7813.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7816 = x7049 - x591;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7817{x7815.tot + x7815.mul * x7816, x7815.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7818{x7808.tot + x7809 * x7817.tot * x7808.mul, x7808.mul * x7817.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7819{x7793.tot + x7794 * x7818.tot * x7793.mul, x7793.mul * x7818.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7820 = x0 - x485;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7821 = x7820 * x7780;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7822 = x7780 * x7809;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7823 = x7820 * x7809;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7824{x80.tot + x80.mul * x597, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7825{x7819.tot + x7823 * x7824.tot * x7819.mul, x7819.mul * x7824.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7826 = x597 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7827{x80.tot + x80.mul * x7826, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7828{x7825.tot + x7821 * x7827.tot * x7825.mul, x7825.mul * x7827.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7829 = x597 - x7050;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7830{x80.tot + x80.mul * x7829, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7831{x7828.tot + x7822 * x7830.tot * x7828.mul, x7828.mul * x7830.mul};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7832 = x7022 - x500;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7833 = x7832 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7834 = x7833 - x85;
@@ -15711,23 +15711,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7838 = x7837 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7839 = x7838 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7840 = x7040 - x7839;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7841{x7212.tot + x7212.mul * x7840, x7212.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7842 = x6955 * x597;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7843{x7841.tot + x7841.mul * x7842, x7841.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7844{x7831.tot + x7036 * x7843.tot * x7831.mul, x7831.mul * x7843.mul};
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7845 = x500 - x7022;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7846{x80.tot + x80.mul * x7845, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7847 = x7230 - x7797;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7848 = x7847 + x485;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7849 = x7848 - x85;
@@ -15741,39 +15741,39 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7853 = x7852 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7854 = x7853 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7855 = x7040 - x7854;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7856{x7846.tot + x7846.mul * x7855, x7846.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7857 = x488 - x7028;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7858{x80.tot + x80.mul * x7857, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7859 = x491 - x7030;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7860{x7858.tot + x7858.mul * x7859, x7858.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7861 = x494 - x7032;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7862{x7860.tot + x7860.mul * x7861, x7860.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7863 = x591 - x7034;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7864{x7862.tot + x7862.mul * x7863, x7862.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7865{x7856.tot + x7241 * x7864.tot * x7856.mul, x7856.mul * x7864.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7866{x7844.tot + x7226 * x7865.tot * x7844.mul, x7844.mul * x7865.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7867{x7866.tot + x7255 * x7256.tot * x7866.mul, x7866.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7868{x7867.tot + x7253 * x7259.tot * x7867.mul, x7867.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7869 = x7038 - x597;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7870{x80.tot + x80.mul * x7869, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7871{x7868.tot + x7254 * x7870.tot * x7868.mul, x7868.mul * x7870.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7872{x7779.tot + x3393 * x7871.tot * x7779.mul, x7779.mul * x7871.mul};
@@ -15807,13 +15807,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7886{x7885.tot + x7885.mul * x1923, x7885.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":28:5)
   MixState x7887{x7886.tot + x7886.mul * x2322, x7886.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7888 = x1 - x965;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7889{x80.tot + x80.mul * x7888, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7890 = x714 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7891 = x7890 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7892 = x7891 - x85;
@@ -15827,23 +15827,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7896 = x7895 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7897 = x7896 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7898 = x7040 - x7897;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7899{x7889.tot + x7889.mul * x7898, x7889.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7900{x7887.tot + x7036 * x7899.tot * x7887.mul, x7887.mul * x7899.mul};
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7901 = x7043 - x714;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7902{x80.tot + x80.mul * x7901, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7903 = x960 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7904 = x7903 + x965;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7905 = x7904 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7906 = x7905 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7907 = x7906 - x85;
@@ -15857,47 +15857,47 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7911 = x7910 - x105;
   // loc("cirgen/components/bytes.cpp":97:10)
   auto x7912 = x7911 * x6;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   auto x7913 = x7040 - x7912;
-  // loc("./cirgen/components/bits.h":61:23)
+  // loc("./cirgen/components/bits.h":68:23)
   MixState x7914{x7902.tot + x7902.mul * x7913, x7902.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7915 = x3 - x965;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7916 = x7046 - x1489;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7917{x80.tot + x80.mul * x7916, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7918 = x7047 - x1696;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7919{x7917.tot + x7917.mul * x7918, x7917.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7920 = x7048 - x1923;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7921{x7919.tot + x7919.mul * x7920, x7919.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7922 = x7049 - x2322;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7923{x7921.tot + x7921.mul * x7922, x7921.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7924{x7914.tot + x7915 * x7923.tot * x7914.mul, x7914.mul * x7923.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7925{x7900.tot + x7226 * x7924.tot * x7900.mul, x7900.mul * x7924.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7926 = x0 - x965;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7927 = x7926 * x7888;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7928 = x7888 * x7915;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7929 = x7926 * x7915;
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7930{x7925.tot + x7929 * x7256.tot * x7925.mul, x7925.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7931{x7930.tot + x7927 * x7259.tot * x7930.mul, x7930.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7932{x80.tot + x80.mul * x7773, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7933{x7931.tot + x7928 * x7932.tot * x7931.mul, x7931.mul * x7932.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7934{x7878.tot + x6970 * x7933.tot * x7878.mul, x7878.mul * x7933.mul};
@@ -15927,9 +15927,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7946 = args[2][0 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("Top/BytesHeader/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":63:40))
   auto x7947 = args[2][1 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7948 = args[2][45 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7949 = args[2][46 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x7950 = x7948 - x7946;
@@ -15967,9 +15967,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7966{x80.tot + x80.mul * x7965, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x7967{x7960.tot + x7961 * x7966.tot * x7960.mul, x7960.mul * x7966.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7968 = args[2][47 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7969 = args[2][48 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x7970 = x7968 - x7948;
@@ -16007,9 +16007,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7986{x80.tot + x80.mul * x7985, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x7987{x7980.tot + x7981 * x7986.tot * x7980.mul, x7980.mul * x7986.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7988 = args[2][49 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7989 = args[2][50 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x7990 = x7988 - x7968;
@@ -16047,9 +16047,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8006{x80.tot + x80.mul * x8005, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8007{x8000.tot + x8001 * x8006.tot * x8000.mul, x8000.mul * x8006.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8008 = args[2][51 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8009 = args[2][52 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8010 = x8008 - x7988;
@@ -16087,9 +16087,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8026{x80.tot + x80.mul * x8025, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8027{x8020.tot + x8021 * x8026.tot * x8020.mul, x8020.mul * x8026.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8028 = args[2][53 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8029 = args[2][54 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8030 = x8028 - x8008;
@@ -16127,9 +16127,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8046{x80.tot + x80.mul * x8045, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8047{x8040.tot + x8041 * x8046.tot * x8040.mul, x8040.mul * x8046.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8048 = args[2][55 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8049 = args[2][56 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8050 = x8048 - x8028;
@@ -16167,9 +16167,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8066{x80.tot + x80.mul * x8065, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8067{x8060.tot + x8061 * x8066.tot * x8060.mul, x8060.mul * x8066.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8068 = args[2][57 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8069 = args[2][58 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8070 = x8068 - x8048;
@@ -16207,9 +16207,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8086{x80.tot + x80.mul * x8085, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8087{x8080.tot + x8081 * x8086.tot * x8080.mul, x8080.mul * x8086.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8088 = args[2][59 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8089 = args[2][60 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8090 = x8088 - x8068;
@@ -16247,9 +16247,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8106{x80.tot + x80.mul * x8105, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8107{x8100.tot + x8101 * x8106.tot * x8100.mul, x8100.mul * x8106.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8108 = args[2][61 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8109 = args[2][62 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8110 = x8108 - x8088;
@@ -16287,9 +16287,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8126{x80.tot + x80.mul * x8125, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8127{x8120.tot + x8121 * x8126.tot * x8120.mul, x8120.mul * x8126.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8128 = args[2][63 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8129 = args[2][64 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8130 = x8128 - x8108;
@@ -16327,9 +16327,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8146{x80.tot + x80.mul * x8145, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8147{x8140.tot + x8141 * x8146.tot * x8140.mul, x8140.mul * x8146.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8148 = args[2][65 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8149 = args[2][66 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8150 = x8148 - x8128;
@@ -16367,9 +16367,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x8166{x80.tot + x80.mul * x8165, x80.mul * (*mix)};
   // loc("cirgen/components/bytes.cpp":77:18)
   MixState x8167{x8160.tot + x8161 * x8166.tot * x8160.mul, x8160.mul * x8166.mul};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8168 = args[2][67 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x8169 = args[2][68 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/bytes.cpp":66:18)
   auto x8170 = x8168 - x8148;
@@ -19917,13 +19917,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x9941 = args[4][2 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("Top/BytesHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":283:45))
   auto x9942 = args[4][3 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x9943 = args[4][4 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x9944 = args[4][5 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x9945 = args[4][6 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x9946 = args[4][7 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/plonk.h":286:10)
   auto x9947 = x9939 * x8602;
@@ -20065,13 +20065,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x10015 = x9977 - x10008;
   // loc("./cirgen/components/plonk.h":286:10)
   MixState x10016{x10014.tot + x10014.mul * x10015, x10014.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10017 = args[4][8 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10018 = args[4][9 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10019 = args[4][10 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10020 = args[4][11 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/plonk.h":286:10)
   auto x10021 = x9943 * x8703;
@@ -20213,13 +20213,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x10089 = x10051 - x10082;
   // loc("./cirgen/components/plonk.h":286:10)
   MixState x10090{x10088.tot + x10088.mul * x10089, x10088.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10091 = args[4][12 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10092 = args[4][13 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10093 = args[4][14 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10094 = args[4][15 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/plonk.h":286:10)
   auto x10095 = x10017 * x8804;
@@ -20361,13 +20361,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x10163 = x10125 - x10156;
   // loc("./cirgen/components/plonk.h":286:10)
   MixState x10164{x10162.tot + x10162.mul * x10163, x10162.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10165 = args[4][16 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10166 = args[4][17 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10167 = args[4][18 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10168 = args[4][19 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/plonk.h":286:10)
   auto x10169 = x10091 * x8905;
@@ -20509,13 +20509,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x10237 = x10199 - x10230;
   // loc("./cirgen/components/plonk.h":286:10)
   MixState x10238{x10236.tot + x10236.mul * x10237, x10236.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10239 = args[4][20 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10240 = args[4][21 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10241 = args[4][22 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10242 = args[4][23 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/plonk.h":286:10)
   auto x10243 = x10165 * x9006;
@@ -20657,13 +20657,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x10311 = x10273 - x10304;
   // loc("./cirgen/components/plonk.h":286:10)
   MixState x10312{x10310.tot + x10310.mul * x10311, x10310.mul * (*mix)};
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10313 = args[4][24 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10314 = args[4][25 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10315 = args[4][26 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/1/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x10316 = args[4][27 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/plonk.h":286:10)
   auto x10317 = x10239 * x9107;
@@ -22171,13 +22171,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x11068{x11067.tot + x11067.mul * x10316, x11067.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x11069{x10457.tot + x6976 * x11068.tot * x10457.mul, x10457.mul * x11068.mul};
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11070 = args[3][8];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11071 = args[3][9];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11072 = args[3][10];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11073 = args[3][11];
   // loc("./cirgen/components/plonk.h":218:23)
   auto x11074 = x11070 * x419;
@@ -22189,13 +22189,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x11077 = x11073 * x419;
   // loc("./cirgen/components/plonk.h":218:17)
   auto x11078 = x11074 + x0;
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11079 = args[3][12];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11080 = args[3][13];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11081 = args[3][14];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11082 = args[3][15];
   // loc("./cirgen/components/plonk.h":218:23)
   auto x11083 = x11079 * x422;
@@ -22213,13 +22213,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x11089 = x11076 + x11085;
   // loc("./cirgen/components/plonk.h":218:17)
   auto x11090 = x11077 + x11086;
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11091 = args[3][16];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11092 = args[3][17];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11093 = args[3][18];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11094 = args[3][19];
   // loc("./cirgen/components/plonk.h":218:23)
   auto x11095 = x11091 * x425;
@@ -22237,13 +22237,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x11101 = x11089 + x11097;
   // loc("./cirgen/components/plonk.h":218:17)
   auto x11102 = x11090 + x11098;
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11103 = args[3][20];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11104 = args[3][21];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11105 = args[3][22];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11106 = args[3][23];
   // loc("./cirgen/components/plonk.h":218:23)
   auto x11107 = x11103 * x407;
@@ -22261,13 +22261,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x11113 = x11101 + x11109;
   // loc("./cirgen/components/plonk.h":218:17)
   auto x11114 = x11102 + x11110;
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11115 = args[3][24];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11116 = args[3][25];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11117 = args[3][26];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11118 = args[3][27];
   // loc("./cirgen/components/plonk.h":218:23)
   auto x11119 = x11115 * x410;
@@ -22285,13 +22285,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x11125 = x11113 + x11121;
   // loc("./cirgen/components/plonk.h":218:17)
   auto x11126 = x11114 + x11122;
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11127 = args[3][28];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11128 = args[3][29];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11129 = args[3][30];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11130 = args[3][31];
   // loc("./cirgen/components/plonk.h":218:23)
   auto x11131 = x11127 * x413;
@@ -22309,13 +22309,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x11137 = x11125 + x11133;
   // loc("./cirgen/components/plonk.h":218:17)
   auto x11138 = x11126 + x11134;
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11139 = args[3][32];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11140 = args[3][33];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11141 = args[3][34];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":218:23))
   auto x11142 = args[3][35];
   // loc("./cirgen/components/plonk.h":218:23)
   auto x11143 = x11139 * x416;
@@ -23323,21 +23323,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x11644 = x11561 * x11611;
   // loc("./cirgen/components/plonk.h":220:16)
   auto x11645 = x11643 + x11644;
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":283:45))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":283:45))
   auto x11646 = args[4][24 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":283:45))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":283:45))
   auto x11647 = args[4][25 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":283:45))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":283:45))
   auto x11648 = args[4][26 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":283:45))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamHeader/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":283:45))
   auto x11649 = args[4][27 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("Top/Mux/3/RamBody/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x11650 = args[4][28 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/3/RamBody/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x11651 = args[4][29 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/3/RamBody/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x11652 = args[4][30 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/3/RamBody/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/ram_load(RamLoadStep)/RamBody/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x11653 = args[4][31 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/plonk.h":286:10)
   auto x11654 = x11646 * x11211;
@@ -25313,13 +25313,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x12639 = x12321 - x12632;
   // loc("./cirgen/components/plonk.h":286:10)
   MixState x12640{x12638.tot + x12638.mul * x12639, x12638.mul * (*mix)};
-  // loc("Top/Mux/5/Mux/3/RamBody/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[0](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x12641 = args[4][32 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/3/RamBody/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[1](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x12642 = args[4][33 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/3/RamBody/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[2](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x12643 = args[4][34 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("Top/Mux/5/Mux/3/RamBody/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/3(MemIOCycle)/RamBody/PlonkBody/FpExtReg/elem[3](Reg)"("./cirgen/components/plonk.h":285:20))
   auto x12644 = args[4][35 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("./cirgen/components/plonk.h":286:30)
   auto x12645 = x12641 * x12578;
@@ -25745,275 +25745,275 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x12855{x12854.tot + x12854.mul * x9942, x12854.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x12856{x12850.tot + x6972 * x12855.tot * x12850.mul, x12850.mul * x12855.mul};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x12857 = x0 - x6955;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x12858 = x6955 * x12857;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x12859{x80.tot + x80.mul * x12858, x80.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12860 = x0 - x7040;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12861 = x7040 * x12860;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12862 = x3 - x7040;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12863 = x12861 * x12862;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12864 = x18 - x7040;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12865 = x12863 * x12864;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12866{x12859.tot + x12859.mul * x12865, x12859.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12867 = x0 - x706;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12868 = x706 * x12867;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12869 = x3 - x706;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12870 = x12868 * x12869;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12871 = x18 - x706;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12872 = x12870 * x12871;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12873{x12866.tot + x12866.mul * x12872, x12866.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12874 = x713 * x717;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12875 = x18 - x709;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12876 = x12874 * x12875;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12877{x12873.tot + x12873.mul * x12876, x12873.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12878 = x0 - x2947;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12879 = x2947 * x12878;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12880 = x3 - x2947;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12881 = x12879 * x12880;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12882 = x18 - x2947;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12883 = x12881 * x12882;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12884{x12877.tot + x12877.mul * x12883, x12877.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12885 = x0 - x2957;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12886 = x2957 * x12885;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12887 = x3 - x2957;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12888 = x12886 * x12887;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12889 = x18 - x2957;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12890 = x12888 * x12889;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12891{x12884.tot + x12884.mul * x12890, x12884.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12892 = x0 - x2985;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12893 = x2985 * x12892;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12894 = x3 - x2985;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12895 = x12893 * x12894;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12896 = x18 - x2985;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12897 = x12895 * x12896;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12898{x12891.tot + x12891.mul * x12897, x12891.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12899 = x0 - x988;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12900 = x988 * x12899;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12901 = x3 - x988;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12902 = x12900 * x12901;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12903 = x18 - x988;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12904 = x12902 * x12903;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12905{x12898.tot + x12898.mul * x12904, x12898.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12906 = x0 - x980;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12907 = x980 * x12906;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12908 = x3 - x980;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12909 = x12907 * x12908;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12910 = x18 - x980;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12911 = x12909 * x12910;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12912{x12905.tot + x12905.mul * x12911, x12905.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12913 = x0 - x998;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12914 = x998 * x12913;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12915 = x3 - x998;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12916 = x12914 * x12915;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12917 = x18 - x998;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12918 = x12916 * x12917;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12919{x12912.tot + x12912.mul * x12918, x12912.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12920 = x0 - x1007;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12921 = x1007 * x12920;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12922 = x3 - x1007;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12923 = x12921 * x12922;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12924 = x18 - x1007;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12925 = x12923 * x12924;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12926{x12919.tot + x12919.mul * x12925, x12919.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12927 = x0 - x1004;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12928 = x1004 * x12927;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12929 = x3 - x1004;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12930 = x12928 * x12929;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12931 = x18 - x1004;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12932 = x12930 * x12931;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12933{x12926.tot + x12926.mul * x12932, x12926.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12934 = x0 - x1015;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12935 = x1015 * x12934;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12936 = x3 - x1015;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12937 = x12935 * x12936;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12938 = x18 - x1015;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12939 = x12937 * x12938;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12940{x12933.tot + x12933.mul * x12939, x12933.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12941 = x0 - x1022;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12942 = x1022 * x12941;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12943 = x3 - x1022;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12944 = x12942 * x12943;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12945 = x18 - x1022;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12946 = x12944 * x12945;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12947{x12940.tot + x12940.mul * x12946, x12940.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12948 = x0 - x1019;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12949 = x1019 * x12948;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12950 = x3 - x1019;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12951 = x12949 * x12950;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12952 = x18 - x1019;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12953 = x12951 * x12952;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12954{x12947.tot + x12947.mul * x12953, x12947.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12955 = x0 - x1158;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12956 = x1158 * x12955;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12957 = x3 - x1158;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12958 = x12956 * x12957;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12959 = x18 - x1158;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12960 = x12958 * x12959;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12961{x12954.tot + x12954.mul * x12960, x12954.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12962 = x1168 * x1219;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12963 = x3 - x1168;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12964 = x12962 * x12963;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12965 = x18 - x1168;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12966 = x12964 * x12965;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12967{x12961.tot + x12961.mul * x12966, x12961.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12968 = x18 - x2019;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12969 = x2028 * x12968;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12970{x12967.tot + x12967.mul * x12969, x12967.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12971 = x0 - x2434;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12972 = x2434 * x12971;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12973 = x3 - x2434;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12974 = x12972 * x12973;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12975 = x18 - x2434;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12976 = x12974 * x12975;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12977{x12970.tot + x12970.mul * x12976, x12970.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12978 = x0 - x2454;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12979 = x2454 * x12978;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12980 = x3 - x2454;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12981 = x12979 * x12980;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12982 = x18 - x2454;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12983 = x12981 * x12982;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12984{x12977.tot + x12977.mul * x12983, x12977.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":48:16)
+  // loc("./cirgen/components/bits.h":55:16)
   auto x12985 = x0 - x3623;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12986 = x3623 * x12985;
-  // loc("./cirgen/components/bits.h":48:26)
+  // loc("./cirgen/components/bits.h":55:26)
   auto x12987 = x3 - x3623;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12988 = x12986 * x12987;
-  // loc("./cirgen/components/bits.h":48:36)
+  // loc("./cirgen/components/bits.h":55:36)
   auto x12989 = x18 - x3623;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   auto x12990 = x12988 * x12989;
-  // loc("./cirgen/components/bits.h":48:11)
+  // loc("./cirgen/components/bits.h":55:11)
   MixState x12991{x12984.tot + x12984.mul * x12990, x12984.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x12992{x12856.tot + x6976 * x12991.tot * x12856.mul, x12856.mul * x12991.mul};
@@ -26141,51 +26141,51 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x13053 = x13052 - x0;
   // loc("./cirgen/components/onehot.h":31:8)
   MixState x13054{x13051.tot + x13051.mul * x13053, x13051.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13055 = x0 - x985;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13056 = x985 * x13055;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13057{x80.tot + x80.mul * x13056, x80.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13058 = x0 - x982;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13059 = x982 * x13058;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13060{x13057.tot + x13057.mul * x13059, x13057.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13061 = x978 * x6910;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13062{x13060.tot + x13060.mul * x13061, x13060.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13063 = x1001 * x7700;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13064{x13062.tot + x13062.mul * x13063, x13062.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13065 = x0 - x996;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13066 = x996 * x13065;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13067{x13064.tot + x13064.mul * x13066, x13064.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13068 = x0 - x992;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13069 = x992 * x13068;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13070{x13067.tot + x13067.mul * x13069, x13067.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13071 = x0 - x1011;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13072 = x1011 * x13071;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13073{x13070.tot + x13070.mul * x13072, x13070.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13074 = x1013 * x6867;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13075{x13073.tot + x13073.mul * x13074, x13073.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13076 = x1026 * x7546;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13077{x13075.tot + x13075.mul * x13076, x13075.mul * (*mix)};
   // loc("./cirgen/components/onehot.h":28:11)
   auto x13078 = x1233 * x7588;
@@ -26245,29 +26245,29 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x13105 = x13104 - x0;
   // loc("./cirgen/components/onehot.h":31:8)
   MixState x13106{x13103.tot + x13103.mul * x13105, x13103.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13107 = x1097 * x1181;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13108{x13106.tot + x13106.mul * x13107, x13106.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13109 = x1103 * x1177;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13110{x13108.tot + x13108.mul * x13109, x13108.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13111 = x1171 * x1179;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13112{x13110.tot + x13110.mul * x13111, x13110.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13113 = x1197 * x1200;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13114{x13112.tot + x13112.mul * x13113, x13112.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13115 = x1210 * x1213;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13116{x13114.tot + x13114.mul * x13115, x13114.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13117 = x1224 * x1227;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13118{x13116.tot + x13116.mul * x13117, x13116.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13119{x13054.tot + x965 * x13118.tot * x13054.mul, x13054.mul * x13118.mul};
@@ -26275,47 +26275,47 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x13120{x13119.tot + x1489 * x13118.tot * x13119.mul, x13119.mul * x13118.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13121{x13120.tot + x1696 * x13118.tot * x13120.mul, x13120.mul * x13118.mul};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13122{x80.tot + x80.mul * x13098, x80.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13123{x13122.tot + x13122.mul * x13102, x13122.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13124 = x0 - x1085;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13125 = x1085 * x13124;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13126{x13123.tot + x13123.mul * x13125, x13123.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13127 = x0 - x1086;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13128 = x1086 * x13127;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13129{x13126.tot + x13126.mul * x13128, x13126.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13130 = x0 - x1087;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13131 = x1087 * x13130;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13132{x13129.tot + x13129.mul * x13131, x13129.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13133 = x0 - x1088;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13134 = x1088 * x13133;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13135{x13132.tot + x13132.mul * x13134, x13132.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13136 = x1062 * x1063;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13137{x13135.tot + x13135.mul * x13136, x13135.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13138 = x1079 * x1080;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13139{x13137.tot + x13137.mul * x13138, x13137.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13140 = x0 - x1121;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13141 = x1121 * x13140;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13142{x13139.tot + x13139.mul * x13141, x13139.mul * (*mix)};
   // loc("./cirgen/components/onehot.h":28:11)
   auto x13143 = x1109 * x2570;
@@ -26379,7 +26379,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x13172 = x13171 - x0;
   // loc("./cirgen/components/onehot.h":31:8)
   MixState x13173{x13170.tot + x13170.mul * x13172, x13170.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13174{x13173.tot + x13173.mul * x13111, x13173.mul * (*mix)};
   // loc("./cirgen/components/onehot.h":28:11)
   auto x13175 = x1192 * x1505;
@@ -26405,17 +26405,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x13185{x13182.tot + x13182.mul * x13184, x13182.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13186{x13121.tot + x1923 * x13185.tot * x13121.mul, x13121.mul * x13185.mul};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13187{x13106.tot + x13106.mul * x13125, x13106.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13188{x13187.tot + x13187.mul * x13128, x13187.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13189{x13188.tot + x13188.mul * x13131, x13188.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13190{x13189.tot + x13189.mul * x13134, x13189.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13191{x13190.tot + x13190.mul * x13136, x13190.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13192{x13191.tot + x13191.mul * x13138, x13191.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":166:16)
   auto x13193 = x1080 * x1063;
@@ -26481,323 +26481,323 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x13223 = x13215 - x13222;
   // loc("cirgen/components/u32.cpp":181:6)
   MixState x13224{x13208.tot + x13208.mul * x13223, x13208.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13225{x13224.tot + x13224.mul * x13107, x13224.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13226{x13225.tot + x13225.mul * x13109, x13225.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13227{x13226.tot + x13226.mul * x13149, x13226.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13228{x13186.tot + x2322 * x13227.tot * x13186.mul, x13186.mul * x13227.mul};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13229{x13224.tot + x13224.mul * x13143, x13224.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13230{x13228.tot + x2515 * x13229.tot * x13228.mul, x13228.mul * x13229.mul};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13231 = x0 - x422;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13232 = x422 * x13231;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13233{x80.tot + x80.mul * x13232, x80.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13234 = x0 - x425;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13235 = x425 * x13234;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13236{x13233.tot + x13233.mul * x13235, x13233.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13237 = x407 * x2922;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13238{x13236.tot + x13236.mul * x13237, x13236.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13239 = x410 * x2960;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13240{x13238.tot + x13238.mul * x13239, x13238.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13241 = x413 * x3025;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13242{x13240.tot + x13240.mul * x13241, x13240.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13243 = x416 * x3001;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13244{x13242.tot + x13242.mul * x13243, x13242.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13245 = x0 - x458;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13246 = x458 * x13245;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13247{x13244.tot + x13244.mul * x13246, x13244.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13248 = x461 * x3012;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13249{x13247.tot + x13247.mul * x13248, x13247.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13250 = x0 - x464;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13251 = x464 * x13250;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13252{x13249.tot + x13249.mul * x13251, x13249.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13253 = x0 - x446;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13254 = x446 * x13253;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13255{x13252.tot + x13252.mul * x13254, x13252.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13256 = x0 - x449;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13257 = x449 * x13256;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13258{x13255.tot + x13255.mul * x13257, x13255.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13259 = x0 - x452;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13260 = x452 * x13259;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13261{x13258.tot + x13258.mul * x13260, x13258.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13262 = x0 - x455;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13263 = x455 * x13262;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13264{x13261.tot + x13261.mul * x13263, x13261.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13265 = x0 - x497;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13266 = x497 * x13265;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13267{x13264.tot + x13264.mul * x13266, x13264.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13268 = x0 - x500;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13269 = x500 * x13268;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13270{x13267.tot + x13267.mul * x13269, x13267.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13271 = x0 - x503;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13272 = x503 * x13271;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13273{x13270.tot + x13270.mul * x13272, x13270.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13274 = x485 * x7820;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13275{x13273.tot + x13273.mul * x13274, x13273.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13276 = x0 - x488;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13277 = x488 * x13276;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13278{x13275.tot + x13275.mul * x13277, x13275.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13279 = x0 - x491;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13280 = x491 * x13279;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13281{x13278.tot + x13278.mul * x13280, x13278.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13282 = x0 - x494;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13283 = x494 * x13282;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13284{x13281.tot + x13281.mul * x13283, x13281.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13285 = x0 - x591;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13286 = x591 * x13285;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13287{x13284.tot + x13284.mul * x13286, x13284.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13288 = x594 * x7794;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13289{x13287.tot + x13287.mul * x13288, x13287.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13290 = x0 - x597;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13291 = x597 * x13290;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13292{x13289.tot + x13289.mul * x13291, x13289.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13293 = x0 - x579;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13294 = x579 * x13293;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13295{x13292.tot + x13292.mul * x13294, x13292.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13296 = x0 - x582;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13297 = x582 * x13296;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13298{x13295.tot + x13295.mul * x13297, x13295.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13299 = x0 - x585;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13300 = x585 * x13299;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13301{x13298.tot + x13298.mul * x13300, x13298.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13302 = x0 - x588;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13303 = x588 * x13302;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13304{x13301.tot + x13301.mul * x13303, x13301.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13305 = x0 - x1274;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13306 = x1274 * x13305;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13307{x13304.tot + x13304.mul * x13306, x13304.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13308 = x2099 * x3411;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13309{x13307.tot + x13307.mul * x13308, x13307.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13310 = x2102 * x7093;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13311{x13309.tot + x13309.mul * x13310, x13309.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13312 = x2105 * x7380;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13313{x13311.tot + x13311.mul * x13312, x13311.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13314 = x2087 * x3603;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13315{x13313.tot + x13313.mul * x13314, x13313.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13316 = x0 - x2090;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13317 = x2090 * x13316;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13318{x13315.tot + x13315.mul * x13317, x13315.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13319 = x2093 * x3855;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13320{x13318.tot + x13318.mul * x13319, x13318.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13321 = x2096 * x6792;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13322{x13320.tot + x13320.mul * x13321, x13320.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13323 = x2659 * x6636;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13324{x13322.tot + x13322.mul * x13323, x13322.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13325 = x2667 * x7146;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13326{x13324.tot + x13324.mul * x13325, x13324.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13327 = x2675 * x7429;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13328{x13326.tot + x13326.mul * x13327, x13326.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13329 = x0 - x2683;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13330 = x2683 * x13329;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13331{x13328.tot + x13328.mul * x13330, x13328.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13332 = x0 - x2691;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13333 = x2691 * x13332;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13334{x13331.tot + x13331.mul * x13333, x13331.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13335 = x0 - x2699;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13336 = x2699 * x13335;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13337{x13334.tot + x13334.mul * x13336, x13334.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13338 = x0 - x2701;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13339 = x2701 * x13338;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13340{x13337.tot + x13337.mul * x13339, x13337.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13341 = x0 - x2709;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13342 = x2709 * x13341;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13343{x13340.tot + x13340.mul * x13342, x13340.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13344 = x2717 * x7199;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13345{x13343.tot + x13343.mul * x13344, x13343.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13346 = x2725 * x7479;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13347{x13345.tot + x13345.mul * x13346, x13345.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13348 = x0 - x2733;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13349 = x2733 * x13348;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13350{x13347.tot + x13347.mul * x13349, x13347.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13351 = x0 - x2741;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13352 = x2741 * x13351;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13353{x13350.tot + x13350.mul * x13352, x13350.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13354 = x0 - x2749;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13355 = x2749 * x13354;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13356{x13353.tot + x13353.mul * x13355, x13353.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13357 = x2757 * x7066;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13358{x13356.tot + x13356.mul * x13357, x13356.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13359 = x2759 * x7354;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13360{x13358.tot + x13358.mul * x13359, x13358.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13361 = x2767 * x7120;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13362{x13360.tot + x13360.mul * x13361, x13360.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13363 = x2775 * x7407;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13364{x13362.tot + x13362.mul * x13363, x13362.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13365 = x2783 * x7173;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13366{x13364.tot + x13364.mul * x13365, x13364.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13367 = x2791 * x7456;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13368{x13366.tot + x13366.mul * x13367, x13366.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13369 = x0 - x2799;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13370 = x2799 * x13369;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13371{x13368.tot + x13368.mul * x13370, x13368.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13372{x13371.tot + x13371.mul * x13056, x13371.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13373{x13372.tot + x13372.mul * x13059, x13372.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13374{x13373.tot + x13373.mul * x13061, x13373.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13375{x13374.tot + x13374.mul * x13063, x13374.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13376{x13375.tot + x13375.mul * x13066, x13375.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13377{x13376.tot + x13376.mul * x13069, x13376.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13378{x13377.tot + x13377.mul * x13072, x13377.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13379{x13378.tot + x13378.mul * x13074, x13378.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13380{x13379.tot + x13379.mul * x13076, x13379.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13381{x13230.tot + x2631 * x13380.tot * x13230.mul, x13230.mul * x13380.mul};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13382{x13236.tot + x13236.mul * x13243, x13236.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13383{x13382.tot + x13382.mul * x13248, x13382.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13384{x13381.tot + x2889 * x13383.tot * x13381.mul, x13381.mul * x13383.mul};
@@ -26859,327 +26859,327 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x13412{x13388.tot + x1453 * x13411.tot * x13388.mul, x13388.mul * x13411.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13413{x13384.tot + x3188 * x13412.tot * x13384.mul, x13384.mul * x13412.mul};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13414{x80.tot + x80.mul * x13308, x80.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13415{x13414.tot + x13414.mul * x13314, x13414.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13416{x13415.tot + x13415.mul * x13319, x13415.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13417{x13416.tot + x13416.mul * x13321, x13416.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13418{x13417.tot + x13417.mul * x13323, x13417.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13419{x13418.tot + x13418.mul * x13344, x13418.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13420{x13419.tot + x13419.mul * x13346, x13419.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13421{x13420.tot + x13420.mul * x13349, x13420.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13422{x13421.tot + x13421.mul * x13352, x13421.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13423{x13422.tot + x13422.mul * x13355, x13422.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13424{x13423.tot + x13423.mul * x13357, x13423.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13425{x13424.tot + x13424.mul * x13359, x13424.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13426{x13425.tot + x13425.mul * x13361, x13425.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13427{x13426.tot + x13426.mul * x13363, x13426.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13428{x13427.tot + x13427.mul * x13365, x13427.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13429{x13428.tot + x13428.mul * x13367, x13428.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13430{x13429.tot + x13429.mul * x13370, x13429.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13431{x13430.tot + x13430.mul * x13056, x13430.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13432{x13431.tot + x13431.mul * x13059, x13431.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13433{x13432.tot + x13432.mul * x13061, x13432.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13434{x13433.tot + x13433.mul * x13063, x13433.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13435{x13434.tot + x13434.mul * x13066, x13434.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13436{x13435.tot + x13435.mul * x13069, x13435.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13437{x13436.tot + x13436.mul * x13072, x13436.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13438{x13437.tot + x13437.mul * x13074, x13437.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13439{x13438.tot + x13438.mul * x13076, x13438.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13440 = x0 - x1028;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13441 = x1028 * x13440;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13442{x13439.tot + x13439.mul * x13441, x13439.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13443{x13442.tot + x13442.mul * x13078, x13442.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13444{x13443.tot + x13443.mul * x13081, x13443.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13445{x13444.tot + x13444.mul * x13084, x13444.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13446{x13445.tot + x13445.mul * x13088, x13445.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13447{x13446.tot + x13446.mul * x13091, x13446.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13448{x13447.tot + x13447.mul * x13094, x13447.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13449{x13448.tot + x13448.mul * x13098, x13448.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13450{x13449.tot + x13449.mul * x13102, x13449.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13451{x13450.tot + x13450.mul * x13125, x13450.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13452{x13451.tot + x13451.mul * x13128, x13451.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13453{x13452.tot + x13452.mul * x13131, x13452.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13454{x13453.tot + x13453.mul * x13134, x13453.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13455{x13454.tot + x13454.mul * x13136, x13454.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13456{x13455.tot + x13455.mul * x13138, x13455.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13457{x13456.tot + x13456.mul * x13141, x13456.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13458{x13457.tot + x13457.mul * x13399, x13457.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13459{x13458.tot + x13458.mul * x13403, x13458.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13460{x13459.tot + x13459.mul * x13407, x13459.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13461{x13460.tot + x13460.mul * x13107, x13460.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13462{x13461.tot + x13461.mul * x13109, x13461.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13463{x13462.tot + x13462.mul * x13143, x13462.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13464{x13463.tot + x13463.mul * x13146, x13463.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13465{x13464.tot + x13464.mul * x13149, x13464.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13466{x13465.tot + x13465.mul * x13153, x13465.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13467{x13466.tot + x13466.mul * x13157, x13466.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13468{x13467.tot + x13467.mul * x13161, x13467.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13469{x13468.tot + x13468.mul * x13165, x13468.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13470{x13469.tot + x13469.mul * x13169, x13469.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13471{x13470.tot + x13470.mul * x13111, x13470.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13472 = x0 - x1185;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13473 = x1185 * x13472;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13474{x13471.tot + x13471.mul * x13473, x13471.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13475{x13474.tot + x13474.mul * x13175, x13474.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13476{x13475.tot + x13475.mul * x13113, x13475.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13477{x13476.tot + x13476.mul * x13179, x13476.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13478{x13477.tot + x13477.mul * x13115, x13477.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13479 = x0 - x1214;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13480 = x1214 * x13479;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13481{x13478.tot + x13478.mul * x13480, x13478.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13482{x13481.tot + x13481.mul * x13117, x13481.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13483 = x0 - x1228;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13484 = x1228 * x13483;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13485{x13482.tot + x13482.mul * x13484, x13482.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13486 = x0 - x2083;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13487 = x2083 * x13486;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13488{x13485.tot + x13485.mul * x13487, x13485.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13489 = x0 - x3819;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13490 = x3819 * x13489;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13491{x13488.tot + x13488.mul * x13490, x13488.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13492 = x0 - x3822;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13493 = x3822 * x13492;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13494{x13491.tot + x13491.mul * x13493, x13491.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13495 = x0 - x3825;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13496 = x3825 * x13495;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13497{x13494.tot + x13494.mul * x13496, x13494.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13498 = x0 - x3828;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13499 = x3828 * x13498;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13500{x13497.tot + x13497.mul * x13499, x13497.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13501{x13500.tot + x13500.mul * x12928, x13500.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13502{x13501.tot + x13501.mul * x12935, x13501.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13503{x13502.tot + x13502.mul * x12942, x13502.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13504{x13503.tot + x13503.mul * x12949, x13503.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13505{x13504.tot + x13504.mul * x12956, x13504.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13506{x13505.tot + x13505.mul * x12962, x13505.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13507{x13506.tot + x13506.mul * x2026, x13506.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13508{x13507.tot + x13507.mul * x12972, x13507.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13509{x13508.tot + x13508.mul * x12979, x13508.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13510{x13509.tot + x13509.mul * x12986, x13509.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13511 = x0 - x146;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13512 = x146 * x13511;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13513{x13510.tot + x13510.mul * x13512, x13510.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13514 = x0 - x157;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13515 = x157 * x13514;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13516{x13513.tot + x13513.mul * x13515, x13513.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13517 = x0 - x159;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13518 = x159 * x13517;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13519{x13516.tot + x13516.mul * x13518, x13516.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13520 = x0 - x170;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13521 = x170 * x13520;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13522{x13519.tot + x13519.mul * x13521, x13519.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13523 = x0 - x172;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13524 = x172 * x13523;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13525{x13522.tot + x13522.mul * x13524, x13522.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13526 = x0 - x183;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13527 = x183 * x13526;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13528{x13525.tot + x13525.mul * x13527, x13525.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13529 = x0 - x185;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13530 = x185 * x13529;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13531{x13528.tot + x13528.mul * x13530, x13528.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13532 = x0 - x196;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13533 = x196 * x13532;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13534{x13531.tot + x13531.mul * x13533, x13531.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13535 = x0 - x198;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13536 = x198 * x13535;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13537{x13534.tot + x13534.mul * x13536, x13534.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13538 = x0 - x200;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13539 = x200 * x13538;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13540{x13537.tot + x13537.mul * x13539, x13537.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13541 = x0 - x202;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13542 = x202 * x13541;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13543{x13540.tot + x13540.mul * x13542, x13540.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13544 = x0 - x204;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13545 = x204 * x13544;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13546{x13543.tot + x13543.mul * x13545, x13543.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13547 = x0 - x206;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13548 = x206 * x13547;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13549{x13546.tot + x13546.mul * x13548, x13546.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13550 = x0 - x208;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13551 = x208 * x13550;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13552{x13549.tot + x13549.mul * x13551, x13549.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13553 = x0 - x210;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13554 = x210 * x13553;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13555{x13552.tot + x13552.mul * x13554, x13552.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13556 = x0 - x212;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13557 = x212 * x13556;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13558{x13555.tot + x13555.mul * x13557, x13555.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13559 = x0 - x214;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13560 = x214 * x13559;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13561{x13558.tot + x13558.mul * x13560, x13558.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13562 = x0 - x216;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13563 = x216 * x13562;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13564{x13561.tot + x13561.mul * x13563, x13561.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13565{x13564.tot + x13564.mul * x2062, x13564.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13566 = x0 - x220;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13567 = x220 * x13566;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13568{x13565.tot + x13565.mul * x13567, x13565.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13569 = x0 - x222;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13570 = x222 * x13569;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13571{x13568.tot + x13568.mul * x13570, x13568.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:32)
+  // loc("./cirgen/components/bits.h":24:32)
   auto x13572 = x0 - x224;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   auto x13573 = x224 * x13572;
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13574{x13571.tot + x13571.mul * x13573, x13571.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13575{x13413.tot + x3393 * x13574.tot * x13413.mul, x13413.mul * x13574.mul};
@@ -27187,11 +27187,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x13576{x13575.tot + x3435 * x13574.tot * x13575.mul, x13575.mul * x13574.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13577{x13576.tot + x3438 * x13574.tot * x13576.mul, x13576.mul * x13574.mul};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13578{x80.tot + x80.mul * x13237, x80.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13579{x13578.tot + x13578.mul * x13239, x13578.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13580{x13579.tot + x13579.mul * x13248, x13579.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13581{x13577.tot + x3441 * x13580.tot * x13577.mul, x13577.mul * x13580.mul};
@@ -27217,7 +27217,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x13591 = x13590 - x0;
   // loc("./cirgen/components/onehot.h":31:8)
   MixState x13592{x13589.tot + x13589.mul * x13591, x13589.mul * (*mix)};
-  // loc("./cirgen/components/bits.h":17:25)
+  // loc("./cirgen/components/bits.h":24:25)
   MixState x13593{x13592.tot + x13592.mul * x13074, x13592.mul * (*mix)};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x13594{x13581.tot + x3444 * x13593.tot * x13581.mul, x13581.mul * x13593.mul};

@@ -43,28 +43,28 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
   Fp x3(0);
   // loc("cirgen/circuit/rv32im/top.cpp":17:17)
   Fp x4(1);
-  // loc("Top/Code/OneHot/hot[1](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[1](Reg)"("./cirgen/components/mux.h":41:25))
   auto x5 = args[0][2 * steps + ((cycle - 0) & mask)];
   assert(x5 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[3](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[3](Reg)"("./cirgen/components/mux.h":41:25))
   auto x6 = args[0][4 * steps + ((cycle - 0) & mask)];
   assert(x6 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[4](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[4](Reg)"("./cirgen/components/mux.h":41:25))
   auto x7 = args[0][5 * steps + ((cycle - 0) & mask)];
   assert(x7 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[5](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[5](Reg)"("./cirgen/components/mux.h":41:25))
   auto x8 = args[0][6 * steps + ((cycle - 0) & mask)];
   assert(x8 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[6](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[6](Reg)"("./cirgen/components/mux.h":41:25))
   auto x9 = args[0][7 * steps + ((cycle - 0) & mask)];
   assert(x9 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[7](Reg)"("./cirgen/components/mux.h":39:25))
+  // loc("Top/Code/OneHot/hot[7](Reg)"("./cirgen/components/mux.h":41:25))
   auto x10 = args[0][8 * steps + ((cycle - 0) & mask)];
   assert(x10 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[0](Reg)"("cirgen/circuit/rv32im/top.cpp":66:27))
+  // loc("Top/Code/OneHot/hot[0](Reg)"("cirgen/circuit/rv32im/top.cpp":78:27))
   auto x11 = args[0][1 * steps + ((cycle - 0) & mask)];
   assert(x11 != Fp::invalid());
-  // loc("Top/Code/OneHot/hot[2](Reg)"("cirgen/circuit/rv32im/top.cpp":66:27))
+  // loc("Top/Code/OneHot/hot[2](Reg)"("cirgen/circuit/rv32im/top.cpp":78:27))
   auto x12 = args[0][3 * steps + ((cycle - 0) & mask)];
   assert(x12 != Fp::invalid());
   if (x11 != 0) {
@@ -405,10 +405,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":63:40))
     auto x56 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x56 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x57 = args[2][45 * steps + ((cycle - 0) & mask)];
     assert(x57 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x58 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x58 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -447,10 +447,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x70 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x71 = args[2][47 * steps + ((cycle - 0) & mask)];
     assert(x71 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x72 = args[2][48 * steps + ((cycle - 0) & mask)];
     assert(x72 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -489,10 +489,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x84 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x85 = args[2][49 * steps + ((cycle - 0) & mask)];
     assert(x85 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x86 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x86 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -531,10 +531,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x98 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x99 = args[2][51 * steps + ((cycle - 0) & mask)];
     assert(x99 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x100 = args[2][52 * steps + ((cycle - 0) & mask)];
     assert(x100 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -573,10 +573,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x112 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x113 = args[2][53 * steps + ((cycle - 0) & mask)];
     assert(x113 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x114 = args[2][54 * steps + ((cycle - 0) & mask)];
     assert(x114 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -615,10 +615,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x126 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x127 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x127 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x128 = args[2][56 * steps + ((cycle - 0) & mask)];
     assert(x128 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -657,10 +657,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x140 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x141 = args[2][57 * steps + ((cycle - 0) & mask)];
     assert(x141 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x142 = args[2][58 * steps + ((cycle - 0) & mask)];
     assert(x142 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -699,10 +699,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x154 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x155 = args[2][59 * steps + ((cycle - 0) & mask)];
     assert(x155 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x156 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x156 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -741,10 +741,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x168 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x169 = args[2][61 * steps + ((cycle - 0) & mask)];
     assert(x169 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x170 = args[2][62 * steps + ((cycle - 0) & mask)];
     assert(x170 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -783,10 +783,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x182 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x183 = args[2][63 * steps + ((cycle - 0) & mask)];
     assert(x183 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x184 = args[2][64 * steps + ((cycle - 0) & mask)];
     assert(x184 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -825,10 +825,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x196 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x197 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x197 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x198 = args[2][66 * steps + ((cycle - 0) & mask)];
     assert(x198 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -867,10 +867,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x210 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x211 = args[2][67 * steps + ((cycle - 0) & mask)];
     assert(x211 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x212 = args[2][68 * steps + ((cycle - 0) & mask)];
     assert(x212 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -909,10 +909,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x224 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x225 = args[2][69 * steps + ((cycle - 0) & mask)];
     assert(x225 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x226 = args[2][70 * steps + ((cycle - 0) & mask)];
     assert(x226 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -951,10 +951,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x238 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x239 = args[2][71 * steps + ((cycle - 0) & mask)];
     assert(x239 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x240 = args[2][72 * steps + ((cycle - 0) & mask)];
     assert(x240 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -993,10 +993,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x252 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x253 = args[2][73 * steps + ((cycle - 0) & mask)];
     assert(x253 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x254 = args[2][74 * steps + ((cycle - 0) & mask)];
     assert(x254 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1035,10 +1035,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x266 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x267 = args[2][75 * steps + ((cycle - 0) & mask)];
     assert(x267 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x268 = args[2][76 * steps + ((cycle - 0) & mask)];
     assert(x268 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1077,10 +1077,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x280 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x281 = args[2][77 * steps + ((cycle - 0) & mask)];
     assert(x281 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x282 = args[2][78 * steps + ((cycle - 0) & mask)];
     assert(x282 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1119,10 +1119,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x294 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x295 = args[2][79 * steps + ((cycle - 0) & mask)];
     assert(x295 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x296 = args[2][80 * steps + ((cycle - 0) & mask)];
     assert(x296 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1161,10 +1161,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x308 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x309 = args[2][81 * steps + ((cycle - 0) & mask)];
     assert(x309 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x310 = args[2][82 * steps + ((cycle - 0) & mask)];
     assert(x310 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1203,10 +1203,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x322 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x323 = args[2][83 * steps + ((cycle - 0) & mask)];
     assert(x323 != Fp::invalid());
-    // loc("Top/Mux/1/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_setup(BytesSetupStep)/BytesSetup/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x324 = args[2][84 * steps + ((cycle - 0) & mask)];
     assert(x324 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1552,10 +1552,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":63:40))
     auto x386 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x386 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x387 = args[2][37 * steps + ((cycle - 0) & mask)];
     assert(x387 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x388 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x388 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1594,10 +1594,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x400 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x401 = args[2][39 * steps + ((cycle - 0) & mask)];
     assert(x401 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x402 = args[2][40 * steps + ((cycle - 0) & mask)];
     assert(x402 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1636,10 +1636,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x414 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x415 = args[2][41 * steps + ((cycle - 0) & mask)];
     assert(x415 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x416 = args[2][42 * steps + ((cycle - 0) & mask)];
     assert(x416 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1678,10 +1678,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x428 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x429 = args[2][43 * steps + ((cycle - 0) & mask)];
     assert(x429 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x430 = args[2][44 * steps + ((cycle - 0) & mask)];
     assert(x430 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1720,10 +1720,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x442 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x443 = args[2][45 * steps + ((cycle - 0) & mask)];
     assert(x443 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x444 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x444 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1762,10 +1762,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x456 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x457 = args[2][47 * steps + ((cycle - 0) & mask)];
     assert(x457 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x458 = args[2][48 * steps + ((cycle - 0) & mask)];
     assert(x458 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1804,10 +1804,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x470 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x471 = args[2][49 * steps + ((cycle - 0) & mask)];
     assert(x471 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x472 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x472 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1846,10 +1846,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x484 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x485 = args[2][51 * steps + ((cycle - 0) & mask)];
     assert(x485 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x486 = args[2][52 * steps + ((cycle - 0) & mask)];
     assert(x486 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1888,10 +1888,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x498 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x499 = args[2][53 * steps + ((cycle - 0) & mask)];
     assert(x499 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x500 = args[2][54 * steps + ((cycle - 0) & mask)];
     assert(x500 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1930,10 +1930,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x512 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x513 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x513 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x514 = args[2][56 * steps + ((cycle - 0) & mask)];
     assert(x514 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -1972,10 +1972,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x526 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x527 = args[2][57 * steps + ((cycle - 0) & mask)];
     assert(x527 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x528 = args[2][58 * steps + ((cycle - 0) & mask)];
     assert(x528 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2014,10 +2014,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x540 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x541 = args[2][59 * steps + ((cycle - 0) & mask)];
     assert(x541 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x542 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x542 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2056,10 +2056,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x554 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x555 = args[2][61 * steps + ((cycle - 0) & mask)];
     assert(x555 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x556 = args[2][62 * steps + ((cycle - 0) & mask)];
     assert(x556 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2098,10 +2098,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x568 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x569 = args[2][63 * steps + ((cycle - 0) & mask)];
     assert(x569 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x570 = args[2][64 * steps + ((cycle - 0) & mask)];
     assert(x570 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2140,10 +2140,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x582 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x583 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x583 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x584 = args[2][66 * steps + ((cycle - 0) & mask)];
     assert(x584 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2182,10 +2182,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x596 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x597 = args[2][67 * steps + ((cycle - 0) & mask)];
     assert(x597 != Fp::invalid());
-    // loc("Top/Mux/2/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_init(RamInitStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x598 = args[2][68 * steps + ((cycle - 0) & mask)];
     assert(x598 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2531,10 +2531,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":63:40))
     auto x660 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x660 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x661 = args[2][37 * steps + ((cycle - 0) & mask)];
     assert(x661 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x662 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x662 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2573,10 +2573,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x674 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x675 = args[2][39 * steps + ((cycle - 0) & mask)];
     assert(x675 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x676 = args[2][40 * steps + ((cycle - 0) & mask)];
     assert(x676 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2615,10 +2615,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x688 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x689 = args[2][41 * steps + ((cycle - 0) & mask)];
     assert(x689 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x690 = args[2][42 * steps + ((cycle - 0) & mask)];
     assert(x690 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2657,10 +2657,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x702 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x703 = args[2][43 * steps + ((cycle - 0) & mask)];
     assert(x703 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x704 = args[2][44 * steps + ((cycle - 0) & mask)];
     assert(x704 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2699,10 +2699,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x716 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x717 = args[2][45 * steps + ((cycle - 0) & mask)];
     assert(x717 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x718 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x718 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2741,10 +2741,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x730 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x731 = args[2][47 * steps + ((cycle - 0) & mask)];
     assert(x731 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x732 = args[2][48 * steps + ((cycle - 0) & mask)];
     assert(x732 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2783,10 +2783,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x744 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x745 = args[2][49 * steps + ((cycle - 0) & mask)];
     assert(x745 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x746 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x746 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2825,10 +2825,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x758 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x759 = args[2][51 * steps + ((cycle - 0) & mask)];
     assert(x759 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x760 = args[2][52 * steps + ((cycle - 0) & mask)];
     assert(x760 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2867,10 +2867,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x772 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x773 = args[2][53 * steps + ((cycle - 0) & mask)];
     assert(x773 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x774 = args[2][54 * steps + ((cycle - 0) & mask)];
     assert(x774 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2909,10 +2909,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x786 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x787 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x787 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x788 = args[2][56 * steps + ((cycle - 0) & mask)];
     assert(x788 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2951,10 +2951,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x800 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x801 = args[2][57 * steps + ((cycle - 0) & mask)];
     assert(x801 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x802 = args[2][58 * steps + ((cycle - 0) & mask)];
     assert(x802 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -2993,10 +2993,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x814 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x815 = args[2][59 * steps + ((cycle - 0) & mask)];
     assert(x815 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x816 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x816 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3035,10 +3035,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x828 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x829 = args[2][61 * steps + ((cycle - 0) & mask)];
     assert(x829 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x830 = args[2][62 * steps + ((cycle - 0) & mask)];
     assert(x830 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3077,10 +3077,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x842 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x843 = args[2][63 * steps + ((cycle - 0) & mask)];
     assert(x843 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x844 = args[2][64 * steps + ((cycle - 0) & mask)];
     assert(x844 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3119,10 +3119,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x856 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x857 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x857 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x858 = args[2][66 * steps + ((cycle - 0) & mask)];
     assert(x858 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3161,10 +3161,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x870 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x871 = args[2][67 * steps + ((cycle - 0) & mask)];
     assert(x871 != Fp::invalid());
-    // loc("Top/Mux/3/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_load(RamLoadStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x872 = args[2][68 * steps + ((cycle - 0) & mask)];
     assert(x872 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3510,10 +3510,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":63:40))
     auto x934 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x934 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x935 = args[2][37 * steps + ((cycle - 0) & mask)];
     assert(x935 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x936 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x936 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3552,10 +3552,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x948 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x949 = args[2][39 * steps + ((cycle - 0) & mask)];
     assert(x949 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x950 = args[2][40 * steps + ((cycle - 0) & mask)];
     assert(x950 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3594,10 +3594,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x962 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x963 = args[2][41 * steps + ((cycle - 0) & mask)];
     assert(x963 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x964 = args[2][42 * steps + ((cycle - 0) & mask)];
     assert(x964 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3636,10 +3636,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x976 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x977 = args[2][43 * steps + ((cycle - 0) & mask)];
     assert(x977 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x978 = args[2][44 * steps + ((cycle - 0) & mask)];
     assert(x978 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3678,10 +3678,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x990 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x991 = args[2][45 * steps + ((cycle - 0) & mask)];
     assert(x991 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x992 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x992 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3720,10 +3720,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1004 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1005 = args[2][47 * steps + ((cycle - 0) & mask)];
     assert(x1005 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1006 = args[2][48 * steps + ((cycle - 0) & mask)];
     assert(x1006 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3762,10 +3762,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1018 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1019 = args[2][49 * steps + ((cycle - 0) & mask)];
     assert(x1019 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1020 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x1020 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3804,10 +3804,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1032 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1033 = args[2][51 * steps + ((cycle - 0) & mask)];
     assert(x1033 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1034 = args[2][52 * steps + ((cycle - 0) & mask)];
     assert(x1034 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3846,10 +3846,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1046 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1047 = args[2][53 * steps + ((cycle - 0) & mask)];
     assert(x1047 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1048 = args[2][54 * steps + ((cycle - 0) & mask)];
     assert(x1048 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3888,10 +3888,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1060 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1061 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x1061 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1062 = args[2][56 * steps + ((cycle - 0) & mask)];
     assert(x1062 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3930,10 +3930,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1074 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1075 = args[2][57 * steps + ((cycle - 0) & mask)];
     assert(x1075 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1076 = args[2][58 * steps + ((cycle - 0) & mask)];
     assert(x1076 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -3972,10 +3972,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1088 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1089 = args[2][59 * steps + ((cycle - 0) & mask)];
     assert(x1089 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1090 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x1090 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4014,10 +4014,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1102 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1103 = args[2][61 * steps + ((cycle - 0) & mask)];
     assert(x1103 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1104 = args[2][62 * steps + ((cycle - 0) & mask)];
     assert(x1104 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4056,10 +4056,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1116 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1117 = args[2][63 * steps + ((cycle - 0) & mask)];
     assert(x1117 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1118 = args[2][64 * steps + ((cycle - 0) & mask)];
     assert(x1118 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4098,10 +4098,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1130 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1131 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x1131 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1132 = args[2][66 * steps + ((cycle - 0) & mask)];
     assert(x1132 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4140,10 +4140,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1144 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1145 = args[2][67 * steps + ((cycle - 0) & mask)];
     assert(x1145 != Fp::invalid());
-    // loc("Top/Mux/4/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/reset(ResetStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1146 = args[2][68 * steps + ((cycle - 0) & mask)];
     assert(x1146 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4489,10 +4489,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":63:40))
     auto x1208 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x1208 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1209 = args[2][37 * steps + ((cycle - 0) & mask)];
     assert(x1209 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1210 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x1210 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4531,10 +4531,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1222 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1223 = args[2][39 * steps + ((cycle - 0) & mask)];
     assert(x1223 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1224 = args[2][40 * steps + ((cycle - 0) & mask)];
     assert(x1224 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4573,10 +4573,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1236 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1237 = args[2][41 * steps + ((cycle - 0) & mask)];
     assert(x1237 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1238 = args[2][42 * steps + ((cycle - 0) & mask)];
     assert(x1238 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4615,10 +4615,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1250 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1251 = args[2][43 * steps + ((cycle - 0) & mask)];
     assert(x1251 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1252 = args[2][44 * steps + ((cycle - 0) & mask)];
     assert(x1252 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4657,10 +4657,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1264 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1265 = args[2][45 * steps + ((cycle - 0) & mask)];
     assert(x1265 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1266 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x1266 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4699,10 +4699,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1278 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1279 = args[2][47 * steps + ((cycle - 0) & mask)];
     assert(x1279 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1280 = args[2][48 * steps + ((cycle - 0) & mask)];
     assert(x1280 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4741,10 +4741,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1292 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1293 = args[2][49 * steps + ((cycle - 0) & mask)];
     assert(x1293 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1294 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x1294 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4783,10 +4783,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1306 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1307 = args[2][51 * steps + ((cycle - 0) & mask)];
     assert(x1307 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1308 = args[2][52 * steps + ((cycle - 0) & mask)];
     assert(x1308 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4825,10 +4825,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1320 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1321 = args[2][53 * steps + ((cycle - 0) & mask)];
     assert(x1321 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1322 = args[2][54 * steps + ((cycle - 0) & mask)];
     assert(x1322 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4867,10 +4867,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1334 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1335 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x1335 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1336 = args[2][56 * steps + ((cycle - 0) & mask)];
     assert(x1336 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4909,10 +4909,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1348 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1349 = args[2][57 * steps + ((cycle - 0) & mask)];
     assert(x1349 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1350 = args[2][58 * steps + ((cycle - 0) & mask)];
     assert(x1350 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4951,10 +4951,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1362 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1363 = args[2][59 * steps + ((cycle - 0) & mask)];
     assert(x1363 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1364 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x1364 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -4993,10 +4993,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1376 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1377 = args[2][61 * steps + ((cycle - 0) & mask)];
     assert(x1377 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1378 = args[2][62 * steps + ((cycle - 0) & mask)];
     assert(x1378 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5035,10 +5035,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1390 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1391 = args[2][63 * steps + ((cycle - 0) & mask)];
     assert(x1391 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1392 = args[2][64 * steps + ((cycle - 0) & mask)];
     assert(x1392 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5077,10 +5077,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1404 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1405 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x1405 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1406 = args[2][66 * steps + ((cycle - 0) & mask)];
     assert(x1406 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5119,10 +5119,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1418 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1419 = args[2][67 * steps + ((cycle - 0) & mask)];
     assert(x1419 != Fp::invalid());
-    // loc("Top/Mux/5/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1420 = args[2][68 * steps + ((cycle - 0) & mask)];
     assert(x1420 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5468,10 +5468,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":63:40))
     auto x1482 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x1482 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1483 = args[2][37 * steps + ((cycle - 0) & mask)];
     assert(x1483 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1484 = args[2][38 * steps + ((cycle - 0) & mask)];
     assert(x1484 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5510,10 +5510,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1496 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1497 = args[2][39 * steps + ((cycle - 0) & mask)];
     assert(x1497 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1498 = args[2][40 * steps + ((cycle - 0) & mask)];
     assert(x1498 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5552,10 +5552,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1510 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1511 = args[2][41 * steps + ((cycle - 0) & mask)];
     assert(x1511 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1512 = args[2][42 * steps + ((cycle - 0) & mask)];
     assert(x1512 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5594,10 +5594,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1524 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1525 = args[2][43 * steps + ((cycle - 0) & mask)];
     assert(x1525 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1526 = args[2][44 * steps + ((cycle - 0) & mask)];
     assert(x1526 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5636,10 +5636,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1538 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1539 = args[2][45 * steps + ((cycle - 0) & mask)];
     assert(x1539 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1540 = args[2][46 * steps + ((cycle - 0) & mask)];
     assert(x1540 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5678,10 +5678,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1552 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1553 = args[2][47 * steps + ((cycle - 0) & mask)];
     assert(x1553 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1554 = args[2][48 * steps + ((cycle - 0) & mask)];
     assert(x1554 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5720,10 +5720,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1566 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1567 = args[2][49 * steps + ((cycle - 0) & mask)];
     assert(x1567 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1568 = args[2][50 * steps + ((cycle - 0) & mask)];
     assert(x1568 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5762,10 +5762,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1580 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1581 = args[2][51 * steps + ((cycle - 0) & mask)];
     assert(x1581 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1582 = args[2][52 * steps + ((cycle - 0) & mask)];
     assert(x1582 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5804,10 +5804,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1594 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1595 = args[2][53 * steps + ((cycle - 0) & mask)];
     assert(x1595 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1596 = args[2][54 * steps + ((cycle - 0) & mask)];
     assert(x1596 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5846,10 +5846,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1608 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1609 = args[2][55 * steps + ((cycle - 0) & mask)];
     assert(x1609 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1610 = args[2][56 * steps + ((cycle - 0) & mask)];
     assert(x1610 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5888,10 +5888,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1622 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1623 = args[2][57 * steps + ((cycle - 0) & mask)];
     assert(x1623 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1624 = args[2][58 * steps + ((cycle - 0) & mask)];
     assert(x1624 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5930,10 +5930,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1636 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1637 = args[2][59 * steps + ((cycle - 0) & mask)];
     assert(x1637 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1638 = args[2][60 * steps + ((cycle - 0) & mask)];
     assert(x1638 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -5972,10 +5972,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1650 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1651 = args[2][61 * steps + ((cycle - 0) & mask)];
     assert(x1651 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1652 = args[2][62 * steps + ((cycle - 0) & mask)];
     assert(x1652 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -6014,10 +6014,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1664 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1665 = args[2][63 * steps + ((cycle - 0) & mask)];
     assert(x1665 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1666 = args[2][64 * steps + ((cycle - 0) & mask)];
     assert(x1666 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -6056,10 +6056,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1678 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1679 = args[2][65 * steps + ((cycle - 0) & mask)];
     assert(x1679 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1680 = args[2][66 * steps + ((cycle - 0) & mask)];
     assert(x1680 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -6098,10 +6098,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
       // loc("cirgen/components/bytes.cpp":79:9)
       if (x1692 != 0) throw std::runtime_error("eqz failed at: cirgen/components/bytes.cpp:79");
     }
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1693 = args[2][67 * steps + ((cycle - 0) & mask)];
     assert(x1693 != Fp::invalid());
-    // loc("Top/Mux/6/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/ram_fini(RamFiniStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1694 = args[2][68 * steps + ((cycle - 0) & mask)];
     assert(x1694 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
@@ -6202,10 +6202,10 @@ Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp*
     // loc("Top/BytesHeader/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":63:40))
     auto x1722 = args[2][1 * steps + ((cycle - 1) & mask)];
     assert(x1722 != Fp::invalid());
-    // loc("Top/Mux/7/PlonkFini/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_fini(BytesFiniStep)/PlonkFini/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1723 = args[2][3 * steps + ((cycle - 0) & mask)];
     assert(x1723 != Fp::invalid());
-    // loc("Top/Mux/7/PlonkFini/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
+    // loc("Top/mux(Mux)/bytes_fini(BytesFiniStep)/PlonkFini/BytesPlonkElement/Reg"("./cirgen/compiler/edsl/component.h":153:27))
     auto x1724 = args[2][4 * steps + ((cycle - 0) & mask)];
     assert(x1724 != Fp::invalid());
     // loc("cirgen/components/bytes.cpp":66:18)
