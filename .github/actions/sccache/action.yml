@@ -39,3 +39,4 @@ runs:
         cache-directories: ~/.cache/risc0
 
     - run: rm $HOME/.cargo/config
+      shell: bash
