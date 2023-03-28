@@ -28,6 +28,7 @@ use rustacuda::{
 };
 use rustacuda_core::UnifiedPointer;
 
+use super::{Buffer, Hal, TRACKER};
 use crate::{
     core::{
         config::{HashSuite, HashSuitePoseidon, HashSuiteSha256},
@@ -35,7 +36,6 @@ use crate::{
         sha::Digest,
         sha_cpu,
     },
-    hal::{Buffer, Hal},
     FRI_FOLD,
 };
 
@@ -228,6 +228,7 @@ struct RawBuffer {
 impl RawBuffer {
     pub fn new(name: &'static str, size: usize) -> Self {
         log::debug!("alloc: {size} bytes, {name}");
+        TRACKER.lock().unwrap().alloc(size);
         Self {
             name,
             buf: unsafe { UnifiedBuffer::uninitialized(size).unwrap() },
@@ -238,6 +239,7 @@ impl RawBuffer {
 impl Drop for RawBuffer {
     fn drop(&mut self) {
         log::debug!("free: {} bytes, {}", self.buf.len(), self.name);
+        TRACKER.lock().unwrap().free(self.buf.len());
     }
 }
 
