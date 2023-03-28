@@ -21,6 +21,9 @@ pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
+use std::sync::Mutex;
+
+use lazy_static::lazy_static;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
@@ -28,6 +31,10 @@ use crate::{
     core::digest::Digest,
     INV_RATE,
 };
+
+lazy_static! {
+    static ref TRACKER: Mutex<MemoryTracker> = Mutex::new(MemoryTracker::new());
+}
 
 pub trait Buffer<T>: Clone {
     fn size(&self) -> usize;
@@ -52,6 +59,10 @@ pub trait Hal {
     type Rng: ConfigRng<Self::Field>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
+
+    fn get_memory_usage(&self) -> usize {
+        TRACKER.lock().unwrap().peak
+    }
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::BufferDigest;
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::BufferElem;
@@ -125,6 +136,26 @@ pub trait EvalCheck<H: Hal> {
         po2: usize,
         steps: usize,
     );
+}
+
+struct MemoryTracker {
+    total: usize,
+    peak: usize,
+}
+
+impl MemoryTracker {
+    pub fn new() -> Self {
+        Self { total: 0, peak: 0 }
+    }
+
+    pub fn alloc(&mut self, size: usize) {
+        self.total += size;
+        self.peak = self.peak.max(self.total);
+    }
+
+    pub fn free(&mut self, size: usize) {
+        self.total = self.total.saturating_sub(size);
+    }
 }
 
 #[cfg(test)]
