@@ -25,6 +25,9 @@
 [zk-proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
 [risc-v]: https://en.wikipedia.org/wiki/RISC-V
 [crates.io]: https://crates.io
+[cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
+[website-getting-started]: https://www.risczero.com/docs
+[examples]: https://github.com/risc0/risc0/tree/main/examples
 
 > WARNING: This software is still experimental, we do not recommend it for
 > production use (see Security section).
@@ -91,97 +94,14 @@ other manner of problems.  Caveat emptor.
 
 ## Getting Started
 
-To get started building applications using the zkVM in Rust, we provide a
-[starter template](https://github.com/risc0/risc0-rust-starter) and a
-number of [working examples](https://github.com/risc0/risc0-rust-examples/).
+If you want to get started with your own project immediately, you can use our
+`cargo risczero` tool to create your own repository. See
+[its README](cargo-risczero-readme) for installation and usage instructions.
 
-## Example
-
-Add a `methods` crate, which will act as a container for code that runs within
-the zkVM. This crate will be configured with a special build-script to enable
-cross-compilation of RISC-V code. The resulting ELF binary will be embedded
-within this crate so that it can be referenced as a dependency in your
-application.
-
-```
-cargo new --lib methods
-```
-
-Adjust `methods/Cargo.toml` to include:
-
-```toml
-[build-dependencies]
-risc0-build = "0.13"
-
-[package.metadata.risc0]
-methods = ["guest"]
-```
-
-Adjust `methods/src/lib.rs` so that its contents are:
-
-```rust
-include!(concat!(env!("OUT_DIR"), "/methods.rs"));
-```
-
-Add a `methods/build.rs` build script with these contents:
-
-```rust
-fn main() {
-  risc0_build::embed_methods();
-}
-```
-
-Within the `methods` crate, create a `guest` crate. Rename the `main.rs` to
-something more appropriate.
-
-```
-cargo new --bin methods/guest
-mv methods/guest/main.rs methods/guest/example.rs
-```
-
-Add `risc0-zkvm` to the `methods/guest/Cargo.toml` file:
-
-```toml
-[dependencies]
-risc0-zkvm = { version = "0.13", default-features = false }
-```
-
-Edit the code in `methods/guest/src/example.rs`:
-
-```rust
-#![no_main]
-#![no_std]
-
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
-    // TODO: Implement your guest code here
-}
-```
-
-Add `risc0-zkvm` and the `methods` crate to your dependencies:
-
-```toml
-[dependencies]
-methods = { path = "methods" }
-risc0-zkvm = "0.13"
-```
-
-Call the prover from your application:
-
-```rust
-use methods::{EXAMPLE_ELF, EXAMPLE_ID};
-use risc0_zkvm::Prover;
-
-fn main() {
-  let mut prover = Prover::new(EXAMPLE_ELF, EXAMPLE_ID).unwrap();
-  let receipt = prover.run().unwrap();
-
-  // The receipt can be sent to another party, where they can:
-
-  receipt.verify(EXAMPLE_ID).unwrap();
-}
-```
+For more guidance on how to use RISC Zero, how RISC Zero projects are typically
+structured, etc., see our [Getting Started page](website-getting-started). You
+may also want to look at the various examples in
+[our examples directory](examples).
 
 ## Rust Binaries
 
