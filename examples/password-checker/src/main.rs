@@ -32,7 +32,7 @@ fn main() {
     };
 
     // a new prover is created to run the pw_checker method
-    let mut prover = Prover::new(PW_CHECKER_ELF, PW_CHECKER_ID).unwrap();
+    let mut prover = Prover::new(PW_CHECKER_ELF).unwrap();
 
     // Adding input to the prover makes it readable by the guest
     let vec = to_vec(&request).unwrap();
@@ -65,7 +65,7 @@ mod tests {
         };
 
         // a new prover is created to run the pw_checker method
-        let mut prover = Prover::new(PW_CHECKER_ELF, PW_CHECKER_ID).unwrap();
+        let mut prover = Prover::new(PW_CHECKER_ELF).unwrap();
 
         // Adding input to the prover makes it readable by the guest
         let vec = to_vec(&request).unwrap();

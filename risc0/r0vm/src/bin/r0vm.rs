@@ -60,6 +60,10 @@ struct Args {
     #[clap(short, long, action = clap::ArgAction::Count)]
     verbose: u8,
 
+    /// Add environment vairables in the form of NAME=value.
+    #[clap(long, action = clap::ArgAction::Append)]
+    env: Vec<String>,
+
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
     /// to read it.
@@ -91,16 +95,8 @@ fn read_image_id(verbose: u8, elf_file: &Path, image_id_file: Option<&Path>) -> 
     Some(id)
 }
 
-fn run_prover(
-    elf_contents: &[u8],
-    image_id: &Digest,
-    opts: ProverOpts,
-    initial_input: Option<Vec<u8>>,
-) -> Result<Receipt> {
-    let mut prover = Prover::new_with_opts(&elf_contents, image_id.clone(), opts).unwrap();
-    if let Some(bytes) = initial_input {
-        prover.add_input_u8_slice(bytes.as_slice());
-    }
+fn run_prover(elf_contents: &[u8], opts: ProverOpts) -> Result<Receipt> {
+    let mut prover = Prover::new_with_opts(&elf_contents, opts).unwrap();
     let receipt = prover.run()?;
 
     Ok(receipt)
@@ -151,39 +147,43 @@ fn main() {
             }
             let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
             let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+            let image_id = image.get_root();
             if let Some(image_id_file) = args.image_id.as_ref() {
-                std::fs::write(&image_id_file, image.root.as_bytes()).unwrap();
+                std::fs::write(&image_id_file, image_id.as_bytes()).unwrap();
                 if args.verbose > 0 {
                     eprintln!("Saved image id to {}", image_id_file.display());
                 }
             }
-            image.root
+            image_id
         })
     };
 
     let mut guest_prof: Option<Profiler> = None;
-    let opts: ProverOpts =
+    let mut opts: ProverOpts =
         ProverOpts::default().with_skip_seal(args.skip_seal || args.receipt.is_none());
+
+    for var in args.env.iter() {
+        let (varname, val) = var
+            .split_once('=')
+            .expect("Environment variables should be of the form NAME=value");
+        opts = opts.with_env_var(varname, val);
+    }
 
     if args.pprof_out.is_some() {
         guest_prof = Some(Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());
     }
 
+    if let Some(input) = args.initial_input.as_ref() {
+        opts = opts.with_stdin(fs::File::open(input).unwrap());
+    }
+
     let proof = run_prover(
         &elf_contents,
-        &image_id,
         if let Some(ref mut profiler) = guest_prof {
             opts.with_trace_callback(profiler.make_trace_callback())
         } else {
             opts
         },
-        args.initial_input.as_ref().map(|input| {
-            let input_bytes = fs::read(input).unwrap();
-            if args.verbose > 0 {
-                eprintln!("Supplying {} bytes of initial input", input_bytes.len());
-            }
-            input_bytes
-        }),
     );
 
     // Now that we're done with the prover, we can collect the guest profiling data.

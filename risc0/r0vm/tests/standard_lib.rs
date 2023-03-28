@@ -18,18 +18,18 @@ use anyhow::Result;
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
 use risc0_zkvm::{receipt::insecure_skip_seal, Receipt};
-use risc0_zkvm_platform::WORD_SIZE;
 
-static EXPECTED_STDOUT: &str = "Hello world on stdout!\n";
-static EXPECTED_STDERR: &str = "Hello world on stderr!\n";
+const STDIN_MSG: &str = "Hello world from stdin!\n";
+const EXPECTED_STDOUT_MSG: &str = "Hello world on stdout!\n";
+const EXPECTED_STDERR: &str = "Hello world on stderr!\n";
+
+fn expected_stdout() -> String {
+    format!("{EXPECTED_STDOUT_MSG}{STDIN_MSG}")
+}
 
 fn load_receipt(p: &Path) -> Receipt {
     let data = std::fs::read(p).unwrap();
-    let as_u32: Vec<u32> = data
-        .chunks(WORD_SIZE)
-        .map(|bytes| u32::from_le_bytes(<[u8; WORD_SIZE]>::try_from(bytes).unwrap()))
-        .collect();
-    risc0_zkvm::serde::from_slice(&as_u32).unwrap()
+    risc0_zkvm::serde::from_slice(&data).unwrap()
 }
 
 #[test]
@@ -50,10 +50,14 @@ fn stdio_outputs_in_receipt() -> Result<()> {
         .arg("--image-id")
         .arg(&*image_id_file)
         .arg("--receipt")
-        .arg(&*receipt_file);
+        .arg(&*receipt_file)
+        .arg("--env")
+        .arg("TEST_MODE=STDIO")
+        .write_stdin(STDIN_MSG);
+
     cmd.assert()
         .stderr(EXPECTED_STDERR)
-        .stdout(EXPECTED_STDOUT)
+        .stdout(expected_stdout())
         .success();
 
     let receipt = load_receipt(&receipt_file);
@@ -84,10 +88,13 @@ fn stdio_outputs_in_receipt_without_seal() -> Result<()> {
         .arg(&*image_id_file)
         .arg("--receipt")
         .arg(&*receipt_file)
-        .arg("--skip-seal");
+        .arg("--skip-seal")
+        .arg("--env")
+        .arg("TEST_MODE=STDIO")
+        .write_stdin(STDIN_MSG);
     cmd.assert()
         .stderr(EXPECTED_STDERR)
-        .stdout(EXPECTED_STDOUT)
+        .stdout(expected_stdout())
         .success();
 
     let receipt = load_receipt(&receipt_file);

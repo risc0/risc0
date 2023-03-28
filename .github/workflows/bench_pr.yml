@@ -10,6 +10,10 @@ on:
 
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   bench:
     runs-on: [self-hosted, bench, "${{ matrix.os }}", "${{ matrix.device }}"]
@@ -45,40 +49,21 @@ jobs:
           prettyName: "${{ matrix.os }}-${{ matrix.feature }}"
           outputMarkdown: true
 
+      - name: Create output dir
+        run: |
+          mkdir -p ${{ runner.temp }}/pr-output/
+          echo ${{ github.event.number }} > ${{ runner.temp }}/pr-output/NR
+
       - name: Write compare markdown to file
         run: |
-          echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ matrix.os }}-${{ matrix.feature }}-output.md
+          echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ runner.temp }}/pr-output/${{ matrix.os }}-${{ matrix.feature }}-output.md
 
       - uses: actions/upload-artifact@v3
         with:
           name: 'md-output'
-          path: ${{ matrix.os }}-${{ matrix.feature }}-output.md
+          path: ${{ runner.temp }}/pr-output/
           if-no-files-found: error
 
-  create-comment:
-    runs-on: ubuntu-22.04
-    needs: [ bench ]
-    permissions:
-      issues: write
-      pull-requests: write
-
-    steps:
-      - uses: actions/download-artifact@v3
-      - name: Merge output files
-        shell: bash
-        run: sed h ./md-output/*-output.md > merged.md
-        id: download
-
-      - uses: actions/github-script@v3
-        name: Create PR comment
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            var fs = require('fs');
-            var body = fs.readFileSync("./merged.md", 'utf8')
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body
-            })
+      # Note: we just push the comment data into artifacts, here
+      # the bench_pr_comment.yml picks up after this workflow to make the comment
+      # needed because: https://securitylab.github.com/research/github-actions-preventing-pwn-requests/

@@ -72,7 +72,7 @@ impl Risc0Method {
         let elf = fs::read(&self.elf_path).unwrap();
         let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
         let image = MemoryImage::new(&program, PAGE_SIZE as u32);
-        image.root
+        image.get_root()
     }
 
     fn rust_def(&self) -> String {
@@ -109,9 +109,9 @@ struct ZipMapEntry {
 // Sources for standard library, and where they should be mapped to.
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry {
-        filename: "7923ccc1ea13f448f3a1d0cb5297c60502100984.zip",
-        zip_url: "https://github.com/risc0/rust/archive/7923ccc1ea13f448f3a1d0cb5297c60502100984.zip",
-        src_prefix: "rust-7923ccc1ea13f448f3a1d0cb5297c60502100984/library",
+        filename: "53bbc8fc2afb2e10e3a90d7bf188bfd6598374ab.zip",
+        zip_url: "https://github.com/risc0/rust/archive/53bbc8fc2afb2e10e3a90d7bf188bfd6598374ab.zip",
+        src_prefix: "rust-53bbc8fc2afb2e10e3a90d7bf188bfd6598374ab/library",
         dst_prefix: "library"
     },
     ZipMapEntry {

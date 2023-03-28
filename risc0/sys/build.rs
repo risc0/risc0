@@ -12,16 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    env,
-    path::{Path, PathBuf},
-};
+use std::{env, path::Path};
 
 use risc0_build_kernel::{KernelBuild, KernelType};
 
 fn main() {
-    build_cpu_kernels();
-
     if env::var("CARGO_FEATURE_CUDA").is_ok() {
         build_cuda_kernels();
     }
@@ -31,43 +26,21 @@ fn main() {
     }
 }
 
-fn build_cpu_kernels() {
-    let srcs: Vec<PathBuf> = glob::glob("cxx/rv32im/*.cpp")
-        .unwrap()
-        .map(|x| x.unwrap())
-        .collect();
-    cc::Build::new()
-        .cpp(true)
-        .debug(false)
-        .files(&srcs)
-        .flag_if_supported("/std:c++17")
-        .flag_if_supported("-std=c++17")
-        .flag_if_supported("-fno-var-tracking")
-        .flag_if_supported("-fno-var-tracking-assignments")
-        .flag_if_supported("-g0")
-        .compile("circuit");
-    for src in srcs {
-        println!("cargo:rerun-if-changed={}", src.display());
-    }
-}
-
 fn build_cuda_kernels() {
-    const CUDA_KERNELS: &[(&str, &str, &[&str])] = &[
-        ("rv32im", "eval_check.cu", &[]),
-        (
-            "zkp",
-            "all.cu",
-            &[
-                "eltwise.cu",
-                "fri.cu",
-                "mix.cu",
-                "ntt.cu",
-                "sha.cu",
-                "zk.cu",
-                "sha256.h",
-            ],
-        ),
-    ];
+    const CUDA_KERNELS: &[(&str, &str, &[&str])] = &[(
+        "zkp",
+        "all.cu",
+        &[
+            "eltwise.cu",
+            "fri.cu",
+            "mix.cu",
+            "ntt.cu",
+            "poseidon.cu",
+            "sha.cu",
+            "zk.cu",
+            "sha256.h",
+        ],
+    )];
 
     let inc_path = Path::new("kernels/zkp/cuda");
     for (name, src, deps) in CUDA_KERNELS {
@@ -83,21 +56,18 @@ fn build_cuda_kernels() {
 }
 
 fn build_metal_kernels() {
-    const METAL_KERNELS: &[(&str, &[&str])] = &[
-        ("rv32im", &["eval_check.metal"]),
-        (
-            "zkp",
-            &[
-                "eltwise.metal",
-                "fri.metal",
-                "mix.metal",
-                "ntt.metal",
-                "poseidon.metal",
-                "sha.metal",
-                "zk.metal",
-            ],
-        ),
-    ];
+    const METAL_KERNELS: &[(&str, &[&str])] = &[(
+        "zkp",
+        &[
+            "eltwise.metal",
+            "fri.metal",
+            "mix.metal",
+            "ntt.metal",
+            "poseidon.metal",
+            "sha.metal",
+            "zk.metal",
+        ],
+    )];
 
     let inc_path = Path::new("kernels/zkp/metal");
     for (name, srcs) in METAL_KERNELS {

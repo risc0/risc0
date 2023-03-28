@@ -17,7 +17,7 @@ use core::{
     cell::UnsafeCell,
 };
 
-use risc0_zkvm_platform::{abi, memory, WORD_SIZE};
+use risc0_zkvm_platform::{memory, syscall, WORD_SIZE};
 
 struct BumpPointerAlloc;
 
@@ -31,7 +31,7 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
             .size()
             / WORD_SIZE;
 
-        abi::zkvm_abi_alloc_words(nwords) as *mut u8
+        syscall::sys_alloc_words(nwords) as *mut u8
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
