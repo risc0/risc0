@@ -45,9 +45,9 @@ mod deserializer;
 mod err;
 mod serializer;
 
-pub use deserializer::{from_slice, Deserializer};
-pub use err::Result;
-pub use serializer::{to_vec, to_vec_with_capacity, AllocVec, Serializer, StreamWriter};
+pub use deserializer::{from_slice, Deserializer, WordRead};
+pub use err::{Error, Result};
+pub use serializer::{to_vec, to_vec_with_capacity, Serializer, WordWrite};
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///
@@ -72,9 +72,10 @@ mod tests {
 
     #[test]
     fn test_map_round_trip() {
-        let input: HashMap<&str, u32> = HashMap::from([("foo", 1), ("bar", 2), ("baz", 3)]);
+        let input: HashMap<String, u32> =
+            HashMap::from([("foo".into(), 1), ("bar".into(), 2), ("baz".into(), 3)]);
         let data = to_vec(&input).unwrap();
-        let output: HashMap<&str, u32> = from_slice(data.as_slice()).unwrap();
+        let output: HashMap<String, u32> = from_slice(data.as_slice()).unwrap();
         assert_eq!(input, output);
     }
 

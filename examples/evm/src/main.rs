@@ -68,7 +68,7 @@ async fn main() {
 
     let zkdb = trace_db.create_zkdb();
 
-    let mut prover = Prover::new(EVM_ELF, EVM_ID).expect("Failed to construct prover");
+    let mut prover = Prover::new(EVM_ELF).expect("Failed to construct prover");
 
     prover.add_input_u32_slice(&to_vec(&env).unwrap());
     prover.add_input_u32_slice(&to_vec(&zkdb).unwrap());

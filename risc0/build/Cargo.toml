@@ -9,7 +9,7 @@ repository = { workspace = true }
 
 [dependencies]
 cargo_metadata = "0.15"
-directories = "4.0"
+directories = "5.0"
 downloader = "0.2"
 risc0-zkvm = { workspace = true, features = ["binfmt"] }
 risc0-zkvm-platform = { workspace = true }
