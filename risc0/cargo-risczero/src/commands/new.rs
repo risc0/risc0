@@ -220,7 +220,7 @@ mod tests {
         assert!(proj_path.exists());
         assert!(proj_path.join(".git").exists());
         assert!(find_in_file(
-            &format!("risc0-zkvm = \"{RISC0_DEFAULT_VERSION}\""),
+            &format!("risc0-zkvm = {{ version = \"{RISC0_DEFAULT_VERSION}\" }}"),
             &proj_path.join("host/Cargo.toml")
         ));
 
