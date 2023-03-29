@@ -5,20 +5,8 @@ edition = "2021"
 
 [workspace]
 
-{% assign feature_std = ", features = ['std']" -%}
-
-[build-dependencies]
-{% if risc0_crate_branch -%}
-risc0-build = { git = "https://github.com/risc0/risc0.git", branch = "{{ risc0_crate_branch }}" }
-{% else %}
-risc0-build = "{{ risc0_version }}"
-{% endif %}
 [dependencies]
-{% unless risc0_std %}
+{%- unless risc0_std %}
 # If you want to try (experimental) std support, add `features = [ "std" ]` to risc0-zkvm
-{% endunless -%}
-{% if risc0_crate_branch -%}
-risc0-zkvm = { git = "https://github.com/risc0/risc0.git", branch = "{{ risc0_crate_branch }}", default-features = false{{ feature_std }} }
-{% else %}
-risc0-zkvm = { version = "{{ risc0_version }}", default-features = false{{ feature_std }} }
-{% endif %}
+{%- endunless %}
+risc0-zkvm = { {{ risc0_zkvm }}, default-features = false{{ risc0_feature_std }} }
