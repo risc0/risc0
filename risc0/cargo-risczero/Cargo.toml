@@ -1,0 +1,28 @@
+[package]
+name = "cargo-risczero"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+description = "RISC Zero CLI tools"
+readme = "README.md"
+keywords = ["risc0", "risczero", "tool", "cli", "generate", "template"]
+
+[dependencies]
+# Note, due to tempfile = 3.3.0 in cargo-generate
+# we have to downgrade all uses of tempfile to 3.3 in our workspace due to:
+# https://github.com/rust-lang/cargo/issues/7880
+cargo-generate = "0.18"
+clap = { version = "4.0", features = ["derive"] }
+const_format = "0.2"
+convert_case = "0.6"
+tracing = { version = "0.1", default-features = false }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+[dev-dependencies]
+tempfile = "3.3"
+
+[[bin]]
+path = "src/bin/main.rs"
+name = "cargo-risczero"

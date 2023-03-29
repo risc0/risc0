@@ -23,7 +23,7 @@ use risc0_core::field::{
     Elem, ExtElem, RootsOfUnity,
 };
 
-use super::{Buffer, Hal};
+use super::{Buffer, Hal, TRACKER};
 use crate::{
     core::{
         config::{HashSuite, HashSuitePoseidon, HashSuiteSha256},
@@ -185,9 +185,25 @@ pub type MetalHalSha256 = MetalHal<MetalHashSha256>;
 pub type MetalHalPoseidon = MetalHal<MetalHashPoseidon>;
 
 #[derive(Clone, Debug)]
+struct TrackedBuffer(MetalBuffer);
+
+impl TrackedBuffer {
+    pub fn new(buffer: MetalBuffer) -> Self {
+        TRACKER.lock().unwrap().alloc(buffer.length() as usize);
+        Self(buffer)
+    }
+}
+
+impl Drop for TrackedBuffer {
+    fn drop(&mut self) {
+        TRACKER.lock().unwrap().free(self.0.length() as usize);
+    }
+}
+
+#[derive(Clone, Debug)]
 pub struct BufferImpl<T> {
     cmd_queue: CommandQueue,
-    buffer: MetalBuffer,
+    buffer: TrackedBuffer,
     offset: usize,
     size: usize,
     marker: PhantomData<T>,
@@ -208,7 +224,7 @@ impl<T> BufferImpl<T> {
         let buffer = device.new_buffer(bytes_len as u64, options);
         Self {
             cmd_queue,
-            buffer,
+            buffer: TrackedBuffer::new(buffer),
             offset: 0,
             size,
             marker: PhantomData,
@@ -222,7 +238,7 @@ impl<T> BufferImpl<T> {
             device.new_buffer_with_data(slice.as_ptr() as *const c_void, bytes_len as u64, options);
         Self {
             cmd_queue,
-            buffer,
+            buffer: TrackedBuffer::new(buffer),
             offset: 0,
             size: slice.len(),
             marker: PhantomData,
@@ -232,7 +248,7 @@ impl<T> BufferImpl<T> {
     pub fn as_arg<'a>(&'a self) -> KernelArg<'a> {
         let offset = self.offset * mem::size_of::<T>();
         KernelArg::Buffer {
-            buffer: &self.buffer,
+            buffer: &self.buffer.0,
             offset: offset as u64,
         }
     }
@@ -240,7 +256,7 @@ impl<T> BufferImpl<T> {
     pub fn as_arg_with_offset<'a>(&'a self, offset: usize) -> KernelArg<'a> {
         let offset = (self.offset + offset) * mem::size_of::<T>();
         KernelArg::Buffer {
-            buffer: &self.buffer,
+            buffer: &self.buffer.0,
             offset: offset as u64,
         }
     }
@@ -248,7 +264,7 @@ impl<T> BufferImpl<T> {
     fn sync(&self) {
         let cmd_buffer = self.cmd_queue.new_command_buffer();
         let blit_encoder = cmd_buffer.new_blit_command_encoder();
-        blit_encoder.synchronize_resource(&self.buffer);
+        blit_encoder.synchronize_resource(&self.buffer.0);
         blit_encoder.end_encoding();
         cmd_buffer.commit();
         cmd_buffer.wait_until_completed();
@@ -273,21 +289,22 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         self.sync();
-        let ptr = self.buffer.contents() as *const T;
-        let len = self.buffer.length() as usize / mem::size_of::<T>();
+        let ptr = self.buffer.0.contents() as *const T;
+        let len = self.buffer.0.length() as usize / mem::size_of::<T>();
         let slice = unsafe { slice::from_raw_parts(ptr, len) };
         f(&slice[self.offset..self.offset + self.size]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         self.sync();
-        let ptr = self.buffer.contents() as *mut T;
-        let len = self.buffer.length() as usize / mem::size_of::<T>();
+        let ptr = self.buffer.0.contents() as *mut T;
+        let len = self.buffer.0.length() as usize / mem::size_of::<T>();
         let slice = unsafe { slice::from_raw_parts_mut(ptr, len) };
         f(&mut slice[self.offset..self.offset + self.size]);
         let offset = self.offset * mem::size_of::<T>();
         let size = self.size * mem::size_of::<T>();
         self.buffer
+            .0
             .did_modify_range(NSRange::new(offset as u64, size as u64));
     }
 }

@@ -18,6 +18,7 @@ bytemuck = { version = "1.12", features = ["derive"] }
 digest = "0.10"
 fil-rustacuda = { version = "0.1", optional = true }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
+lazy_static = { version = "1.4", optional = true }
 metal = { version = "0.24", optional = true }
 paste = "1.0"
 rand_core = "0.6"
@@ -55,10 +56,11 @@ cuda = [
 ]
 metal = ["dep:metal", "risc0-sys/metal"]
 prove = [
+  "dep:lazy_static",
   "dep:ndarray",
   "dep:rand",
   "dep:rayon",
-  "std",
-  "risc0-sys"
+  "risc0-sys",
+  "std"
 ]
 std = ["anyhow/std", "risc0-zeroio/std"]
