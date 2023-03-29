@@ -97,16 +97,6 @@ other manner of problems.  Caveat emptor.
 
 First, clone this repository and [install rust](install-rust).
 
-To run a simple RISC Zero program, navigate to the `examples/factors` directory
-and run `cargo run`:
-```
-cd examples/factors
-cargo run -r
-```
-This should produce the output `I know the factors of 391, and I can prove it!`.
-Congratulations, you've produced your first RISC Zero zero-knowledge proof! You
-can find more examples in this [examples folder](examples).
-
 To start your own project, you can use our `cargo risczero` tool to write the
 initial boilerplate and set up a standard file structure. First install the tool
 ```
@@ -118,6 +108,16 @@ cargo risczero new my_project
 ```
 More details and options for `cargo risczero` are given in
 [its README](cargo-risczero-readme).
+
+To run a simple RISC Zero program, navigate to the `examples/factors` directory
+and run `cargo run`:
+```
+cd examples/factors
+cargo run -r
+```
+This should produce the output `I know the factors of 391, and I can prove it!`.
+Congratulations, you've produced your first RISC Zero zero-knowledge proof! You
+can find more examples in this [examples folder](examples).
 
 For more guidance on how to use RISC Zero, how RISC Zero projects are typically
 structured, and other resources useful to developers new to RISC Zero, see our
