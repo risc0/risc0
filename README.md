@@ -28,6 +28,7 @@
 [cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
 [website-getting-started]: https://www.risczero.com/docs
 [examples]: https://github.com/risc0/risc0/tree/main/examples
+[install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 
 > WARNING: This software is still experimental, we do not recommend it for
 > production use (see Security section).
@@ -94,14 +95,33 @@ other manner of problems.  Caveat emptor.
 
 ## Getting Started
 
-If you want to get started with your own project immediately, you can use our
-`cargo risczero` tool to create your own repository. See
-[its README](cargo-risczero-readme) for installation and usage instructions.
+First, clone this repository and [install rust](install-rust).
+
+To run a simple RISC Zero program, navigate to the `examples/factors` directory
+and run `cargo run`:
+```
+cd examples/factors
+cargo run -r
+```
+This should produce the output `I know the factors of 391, and I can prove it!`.
+Congratulations, you've produced your first RISC Zero zero-knowledge proof! You
+can find more examples in this [examples folder](examples).
+
+To start your own project, you can use our `cargo risczero` tool to write the
+initial boilerplate and set up a standard file structure. First install the tool
+```
+cargo install cargo-risczero
+```
+Then, create a new project (named `my_project` in this example command)
+```
+cargo risczero new my_project
+```
+More details and options for `cargo risczero` are given in
+[its README](cargo-risczero-readme).
 
 For more guidance on how to use RISC Zero, how RISC Zero projects are typically
-structured, etc., see our [Getting Started page](website-getting-started). You
-may also want to look at the various examples in
-[our examples directory](examples).
+structured, and other resources useful to developers new to RISC Zero, see our
+[Getting Started page](website-getting-started).
 
 ## Rust Binaries
 
