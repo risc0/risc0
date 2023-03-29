@@ -7,7 +7,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 description = "RISC Zero CLI tools"
 readme = "README.md"
-keywords = ["risc0", "risczero", "tool", "cli", "generate", "template"]
+keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 
 [dependencies]
 # Note, due to tempfile = 3.3.0 in cargo-generate
