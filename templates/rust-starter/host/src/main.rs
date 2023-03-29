@@ -22,6 +22,6 @@ fn main() {
     // Optional: Verify receipt to confirm that recipients will also be able to
     // verify your receipt
     receipt.verify(&METHOD_NAME_ID).expect(
-        "Code you have proven should successfully verify; did you specify the correct method ID?",
+        "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
 }
