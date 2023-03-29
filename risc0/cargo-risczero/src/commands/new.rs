@@ -20,7 +20,7 @@ use const_format::concatcp;
 use convert_case::{Case, Casing};
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
-const RISC0_TEMPLATE_DIR: &str = "templates/rust-stater";
+const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
 const RISC0_DEFAULT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_DEFAULT_VERSION);
 
