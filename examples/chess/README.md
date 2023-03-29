@@ -8,7 +8,7 @@ Takes a move that is kept private and an initial board state that is published t
 
 First, make sure [rustup](https://rustup.rs) is installed. This project uses a [nightly](https://doc.rust-lang.org/book/appendix-07-nightly-rust.html) version of [Rust](https://doc.rust-lang.org/book/ch01-01-installation.html). The [`rust-toolchain`](rust-toolchain) file will be used by `cargo` to automatically install the correct version.
 
-To build all methods and create a zero-knowledge proof that the position defined [here](https://github.com/risc0/risc0-rust-examples/blob/main/chess/host/src/main.rs) includes a mate-in-one, run the following command from this directory:
+To build all methods and create a zero-knowledge proof that the position defined [here](https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L28) includes a mate-in-one, run the following command from this directory:
 
 ```
 cargo run -r
@@ -16,7 +16,7 @@ cargo run -r
 
 ## About the code
 The [guest code](https://github.com/risc0/risc0-rust-examples/blob/main/chess/methods/guest/src/bin/checkmate.rs) generates the `pos` that results from a given `move` on a given `board`, and then checks that `pos` is checkmate.
-The [host code](https://github.com/risc0/risc0-rust-examples/blob/main/chess/host/src/main.rs) supplies the `move` and the `board`. 
+The [host code](https://github.com/risc0/risc0/blob/main/examples/chess/methods/guest/src/main.rs) supplies the `move` and the `board`.
 
 ## Video Tutorial
 
