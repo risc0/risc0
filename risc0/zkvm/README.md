@@ -12,11 +12,10 @@ find helpful, especially if you're new to the RISC Zero zkVM. These include:
 
 * Our [Hello Multiply!](https://www.risczero.com/docs/examples/hello_multiply)
 tutorial, which walks you through writing your first zkVM project.
-* A [zkVM Rust starter template](https://github.com/risc0/risc0-rust-starter),
-a template for starting zkVM projects. It includes code for building and
-launching a zkVM guest and guidance on where projects most commonly modify
-host and guest code.
-* The [zkVM Rust examples repository](https://github.com/risc0/risc0-rust-examples),
+* The [`cargo risczero` tool](https://crates.io/crates/cargo-risczero). It
+includes a `new` command which generates code for building and launching a zkVM
+guest and guidance on where projects most commonly modify host and guest code.
+* The [zkVM Rust examples directory](https://github.com/risc0/risc0/tree/main/examples),
 which contains various examples using our zkVM.
 * [This clip](https://youtu.be/cLqFvhmXiD0) from our presentation at ZK Hack
 III gives an overview of the RISC Zero zkVM.
