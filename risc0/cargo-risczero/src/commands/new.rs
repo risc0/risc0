@@ -66,8 +66,12 @@ pub struct NewCommand {
     ///
     /// Toggles the `#![no_std]` in the guest main() and the `std` feature flag
     /// on the `risc0_zkvm` crate.
-    #[clap(value_parser, long, global = true)]
+    #[clap(value_parser, long, global = false)]
     pub std: bool,
+
+    /// Use a path dependency for risc0.
+    #[clap(long)]
+    pub path: Option<PathBuf>,
 }
 
 impl NewCommand {
@@ -104,13 +108,27 @@ impl NewCommand {
         let risc0_version = std::env::var("CARGO_PKG_VERSION")
             .unwrap_or_else(|_| RISC0_DEFAULT_VERSION.to_string());
 
-        let mut template_variables = vec![format!("risc0_version={risc0_version}")];
+        let mut template_variables = Vec::new();
         if let Some(branch) = self.use_git_branch.as_ref() {
-            template_variables.push(format!("risc0_crate_branch={branch}"))
+            let spec =
+                format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{branch}\"");
+            template_variables.push(format!("risc0_build={spec}"));
+            template_variables.push(format!("risc0_zkvm={spec}"));
+        } else if let Some(path) = self.path.as_ref() {
+            let path = path.to_str().unwrap();
+            let build = format!("path = \"{path}/risc0/build\"");
+            let zkvm = format!("path = \"{path}/risc0/zkvm\"");
+            template_variables.push(format!("risc0_build={build}"));
+            template_variables.push(format!("risc0_zkvm={zkvm}"));
+        } else {
+            let spec = format!("version = \"{risc0_version}\"");
+            template_variables.push(format!("risc0_build={spec}"));
+            template_variables.push(format!("risc0_zkvm={spec}"));
         }
 
         if self.std {
-            template_variables.push(format!("risc0_std={}", self.std));
+            template_variables.push(format!("risc0_std=true"));
+            template_variables.push(format!("risc0_feature_std=, features = ['std']"));
         }
 
         cargo_generate::generate(GenerateArgs {
@@ -202,7 +220,7 @@ mod tests {
         assert!(proj_path.exists());
         assert!(proj_path.join(".git").exists());
         assert!(find_in_file(
-            &format!("risc0-zkvm = \"{RISC0_DEFAULT_VERSION}\""),
+            &format!("risc0-zkvm = {{ version = \"{RISC0_DEFAULT_VERSION}\" }}"),
             &proj_path.join("host/Cargo.toml")
         ));
 
