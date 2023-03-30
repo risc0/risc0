@@ -221,12 +221,12 @@ mod tests {
         assert!(proj_path.join(".git").exists());
         assert!(find_in_file(
             &format!("risc0-zkvm = {{ version = \"{RISC0_DEFAULT_VERSION}\" }}"),
-            &proj_path.join("host/Cargo.toml")
+            &proj_path.join("Cargo.toml")
         ));
 
         assert!(find_in_file(
             "#![no_std]",
-            &proj_path.join("methods/guest/src/bin/method_name.rs")
+            &proj_path.join("methods/guest/src/main.rs")
         ));
     }
 
@@ -256,7 +256,7 @@ mod tests {
         assert!(!proj_path.join(".git").exists());
         assert!(find_in_file(
             "risc0-zkvm = { git = \"https://github.com/risc0/risc0.git\", branch = \"main\"",
-            &proj_path.join("host/Cargo.toml")
+            &proj_path.join("Cargo.toml")
         ));
     }
 
@@ -282,7 +282,7 @@ mod tests {
 
         assert!(!find_in_file(
             "#![no_std]",
-            &proj_path.join("methods/guest/src/bin/method_name.rs")
+            &proj_path.join("methods/guest/src/main.rs")
         ));
         assert!(!find_in_file(
             "feature = ['std']",
