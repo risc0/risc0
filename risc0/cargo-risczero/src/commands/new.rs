@@ -17,7 +17,6 @@ use std::path::PathBuf;
 use cargo_generate::{GenerateArgs, TemplatePath, Vcs};
 use clap::Parser;
 use const_format::concatcp;
-use convert_case::{Case, Casing};
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
 const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
@@ -127,14 +126,14 @@ impl NewCommand {
         }
 
         if self.std {
-            template_variables.push(format!("risc0_std=true"));
-            template_variables.push(format!("risc0_feature_std=, features = ['std']"));
+            template_variables.push("risc0_std=true".to_string());
+            template_variables.push("risc0_feature_std=, features = ['std']".to_string());
         }
 
         cargo_generate::generate(GenerateArgs {
             template_path,
             list_favorites: false,
-            name: Some(self.name.to_case(Case::Snake)),
+            name: Some(self.name.clone()),
             force: true,
             verbose: true,
             template_values_file: None,
