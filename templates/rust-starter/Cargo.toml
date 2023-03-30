@@ -1,8 +1,12 @@
-[workspace]
-members = [
-    "methods",
-    "host",
-]
+[package]
+name = "{{ project-name }}"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+methods = { path = "methods" }
+risc0-zkvm = { {{ risc0_zkvm }} }
+serde = "1.0"
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
