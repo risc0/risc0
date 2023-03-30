@@ -220,7 +220,7 @@ mod tests {
         assert!(proj_path.join(".git").exists());
         assert!(find_in_file(
             &format!("risc0-zkvm = {{ version = \"{RISC0_DEFAULT_VERSION}\" }}"),
-            &proj_path.join("Cargo.toml")
+            &proj_path.join("host/Cargo.toml")
         ));
 
         assert!(find_in_file(
@@ -255,7 +255,7 @@ mod tests {
         assert!(!proj_path.join(".git").exists());
         assert!(find_in_file(
             "risc0-zkvm = { git = \"https://github.com/risc0/risc0.git\", branch = \"main\"",
-            &proj_path.join("Cargo.toml")
+            &proj_path.join("host/Cargo.toml")
         ));
     }
 
