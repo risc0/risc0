@@ -24,12 +24,12 @@ fn main() {
 
     // Make the prover.
     let mut prover = Prover::new(SEARCH_JSON_ELF)
-        .expect("Prover should be constructed from matching method code & ID");
+        .expect("Prover should be constructed from valid ELF binary");
 
     prover.add_input_u32_slice(&to_vec(&data).expect("should be serializable"));
 
     // Run prover & generate receipt
-    let receipt = prover.run().expect("Code should be provable");
+    let receipt = prover.run().expect("Code should be provable unless it had an error or exceeded the maximum cycle limit");
 
     receipt
         .verify(&SEARCH_JSON_ID)
