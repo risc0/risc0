@@ -1,5 +1,6 @@
 [package]
-name = "methods-guest"
+# TODO: Rename this package to change the method name from METHOD_NAME
+name = "method_name"
 version = "0.1.0"
 edition = "2021"
 

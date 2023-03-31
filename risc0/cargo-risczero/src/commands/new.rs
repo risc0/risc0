@@ -225,7 +225,7 @@ mod tests {
 
         assert!(find_in_file(
             "#![no_std]",
-            &proj_path.join("methods/guest/src/bin/method_name.rs")
+            &proj_path.join("methods/guest/src/main.rs")
         ));
     }
 
@@ -281,7 +281,7 @@ mod tests {
 
         assert!(!find_in_file(
             "#![no_std]",
-            &proj_path.join("methods/guest/src/bin/method_name.rs")
+            &proj_path.join("methods/guest/src/main.rs")
         ));
         assert!(!find_in_file(
             "feature = ['std']",

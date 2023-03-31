@@ -3,6 +3,9 @@
 // `METHOD_NAME_ID` with `MULTIPLY_ID`
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 use risc0_zkvm::Prover;
+// TODO: Uncomment the `use` line below for serialization helper functions for
+// communication with the guest
+// use risc0_zkvm::serde::{from_slice, to_vec}
 
 fn main() {
     // Make the prover.
@@ -22,6 +25,6 @@ fn main() {
     // Optional: Verify receipt to confirm that recipients will also be able to
     // verify your receipt
     receipt.verify(&METHOD_NAME_ID).expect(
-        "Code you have proven should successfully verify; did you specify the correct method ID?",
+        "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
 }
