@@ -148,6 +148,7 @@ impl KernelBuild {
                 cmd.arg("-o").arg(&out_path);
                 cmd.args(self.files.iter());
                 cmd.arg("-I").arg(sys_inc_dir);
+                cmd.arg("--ptxas-options=-O1");
                 for inc_dir in self.inc_dirs.iter() {
                     cmd.arg("-I").arg(inc_dir);
                 }
