@@ -97,7 +97,7 @@ other manner of problems.  Caveat emptor.
 
 To start your own project, you can use our `cargo risczero` tool to write the
 initial boilerplate and set up a standard directory structure.
-First install the tool:
+First, [install Rust][install-rust] if you don't already have it, then install the `cargo risczero` tool:
 
 ```
 cargo install cargo-risczero
