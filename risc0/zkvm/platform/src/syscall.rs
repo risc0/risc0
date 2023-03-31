@@ -72,18 +72,6 @@ pub mod reg_abi {
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
 
-/// Compute `ceil(a / b)` via truncated integer division.
-#[allow(dead_code)]
-const fn div_ceil(a: u32, b: u32) -> u32 {
-    (a + b - 1) / b
-}
-
-/// Round `a` up to the nearest multipe of `b`.
-#[allow(dead_code)]
-const fn round_up(a: u32, b: u32) -> u32 {
-    div_ceil(a, b) * b
-}
-
 // TODO: We can probably use ffi::CStr::from_bytes_with_nul once it's
 // const-stablized instead of rolling our own structure:
 // https://github.com/rust-lang/rust/issues/101719
