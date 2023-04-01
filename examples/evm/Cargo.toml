@@ -10,9 +10,7 @@ ethers-core = "2.0"
 ethers-providers = "2.0"
 evm-core = { path = "core", features = ["ethers"] }
 log = "0.4"
-methods = { path = "methods" }
-openssl = "0.10.48"
-risc0-build = { path = "../../risc0/build" }
+evm-methods = { path = "methods" }
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 tokio = "1.23"

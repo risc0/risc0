@@ -21,8 +21,8 @@ use evm_core::{
     ether_trace::{Http, Provider},
     Env, EvmResult, EVM,
 };
+use evm_methods::{EVM_ELF, EVM_ID};
 use log::info;
-use methods::{EVM_ELF, EVM_ID};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
     Prover,

@@ -38,6 +38,7 @@ impl<T> ResTrack<T>
 where
     T: Clone,
 {
+    #[cfg(not(target_os = "zkvm"))]
     pub fn reset(&mut self) {
         self.idx = 0;
     }
@@ -48,6 +49,7 @@ where
         res
     }
 
+    #[cfg(not(target_os = "zkvm"))]
     pub fn set(&mut self, elm: &T) {
         self.elms.push(elm.clone());
     }
@@ -258,11 +260,9 @@ mod tests {
 
     use super::*;
 
-    // Ignored because it requires a live RPC_URL to run
-    #[ignore]
     #[tokio::test]
     async fn trace_tx() {
-        let rpc_url = env::var("RPC_URL").unwrap();
+        let rpc_url = "https://cloudflare-eth.com/";
 
         let tx_hash =
             H256::from_str("0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7")
@@ -276,7 +276,7 @@ mod tests {
         assert_eq!(block_numb, ethers_core::types::U64::from(16424130));
 
         let mut env = Env::default();
-        env.block.number = U256::from(block_numb.as_u64());
+        env.block.number = U256::from(block_numb.as_u64()).into();
         env.tx = ether_trace::txenv_from_tx(tx);
 
         let trace_db = ether_trace::TraceTx::new(client, Some(block_numb.as_u64())).unwrap();
