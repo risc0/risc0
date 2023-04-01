@@ -17,7 +17,7 @@
 use core::{cell::UnsafeCell, default::Default, mem::MaybeUninit, ptr, ptr::null_mut, slice};
 
 use bytemuck::Pod;
-use risc0_zkp::core::sha::{Digest, DIGEST_BYTES, DIGEST_WORDS};
+use risc0_zkp::core::digest::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
     fileno, memory, syscall,
     syscall::{

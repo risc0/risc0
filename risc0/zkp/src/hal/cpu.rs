@@ -29,12 +29,15 @@ use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
 use super::{Buffer, Hal, TRACKER};
 use crate::{
     core::{
-        blake2b::HashSuiteBlake2bCpu,
-        config::{ConfigHash, HashSuite, HashSuitePoseidon, HashSuiteSha256},
         digest::Digest,
+        hash::{
+            blake2b::Blake2bCpuHashSuite,
+            poseidon::PoseidonHashSuite,
+            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+            HashFn, HashSuite,
+        },
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
-        sha_cpu,
     },
     FRI_FOLD,
 };
@@ -43,9 +46,9 @@ pub struct CpuHal<F: Field, HS: HashSuite<F>> {
     phantom: PhantomData<(F, HS)>,
 }
 
-pub type BabyBearSha256CpuHal = CpuHal<BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>>;
-pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, HashSuitePoseidon>;
-pub type BabyBearBlake2bCpuHal = CpuHal<BabyBear, HashSuiteBlake2bCpu>;
+pub type BabyBearSha256CpuHal = CpuHal<BabyBear, Sha256HashSuite<BabyBear, CpuImpl>>;
+pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, PoseidonHashSuite>;
+pub type BabyBearBlake2bCpuHal = CpuHal<BabyBear, Blake2bCpuHashSuite>;
 
 impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
     pub fn new() -> Self {
@@ -266,7 +269,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     type BufferDigest = CpuBuffer<Digest>;
     type BufferU32 = CpuBuffer<u32>;
     type HashSuite = HS;
-    type Hash = HS::Hash;
+    type HashFn = HS::HashFn;
     type Rng = HS::Rng;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::BufferElem {
@@ -546,7 +549,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
             let column: Vec<Self::Elem> =
                 (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
-            *output = *Self::Hash::hash_elem_slice(column.as_slice());
+            *output = *Self::HashFn::hash_elem_slice(column.as_slice());
         });
     }
 
@@ -559,7 +562,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         (0..output.size()).into_par_iter().for_each(|idx| {
             let in1 = input.get(2 * idx + 0);
             let in2 = input.get(2 * idx + 1);
-            output.set(idx, *Self::Hash::hash_pair(&in1, &in2));
+            output.set(idx, *Self::HashFn::hash_pair(&in1, &in2));
         });
     }
 }

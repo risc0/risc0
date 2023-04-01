@@ -15,7 +15,7 @@
 use core::marker::PhantomData;
 
 use super::{Buffer, EvalCheck, Hal};
-use crate::core::sha::Digest;
+use crate::core::digest::Digest;
 
 #[derive(Clone, Debug)]
 pub struct BufferImpl<T, U: Buffer<T>, V: Buffer<T>> {
@@ -105,7 +105,7 @@ where
     type BufferExtElem = BufferImpl<Self::ExtElem, U::BufferExtElem, V::BufferExtElem>;
     type BufferU32 = BufferImpl<u32, U::BufferU32, V::BufferU32>;
     type HashSuite = U::HashSuite;
-    type Hash = U::Hash;
+    type HashFn = U::HashFn;
     type Rng = U::Rng;
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::BufferDigest {
@@ -132,11 +132,7 @@ where
         BufferImpl::new(buf1, buf2)
     }
 
-    fn copy_from_digest(
-        &self,
-        name: &'static str,
-        slice: &[crate::core::sha::Digest],
-    ) -> Self::BufferDigest {
+    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::BufferDigest {
         let buf1 = self.hal1.copy_from_digest(name, slice);
         let buf2 = self.hal2.copy_from_digest(name, slice);
         BufferImpl::new(buf1, buf2)

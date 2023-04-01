@@ -16,7 +16,7 @@ use std::{fmt, io::Cursor, str::from_utf8, sync::Mutex};
 
 use anyhow::Result;
 use risc0_zeroio::to_vec;
-use risc0_zkp::core::sha::Digest;
+use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_methods::MULTI_TEST_ID;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
@@ -292,7 +292,7 @@ fn sha_cycle_count() {
 
 #[test]
 fn test_poseidon_proof() {
-    use risc0_zkp::core::config::HashSuitePoseidon;
+    use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
 
     use crate::prove::default_poseidon_hal;
     let (hal, eval) = default_poseidon_hal();
@@ -301,7 +301,7 @@ fn test_poseidon_proof() {
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
     let receipt = prover.run_with_hal(hal.as_ref(), &eval).unwrap();
     receipt
-        .verify_with_hash::<HashSuitePoseidon, _>(&MULTI_TEST_ID)
+        .verify_with_hash::<PoseidonHashSuite, _>(&MULTI_TEST_ID)
         .unwrap();
 }
 
@@ -310,20 +310,20 @@ fn test_blake2b_proof() {
     use risc0_circuit_rv32im::cpu::CpuEvalCheck;
     use risc0_core::field::baby_bear::BabyBear;
     use risc0_zkp::{
-        core::blake2b::{Blake2bCpuImpl, HashSuiteBlake2b, HashSuiteBlake2bCpu},
+        core::hash::blake2b::{Blake2bCpuHashSuite, Blake2bCpuImpl, Blake2bHashSuite},
         hal::cpu::CpuHal,
     };
 
     use crate::CIRCUIT;
 
-    let hal = CpuHal::<BabyBear, HashSuiteBlake2bCpu>::new();
+    let hal = CpuHal::<BabyBear, Blake2bCpuHashSuite>::new();
     let eval = CpuEvalCheck::new(&CIRCUIT);
     let opts = ProverOpts::default().with_skip_verify(true);
     let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
     let receipt = prover.run_with_hal(&hal, &eval).unwrap();
     receipt
-        .verify_with_hash::<HashSuiteBlake2b<Blake2bCpuImpl>, _>(&MULTI_TEST_ID)
+        .verify_with_hash::<Blake2bHashSuite<Blake2bCpuImpl>, _>(&MULTI_TEST_ID)
         .unwrap();
 }
 

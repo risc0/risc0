@@ -18,10 +18,10 @@ use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
-    core::config::HashSuite,
+    core::hash::HashSuite,
     hal::{EvalCheck, Hal},
 };
-use risc0_zkvm::{prove::default_hal, serde::to_vec, ControlIdLocator, Prover, Receipt};
+use risc0_zkvm::{prove::default_hal, serde::to_vec, ControlId, Prover, Receipt};
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
     BENCH_ELF,
@@ -109,7 +109,7 @@ fn run_with_iterations(iterations: usize) {
 fn top<H, E>(hal: &H, eval: &E, iterations: u64) -> (Receipt, usize)
 where
     H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);

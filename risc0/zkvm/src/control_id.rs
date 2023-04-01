@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub const CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2;
+
+pub type RawControlId = [&'static str; CONTROL_ID_ENTRIES];
+
+pub const SHA256_CONTROL_ID: RawControlId = [
     "e381e3e393ce236957923168f4e121c8ea4e9c6d902f347b384ab02a2fd9cbc1", //
     "37f1d57b121219236acd2051003c3f52305ee906e07c34a3116cc48b2ace243b", //
     "5b1cc0c8259979c0cf2f881eb12160c25da18cb40df760febe13ecf596640dce", //
@@ -28,8 +32,7 @@ pub const CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_
     "4a75e6239c6db8a52b677d39438b6901ecb12069ba7331eee21f8d54725f7070", //
 ];
 
-pub const POSEIDON_CONTROL_ID: [&'static str;
-    risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+pub const POSEIDON_CONTROL_ID: RawControlId = [
     "d38eab0ec1ca2d4159e0a95942d8480ec956016cc93cf24640f04d5d72f0a43a", //
     "379fc406899ab567e687f5215400e56e545ab5253e0c380736b7af65f68ef468", //
     "55fe5631d0f74610caf8c84b0c5e6073ff19e2115e334b623bcf546c41d49001", //
@@ -45,8 +48,7 @@ pub const POSEIDON_CONTROL_ID: [&'static str;
     "1814c948eda9943d3ca68414087601433b50ff5e29fccf67ed10506e4a78b027", //
 ];
 
-pub const BLAKE2B_CONTROL_ID: [&'static str;
-    risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+pub const BLAKE2B_CONTROL_ID: RawControlId = [
     "67eebdc307a901a343bd1fa3a1160a97cdab9ada32057ce26a3536ad145ab412", //
     "ca7448ef0f06a678826296ee1b5ca3c90a20ca6af2f66eaef96cc73bd8ec48b7", //
     "842c6463187287c7cad5564b72cff8ff775f9146aaf32a22395a5cd6f999b39a", //

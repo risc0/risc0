@@ -26,10 +26,13 @@ use risc0_core::field::{
 use super::{Buffer, Hal, TRACKER};
 use crate::{
     core::{
-        config::{HashSuite, HashSuitePoseidon, HashSuiteSha256},
+        digest::Digest,
+        hash::{
+            poseidon::{self, PoseidonHashSuite},
+            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+            HashSuite,
+        },
         log2_ceil,
-        sha::Digest,
-        sha_cpu,
     },
     FRI_FOLD,
 };
@@ -74,7 +77,7 @@ pub trait MetalHash {
 pub struct MetalHashSha256 {}
 
 impl MetalHash for MetalHashSha256 {
-    type HashSuite = HashSuiteSha256<BabyBear, sha_cpu::Impl>;
+    type HashSuite = Sha256HashSuite<BabyBear, CpuImpl>;
 
     fn new(_hal: &MetalHal<Self>) -> Self {
         MetalHashSha256 {}
@@ -115,10 +118,9 @@ pub struct MetalHashPoseidon {
 }
 
 impl MetalHash for MetalHashPoseidon {
-    type HashSuite = HashSuitePoseidon;
+    type HashSuite = PoseidonHashSuite;
 
     fn new(hal: &MetalHal<Self>) -> Self {
-        use crate::core::poseidon;
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
@@ -400,7 +402,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type BufferU32 = BufferImpl<u32>;
 
     type HashSuite = MH::HashSuite;
-    type Hash = <MH::HashSuite as HashSuite<BabyBear>>::Hash;
+    type HashFn = <MH::HashSuite as HashSuite<BabyBear>>::HashFn;
     type Rng = <MH::HashSuite as HashSuite<BabyBear>>::Rng;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::BufferElem {

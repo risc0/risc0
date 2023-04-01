@@ -19,8 +19,8 @@ use core::marker::PhantomData;
 use rand_core::{impls, Error, RngCore};
 use risc0_core::field::{Elem, Field};
 
-use super::config::ConfigRng;
-use super::sha::{Digest, Sha256, DIGEST_WORDS};
+use super::{Digest, Sha256, DIGEST_WORDS};
+use crate::core::hash::Rng;
 
 /// A random number generator driven by a [Sha256].
 #[derive(Clone, Debug)]
@@ -83,7 +83,7 @@ impl<S: Sha256> RngCore for ShaRng<S> {
     }
 }
 
-impl<S: Sha256, F: Field> ConfigRng<F> for ShaRng<S> {
+impl<S: Sha256, F: Field> Rng<F> for ShaRng<S> {
     fn new() -> Self {
         Self::inner_new()
     }
@@ -105,8 +105,7 @@ impl<S: Sha256, F: Field> ConfigRng<F> for ShaRng<S> {
 pub mod testutil {
     use rand_core::RngCore;
 
-    use super::ShaRng;
-    use crate::core::sha::Sha256;
+    use super::{Sha256, ShaRng};
 
     // Runs conformance test on a SHA implementation to make sure it
     // properly behaves for generating pseudo-random numbers.

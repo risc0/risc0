@@ -17,7 +17,7 @@
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 
 use super::{consts::CELLS, poseidon_mix, CELLS_OUT, CELLS_RATE};
-use crate::core::{config::ConfigRng, sha::Digest};
+use crate::core::{digest::Digest, hash::Rng};
 
 /// A random number generator driven by Poseidon
 #[derive(Clone, Debug)]
@@ -28,7 +28,7 @@ pub struct PoseidonRng {
     pool_used: usize,
 }
 
-impl ConfigRng<BabyBear> for PoseidonRng {
+impl Rng<BabyBear> for PoseidonRng {
     fn new() -> Self {
         Self {
             cells: [Elem::new(0); CELLS],

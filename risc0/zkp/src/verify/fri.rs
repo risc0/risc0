@@ -18,7 +18,7 @@ use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use super::VerifyHal;
 use crate::{
-    core::{config::ConfigHash, log2_ceil},
+    core::{hash::HashFn, log2_ceil},
     verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     FRI_FOLD, FRI_FOLD_PO2, FRI_MIN_DEGREE, INV_RATE, QUERIES,
 };
@@ -106,7 +106,7 @@ where
     );
     // Grab the final coeffs + commit
     let final_coeffs = iop.read_field_elem_slice(H::ExtElem::EXT_SIZE * degree);
-    let final_digest = H::Hash::hash_elem_slice(final_coeffs);
+    let final_digest = H::HashFn::hash_elem_slice(final_coeffs);
     iop.commit(&final_digest);
     // Get the generator for the final polynomial evaluations
     let gen = <H::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];
