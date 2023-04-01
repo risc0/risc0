@@ -9,8 +9,8 @@ env_logger = "0.10"
 ethers-core = "2.0"
 ethers-providers = "2.0"
 evm-core = { path = "core", features = ["ethers"] }
-log = "0.4"
 evm-methods = { path = "methods" }
+log = "0.4"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 tokio = "1.23"
