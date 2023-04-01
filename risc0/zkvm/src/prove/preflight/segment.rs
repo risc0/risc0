@@ -17,7 +17,7 @@ use core::cell::RefCell;
 
 use anyhow::{anyhow, Result};
 use risc0_zkp::{
-    core::config::HashSuite,
+    core::hash::HashSuite,
     field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     hal::Hal,
 };
@@ -28,7 +28,7 @@ use crate::{
         preflight::exec::{ExecState, OperationType, SyscallResult},
         EvalCheck, Syscall, SyscallContext,
     },
-    ControlIdLocator, MemoryImage, Prover, ProverOpts, Receipt,
+    ControlId, MemoryImage, Prover, ProverOpts, Receipt,
 };
 
 // TODO: Get this from ProverOpts::segment_limit_po2 once that option is
@@ -107,7 +107,7 @@ impl Segment {
     pub fn prove_with_hal<H, E>(&self, hal: &H, eval: &E) -> Result<Receipt>
     where
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
+        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
         E: EvalCheck<H>,
     {
         log::debug!(
