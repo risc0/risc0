@@ -22,13 +22,15 @@ use sha_methods::{HASH_ELF, HASH_ID};
 
 fn provably_hash(input: &str) -> Receipt {
     // Make the prover.
-    let mut prover = Prover::new(HASH_ELF)
-        .expect("Prover should be constructed from matching code and method ID");
+    let mut prover =
+        Prover::new(HASH_ELF).expect("Prover should be constructed from valid ELF binary");
 
     prover.add_input_u32_slice(&to_vec(input).expect("input string should serialize"));
 
     // Run prover & generate receipt
-    prover.run().expect("Code should be provable")
+    prover.run().expect(
+        "Code should be provable unless it had an error or exceeded the maximum cycle limit",
+    )
 }
 
 fn main() {
