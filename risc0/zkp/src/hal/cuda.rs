@@ -392,7 +392,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type BufferU32 = BufferImpl<u32>;
 
     type HashSuite = CH::HashSuite;
-    type Hash = <CH::HashSuite as HashSuite<BabyBear>>::Hash;
+    type HashFn = <CH::HashSuite as HashSuite<BabyBear>>::HashFn;
     type Rng = <CH::HashSuite as HashSuite<BabyBear>>::Rng;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::BufferElem {
