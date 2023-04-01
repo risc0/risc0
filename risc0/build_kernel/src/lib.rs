@@ -148,6 +148,13 @@ impl KernelBuild {
                 cmd.arg("-o").arg(&out_path);
                 cmd.args(self.files.iter());
                 cmd.arg("-I").arg(sys_inc_dir);
+
+                // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
+                // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
+                // decrease in performance but a compile time in int the minutes. Use
+                // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
+                let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or_else(|_| "1".to_string());
+                cmd.arg(format!("--ptxas-options=-O{ptx_opt_level}"));
                 for inc_dir in self.inc_dirs.iter() {
                     cmd.arg("-I").arg(inc_dir);
                 }
