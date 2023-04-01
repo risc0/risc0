@@ -132,16 +132,22 @@ impl MemoryImage {
 
         // Compute the page table hashes except for the very last root hash.
         let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
-        for i in 0..info.num_pages {
-            let page_addr = info.get_page_addr(i as u32);
-            let page = &image[page_addr as usize..page_addr as usize + page_size as usize];
+        let mut img = Self { image, info };
+        img.hash_pages();
+        img
+    }
+
+    /// Calculate and update the image merkle tree within this image.
+    pub fn hash_pages(&mut self) {
+        for i in 0..self.info.num_pages {
+            let page_addr = self.info.get_page_addr(i as u32);
+            let page =
+                &self.image[page_addr as usize..page_addr as usize + self.info.page_size as usize];
             let digest = hash_page(page);
-            let entry_addr = info.get_page_entry_addr(i as u32);
-            image[entry_addr as usize..entry_addr as usize + DIGEST_BYTES]
+            let entry_addr = self.info.get_page_entry_addr(i as u32);
+            self.image[entry_addr as usize..entry_addr as usize + DIGEST_BYTES]
                 .copy_from_slice(digest.as_bytes());
         }
-
-        Self { image, info }
     }
 
     /// Verify the integrity of the MemoryImage.

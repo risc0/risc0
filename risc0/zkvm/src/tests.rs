@@ -113,15 +113,23 @@ fn memory_io() {
     run_memio(&[(HEAP.start(), 1)]).unwrap();
 
     // Unaligned write is bad
-    assert!(unwrap_err(run_memio(&[(HEAP.start() + 1001, 1)]))
-        .starts_with("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl"));
+    let err = unwrap_err(run_memio(&[(HEAP.start() + 1001, 1)]));
+    assert!(
+        err.starts_with("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl")
+            || err.starts_with("AlignmentFault"),
+        "Actual: {err}"
+    );
 
     // Aligned read is fine
     run_memio(&[(HEAP.start(), 0)]).unwrap();
 
     // Unaligned read is bad
-    assert!(unwrap_err(run_memio(&[(HEAP.start() + 1, 0)]))
-        .starts_with("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl"));
+    let err = unwrap_err(run_memio(&[(HEAP.start() + 1, 0)]));
+    assert!(
+        err.starts_with("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl")
+            || err.starts_with("AlignmentFault"),
+        "Actual: {err}"
+    );
 }
 
 fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
