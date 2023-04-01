@@ -31,10 +31,13 @@ use rustacuda_core::UnifiedPointer;
 use super::{Buffer, Hal, TRACKER};
 use crate::{
     core::{
-        config::{HashSuite, HashSuitePoseidon, HashSuiteSha256},
+        digest::Digest,
+        hash::{
+            poseidon::{self, PoseidonHashSuite},
+            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+            HashSuite,
+        },
         log2_ceil,
-        sha::Digest,
-        sha_cpu,
     },
     FRI_FOLD,
 };
@@ -60,7 +63,7 @@ pub trait CudaHash {
 pub struct CudaHashSha256 {}
 
 impl CudaHash for CudaHashSha256 {
-    type HashSuite = HashSuiteSha256<BabyBear, sha_cpu::Impl>;
+    type HashSuite = Sha256HashSuite<BabyBear, CpuImpl>;
 
     fn new(_hal: &CudaHal<Self>) -> Self {
         CudaHashSha256 {}
@@ -126,10 +129,9 @@ pub struct CudaHashPoseidon {
 }
 
 impl CudaHash for CudaHashPoseidon {
-    type HashSuite = HashSuitePoseidon;
+    type HashSuite = PoseidonHashSuite;
 
     fn new(hal: &CudaHal<Self>) -> Self {
-        use crate::core::poseidon;
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);

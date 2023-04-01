@@ -369,7 +369,7 @@ impl Loader {
         Ok(loader.cycle)
     }
 
-    /// Compute the [ControlId] associated with the given HAL
+    /// Compute the `ControlId` associated with the given HAL
     pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> Vec<Digest> {
         let code_size = CIRCUIT.code_size();
 
