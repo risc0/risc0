@@ -13,14 +13,14 @@
 // limitations under the License.
 
 use clap::{Arg, Command};
-use methods::{HOTP_ELF, HOTP_ID};
+use methods::{HMAC_ELF, HMAC_ID};
 use risc0_zkp::core::sha::Digest;
 use risc0_zkvm::serde::{from_slice, to_vec};
 use risc0_zkvm::{Prover, Receipt};
 
 fn hmac(key: &str, message: &str) -> Receipt {
     // Make the prover.
-    let mut prover = Prover::new(HOTP_ELF, HOTP_ID)
+    let mut prover = Prover::new(HMAC_ELF, HMAC_ID)
         .expect("Prover should be constructed from matching code and method ID");
 
     prover.add_input_u32_slice(&to_vec(key).expect("input string should serialize"));
@@ -42,18 +42,18 @@ fn main() {
 
     // Prove hash and verify it
     let receipt = hmac(key, message);
-    receipt.verify(HOTP_ID).expect("Proven code should verify");
+    receipt.verify(HMAC_ID).expect("Proven code should verify");
 
     let journal = receipt.journal;
     let digest =
         from_slice::<Digest>(journal.as_slice()).expect("Journal should contain SHA Digest");
 
-    println!("I provably know data whose SHA-256 hash is {}", digest);
+    println!("I provably know the message and key such that HMAC is {}", digest);
 }
 
 // #[cfg(test)]
 // mod tests {
-//     use methods::HOTP_ID;
+//     use methods::HMAC_ID;
 //     use risc0_zkp::core::sha::Digest;
 //     use risc0_zkvm::serde::from_slice;
 //
@@ -64,7 +64,7 @@ fn main() {
 //     #[test]
 //     fn main() {
 //         let receipt = hmac(TEST_STRING);
-//         receipt.verify(HOTP_ID).expect("Proven code should verify");
+//         receipt.verify(HMAC_ID).expect("Proven code should verify");
 //
 //         let digest = from_slice::<Digest>(receipt.journal.as_slice())
 //             .expect("Journal should contain SHA Digest");
