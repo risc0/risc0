@@ -14,7 +14,8 @@
 
 #![no_main]
 #![allow(unused_imports)]
-use evm_core::{Env, EvmResult, ZkDb, EVM};
+
+use evm_core::{Env, EvmResult, ExecutionResult, ZkDb, EVM};
 use externc_libm::math::fmod;
 use risc0_zkvm::guest::env;
 
@@ -27,10 +28,14 @@ pub fn main() {
     let mut evm = EVM::new();
     evm.database(db);
     evm.env = env;
-    let (res, state) = evm.transact();
-    env::commit(&EvmResult {
-        exit_reason: res.exit_reason,
-        state,
-    });
+    let res = evm.transact().unwrap();
+    if let ExecutionResult::Success { reason, .. } = res.result {
+        env::commit(&EvmResult {
+            exit_reason: reason,
+            state: res.state,
+        });
+    } else {
+        panic!("Unexpected result");
+    }
     env::log("");
 }
