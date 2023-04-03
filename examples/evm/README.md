@@ -28,6 +28,8 @@ RUST_LOG=info cargo run --release -F cuda -- -t 0x671a3b40ecb7d51b209e68392df2d3
 
 ## Testing
 
+The RPC URL used by tests is: https://cloudflare-eth.com/.
+
 ```bash
-RPC_URL=<RPC_URL_HERE> cargo test
+cargo test
 ```
