@@ -266,12 +266,9 @@ where
         fs::create_dir_all(&cache_dir).unwrap();
     }
 
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env);
-
-    let temp_dir = tempdir_in(out_dir).unwrap();
+    let temp_dir = tempdir_in(&cache_dir).unwrap();
     let mut downloader = Downloader::builder()
-        .download_folder(&temp_dir.path())
+        .download_folder(temp_dir.path())
         .build()
         .unwrap();
 
