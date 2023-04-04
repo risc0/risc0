@@ -130,7 +130,7 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
-    use wordle_core::{LetterFeedback, WordFeedback};
+    use wordle_core::LetterFeedback;
 
     use crate::{Player, Server};
 
