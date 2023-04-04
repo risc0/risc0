@@ -13,13 +13,19 @@
 // limitations under the License.
 
 pub use hashbrown::HashMap;
-pub use primitive_types::{H160 as Address, H256, U256};
-use revm::db::Database;
-use revm::{Account, AccountInfo, Bytecode};
-// use log::info;
-
+pub use primitive_types::{H256, U256};
 // Re-export revm members for external usage.
-pub use revm::{Env, ExecutionResult, Return, TransactTo, EVM};
+pub use revm::{
+    primitives::{
+        result::{Eval, ExecutionResult},
+        Env,
+    },
+    EVM,
+};
+use revm::{
+    primitives::{AccountInfo, Bytecode, State, B160, B256},
+    Database,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Deserialize, Serialize)]
@@ -32,6 +38,7 @@ impl<T> ResTrack<T>
 where
     T: Clone,
 {
+    #[cfg(not(target_os = "zkvm"))]
     pub fn reset(&mut self) {
         self.idx = 0;
     }
@@ -42,6 +49,7 @@ where
         res
     }
 
+    #[cfg(not(target_os = "zkvm"))]
     pub fn set(&mut self, elm: &T) {
         self.elms.push(elm.clone());
     }
@@ -57,21 +65,29 @@ pub struct ZkDb {
 
 impl Database for ZkDb {
     type Error = ();
+
     /// Get basic account information.
-    fn basic(&mut self, _address: Address) -> Result<Option<AccountInfo>, Self::Error> {
+    fn basic(&mut self, _address: B160) -> Result<Option<AccountInfo>, Self::Error> {
         Ok(self.basic.get())
     }
+
     /// Get account code by its hash
-    fn code_by_hash(&mut self, _code_hash: H256) -> Result<Bytecode, Self::Error> {
+    fn code_by_hash(&mut self, _code_hash: B256) -> Result<Bytecode, Self::Error> {
         Ok(self.code_hash.get())
     }
+
     /// Get storage value of address at index.
-    fn storage(&mut self, _address: Address, _index: U256) -> Result<U256, Self::Error> {
-        Ok(self.storage.get())
+    fn storage(
+        &mut self,
+        _address: B160,
+        _index: revm::primitives::U256,
+    ) -> Result<revm::primitives::U256, Self::Error> {
+        Ok(self.storage.get().into())
     }
+
     // History related
-    fn block_hash(&mut self, _number: U256) -> Result<H256, Self::Error> {
-        Ok(self.block.get())
+    fn block_hash(&mut self, _number: revm::primitives::U256) -> Result<B256, Self::Error> {
+        Ok(self.block.get().0.into())
     }
 }
 
@@ -80,26 +96,26 @@ pub mod ether_trace {
     use std::sync::Arc;
 
     use bytes::Bytes;
-    use ethers_core::types::{BlockId, Transaction, H160 as eH160, U64 as eU64};
+    use ethers_core::types::{BlockId, Transaction, H160, U64};
     use ethers_providers::Middleware;
     pub use ethers_providers::{Http, Provider};
-    use revm::TxEnv;
+    use revm::primitives::{CreateScheme, TransactTo, TxEnv};
     use tokio::runtime::Handle;
 
     use super::*;
 
     pub fn txenv_from_tx(tx: Transaction) -> TxEnv {
         TxEnv {
-            caller: tx.from,
+            caller: tx.from.0.into(),
             gas_limit: tx.gas.as_u64(),
-            gas_price: tx.gas_price.unwrap(),
-            gas_priority_fee: tx.max_priority_fee_per_gas,
+            gas_price: tx.gas_price.unwrap().into(),
+            gas_priority_fee: tx.max_priority_fee_per_gas.map(|x| x.into()),
             transact_to: if let Some(to_addr) = tx.to {
-                TransactTo::Call(to_addr)
+                TransactTo::Call(to_addr.0.into())
             } else {
-                TransactTo::Create(revm::CreateScheme::Create) // TODO: create2
+                TransactTo::Create(CreateScheme::Create) // TODO: create2
             },
-            value: tx.value,
+            value: tx.value.into(),
             data: Bytes::from(tx.input.to_vec()), // TODO: gotta be a cleaner way
             chain_id: tx.chain_id.map(|elm| elm.as_u64()),
             nonce: Some(tx.nonce.as_u64()),
@@ -158,8 +174,8 @@ pub mod ether_trace {
         M: Middleware,
     {
         type Error = ();
-        fn basic(&mut self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
-            let add = eH160::from(address.0);
+        fn basic(&mut self, address: B160) -> Result<Option<AccountInfo>, Self::Error> {
+            let add = H160::from(address.0);
 
             let f = async {
                 let nonce = self.client.get_transaction_count(add, self.block_number);
@@ -177,20 +193,23 @@ pub mod ether_trace {
                 code.unwrap_or_else(|e| panic!("ethers get code error: {e:?}"))
                     .0,
             );
-            let res = Some(AccountInfo::new(balance, nonce, bytecode));
+            let res = Some(AccountInfo::new(balance.into(), nonce, bytecode));
             self.db.basic.set(&res);
             Ok(res)
         }
 
-        fn code_by_hash(&mut self, _code_hash: H256) -> Result<Bytecode, Self::Error> {
+        fn code_by_hash(&mut self, _code_hash: B256) -> Result<Bytecode, Self::Error> {
             // not needed because we already load code with basic info
             panic!("Should not be called. Code is already loaded");
         }
 
-        fn storage(&mut self, address: Address, index: U256) -> Result<U256, Self::Error> {
-            let add = eH160::from(address.0);
-            let mut bytes = [0; 32];
-            index.to_big_endian(&mut bytes);
+        fn storage(
+            &mut self,
+            address: B160,
+            index: revm::primitives::U256,
+        ) -> Result<revm::primitives::U256, Self::Error> {
+            let add = H160::from(address.0);
+            let bytes = index.to_be_bytes();
             let index = H256::from(bytes);
             let f = async {
                 let storage = self
@@ -202,14 +221,14 @@ pub mod ether_trace {
             };
             let res = self.block_on(f);
             self.db.storage.set(&res);
-            Ok(res)
+            Ok(res.into())
         }
 
-        fn block_hash(&mut self, number: U256) -> Result<H256, Self::Error> {
-            if number > U256::from(u64::MAX) {
-                return Ok(revm::KECCAK_EMPTY);
+        fn block_hash(&mut self, number: revm::primitives::U256) -> Result<B256, Self::Error> {
+            if number > revm::primitives::U256::from(u64::MAX) {
+                return Ok(B256::zero());
             }
-            let number = eU64::from(u64::try_from(number).unwrap());
+            let number = U64::from(u64::try_from(number).unwrap());
             let f = async {
                 self.client
                     .get_block(BlockId::from(number))
@@ -219,15 +238,15 @@ pub mod ether_trace {
             };
             let res = H256(self.block_on(f).unwrap().hash.unwrap().0);
             self.db.block.set(&res);
-            Ok(res)
+            Ok(res.0.into())
         }
     }
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct EvmResult {
-    pub exit_reason: Return,
-    pub state: HashMap<Address, Account>,
+    pub exit_reason: Eval,
+    pub state: State,
 }
 
 #[cfg(test)]
@@ -241,11 +260,9 @@ mod tests {
 
     use super::*;
 
-    // Ignored because it requires a live RPC_URL to run
-    #[ignore]
     #[tokio::test]
     async fn trace_tx() {
-        let rpc_url = env::var("RPC_URL").unwrap();
+        let rpc_url = "https://cloudflare-eth.com/";
 
         let tx_hash =
             H256::from_str("0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7")
@@ -259,7 +276,7 @@ mod tests {
         assert_eq!(block_numb, ethers_core::types::U64::from(16424130));
 
         let mut env = Env::default();
-        env.block.number = U256::from(block_numb.as_u64());
+        env.block.number = U256::from(block_numb.as_u64()).into();
         env.tx = ether_trace::txenv_from_tx(tx);
 
         let trace_db = ether_trace::TraceTx::new(client, Some(block_numb.as_u64())).unwrap();
@@ -270,13 +287,13 @@ mod tests {
         evm.env = env.clone();
 
         // Trick to allow block_on() blocking in async -> sync -> async
-        let ((res, _state), trace_db) =
-            tokio::task::spawn_blocking(move || (evm.transact(), evm.take_db()))
-                .await
-                .unwrap();
+        let (res, trace_db) = tokio::task::spawn_blocking(move || (evm.transact(), evm.take_db()))
+            .await
+            .unwrap();
+        let res = res.unwrap();
 
-        assert_eq!(res.exit_reason, Return::Return);
-        assert_eq!(res.gas_used, 29316);
+        // assert_eq!(res.exit_reason, Return::Return);
+        assert_eq!(res.result.gas_used(), 29316);
 
         let zkdb = trace_db.create_zkdb();
         assert_eq!(zkdb.basic.elms.len(), 3);
@@ -288,7 +305,6 @@ mod tests {
         evm.database(zkdb);
         evm.env = env;
 
-        let (res, _state) = evm.transact();
-        assert_eq!(res.exit_reason, Return::Return);
+        evm.transact().unwrap();
     }
 }

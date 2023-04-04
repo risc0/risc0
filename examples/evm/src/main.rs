@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::str::FromStr;
-use std::sync::Arc;
+use std::{str::FromStr, sync::Arc};
 
 use clap::Parser;
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
-use evm_core::ether_trace::{Http, Provider};
-use evm_core::{Env, EvmResult, EVM};
+use evm_core::{
+    ether_trace::{Http, Provider},
+    Env, EvmResult, EVM,
+};
+use evm_methods::{EVM_ELF, EVM_ID};
 use log::info;
-use methods::{EVM_ELF, EVM_ID};
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::Prover;
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    Prover,
+};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -48,7 +51,7 @@ async fn main() {
     info!("Running TX: 0x{:x} at block {}", tx_hash, block_numb);
 
     let mut env = Env::default();
-    env.block.number = U256::from(block_numb.as_u64());
+    env.block.number = U256::from(block_numb.as_u64()).into();
     env.tx = evm_core::ether_trace::txenv_from_tx(tx);
     let trace_db = evm_core::ether_trace::TraceTx::new(client, Some(block_numb.as_u64())).unwrap();
 
@@ -56,12 +59,12 @@ async fn main() {
     evm.database(trace_db);
     evm.env = env.clone();
 
-    let ((res, _state), trace_db) =
-        tokio::task::spawn_blocking(move || (evm.transact(), evm.take_db()))
-            .await
-            .unwrap();
+    let (res, trace_db) = tokio::task::spawn_blocking(move || (evm.transact(), evm.take_db()))
+        .await
+        .unwrap();
 
-    if res.exit_reason != evm_core::Return::Return {
+    let res = res.unwrap();
+    if !res.result.is_success() {
         println!("TX failed in pre-flight");
         return;
     }
