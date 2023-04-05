@@ -87,9 +87,8 @@ impl Segment {
         let mut mem_init = exec.mem.clone();
         mem_init.hash_pages();
         Segment {
-            mem_init: mem_init,
+            mem_init,
             entry: exec.pc,
-
             cycles: 0,
             syscalls: Vec::new(),
         }
@@ -126,7 +125,7 @@ impl Segment {
             Rc::new(RefCell::new(self.mem_init.clone())),
             self.entry,
             opts,
-        )?;
+        );
 
         p.run_with_hal(hal, eval)
     }
