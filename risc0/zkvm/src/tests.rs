@@ -695,7 +695,7 @@ fn pause_continue() {
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
 #[cfg_attr(feature = "cuda", serial)]
 fn continuation() {
-    let segment_limit_po2 = 16; // 64k cycles
+    let segment_limit_po2 = 17; // 128k cycles
     const COUNT: usize = 4; // Number of total chunks to aim for.
 
     let opts = ProverOpts::default().with_segment_limit_po2(segment_limit_po2);

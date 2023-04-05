@@ -25,8 +25,9 @@ use risc0_core::field::{
     ExtElem,
 };
 
+pub use self::consts::CELLS;
 use self::consts::{
-    CELLS, MDS, PARTIAL_COMP_MATRIX, PARTIAL_COMP_OFFSET, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
+    MDS, PARTIAL_COMP_MATRIX, PARTIAL_COMP_OFFSET, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
     ROUND_CONSTANTS,
 };
 pub use self::rng::PoseidonRng;

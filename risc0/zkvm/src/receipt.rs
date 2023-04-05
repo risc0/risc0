@@ -60,7 +60,7 @@
 //! #    journal: journal,
 //! # };
 //! # use crate::risc0_zkvm::sha::Sha256;
-//! # let IMAGE_ID: [u32; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
+//! # const IMAGE_ID: [u32; 8] = [0, 0, 0, 0, 0, 0, 0, 0];
 //! // Here `receipt` is a Receipt whose journal contains the String "test"
 //! receipt.verify(&IMAGE_ID);
 //! let committed_value: String = risc0_zkvm::serde::from_slice(&receipt.journal)?;
@@ -81,14 +81,14 @@ use alloc::vec::Vec;
 
 use anyhow::{anyhow, Result};
 use hex::FromHex;
+use risc0_circuit_rv32im::layout;
 #[cfg(not(target_os = "zkvm"))]
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 #[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::core::hash::{sha::Sha256HashSuite, HashSuite};
-use risc0_zkp::{core::digest::Digest, verify::VerificationError, MIN_CYCLES_PO2};
-use risc0_zkvm_platform::{syscall::DIGEST_BYTES, WORD_SIZE};
+use risc0_zkp::{core::digest::Digest, layout::Buffer, verify::VerificationError, MIN_CYCLES_PO2};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -176,11 +176,8 @@ where
 {
     let image_id: &Digest = image_id.into();
     let check_globals = |io: &[BabyBearElem]| -> Result<(), VerificationError> {
-        // Convert to u32 first
-        let mut it = io.iter().map(|x| u32::from(*x));
-
         // Decode the global outputs
-        let global = Global::decode(&mut it)?;
+        let global = Global::decode(layout::OutBuffer(io))?;
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("io: {global:#?}");
 
@@ -331,32 +328,34 @@ struct Global {
 }
 
 impl SystemState {
-    pub fn decode<I>(it: &mut I) -> Result<Self, VerificationError>
-    where
-        I: Iterator<Item = u32>,
-    {
-        let bytes: Vec<u8> = it.take(WORD_SIZE).map(|x| x as u8).collect();
-        let _pc = u32::from_le_bytes(
-            bytes
-                .try_into()
-                .or(Err(VerificationError::ReceiptFormatError))?,
-        );
-        let bytes: Vec<u8> = it.take(DIGEST_BYTES).map(|x| x as u8).collect();
+    fn decode(
+        io: layout::OutBuffer,
+        sys_state: &layout::SystemState,
+    ) -> Result<Self, VerificationError> {
+        let bytes: Vec<u8> = io
+            .tree(sys_state.image_id)
+            .get_bytes()
+            .or(Err(VerificationError::ReceiptFormatError))?;
+        let _pc = io
+            .tree(sys_state.pc)
+            .get_u32()
+            .or(Err(VerificationError::ReceiptFormatError))?;
         let image_id = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
         Ok(Self { _pc, image_id })
     }
 }
 
 impl Global {
-    pub fn decode<I>(it: &mut I) -> Result<Self, VerificationError>
-    where
-        I: Iterator<Item = u32>,
-    {
-        let pre = SystemState::decode(it)?;
-        let _post = SystemState::decode(it)?;
-        let _check_dirty = it.next().ok_or(VerificationError::ReceiptFormatError)?;
-        let bytes: Vec<u8> = it.take(DIGEST_BYTES).map(|x| x as u8).collect();
+    fn decode(io: layout::OutBuffer) -> Result<Self, VerificationError> {
+        let body = layout::LAYOUT.mux.body;
+        let pre = SystemState::decode(io, body.pre)?;
+        let _post = SystemState::decode(io, body.post)?;
+        let bytes: Vec<u8> = io
+            .tree(body.output)
+            .get_bytes()
+            .or(Err(VerificationError::ReceiptFormatError))?;
         let output = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
+        let _check_dirty = io.get_u64(body.check_dirty) as u32;
 
         Ok(Self {
             pre,

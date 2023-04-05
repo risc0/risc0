@@ -22,6 +22,7 @@ pub mod adapter;
 pub mod core;
 #[cfg(feature = "prove")]
 pub mod hal;
+pub mod layout;
 mod merkle;
 #[cfg(feature = "prove")]
 pub mod prove;
