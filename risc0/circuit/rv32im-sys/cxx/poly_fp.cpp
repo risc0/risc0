@@ -869,21 +869,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x417 = x416 - x185;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x418{x415.tot + x415.mul * x417, x415.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x419 = args[2][114 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x420 = x419 - x84;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x421{x418.tot + x418.mul * x420, x418.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x422 = args[2][115 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x423 = x422 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x424{x421.tot + x421.mul * x423, x421.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x425 = args[2][116 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x426{x424.tot + x424.mul * x425, x424.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x427 = x407 - x407;
@@ -947,21 +947,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x456 = x455 - x202;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x457{x454.tot + x454.mul * x456, x454.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x458 = args[2][121 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x459 = x458 - x445;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x460{x457.tot + x457.mul * x459, x457.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x461 = args[2][122 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x462 = x461 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x463{x460.tot + x460.mul * x462, x460.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x464 = args[2][123 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x465{x463.tot + x463.mul * x464, x463.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x466 = x446 - x446;
@@ -1025,21 +1025,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x495 = x494 - x210;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x496{x493.tot + x493.mul * x495, x493.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x497 = args[2][128 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x498 = x497 - x484;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x499{x496.tot + x496.mul * x498, x496.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x500 = args[2][129 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x501 = x500 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x502{x499.tot + x499.mul * x501, x499.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x503 = args[2][130 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x504{x502.tot + x502.mul * x503, x502.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x505 = x485 - x485;
@@ -1085,13 +1085,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x525 = x416 - x518;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x526{x524.tot + x524.mul * x525, x524.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x527 = x419 - x7;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x528{x526.tot + x526.mul * x527, x526.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x529{x528.tot + x528.mul * x423, x528.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x530{x529.tot + x529.mul * x425, x529.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x531{x530.tot + x530.mul * x427, x530.mul * (*mix)};
@@ -1125,13 +1125,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x545 = x455 - x538;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x546{x544.tot + x544.mul * x545, x544.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x547 = x458 - x8;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x548{x546.tot + x546.mul * x547, x546.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x549{x548.tot + x548.mul * x462, x548.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x550{x549.tot + x549.mul * x464, x549.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x551{x550.tot + x550.mul * x466, x550.mul * (*mix)};
@@ -1165,13 +1165,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x565 = x494 - x558;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x566{x564.tot + x564.mul * x565, x564.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x567 = x497 - x9;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x568{x566.tot + x566.mul * x567, x566.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x569{x568.tot + x568.mul * x501, x568.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x570{x569.tot + x569.mul * x503, x569.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x571{x570.tot + x570.mul * x505, x570.mul * (*mix)};
@@ -1213,21 +1213,21 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x589 = x588 - x578;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x590{x587.tot + x587.mul * x589, x587.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x591 = args[2][135 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x592 = x591 - x10;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x593{x590.tot + x590.mul * x592, x590.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x594 = args[2][136 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x595 = x594 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x596{x593.tot + x593.mul * x595, x593.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x597 = args[2][137 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x598{x596.tot + x596.mul * x597, x596.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x599 = x579 - x579;
@@ -1271,13 +1271,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x618 = x416 - x611;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x619{x617.tot + x617.mul * x618, x617.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x620 = x419 - x11;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x621{x619.tot + x619.mul * x620, x619.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x622{x621.tot + x621.mul * x423, x621.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x623{x622.tot + x622.mul * x425, x622.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x624{x623.tot + x623.mul * x427, x623.mul * (*mix)};
@@ -1311,13 +1311,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x638 = x455 - x631;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x639{x637.tot + x637.mul * x638, x637.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x640 = x458 - x12;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x641{x639.tot + x639.mul * x640, x639.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x642{x641.tot + x641.mul * x462, x641.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x643{x642.tot + x642.mul * x464, x642.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x644{x643.tot + x643.mul * x466, x643.mul * (*mix)};
@@ -1351,13 +1351,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x658 = x494 - x651;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x659{x657.tot + x657.mul * x658, x657.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x660 = x497 - x13;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x661{x659.tot + x659.mul * x660, x659.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x662{x661.tot + x661.mul * x501, x661.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x663{x662.tot + x662.mul * x503, x662.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x664{x663.tot + x663.mul * x505, x663.mul * (*mix)};
@@ -1391,13 +1391,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x678 = x588 - x671;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x679{x677.tot + x677.mul * x678, x677.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x680 = x591 - x14;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x681{x679.tot + x679.mul * x680, x679.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x682{x681.tot + x681.mul * x595, x681.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x683{x682.tot + x682.mul * x597, x682.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x684{x683.tot + x683.mul * x599, x683.mul * (*mix)};
@@ -1613,11 +1613,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x789 = x788 - x30;
   // loc("cirgen/circuit/rv32im/body.cpp":68:42)
   MixState x790{x80.tot + x80.mul * x789, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x791{x790.tot + x790.mul * x527, x790.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x792{x791.tot + x791.mul * x423, x791.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x793{x792.tot + x792.mul * x425, x792.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x794{x793.tot + x793.mul * x427, x793.mul * (*mix)};
@@ -1651,11 +1651,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x808 = x807 - x416;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x809{x806.tot + x806.mul * x808, x806.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x810{x809.tot + x809.mul * x547, x809.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x811{x810.tot + x810.mul * x462, x810.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x812{x811.tot + x811.mul * x464, x811.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x813{x812.tot + x812.mul * x466, x812.mul * (*mix)};
@@ -1689,11 +1689,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x827 = x826 - x455;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x828{x825.tot + x825.mul * x827, x825.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x829{x828.tot + x828.mul * x567, x828.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x830{x829.tot + x829.mul * x501, x829.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x831{x830.tot + x830.mul * x503, x830.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x832{x831.tot + x831.mul * x505, x831.mul * (*mix)};
@@ -1727,11 +1727,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x846 = x845 - x494;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x847{x844.tot + x844.mul * x846, x844.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x848{x847.tot + x847.mul * x592, x847.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x849{x848.tot + x848.mul * x595, x848.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x850{x849.tot + x849.mul * x597, x849.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x851{x850.tot + x850.mul * x599, x850.mul * (*mix)};
@@ -1795,11 +1795,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x880{x877.tot + x877.mul * x879, x877.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":65:13)
   MixState x881{x748.tot + x84 * x880.tot * x748.mul, x748.mul * x880.mul};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x882{x80.tot + x80.mul * x620, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x883{x882.tot + x882.mul * x423, x882.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x884{x883.tot + x883.mul * x425, x883.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x885{x884.tot + x884.mul * x427, x884.mul * (*mix)};
@@ -1833,11 +1833,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x899 = x898 - x416;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x900{x897.tot + x897.mul * x899, x897.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x901{x900.tot + x900.mul * x640, x900.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x902{x901.tot + x901.mul * x462, x901.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x903{x902.tot + x902.mul * x464, x902.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x904{x903.tot + x903.mul * x466, x903.mul * (*mix)};
@@ -1871,11 +1871,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x918 = x917 - x455;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x919{x916.tot + x916.mul * x918, x916.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x920{x919.tot + x919.mul * x660, x919.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x921{x920.tot + x920.mul * x501, x920.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x922{x921.tot + x921.mul * x503, x921.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x923{x922.tot + x922.mul * x505, x922.mul * (*mix)};
@@ -1909,11 +1909,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x937 = x936 - x494;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x938{x935.tot + x935.mul * x937, x935.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x939{x938.tot + x938.mul * x680, x938.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x940{x939.tot + x939.mul * x595, x939.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x941{x940.tot + x940.mul * x597, x940.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x942{x941.tot + x941.mul * x599, x941.mul * (*mix)};
@@ -1965,17 +1965,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x965 = args[2][100 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/circuit/rv32im/compute.cpp":112:41)
   auto x966 = x735 * x19;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x967 = x422 - x966;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x968{x80.tot + x80.mul * x967, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x969 = x425 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x970{x968.tot + x968.mul * x969, x968.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x971 = x407 - x0;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x972{x970.tot + x970.mul * x971, x970.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x973{x972.tot + x972.mul * x429, x972.mul * (*mix)};
@@ -2105,17 +2105,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1035 = x1034 + x1011;
   // loc("cirgen/circuit/rv32im/compute.cpp":134:39)
   auto x1036 = x1035 + x40;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1037 = x461 - x1036;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1038{x1031.tot + x1031.mul * x1037, x1031.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x1039 = x464 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1040{x1038.tot + x1038.mul * x1039, x1038.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x1041 = x446 - x0;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1042{x1040.tot + x1040.mul * x1041, x1040.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1043{x1042.tot + x1042.mul * x468, x1042.mul * (*mix)};
@@ -2133,17 +2133,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1049 = x1048 + x1002;
   // loc("cirgen/circuit/rv32im/compute.cpp":135:39)
   auto x1050 = x1049 + x40;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1051 = x500 - x1050;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1052{x1047.tot + x1047.mul * x1051, x1047.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x1053 = x503 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1054{x1052.tot + x1052.mul * x1053, x1052.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x1055 = x485 - x0;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1056{x1054.tot + x1054.mul * x1055, x1054.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1057{x1056.tot + x1056.mul * x507, x1056.mul * (*mix)};
@@ -2585,17 +2585,17 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1275 = x1274 - x204;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1276{x1273.tot + x1273.mul * x1275, x1273.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1277 = x594 - x1267;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1278{x1276.tot + x1276.mul * x1277, x1276.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x1279 = x597 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1280{x1278.tot + x1278.mul * x1279, x1278.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x1281 = x579 - x3;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1282{x1280.tot + x1280.mul * x1281, x1280.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1283{x1282.tot + x1282.mul * x601, x1282.mul * (*mix)};
@@ -2851,11 +2851,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1408{x1407.tot + x1407.mul * x588, x1407.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1409{x1408.tot + x1408.mul * x1274, x1408.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1410{x1409.tot + x1409.mul * x1277, x1409.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1411{x1410.tot + x1410.mul * x1279, x1410.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1412{x1411.tot + x1411.mul * x1281, x1411.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1413{x1412.tot + x1412.mul * x601, x1412.mul * (*mix)};
@@ -2917,11 +2917,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x1441{x1440.tot + x1440.mul * x588, x1440.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1442{x1441.tot + x1441.mul * x1274, x1441.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1443{x1442.tot + x1442.mul * x1277, x1442.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1444{x1443.tot + x1443.mul * x1279, x1443.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1445{x1444.tot + x1444.mul * x1281, x1444.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1446{x1445.tot + x1445.mul * x601, x1445.mul * (*mix)};
@@ -3711,11 +3711,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1838 = x1274 - x1069;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1839{x1837.tot + x1837.mul * x1838, x1837.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1840{x1839.tot + x1839.mul * x1277, x1839.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1841{x1840.tot + x1840.mul * x1279, x1840.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1842{x1841.tot + x1841.mul * x1281, x1841.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1843{x1842.tot + x1842.mul * x601, x1842.mul * (*mix)};
@@ -3959,13 +3959,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1962 = x1961 + x1062;
   // loc("cirgen/circuit/rv32im/memio.cpp":38:39)
   auto x1963 = x1962 + x40;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1964 = x461 - x1963;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1965{x1958.tot + x1958.mul * x1964, x1958.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1966{x1965.tot + x1965.mul * x1039, x1965.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1967{x1966.tot + x1966.mul * x1041, x1966.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1968{x1967.tot + x1967.mul * x468, x1967.mul * (*mix)};
@@ -3981,13 +3981,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x1973 = x1972 + x1938;
   // loc("cirgen/circuit/rv32im/memio.cpp":39:39)
   auto x1974 = x1973 + x40;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x1975 = x500 - x1974;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x1976{x1971.tot + x1971.mul * x1975, x1971.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x1977{x1976.tot + x1976.mul * x1053, x1976.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x1978{x1977.tot + x1977.mul * x1055, x1977.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x1979{x1978.tot + x1978.mul * x507, x1978.mul * (*mix)};
@@ -4107,13 +4107,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2036 = x2034 + x2035;
   // loc("cirgen/circuit/rv32im/memio.cpp":79:14)
   auto x2037 = x2036 + x214;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x2038 = x594 - x2037;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2039{x2029.tot + x2029.mul * x2038, x2029.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2040{x2039.tot + x2039.mul * x1279, x2039.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2041{x2040.tot + x2040.mul * x1291, x2040.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2042{x2041.tot + x2041.mul * x601, x2041.mul * (*mix)};
@@ -4229,23 +4229,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2097 = x2096 - x2083;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2098{x2095.tot + x2095.mul * x2097, x2095.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x2099 = args[2][143 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x2100 = x2099 - x2086;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2101{x2098.tot + x2098.mul * x2100, x2098.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x2102 = args[2][144 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   auto x2103 = x2102 - x406;
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2104{x2101.tot + x2101.mul * x2103, x2101.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x2105 = args[2][145 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x2106 = x2105 - x3;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2107{x2104.tot + x2104.mul * x2106, x2104.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x2108 = x2087 - x2087;
@@ -4521,13 +4521,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2243 = x2096 - x2236;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2244{x2242.tot + x2242.mul * x2243, x2242.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x2245 = x2099 - x2037;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2246{x2244.tot + x2244.mul * x2245, x2244.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2247{x2246.tot + x2246.mul * x2103, x2246.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2248{x2247.tot + x2247.mul * x2106, x2247.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2249{x2248.tot + x2248.mul * x2108, x2248.mul * (*mix)};
@@ -4587,11 +4587,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2276 = x2096 - x2271;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2277{x2275.tot + x2275.mul * x2276, x2275.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2278{x2277.tot + x2277.mul * x2245, x2277.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2279{x2278.tot + x2278.mul * x2103, x2278.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2280{x2279.tot + x2279.mul * x2106, x2279.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2281{x2280.tot + x2280.mul * x2108, x2280.mul * (*mix)};
@@ -4645,11 +4645,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2305 = x2096 - x2300;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2306{x2304.tot + x2304.mul * x2305, x2304.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2307{x2306.tot + x2306.mul * x2245, x2306.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2308{x2307.tot + x2307.mul * x2103, x2307.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2309{x2308.tot + x2308.mul * x2106, x2308.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2310{x2309.tot + x2309.mul * x2108, x2309.mul * (*mix)};
@@ -4983,11 +4983,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2474 = x1274 - x218;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2475{x2473.tot + x2473.mul * x2474, x2473.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2476{x2475.tot + x2475.mul * x1277, x2475.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2477{x2476.tot + x2476.mul * x1279, x2476.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2478{x2477.tot + x2477.mul * x1281, x2477.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2479{x2478.tot + x2478.mul * x601, x2478.mul * (*mix)};
@@ -5011,11 +5011,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2488 = x1274 - x206;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2489{x2487.tot + x2487.mul * x2488, x2487.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2490{x2489.tot + x2489.mul * x1277, x2489.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2491{x2490.tot + x2490.mul * x1279, x2490.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2492{x2491.tot + x2491.mul * x1281, x2491.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2493{x2492.tot + x2492.mul * x601, x2492.mul * (*mix)};
@@ -5087,11 +5087,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2526 = x1103 - x2523;
   // loc("cirgen/circuit/rv32im/divide.cpp":47:3)
   MixState x2527{x2525.tot + x2525.mul * x2526, x2525.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2528{x2527.tot + x2527.mul * x1037, x2527.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2529{x2528.tot + x2528.mul * x1039, x2528.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2530{x2529.tot + x2529.mul * x1041, x2529.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2531{x2530.tot + x2530.mul * x468, x2530.mul * (*mix)};
@@ -5101,11 +5101,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x2533{x2532.tot + x2532.mul * x472, x2532.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2534{x2533.tot + x2533.mul * x1046, x2533.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2535{x2534.tot + x2534.mul * x1051, x2534.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2536{x2535.tot + x2535.mul * x1053, x2535.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2537{x2536.tot + x2536.mul * x1055, x2536.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2538{x2537.tot + x2537.mul * x507, x2537.mul * (*mix)};
@@ -5191,11 +5191,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2578 = x1274 - x216;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2579{x2577.tot + x2577.mul * x2578, x2577.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2580{x2579.tot + x2579.mul * x1277, x2579.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2581{x2580.tot + x2580.mul * x1279, x2580.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2582{x2581.tot + x2581.mul * x1281, x2581.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2583{x2582.tot + x2582.mul * x601, x2582.mul * (*mix)};
@@ -5227,11 +5227,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x2596 = x1274 - x208;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2597{x2595.tot + x2595.mul * x2596, x2595.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x2598{x2597.tot + x2597.mul * x1277, x2597.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x2599{x2598.tot + x2598.mul * x1279, x2598.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x2600{x2599.tot + x2599.mul * x1281, x2599.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x2601{x2600.tot + x2600.mul * x601, x2600.mul * (*mix)};
@@ -6419,13 +6419,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3192{x3191.tot + x3191.mul * x416, x3191.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/ecall.cpp":125:7)
   MixState x3193{x3192.tot + x3192.mul * x458, x3192.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3194 = x461 - x57;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3195{x3193.tot + x3193.mul * x3194, x3193.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3196{x3195.tot + x3195.mul * x1039, x3195.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3197{x3196.tot + x3196.mul * x1041, x3196.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3198{x3197.tot + x3197.mul * x468, x3197.mul * (*mix)};
@@ -6447,13 +6447,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3206 = x3205 - x449;
   // loc("./cirgen/components/onehot.h":40:8)
   MixState x3207{x3201.tot + x3201.mul * x3206, x3201.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3208 = x500 - x58;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3209{x80.tot + x80.mul * x3208, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3210{x3209.tot + x3209.mul * x1053, x3209.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3211{x3210.tot + x3210.mul * x1055, x3210.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3212{x3211.tot + x3211.mul * x507, x3211.mul * (*mix)};
@@ -6475,13 +6475,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3220{x3218.tot + x3218.mul * x3219, x3218.mul * (*mix)};
   // loc("./cirgen/components/mux.h":39:25)
   MixState x3221{x3207.tot + x1420 * x3220.tot * x3207.mul, x3207.mul * x3220.mul};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3222 = x594 - x59;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3223{x3215.tot + x3215.mul * x3222, x3215.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3224{x3223.tot + x3223.mul * x1279, x3223.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3225{x3224.tot + x3224.mul * x1291, x3224.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3226{x3225.tot + x3225.mul * x601, x3225.mul * (*mix)};
@@ -6787,13 +6787,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3376{x3374.tot + x3374.mul * x3375, x3374.mul * (*mix)};
   // loc("./cirgen/components/mux.h":39:25)
   MixState x3377{x3352.tot + x1085 * x3376.tot * x3352.mul, x3352.mul * x3376.mul};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3378 = x2099 - x60;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3379{x3229.tot + x3229.mul * x3378, x3229.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3380{x3379.tot + x3379.mul * x2103, x3379.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3381{x3380.tot + x3380.mul * x2119, x3380.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3382{x3381.tot + x3381.mul * x2108, x3381.mul * (*mix)};
@@ -6941,13 +6941,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3453{x3452.tot + x3452.mul * x715, x3452.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":23:7)
   MixState x3454{x3453.tot + x3453.mul * x718, x3453.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3455 = x422 - x61;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3456{x80.tot + x80.mul * x3455, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3457{x3456.tot + x3456.mul * x969, x3456.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3458{x3457.tot + x3457.mul * x971, x3457.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3459{x3458.tot + x3458.mul * x429, x3458.mul * (*mix)};
@@ -6957,13 +6957,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3461{x3460.tot + x3460.mul * x433, x3460.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3462{x3461.tot + x3461.mul * x976, x3461.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3463 = x461 - x62;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3464{x3462.tot + x3462.mul * x3463, x3462.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3465{x3464.tot + x3464.mul * x1039, x3464.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3466{x3465.tot + x3465.mul * x1041, x3465.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3467{x3466.tot + x3466.mul * x468, x3466.mul * (*mix)};
@@ -7195,13 +7195,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3580{x3577.tot + x3577.mul * x3579, x3577.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":239:24)
   auto x3581 = x582 + x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3582 = x422 - x3581;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3583{x3580.tot + x3580.mul * x3582, x3580.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3584{x3583.tot + x3583.mul * x969, x3583.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3585{x3584.tot + x3584.mul * x971, x3584.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3586{x3585.tot + x3585.mul * x429, x3585.mul * (*mix)};
@@ -7213,13 +7213,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3589{x3588.tot + x3588.mul * x976, x3588.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":240:24)
   auto x3590 = x3581 + x17;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3591 = x461 - x3590;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3592{x3589.tot + x3589.mul * x3591, x3589.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3593{x3592.tot + x3592.mul * x1039, x3592.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3594{x3593.tot + x3593.mul * x1041, x3593.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3595{x3594.tot + x3594.mul * x468, x3594.mul * (*mix)};
@@ -7785,15 +7785,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3875 = x585 + x23;
   // loc("cirgen/circuit/rv32im/sha.cpp":311:24)
   auto x3876 = x3875 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3877 = x422 - x3876;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3878{x80.tot + x80.mul * x3877, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3879{x3878.tot + x3878.mul * x969, x3878.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x3880 = x407 - x2667;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3881{x3879.tot + x3879.mul * x3880, x3879.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3882{x3881.tot + x3881.mul * x429, x3881.mul * (*mix)};
@@ -7805,13 +7805,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3885{x3884.tot + x3884.mul * x976, x3884.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":312:24)
   auto x3886 = x70 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3887 = x461 - x3886;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3888{x3885.tot + x3885.mul * x3887, x3885.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3889{x3888.tot + x3888.mul * x1039, x3888.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3890{x3889.tot + x3889.mul * x1041, x3889.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3891{x3890.tot + x3890.mul * x468, x3890.mul * (*mix)};
@@ -7827,13 +7827,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x3896 = x588 + x23;
   // loc("cirgen/circuit/rv32im/sha.cpp":315:24)
   auto x3897 = x3896 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3898 = x422 - x3897;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3899{x80.tot + x80.mul * x3898, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3900{x3899.tot + x3899.mul * x969, x3899.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3901{x3900.tot + x3900.mul * x3880, x3900.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3902{x3901.tot + x3901.mul * x429, x3901.mul * (*mix)};
@@ -7845,13 +7845,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x3905{x3904.tot + x3904.mul * x976, x3904.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":316:24)
   auto x3906 = x71 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x3907 = x461 - x3906;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x3908{x3905.tot + x3905.mul * x3907, x3905.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x3909{x3908.tot + x3908.mul * x1039, x3908.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x3910{x3909.tot + x3909.mul * x1041, x3909.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x3911{x3910.tot + x3910.mul * x468, x3910.mul * (*mix)};
@@ -11247,13 +11247,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x5606{x5605.tot + x5605.mul * x718, x5605.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/sha.cpp":384:24)
   auto x5607 = x73 - x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x5608 = x461 - x5607;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x5609{x80.tot + x80.mul * x5608, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x5610{x5609.tot + x5609.mul * x1039, x5609.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x5611{x5610.tot + x5610.mul * x1041, x5610.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x5612{x5611.tot + x5611.mul * x468, x5611.mul * (*mix)};
@@ -13307,13 +13307,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6636 = x0 - x2659;
   // loc("cirgen/circuit/rv32im/sha.cpp":406:26)
   auto x6637 = x579 + x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x6638 = x422 - x6637;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x6639{x80.tot + x80.mul * x6638, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x6640{x6639.tot + x6639.mul * x969, x6639.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x6641{x6640.tot + x6640.mul * x971, x6640.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6642{x6641.tot + x6641.mul * x429, x6641.mul * (*mix)};
@@ -13327,13 +13327,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6646 = x579 + x17;
   // loc("cirgen/circuit/rv32im/sha.cpp":407:26)
   auto x6647 = x6646 + x1274;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   auto x6648 = x461 - x6647;
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x6649{x6645.tot + x6645.mul * x6648, x6645.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x6650{x6649.tot + x6649.mul * x1039, x6649.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x6651{x6650.tot + x6650.mul * x1041, x6650.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6652{x6651.tot + x6651.mul * x468, x6651.mul * (*mix)};
@@ -13501,13 +13501,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6733 = x458 - x3693;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6734{x6732.tot + x6732.mul * x6733, x6732.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x6735{x6734.tot + x6734.mul * x6638, x6734.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x6736{x6735.tot + x6735.mul * x969, x6735.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x6737 = x407 - x3;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x6738{x6736.tot + x6736.mul * x6737, x6736.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6739{x6738.tot + x6738.mul * x429, x6738.mul * (*mix)};
@@ -13533,13 +13533,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x6749 = x497 - x3772;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6750{x6748.tot + x6748.mul * x6749, x6748.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":169:3)
+  // loc("cirgen/components/ram.cpp":168:3)
   MixState x6751{x6750.tot + x6750.mul * x6648, x6750.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":170:3)
+  // loc("cirgen/components/ram.cpp":169:3)
   MixState x6752{x6751.tot + x6751.mul * x1039, x6751.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   auto x6753 = x446 - x3;
-  // loc("cirgen/components/ram.cpp":171:3)
+  // loc("cirgen/components/ram.cpp":170:3)
   MixState x6754{x6752.tot + x6752.mul * x6753, x6752.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x6755{x6754.tot + x6754.mul * x468, x6754.mul * (*mix)};
@@ -14103,13 +14103,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7034 = args[2][95 * steps + ((cycle - kInvRate * 0) & mask)];
   // loc("cirgen/components/u32.cpp":28:5)
   MixState x7035{x7033.tot + x7033.mul * x7034, x7033.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":116:3)
+  // loc("cirgen/components/ram.cpp":115:3)
   auto x7036 = args[2][96 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":116:3)
+  // loc("cirgen/components/ram.cpp":115:3)
   MixState x7037{x7035.tot + x7035.mul * x7036, x7035.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":117:3)
+  // loc("cirgen/components/ram.cpp":116:3)
   auto x7038 = args[2][97 * steps + ((cycle - kInvRate * 0) & mask)];
-  // loc("cirgen/components/ram.cpp":117:3)
+  // loc("cirgen/components/ram.cpp":116:3)
   MixState x7039{x7037.tot + x7037.mul * x7038, x7037.mul * (*mix)};
   // loc("./cirgen/components/bits.h":61:23)
   auto x7040 = args[2][69 * steps + ((cycle - kInvRate * 0) & mask)];
@@ -14133,13 +14133,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7049 = args[2][95 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("Top/Mux/3/RamHeader/RamPlonkVerifier/Reg"("cirgen/components/ram.cpp":60:56))
   auto x7050 = args[2][97 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7051 = x1 - x2102;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7052{x80.tot + x80.mul * x7051, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7053 = x1274 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7054 = x7053 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7055 = x7054 - x107;
@@ -14157,27 +14157,27 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7061 = x706 - x7060;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7062{x7052.tot + x7052.mul * x7061, x7052.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7063 = x6955 * x7050;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7064{x7062.tot + x7062.mul * x7063, x7062.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7065{x80.tot + x2757 * x7064.tot * x80.mul, x80.mul * x7064.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7066 = x0 - x2757;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7067 = x7043 - x1274;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7068{x80.tot + x80.mul * x7067, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7069 = x2099 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7070 = x7069 + x2102;
-  // loc("cirgen/components/ram.cpp":100:43)
+  // loc("cirgen/components/ram.cpp":99:43)
   auto x7071 = x7044 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7072 = x7070 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7073 = x7072 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7074 = x7073 - x107;
@@ -14195,59 +14195,59 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7080 = x706 - x7079;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7081{x7068.tot + x7068.mul * x7080, x7068.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7082 = x3 - x2102;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7083 = x7046 - x2105;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7084{x80.tot + x80.mul * x7083, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7085 = x7047 - x2087;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7086{x7084.tot + x7084.mul * x7085, x7084.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7087 = x7048 - x2090;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7088{x7086.tot + x7086.mul * x7087, x7086.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7089 = x7049 - x2093;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7090{x7088.tot + x7088.mul * x7089, x7088.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7091{x7081.tot + x7082 * x7090.tot * x7081.mul, x7081.mul * x7090.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7092{x7065.tot + x7066 * x7091.tot * x7065.mul, x7065.mul * x7091.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7093 = x0 - x2102;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7094 = x7093 * x7051;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7095 = x7051 * x7082;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7096 = x7093 * x7082;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7097{x80.tot + x80.mul * x2759, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7098{x7092.tot + x7096 * x7097.tot * x7092.mul, x7092.mul * x7097.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7099 = x2759 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7100{x80.tot + x80.mul * x7099, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7101{x7098.tot + x7094 * x7100.tot * x7098.mul, x7098.mul * x7100.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7102 = x2759 - x7050;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7103{x80.tot + x80.mul * x7102, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7104{x7101.tot + x7095 * x7103.tot * x7101.mul, x7101.mul * x7103.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7105 = x1 - x2667;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7106{x80.tot + x80.mul * x7105, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7107 = x2096 - x1274;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7108 = x7107 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7109 = x7108 - x131;
@@ -14265,25 +14265,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7115 = x709 - x7114;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7116{x7106.tot + x7106.mul * x7115, x7106.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7117 = x6955 * x2759;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7118{x7116.tot + x7116.mul * x7117, x7116.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7119{x7104.tot + x2767 * x7118.tot * x7104.mul, x7104.mul * x7118.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7120 = x0 - x2767;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7121 = x1274 - x2096;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7122{x80.tot + x80.mul * x7121, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7123 = x2659 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7124 = x7123 + x2667;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7125 = x7124 - x7069;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7126 = x7125 + x2102;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7127 = x7126 - x131;
@@ -14301,59 +14301,59 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7133 = x709 - x7132;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7134{x7122.tot + x7122.mul * x7133, x7122.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7135 = x3 - x2667;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7136 = x2105 - x2675;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7137{x80.tot + x80.mul * x7136, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7138 = x2087 - x2683;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7139{x7137.tot + x7137.mul * x7138, x7137.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7140 = x2090 - x2691;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7141{x7139.tot + x7139.mul * x7140, x7139.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7142 = x2093 - x2699;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7143{x7141.tot + x7141.mul * x7142, x7141.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7144{x7134.tot + x7135 * x7143.tot * x7134.mul, x7134.mul * x7143.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7145{x7119.tot + x7120 * x7144.tot * x7119.mul, x7119.mul * x7144.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7146 = x0 - x2667;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7147 = x7146 * x7105;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7148 = x7105 * x7135;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7149 = x7146 * x7135;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7150{x80.tot + x80.mul * x2775, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7151{x7145.tot + x7149 * x7150.tot * x7145.mul, x7145.mul * x7150.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7152 = x2775 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7153{x80.tot + x80.mul * x7152, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7154{x7151.tot + x7147 * x7153.tot * x7151.mul, x7151.mul * x7153.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7155 = x2775 - x2759;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7156{x80.tot + x80.mul * x7155, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7157{x7154.tot + x7148 * x7156.tot * x7154.mul, x7154.mul * x7156.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7158 = x1 - x2717;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7159{x80.tot + x80.mul * x7158, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7160 = x2701 - x2096;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7161 = x7160 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7162 = x7161 - x146;
@@ -14371,25 +14371,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7168 = x2947 - x7167;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7169{x7159.tot + x7159.mul * x7168, x7159.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7170 = x6955 * x2775;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7171{x7169.tot + x7169.mul * x7170, x7169.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7172{x7157.tot + x2783 * x7171.tot * x7157.mul, x7157.mul * x7171.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7173 = x0 - x2783;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7174 = x2096 - x2701;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7175{x80.tot + x80.mul * x7174, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7176 = x2709 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7177 = x7176 + x2717;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7178 = x7177 - x7123;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7179 = x7178 + x2667;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7180 = x7179 - x146;
@@ -14407,59 +14407,59 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7186 = x2947 - x7185;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7187{x7175.tot + x7175.mul * x7186, x7175.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7188 = x3 - x2717;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7189 = x2675 - x2725;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7190{x80.tot + x80.mul * x7189, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7191 = x2683 - x2733;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7192{x7190.tot + x7190.mul * x7191, x7190.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7193 = x2691 - x2741;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7194{x7192.tot + x7192.mul * x7193, x7192.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7195 = x2699 - x2749;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7196{x7194.tot + x7194.mul * x7195, x7194.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7197{x7187.tot + x7188 * x7196.tot * x7187.mul, x7187.mul * x7196.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7198{x7172.tot + x7173 * x7197.tot * x7172.mul, x7172.mul * x7197.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7199 = x0 - x2717;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7200 = x7199 * x7158;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7201 = x7158 * x7188;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7202 = x7199 * x7188;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7203{x80.tot + x80.mul * x2791, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7204{x7198.tot + x7202 * x7203.tot * x7198.mul, x7198.mul * x7203.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7205 = x2791 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7206{x80.tot + x80.mul * x7205, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7207{x7204.tot + x7200 * x7206.tot * x7204.mul, x7204.mul * x7206.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7208 = x2791 - x2775;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7209{x80.tot + x80.mul * x7208, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7210{x7207.tot + x7201 * x7209.tot * x7207.mul, x7207.mul * x7209.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7211 = x1 - x7026;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7212{x80.tot + x80.mul * x7211, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7213 = x7022 - x2701;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7214 = x7213 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7215 = x7214 - x85;
@@ -14477,25 +14477,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7221 = x7040 - x7220;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7222{x7212.tot + x7212.mul * x7221, x7212.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7223 = x6955 * x2791;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7224{x7222.tot + x7222.mul * x7223, x7222.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7225{x7210.tot + x7036 * x7224.tot * x7210.mul, x7210.mul * x7224.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7226 = x0 - x7036;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7227 = x2701 - x7022;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7228{x80.tot + x80.mul * x7227, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7229 = x7024 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7230 = x7229 + x7026;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7231 = x7230 - x7176;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7232 = x7231 + x2717;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7233 = x7232 - x85;
@@ -14513,51 +14513,51 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7239 = x7040 - x7238;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7240{x7228.tot + x7228.mul * x7239, x7228.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7241 = x3 - x7026;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7242 = x2725 - x7028;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7243{x80.tot + x80.mul * x7242, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7244 = x2733 - x7030;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7245{x7243.tot + x7243.mul * x7244, x7243.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7246 = x2741 - x7032;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7247{x7245.tot + x7245.mul * x7246, x7245.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7248 = x2749 - x7034;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7249{x7247.tot + x7247.mul * x7248, x7247.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7250{x7240.tot + x7241 * x7249.tot * x7240.mul, x7240.mul * x7249.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7251{x7225.tot + x7226 * x7250.tot * x7225.mul, x7225.mul * x7250.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7252 = x0 - x7026;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7253 = x7252 * x7211;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7254 = x7211 * x7241;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7255 = x7252 * x7241;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7256{x80.tot + x80.mul * x7038, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7257{x7251.tot + x7255 * x7256.tot * x7251.mul, x7251.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7258 = x7038 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7259{x80.tot + x80.mul * x7258, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7260{x7257.tot + x7253 * x7259.tot * x7257.mul, x7257.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7261 = x7038 - x2791;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7262{x80.tot + x80.mul * x7261, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7263{x7260.tot + x7254 * x7262.tot * x7260.mul, x7260.mul * x7262.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7264{x7042.tot + x395 * x7263.tot * x7042.mul, x7042.mul * x7263.mul};
@@ -14577,9 +14577,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7271 = x2947 - x7270;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7272{x7052.tot + x7052.mul * x7271, x7052.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7273{x7272.tot + x7272.mul * x7063, x7272.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7274{x80.tot + x2757 * x7273.tot * x80.mul, x80.mul * x7273.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7275 = x7073 - x131;
@@ -14597,15 +14597,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7281 = x2947 - x7280;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7282{x7068.tot + x7068.mul * x7281, x7068.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7283{x7282.tot + x7082 * x7090.tot * x7282.mul, x7282.mul * x7090.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7284{x7274.tot + x7066 * x7283.tot * x7274.mul, x7274.mul * x7283.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7285{x7284.tot + x7096 * x7097.tot * x7284.mul, x7284.mul * x7097.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7286{x7285.tot + x7094 * x7100.tot * x7285.mul, x7285.mul * x7100.mul};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7287{x7286.tot + x7095 * x7103.tot * x7286.mul, x7286.mul * x7103.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7288 = x7108 - x146;
@@ -14623,9 +14623,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7294 = x2957 - x7293;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7295{x7106.tot + x7106.mul * x7294, x7106.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7296{x7295.tot + x7295.mul * x7117, x7295.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7297{x7287.tot + x2767 * x7296.tot * x7287.mul, x7287.mul * x7296.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7298 = x7126 - x146;
@@ -14643,15 +14643,15 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7304 = x2957 - x7303;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7305{x7122.tot + x7122.mul * x7304, x7122.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7306{x7305.tot + x7135 * x7143.tot * x7305.mul, x7305.mul * x7143.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7307{x7297.tot + x7120 * x7306.tot * x7297.mul, x7297.mul * x7306.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7308{x7307.tot + x7149 * x7150.tot * x7307.mul, x7307.mul * x7150.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7309{x7308.tot + x7147 * x7153.tot * x7308.mul, x7308.mul * x7153.mul};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7310{x7309.tot + x7148 * x7156.tot * x7309.mul, x7309.mul * x7156.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7311 = x7161 - x170;
@@ -14669,9 +14669,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7317 = x2985 - x7316;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7318{x7159.tot + x7159.mul * x7317, x7159.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7319{x7318.tot + x7318.mul * x7170, x7318.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7320{x7310.tot + x2783 * x7319.tot * x7310.mul, x7310.mul * x7319.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7321 = x7179 - x170;
@@ -14689,35 +14689,35 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7327 = x2985 - x7326;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7328{x7175.tot + x7175.mul * x7327, x7175.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7329{x7328.tot + x7188 * x7196.tot * x7328.mul, x7328.mul * x7196.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7330{x7320.tot + x7173 * x7329.tot * x7320.mul, x7320.mul * x7329.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7331{x7330.tot + x7202 * x7203.tot * x7330.mul, x7330.mul * x7203.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7332{x7331.tot + x7200 * x7206.tot * x7331.mul, x7331.mul * x7206.mul};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7333{x7332.tot + x7201 * x7209.tot * x7332.mul, x7332.mul * x7209.mul};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7334{x7333.tot + x7036 * x7224.tot * x7333.mul, x7333.mul * x7224.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7335{x7334.tot + x7226 * x7250.tot * x7334.mul, x7334.mul * x7250.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7336{x7335.tot + x7255 * x7256.tot * x7335.mul, x7335.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7337{x7336.tot + x7253 * x7259.tot * x7336.mul, x7336.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7338{x7337.tot + x7254 * x7262.tot * x7337.mul, x7337.mul * x7262.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7339{x7264.tot + x514 * x7338.tot * x7264.mul, x7264.mul * x7338.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7340 = x1 - x2105;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7341{x80.tot + x80.mul * x7340, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7342 = x2099 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7343 = x7342 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7344 = x7343 - x131;
@@ -14735,23 +14735,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7350 = x2947 - x7349;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7351{x7341.tot + x7341.mul * x7350, x7341.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7352{x7351.tot + x7351.mul * x7063, x7351.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7353{x80.tot + x2759 * x7352.tot * x80.mul, x80.mul * x7352.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7354 = x0 - x2759;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7355 = x7043 - x2099;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7356{x80.tot + x80.mul * x7355, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7357 = x2102 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7358 = x7357 + x2105;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7359 = x7358 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7360 = x7359 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7361 = x7360 - x131;
@@ -14769,59 +14769,59 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7367 = x2947 - x7366;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7368{x7356.tot + x7356.mul * x7367, x7356.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7369 = x3 - x2105;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7370 = x7046 - x2087;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7371{x80.tot + x80.mul * x7370, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7372 = x7047 - x2090;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7373{x7371.tot + x7371.mul * x7372, x7371.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7374 = x7048 - x2093;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7375{x7373.tot + x7373.mul * x7374, x7373.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7376 = x7049 - x2096;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7377{x7375.tot + x7375.mul * x7376, x7375.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7378{x7368.tot + x7369 * x7377.tot * x7368.mul, x7368.mul * x7377.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7379{x7353.tot + x7354 * x7378.tot * x7353.mul, x7353.mul * x7378.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7380 = x0 - x2105;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7381 = x7380 * x7340;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7382 = x7340 * x7369;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7383 = x7380 * x7369;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7384{x80.tot + x80.mul * x2767, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7385{x7379.tot + x7383 * x7384.tot * x7379.mul, x7379.mul * x7384.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7386 = x2767 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7387{x80.tot + x80.mul * x7386, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7388{x7385.tot + x7381 * x7387.tot * x7385.mul, x7385.mul * x7387.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7389 = x2767 - x7050;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7390{x80.tot + x80.mul * x7389, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7391{x7388.tot + x7382 * x7390.tot * x7388.mul, x7388.mul * x7390.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7392 = x1 - x2675;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7393{x80.tot + x80.mul * x7392, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7394 = x2659 - x2099;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7395 = x7394 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7396 = x7395 - x146;
@@ -14839,25 +14839,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7402 = x2957 - x7401;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7403{x7393.tot + x7393.mul * x7402, x7393.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7404 = x6955 * x2767;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7405{x7403.tot + x7403.mul * x7404, x7403.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7406{x7391.tot + x2775 * x7405.tot * x7391.mul, x7391.mul * x7405.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7407 = x0 - x2775;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7408 = x2099 - x2659;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7409{x80.tot + x80.mul * x7408, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7410 = x2667 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7411 = x7410 + x2675;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7412 = x7411 - x7357;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7413 = x7412 + x2105;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7414 = x7413 - x146;
@@ -14875,51 +14875,51 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7420 = x2957 - x7419;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7421{x7409.tot + x7409.mul * x7420, x7409.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7422 = x3 - x2675;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7423{x80.tot + x80.mul * x7138, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7424{x7423.tot + x7423.mul * x7140, x7423.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7425{x7424.tot + x7424.mul * x7142, x7424.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7426{x7425.tot + x7425.mul * x7174, x7425.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7427{x7421.tot + x7422 * x7426.tot * x7421.mul, x7421.mul * x7426.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7428{x7406.tot + x7407 * x7427.tot * x7406.mul, x7406.mul * x7427.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7429 = x0 - x2675;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7430 = x7429 * x7392;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7431 = x7392 * x7422;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7432 = x7429 * x7422;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7433{x80.tot + x80.mul * x2783, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7434{x7428.tot + x7432 * x7433.tot * x7428.mul, x7428.mul * x7433.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7435 = x2783 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7436{x80.tot + x80.mul * x7435, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7437{x7434.tot + x7430 * x7436.tot * x7434.mul, x7434.mul * x7436.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7438 = x2783 - x2767;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7439{x80.tot + x80.mul * x7438, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7440{x7437.tot + x7431 * x7439.tot * x7437.mul, x7437.mul * x7439.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7441 = x1 - x2725;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7442{x80.tot + x80.mul * x7441, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7443 = x2709 - x2659;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7444 = x7443 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7445 = x7444 - x170;
@@ -14937,25 +14937,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7451 = x2985 - x7450;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7452{x7442.tot + x7442.mul * x7451, x7442.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7453 = x6955 * x2783;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7454{x7452.tot + x7452.mul * x7453, x7452.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7455{x7440.tot + x2791 * x7454.tot * x7440.mul, x7440.mul * x7454.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7456 = x0 - x2791;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7457 = x2659 - x2709;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7458{x80.tot + x80.mul * x7457, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7459 = x2717 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7460 = x7459 + x2725;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7461 = x7460 - x7410;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7462 = x7461 + x2675;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7463 = x7462 - x170;
@@ -14973,49 +14973,49 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7469 = x2985 - x7468;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7470{x7458.tot + x7458.mul * x7469, x7458.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7471 = x3 - x2725;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7472{x80.tot + x80.mul * x7191, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7473{x7472.tot + x7472.mul * x7193, x7472.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7474{x7473.tot + x7473.mul * x7195, x7473.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7475 = x2701 - x2757;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7476{x7474.tot + x7474.mul * x7475, x7474.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7477{x7470.tot + x7471 * x7476.tot * x7470.mul, x7470.mul * x7476.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7478{x7455.tot + x7456 * x7477.tot * x7455.mul, x7455.mul * x7477.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7479 = x0 - x2725;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7480 = x7479 * x7441;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7481 = x7441 * x7471;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7482 = x7479 * x7471;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7483{x80.tot + x80.mul * x2799, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7484{x7478.tot + x7482 * x7483.tot * x7478.mul, x7478.mul * x7483.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7485 = x2799 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7486{x80.tot + x80.mul * x7485, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7487{x7484.tot + x7480 * x7486.tot * x7484.mul, x7484.mul * x7486.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7488 = x2799 - x2783;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7489{x80.tot + x80.mul * x7488, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7490{x7487.tot + x7481 * x7489.tot * x7487.mul, x7487.mul * x7489.mul};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7491 = x7022 - x2709;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7492 = x7491 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7493 = x7492 - x85;
@@ -15033,19 +15033,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7499 = x7040 - x7498;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7500{x7212.tot + x7212.mul * x7499, x7212.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7501 = x6955 * x2799;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7502{x7500.tot + x7500.mul * x7501, x7500.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7503{x7490.tot + x7036 * x7502.tot * x7490.mul, x7490.mul * x7502.mul};
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7504 = x2709 - x7022;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7505{x80.tot + x80.mul * x7504, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7506 = x7230 - x7459;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7507 = x7506 + x2725;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7508 = x7507 - x85;
@@ -15063,35 +15063,35 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7514 = x7040 - x7513;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7515{x7505.tot + x7505.mul * x7514, x7505.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7516 = x2733 - x7028;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7517{x80.tot + x80.mul * x7516, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7518 = x2741 - x7030;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7519{x7517.tot + x7517.mul * x7518, x7517.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7520 = x2749 - x7032;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7521{x7519.tot + x7519.mul * x7520, x7519.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7522 = x2757 - x7034;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7523{x7521.tot + x7521.mul * x7522, x7521.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7524{x7515.tot + x7241 * x7523.tot * x7515.mul, x7515.mul * x7523.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7525{x7503.tot + x7226 * x7524.tot * x7503.mul, x7503.mul * x7524.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7526{x7525.tot + x7255 * x7256.tot * x7525.mul, x7525.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7527{x7526.tot + x7253 * x7259.tot * x7526.mul, x7526.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7528 = x7038 - x2799;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7529{x80.tot + x80.mul * x7528, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7530{x7527.tot + x7254 * x7529.tot * x7527.mul, x7527.mul * x7529.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7531{x80.tot + x965 * x7530.tot * x80.mul, x80.mul * x7530.mul};
@@ -15099,9 +15099,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7532{x7531.tot + x1489 * x7530.tot * x7531.mul, x7531.mul * x7530.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7533{x7532.tot + x1696 * x7530.tot * x7532.mul, x7532.mul * x7530.mul};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7534 = x2659 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7535 = x7534 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7536 = x7535 - x131;
@@ -15119,19 +15119,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7542 = x2947 - x7541;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7543{x7393.tot + x7393.mul * x7542, x7393.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7544{x7543.tot + x7543.mul * x7063, x7543.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7545{x80.tot + x1026 * x7544.tot * x80.mul, x80.mul * x7544.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7546 = x0 - x1026;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7547 = x7043 - x2659;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7548{x80.tot + x80.mul * x7547, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7549 = x7411 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7550 = x7549 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7551 = x7550 - x131;
@@ -15149,41 +15149,41 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7557 = x2947 - x7556;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7558{x7548.tot + x7548.mul * x7557, x7548.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7559 = x7046 - x2683;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7560{x80.tot + x80.mul * x7559, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7561 = x7047 - x2691;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7562{x7560.tot + x7560.mul * x7561, x7560.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7563 = x7048 - x2699;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7564{x7562.tot + x7562.mul * x7563, x7562.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7565 = x7049 - x2701;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7566{x7564.tot + x7564.mul * x7565, x7564.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7567{x7558.tot + x7422 * x7566.tot * x7558.mul, x7558.mul * x7566.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7568{x7545.tot + x7546 * x7567.tot * x7545.mul, x7545.mul * x7567.mul};
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7569{x80.tot + x80.mul * x1028, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7570{x7568.tot + x7432 * x7569.tot * x7568.mul, x7568.mul * x7569.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7571 = x1028 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7572{x80.tot + x80.mul * x7571, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7573{x7570.tot + x7430 * x7572.tot * x7570.mul, x7570.mul * x7572.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7574 = x1028 - x7050;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7575{x80.tot + x80.mul * x7574, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7576{x7573.tot + x7431 * x7575.tot * x7573.mul, x7573.mul * x7575.mul};
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7577 = x7444 - x146;
@@ -15201,13 +15201,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7583 = x2957 - x7582;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7584{x7442.tot + x7442.mul * x7583, x7442.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7585 = x6955 * x1028;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7586{x7584.tot + x7584.mul * x7585, x7584.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7587{x7576.tot + x1233 * x7586.tot * x7576.mul, x7576.mul * x7586.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7588 = x0 - x1233;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7589 = x7462 - x146;
@@ -15225,33 +15225,33 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7595 = x2957 - x7594;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7596{x7458.tot + x7458.mul * x7595, x7458.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7597{x7596.tot + x7471 * x7476.tot * x7596.mul, x7596.mul * x7476.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7598{x7587.tot + x7588 * x7597.tot * x7587.mul, x7587.mul * x7597.mul};
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7599{x80.tot + x80.mul * x1299, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7600{x7598.tot + x7482 * x7599.tot * x7598.mul, x7598.mul * x7599.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7601 = x1299 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7602{x80.tot + x80.mul * x7601, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7603{x7600.tot + x7480 * x7602.tot * x7600.mul, x7600.mul * x7602.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7604 = x1299 - x1028;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7605{x80.tot + x80.mul * x7604, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7606{x7603.tot + x7481 * x7605.tot * x7603.mul, x7603.mul * x7605.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7607 = x1 - x2775;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7608{x80.tot + x80.mul * x7607, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7609 = x2759 - x2709;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7610 = x7609 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7611 = x7610 - x170;
@@ -15269,25 +15269,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7617 = x2985 - x7616;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7618{x7608.tot + x7608.mul * x7617, x7608.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7619 = x6955 * x1299;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7620{x7618.tot + x7618.mul * x7619, x7618.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7621{x7606.tot + x1320 * x7620.tot * x7606.mul, x7606.mul * x7620.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7622 = x0 - x1320;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7623 = x2709 - x2759;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7624{x80.tot + x80.mul * x7623, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7625 = x2767 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7626 = x7625 + x2775;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7627 = x7626 - x7459;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7628 = x7627 + x2725;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7629 = x7628 - x170;
@@ -15305,57 +15305,57 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7635 = x2985 - x7634;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7636{x7624.tot + x7624.mul * x7635, x7624.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7637 = x3 - x2775;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7638 = x2733 - x2783;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7639{x80.tot + x80.mul * x7638, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7640 = x2741 - x2791;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7641{x7639.tot + x7639.mul * x7640, x7639.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7642 = x2749 - x2799;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7643{x7641.tot + x7641.mul * x7642, x7641.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7644 = x2757 - x985;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7645{x7643.tot + x7643.mul * x7644, x7643.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7646{x7636.tot + x7637 * x7645.tot * x7636.mul, x7636.mul * x7645.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7647{x7621.tot + x7622 * x7646.tot * x7621.mul, x7621.mul * x7646.mul};
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7648 = x7407 * x7607;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7649 = x7607 * x7637;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7650 = x7407 * x7637;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7651{x80.tot + x80.mul * x1343, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7652{x7647.tot + x7650 * x7651.tot * x7647.mul, x7647.mul * x7651.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7653 = x1343 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7654{x80.tot + x80.mul * x7653, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7655{x7652.tot + x7648 * x7654.tot * x7652.mul, x7652.mul * x7654.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7656 = x1343 - x1299;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7657{x80.tot + x80.mul * x7656, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7658{x7655.tot + x7649 * x7657.tot * x7655.mul, x7655.mul * x7657.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7659 = x1 - x1001;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7660{x80.tot + x80.mul * x7659, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7661 = x982 - x2759;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7662 = x7661 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7663 = x7662 - x185;
@@ -15373,25 +15373,25 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7669 = x988 - x7668;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7670{x7660.tot + x7660.mul * x7669, x7660.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7671 = x6955 * x1343;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7672{x7670.tot + x7670.mul * x7671, x7670.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7673{x7658.tot + x1365 * x7672.tot * x7658.mul, x7658.mul * x7672.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7674 = x0 - x1365;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7675 = x2759 - x982;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7676{x80.tot + x80.mul * x7675, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7677 = x978 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7678 = x7677 + x1001;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7679 = x7678 - x7625;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7680 = x7679 + x2775;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7681 = x7680 - x185;
@@ -15409,55 +15409,55 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7687 = x988 - x7686;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7688{x7676.tot + x7676.mul * x7687, x7676.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7689 = x3 - x1001;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7690 = x2783 - x996;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7691{x80.tot + x80.mul * x7690, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7692 = x2791 - x992;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7693{x7691.tot + x7691.mul * x7692, x7691.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7694 = x2799 - x1011;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7695{x7693.tot + x7693.mul * x7694, x7693.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7696 = x985 - x1013;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7697{x7695.tot + x7695.mul * x7696, x7695.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7698{x7688.tot + x7689 * x7697.tot * x7688.mul, x7688.mul * x7697.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7699{x7673.tot + x7674 * x7698.tot * x7673.mul, x7673.mul * x7698.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7700 = x0 - x1001;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7701 = x7700 * x7659;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7702 = x7659 * x7689;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7703 = x7700 * x7689;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7704{x80.tot + x80.mul * x1387, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7705{x7699.tot + x7703 * x7704.tot * x7699.mul, x7699.mul * x7704.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7706 = x1387 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7707{x80.tot + x80.mul * x7706, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7708{x7705.tot + x7701 * x7707.tot * x7705.mul, x7705.mul * x7707.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7709 = x1387 - x1343;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7710{x80.tot + x80.mul * x7709, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7711{x7708.tot + x7702 * x7710.tot * x7708.mul, x7708.mul * x7710.mul};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7712 = x7022 - x982;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7713 = x7712 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7714 = x7713 - x85;
@@ -15475,19 +15475,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7720 = x7040 - x7719;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7721{x7212.tot + x7212.mul * x7720, x7212.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7722 = x6955 * x1387;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7723{x7721.tot + x7721.mul * x7722, x7721.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7724{x7711.tot + x7036 * x7723.tot * x7711.mul, x7711.mul * x7723.mul};
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7725 = x982 - x7022;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7726{x80.tot + x80.mul * x7725, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7727 = x7230 - x7677;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7728 = x7727 + x1001;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7729 = x7728 - x85;
@@ -15505,35 +15505,35 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7735 = x7040 - x7734;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7736{x7726.tot + x7726.mul * x7735, x7726.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7737 = x996 - x7028;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7738{x80.tot + x80.mul * x7737, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7739 = x992 - x7030;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7740{x7738.tot + x7738.mul * x7739, x7738.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7741 = x1011 - x7032;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7742{x7740.tot + x7740.mul * x7741, x7740.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7743 = x1013 - x7034;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7744{x7742.tot + x7742.mul * x7743, x7742.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7745{x7736.tot + x7241 * x7744.tot * x7736.mul, x7736.mul * x7744.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7746{x7724.tot + x7226 * x7745.tot * x7724.mul, x7724.mul * x7745.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7747{x7746.tot + x7255 * x7256.tot * x7746.mul, x7746.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7748{x7747.tot + x7253 * x7259.tot * x7747.mul, x7747.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7749 = x7038 - x1387;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7750{x80.tot + x80.mul * x7749, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7751{x7748.tot + x7254 * x7750.tot * x7748.mul, x7748.mul * x7750.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7752{x7533.tot + x1923 * x7751.tot * x7533.mul, x7533.mul * x7751.mul};
@@ -15573,13 +15573,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7769 = args[2][96 * steps + ((cycle - kInvRate * 1) & mask)];
   // loc("Top/Mux/5/RamHeader/RamPlonkVerifier/Twit/Reg"("./cirgen/compiler/edsl/component.h":153:27))
   auto x7770 = args[2][69 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/components/ram.cpp":129:3)
+  // loc("cirgen/components/ram.cpp":128:3)
   auto x7771 = x7036 - x7769;
-  // loc("cirgen/components/ram.cpp":129:3)
+  // loc("cirgen/components/ram.cpp":128:3)
   MixState x7772{x7768.tot + x7768.mul * x7771, x7768.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":130:3)
+  // loc("cirgen/components/ram.cpp":129:3)
   auto x7773 = x7038 - x7050;
-  // loc("cirgen/components/ram.cpp":130:3)
+  // loc("cirgen/components/ram.cpp":129:3)
   MixState x7774{x7772.tot + x7772.mul * x7773, x7772.mul * (*mix)};
   // loc("./cirgen/components/bits.h":61:23)
   auto x7775 = x7040 - x7770;
@@ -15591,13 +15591,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7778{x7777.tot + x2889 * x7776.tot * x7777.mul, x7777.mul * x7776.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7779{x7778.tot + x3188 * x7751.tot * x7778.mul, x7778.mul * x7751.mul};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7780 = x1 - x485;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7781{x80.tot + x80.mul * x7780, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7782 = x500 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7783 = x7782 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7784 = x7783 - x131;
@@ -15615,23 +15615,23 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7790 = x2947 - x7789;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7791{x7781.tot + x7781.mul * x7790, x7781.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7792{x7791.tot + x7791.mul * x7063, x7791.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7793{x80.tot + x594 * x7792.tot * x80.mul, x80.mul * x7792.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   auto x7794 = x0 - x594;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7795 = x7043 - x500;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7796{x80.tot + x80.mul * x7795, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7797 = x503 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7798 = x7797 + x485;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7799 = x7798 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7800 = x7799 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7801 = x7800 - x131;
@@ -15649,55 +15649,55 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7807 = x2947 - x7806;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7808{x7796.tot + x7796.mul * x7807, x7796.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7809 = x3 - x485;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7810 = x7046 - x488;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7811{x80.tot + x80.mul * x7810, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7812 = x7047 - x491;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7813{x7811.tot + x7811.mul * x7812, x7811.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7814 = x7048 - x494;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7815{x7813.tot + x7813.mul * x7814, x7813.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7816 = x7049 - x591;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7817{x7815.tot + x7815.mul * x7816, x7815.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7818{x7808.tot + x7809 * x7817.tot * x7808.mul, x7808.mul * x7817.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7819{x7793.tot + x7794 * x7818.tot * x7793.mul, x7793.mul * x7818.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7820 = x0 - x485;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7821 = x7820 * x7780;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7822 = x7780 * x7809;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7823 = x7820 * x7809;
-  // loc("cirgen/components/ram.cpp":110:18)
+  // loc("cirgen/components/ram.cpp":109:18)
   MixState x7824{x80.tot + x80.mul * x597, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7825{x7819.tot + x7823 * x7824.tot * x7819.mul, x7819.mul * x7824.mul};
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   auto x7826 = x597 - x0;
-  // loc("cirgen/components/ram.cpp":111:17)
+  // loc("cirgen/components/ram.cpp":110:17)
   MixState x7827{x80.tot + x80.mul * x7826, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7828{x7825.tot + x7821 * x7827.tot * x7825.mul, x7825.mul * x7827.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7829 = x597 - x7050;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7830{x80.tot + x80.mul * x7829, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7831{x7828.tot + x7822 * x7830.tot * x7828.mul, x7828.mul * x7830.mul};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7832 = x7022 - x500;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7833 = x7832 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7834 = x7833 - x85;
@@ -15715,19 +15715,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7840 = x7040 - x7839;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7841{x7212.tot + x7212.mul * x7840, x7212.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   auto x7842 = x6955 * x597;
-  // loc("cirgen/components/ram.cpp":92:9)
+  // loc("cirgen/components/ram.cpp":91:9)
   MixState x7843{x7841.tot + x7841.mul * x7842, x7841.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7844{x7831.tot + x7036 * x7843.tot * x7831.mul, x7831.mul * x7843.mul};
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7845 = x500 - x7022;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7846{x80.tot + x80.mul * x7845, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7847 = x7230 - x7797;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7848 = x7847 + x485;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7849 = x7848 - x85;
@@ -15745,35 +15745,35 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7855 = x7040 - x7854;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7856{x7846.tot + x7846.mul * x7855, x7846.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7857 = x488 - x7028;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7858{x80.tot + x80.mul * x7857, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7859 = x491 - x7030;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7860{x7858.tot + x7858.mul * x7859, x7858.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7861 = x494 - x7032;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7862{x7860.tot + x7860.mul * x7861, x7860.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7863 = x591 - x7034;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7864{x7862.tot + x7862.mul * x7863, x7862.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7865{x7856.tot + x7241 * x7864.tot * x7856.mul, x7856.mul * x7864.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7866{x7844.tot + x7226 * x7865.tot * x7844.mul, x7844.mul * x7865.mul};
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7867{x7866.tot + x7255 * x7256.tot * x7866.mul, x7866.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7868{x7867.tot + x7253 * x7259.tot * x7867.mul, x7867.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   auto x7869 = x7038 - x597;
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7870{x80.tot + x80.mul * x7869, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7871{x7868.tot + x7254 * x7870.tot * x7868.mul, x7868.mul * x7870.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7872{x7779.tot + x3393 * x7871.tot * x7779.mul, x7779.mul * x7871.mul};
@@ -15807,13 +15807,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7886{x7885.tot + x7885.mul * x1923, x7885.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":28:5)
   MixState x7887{x7886.tot + x7886.mul * x2322, x7886.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   auto x7888 = x1 - x965;
-  // loc("cirgen/components/ram.cpp":88:9)
+  // loc("cirgen/components/ram.cpp":87:9)
   MixState x7889{x80.tot + x80.mul * x7888, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7890 = x714 - x7043;
-  // loc("cirgen/components/ram.cpp":90:17)
+  // loc("cirgen/components/ram.cpp":89:17)
   auto x7891 = x7890 - x0;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7892 = x7891 - x85;
@@ -15831,19 +15831,19 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7898 = x7040 - x7897;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7899{x7889.tot + x7889.mul * x7898, x7889.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":86:15)
+  // loc("cirgen/components/ram.cpp":85:15)
   MixState x7900{x7887.tot + x7036 * x7899.tot * x7887.mul, x7887.mul * x7899.mul};
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   auto x7901 = x7043 - x714;
-  // loc("cirgen/components/ram.cpp":98:9)
+  // loc("cirgen/components/ram.cpp":97:9)
   MixState x7902{x80.tot + x80.mul * x7901, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7903 = x960 * x18;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7904 = x7903 + x965;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7905 = x7904 - x7071;
-  // loc("cirgen/components/ram.cpp":100:17)
+  // loc("cirgen/components/ram.cpp":99:17)
   auto x7906 = x7905 + x7045;
   // loc("cirgen/components/bytes.cpp":97:11)
   auto x7907 = x7906 - x85;
@@ -15861,43 +15861,43 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x7913 = x7040 - x7912;
   // loc("./cirgen/components/bits.h":61:23)
   MixState x7914{x7902.tot + x7902.mul * x7913, x7902.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   auto x7915 = x3 - x965;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7916 = x7046 - x1489;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7917{x80.tot + x80.mul * x7916, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7918 = x7047 - x1696;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7919{x7917.tot + x7917.mul * x7918, x7917.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7920 = x7048 - x1923;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7921{x7919.tot + x7919.mul * x7920, x7919.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   auto x7922 = x7049 - x2322;
-  // loc("cirgen/components/ram.cpp":102:43)
+  // loc("cirgen/components/ram.cpp":101:43)
   MixState x7923{x7921.tot + x7921.mul * x7922, x7921.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":102:39)
+  // loc("cirgen/components/ram.cpp":101:39)
   MixState x7924{x7914.tot + x7915 * x7923.tot * x7914.mul, x7914.mul * x7923.mul};
-  // loc("cirgen/components/ram.cpp":96:19)
+  // loc("cirgen/components/ram.cpp":95:19)
   MixState x7925{x7900.tot + x7226 * x7924.tot * x7900.mul, x7900.mul * x7924.mul};
-  // loc("cirgen/components/ram.cpp":105:18)
+  // loc("cirgen/components/ram.cpp":104:18)
   auto x7926 = x0 - x965;
-  // loc("cirgen/components/ram.cpp":105:17)
+  // loc("cirgen/components/ram.cpp":104:17)
   auto x7927 = x7926 * x7888;
-  // loc("cirgen/components/ram.cpp":106:16)
+  // loc("cirgen/components/ram.cpp":105:16)
   auto x7928 = x7888 * x7915;
-  // loc("cirgen/components/ram.cpp":107:18)
+  // loc("cirgen/components/ram.cpp":106:18)
   auto x7929 = x7926 * x7915;
-  // loc("cirgen/components/ram.cpp":110:14)
+  // loc("cirgen/components/ram.cpp":109:14)
   MixState x7930{x7925.tot + x7929 * x7256.tot * x7925.mul, x7925.mul * x7256.mul};
-  // loc("cirgen/components/ram.cpp":111:13)
+  // loc("cirgen/components/ram.cpp":110:13)
   MixState x7931{x7930.tot + x7927 * x7259.tot * x7930.mul, x7930.mul * x7259.mul};
-  // loc("cirgen/components/ram.cpp":112:16)
+  // loc("cirgen/components/ram.cpp":111:16)
   MixState x7932{x80.tot + x80.mul * x7773, x80.mul * (*mix)};
-  // loc("cirgen/components/ram.cpp":112:12)
+  // loc("cirgen/components/ram.cpp":111:12)
   MixState x7933{x7931.tot + x7928 * x7932.tot * x7931.mul, x7931.mul * x7932.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x7934{x7878.tot + x6970 * x7933.tot * x7878.mul, x7878.mul * x7933.mul};

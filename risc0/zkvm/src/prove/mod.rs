@@ -82,6 +82,8 @@ use crate::{
     ControlId, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
+const DEFAULT_SEGMENT_LIMIT_PO2: usize = 23; // 16M cycles
+
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
 pub mod cuda {
@@ -183,23 +185,36 @@ cfg_if::cfg_if! {
 
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
-    pub(crate) skip_seal: bool,
+    skip_seal: bool,
 
-    pub(crate) skip_verify: bool,
+    skip_verify: bool,
 
-    pub(crate) syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
+    syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
+
+    io: PosixIo<'a>,
+    env_vars: HashMap<String, String>,
+    trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
     pub(crate) unknown_syscall_handler: Box<dyn Syscall + 'a>,
 
-    pub(crate) io: PosixIo<'a>,
-    pub(crate) env_vars: HashMap<String, String>,
-    pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
+    preflight: bool,
 
-    pub(crate) preflight: bool,
+    segment_limit_po2: usize,
 
     pub(crate) finalized: bool,
 }
 
 impl<'a> ProverOpts<'a> {
+    /// Set the segment limit specified as a power of 2.
+    ///
+    /// When running a large program, this limit specifies the max cycles
+    /// allowed for a particular segment.
+    pub fn with_segment_limit_po2(self, segment_limit_po2: usize) -> Self {
+        Self {
+            segment_limit_po2,
+            ..self
+        }
+    }
+
     /// If true, skip generating the seal in receipt. This should
     /// only be used for testing. In this case, performace will be
     /// much better but we will not be able to cryptographically
@@ -295,7 +310,7 @@ impl<'a> ProverOpts<'a> {
     }
 
     /// Add late-binding handlers for constructed environment.
-    pub(crate) fn finalize(mut self) -> Self {
+    fn finalize(mut self) -> Self {
         if self.finalized {
             self
         } else {
@@ -322,6 +337,7 @@ impl<'a> ProverOpts<'a> {
             preflight: false,
             unknown_syscall_handler: Box::new(UnknownSyscall),
             finalized: false,
+            segment_limit_po2: DEFAULT_SEGMENT_LIMIT_PO2,
         }
     }
 }
@@ -453,6 +469,13 @@ pub struct Prover<'a> {
     /// called. Note that this is privately shared with the host; it is not
     /// present in the [Receipt].
     pub cycles: usize,
+
+    /// The exit code reported by the latest segment execution. The possible
+    /// values are:
+    /// - 0: Halted normally
+    /// - 1: User-initiated pause
+    /// - 2: System-initiated split
+    pub exit_code: u32,
 }
 
 impl<'a> Prover<'a> {
@@ -474,22 +497,20 @@ impl<'a> Prover<'a> {
             pc: program.entry,
             cycles: 0,
             preflight_segments: None,
+            exit_code: 0,
         })
     }
 
     /// Construct a prover from a memory image.
-    pub fn from_image(
-        image: Rc<RefCell<MemoryImage>>,
-        pc: u32,
-        opts: ProverOpts<'a>,
-    ) -> Result<Self> {
-        Ok(Prover {
+    pub fn from_image(image: Rc<RefCell<MemoryImage>>, pc: u32, opts: ProverOpts<'a>) -> Self {
+        Prover {
             inner: ProverImpl::new(opts),
             image,
             pc,
             cycles: 0,
             preflight_segments: None,
-        })
+            exit_code: 0,
+        }
     }
 
     /// Provide input data to the guest. This data can be read by the guest
@@ -555,14 +576,22 @@ impl<'a> Prover<'a> {
         <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
         E: EvalCheck<H>,
     {
-        let mut opts = take(&mut self.inner.opts);
-        if !self.inner.input.is_empty() {
-            // TODO: Remove add_input_*_slice in favor of with_stdin,
-            // and eliminate this "input" field.
-            opts = opts.with_stdin(Cursor::new(take(&mut self.inner.input)))
+        if !self.inner.opts_finalized {
+            let mut opts = take(&mut self.inner.opts);
+            if !self.inner.input.is_empty() {
+                // TODO: Remove add_input_*_slice in favor of with_stdin,
+                // and eliminate this "input" field.
+                opts = opts.with_stdin(Cursor::new(take(&mut self.inner.input)))
+            }
+            self.inner.opts = opts.finalize();
+            self.inner.opts_finalized = true;
+        } else {
+            // Continuation; opts was finalized the previous run.  Make sure we didn't get
+            // any more input.
+            assert!(self.inner.input.is_empty(), "Input may not be added after the prover starts proving using the add_input_* calls");
         }
-        self.inner.opts = opts.finalize();
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
+        let segment_limit_po2 = self.inner.opts.segment_limit_po2;
 
         if self.inner.opts.preflight {
             let segments = self.preflight_segments.get_or_insert_with(|| {
@@ -587,10 +616,16 @@ impl<'a> Prover<'a> {
         }
 
         let image_id = self.image.borrow().get_root();
-        let mut executor =
-            RV32Executor::new(&CIRCUIT, Rc::clone(&self.image), self.pc, &mut self.inner);
-        let (cycles, pc) = executor.run()?;
+        let mut executor = RV32Executor::new(
+            &CIRCUIT,
+            Rc::clone(&self.image),
+            self.pc,
+            &mut self.inner,
+            segment_limit_po2,
+        );
+        let (cycles, exit_code, pc) = executor.run()?;
         self.cycles = cycles;
+        self.exit_code = exit_code;
         self.pc = pc;
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
@@ -656,6 +691,10 @@ struct ProverImpl<'a> {
     pub input: Vec<u8>,
     pub journal: Journal,
     pub opts: ProverOpts<'a>,
+
+    // True if we've already called finalize() on the ProverOpts.
+    // TODO: If we get rid of the add_input* calls, this should be unnecessary.
+    opts_finalized: bool,
 }
 
 impl<'a> ProverImpl<'a> {
@@ -666,6 +705,7 @@ impl<'a> ProverImpl<'a> {
             input: Vec::new(),
             journal,
             opts,
+            opts_finalized: false,
         }
     }
 }

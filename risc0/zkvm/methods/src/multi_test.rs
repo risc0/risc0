@@ -48,6 +48,10 @@ pub enum MultiTestSpec {
         pos_and_len: Vec<(u32, u32)>,
     },
     PauseContinue,
+    BusyLoop {
+        /// Busy loop until the guest has run for at least this number of cycles
+        cycles: u32,
+    },
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

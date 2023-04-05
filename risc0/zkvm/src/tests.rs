@@ -22,7 +22,7 @@ use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
-use risc0_zkvm_platform::{fileno, memory::HEAP, WORD_SIZE};
+use risc0_zkvm_platform::{fileno, memory::HEAP, syscall::halt, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
@@ -684,7 +684,41 @@ fn pause_continue() {
 
     // Run until sys_pause
     prover.run().unwrap();
+    assert_eq!(prover.exit_code, halt::PAUSE);
 
     // Run until sys_halt
     prover.run().unwrap();
+    assert_eq!(prover.exit_code, halt::TERMINATE);
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn continuation() {
+    let segment_limit_po2 = 16; // 64k cycles
+    const COUNT: usize = 4; // Number of total chunks to aim for.
+
+    let opts = ProverOpts::default().with_segment_limit_po2(segment_limit_po2);
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
+    prover.add_input_u32_slice(
+        &to_vec(&MultiTestSpec::BusyLoop {
+            // BusyLoop goes for *at least* this many cycles, so should fill up (COUNT - 1) blocks
+            // and then slightly overflow into the next one.
+            cycles: ((COUNT - 1) * (1 << segment_limit_po2)) as u32,
+        })
+        .unwrap(),
+    );
+
+    for count in 0..COUNT {
+        prover.run().unwrap();
+        if count == COUNT - 1 {
+            assert_eq!(prover.exit_code, halt::TERMINATE);
+        } else {
+            assert_eq!(
+                prover.exit_code,
+                halt::SPLIT,
+                "expected a split at part {count}"
+            );
+        }
+    }
 }
