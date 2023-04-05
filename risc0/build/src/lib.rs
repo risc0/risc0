@@ -409,10 +409,9 @@ fn build_guest_package<P>(
         }
     }
 
-    let status = cmd.status().unwrap();
-
-    if !status.success() {
-        std::process::exit(status.code().unwrap());
+    let res = child.wait().expect("Guest 'cargo build' failed");
+    if !res.success() {
+        std::process::exit(res.code().unwrap());
     }
 }
 
