@@ -5,9 +5,6 @@ edition = "2021"
 
 [workspace]
 
-[build-dependencies]
-risc0-build = { path = "../../../../risc0/build" }
-
 [dependencies]
 evm-core = { path = "../../core", default-features = false }
 externc-libm = { git = "https://github.com/HaruxOS/externc-libm" }
