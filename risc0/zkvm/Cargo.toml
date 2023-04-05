@@ -56,6 +56,7 @@ sha2 = { version = "0.10", optional = true }
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
 criterion = { version = "0.4", features = ["html_reports"] }
+human-repr = "1.0"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -63,7 +64,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 env_logger = "0.10"
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
-serial_test = "1.0"
+serial_test = "2.0"
 tar = "0.4"
 test-log = { version = "0.2", features = ["trace"] }
 

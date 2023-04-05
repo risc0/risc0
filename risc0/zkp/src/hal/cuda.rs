@@ -28,14 +28,17 @@ use rustacuda::{
 };
 use rustacuda_core::UnifiedPointer;
 
+use super::{Buffer, Hal, TRACKER};
 use crate::{
     core::{
-        config::{HashSuite, HashSuitePoseidon, HashSuiteSha256},
+        digest::Digest,
+        hash::{
+            poseidon::{self, PoseidonHashSuite},
+            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+            HashSuite,
+        },
         log2_ceil,
-        sha::Digest,
-        sha_cpu,
     },
-    hal::{Buffer, Hal},
     FRI_FOLD,
 };
 
@@ -60,7 +63,7 @@ pub trait CudaHash {
 pub struct CudaHashSha256 {}
 
 impl CudaHash for CudaHashSha256 {
-    type HashSuite = HashSuiteSha256<BabyBear, sha_cpu::Impl>;
+    type HashSuite = Sha256HashSuite<BabyBear, CpuImpl>;
 
     fn new(_hal: &CudaHal<Self>) -> Self {
         CudaHashSha256 {}
@@ -126,10 +129,9 @@ pub struct CudaHashPoseidon {
 }
 
 impl CudaHash for CudaHashPoseidon {
-    type HashSuite = HashSuitePoseidon;
+    type HashSuite = PoseidonHashSuite;
 
     fn new(hal: &CudaHal<Self>) -> Self {
-        use crate::core::poseidon;
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
@@ -228,6 +230,7 @@ struct RawBuffer {
 impl RawBuffer {
     pub fn new(name: &'static str, size: usize) -> Self {
         log::debug!("alloc: {size} bytes, {name}");
+        TRACKER.lock().unwrap().alloc(size);
         Self {
             name,
             buf: unsafe { UnifiedBuffer::uninitialized(size).unwrap() },
@@ -238,6 +241,7 @@ impl RawBuffer {
 impl Drop for RawBuffer {
     fn drop(&mut self) {
         log::debug!("free: {} bytes, {}", self.buf.len(), self.name);
+        TRACKER.lock().unwrap().free(self.buf.len());
     }
 }
 
@@ -388,7 +392,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type BufferU32 = BufferImpl<u32>;
 
     type HashSuite = CH::HashSuite;
-    type Hash = <CH::HashSuite as HashSuite<BabyBear>>::Hash;
+    type HashFn = <CH::HashSuite as HashSuite<BabyBear>>::HashFn;
     type Rng = <CH::HashSuite as HashSuite<BabyBear>>::Rng;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::BufferElem {

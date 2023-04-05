@@ -14,20 +14,29 @@
 
 //! Simple SHA-256 wrappers.
 
+#[cfg(not(target_os = "zkvm"))]
+pub mod cpu;
+mod rng;
+pub mod rust_crypto;
+
 use alloc::format;
 use alloc::vec::Vec;
 use core::{
     fmt::{Debug, Display, Formatter},
+    marker::PhantomData,
     ops::DerefMut,
 };
 
 use bytemuck::{Pod, PodCastError, Zeroable};
 use hex::{FromHex, FromHexError};
+use risc0_core::field::Field;
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 pub use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-pub use super::digest::{Digest, DIGEST_BYTES, DIGEST_WORDS};
+use self::rng::ShaRng;
+use super::{HashFn, HashSuite};
+use crate::core::digest::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 
 /// The number of words in the representation of a [Block].
 ///
@@ -305,169 +314,35 @@ impl Debug for Block {
     }
 }
 
-pub mod rust_crypto {
-    //! [Rust Crypto] wrappers for the RISC0 Sha256 trait.
-    //!
-    //! [Rust Crypto]: https://github.com/RustCrypto
-    //!
-    //! # Usage
-    //!
-    //! ```rust
-    //! use risc0_zkp::core::{
-    //!     sha::rust_crypto::{Sha256, Digest as _},
-    //!     sha_cpu,
-    //! };
-    //!
-    //! // create a Sha256 object
-    //! let mut hasher = Sha256::<sha_cpu::Impl>::new();
-    //!
-    //! // write input message
-    //! hasher.update(b"hello world");
-    //!
-    //! // read hash digest and consume hasher
-    //! let result = hasher.finalize();
-    //!
-    //! assert_eq!(hex::encode(result), "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9");
-    //!
-    //! // more concise version of the code above.
-    //! assert_eq!(hex::encode(Sha256::<sha_cpu::Impl>::digest(b"hello world")),
-    //!     "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
-    //! );
-    //! ```
+/// Wrap a Sha256 trait as a HashFn trait
+pub struct Sha256HashFn<S: Sha256> {
+    phantom: PhantomData<S>,
+}
 
-    use alloc::format;
-    use alloc::vec::Vec;
-    use core::fmt::{Debug, Formatter};
+impl<S: Sha256, F: Field> HashFn<F> for Sha256HashFn<S> {
+    type DigestPtr = S::DigestPtr;
 
-    use digest::{
-        block_buffer::Eager,
-        core_api::{
-            AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
-            CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
-        },
-        typenum::{U32, U64},
-        HashMarker, InvalidOutputSize,
-    };
-    pub use digest::{Digest, Output};
-
-    use super::{BLOCK_BYTES, SHA256_INIT};
-
-    /// Core block-level SHA-256 hasher with variable output size.
-    ///
-    /// Supports initialization only for the 32 byte output size.
-    #[derive(Clone)]
-    pub struct Sha256VarCore<S: super::Sha256> {
-        // Current internal state of the SHA-256 hashing operation.
-        state: Option<S::DigestPtr>,
-        // Counter of the number of blocks hashed so far. Note that with blocks of 64 bytes, this
-        // implies that a maximum of 256 GB can be hashed.
-        block_len: u32,
+    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+        S::hash_pair(a, b)
     }
 
-    impl<S: super::Sha256> HashMarker for Sha256VarCore<S> {}
-
-    impl<S: super::Sha256> BlockSizeUser for Sha256VarCore<S> {
-        type BlockSize = U64;
+    fn hash_elem_slice(slice: &[F::Elem]) -> Self::DigestPtr {
+        S::hash_raw_pod_slice(slice)
     }
 
-    impl<S: super::Sha256> BufferKindUser for Sha256VarCore<S> {
-        type BufferKind = Eager;
+    fn hash_ext_elem_slice(slice: &[F::ExtElem]) -> Self::DigestPtr {
+        S::hash_raw_pod_slice(slice)
     }
+}
 
-    impl<S: super::Sha256> UpdateCore for Sha256VarCore<S> {
-        #[inline]
-        fn update_blocks(&mut self, blocks: &[Block<Self>]) {
-            self.block_len += u32::try_from(blocks.len()).unwrap();
+/// Make a hash suite from a Sha256 trait
+pub struct Sha256HashSuite<F: Field, S: Sha256> {
+    phantom: PhantomData<(F, S)>,
+}
 
-            // If aligned, reinterpret the u8 array blocks as u32 array blocks.
-            // If unaligned, the data needs to be copied.
-            // NOTE: The current implementation makes a full-copy of the blocks on the heap
-            // when the input is not word-aligned. Although a copy is needed,
-            // this could be done (slightly less efficiently in the zkVM) by
-            // copying to a fixed width buffer and incrementally hashing.
-            // SAFETY: We know that Block (alias for
-            // GenericArray<u8, U64>) is an array of bytes and so is safe to
-            // reinterpret as blocks of words.
-            let current_state = self.state.as_deref().unwrap_or(&SHA256_INIT);
-            self.state = Some(match unsafe { blocks.align_to::<super::Block>() } {
-                (&[], aligned_blocks, &[]) => S::compress_slice(current_state, aligned_blocks),
-                _ => S::compress_slice(
-                    current_state,
-                    &blocks
-                        .iter()
-                        .map(|block| bytemuck::pod_read_unaligned(block.as_slice()))
-                        .collect::<Vec<_>>(),
-                ),
-            });
-        }
-    }
-
-    impl<S: super::Sha256> OutputSizeUser for Sha256VarCore<S> {
-        type OutputSize = U32;
-    }
-
-    impl<S: super::Sha256> VariableOutputCore for Sha256VarCore<S> {
-        const TRUNC_SIDE: TruncSide = TruncSide::Left;
-
-        #[inline]
-        fn new(output_size: usize) -> Result<Self, InvalidOutputSize> {
-            let state = match output_size {
-                32 => None,
-                _ => return Err(InvalidOutputSize),
-            };
-            let block_len = 0;
-            Ok(Self { state, block_len })
-        }
-
-        #[inline]
-        fn finalize_variable_core(&mut self, buffer: &mut Buffer<Self>, out: &mut Output<Self>) {
-            let bit_len = 8
-                * (u32::try_from(buffer.get_pos()).unwrap()
-                    + (BLOCK_BYTES as u32) * self.block_len);
-            buffer.len64_padding_be(bit_len as u64, |block| {
-                // If aligned, reinterpret the u8 array blocks as a u32 array block.
-                // If unaligned, the data needs to be copied.
-                let current_state = self.state.as_deref().unwrap_or(&SHA256_INIT);
-                self.state = Some(
-                    match bytemuck::try_from_bytes::<super::Block>(block.as_slice()) {
-                        Ok(b) => {
-                            S::compress(current_state, b.as_half_blocks().0, b.as_half_blocks().1)
-                        }
-                        Err(_) => {
-                            let b: super::Block = bytemuck::pod_read_unaligned(block.as_slice());
-                            S::compress(current_state, b.as_half_blocks().0, b.as_half_blocks().1)
-                        }
-                    },
-                );
-            });
-
-            // NOTE: With some work, it would be possible to eliminate the copy here.
-            // However it will require quite a bit of reworking of the APIs
-            // involved and this copy may be optimized out by the compiler
-            // anyway.
-            out.copy_from_slice(self.state.as_deref().unwrap().as_bytes())
-        }
-    }
-
-    impl<S: super::Sha256> AlgorithmName for Sha256VarCore<S> {
-        #[inline]
-        fn write_alg_name(f: &mut Formatter<'_>) -> core::fmt::Result {
-            f.write_str("Sha256")
-        }
-    }
-
-    impl<S: super::Sha256> Debug for Sha256VarCore<S> {
-        #[inline]
-        fn fmt(&self, f: &mut Formatter<'_>) -> core::fmt::Result {
-            f.write_str(&format!(
-                "Sha256VarCore<{}> {{ ... }}",
-                core::any::type_name::<S>()
-            ))
-        }
-    }
-
-    /// SHA-256 implementation cross-compatible with `sha2::Sha256`.
-    pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
+impl<F: Field, S: Sha256> HashSuite<F> for Sha256HashSuite<F, S> {
+    type HashFn = Sha256HashFn<S>;
+    type Rng = ShaRng<S>;
 }
 
 #[allow(missing_docs)]
@@ -478,8 +353,11 @@ pub mod testutil {
     use hex::FromHex;
     use risc0_core::field::baby_bear::{BabyBearElem, BabyBearExtElem};
 
-    use super::rust_crypto::Digest as _;
-    use super::{rust_crypto, Digest, Sha256};
+    use super::{
+        rust_crypto::{self, Digest as _},
+        Sha256,
+    };
+    use crate::core::digest::Digest;
 
     // Runs conformance test on a SHA-256 implementation to make sure it properly
     // behaves.
@@ -491,7 +369,7 @@ pub mod testutil {
         test_elems::<S>();
         test_extelems::<S>();
 
-        crate::core::sha_rng::testutil::test_sha_rng_impl::<S>();
+        super::rng::testutil::test_sha_rng_impl::<S>();
     }
 
     fn test_sha_basics<S: Sha256>() {

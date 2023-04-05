@@ -29,7 +29,7 @@ use risc0_core::field::{
 };
 use risc0_zkp::{
     adapter::{CircuitInfo, CircuitStepHandler},
-    core::sha::BLOCK_BYTES,
+    core::hash::sha::BLOCK_BYTES,
     prove::executor::Executor,
     MAX_CYCLES_PO2, ZK_CYCLES,
 };

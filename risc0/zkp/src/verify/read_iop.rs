@@ -16,16 +16,16 @@ use core::marker::PhantomData;
 
 use risc0_core::field::{Elem, Field};
 
-use crate::core::{config::ConfigRng, sha::Digest};
+use crate::core::{digest::Digest, hash::Rng};
 
 #[derive(Debug)]
-pub struct ReadIOP<'a, F: Field, R: ConfigRng<F>> {
+pub struct ReadIOP<'a, F: Field, R: Rng<F>> {
     proof: &'a [u32],
     rng: R,
     phantom: PhantomData<F>,
 }
 
-impl<'a, F: Field, R: ConfigRng<F>> ReadIOP<'a, F, R> {
+impl<'a, F: Field, R: Rng<F>> ReadIOP<'a, F, R> {
     pub fn new(proof: &'a [u32]) -> Self {
         ReadIOP {
             proof,

@@ -37,10 +37,22 @@ pub fn main() {
     );
 
     let mut feedback: WordFeedback = WordFeedback::default();
+
+    // to avoid false positive partial matches, create a pool of only letters
+    // that didn't have an exact match
+    let mut secret_unmatched: String = String::from("");
+
+    for i in 0..WORD_LENGTH {
+        if secret.as_bytes()[i] != guess.as_bytes()[i] {
+            secret_unmatched.push(secret.as_bytes()[i] as char);
+       }
+    }
+
+    // second round for distinguishing partial matches from misses
     for i in 0..WORD_LENGTH {
         feedback.0[i] = if secret.as_bytes()[i] == guess.as_bytes()[i] {
             LetterFeedback::Correct
-        } else if secret.as_bytes().contains(&guess.as_bytes()[i]) {
+        } else if secret_unmatched.as_bytes().contains(&guess.as_bytes()[i]) {
             LetterFeedback::Present
         } else {
             LetterFeedback::Miss

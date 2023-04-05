@@ -23,12 +23,15 @@ use anyhow::Result;
 use log::{debug, trace};
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
-    adapter::TapsProvider, core::sha::SHA256_INIT, hal::Hal, prove::poly_group::PolyGroup,
+    adapter::TapsProvider,
+    core::{digest::Digest, hash::sha::SHA256_INIT},
+    hal::Hal,
+    prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 
-use crate::{ControlId, CIRCUIT};
+use crate::CIRCUIT;
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;
@@ -366,8 +369,8 @@ impl Loader {
         Ok(loader.cycle)
     }
 
-    /// Compute the [ControlId] associated with the given HAL
-    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> ControlId {
+    /// Compute the `ControlId` associated with the given HAL
+    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> Vec<Digest> {
         let code_size = CIRCUIT.code_size();
 
         // Start with an empty table
@@ -390,7 +393,7 @@ impl Loader {
             table.push(code_group.merkle.root().clone());
         }
 
-        ControlId { table }
+        table
     }
 
     fn load_code(&self, code: &mut [BabyBearElem], max_cycles: usize) {

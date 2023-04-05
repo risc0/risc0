@@ -25,17 +25,16 @@ fn main() {
 
     // Multiply them inside the ZKP
     // First, we make the prover, loading the 'multiply' method
-    let mut prover = Prover::new(MULTIPLY_ELF).expect(
-        "Prover should be constructed from valid method source code and corresponding method ID",
-    );
+    let mut prover =
+        Prover::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
 
     // Next we send a & b to the guest
     prover.add_input_u32_slice(&to_vec(&a).expect("should be serializable"));
     prover.add_input_u32_slice(&to_vec(&b).expect("should be serializable"));
     // Run prover & generate receipt
-    let receipt = prover
-        .run()
-        .expect("Should be able to prove valid code that fits in the cycle count.");
+    let receipt = prover.run().expect(
+        "Code should be provable unless it had an error or exceeded the maximum cycle limit",
+    );
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
     let c: u64 = from_slice(&receipt.journal).expect(
@@ -49,7 +48,7 @@ fn main() {
 
     // Verify receipt, panic if it's wrong
     receipt.verify(&MULTIPLY_ID).expect(
-        "Code you have proven should successfully verify; did you specify the correct method ID?",
+        "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
 }
 

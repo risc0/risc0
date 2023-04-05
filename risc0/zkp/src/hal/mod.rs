@@ -21,13 +21,20 @@ pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
+use std::sync::Mutex;
+
+use lazy_static::lazy_static;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    core::config::{ConfigHash, ConfigRng, HashSuite},
     core::digest::Digest,
+    core::hash::{HashFn, HashSuite, Rng},
     INV_RATE,
 };
+
+lazy_static! {
+    static ref TRACKER: Mutex<MemoryTracker> = Mutex::new(MemoryTracker::new());
+}
 
 pub trait Buffer<T>: Clone {
     fn size(&self) -> usize;
@@ -48,10 +55,14 @@ pub trait Hal {
     type BufferExtElem: Buffer<Self::ExtElem>;
     type BufferU32: Buffer<u32>;
     type HashSuite: HashSuite<Self::Field>;
-    type Hash: ConfigHash<Self::Field>;
-    type Rng: ConfigRng<Self::Field>;
+    type HashFn: HashFn<Self::Field>;
+    type Rng: Rng<Self::Field>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
+
+    fn get_memory_usage(&self) -> usize {
+        TRACKER.lock().unwrap().peak
+    }
 
     fn alloc_digest(&self, name: &'static str, size: usize) -> Self::BufferDigest;
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::BufferElem;
@@ -127,6 +138,26 @@ pub trait EvalCheck<H: Hal> {
     );
 }
 
+struct MemoryTracker {
+    total: usize,
+    peak: usize,
+}
+
+impl MemoryTracker {
+    pub fn new() -> Self {
+        Self { total: 0, peak: 0 }
+    }
+
+    pub fn alloc(&mut self, size: usize) {
+        self.total += size;
+        self.peak = self.peak.max(self.total);
+    }
+
+    pub fn free(&mut self, size: usize) {
+        self.total = self.total.saturating_sub(size);
+    }
+}
+
 #[cfg(test)]
 #[allow(unused)]
 mod testutil {
@@ -136,8 +167,9 @@ mod testutil {
     use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
 
     use super::{EvalCheck, Hal};
+    use crate::core::digest::Digest;
     use crate::{
-        core::{config::HashSuiteSha256, log2_ceil, sha::Digest, sha_cpu},
+        core::log2_ceil,
         hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
     };
