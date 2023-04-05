@@ -82,7 +82,7 @@ use crate::{
     ControlId, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
-const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20; // 1M cycles
+const DEFAULT_SEGMENT_LIMIT_PO2: usize = 23; // 16M cycles
 
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
