@@ -90,9 +90,9 @@ impl Risc0Method {
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
             r##"
-pub const {upper}_ELF: &'static [u8] = &{elf_contents:?};
+pub const {upper}_ELF: &[u8] = &{elf_contents:?};
 pub const {upper}_ID: [u32; 8] = {image_id:?};
-pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
+pub const {upper}_PATH: &str = r#"{elf_path}"#;
             "##
         )
     }
@@ -387,16 +387,19 @@ fn build_guest_package<P>(
     // send directly to the tty, if available.  This way we get
     // progress messages from the inner cargo so the user doesn't
     // think it's just hanging.
+    let tty_file = env::var("RISC0_GUEST_LOGFILE").unwrap_or_else(|_| "/dev/tty".to_string());
+
     let mut tty = fs::OpenOptions::new()
         .read(true)
         .write(true)
-        .open("/dev/tty")
+        .create(true)
+        .open(tty_file)
         .ok();
 
     if let Some(tty) = &mut tty {
-        write!(
+        writeln!(
             tty,
-            "{}: Starting build for riscv32im-risc0-zkvm-elf   \n",
+            "{}: Starting build for riscv32im-risc0-zkvm-elf",
             pkg.name
         )
         .unwrap();
@@ -404,7 +407,7 @@ fn build_guest_package<P>(
 
     for line in BufReader::new(stderr).lines() {
         match &mut tty {
-            Some(tty) => write!(tty, "{}: {}   \n", pkg.name, line.unwrap()).unwrap(),
+            Some(tty) => writeln!(tty, "{}: {}", pkg.name, line.unwrap()).unwrap(),
             None => eprintln!("{}", line.unwrap()),
         }
     }
