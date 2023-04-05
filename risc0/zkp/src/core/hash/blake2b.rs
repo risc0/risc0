@@ -13,8 +13,7 @@
 // limitations under the License.
 
 //! A Blake2b HashSuite.
-use alloc::boxed::Box;
-use alloc::vec::Vec;
+use alloc::{boxed::Box, vec::Vec};
 use core::marker::PhantomData;
 
 use blake2::{
@@ -22,13 +21,13 @@ use blake2::{
     Blake2bVar,
 };
 use rand_core::{impls, Error, RngCore};
-use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_core::field::Elem;
-use risc0_core::field::ExtElem;
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem,
+};
 
-use super::config::HashSuite;
-use super::digest::Digest;
-use crate::core::config::{ConfigHash, ConfigRng};
+use super::{HashFn, HashSuite, Rng};
+use crate::core::digest::Digest;
 
 /// Hash function trait.
 pub trait Blake2b {
@@ -40,7 +39,7 @@ pub trait Blake2b {
 pub struct Blake2bCpuImpl;
 
 /// Type alias for Blake2b HashSuite using CPU.
-pub type HashSuiteBlake2bCpu = HashSuiteBlake2b<Blake2bCpuImpl>;
+pub type Blake2bCpuHashSuite = Blake2bHashSuite<Blake2bCpuImpl>;
 
 impl Blake2b for Blake2bCpuImpl {
     fn blake2b<T: AsRef<[u8]>>(data: T) -> [u8; 32] {
@@ -57,21 +56,21 @@ impl Blake2b for Blake2bCpuImpl {
 
 /// Blake2b HashSuite.
 /// We are using a generic hasher to allow different implementations.
-pub struct HashSuiteBlake2b<T: Blake2b> {
+pub struct Blake2bHashSuite<T: Blake2b> {
     hasher: PhantomData<T>,
 }
 
-impl<T: Blake2b> HashSuite<BabyBear> for HashSuiteBlake2b<T> {
-    type Hash = ConfigHashBlake2b<T>;
+impl<T: Blake2b> HashSuite<BabyBear> for Blake2bHashSuite<T> {
+    type HashFn = Blake2bHashFn<T>;
     type Rng = Blake2bRng<T>;
 }
 
-/// Blake2b ConfigHash.
-pub struct ConfigHashBlake2b<T: Blake2b> {
+/// Blake2b HashFn.
+pub struct Blake2bHashFn<T: Blake2b> {
     hasher: PhantomData<T>,
 }
 
-impl<T: Blake2b> ConfigHash<BabyBear> for ConfigHashBlake2b<T> {
+impl<T: Blake2b> HashFn<BabyBear> for Blake2bHashFn<T> {
     type DigestPtr = Box<Digest>;
 
     fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
@@ -104,7 +103,7 @@ pub struct Blake2bRng<T: Blake2b> {
     hasher: PhantomData<T>,
 }
 
-impl<T: Blake2b> ConfigRng<BabyBear> for Blake2bRng<T> {
+impl<T: Blake2b> Rng<BabyBear> for Blake2bRng<T> {
     fn new() -> Self {
         Self {
             current: [0; 32],

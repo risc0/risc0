@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::core::sha::{Digest, Sha256, BLOCK_BYTES, SHA256_INIT};
+use risc0_zkp::core::{
+    digest::Digest,
+    hash::sha::{Sha256, BLOCK_BYTES, SHA256_INIT},
+};
 use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE},
     syscall::DIGEST_BYTES,

@@ -27,8 +27,8 @@ use lazy_static::lazy_static;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    core::config::{ConfigHash, ConfigRng, HashSuite},
     core::digest::Digest,
+    core::hash::{HashFn, HashSuite, Rng},
     INV_RATE,
 };
 
@@ -55,8 +55,8 @@ pub trait Hal {
     type BufferExtElem: Buffer<Self::ExtElem>;
     type BufferU32: Buffer<u32>;
     type HashSuite: HashSuite<Self::Field>;
-    type Hash: ConfigHash<Self::Field>;
-    type Rng: ConfigRng<Self::Field>;
+    type HashFn: HashFn<Self::Field>;
+    type Rng: Rng<Self::Field>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 
@@ -167,8 +167,9 @@ mod testutil {
     use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
 
     use super::{EvalCheck, Hal};
+    use crate::core::digest::Digest;
     use crate::{
-        core::{config::HashSuiteSha256, log2_ceil, sha::Digest, sha_cpu},
+        core::log2_ceil,
         hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
     };

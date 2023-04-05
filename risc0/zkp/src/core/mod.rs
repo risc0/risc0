@@ -13,27 +13,15 @@
 // limitations under the License.
 
 //! Core module used to implement a zk-STARK prover and verifier.
-//!
-//! This includes support for:
-//! * [ntt]: Number-theoretic transform (NTT)
-//! * [sha]: SHA-256 hashing support
-//! * [sha_rng]: Cryptographic random number generator (CRNG) based on SHA-256
-//! * Other basic ZKP utilities
 
 #![deny(missing_docs)]
 
 extern crate alloc;
 
-pub mod blake2b;
-pub mod config;
 pub mod digest;
+pub mod hash;
 pub mod ntt;
 pub mod poly;
-pub mod poseidon;
-pub mod sha;
-#[cfg(not(target_os = "zkvm"))]
-pub mod sha_cpu;
-pub mod sha_rng;
 
 use rand_core::RngCore;
 

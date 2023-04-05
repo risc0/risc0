@@ -58,7 +58,7 @@ use risc0_circuit_rv32im::{REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_G
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
-    core::config::HashSuite,
+    core::hash::HashSuite,
     hal::{EvalCheck, Hal},
     prove::adapter::ProveAdapter,
 };
@@ -79,7 +79,7 @@ use self::exec::{HostHandler, RV32Executor};
 use crate::{
     binfmt::elf::Program,
     receipt::{insecure_skip_seal, Receipt},
-    ControlIdLocator, MemoryImage, CIRCUIT, PAGE_SIZE,
+    ControlId, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
 
 /// HAL creation functions for CUDA.
@@ -552,7 +552,7 @@ impl<'a> Prover<'a> {
     pub fn run_with_hal<H, E>(&mut self, hal: &H, eval: &E) -> Result<Receipt>
     where
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
+        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
         E: EvalCheck<H>,
     {
         let mut opts = take(&mut self.inner.opts);

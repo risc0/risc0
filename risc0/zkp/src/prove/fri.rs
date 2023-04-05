@@ -18,7 +18,7 @@ use log::debug;
 use risc0_core::field::ExtElem;
 
 use crate::{
-    core::{config::ConfigHash, log2_ceil},
+    core::{hash::HashFn, log2_ceil},
     hal::{Buffer, Hal},
     prove::{merkle::MerkleTreeProver, write_iop::WriteIOP},
     FRI_FOLD, FRI_MIN_DEGREE, INV_RATE, QUERIES,
@@ -109,7 +109,7 @@ pub fn fri_prove<H: Hal, F>(
     // Dump final polynomial + commit
     final_coeffs.view(|view| {
         iop.write_field_elem_slice::<H::Elem>(view);
-        let digest = H::Hash::hash_elem_slice(view);
+        let digest = H::HashFn::hash_elem_slice(view);
         iop.commit(&digest);
     });
     // Do queries
