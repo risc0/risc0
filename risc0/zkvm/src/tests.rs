@@ -180,9 +180,11 @@ fn fail() {
     let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Fail).unwrap());
 
-    assert!(unwrap_err(prover.run())
-        .to_string()
-        .contains("MultiTestSpec::Fail invoked"));
+    let err = unwrap_err(prover.run());
+    assert!(
+        err.to_string().contains("MultiTestSpec::Fail invoked"),
+        "Actual: {err}"
+    );
 }
 
 #[test]

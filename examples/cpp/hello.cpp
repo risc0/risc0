@@ -12,23 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo_risczero::{Cargo, RisczeroCmd};
-use clap::Parser;
-use tracing_subscriber::EnvFilter;
+#include <cstddef>
+#include <cstdint>
+#include <unistd.h>
 
-fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
+// TODO: Provide these definitions in a header file for all zkvm C++ programs.
+extern "C" {
+  extern void sys_write(uint32_t fd, void* msg, uint32_t msglen);
+  extern void sys_halt();
+}
 
-    let Cargo::Risczero(args) = Cargo::parse();
+char msg[] = "Hello world!\n";
+size_t msg_len = sizeof(msg) - 1;
 
-    match args.command {
-        RisczeroCmd::New(new) => {
-            new.run();
-        }
-        RisczeroCmd::Staticlib(staticlib) => {
-            staticlib.run();
-        }
-    }
+int main()
+{
+  sys_write(STDOUT_FILENO, msg, msg_len);
+  sys_halt();
 }

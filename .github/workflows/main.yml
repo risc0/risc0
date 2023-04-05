@@ -91,6 +91,8 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      - run: make test
+        working-directory: examples/cpp
       - run: sccache --show-stats
 
   doc:

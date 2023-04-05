@@ -18,11 +18,15 @@
 use clap::{Parser, Subcommand};
 
 use crate::commands::new::NewCommand;
+use crate::commands::staticlib::StaticlibCommand;
 
 /// Implementations of the commands
 pub mod commands {
     /// Create a new RISC Zero project
     pub mod new;
+
+    /// Build the static runtime library for the ZKVM.
+    pub mod staticlib;
 }
 
 #[derive(Parser)]
@@ -47,6 +51,8 @@ pub struct Risczero {
 pub enum RisczeroCmd {
     /// Creates a new risczero starter project.
     New(NewCommand),
+    /// Builds a static library for zkvm runtime support.
+    Staticlib(StaticlibCommand),
 }
 
 #[cfg(test)]

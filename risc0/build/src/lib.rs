@@ -141,11 +141,8 @@ fn sha_digest_with_hex(data: &[u8]) -> (Vec<u8>, String) {
 }
 
 /// Returns the given cargo Package from the metadata.
-fn get_package<P>(manifest_dir: P) -> Package
-where
-    P: AsRef<Path>,
-{
-    let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
+fn get_package(manifest_dir: &Path) -> Package {
+    let manifest_path = manifest_dir.join("Cargo.toml");
     let manifest_meta = MetadataCommand::new()
         .manifest_path(&manifest_path)
         .no_deps()
@@ -160,16 +157,13 @@ where
         })
         .collect();
     if matching.len() == 0 {
-        eprintln!(
-            "ERROR: No package found in {}",
-            manifest_dir.as_ref().display()
-        );
+        eprintln!("ERROR: No package found in {}", manifest_dir.display());
         std::process::exit(-1);
     }
     if matching.len() > 1 {
         eprintln!(
             "ERROR: Multiple packages found in {}",
-            manifest_dir.as_ref().display()
+            manifest_dir.display()
         );
         std::process::exit(-1);
     }
@@ -178,7 +172,7 @@ where
 
 /// When called from a build.rs, returns the current package being built.
 fn current_package() -> Package {
-    get_package(env::var("CARGO_MANIFEST_DIR").unwrap())
+    get_package(&env::var("CARGO_MANIFEST_DIR").unwrap().as_ref())
 }
 
 /// Returns all inner packages specified the "methods" list inside
@@ -189,16 +183,13 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
         .unwrap()
         .methods
         .iter()
-        .map(|inner| get_package(manifest_dir.join(inner)))
+        .map(|inner| get_package(&manifest_dir.join(inner).as_ref()))
         .collect()
 }
 
 /// Returns all methods associated with the given riscv guest package.
-fn guest_methods<P>(pkg: &Package, out_dir: P) -> Vec<Risc0Method>
-where
-    P: AsRef<Path>,
-{
-    let target_dir = out_dir.as_ref().join("riscv-guest");
+fn guest_methods(pkg: &Package, out_dir: &Path) -> Vec<Risc0Method> {
+    let target_dir = out_dir.join("riscv-guest");
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
@@ -212,18 +203,26 @@ where
         .collect()
 }
 
+/// Results from setting up an environment for guest compilation.
+///
+/// Only marked pub to be accesible by "cargo risczero"; not intended for
+/// public use.
 #[derive(Debug)]
-struct GuestBuildEnv {
+#[doc(hidden)]
+pub struct GuestBuildEnv {
     target_spec: PathBuf,
     rust_lib_src: PathBuf,
 }
 
-fn setup_guest_build_env<P>(out_dir: P) -> GuestBuildEnv
-where
-    P: AsRef<Path>,
-{
+/// Create a build environment to build code for the guest,
+/// downloading the standard library if necessary.
+///
+/// Only marked pub to be accesible by "cargo risczero"; not intended for
+/// public use.
+#[doc(hidden)]
+pub fn setup_guest_build_env(out_dir: &Path) -> GuestBuildEnv {
     // RISCV target specification
-    let target_spec_path = out_dir.as_ref().join("riscv32im-risc0-zkvm-elf.json");
+    let target_spec_path = out_dir.join("riscv32im-risc0-zkvm-elf.json");
     let linker_script: String = LINKER_SCRIPT.escape_default().to_string();
     fs::write(
         &target_spec_path,
@@ -234,7 +233,7 @@ where
     // Rust standard library.  If any of the RUST_LIB_MAP changed, we
     // want to have a different hash so that we make sure we recompile.
     let (_, src_id_hash) = sha_digest_with_hex(format!("{:?}", RUST_LIB_MAP).as_bytes());
-    let rust_lib_path = out_dir.as_ref().join(format!("rust-std_{}", src_id_hash));
+    let rust_lib_path = out_dir.join(format!("rust-std_{}", src_id_hash));
     if !rust_lib_path.exists() {
         println!(
             "Standard library {} does not exist; downloading",
@@ -257,10 +256,7 @@ fn risc0_cache() -> PathBuf {
         .into()
 }
 
-fn download_zip_map<P>(zip_map: &[ZipMapEntry], dest_base: P)
-where
-    P: AsRef<Path>,
-{
+fn download_zip_map(zip_map: &[ZipMapEntry], dest_base: &Path) {
     let cache_dir = risc0_cache();
     if !cache_dir.is_dir() {
         fs::create_dir_all(&cache_dir).unwrap();
@@ -272,7 +268,7 @@ where
         .build()
         .unwrap();
 
-    let tmp_dest_base = dest_base.as_ref().with_extension("downloadtmp");
+    let tmp_dest_base = dest_base.with_extension("downloadtmp");
     if tmp_dest_base.exists() {
         fs::remove_dir_all(&tmp_dest_base).unwrap();
     }
@@ -321,66 +317,78 @@ where
         }
         println!("Wrote {} files", nwrote);
     }
-    fs::rename(&tmp_dest_base, dest_base.as_ref()).unwrap();
+    fs::rename(&tmp_dest_base, dest_base).unwrap();
+}
+
+impl GuestBuildEnv {
+    /// Creates a std::process::Command to execute the given cargo
+    /// command in an environment suitable for targeting the zkvm guest.
+    //
+    /// Only marked pub to be accesible by "cargo risczero"; not intended for
+    /// public use.
+    #[doc(hidden)]
+    pub fn cargo_command(&self, cargo_cmd: &str, std: bool) -> Command {
+        let mut cmd = Command::new(env::var("CARGO").unwrap());
+        let mut std_parts = vec!["alloc", "core", "proc_macro", "panic_abort"];
+        if std {
+            std_parts.push("std");
+        }
+        let build_std = format!("build-std={}", std_parts.join(","));
+        cmd.args(&[
+            cargo_cmd,
+            "--target",
+            self.target_spec.to_str().unwrap(),
+            "-Z",
+            build_std.as_str(),
+            "-Z",
+            "build-std-features=compiler-builtins-mem",
+        ]);
+
+        // riscv32im defaults to emitting atomic operations; we can
+        // get rid of these by adding an extra llvm pass:
+        cmd.env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic");
+
+        // The RISC0_STANDARD_LIB variable can be set for testing purposes
+        // to override the downloaded standard library.  It should point
+        // to the root of the rust repository.
+        let risc0_standard_lib: String = if let Ok(path) = env::var("RISC0_STANDARD_LIB") {
+            path
+        } else {
+            self.rust_lib_src.to_str().unwrap().into()
+        };
+        eprintln!("Using rust standard library root: {}", risc0_standard_lib);
+        cmd.env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib);
+
+        cmd
+    }
 }
 
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(
+fn build_guest_package(
     pkg: &Package,
-    target_dir: P,
+    target_dir: &Path,
     guest_build_env: &GuestBuildEnv,
     features: Vec<String>,
     std: bool,
-) where
-    P: AsRef<Path>,
-{
-    fs::create_dir_all(target_dir.as_ref()).unwrap();
-    let cargo = env::var("CARGO").unwrap();
-    let mut std_parts = vec!["alloc", "core", "proc_macro", "panic_abort"];
-    if std {
-        std_parts.push("std");
-    }
-    let build_std = format!("build-std={}", std_parts.join(","));
-    let mut args = vec![
-        "build",
+) {
+    fs::create_dir_all(target_dir).unwrap();
+    let mut cmd = guest_build_env.cargo_command("build", std);
+
+    cmd.args(&[
         "--release",
-        "--target",
-        guest_build_env.target_spec.to_str().unwrap(),
-        "-Z",
-        build_std.as_str(),
-        "-Z",
-        "build-std-features=compiler-builtins-mem",
         "--manifest-path",
         pkg.manifest_path.as_str(),
         "--target-dir",
-        target_dir.as_ref().to_str().unwrap(),
-    ];
+        target_dir.to_str().unwrap(),
+    ]);
     let features_str = features.join(",");
     if !features.is_empty() {
-        args.push("--features");
-        args.push(&features_str);
+        cmd.args(&["--features", &features_str]);
     }
-    println!("Building guest package: {cargo} {}", args.join(" "));
-    // The RISC0_STANDARD_LIB variable can be set for testing purposes
-    // to override the downloaded standard library.  It should point
-    // to the root of the rust repository.
-    let risc0_standard_lib: String = if let Ok(path) = env::var("RISC0_STANDARD_LIB") {
-        path
-    } else {
-        guest_build_env.rust_lib_src.to_str().unwrap().into()
-    };
+    println!("Building guest package: {cmd:?}");
 
-    println!("Using rust standard library root: {}", risc0_standard_lib);
-
-    let mut cmd = Command::new(cargo);
-    let mut child = cmd
-        .env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic")
-        .env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib)
-        .args(args)
-        .stderr(Stdio::piped())
-        .spawn()
-        .unwrap();
+    let mut child = cmd.stderr(Stdio::piped()).spawn().unwrap();
     let stderr = child.stderr.take().unwrap();
 
     // HACK: Attempt to bypass the parent cargo output capture and

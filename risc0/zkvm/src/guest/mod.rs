@@ -115,22 +115,6 @@ pub fn abort(msg: &str) -> ! {
     _fault()
 }
 
-#[cfg(all(not(feature = "std"), target_os = "zkvm"))]
-mod handlers {
-    use core::{alloc::Layout, panic::PanicInfo};
-
-    #[panic_handler]
-    fn panic_fault(panic_info: &PanicInfo) -> ! {
-        let msg = ::alloc::format!("{}", panic_info);
-        crate::guest::abort(&msg)
-    }
-
-    #[alloc_error_handler]
-    fn alloc_fault(_layout: Layout) -> ! {
-        crate::guest::abort("Memory allocation failure")
-    }
-}
-
 /// Used for defining a main entrypoint.
 ///
 /// # Example

@@ -21,3 +21,4 @@ core = { optional = true, package = "rustc-std-workspace-core", version = "1.0.0
 [features]
 default = []
 rustc-dep-of-std = ["core", "compiler_builtins"]
+std = []

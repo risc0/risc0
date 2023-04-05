@@ -13,8 +13,10 @@
 // limitations under the License.
 
 #![doc = include_str!("../README.md")]
-#![no_std]
 #![allow(unused_variables)]
+#![cfg_attr(all(not(feature = "std"), target_os = "zkvm"), no_std)]
+#![feature(alloc_error_handler)]
+#![feature(panic_info_message)]
 
 pub mod memory;
 #[macro_use]
@@ -29,4 +31,30 @@ pub mod fileno {
     pub const STDOUT: u32 = 1;
     pub const STDERR: u32 = 2;
     pub const JOURNAL: u32 = 3;
+}
+
+#[cfg(all(not(feature = "std"), target_os = "zkvm"))]
+mod handlers {
+    use core::{alloc::Layout, panic::PanicInfo};
+
+    fn abort(s: &str) -> ! {
+        let bytes = s.as_bytes();
+        unsafe { crate::syscall::sys_panic(bytes.as_ptr(), bytes.len()) }
+    }
+
+    #[panic_handler]
+    fn panic_fault(panic_info: &PanicInfo) -> ! {
+        if let Some(msg) = panic_info.message().and_then(|msg| msg.as_str()) {
+            // Prefer to include the panic message if we don't have to
+            // invoke allocation or formatting.
+            abort(msg);
+        } else {
+            abort("Panic occured");
+        }
+    }
+
+    #[alloc_error_handler]
+    fn alloc_fault(_layout: Layout) -> ! {
+        abort("Memory allocation failure")
+    }
 }
