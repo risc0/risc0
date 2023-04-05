@@ -23,9 +23,9 @@ macro_rules! baby_bear_array {
     }
 }
 
+// TODO: Document
+#[doc(hidden)]
 pub const CELLS: usize = 24;
-pub const ALPHA: usize = 7;
-pub const ROUNDS_FULL: usize = 8;
 pub const ROUNDS_HALF_FULL: usize = 4;
 pub const ROUNDS_PARTIAL: usize = 21;
 

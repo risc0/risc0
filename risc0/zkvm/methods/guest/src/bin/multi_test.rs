@@ -23,8 +23,11 @@ use core::arch::asm;
 
 use getrandom::getrandom;
 use risc0_zeroio::deserialize::Deserialize;
-use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
-use risc0_zkvm::guest::{env, memory_barrier, sha};
+use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
+use risc0_zkvm::{
+    guest::{env, memory_barrier, sha},
+    sha::{Digest, Sha256},
+};
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef, SYS_MULTI_TEST};
 use risc0_zkvm_platform::syscall::sys_read;
 
@@ -146,6 +149,28 @@ pub fn main() {
             env::log("before");
             env::pause();
             env::log("after");
+        }
+        MultiTestSpecRef::BusyLoop(cycles) => {
+            let target_cycles = cycles.cycles();
+            let mut last_cycles = env::get_cycle_count();
+
+            // Count all the cycles that have happened so far before we got to this point.
+            env::log("Busy loop starting!");
+            let mut tot_cycles = last_cycles;
+
+            while tot_cycles < target_cycles as usize {
+                let now_cycles = env::get_cycle_count();
+                if now_cycles <= last_cycles {
+                    // Cycle count may have reset or wrapped around.
+                    // Since we don't know which, just start counting
+                    // from zero.
+                    tot_cycles += now_cycles;
+                } else {
+                    tot_cycles += now_cycles - last_cycles;
+                }
+                last_cycles = now_cycles;
+            }
+            env::log("Busy loop complete");
         }
     }
 }

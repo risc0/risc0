@@ -130,8 +130,12 @@ mod tests {
     use crate::{
         adapter::{MixState, PolyExt},
         core::{
-            config::{ConfigRng, HashSuite, HashSuitePoseidon, HashSuiteSha256},
-            log2_ceil, sha_cpu,
+            hash::{
+                poseidon::PoseidonHashSuite,
+                sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+                HashSuite, Rng as _,
+            },
+            log2_ceil,
         },
         hal::cpu::CpuHal,
         verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, CpuVerifyHal, VerificationError},
@@ -150,8 +154,8 @@ mod tests {
         }
     }
 
-    type ShaSuite = HashSuiteSha256<BabyBear, sha_cpu::Impl>;
-    type PoseidonSuite = HashSuitePoseidon;
+    type ShaSuite = Sha256HashSuite<BabyBear, CpuImpl>;
+    type PoseidonSuite = PoseidonHashSuite;
     type VerifierHal<'a, HS> = CpuVerifyHal<'a, BabyBear, HS, MockCircuit>;
 
     fn init_prover<H: Hal>(

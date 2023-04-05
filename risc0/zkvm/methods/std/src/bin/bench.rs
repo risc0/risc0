@@ -14,8 +14,10 @@
 
 #![no_main]
 
-use risc0_zkp::core::sha::Sha256;
-use risc0_zkvm::guest::{env, memory_barrier, sha};
+use risc0_zkvm::{
+    guest::{env, memory_barrier, sha},
+    sha::Sha256,
+};
 use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
 
 risc0_zkvm::entry!(main);

@@ -21,7 +21,10 @@ use core::{
     mem::{self, MaybeUninit},
 };
 
-use risc0_zkp::core::sha::{Block, Digest, BLOCK_WORDS, DIGEST_WORDS, SHA256_INIT};
+use risc0_zkp::core::{
+    digest::{Digest, DIGEST_WORDS},
+    hash::sha::{Block, BLOCK_WORDS, SHA256_INIT},
+};
 use risc0_zkvm_platform::{
     syscall::{sys_sha_buffer, sys_sha_compress},
     WORD_SIZE,
@@ -225,11 +228,11 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
 
 /// A guest-side [Sha256] implementation.
 ///
-/// [Sha256]: risc0_zkp::core::sha::Sha256
+/// [Sha256]: risc0_zkp::core::hash::sha::Sha256
 #[derive(Debug, Clone)]
 pub struct Impl {}
 
-impl risc0_zkp::core::sha::Sha256 for Impl {
+impl risc0_zkp::core::hash::sha::Sha256 for Impl {
     type DigestPtr = &'static mut Digest;
 
     fn hash_bytes(bytes: &[u8]) -> Self::DigestPtr {

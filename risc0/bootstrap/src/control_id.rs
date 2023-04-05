@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub const CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2;
+
+pub type RawControlId = [&'static str; CONTROL_ID_ENTRIES];
+
+pub const SHA256_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
     "{}", //
@@ -28,7 +32,7 @@ pub const CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_
     "{}", //
 ];
 
-pub const POSEIDON_CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+pub const POSEIDON_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
     "{}", //
@@ -44,7 +48,7 @@ pub const POSEIDON_CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_
     "{}", //
 ];
 
-pub const BLAKE2B_CONTROL_ID: [&'static str; risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYCLES_PO2] = [
+pub const BLAKE2B_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
     "{}", //

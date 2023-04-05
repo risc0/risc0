@@ -17,15 +17,15 @@ use core::marker::PhantomData;
 
 use risc0_core::field::{Elem, Field};
 
-use crate::core::{config::ConfigRng, sha::Digest};
+use crate::core::{digest::Digest, hash::Rng};
 
-pub struct WriteIOP<F: Field, R: ConfigRng<F>> {
+pub struct WriteIOP<F: Field, R: Rng<F>> {
     pub proof: Vec<u32>,
     pub rng: R,
     phantom: PhantomData<F>,
 }
 
-impl<F: Field, R: ConfigRng<F>> WriteIOP<F, R> {
+impl<F: Field, R: Rng<F>> WriteIOP<F, R> {
     /// Create a new empty proof
     pub fn new() -> Self {
         Self {

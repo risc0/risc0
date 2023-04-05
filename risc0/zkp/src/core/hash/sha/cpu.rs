@@ -22,7 +22,8 @@ use sha2::{
     Digest as _,
 };
 
-use super::sha::{Block, Digest, Sha256, DIGEST_WORDS, SHA256_INIT};
+use super::{Block, Sha256, SHA256_INIT};
+use crate::core::digest::{Digest, DIGEST_WORDS};
 
 /// A CPU-based [Sha256] implementation.
 #[derive(Default, Clone)]
@@ -30,66 +31,6 @@ pub struct Impl {}
 
 fn set_word(buf: &mut [u8], idx: usize, word: u32) {
     buf[(4 * idx)..(4 * idx + 4)].copy_from_slice(&word.to_ne_bytes());
-}
-
-impl Impl {
-    /// Compute the hash of a slice of plain-old-data using the
-    /// specified offset and stride. 'size' specifies the number of
-    /// elements to hash.
-    pub fn hash_pod_stride<T: bytemuck::Pod>(
-        pods: &[T],
-        offset: usize,
-        size: usize,
-        stride: usize,
-    ) -> Box<Digest> {
-        // Because bytes in our digests are in big-endian order, regardless of host
-        // architecture, and the `sha2::compress256` function takes words in native
-        // byte order, the bytes of the IV need to be flipped on little-endian
-        // machines (e.g. x86).
-        let mut state: [u32; DIGEST_WORDS] = SHA256_INIT.into();
-        for word in state.iter_mut() {
-            *word = word.to_be();
-        }
-
-        let mut block: GenericArray<u8, U64> = GenericArray::default();
-
-        // Construct an Iterator<u8> with the given, offset, stride, and size in items.
-        let mut bytes = pods
-            .iter()
-            .skip(offset)
-            .step_by(stride)
-            .take(size)
-            .flat_map(|pod| bytemuck::cast_slice(slice::from_ref(pod)) as &[u8])
-            .copied()
-            .fuse();
-
-        let mut off = 0;
-        while let Some(b1) = bytes.next() {
-            let b2 = bytes.next().unwrap_or(0);
-            let b3 = bytes.next().unwrap_or(0);
-            let b4 = bytes.next().unwrap_or(0);
-            set_word(
-                block.as_mut_slice(),
-                off,
-                u32::from_ne_bytes([b1, b2, b3, b4]),
-            );
-            off += 1;
-            if off == 16 {
-                sha2::compress256(&mut state, slice::from_ref(&block));
-                off = 0;
-            }
-        }
-        if off != 0 {
-            block[off * 4..].fill(0);
-            sha2::compress256(&mut state, slice::from_ref(&block));
-        }
-
-        // Flip the bytes back to big-endian order from native order.
-        for word in state.iter_mut() {
-            *word = word.to_be();
-        }
-        Box::new(Digest::from(state))
-    }
 }
 
 impl Sha256 for Impl {
@@ -193,6 +134,6 @@ mod tests {
 
     #[test]
     fn test_impl() {
-        crate::core::sha::testutil::test_sha_impl::<Impl>();
+        crate::core::hash::sha::testutil::test_sha_impl::<Impl>();
     }
 }

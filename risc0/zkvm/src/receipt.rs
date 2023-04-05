@@ -80,19 +80,20 @@
 use alloc::vec::Vec;
 
 use anyhow::{anyhow, Result};
+use hex::FromHex;
 use risc0_circuit_rv32im::layout;
 #[cfg(not(target_os = "zkvm"))]
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 #[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::core::config::{HashSuite, HashSuiteSha256};
-use risc0_zkp::{core::sha::Digest, layout::Buffer, verify::VerificationError, MIN_CYCLES_PO2};
+use risc0_zkp::core::hash::{sha::Sha256HashSuite, HashSuite};
+use risc0_zkp::{core::digest::Digest, layout::Buffer, verify::VerificationError, MIN_CYCLES_PO2};
 use serde::{Deserialize, Serialize};
 
 use crate::{
     sha::rust_crypto::{Digest as _, Sha256},
-    ControlIdLocator, CIRCUIT,
+    ControlId, CIRCUIT,
 };
 
 /// Reports whether the zkVM is in the insecure seal skipping mode.
@@ -170,7 +171,7 @@ pub struct Receipt {
 pub fn verify_with_hal<'a, H, D>(hal: &H, image_id: D, seal: &[u32], journal: &[u8]) -> Result<()>
 where
     H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
-    H::Hash: ControlIdLocator,
+    H::HashFn: ControlId,
     &'a Digest: From<D>,
 {
     let image_id: &Digest = image_id.into();
@@ -212,14 +213,17 @@ where
         return Ok(());
     }
 
-    let control_id = H::Hash::get_control_id();
+    let control_id = &H::HashFn::CONTROL_ID;
     let check_code = |po2: u32, merkle_root: &Digest| -> Result<(), VerificationError> {
         let po2 = po2 as usize;
         let which = po2 - MIN_CYCLES_PO2;
-        if which >= control_id.table.len() || control_id.table[which] != *merkle_root {
-            return Err(VerificationError::ControlVerificationError);
+        if which < control_id.len() {
+            let entry: Digest = Digest::from_hex(control_id[which]).unwrap();
+            if entry == *merkle_root {
+                return Ok(());
+            }
         }
-        Ok(())
+        Err(VerificationError::ControlVerificationError)
     };
 
     risc0_zkp::verify::verify(hal, &CIRCUIT, seal, check_code, check_globals)
@@ -254,7 +258,7 @@ impl Receipt {
     where
         &'a Digest: From<D>,
     {
-        self.verify_with_hash::<HashSuiteSha256<BabyBear, crate::sha::Impl>, _>(image_id)
+        self.verify_with_hash::<Sha256HashSuite<BabyBear, crate::sha::Impl>, _>(image_id)
     }
 
     /// Verifies a receipt with a user-specified hash function using the CPU.
@@ -270,7 +274,7 @@ impl Receipt {
     pub fn verify_with_hash<'a, HS, D>(&self, image_id: D) -> Result<()>
     where
         HS: HashSuite<BabyBear>,
-        HS::Hash: ControlIdLocator,
+        HS::HashFn: ControlId,
         &'a Digest: From<D>,
     {
         let hal = risc0_zkp::verify::CpuVerifyHal::<BabyBear, HS, _>::new(&crate::CIRCUIT);
@@ -292,7 +296,7 @@ impl Receipt {
     pub fn verify_with_hal<'a, H, D>(&self, hal: &H, image_id: D) -> Result<()>
     where
         H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
-        H::Hash: ControlIdLocator,
+        H::HashFn: ControlId,
         &'a Digest: From<D>,
     {
         verify_with_hal(hal, image_id, &self.seal, &self.journal)

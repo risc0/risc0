@@ -15,24 +15,74 @@
 //! An implementation of Poseidon targeting the Baby Bear field with a security
 //! of 128 bits.
 
-#[allow(dead_code)]
-#[allow(missing_docs)]
-pub mod consts;
+pub(crate) mod consts;
 mod rng;
 
-use risc0_core::field::baby_bear::Elem;
+use alloc::{boxed::Box, vec::Vec};
 
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
+    ExtElem,
+};
+
+pub use self::consts::CELLS;
 use self::consts::{
-    CELLS, MDS, PARTIAL_COMP_MATRIX, PARTIAL_COMP_OFFSET, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
+    MDS, PARTIAL_COMP_MATRIX, PARTIAL_COMP_OFFSET, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
     ROUND_CONSTANTS,
 };
 pub use self::rng::PoseidonRng;
+use super::{HashFn, HashSuite};
+use crate::core::digest::{Digest, DIGEST_WORDS};
 
 /// The 'rate' of the sponge, i.e. how much we can safely add/remove per mixing.
 pub const CELLS_RATE: usize = 16;
 
 /// The size of the hash output in cells (~ 248 bits)
 pub const CELLS_OUT: usize = 8;
+
+/// A hash implemention for Poseidon
+pub struct PoseidonHashFn {}
+
+impl HashFn<BabyBear> for PoseidonHashFn {
+    type DigestPtr = Box<Digest>;
+
+    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+        let both: Vec<BabyBearElem> = a
+            .as_words()
+            .iter()
+            .chain(b.as_words())
+            .map(|w| BabyBearElem::new_raw(*w))
+            .collect();
+        assert!(both.len() == 16);
+        to_digest(unpadded_hash(both.iter()))
+    }
+
+    fn hash_elem_slice(slice: &[BabyBearElem]) -> Self::DigestPtr {
+        to_digest(unpadded_hash(slice.iter()))
+    }
+
+    fn hash_ext_elem_slice(slice: &[BabyBearExtElem]) -> Self::DigestPtr {
+        to_digest(unpadded_hash(
+            slice.iter().map(|ee| ee.subelems().iter()).flatten(),
+        ))
+    }
+}
+
+/// A hash suite using Poseidon for both MT hashes and RNG
+pub struct PoseidonHashSuite {}
+
+impl HashSuite<BabyBear> for PoseidonHashSuite {
+    type HashFn = PoseidonHashFn;
+    type Rng = PoseidonRng;
+}
+
+fn to_digest(elems: [BabyBearElem; CELLS_OUT]) -> Box<Digest> {
+    let mut state: [u32; DIGEST_WORDS] = [0; DIGEST_WORDS];
+    for i in 0..DIGEST_WORDS {
+        state[i] = elems[i].as_u32_montgomery();
+    }
+    Box::new(Digest::from(state))
+}
 
 fn add_round_constants(cells: &mut [Elem; CELLS], round: usize) {
     for i in 0..CELLS {

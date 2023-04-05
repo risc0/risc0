@@ -34,7 +34,10 @@ mod exec;
 pub mod io;
 pub(crate) mod loader;
 mod plonk;
-mod preflight;
+// Preflight is a work in progress right now; don't include it in documentation
+// yet.
+#[doc(hidden)]
+pub mod preflight;
 #[cfg(feature = "profiler")]
 pub mod profiler;
 
@@ -58,7 +61,7 @@ use risc0_circuit_rv32im::{
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
     adapter::TapsProvider,
-    core::config::HashSuite,
+    core::hash::HashSuite,
     hal::{EvalCheck, Hal},
     layout::Buffer,
     prove::adapter::ProveAdapter,
@@ -76,15 +79,14 @@ use risc0_zkvm_platform::{
     WORD_SIZE,
 };
 
-use self::{
-    exec::{HostHandler, RV32Executor},
-    preflight::Preflight,
-};
+use self::exec::{HostHandler, RV32Executor};
 use crate::{
     binfmt::elf::Program,
     receipt::{insecure_skip_seal, Receipt},
-    ControlIdLocator, MemoryImage, CIRCUIT, PAGE_SIZE,
+    ControlId, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
+
+const DEFAULT_SEGMENT_LIMIT_PO2: usize = 23; // 16M cycles
 
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
@@ -187,20 +189,36 @@ cfg_if::cfg_if! {
 
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
-    pub(crate) skip_seal: bool,
+    skip_seal: bool,
 
-    pub(crate) skip_verify: bool,
+    skip_verify: bool,
 
-    pub(crate) syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
+    syscall_handlers: HashMap<String, Box<dyn Syscall + 'a>>,
 
-    pub(crate) io: PosixIo<'a>,
-    pub(crate) env_vars: HashMap<String, String>,
-    pub(crate) trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
+    io: PosixIo<'a>,
+    env_vars: HashMap<String, String>,
+    trace_callback: Option<Box<dyn FnMut(TraceEvent) -> Result<()> + 'a>>,
+    pub(crate) unknown_syscall_handler: Box<dyn Syscall + 'a>,
 
-    pub(crate) preflight: bool,
+    preflight: bool,
+
+    segment_limit_po2: usize,
+
+    pub(crate) finalized: bool,
 }
 
 impl<'a> ProverOpts<'a> {
+    /// Set the segment limit specified as a power of 2.
+    ///
+    /// When running a large program, this limit specifies the max cycles
+    /// allowed for a particular segment.
+    pub fn with_segment_limit_po2(self, segment_limit_po2: usize) -> Self {
+        Self {
+            segment_limit_po2,
+            ..self
+        }
+    }
+
     /// If true, skip generating the seal in receipt. This should
     /// only be used for testing. In this case, performace will be
     /// much better but we will not be able to cryptographically
@@ -253,6 +271,12 @@ impl<'a> ProverOpts<'a> {
         self
     }
 
+    /// Provide a handler for when an unknown syscall is encountered.
+    pub fn with_unknown_syscall_handler(mut self, handler: impl Syscall + 'a) -> Self {
+        self.unknown_syscall_handler = Box::new(handler);
+        self
+    }
+
     /// Add a callback handler for raw trace messages.
     pub fn with_trace_callback(
         mut self,
@@ -290,13 +314,48 @@ impl<'a> ProverOpts<'a> {
     }
 
     /// Add late-binding handlers for constructed environment.
-    pub(crate) fn finalize(mut self) -> Self {
-        let io = Rc::new(take(&mut self.io));
-        let getenv = Getenv(take(&mut self.env_vars));
-        self.with_syscall(SYS_READ, io.clone())
-            .with_syscall(SYS_READ_AVAIL, io.clone())
-            .with_syscall(SYS_WRITE, io)
-            .with_syscall(SYS_GETENV, getenv)
+    fn finalize(mut self) -> Self {
+        if self.finalized {
+            self
+        } else {
+            self.finalized = true;
+            let io = Rc::new(take(&mut self.io));
+            let getenv = Getenv(take(&mut self.env_vars));
+            self.with_syscall(SYS_READ, io.clone())
+                .with_syscall(SYS_READ_AVAIL, io.clone())
+                .with_syscall(SYS_WRITE, io)
+                .with_syscall(SYS_GETENV, getenv)
+        }
+    }
+
+    /// Returns an empty ProverOpts with none of the default system calls or
+    /// file descriptors attached.
+    pub fn without_defaults() -> Self {
+        ProverOpts {
+            io: PosixIo::new(),
+            skip_seal: false,
+            skip_verify: false,
+            syscall_handlers: HashMap::new(),
+            env_vars: HashMap::new(),
+            trace_callback: None,
+            preflight: false,
+            unknown_syscall_handler: Box::new(UnknownSyscall),
+            finalized: false,
+            segment_limit_po2: DEFAULT_SEGMENT_LIMIT_PO2,
+        }
+    }
+}
+
+struct UnknownSyscall;
+
+impl Syscall for UnknownSyscall {
+    fn syscall(
+        &self,
+        syscall: &str,
+        _ctx: &dyn SyscallContext,
+        _to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        panic!("Unknown syscall {syscall}")
     }
 }
 
@@ -359,21 +418,14 @@ impl Syscall for Getenv {
 
 impl<'a> Default for ProverOpts<'a> {
     fn default() -> ProverOpts<'a> {
-        ProverOpts {
-            io: PosixIo::new(),
-            skip_seal: false,
-            skip_verify: false,
-            syscall_handlers: HashMap::new(),
-            env_vars: HashMap::new(),
-            trace_callback: None,
-            preflight: std::env::var("RISC0_EXPERIMENTAL_PREFLIGHT").is_ok(),
-        }
-        .with_read_fd(fileno::STDIN, BufReader::new(stdin()))
-        .with_write_fd(fileno::STDOUT, stdout())
-        .with_write_fd(fileno::STDERR, stderr())
-        .with_syscall(SYS_PANIC, DefaultSyscall)
-        .with_syscall(SYS_LOG, DefaultSyscall)
-        .with_syscall(SYS_CYCLE_COUNT, DefaultSyscall)
+        Self::without_defaults()
+            .with_preflight(std::env::var("RISC0_EXPERIMENTAL_PREFLIGHT").is_ok())
+            .with_read_fd(fileno::STDIN, BufReader::new(stdin()))
+            .with_write_fd(fileno::STDOUT, stdout())
+            .with_write_fd(fileno::STDERR, stderr())
+            .with_syscall(SYS_PANIC, DefaultSyscall)
+            .with_syscall(SYS_LOG, DefaultSyscall)
+            .with_syscall(SYS_CYCLE_COUNT, DefaultSyscall)
     }
 }
 
@@ -413,6 +465,7 @@ pub struct Prover<'a> {
     inner: ProverImpl<'a>,
     image: Rc<RefCell<MemoryImage>>,
     pc: u32,
+    preflight_segments: Option<Box<dyn Iterator<Item = Result<preflight::Segment>> + 'a>>,
 
     /// How many cycles executing the guest took.
     ///
@@ -420,6 +473,13 @@ pub struct Prover<'a> {
     /// called. Note that this is privately shared with the host; it is not
     /// present in the [Receipt].
     pub cycles: usize,
+
+    /// The exit code reported by the latest segment execution. The possible
+    /// values are:
+    /// - 0: Halted normally
+    /// - 1: User-initiated pause
+    /// - 2: System-initiated split
+    pub exit_code: u32,
 }
 
 impl<'a> Prover<'a> {
@@ -440,21 +500,21 @@ impl<'a> Prover<'a> {
             image: Rc::new(RefCell::new(MemoryImage::new(&program, PAGE_SIZE as u32))),
             pc: program.entry,
             cycles: 0,
+            preflight_segments: None,
+            exit_code: 0,
         })
     }
 
     /// Construct a prover from a memory image.
-    pub fn from_image(
-        image: Rc<RefCell<MemoryImage>>,
-        pc: u32,
-        opts: ProverOpts<'a>,
-    ) -> Result<Self> {
-        Ok(Prover {
+    pub fn from_image(image: Rc<RefCell<MemoryImage>>, pc: u32, opts: ProverOpts<'a>) -> Self {
+        Prover {
             inner: ProverImpl::new(opts),
             image,
             pc,
             cycles: 0,
-        })
+            preflight_segments: None,
+            exit_code: 0,
+        }
     }
 
     /// Provide input data to the guest. This data can be read by the guest
@@ -517,43 +577,59 @@ impl<'a> Prover<'a> {
     pub fn run_with_hal<H, E>(&mut self, hal: &H, eval: &E) -> Result<Receipt>
     where
         H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
+        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
         E: EvalCheck<H>,
     {
-        let mut opts = take(&mut self.inner.opts);
-        if !self.inner.input.is_empty() {
-            // TODO: Remove add_input_*_slice in favor of with_stdin,
-            // and eliminate this "input" field.
-            opts = opts.with_stdin(Cursor::new(take(&mut self.inner.input)))
+        if !self.inner.opts_finalized {
+            let mut opts = take(&mut self.inner.opts);
+            if !self.inner.input.is_empty() {
+                // TODO: Remove add_input_*_slice in favor of with_stdin,
+                // and eliminate this "input" field.
+                opts = opts.with_stdin(Cursor::new(take(&mut self.inner.input)))
+            }
+            self.inner.opts = opts.finalize();
+            self.inner.opts_finalized = true;
+        } else {
+            // Continuation; opts was finalized the previous run.  Make sure we didn't get
+            // any more input.
+            assert!(self.inner.input.is_empty(), "Input may not be added after the prover starts proving using the add_input_* calls");
         }
-        self.inner.opts = opts.finalize();
         let skip_seal = self.inner.opts.skip_seal || insecure_skip_seal();
-        let journal = self.inner.journal.buf.take();
+        let segment_limit_po2 = self.inner.opts.segment_limit_po2;
 
         if self.inner.opts.preflight {
-            if skip_seal {
+            let segments = self.preflight_segments.get_or_insert_with(|| {
                 let opts = take(&mut self.inner.opts);
-
                 // TODO: avoid image clone
-                let mut preflight = Preflight::new(self.pc, self.image.borrow().clone(), opts);
+                let exec =
+                    preflight::exec::ExecState::new(self.pc, self.image.borrow().clone(), opts);
 
-                while !preflight.is_halted() {
-                    preflight.step().unwrap()
-                }
-                return Ok(Receipt {
-                    journal,
-                    seal: Vec::new(),
-                });
+                Box::new(exec.segmentize())
+            });
+
+            let segment = segments
+                .next()
+                .expect("Ran out of segments but user still wants more!")?;
+            let journal = self.inner.journal.buf.take();
+            let seal = if skip_seal {
+                Vec::new()
             } else {
-                eprintln!("WARNING: Experimental preflight not yet compatible with generating a seal; not running preflight.");
-            }
+                segment.prove_with_hal(hal, eval)?.seal
+            };
+            return Ok(Receipt { journal, seal });
         }
 
         let image_id = self.image.borrow().get_root();
-        let mut executor =
-            RV32Executor::new(&CIRCUIT, Rc::clone(&self.image), self.pc, &mut self.inner);
-        let (cycles, pc) = executor.run()?;
+        let mut executor = RV32Executor::new(
+            &CIRCUIT,
+            Rc::clone(&self.image),
+            self.pc,
+            &mut self.inner,
+            segment_limit_po2,
+        );
+        let (cycles, exit_code, pc) = executor.run()?;
         self.cycles = cycles;
+        self.exit_code = exit_code;
         self.pc = pc;
 
         let mut adapter = ProveAdapter::new(&mut executor.executor);
@@ -623,6 +699,10 @@ struct ProverImpl<'a> {
     pub input: Vec<u8>,
     pub journal: Journal,
     pub opts: ProverOpts<'a>,
+
+    // True if we've already called finalize() on the ProverOpts.
+    // TODO: If we get rid of the add_input* calls, this should be unnecessary.
+    opts_finalized: bool,
 }
 
 impl<'a> ProverImpl<'a> {
@@ -633,6 +713,7 @@ impl<'a> ProverImpl<'a> {
             input: Vec::new(),
             journal,
             opts,
+            opts_finalized: false,
         }
     }
 }
@@ -661,7 +742,10 @@ impl<'a> HostHandler for ProverImpl<'a> {
                 bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
                 Ok((0, 0))
             }
-            _ => bail!("Unknown syscall: {syscall}"),
+            _ => self
+                .opts
+                .unknown_syscall_handler
+                .syscall(syscall, ctx, to_guest),
         }
     }
 

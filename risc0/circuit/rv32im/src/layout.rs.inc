@@ -1,8 +1,8 @@
 // :0
-pub struct BytesSetupStep {}
-impl risc0_zkp::layout::Component for BytesSetupStep {
+pub struct BytesInitStep {}
+impl risc0_zkp::layout::Component for BytesInitStep {
     fn ty_name(&self) -> &'static str {
-        "BytesSetupStep"
+        "BytesInitStep"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -10,7 +10,7 @@ impl risc0_zkp::layout::Component for BytesSetupStep {
     }
 }
 
-// circuit/rv32im/global.h:15
+// circuit/rv32im/global.h:28
 pub struct U32Reg {
     pub byte: &'static [&'static OutReg; 4],
 }
@@ -43,15 +43,15 @@ impl risc0_zkp::layout::Component for SystemState {
 }
 
 // :0
-pub struct BodyStep {
+pub struct RamFiniStep {
     pub check_dirty: &'static OutReg,
     pub post: &'static SystemState,
     pub pre: &'static SystemState,
     pub output: &'static [&'static U32Reg; 8],
 }
-impl risc0_zkp::layout::Component for BodyStep {
+impl risc0_zkp::layout::Component for RamFiniStep {
     fn ty_name(&self) -> &'static str {
-        "BodyStep"
+        "RamFiniStep"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -65,14 +65,14 @@ impl risc0_zkp::layout::Component for BodyStep {
 
 // cirgen/circuit/rv32im/top.cpp:60
 pub struct Mux {
-    pub body: &'static BodyStep,
-    pub bytes_fini: &'static BytesSetupStep,
-    pub bytes_init: &'static BytesSetupStep,
-    pub bytes_setup: &'static BytesSetupStep,
-    pub ram_fini: &'static BodyStep,
-    pub ram_init: &'static BodyStep,
-    pub ram_load: &'static BodyStep,
-    pub reset: &'static BodyStep,
+    pub body: &'static RamFiniStep,
+    pub bytes_fini: &'static BytesInitStep,
+    pub bytes_init: &'static BytesInitStep,
+    pub bytes_setup: &'static BytesInitStep,
+    pub ram_fini: &'static RamFiniStep,
+    pub ram_init: &'static RamFiniStep,
+    pub ram_load: &'static RamFiniStep,
+    pub reset: &'static RamFiniStep,
 }
 impl risc0_zkp::layout::Component for Mux {
     fn ty_name(&self) -> &'static str {
@@ -718,7 +718,7 @@ pub const LAYOUT_MUX_BODY_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_BODY: BodyStep = BodyStep {
+pub const LAYOUT_MUX_BODY: RamFiniStep = RamFiniStep {
     check_dirty: &LAYOUT_MUX_BODY_CHECK_DIRTY,
     post: &LAYOUT_MUX_BODY_POST,
     pre: &LAYOUT_MUX_BODY_PRE,
@@ -735,13 +735,13 @@ pub const LAYOUT_MUX_BODY: BodyStep = BodyStep {
 };
 
 // :0
-pub const LAYOUT_MUX_BYTES_FINI: BytesSetupStep = BytesSetupStep {};
+pub const LAYOUT_MUX_BYTES_FINI: BytesInitStep = BytesInitStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_INIT: BytesSetupStep = BytesSetupStep {};
+pub const LAYOUT_MUX_BYTES_INIT: BytesInitStep = BytesInitStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_SETUP: BytesSetupStep = BytesSetupStep {};
+pub const LAYOUT_MUX_BYTES_SETUP: BytesInitStep = BytesInitStep {};
 
 // :0
 pub const LAYOUT_MUX_RAM_FINI_CHECK_DIRTY: OutReg = OutReg { offset: 72 };
@@ -1349,7 +1349,7 @@ pub const LAYOUT_MUX_RAM_FINI_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_RAM_FINI: BodyStep = BodyStep {
+pub const LAYOUT_MUX_RAM_FINI: RamFiniStep = RamFiniStep {
     check_dirty: &LAYOUT_MUX_RAM_FINI_CHECK_DIRTY,
     post: &LAYOUT_MUX_RAM_FINI_POST,
     pre: &LAYOUT_MUX_RAM_FINI_PRE,
@@ -1971,7 +1971,7 @@ pub const LAYOUT_MUX_RAM_INIT_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_RAM_INIT: BodyStep = BodyStep {
+pub const LAYOUT_MUX_RAM_INIT: RamFiniStep = RamFiniStep {
     check_dirty: &LAYOUT_MUX_RAM_INIT_CHECK_DIRTY,
     post: &LAYOUT_MUX_RAM_INIT_POST,
     pre: &LAYOUT_MUX_RAM_INIT_PRE,
@@ -2593,7 +2593,7 @@ pub const LAYOUT_MUX_RAM_LOAD_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_RAM_LOAD: BodyStep = BodyStep {
+pub const LAYOUT_MUX_RAM_LOAD: RamFiniStep = RamFiniStep {
     check_dirty: &LAYOUT_MUX_RAM_LOAD_CHECK_DIRTY,
     post: &LAYOUT_MUX_RAM_LOAD_POST,
     pre: &LAYOUT_MUX_RAM_LOAD_PRE,
@@ -3215,7 +3215,7 @@ pub const LAYOUT_MUX_RESET_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_RESET: BodyStep = BodyStep {
+pub const LAYOUT_MUX_RESET: RamFiniStep = RamFiniStep {
     check_dirty: &LAYOUT_MUX_RESET_CHECK_DIRTY,
     post: &LAYOUT_MUX_RESET_POST,
     pre: &LAYOUT_MUX_RESET_PRE,

@@ -1,0 +1,13 @@
+[package]
+# TODO: Rename this package to change the method name from METHOD_NAME
+name = "method_name"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+{%- unless risc0_std %}
+# If you want to try (experimental) std support, add `features = [ "std" ]` to risc0-zkvm
+{%- endunless %}
+risc0-zkvm = { {{ risc0_zkvm }}, default-features = false{{ risc0_feature_std }} }

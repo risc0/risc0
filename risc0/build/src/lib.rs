@@ -90,9 +90,9 @@ impl Risc0Method {
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
             r##"
-pub const {upper}_ELF: &'static [u8] = &{elf_contents:?};
+pub const {upper}_ELF: &[u8] = &{elf_contents:?};
 pub const {upper}_ID: [u32; 8] = {image_id:?};
-pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
+pub const {upper}_PATH: &str = r#"{elf_path}"#;
             "##
         )
     }
@@ -266,12 +266,9 @@ where
         fs::create_dir_all(&cache_dir).unwrap();
     }
 
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env);
-
-    let temp_dir = tempdir_in(out_dir).unwrap();
+    let temp_dir = tempdir_in(&cache_dir).unwrap();
     let mut downloader = Downloader::builder()
-        .download_folder(&temp_dir.path())
+        .download_folder(temp_dir.path())
         .build()
         .unwrap();
 
@@ -390,16 +387,19 @@ fn build_guest_package<P>(
     // send directly to the tty, if available.  This way we get
     // progress messages from the inner cargo so the user doesn't
     // think it's just hanging.
+    let tty_file = env::var("RISC0_GUEST_LOGFILE").unwrap_or_else(|_| "/dev/tty".to_string());
+
     let mut tty = fs::OpenOptions::new()
         .read(true)
         .write(true)
-        .open("/dev/tty")
+        .create(true)
+        .open(tty_file)
         .ok();
 
     if let Some(tty) = &mut tty {
-        write!(
+        writeln!(
             tty,
-            "{}: Starting build for riscv32im-risc0-zkvm-elf   \n",
+            "{}: Starting build for riscv32im-risc0-zkvm-elf",
             pkg.name
         )
         .unwrap();
@@ -407,15 +407,14 @@ fn build_guest_package<P>(
 
     for line in BufReader::new(stderr).lines() {
         match &mut tty {
-            Some(tty) => write!(tty, "{}: {}   \n", pkg.name, line.unwrap()).unwrap(),
+            Some(tty) => writeln!(tty, "{}: {}", pkg.name, line.unwrap()).unwrap(),
             None => eprintln!("{}", line.unwrap()),
         }
     }
 
-    let status = cmd.status().unwrap();
-
-    if !status.success() {
-        std::process::exit(status.code().unwrap());
+    let res = child.wait().expect("Guest 'cargo build' failed");
+    if !res.success() {
+        std::process::exit(res.code().unwrap());
     }
 }
 

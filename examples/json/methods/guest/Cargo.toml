@@ -5,9 +5,6 @@ edition = "2021"
 
 [workspace]
 
-[build-dependencies]
-risc0-build = { path = "../../../../risc0/build" }
-
 [dependencies]
 json = "0.12"
 json-core = { path = "../../core" }
