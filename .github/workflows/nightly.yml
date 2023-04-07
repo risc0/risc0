@@ -1,0 +1,32 @@
+name: Nightly Tasks
+
+on:
+  schedule:
+    - cron: '7 0 * * *' # Nightly (ish) Pacific
+  workflow_dispatch:
+
+jobs:
+  crates_validate:
+    runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      RUST_BACKTRACE: full
+      TOP_N_CRATES: 1000
+      RUST_LOG: info
+    steps:
+      - uses: actions/checkout@v3
+      - run: cargo install --path risc0/cargo-risczero
+      - run: cargo build --manifest-path ./tools/crates-validator/ --release
+      - name: Create working directory
+        run: mkdir -p ${{ runner.temp }}/crate-validation/
+      - name: Generate the profile
+        run: tools/crates-validator/target/release/gen-profiles -r ./ -o ${{ runner.temp }}/crate-validation/profiles.json -c $TOP_N_CRATES
+      - name: Validate profiles
+        run: tools/crates-validator/target/release/main -p ${{ runner.temp }}/crate-validation/profiles.json -j ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+      - name: delete input profile
+        run: rm ${{ runner.temp }}/crate-validation/profiles.json
+      - name: Upload artifact results
+        uses: actions/upload-artifact@v3
+        with:
+          name: crates-test-results
+          path: ${{ runner.temp }}/crate-validation/
+          retention-days: 2
