@@ -24,6 +24,7 @@ jobs:
         run: tools/crates-validator/target/release/main -p ${{ runner.temp }}/crate-validation/profiles.json -j ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
       - name: delete input profile
         run: rm ${{ runner.temp }}/crate-validation/profiles.json
+      - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
       - name: Upload artifact results
         uses: actions/upload-artifact@v3
         with:
