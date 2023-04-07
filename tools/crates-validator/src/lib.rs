@@ -246,7 +246,6 @@ impl Validator {
 
     /// Customizes the template with crate profile specifics
     fn customize_guest(&self, profile: &CrateProfile, working_dir: &Path) -> Result<()> {
-        // TODO: rewrite methods/Cargo.toml to inject our local version of risc0-build?
         let methods_dir = working_dir.join("methods");
         if !methods_dir.exists() {
             bail!(
