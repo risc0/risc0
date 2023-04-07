@@ -1,0 +1,19 @@
+{
+    "risc0_path": "/home/parker/src/risc0/",
+    "fast_mode": true,
+    "profiles": [
+        {
+            "name": "syn",
+            "version": "1.0.109",
+            "std": false
+        },
+        {
+            "name": "lazy_static",
+            "version": "1.4.0",
+            "std": true,
+            "import_str": "use lazy_static::lazy_static;\nlazy_static! {\n\tstatic ref EXAMPLE: u8 = 42;\n}",
+            "should_fail": false,
+            "run_prover": true
+        }
+    ]
+}
