@@ -17,8 +17,8 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 
-use risc0_zeroio::{Deserialize, Serialize};
 use risc0_zkvm::declare_syscall;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MultiTestSpec {

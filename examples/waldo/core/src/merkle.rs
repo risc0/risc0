@@ -74,7 +74,7 @@ where
     pub fn vector_oracle_callback<'a>(&'a self) -> impl Fn(&[u8]) -> Vec<u8> + 'a {
         |data| {
             // TODO: Using bincode here, but it would likely be better on the guest side to
-            // use the risc0 zeroio or serde crates. I should try to use one of
+            // use the risc0 serde crate. I should try to use one of
             // those (again).
             let index: usize = bincode::deserialize::<u32>(data)
                 .unwrap()

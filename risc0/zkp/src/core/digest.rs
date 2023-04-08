@@ -21,7 +21,6 @@ use core::fmt::{Debug, Display, Formatter};
 
 use bytemuck::{Pod, PodCastError, Zeroable};
 use hex::{FromHex, FromHexError};
-use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 pub use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
@@ -39,19 +38,7 @@ pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
 /// storage is in u32's in part to simiplify alignment requirements, especially
 /// in the zkVM.
 #[derive(
-    Copy,
-    Clone,
-    Eq,
-    Ord,
-    PartialOrd,
-    PartialEq,
-    Hash,
-    Pod,
-    Zeroable,
-    Serialize,
-    Deserialize,
-    ZeroioSerialize,
-    ZeroioDeserialize,
+    Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash, Pod, Zeroable, Serialize, Deserialize,
 )]
 #[repr(transparent)]
 pub struct Digest([u32; DIGEST_WORDS]);
