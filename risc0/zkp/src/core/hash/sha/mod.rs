@@ -30,7 +30,6 @@ use core::{
 use bytemuck::{Pod, PodCastError, Zeroable};
 use hex::{FromHex, FromHexError};
 use risc0_core::field::Field;
-use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 pub use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
@@ -122,19 +121,7 @@ pub trait Sha256 {
 /// 512-bit (64-byte) chunks in a [Merkle–Damgård] construction.
 ///
 /// [Merkle–Damgård]: https://en.wikipedia.org/wiki/Merkle%E2%80%93Damg%C3%A5rd_construction
-#[derive(
-    Copy,
-    Clone,
-    Eq,
-    PartialEq,
-    Hash,
-    Pod,
-    Zeroable,
-    Serialize,
-    Deserialize,
-    ZeroioSerialize,
-    ZeroioDeserialize,
-)]
+#[derive(Copy, Clone, Eq, PartialEq, Hash, Pod, Zeroable, Serialize, Deserialize)]
 #[repr(transparent)]
 pub struct Block([u32; BLOCK_WORDS]);
 

@@ -245,24 +245,6 @@ impl FdReader {
 
         tot_read
     }
-
-    /// Read the entire stream as words.
-    ///
-    /// TODO: This is not a very efficient interface, and is only
-    /// needed for zeroio; we should evaluate zeroio and either
-    /// optimize this or remove zeroio.
-    pub fn read_words_to_end(&mut self, buf: &mut alloc::vec::Vec<u32>) {
-        const BUF_WORDS: usize = 1024;
-        loop {
-            let start = buf.len();
-            buf.resize(start + BUF_WORDS, 0);
-            let nread = self.read_bytes_all(bytemuck::cast_slice_mut(&mut buf[start..]));
-            if nread != BUF_WORDS * WORD_SIZE {
-                buf.truncate(start + nread / WORD_SIZE);
-                return;
-            }
-        }
-    }
 }
 
 impl Read for FdReader {

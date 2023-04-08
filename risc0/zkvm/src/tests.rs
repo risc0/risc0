@@ -15,7 +15,6 @@
 use std::{fmt, io::Cursor, str::from_utf8, sync::Mutex};
 
 use anyhow::Result;
-use risc0_zeroio::to_vec;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_methods::MULTI_TEST_ID;
 use risc0_zkvm_methods::{
@@ -27,7 +26,10 @@ use serial_test::serial;
 use test_log::test;
 
 use super::{Prover, ProverOpts, Receipt};
-use crate::prove::TraceEvent;
+use crate::{
+    prove::TraceEvent,
+    serde::{from_slice, to_vec},
+};
 
 #[test]
 #[serial]
@@ -598,15 +600,7 @@ fn posix_style_read() {
         );
         let receipt = prover.run().unwrap();
 
-        use risc0_zeroio::Deserialize;
-        // Ugh, journal is of u8s which might not be u32-aligned,
-        // causing bytemuck::cast_slice to fail.
-        let journal_copy: Vec<u32> = receipt
-            .journal
-            .chunks(WORD_SIZE)
-            .map(|word| u32::from_le_bytes(word.try_into().unwrap()))
-            .collect();
-        let actual = Vec::<u8>::deserialize_from(&journal_copy);
+        let actual: Vec<u8> = from_slice(&receipt.journal).unwrap();
         assert_eq!(
             std::str::from_utf8(&actual).unwrap(),
             std::str::from_utf8(&expected).unwrap(),
