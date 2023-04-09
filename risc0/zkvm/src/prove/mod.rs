@@ -83,7 +83,7 @@ use self::exec::{HostHandler, RV32Executor};
 use crate::{
     binfmt::elf::Program,
     receipt::{insecure_skip_seal, Receipt},
-    ControlId, MemoryImage, CIRCUIT, PAGE_SIZE,
+    ControlId, MemoryImage, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT, PAGE_SIZE,
 };
 
 const DEFAULT_SEGMENT_LIMIT_PO2: usize = 23; // 16M cycles
@@ -800,5 +800,19 @@ impl Debug for TraceEvent {
             Self::RegisterSet { reg, value } => write!(f, "RegisterSet({reg}, 0x{value:08X})"),
             Self::MemorySet { addr, value } => write!(f, "MemorySet(0x{addr:08X}, 0x{value:08X})"),
         }
+    }
+}
+
+impl Session {
+    /// For each segment, call [Segment::prove] and collect the receipts.
+    pub fn prove(&self) -> Result<SessionReceipt> {
+        todo!()
+    }
+}
+
+impl Segment {
+    /// Call the ZKP system to produce a [SegmentReceipt].
+    pub fn prove(&self) -> Result<SegmentReceipt> {
+        todo!()
     }
 }

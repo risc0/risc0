@@ -1,0 +1,67 @@
+// Copyright 2023 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+//! TODO
+
+use risc0_zkp::core::digest::Digest;
+
+use crate::MemoryImage;
+
+/// TODO
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum ExitCode {
+    /// TODO
+    SystemSplit,
+
+    /// TODO
+    SessionLimit,
+
+    /// TODO
+    Paused,
+
+    /// TODO
+    Halted(u32),
+}
+
+/// TODO
+pub struct Session {
+    /// TODO
+    pub segments: Vec<Segment>,
+}
+
+/// TODO
+pub struct Segment {
+    pub(crate) pre_image: MemoryImage,
+    pub(crate) post_image_id: Digest,
+    // syscall_log: SyscallLog,
+    pub(crate) exit_code: ExitCode,
+}
+
+impl Session {
+    /// TODO
+    pub fn new(segments: Vec<Segment>) -> Self {
+        Self { segments }
+    }
+}
+
+impl Segment {
+    /// TODO
+    pub fn new(pre_image: MemoryImage, post_image_id: Digest, exit_code: ExitCode) -> Self {
+        Self {
+            pre_image,
+            post_image_id,
+            exit_code,
+        }
+    }
+}

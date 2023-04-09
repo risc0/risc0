@@ -100,7 +100,7 @@ impl SyscallContext for MemoryState {
     #[track_caller]
     fn load_u8(&self, addr: u32) -> u8 {
         // debug!("load_u8: 0x{addr:08X}");
-        self.ram.borrow().image[addr as usize]
+        self.ram.borrow().buf[addr as usize]
     }
 
     #[track_caller]
@@ -133,7 +133,7 @@ impl MemoryState {
     #[track_caller]
     fn store_u8(&mut self, addr: u32, value: u8) {
         // debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
-        self.ram.borrow_mut().image[addr as usize] = value;
+        self.ram.borrow_mut().buf[addr as usize] = value;
     }
 
     #[track_caller]

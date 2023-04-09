@@ -23,12 +23,17 @@ extern crate alloc;
 #[cfg(feature = "binfmt")]
 pub mod binfmt;
 mod control_id;
+#[cfg(feature = "prove")]
+mod exec;
 #[cfg(any(target_os = "zkvm", doc))]
 pub mod guest;
+mod opcode;
 #[cfg(feature = "prove")]
 pub mod prove;
-pub mod receipt;
+mod receipt;
 pub mod serde;
+#[cfg(feature = "prove")]
+mod session;
 pub mod sha;
 #[cfg(test)]
 mod tests;
@@ -42,11 +47,15 @@ use risc0_zkp::core::hash::{
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
-pub use crate::binfmt::{elf::Program, image::MemoryImage};
-use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
+pub use self::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(feature = "prove")]
-pub use crate::prove::{loader::Loader, Prover, ProverOpts};
-pub use crate::receipt::Receipt;
+pub use self::exec::{Executor, ExecutorEnv};
+#[cfg(feature = "prove")]
+pub use self::prove::{loader::Loader, Prover, ProverOpts};
+pub use self::receipt::{Receipt, SegmentReceipt, SessionReceipt};
+#[cfg(feature = "prove")]
+pub use self::session::{ExitCode, Segment, Session};
+use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
@@ -66,4 +75,11 @@ impl ControlId for PoseidonHashFn {
 
 impl<T: Blake2b> ControlId for Blake2bHashFn<T> {
     const CONTROL_ID: RawControlId = BLAKE2B_CONTROL_ID;
+}
+
+/// Align the given address `addr` upwards to alignment `align`.
+///
+/// Requires that `align` is a power of two.
+pub fn align_up(addr: usize, align: usize) -> usize {
+    (addr + align - 1) & !(align - 1)
 }
