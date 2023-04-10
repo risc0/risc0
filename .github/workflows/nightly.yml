@@ -34,7 +34,7 @@ jobs:
       - name: Generate the profile
         run: |
           target/release/gen-profiles \
-          -r ./ \
+          -r ../../ \
           -o ${{ runner.temp }}/crate-validation/profiles.json \
           -c $TOP_N_CRATES
         working-directory: tools/crates-validator/
