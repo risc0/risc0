@@ -5,9 +5,9 @@ on:
     - cron: '7 0 * * *' # Nightly (ish) Pacific
   workflow_dispatch:
     inputs:
-    crate_count:
-      description: 'How many crates (sorted by downloads) to test'
-      default: 100
+      crate_count:
+        description: 'How many crates (sorted by downloads) to test'
+        default: 100
 
 jobs:
   crates_validate:
