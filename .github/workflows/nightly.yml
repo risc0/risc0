@@ -23,7 +23,7 @@ jobs:
           DEFAULT_CRATE_COUNT: 1000
         run: echo "TOP_N_CRATES=${{ github.event.inputs.crate_count || env.DEFAULT_CRATE_COUNT }}" >> $GITHUB_ENV
 
-      - run: cargo install --path risc0/cargo-risczero
+      - run: cargo install --force --path risc0/cargo-risczero
 
       - run: cargo build --release
         working-directory: tools/crates-validator/
