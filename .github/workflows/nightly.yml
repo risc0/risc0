@@ -8,6 +8,7 @@ on:
     crate_count:
       description: 'How many crates (sorted by downloads) to test'
       default: 100
+  pull_request:
 
 jobs:
   crates_validate:
