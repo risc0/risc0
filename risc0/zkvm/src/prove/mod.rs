@@ -187,6 +187,31 @@ cfg_if::cfg_if! {
     }
 }
 
+struct ReadToObj<'a, T: serde::de::DeserializeOwned> {
+    obj: &'a mut T,
+    buf: Vec<u8>,
+}
+
+impl<'a, T: serde::de::DeserializeOwned> Write for ReadToObj<'a, T> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.buf.write(buf)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.buf.flush()
+    }
+}
+
+impl<'a, T: serde::de::DeserializeOwned> Drop for ReadToObj<'a, T> {
+    fn drop(&mut self) {
+        let aligned: Vec<u32> = self
+            .buf
+            .chunks(WORD_SIZE)
+            .map(|b| u32::from_le_bytes(b.try_into().unwrap()))
+            .collect();
+        *self.obj = crate::serde::from_slice(&aligned).unwrap();
+    }
+}
+
 /// Options available to modify the prover's behavior.
 pub struct ProverOpts<'a> {
     skip_seal: bool,
@@ -288,17 +313,31 @@ impl<'a> ProverOpts<'a> {
     }
 
     /// Add a posix-style standard input.
-    pub fn with_stdin(mut self, reader: impl Read + 'a) -> Self {
-        self.io = self
-            .io
-            .with_read_fd(fileno::STDIN, Box::new(BufReader::new(reader)));
-        self
+    pub fn with_stdin(self, reader: impl Read + 'a) -> Self {
+        self.with_read_fd(fileno::STDIN, BufReader::new(reader))
     }
 
     /// Add a posix-style standard output.
-    pub fn with_stdout(mut self, writer: impl Write + 'a) -> Self {
-        self.io = self.io.with_write_fd(fileno::STDOUT, Box::new(writer));
-        self
+    pub fn with_stdout(self, writer: impl Write + 'a) -> Self {
+        self.with_write_fd(fileno::STDOUT, Box::new(writer))
+    }
+
+    /// Add a serialized object on standard input
+    pub fn with_stdin_obj(self, obj: impl serde::Serialize) -> Self {
+        let serialized = crate::serde::to_vec(&obj).unwrap();
+        let bytes: Vec<u8> = bytemuck::cast_slice(&serialized).to_vec();
+        self.with_stdin(Cursor::new(bytes))
+    }
+
+    /// Add an object to be deserialized from the guest's standadrd output
+    pub fn with_stdout_obj(self, obj: &'a mut impl serde::de::DeserializeOwned) -> Self {
+        self.with_write_fd(
+            fileno::STDOUT,
+            ReadToObj {
+                obj,
+                buf: Vec::new(),
+            },
+        )
     }
 
     /// Add a posix-style file descriptor for reading.

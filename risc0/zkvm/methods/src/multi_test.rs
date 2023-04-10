@@ -20,7 +20,7 @@ use alloc::vec::Vec;
 use risc0_zkvm::declare_syscall;
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 pub enum MultiTestSpec {
     DoNothing,
     ShaConforms,
@@ -31,9 +31,7 @@ pub enum MultiTestSpec {
     EventTrace,
     Profiler,
     Fail,
-    CopyToStdout {
-        fd: u32,
-    },
+    CopyToStdout,
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and
         /// output it; nonzero means write that value.

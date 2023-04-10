@@ -28,10 +28,7 @@ use risc0_zkvm::{
     sha::{Digest, Sha256},
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
-use risc0_zkvm_platform::{
-    fileno,
-    syscall::{sys_read, sys_write},
-};
+use risc0_zkvm_platform::syscall::sys_read;
 
 risc0_zkvm::entry!(main);
 
@@ -146,17 +143,8 @@ pub fn main() {
             env::pause();
             env::log("after");
         }
-        MultiTestSpec::CopyToStdout { fd } => {
-            // Unaligned buffer size to exercise things a little bit.
-            const BUF_SIZE: usize = 9;
-            let mut buf = [0u8; BUF_SIZE];
-            loop {
-                let nread = unsafe { sys_read(fd, buf.as_mut_ptr(), buf.len()) };
-                if nread == 0 {
-                    break;
-                }
-                unsafe { sys_write(fileno::STDOUT, buf.as_mut_ptr(), nread) }
-            }
+        MultiTestSpec::CopyToStdout => {
+            env::write(&impl_select);
         }
         MultiTestSpec::BusyLoop { cycles } => {
             let mut last_cycles = env::get_cycle_count();
