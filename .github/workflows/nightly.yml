@@ -64,13 +64,14 @@ jobs:
         uses: actions/checkout@master
         with:
           repository: risc0/benchmarks
-          token: ${{secrets.GITHUB_TOKEN}}
+          token: ${{ secrets.BENCHMARK_TOKEN }}
 
       - run: |
           mkdir -p dev/crate-validation/
           cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
           git add .
           git commit -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" -m "Added update at '$(date)'"
+          git remote set-url origin "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/benchmarks.git"
           git push origin main
         shell: bash
         working-directory: ./benchmarks/
