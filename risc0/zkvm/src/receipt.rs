@@ -71,10 +71,7 @@
 //! The public outputs of the [Receipt] are contained in the [Receipt::journal].
 //! We provide serialization tools in the zkVM [serde](crate::serde) module,
 //! which can be used to read data from the journal as the same type it was
-//! written to the journal. We also have a crate
-//! [zeroio](https://docs.rs/risc0-zeroio/latest/risc0_zeroio/) offering an
-//! alternative serialization approach which is more restrictive but may have
-//! better performance for some use cases. If you prefer, you can also directly
+//! written to the journal. If you prefer, you can also directly
 //! access the [Receipt::journal] as a `Vec<u8>`.
 
 use alloc::vec::Vec;
@@ -85,7 +82,6 @@ use risc0_circuit_rv32im::layout;
 #[cfg(not(target_os = "zkvm"))]
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zeroio::{Deserialize as ZeroioDeserialize, Serialize as ZeroioSerialize};
 #[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::core::hash::{sha::Sha256HashSuite, HashSuite};
 use risc0_zkp::{core::digest::Digest, layout::Buffer, verify::VerificationError, MIN_CYCLES_PO2};
@@ -140,7 +136,7 @@ pub fn insecure_skip_seal() -> bool {
 /// and the [Receipt::seal] is cryptographically opaque.
 ///
 /// See [the module-level documentation](crate::receipt) for usage examples.
-#[derive(Deserialize, Serialize, ZeroioSerialize, ZeroioDeserialize, Clone, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Receipt {
     /// The journal contains the public outputs of the computation.
     ///
