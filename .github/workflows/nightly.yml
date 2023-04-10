@@ -8,7 +8,6 @@ on:
     crate_count:
       description: 'How many crates (sorted by downloads) to test'
       default: 100
-  pull_request:
 
 jobs:
   crates_validate:
@@ -18,6 +17,7 @@ jobs:
       RUST_LOG: info
     steps:
       - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
       - name: Set the variables
         env:
           DEFAULT_CRATE_COUNT: 1000
