@@ -60,7 +60,8 @@ jobs:
           path: ${{ runner.temp }}/crate-validation/
           retention-days: 2
 
-      - run: |
+      - name: Commit results to risc0/benchmarks
+        run: |
           git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/benchmarks.git" ${{ runner.temp }}/benchmarks/
           cd ${{ runner.temp }}/benchmarks/
           cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
