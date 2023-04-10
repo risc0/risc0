@@ -43,7 +43,8 @@ jobs:
         run: |
           target/release/main \
           -p ${{ runner.temp }}/crate-validation/profiles.json \
-          -j ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+          -j ${{ runner.temp }}/crate-validation/profile-results.json
+      # &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
 
