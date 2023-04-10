@@ -43,7 +43,7 @@ jobs:
         run: |
           target/release/main \
           -p ${{ runner.temp }}/crate-validation/profiles.json \
-          -j ${{ runner.temp }}/crate-validation/profile-results.json
+          -j ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
       # &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
@@ -59,3 +59,18 @@ jobs:
           name: crates-test-results
           path: ${{ runner.temp }}/crate-validation/
           retention-days: 2
+
+      - name: Checkout benchmark repository
+        uses: actions/checkout@master
+        with:
+          repository: risc0/benchmarks
+          token: ${{ GITHUB_TOKEN }}
+
+      - run: |
+          mkdir -p dev/crate-validation/
+          cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
+          git add .
+          git commit -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" -m "Added update at '$(date)'"
+          git push origin main
+        shell: bash
+        working-directory: ./benchmarks/
