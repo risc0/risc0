@@ -39,7 +39,6 @@ tracing = { version = "0.1", default-features = false, features = ["attributes"]
 # Host dependencies
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 addr2line = { version = "0.19", optional = true }
-builder-pattern = "0.4"
 elf = { version = "0.7", optional = true }
 generic-array = { version = "0.14", default-features = false, optional = true }
 getrandom = { version = "0.2", optional = true }

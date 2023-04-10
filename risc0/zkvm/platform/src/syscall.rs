@@ -65,8 +65,7 @@ pub mod reg_abi {
     pub const REG_T4: usize = 29; // temporary
     pub const REG_T5: usize = 30; // temporary
     pub const REG_T6: usize = 31; // temporary
-    pub const REG_PC: usize = 32; // program counter
-    pub const REG_MAX: usize = 33; // maximum number of registers
+    pub const REG_MAX: usize = 32; // maximum number of registers
 }
 
 pub const DIGEST_WORDS: usize = 8;

@@ -21,7 +21,6 @@ use core::cell::RefCell;
 use anyhow::Result;
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
-use num_traits::FromPrimitive;
 use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem},
@@ -44,7 +43,10 @@ use risc0_zkvm_platform::{
 };
 
 use super::{loader::Loader, plonk, SyscallContext, TraceEvent};
-use crate::binfmt::image::{MemoryImage, PageTableInfo};
+use crate::{
+    binfmt::image::{MemoryImage, PageTableInfo},
+    opcode::{MajorType, OpCode},
+};
 
 const IMM_BITS: usize = 12;
 
@@ -149,59 +151,6 @@ impl MemoryState {
         // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
         self.store_region(addr, &value.to_le_bytes());
-    }
-}
-
-#[allow(dead_code)]
-#[derive(Debug, num_derive::FromPrimitive, PartialEq)]
-#[repr(u32)]
-enum MajorType {
-    Compute0,
-    Compute1,
-    Compute2,
-    MemIo,
-    Multiply,
-    Divide,
-    VerifyAnd,
-    VerifyDivide,
-    ECall,
-    ShaInit,
-    ShaLoad,
-    ShaMain,
-    PageFault,
-    CopyIn,
-    Halt,
-    MuxSize,
-}
-
-impl MajorType {
-    fn as_u32(self) -> u32 {
-        self as u32
-    }
-}
-
-#[derive(Debug)]
-struct OpCode {
-    mnemonic: &'static str,
-    major: MajorType,
-    minor: u32,
-}
-
-impl OpCode {
-    fn new(mnemonic: &'static str, idx: u32) -> Self {
-        Self {
-            mnemonic,
-            major: FromPrimitive::from_u32(idx / 8).unwrap(),
-            minor: idx % 8,
-        }
-    }
-
-    fn with_major_minor(mnemonic: &'static str, major: MajorType, minor: u32) -> Self {
-        Self {
-            mnemonic,
-            major,
-            minor,
-        }
     }
 }
 
@@ -334,7 +283,7 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
             }
             "getMinor" => {
                 let inst = merge_word8((args[0], args[1], args[2], args[3]));
-                let opcode = self.decode(inst);
+                let opcode = OpCode::decode(inst);
                 outs[0] = opcode.minor.into();
                 Ok(())
             }
@@ -456,7 +405,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     fn get_major(&mut self, cycle: BabyBearElem, pc: BabyBearElem) -> Result<BabyBearElem> {
         let pc: u32 = pc.into();
         let inst = self.memory.load_u32(pc);
-        let opcode = self.decode(inst);
+        let opcode = OpCode::decode(inst);
         trace!("decode: {}", opcode.mnemonic);
 
         // determine if PageFaults are needed
@@ -604,7 +553,7 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
     fn page_info(&mut self, pc: BabyBearElem) -> (BabyBearElem, BabyBearElem, BabyBearElem) {
         let pc: u32 = pc.into();
         let inst = self.memory.load_u32(pc);
-        let opcode = self.decode(inst);
+        let opcode = OpCode::decode(inst);
         let info = self.get_page_faults(pc, inst, &opcode);
 
         if self.is_flushing {
@@ -883,92 +832,6 @@ impl<'a, H: HostHandler> MachineContext<'a, H> {
             self.syscall_out_regs
         );
         Ok(self.syscall_out_regs)
-    }
-
-    fn decode(&self, word: u32) -> OpCode {
-        let opcode = word & 0x0000007f;
-        let rs2 = (word & 0x01f00000) >> 20;
-        let funct3 = (word & 0x00007000) >> 12;
-        let funct7 = (word & 0xfe000000) >> 25;
-        // debug!("decode: 0x{word:08X}");
-
-        match opcode {
-            0b0000011 => match funct3 {
-                0x0 => OpCode::new("LB", 24),
-                0x1 => OpCode::new("LH", 25),
-                0x2 => OpCode::new("LW", 26),
-                0x4 => OpCode::new("LBU", 27),
-                0x5 => OpCode::new("LHU", 28),
-                _ => unreachable!(),
-            },
-            0b0010011 => match funct3 {
-                0x0 => OpCode::new("ADDI", 7),
-                0x1 => OpCode::new("SLLI", 37),
-                0x2 => OpCode::new("SLTI", 11),
-                0x3 => OpCode::new("SLTIU", 12),
-                0x4 => OpCode::new("XORI", 8),
-                0x5 => match funct7 {
-                    0x00 => OpCode::new("SRLI", 46),
-                    0x20 => OpCode::new("SRAI", 47),
-                    _ => unreachable!(),
-                },
-                0x6 => OpCode::new("ORI", 9),
-                0x7 => OpCode::new("ANDI", 10),
-                _ => unreachable!(),
-            },
-            0b0010111 => OpCode::new("AUIPC", 22),
-            0b0100011 => match funct3 {
-                0x0 => OpCode::new("SB", 29),
-                0x1 => OpCode::new("SH", 30),
-                0x2 => OpCode::new("SW", 31),
-                _ => unreachable!(),
-            },
-            0b0110011 => match (funct3, funct7) {
-                (0x0, 0x00) => OpCode::new("ADD", 0),
-                (0x0, 0x20) => OpCode::new("SUB", 1),
-                (0x1, 0x00) => OpCode::new("SLL", 36),
-                (0x2, 0x00) => OpCode::new("SLT", 5),
-                (0x3, 0x00) => OpCode::new("SLTU", 6),
-                (0x4, 0x00) => OpCode::new("XOR", 2),
-                (0x5, 0x00) => OpCode::new("SRL", 44),
-                (0x5, 0x20) => OpCode::new("SRA", 45),
-                (0x6, 0x00) => OpCode::new("OR", 3),
-                (0x7, 0x00) => OpCode::new("AND", 4),
-                (0x0, 0x01) => OpCode::new("MUL", 32),
-                (0x1, 0x01) => OpCode::new("MULH", 33),
-                (0x2, 0x01) => OpCode::new("MULSU", 34),
-                (0x3, 0x01) => OpCode::new("MULU", 35),
-                (0x4, 0x01) => OpCode::new("DIV", 40),
-                (0x5, 0x01) => OpCode::new("DIVU", 41),
-                (0x6, 0x01) => OpCode::new("REM", 42),
-                (0x7, 0x01) => OpCode::new("REMU", 43),
-                _ => unreachable!(),
-            },
-            0b0110111 => OpCode::new("LUI", 21),
-            0b1100011 => match funct3 {
-                0x0 => OpCode::new("BEQ", 13),
-                0x1 => OpCode::new("BNE", 14),
-                0x4 => OpCode::new("BLT", 15),
-                0x5 => OpCode::new("BGE", 16),
-                0x6 => OpCode::new("BLTU", 17),
-                0x7 => OpCode::new("BGEU", 18),
-                _ => unreachable!(),
-            },
-            0b1100111 => match funct3 {
-                0x0 => OpCode::new("JALR", 20),
-                _ => unreachable!(),
-            },
-            0b1101111 => OpCode::new("JAL", 19),
-            0b1110011 => match funct3 {
-                0x0 => match (rs2, funct7) {
-                    (0x0, 0x0) => OpCode::with_major_minor("ECALL", MajorType::ECall, 0),
-                    (0x1, 0x0) => OpCode::with_major_minor("EBREAK", MajorType::ECall, 1),
-                    _ => unreachable!(),
-                },
-                _ => unreachable!(),
-            },
-            _ => panic!("Illegal opcode: 0b{opcode:07b}"),
-        }
     }
 }
 

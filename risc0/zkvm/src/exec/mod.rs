@@ -14,17 +14,15 @@
 
 //! TODO
 
+mod env;
 mod io;
+mod monitor;
 #[cfg(test)]
 mod tests;
 
-use std::{
-    array,
-    collections::{BTreeSet, HashMap},
-};
+use std::array;
 
 use anyhow::{anyhow, bail, Result};
-use builder_pattern::Builder;
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -33,29 +31,25 @@ use risc0_zkp::{
     ZK_CYCLES,
 };
 use risc0_zkvm_platform::{
-    memory::SYSTEM,
+    memory::MEM_SIZE,
     syscall::{
         ecall, halt,
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
+        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_MAX, REG_T0},
     },
     PAGE_SIZE, WORD_SIZE,
 };
 use rrs_lib::{
     instruction_executor::InstructionExecutor,
     instruction_string_outputter::InstructionStringOutputter, process_instruction, HartState,
-    MemAccessSize, Memory,
 };
 
-use self::io::{Syscall, SyscallContext};
-use crate::{align_up, binfmt::image::PageTableInfo, Loader, Segment};
+pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
+use self::monitor::MemoryMonitor;
 use crate::{
+    align_up,
     opcode::{MajorType, OpCode},
-    ExitCode, MemoryImage, Session,
+    ExitCode, Loader, MemoryImage, Program, Segment, Session,
 };
-
-const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20; // 1M cycles
-
-const DEFAULT_SESSION_LIMIT: usize = 64 * 1024 * 1024; // 64M cycles
 
 // The number of cycles required to compress a SHA-256 block.
 const SHA_CYCLES: usize = 72;
@@ -67,22 +61,6 @@ const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
 const CYCLES_PER_PAGE: usize = SHA_CYCLES * BLOCKS_PER_PAGE;
 
 /// TODO
-#[derive(Builder)]
-pub struct ExecutorEnv {
-    #[default(HashMap::new())]
-    vars: HashMap<String, String>,
-
-    #[default(DEFAULT_SEGMENT_LIMIT_PO2)]
-    segment_limit_po2: usize,
-
-    #[default(DEFAULT_SESSION_LIMIT)]
-    session_limit: usize,
-
-    #[default(HashMap::new())]
-    syscall_handlers: HashMap<String, Box<dyn Syscall>>,
-}
-
-/// TODO
 pub struct Executor {
     env: ExecutorEnv,
     pre_image: MemoryImage,
@@ -91,164 +69,8 @@ pub struct Executor {
     init_cycles: usize,
     fini_cycles: usize,
     body_cycles: usize,
-}
-
-#[derive(Eq, Ord, PartialEq, PartialOrd)]
-struct MemStore {
-    addr: u32,
-    data: u8,
-}
-
-struct MemoryMonitor {
-    image: MemoryImage,
-    faults: PageFaults,
-    pending_faults: PageFaults,
-    pending_writes: BTreeSet<MemStore>,
-}
-
-impl MemoryMonitor {
-    fn new(image: MemoryImage) -> Self {
-        Self {
-            image,
-            faults: PageFaults::new(),
-            pending_faults: PageFaults::new(),
-            pending_writes: BTreeSet::new(),
-        }
-    }
-
-    fn load_u8(&mut self, addr: u32) -> u8 {
-        let info = &self.image.info;
-        self.pending_faults.include(info, addr, IncludeDir::Read);
-        self.image.buf[addr as usize]
-    }
-
-    fn load_u16(&mut self, addr: u32) -> u16 {
-        assert_eq!(addr % 2, 0, "unaligned load");
-        u16::from_le_bytes(self.load_array(addr))
-    }
-
-    fn load_u32(&mut self, addr: u32) -> u32 {
-        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
-        u32::from_le_bytes(self.load_array(addr))
-    }
-
-    fn load_array<const N: usize>(&mut self, addr: u32) -> [u8; N] {
-        array::from_fn(|idx| self.load_u8(addr + idx as u32))
-    }
-
-    fn load_register(&mut self, idx: usize) -> u32 {
-        self.load_u32(get_register_addr(idx))
-    }
-
-    fn load_registers<const N: usize>(&mut self, idxs: [usize; N]) -> [u32; N] {
-        idxs.map(|idx| self.load_register(idx))
-    }
-
-    fn load_string(&mut self, mut addr: u32) -> Result<String> {
-        let mut s: Vec<u8> = Vec::new();
-        loop {
-            let b = self.load_u8(addr);
-            if b == 0 {
-                break;
-            }
-            s.push(b);
-            addr += 1;
-        }
-        String::from_utf8(s).map_err(anyhow::Error::msg)
-    }
-
-    fn store_u8(&mut self, addr: u32, data: u8) {
-        let info = &self.image.info;
-        self.pending_faults.include(info, addr, IncludeDir::Write);
-        self.pending_writes.insert(MemStore { addr, data });
-    }
-
-    fn store_u16(&mut self, addr: u32, data: u16) {
-        assert_eq!(addr % 2, 0, "unaligned store");
-        self.store_region(addr, &data.to_le_bytes());
-    }
-
-    fn store_u32(&mut self, addr: u32, data: u32) {
-        assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
-        self.store_region(addr, &data.to_le_bytes());
-    }
-
-    fn store_region(&mut self, addr: u32, slice: &[u8]) {
-        for i in 0..slice.len() {
-            self.store_u8(addr + i as u32, slice[i]);
-        }
-    }
-
-    fn store_register(&mut self, idx: usize, data: u32) {
-        self.store_u32(get_register_addr(idx), data);
-    }
-
-    // commit all pending activity
-    fn commit(&mut self) {
-        while let Some(op) = self.pending_writes.pop_first() {
-            self.image.buf[op.addr as usize] = op.data;
-        }
-        self.faults.append(&mut self.pending_faults);
-    }
-
-    // drop all pending activity
-    fn rollback(&mut self) {
-        self.pending_writes.clear();
-        self.pending_faults.clear();
-    }
-
-    fn total_faults(&self) -> usize {
-        let reads = self.faults.reads.union(&self.pending_faults.reads).count();
-        let writes = self
-            .faults
-            .writes
-            .union(&self.pending_faults.writes)
-            .count();
-        reads + writes
-    }
-
-    fn clear(&mut self) {
-        self.faults.clear();
-        self.pending_writes.clear();
-        self.pending_faults.clear();
-    }
-}
-
-impl Memory for MemoryMonitor {
-    fn read_mem(&mut self, addr: u32, size: MemAccessSize) -> Option<u32> {
-        match size {
-            MemAccessSize::Byte => Some(self.load_u8(addr) as u32),
-            MemAccessSize::HalfWord => Some(self.load_u16(addr) as u32),
-            MemAccessSize::Word => Some(self.load_u32(addr)),
-        }
-    }
-
-    fn write_mem(&mut self, addr: u32, size: MemAccessSize, store_data: u32) -> bool {
-        match size {
-            MemAccessSize::Byte => self.store_u8(addr, store_data as u8),
-            MemAccessSize::HalfWord => self.store_u16(addr, store_data as u16),
-            MemAccessSize::Word => self.store_u32(addr, store_data),
-        };
-        true
-    }
-}
-
-impl SyscallContext for MemoryMonitor {
-    fn get_cycle(&self) -> usize {
-        todo!()
-    }
-
-    fn load_u32(&mut self, addr: u32) -> u32 {
-        MemoryMonitor::load_u32(self, addr)
-    }
-
-    fn load_u8(&mut self, addr: u32) -> u8 {
-        MemoryMonitor::load_u8(self, addr)
-    }
-}
-
-fn get_register_addr(idx: usize) -> u32 {
-    (SYSTEM.start() + idx * WORD_SIZE) as u32
+    segment_cycle: usize,
+    session_cycle: usize,
 }
 
 #[derive(Default)]
@@ -266,8 +88,6 @@ impl OpcodeResult {
     }
 }
 
-impl ExecutorEnv {}
-
 impl Executor {
     /// TODO
     pub fn new(env: ExecutorEnv, image: MemoryImage, pc: u32) -> Self {
@@ -276,13 +96,10 @@ impl Executor {
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
 
-        let registers = core::array::from_fn(|reg| {
-            u32::from_le_bytes(
-                image.buf[SYSTEM.start() + reg * WORD_SIZE..SYSTEM.start() + (reg + 1) * WORD_SIZE]
-                    .try_into()
-                    .unwrap(),
-            )
-        });
+        let mut monitor = MemoryMonitor::new(image);
+        let all_regs: [usize; REG_MAX] = array::from_fn(|idx| idx);
+        let registers = monitor.load_registers(all_regs);
+        monitor.clear();
 
         let hart = HartState {
             registers,
@@ -293,12 +110,21 @@ impl Executor {
         Self {
             env,
             pre_image,
-            monitor: MemoryMonitor::new(image),
+            monitor,
             hart,
             init_cycles,
             fini_cycles,
             body_cycles: 0,
+            segment_cycle: init_cycles,
+            session_cycle: init_cycles,
         }
+    }
+
+    /// TODO
+    pub fn from_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Self> {
+        let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+        Ok(Self::new(env, image, program.entry))
     }
 
     /// TODO
@@ -309,14 +135,19 @@ impl Executor {
             let result = self.step()?;
             if let Some(exit_code) = result {
                 let pre_image = self.pre_image.clone();
-                self.monitor.image.hash_pages();
+                self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
                 let post_image_id = self.monitor.image.get_root();
                 let segment = Segment::new(pre_image, post_image_id, exit_code);
                 segments.push(segment);
                 match exit_code {
                     ExitCode::SystemSplit => self.split(),
                     ExitCode::SessionLimit => bail!("Session limit exceeded"),
-                    ExitCode::Paused | ExitCode::Halted(_) => {
+                    ExitCode::Paused => {
+                        log::debug!("Paused: {}", self.segment_cycle);
+                        break;
+                    }
+                    ExitCode::Halted(exit_code) => {
+                        log::debug!("Halted({exit_code}): {}", self.segment_cycle);
                         break;
                     }
                 };
@@ -327,9 +158,10 @@ impl Executor {
     }
 
     fn split(&mut self) {
-        log::debug!("SystemSplit");
+        log::debug!("SystemSplit: {}", self.segment_cycle);
         self.pre_image = self.monitor.image.clone();
         self.body_cycles = 0;
+        self.segment_cycle = self.init_cycles;
         self.monitor.clear();
     }
 
@@ -339,14 +171,17 @@ impl Executor {
         let insn = self.monitor.load_u32(insn_pc);
         let opcode = OpCode::decode(insn);
 
-        let mut outputter = InstructionStringOutputter { insn_pc };
-        let desc = process_instruction(&mut outputter, insn);
-        log::debug!(
-            "pc: 0x{:08x}, insn: 0x{:08x}, {}",
-            outputter.insn_pc,
-            insn,
-            desc.unwrap_or(opcode.mnemonic.into())
-        );
+        if log::log_enabled!(log::Level::Debug) {
+            let mut outputter = InstructionStringOutputter { insn_pc };
+            let desc = process_instruction(&mut outputter, insn);
+            log::debug!(
+                "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {}",
+                self.segment_cycle,
+                outputter.insn_pc,
+                insn,
+                desc.unwrap_or(opcode.mnemonic.into())
+            );
+        }
 
         let mut hart = HartState {
             registers: self.hart.registers,
@@ -355,7 +190,7 @@ impl Executor {
         };
 
         let op_result = if opcode.major == MajorType::ECall {
-            self.ecall()?
+            self.ecall(&mut hart)?
         } else {
             InstructionExecutor {
                 mem: &mut self.monitor,
@@ -386,6 +221,7 @@ impl Executor {
             self.hart = hart;
             self.monitor.commit();
             self.body_cycles += opcode.cycles + op_result.extra_cycles;
+            self.segment_cycle = segment_cycles;
             op_result.exit_code
         };
         Ok(exit_code)
@@ -407,8 +243,11 @@ impl Executor {
             + SHA_CYCLES
             + ZK_CYCLES;
 
-        log::debug!(
-            "body_cycles: {}, fault_cycles: {fault_cycles}, opcode_cycles: {}, total: {total_cycles}",
+        log::trace!(
+            "body_cycles: {}\
+            , fault_cycles: {fault_cycles}\
+            , opcode_cycles: {}\
+            , total: {total_cycles}",
             self.body_cycles,
             opcode.cycles,
         );
@@ -416,11 +255,11 @@ impl Executor {
         total_cycles
     }
 
-    fn ecall(&mut self) -> Result<OpcodeResult> {
+    fn ecall(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
         match self.monitor.load_register(REG_T0) {
             ecall::HALT => self.ecall_halt(),
             ecall::OUTPUT => Ok(OpcodeResult::default()),
-            ecall::SOFTWARE => self.ecall_software(),
+            ecall::SOFTWARE => self.ecall_software(hart),
             ecall::SHA => self.ecall_sha(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
@@ -481,24 +320,28 @@ impl Executor {
         Ok(OpcodeResult::new(None, SHA_CYCLES * count as usize))
     }
 
-    fn ecall_software(&mut self) -> Result<OpcodeResult> {
+    fn ecall_software(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
         let [to_guest_ptr, to_guest_words, name_ptr] =
             self.monitor.load_registers([REG_A0, REG_A1, REG_A2]);
         let syscall_name = self.monitor.load_string(name_ptr)?;
-        log::debug!("Guest called syscall {syscall_name} requesting {to_guest_words} words back");
+        log::debug!("Guest called syscall {syscall_name:?} requesting {to_guest_words} words back");
 
         let chunks = align_up(to_guest_words as usize, WORD_SIZE);
-        let mut to_guest = vec![0u32; to_guest_words as usize];
+        let mut to_guest = vec![0; to_guest_words as usize];
 
-        let (a0, a1): (u32, u32);
-        if let Some(cb) = self.env.syscall_handlers.get(&syscall_name) {
-            (a0, a1) = cb.syscall(&syscall_name, &mut self.monitor, &mut to_guest)?;
-            self.monitor
-                .store_region(to_guest_ptr, bytemuck::cast_slice(&to_guest));
-        } else {
-            bail!("Unknown syscall {syscall_name}");
-        }
+        let handler = self
+            .env
+            .syscalls
+            .inner
+            .get(&syscall_name)
+            .ok_or(anyhow!("Unknown syscall: {syscall_name:?}"))?;
+        let (a0, a1) =
+            handler
+                .borrow_mut()
+                .syscall(&syscall_name, &mut self.monitor, &mut to_guest)?;
 
+        self.monitor
+            .store_region(to_guest_ptr, bytemuck::cast_slice(&to_guest));
         self.monitor.store_register(REG_A0, a0);
         self.monitor.store_register(REG_A1, a1);
 
@@ -510,66 +353,10 @@ impl Executor {
         //     regs: (a0, a1),
         // });
 
+        hart.pc += WORD_SIZE as u32;
+
         // One cycle for the ecall cycle, then one for each chunk or
         // portion thereof then one to save output (a0, a1)
         Ok(OpcodeResult::new(None, 1 + chunks + 1))
-    }
-}
-
-struct PageFaults {
-    reads: BTreeSet<u32>,
-    writes: BTreeSet<u32>,
-}
-
-enum IncludeDir {
-    Read,
-    Write,
-}
-
-impl PageFaults {
-    pub fn new() -> Self {
-        Self {
-            reads: BTreeSet::new(),
-            writes: BTreeSet::new(),
-        }
-    }
-
-    fn include(&mut self, info: &PageTableInfo, addr: u32, dir: IncludeDir) {
-        let mut addr = addr;
-        loop {
-            let page_idx = info.get_page_index(addr);
-            let entry_addr = info.get_page_entry_addr(page_idx);
-            match dir {
-                IncludeDir::Read => self.reads.insert(page_idx),
-                IncludeDir::Write => self.writes.insert(page_idx),
-            };
-            if page_idx == info.root_idx {
-                break;
-            }
-            addr = entry_addr;
-        }
-    }
-
-    fn clear(&mut self) {
-        self.reads.clear();
-        self.writes.clear();
-    }
-
-    fn append(&mut self, rhs: &mut Self) {
-        self.reads.append(&mut rhs.reads);
-        self.writes.append(&mut rhs.writes);
-    }
-
-    #[allow(dead_code)]
-    fn dump(&self) {
-        log::debug!("PageFaultInfo");
-        log::debug!("  reads>");
-        for idx in self.reads.iter().rev() {
-            log::debug!("  0x{:08X}", idx);
-        }
-        log::debug!("  writes>");
-        for idx in self.writes.iter().rev() {
-            log::debug!("  0x{:08X}", idx);
-        }
     }
 }

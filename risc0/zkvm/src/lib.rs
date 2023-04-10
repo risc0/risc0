@@ -27,10 +27,11 @@ mod control_id;
 mod exec;
 #[cfg(any(target_os = "zkvm", doc))]
 pub mod guest;
+#[cfg(feature = "prove")]
 mod opcode;
 #[cfg(feature = "prove")]
 pub mod prove;
-mod receipt;
+pub mod receipt;
 pub mod serde;
 #[cfg(feature = "prove")]
 mod session;
@@ -49,7 +50,7 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 #[cfg(feature = "binfmt")]
 pub use self::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(feature = "prove")]
-pub use self::exec::{Executor, ExecutorEnv};
+pub use self::exec::{Executor, ExecutorEnv, ExecutorEnvBuilder};
 #[cfg(feature = "prove")]
 pub use self::prove::{loader::Loader, Prover, ProverOpts};
 pub use self::receipt::{Receipt, SegmentReceipt, SessionReceipt};
@@ -80,6 +81,6 @@ impl<T: Blake2b> ControlId for Blake2bHashFn<T> {
 /// Align the given address `addr` upwards to alignment `align`.
 ///
 /// Requires that `align` is a power of two.
-pub fn align_up(addr: usize, align: usize) -> usize {
+pub const fn align_up(addr: usize, align: usize) -> usize {
     (addr + align - 1) & !(align - 1)
 }

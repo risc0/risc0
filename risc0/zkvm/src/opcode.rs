@@ -42,6 +42,12 @@ pub struct OpCode {
     pub cycles: usize,
 }
 
+impl MajorType {
+    pub fn as_u32(self) -> u32 {
+        self as u32
+    }
+}
+
 impl OpCode {
     fn new(mnemonic: &'static str, idx: u32, cycles: usize) -> Self {
         Self {

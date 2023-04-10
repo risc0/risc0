@@ -389,7 +389,7 @@ pub struct ReceiptMetadata {}
 
 impl SessionReceipt {
     /// TODO
-    pub fn verify<D>(&self, image_id: D) -> Result<()>
+    pub fn verify<D>(&self, _image_id: D) -> Result<()>
     where
         Digest: From<D>,
     {
