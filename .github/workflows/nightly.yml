@@ -22,17 +22,36 @@ jobs:
         env:
           DEFAULT_CRATE_COUNT: 1000
         run: echo "TOP_N_CRATES=${{ github.event.inputs.crate_count || env.DEFAULT_CRATE_COUNT }}" >> $GITHUB_ENV
+
       - run: cargo install --path risc0/cargo-risczero
-      - run: cargo build --manifest-path ./tools/crates-validator/ --release
+
+      - run: cargo build --release
+        working-directory: tools/crates-validator/
+
       - name: Create working directory
         run: mkdir -p ${{ runner.temp }}/crate-validation/
+
       - name: Generate the profile
-        run: tools/crates-validator/target/release/gen-profiles -r ./ -o ${{ runner.temp }}/crate-validation/profiles.json -c $TOP_N_CRATES
+        run: |
+          target/release/gen-profiles \
+          -r ./ \
+          -o ${{ runner.temp }}/crate-validation/profiles.json \
+          -c $TOP_N_CRATES
+        working-directory: tools/crates-validator/
+
       - name: Validate profiles
-        run: tools/crates-validator/target/release/main -p ${{ runner.temp }}/crate-validation/profiles.json -j ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
-      - name: delete input profile
+        run: |
+          target/release/main \
+          -p ${{ runner.temp }}/crate-validation/profiles.json \
+          -j ${{ runner.temp }}/crate-validation/profile-results.json \
+          &> ${{ runner.temp }}/crate-validation/crate-results.log
+        working-directory: tools/crates-validator/
+
+      - name: Delete input profile
         run: rm ${{ runner.temp }}/crate-validation/profiles.json
+
       - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
+
       - name: Upload artifact results
         uses: actions/upload-artifact@v3
         with:
