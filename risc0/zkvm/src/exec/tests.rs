@@ -14,12 +14,11 @@
 
 use std::collections::BTreeMap;
 
-use risc0_zeroio::to_vec;
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
 use risc0_zkvm_platform::{PAGE_SIZE, WORD_SIZE};
 
 use super::{Executor, ExecutorEnv};
-use crate::{ExitCode, MemoryImage, Program};
+use crate::{serde::to_vec, ExitCode, MemoryImage, Program};
 
 #[test_log::test]
 fn basic() {
