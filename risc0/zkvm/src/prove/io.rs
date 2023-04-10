@@ -23,7 +23,12 @@
 //! be used to enable the handlers provided in this module.
 
 use core::{cell::RefCell, marker::PhantomData, mem::take};
-use std::{collections::BTreeMap, io::BufRead, io::Write, ops::DerefMut, rc::Rc};
+use std::{
+    collections::{BTreeMap, VecDeque},
+    io::{BufRead, Read, Write},
+    ops::DerefMut,
+    rc::Rc,
+};
 
 use anyhow::{bail, Result};
 use bytemuck::Pod;
@@ -35,6 +40,9 @@ use risc0_zkvm_platform::{
     },
     WORD_SIZE,
 };
+use serde::{de::DeserializeOwned, Serialize};
+
+use crate::serde::{to_vec, Deserializer};
 
 /// An I/O handler that returns arbitrary data to the guest. On the
 /// guest side, use `env::send_slice`, `env::recv_slice`, or
@@ -328,5 +336,125 @@ impl<'a> Syscall for Rc<PosixIo<'a>> {
 impl<'a> Default for PosixIo<'a> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+trait ObjectIoHandler<'a> {
+    fn try_from_guest(&mut self, io: &mut ObjectIo<'a>, buf: &[u8]) -> Option<usize>;
+}
+
+#[derive(Default)]
+/// TODO: Document
+pub struct ObjectIo<'a> {
+    from_guest_buf: Vec<u8>,
+    to_guest_buf: Vec<u8>,
+    handlers: VecDeque<Box<dyn ObjectIoHandler<'a> + 'a>>,
+}
+
+impl<'a> Read for ObjectIo<'a> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        let nread = std::cmp::min(buf.len(), self.to_guest_buf.len());
+        buf[..nread].clone_from_slice(&self.to_guest_buf[..nread]);
+        self.to_guest_buf.drain(..nread);
+
+        Ok(nread)
+    }
+}
+
+impl<'a> Write for ObjectIo<'a> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.from_guest_buf.extend_from_slice(buf);
+
+        let from_guest_buf = std::mem::take(&mut self.from_guest_buf);
+        let mut handler = self.handlers.pop_front().unwrap();
+        if let Some(nread) = handler.try_from_guest(self, &from_guest_buf) {
+            self.from_guest_buf = from_guest_buf[nread..].to_vec();
+        } else {
+            self.from_guest_buf = from_guest_buf;
+            self.handlers.push_front(handler);
+        }
+
+        Ok(buf.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.from_guest_buf.flush()
+    }
+}
+
+impl<'a> ObjectIo<'a> {
+    /// Creates a new ObjectIo for interacting with guest calls to env::send and
+    /// env::recv.
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    /// Queues an object to be serialized and sent to the guest.
+    pub fn write<T: Serialize>(&mut self, obj: &T) -> &mut Self {
+        let v = to_vec(obj).unwrap();
+        self.to_guest_buf.extend(bytemuck::cast_slice(&v));
+        self
+    }
+
+    /// Queues an object to be deserialized from the guest.   Calls the given
+    /// callback once it arrives. The callback is provided this ObjectIo
+    /// which it may use to queue additional sends or recvs.
+    pub fn read<T: DeserializeOwned + 'a>(
+        &mut self,
+        f: impl 'a + for<'b> FnOnce(&'b mut ObjectIo<'a>, T),
+    ) -> &mut Self {
+        self.handlers.push_back(Box::new(ObjectRecv {
+            f: Some(f),
+            phantom: PhantomData,
+        }));
+        self
+    }
+}
+
+struct ObjectRecv<'a, T: DeserializeOwned, F: for<'b> FnOnce(&'b mut ObjectIo<'a>, T)> {
+    f: Option<F>,
+    phantom: PhantomData<&'a T>,
+}
+
+impl<'a, T: DeserializeOwned, F: for<'b> FnOnce(&'b mut ObjectIo<'a>, T)> ObjectIoHandler<'a>
+    for ObjectRecv<'a, T, F>
+{
+    fn try_from_guest(&mut self, io: &mut ObjectIo<'a>, buf: &[u8]) -> Option<usize> {
+        let u32s: Vec<u32> = buf
+            .chunks_exact(WORD_SIZE)
+            .map(|b| u32::from_le_bytes(b.try_into().unwrap()))
+            .collect();
+        let mut u32_slice: &[u32] = &u32s;
+        let mut deserializer = Deserializer::new(&mut u32_slice);
+        if let Ok(obj) = T::deserialize(&mut deserializer) {
+            (self.f.take().unwrap())(io, obj);
+            let nread = WORD_SIZE * (u32s.len() - u32_slice.len());
+            Some(nread)
+        } else {
+            None
+        }
+    }
+}
+
+#[derive(Clone)]
+pub(crate) struct ObjectIoRef<'a>(pub(crate) Rc<RefCell<ObjectIo<'a>>>);
+
+impl<'a> ObjectIoRef<'a> {
+    pub fn new(io: ObjectIo<'a>) -> Self {
+        Self(Rc::new(RefCell::new(io)))
+    }
+}
+
+impl<'a> Read for ObjectIoRef<'a> {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        Read::read(&mut *(*self.0).borrow_mut(), buf)
+    }
+}
+
+impl<'a> Write for ObjectIoRef<'a> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        Write::write(&mut *(*self.0).borrow_mut(), buf)
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Write::flush(&mut *(*self.0).borrow_mut())
     }
 }

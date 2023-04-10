@@ -27,7 +27,7 @@ use test_log::test;
 
 use super::{Prover, ProverOpts, Receipt};
 use crate::{
-    prove::TraceEvent,
+    prove::{io::ObjectIo, TraceEvent},
     serde::{from_slice, to_vec},
 };
 
@@ -302,17 +302,30 @@ fn sha_cycle_count() {
 
 #[test]
 fn stdio() {
-    let spec = MultiTestSpec::CopyToStdout;
-    let mut out_spec = MultiTestSpec::DoNothing;
+    let spec = MultiTestSpec::ObjectIo;
+    let mut actual_spec = MultiTestSpec::DoNothing;
+    let msg = String::from("Hello world!");
+    let mut actual_msg = String::new();
     {
+        let mut io = ObjectIo::new();
+        // Write MultiTestSpec::ObjectIo;
+        io.write(&spec);
+        io.read(|io, obj| {
+            // Expect to receive a copy of it back out.
+            actual_spec = obj;
+            // Write an encoded string msg
+            io.write(&msg);
+            // Expect to receive that string message echoed back.
+            io.read(|_, some_str| actual_msg = some_str);
+        });
         let opts = ProverOpts::default()
             .with_skip_seal(true)
-            .with_stdin_obj(&spec)
-            .with_stdout_obj(&mut out_spec);
+            .with_object_io(io);
         let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
         prover.run().unwrap();
     }
-    assert_eq!(&spec, &out_spec);
+    assert_eq!(&spec, &actual_spec);
+    assert_eq!(&msg, &actual_msg);
 }
 
 #[test]

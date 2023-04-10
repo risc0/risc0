@@ -82,6 +82,7 @@ use risc0_zkvm_platform::{
 use self::exec::{HostHandler, RV32Executor};
 use crate::{
     binfmt::elf::Program,
+    prove::io::ObjectIo,
     receipt::{insecure_skip_seal, Receipt},
     ControlId, MemoryImage, CIRCUIT, PAGE_SIZE,
 };
@@ -322,11 +323,11 @@ impl<'a> ProverOpts<'a> {
         self.with_write_fd(fileno::STDOUT, Box::new(writer))
     }
 
-    /// Add a serialized object on standard input
-    pub fn with_stdin_obj(self, obj: impl serde::Serialize) -> Self {
-        let serialized = crate::serde::to_vec(&obj).unwrap();
-        let bytes: Vec<u8> = bytemuck::cast_slice(&serialized).to_vec();
-        self.with_stdin(Cursor::new(bytes))
+    /// Transfer serialized objects to/from the guest on standard input/output.
+    /// The guest can use env::recv and end::send to interact with the host.
+    pub fn with_object_io(self, io: ObjectIo<'a>) -> Self {
+        let io = crate::prove::io::ObjectIoRef::new(io);
+        self.with_stdin(io.clone()).with_stdout(io.clone())
     }
 
     /// Add an object to be deserialized from the guest's standadrd output

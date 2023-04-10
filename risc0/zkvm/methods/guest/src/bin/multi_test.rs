@@ -18,7 +18,7 @@
 #![no_std]
 
 extern crate alloc;
-use alloc::vec;
+use alloc::{string::String, vec};
 use core::arch::asm;
 
 use getrandom::getrandom;
@@ -143,8 +143,10 @@ pub fn main() {
             env::pause();
             env::log("after");
         }
-        MultiTestSpec::CopyToStdout => {
+        MultiTestSpec::ObjectIo => {
             env::write(&impl_select);
+            let msg: String = env::read();
+            env::write(&msg);
         }
         MultiTestSpec::BusyLoop { cycles } => {
             let mut last_cycles = env::get_cycle_count();
