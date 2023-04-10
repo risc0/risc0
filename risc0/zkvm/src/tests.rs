@@ -301,6 +301,24 @@ fn sha_cycle_count() {
 }
 
 #[test]
+fn stdio() {
+    const MSG: &str = "Hello world!  This is a test of standard input and output.";
+    const FD: u32 = 123;
+    let mut stdout: Vec<u8> = Vec::new();
+    {
+        let spec = &to_vec(&MultiTestSpec::CopyToStdout { fd: FD }).unwrap();
+        let opts = ProverOpts::default()
+            .with_skip_seal(true)
+            .with_read_fd(FD, MSG.as_bytes())
+            .with_stdin(bytemuck::cast_slice(&spec))
+            .with_stdout(&mut stdout);
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
+        prover.run().unwrap();
+    }
+    assert_eq!(MSG, core::str::from_utf8(&stdout).unwrap());
+}
+
+#[test]
 fn test_poseidon_proof() {
     use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
 

@@ -31,6 +31,9 @@ pub enum MultiTestSpec {
     EventTrace,
     Profiler,
     Fail,
+    CopyToStdout {
+        fd: u32,
+    },
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and
         /// output it; nonzero means write that value.

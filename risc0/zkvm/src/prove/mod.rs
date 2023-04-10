@@ -287,11 +287,17 @@ impl<'a> ProverOpts<'a> {
         self
     }
 
-    /// Add a posix-style file descriptor for reading
+    /// Add a posix-style standard input.
     pub fn with_stdin(mut self, reader: impl Read + 'a) -> Self {
         self.io = self
             .io
             .with_read_fd(fileno::STDIN, Box::new(BufReader::new(reader)));
+        self
+    }
+
+    /// Add a posix-style standard output.
+    pub fn with_stdout(mut self, writer: impl Write + 'a) -> Self {
+        self.io = self.io.with_write_fd(fileno::STDOUT, Box::new(writer));
         self
     }
 
