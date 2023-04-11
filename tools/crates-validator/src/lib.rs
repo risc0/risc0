@@ -56,30 +56,38 @@ impl ValidationResults {
 pub struct CrateProfile {
     /// Crate name
     pub name: String,
+
     /// Crate version
     pub version: Option<String>,
+
     /// Does the crate need 'std' feature
     pub std: bool,
+
     /// Inject a custom main() body
     ///
     /// # Example
     /// `println!("hello world");`
     pub custom_main: Option<String>,
+
     /// Inject a top level scope string, like a `use` statement.
     ///
     /// # Example
     /// `use lazy_static::lazy_static;`
     pub import_str: Option<String>,
+
     /// Toggle running the prover to test the guest crate
     #[serde(default = "bool::default")]
     pub run_prover: bool,
+
     /// Expect that build | run steps should fail
     #[serde(default = "bool::default")]
     pub should_fail: bool,
+
     /// Toggles if we should inject CC flags
     ///
     /// Reference: https://github.com/risc0/risc0/issues/443
     pub inject_cc_flags: bool,
+
     /// Toggles injecting a crossbeam atomics fix
     ///
     /// Reference: https://github.com/risc0/risc0/issues/444
@@ -87,6 +95,9 @@ pub struct CrateProfile {
 
     /// Validation results
     pub results: Option<ValidationResults>,
+
+    /// Flag to represent if this profile has been customized
+    pub customized: bool,
 }
 
 /// Top level profile config
@@ -152,6 +163,8 @@ const CROSSBEAM_PATCH: &str = r#"
 crossbeam = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
 crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }
 crossbeam-channel = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }"#;
+
+const MAX_ERROR_LINES: u64 = 200;
 
 pub struct Validator {
     pub context: ProfileConfig,
@@ -362,7 +375,7 @@ impl Validator {
     }
 
     // Builds the template project
-    fn build_project(&self, profile: &CrateProfile, working_dir: &Path) -> Result<bool> {
+    fn build_project(&self, profile: &CrateProfile, working_dir: &Path) -> Result<(bool, String)> {
         debug!(
             "building {} - {}",
             profile.name,
@@ -405,12 +418,19 @@ impl Validator {
         let status = output.status;
         let res = if status.success() || (!status.success() && profile.should_fail) {
             info!("{} - build - SUCCESS", profile.name);
-            true
+            (true, String::new())
         } else {
             // Write out the build log to stderr
             // TODO: Capture and analyze this log for common classes of errors?
             let reader = BufReader::new(guest_log_file);
+            let mut build_log_trimmed = String::new();
+            let mut count = 0;
             for line in reader.lines().flatten() {
+                if count < MAX_ERROR_LINES {
+                    build_log_trimmed += &line;
+                    build_log_trimmed += "\n";
+                    count += 1;
+                }
                 writeln!(std::io::stderr(), "{line}")?;
             }
 
@@ -418,7 +438,7 @@ impl Validator {
             std::io::stderr().write_all(&output.stderr).unwrap();
 
             error!("{} - build - FAILED", profile.name);
-            false
+            (false, build_log_trimmed)
         };
 
         Ok(res)
@@ -468,9 +488,12 @@ impl Validator {
         }
         let working_dir = self.gen_initial_project(profile)?;
         self.customize_guest(profile, &working_dir)?;
-        if !self.build_project(profile, &working_dir)? {
-            // TODO: push in the build errors ...
-            profile.results = Some(ValidationResults::from(RunStatus::BuildFail));
+        let (build_success, build_errors) = self.build_project(profile, &working_dir)?;
+        if !build_success {
+            profile.results = Some(ValidationResults {
+                status: RunStatus::BuildFail,
+                build_errors: Some(build_errors),
+            });
             return Ok(());
         }
         if profile.run_prover && !self.run_prover(profile, &working_dir)? {

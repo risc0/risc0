@@ -21,6 +21,7 @@ pub const SKIP_CRATES: &[&str] = &[
 ];
 
 pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile {
+    profile.customized = true;
     match crate_name {
         "lazy_static" => {
             profile.std = true;
@@ -57,7 +58,7 @@ pub fn lookup_crate(crate_name: &str, mut profile: CrateProfile) -> CrateProfile
         | "multimap" | "tower" | "serde_cbor" | "md-5" | "tinytemplate" | "cargo_metadata"
         | "serde_bytes" | "tungstenite" | "tracing-serde" | "sha3" | "string_cache"
         | "serde_with" | "headers" | "hyper-timeout" => profile.std = true,
-        _ => (),
+        _ => profile.customized = false,
     }
     profile
 }
