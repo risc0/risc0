@@ -32,6 +32,7 @@ pub(super) struct MemoryMonitor {
     faults: PageFaults,
     pending_faults: PageFaults,
     pending_writes: BTreeSet<MemStore>,
+    cycle: usize,
 }
 
 impl MemoryMonitor {
@@ -41,6 +42,7 @@ impl MemoryMonitor {
             faults: PageFaults::new(),
             pending_faults: PageFaults::new(),
             pending_writes: BTreeSet::new(),
+            cycle: 0,
         }
     }
 
@@ -102,9 +104,10 @@ impl MemoryMonitor {
     }
 
     pub fn store_region(&mut self, addr: u32, slice: &[u8]) {
-        for i in 0..slice.len() {
-            self.store_u8(addr + i as u32, slice[i]);
-        }
+        slice
+            .iter()
+            .enumerate()
+            .for_each(|(i, x)| self.store_u8(addr + i as u32, *x));
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {
@@ -112,11 +115,13 @@ impl MemoryMonitor {
     }
 
     // commit all pending activity
-    pub fn commit(&mut self) {
-        while let Some(op) = self.pending_writes.pop_first() {
+    pub fn commit(&mut self, cycle: usize) {
+        for op in self.pending_writes.iter() {
             self.image.buf[op.addr as usize] = op.data;
         }
+        self.pending_writes.clear();
         self.faults.append(&mut self.pending_faults);
+        self.cycle = cycle;
     }
 
     // drop all pending activity
@@ -163,7 +168,7 @@ impl Memory for MemoryMonitor {
 
 impl SyscallContext for MemoryMonitor {
     fn get_cycle(&self) -> usize {
-        todo!()
+        self.cycle
     }
 
     fn load_u32(&mut self, addr: u32) -> u32 {

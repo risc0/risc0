@@ -18,10 +18,14 @@ use std::{
     cell::RefCell,
     collections::{BTreeMap, HashMap},
     io::{stderr, stdin, stdout, BufRead, BufReader, Write},
+    marker::PhantomData,
+    mem::take,
+    ops::DerefMut,
     rc::Rc,
 };
 
 use anyhow::{bail, Result};
+use bytemuck::Pod;
 use risc0_zkvm_platform::{
     fileno,
     memory::SYSTEM,
@@ -84,21 +88,128 @@ pub trait SyscallContext {
     }
 }
 
-/// Posix-style I/O
-#[derive(Clone)]
-pub struct PosixIo {
-    read_fds: BTreeMap<u32, Rc<RefCell<dyn BufRead>>>,
-    write_fds: BTreeMap<u32, Rc<RefCell<dyn Write>>>,
+/// An I/O handler that returns arbitrary data to the guest. On the
+/// guest side, use `env::send_slice`, `env::recv_slice`, or
+/// `end::send_recv_slice`.
+///
+/// When activated as a SyscallHandler, the SyscallHandler expects two
+/// calls. The first call returns (nelem, _) indicating how many
+/// elements are to be sent back to the guest, and the second call
+/// actually returns the elements after the guest allocates space.
+pub trait SliceIo: Sized {
+    /// Type for data received from guest
+    type FromGuest: Pod;
+    /// Type for data sent to guest
+    type ToGuest: Pod;
+    /// Host side I/O handling
+    ///
+    /// Whatever data the guest sent is received by this function in
+    /// `from_guest`, and this function is to return the data the host is
+    /// sending to the guest.
+
+    fn handle_io(&self, syscall: &str, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest>;
+
+    /// Makes a Syscall handler for this SliceIo definition.g
+    fn to_syscall(self) -> SliceIoSyscall<Self> {
+        SliceIoSyscall::new(self)
+    }
 }
 
-impl PosixIo {
-    pub fn with_read_fd(&mut self, fd: u32, reader: Rc<RefCell<dyn BufRead>>) -> &mut Self {
-        self.read_fds.insert(fd, reader);
+/// A wrapper around a SliceIo that exposes it as a Syscall handler.
+pub struct SliceIoSyscall<H: SliceIo> {
+    handler: H,
+    stored_result: RefCell<Option<Vec<H::ToGuest>>>,
+}
+
+impl<H: SliceIo> SliceIoSyscall<H> {
+    /// Wraps the given SliceIo into a SliceIoSyscall.
+    pub fn new(handler: H) -> Self {
+        Self {
+            handler,
+            stored_result: RefCell::new(None),
+        }
+    }
+}
+
+impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
+    fn syscall(
+        &mut self,
+        syscall: &str,
+        ctx: &mut dyn SyscallContext,
+        to_guest: &mut [u32],
+    ) -> Result<(u32, u32)> {
+        let mut stored_result = self.stored_result.borrow_mut();
+        let buf_ptr = ctx.load_register(REG_A3);
+        let buf_len = ctx.load_register(REG_A4);
+        let from_guest_bytes = ctx.load_region(buf_ptr, buf_len);
+        let from_guest: &[H::FromGuest] = bytemuck::cast_slice(from_guest_bytes.as_slice());
+        match take(stored_result.deref_mut()) {
+            None => {
+                // First call of pair.  Send the data from the guest to the SliceIo
+                // and save what it returns.
+                assert_eq!(to_guest.len(), 0);
+                let from_guest: &[H::FromGuest] = bytemuck::cast_slice(from_guest);
+                let result = self.handler.handle_io(syscall, from_guest);
+                let len = result.len();
+                *stored_result = Some(result);
+                Ok((len as u32, 0))
+            }
+            Some(stored) => {
+                // Second call of pair.  We already have data to send
+                // to the guest; send it to the buffer that the guest
+                // allocated.
+                let stored_bytes: &[u8] = bytemuck::cast_slice(stored.as_slice());
+                let to_guest_bytes: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
+                if core::mem::size_of::<H::ToGuest>() < WORD_SIZE {
+                    assert!(stored_bytes.len() <= to_guest_bytes.len());
+                    assert!(stored_bytes.len() + WORD_SIZE > to_guest_bytes.len());
+                } else {
+                    assert!(to_guest_bytes.len() >= stored_bytes.len());
+                }
+                to_guest_bytes[..stored_bytes.len()].clone_from_slice(stored_bytes);
+                Ok((0, 0))
+            }
+        }
+    }
+}
+
+/// Generates a Syscall from a simple slice function
+pub fn slice_io_from_fn<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>>(f: F) -> impl SliceIo {
+    FnWrapper {
+        f,
+        phantom: PhantomData,
+    }
+}
+
+struct FnWrapper<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>> {
+    f: F,
+    phantom: PhantomData<(T, U)>,
+}
+
+impl<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>> SliceIo for FnWrapper<T, U, F> {
+    type FromGuest = T;
+    type ToGuest = U;
+
+    fn handle_io(&self, _syscall: &str, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest> {
+        (self.f)(from_guest)
+    }
+}
+
+/// Posix-style I/O
+#[derive(Clone)]
+pub struct PosixIo<'a> {
+    read_fds: BTreeMap<u32, Rc<RefCell<dyn BufRead + 'a>>>,
+    write_fds: BTreeMap<u32, Rc<RefCell<dyn Write + 'a>>>,
+}
+
+impl<'a> PosixIo<'a> {
+    pub fn with_read_fd(&mut self, fd: u32, reader: impl BufRead + 'a) -> &mut Self {
+        self.read_fds.insert(fd, Rc::new(RefCell::new(reader)));
         self
     }
 
-    pub fn with_write_fd(&mut self, fd: u32, writer: Rc<RefCell<dyn Write>>) -> &mut Self {
-        self.write_fds.insert(fd, writer);
+    pub fn with_write_fd(&mut self, fd: u32, writer: impl Write + 'a) -> &mut Self {
+        self.write_fds.insert(fd, Rc::new(RefCell::new(writer)));
         self
     }
 
@@ -196,23 +307,20 @@ impl PosixIo {
     }
 }
 
-impl Default for PosixIo {
+impl<'a> Default for PosixIo<'a> {
     fn default() -> Self {
         let mut new = Self {
             read_fds: Default::default(),
             write_fds: Default::default(),
         };
-        new.with_read_fd(
-            fileno::STDIN,
-            Rc::new(RefCell::new(BufReader::new(stdin()))),
-        )
-        .with_write_fd(fileno::STDOUT, Rc::new(RefCell::new(stdout())))
-        .with_write_fd(fileno::STDERR, Rc::new(RefCell::new(stderr())));
+        new.with_read_fd(fileno::STDIN, BufReader::new(stdin()))
+            .with_write_fd(fileno::STDOUT, stdout())
+            .with_write_fd(fileno::STDERR, stderr());
         new
     }
 }
 
-impl Syscall for PosixIo {
+impl<'a> Syscall for PosixIo<'a> {
     fn syscall(
         &mut self,
         syscall: &str,
@@ -232,7 +340,7 @@ impl Syscall for PosixIo {
     }
 }
 
-impl Syscall for Rc<RefCell<PosixIo>> {
+impl<'a> Syscall for Rc<RefCell<PosixIo<'a>>> {
     fn syscall(
         &mut self,
         syscall: &str,
@@ -244,29 +352,26 @@ impl Syscall for Rc<RefCell<PosixIo>> {
 }
 
 #[derive(Clone)]
-pub(crate) struct SyscallTable {
-    pub(crate) inner: HashMap<String, Rc<RefCell<dyn Syscall>>>,
+pub(crate) struct SyscallTable<'a> {
+    pub(crate) inner: HashMap<String, Rc<RefCell<dyn Syscall + 'a>>>,
 }
 
-impl Default for SyscallTable {
+impl<'a> Default for SyscallTable<'a> {
     fn default() -> Self {
         let mut new = Self {
             inner: Default::default(),
         };
-        new.with_syscall(SYS_CYCLE_COUNT, Rc::new(RefCell::new(syscalls::CycleCount)))
-            .with_syscall(SYS_LOG, Rc::new(RefCell::new(syscalls::Log)))
-            .with_syscall(SYS_PANIC, Rc::new(RefCell::new(syscalls::Panic)));
+        new.with_syscall(SYS_CYCLE_COUNT, syscalls::CycleCount)
+            .with_syscall(SYS_LOG, syscalls::Log)
+            .with_syscall(SYS_PANIC, syscalls::Panic);
         new
     }
 }
 
-impl SyscallTable {
-    pub fn with_syscall(
-        &mut self,
-        syscall: SyscallName,
-        handler: Rc<RefCell<dyn Syscall>>,
-    ) -> &mut Self {
-        self.inner.insert(syscall.as_str().to_string(), handler);
+impl<'a> SyscallTable<'a> {
+    pub fn with_syscall(&mut self, syscall: SyscallName, handler: impl Syscall + 'a) -> &mut Self {
+        self.inner
+            .insert(syscall.as_str().to_string(), Rc::new(RefCell::new(handler)));
         self
     }
 }

@@ -12,9 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
+use std::{collections::BTreeMap, sync::Mutex};
 
-use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF};
+use risc0_zkvm_methods::{
+    multi_test::{MultiTestSpec, SYS_MULTI_TEST},
+    MULTI_TEST_ELF,
+};
 use risc0_zkvm_platform::{PAGE_SIZE, WORD_SIZE};
 
 use super::{Executor, ExecutorEnv};
@@ -87,12 +90,80 @@ fn system_split() {
 }
 
 #[test_log::test]
-fn sha_accel() {
+fn host_syscall() {
+    let expected: Vec<Vec<u8>> = vec![
+        "".into(),
+        "H".into(),
+        "He".into(),
+        "Hel".into(),
+        "Hell".into(),
+        "Hello".into(),
+    ];
+    let input = to_vec(&MultiTestSpec::Syscall {
+        count: expected.len() as u32 - 1,
+    })
+    .unwrap();
+    let actual: Mutex<Vec<Vec<u8>>> = Vec::new().into();
     let env = ExecutorEnv::default()
-        .add_input(&to_vec(&MultiTestSpec::ShaConforms).unwrap())
+        .add_input(&input)
+        .io_callback(SYS_MULTI_TEST, |buf: &[u8]| -> Vec<u8> {
+            let mut actual = actual.lock().unwrap();
+            actual.push(buf.into());
+            expected[actual.len()].clone()
+        })
         .build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
+    assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
+}
+
+// Make sure panics in the callback get propagated correctly.
+#[test_log::test]
+#[should_panic(expected = "I am panicking from here!")]
+fn host_syscall_callback_panic() {
+    let input = to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap();
+    let env = ExecutorEnv::default()
+        .add_input(&input)
+        .io_callback(SYS_MULTI_TEST, |_buf: &[u8]| -> Vec<u8> {
+            panic!("I am panicking from here!");
+        })
+        .build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run().unwrap();
+}
+
+#[test_log::test]
+fn sha_accel() {
+    let input = to_vec(&MultiTestSpec::ShaConforms).unwrap();
+    let env = ExecutorEnv::default().add_input(&input).build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run().unwrap();
+}
+
+#[test_log::test]
+fn sha_cycle_count() {
+    let input = to_vec(&MultiTestSpec::ShaCycleCount).unwrap();
+    let env = ExecutorEnv::default().add_input(&input).build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run().unwrap();
+}
+
+#[test_log::test]
+fn stdio() {
+    const MSG: &str = "Hello world!  This is a test of standard input and output.";
+    const FD: u32 = 123;
+    let spec = to_vec(&MultiTestSpec::CopyToStdout { fd: FD }).unwrap();
+    let mut stdout: Vec<u8> = Vec::new();
+    {
+        let env = ExecutorEnv::default()
+            .read_fd(FD, MSG.as_bytes())
+            .stdin(bytemuck::cast_slice(&spec))
+            .stdout(&mut stdout)
+            .build();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        exec.run().unwrap();
+    }
+    assert_eq!(MSG, core::str::from_utf8(&stdout).unwrap());
 }
 
 // These tests come from:

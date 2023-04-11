@@ -15,10 +15,8 @@
 //! TODO
 
 use std::{
-    cell::RefCell,
     collections::HashMap,
-    io::{BufRead, Cursor, Write},
-    rc::Rc,
+    io::{BufRead, BufReader, Cursor, Read, Write},
 };
 
 use bytemuck::Pod;
@@ -30,7 +28,7 @@ use risc0_zkvm_platform::{
     },
 };
 
-use super::io::{syscalls, PosixIo, Syscall, SyscallTable};
+use super::io::{slice_io_from_fn, syscalls, PosixIo, SliceIo, Syscall, SyscallTable};
 
 const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20; // 1M cycles
 
@@ -38,29 +36,29 @@ const DEFAULT_SESSION_LIMIT: usize = 64 * 1024 * 1024; // 64M cycles
 
 /// TODO
 #[derive(Clone)]
-pub struct ExecutorEnvBuilder {
-    inner: ExecutorEnv,
+pub struct ExecutorEnvBuilder<'a> {
+    inner: ExecutorEnv<'a>,
 }
 
 /// TODO
 #[derive(Clone)]
-pub struct ExecutorEnv {
+pub struct ExecutorEnv<'a> {
     pub(crate) env_vars: HashMap<String, String>,
     pub(crate) segment_limit_po2: usize,
     pub(crate) session_limit: usize,
-    pub(crate) syscalls: SyscallTable,
-    pub(crate) io: PosixIo,
+    pub(crate) syscalls: SyscallTable<'a>,
+    pub(crate) io: PosixIo<'a>,
     input: Vec<u8>,
 }
 
-impl ExecutorEnv {
+impl<'a> ExecutorEnv<'a> {
     /// TODO
-    pub fn default() -> ExecutorEnvBuilder {
+    pub fn default() -> ExecutorEnvBuilder<'a> {
         ExecutorEnvBuilder::default()
     }
 }
 
-impl Default for ExecutorEnvBuilder {
+impl<'a> Default for ExecutorEnvBuilder<'a> {
     fn default() -> Self {
         Self {
             inner: ExecutorEnv {
@@ -75,21 +73,22 @@ impl Default for ExecutorEnvBuilder {
     }
 }
 
-impl ExecutorEnvBuilder {
+impl<'a> ExecutorEnvBuilder<'a> {
     /// TODO
-    pub fn build(&mut self) -> ExecutorEnv {
-        let mut new = self.clone();
-        let getenv = Rc::new(RefCell::new(syscalls::Getenv(self.inner.env_vars.clone())));
-        if !new.inner.input.is_empty() {
-            let reader = Rc::new(RefCell::new(Cursor::new(new.inner.input.clone())));
-            new.inner.io.with_read_fd(fileno::STDIN, reader);
+    pub fn build(&mut self) -> ExecutorEnv<'a> {
+        let mut result = self.clone();
+        let getenv = syscalls::Getenv(self.inner.env_vars.clone());
+        if !self.inner.input.is_empty() {
+            let reader = Cursor::new(self.inner.input.clone());
+            result.inner.io.with_read_fd(fileno::STDIN, reader);
         }
-        let io = Rc::new(RefCell::new(new.inner.io.clone()));
-        new.syscall(SYS_GETENV, getenv)
+        let io = result.inner.io.clone();
+        result
+            .syscall(SYS_GETENV, getenv)
             .syscall(SYS_READ, io.clone())
             .syscall(SYS_READ_AVAIL, io.clone())
             .syscall(SYS_WRITE, io);
-        new.inner
+        result.inner.clone()
     }
 
     /// TODO
@@ -127,45 +126,50 @@ impl ExecutorEnvBuilder {
     }
 
     /// Add a handler for a raw syscall implementation.
-    pub fn syscall(
-        &mut self,
-        syscall: SyscallName,
-        handler: Rc<RefCell<dyn Syscall>>,
-    ) -> &mut Self {
-        self.inner
-            .syscalls
-            .inner
-            .insert(syscall.as_str().to_string(), handler);
+    pub fn syscall(&mut self, syscall: SyscallName, handler: impl Syscall + 'a) -> &mut Self {
+        self.inner.syscalls.with_syscall(syscall, handler);
         self
     }
 
-    /// Add a posix-style file descriptor for reading
-    pub fn stdin(&mut self, reader: Rc<RefCell<dyn BufRead>>) -> &mut Self {
-        self.inner.io.with_read_fd(fileno::STDIN, reader);
-        self
+    /// Add a posix-style standard input.
+    pub fn stdin(&mut self, reader: impl Read + 'a) -> &mut Self {
+        self.read_fd(fileno::STDIN, BufReader::new(reader))
+    }
+
+    /// Add a posix-style standard output.
+    pub fn stdout(&mut self, writer: impl Write + 'a) -> &mut Self {
+        self.write_fd(fileno::STDOUT, writer)
     }
 
     /// Add a posix-style file descriptor for reading.
-    pub fn read_fd(&mut self, fd: u32, reader: Rc<RefCell<dyn BufRead>>) -> &mut Self {
+    pub fn read_fd(&mut self, fd: u32, reader: impl BufRead + 'a) -> &mut Self {
         self.inner.io.with_read_fd(fd, reader);
         self
     }
 
     /// Add a posix-style file descriptor for writing.
-    pub fn write_fd(&mut self, fd: u32, writer: Rc<RefCell<dyn Write>>) -> &mut Self {
+    pub fn write_fd(&mut self, fd: u32, writer: impl Write + 'a) -> &mut Self {
         self.inner.io.with_write_fd(fd, writer);
         self
     }
 
-    // pub fn slice_io(self, syscall: SyscallName, handler: impl SliceIo + 'a)
-    // -> Self { self.with_syscall(syscall, handler.to_syscall())
-    // }
+    /// Add a handler for a syscall which inputs and outputs a slice
+    /// of plain old data. The guest can call these by invoking
+    /// `risc0_zkvm::guest::env::send_recv_slice`
+    pub fn slice_io(&mut self, syscall: SyscallName, handler: impl SliceIo + 'a) -> &mut Self {
+        self.syscall(syscall, handler.to_syscall());
+        self
+    }
 
-    // pub fn sendrecv_callback(
-    //     self,
-    //     syscall: SyscallName,
-    //     f: impl Fn(&[u8]) -> Vec<u8> + 'a,
-    // ) -> Self {
-    //     self.with_slice_io(syscall, io::slice_io_from_fn(f))
-    // }
+    /// Add a handler for a syscall which inputs and outputs a slice
+    /// of plain old data. The guest can call these callbacks by
+    /// invoking `risc0_zkvm::guest::env::send_recv_slice`.
+    pub fn io_callback(
+        &mut self,
+        syscall: SyscallName,
+        f: impl Fn(&[u8]) -> Vec<u8> + 'a,
+    ) -> &mut Self {
+        self.slice_io(syscall, slice_io_from_fn(f));
+        self
+    }
 }

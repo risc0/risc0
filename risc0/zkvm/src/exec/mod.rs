@@ -26,7 +26,7 @@ use anyhow::{anyhow, bail, Result};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
-        hash::sha::BLOCK_BYTES,
+        hash::sha::{BLOCK_BYTES, BLOCK_WORDS},
     },
     ZK_CYCLES,
 };
@@ -61,8 +61,8 @@ const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
 const CYCLES_PER_PAGE: usize = SHA_CYCLES * BLOCKS_PER_PAGE;
 
 /// TODO
-pub struct Executor {
-    env: ExecutorEnv,
+pub struct Executor<'a> {
+    env: ExecutorEnv<'a>,
     pre_image: MemoryImage,
     monitor: MemoryMonitor,
     hart: HartState,
@@ -88,9 +88,9 @@ impl OpcodeResult {
     }
 }
 
-impl Executor {
+impl<'a> Executor<'a> {
     /// TODO
-    pub fn new(env: ExecutorEnv, image: MemoryImage, pc: u32) -> Self {
+    pub fn new(env: ExecutorEnv<'a>, image: MemoryImage, pc: u32) -> Self {
         let pre_image = image.clone();
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
@@ -121,7 +121,7 @@ impl Executor {
     }
 
     /// TODO
-    pub fn from_elf(env: ExecutorEnv, elf: &[u8]) -> Result<Self> {
+    pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32);
         Ok(Self::new(env, image, program.entry))
@@ -219,9 +219,11 @@ impl Executor {
             Some(ExitCode::SystemSplit)
         } else {
             self.hart = hart;
-            self.monitor.commit();
             self.body_cycles += opcode.cycles + op_result.extra_cycles;
+            let delta = segment_cycles - self.segment_cycle;
             self.segment_cycle = segment_cycles;
+            self.session_cycle += delta;
+            self.monitor.commit(self.session_cycle);
             op_result.exit_code
         };
         Ok(exit_code)
@@ -258,9 +260,9 @@ impl Executor {
     fn ecall(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
         match self.monitor.load_register(REG_T0) {
             ecall::HALT => self.ecall_halt(),
-            ecall::OUTPUT => Ok(OpcodeResult::default()),
+            ecall::OUTPUT => self.ecall_output(hart),
             ecall::SOFTWARE => self.ecall_software(hart),
-            ecall::SHA => self.ecall_sha(),
+            ecall::SHA => self.ecall_sha(hart),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }
@@ -276,7 +278,13 @@ impl Executor {
         Ok(OpcodeResult::new(Some(exit_code), 0))
     }
 
-    fn ecall_sha(&mut self) -> Result<OpcodeResult> {
+    fn ecall_output(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
+        log::debug!("ecall(output)");
+        hart.pc += WORD_SIZE as u32;
+        Ok(OpcodeResult::default())
+    }
+
+    fn ecall_sha(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
         let [out_state_ptr, in_state_ptr, mut block1_ptr, mut block2_ptr, count] = self
             .monitor
             .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
@@ -289,7 +297,7 @@ impl Executor {
 
         log::debug!("Initial sha state: {state:08x?}");
         for _ in 0..count {
-            let mut block = [0u32; DIGEST_WORDS * 2];
+            let mut block = [0u32; BLOCK_WORDS];
             for i in 0..DIGEST_WORDS {
                 block[i] = self.monitor.load_u32(block1_ptr + (i * WORD_SIZE) as u32);
             }
@@ -316,6 +324,7 @@ impl Executor {
 
         self.monitor
             .store_region(out_state_ptr, bytemuck::cast_slice(&state));
+        hart.pc += WORD_SIZE as u32;
 
         Ok(OpcodeResult::new(None, SHA_CYCLES * count as usize))
     }
@@ -342,8 +351,8 @@ impl Executor {
 
         self.monitor
             .store_region(to_guest_ptr, bytemuck::cast_slice(&to_guest));
-        self.monitor.store_register(REG_A0, a0);
-        self.monitor.store_register(REG_A1, a1);
+        self.store_register(hart, REG_A0, a0);
+        self.store_register(hart, REG_A1, a1);
 
         log::debug!("Syscall returned a0: {a0:#X}, a1: {a1:#X}");
 
@@ -358,5 +367,10 @@ impl Executor {
         // One cycle for the ecall cycle, then one for each chunk or
         // portion thereof then one to save output (a0, a1)
         Ok(OpcodeResult::new(None, 1 + chunks + 1))
+    }
+
+    fn store_register(&mut self, hart: &mut HartState, idx: usize, data: u32) {
+        self.monitor.store_register(idx, data);
+        hart.registers[idx] = data;
     }
 }
