@@ -167,6 +167,10 @@ impl<'a> Executor<'a> {
 
     /// TODO
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
+        if self.session_cycle > self.env.get_session_limit() {
+            return Ok(Some(ExitCode::SessionLimit));
+        }
+
         let insn_pc = self.hart.pc;
         let insn = self.monitor.load_u32(insn_pc);
         let opcode = OpCode::decode(insn);
@@ -212,7 +216,7 @@ impl<'a> Executor<'a> {
         // * return ExitCode::SystemSplit
         // otherwise, commit memory and hart
 
-        let segment_limit = 1 << self.env.segment_limit_po2;
+        let segment_limit = self.env.get_segment_limit();
         let segment_cycles = self.segment_cycles(&opcode);
         let exit_code = if segment_cycles > segment_limit {
             self.monitor.rollback();
@@ -340,9 +344,7 @@ impl<'a> Executor<'a> {
 
         let handler = self
             .env
-            .syscalls
-            .inner
-            .get(&syscall_name)
+            .get_syscall(&syscall_name)
             .ok_or(anyhow!("Unknown syscall: {syscall_name:?}"))?;
         let (a0, a1) =
             handler

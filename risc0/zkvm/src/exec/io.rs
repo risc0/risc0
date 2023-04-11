@@ -99,14 +99,15 @@ pub trait SyscallContext {
 pub trait SliceIo: Sized {
     /// Type for data received from guest
     type FromGuest: Pod;
+
     /// Type for data sent to guest
     type ToGuest: Pod;
+
     /// Host side I/O handling
     ///
     /// Whatever data the guest sent is received by this function in
     /// `from_guest`, and this function is to return the data the host is
     /// sending to the guest.
-
     fn handle_io(&self, syscall: &str, from_guest: &[Self::FromGuest]) -> Vec<Self::ToGuest>;
 
     /// Makes a Syscall handler for this SliceIo definition.g
@@ -122,7 +123,7 @@ pub struct SliceIoSyscall<H: SliceIo> {
 }
 
 impl<H: SliceIo> SliceIoSyscall<H> {
-    /// Wraps the given SliceIo into a SliceIoSyscall.
+    /// Wraps the given [SliceIo] into a [SliceIoSyscall].
     pub fn new(handler: H) -> Self {
         Self {
             handler,
@@ -145,7 +146,7 @@ impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
         let from_guest: &[H::FromGuest] = bytemuck::cast_slice(from_guest_bytes.as_slice());
         match take(stored_result.deref_mut()) {
             None => {
-                // First call of pair.  Send the data from the guest to the SliceIo
+                // First call of pair. Send the data from the guest to the SliceIo
                 // and save what it returns.
                 assert_eq!(to_guest.len(), 0);
                 let from_guest: &[H::FromGuest] = bytemuck::cast_slice(from_guest);
@@ -155,7 +156,7 @@ impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
                 Ok((len as u32, 0))
             }
             Some(stored) => {
-                // Second call of pair.  We already have data to send
+                // Second call of pair. We already have data to send
                 // to the guest; send it to the buffer that the guest
                 // allocated.
                 let stored_bytes: &[u8] = bytemuck::cast_slice(stored.as_slice());
@@ -173,7 +174,7 @@ impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
     }
 }
 
-/// Generates a Syscall from a simple slice function
+/// Generates a [Syscall] from a simple slice function
 pub fn slice_io_from_fn<T: Pod, U: Pod, F: Fn(&[T]) -> Vec<U>>(f: F) -> impl SliceIo {
     FnWrapper {
         f,

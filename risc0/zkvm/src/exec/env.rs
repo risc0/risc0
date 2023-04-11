@@ -15,8 +15,10 @@
 //! TODO
 
 use std::{
+    cell::RefCell,
     collections::HashMap,
     io::{BufRead, BufReader, Cursor, Read, Write},
+    rc::Rc,
 };
 
 use bytemuck::Pod;
@@ -43,11 +45,11 @@ pub struct ExecutorEnvBuilder<'a> {
 /// TODO
 #[derive(Clone)]
 pub struct ExecutorEnv<'a> {
-    pub(crate) env_vars: HashMap<String, String>,
-    pub(crate) segment_limit_po2: usize,
-    pub(crate) session_limit: usize,
-    pub(crate) syscalls: SyscallTable<'a>,
-    pub(crate) io: PosixIo<'a>,
+    env_vars: HashMap<String, String>,
+    segment_limit_po2: usize,
+    session_limit: usize,
+    syscalls: SyscallTable<'a>,
+    io: PosixIo<'a>,
     input: Vec<u8>,
 }
 
@@ -55,6 +57,18 @@ impl<'a> ExecutorEnv<'a> {
     /// TODO
     pub fn default() -> ExecutorEnvBuilder<'a> {
         ExecutorEnvBuilder::default()
+    }
+
+    pub(crate) fn get_segment_limit(&self) -> usize {
+        1 << self.segment_limit_po2
+    }
+
+    pub(crate) fn get_session_limit(&self) -> usize {
+        self.session_limit
+    }
+
+    pub(crate) fn get_syscall(&self, name: &str) -> Option<&Rc<RefCell<(dyn Syscall + 'a)>>> {
+        self.syscalls.inner.get(name)
     }
 }
 
