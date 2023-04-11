@@ -18,7 +18,7 @@ use anyhow::Result;
 use risc0_zkvm_platform::{memory::SYSTEM, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
-use super::io::SyscallContext;
+use super::{io::SyscallContext, OpCodeResult};
 use crate::{binfmt::image::PageTableInfo, MemoryImage};
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
@@ -33,6 +33,7 @@ pub(super) struct MemoryMonitor {
     pending_faults: PageFaults,
     pending_writes: BTreeSet<MemStore>,
     cycle: usize,
+    op_result: Option<OpCodeResult>,
 }
 
 impl MemoryMonitor {
@@ -43,6 +44,7 @@ impl MemoryMonitor {
             pending_faults: PageFaults::new(),
             pending_writes: BTreeSet::new(),
             cycle: 0,
+            op_result: None,
         }
     }
 
@@ -114,6 +116,14 @@ impl MemoryMonitor {
         self.store_u32(get_register_addr(idx), data);
     }
 
+    pub fn save_op(&mut self, op_result: OpCodeResult) {
+        self.op_result = Some(op_result);
+    }
+
+    pub fn restore_op(&self) -> Option<OpCodeResult> {
+        self.op_result.clone()
+    }
+
     // commit all pending activity
     pub fn commit(&mut self, cycle: usize) {
         for op in self.pending_writes.iter() {
@@ -122,12 +132,8 @@ impl MemoryMonitor {
         self.pending_writes.clear();
         self.faults.append(&mut self.pending_faults);
         self.cycle = cycle;
-    }
-
-    // drop all pending activity
-    pub fn rollback(&mut self) {
-        self.pending_writes.clear();
-        self.pending_faults.clear();
+        self.op_result = None;
+        // self.faults.dump();
     }
 
     pub fn total_faults(&self) -> usize {
@@ -143,6 +149,10 @@ impl MemoryMonitor {
     pub fn clear(&mut self) {
         self.faults.clear();
         self.pending_writes.clear();
+        self.pending_faults.clear();
+    }
+
+    pub fn clear_pending_faults(&mut self) {
         self.pending_faults.clear();
     }
 }

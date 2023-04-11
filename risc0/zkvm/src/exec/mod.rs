@@ -34,7 +34,7 @@ use risc0_zkvm_platform::{
     memory::MEM_SIZE,
     syscall::{
         ecall, halt,
-        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_MAX, REG_T0},
+        reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
     },
     PAGE_SIZE, WORD_SIZE,
 };
@@ -65,7 +65,7 @@ pub struct Executor<'a> {
     env: ExecutorEnv<'a>,
     pre_image: MemoryImage,
     monitor: MemoryMonitor,
-    hart: HartState,
+    pc: u32,
     init_cycles: usize,
     fini_cycles: usize,
     body_cycles: usize,
@@ -73,15 +73,17 @@ pub struct Executor<'a> {
     session_cycle: usize,
 }
 
-#[derive(Default)]
-struct OpcodeResult {
+#[derive(Clone)]
+struct OpCodeResult {
+    pc: u32,
     exit_code: Option<ExitCode>,
     extra_cycles: usize,
 }
 
-impl OpcodeResult {
-    fn new(exit_code: Option<ExitCode>, extra_cycles: usize) -> Self {
+impl OpCodeResult {
+    fn new(pc: u32, exit_code: Option<ExitCode>, extra_cycles: usize) -> Self {
         Self {
+            pc,
             exit_code,
             extra_cycles,
         }
@@ -92,26 +94,16 @@ impl<'a> Executor<'a> {
     /// TODO
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage, pc: u32) -> Self {
         let pre_image = image.clone();
+        let monitor = MemoryMonitor::new(image);
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
-
-        let mut monitor = MemoryMonitor::new(image);
-        let all_regs: [usize; REG_MAX] = array::from_fn(|idx| idx);
-        let registers = monitor.load_registers(all_regs);
-        monitor.clear();
-
-        let hart = HartState {
-            registers,
-            pc,
-            last_register_write: None,
-        };
 
         Self {
             env,
             pre_image,
             monitor,
-            hart,
+            pc,
             init_cycles,
             fini_cycles,
             body_cycles: 0,
@@ -171,43 +163,51 @@ impl<'a> Executor<'a> {
             return Ok(Some(ExitCode::SessionLimit));
         }
 
-        let insn_pc = self.hart.pc;
-        let insn = self.monitor.load_u32(insn_pc);
+        let insn = self.monitor.load_u32(self.pc);
         let opcode = OpCode::decode(insn);
 
         if log::log_enabled!(log::Level::Debug) {
-            let mut outputter = InstructionStringOutputter { insn_pc };
+            let mut outputter = InstructionStringOutputter { insn_pc: self.pc };
             let desc = process_instruction(&mut outputter, insn);
             log::debug!(
                 "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {}",
                 self.segment_cycle,
-                outputter.insn_pc,
+                self.pc,
                 insn,
                 desc.unwrap_or(opcode.mnemonic.into())
             );
         }
 
-        let mut hart = HartState {
-            registers: self.hart.registers,
-            pc: self.hart.pc,
-            last_register_write: self.hart.last_register_write,
-        };
+        if let Some(op_result) = self.monitor.restore_op() {
+            let segment_cycles = self.segment_cycles(&opcode);
+            return Ok(self.advance(opcode, op_result, segment_cycles));
+        }
 
         let op_result = if opcode.major == MajorType::ECall {
-            self.ecall(&mut hart)?
+            self.ecall()?
         } else {
+            let registers = self.monitor.load_registers(array::from_fn(|idx| idx));
+            self.monitor.clear_pending_faults();
+            let mut hart = HartState {
+                registers,
+                pc: self.pc,
+                last_register_write: None,
+            };
+
             InstructionExecutor {
                 mem: &mut self.monitor,
                 hart_state: &mut hart,
             }
             .step()
             .map_err(|err| anyhow!("{:?}", err))?;
-            OpcodeResult::default()
-        };
 
-        if let Some(idx) = hart.last_register_write {
-            self.monitor.store_register(idx, hart.registers[idx]);
-        }
+            if let Some(idx) = hart.last_register_write {
+                self.monitor.store_register(idx, hart.registers[idx]);
+            }
+
+            OpCodeResult::new(hart.pc, None, 0)
+        };
+        self.monitor.save_op(op_result.clone());
 
         // try to execute the next instruction
         // if the segment limit is exceeded:
@@ -219,18 +219,26 @@ impl<'a> Executor<'a> {
         let segment_limit = self.env.get_segment_limit();
         let segment_cycles = self.segment_cycles(&opcode);
         let exit_code = if segment_cycles > segment_limit {
-            self.monitor.rollback();
             Some(ExitCode::SystemSplit)
         } else {
-            self.hart = hart;
-            self.body_cycles += opcode.cycles + op_result.extra_cycles;
-            let delta = segment_cycles - self.segment_cycle;
-            self.segment_cycle = segment_cycles;
-            self.session_cycle += delta;
-            self.monitor.commit(self.session_cycle);
-            op_result.exit_code
+            self.advance(opcode, op_result, segment_cycles)
         };
         Ok(exit_code)
+    }
+
+    fn advance(
+        &mut self,
+        opcode: OpCode,
+        op_result: OpCodeResult,
+        segment_cycles: usize,
+    ) -> Option<ExitCode> {
+        self.pc = op_result.pc;
+        self.body_cycles += opcode.cycles + op_result.extra_cycles;
+        let delta = segment_cycles - self.segment_cycle;
+        self.segment_cycle = segment_cycles;
+        self.session_cycle += delta;
+        self.monitor.commit(self.session_cycle);
+        op_result.exit_code
     }
 
     fn segment_cycles(&self, opcode: &OpCode) -> usize {
@@ -261,34 +269,32 @@ impl<'a> Executor<'a> {
         total_cycles
     }
 
-    fn ecall(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
+    fn ecall(&mut self) -> Result<OpCodeResult> {
         match self.monitor.load_register(REG_T0) {
             ecall::HALT => self.ecall_halt(),
-            ecall::OUTPUT => self.ecall_output(hart),
-            ecall::SOFTWARE => self.ecall_software(hart),
-            ecall::SHA => self.ecall_sha(hart),
+            ecall::OUTPUT => self.ecall_output(),
+            ecall::SOFTWARE => self.ecall_software(),
+            ecall::SHA => self.ecall_sha(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }
 
-    fn ecall_halt(&mut self) -> Result<OpcodeResult> {
+    fn ecall_halt(&mut self) -> Result<OpCodeResult> {
         let halt_type = self.monitor.load_register(REG_A0);
         let exit_code = match halt_type {
             halt::TERMINATE => ExitCode::Halted(0),
             halt::PAUSE => ExitCode::Paused,
-            halt::SPLIT => ExitCode::SystemSplit,
             _ => bail!("Illegal halt type: {halt_type}"),
         };
-        Ok(OpcodeResult::new(Some(exit_code), 0))
+        Ok(OpCodeResult::new(self.pc, Some(exit_code), 0))
     }
 
-    fn ecall_output(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
+    fn ecall_output(&mut self) -> Result<OpCodeResult> {
         log::debug!("ecall(output)");
-        hart.pc += WORD_SIZE as u32;
-        Ok(OpcodeResult::default())
+        Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0))
     }
 
-    fn ecall_sha(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
+    fn ecall_sha(&mut self) -> Result<OpCodeResult> {
         let [out_state_ptr, in_state_ptr, mut block1_ptr, mut block2_ptr, count] = self
             .monitor
             .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
@@ -328,12 +334,15 @@ impl<'a> Executor<'a> {
 
         self.monitor
             .store_region(out_state_ptr, bytemuck::cast_slice(&state));
-        hart.pc += WORD_SIZE as u32;
 
-        Ok(OpcodeResult::new(None, SHA_CYCLES * count as usize))
+        Ok(OpCodeResult::new(
+            self.pc + WORD_SIZE as u32,
+            None,
+            SHA_CYCLES * count as usize,
+        ))
     }
 
-    fn ecall_software(&mut self, hart: &mut HartState) -> Result<OpcodeResult> {
+    fn ecall_software(&mut self) -> Result<OpCodeResult> {
         let [to_guest_ptr, to_guest_words, name_ptr] =
             self.monitor.load_registers([REG_A0, REG_A1, REG_A2]);
         let syscall_name = self.monitor.load_string(name_ptr)?;
@@ -353,8 +362,8 @@ impl<'a> Executor<'a> {
 
         self.monitor
             .store_region(to_guest_ptr, bytemuck::cast_slice(&to_guest));
-        self.store_register(hart, REG_A0, a0);
-        self.store_register(hart, REG_A1, a1);
+        self.monitor.store_register(REG_A0, a0);
+        self.monitor.store_register(REG_A1, a1);
 
         log::debug!("Syscall returned a0: {a0:#X}, a1: {a1:#X}");
 
@@ -364,15 +373,12 @@ impl<'a> Executor<'a> {
         //     regs: (a0, a1),
         // });
 
-        hart.pc += WORD_SIZE as u32;
-
         // One cycle for the ecall cycle, then one for each chunk or
         // portion thereof then one to save output (a0, a1)
-        Ok(OpcodeResult::new(None, 1 + chunks + 1))
-    }
-
-    fn store_register(&mut self, hart: &mut HartState, idx: usize, data: u32) {
-        self.monitor.store_register(idx, data);
-        hart.registers[idx] = data;
+        Ok(OpCodeResult::new(
+            self.pc + WORD_SIZE as u32,
+            None,
+            1 + chunks + 1,
+        ))
     }
 }
