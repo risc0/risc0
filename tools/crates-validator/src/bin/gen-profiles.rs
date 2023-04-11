@@ -122,7 +122,8 @@ fn main() -> Result<()> {
                 entry.insert(row);
             }
             Entry::Occupied(mut entry) => {
-                if row.created_at > entry.get().created_at {
+                // find newest, non-pre-release version:
+                if row.created_at > entry.get().created_at && row.num.pre.is_empty() {
                     entry.insert(row);
                 }
             }
