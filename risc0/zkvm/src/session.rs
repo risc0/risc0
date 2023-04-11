@@ -15,11 +15,12 @@
 //! TODO
 
 use risc0_zkp::core::digest::Digest;
+use serde::{Deserialize, Serialize};
 
-use crate::MemoryImage;
+use crate::{exec::SyscallRecord, MemoryImage};
 
 /// TODO
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ExitCode {
     /// TODO
     SystemSplit,
@@ -35,16 +36,18 @@ pub enum ExitCode {
 }
 
 /// TODO
+#[derive(Serialize, Deserialize)]
 pub struct Session {
     /// TODO
     pub segments: Vec<Segment>,
 }
 
 /// TODO
+#[derive(Serialize, Deserialize)]
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
-    // syscall_log: SyscallLog,
+    syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
 }
 
@@ -57,11 +60,17 @@ impl Session {
 
 impl Segment {
     /// TODO
-    pub fn new(pre_image: MemoryImage, post_image_id: Digest, exit_code: ExitCode) -> Self {
+    pub fn new(
+        pre_image: MemoryImage,
+        post_image_id: Digest,
+        exit_code: ExitCode,
+        syscalls: Vec<SyscallRecord>,
+    ) -> Self {
         Self {
             pre_image,
             post_image_id,
             exit_code,
+            syscalls,
         }
     }
 }

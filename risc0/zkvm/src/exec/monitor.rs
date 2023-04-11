@@ -18,7 +18,7 @@ use anyhow::Result;
 use risc0_zkvm_platform::{memory::SYSTEM, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
-use super::{io::SyscallContext, OpCodeResult};
+use super::{io::SyscallContext, OpCodeResult, SyscallRecord};
 use crate::{binfmt::image::PageTableInfo, MemoryImage};
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
@@ -27,13 +27,14 @@ struct MemStore {
     data: u8,
 }
 
-pub(super) struct MemoryMonitor {
-    pub(super) image: MemoryImage,
+pub struct MemoryMonitor {
+    pub image: MemoryImage,
     faults: PageFaults,
     pending_faults: PageFaults,
     pending_writes: BTreeSet<MemStore>,
     cycle: usize,
     op_result: Option<OpCodeResult>,
+    pub syscalls: Vec<SyscallRecord>,
 }
 
 impl MemoryMonitor {
@@ -45,6 +46,7 @@ impl MemoryMonitor {
             pending_writes: BTreeSet::new(),
             cycle: 0,
             op_result: None,
+            syscalls: Vec::new(),
         }
     }
 
@@ -132,7 +134,10 @@ impl MemoryMonitor {
         self.pending_writes.clear();
         self.faults.append(&mut self.pending_faults);
         self.cycle = cycle;
-        self.op_result = None;
+        let op_result = self.op_result.take().unwrap();
+        if let Some(syscall) = op_result.syscall {
+            self.syscalls.push(syscall);
+        }
         // self.faults.dump();
     }
 
@@ -150,6 +155,7 @@ impl MemoryMonitor {
         self.faults.clear();
         self.pending_writes.clear();
         self.pending_faults.clear();
+        self.syscalls.clear();
     }
 
     pub fn clear_pending_faults(&mut self) {

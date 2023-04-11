@@ -21,6 +21,7 @@ use risc0_zkvm_platform::{
     syscall::DIGEST_BYTES,
     WORD_SIZE,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::{binfmt::elf::Program, sha};
 
@@ -34,7 +35,7 @@ const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PageTableInfo {
     pub page_size: u32,
     page_table_addr: u32,
@@ -103,7 +104,7 @@ impl PageTableInfo {
 /// This is an image of the full memory state of the zkVM, including the data,
 /// text, inputs, page table, and system memory. In addition to the memory image
 /// proper, this includes some metadata about the page table.
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct MemoryImage {
     /// The memory image as a vector of bytes
     pub buf: Vec<u8>,

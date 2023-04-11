@@ -20,7 +20,7 @@ mod monitor;
 #[cfg(test)]
 mod tests;
 
-use std::array;
+use std::{array, mem::take};
 
 use anyhow::{anyhow, bail, Result};
 use risc0_zkp::{
@@ -42,6 +42,7 @@ use rrs_lib::{
     instruction_executor::InstructionExecutor,
     instruction_string_outputter::InstructionStringOutputter, process_instruction, HartState,
 };
+use serde::{Deserialize, Serialize};
 
 pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
 use self::monitor::MemoryMonitor;
@@ -73,19 +74,32 @@ pub struct Executor<'a> {
     session_cycle: usize,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SyscallRecord {
+    pub to_guest: Vec<u32>,
+    pub regs: (u32, u32),
+}
+
 #[derive(Clone)]
-struct OpCodeResult {
+pub struct OpCodeResult {
     pc: u32,
     exit_code: Option<ExitCode>,
     extra_cycles: usize,
+    syscall: Option<SyscallRecord>,
 }
 
 impl OpCodeResult {
-    fn new(pc: u32, exit_code: Option<ExitCode>, extra_cycles: usize) -> Self {
+    fn new(
+        pc: u32,
+        exit_code: Option<ExitCode>,
+        extra_cycles: usize,
+        syscall: Option<SyscallRecord>,
+    ) -> Self {
         Self {
             pc,
             exit_code,
             extra_cycles,
+            syscall,
         }
     }
 }
@@ -129,13 +143,14 @@ impl<'a> Executor<'a> {
                 let pre_image = self.pre_image.clone();
                 self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
                 let post_image_id = self.monitor.image.get_root();
-                let segment = Segment::new(pre_image, post_image_id, exit_code);
-                segments.push(segment);
+                let syscalls = take(&mut self.monitor.syscalls);
+                segments.push(Segment::new(pre_image, post_image_id, exit_code, syscalls));
                 match exit_code {
                     ExitCode::SystemSplit => self.split(),
                     ExitCode::SessionLimit => bail!("Session limit exceeded"),
                     ExitCode::Paused => {
                         log::debug!("Paused: {}", self.segment_cycle);
+                        self.split();
                         break;
                     }
                     ExitCode::Halted(exit_code) => {
@@ -205,7 +220,7 @@ impl<'a> Executor<'a> {
                 self.monitor.store_register(idx, hart.registers[idx]);
             }
 
-            OpCodeResult::new(hart.pc, None, 0)
+            OpCodeResult::new(hart.pc, None, 0, None)
         };
         self.monitor.save_op(op_result.clone());
 
@@ -286,12 +301,12 @@ impl<'a> Executor<'a> {
             halt::PAUSE => ExitCode::Paused,
             _ => bail!("Illegal halt type: {halt_type}"),
         };
-        Ok(OpCodeResult::new(self.pc, Some(exit_code), 0))
+        Ok(OpCodeResult::new(self.pc, Some(exit_code), 0, None))
     }
 
     fn ecall_output(&mut self) -> Result<OpCodeResult> {
         log::debug!("ecall(output)");
-        Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0))
+        Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0, None))
     }
 
     fn ecall_sha(&mut self) -> Result<OpCodeResult> {
@@ -339,6 +354,7 @@ impl<'a> Executor<'a> {
             self.pc + WORD_SIZE as u32,
             None,
             SHA_CYCLES * count as usize,
+            None,
         ))
     }
 
@@ -367,18 +383,16 @@ impl<'a> Executor<'a> {
 
         log::debug!("Syscall returned a0: {a0:#X}, a1: {a1:#X}");
 
-        // Record the syscall
-        // c.op.syscalls.push(SyscallResult {
-        //     to_guest,
-        //     regs: (a0, a1),
-        // });
-
         // One cycle for the ecall cycle, then one for each chunk or
         // portion thereof then one to save output (a0, a1)
         Ok(OpCodeResult::new(
             self.pc + WORD_SIZE as u32,
             None,
             1 + chunks + 1,
+            Some(SyscallRecord {
+                to_guest,
+                regs: (a0, a1),
+            }),
         ))
     }
 }
