@@ -66,6 +66,6 @@ jobs:
           cd ${{ runner.temp }}/benchmarks/
           cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
           git add .
-          git commit --author="nightly-action <github@users.noreply.github.com>" -m "Added update at '$(date)'"
+          git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
           git push origin main
         shell: bash
