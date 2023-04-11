@@ -102,5 +102,14 @@ fn main() -> Result<()> {
         validator.context.profiles.borrow().len()
     );
 
+    if let Some(out_path) = args.json_output {
+        std::fs::write(
+            out_path,
+            serde_json::to_string(&validator.context)
+                .context("Failed to serialize Validator context")?,
+        )
+        .context("Failed to write output json file")?;
+    }
+
     Ok(())
 }
