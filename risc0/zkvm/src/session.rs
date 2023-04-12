@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{exec::SyscallRecord, MemoryImage};
 
-/// TODO
+/// Indicates how a [Segment] or [Session]'s execution has terminated
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ExitCode {
     /// This indicates when a system-initiated split has occured due to the
@@ -39,14 +39,29 @@ pub enum ExitCode {
     Halted(u32),
 }
 
-/// TODO
+/// The execution trace of a program.
+///
+/// The record of memory transactions of an execution that starts from an
+/// initial memory image (which includes the starting PC) and proceeds until
+/// either a sys_halt or a sys_pause syscall is encountered. This record is
+/// stored as a vector of [Segment]s.
 #[derive(Serialize, Deserialize)]
 pub struct Session {
-    /// TODO
+    /// The constituent [Segment]s of the Session. The final [Segment] will have
+    /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
+    /// or [SessionLimit](ExitCode::SessionLimit), and all other [Segment]s (if
+    /// any) will have [ExitCode::SystemSplit].
     pub segments: Vec<Segment>,
 }
 
-/// TODO
+/// The execution trace of a portion of a program.
+///
+/// The record of memory transactions of an execution that starts from an
+/// initial memory image, and proceeds until terminated by the system or user.
+/// This represents a chunk of execution work that will be proven in a single
+/// call to the ZKP system. It does not necessarily represent an entire program;
+/// see [Session] for tracking memory transactions until a user-requested
+/// termination.
 #[derive(Serialize, Deserialize)]
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
@@ -56,14 +71,14 @@ pub struct Segment {
 }
 
 impl Session {
-    /// TODO
+    /// Create a new Session from its constituent [Segment]s.
     pub fn new(segments: Vec<Segment>) -> Self {
         Self { segments }
     }
 }
 
 impl Segment {
-    /// TODO
+    /// Create a new Session from its constituent components.
     pub fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
