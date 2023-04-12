@@ -334,8 +334,6 @@ impl Validator {
         let mut crate_line = format!(
             "{} = {{ version = \"{}\" }}",
             profile.name,
-            // TODO: if None, fetch the most recent version from crates.io?
-            // if not, remove Option.
             profile.version.as_ref().unwrap()
         );
         if profile.crossbeam_patch {
