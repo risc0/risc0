@@ -25,7 +25,7 @@ use crate::{serde::to_vec, ExitCode, MemoryImage, Program};
 
 #[test_log::test]
 fn basic() {
-    let env = ExecutorEnv::default().build();
+    let env = ExecutorEnv::default();
     let image = BTreeMap::from([
         (0x4000, 0x1234b137), // lui x2, 0x1234b000
         (0x4004, 0xf387e1b7), // lui x3, 0xf387e000
@@ -60,7 +60,7 @@ fn system_split() {
     init();
 
     let entry = 0x4000_u32;
-    let env = ExecutorEnv::default()
+    let env = ExecutorEnv::builder()
         .segment_limit_po2(14) // 16K cycles
         .build();
     let mut image = BTreeMap::new();
@@ -104,7 +104,7 @@ fn host_syscall() {
     })
     .unwrap();
     let actual: Mutex<Vec<Vec<u8>>> = Vec::new().into();
-    let env = ExecutorEnv::default()
+    let env = ExecutorEnv::builder()
         .add_input(&input)
         .io_callback(SYS_MULTI_TEST, |buf: &[u8]| -> Vec<u8> {
             let mut actual = actual.lock().unwrap();
@@ -122,7 +122,7 @@ fn host_syscall() {
 #[should_panic(expected = "I am panicking from here!")]
 fn host_syscall_callback_panic() {
     let input = to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap();
-    let env = ExecutorEnv::default()
+    let env = ExecutorEnv::builder()
         .add_input(&input)
         .io_callback(SYS_MULTI_TEST, |_buf: &[u8]| -> Vec<u8> {
             panic!("I am panicking from here!");
@@ -135,7 +135,7 @@ fn host_syscall_callback_panic() {
 #[test_log::test]
 fn sha_accel() {
     let input = to_vec(&MultiTestSpec::ShaConforms).unwrap();
-    let env = ExecutorEnv::default().add_input(&input).build();
+    let env = ExecutorEnv::builder().add_input(&input).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
 }
@@ -143,7 +143,7 @@ fn sha_accel() {
 #[test_log::test]
 fn sha_cycle_count() {
     let input = to_vec(&MultiTestSpec::ShaCycleCount).unwrap();
-    let env = ExecutorEnv::default().add_input(&input).build();
+    let env = ExecutorEnv::builder().add_input(&input).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
 }
@@ -155,7 +155,7 @@ fn stdio() {
     let spec = to_vec(&MultiTestSpec::CopyToStdout { fd: FD }).unwrap();
     let mut stdout: Vec<u8> = Vec::new();
     {
-        let env = ExecutorEnv::default()
+        let env = ExecutorEnv::builder()
             .read_fd(FD, MSG.as_bytes())
             .stdin(bytemuck::cast_slice(&spec))
             .stdout(&mut stdout)
@@ -199,7 +199,7 @@ mod riscv {
             let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
             let image = MemoryImage::new(&program, PAGE_SIZE as u32);
 
-            let env = ExecutorEnv::default().build();
+            let env = ExecutorEnv::default();
             let mut exec = Executor::new(env, image, program.entry);
             exec.run().unwrap();
         }

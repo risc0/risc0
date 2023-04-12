@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! TODO
+//! This module defines [Session] and [Segment] which provides a way to share
+//! execution traces between the execution phase and the proving phase.
 
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
@@ -22,16 +23,19 @@ use crate::{exec::SyscallRecord, MemoryImage};
 /// TODO
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ExitCode {
-    /// TODO
+    /// This indicates when a system-initiated split has occured due to the
+    /// segment limit being exceeded.
     SystemSplit,
 
-    /// TODO
+    /// This indicates that the session limit has been reached.
     SessionLimit,
 
-    /// TODO
+    /// A user may manually pause a session so that it can be resumed at a later
+    /// time.
     Paused,
 
-    /// TODO
+    /// This indicates normal termination of a program with an interior exit
+    /// code returned from the guest.
     Halted(u32),
 }
 

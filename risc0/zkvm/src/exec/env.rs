@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! TODO
+//! This module defines the [ExecutorEnv] and [ExecutorEnvBuilder].
 
 use std::{
     cell::RefCell,
@@ -32,17 +32,20 @@ use risc0_zkvm_platform::{
 
 use super::io::{slice_io_from_fn, syscalls, PosixIo, SliceIo, Syscall, SyscallTable};
 
+/// The default segment limit specified in powers of 2 cycles. Choose this value
+/// to try and fit with 8GB of RAM.
 const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20; // 1M cycles
 
+/// The default session limit specified in cycles.
 const DEFAULT_SESSION_LIMIT: usize = 64 * 1024 * 1024; // 64M cycles
 
-/// TODO
+/// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Clone)]
 pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
 
-/// TODO
+/// The [super::Executor] is configured from this object.
 #[derive(Clone)]
 pub struct ExecutorEnv<'a> {
     env_vars: HashMap<String, String>,
@@ -54,8 +57,8 @@ pub struct ExecutorEnv<'a> {
 }
 
 impl<'a> ExecutorEnv<'a> {
-    /// TODO
-    pub fn default() -> ExecutorEnvBuilder<'a> {
+    /// Construct a [ExecutorEnvBuilder].
+    pub fn builder() -> ExecutorEnvBuilder<'a> {
         ExecutorEnvBuilder::default()
     }
 
@@ -69,6 +72,12 @@ impl<'a> ExecutorEnv<'a> {
 
     pub(crate) fn get_syscall(&self, name: &str) -> Option<&Rc<RefCell<(dyn Syscall + 'a)>>> {
         self.syscalls.inner.get(name)
+    }
+}
+
+impl<'a> Default for ExecutorEnv<'a> {
+    fn default() -> Self {
+        Self::builder().build()
     }
 }
 
@@ -88,7 +97,7 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
 }
 
 impl<'a> ExecutorEnvBuilder<'a> {
-    /// TODO
+    /// Finalize this builder to construct an [ExecutorEnv].
     pub fn build(&mut self) -> ExecutorEnv<'a> {
         let mut result = self.clone();
         let getenv = syscalls::Getenv(self.inner.env_vars.clone());
@@ -105,19 +114,19 @@ impl<'a> ExecutorEnvBuilder<'a> {
         result.inner.clone()
     }
 
-    /// TODO
+    /// Set a segment limit, specified in powers of 2 cycles.
     pub fn segment_limit_po2(&mut self, limit: usize) -> &mut Self {
         self.inner.segment_limit_po2 = limit;
         self
     }
 
-    /// TODO
+    /// Set a session limit, specified in number of cycles.
     pub fn session_limit(&mut self, limit: usize) -> &mut Self {
         self.inner.session_limit = limit;
         self
     }
 
-    /// TODO
+    /// Add environment variables to the guest environment.
     pub fn env_vars(&mut self, vars: HashMap<String, String>) -> &mut Self {
         self.inner.env_vars = vars;
         self
@@ -131,7 +140,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
-    /// TODO
+    /// Add initial input that can be read by the guest from stdin.
     pub fn add_input<T: Pod>(&mut self, slice: &[T]) -> &mut Self {
         self.inner
             .input
