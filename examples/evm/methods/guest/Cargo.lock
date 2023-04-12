@@ -815,27 +815,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-zeroio"
-version = "0.14.0"
-dependencies = [
- "bytemuck",
- "impl-trait-for-tuples",
- "log",
- "risc0-zeroio-derive",
- "risc0-zkvm-platform",
- "tracing",
-]
-
-[[package]]
-name = "risc0-zeroio-derive"
-version = "0.14.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 1.0.109",
-]
-
-[[package]]
 name = "risc0-zkp"
 version = "0.14.0"
 dependencies = [
@@ -848,7 +827,6 @@ dependencies = [
  "paste",
  "rand_core",
  "risc0-core",
- "risc0-zeroio",
  "risc0-zkvm-platform",
  "serde",
  "sha2",
@@ -869,7 +847,6 @@ dependencies = [
  "num-traits",
  "risc0-circuit-rv32im",
  "risc0-core",
- "risc0-zeroio",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
