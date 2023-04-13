@@ -373,7 +373,8 @@ pub struct SessionReceipt {
 
     /// The public data written by the guest in this Session.
     ///
-    /// This data is cryptographically attested to in [SessionReceipt::verify].
+    /// This data is cryptographically authenticated in
+    /// [SessionReceipt::verify].
     pub journal: Vec<u8>,
 }
 
