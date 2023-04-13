@@ -130,6 +130,11 @@ impl MemoryImage {
             }
         }
 
+        MemoryImage::from_image(image, page_size)
+    }
+
+    /// Construct MemoryImage from an existing image
+    pub fn from_image(image: Vec<u8>, page_size: u32) -> Self {
         // Compute the page table hashes except for the very last root hash.
         let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
         let mut img = Self { image, info };
