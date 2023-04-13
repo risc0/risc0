@@ -31,7 +31,7 @@ pub fn main() {
     let outer_pad_byte: u8 = 0x5c;
     let key_pad_byte:   u8 = 0x00;
 
-    let mut auth_key: &mut [u8; SHA_KEY_BYTES] = &mut [key_pad_byte; SHA_KEY_BYTES];
+    let auth_key: &mut [u8; SHA_KEY_BYTES] = &mut [key_pad_byte; SHA_KEY_BYTES];
 
     // if the key is longer than the hasher's block length, it should be truncated using the hasher
     if key.len() > SHA_KEY_BYTES {

@@ -51,27 +51,28 @@ fn main() {
     println!("I provably know the message and key such that HMAC is {}", digest);
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use methods::HMAC_ID;
-//     use risc0_zkp::core::sha::Digest;
-//     use risc0_zkvm::serde::from_slice;
-//
-//     use crate::hmac;
-//
-//     const TEST_STRING: &str = "abc";
-//
-//     #[test]
-//     fn main() {
-//         let receipt = hmac(TEST_STRING);
-//         receipt.verify(HMAC_ID).expect("Proven code should verify");
-//
-//         let digest = from_slice::<Digest>(receipt.journal.as_slice())
-//             .expect("Journal should contain SHA Digest");
-//         assert_eq!(
-//             hex::encode(digest.as_bytes()),
-//             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
-//             "We expect to match the reference SHA-256 hash of the standard test value 'abc'"
-//         );
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    use methods::HMAC_ID;
+    use risc0_zkp::core::sha::Digest;
+    use risc0_zkvm::serde::from_slice;
+
+    use crate::hmac;
+
+    const TEST_MESSAGE: &str = "Some text";
+    const TEST_KEY: &str = "123";
+
+    #[test]
+    fn main() {
+        let receipt = hmac(TEST_KEY, TEST_MESSAGE);
+        receipt.verify(HMAC_ID).expect("Proven code should verify");
+
+        let digest = from_slice::<Digest>(receipt.journal.as_slice())
+            .expect("Journal should contain HMAC");
+        assert_eq!(
+            hex::encode(digest.as_bytes()),
+            "bb0ed8249d22fc675ca411db142d0081a4c9ffc38d3e9dd05eeeab924f4cb384",
+            "We expect to match the reference HMAC of the standard test value ['Some text', '123']"
+        );
+    }
+}

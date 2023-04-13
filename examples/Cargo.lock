@@ -683,22 +683,22 @@ dependencies = [
 
 [[package]]
 name = "directories"
-version = "4.0.1"
+version = "5.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f51c5d4ddabd36886dd3e1438cb358cdcb0d7c499cb99cb4ac2e38e18b5cb210"
+checksum = "74be3be809c18e089de43bdc504652bb2bc473fca8756131f8689db8cf079ba9"
 dependencies = [
  "dirs-sys",
 ]
 
 [[package]]
 name = "dirs-sys"
-version = "0.3.7"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1b1d1d91c932ef41c0f2663aa8b0ca0342d444d842c06914aa0a7e352d0bada6"
+checksum = "04414300db88f70d74c5ff54e50f9e1d1737d9a5b90f53fcf2e95ca2a9ab554b"
 dependencies = [
  "libc",
  "redox_users",
- "winapi",
+ "windows-sys 0.45.0",
 ]
 
 [[package]]
@@ -2607,7 +2607,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "cargo_metadata",
  "directories",
@@ -2623,7 +2623,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "cc",
  "directories",
@@ -2635,7 +2635,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "anyhow",
  "fil-rustacuda",
@@ -2655,7 +2655,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "cc",
  "glob",
@@ -2666,7 +2666,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -2674,7 +2674,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "cc",
  "glob",
@@ -2684,7 +2684,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zeroio"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "bytemuck",
  "impl-trait-for-tuples",
@@ -2696,7 +2696,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zeroio-derive"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "proc-macro2",
  "quote 1.0.23",
@@ -2705,7 +2705,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -2713,6 +2713,7 @@ dependencies = [
  "digest",
  "fil-rustacuda",
  "hex",
+ "lazy_static",
  "log",
  "metal",
  "ndarray",
@@ -2733,7 +2734,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.13.0"
+version = "0.14.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -2761,7 +2762,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.13.0"
+version = "0.14.0"
 
 [[package]]
 name = "rlp"
