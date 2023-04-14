@@ -59,7 +59,7 @@ fn init() {
 fn system_split() {
     init();
 
-    let entry = 0x4000_u32;
+    let entry = 0x4000;
     let env = ExecutorEnv::builder()
         .segment_limit_po2(14) // 16K cycles
         .build();
@@ -165,6 +165,298 @@ fn stdio() {
     }
     assert_eq!(MSG, core::str::from_utf8(&stdout).unwrap());
 }
+
+// #[cfg(feature = "profiler")]
+// #[test]
+// fn profiler() {
+//     use crate::{
+//         binfmt::elf::Program,
+//         prove::profiler::{Frame, Profiler},
+//     };
+
+//     let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
+//     {
+//         let opts = ProverOpts::default()
+//             .with_skip_seal(true)
+//             .with_trace_callback(prof.make_trace_callback());
+//         let mut prover = Prover::new_with_opts(MULTI_TEST_ELF,
+// opts).unwrap();         prover.add_input_u32_slice(&to_vec(&
+// MultiTestSpec::Profiler).unwrap());         prover.run().unwrap();
+//     }
+
+//     prof.finalize();
+
+//     // Gather up anything containing our profile_test functions.
+//     // If the test doesn't pass, we don't want to display the
+//     // whole profiling structure.
+//     let occurences: Vec<_> = prof
+//         .iter()
+//         .filter(|(frames, _addr, _count)| frames.iter().any(|fr|
+// fr.name.contains("profile_test")))         .collect();
+
+//     assert!(!occurences.is_empty(), "{:#?}", Vec::from_iter(prof.iter()));
+
+//     let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
+
+//     assert!(
+//         occurences.iter().any(|(fr, addr, _count)| {
+//             match fr.as_slice() {
+//                 [fr1 @ Frame {
+//                     name: name1,
+//                     filename: fn1,
+//                     ..
+//                 }, fr2 @ Frame {
+//                     name: name2,
+//                     filename: fn2,
+//                     ..
+//                 }] => {
+//                     println!("Inspecting frames:\n{fr1:?}\n{fr2:?}\n");
+//                     if name1 != "profile_test_func2" || name2 !=
+// "profile_test_func1" {                         println!("Names did not match:
+// {}, {}", name1, name2);                         return false;
+//                     }
+//                     if !fn1.ends_with("multi_test.rs") ||
+// !fn2.ends_with("multi_test.rs") {                         println!("Filenames
+// did not match: {}, {}", fn1, fn2);                         return false;
+//                     }
+//                     // Check to make sure we hit the "nop" instruction
+//                     match elf_mem.get(&(*addr as u32)) {
+//                         None => {
+//                             println!("Addr {addr} not present in elf");
+//                             return false;
+//                         }
+//                         Some(0x00_00_00_13) => (),
+//                         Some(inst) => {
+//                             println!("Looking for 'nop'; got 0x{inst:08x}");
+//                             return false;
+//                         }
+//                     }
+
+//                     // All checks passed; this is the occurence we were
+// looking for.                     true
+//                 }
+//                 _ => {
+//                     println!("{:#?}", fr);
+//                     false
+//                 }
+//             }
+//         }),
+//         "{:#?}",
+//         occurences
+//     );
+// }
+
+// #[test]
+// fn trace() {
+//     let mut events: Vec<TraceEvent> = Vec::new();
+//     {
+//         let opts = ProverOpts::default()
+//             .with_skip_seal(true)
+//             .with_trace_callback(|event| Ok(events.push(event)));
+//         let mut prover = Prover::new_with_opts(MULTI_TEST_ELF,
+// opts).unwrap();         prover.add_input_u32_slice(&to_vec(&
+// MultiTestSpec::EventTrace).unwrap());
+
+//         prover.run().unwrap();
+//     }
+//     let occurances = events
+//         .windows(4)
+//         .filter_map(|window| {
+//             if let &[TraceEvent::InstructionStart {
+//                 // li x5, 1337
+//                 cycle: cycle1,
+//                 pc: pc1,
+//             }, TraceEvent::RegisterSet {
+//                 reg: 5,
+//                 value: 1337,
+//             }, TraceEvent::InstructionStart {
+//                 // sw x5, 548(zero)
+//                 cycle: cycle2,
+//                 pc: pc2,
+//             }, TraceEvent::RegisterSet {
+//                 reg: 6,
+//                 value: 0x08000000,
+//             }] = window
+//             {
+//                 assert_eq!(cycle1 + 1, cycle2, "li should take 1 cycles:
+// {:#?}", window);                 assert_eq!(
+//                     pc1 + WORD_SIZE as u32,
+//                     pc2,
+//                     "program counter should advance one word: {:#?}",
+//                     window
+//                 );
+//                 Some(())
+//             } else {
+//                 None
+//             }
+//         })
+//         .count();
+//     assert_eq!(occurances, 1, "trace events: {:#?}", &events);
+//     assert!(events.contains(&TraceEvent::MemorySet {
+//         addr: 0x08000224,
+//         value: 1337
+//     }));
+// }
+
+// #[test]
+// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+// #[cfg_attr(feature = "cuda", serial)]
+// fn posix_style_read() {
+//     // Tests sys_read into a buffer of bytes that may not be word
+//     // aligned.  To make sure we don't miss any edge cases, this tries
+//     // all permutations of start alignment, end alignment, and 0, 1,
+//     // or 2 whole words.
+
+//     // Initial buffer to read bytes on top of.
+//     let orig: Vec<u8> = (b'a'..b'z')
+//         .chain(b'0'..b'9')
+//         .chain(b"!@#$%^&*()".iter().cloned())
+//         .collect();
+//     // Input to read bytes from.
+//     let readbuf: Vec<u8> = (b'A'..b'Z').collect();
+
+//     let run = |pos_and_len: Vec<(u32, u32)>| {
+//         let mut expected = orig.to_vec();
+
+//         let mut expected_readbuf = readbuf.as_slice();
+//         for (pos, len) in pos_and_len.iter() {
+//             let pos = *pos as usize;
+//             let len = *len as usize;
+
+//             let this_read;
+//             (this_read, expected_readbuf) = expected_readbuf.split_at(len);
+//             expected[pos..pos + len].clone_from_slice(this_read);
+//         }
+
+//         let opts = ProverOpts::default()
+//             .with_skip_seal(true)
+//             .with_read_fd(123, readbuf.as_slice());
+
+//         let mut prover = Prover::new_with_opts(MULTI_TEST_ELF,
+// opts).unwrap();         prover.add_input_u32_slice(
+//             &to_vec(&MultiTestSpec::SysRead {
+//                 fd: 123,
+//                 orig: orig.to_vec(),
+//                 pos_and_len: pos_and_len.clone(),
+//             })
+//             .unwrap(),
+//         );
+//         let receipt = prover.run().unwrap();
+
+//         let actual: Vec<u8> = from_slice(&receipt.journal).unwrap();
+//         assert_eq!(
+//             std::str::from_utf8(&actual).unwrap(),
+//             std::str::from_utf8(&expected).unwrap(),
+//             "pos and lens: {pos_and_len:?}"
+//         );
+//     };
+
+//     fn next_offset(mut pos: u32, offset: u32) -> u32 {
+//         while (pos % WORD_SIZE as u32) != offset {
+//             pos += 1;
+//         }
+//         pos
+//     }
+
+//     for start_offset in 0..WORD_SIZE as u32 {
+//         for end_offset in 0..WORD_SIZE as u32 {
+//             let mut pos = 0;
+//             let mut pos_and_len: Vec<(u32, u32)> = Vec::new();
+
+//             // Make up a bunch of reads to overwrite parts of the buffer.
+//             for nwords in 0..3 {
+//                 pos = next_offset(pos, start_offset);
+//                 let start = pos;
+//                 pos += nwords * WORD_SIZE as u32;
+//                 pos = next_offset(pos, end_offset);
+//                 let len = pos - start;
+//                 pos_and_len.push((pos, len));
+//                 assert!(
+//                     pos + len < orig.len() as u32,
+//                     "Ran out of space to test writes. pos: {pos} len: {len}
+// end: {end_offset} start = {start_offset}"                 );
+//                 // Make sure there's at least one non-overwritten character
+// between reads.                 pos += 1;
+//             }
+
+//             run(pos_and_len);
+//         }
+//     }
+// }
+
+// #[test]
+// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+// #[cfg_attr(feature = "cuda", serial)]
+// fn environment() {
+//     let opts = ProverOpts::default()
+//         .with_env_var("TEST_MODE", "ENV_VARS")
+//         .with_env_var("ENV_VAR1", "val1")
+//         .with_env_var("ENV_VAR2", "")
+//         .with_read_fd(
+//             fileno::STDIN,
+//             Cursor::new(
+//                 r"ENV_VAR1
+// ENV_VAR2
+// ENV_VAR3",
+//             ),
+//         );
+//     let mut prover = Prover::new_with_opts(STANDARD_LIB_ELF, opts).unwrap();
+//     let receipt = prover.run().unwrap();
+//     let actual = receipt.journal.as_slice();
+//     assert_eq!(
+//         from_utf8(actual).unwrap(),
+//         r"ENV_VAR1=val1
+// ENV_VAR2=
+// !ENV_VAR3
+// "
+//     );
+// }
+
+// #[test]
+// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+// #[cfg_attr(feature = "cuda", serial)]
+// fn commit_hello_world() {
+//     let mut prover = Prover::new(HELLO_COMMIT_ELF).unwrap();
+//     prover.run().unwrap();
+// }
+
+// #[test]
+// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+// #[cfg_attr(feature = "cuda", serial)]
+// fn do_random() {
+//     let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
+//     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoRandom).unwrap());
+//     prover.run().unwrap();
+// }
+
+// #[test]
+// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
+// #[cfg_attr(feature = "cuda", serial)]
+// fn slice_io() {
+//     let run = |slice: &[u8]| {
+//         let mut prover = Prover::new(SLICE_IO_ELF).unwrap();
+//         prover.add_input_u32_slice(&[slice.len() as u32]);
+//         prover.add_input_u8_slice(slice);
+//         let receipt = prover.run().unwrap();
+//         assert_eq!(receipt.journal, slice);
+//     };
+
+//     run(b"");
+//     run(b"xyz");
+//     run(b"0000");
+// }
+
+// #[test]
+// #[cfg_attr(feature = "cuda", serial)]
+// fn fail() {
+//     // Check that a compliant host will fault.
+//     let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
+//     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Fail).unwrap());
+
+//     assert!(unwrap_err(prover.run())
+//         .to_string()
+//         .contains("MultiTestSpec::Fail invoked"));
+// }
 
 // These tests come from:
 // https://github.com/riscv-software-src/riscv-tests

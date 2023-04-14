@@ -76,7 +76,7 @@
 
 use alloc::vec::Vec;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 use hex::FromHex;
 use risc0_circuit_rv32im::layout;
 #[cfg(not(target_os = "zkvm"))]
@@ -171,38 +171,41 @@ where
     &'a Digest: From<D>,
 {
     let image_id: &Digest = image_id.into();
-    let check_globals = |io: &[BabyBearElem]| -> Result<(), VerificationError> {
-        // Decode the global outputs
-        let global = Global::decode(layout::OutBuffer(io))?;
-        #[cfg(not(target_os = "zkvm"))]
-        log::debug!("io: {global:#?}");
+    // Decode the global outputs
+    let io = bytemuck::cast_slice(seal);
+    let global = Global::decode(layout::OutBuffer(io))
+        .map_err(|err| anyhow!("Verification error: {err}"))?;
+    #[cfg(not(target_os = "zkvm"))]
+    log::debug!("io: {global:#?}");
 
-        // verify the image_id
-        if global.pre.image_id != *image_id {
-            return Err(VerificationError::ImageVerificationError);
-        }
+    // verify the image_id
+    if global.pre.image_id != *image_id {
+        bail!(
+            "Verification error: {}",
+            VerificationError::ImageVerificationError
+        );
+    }
 
-        // verify the output matches the digest of the journal
-        let digest = Sha256::digest(journal);
-        let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
-        let output_words = global.output.as_words();
-        let is_journal_valid = || {
-            (journal.is_empty() && output_words.iter().all(|x| *x == 0))
-                || digest_words == output_words
-        };
-        if !is_journal_valid() {
-            #[cfg(not(target_os = "zkvm"))]
-            log::debug!(
-                "journal: \"{}\", digest: 0x{}, output: 0x{}",
-                hex::encode(journal),
-                hex::encode(bytemuck::cast_slice(digest_words)),
-                hex::encode(bytemuck::cast_slice(output_words))
-            );
-            return Err(VerificationError::JournalDigestMismatch);
-        }
-
-        Ok(())
+    // verify the output matches the digest of the journal
+    let digest = Sha256::digest(journal);
+    let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
+    let output_words = global.output.as_words();
+    let is_journal_valid = || {
+        (journal.is_empty() && output_words.iter().all(|x| *x == 0)) || digest_words == output_words
     };
+    if !is_journal_valid() {
+        #[cfg(not(target_os = "zkvm"))]
+        log::debug!(
+            "journal: \"{}\", digest: 0x{}, output: 0x{}",
+            hex::encode(journal),
+            hex::encode(bytemuck::cast_slice(digest_words)),
+            hex::encode(bytemuck::cast_slice(output_words))
+        );
+        bail!(
+            "Verification error: {}",
+            VerificationError::JournalDigestMismatch
+        );
+    }
 
     #[cfg(any(feature = "std", target_os = "zkvm"))]
     if insecure_skip_seal() {
@@ -222,8 +225,8 @@ where
         Err(VerificationError::ControlVerificationError)
     };
 
-    risc0_zkp::verify::verify(hal, &CIRCUIT, seal, check_code, check_globals)
-        .map_err(|err| anyhow!("Verification failed: {}", err))
+    risc0_zkp::verify::verify(hal, &CIRCUIT, seal, check_code)
+        .map_err(|err| anyhow!("Verification failed: {err}"))
 }
 
 impl Receipt {
@@ -240,7 +243,6 @@ impl Receipt {
         }
     }
 
-    #[cfg(not(target_os = "zkvm"))]
     /// Verifies a SHA-256 receipt using CPU
     ///
     /// Verifies that this receipt was constructed by running code whose ImageID
@@ -250,6 +252,7 @@ impl Receipt {
     ///
     /// This runs the verification on the CPU and is for receipts using SHA-256
     /// as their hash function.
+    #[cfg(not(target_os = "zkvm"))]
     pub fn verify<'a, D>(&self, image_id: D) -> Result<()>
     where
         &'a Digest: From<D>,
@@ -309,18 +312,30 @@ impl Receipt {
     }
 }
 
+/// TODO
 #[derive(Debug)]
-struct SystemState {
-    _pc: u32,
-    image_id: Digest,
+pub struct SystemState {
+    /// TODO
+    pub pc: u32,
+
+    /// TODO
+    pub image_id: Digest,
 }
 
+/// TODO
 #[derive(Debug)]
-struct Global {
-    pre: SystemState,
-    _post: SystemState,
-    _check_dirty: u32,
-    output: Digest,
+pub struct Global {
+    /// TODO
+    pub pre: SystemState,
+
+    /// TODO
+    pub post: SystemState,
+
+    /// TODO
+    pub check_dirty: u32,
+
+    /// TODO
+    pub output: Digest,
 }
 
 impl SystemState {
@@ -332,12 +347,12 @@ impl SystemState {
             .tree(sys_state.image_id)
             .get_bytes()
             .or(Err(VerificationError::ReceiptFormatError))?;
-        let _pc = io
+        let pc = io
             .tree(sys_state.pc)
             .get_u32()
             .or(Err(VerificationError::ReceiptFormatError))?;
         let image_id = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        Ok(Self { _pc, image_id })
+        Ok(Self { pc, image_id })
     }
 }
 
@@ -345,25 +360,25 @@ impl Global {
     fn decode(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
         let pre = SystemState::decode(io, body.pre)?;
-        let _post = SystemState::decode(io, body.post)?;
+        let post = SystemState::decode(io, body.post)?;
         let bytes: Vec<u8> = io
             .tree(body.output)
             .get_bytes()
             .or(Err(VerificationError::ReceiptFormatError))?;
         let output = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        let _check_dirty = io.get_u64(body.check_dirty) as u32;
+        let check_dirty = io.get_u64(body.check_dirty) as u32;
 
         Ok(Self {
             pre,
-            _post,
-            _check_dirty,
+            post,
+            check_dirty,
             output,
         })
     }
 }
 
 /// TODO
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SessionReceipt {
     /// TODO
     pub segments: Vec<SegmentReceipt>,
@@ -373,35 +388,116 @@ pub struct SessionReceipt {
 }
 
 /// TODO
-#[derive(Deserialize, Serialize, Clone, Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SegmentReceipt {
     /// TODO
     pub seal: Vec<u32>,
 }
 
-/// TODO
-#[derive(Deserialize, Serialize, Clone, Debug)]
-pub struct ReceiptMetadata {}
-
 impl SessionReceipt {
     /// TODO
-    pub fn verify<D>(&self, _image_id: D) -> Result<()>
+    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
+        let hal = risc0_zkp::verify::CpuVerifyHal::<
+            BabyBear,
+            Sha256HashSuite<BabyBear, crate::sha::Impl>,
+            _,
+        >::new(&crate::CIRCUIT);
+        self.verify_with_hal(&hal, image_id)
+    }
+
+    /// TODO
+    pub fn verify_with_hal<H>(
+        &self,
+        hal: &H,
+        image_id: impl Into<Digest>,
+    ) -> Result<(), VerificationError>
     where
-        Digest: From<D>,
+        H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
+        H::HashFn: ControlId,
     {
-        todo!()
+        let (final_receipt, receipts) = self
+            .segments
+            .as_slice()
+            .split_last()
+            .ok_or(VerificationError::ReceiptFormatError)?;
+        let mut prev_image_id = image_id.into();
+        for receipt in receipts {
+            receipt.verify_with_hal(hal)?;
+            let metadata = receipt.get_metadata()?;
+            if prev_image_id != metadata.pre.image_id {
+                return Err(VerificationError::ImageVerificationError);
+            }
+            // assert_eq!(metadata.exit_code, ExitCode::SystemSplit);
+            prev_image_id = metadata.post.image_id;
+        }
+        final_receipt.verify_with_hal(hal)?;
+        let metadata = final_receipt.get_metadata()?;
+        // log::debug!("metadata: {metadata:#?}");
+        if prev_image_id != metadata.pre.image_id {
+            return Err(VerificationError::ImageVerificationError);
+        }
+
+        let digest = Sha256::digest(&self.journal);
+        let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
+        let output_words = metadata.output.as_words();
+        let is_journal_valid = || {
+            (self.journal.is_empty() && output_words.iter().all(|x| *x == 0))
+                || digest_words == output_words
+        };
+        if !is_journal_valid() {
+            #[cfg(not(target_os = "zkvm"))]
+            log::debug!(
+                "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
+                hex::encode(&self.journal),
+                hex::encode(bytemuck::cast_slice(digest_words)),
+                hex::encode(bytemuck::cast_slice(output_words)),
+                self.journal
+            );
+            return Err(VerificationError::JournalDigestMismatch);
+        }
+
+        // assert_ne!(metadata.exit_code, ExitCode::SystemSplit);
+        // Ok(metadata.exit_code)
+        Ok(())
     }
 }
 
 impl SegmentReceipt {
     /// TODO
-    pub fn get_metadata(&self) -> ReceiptMetadata {
-        todo!()
+    pub fn get_metadata(&self) -> Result<Global, VerificationError> {
+        let elems = bytemuck::cast_slice(&self.seal);
+        Global::decode(layout::OutBuffer(elems))
     }
 
     /// TODO
-    pub fn verify(&self) -> Result<()> {
-        todo!()
+    pub fn verify(&self) -> Result<(), VerificationError> {
+        let hal = risc0_zkp::verify::CpuVerifyHal::<
+            BabyBear,
+            Sha256HashSuite<BabyBear, crate::sha::Impl>,
+            _,
+        >::new(&crate::CIRCUIT);
+        self.verify_with_hal(&hal)
+    }
+
+    /// TODO
+    pub fn verify_with_hal<H>(&self, hal: &H) -> Result<(), VerificationError>
+    where
+        H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
+        H::HashFn: ControlId,
+    {
+        let control_id = &H::HashFn::CONTROL_ID;
+        let check_code = |po2: u32, merkle_root: &Digest| -> Result<(), VerificationError> {
+            let po2 = po2 as usize;
+            let which = po2 - MIN_CYCLES_PO2;
+            if which < control_id.len() {
+                let entry: Digest = Digest::from_hex(control_id[which]).unwrap();
+                if entry == *merkle_root {
+                    return Ok(());
+                }
+            }
+            Err(VerificationError::ControlVerificationError)
+        };
+        risc0_zkp::verify::verify(hal, &CIRCUIT, &self.seal, check_code)
     }
 
     /// Extracts the seal from the receipt, as a series of bytes.
@@ -409,5 +505,3 @@ impl SegmentReceipt {
         bytemuck::cast_slice(self.seal.as_slice())
     }
 }
-
-impl ReceiptMetadata {}
