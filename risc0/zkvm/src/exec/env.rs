@@ -52,7 +52,7 @@ pub struct ExecutorEnv<'a> {
     segment_limit_po2: usize,
     session_limit: usize,
     syscalls: SyscallTable<'a>,
-    io: PosixIo<'a>,
+    pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
     input: Vec<u8>,
 }
 
@@ -103,7 +103,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
         let getenv = syscalls::Getenv(self.inner.env_vars.clone());
         if !self.inner.input.is_empty() {
             let reader = Cursor::new(self.inner.input.clone());
-            result.inner.io.with_read_fd(fileno::STDIN, reader);
+            result
+                .inner
+                .io
+                .borrow_mut()
+                .with_read_fd(fileno::STDIN, reader);
         }
         let io = result.inner.io.clone();
         result
@@ -166,13 +170,13 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Add a posix-style file descriptor for reading.
     pub fn read_fd(&mut self, fd: u32, reader: impl BufRead + 'a) -> &mut Self {
-        self.inner.io.with_read_fd(fd, reader);
+        self.inner.io.borrow_mut().with_read_fd(fd, reader);
         self
     }
 
     /// Add a posix-style file descriptor for writing.
     pub fn write_fd(&mut self, fd: u32, writer: impl Write + 'a) -> &mut Self {
-        self.inner.io.with_write_fd(fd, writer);
+        self.inner.io.borrow_mut().with_write_fd(fd, writer);
         self
     }
 

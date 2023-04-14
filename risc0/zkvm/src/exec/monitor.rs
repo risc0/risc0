@@ -19,7 +19,7 @@ use risc0_zkvm_platform::{memory::SYSTEM, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
 use super::{io::SyscallContext, OpCodeResult, SyscallRecord};
-use crate::{binfmt::image::PageTableInfo, MemoryImage};
+use crate::{binfmt::image::PageTableInfo, session::PageFaults, MemoryImage};
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
 struct MemStore {
@@ -29,7 +29,7 @@ struct MemStore {
 
 pub struct MemoryMonitor {
     pub image: MemoryImage,
-    faults: PageFaults,
+    pub(crate) faults: PageFaults,
     pending_faults: PageFaults,
     pending_writes: BTreeSet<MemStore>,
     cycle: usize,
@@ -198,11 +198,6 @@ impl SyscallContext for MemoryMonitor {
 
 fn get_register_addr(idx: usize) -> u32 {
     (SYSTEM.start() + idx * WORD_SIZE) as u32
-}
-
-struct PageFaults {
-    reads: BTreeSet<u32>,
-    writes: BTreeSet<u32>,
 }
 
 enum IncludeDir {

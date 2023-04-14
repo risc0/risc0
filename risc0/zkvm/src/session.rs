@@ -15,6 +15,8 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
+use alloc::collections::BTreeSet;
+
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
@@ -39,11 +41,20 @@ pub enum ExitCode {
     Halted(u32),
 }
 
+#[derive(Clone, Default, Serialize, Deserialize)]
+pub struct PageFaults {
+    pub(crate) reads: BTreeSet<u32>,
+    pub(crate) writes: BTreeSet<u32>,
+}
+
 /// TODO
 #[derive(Serialize, Deserialize)]
 pub struct Session {
     /// TODO
     pub segments: Vec<Segment>,
+
+    /// TODO
+    pub journal: Vec<u8>,
 }
 
 /// TODO
@@ -51,30 +62,35 @@ pub struct Session {
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
-    syscalls: Vec<SyscallRecord>,
+    pub(crate) pc: u32,
+    pub(crate) faults: PageFaults,
+    pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
 }
 
 impl Session {
     /// TODO
-    pub fn new(segments: Vec<Segment>) -> Self {
-        Self { segments }
+    pub fn new(segments: Vec<Segment>, journal: Vec<u8>) -> Self {
+        Self { segments, journal }
     }
 }
 
 impl Segment {
-    /// TODO
-    pub fn new(
+    pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
-        exit_code: ExitCode,
+        pc: u32,
+        faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
+        exit_code: ExitCode,
     ) -> Self {
         Self {
             pre_image,
             post_image_id,
-            exit_code,
+            pc,
+            faults,
             syscalls,
+            exit_code,
         }
     }
 }

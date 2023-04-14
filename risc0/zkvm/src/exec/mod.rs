@@ -23,7 +23,7 @@ mod monitor;
 #[cfg(test)]
 mod tests;
 
-use std::{array, mem::take};
+use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use anyhow::{anyhow, bail, Result};
 use risc0_zkp::{
@@ -34,6 +34,7 @@ use risc0_zkp::{
     ZK_CYCLES,
 };
 use risc0_zkvm_platform::{
+    fileno,
     memory::MEM_SIZE,
     syscall::{
         ecall, halt,
@@ -71,6 +72,7 @@ pub struct Executor<'a> {
     env: ExecutorEnv<'a>,
     pre_image: MemoryImage,
     monitor: MemoryMonitor,
+    pre_pc: u32,
     pc: u32,
     init_cycles: usize,
     fini_cycles: usize,
@@ -109,6 +111,22 @@ impl OpCodeResult {
     }
 }
 
+// Capture the journal output in a buffer that we can access afterwards.
+#[derive(Clone, Default)]
+struct Journal {
+    buf: Rc<RefCell<Vec<u8>>>,
+}
+
+impl Write for Journal {
+    fn write(&mut self, bytes: &[u8]) -> std::io::Result<usize> {
+        self.buf.borrow_mut().write(bytes)
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.buf.borrow_mut().flush()
+    }
+}
+
 impl<'a> Executor<'a> {
     /// Construct a new [Executor] from a [MemoryImage] and entry point.
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage, pc: u32) -> Self {
@@ -122,6 +140,7 @@ impl<'a> Executor<'a> {
             env,
             pre_image,
             monitor,
+            pre_pc: pc,
             pc,
             init_cycles,
             fini_cycles,
@@ -141,6 +160,11 @@ impl<'a> Executor<'a> {
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
     pub fn run(&mut self) -> Result<Session> {
+        let journal = Journal::default();
+        self.env
+            .io
+            .borrow_mut()
+            .with_write_fd(fileno::JOURNAL, journal.clone());
         let mut segments = Vec::new();
 
         loop {
@@ -150,7 +174,15 @@ impl<'a> Executor<'a> {
                 self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
                 let post_image_id = self.monitor.image.get_root();
                 let syscalls = take(&mut self.monitor.syscalls);
-                segments.push(Segment::new(pre_image, post_image_id, exit_code, syscalls));
+                let faults = take(&mut self.monitor.faults);
+                segments.push(Segment::new(
+                    pre_image,
+                    post_image_id,
+                    self.pre_pc,
+                    faults,
+                    syscalls,
+                    exit_code,
+                ));
                 match exit_code {
                     ExitCode::SystemSplit => self.split(),
                     ExitCode::SessionLimit => bail!("Session limit exceeded"),
@@ -167,7 +199,7 @@ impl<'a> Executor<'a> {
             };
         }
 
-        Ok(Session::new(segments))
+        Ok(Session::new(segments, journal.buf.take()))
     }
 
     fn split(&mut self) {
@@ -175,6 +207,7 @@ impl<'a> Executor<'a> {
         self.pre_image = self.monitor.image.clone();
         self.body_cycles = 0;
         self.segment_cycle = self.init_cycles;
+        self.pre_pc = self.pc;
         self.monitor.clear();
     }
 
@@ -402,5 +435,47 @@ impl<'a> Executor<'a> {
                 regs: (a0, a1),
             }),
         ))
+    }
+}
+
+/// An event traced from the running VM.
+#[allow(dead_code)] // TODO
+#[non_exhaustive]
+#[derive(PartialEq)]
+pub enum TraceEvent {
+    /// An instruction has started at the given program counter
+    InstructionStart {
+        /// Cycle number since startup
+        cycle: u32,
+        /// Program counter of the instruction being executed
+        pc: u32,
+    },
+
+    /// A register has been set
+    RegisterSet {
+        /// Register ID (0-16)
+        reg: usize,
+        /// New value in the register
+        value: u32,
+    },
+
+    /// A memory location has been written
+    MemorySet {
+        /// Address of word that's been written
+        addr: u32,
+        /// Value of word that's been written
+        value: u32,
+    },
+}
+
+impl Debug for TraceEvent {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::InstructionStart { cycle, pc } => {
+                write!(f, "InstructionStart({cycle}, 0x{pc:08X})")
+            }
+            Self::RegisterSet { reg, value } => write!(f, "RegisterSet({reg}, 0x{value:08X})"),
+            Self::MemorySet { addr, value } => write!(f, "MemorySet(0x{addr:08X}, 0x{value:08X})"),
+        }
     }
 }
