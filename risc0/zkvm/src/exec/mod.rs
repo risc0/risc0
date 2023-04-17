@@ -30,6 +30,7 @@ use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
         hash::sha::{BLOCK_BYTES, BLOCK_WORDS},
+        log2_ceil,
     },
     ZK_CYCLES,
 };
@@ -53,17 +54,12 @@ use self::monitor::MemoryMonitor;
 use crate::{
     align_up,
     opcode::{MajorType, OpCode},
+    session::PageRead,
     ExitCode, Loader, MemoryImage, Program, Segment, Session,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
 const SHA_CYCLES: usize = 72;
-
-/// The number of blocks that fit within a single page.
-const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
-
-/// The number of cycles required to compute a SHA-256 digest of a page.
-const CYCLES_PER_PAGE: usize = SHA_CYCLES * BLOCKS_PER_PAGE;
 
 /// The Executor provides an implementation for the execution phase.
 ///
@@ -78,7 +74,8 @@ pub struct Executor<'a> {
     fini_cycles: usize,
     body_cycles: usize,
     segment_cycle: usize,
-    session_cycle: usize,
+    segments: Vec<Segment>,
+    page_reads: Vec<PageRead>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -146,7 +143,8 @@ impl<'a> Executor<'a> {
             fini_cycles,
             body_cycles: 0,
             segment_cycle: init_cycles,
-            session_cycle: init_cycles,
+            segments: Vec::new(),
+            page_reads: Vec::new(),
         }
     }
 
@@ -165,63 +163,68 @@ impl<'a> Executor<'a> {
             .io
             .borrow_mut()
             .with_write_fd(fileno::JOURNAL, journal.clone());
-        let mut segments = Vec::new();
 
-        loop {
-            let result = self.step()?;
-            if let Some(exit_code) = result {
-                let pre_image = self.pre_image.clone();
-                self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
-                let post_image_id = self.monitor.image.get_root();
-                let syscalls = take(&mut self.monitor.syscalls);
-                let faults = take(&mut self.monitor.faults);
-                segments.push(Segment::new(
-                    pre_image,
-                    post_image_id,
-                    self.pre_pc,
-                    faults,
-                    syscalls,
-                    exit_code,
-                ));
-                match exit_code {
-                    ExitCode::SystemSplit => self.split(),
-                    ExitCode::SessionLimit => bail!("Session limit exceeded"),
-                    ExitCode::Paused => {
-                        log::debug!("Paused: {}", self.segment_cycle);
-                        self.split();
-                        break;
-                    }
-                    ExitCode::Halted(exit_code) => {
-                        log::debug!("Halted({exit_code}): {}", self.segment_cycle);
-                        break;
-                    }
+        let mut run_loop = || -> Result<ExitCode> {
+            loop {
+                if let Some(exit_code) = self.step()? {
+                    let pre_image = self.pre_image.clone();
+                    self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
+                    let post_image_id = self.monitor.image.get_root();
+                    let syscalls = take(&mut self.monitor.syscalls);
+                    self.segments.push(Segment::new(
+                        pre_image,
+                        post_image_id,
+                        self.pre_pc,
+                        self.page_reads.clone(),
+                        self.monitor.get_page_writes(),
+                        syscalls,
+                        exit_code,
+                        log2_ceil(self.segment_cycle.next_power_of_two()),
+                    ));
+                    match exit_code {
+                        ExitCode::SystemSplit(_) => self.split(),
+                        ExitCode::SessionLimit => bail!("Session limit exceeded"),
+                        ExitCode::Paused => {
+                            log::debug!("Paused: {}", self.segment_cycle);
+                            self.split();
+                            return Ok(exit_code);
+                        }
+                        ExitCode::Halted(inner) => {
+                            log::debug!("Halted({inner}): {}", self.segment_cycle);
+                            return Ok(exit_code);
+                        }
+                    };
                 };
-            };
-        }
+            }
+        };
 
-        Ok(Session::new(segments, journal.buf.take()))
+        let exit_code = run_loop()?;
+        let mut segments = Vec::new();
+        std::mem::swap(&mut segments, &mut self.segments);
+        Ok(Session::new(segments, journal.buf.take(), exit_code))
     }
 
     fn split(&mut self) {
-        log::debug!("SystemSplit: {}", self.segment_cycle);
+        log::debug!("Split: {}", self.segment_cycle);
         self.pre_image = self.monitor.image.clone();
         self.body_cycles = 0;
         self.segment_cycle = self.init_cycles;
         self.pre_pc = self.pc;
         self.monitor.clear();
+        self.page_reads.clear();
     }
 
     /// Execute a single instruction.
     ///
     /// This can be directly used by debuggers.
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
-        if self.session_cycle > self.env.get_session_limit() {
+        if self.session_cycle() > self.env.get_session_limit() {
             return Ok(Some(ExitCode::SessionLimit));
         }
 
         let insn = self.monitor.load_u32(self.pc);
-        let opcode = OpCode::decode(insn);
 
+        let opcode = OpCode::decode(insn);
         if log::log_enabled!(log::Level::Debug) {
             let mut outputter = InstructionStringOutputter { insn_pc: self.pc };
             let desc = process_instruction(&mut outputter, insn);
@@ -235,15 +238,13 @@ impl<'a> Executor<'a> {
         }
 
         if let Some(op_result) = self.monitor.restore_op() {
-            let segment_cycles = self.segment_cycles(&opcode);
-            return Ok(self.advance(opcode, op_result, segment_cycles));
+            return Ok(self.advance(opcode, op_result));
         }
 
         let op_result = if opcode.major == MajorType::ECall {
             self.ecall()?
         } else {
             let registers = self.monitor.load_registers(array::from_fn(|idx| idx));
-            self.monitor.clear_pending_faults();
             let mut hart = HartState {
                 registers,
                 pc: self.pc,
@@ -275,25 +276,27 @@ impl<'a> Executor<'a> {
         let segment_limit = self.env.get_segment_limit();
         let segment_cycles = self.segment_cycles(&opcode);
         let exit_code = if segment_cycles > segment_limit {
-            Some(ExitCode::SystemSplit)
+            Some(ExitCode::SystemSplit(self.segment_cycle))
         } else {
-            self.advance(opcode, op_result, segment_cycles)
+            self.advance(opcode, op_result)
         };
         Ok(exit_code)
     }
 
-    fn advance(
-        &mut self,
-        opcode: OpCode,
-        op_result: OpCodeResult,
-        segment_cycles: usize,
-    ) -> Option<ExitCode> {
+    fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
+        let mut pending_page_reads = self.monitor.pending_page_reads();
+        if !pending_page_reads.is_empty() {
+            pending_page_reads.reverse();
+            let page_read = PageRead::new(self.segment_cycle as u32, pending_page_reads);
+            log::debug!("page_read: {}, {:x?}", page_read.cycle, page_read.idxs);
+            self.page_reads.push(page_read);
+        }
         self.pc = op_result.pc;
         self.body_cycles += opcode.cycles + op_result.extra_cycles;
-        let delta = segment_cycles - self.segment_cycle;
-        self.segment_cycle = segment_cycles;
-        self.session_cycle += delta;
-        self.monitor.commit(self.session_cycle);
+        let total_page_read_cycles = self.monitor.total_page_read_cycles();
+        // log::debug!("total_page_read_cycles: {total_page_read_cycles}");
+        self.segment_cycle = self.init_cycles + total_page_read_cycles + self.body_cycles;
+        self.monitor.commit(self.session_cycle());
         op_result.exit_code
     }
 
@@ -304,7 +307,7 @@ impl<'a> Executor<'a> {
         // - each page fault requires 1 PageFault cycle + CYCLES_PER_PAGE cycles
         // - leave room for fini_cycles
         // - leave room for ZK cycles
-        let fault_cycles = self.monitor.total_faults() * (1 + CYCLES_PER_PAGE);
+        let fault_cycles = self.monitor.total_fault_cycles();
         let total_cycles = self.init_cycles
             + opcode.cycles
             + self.body_cycles
@@ -313,16 +316,20 @@ impl<'a> Executor<'a> {
             + SHA_CYCLES
             + ZK_CYCLES;
 
-        log::trace!(
-            "body_cycles: {}\
-            , fault_cycles: {fault_cycles}\
-            , opcode_cycles: {}\
-            , total: {total_cycles}",
-            self.body_cycles,
-            opcode.cycles,
-        );
+        // log::trace!(
+        //     "body_cycles: {}\
+        //     , fault_cycles: {fault_cycles}\
+        //     , opcode_cycles: {}\
+        //     , total: {total_cycles}",
+        //     self.body_cycles,
+        //     opcode.cycles,
+        // );
 
         total_cycles
+    }
+
+    fn session_cycle(&self) -> usize {
+        self.segments.len() * self.env.get_segment_limit() + self.segment_cycle
     }
 
     fn ecall(&mut self) -> Result<OpCodeResult> {
@@ -422,14 +429,15 @@ impl<'a> Executor<'a> {
         self.monitor.store_register(REG_A0, a0);
         self.monitor.store_register(REG_A1, a1);
 
-        log::debug!("Syscall returned a0: {a0:#X}, a1: {a1:#X}");
+        log::debug!("Syscall returned a0: {a0:#X}, a1: {a1:#X}, chunks: {chunks}");
 
         // One cycle for the ecall cycle, then one for each chunk or
         // portion thereof then one to save output (a0, a1)
         Ok(OpCodeResult::new(
             self.pc + WORD_SIZE as u32,
             None,
-            1 + chunks + 1,
+            // 1 + chunks + 1,
+            1 + 1,
             Some(SyscallRecord {
                 to_guest,
                 regs: (a0, a1),

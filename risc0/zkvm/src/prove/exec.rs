@@ -14,30 +14,22 @@
 
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use lazy_regex::{regex, Captures};
 use log::{debug, trace};
-use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem as Elem},
     Elem as _,
 };
-use risc0_zkp::{
-    adapter::{CircuitInfo, CircuitStepHandler},
-    prove::executor::Executor,
-    MAX_CYCLES_PO2,
-};
-use risc0_zkvm_platform::{
-    syscall::{halt, DIGEST_WORDS},
-    WORD_SIZE,
-};
+use risc0_zkp::adapter::CircuitStepHandler;
+use risc0_zkvm_platform::{syscall::halt, WORD_SIZE};
 
-use super::{loader::Loader, plonk};
+use super::plonk;
 use crate::{
     binfmt::image::MemoryImage,
-    exec::SyscallRecord,
     opcode::{MajorType, OpCode},
-    session::PageFaults,
+    session::PageRead,
+    ExitCode, Segment,
 };
 
 #[allow(dead_code)]
@@ -133,7 +125,8 @@ fn merge_word8((x0, x1, x2, x3): (Elem, Elem, Elem, Elem)) -> u32 {
 
 pub struct MachineContext {
     memory: MemoryState,
-    faults: PageFaults,
+    page_reads: VecDeque<PageRead>,
+    page_writes: VecDeque<u32>,
     syscall_out_data: VecDeque<u32>,
     syscall_out_regs: VecDeque<(u32, u32)>,
 
@@ -143,11 +136,12 @@ pub struct MachineContext {
     // next dirty page will be reported in a 'pageInfo' extern.
     is_flushing: bool,
 
+    pending_page_reads: VecDeque<u32>,
+
     // This is just for diagnostics: tracks which words have been paged in.
     resident_words: BTreeSet<u32>,
 
-    last_pc: u32,
-    exit_code: u32,
+    exit_code: ExitCode,
 }
 
 impl CircuitStepHandler<Elem> for MachineContext {
@@ -195,7 +189,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 Ok(())
             }
             "ramRead" => {
-                (outs[0], outs[1], outs[2], outs[3]) = self.ram_read(args[0], args[1]);
+                (outs[0], outs[1], outs[2], outs[3]) = self.ram_read(cycle, args[0], args[1]);
                 Ok(())
             }
             "plonkWrite" => {
@@ -251,54 +245,87 @@ impl CircuitStepHandler<Elem> for MachineContext {
 }
 
 impl MachineContext {
-    pub fn new(image: MemoryImage, faults: PageFaults, syscalls: Vec<SyscallRecord>) -> Self {
-        let syscall_out_data: Vec<u32> = syscalls
+    pub fn new(segment: &Segment) -> Self {
+        let syscall_out_data: Vec<u32> = segment
+            .syscalls
             .iter()
             .flat_map(|syscall| syscall.to_guest.clone())
             .collect();
-        let syscall_out_regs: Vec<(u32, u32)> =
-            syscalls.iter().map(|syscall| syscall.regs).collect();
+        let syscall_out_regs: Vec<(u32, u32)> = segment
+            .syscalls
+            .iter()
+            .map(|syscall| syscall.regs)
+            .collect();
+        log::debug!("{:?}", segment.page_reads);
         MachineContext {
-            memory: MemoryState::new(image),
-            faults,
+            memory: MemoryState::new(segment.pre_image.clone()),
+            page_reads: VecDeque::from(segment.page_reads.clone()),
+            page_writes: VecDeque::from(segment.page_writes.clone()),
             syscall_out_data: VecDeque::from(syscall_out_data),
             syscall_out_regs: VecDeque::from(syscall_out_regs),
             is_halted: false,
             is_flushing: false,
+            pending_page_reads: VecDeque::new(),
             resident_words: BTreeSet::new(),
-            last_pc: 0,
-            exit_code: 0,
+            exit_code: segment.exit_code,
         }
     }
 
     fn halt(&mut self, cycle: usize, exit_code: Elem, pc: Elem) {
         if !self.is_halted {
-            self.exit_code = exit_code.into();
-            self.last_pc = pc.into();
-            match self.exit_code {
+            let exit_code = exit_code.into();
+            let pc: u32 = pc.into();
+            match exit_code {
                 halt::TERMINATE => {
-                    debug!("TERM[{cycle}]> pc: 0x{:08x}", self.last_pc);
+                    debug!("HALT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 halt::PAUSE => {
-                    self.last_pc += 4;
-                    debug!("PAUSE[{cycle}]> pc: 0x{:08x}", self.last_pc);
+                    debug!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
                 }
                 halt::SPLIT => {
-                    debug!("SPLIT[{cycle}]> pc: 0x{:08x}", self.last_pc);
+                    debug!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
                 }
-                _ => unimplemented!("Unsupported halt mode: {}", self.exit_code),
+                _ => unimplemented!("Unsupported exit_code: {exit_code}"),
             }
             self.is_halted = true;
         }
     }
 
-    fn get_major(&mut self, _cycle: Elem, pc: Elem) -> Result<Elem> {
+    fn get_major(&mut self, cycle: Elem, pc: Elem) -> Result<Elem> {
+        let cycle: u32 = cycle.into();
         let pc: u32 = pc.into();
         let insn = self.memory.load_u32(pc);
         let opcode = OpCode::decode(insn);
         trace!("decode: {}", opcode.mnemonic);
 
-        if !self.faults.reads.is_empty() || (self.is_flushing && !self.faults.writes.is_empty()) {
+        if let ExitCode::SystemSplit(split_cycle) = self.exit_code {
+            if cycle >= split_cycle as u32 {
+                log::debug!("split[{cycle}]> split_cycle: {split_cycle}");
+                if !self.is_flushing {
+                    log::debug!("FLUSH[{cycle}]> pc: 0x{pc:08x}");
+                    self.is_flushing = true;
+                }
+            }
+        }
+
+        if !self.pending_page_reads.is_empty() {
+            return Ok(MajorType::PageFault.as_u32().into());
+        }
+
+        if let Some(event) = self.page_reads.front() {
+            let event_cycle = event.cycle;
+            if cycle >= event_cycle {
+                let page_reads = self.page_reads.pop_front().unwrap();
+                log::debug!(
+                    "cycle: {cycle}, event: {}, page_reads: {page_reads:?}",
+                    event_cycle
+                );
+                self.pending_page_reads = VecDeque::from(page_reads.idxs);
+                return Ok(MajorType::PageFault.as_u32().into());
+            }
+        }
+
+        if self.is_flushing && !self.page_writes.is_empty() {
             return Ok(MajorType::PageFault.as_u32().into());
         }
 
@@ -306,12 +333,13 @@ impl MachineContext {
     }
 
     fn page_info(&mut self, _pc: Elem) -> (Elem, Elem, Elem) {
-        if let Some(page_idx) = self.faults.reads.pop_last() {
+        if let Some(page_idx) = self.pending_page_reads.pop_front() {
+            // log::debug!("page_read: {page_idx}");
             return (Elem::ONE, page_idx.into(), Elem::ZERO);
         }
 
         if self.is_flushing {
-            if let Some(page_idx) = self.faults.writes.pop_first() {
+            if let Some(page_idx) = self.page_writes.pop_front() {
                 return (Elem::ZERO, page_idx.into(), Elem::ZERO);
             }
         }
@@ -383,7 +411,10 @@ impl MachineContext {
             let format = captures.get(2).map_or("", |x| x.as_str());
             match format {
                 "u" => format!("{:width$}", next_arg()),
-                "x" => format!("{:0width$x}", next_arg()),
+                "x" => {
+                    let width = width.saturating_sub(2);
+                    format!("0x{:0width$x}", next_arg())
+                }
                 "d" => format!("{:width$}", next_arg() as i32),
                 "%" => format!("%"),
                 "w" => {
@@ -412,7 +443,7 @@ impl MachineContext {
         trace!("{}", formatted);
     }
 
-    fn ram_read(&mut self, addr: Elem, op: Elem) -> (Elem, Elem, Elem, Elem) {
+    fn ram_read(&mut self, cycle: usize, addr: Elem, op: Elem) -> (Elem, Elem, Elem, Elem) {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
         let info = &self.memory.ram.info;
@@ -423,7 +454,7 @@ impl MachineContext {
                 let addr = addr * WORD_SIZE as u32;
                 let page_idx = info.get_page_index(addr);
                 let entry_addr = info.get_page_entry_addr(page_idx);
-                debug!("  ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}");
+                debug!("[{cycle}] ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}, page_idx: {page_idx}");
                 panic!("Memory read before page in: 0x{addr:08x}");
             }
         }
@@ -496,57 +527,11 @@ impl MachineContext {
     }
 
     fn syscall_fini(&mut self) -> Result<(u32, u32)> {
-        let syscall_out_regs = self.syscall_out_regs.pop_front().unwrap();
-        debug!("Syscall complete, output registers: {:?}", syscall_out_regs);
+        let syscall_out_regs = self
+            .syscall_out_regs
+            .pop_front()
+            .ok_or(anyhow!("Invalid syscall records"))?;
+        debug!("syscall_fini: {:?}", syscall_out_regs);
         Ok(syscall_out_regs)
-    }
-}
-
-pub struct RV32Executor {
-    pub executor: Executor<BabyBear, CircuitImpl, MachineContext>,
-}
-
-impl RV32Executor {
-    pub fn new(
-        circuit: &'static CircuitImpl,
-        image: MemoryImage,
-        pc: u32,
-        faults: PageFaults,
-        syscalls: Vec<SyscallRecord>,
-    ) -> Self {
-        let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
-        debug!("run> pc: 0x{:08x}", pc);
-
-        // initialize PC
-        let pc_bytes = pc.to_le_bytes();
-        for i in 0..WORD_SIZE {
-            io[i] = (pc_bytes[i] as u32).into();
-        }
-
-        // initialize ImageID
-        let image_id = image.get_root();
-        let image_id = image_id.as_words();
-        for i in 0..DIGEST_WORDS {
-            let bytes = image_id[i].to_le_bytes();
-            for j in 0..WORD_SIZE {
-                io[(i + 1) * WORD_SIZE + j] = (bytes[j] as u32).into();
-            }
-        }
-
-        let machine = MachineContext::new(image, faults, syscalls);
-        let executor = Executor::new(circuit, machine, 13, MAX_CYCLES_PO2, &io);
-        Self { executor }
-    }
-
-    #[tracing::instrument(skip_all)]
-    pub fn run(&mut self) -> Result<(usize, u32, u32)> {
-        let loader = Loader::new();
-        let cycles = loader.load(|chunk, fini| self.executor.step(chunk, fini))?;
-        self.executor.finalize();
-        Ok((
-            cycles,
-            self.executor.handler.exit_code,
-            self.executor.handler.last_pc,
-        ))
     }
 }

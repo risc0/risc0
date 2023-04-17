@@ -22,7 +22,7 @@ use test_log::test;
 use super::default_hal;
 use crate::{
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, SessionReceipt,
+    Executor, ExecutorEnv, ExitCode, SessionReceipt,
 };
 
 fn prove_nothing() -> Result<SessionReceipt> {
@@ -127,51 +127,46 @@ fn memory_io() {
     run_memio(&[(HEAP.start() + 1, 0)]).unwrap_err();
 }
 
-// #[test]
-// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
-// #[cfg_attr(feature = "cuda", serial)]
-// fn pause_continue() {
-//     let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
-//     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::PauseContinue).
-// unwrap());
+#[test]
+#[cfg_attr(feature = "cuda", serial)]
+fn pause_continue() {
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
+        .build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let (hal, eval) = default_hal();
 
-//     // Run until sys_pause
-//     prover.run().unwrap();
-//     assert_eq!(prover.exit_code, halt::PAUSE);
+    // Run until sys_pause
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Paused);
+    session.prove(hal.as_ref(), &eval).unwrap();
 
-//     // Run until sys_halt
-//     prover.run().unwrap();
-//     assert_eq!(prover.exit_code, halt::TERMINATE);
-// }
+    // Run until sys_halt
+    let session = exec.run().unwrap();
+    assert_eq!(session.exit_code, ExitCode::Halted(0));
+    session.prove(hal.as_ref(), &eval).unwrap();
+}
 
-// #[test]
-// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
-// #[cfg_attr(feature = "cuda", serial)]
-// fn continuation() {
-//     let segment_limit_po2 = 17; // 128k cycles
-//     const COUNT: usize = 4; // Number of total chunks to aim for.
+#[test]
+#[cfg_attr(feature = "cuda", serial)]
+fn continuation() {
+    const COUNT: usize = 2; // Number of total chunks to aim for.
+    let segment_limit_po2 = 15; // 32k cycles
+    let cycles = 1 << segment_limit_po2;
 
-//     let opts =
-// ProverOpts::default().with_segment_limit_po2(segment_limit_po2);     let mut
-// prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();     prover.
-// add_input_u32_slice(         &to_vec(&MultiTestSpec::BusyLoop {
-//             // BusyLoop goes for *at least* this many cycles, so should fill
-// up (COUNT - 1) blocks             // and then slightly overflow into the next
-// one.             cycles: ((COUNT - 1) * (1 << segment_limit_po2)) as u32,
-//         })
-//         .unwrap(),
-//     );
+    let spec = &to_vec(&MultiTestSpec::BusyLoop { cycles }).unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&spec)
+        .segment_limit_po2(segment_limit_po2)
+        .build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    assert_eq!(session.segments.len(), COUNT);
 
-//     for count in 0..COUNT {
-//         prover.run().unwrap();
-//         if count == COUNT - 1 {
-//             assert_eq!(prover.exit_code, halt::TERMINATE);
-//         } else {
-//             assert_eq!(
-//                 prover.exit_code,
-//                 halt::SPLIT,
-//                 "expected a split at part {count}"
-//             );
-//         }
-//     }
-// }
+    let segments = &session.segments;
+    // assert_eq!(segments[0].exit_code, ExitCode::SystemSplit(52727));
+    assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
+
+    let (hal, eval) = default_hal();
+    session.prove(hal.as_ref(), &eval).unwrap();
+}

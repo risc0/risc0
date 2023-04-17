@@ -21,8 +21,9 @@
 //!
 //! # Usage
 //!
-//! We provide two interfaces for SHA hashing.
-//! The first interface is based on [Rust Crypto](https://github.com/RustCrypto) wrappers and can be found in the [rust_crypto] module, along with documentation and usage notes.
+//! We provide two interfaces for SHA hashing. The first interface is based on
+//! [Rust Crypto](https://github.com/RustCrypto) wrappers and can be found in
+//! the [rust_crypto] module, along with documentation and usage notes.
 //!
 //! The other interface is to directly use an implementation of the [Sha256]
 //! trait defined in this module:

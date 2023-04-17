@@ -39,18 +39,22 @@ mod tests;
 use anyhow::{anyhow, Result};
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
-    REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
+    CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
 };
-use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
+use risc0_core::field::{
+    baby_bear::{BabyBear, Elem, ExtElem},
+    Elem as _,
+};
 use risc0_zkp::{
-    adapter::TapsProvider,
-    core::hash::HashSuite,
+    adapter::{CircuitInfo, TapsProvider},
+    core::{digest::DIGEST_WORDS, hash::HashSuite},
     hal::{EvalCheck, Hal},
     layout::Buffer,
-    prove::adapter::ProveAdapter,
+    prove::{adapter::ProveAdapter, executor::Executor},
 };
+use risc0_zkvm_platform::WORD_SIZE;
 
-use self::exec::RV32Executor;
+use self::{exec::MachineContext, loader::Loader};
 use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT};
 
 /// HAL creation functions for CUDA.
@@ -156,7 +160,7 @@ impl Session {
     /// For each segment, call [Segment::prove] and collect the receipts.
     pub fn prove<H, E>(&self, hal: &H, eval: &E) -> Result<SessionReceipt>
     where
-        H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+        H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
         <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
         E: EvalCheck<H>,
     {
@@ -180,20 +184,19 @@ impl Segment {
     /// Call the ZKP system to produce a [SegmentReceipt].
     pub fn prove<H, E>(&self, hal: &H, eval: &E) -> Result<SegmentReceipt>
     where
-        H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
+        H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
         <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
         E: EvalCheck<H>,
     {
-        let mut executor = RV32Executor::new(
-            &CIRCUIT,
-            self.pre_image.clone(),
-            self.pc,
-            self.faults.clone(),
-            self.syscalls.clone(),
-        );
-        executor.run()?;
+        let io = self.prepare_globals();
+        let machine = MachineContext::new(&self);
+        let mut executor = Executor::new(&CIRCUIT, machine, self.po2, self.po2, &io);
 
-        let mut adapter = ProveAdapter::new(&mut executor.executor);
+        let loader = Loader::new();
+        loader.load(|chunk, fini| executor.step(chunk, fini))?;
+        executor.finalize();
+
+        let mut adapter = ProveAdapter::new(&mut executor);
         let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
 
         adapter.execute(prover.iop());
@@ -228,5 +231,28 @@ impl Segment {
             .map_err(|err| anyhow!("Verification error: {err}"))?;
 
         Ok(receipt)
+    }
+
+    fn prepare_globals(&self) -> Vec<Elem> {
+        let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
+        log::debug!("run> pc: 0x{:08x}", self.pc);
+
+        // initialize PC
+        let pc_bytes = self.pc.to_le_bytes();
+        for i in 0..WORD_SIZE {
+            io[i] = (pc_bytes[i] as u32).into();
+        }
+
+        // initialize ImageID
+        let image_id = self.pre_image.get_root();
+        let image_id = image_id.as_words();
+        for i in 0..DIGEST_WORDS {
+            let bytes = image_id[i].to_le_bytes();
+            for j in 0..WORD_SIZE {
+                io[(i + 1) * WORD_SIZE + j] = (bytes[j] as u32).into();
+            }
+        }
+
+        io
     }
 }

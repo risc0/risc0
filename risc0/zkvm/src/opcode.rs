@@ -77,7 +77,7 @@ impl OpCode {
         let rs2 = (word & 0x01f00000) >> 20;
         let funct3 = (word & 0x00007000) >> 12;
         let funct7 = (word & 0xfe000000) >> 25;
-        // debug!("decode: 0x{word:08X}");
+        // log::debug!("decode: 0x{word:08X}");
 
         match opcode {
             0b0000011 => match funct3 {

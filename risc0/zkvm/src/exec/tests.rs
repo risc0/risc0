@@ -12,18 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::BTreeMap, sync::Mutex};
+use std::{collections::BTreeMap, io::Cursor, str::from_utf8, sync::Mutex};
 
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    MULTI_TEST_ELF,
+    HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
-use risc0_zkvm_platform::{PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::{fileno, PAGE_SIZE, WORD_SIZE};
+use test_log::test;
 
 use super::{Executor, ExecutorEnv};
-use crate::{serde::to_vec, ExitCode, MemoryImage, Program};
+use crate::{
+    serde::{from_slice, to_vec},
+    ExitCode, MemoryImage, Program,
+};
 
-#[test_log::test]
+#[test]
 fn basic() {
     let env = ExecutorEnv::default();
     let image = BTreeMap::from([
@@ -48,17 +52,8 @@ fn basic() {
     assert_ne!(session.segments[0].post_image_id, pre_image_id);
 }
 
-fn init() {
-    let _ = env_logger::builder()
-        .format_timestamp_millis()
-        .is_test(true)
-        .try_init();
-}
-
 #[test]
 fn system_split() {
-    init();
-
     let entry = 0x4000;
     let env = ExecutorEnv::builder()
         .segment_limit_po2(14) // 16K cycles
@@ -79,7 +74,7 @@ fn system_split() {
     let session = exec.run().unwrap();
 
     assert_eq!(session.segments.len(), 2);
-    assert_eq!(session.segments[0].exit_code, ExitCode::SystemSplit);
+    assert_eq!(session.segments[0].exit_code, ExitCode::SystemSplit(0));
     assert_eq!(session.segments[0].pre_image.get_root(), pre_image_id);
     assert_ne!(session.segments[0].post_image_id, pre_image_id);
     assert_eq!(session.segments[1].exit_code, ExitCode::Halted(0));
@@ -89,7 +84,7 @@ fn system_split() {
     );
 }
 
-#[test_log::test]
+#[test]
 fn host_syscall() {
     let expected: Vec<Vec<u8>> = vec![
         "".into(),
@@ -118,7 +113,7 @@ fn host_syscall() {
 }
 
 // Make sure panics in the callback get propagated correctly.
-#[test_log::test]
+#[test]
 #[should_panic(expected = "I am panicking from here!")]
 fn host_syscall_callback_panic() {
     let input = to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap();
@@ -132,7 +127,7 @@ fn host_syscall_callback_panic() {
     exec.run().unwrap();
 }
 
-#[test_log::test]
+#[test]
 fn sha_accel() {
     let input = to_vec(&MultiTestSpec::ShaConforms).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build();
@@ -140,7 +135,7 @@ fn sha_accel() {
     exec.run().unwrap();
 }
 
-#[test_log::test]
+#[test]
 fn sha_cycle_count() {
     let input = to_vec(&MultiTestSpec::ShaCycleCount).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build();
@@ -148,7 +143,7 @@ fn sha_cycle_count() {
     exec.run().unwrap();
 }
 
-#[test_log::test]
+#[test]
 fn stdio() {
     const MSG: &str = "Hello world!  This is a test of standard input and output.";
     const FD: u32 = 123;
@@ -163,7 +158,7 @@ fn stdio() {
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         exec.run().unwrap();
     }
-    assert_eq!(MSG, core::str::from_utf8(&stdout).unwrap());
+    assert_eq!(MSG, from_utf8(&stdout).unwrap());
 }
 
 // #[cfg(feature = "profiler")]
@@ -298,165 +293,154 @@ fn stdio() {
 //     }));
 // }
 
-// #[test]
-// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
-// #[cfg_attr(feature = "cuda", serial)]
-// fn posix_style_read() {
-//     // Tests sys_read into a buffer of bytes that may not be word
-//     // aligned.  To make sure we don't miss any edge cases, this tries
-//     // all permutations of start alignment, end alignment, and 0, 1,
-//     // or 2 whole words.
+// Tests sys_read into a buffer of bytes that may not be word aligned.
+//
+// To make sure we don't miss any edge cases, this tries all permutations of
+// start alignment, end alignment, and 0, 1, or 2 whole words.
+#[test]
+fn posix_style_read() {
+    // Initial buffer to read bytes on top of.
+    let orig: Vec<u8> = (b'a'..b'z')
+        .chain(b'0'..b'9')
+        .chain(b"!@#$%^&*()".iter().cloned())
+        .collect();
+    // Input to read bytes from.
+    let readbuf: Vec<u8> = (b'A'..b'Z').collect();
 
-//     // Initial buffer to read bytes on top of.
-//     let orig: Vec<u8> = (b'a'..b'z')
-//         .chain(b'0'..b'9')
-//         .chain(b"!@#$%^&*()".iter().cloned())
-//         .collect();
-//     // Input to read bytes from.
-//     let readbuf: Vec<u8> = (b'A'..b'Z').collect();
+    let run = |pos_and_len: Vec<(u32, u32)>| {
+        let mut expected = orig.to_vec();
 
-//     let run = |pos_and_len: Vec<(u32, u32)>| {
-//         let mut expected = orig.to_vec();
+        let mut expected_readbuf = readbuf.as_slice();
+        for (pos, len) in pos_and_len.iter() {
+            let pos = *pos as usize;
+            let len = *len as usize;
 
-//         let mut expected_readbuf = readbuf.as_slice();
-//         for (pos, len) in pos_and_len.iter() {
-//             let pos = *pos as usize;
-//             let len = *len as usize;
+            let this_read;
+            (this_read, expected_readbuf) = expected_readbuf.split_at(len);
+            expected[pos..pos + len].clone_from_slice(this_read);
+        }
 
-//             let this_read;
-//             (this_read, expected_readbuf) = expected_readbuf.split_at(len);
-//             expected[pos..pos + len].clone_from_slice(this_read);
-//         }
+        let spec = to_vec(&MultiTestSpec::SysRead {
+            fd: 123,
+            orig: orig.to_vec(),
+            pos_and_len: pos_and_len.clone(),
+        })
+        .unwrap();
+        let env = ExecutorEnv::builder()
+            .read_fd(123, readbuf.as_slice())
+            .add_input(&spec)
+            .build();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let session = exec.run().unwrap();
 
-//         let opts = ProverOpts::default()
-//             .with_skip_seal(true)
-//             .with_read_fd(123, readbuf.as_slice());
+        let actual: Vec<u8> = from_slice(&session.journal).unwrap();
+        assert_eq!(
+            from_utf8(&actual).unwrap(),
+            from_utf8(&expected).unwrap(),
+            "pos and lens: {pos_and_len:?}"
+        );
+    };
 
-//         let mut prover = Prover::new_with_opts(MULTI_TEST_ELF,
-// opts).unwrap();         prover.add_input_u32_slice(
-//             &to_vec(&MultiTestSpec::SysRead {
-//                 fd: 123,
-//                 orig: orig.to_vec(),
-//                 pos_and_len: pos_and_len.clone(),
-//             })
-//             .unwrap(),
-//         );
-//         let receipt = prover.run().unwrap();
+    fn next_offset(mut pos: u32, offset: u32) -> u32 {
+        while (pos % WORD_SIZE as u32) != offset {
+            pos += 1;
+        }
+        pos
+    }
 
-//         let actual: Vec<u8> = from_slice(&receipt.journal).unwrap();
-//         assert_eq!(
-//             std::str::from_utf8(&actual).unwrap(),
-//             std::str::from_utf8(&expected).unwrap(),
-//             "pos and lens: {pos_and_len:?}"
-//         );
-//     };
+    for start_offset in 0..WORD_SIZE as u32 {
+        for end_offset in 0..WORD_SIZE as u32 {
+            let mut pos = 0;
+            let mut pos_and_len: Vec<(u32, u32)> = Vec::new();
 
-//     fn next_offset(mut pos: u32, offset: u32) -> u32 {
-//         while (pos % WORD_SIZE as u32) != offset {
-//             pos += 1;
-//         }
-//         pos
-//     }
+            // Make up a bunch of reads to overwrite parts of the buffer.
+            for nwords in 0..3 {
+                pos = next_offset(pos, start_offset);
+                let start = pos;
+                pos += nwords * WORD_SIZE as u32;
+                pos = next_offset(pos, end_offset);
+                let len = pos - start;
+                pos_and_len.push((pos, len));
+                assert!(
+                    pos + len < orig.len() as u32,
+                    "Ran out of space to test writes. pos: {pos} len: {len} end: {end_offset} start = {start_offset}"
+                );
+                // Make sure there's at least one non-overwritten character between reads.
+                pos += 1;
+            }
 
-//     for start_offset in 0..WORD_SIZE as u32 {
-//         for end_offset in 0..WORD_SIZE as u32 {
-//             let mut pos = 0;
-//             let mut pos_and_len: Vec<(u32, u32)> = Vec::new();
+            run(pos_and_len);
+        }
+    }
+}
 
-//             // Make up a bunch of reads to overwrite parts of the buffer.
-//             for nwords in 0..3 {
-//                 pos = next_offset(pos, start_offset);
-//                 let start = pos;
-//                 pos += nwords * WORD_SIZE as u32;
-//                 pos = next_offset(pos, end_offset);
-//                 let len = pos - start;
-//                 pos_and_len.push((pos, len));
-//                 assert!(
-//                     pos + len < orig.len() as u32,
-//                     "Ran out of space to test writes. pos: {pos} len: {len}
-// end: {end_offset} start = {start_offset}"                 );
-//                 // Make sure there's at least one non-overwritten character
-// between reads.                 pos += 1;
-//             }
+#[test]
+fn environment() {
+    let env = ExecutorEnv::builder()
+        .env_var("TEST_MODE", "ENV_VARS")
+        .env_var("ENV_VAR1", "val1")
+        .env_var("ENV_VAR2", "")
+        .read_fd(
+            fileno::STDIN,
+            Cursor::new(
+                r"ENV_VAR1
+ENV_VAR2
+ENV_VAR3",
+            ),
+        )
+        .build();
+    let mut exec = Executor::from_elf(env, STANDARD_LIB_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let actual = session.journal.as_slice();
+    assert_eq!(
+        from_utf8(actual).unwrap(),
+        r"ENV_VAR1=val1
+ENV_VAR2=
+!ENV_VAR3
+"
+    );
+}
 
-//             run(pos_and_len);
-//         }
-//     }
-// }
+#[test]
+fn commit_hello_world() {
+    let mut exec = Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+    exec.run().unwrap();
+}
 
-// #[test]
-// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
-// #[cfg_attr(feature = "cuda", serial)]
-// fn environment() {
-//     let opts = ProverOpts::default()
-//         .with_env_var("TEST_MODE", "ENV_VARS")
-//         .with_env_var("ENV_VAR1", "val1")
-//         .with_env_var("ENV_VAR2", "")
-//         .with_read_fd(
-//             fileno::STDIN,
-//             Cursor::new(
-//                 r"ENV_VAR1
-// ENV_VAR2
-// ENV_VAR3",
-//             ),
-//         );
-//     let mut prover = Prover::new_with_opts(STANDARD_LIB_ELF, opts).unwrap();
-//     let receipt = prover.run().unwrap();
-//     let actual = receipt.journal.as_slice();
-//     assert_eq!(
-//         from_utf8(actual).unwrap(),
-//         r"ENV_VAR1=val1
-// ENV_VAR2=
-// !ENV_VAR3
-// "
-//     );
-// }
+#[test]
+fn random() {
+    let spec = to_vec(&MultiTestSpec::DoRandom).unwrap();
+    let env = ExecutorEnv::builder().add_input(&spec).build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run().unwrap();
+}
 
-// #[test]
-// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
-// #[cfg_attr(feature = "cuda", serial)]
-// fn commit_hello_world() {
-//     let mut prover = Prover::new(HELLO_COMMIT_ELF).unwrap();
-//     prover.run().unwrap();
-// }
+#[test]
+fn slice_io() {
+    let run = |slice: &[u8]| {
+        let env = ExecutorEnv::builder()
+            .add_input(&[slice.len() as u32])
+            .add_input(slice)
+            .build();
+        let mut exec = Executor::from_elf(env, SLICE_IO_ELF).unwrap();
+        let session = exec.run().unwrap();
+        assert_eq!(session.journal, slice);
+    };
 
-// #[test]
-// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
-// #[cfg_attr(feature = "cuda", serial)]
-// fn do_random() {
-//     let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
-//     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoRandom).unwrap());
-//     prover.run().unwrap();
-// }
+    run(b"");
+    run(b"xyz");
+    run(b"0000");
+}
 
-// #[test]
-// #[cfg_attr(feature = "insecure_skip_seal", ignore)]
-// #[cfg_attr(feature = "cuda", serial)]
-// fn slice_io() {
-//     let run = |slice: &[u8]| {
-//         let mut prover = Prover::new(SLICE_IO_ELF).unwrap();
-//         prover.add_input_u32_slice(&[slice.len() as u32]);
-//         prover.add_input_u8_slice(slice);
-//         let receipt = prover.run().unwrap();
-//         assert_eq!(receipt.journal, slice);
-//     };
-
-//     run(b"");
-//     run(b"xyz");
-//     run(b"0000");
-// }
-
-// #[test]
-// #[cfg_attr(feature = "cuda", serial)]
-// fn fail() {
-//     // Check that a compliant host will fault.
-//     let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
-//     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Fail).unwrap());
-
-//     assert!(unwrap_err(prover.run())
-//         .to_string()
-//         .contains("MultiTestSpec::Fail invoked"));
-// }
+// Check that a compliant host will fault.
+#[test]
+fn fail() {
+    let spec = to_vec(&MultiTestSpec::Fail).unwrap();
+    let env = ExecutorEnv::builder().add_input(&spec).build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let err = exec.run().err().unwrap();
+    assert!(err.to_string().contains("MultiTestSpec::Fail invoked"));
+}
 
 // These tests come from:
 // https://github.com/riscv-software-src/riscv-tests
