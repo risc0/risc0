@@ -15,6 +15,8 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
+use alloc::collections::BTreeSet;
+
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
@@ -39,6 +41,12 @@ pub enum ExitCode {
     Halted(u32),
 }
 
+#[derive(Clone, Default, Serialize, Deserialize)]
+pub struct PageFaults {
+    pub(crate) reads: BTreeSet<u32>,
+    pub(crate) writes: BTreeSet<u32>,
+}
+
 /// The execution trace of a program.
 ///
 /// The record of memory transactions of an execution that starts from an
@@ -52,6 +60,9 @@ pub struct Session {
     /// or [SessionLimit](ExitCode::SessionLimit), and all other [Segment]s (if
     /// any) will have [ExitCode::SystemSplit].
     pub segments: Vec<Segment>,
+
+    /// The data publicly committed by the guest program.
+    pub journal: Vec<u8>,
 }
 
 /// The execution trace of a portion of a program.
@@ -66,30 +77,36 @@ pub struct Session {
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
-    syscalls: Vec<SyscallRecord>,
+    pub(crate) pc: u32,
+    pub(crate) faults: PageFaults,
+    pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
 }
 
 impl Session {
-    /// Create a new Session from its constituent [Segment]s.
-    pub fn new(segments: Vec<Segment>) -> Self {
-        Self { segments }
+    /// Create a new Session from its constituent [Segment]s and journal.
+    pub fn new(segments: Vec<Segment>, journal: Vec<u8>) -> Self {
+        Self { segments, journal }
     }
 }
 
 impl Segment {
     /// Create a new Session from its constituent components.
-    pub fn new(
+    pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
-        exit_code: ExitCode,
+        pc: u32,
+        faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
+        exit_code: ExitCode,
     ) -> Self {
         Self {
             pre_image,
             post_image_id,
-            exit_code,
+            pc,
+            faults,
             syscalls,
+            exit_code,
         }
     }
 }
