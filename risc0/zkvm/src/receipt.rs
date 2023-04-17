@@ -362,20 +362,30 @@ impl Global {
     }
 }
 
-/// TODO
+/// A receipt attesting to the execution of a Session.
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct SessionReceipt {
-    /// TODO
+    /// The constituent [SegmentReceipt]s.
+    ///
+    /// Together these can be used by [SessionReceipt::verify] to
+    /// cryptographically prove that this full Session was faithfully executed.
     pub segments: Vec<SegmentReceipt>,
 
-    /// TODO
+    /// The public data written by the guest in this Session.
+    ///
+    /// This data is cryptographically authenticated in
+    /// [SessionReceipt::verify].
     pub journal: Vec<u8>,
 }
 
-/// TODO
+/// A receipt attesting to the execution of a Segment.
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct SegmentReceipt {
-    /// TODO
+    /// The cryptographic data attesting to the validity of the code execution.
+    ///
+    /// This data is used by the ZKP Verifier (as called by
+    /// [SegmentReceipt::verify]) to cryptographically prove that this Segment
+    /// was faithfully executed.
     pub seal: Vec<u32>,
 }
 
@@ -384,7 +394,12 @@ pub struct SegmentReceipt {
 pub struct ReceiptMetadata {}
 
 impl SessionReceipt {
-    /// TODO
+    /// Verifies the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
+    /// stitch together correctly, and that the initial memory image matches the
+    /// given `_image_id` parameter.
     pub fn verify<D>(&self, _image_id: D) -> Result<()>
     where
         Digest: From<D>,
@@ -399,7 +414,10 @@ impl SegmentReceipt {
         todo!()
     }
 
-    /// TODO
+    /// Verifies the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that the seal does
+    /// validly indicate that this Segment was executed faithfully.
     pub fn verify(&self) -> Result<()> {
         todo!()
     }
