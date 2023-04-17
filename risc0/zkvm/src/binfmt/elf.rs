@@ -70,11 +70,8 @@ impl Program {
                     let len = std::cmp::min(file_size - i, 4);
                     for j in 0..len {
                         let offset = (offset + i + j) as usize;
-                        if offset >= input.len() {
-                            bail!("Invalid segment offset");
-                        }
-                        let byte = input[offset] as u32;
-                        word |= byte << j * 8;
+                        let byte = input.get(offset).context("Invalid segment offset")?;
+                        word |= (*byte as u32) << (j * 8);
                     }
                     image.insert(addr, word);
                 }
