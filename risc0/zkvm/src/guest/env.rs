@@ -29,7 +29,8 @@ use risc0_zkvm_platform::{
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-    guest::{align_up, memory_barrier, sha},
+    align_up,
+    guest::{memory_barrier, sha},
     serde::{Deserializer, Result as SerdeResult, Serializer, WordRead, WordWrite},
     sha::rust_crypto::{Digest as _, Output, Sha256},
 };

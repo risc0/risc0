@@ -194,17 +194,17 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
 }
 
 /// Returns all methods associated with the given riscv guest package.
-fn guest_methods<P>(pkg: &Package, out_dir: P) -> Vec<Risc0Method>
+fn guest_methods<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
 where
     P: AsRef<Path>,
 {
-    let target_dir = out_dir.as_ref().join("riscv-guest");
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| Risc0Method {
             name: target.name.clone(),
             elf_path: target_dir
+                .as_ref()
                 .join("riscv32im-risc0-zkvm-elf")
                 .join("release")
                 .join(&target.name),
@@ -335,6 +335,12 @@ fn build_guest_package<P>(
 ) where
     P: AsRef<Path>,
 {
+    let skip_var_name = "RISC0_SKIP_BUILD";
+    println!("cargo:rerun-if-env-changed={}", skip_var_name);
+    if env::var(skip_var_name).is_ok() {
+        return;
+    }
+
     fs::create_dir_all(target_dir.as_ref()).unwrap();
     let cargo = env::var("CARGO").unwrap();
     let mut std_parts = vec!["alloc", "core", "proc_macro", "panic_abort"];
@@ -441,14 +447,18 @@ impl Default for GuestOptions {
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
 pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
-    let skip_var_name = "RISC0_SKIP_BUILD";
-    println!("cargo:rerun-if-env-changed={}", skip_var_name);
-    if env::var(skip_var_name).is_ok() {
-        return;
-    }
-
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env);
+    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
+    let guest_dir = out_dir
+        .parent() // out
+        .unwrap()
+        .parent() // $crate
+        .unwrap()
+        .parent() // build
+        .unwrap()
+        .parent() // $profile
+        .unwrap()
+        .join("riscv-guest");
 
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
@@ -466,13 +476,13 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 
         build_guest_package(
             &guest_pkg,
-            &out_dir.join("riscv-guest"),
+            &guest_dir,
             &guest_build_env,
             guest_options.features,
             guest_options.std,
         );
 
-        for method in guest_methods(&guest_pkg, &out_dir) {
+        for method in guest_methods(&guest_pkg, &guest_dir) {
             methods_file
                 .write_all(method.rust_def().as_bytes())
                 .unwrap();

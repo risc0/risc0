@@ -18,10 +18,8 @@ use bytemuck::Pod;
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::de::{DeserializeOwned, DeserializeSeed, IntoDeserializer, Visitor};
 
-use super::{
-    align_up,
-    err::{Error, Result},
-};
+use super::err::{Error, Result};
+use crate::align_up;
 
 /// A reader for reading streams with serialized word-based data
 pub trait WordRead {

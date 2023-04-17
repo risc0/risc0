@@ -26,12 +26,10 @@ use rrs_lib::{
     MemAccessSize, Memory,
 };
 
-use super::{
+use super::segment::{Segment, Segmentize};
+use crate::{
     align_up,
     opcode::{MajorType, OpCode},
-    segment::{Segment, Segmentize},
-};
-use crate::{
     prove::{io::SyscallContext, ProverOpts},
     sha::{DIGEST_BYTES, DIGEST_WORDS},
     MemoryImage,
@@ -115,18 +113,18 @@ impl<'a, 'b> SyscallContext for OperationBuilder<'a, 'b> {
 
     fn load_u32(&self, addr: u32) -> u32 {
         u32::from_le_bytes(
-            self.exec.mem.image[addr as usize..addr as usize + WORD_SIZE]
+            self.exec.mem.buf[addr as usize..addr as usize + WORD_SIZE]
                 .try_into()
                 .unwrap(),
         )
     }
 
     fn load_u8(&self, addr: u32) -> u8 {
-        self.exec.mem.image[addr as usize]
+        self.exec.mem.buf[addr as usize]
     }
 
     fn load_region(&self, addr: u32, len: u32) -> Vec<u8> {
-        self.exec.mem.image[addr as usize..(addr + len) as usize].to_vec()
+        self.exec.mem.buf[addr as usize..(addr + len) as usize].to_vec()
     }
 }
 
@@ -225,7 +223,7 @@ impl<'a> ExecState<'a> {
     pub fn new(entry: u32, mem_init: MemoryImage, opts: ProverOpts<'a>) -> Self {
         let registers = core::array::from_fn(|reg| {
             u32::from_le_bytes(
-                mem_init.image
+                mem_init.buf
                     [SYSTEM.start() + reg * WORD_SIZE..SYSTEM.start() + (reg + 1) * WORD_SIZE]
                     .try_into()
                     .unwrap(),
@@ -447,10 +445,10 @@ impl<'a> ExecState<'a> {
 
         for wr in op.mem_writes.iter() {
             let addr = wr.addr as usize;
-            if addr + WORD_SIZE > self.mem.image.len() {
+            if addr + WORD_SIZE > self.mem.buf.len() {
                 bail!("Out of bounds write: {wr:?}");
             }
-            self.mem.image[addr..addr + WORD_SIZE].clone_from_slice(&wr.val.to_le_bytes());
+            self.mem.buf[addr..addr + WORD_SIZE].clone_from_slice(&wr.val.to_le_bytes());
 
             // Update rrs_lib's register structure
             if addr >= SYSTEM.start() {

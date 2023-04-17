@@ -361,3 +361,53 @@ impl Global {
         })
     }
 }
+
+/// TODO
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct SessionReceipt {
+    /// TODO
+    pub segments: Vec<SegmentReceipt>,
+
+    /// TODO
+    pub journal: Vec<u8>,
+}
+
+/// TODO
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct SegmentReceipt {
+    /// TODO
+    pub seal: Vec<u32>,
+}
+
+/// TODO
+#[derive(Deserialize, Serialize, Clone, Debug)]
+pub struct ReceiptMetadata {}
+
+impl SessionReceipt {
+    /// TODO
+    pub fn verify<D>(&self, _image_id: D) -> Result<()>
+    where
+        Digest: From<D>,
+    {
+        todo!()
+    }
+}
+
+impl SegmentReceipt {
+    /// TODO
+    pub fn get_metadata(&self) -> ReceiptMetadata {
+        todo!()
+    }
+
+    /// TODO
+    pub fn verify(&self) -> Result<()> {
+        todo!()
+    }
+
+    /// Extracts the seal from the receipt, as a series of bytes.
+    pub fn get_seal_bytes(&self) -> &[u8] {
+        bytemuck::cast_slice(self.seal.as_slice())
+    }
+}
+
+impl ReceiptMetadata {}
