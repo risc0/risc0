@@ -31,7 +31,7 @@ use risc0_zkvm_platform::{
 };
 use serde::Serialize;
 
-use crate::guest::align_up;
+use crate::align_up;
 
 // FIP 180-4 specifies that the bit-string being hashed should have a `1`
 // appended to it before padding.

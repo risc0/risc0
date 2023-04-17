@@ -107,7 +107,7 @@ impl PageTableInfo {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MemoryImage {
     /// The memory image as a vector of bytes
-    pub image: Vec<u8>,
+    pub buf: Vec<u8>,
 
     /// Metadata about the structure of the page table
     pub info: PageTableInfo,
@@ -120,20 +120,20 @@ impl MemoryImage {
     /// execution not yet begun), and with the page table Merkle tree
     /// constructed.
     pub fn new(program: &Program, page_size: u32) -> Self {
-        let mut image = vec![0_u8; MEM_SIZE];
+        let mut buf = vec![0_u8; MEM_SIZE];
 
         // Load the ELF into the memory image.
         for (addr, data) in program.image.iter() {
             let addr = *addr as usize;
             let bytes = data.to_le_bytes();
             for i in 0..WORD_SIZE {
-                image[addr + i] = bytes[i];
+                buf[addr + i] = bytes[i];
             }
         }
 
         // Compute the page table hashes except for the very last root hash.
         let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
-        let mut img = Self { image, info };
+        let mut img = Self { buf, info };
         img.hash_pages();
         img
     }
@@ -143,10 +143,10 @@ impl MemoryImage {
         for i in 0..self.info.num_pages {
             let page_addr = self.info.get_page_addr(i as u32);
             let page =
-                &self.image[page_addr as usize..page_addr as usize + self.info.page_size as usize];
+                &self.buf[page_addr as usize..page_addr as usize + self.info.page_size as usize];
             let digest = hash_page(page);
             let entry_addr = self.info.get_page_entry_addr(i as u32);
-            self.image[entry_addr as usize..entry_addr as usize + DIGEST_BYTES]
+            self.buf[entry_addr as usize..entry_addr as usize + DIGEST_BYTES]
                 .copy_from_slice(digest.as_bytes());
         }
     }
@@ -162,10 +162,10 @@ impl MemoryImage {
         while page_idx < self.info.root_idx {
             let page_addr = self.info.get_page_addr(page_idx);
             let page =
-                &self.image[page_addr as usize..page_addr as usize + self.info.page_size as usize];
+                &self.buf[page_addr as usize..page_addr as usize + self.info.page_size as usize];
             let expected = hash_page(page);
             let entry_addr = self.info.get_page_entry_addr(page_idx);
-            let entry = &self.image[entry_addr as usize..entry_addr as usize + DIGEST_BYTES];
+            let entry = &self.buf[entry_addr as usize..entry_addr as usize + DIGEST_BYTES];
             let actual = Digest::try_from(entry)?;
             log::debug!(
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
@@ -178,8 +178,8 @@ impl MemoryImage {
 
         let root_page_addr = self.info.root_page_addr;
         let root_page_bytes = self.info._num_root_entries * DIGEST_BYTES as u32;
-        let root_page = &self.image
-            [root_page_addr as usize..root_page_addr as usize + root_page_bytes as usize];
+        let root_page =
+            &self.buf[root_page_addr as usize..root_page_addr as usize + root_page_bytes as usize];
         let expected = hash_page(root_page);
         let root = self.get_root();
         if expected != root {
@@ -192,7 +192,7 @@ impl MemoryImage {
     /// Compute and return the root entry of the merkle tree.
     pub fn get_root(&self) -> Digest {
         let root_page_addr = self.info.root_page_addr;
-        let root_page = &self.image[root_page_addr as usize..self.info.root_addr as usize];
+        let root_page = &self.buf[root_page_addr as usize..self.info.root_addr as usize];
         hash_page(root_page)
     }
 }
