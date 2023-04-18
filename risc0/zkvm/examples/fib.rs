@@ -15,11 +15,11 @@
 use clap::Parser;
 use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
 use risc0_zkp::{
-    core::config::HashSuite,
+    core::hash::HashSuite,
     hal::{EvalCheck, Hal},
 };
-use risc0_zkvm::{prove::default_hal, ControlIdLocator, Prover, Receipt};
-use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
+use risc0_zkvm::{prove::default_hal, ControlId, Prover, Receipt};
+use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(Parser)]
@@ -55,10 +55,10 @@ fn main() {
 fn top<H, E>(hal: &H, eval: &E, iterations: u32) -> (Receipt, usize)
 where
     H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
-    let mut prover = Prover::new(FIB_ELF, FIB_ID).unwrap();
+    let mut prover = Prover::new(FIB_ELF).unwrap();
     prover.add_input_u32_slice(&[iterations]);
     (prover.run_with_hal(hal, eval).unwrap(), prover.cycles)
 }

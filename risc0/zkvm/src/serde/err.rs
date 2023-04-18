@@ -17,14 +17,21 @@ use core::fmt::{Display, Formatter};
 // use alloc::string::{String, ToString};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
+/// Errors used by Serde
 pub enum Error {
-    // Custom(String),
+    /// Found a bool that wasn't 0 or 1
     DeserializeBadBool,
+    /// Found an invalid unicode char
     DeserializeBadChar,
+    /// Found an Option discriminant that wasn't 0 or 1
     DeserializeBadOption,
+    /// Tried to parse invalid utf-8
     DeserializeBadUtf8,
+    /// Unexpected end during deserialization
     DeserializeUnexpectedEnd,
+    /// Not supported
     NotSupported,
+    /// The serialize buffer is full
     SerializeBufferFull,
 }
 

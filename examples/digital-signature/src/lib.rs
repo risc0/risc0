@@ -65,7 +65,7 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
         msg: msg,
     };
 
-    let mut prover = Prover::new(SIGN_ELF, SIGN_ID)?;
+    let mut prover = Prover::new(SIGN_ELF)?;
     let vec = to_vec(&params).unwrap();
     prover.add_input_u32_slice(vec.as_slice());
     let receipt = prover.run()?;

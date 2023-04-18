@@ -72,7 +72,7 @@ impl Risc0Method {
         let elf = fs::read(&self.elf_path).unwrap();
         let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
         let image = MemoryImage::new(&program, PAGE_SIZE as u32);
-        image.root
+        image.get_root()
     }
 
     fn rust_def(&self) -> String {
@@ -90,9 +90,9 @@ impl Risc0Method {
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
             r##"
-pub const {upper}_ELF: &'static [u8] = &{elf_contents:?};
+pub const {upper}_ELF: &[u8] = &{elf_contents:?};
 pub const {upper}_ID: [u32; 8] = {image_id:?};
-pub const {upper}_PATH: &'static str = r#"{elf_path}"#;
+pub const {upper}_PATH: &str = r#"{elf_path}"#;
             "##
         )
     }
@@ -194,17 +194,17 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
 }
 
 /// Returns all methods associated with the given riscv guest package.
-fn guest_methods<P>(pkg: &Package, out_dir: P) -> Vec<Risc0Method>
+fn guest_methods<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
 where
     P: AsRef<Path>,
 {
-    let target_dir = out_dir.as_ref().join("riscv-guest");
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
         .map(|target| Risc0Method {
             name: target.name.clone(),
             elf_path: target_dir
+                .as_ref()
                 .join("riscv32im-risc0-zkvm-elf")
                 .join("release")
                 .join(&target.name),
@@ -266,12 +266,9 @@ where
         fs::create_dir_all(&cache_dir).unwrap();
     }
 
-    let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env);
-
-    let temp_dir = tempdir_in(out_dir).unwrap();
+    let temp_dir = tempdir_in(&cache_dir).unwrap();
     let mut downloader = Downloader::builder()
-        .download_folder(&temp_dir.path())
+        .download_folder(temp_dir.path())
         .build()
         .unwrap();
 
@@ -338,6 +335,12 @@ fn build_guest_package<P>(
 ) where
     P: AsRef<Path>,
 {
+    let skip_var_name = "RISC0_SKIP_BUILD";
+    println!("cargo:rerun-if-env-changed={}", skip_var_name);
+    if env::var(skip_var_name).is_ok() {
+        return;
+    }
+
     fs::create_dir_all(target_dir.as_ref()).unwrap();
     let cargo = env::var("CARGO").unwrap();
     let mut std_parts = vec!["alloc", "core", "proc_macro", "panic_abort"];
@@ -390,16 +393,19 @@ fn build_guest_package<P>(
     // send directly to the tty, if available.  This way we get
     // progress messages from the inner cargo so the user doesn't
     // think it's just hanging.
+    let tty_file = env::var("RISC0_GUEST_LOGFILE").unwrap_or_else(|_| "/dev/tty".to_string());
+
     let mut tty = fs::OpenOptions::new()
         .read(true)
         .write(true)
-        .open("/dev/tty")
+        .create(true)
+        .open(tty_file)
         .ok();
 
     if let Some(tty) = &mut tty {
-        write!(
+        writeln!(
             tty,
-            "{}: Starting build for riscv32im-risc0-zkvm-elf   \n",
+            "{}: Starting build for riscv32im-risc0-zkvm-elf",
             pkg.name
         )
         .unwrap();
@@ -407,15 +413,14 @@ fn build_guest_package<P>(
 
     for line in BufReader::new(stderr).lines() {
         match &mut tty {
-            Some(tty) => write!(tty, "{}: {}   \n", pkg.name, line.unwrap()).unwrap(),
+            Some(tty) => writeln!(tty, "{}: {}", pkg.name, line.unwrap()).unwrap(),
             None => eprintln!("{}", line.unwrap()),
         }
     }
 
-    let status = cmd.status().unwrap();
-
-    if !status.success() {
-        std::process::exit(status.code().unwrap());
+    let res = child.wait().expect("Guest 'cargo build' failed");
+    if !res.success() {
+        std::process::exit(res.code().unwrap());
     }
 }
 
@@ -442,14 +447,18 @@ impl Default for GuestOptions {
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
 pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
-    let skip_var_name = "RISC0_SKIP_BUILD";
-    println!("cargo:rerun-if-env-changed={}", skip_var_name);
-    if env::var(skip_var_name).is_ok() {
-        return;
-    }
-
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
-    let out_dir = Path::new(&out_dir_env);
+    let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
+    let guest_dir = out_dir
+        .parent() // out
+        .unwrap()
+        .parent() // $crate
+        .unwrap()
+        .parent() // build
+        .unwrap()
+        .parent() // $profile
+        .unwrap()
+        .join("riscv-guest");
 
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
@@ -467,13 +476,13 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 
         build_guest_package(
             &guest_pkg,
-            &out_dir.join("riscv-guest"),
+            &guest_dir,
             &guest_build_env,
             guest_options.features,
             guest_options.std,
         );
 
-        for method in guest_methods(&guest_pkg, &out_dir) {
+        for method in guest_methods(&guest_pkg, &guest_dir) {
             methods_file
                 .write_all(method.rust_def().as_bytes())
                 .unwrap();

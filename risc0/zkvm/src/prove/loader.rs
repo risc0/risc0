@@ -23,16 +23,24 @@ use anyhow::Result;
 use log::{debug, trace};
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
-    adapter::TapsProvider, core::sha::SHA256_INIT, hal::Hal, prove::poly_group::PolyGroup,
+    adapter::TapsProvider,
+    core::{digest::Digest, hash::sha::SHA256_INIT},
+    hal::Hal,
+    prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 
-use super::split_word16;
-use crate::{ControlId, CIRCUIT};
+use crate::CIRCUIT;
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;
+
+// The number of cycles needed after the body phase.
+// 2: Reset(fini)
+// 1: RamFini
+// 1: BytesFini
+const FINI_TAILROOM: usize = 4;
 
 const SHA_K_OFFSET: usize = memory::PRE_LOAD.start();
 const SHA_K_SIZE: usize = 64;
@@ -51,56 +59,22 @@ static SHA_K: [u32; SHA_K_SIZE] = [
 
 /// These are the columns of the control group.
 /// Entries of each column are elements of the Baby Bear Field.
-pub enum ControlIndex {
-    /// Cycle is a control column that serves as a counter for zkVM operation.
+enum ControlIndex {
     Cycle,
-    /// Init is an indicator column used to mark the Init phase of zkVM
-    /// execution.
-    Init,
-    /// Setup is an indicator column used to mark the Setup phase of zkVM
-    /// execution.
-    Setup,
-    /// RamLoad is an indicator column used to mark the RamLoad phase of zkVM
-    /// execution.
+    BytesInit,
+    BytesSetup,
+    RamInit,
     RamLoad,
-    /// Reset is an indicator column used to mark the Reset phase of zkVM
-    /// execution.
     Reset,
-    /// Body is an indicator column used to mark the main body of zkVM
-    /// execution.
     Body,
-    /// RamFini is an indicator column used to mark the RamFini phase of zkVM
-    /// execution.
     RamFini,
-    /// BytesFini is an indicator column used to mark the BytesFini phase of
-    /// zkVM execution.
     BytesFini,
-    /// Info contains auxiliary information used to manage transitions between
-    /// phases of zkVM execution.
     Info,
-    /// The loader writes data from the ELF binary into this column using the
-    /// TripleWord struct. Each word is split into a hi part and lo part
-    /// because the field is smaller than 32 bits.
     Data1Lo,
-    /// The loader writes data from the ELF binary into this column using the
-    /// TripleWord struct. Each word is split into a hi part and lo part
-    /// because the field is smaller than 32 bits.
     Data1Hi,
-    /// The loader writes data from the ELF binary into this column using the
-    /// TripleWord struct. Each word is split into a hi part and lo part
-    /// because the field is smaller than 32 bits.
     Data2Lo,
-    /// The loader writes data from the ELF binary into this column using the
-    /// TripleWord struct. Each word is split into a hi part and lo part
-    /// because the field is smaller than 32 bits.
     Data2Hi,
-    /// The loader writes data from the ELF binary into this column using the
-    /// TripleWord struct. Each word is split into a hi part and lo part
-    /// because the field is smaller than 32 bits.
     Data3Lo,
-    /// The loader writes data from the ELF binary into this column using the
-    /// TripleWord struct. Each word is split into a hi part and lo part
-    /// because the field is smaller than 32 bits.
     Data3Hi,
 }
 
@@ -151,32 +125,40 @@ where
         }
     }
 
-    /// Initialization Phase
-    pub fn init(&mut self) -> Result<bool> {
-        debug!("INIT");
+    /// Initialize bytes
+    pub fn bytes_init(&mut self) -> Result<bool> {
+        debug!("BYTES_INIT");
         self.start();
-        self.code[ControlIndex::Init] = BabyBearElem::ONE;
+        self.code[ControlIndex::BytesInit] = BabyBearElem::ONE;
         self.next()
     }
 
-    /// Setup Phase: Prepare for loading
-    pub fn setup(&mut self, count: usize) -> Result<bool> {
-        debug!("SETUP");
+    /// Setup bytes lookup tables
+    pub fn bytes_setup(&mut self, count: usize) -> Result<bool> {
+        debug!("BYTES_SETUP");
         for _ in 0..count - 1 {
             self.start();
-            self.code[ControlIndex::Setup] = BabyBearElem::ONE;
+            self.code[ControlIndex::BytesSetup] = BabyBearElem::ONE;
             self.next()?;
         }
         self.start();
-        self.code[ControlIndex::Setup] = BabyBearElem::ONE;
+        self.code[ControlIndex::BytesSetup] = BabyBearElem::ONE;
         self.code[ControlIndex::Info] = BabyBearElem::ONE;
+        self.next()
+    }
+
+    /// Initialize ram
+    pub fn ram_init(&mut self) -> Result<bool> {
+        debug!("RAM_INIT");
+        self.start();
+        self.code[ControlIndex::RamInit] = BabyBearElem::ONE;
         self.next()
     }
 
     /// Load Phase: Write binary instructions from ELF into control columns
     /// Instructions are written three words at a time.
-    pub fn load(&mut self, triple: &TripleWord) -> Result<bool> {
-        trace!("LOAD[{}]: {triple:?}", self.cycle);
+    pub fn ram_load(&mut self, triple: &TripleWord) -> Result<bool> {
+        trace!("RAM_LOAD[{}]: {triple:?}", self.cycle);
         self.start();
         self.code[ControlIndex::RamLoad] = BabyBearElem::ONE;
         self.code[ControlIndex::Info] = BabyBearElem::new(triple.addr);
@@ -196,16 +178,32 @@ where
     }
 
     /// Reset Phase
-    pub fn reset(&mut self) -> Result<bool> {
+    pub fn reset(&mut self, phase: BabyBearElem) -> Result<bool> {
         debug!("RESET");
         self.start();
         self.code[ControlIndex::Reset] = BabyBearElem::ONE;
-        self.code[ControlIndex::Info] = BabyBearElem::ONE;
+        self.code[ControlIndex::Info] = BabyBearElem::ONE; // isFirst
+        self.code[ControlIndex::Data1Lo] = phase; // isInit
         self.next()?;
 
         self.start();
         self.code[ControlIndex::Reset] = BabyBearElem::ONE;
+        self.code[ControlIndex::Info] = BabyBearElem::ZERO; // isFirst
+        self.code[ControlIndex::Data1Lo] = phase; // isInit
         self.next()
+    }
+
+    /// Body Phase: In this phase, the zkVM executes the loaded instructions.
+    pub fn body(&mut self) -> Result<()> {
+        debug!("BODY");
+        loop {
+            self.start();
+            self.code[ControlIndex::Body] = BabyBearElem::ONE;
+            if !self.next_fini(FINI_TAILROOM)? {
+                break;
+            }
+        }
+        Ok(())
     }
 
     /// Fini Phase: Initialize RamFini and BytesFini
@@ -218,19 +216,6 @@ where
         self.start();
         self.code[ControlIndex::BytesFini] = BabyBearElem::ONE;
         self.next()
-    }
-
-    /// Body Phase: In this phase, the zkVM executes the loaded instructions.
-    pub fn body(&mut self) -> Result<()> {
-        debug!("BODY");
-        loop {
-            self.start();
-            self.code[ControlIndex::Body] = BabyBearElem::ONE;
-            if !self.next_fini(2)? {
-                break;
-            }
-        }
-        Ok(())
     }
 
     fn start(&mut self) {
@@ -249,6 +234,13 @@ where
         self.cycle += 1;
         (self.step)(&self.code.0, fini)
     }
+}
+
+fn split_word16(value: u32) -> (BabyBearElem, BabyBearElem) {
+    (
+        BabyBearElem::new(value & 0xffff),
+        BabyBearElem::new(value >> 16),
+    )
 }
 
 const fn div_ceil(a: usize, b: usize) -> usize {
@@ -364,19 +356,51 @@ impl Loader {
         F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
     {
         let mut loader = LoaderImpl::new(step);
-        loader.init()?;
-        loader.setup(Self::SETUP_CYCLES)?;
-        for triple in &self.system {
-            loader.load(triple)?;
-        }
-        loader.reset()?;
+        self.pre_steps(&mut loader)?;
         loader.body()?;
-        loader.fini()?;
+        self.post_steps(&mut loader)?;
         Ok(loader.cycle)
     }
 
-    /// Compute the [ControlId] associated with the given HAL
-    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> ControlId {
+    /// Compute the number of cycles needed for initialization.
+    pub fn init_cycles(&self) -> usize {
+        let mut loader = LoaderImpl::new(|_, _| Ok(true));
+        self.pre_steps(&mut loader).unwrap();
+        loader.cycle
+    }
+
+    /// Compute the number of cycles needed for finalization.
+    pub fn fini_cycles(&self) -> usize {
+        let mut loader = LoaderImpl::new(|_, _| Ok(true));
+        self.post_steps(&mut loader).unwrap();
+        loader.cycle
+    }
+
+    fn pre_steps<F>(&self, loader: &mut LoaderImpl<F>) -> Result<()>
+    where
+        F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
+    {
+        loader.bytes_init()?;
+        loader.bytes_setup(Self::SETUP_CYCLES)?;
+        loader.ram_init()?;
+        for triple in &self.system {
+            loader.ram_load(triple)?;
+        }
+        loader.reset(BabyBearElem::ONE)?;
+        Ok(())
+    }
+
+    fn post_steps<F>(&self, loader: &mut LoaderImpl<F>) -> Result<()>
+    where
+        F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
+    {
+        loader.reset(BabyBearElem::ZERO)?;
+        loader.fini()?;
+        Ok(())
+    }
+
+    /// Compute the `ControlId` associated with the given HAL
+    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> Vec<Digest> {
         let code_size = CIRCUIT.code_size();
 
         // Start with an empty table
@@ -399,7 +423,7 @@ impl Loader {
             table.push(code_group.merkle.root().clone());
         }
 
-        ControlId { table }
+        table
     }
 
     fn load_code(&self, code: &mut [BabyBearElem], max_cycles: usize) {

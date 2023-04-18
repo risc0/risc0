@@ -27,7 +27,6 @@ getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 risc0-circuit-rv32im = { workspace = true }
 risc0-core = { workspace = true }
-risc0-zeroio = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
@@ -56,6 +55,7 @@ sha2 = { version = "0.10", optional = true }
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
 criterion = { version = "0.4", features = ["html_reports"] }
+human-repr = "1.0"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
@@ -63,7 +63,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 env_logger = "0.10"
 flate2 = "1.0"
 risc0-zkvm-methods = { path = "methods" }
-serial_test = "1.0"
+serial_test = "2.0"
 tar = "0.4"
 test-log = { version = "0.2", features = ["trace"] }
 
@@ -88,4 +88,4 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
-std = ["anyhow/std", "risc0-circuit-rv32im/std", "risc0-zeroio/std", "risc0-zkp/std", "serde/std", "num-traits/std"]
+std = ["anyhow/std", "risc0-circuit-rv32im/std", "risc0-zkp/std", "serde/std", "num-traits/std"]

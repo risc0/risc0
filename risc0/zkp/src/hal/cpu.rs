@@ -26,15 +26,18 @@ use ndarray::{ArrayView, ArrayViewMut, Axis};
 use rayon::prelude::*;
 use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
 
-use super::{Buffer, Hal};
+use super::{Buffer, Hal, TRACKER};
 use crate::{
     core::{
-        blake2b::HashSuiteBlake2bCpu,
-        config::{ConfigHash, HashSuite, HashSuitePoseidon, HashSuiteSha256},
         digest::Digest,
+        hash::{
+            blake2b::Blake2bCpuHashSuite,
+            poseidon::PoseidonHashSuite,
+            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+            HashFn, HashSuite,
+        },
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
-        sha_cpu,
     },
     FRI_FOLD,
 };
@@ -43,9 +46,9 @@ pub struct CpuHal<F: Field, HS: HashSuite<F>> {
     phantom: PhantomData<(F, HS)>,
 }
 
-pub type BabyBearSha256CpuHal = CpuHal<BabyBear, HashSuiteSha256<BabyBear, sha_cpu::Impl>>;
-pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, HashSuitePoseidon>;
-pub type BabyBearBlake2bCpuHal = CpuHal<BabyBear, HashSuiteBlake2bCpu>;
+pub type BabyBearSha256CpuHal = CpuHal<BabyBear, Sha256HashSuite<BabyBear, CpuImpl>>;
+pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, PoseidonHashSuite>;
+pub type BabyBearBlake2bCpuHal = CpuHal<BabyBear, Blake2bCpuHashSuite>;
 
 impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
     pub fn new() -> Self {
@@ -75,9 +78,30 @@ impl Region {
     }
 }
 
+struct TrackedVec<T>(Vec<T>);
+
+impl<T> TrackedVec<T> {
+    pub fn new(vec: Vec<T>) -> Self {
+        TRACKER
+            .lock()
+            .unwrap()
+            .alloc(vec.capacity() * std::mem::size_of::<T>());
+        Self(vec)
+    }
+}
+
+impl<T> Drop for TrackedVec<T> {
+    fn drop(&mut self) {
+        TRACKER
+            .lock()
+            .unwrap()
+            .free(self.0.capacity() * std::mem::size_of::<T>());
+    }
+}
+
 #[derive(Clone)]
 pub struct CpuBuffer<T> {
-    buf: Rc<RefCell<Vec<T>>>,
+    buf: Rc<RefCell<TrackedVec<T>>>,
     region: Region,
 }
 
@@ -150,7 +174,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     fn new(size: usize) -> Self {
         let buf = vec![T::default(); size];
         CpuBuffer {
-            buf: Rc::new(RefCell::new(buf)),
+            buf: Rc::new(RefCell::new(TrackedVec::new(buf))),
             region: Region(0, size),
         }
     }
@@ -162,7 +186,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     fn copy_from(slice: &[T]) -> Self {
         let bytes = bytemuck::cast_slice(slice);
         CpuBuffer {
-            buf: Rc::new(RefCell::new(Vec::from(bytes))),
+            buf: Rc::new(RefCell::new(TrackedVec::new(Vec::from(bytes)))),
             region: Region(0, slice.len()),
         }
     }
@@ -171,8 +195,9 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     where
         F: FnMut(usize) -> T,
     {
+        let vec = (0..size).map(f).collect();
         CpuBuffer {
-            buf: Rc::new(RefCell::new((0..size).map(f).collect())),
+            buf: Rc::new(RefCell::new(TrackedVec::new(vec))),
             region: Region(0, size),
         }
     }
@@ -180,7 +205,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     pub fn as_slice<'a>(&'a self) -> Ref<'a, [T]> {
         let vec = self.buf.borrow();
         Ref::map(vec, |vec| {
-            let slice = bytemuck::cast_slice(vec);
+            let slice = bytemuck::cast_slice(&vec.0);
             &slice[self.region.range()]
         })
     }
@@ -188,7 +213,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
     pub fn as_slice_mut<'a>(&'a self) -> RefMut<'a, [T]> {
         let vec = self.buf.borrow_mut();
         RefMut::map(vec, |vec| {
-            let slice = bytemuck::cast_slice_mut(vec);
+            let slice = bytemuck::cast_slice_mut(&mut vec.0);
             &mut slice[self.region.range()]
         })
     }
@@ -202,7 +227,7 @@ impl<T: Default + Clone + Pod> From<Vec<T>> for CpuBuffer<T> {
     fn from(vec: Vec<T>) -> CpuBuffer<T> {
         let size = vec.len();
         CpuBuffer {
-            buf: Rc::new(RefCell::new(vec)),
+            buf: Rc::new(RefCell::new(TrackedVec::new(vec))),
             region: Region(0, size),
         }
     }
@@ -224,13 +249,13 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buf.borrow();
-        let slice = bytemuck::cast_slice(&buf);
+        let slice = bytemuck::cast_slice(&buf.0);
         f(&slice[self.region.range()]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buf.borrow_mut();
-        let slice = bytemuck::cast_slice_mut(&mut buf);
+        let slice = bytemuck::cast_slice_mut(&mut buf.0);
         f(&mut slice[self.region.range()]);
     }
 }
@@ -244,7 +269,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     type BufferDigest = CpuBuffer<Digest>;
     type BufferU32 = CpuBuffer<u32>;
     type HashSuite = HS;
-    type Hash = HS::Hash;
+    type HashFn = HS::HashFn;
     type Rng = HS::Rng;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::BufferElem {
@@ -524,7 +549,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
             let column: Vec<Self::Elem> =
                 (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
-            *output = *Self::Hash::hash_elem_slice(column.as_slice());
+            *output = *Self::HashFn::hash_elem_slice(column.as_slice());
         });
     }
 
@@ -537,7 +562,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         (0..output.size()).into_par_iter().for_each(|idx| {
             let in1 = input.get(2 * idx + 0);
             let in2 = input.get(2 * idx + 1);
-            output.set(idx, *Self::Hash::hash_pair(&in1, &in2));
+            output.set(idx, *Self::HashFn::hash_pair(&in1, &in2));
         });
     }
 }

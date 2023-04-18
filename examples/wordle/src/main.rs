@@ -43,7 +43,7 @@ impl<'a> Server<'a> {
     }
 
     pub fn check_round(&self, guess_word: &str) -> Receipt {
-        let mut prover = Prover::new(WORDLE_ELF, WORDLE_ID).expect("failed to construct prover");
+        let mut prover = Prover::new(WORDLE_ELF).expect("failed to construct prover");
 
         prover.add_input_u32_slice(to_vec(self.secret_word).unwrap().as_slice());
         prover.add_input_u32_slice(to_vec(&guess_word).unwrap().as_slice());
@@ -84,7 +84,7 @@ fn read_stdin_guess() -> String {
         if guess.chars().count() == WORD_LENGTH {
             break;
         } else {
-            println!("Your guess must have 5 letters!");
+            println!("Your guess must have 5 letters. Try again :)");
             guess.clear();
         }
     }
@@ -92,10 +92,19 @@ fn read_stdin_guess() -> String {
 }
 
 fn play_rounds(server: Server, player: Player, rounds: usize) -> bool {
-    for _ in 0..rounds {
+    for turn_index in 0..rounds {
+        let remaining_guesses = rounds - turn_index;
         let guess_word = read_stdin_guess();
         let receipt = server.check_round(guess_word.as_str());
         let score = player.check_receipt(receipt);
+
+        if remaining_guesses == rounds {
+            println!("Good guess! Our server has calculated your results.");
+            println!("You'll have 6 chances to get the word right.");
+        } else {
+            println!("You have {} guesses remaining.", remaining_guesses);
+        }
+
         score.print(guess_word.as_str());
         if score.game_is_won() {
             return true;
@@ -105,7 +114,7 @@ fn play_rounds(server: Server, player: Player, rounds: usize) -> bool {
 }
 
 fn main() {
-    println!("Welcome to fair wordle!");
+    println!("Welcome to fair Wordle! Enter a five-letter word.");
 
     let server = Server::new(wordlist::pick_word());
     let player = Player {
@@ -113,14 +122,16 @@ fn main() {
     };
 
     if play_rounds(server, player, 6) {
-        println!("You won!");
+        println!("You won!\n");
     } else {
-        println!("Game over");
+        println!("Game over!\n");
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use wordle_core::LetterFeedback;
+
     use crate::{Player, Server};
 
     const TEST_GUESS_WRONG: &str = "roofs";
@@ -144,5 +155,46 @@ mod tests {
         let receipt = server.check_round(&guess_word);
         let score = player.check_receipt(receipt);
         assert!(score.game_is_won(), "Correct guess should win the game");
+    }
+
+    /// If a guessed letter is present in every position where it ought to
+    /// appear, and also in an incorrect position, the 'bonus' letter
+    /// shouldn't flag yellow
+    #[test]
+    fn test_partial_match_false_positives() {
+        let server = Server::new("spare");
+        let player = Player {
+            hash: server.get_secret_word_hash(),
+        };
+
+        let guess_word = "apple";
+        let receipt = server.check_round(&guess_word);
+        let score = player.check_receipt(receipt);
+        score.print(guess_word);
+
+        assert!(
+            score.0[0] == LetterFeedback::Present,
+            "Other partials should be yellow"
+        );
+
+        assert!(
+            score.0[1] == LetterFeedback::Correct,
+            "Consumed exact matches should be green"
+        );
+
+        assert!(
+            score.0[2] == LetterFeedback::Miss,
+            "Excessive instances of letter should not flag yellow"
+        );
+
+        assert!(
+            score.0[1] == LetterFeedback::Correct,
+            "Misses should still miss"
+        );
+
+        assert!(
+            score.0[1] == LetterFeedback::Correct,
+            "Unconsumed matches should be green"
+        );
     }
 }

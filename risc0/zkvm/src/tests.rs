@@ -15,20 +15,26 @@
 use std::{fmt, io::Cursor, str::from_utf8, sync::Mutex};
 
 use anyhow::Result;
-use risc0_zeroio::to_vec;
-use risc0_zkp::core::blake2b::{Blake2bCpuImpl, HashSuiteBlake2bCpu};
-use risc0_zkp::core::sha::Digest;
+use risc0_zkp::core::digest::Digest;
+use risc0_zkvm_methods::MULTI_TEST_ID;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
-    HELLO_COMMIT_ELF, HELLO_COMMIT_ID, MULTI_TEST_ELF, MULTI_TEST_ID, SLICE_IO_ELF, SLICE_IO_ID,
-    STANDARD_LIB_ELF, STANDARD_LIB_ID,
+    HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
-use risc0_zkvm_platform::{fileno, memory::HEAP, syscall::bigint, WORD_SIZE};
+use risc0_zkvm_platform::{
+    fileno,
+    memory::HEAP,
+    syscall::{bigint, halt},
+    WORD_SIZE,
+};
 use serial_test::serial;
 use test_log::test;
 
 use super::{Prover, ProverOpts, Receipt};
-use crate::prove::TraceEvent;
+use crate::{
+    prove::TraceEvent,
+    serde::{from_slice, to_vec},
+};
 
 #[test]
 #[serial]
@@ -88,7 +94,7 @@ fn sha_basics() {
 }
 
 fn run_sha(msg: &str) -> Digest {
-    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
+    let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap());
     let receipt = prover.run().unwrap();
     Digest::try_from(receipt.journal.as_slice()).unwrap()
@@ -114,15 +120,23 @@ fn memory_io() {
     run_memio(&[(HEAP.start(), 1)]).unwrap();
 
     // Unaligned write is bad
-    assert!(unwrap_err(run_memio(&[(HEAP.start() + 1001, 1)]))
-        .starts_with("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl"));
+    let err = unwrap_err(run_memio(&[(HEAP.start() + 1001, 1)]));
+    assert!(
+        err.starts_with("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl")
+            || err.starts_with("AlignmentFault"),
+        "Actual: {err}"
+    );
 
     // Aligned read is fine
     run_memio(&[(HEAP.start(), 0)]).unwrap();
 
     // Unaligned read is bad
-    assert!(unwrap_err(run_memio(&[(HEAP.start() + 1, 0)]))
-        .starts_with("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl"));
+    let err = unwrap_err(run_memio(&[(HEAP.start() + 1, 0)]));
+    assert!(
+        err.starts_with("eqz failed at: ./cirgen/circuit/rv32im/rv32im.inl")
+            || err.starts_with("AlignmentFault"),
+        "Actual: {err}"
+    );
 }
 
 fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
@@ -133,13 +147,13 @@ fn run_memio(pairs: &[(usize, usize)]) -> Result<Receipt> {
             .map(|(addr, value)| (addr as u32, value as u32))
             .collect(),
     };
-    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
+    let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
     prover.add_input_u32_slice(&to_vec(&spec).unwrap());
     prover.run()
 }
 
 fn run_do_nothing(opts: ProverOpts) -> Result<Receipt> {
-    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
     prover.run()
 }
@@ -170,7 +184,7 @@ fn receipt_serde_no_seal() {
 #[cfg_attr(feature = "cuda", serial)]
 fn fail() {
     // Check that a compliant host will fault.
-    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
+    let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Fail).unwrap());
 
     assert!(unwrap_err(prover.run())
@@ -183,9 +197,7 @@ fn fail() {
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
     let receipt = run_do_nothing(ProverOpts::default()).unwrap();
-    receipt
-        .verify(&MULTI_TEST_ID)
-        .expect("Verification should succeed before we corrupt the image_id");
+    receipt.verify(&MULTI_TEST_ID).unwrap();
     let mut digest: Digest = MULTI_TEST_ID.into();
     for word in digest.as_mut_words() {
         *word = word.wrapping_add(1);
@@ -203,17 +215,17 @@ fn check_image_id() {
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
 #[cfg_attr(feature = "cuda", serial)]
 fn commit_hello_world() {
-    let mut prover = Prover::new(HELLO_COMMIT_ELF, HELLO_COMMIT_ID).unwrap();
-    prover.run().expect("Could not get receipt");
+    let mut prover = Prover::new(HELLO_COMMIT_ELF).unwrap();
+    prover.run().unwrap();
 }
 
 #[test]
 #[cfg_attr(feature = "insecure_skip_seal", ignore)]
 #[cfg_attr(feature = "cuda", serial)]
 fn do_random() {
-    let mut prover = Prover::new(MULTI_TEST_ELF, MULTI_TEST_ID).unwrap();
+    let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoRandom).unwrap());
-    prover.run().expect("Could not get receipt");
+    prover.run().unwrap();
 }
 
 #[test]
@@ -221,10 +233,10 @@ fn do_random() {
 #[cfg_attr(feature = "cuda", serial)]
 fn slice_io() {
     let run = |slice: &[u8]| {
-        let mut prover = Prover::new(SLICE_IO_ELF, SLICE_IO_ID).unwrap();
+        let mut prover = Prover::new(SLICE_IO_ELF).unwrap();
         prover.add_input_u32_slice(&[slice.len() as u32]);
         prover.add_input_u8_slice(slice);
-        let receipt = prover.run().expect("Could not get receipt");
+        let receipt = prover.run().unwrap();
         assert_eq!(receipt.journal, slice);
     };
 
@@ -251,7 +263,7 @@ fn host_syscall() {
             act.push(buf.into());
             expected[act.len()].clone()
         });
-    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
     prover.add_input_u32_slice(
         &to_vec(&MultiTestSpec::Syscall {
             count: expected.len() as u32 - 1,
@@ -272,7 +284,7 @@ fn host_syscall_callback_panic() {
         .with_sendrecv_callback(SYS_MULTI_TEST, |_buf: &[u8]| -> Vec<u8> {
             panic!("I am panicking from here!");
         });
-    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Syscall { count: 5 }).unwrap());
     prover.run().unwrap();
 }
@@ -280,7 +292,7 @@ fn host_syscall_callback_panic() {
 #[test]
 fn sha_accel() {
     let opts = ProverOpts::default().with_skip_seal(true);
-    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaConforms).unwrap());
     prover.run().unwrap();
 }
@@ -317,23 +329,41 @@ fn bigint_accel() {
 #[test]
 fn sha_cycle_count() {
     let opts = ProverOpts::default().with_skip_seal(true);
-    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::ShaCycleCount).unwrap());
     prover.run().unwrap();
 }
 
 #[test]
+fn stdio() {
+    const MSG: &str = "Hello world!  This is a test of standard input and output.";
+    const FD: u32 = 123;
+    let mut stdout: Vec<u8> = Vec::new();
+    {
+        let spec = &to_vec(&MultiTestSpec::CopyToStdout { fd: FD }).unwrap();
+        let opts = ProverOpts::default()
+            .with_skip_seal(true)
+            .with_read_fd(FD, MSG.as_bytes())
+            .with_stdin(bytemuck::cast_slice(&spec))
+            .with_stdout(&mut stdout);
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
+        prover.run().unwrap();
+    }
+    assert_eq!(MSG, core::str::from_utf8(&stdout).unwrap());
+}
+
+#[test]
 fn test_poseidon_proof() {
-    use risc0_zkp::core::config::HashSuitePoseidon;
+    use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
 
     use crate::prove::default_poseidon_hal;
     let (hal, eval) = default_poseidon_hal();
     let opts = ProverOpts::default().with_skip_verify(true);
-    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
     let receipt = prover.run_with_hal(hal.as_ref(), &eval).unwrap();
     receipt
-        .verify_with_hash::<HashSuitePoseidon, _>(&MULTI_TEST_ID)
+        .verify_with_hash::<PoseidonHashSuite, _>(&MULTI_TEST_ID)
         .unwrap();
 }
 
@@ -341,34 +371,38 @@ fn test_poseidon_proof() {
 fn test_blake2b_proof() {
     use risc0_circuit_rv32im::cpu::CpuEvalCheck;
     use risc0_core::field::baby_bear::BabyBear;
-    use risc0_zkp::core::blake2b::HashSuiteBlake2b;
-    use risc0_zkp::hal::cpu::CpuHal;
+    use risc0_zkp::{
+        core::hash::blake2b::{Blake2bCpuHashSuite, Blake2bCpuImpl, Blake2bHashSuite},
+        hal::cpu::CpuHal,
+    };
 
     use crate::CIRCUIT;
 
-    let hal = CpuHal::<BabyBear, HashSuiteBlake2bCpu>::new();
+    let hal = CpuHal::<BabyBear, Blake2bCpuHashSuite>::new();
     let eval = CpuEvalCheck::new(&CIRCUIT);
     let opts = ProverOpts::default().with_skip_verify(true);
-    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
     prover.add_input_u32_slice(&to_vec(&MultiTestSpec::DoNothing).unwrap());
     let receipt = prover.run_with_hal(&hal, &eval).unwrap();
     receipt
-        .verify_with_hash::<HashSuiteBlake2b<Blake2bCpuImpl>, _>(&MULTI_TEST_ID)
+        .verify_with_hash::<Blake2bHashSuite<Blake2bCpuImpl>, _>(&MULTI_TEST_ID)
         .unwrap();
 }
 
 #[cfg(feature = "profiler")]
 #[test]
 fn profiler() {
-    use crate::binfmt::elf::Program;
-    use crate::prove::profiler::{Frame, Profiler};
+    use crate::{
+        binfmt::elf::Program,
+        prove::profiler::{Frame, Profiler},
+    };
 
     let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
     {
         let opts = ProverOpts::default()
             .with_skip_seal(true)
             .with_trace_callback(prof.make_trace_callback());
-        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
         prover.add_input_u32_slice(&to_vec(&MultiTestSpec::Profiler).unwrap());
         prover.run().unwrap();
     }
@@ -442,7 +476,7 @@ fn trace() {
         let opts = ProverOpts::default()
             .with_skip_seal(true)
             .with_trace_callback(|event| Ok(events.push(event)));
-        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
         prover.add_input_u32_slice(&to_vec(&MultiTestSpec::EventTrace).unwrap());
 
         prover.run().unwrap();
@@ -499,9 +533,8 @@ mod riscv_tests {
                 use std::io::Read;
 
                 use flate2::read::GzDecoder;
-                use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
                 use tar::Archive;
-                use $crate::{MemoryImage, Program, Prover};
+                use $crate::Prover;
 
                 let bytes = include_bytes!("testdata/riscv-tests.tgz");
                 let gz = GzDecoder::new(&bytes[..]);
@@ -519,10 +552,7 @@ mod riscv_tests {
                     let mut elf = Vec::new();
                     entry.read_to_end(&mut elf).unwrap();
 
-                    let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
-                    let image = MemoryImage::new(&program, PAGE_SIZE as u32);
-
-                    let mut prover = Prover::new(elf.as_slice(), image.root).unwrap();
+                    let mut prover = Prover::new(elf.as_slice()).unwrap();
                     prover.run().unwrap();
                 }
             }
@@ -611,7 +641,7 @@ fn posix_style_read() {
             .with_skip_seal(true)
             .with_read_fd(123, readbuf.as_slice());
 
-        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+        let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
         prover.add_input_u32_slice(
             &to_vec(&MultiTestSpec::SysRead {
                 fd: 123,
@@ -620,17 +650,9 @@ fn posix_style_read() {
             })
             .unwrap(),
         );
-        let receipt = prover.run().expect("Could not get receipt");
+        let receipt = prover.run().unwrap();
 
-        use risc0_zeroio::Deserialize;
-        // Ugh, journal is of u8s which might not be u32-aligned,
-        // causing bytemuck::cast_slice to fail.
-        let journal_copy: Vec<u32> = receipt
-            .journal
-            .chunks(WORD_SIZE)
-            .map(|word| u32::from_le_bytes(word.try_into().unwrap()))
-            .collect();
-        let actual = Vec::<u8>::deserialize_from(&journal_copy);
+        let actual: Vec<u8> = from_slice(&receipt.journal).unwrap();
         assert_eq!(
             std::str::from_utf8(&actual).unwrap(),
             std::str::from_utf8(&expected).unwrap(),
@@ -687,7 +709,7 @@ ENV_VAR2
 ENV_VAR3",
             ),
         );
-    let mut prover = Prover::new_with_opts(STANDARD_LIB_ELF, STANDARD_LIB_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(STANDARD_LIB_ELF, opts).unwrap();
     let receipt = prover.run().unwrap();
     let actual = receipt.journal.as_slice();
     assert_eq!(
@@ -697,4 +719,52 @@ ENV_VAR2=
 !ENV_VAR3
 "
     );
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn pause_continue() {
+    let mut prover = Prover::new(MULTI_TEST_ELF).unwrap();
+    prover.add_input_u32_slice(&to_vec(&MultiTestSpec::PauseContinue).unwrap());
+
+    // Run until sys_pause
+    prover.run().unwrap();
+    assert_eq!(prover.exit_code, halt::PAUSE);
+
+    // Run until sys_halt
+    prover.run().unwrap();
+    assert_eq!(prover.exit_code, halt::TERMINATE);
+}
+
+#[test]
+#[cfg_attr(feature = "insecure_skip_seal", ignore)]
+#[cfg_attr(feature = "cuda", serial)]
+fn continuation() {
+    let segment_limit_po2 = 17; // 128k cycles
+    const COUNT: usize = 4; // Number of total chunks to aim for.
+
+    let opts = ProverOpts::default().with_segment_limit_po2(segment_limit_po2);
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
+    prover.add_input_u32_slice(
+        &to_vec(&MultiTestSpec::BusyLoop {
+            // BusyLoop goes for *at least* this many cycles, so should fill up (COUNT - 1) blocks
+            // and then slightly overflow into the next one.
+            cycles: ((COUNT - 1) * (1 << segment_limit_po2)) as u32,
+        })
+        .unwrap(),
+    );
+
+    for count in 0..COUNT {
+        prover.run().unwrap();
+        if count == COUNT - 1 {
+            assert_eq!(prover.exit_code, halt::TERMINATE);
+        } else {
+            assert_eq!(
+                prover.exit_code,
+                halt::SPLIT,
+                "expected a split at part {count}"
+            );
+        }
+    }
 }

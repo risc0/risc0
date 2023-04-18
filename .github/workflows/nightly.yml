@@ -1,0 +1,71 @@
+name: Nightly Tasks
+
+on:
+  schedule:
+    - cron: '7 0 * * *' # Nightly (ish) Pacific
+  workflow_dispatch:
+    inputs:
+      crate_count:
+        description: 'How many crates (sorted by downloads) to test'
+        default: 100
+
+jobs:
+  crates_validate:
+    runs-on: [self-hosted, prod, Linux, cpu]
+    env:
+      RUST_BACKTRACE: full
+      RUST_LOG: info
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - name: Set the variables
+        env:
+          DEFAULT_CRATE_COUNT: 1000
+        run: echo "TOP_N_CRATES=${{ github.event.inputs.crate_count || env.DEFAULT_CRATE_COUNT }}" >> $GITHUB_ENV
+
+      - run: cargo install --force --path risc0/cargo-risczero
+
+      - run: cargo build --release
+        working-directory: tools/crates-validator/
+
+      - name: Create working directory
+        run: mkdir -p ${{ runner.temp }}/crate-validation/
+
+      - name: Generate the profile
+        run: |
+          target/release/gen-profiles \
+          -r ${{ github.workspace }} \
+          -o ${{ runner.temp }}/crate-validation/profiles.json \
+          -c $TOP_N_CRATES
+        working-directory: tools/crates-validator/
+
+      - name: Validate profiles
+        run: |
+          target/release/main \
+          -p ${{ runner.temp }}/crate-validation/profiles.json \
+          -j ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
+      # &> ${{ runner.temp }}/crate-validation/crate-results.log
+        shell: bash
+        working-directory: tools/crates-validator/
+
+      - name: Delete input profile
+        run: rm ${{ runner.temp }}/crate-validation/profiles.json
+
+      - run: tail -n 1 ${{ runner.temp }}/crate-validation/crate-results.log
+
+      - name: Upload artifact results
+        uses: actions/upload-artifact@v3
+        with:
+          name: crates-test-results
+          path: ${{ runner.temp }}/crate-validation/
+          retention-days: 2
+
+      - name: Commit results to risc0/benchmarks
+        run: |
+          git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/benchmarks.git" ${{ runner.temp }}/benchmarks/
+          cd ${{ runner.temp }}/benchmarks/
+          cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
+          git add .
+          git  -c "user.name=nightly-action" -c "user.email=github@users.noreply.github.com" commit -m "Added update at '$(date)'"
+          git push origin main
+        shell: bash

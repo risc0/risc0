@@ -5,18 +5,15 @@ edition = "2021"
 
 [dependencies]
 bytes = { version = "1.1", default-features = false }
-ethers-core = { version = "1.0.2", optional = true }
-ethers-providers = { version = "1.0.2", optional = true }
-futures = { version = "0.3.24", optional = true }
+ethers-core = { version = "2.0", optional = true }
+ethers-providers = { version = "2.0", optional = true }
+futures = { version = "0.3", optional = true }
 getrandom = { version = "0.2", features = ["custom"] }
 hashbrown = "0.13"
-primitive-types = "0.12.1"
-revm = { version = "2.3.1", default-features = false, features = ["std", "k256", "with-serde"] }
+primitive-types = { version = "0.12", features = ["serde"] }
+revm = { version = "3.0", default-features = false, features = ["std", "serde"] }
 serde = "1.0"
-tokio = { version = "1.23", features = [
-    "rt-multi-thread",
-    "macros",
-], optional = true }
+tokio = { version = "1.23", features = ["rt-multi-thread", "macros"], optional = true }
 
 [features]
 default = ["ethers"]

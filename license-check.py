@@ -28,6 +28,9 @@ EXTENSIONS = [
     '.sol',
 ]
 
+SKIP_DIRS = [
+    str(Path.cwd()) + "/templates/rust-starter",
+]
 
 def check_header(expected_year, lines_actual):
     for (expected, actual) in zip(PUBLIC_HEADER, lines_actual):
@@ -70,6 +73,14 @@ def main():
     ret = 0
     for path in tracked_files():
         if path.suffix in EXTENSIONS:
+            skip = False
+            for path_start in SKIP_DIRS:
+                if str(path).startswith(path_start):
+                    skip = True
+                    break
+            if skip:
+                continue
+
             ret |= check_file(root, path)
     sys.exit(ret)
 

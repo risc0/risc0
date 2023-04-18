@@ -18,7 +18,6 @@ use anyhow::Result;
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
 use risc0_zkvm::{receipt::insecure_skip_seal, Receipt};
-use risc0_zkvm_platform::WORD_SIZE;
 
 const STDIN_MSG: &str = "Hello world from stdin!\n";
 const EXPECTED_STDOUT_MSG: &str = "Hello world on stdout!\n";
@@ -30,11 +29,7 @@ fn expected_stdout() -> String {
 
 fn load_receipt(p: &Path) -> Receipt {
     let data = std::fs::read(p).unwrap();
-    let as_u32: Vec<u32> = data
-        .chunks(WORD_SIZE)
-        .map(|bytes| u32::from_le_bytes(<[u8; WORD_SIZE]>::try_from(bytes).unwrap()))
-        .collect();
-    risc0_zkvm::serde::from_slice(&as_u32).unwrap()
+    risc0_zkvm::serde::from_slice(&data).unwrap()
 }
 
 #[test]

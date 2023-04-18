@@ -26,6 +26,12 @@ pub mod ecall {
     pub const BIGINT: u32 = 4;
 }
 
+pub mod halt {
+    pub const TERMINATE: u32 = 0;
+    pub const PAUSE: u32 = 1;
+    pub const SPLIT: u32 = 2;
+}
+
 pub mod reg_abi {
     pub const REG_ZERO: usize = 0; // zero constant
     pub const REG_RA: usize = 1; // return address
@@ -60,8 +66,7 @@ pub mod reg_abi {
     pub const REG_T4: usize = 29; // temporary
     pub const REG_T5: usize = 30; // temporary
     pub const REG_T6: usize = 31; // temporary
-    pub const REG_PC: usize = 32; // program counter
-    pub const REG_MAX: usize = 33; // maximum number of registers
+    pub const REG_MAX: usize = 32; // maximum number of registers
 }
 
 pub const DIGEST_WORDS: usize = 8;
@@ -78,18 +83,6 @@ pub mod bigint {
 
     /// BigInt width, in words, handled by the BigInt accelerator circuit.
     pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
-}
-
-/// Compute `ceil(a / b)` via truncated integer division.
-#[allow(dead_code)]
-const fn div_ceil(a: u32, b: u32) -> u32 {
-    (a + b - 1) / b
-}
-
-/// Round `a` up to the nearest multipe of `b`.
-#[allow(dead_code)]
-const fn round_up(a: u32, b: u32) -> u32 {
-    div_ceil(a, b) * b
 }
 
 // TODO: We can probably use ffi::CStr::from_bytes_with_nul once it's
@@ -112,28 +105,26 @@ pub struct SyscallName(*const u8);
 macro_rules! declare_syscall {
     ($(#[$meta:meta])*
      $vis:vis $name:ident) => {
-            $(#[$meta])*
-            $vis const $name: $crate::syscall::SyscallName
-                = unsafe{
-                    $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
-                        module_path!(),
-                        "::",
-                        stringify!($name),
-                        "\0").as_ptr())
-                };
+        $(#[$meta])*
+        $vis const $name: $crate::syscall::SyscallName = unsafe {
+            $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
+                module_path!(),
+                "::",
+                stringify!($name),
+                "\0").as_ptr())
+        };
     };
 }
 
 pub mod nr {
-    declare_syscall!(pub SYS_PANIC);
-    declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_CYCLE_COUNT);
-    declare_syscall!(pub SYS_INITIAL_INPUT);
+    declare_syscall!(pub SYS_GETENV);
+    declare_syscall!(pub SYS_LOG);
+    declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
     declare_syscall!(pub SYS_READ_AVAIL);
     declare_syscall!(pub SYS_READ);
     declare_syscall!(pub SYS_WRITE);
-    declare_syscall!(pub SYS_GETENV);
 }
 
 impl SyscallName {
@@ -221,14 +212,30 @@ impl_syscall!(syscall_5, a3, a4, a5, a6, a7);
 
 #[inline(always)]
 #[no_mangle]
-pub unsafe extern "C" fn sys_halt() {
+pub unsafe extern "C" fn sys_halt() -> ! {
     #[cfg(target_os = "zkvm")]
     {
         asm!(
             "ecall",
             in("t0") ecall::HALT,
+            in("a0") halt::TERMINATE,
         );
         unreachable!();
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn sys_pause() {
+    #[cfg(target_os = "zkvm")]
+    {
+        asm!(
+            "ecall",
+            in("t0") ecall::HALT,
+            in("a0") halt::PAUSE,
+        );
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()
@@ -430,6 +437,39 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize)
     );
 
     nread
+}
+
+/// Reads up to the given number of words into the buffer [recv_buf,
+/// recv_buf + nwords).  Returns the number of bytes actually read.
+/// sys_read_words is a more efficient interface than sys_read, but
+/// varies from POSIX semantics.  Notably:
+///
+/// * The read length is specified in words, not bytes.  (The output
+/// length is still returned in bytes)
+///
+/// * If not all data is available, sys_read_words will block on the
+/// input stream instead of returning a short read.
+///
+/// * recv_buf must be word-aligned.
+///
+/// * All of the buffer is overwritten, even in the case of EOF
+/// mid-way through.
+///
+/// # Safety
+///
+/// `recv_buf' must be a word-aligned pointer and point to a region of
+/// `nwords' size.
+pub unsafe extern "C" fn sys_read_words(fd: u32, recv_buf: *mut u32, nwords: usize) -> usize {
+    let nbytes_requested = nwords * WORD_SIZE;
+    let Return(nread, _) = syscall_2(
+        nr::SYS_READ,
+        recv_buf,
+        nwords,
+        fd,
+        (nwords * WORD_SIZE) as u32,
+    );
+    assert!(nread as usize <= nbytes_requested);
+    nread as usize
 }
 
 #[no_mangle]
