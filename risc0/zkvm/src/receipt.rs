@@ -87,7 +87,7 @@ pub struct SystemState {
 
 /// TODO
 #[derive(Debug)]
-pub struct Global {
+pub struct ReceiptMetadata {
     /// TODO
     pub pre: SystemState,
 
@@ -101,25 +101,40 @@ pub struct Global {
     pub output: Digest,
 }
 
-/// TODO
+/// A receipt attesting to the execution of a Session.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SessionReceipt {
-    /// TODO
+    /// The constituent [SegmentReceipt]s.
+    ///
+    /// Together these can be used by [SessionReceipt::verify] to
+    /// cryptographically prove that this full Session was faithfully executed.
     pub segments: Vec<SegmentReceipt>,
 
-    /// TODO
+    /// The public data written by the guest in this Session.
+    ///
+    /// This data is cryptographically authenticated in
+    /// [SessionReceipt::verify].
     pub journal: Vec<u8>,
 }
 
-/// TODO
+/// A receipt attesting to the execution of a Segment.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SegmentReceipt {
-    /// TODO
+    /// The cryptographic data attesting to the validity of the code execution.
+    ///
+    /// This data is used by the ZKP Verifier (as called by
+    /// [SegmentReceipt::verify]) to cryptographically prove that this Segment
+    /// was faithfully executed.
     pub seal: Vec<u32>,
 }
 
 impl SessionReceipt {
-    /// TODO
+    /// Verifies the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
+    /// stitch together correctly, and that the initial memory image matches the
+    /// given `_image_id` parameter.
     #[cfg(not(target_os = "zkvm"))]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
@@ -130,7 +145,12 @@ impl SessionReceipt {
         self.verify_with_hal(&hal, image_id)
     }
 
-    /// TODO
+    /// Verifies the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
+    /// stitch together correctly, and that the initial memory image matches the
+    /// given `_image_id` parameter.
     pub fn verify_with_hal<H>(
         &self,
         hal: &H,
@@ -189,12 +209,15 @@ impl SessionReceipt {
 
 impl SegmentReceipt {
     /// TODO
-    pub fn get_metadata(&self) -> Result<Global, VerificationError> {
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
-        Global::decode(layout::OutBuffer(elems))
+        ReceiptMetadata::decode(layout::OutBuffer(elems))
     }
 
-    /// TODO
+    /// Verifies the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that the seal does
+    /// validly indicate that this Segment was executed faithfully.
     #[cfg(not(target_os = "zkvm"))]
     pub fn verify(&self) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
@@ -205,7 +228,10 @@ impl SegmentReceipt {
         self.verify_with_hal(&hal)
     }
 
-    /// TODO
+    /// Verifies the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that the seal does
+    /// validly indicate that this Segment was executed faithfully.
     pub fn verify_with_hal<H>(&self, hal: &H) -> Result<(), VerificationError>
     where
         H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
@@ -250,7 +276,7 @@ impl SystemState {
     }
 }
 
-impl Global {
+impl ReceiptMetadata {
     fn decode(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
         let pre = SystemState::decode(io, body.pre)?;
