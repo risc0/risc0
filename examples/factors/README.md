@@ -169,8 +169,6 @@ Once committed to the `journal`, anyone with the receipt can read this value.
 Now you should be able to confirm your work again with `cargo run --release`.
 Once more, the program won't do anything, but it should run successfully and build with a single warning about `from_slice` being unused.
 
-## TODO: From here!
-
 ## Step 5 (Host): Generate a receipt and read its journal contents
 
 For this step, we return to the main file for the host driver program at `factors/host/src/main.rs`, which currently has a placeholder comment asking to fill in with code for handling the receipt:
