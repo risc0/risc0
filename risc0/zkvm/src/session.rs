@@ -90,7 +90,7 @@ pub struct Segment {
 }
 
 impl Session {
-    /// TODO
+    /// Construct a Session from Vec of [Segment], journal, and [ExitCode] 
     pub fn new(segments: Vec<Segment>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
         Self {
             segments,
