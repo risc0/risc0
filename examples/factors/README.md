@@ -123,6 +123,8 @@ You will get a warning about `from_slice` being unused; this function is needed 
 ## Step 4 (Guest): Multiply two values and commit their result
 
 Now it's time to start writing guest code.
+This is the portion of the code that will be proven.
+
 Open the main guest program file `methods/guest/src/main.rs`.
 In its final form, we'll tell the guest to read the values of `a` and `b` from the host and multiply them together.
 We'll then publicly commit their product to the `receipt` portion of the `journal`.
