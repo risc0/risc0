@@ -186,7 +186,7 @@ For this step, we return to the main file for the host driver program at `factor
 ```
 
 In a real-world scenario, we'd want to hand the [receipt] to someone else, but reading it ourselves will be a nice way to check our project is working as expected.
-So, let's extract the [journal]'s contents by replacing the lines above with the following lines.
+So, let's extract the [journal]'s contents by replacing the "`TODO`" in the above code snippet with the following lines.
 
 ```rust
     // Extract journal of receipt (i.e. output c, where c = a * b)
