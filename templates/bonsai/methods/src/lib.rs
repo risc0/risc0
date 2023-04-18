@@ -18,8 +18,7 @@ include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 
 #[cfg(test)]
 mod tests {
-    use ethabi::ethereum_types::U256;
-    use ethabi::Token;
+    use ethabi::{ethereum_types::U256, Token};
     use risc0_zkvm::{Executor, ExecutorEnv};
 
     use super::FIBONACCI_ELF;

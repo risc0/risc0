@@ -251,8 +251,7 @@ pub struct EvmResult {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-    use std::sync::Arc;
+    use std::{str::FromStr, sync::Arc};
 
     use ether_trace::{Http, Provider};
     use ethers_providers::Middleware;

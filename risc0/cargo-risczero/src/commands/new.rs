@@ -161,9 +161,11 @@ impl NewCommand {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
-    use std::io::{BufRead, BufReader};
-    use std::path::Path;
+    use std::{
+        fs::File,
+        io::{BufRead, BufReader},
+        path::Path,
+    };
 
     use tempfile::{tempdir, TempDir};
 

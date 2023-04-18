@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Tests for the HelloBonsai contract using a mock for the Bonsai proxy contract.
+//! Tests for the HelloBonsai contract using a mock for the Bonsai proxy
+//! contract.
 
 pub mod utils;
 
-use std::collections::HashMap;
-use std::error::Error;
+use std::{collections::HashMap, error::Error};
 
 use ethers::prelude::*;
 use hello_bonsai_contracts::HelloBonsai;

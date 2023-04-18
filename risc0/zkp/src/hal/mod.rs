@@ -27,8 +27,10 @@ use lazy_static::lazy_static;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    core::digest::Digest,
-    core::hash::{HashFn, HashSuite, Rng},
+    core::{
+        digest::Digest,
+        hash::{HashFn, HashSuite, Rng},
+    },
     INV_RATE,
 };
 
@@ -162,14 +164,12 @@ impl MemoryTracker {
 #[allow(unused)]
 mod testutil {
     // TODO: Not fully generic over hash
-    use rand::thread_rng;
-    use rand::RngCore;
+    use rand::{thread_rng, RngCore};
     use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
 
     use super::{EvalCheck, Hal};
-    use crate::core::digest::Digest;
     use crate::{
-        core::log2_ceil,
+        core::{digest::Digest, log2_ceil},
         hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
     };

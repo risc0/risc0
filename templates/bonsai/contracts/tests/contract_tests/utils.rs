@@ -12,13 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Utilities for writing tests for Bonsai applications. Supports testing of applications that use
-//! the Bonsai proxy to make requests for processing by a RISC Zero guest by providing utilities to
-//! run a mock of Bonsai.
+//! Utilities for writing tests for Bonsai applications. Supports testing of
+//! applications that use the Bonsai proxy to make requests for processing by a
+//! RISC Zero guest by providing utilities to run a mock of Bonsai.
 
 use std::{collections::HashMap, error::Error, future::Future, ops::Deref, sync::Arc};
 
-use ethers::{core::k256::ecdsa::SigningKey, prelude::*, utils::{Ganache, GanacheInstance}};
+use ethers::{
+    core::k256::ecdsa::SigningKey,
+    prelude::*,
+    utils::{Ganache, GanacheInstance},
+};
 use risc0_zkvm::{sha::Digest, Executor, ExecutorEnv};
 use tokio::{sync::oneshot, task::JoinHandle};
 

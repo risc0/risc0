@@ -15,11 +15,12 @@
 use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::{Arg, Command};
-use risc0_zkvm::prove::default_hal;
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::{Executor, ExecutorEnv, SessionReceipt};
-use shakmaty::fen::Fen;
-use shakmaty::{CastlingMode, Chess, FromSetup, Position, Setup};
+use risc0_zkvm::{
+    prove::default_hal,
+    serde::{from_slice, to_vec},
+    Executor, ExecutorEnv, SessionReceipt,
+};
+use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
 
 fn main() {
     let matches =

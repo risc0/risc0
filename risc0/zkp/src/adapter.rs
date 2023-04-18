@@ -19,8 +19,7 @@ use alloc::vec::Vec;
 use anyhow::Result;
 use risc0_core::field::{Elem, ExtElem, Field};
 
-use crate::hal::cpu::SyncSlice;
-use crate::taps::TapSet;
+use crate::{hal::cpu::SyncSlice, taps::TapSet};
 
 // TODO: Remove references to these constants so we don't depend on a
 // fixed set of register groups.

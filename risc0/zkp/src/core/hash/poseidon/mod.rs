@@ -25,12 +25,11 @@ use risc0_core::field::{
     ExtElem,
 };
 
-pub use self::consts::CELLS;
 use self::consts::{
     MDS, PARTIAL_COMP_MATRIX, PARTIAL_COMP_OFFSET, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
     ROUND_CONSTANTS,
 };
-pub use self::rng::PoseidonRng;
+pub use self::{consts::CELLS, rng::PoseidonRng};
 use super::{HashFn, HashSuite};
 use crate::core::digest::{Digest, DIGEST_WORDS};
 

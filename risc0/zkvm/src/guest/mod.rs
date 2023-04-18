@@ -63,12 +63,10 @@ pub mod sha;
 
 use core::{arch::asm, mem, ptr};
 
-use getrandom::register_custom_getrandom;
-use getrandom::Error;
-use risc0_zkvm_platform::WORD_SIZE;
+use getrandom::{register_custom_getrandom, Error};
 use risc0_zkvm_platform::{
-    syscall::nr::SYS_PANIC,
-    syscall::{sys_panic, sys_rand},
+    syscall::{nr::SYS_PANIC, sys_panic, sys_rand},
+    WORD_SIZE,
 };
 
 pub use crate::entry;
