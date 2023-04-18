@@ -209,6 +209,8 @@ mod tests {
             &template_path
                 .join("templates/rust-starter")
                 .to_string_lossy(),
+            "--templ-subdir",
+            "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
             proj_name,
@@ -241,6 +243,8 @@ mod tests {
             &template_path
                 .join("templates/rust-starter")
                 .to_string_lossy(),
+            "--templ-subdir",
+            "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
             "--no-git",
@@ -271,6 +275,8 @@ mod tests {
             &template_path
                 .join("templates/rust-starter")
                 .to_string_lossy(),
+            "--templ-subdir",
+            "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
             "--std",
