@@ -34,7 +34,7 @@ pub struct NewCommand {
     #[clap(value_parser, long, short, default_value = RISC0_GH_REPO)]
     pub template: String,
 
-    /// location of the template
+    /// Location of the template
     ///
     /// The subdirectory location of the template used for generating the new
     /// project. This path is relative to the base repository specified by
