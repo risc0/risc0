@@ -34,6 +34,14 @@ pub struct NewCommand {
     #[clap(value_parser, long, short, default_value = RISC0_GH_REPO)]
     pub template: String,
 
+    /// location of the template
+    ///
+    /// The subdirectory location of the template used for generating the new
+    /// project. This path is relative to the base repository specified by
+    /// --template
+    #[clap(value_parser, long, default_value = RISC0_TEMPLATE_DIR)]
+    pub templ_subdir: String,
+
     /// template git tag.
     #[clap(value_parser, long, default_value = RISC0_RELEASE_TAG)]
     pub tag: String,
@@ -76,12 +84,6 @@ pub struct NewCommand {
 impl NewCommand {
     /// Execute this command
     pub fn run(&self) {
-        let subfolder = if self.template == RISC0_GH_REPO {
-            Some(RISC0_TEMPLATE_DIR.to_string())
-        } else {
-            None
-        };
-
         let dest_dir = if let Some(dest_dir) = self.dest.clone() {
             dest_dir
         } else {
@@ -90,7 +92,7 @@ impl NewCommand {
 
         let mut template_path = TemplatePath {
             auto_path: Some(self.template.clone()),
-            subfolder,
+            subfolder: Some(self.templ_subdir.clone()),
             git: None,
             branch: None,
             path: None,
