@@ -1,14 +1,8 @@
 # Factors
 
-[install-rust]: https://www.rust-lang.org/tools/install
-[cargo-risczero]: https://crates.io/crates/cargo-risczero
-[examples-dir]: https://github.com/risc0/risc0/tree/main/examples
-[getting-started]: https://www.risczero.com/docs/
-[discord]: https://discord.com/invite/risczero
-
 The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite -- and that they know the factors -- without revealing any further information about the number.
 
-To see this example in action, [install Rust](install-rust) and use `cargo run` in this directory to run it:
+To see this example in action, [install Rust][install-rust] and use `cargo run` in this directory to run it:
 ```
 cargo run
 ```
@@ -20,7 +14,7 @@ This example was chosen because it is straightforward and is a good introduction
 
 ## Step 1: Create a new project
 
-First, [install rust](install-rust) if you don't already have it. Next you can create a RISC Zero zkVM project with boilerplate already filled out using our [`cargo risczero` tool](cargo-risczero):
+First, [install rust][install-rust] if you don't already have it. Next you can create a RISC Zero zkVM project with boilerplate already filled out using our [`cargo risczero` tool][cargo-risczero]:
 ```
 ## Install from crates.io
 cargo install cargo-risczero
@@ -198,6 +192,12 @@ So, let's extract the journal's contents by replacing the lines above with the f
 
 You should now be able to see your proof of factorization with `cargo run --release`.
 If your program printed the "Hello, world!" assertion and `receipt` verification was a success, congratulations!
-If not, we hope that troubleshooting will get you familiar with the system, and we'd love to chat with you on [Discord](discord).
+If not, we hope that troubleshooting will get you familiar with the system, and we'd love to chat with you on [Discord][discord].
 
-If you're ready to start building more complex projects, we recommend taking a look at the other examples in [our examples directory](examples-dir) and looking through our further [Getting Started resources](getting-started) for more project ideas that use zero-knowledge proofs.
+If you're ready to start building more complex projects, we recommend taking a look at the other examples in [our examples directory][examples-dir] and looking through our further [Getting Started resources][getting-started] for more project ideas that use zero-knowledge proofs.
+
+[install-rust]: https://www.rust-lang.org/tools/install
+[cargo-risczero]: https://crates.io/crates/cargo-risczero
+[examples-dir]: https://github.com/risc0/risc0/tree/main/examples
+[getting-started]: https://www.risczero.com/docs/
+[discord]: https://discord.com/invite/risczero
