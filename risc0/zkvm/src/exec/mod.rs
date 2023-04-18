@@ -43,10 +43,7 @@ use risc0_zkvm_platform::{
     },
     PAGE_SIZE, WORD_SIZE,
 };
-use rrs_lib::{
-    instruction_executor::InstructionExecutor,
-    instruction_string_outputter::InstructionStringOutputter, process_instruction, HartState,
-};
+use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
 
 pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
@@ -54,7 +51,6 @@ use self::monitor::MemoryMonitor;
 use crate::{
     align_up,
     opcode::{MajorType, OpCode},
-    session::PageRead,
     ExitCode, Loader, MemoryImage, Program, Segment, Session,
 };
 
@@ -75,7 +71,7 @@ pub struct Executor<'a> {
     body_cycles: usize,
     segment_cycle: usize,
     segments: Vec<Segment>,
-    page_reads: Vec<PageRead>,
+    insn_counter: u32,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -144,7 +140,7 @@ impl<'a> Executor<'a> {
             body_cycles: 0,
             segment_cycle: init_cycles,
             segments: Vec::new(),
-            page_reads: Vec::new(),
+            insn_counter: 0,
         }
     }
 
@@ -158,6 +154,8 @@ impl<'a> Executor<'a> {
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
     pub fn run(&mut self) -> Result<Session> {
+        self.monitor.clear_session();
+
         let journal = Journal::default();
         self.env
             .io
@@ -167,19 +165,22 @@ impl<'a> Executor<'a> {
         let mut run_loop = || -> Result<ExitCode> {
             loop {
                 if let Some(exit_code) = self.step()? {
+                    let total_cycles = self.total_cycles();
+                    log::debug!("exit_code: {exit_code:?}, total_cycles: {total_cycles}");
+                    assert!(total_cycles <= (1 << self.env.segment_limit_po2));
                     let pre_image = self.pre_image.clone();
                     self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
                     let post_image_id = self.monitor.image.get_root();
                     let syscalls = take(&mut self.monitor.syscalls);
+                    let faults = take(&mut self.monitor.faults);
                     self.segments.push(Segment::new(
                         pre_image,
                         post_image_id,
                         self.pre_pc,
-                        self.page_reads.clone(),
-                        self.monitor.get_page_writes(),
+                        faults,
                         syscalls,
                         exit_code,
-                        log2_ceil(self.segment_cycle.next_power_of_two()),
+                        log2_ceil(total_cycles.next_power_of_two()),
                     ));
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),
@@ -205,13 +206,12 @@ impl<'a> Executor<'a> {
     }
 
     fn split(&mut self) {
-        log::debug!("Split: {}", self.segment_cycle);
         self.pre_image = self.monitor.image.clone();
         self.body_cycles = 0;
+        self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
         self.pre_pc = self.pc;
-        self.monitor.clear();
-        self.page_reads.clear();
+        self.monitor.clear_segment();
     }
 
     /// Execute a single instruction.
@@ -223,19 +223,7 @@ impl<'a> Executor<'a> {
         }
 
         let insn = self.monitor.load_u32(self.pc);
-
-        let opcode = OpCode::decode(insn);
-        if log::log_enabled!(log::Level::Debug) {
-            let mut outputter = InstructionStringOutputter { insn_pc: self.pc };
-            let desc = process_instruction(&mut outputter, insn);
-            log::debug!(
-                "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {}",
-                self.segment_cycle,
-                self.pc,
-                insn,
-                desc.unwrap_or(opcode.mnemonic.into())
-            );
-        }
+        let opcode = OpCode::decode(insn, self.pc)?;
 
         if let Some(op_result) = self.monitor.restore_op() {
             return Ok(self.advance(opcode, op_result));
@@ -274,9 +262,15 @@ impl<'a> Executor<'a> {
         // otherwise, commit memory and hart
 
         let segment_limit = self.env.get_segment_limit();
-        let segment_cycles = self.segment_cycles(&opcode);
-        let exit_code = if segment_cycles > segment_limit {
-            Some(ExitCode::SystemSplit(self.segment_cycle))
+        let total_pending_cycles = self.total_pending_cycles(&opcode);
+        // log::debug!(
+        //     "cycle: {}, segment: {}, total: {}",
+        //     self.segment_cycle,
+        //     total_pending_cycles,
+        //     self.total_cycles()
+        // );
+        let exit_code = if total_pending_cycles > segment_limit {
+            Some(ExitCode::SystemSplit(self.insn_counter))
         } else {
             self.advance(opcode, op_result)
         };
@@ -284,14 +278,16 @@ impl<'a> Executor<'a> {
     }
 
     fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
-        let mut pending_page_reads = self.monitor.pending_page_reads();
-        if !pending_page_reads.is_empty() {
-            pending_page_reads.reverse();
-            let page_read = PageRead::new(self.segment_cycle as u32, pending_page_reads);
-            log::debug!("page_read: {}, {:x?}", page_read.cycle, page_read.idxs);
-            self.page_reads.push(page_read);
-        }
+        log::debug!(
+            "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
+            self.segment_cycle,
+            self.pc,
+            opcode.insn,
+            opcode
+        );
+
         self.pc = op_result.pc;
+        self.insn_counter += 1;
         self.body_cycles += opcode.cycles + op_result.extra_cycles;
         let total_page_read_cycles = self.monitor.total_page_read_cycles();
         // log::debug!("total_page_read_cycles: {total_page_read_cycles}");
@@ -300,32 +296,29 @@ impl<'a> Executor<'a> {
         op_result.exit_code
     }
 
-    fn segment_cycles(&self, opcode: &OpCode) -> usize {
-        // How many cycles are required to execute the next instruction?
+    fn total_cycles(&self) -> usize {
+        self.init_cycles
+            + self.monitor.total_fault_cycles()
+            + self.body_cycles
+            + self.fini_cycles
+            + SHA_CYCLES
+            + ZK_CYCLES
+    }
+
+    fn total_pending_cycles(&self, opcode: &OpCode) -> usize {
+        // How many cycles are required for the entire segment?
         // This sum is based on:
         // - ensure we don't split in the middle of a SHA compress
         // - each page fault requires 1 PageFault cycle + CYCLES_PER_PAGE cycles
         // - leave room for fini_cycles
         // - leave room for ZK cycles
-        let fault_cycles = self.monitor.total_fault_cycles();
-        let total_cycles = self.init_cycles
+        self.init_cycles
+            + self.monitor.total_pending_fault_cycles()
             + opcode.cycles
             + self.body_cycles
-            + fault_cycles
             + self.fini_cycles
             + SHA_CYCLES
-            + ZK_CYCLES;
-
-        // log::trace!(
-        //     "body_cycles: {}\
-        //     , fault_cycles: {fault_cycles}\
-        //     , opcode_cycles: {}\
-        //     , total: {total_cycles}",
-        //     self.body_cycles,
-        //     opcode.cycles,
-        // );
-
-        total_cycles
+            + ZK_CYCLES
     }
 
     fn session_cycle(&self) -> usize {
@@ -344,12 +337,21 @@ impl<'a> Executor<'a> {
 
     fn ecall_halt(&mut self) -> Result<OpCodeResult> {
         let halt_type = self.monitor.load_register(REG_A0);
-        let exit_code = match halt_type {
-            halt::TERMINATE => ExitCode::Halted(0),
-            halt::PAUSE => ExitCode::Paused,
+        match halt_type {
+            halt::TERMINATE => Ok(OpCodeResult::new(
+                self.pc,
+                Some(ExitCode::Halted(0)),
+                0,
+                None,
+            )),
+            halt::PAUSE => Ok(OpCodeResult::new(
+                self.pc + WORD_SIZE as u32,
+                Some(ExitCode::Paused),
+                0,
+                None,
+            )),
             _ => bail!("Illegal halt type: {halt_type}"),
-        };
-        Ok(OpCodeResult::new(self.pc, Some(exit_code), 0, None))
+        }
     }
 
     fn ecall_output(&mut self) -> Result<OpCodeResult> {
@@ -436,8 +438,7 @@ impl<'a> Executor<'a> {
         Ok(OpCodeResult::new(
             self.pc + WORD_SIZE as u32,
             None,
-            // 1 + chunks + 1,
-            1 + 1,
+            1 + chunks + 1,
             Some(SyscallRecord {
                 to_guest,
                 regs: (a0, a1),
@@ -448,7 +449,6 @@ impl<'a> Executor<'a> {
 
 /// An event traced from the running VM.
 #[allow(dead_code)] // TODO
-#[non_exhaustive]
 #[derive(PartialEq)]
 pub enum TraceEvent {
     /// An instruction has started at the given program counter

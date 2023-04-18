@@ -396,6 +396,7 @@ pub struct SegmentReceipt {
 
 impl SessionReceipt {
     /// TODO
+    #[cfg(not(target_os = "zkvm"))]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         let hal = risc0_zkp::verify::CpuVerifyHal::<
             BabyBear,
@@ -406,6 +407,7 @@ impl SessionReceipt {
     }
 
     /// TODO
+    #[cfg(not(target_os = "zkvm"))]
     pub fn verify_with_hal<H>(
         &self,
         hal: &H,
@@ -470,16 +472,17 @@ impl SegmentReceipt {
     }
 
     /// TODO
+    #[cfg(not(target_os = "zkvm"))]
     pub fn verify(&self) -> Result<(), VerificationError> {
-        let hal = risc0_zkp::verify::CpuVerifyHal::<
-            BabyBear,
-            Sha256HashSuite<BabyBear, crate::sha::Impl>,
-            _,
-        >::new(&crate::CIRCUIT);
+        let hal =
+            risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
+                &crate::CIRCUIT,
+            );
         self.verify_with_hal(&hal)
     }
 
     /// TODO
+    #[cfg(not(target_os = "zkvm"))]
     pub fn verify_with_hal<H>(&self, hal: &H) -> Result<(), VerificationError>
     where
         H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,

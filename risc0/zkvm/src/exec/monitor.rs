@@ -19,14 +19,11 @@ use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{memory::SYSTEM, PAGE_SIZE, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
-use super::{io::SyscallContext, OpCodeResult, SyscallRecord, SHA_CYCLES};
-use crate::{binfmt::image::PageTableInfo, MemoryImage};
+use super::{io::SyscallContext, OpCodeResult, SyscallRecord};
+use crate::{binfmt::image::PageTableInfo, session::PageFaults, MemoryImage};
 
 /// The number of blocks that fit within a single page.
 const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
-
-/// The number of cycles required to compute a SHA-256 digest of a page.
-// const CYCLES_PER_PAGE: usize = SHA_CYCLES * BLOCKS_PER_PAGE;
 
 const SHA_INIT: usize = 5;
 const SHA_LOAD: usize = 16;
@@ -42,15 +39,9 @@ struct MemStore {
     data: u8,
 }
 
-#[derive(Clone, Default)]
-struct PageFaults {
-    reads: BTreeSet<u32>,
-    writes: BTreeSet<u32>,
-}
-
 pub struct MemoryMonitor {
     pub image: MemoryImage,
-    faults: PageFaults,
+    pub faults: PageFaults,
     pending_faults: PageFaults,
     pending_writes: BTreeSet<MemStore>,
     cycle: usize,
@@ -174,15 +165,17 @@ impl MemoryMonitor {
             .collect()
     }
 
-    pub fn get_page_writes(&self) -> Vec<u32> {
-        self.faults.writes.iter().cloned().collect()
-    }
-
     pub fn total_page_read_cycles(&self) -> usize {
         self.compute_page_cycles(self.faults.reads.union(&self.pending_faults.reads))
     }
 
     pub fn total_fault_cycles(&self) -> usize {
+        let reads = self.compute_page_cycles(self.faults.reads.iter());
+        let writes = self.compute_page_cycles(self.faults.writes.iter());
+        reads + writes
+    }
+
+    pub fn total_pending_fault_cycles(&self) -> usize {
         let reads = self.compute_page_cycles(self.faults.reads.union(&self.pending_faults.reads));
         let writes =
             self.compute_page_cycles(self.faults.writes.union(&self.pending_faults.writes));
@@ -205,11 +198,15 @@ impl MemoryMonitor {
         })
     }
 
-    pub fn clear(&mut self) {
+    pub fn clear_segment(&mut self) {
         self.faults.clear();
-        self.pending_writes.clear();
-        self.pending_faults.clear();
         self.syscalls.clear();
+    }
+
+    pub fn clear_session(&mut self) {
+        self.clear_segment();
+        self.pending_faults.clear();
+        self.pending_writes.clear();
     }
 }
 

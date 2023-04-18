@@ -16,19 +16,25 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use anyhow::{anyhow, Result};
 use lazy_regex::{regex, Captures};
-use log::{debug, trace};
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem as Elem},
     Elem as _,
 };
 use risc0_zkp::adapter::CircuitStepHandler;
-use risc0_zkvm_platform::{syscall::halt, WORD_SIZE};
+use risc0_zkvm_platform::{
+    memory::SYSTEM,
+    syscall::{
+        ecall, halt,
+        reg_abi::{REG_A0, REG_T0},
+    },
+    WORD_SIZE,
+};
 
 use super::plonk;
 use crate::{
     binfmt::image::MemoryImage,
     opcode::{MajorType, OpCode},
-    session::PageRead,
+    session::PageFaults,
     ExitCode, Segment,
 };
 
@@ -69,13 +75,13 @@ impl MemoryState {
 
     #[track_caller]
     fn load_u8(&self, addr: u32) -> u8 {
-        // debug!("load_u8: 0x{addr:08X}");
+        // log::debug!("load_u8: 0x{addr:08X}");
         self.ram.buf[addr as usize]
     }
 
     #[track_caller]
     fn load_u32(&self, addr: u32) -> u32 {
-        // debug!("load_u32: 0x{addr:08X}");
+        // log::debug!("load_u32: 0x{addr:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
         let mut bytes = [0u8; WORD_SIZE];
         for i in 0..WORD_SIZE {
@@ -84,15 +90,19 @@ impl MemoryState {
         u32::from_le_bytes(bytes)
     }
 
+    fn load_register(&self, idx: usize) -> u32 {
+        self.load_u32(get_register_addr(idx))
+    }
+
     #[track_caller]
     fn store_u8(&mut self, addr: u32, value: u8) {
-        // debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
+        // log::debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
         self.ram.buf[addr as usize] = value;
     }
 
     #[track_caller]
     fn store_region(&mut self, addr: u32, slice: &[u8]) {
-        // trace!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
+        // log::trace!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
         for i in 0..slice.len() {
             self.store_u8(addr + i as u32, slice[i]);
         }
@@ -100,10 +110,14 @@ impl MemoryState {
 
     #[track_caller]
     fn store_u32(&mut self, addr: u32, value: u32) {
-        // debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
+        // log::debug!("store_u32: 0x{addr:08X} <= 0x{value:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
         self.store_region(addr, &value.to_le_bytes());
     }
+}
+
+fn get_register_addr(idx: usize) -> u32 {
+    (SYSTEM.start() + idx * WORD_SIZE) as u32
 }
 
 fn split_word8(value: u32) -> (Elem, Elem, Elem, Elem) {
@@ -125,8 +139,7 @@ fn merge_word8((x0, x1, x2, x3): (Elem, Elem, Elem, Elem)) -> u32 {
 
 pub struct MachineContext {
     memory: MemoryState,
-    page_reads: VecDeque<PageRead>,
-    page_writes: VecDeque<u32>,
+    faults: PageFaults,
     syscall_out_data: VecDeque<u32>,
     syscall_out_regs: VecDeque<(u32, u32)>,
 
@@ -136,12 +149,12 @@ pub struct MachineContext {
     // next dirty page will be reported in a 'pageInfo' extern.
     is_flushing: bool,
 
-    pending_page_reads: VecDeque<u32>,
-
     // This is just for diagnostics: tracks which words have been paged in.
     resident_words: BTreeSet<u32>,
 
     exit_code: ExitCode,
+
+    insn_counter: u32,
 }
 
 impl CircuitStepHandler<Elem> for MachineContext {
@@ -165,7 +178,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
             }
             "getMinor" => {
                 let insn = merge_word8((args[0], args[1], args[2], args[3]));
-                let opcode = OpCode::decode(insn);
+                let opcode = OpCode::decode(insn, 0)?;
                 outs[0] = opcode.minor.into();
                 Ok(())
             }
@@ -256,18 +269,16 @@ impl MachineContext {
             .iter()
             .map(|syscall| syscall.regs)
             .collect();
-        log::debug!("{:?}", segment.page_reads);
         MachineContext {
             memory: MemoryState::new(segment.pre_image.clone()),
-            page_reads: VecDeque::from(segment.page_reads.clone()),
-            page_writes: VecDeque::from(segment.page_writes.clone()),
+            faults: segment.faults.clone(),
             syscall_out_data: VecDeque::from(syscall_out_data),
             syscall_out_regs: VecDeque::from(syscall_out_regs),
             is_halted: false,
             is_flushing: false,
-            pending_page_reads: VecDeque::new(),
             resident_words: BTreeSet::new(),
             exit_code: segment.exit_code,
+            insn_counter: 0,
         }
     }
 
@@ -277,13 +288,14 @@ impl MachineContext {
             let pc: u32 = pc.into();
             match exit_code {
                 halt::TERMINATE => {
-                    debug!("HALT[{cycle}]> pc: 0x{pc:08x}");
+                    log::debug!("HALT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 halt::PAUSE => {
-                    debug!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
+                    log::debug!("PAUSE[{cycle}]> pc: 0x{pc:08x}");
+                    self.is_flushing = true;
                 }
                 halt::SPLIT => {
-                    debug!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
+                    log::debug!("SPLIT[{cycle}]> pc: 0x{pc:08x}");
                 }
                 _ => unimplemented!("Unsupported exit_code: {exit_code}"),
             }
@@ -295,51 +307,55 @@ impl MachineContext {
         let cycle: u32 = cycle.into();
         let pc: u32 = pc.into();
         let insn = self.memory.load_u32(pc);
-        let opcode = OpCode::decode(insn);
-        trace!("decode: {}", opcode.mnemonic);
+        let opcode = OpCode::decode(insn, pc)?;
 
-        if let ExitCode::SystemSplit(split_cycle) = self.exit_code {
-            if cycle >= split_cycle as u32 {
-                log::debug!("split[{cycle}]> split_cycle: {split_cycle}");
-                if !self.is_flushing {
-                    log::debug!("FLUSH[{cycle}]> pc: 0x{pc:08x}");
+        if opcode.major == MajorType::ECall {
+            let minor = self.memory.load_register(REG_T0);
+            if minor == ecall::HALT {
+                let mode = self.memory.load_register(REG_A0);
+                if mode == halt::PAUSE {
                     self.is_flushing = true;
                 }
             }
         }
 
-        if !self.pending_page_reads.is_empty() {
-            return Ok(MajorType::PageFault.as_u32().into());
-        }
-
-        if let Some(event) = self.page_reads.front() {
-            let event_cycle = event.cycle;
-            if cycle >= event_cycle {
-                let page_reads = self.page_reads.pop_front().unwrap();
-                log::debug!(
-                    "cycle: {cycle}, event: {}, page_reads: {page_reads:?}",
-                    event_cycle
-                );
-                self.pending_page_reads = VecDeque::from(page_reads.idxs);
-                return Ok(MajorType::PageFault.as_u32().into());
+        if let ExitCode::SystemSplit(split_insn) = self.exit_code {
+            if self.insn_counter == split_insn {
+                if !self.is_flushing {
+                    log::debug!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
+                    self.is_flushing = true;
+                }
             }
         }
 
-        if self.is_flushing && !self.page_writes.is_empty() {
+        if !self.faults.reads.is_empty() {
             return Ok(MajorType::PageFault.as_u32().into());
         }
+
+        if self.is_flushing {
+            return Ok(MajorType::PageFault.as_u32().into());
+        }
+
+        log::debug!(
+            "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
+            cycle,
+            pc,
+            insn,
+            opcode
+        );
+        self.insn_counter += 1;
 
         Ok(opcode.major.as_u32().into())
     }
 
     fn page_info(&mut self, _pc: Elem) -> (Elem, Elem, Elem) {
-        if let Some(page_idx) = self.pending_page_reads.pop_front() {
-            // log::debug!("page_read: {page_idx}");
+        if let Some(page_idx) = self.faults.reads.pop_last() {
             return (Elem::ONE, page_idx.into(), Elem::ZERO);
         }
 
         if self.is_flushing {
-            if let Some(page_idx) = self.page_writes.pop_front() {
+            if let Some(page_idx) = self.faults.writes.pop_first() {
+                log::debug!("page_write: 0x{page_idx:08x}");
                 return (Elem::ZERO, page_idx.into(), Elem::ZERO);
             }
         }
@@ -360,7 +376,7 @@ impl MachineContext {
         let mut numer = merge_word8(numer) as u32;
         let mut denom = merge_word8(denom) as u32;
         let sign: u32 = sign.into();
-        // debug!("divide: [{sign}] {numer} / {denom}");
+        // log::debug!("divide: [{sign}] {numer} / {denom}");
         let ones_comp = (sign == 2) as u32;
         let neg_numer = sign != 0 && (numer as i32) < 0;
         let neg_denom = sign == 1 && (denom as i32) < 0;
@@ -383,7 +399,7 @@ impl MachineContext {
         if neg_numer {
             rem = (!rem).overflowing_add(1 - ones_comp).0;
         }
-        // debug!("  quot: {quot}, rem: {rem}");
+        // log::debug!("  quot: {quot}, rem: {rem}");
         (split_word8(quot), split_word8(rem))
     }
 
@@ -440,7 +456,7 @@ impl MachineContext {
             "Args missing formatting: {:?} in {msg}",
             args_left
         );
-        trace!("{}", formatted);
+        log::trace!("{}", formatted);
     }
 
     fn ram_read(&mut self, cycle: usize, addr: Elem, op: Elem) -> (Elem, Elem, Elem, Elem) {
@@ -454,13 +470,13 @@ impl MachineContext {
                 let addr = addr * WORD_SIZE as u32;
                 let page_idx = info.get_page_index(addr);
                 let entry_addr = info.get_page_entry_addr(page_idx);
-                debug!("[{cycle}] ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}, page_idx: {page_idx}");
+                log::debug!("[{cycle}] ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}, page_idx: {page_idx}");
                 panic!("Memory read before page in: 0x{addr:08x}");
             }
         }
         let addr = addr * WORD_SIZE as u32;
         let word = self.memory.load_u32(addr);
-        // debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
+        // log::debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
         split_word8(word)
     }
 
@@ -478,7 +494,7 @@ impl MachineContext {
 
         let data = merge_word8(data);
         let addr = addr * WORD_SIZE as u32;
-        // debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
+        // log::debug!("ram_write> 0x{:08X} <= 0x{:08X}", addr, data);
         self.memory.store_u32(addr, data);
 
         Ok(())
@@ -531,7 +547,7 @@ impl MachineContext {
             .syscall_out_regs
             .pop_front()
             .ok_or(anyhow!("Invalid syscall records"))?;
-        debug!("syscall_fini: {:?}", syscall_out_regs);
+        log::debug!("syscall_fini: {:?}", syscall_out_regs);
         Ok(syscall_out_regs)
     }
 }

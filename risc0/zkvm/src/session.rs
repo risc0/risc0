@@ -15,6 +15,8 @@
 //! This module defines [Session] and [Segment] which provides a way to share
 //! execution traces between the execution phase and the proving phase.
 
+use alloc::collections::BTreeSet;
+
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
@@ -25,7 +27,7 @@ use crate::{exec::SyscallRecord, MemoryImage};
 pub enum ExitCode {
     /// This indicates when a system-initiated split has occured due to the
     /// segment limit being exceeded.
-    SystemSplit(usize),
+    SystemSplit(u32),
 
     /// This indicates that the session limit has been reached.
     SessionLimit,
@@ -40,9 +42,9 @@ pub enum ExitCode {
 }
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
-pub struct PageRead {
-    pub(crate) cycle: u32,
-    pub(crate) idxs: Vec<u32>,
+pub struct PageFaults {
+    pub(crate) reads: BTreeSet<u32>,
+    pub(crate) writes: BTreeSet<u32>,
 }
 
 /// TODO
@@ -64,8 +66,7 @@ pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
     pub(crate) pc: u32,
-    pub(crate) page_reads: Vec<PageRead>,
-    pub(crate) page_writes: Vec<u32>,
+    pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
     pub(crate) po2: usize,
@@ -87,8 +88,7 @@ impl Segment {
         pre_image: MemoryImage,
         post_image_id: Digest,
         pc: u32,
-        page_reads: Vec<PageRead>,
-        page_writes: Vec<u32>,
+        faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
         po2: usize,
@@ -97,17 +97,10 @@ impl Segment {
             pre_image,
             post_image_id,
             pc,
-            page_reads,
-            page_writes,
+            faults,
             syscalls,
             exit_code,
             po2,
         }
-    }
-}
-
-impl PageRead {
-    pub fn new(cycle: u32, idxs: Vec<u32>) -> Self {
-        Self { cycle, idxs }
     }
 }

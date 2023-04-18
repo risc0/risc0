@@ -30,7 +30,9 @@ use risc0_zkvm_platform::{
     fileno,
     memory::SYSTEM,
     syscall::{
-        nr::{SYS_CYCLE_COUNT, SYS_LOG, SYS_PANIC, SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
+        nr::{
+            SYS_CYCLE_COUNT, SYS_LOG, SYS_PANIC, SYS_RANDOM, SYS_READ, SYS_READ_AVAIL, SYS_WRITE,
+        },
         reg_abi::{REG_A3, REG_A4, REG_A5},
         SyscallName,
     },
@@ -364,7 +366,8 @@ impl<'a> Default for SyscallTable<'a> {
         };
         new.with_syscall(SYS_CYCLE_COUNT, syscalls::CycleCount)
             .with_syscall(SYS_LOG, syscalls::Log)
-            .with_syscall(SYS_PANIC, syscalls::Panic);
+            .with_syscall(SYS_PANIC, syscalls::Panic)
+            .with_syscall(SYS_RANDOM, syscalls::Random);
         new
     }
 }
@@ -455,6 +458,22 @@ pub(crate) mod syscalls {
             let from_guest = ctx.load_region(buf_ptr, buf_len);
             let msg = from_utf8(&from_guest)?;
             bail!("Guest panicked: {msg}");
+        }
+    }
+
+    pub(crate) struct Random;
+    impl Syscall for Random {
+        fn syscall(
+            &mut self,
+            _syscall: &str,
+            _ctx: &mut dyn SyscallContext,
+            to_guest: &mut [u32],
+        ) -> Result<(u32, u32)> {
+            log::debug!("SYS_RANDOM: {}", to_guest.len());
+            let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
+            getrandom::getrandom(rand_buf.as_mut_slice())?;
+            bytemuck::cast_slice_mut(to_guest).clone_from_slice(rand_buf.as_slice());
+            Ok((0, 0))
         }
     }
 }

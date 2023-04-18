@@ -13,31 +13,56 @@
 // limitations under the License.
 
 use anyhow::Result;
-use risc0_zkp::{core::digest::Digest, verify::VerificationError};
+use risc0_circuit_rv32im::cpu::CpuEvalCheck;
+use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
+use risc0_zkp::{
+    core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
+    hal::{cpu::CpuHal, EvalCheck, Hal},
+    verify::{HashSuite, VerificationError},
+};
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use risc0_zkvm_platform::memory::HEAP;
 use serial_test::serial;
 use test_log::test;
 
-use super::default_hal;
+use super::{default_hal, default_poseidon_hal};
 use crate::{
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, ExitCode, SessionReceipt,
+    ControlId, Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT,
 };
 
-fn prove_nothing() -> Result<SessionReceipt> {
+fn prove_nothing<H, E>(hal: &H, eval: &E) -> Result<SessionReceipt>
+where
+    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
+    E: EvalCheck<H>,
+{
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let (hal, eval) = default_hal();
-    session.prove(hal.as_ref(), &eval)
+    session.prove(hal, eval)
+}
+
+#[test]
+#[cfg_attr(feature = "cuda", serial)]
+fn hashfn_poseidon() {
+    let (hal, eval) = default_poseidon_hal();
+    prove_nothing(hal.as_ref(), &eval).unwrap();
+}
+
+#[test]
+fn hashfn_blake2b() {
+    let hal = CpuHal::<BabyBear, Blake2bCpuHashSuite>::new();
+    let eval = CpuEvalCheck::new(&CIRCUIT);
+    prove_nothing(&hal, &eval).unwrap();
 }
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde() {
-    let receipt = prove_nothing().unwrap();
+    let (hal, eval) = default_hal();
+    let receipt = prove_nothing(hal.as_ref(), &eval).unwrap();
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
     let decoded: SessionReceipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
@@ -47,7 +72,8 @@ fn receipt_serde() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
-    let receipt = prove_nothing().unwrap();
+    let (hal, eval) = default_hal();
+    let receipt = prove_nothing(hal.as_ref(), &eval).unwrap();
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
@@ -150,7 +176,7 @@ fn pause_continue() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn continuation() {
-    const COUNT: usize = 2; // Number of total chunks to aim for.
+    const COUNT: usize = 7; // Number of total chunks to aim for.
     let segment_limit_po2 = 15; // 32k cycles
     let cycles = 1 << segment_limit_po2;
 
@@ -163,10 +189,112 @@ fn continuation() {
     let session = exec.run().unwrap();
     assert_eq!(session.segments.len(), COUNT);
 
-    let segments = &session.segments;
-    // assert_eq!(segments[0].exit_code, ExitCode::SystemSplit(52727));
-    assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
+    let (final_segment, segments) = session.segments.split_last().unwrap();
+    for segment in segments {
+        assert!(std::matches!(segment.exit_code, ExitCode::SystemSplit(_)));
+    }
+    assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
     let (hal, eval) = default_hal();
     session.prove(hal.as_ref(), &eval).unwrap();
+}
+
+// These tests come from:
+// https://github.com/riscv-software-src/riscv-tests
+// They were built using the toolchain from:
+// https://github.com/risc0/toolchain/releases/tag/2022.03.25
+mod riscv {
+    use crate::{prove::default_hal, Executor, ExecutorEnv, MemoryImage, Program};
+
+    fn run_test(test_name: &str) {
+        use std::io::Read;
+
+        use flate2::read::GzDecoder;
+        use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+        use tar::Archive;
+
+        let bytes = include_bytes!("../testdata/riscv-tests.tgz");
+        let gz = GzDecoder::new(&bytes[..]);
+        let mut tar = Archive::new(gz);
+        for entry in tar.entries().unwrap() {
+            let mut entry = entry.unwrap();
+            if !entry.header().entry_type().is_file() {
+                continue;
+            }
+            let path = entry.path().unwrap();
+            let filename = path.file_name().unwrap().to_str().unwrap();
+            if filename != test_name {
+                continue;
+            }
+            let mut elf = Vec::new();
+            entry.read_to_end(&mut elf).unwrap();
+
+            let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
+            let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+
+            let env = ExecutorEnv::default();
+            let mut exec = Executor::new(env, image, program.entry);
+            let session = exec.run().unwrap();
+
+            let (hal, eval) = default_hal();
+            session.prove(hal.as_ref(), &eval).unwrap();
+        }
+    }
+
+    macro_rules! test_case {
+        ($func_name:ident) => {
+            #[test_log::test]
+            #[cfg_attr(feature = "cuda", serial_test::serial)]
+            fn $func_name() {
+                run_test(stringify!($func_name));
+            }
+        };
+    }
+
+    test_case!(add);
+    test_case!(addi);
+    test_case!(and);
+    test_case!(andi);
+    test_case!(auipc);
+    test_case!(beq);
+    test_case!(bge);
+    test_case!(bgeu);
+    test_case!(blt);
+    test_case!(bltu);
+    test_case!(bne);
+    test_case!(div);
+    test_case!(divu);
+    test_case!(jal);
+    test_case!(jalr);
+    test_case!(lb);
+    test_case!(lbu);
+    test_case!(lh);
+    test_case!(lhu);
+    test_case!(lui);
+    test_case!(lw);
+    test_case!(mul);
+    test_case!(mulh);
+    test_case!(mulhsu);
+    test_case!(mulhu);
+    test_case!(or);
+    test_case!(ori);
+    test_case!(rem);
+    test_case!(remu);
+    test_case!(sb);
+    test_case!(sh);
+    test_case!(simple);
+    test_case!(sll);
+    test_case!(slli);
+    test_case!(slt);
+    test_case!(slti);
+    test_case!(sltiu);
+    test_case!(sltu);
+    test_case!(sra);
+    test_case!(srai);
+    test_case!(srl);
+    test_case!(srli);
+    test_case!(sub);
+    test_case!(sw);
+    test_case!(xor);
+    test_case!(xori);
 }

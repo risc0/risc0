@@ -36,8 +36,6 @@ pub mod serde;
 #[cfg(feature = "prove")]
 mod session;
 pub mod sha;
-// #[cfg(test)]
-// mod tests;
 
 pub use anyhow::Result;
 use risc0_zkp::core::hash::{

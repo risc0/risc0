@@ -51,6 +51,7 @@ use risc0_zkp::{
     hal::{EvalCheck, Hal},
     layout::Buffer,
     prove::{adapter::ProveAdapter, executor::Executor},
+    verify::CpuVerifyHal,
 };
 use risc0_zkvm_platform::WORD_SIZE;
 
@@ -173,8 +174,9 @@ impl Session {
             journal: self.journal.clone(),
         };
         let image_id = self.segments[0].pre_image.get_root();
+        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
         receipt
-            .verify(image_id)
+            .verify_with_hal(&hal, image_id)
             .map_err(|err| anyhow!("Verification error: {err}"))?;
         Ok(receipt)
     }
@@ -226,8 +228,9 @@ impl Segment {
         let seal = prover.finalize(&[&mix, &out], eval);
 
         let receipt = SegmentReceipt { seal };
+        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
         receipt
-            .verify()
+            .verify_with_hal(&hal)
             .map_err(|err| anyhow!("Verification error: {err}"))?;
 
         Ok(receipt)
