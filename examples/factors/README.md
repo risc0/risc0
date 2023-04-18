@@ -193,6 +193,7 @@ So, let's extract the journal's contents by replacing the lines above with the f
 You should now be able to see your proof of factorization with `cargo run --release`.
 If your program printed the "Hello, world!" assertion and `receipt` verification was a success, congratulations!
 If not, we hope that troubleshooting will get you familiar with the system, and we'd love to chat with you on [Discord][discord].
+Or, if you believe you've found a bug or other problem in our code, please [open an issue][issues] describing the problem.
 
 If you're ready to start building more complex projects, we recommend taking a look at the other examples in [our examples directory][examples-dir] and looking through our further [Getting Started resources][getting-started] for more project ideas that use zero-knowledge proofs.
 
@@ -201,3 +202,4 @@ If you're ready to start building more complex projects, we recommend taking a l
 [examples-dir]: https://github.com/risc0/risc0/tree/main/examples
 [getting-started]: https://www.risczero.com/docs/
 [discord]: https://discord.com/invite/risczero
+[issues]: https://github.com/risc0/risc0/issues
