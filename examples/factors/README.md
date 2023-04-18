@@ -116,7 +116,6 @@ The `prover.run()` command will cause our guest program to execute:
     );
 ```
 
-Make sure to uncomment the `use risc0_zkvm::serde::{from_slice, to_vec};` line at the top of the file so that we can access the helper functions in the lines we just added.
 You can confirm your work with `cargo run --release` -- the program still won't do anything, but it should compile and run successfully.
 You will get a warning about `from_slice` being unused; this function is needed when reading the journal, but the guest hasn't written to it yet, so the host can't read from it yet.
 
@@ -146,9 +145,7 @@ pub fn main() {
 ```
 ### Load values from the host
 
-First, uncomment `use risc0_zkvm::guest::env;` at the top of the file (outside of the function body) to bring `env` into scope.
-
-Then, we use `env::read()` to load both numbers:
+Use `env::read()` to load both numbers that the host provided:
 
 ```rust
     let a: u64 = env::read();

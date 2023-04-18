@@ -3,9 +3,7 @@
 // `METHOD_NAME_ID` with `MULTIPLY_ID`
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 use risc0_zkvm::Prover;
-// TODO: Uncomment the `use` line below for serialization helper functions for
-// communication with the guest
-// use risc0_zkvm::serde::{from_slice, to_vec};
+use risc0_zkvm::serde::{from_slice, to_vec};
 
 fn main() {
     // Make the prover.
