@@ -25,7 +25,7 @@ pub(crate) mod merkle;
 pub mod read_iop;
 
 use alloc::{vec, vec::Vec};
-use core::fmt;
+use core::fmt::{self};
 #[cfg(not(target_os = "zkvm"))]
 use core::marker::PhantomData;
 
@@ -77,6 +77,9 @@ impl fmt::Display for VerificationError {
         }
     }
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for VerificationError {}
 
 pub trait VerifyHal {
     type HashFn: HashFn<Self::Field>;

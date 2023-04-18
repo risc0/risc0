@@ -13,12 +13,13 @@
 // limitations under the License.
 
 use password_checker_core::PasswordRequest;
-use password_checker_methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
+use password_checker_methods::PW_CHECKER_ELF;
 use rand::prelude::*;
 use risc0_zkvm::{
+    prove::default_hal,
     serde::{from_slice, to_vec},
     sha::Digest,
-    Prover,
+    Executor, ExecutorEnv,
 };
 
 fn main() {
@@ -31,47 +32,38 @@ fn main() {
         salt,
     };
 
-    // a new prover is created to run the pw_checker method
-    let mut prover = Prover::new(PW_CHECKER_ELF).unwrap();
-
-    // Adding input to the prover makes it readable by the guest
-    let vec = to_vec(&request).unwrap();
-    prover.add_input_u32_slice(&vec);
-
-    let receipt = prover.run().unwrap();
-    let password_hash: Digest = from_slice(&receipt.journal).unwrap();
+    let password_hash = password_checker(request);
     println!("Password hash is: {}", &password_hash);
+}
 
-    // In most scenarios, we would serialize and send the receipt to a verifier here
-    // The verifier checks the receipt with the following call, which panics if the
-    // receipt is wrong
-    receipt.verify(&PW_CHECKER_ID).unwrap();
+fn password_checker(request: PasswordRequest) -> Digest {
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&request).unwrap())
+        .build();
+
+    let mut exec = Executor::from_elf(env, PW_CHECKER_ELF).unwrap();
+    let session = exec.run().unwrap();
+
+    let (hal, eval) = default_hal();
+    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+
+    from_slice(&receipt.journal).unwrap()
 }
 
 #[cfg(test)]
 mod tests {
     use password_checker_core::PasswordRequest;
-    use password_checker_methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
-    use risc0_zkvm::{serde::to_vec, Prover};
-
-    const TEST_SALT: [u8; 32] = [0u8; 32];
-    const TEST_PASSWORD: &str = "S00perSecr1t!!!";
 
     #[test]
     fn main() {
+        const TEST_SALT: [u8; 32] = [0u8; 32];
+        const TEST_PASSWORD: &str = "S00perSecr1t!!!";
+
         let request = PasswordRequest {
             password: TEST_PASSWORD.into(),
             salt: TEST_SALT,
         };
 
-        // a new prover is created to run the pw_checker method
-        let mut prover = Prover::new(PW_CHECKER_ELF).unwrap();
-
-        // Adding input to the prover makes it readable by the guest
-        let vec = to_vec(&request).unwrap();
-        prover.add_input_u32_slice(&vec);
-
-        let receipt = prover.run().unwrap();
-        assert!(receipt.verify(&PW_CHECKER_ID).is_ok());
+        super::password_checker(request);
     }
 }

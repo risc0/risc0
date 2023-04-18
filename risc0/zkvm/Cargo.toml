@@ -88,4 +88,10 @@ prove = [
   "risc0-zkp/prove",
   "std",
 ]
-std = ["anyhow/std", "risc0-circuit-rv32im/std", "risc0-zkp/std", "serde/std", "num-traits/std"]
+std = [
+  "anyhow/std",
+  "num-traits/std",
+  "risc0-circuit-rv32im/std",
+  "risc0-zkp/std",
+  "serde/std",
+]

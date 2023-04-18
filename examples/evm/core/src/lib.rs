@@ -251,7 +251,6 @@ pub struct EvmResult {
 
 #[cfg(test)]
 mod tests {
-    use std::env;
     use std::str::FromStr;
     use std::sync::Arc;
 

@@ -14,23 +14,25 @@
 
 use clap::{Arg, Command};
 use risc0_zkvm::{
+    prove::default_hal,
     serde::{from_slice, to_vec},
     sha::Digest,
-    Prover, Receipt,
+    Executor, ExecutorEnv,
 };
-use sha_methods::{HASH_ELF, HASH_ID};
+use sha_methods::HASH_ELF;
 
-fn provably_hash(input: &str) -> Receipt {
-    // Make the prover.
-    let mut prover =
-        Prover::new(HASH_ELF).expect("Prover should be constructed from valid ELF binary");
+fn provably_hash(input: &str) -> Digest {
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(input).unwrap())
+        .build();
 
-    prover.add_input_u32_slice(&to_vec(input).expect("input string should serialize"));
+    let mut exec = Executor::from_elf(env, HASH_ELF).unwrap();
+    let session = exec.run().unwrap();
 
-    // Run prover & generate receipt
-    prover.run().expect(
-        "Code should be provable unless it had an error or exceeded the maximum cycle limit",
-    )
+    let (hal, eval) = default_hal();
+    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+
+    from_slice(&receipt.journal).unwrap()
 }
 
 fn main() {
@@ -41,30 +43,16 @@ fn main() {
     let message = matches.get_one::<String>("message").unwrap();
 
     // Prove hash and verify it
-    let receipt = provably_hash(message);
-    receipt.verify(&HASH_ID).expect("Proven code should verify");
-
-    let digest: Digest = from_slice(&receipt.journal).expect("Journal should contain SHA Digest");
+    let digest = provably_hash(message);
 
     println!("I provably know data whose SHA-256 hash is {}", digest);
 }
 
 #[cfg(test)]
 mod tests {
-    use risc0_zkvm::{serde::from_slice, sha::Digest};
-    use sha_methods::HASH_ID;
-
-    use crate::provably_hash;
-
-    const TEST_STRING: &str = "abc";
-
     #[test]
     fn main() {
-        let receipt = provably_hash(TEST_STRING);
-        receipt.verify(&HASH_ID).expect("Proven code should verify");
-
-        let digest: Digest =
-            from_slice(&receipt.journal).expect("Journal should contain SHA Digest");
+        let digest = super::provably_hash("abc");
         assert_eq!(
             hex::encode(digest.as_bytes()),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
