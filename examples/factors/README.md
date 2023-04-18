@@ -118,16 +118,15 @@ The `prover.run()` command will cause our guest program to execute:
 ```
 
 You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
-You will get a warning about `from_slice` being unused; this function is needed when reading the journal, but the guest hasn't written to it yet, so the host can't read from it yet.
+You will get a warning about `from_slice` being unused; this function is needed when reading the [journal], but the guest hasn't written to it yet, so the host can't read from it yet.
 
 ## Step 4 (Guest): Multiply two values and commit their result
 
-Now it's time to start writing guest code.
+Now it's time to start writing guest code, located in `methods/guest/src/main.rs`.
 This is the portion of the code that will be proven.
 
-Open the main guest program file `methods/guest/src/main.rs`.
-In its final form, we'll tell the guest to read the values of `a` and `b` from the host and multiply them together.
-We'll then publicly commit their product to the `receipt` portion of the `journal`.
+For this project, we'll tell the guest to read the values of `a` and `b` from the host and multiply them together.
+We'll then publicly commit their product to the [journal] portion of the [receipt].
 
 Here is the complete guest program.
 We'll break this down step by step below:
@@ -157,30 +156,37 @@ Use `env::read()` to load both numbers that the host provided:
 ### Confirm that factors are non-trivial
 
 Next, we'll add a line that panics if either chosen value is 1. This will leave us with a guest program that only completes if the product of `a` and `b` is genuinely composite. 
-```
+```rust
     // Verify that neither of them are 1 (i.e. nontrivial factors)
     if a == 1 || b == 1 {
         panic!("Trivial factors")
     }
 ```
 
+## Compute and publish the product
+
 Now we can compute their product and `commit` it.
-Once committed to the `journal`, anyone with the receipt can read this value.
+```rust
+    let product = a.checked_mul(b).expect("Integer overflow");
+    env::commit(&product);
+```
+The `env::commit` function is used to commit public results to the [journal].
+Once committed to the journal, anyone with the [receipt] can read this value.
 
 Now you should be able to confirm your work again with `cargo run --release`.
 Once more, the program won't do anything, but it should run successfully and build with a single warning about `from_slice` being unused.
 
 ## Step 5 (Host): Generate a receipt and read its journal contents
 
-For this step, we return to the main file for the host driver program at `factors/host/src/main.rs`, which currently has a placeholder comment asking to fill in with code for handling the receipt:
+For this step, we return to the main file for the host driver program at `factors/host/src/main.rs`, which currently has a placeholder comment asking to fill in with code for handling the [receipt]:
 
 ```rust
     // TODO: Implement code for transmitting or serializing the receipt for
     // other parties to verify here
 ```
 
-In a real-world scenario, we'd want to hand the receipt to someone else, but reading it ourselves will be a nice way to check our project is working as expected.
-So, let's extract the journal's contents by replacing the lines above with the following lines.
+In a real-world scenario, we'd want to hand the [receipt] to someone else, but reading it ourselves will be a nice way to check our project is working as expected.
+So, let's extract the [journal]'s contents by replacing the lines above with the following lines.
 
 ```rust
     // Extract journal of receipt (i.e. output c, where c = a * b)
@@ -191,7 +197,7 @@ So, let's extract the journal's contents by replacing the lines above with the f
 ```
 
 You should now be able to see your proof of factorization with `cargo run --release`.
-If your program printed the "Hello, world!" assertion and `receipt` verification was a success, congratulations!
+If your program printed the "Hello, world!" assertion and [receipt] verification was a success, congratulations!
 If not, we hope that troubleshooting will get you familiar with the system, and we'd love to chat with you on [Discord].
 Or, if you believe you've found a bug or other problem in our code, please open an [issue] describing the problem.
 
@@ -203,3 +209,5 @@ If you're ready to start building more complex projects, we recommend taking a l
 [Getting Started resources]: https://www.risczero.com/docs/
 [Discord]: https://discord.com/invite/risczero
 [issue]: https://github.com/risc0/risc0/issues
+[receipt]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/receipt/struct.Receipt.html
+[journal]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/receipt/struct.Receipt.html#structfield.journal
