@@ -36,7 +36,7 @@ pub fn bench(c: &mut Criterion) {
             group.bench_with_input(
                 BenchmarkId::from_parameter(format!(
                     "{iterations}/{}",
-                    if with_seal { "prove" } else { "execute" }
+                    if with_seal { "proof" } else { "run" }
                 )),
                 &iterations,
                 |b, &iterations| {

@@ -27,7 +27,7 @@ use rand_core::RngCore;
 
 /// For x = (1 << po2), given x, find po2.
 /// # Example
-/// ```
+/// ```rust
 /// # use risc0_zkp::core::to_po2;
 /// #
 /// assert_eq!(to_po2(7), 2);
@@ -42,7 +42,7 @@ pub fn to_po2(x: usize) -> usize {
 /// Find the smallest `result` such that, for the provided value,
 /// `2^result >= value`.
 /// # Example
-/// ```
+/// ```rust
 /// # use risc0_zkp::core::log2_ceil;
 /// #
 /// assert_eq!(log2_ceil(8), 3); // 2^3 = 8

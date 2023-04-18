@@ -19,15 +19,19 @@
 //! [Session]. See the [Session] documentation for more detailed usage
 //! information.
 //!
-//! ```
+//! ```rust
 //! use risc0_zkvm::{prove::default_hal, ControlId, Executor, ExecutorEnv, Session, SessionReceipt};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
+//!
+//! # #[cfg(not(feature = "cuda"))]
+//! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build();
 //! let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
 //! let session = exec.run().unwrap();
 //! let (hal, eval) = default_hal();
 //! let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+//! # }
 //! ```
 
 mod exec;

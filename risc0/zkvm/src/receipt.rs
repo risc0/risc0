@@ -25,15 +25,18 @@
 //!
 //! # Usage
 //! To create a receipt, use [crate::Session::prove]:
-//! ```
+//! ```rust
 //! use risc0_zkvm::{prove::default_hal, ControlId, Executor, ExecutorEnv, Session, SessionReceipt};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
+//! # #[cfg(not(feature = "cuda"))]
+//! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build();
 //! let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
 //! let session = exec.run().unwrap();
 //! let (hal, eval) = default_hal();
 //! let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+//! # }
 //! ```
 //!
 //! To confirm that a [SessionReceipt] was honestly generated, use
@@ -41,18 +44,21 @@
 //! been executed as a parameter. (See
 //! [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
 //! information about how ImageIDs are generated.)
-//! ```
+//! ```rust
 //! use risc0_zkvm::SessionReceipt;
 //!
 //! # use risc0_zkvm::{prove::default_hal, ControlId, Executor, ExecutorEnv, Session};
 //! # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 //!
+//! # #[cfg(not(feature = "cuda"))]
+//! # {
 //! # let env = ExecutorEnv::builder().add_input(&[20]).build();
 //! # let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
 //! # let session = exec.run().unwrap();
 //! # let (hal, eval) = default_hal();
 //! # let receipt = session.prove(hal.as_ref(), &eval).unwrap();
 //! receipt.verify(FIB_ID).unwrap();
+//! # }
 //! ```
 //!
 //! The public outputs of the [SessionReceipt] are contained in the

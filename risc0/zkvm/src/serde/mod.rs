@@ -21,7 +21,7 @@
 //! On the host side, a serialization function such as [to_vec] should be used
 //! when transmitting data to the guest. Similarly, the deserialization function
 //! [from_slice] should be used when reading data from the guest. For example:
-//! ```
+//! ```rust
 //! use risc0_zkvm::serde::{from_slice, to_vec};
 //! let input = 42_u32;
 //! let encoded = to_vec(&[input]).unwrap();
