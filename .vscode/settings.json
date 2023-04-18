@@ -8,6 +8,9 @@
   "emmet.includeLanguages": {
     "rust": "html"
   },
+  "rust-analyzer.cargo.extraEnv": {
+    "RISC0_SKIP_BUILD": "1"
+  },
   "files.eol": "\n",
   "git.ignoreLimitWarning": true,
   "files.associations": {
@@ -30,5 +33,6 @@
     "charconv": "cpp",
     "stdexcept": "cpp",
     "array": "cpp"
-  }
+  },
+  "rust-analyzer.showUnlinkedFileNotification": false
 }

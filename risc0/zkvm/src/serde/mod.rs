@@ -49,13 +49,6 @@ pub use deserializer::{from_slice, Deserializer, WordRead};
 pub use err::{Error, Result};
 pub use serializer::{to_vec, to_vec_with_capacity, Serializer, WordWrite};
 
-/// Align the given address `addr` upwards to alignment `align`.
-///
-/// Requires that `align` is a power of two.
-fn align_up(addr: usize, align: usize) -> usize {
-    (addr + align - 1) & !(align - 1)
-}
-
 #[cfg(test)]
 mod tests {
     use std::collections::HashMap;

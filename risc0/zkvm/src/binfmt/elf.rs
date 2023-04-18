@@ -14,7 +14,7 @@
 
 use alloc::collections::BTreeMap;
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use elf::{endian::LittleEndian, file::Class, ElfBytes};
 
 /// A RISC Zero program
@@ -50,11 +50,17 @@ impl Program {
         }
         for segment in segments.iter().filter(|x| x.p_type == elf::abi::PT_LOAD) {
             let file_size: u32 = segment.p_filesz.try_into()?;
+            if file_size >= max_mem {
+                bail!("Invalid segment file_size");
+            }
             let mem_size: u32 = segment.p_memsz.try_into()?;
+            if mem_size >= max_mem {
+                bail!("Invalid segment mem_size");
+            }
             let vaddr: u32 = segment.p_vaddr.try_into()?;
             let offset: u32 = segment.p_offset.try_into()?;
             for i in (0..mem_size).step_by(4) {
-                let addr = vaddr + i;
+                let addr = vaddr.checked_add(i).context("Invalid segment vaddr")?;
                 if i >= file_size {
                     // Past the file size, all zeros.
                     image.insert(addr, 0);
@@ -64,8 +70,8 @@ impl Program {
                     let len = std::cmp::min(file_size - i, 4);
                     for j in 0..len {
                         let offset = (offset + i + j) as usize;
-                        let byte = input[offset] as u32;
-                        word |= byte << j * 8;
+                        let byte = input.get(offset).context("Invalid segment offset")?;
+                        word |= (*byte as u32) << (j * 8);
                     }
                     image.insert(addr, word);
                 }

@@ -16,14 +16,9 @@
 //! evaluating the circuit.  Experimental.
 
 pub mod exec;
-mod opcode;
 pub mod segment;
 #[cfg(test)]
 pub mod tests;
 
 pub use exec::ExecState;
 pub use segment::Segment;
-
-fn align_up(addr: usize, align: usize) -> usize {
-    (addr + align - 1) & !(align - 1)
-}
