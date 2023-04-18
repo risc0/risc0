@@ -64,7 +64,7 @@ pub struct Session {
     /// The data publicly committed by the guest program.
     pub journal: Vec<u8>,
 
-    /// TODO
+    /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 }
 
@@ -90,7 +90,7 @@ pub struct Segment {
 }
 
 impl Session {
-    /// Construct a Session from Vec of [Segment], journal, and [ExitCode] 
+    /// Construct a new [Session] from its constituent components.
     pub fn new(segments: Vec<Segment>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
         Self {
             segments,
@@ -101,7 +101,7 @@ impl Session {
 }
 
 impl Segment {
-    /// Create a new Session from its constituent components.
+    /// Create a new [Segment] from its constituent components.
     pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
