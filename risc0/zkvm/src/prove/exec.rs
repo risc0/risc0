@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use alloc::{
     collections::{BTreeMap, BTreeSet, VecDeque},
     rc::Rc,
@@ -37,7 +36,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::{
     memory::SYSTEM,
     syscall::{
-        bigint, ecall, ecall, halt,
+        bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
         DIGEST_WORDS,
     },
@@ -306,9 +305,6 @@ impl<'a, H: HostHandler> CircuitStepHandler<BabyBearElem> for MachineContext<'a,
                 outs[..bigint::WIDTH_BYTES * 2].copy_from_slice(&q[..]);
                 outs[bigint::WIDTH_BYTES * 2..].copy_from_slice(&r[..]);
                 Ok(())
-            }
-            "pageRead" => {
-                (outs[0]) = self.page_read(args[0]);
             }
             "pageInfo" => {
                 (outs[0], outs[1], outs[2]) = self.page_info(args[0]);

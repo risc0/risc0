@@ -21,12 +21,7 @@ use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
-use risc0_zkvm_platform::{
-    fileno,
-    memory::HEAP,
-    syscall::{bigint, halt},
-    WORD_SIZE,
-};
+use risc0_zkvm_platform::{fileno, memory::HEAP, syscall::halt, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
@@ -300,7 +295,7 @@ fn sha_accel() {
 #[test]
 fn bigint_accel() {
     let opts = ProverOpts::default().with_skip_seal(true);
-    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, MULTI_TEST_ID, opts).unwrap();
+    let mut prover = Prover::new_with_opts(MULTI_TEST_ELF, opts).unwrap();
 
     let x = [1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 8u32];
     let y = [9u32, 10u32, 11u32, 12u32, 13u32, 14u32, 15u32, 16u32];
