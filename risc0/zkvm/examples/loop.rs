@@ -53,17 +53,23 @@ fn main() {
         let start = Instant::now();
         let (session, receipt) = top(hal.as_ref(), &eval, iterations);
         let duration = start.elapsed();
-        let po2 = session.segments[0].po2;
-        let cycles = 1 << po2;
 
-        let seal = receipt.segments[0].get_seal_bytes().len();
+        let cycles = session
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + (1 << segment.po2));
+
+        let seal = receipt
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
         let usage = hal.get_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
 
         if !args.quiet {
             println!(
                 "| {:>9}k | {:>10} | {:>10} | {:>10} | {:>8}hz |",
-                po2,
+                cycles / 1024,
                 duration.human_duration().to_string(),
                 usage.human_count_bytes().to_string(),
                 seal.human_count_bytes().to_string(),
@@ -73,21 +79,20 @@ fn main() {
     } else {
         println!(
             "| {:>10} | {:>10} | {:>10} | {:>10} | {:>10} |",
-            "Po2", "Duration", "RAM", "Seal", "Speed"
+            "Cycles", "Duration", "RAM", "Seal", "Speed"
         );
 
         for iterations in [
-            0,       // warm-up
-            1,       // 32K
-            2048,    // 64K
-            4096,    // 128K
-            16384,   // 256K
-            32768,   // 512K
-            65536,   // 1M
-            131072,  // 2M
-            262144,  // 4M
-            524288,  // 8M
-            1048576, // 16M
+            0,           // warm-up
+            1,           // 16, 64K
+            4 * 1024,    // 17, 128K
+            16 * 1024,   // 18, 256K
+            32 * 1024,   // 19, 512K
+            64 * 1024,   // 20, 1M
+            200 * 1024,  // 21, 2M
+            400 * 1024,  // 22, 4M
+            900 * 1024,  // 23, 8M
+            1400 * 1024, // 24, 16M
         ] {
             run_with_iterations(iterations);
         }
