@@ -1,6 +1,6 @@
 # Factors
 
-The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite -- and that they know the factors -- without revealing any further information about the number.
+The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
 
 To see this example in action, [install Rust] and use `cargo run` in this directory to run it:
 ```
@@ -10,7 +10,7 @@ cargo run
 # Tutorial
 ## How to Recreate _Factors_
 
-This example was chosen because it is straightforward and is a good introduction for beginners. If you're looking to get started creating RISC Zero zkVM projects, you're in the right place! We'll spend the rest of this readme walking you through how to recreate the factors example for yourself, assuming no prior knowledge of RISC Zero.
+This example is a good introduction for beginners to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place! We'll spend the rest of this readme walking you through how to recreate the factors example for yourself, assuming no prior knowledge of RISC Zero.
 
 ## Step 1: Create a new project
 
@@ -34,7 +34,7 @@ cd factors
 
 This project will call a program that executes on the guest zkVM.
 It's currently named `method_name`.
-We want to name it something that represents what the guest program does -- let's call it `multiply`.
+We want to name it something that represents what the guest program does — let's call it `multiply`.
 Edit `methods/guest/Cargo.toml`, changing the line `name = "method_name"` to instead read
 ```
 name = "multiply"
@@ -100,7 +100,8 @@ The `prover.run()` command will cause our guest program to execute:
 ```
  We'd like the host to make the values of `a` and `b` available to the guest prior to execution.
  Because the prover is responsible for managing guest-readable memory, we need to share them after the prover is created.
- To accomplish this, let's send our two values to the guest between the lines listed above:
+ To accomplish this, let's send our two values to the guest.
+ We do this in between making the prover and running the prover (in place of the "`TODO`" in the previous code snippet).
 
  ```rust
     // Make the prover.
@@ -116,7 +117,7 @@ The `prover.run()` command will cause our guest program to execute:
     );
 ```
 
-You can confirm your work with `cargo run --release` -- the program still won't do anything, but it should compile and run successfully.
+You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
 You will get a warning about `from_slice` being unused; this function is needed when reading the journal, but the guest hasn't written to it yet, so the host can't read from it yet.
 
 ## Step 4 (Guest): Multiply two values and commit their result
