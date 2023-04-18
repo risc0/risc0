@@ -69,7 +69,9 @@ pub struct Segment {
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
-    pub(crate) po2: usize,
+
+    /// The number of cycles in powers of 2.
+    pub po2: usize,
 }
 
 impl Session {

@@ -12,22 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use criterion::{
-    black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
-};
-use risc0_zkvm::{Prover, ProverOpts};
+use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput};
+use risc0_zkvm::{prove::default_hal, Executor, ExecutorEnv};
 use risc0_zkvm_methods::FIB_ELF;
 
-fn prover_setup(iterations: u32, with_seal: bool) -> Prover<'static> {
-    let opts = ProverOpts::default().with_skip_seal(!with_seal);
-    let mut prover = Prover::new_with_opts(FIB_ELF, opts).unwrap();
-    prover.add_input_u32_slice(&[iterations]);
-    prover
-}
-
-fn prover_run(prover: &mut Prover) -> usize {
-    prover.run().unwrap();
-    prover.cycles
+fn setup(iterations: u32) -> Executor<'static> {
+    let env = ExecutorEnv::builder().add_input(&[iterations]).build();
+    Executor::from_elf(env, FIB_ELF).unwrap()
 }
 
 pub fn bench(c: &mut Criterion) {
@@ -35,19 +26,30 @@ pub fn bench(c: &mut Criterion) {
 
     for with_seal in [true, false] {
         for iterations in [100, 200] {
-            let cycles = prover_run(&mut prover_setup(iterations, with_seal));
+            let (hal, eval) = default_hal();
+            let mut exec = setup(iterations);
+            let session = exec.run().unwrap();
+            let po2 = session.segments[0].po2;
+            let cycles = 1 << po2;
             group.sample_size(10);
             group.throughput(Throughput::Elements(cycles as u64));
             group.bench_with_input(
                 BenchmarkId::from_parameter(format!(
                     "{iterations}/{}",
-                    if with_seal { "proof" } else { "run" }
+                    if with_seal { "prove" } else { "execute" }
                 )),
                 &iterations,
                 |b, &iterations| {
                     b.iter_batched(
-                        || prover_setup(iterations, with_seal),
-                        |mut prover| black_box(prover_run(&mut prover)),
+                        || setup(iterations),
+                        |mut exec| {
+                            let session = exec.run().unwrap();
+                            if with_seal {
+                                session.prove(hal.as_ref(), &eval).unwrap();
+                            }
+                            let po2 = session.segments[0].po2;
+                            1 << po2
+                        },
                         BatchSize::SmallInput,
                     )
                 },

@@ -19,17 +19,14 @@
 //! corresponding deserialization.
 //!
 //! On the host side, a serialization function such as [to_vec] should be used
-//! when transmitting data to the guest, e.g.
-//! ```ignore
-//! prover.add_input_u32_slice(
-//!     &to_vec(&a).expect("should be given serializeable type")
-//! );
+//! when transmitting data to the guest. Similarly, the deserialization function
+//! [from_slice] should be used when reading data from the guest. For example:
 //! ```
-//! Similarly, the deserialization function [from_slice] should be used when
-//! reading data from the guest, e.g.
-//! ```ignore
-//! let c: u64 = from_slice(&receipt.journal)
-//!     .expect("should deserialize if type matches what the guest committed");
+//! use risc0_zkvm::serde::{from_slice, to_vec};
+//! let input = 42_u32;
+//! let encoded = to_vec(&[input]).unwrap();
+//! let output: u32 = from_slice(&encoded).unwrap();
+//! assert_eq!(input, output);
 //! ```
 //!
 //! On the guest side, the necessary (de)serialization functionality is
