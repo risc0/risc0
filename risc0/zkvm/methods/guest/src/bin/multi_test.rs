@@ -22,7 +22,6 @@ use alloc::vec;
 use core::arch::asm;
 
 use getrandom::getrandom;
-use risc0_zeroio::deserialize::Deserialize;
 use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
 use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
@@ -31,7 +30,7 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
     fileno,
-    syscall::{sys_read, sys_write},
+    syscall::{bigint, sys_bigint, sys_read, sys_write},
 };
 
 risc0_zkvm::entry!(main);
@@ -180,12 +179,8 @@ pub fn main() {
             }
             env::log("Busy loop complete");
         }
-        MultiTestSpecRef::BigInt(inputs) => {
+        MultiTestSpec::BigInt { x, y, modulus } => {
             let mut result = [0u32; bigint::WIDTH_WORDS];
-            let x = Deserialize::from_ref(&inputs.x());
-            let y = Deserialize::from_ref(&inputs.y());
-            let modulus = Deserialize::from_ref(&inputs.modulus());
-
             unsafe {
                 sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus);
             }
