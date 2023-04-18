@@ -12,13 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use criterion::{criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput};
-use risc0_zkvm::{prove::default_hal, Executor, ExecutorEnv};
+use criterion::{
+    black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
+};
+use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
+use risc0_zkp::{
+    hal::{EvalCheck, Hal},
+    verify::HashSuite,
+};
+use risc0_zkvm::{prove::default_hal, ControlId, Executor, ExecutorEnv};
 use risc0_zkvm_methods::FIB_ELF;
 
 fn setup(iterations: u32) -> Executor<'static> {
     let env = ExecutorEnv::builder().add_input(&[iterations]).build();
     Executor::from_elf(env, FIB_ELF).unwrap()
+}
+
+fn run<H, E>(hal: &H, eval: &E, exec: &mut Executor, with_seal: bool)
+where
+    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
+    E: EvalCheck<H>,
+{
+    let session = exec.run().unwrap();
+    if with_seal {
+        session.prove(hal, eval).unwrap();
+    }
 }
 
 pub fn bench(c: &mut Criterion) {
@@ -42,14 +61,7 @@ pub fn bench(c: &mut Criterion) {
                 |b, &iterations| {
                     b.iter_batched(
                         || setup(iterations),
-                        |mut exec| {
-                            let session = exec.run().unwrap();
-                            if with_seal {
-                                session.prove(hal.as_ref(), &eval).unwrap();
-                            }
-                            let po2 = session.segments[0].po2;
-                            1 << po2
-                        },
+                        |mut exec| black_box(run(hal.as_ref(), &eval, &mut exec, with_seal)),
                         BatchSize::SmallInput,
                     )
                 },
