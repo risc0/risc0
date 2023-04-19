@@ -113,6 +113,6 @@ jobs:
       - uses: ./.github/actions/rustup
       - run: cargo install --path risc0/cargo-risczero
       - run: |
-          cargo risczero new --template ./templates/rust-starter --templ-subdir="" --path ./ --dest ${{ runner.temp }} template-test
+          cargo risczero new --template templates/rust-starter --templ-subdir="" --path ./ --dest ${{ runner.temp }} template-test
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
