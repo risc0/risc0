@@ -49,7 +49,7 @@ pub struct ExecutorEnvBuilder<'a> {
 #[derive(Clone)]
 pub struct ExecutorEnv<'a> {
     env_vars: HashMap<String, String>,
-    segment_limit_po2: usize,
+    pub(crate) segment_limit_po2: usize,
     session_limit: usize,
     syscalls: SyscallTable<'a>,
     pub(crate) io: Rc<RefCell<PosixIo<'a>>>,

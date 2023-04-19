@@ -36,8 +36,6 @@ pub mod serde;
 #[cfg(feature = "prove")]
 mod session;
 pub mod sha;
-#[cfg(test)]
-mod tests;
 
 pub use anyhow::Result;
 use risc0_zkp::core::hash::{
@@ -49,13 +47,13 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
 pub use self::binfmt::{elf::Program, image::MemoryImage};
+pub use self::receipt::{SegmentReceipt, SessionReceipt};
 #[cfg(feature = "prove")]
-pub use self::exec::{Executor, ExecutorEnv, ExecutorEnvBuilder};
-#[cfg(feature = "prove")]
-pub use self::prove::{loader::Loader, Prover, ProverOpts};
-pub use self::receipt::{Receipt, SegmentReceipt, SessionReceipt};
-#[cfg(feature = "prove")]
-pub use self::session::{ExitCode, Segment, Session};
+pub use self::{
+    exec::{Executor, ExecutorEnv, ExecutorEnvBuilder},
+    prove::loader::Loader,
+    session::{ExitCode, Segment, Session},
+};
 use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();

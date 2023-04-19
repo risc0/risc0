@@ -15,19 +15,29 @@
 use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
 };
-use risc0_zkvm::{Prover, ProverOpts};
+use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
+use risc0_zkp::{
+    hal::{EvalCheck, Hal},
+    verify::HashSuite,
+};
+use risc0_zkvm::{prove::default_hal, ControlId, Executor, ExecutorEnv};
 use risc0_zkvm_methods::FIB_ELF;
 
-fn prover_setup(iterations: u32, with_seal: bool) -> Prover<'static> {
-    let opts = ProverOpts::default().with_skip_seal(!with_seal);
-    let mut prover = Prover::new_with_opts(FIB_ELF, opts).unwrap();
-    prover.add_input_u32_slice(&[iterations]);
-    prover
+fn setup(iterations: u32) -> Executor<'static> {
+    let env = ExecutorEnv::builder().add_input(&[iterations]).build();
+    Executor::from_elf(env, FIB_ELF).unwrap()
 }
 
-fn prover_run(prover: &mut Prover) -> usize {
-    prover.run().unwrap();
-    prover.cycles
+fn run<H, E>(hal: &H, eval: &E, exec: &mut Executor, with_seal: bool)
+where
+    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
+    E: EvalCheck<H>,
+{
+    let session = exec.run().unwrap();
+    if with_seal {
+        session.prove(hal, eval).unwrap();
+    }
 }
 
 pub fn bench(c: &mut Criterion) {
@@ -35,7 +45,11 @@ pub fn bench(c: &mut Criterion) {
 
     for with_seal in [true, false] {
         for iterations in [100, 200] {
-            let cycles = prover_run(&mut prover_setup(iterations, with_seal));
+            let (hal, eval) = default_hal();
+            let mut exec = setup(iterations);
+            let session = exec.run().unwrap();
+            let po2 = session.segments[0].po2;
+            let cycles = 1 << po2;
             group.sample_size(10);
             group.throughput(Throughput::Elements(cycles as u64));
             group.bench_with_input(
@@ -46,8 +60,8 @@ pub fn bench(c: &mut Criterion) {
                 &iterations,
                 |b, &iterations| {
                     b.iter_batched(
-                        || prover_setup(iterations, with_seal),
-                        |mut prover| black_box(prover_run(&mut prover)),
+                        || setup(iterations),
+                        |mut exec| black_box(run(hal.as_ref(), &eval, &mut exec, with_seal)),
                         BatchSize::SmallInput,
                     )
                 },

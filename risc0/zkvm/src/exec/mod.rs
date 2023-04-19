@@ -30,6 +30,7 @@ use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
         hash::sha::{BLOCK_BYTES, BLOCK_WORDS},
+        log2_ceil,
     },
     ZK_CYCLES,
 };
@@ -42,10 +43,7 @@ use risc0_zkvm_platform::{
     },
     PAGE_SIZE, WORD_SIZE,
 };
-use rrs_lib::{
-    instruction_executor::InstructionExecutor,
-    instruction_string_outputter::InstructionStringOutputter, process_instruction, HartState,
-};
+use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 use serde::{Deserialize, Serialize};
 
 pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
@@ -58,12 +56,6 @@ use crate::{
 
 /// The number of cycles required to compress a SHA-256 block.
 const SHA_CYCLES: usize = 72;
-
-/// The number of blocks that fit within a single page.
-const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
-
-/// The number of cycles required to compute a SHA-256 digest of a page.
-const CYCLES_PER_PAGE: usize = SHA_CYCLES * BLOCKS_PER_PAGE;
 
 /// The Executor provides an implementation for the execution phase.
 ///
@@ -78,7 +70,8 @@ pub struct Executor<'a> {
     fini_cycles: usize,
     body_cycles: usize,
     segment_cycle: usize,
-    session_cycle: usize,
+    segments: Vec<Segment>,
+    insn_counter: u32,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -146,7 +139,8 @@ impl<'a> Executor<'a> {
             fini_cycles,
             body_cycles: 0,
             segment_cycle: init_cycles,
-            session_cycle: init_cycles,
+            segments: Vec::new(),
+            insn_counter: 0,
         }
     }
 
@@ -160,90 +154,85 @@ impl<'a> Executor<'a> {
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
     pub fn run(&mut self) -> Result<Session> {
+        self.monitor.clear_session();
+
         let journal = Journal::default();
         self.env
             .io
             .borrow_mut()
             .with_write_fd(fileno::JOURNAL, journal.clone());
-        let mut segments = Vec::new();
 
-        loop {
-            let result = self.step()?;
-            if let Some(exit_code) = result {
-                let pre_image = self.pre_image.clone();
-                self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
-                let post_image_id = self.monitor.image.get_root();
-                let syscalls = take(&mut self.monitor.syscalls);
-                let faults = take(&mut self.monitor.faults);
-                segments.push(Segment::new(
-                    pre_image,
-                    post_image_id,
-                    self.pre_pc,
-                    faults,
-                    syscalls,
-                    exit_code,
-                ));
-                match exit_code {
-                    ExitCode::SystemSplit => self.split(),
-                    ExitCode::SessionLimit => bail!("Session limit exceeded"),
-                    ExitCode::Paused => {
-                        log::debug!("Paused: {}", self.segment_cycle);
-                        self.split();
-                        break;
-                    }
-                    ExitCode::Halted(exit_code) => {
-                        log::debug!("Halted({exit_code}): {}", self.segment_cycle);
-                        break;
-                    }
+        let mut run_loop = || -> Result<ExitCode> {
+            loop {
+                if let Some(exit_code) = self.step()? {
+                    let total_cycles = self.total_cycles();
+                    log::debug!("exit_code: {exit_code:?}, total_cycles: {total_cycles}");
+                    assert!(total_cycles <= (1 << self.env.segment_limit_po2));
+                    let pre_image = self.pre_image.clone();
+                    self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
+                    let post_image_id = self.monitor.image.get_root();
+                    let syscalls = take(&mut self.monitor.syscalls);
+                    let faults = take(&mut self.monitor.faults);
+                    self.segments.push(Segment::new(
+                        pre_image,
+                        post_image_id,
+                        self.pre_pc,
+                        faults,
+                        syscalls,
+                        exit_code,
+                        log2_ceil(total_cycles.next_power_of_two()),
+                    ));
+                    match exit_code {
+                        ExitCode::SystemSplit(_) => self.split(),
+                        ExitCode::SessionLimit => bail!("Session limit exceeded"),
+                        ExitCode::Paused => {
+                            log::debug!("Paused: {}", self.segment_cycle);
+                            self.split();
+                            return Ok(exit_code);
+                        }
+                        ExitCode::Halted(inner) => {
+                            log::debug!("Halted({inner}): {}", self.segment_cycle);
+                            return Ok(exit_code);
+                        }
+                    };
                 };
-            };
-        }
+            }
+        };
 
-        Ok(Session::new(segments, journal.buf.take()))
+        let exit_code = run_loop()?;
+        let mut segments = Vec::new();
+        std::mem::swap(&mut segments, &mut self.segments);
+        Ok(Session::new(segments, journal.buf.take(), exit_code))
     }
 
     fn split(&mut self) {
-        log::debug!("SystemSplit: {}", self.segment_cycle);
         self.pre_image = self.monitor.image.clone();
         self.body_cycles = 0;
+        self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
         self.pre_pc = self.pc;
-        self.monitor.clear();
+        self.monitor.clear_segment();
     }
 
     /// Execute a single instruction.
     ///
     /// This can be directly used by debuggers.
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
-        if self.session_cycle > self.env.get_session_limit() {
+        if self.session_cycle() > self.env.get_session_limit() {
             return Ok(Some(ExitCode::SessionLimit));
         }
 
         let insn = self.monitor.load_u32(self.pc);
-        let opcode = OpCode::decode(insn);
-
-        if log::log_enabled!(log::Level::Debug) {
-            let mut outputter = InstructionStringOutputter { insn_pc: self.pc };
-            let desc = process_instruction(&mut outputter, insn);
-            log::debug!(
-                "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {}",
-                self.segment_cycle,
-                self.pc,
-                insn,
-                desc.unwrap_or(opcode.mnemonic.into())
-            );
-        }
+        let opcode = OpCode::decode(insn, self.pc)?;
 
         if let Some(op_result) = self.monitor.restore_op() {
-            let segment_cycles = self.segment_cycles(&opcode);
-            return Ok(self.advance(opcode, op_result, segment_cycles));
+            return Ok(self.advance(opcode, op_result));
         }
 
         let op_result = if opcode.major == MajorType::ECall {
             self.ecall()?
         } else {
             let registers = self.monitor.load_registers(array::from_fn(|idx| idx));
-            self.monitor.clear_pending_faults();
             let mut hart = HartState {
                 registers,
                 pc: self.pc,
@@ -273,56 +262,67 @@ impl<'a> Executor<'a> {
         // otherwise, commit memory and hart
 
         let segment_limit = self.env.get_segment_limit();
-        let segment_cycles = self.segment_cycles(&opcode);
-        let exit_code = if segment_cycles > segment_limit {
-            Some(ExitCode::SystemSplit)
+        let total_pending_cycles = self.total_pending_cycles(&opcode);
+        // log::debug!(
+        //     "cycle: {}, segment: {}, total: {}",
+        //     self.segment_cycle,
+        //     total_pending_cycles,
+        //     self.total_cycles()
+        // );
+        let exit_code = if total_pending_cycles > segment_limit {
+            Some(ExitCode::SystemSplit(self.insn_counter))
         } else {
-            self.advance(opcode, op_result, segment_cycles)
+            self.advance(opcode, op_result)
         };
         Ok(exit_code)
     }
 
-    fn advance(
-        &mut self,
-        opcode: OpCode,
-        op_result: OpCodeResult,
-        segment_cycles: usize,
-    ) -> Option<ExitCode> {
+    fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
+        log::debug!(
+            "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
+            self.segment_cycle,
+            self.pc,
+            opcode.insn,
+            opcode
+        );
+
         self.pc = op_result.pc;
+        self.insn_counter += 1;
         self.body_cycles += opcode.cycles + op_result.extra_cycles;
-        let delta = segment_cycles - self.segment_cycle;
-        self.segment_cycle = segment_cycles;
-        self.session_cycle += delta;
-        self.monitor.commit(self.session_cycle);
+        let total_page_read_cycles = self.monitor.total_page_read_cycles();
+        // log::debug!("total_page_read_cycles: {total_page_read_cycles}");
+        self.segment_cycle = self.init_cycles + total_page_read_cycles + self.body_cycles;
+        self.monitor.commit(self.session_cycle());
         op_result.exit_code
     }
 
-    fn segment_cycles(&self, opcode: &OpCode) -> usize {
-        // How many cycles are required to execute the next instruction?
+    fn total_cycles(&self) -> usize {
+        self.init_cycles
+            + self.monitor.total_fault_cycles()
+            + self.body_cycles
+            + self.fini_cycles
+            + SHA_CYCLES
+            + ZK_CYCLES
+    }
+
+    fn total_pending_cycles(&self, opcode: &OpCode) -> usize {
+        // How many cycles are required for the entire segment?
         // This sum is based on:
         // - ensure we don't split in the middle of a SHA compress
         // - each page fault requires 1 PageFault cycle + CYCLES_PER_PAGE cycles
         // - leave room for fini_cycles
         // - leave room for ZK cycles
-        let fault_cycles = self.monitor.total_faults() * (1 + CYCLES_PER_PAGE);
-        let total_cycles = self.init_cycles
+        self.init_cycles
+            + self.monitor.total_pending_fault_cycles()
             + opcode.cycles
             + self.body_cycles
-            + fault_cycles
             + self.fini_cycles
             + SHA_CYCLES
-            + ZK_CYCLES;
+            + ZK_CYCLES
+    }
 
-        log::trace!(
-            "body_cycles: {}\
-            , fault_cycles: {fault_cycles}\
-            , opcode_cycles: {}\
-            , total: {total_cycles}",
-            self.body_cycles,
-            opcode.cycles,
-        );
-
-        total_cycles
+    fn session_cycle(&self) -> usize {
+        self.segments.len() * self.env.get_segment_limit() + self.segment_cycle
     }
 
     fn ecall(&mut self) -> Result<OpCodeResult> {
@@ -337,12 +337,21 @@ impl<'a> Executor<'a> {
 
     fn ecall_halt(&mut self) -> Result<OpCodeResult> {
         let halt_type = self.monitor.load_register(REG_A0);
-        let exit_code = match halt_type {
-            halt::TERMINATE => ExitCode::Halted(0),
-            halt::PAUSE => ExitCode::Paused,
+        match halt_type {
+            halt::TERMINATE => Ok(OpCodeResult::new(
+                self.pc,
+                Some(ExitCode::Halted(0)),
+                0,
+                None,
+            )),
+            halt::PAUSE => Ok(OpCodeResult::new(
+                self.pc + WORD_SIZE as u32,
+                Some(ExitCode::Paused),
+                0,
+                None,
+            )),
             _ => bail!("Illegal halt type: {halt_type}"),
-        };
-        Ok(OpCodeResult::new(self.pc, Some(exit_code), 0, None))
+        }
     }
 
     fn ecall_output(&mut self) -> Result<OpCodeResult> {
@@ -422,7 +431,7 @@ impl<'a> Executor<'a> {
         self.monitor.store_register(REG_A0, a0);
         self.monitor.store_register(REG_A1, a1);
 
-        log::debug!("Syscall returned a0: {a0:#X}, a1: {a1:#X}");
+        log::debug!("Syscall returned a0: {a0:#X}, a1: {a1:#X}, chunks: {chunks}");
 
         // One cycle for the ecall cycle, then one for each chunk or
         // portion thereof then one to save output (a0, a1)
@@ -440,7 +449,6 @@ impl<'a> Executor<'a> {
 
 /// An event traced from the running VM.
 #[allow(dead_code)] // TODO
-#[non_exhaustive]
 #[derive(PartialEq)]
 pub enum TraceEvent {
     /// An instruction has started at the given program counter

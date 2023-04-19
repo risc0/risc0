@@ -16,7 +16,7 @@ use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{serde, Prover, ProverOpts};
+use risc0_zkvm::{prove::default_hal, serde, Executor, ExecutorEnv};
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
     merkle::SYS_VECTOR_ORACLE,
@@ -40,12 +40,12 @@ struct Args {
     waldo_y: u32,
 
     /// Width, in pixels, of the cutout for Waldo.
-    #[clap(short = 'w', long, value_parser)]
-    waldo_width: u32,
+    #[clap(long, value_parser)]
+    width: u32,
 
     /// Height, in pixels, of the cutout for Waldo.
-    #[clap(short = 'h', long, value_parser)]
-    waldo_height: u32,
+    #[clap(long, value_parser)]
+    height: u32,
 
     /// Optional input file path to an image mask to apply to Waldo.
     /// Grayscale pixel values will be subtracted from the cropped image of
@@ -76,7 +76,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     let crop_location = (args.waldo_x, args.waldo_y);
-    let crop_dimensions = (args.waldo_width, args.waldo_height);
+    let crop_dimensions = (args.width, args.height);
 
     // Read the image mask from disk, if provided.
     let mask = args.mask.map_or(Ok::<_, Box<dyn Error>>(None), |path| {
@@ -102,13 +102,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         img_merkle_tree.root(),
     );
 
-    // Make the prover, loading the image crop method binary and method ID, and
-    // registering a send_recv callback to communicate vector oracle data from
-    // the Merkle tree.
-    let prover_opts = ProverOpts::default()
-        .with_sendrecv_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback());
-    let mut prover = Prover::new_with_opts(IMAGE_CROP_ELF, prover_opts)?;
-
     // Give the private input to the guest, including Waldo's location.
     let input = PrivateInput {
         root: img_merkle_tree.root(),
@@ -117,14 +110,25 @@ fn main() -> Result<(), Box<dyn Error>> {
         crop_location,
         crop_dimensions,
     };
-    prover.add_input_u32_slice(&serde::to_vec(&input)?);
+
+    // Make the ExecutorEnv, registering an io_callback to communicate
+    // vector oracle data from the Merkle tree.
+    let env = ExecutorEnv::builder()
+        .add_input(&serde::to_vec(&input)?)
+        .io_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback())
+        .build();
 
     // Run prover and generate receipt
     println!(
         "Running the prover to cut out Waldo at {:?} with dimensions {:?}",
         input.crop_location, input.crop_dimensions,
     );
-    let receipt = prover.run()?;
+    // Make the Executor, loading the image crop method binary.
+    let mut exec = Executor::from_elf(env, IMAGE_CROP_ELF)?;
+    let session = exec.run()?;
+
+    let (hal, eval) = default_hal();
+    let receipt = session.prove(hal.as_ref(), &eval)?;
 
     // Save the receipt to disk so it can be sent to the verifier.
     fs::write(&args.receipt, bincode::serialize(&receipt)?)?;

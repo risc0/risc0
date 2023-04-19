@@ -7,7 +7,7 @@ edition = "2021"
 clap = "3.1"
 digital-signature-core = { path = "core" }
 digital-signature-methods = { path = "methods" }
-env_logger = "0.9"
+env_logger = "0.10"
 log = "0.4"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"

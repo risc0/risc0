@@ -25,7 +25,7 @@ pub(crate) mod merkle;
 pub mod read_iop;
 
 use alloc::{vec, vec::Vec};
-use core::fmt;
+use core::fmt::{self};
 #[cfg(not(target_os = "zkvm"))]
 use core::marker::PhantomData;
 
@@ -50,7 +50,7 @@ use crate::{
     FRI_FOLD, INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum VerificationError {
     ReceiptFormatError,
     ControlVerificationError,
@@ -77,6 +77,9 @@ impl fmt::Display for VerificationError {
         }
     }
 }
+
+#[cfg(feature = "std")]
+impl std::error::Error for VerificationError {}
 
 pub trait VerifyHal {
     type HashFn: HashFn<Self::Field>;
@@ -268,18 +271,16 @@ mod host {
 
 /// Verify a seal is valid for the given circuit, code, and globals
 #[tracing::instrument(skip_all)]
-pub fn verify<'a, H, C, CheckCode, CheckGlobals>(
+pub fn verify<'a, H, C, CheckCode>(
     hal: &'a H,
     circuit: &C,
     seal: &'a [u32],
     check_code: CheckCode,
-    check_globals: CheckGlobals,
 ) -> Result<(), VerificationError>
 where
     H: VerifyHal,
     C: CircuitInfo + TapsProvider,
     CheckCode: Fn(u32, &Digest) -> Result<(), VerificationError>,
-    CheckGlobals: Fn(&[H::Elem]) -> Result<(), VerificationError>,
 {
     if seal.len() == 0 {
         return Err(VerificationError::ReceiptFormatError);
@@ -293,9 +294,6 @@ where
 
     // Read any execution state
     adapter.execute(&mut iop);
-
-    let io = adapter.out.ok_or(VerificationError::ReceiptFormatError)?;
-    check_globals(&io)?;
 
     // Get the size
     let po2 = adapter.po2();

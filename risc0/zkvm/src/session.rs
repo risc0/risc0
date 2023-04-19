@@ -27,7 +27,7 @@ use crate::{exec::SyscallRecord, MemoryImage};
 pub enum ExitCode {
     /// This indicates when a system-initiated split has occured due to the
     /// segment limit being exceeded.
-    SystemSplit,
+    SystemSplit(u32),
 
     /// This indicates that the session limit has been reached.
     SessionLimit,
@@ -41,7 +41,7 @@ pub enum ExitCode {
     Halted(u32),
 }
 
-#[derive(Clone, Default, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
     pub(crate) reads: BTreeSet<u32>,
     pub(crate) writes: BTreeSet<u32>,
@@ -63,6 +63,9 @@ pub struct Session {
 
     /// The data publicly committed by the guest program.
     pub journal: Vec<u8>,
+
+    /// The [ExitCode] of the session.
+    pub exit_code: ExitCode,
 }
 
 /// The execution trace of a portion of a program.
@@ -81,17 +84,24 @@ pub struct Segment {
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
+
+    /// The number of cycles in powers of 2.
+    pub po2: usize,
 }
 
 impl Session {
-    /// Create a new Session from its constituent [Segment]s and journal.
-    pub fn new(segments: Vec<Segment>, journal: Vec<u8>) -> Self {
-        Self { segments, journal }
+    /// Construct a new [Session] from its constituent components.
+    pub fn new(segments: Vec<Segment>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
+        Self {
+            segments,
+            journal,
+            exit_code,
+        }
     }
 }
 
 impl Segment {
-    /// Create a new Session from its constituent components.
+    /// Create a new [Segment] from its constituent components.
     pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
@@ -99,6 +109,7 @@ impl Segment {
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
+        po2: usize,
     ) -> Self {
         Self {
             pre_image,
@@ -107,6 +118,7 @@ impl Segment {
             faults,
             syscalls,
             exit_code,
+            po2,
         }
     }
 }
