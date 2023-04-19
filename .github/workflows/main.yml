@@ -100,3 +100,19 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+
+  check_template:
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - run: cargo install --path risc0/cargo-risczero
+      - run: |
+          cargo risczero new --template ./templates/rust-starter --templ-subdir="" --path ./ --dest ${{ runner.temp }} template-test
+      - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
+      - run: ${{ runner.temp }}/template-test/target/release/host
