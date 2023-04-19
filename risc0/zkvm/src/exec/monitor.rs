@@ -19,7 +19,7 @@ use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{memory::SYSTEM, PAGE_SIZE, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
-use super::{io::SyscallContext, OpCodeResult, SyscallRecord};
+use super::{io::SyscallContext, OpCodeResult, SyscallRecord, TraceEvent};
 use crate::{binfmt::image::PageTableInfo, session::PageFaults, MemoryImage};
 
 /// The number of blocks that fit within a single page.
@@ -47,6 +47,7 @@ pub struct MemoryMonitor {
     cycle: usize,
     op_result: Option<OpCodeResult>,
     pub syscalls: Vec<SyscallRecord>,
+    pub trace_writes: BTreeSet<TraceEvent>,
 }
 
 impl MemoryMonitor {
@@ -59,6 +60,7 @@ impl MemoryMonitor {
             cycle: 0,
             op_result: None,
             syscalls: Vec::new(),
+            trace_writes: BTreeSet::new(),
         }
     }
 
@@ -105,32 +107,52 @@ impl MemoryMonitor {
         String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 
-    pub fn store_u8(&mut self, addr: u32, data: u8) {
+    fn raw_store_u8(&mut self, addr: u32, data: u8) {
         let info = &self.image.info;
         self.pending_faults.include(info, addr, IncludeDir::Read);
         self.pending_faults.include(info, addr, IncludeDir::Write);
         self.pending_writes.insert(MemStore { addr, data });
     }
 
+    pub fn store_u8(&mut self, addr: u32, data: u8) {
+        self.raw_store_u8(addr, data);
+        self.trace_writes.insert(TraceEvent::MemorySet {
+            addr,
+            value: data as u32,
+        });
+    }
+
     pub fn store_u16(&mut self, addr: u32, data: u16) {
         assert_eq!(addr % 2, 0, "unaligned store");
         self.store_region(addr, &data.to_le_bytes());
+        self.trace_writes.insert(TraceEvent::MemorySet {
+            addr,
+            value: data as u32,
+        });
     }
 
     pub fn store_u32(&mut self, addr: u32, data: u32) {
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
         self.store_region(addr, &data.to_le_bytes());
+        self.trace_writes.insert(TraceEvent::MemorySet {
+            addr,
+            value: data as u32,
+        });
     }
 
     pub fn store_region(&mut self, addr: u32, slice: &[u8]) {
         slice
             .iter()
             .enumerate()
-            .for_each(|(i, x)| self.store_u8(addr + i as u32, *x));
+            .for_each(|(i, x)| self.raw_store_u8(addr + i as u32, *x));
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {
-        self.store_u32(get_register_addr(idx), data);
+        self.store_region(get_register_addr(idx), &data.to_le_bytes());
+        self.trace_writes.insert(TraceEvent::RegisterSet {
+            reg: idx,
+            value: data,
+        });
     }
 
     pub fn save_op(&mut self, op_result: OpCodeResult) {
@@ -153,6 +175,7 @@ impl MemoryMonitor {
         if let Some(syscall) = op_result.syscall {
             self.syscalls.push(syscall);
         }
+        self.trace_writes.clear();
         // self.faults.dump();
     }
 

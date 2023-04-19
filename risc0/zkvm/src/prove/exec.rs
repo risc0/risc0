@@ -171,7 +171,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 self.halt(cycle, args[0], args[1]);
                 Ok(())
             }
-            "trace" => self.trace(cycle, args[0]),
+            "trace" => Ok(()),
             "getMajor" => {
                 outs[0] = self.get_major(args[0], args[1])?;
                 Ok(())
@@ -225,10 +225,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 self.log(extra, args);
                 Ok(())
             }
-            "syscallInit" => {
-                self.syscall_init(cycle)?;
-                Ok(())
-            }
+            "syscallInit" => Ok(()),
             "syscallBody" => {
                 (outs[0], outs[1], outs[2], outs[3]) = split_word8(self.syscall_body()?);
                 Ok(())
@@ -361,10 +358,6 @@ impl MachineContext {
         }
 
         (Elem::ZERO, Elem::ZERO, Elem::ONE)
-    }
-
-    fn trace(&mut self, _cycle: usize, _pc: Elem) -> Result<()> {
-        Ok(())
     }
 
     fn divide(
@@ -532,10 +525,6 @@ impl MachineContext {
             accum.write(args);
             self.memory.plonk_accum.insert(name.to_string(), accum);
         }
-    }
-
-    fn syscall_init(&mut self, _cycle: usize) -> Result<()> {
-        Ok(())
     }
 
     fn syscall_body(&mut self) -> Result<u32> {

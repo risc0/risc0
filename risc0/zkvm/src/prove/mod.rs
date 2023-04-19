@@ -54,7 +54,7 @@ use risc0_zkp::{
     core::{digest::DIGEST_WORDS, hash::HashSuite},
     hal::{EvalCheck, Hal},
     layout::Buffer,
-    prove::{adapter::ProveAdapter, executor::Executor},
+    prove::{adapter::ProveAdapter, executor::Executor, Prover},
     verify::CpuVerifyHal,
 };
 use risc0_zkvm_platform::WORD_SIZE;
@@ -203,7 +203,7 @@ impl Segment {
         executor.finalize();
 
         let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+        let mut prover = Prover::new(hal, CIRCUIT.get_taps());
 
         adapter.execute(prover.iop());
 

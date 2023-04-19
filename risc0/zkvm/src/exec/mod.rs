@@ -18,8 +18,10 @@
 //! [Segment]s, each which contains an execution trace of the specified program.
 
 mod env;
-mod io;
+pub(crate) mod io;
 mod monitor;
+#[cfg(feature = "profiler")]
+pub(crate) mod profiler;
 #[cfg(test)]
 mod tests;
 
@@ -254,6 +256,18 @@ impl<'a> Executor<'a> {
         };
         self.monitor.save_op(op_result.clone());
 
+        if let Some(ref trace_callback) = self.env.trace_callback {
+            trace_callback.borrow_mut()(TraceEvent::InstructionStart {
+                cycle: self.session_cycle() as u32,
+                pc: self.pc,
+            })
+            .unwrap();
+
+            for event in self.monitor.trace_writes.iter() {
+                trace_callback.borrow_mut()(event.clone()).unwrap();
+            }
+        }
+
         // try to execute the next instruction
         // if the segment limit is exceeded:
         // * don't increment the PC
@@ -448,8 +462,7 @@ impl<'a> Executor<'a> {
 }
 
 /// An event traced from the running VM.
-#[allow(dead_code)] // TODO
-#[derive(PartialEq)]
+#[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub enum TraceEvent {
     /// An instruction has started at the given program counter
     InstructionStart {

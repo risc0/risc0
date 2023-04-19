@@ -72,7 +72,7 @@ jobs:
       - uses: ./.github/actions/sccache
       - run: npm install
         working-directory: templates/bonsai
-      - run: cargo test -F $FEATURE
+      - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
       - run: PATH=$PWD/node_modules/.bin:$PATH cargo test -F $FEATURE
