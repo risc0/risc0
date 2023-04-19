@@ -111,9 +111,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
-      - run: cargo install --path risc0/cargo-risczero
       - run: |
-          cargo risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
+          cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
