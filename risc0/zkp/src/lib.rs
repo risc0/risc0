@@ -17,6 +17,7 @@
 #![deny(rustdoc::broken_intra_doc_links)]
 
 extern crate alloc;
+extern crate ff;
 
 pub mod adapter;
 pub mod core;

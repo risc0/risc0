@@ -16,6 +16,7 @@
 
 pub mod blake2b;
 pub mod poseidon;
+pub mod poseidon_254;
 pub mod sha;
 
 use core::{fmt::Debug, ops::DerefMut};
