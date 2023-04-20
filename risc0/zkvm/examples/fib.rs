@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::sync::Arc;
+
 use clap::Parser;
-use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_zkp::{
-    core::hash::HashSuite,
-    hal::{EvalCheck, Hal},
+use risc0_zkvm::{
+    prove::{default_prover, Prover},
+    Executor, ExecutorEnv, Session, SessionReceipt,
 };
-use risc0_zkvm::{prove::default_hal, ControlId, Executor, ExecutorEnv, Session, SessionReceipt};
 use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
@@ -37,9 +37,9 @@ fn main() {
         .init();
 
     let args = Args::parse();
-    let (hal, eval) = default_hal();
+    let prover = default_prover();
 
-    let (session, receipt) = top(hal.as_ref(), &eval, args.iterations);
+    let (session, receipt) = top(prover, args.iterations);
     let po2 = session.segments[0].po2;
     let seal = receipt.segments[0].get_seal_bytes().len();
     let journal = receipt.journal.len();
@@ -48,15 +48,10 @@ fn main() {
 }
 
 #[tracing::instrument(skip_all)]
-fn top<H, E>(hal: &H, eval: &E, iterations: u32) -> (Session, SessionReceipt)
-where
-    H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
-    E: EvalCheck<H>,
-{
+fn top(prover: Arc<dyn Prover>, iterations: u32) -> (Session, SessionReceipt) {
     let env = ExecutorEnv::builder().add_input(&[iterations]).build();
     let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = session.prove(hal, eval).unwrap();
+    let receipt = prover.prove_session(&session).unwrap();
     (session, receipt)
 }

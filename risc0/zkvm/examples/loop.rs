@@ -12,17 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{process::Command, time::Instant};
+use std::{process::Command, sync::Arc, time::Instant};
 
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
-use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-use risc0_zkp::{
-    core::hash::HashSuite,
-    hal::{EvalCheck, Hal},
-};
 use risc0_zkvm::{
-    prove::default_hal, serde::to_vec, ControlId, Executor, ExecutorEnv, Session, SessionReceipt,
+    prove::{default_prover, Prover},
+    serde::to_vec,
+    Executor, ExecutorEnv, Session, SessionReceipt,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -48,10 +45,10 @@ fn main() {
             .with(tracing_forest::ForestLayer::default())
             .init();
 
-        let (hal, eval) = default_hal();
+        let prover = default_prover();
 
         let start = Instant::now();
-        let (session, receipt) = top(hal.as_ref(), &eval, iterations);
+        let (session, receipt) = top(prover.clone(), iterations);
         let duration = start.elapsed();
 
         let cycles = session
@@ -63,7 +60,7 @@ fn main() {
             .segments
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
-        let usage = hal.get_memory_usage();
+        let usage = prover.get_peak_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
 
         if !args.quiet {
@@ -114,18 +111,13 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top<H, E>(hal: &H, eval: &E, iterations: u64) -> (Session, SessionReceipt)
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
-    E: EvalCheck<H>,
-{
+fn top(prover: Arc<dyn Prover>, iterations: u64) -> (Session, SessionReceipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
         .build();
     let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = session.prove(hal, eval).unwrap();
+    let receipt = prover.prove_session(&session).unwrap();
     (session, receipt)
 }

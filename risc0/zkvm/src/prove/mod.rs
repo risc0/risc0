@@ -40,7 +40,9 @@ mod plonk;
 #[cfg(test)]
 mod tests;
 
-use anyhow::{anyhow, Result};
+use std::{collections::HashMap, sync::Arc};
+
+use anyhow::Result;
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
     CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
@@ -88,115 +90,162 @@ pub mod cuda {
 /// HAL creation functions for Metal.
 #[cfg(feature = "metal")]
 pub mod metal {
-    use std::rc::Rc;
+    use std::sync::Arc;
 
     use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
     use risc0_zkp::hal::metal::{MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon};
 
-    /// Returns the default SHA-256 HAL for the rv32im circuit.
-    pub fn default_hal() -> (Rc<MetalHalSha256>, MetalEvalCheckSha256) {
-        let hal = Rc::new(MetalHalSha256::new());
-        let eval = MetalEvalCheckSha256::new(hal.clone());
-        (hal, eval)
+    use super::HalEval;
+
+    /// Creates a HAL for the rv32im circuit that uses the SHA-256 hashing
+    /// function.
+    pub fn sha256_hal_eval() -> HalEval<MetalHalSha256, MetalEvalCheckSha256> {
+        let hal = Arc::new(MetalHalSha256::new());
+        let eval = Arc::new(MetalEvalCheckSha256::new(hal.clone()));
+        HalEval { hal, eval }
     }
 
-    /// Returns the default Poseidon HAL for the rv32im circuit.
-    pub fn default_poseidon_hal() -> (Rc<MetalHalPoseidon>, MetalEvalCheck<MetalHashPoseidon>) {
-        let hal = Rc::new(MetalHalPoseidon::new());
-        let eval = MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone());
-        (hal, eval)
+    /// Creates a HAL for the rv32im circuit that uses the Poseidon hashing
+    /// function.
+    pub fn poseidon_hal_eval() -> HalEval<MetalHalPoseidon, MetalEvalCheck<MetalHashPoseidon>> {
+        let hal = Arc::new(MetalHalPoseidon::new());
+        let eval = Arc::new(MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone()));
+        HalEval { hal, eval }
     }
 }
 
 /// HAL creation functions for the CPU.
 pub mod cpu {
-    use std::rc::Rc;
+    use std::sync::Arc;
 
     use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitImpl};
     use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
 
+    use super::HalEval;
     use crate::CIRCUIT;
 
-    /// Returns the default SHA-256 HAL for the rv32im circuit.
+    /// Creates a HAL for the rv32im circuit that uses the SHA-256 hashing
+    /// function.
     ///
-    /// RISC Zero uses a
+    /// The zkVM uses a
     /// [HAL](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/index.html)
-    /// (Hardware Abstraction Layer) to interface with the zkVM circuit.
-    /// This function returns the default HAL for the selected `risc0-zkvm`
-    /// features. It also returns the associated
-    /// [EvalCheck](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/trait.EvalCheck.html)
-    /// used for computing the cryptographic check polynomial.
+    /// (Hardware Abstraction Layer) to accelerate computationally intensive
+    /// operations. This function returns a HAL implementation that makes use of
+    /// multi-core CPUs.
+    pub fn sha256_hal_eval() -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitImpl>> {
+        let hal = Arc::new(BabyBearSha256CpuHal::new());
+        let eval = Arc::new(CpuEvalCheck::new(&CIRCUIT));
+        HalEval { hal, eval }
+    }
+
+    /// Creates a HAL for the rv32im circuit that uses the Poseidon hashing
+    /// function.
     ///
-    /// Note that this function will return different types when
-    /// `risc0-zkvm` is built with features that select different the target
-    /// hardware. The version documented here is used when no special
-    /// hardware features are selected.
-    pub fn default_hal() -> (Rc<BabyBearSha256CpuHal>, CpuEvalCheck<'static, CircuitImpl>) {
-        let hal = Rc::new(BabyBearSha256CpuHal::new());
-        let eval = CpuEvalCheck::new(&CIRCUIT);
-        (hal, eval)
-    }
-
-    /// Returns the default Poseidon HAL for the rv32im circuit.
-    ///
-    /// The same as [default_hal] except it gives the default HAL for
-    /// securing the circuit using Poseidon (instead of SHA-256).
-    pub fn default_poseidon_hal() -> (
-        Rc<BabyBearPoseidonCpuHal>,
-        CpuEvalCheck<'static, CircuitImpl>,
-    ) {
-        let hal = Rc::new(BabyBearPoseidonCpuHal::new());
-        let eval = CpuEvalCheck::new(&CIRCUIT);
-        (hal, eval)
-    }
-}
-
-cfg_if::cfg_if! {
-    if #[cfg(feature = "cuda")] {
-        pub use cuda::{default_hal, default_poseidon_hal};
-    } else if #[cfg(feature = "metal")] {
-        pub use metal::{default_hal, default_poseidon_hal};
-    } else {
-        pub use cpu::{default_hal, default_poseidon_hal};
-    }
-}
-
-impl Session {
-    /// For each segment, call [Segment::prove] and collect the receipts.
-    pub fn prove<H, E>(&self, hal: &H, eval: &E) -> Result<SessionReceipt>
-    where
-        H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
-        E: EvalCheck<H>,
+    /// The zkVM uses a
+    /// [HAL](https://docs.rs/risc0-zkp/latest/risc0_zkp/hal/index.html)
+    /// (Hardware Abstraction Layer) to accelerate computationally intensive
+    /// operations. This function returns a HAL implementation that makes use of
+    /// multi-core CPUs.
+    pub fn poseidon_hal_eval() -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitImpl>>
     {
+        let hal = Arc::new(BabyBearPoseidonCpuHal::new());
+        let eval = Arc::new(CpuEvalCheck::new(&CIRCUIT));
+        HalEval { hal, eval }
+    }
+}
+
+/// A pair of [Hal] and [EvalCheck].
+#[derive(Clone)]
+pub struct HalEval<H, E>
+where
+    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
+    E: EvalCheck<H>,
+{
+    /// A [Hal] implementation.
+    pub hal: Arc<H>,
+
+    /// An [EvalCheck] implementation.
+    pub eval: Arc<E>,
+}
+
+/// TODO
+pub trait Prover {
+    /// TODO
+    fn prove_session(&self, session: &Session) -> Result<SessionReceipt>;
+
+    /// TODO
+    fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt>;
+
+    /// TODO
+    fn get_peak_memory_usage(&self) -> usize;
+
+    /// TODO
+    fn get_name(&self) -> String;
+}
+
+/// An implementation of a [Prover] that runs locally.
+pub struct LocalProver<H, E>
+where
+    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
+    E: EvalCheck<H>,
+{
+    name: String,
+    hal_eval: HalEval<H, E>,
+}
+
+impl<H, E> LocalProver<H, E>
+where
+    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
+    E: EvalCheck<H>,
+{
+    /// Construct a [LocalProver] with the given name and [HalEval].
+    pub fn new(name: &str, hal_eval: HalEval<H, E>) -> Self {
+        Self {
+            name: name.to_string(),
+            hal_eval,
+        }
+    }
+}
+
+impl<H, E> Prover for LocalProver<H, E>
+where
+    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
+    E: EvalCheck<H>,
+{
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn get_peak_memory_usage(&self) -> usize {
+        self.hal_eval.hal.get_memory_usage()
+    }
+
+    fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
+        log::debug!("prove_session: {}", self.name);
         let mut segments = Vec::new();
-        for segment in self.segments.iter() {
-            segments.push(segment.prove(hal, eval)?);
+        for segment in session.segments.iter() {
+            segments.push(self.prove_segment(segment)?);
         }
         let receipt = SessionReceipt {
             segments,
-            journal: self.journal.clone(),
+            journal: session.journal.clone(),
         };
-        let image_id = self.segments[0].pre_image.get_root();
+        let image_id = session.segments[0].pre_image.get_root();
         let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
-        receipt
-            .verify_with_hal(&hal, image_id)
-            .map_err(|err| anyhow!("Verification error: {err}"))?;
+        receipt.verify_with_hal(&hal, image_id)?;
         Ok(receipt)
     }
-}
 
-impl Segment {
-    /// Call the ZKP system to produce a [SegmentReceipt].
-    pub fn prove<H, E>(&self, hal: &H, eval: &E) -> Result<SegmentReceipt>
-    where
-        H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-        <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
-        E: EvalCheck<H>,
-    {
-        let io = self.prepare_globals();
-        let machine = MachineContext::new(&self);
-        let mut executor = Executor::new(&CIRCUIT, machine, self.po2, self.po2, &io);
+    fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt> {
+        log::debug!("prove_segment: {}", self.name);
+        let (hal, eval) = (self.hal_eval.hal.as_ref(), &self.hal_eval.eval);
+
+        let io = segment.prepare_globals();
+        let machine = MachineContext::new(segment);
+        let mut executor = Executor::new(&CIRCUIT, machine, segment.po2, segment.po2, &io);
 
         let loader = Loader::new();
         loader.load(|chunk, fini| executor.step(chunk, fini))?;
@@ -229,15 +278,76 @@ impl Segment {
         log::debug!("Globals: {:?}", OutBuffer(out_slice).tree(&LAYOUT));
         let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
 
-        let seal = prover.finalize(&[&mix, &out], eval);
+        let seal = prover.finalize(&[&mix, &out], eval.as_ref());
 
         let receipt = SegmentReceipt { seal };
         let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
-        receipt
-            .verify_with_hal(&hal)
-            .map_err(|err| anyhow!("Verification error: {err}"))?;
+        receipt.verify_with_hal(&hal)?;
 
         Ok(receipt)
+    }
+}
+
+fn provers() -> HashMap<String, Arc<dyn Prover>> {
+    let mut table: HashMap<String, Arc<dyn Prover>> = HashMap::new();
+    {
+        let prover = Arc::new(LocalProver::new("cpu", cpu::sha256_hal_eval()));
+        table.insert("cpu".to_string(), prover.clone());
+        table.insert("$default".to_string(), prover);
+    }
+    {
+        let prover = Arc::new(LocalProver::new("cpu:poseidon", cpu::poseidon_hal_eval()));
+        table.insert("cpu:poseidon".to_string(), prover.clone());
+        table.insert("$poseidon".to_string(), prover);
+    }
+    #[cfg(feature = "metal")]
+    {
+        let prover = Arc::new(LocalProver::new("metal", metal::sha256_hal_eval()));
+        table.insert("metal".to_string(), prover.clone());
+        table.insert("$gpu".to_string(), prover.clone());
+        table.insert("$default".to_string(), prover);
+
+        let prover = Arc::new(LocalProver::new(
+            "metal:poseidon",
+            metal::poseidon_hal_eval(),
+        ));
+        table.insert("metal:poseidon".to_string(), prover.clone());
+        table.insert("$poseidon".to_string(), prover);
+    }
+    table
+}
+
+/// Return a default [Prover] based on environment variables, falling back to a
+/// default CPU-based prover.
+pub fn default_prover() -> Arc<dyn Prover> {
+    let provers = provers();
+    if let Ok(requested) = std::env::var("RISC0_PROVER") {
+        if let Some(prover) = provers.get(&requested) {
+            return prover.clone();
+        }
+    }
+    if let Some(prover) = provers.get("$default") {
+        return prover.clone();
+    }
+    provers.get("cpu").unwrap().clone()
+}
+
+/// Return a [Prover] registered by with specified `name`.
+pub fn get_prover(name: &str) -> Arc<dyn Prover> {
+    provers().get(name).unwrap().clone()
+}
+
+impl Session {
+    /// For each segment, call [Segment::prove] and collect the receipts.
+    pub fn prove(&self) -> Result<SessionReceipt> {
+        default_prover().prove_session(self)
+    }
+}
+
+impl Segment {
+    /// Call the ZKP system to produce a [SegmentReceipt].
+    pub fn prove(&self) -> Result<SegmentReceipt> {
+        default_prover().prove_segment(self)
     }
 
     fn prepare_globals(&self) -> Vec<Elem> {
