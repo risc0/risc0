@@ -20,7 +20,7 @@
 
 extern crate alloc;
 
-#[cfg(feature = "binfmt")]
+#[cfg(feature = "_binfmt")]
 pub mod binfmt;
 mod control_id;
 #[cfg(feature = "prove")]
@@ -45,7 +45,7 @@ use risc0_zkp::core::hash::{
 };
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
-#[cfg(feature = "binfmt")]
+#[cfg(feature = "_binfmt")]
 pub use self::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
