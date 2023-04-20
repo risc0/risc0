@@ -1,13 +1,9 @@
 [package]
-name = "starter"
+name = "host"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 methods = { path = "../methods" }
-{% if risc0_crate_branch %}
-risc0-zkvm = { git = "https://github.com/risc0/risc0.git", branch = "{{ risc0_crate_branch }}" }
-{% else %}
-risc0-zkvm = "{{ risc0_version }}"
-{% endif %}
+risc0-zkvm = { {{ risc0_zkvm }} }
 serde = "1.0"

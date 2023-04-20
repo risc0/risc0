@@ -5,9 +5,6 @@ edition = "2021"
 
 [workspace]
 
-[build-dependencies]
-risc0-build = { path = "../../../../risc0/build" }
-
 [dependencies]
 chess-core = { path = "../../core" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }

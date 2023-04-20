@@ -22,6 +22,7 @@ pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
 mod info;
+pub mod layout;
 #[cfg(feature = "metal")]
 pub mod metal;
 pub mod poly_ext;

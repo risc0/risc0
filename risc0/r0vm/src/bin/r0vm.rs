@@ -12,18 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::default::Default;
-use std::{
-    fs,
-    io::Write,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::PathBuf};
 
-use anyhow::Result;
 use clap::Parser;
-use risc0_zkvm::sha::{Digest, DIGEST_WORDS};
-use risc0_zkvm::{prove::profiler::Profiler, Prover, ProverOpts, Receipt};
-use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm::{prove::default_hal, Executor, ExecutorEnv, SessionReceipt};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -33,24 +25,9 @@ struct Args {
     #[clap(long)]
     elf: PathBuf,
 
-    /// ImageID file; created if needed and it doesn't exist.
-    #[clap(long)]
-    image_id: Option<PathBuf>,
-
     /// Receipt output file.
     #[clap(long)]
     receipt: Option<PathBuf>,
-
-    /// EXPERIMENTAL: When enabled, writes the receipt in a format usable by the
-    /// "verify" guest method.
-    #[clap(long)]
-    input_for_verify: bool,
-
-    /// Skip generating the seal in receipt.  This should only be used
-    /// for testing.  In this case, performace will be much better but
-    /// we will not be able to cryptographically verify the execution.
-    #[clap(long)]
-    skip_seal: bool,
 
     /// File to read initial input from.
     #[clap(long)]
@@ -67,53 +44,12 @@ struct Args {
     /// Write "pprof" protobuf output of the guest's run to this file.
     /// You can use google's pprof (<https://github.com/google/pprof>)
     /// to read it.
+    #[cfg(feature = "profiler")]
     #[clap(long)]
     pprof_out: Option<PathBuf>,
 }
 
-fn read_image_id(verbose: u8, elf_file: &Path, image_id_file: Option<&Path>) -> Option<Digest> {
-    let elf_mtime = fs::metadata(elf_file).ok()?.modified().ok()?;
-    let id_mtime = fs::metadata(image_id_file.as_ref()?)
-        .ok()?
-        .modified()
-        .ok()?;
-
-    if elf_mtime > id_mtime {
-        return None;
-    }
-
-    let buf = fs::read(image_id_file?).ok()?;
-    let id = Digest::try_from(buf).ok()?;
-
-    if verbose > 0 {
-        println!(
-            "Successfully read image id from {}",
-            image_id_file.unwrap().display()
-        );
-    }
-
-    Some(id)
-}
-
-fn run_prover(elf_contents: &[u8], opts: ProverOpts) -> Result<Receipt> {
-    let mut prover = Prover::new_with_opts(&elf_contents, opts).unwrap();
-    let receipt = prover.run()?;
-
-    Ok(receipt)
-}
-
-fn encode_receipt(receipt: &Receipt, image_id: &[u8], args: &Args) -> Vec<u8> {
-    if args.input_for_verify {
-        let mut encoded: Vec<u8> = Vec::new();
-        let mut add_input_u32_slice =
-            |slice: &[u32]| encoded.write_all(bytemuck::cast_slice(slice)).unwrap();
-        add_input_u32_slice(&[receipt.seal.len() as u32]);
-        add_input_u32_slice(&receipt.seal);
-        add_input_u32_slice(&[(image_id.len() / 4) as u32]);
-        encoded.write_all(image_id).unwrap();
-        return encoded;
-    }
-
+fn encode_receipt(receipt: &SessionReceipt) -> Vec<u8> {
     bytemuck::cast_slice(risc0_zkvm::serde::to_vec(&receipt).unwrap().as_slice()).into()
 }
 
@@ -131,82 +67,51 @@ fn main() {
         );
     }
 
-    let image_id: Digest = if args.receipt.is_none() || args.skip_seal {
-        // No need to generate a image ID since we don't need to
-        // generate an actual proof.
-        Digest::from([0; DIGEST_WORDS])
-    } else {
-        read_image_id(
-            args.verbose,
-            &args.elf,
-            args.image_id.as_ref().map(|p| p.as_path()),
-        )
-        .unwrap_or_else(|| {
-            if args.verbose > 0 {
-                eprintln!("Computing image id");
-            }
-            let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32);
-            let image_id = image.get_root();
-            if let Some(image_id_file) = args.image_id.as_ref() {
-                std::fs::write(&image_id_file, image_id.as_bytes()).unwrap();
-                if args.verbose > 0 {
-                    eprintln!("Saved image id to {}", image_id_file.display());
-                }
-            }
-            image_id
-        })
+    #[cfg(feature = "profiler")]
+    let mut guest_prof: Option<risc0_zkvm::Profiler> = None;
+    #[cfg(feature = "profiler")]
+    if args.pprof_out.is_some() {
+        guest_prof =
+            Some(risc0_zkvm::Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());
+    }
+
+    let session = {
+        let mut builder = ExecutorEnv::builder();
+
+        for var in args.env.iter() {
+            let (name, value) = var
+                .split_once('=')
+                .expect("Environment variables should be of the form NAME=value");
+            builder.env_var(name, value);
+        }
+
+        if let Some(input) = args.initial_input.as_ref() {
+            builder.stdin(fs::File::open(input).unwrap());
+        }
+
+        #[cfg(feature = "profiler")]
+        if let Some(ref mut profiler) = guest_prof {
+            builder.trace_callback(profiler.make_trace_callback());
+        }
+
+        let env = builder.build();
+        let mut exec = Executor::from_elf(env, &elf_contents).unwrap();
+        exec.run().unwrap()
     };
 
-    let mut guest_prof: Option<Profiler> = None;
-    let mut opts: ProverOpts =
-        ProverOpts::default().with_skip_seal(args.skip_seal || args.receipt.is_none());
-
-    for var in args.env.iter() {
-        let (varname, val) = var
-            .split_once('=')
-            .expect("Environment variables should be of the form NAME=value");
-        opts = opts.with_env_var(varname, val);
-    }
-
-    if args.pprof_out.is_some() {
-        guest_prof = Some(Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());
-    }
-
-    if let Some(input) = args.initial_input.as_ref() {
-        opts = opts.with_stdin(fs::File::open(input).unwrap());
-    }
-
-    let proof = run_prover(
-        &elf_contents,
-        if let Some(ref mut profiler) = guest_prof {
-            opts.with_trace_callback(profiler.make_trace_callback())
-        } else {
-            opts
-        },
-    );
-
     // Now that we're done with the prover, we can collect the guest profiling data.
+    #[cfg(feature = "profiler")]
     if let Some(ref mut profiler) = guest_prof.as_mut() {
         profiler.finalize();
         let report = profiler.encode_to_vec();
         fs::write(args.pprof_out.as_ref().unwrap(), &report)
             .expect("Unable to write profiling output");
     }
-    let receipt = proof.expect("Run failed");
-    let receipt_data = encode_receipt(&receipt, image_id.as_bytes(), &args);
 
-    if args.skip_seal || args.receipt.is_none() {
-        if args.verbose > 0 {
-            eprintln!("Skipping seal generation.");
-        }
-    } else {
-        if args.verbose > 0 {
-            eprintln!("Verifying that we executed correctly.");
-            receipt.verify(&image_id).unwrap();
-        }
-    }
+    let (hal, eval) = default_hal();
+    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
 
+    let receipt_data = encode_receipt(&receipt);
     if let Some(receipt_file) = args.receipt.as_ref() {
         fs::write(receipt_file, receipt_data.as_slice()).expect("Unable to write receipt file");
         if args.verbose > 0 {

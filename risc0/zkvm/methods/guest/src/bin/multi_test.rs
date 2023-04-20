@@ -22,11 +22,16 @@ use alloc::vec;
 use core::arch::asm;
 
 use getrandom::getrandom;
-use risc0_zeroio::deserialize::Deserialize;
-use risc0_zkp::core::sha::{testutil::test_sha_impl, Digest, Sha256};
-use risc0_zkvm::guest::{env, memory_barrier, sha};
-use risc0_zkvm_methods::multi_test::{MultiTestSpec, MultiTestSpecRef, SYS_MULTI_TEST};
-use risc0_zkvm_platform::syscall::sys_read;
+use risc0_zkp::core::hash::sha::testutil::test_sha_impl;
+use risc0_zkvm::{
+    guest::{env, memory_barrier, sha},
+    sha::{Digest, Sha256},
+};
+use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
+use risc0_zkvm_platform::{
+    fileno,
+    syscall::{sys_read, sys_write},
+};
 
 risc0_zkvm::entry!(main);
 
@@ -43,14 +48,11 @@ fn profile_test_func2() {
 }
 
 pub fn main() {
-    // TODO: Either make zeroio work well with env::stdin, or convert to serde.
-    let mut words: vec::Vec<u32> = vec::Vec::with_capacity(1024);
-    env::stdin().read_words_to_end(&mut words);
-    let impl_select = MultiTestSpec::deserialize_from(&words);
+    let impl_select: MultiTestSpec = env::read();
     match impl_select {
-        MultiTestSpecRef::DoNothing(_) => {}
-        MultiTestSpecRef::ShaConforms(_) => test_sha_impl::<sha::Impl>(),
-        MultiTestSpecRef::ShaCycleCount(_) => {
+        MultiTestSpec::DoNothing => {}
+        MultiTestSpec::ShaConforms => test_sha_impl::<sha::Impl>(),
+        MultiTestSpec::ShaCycleCount => {
             // Time the simulated sha so that it estimates what we'd
             // see when it's a custom circuit.
             let a: &Digest = &Digest::from([1, 2, 3, 4, 5, 6, 7, 8]);
@@ -71,7 +73,7 @@ pub fn main() {
             // our simulation doesn't run faster.
             assert!(total >= 72, "total: {total}");
         }
-        MultiTestSpecRef::EventTrace(_) => unsafe {
+        MultiTestSpec::EventTrace => unsafe {
             // Execute some instructions with distinctive arguments
             // that are easy to find in the event trace.
             asm!(r"
@@ -85,15 +87,15 @@ pub fn main() {
       sw x5, 548(x6)
 ", out("x5") _, out("x6") _);
         },
-        MultiTestSpecRef::Profiler(_) => {
+        MultiTestSpec::Profiler => {
             // Call an external function to make sure it's detected during profiling.
             profile_test_func1()
         }
-        MultiTestSpecRef::Fail(_) => {
+        MultiTestSpec::Fail => {
             panic!("MultiTestSpec::Fail invoked");
         }
-        MultiTestSpecRef::ReadWriteMem(values) => {
-            for (addr, value) in values.values().iter() {
+        MultiTestSpec::ReadWriteMem { values } => {
+            for (addr, value) in values.into_iter() {
                 if value != 0 {
                     let ptr = addr as *mut u32;
                     unsafe { ptr.write_volatile(value) };
@@ -104,48 +106,78 @@ pub fn main() {
                 }
             }
         }
-        MultiTestSpecRef::ShaDigest(data) => {
-            let digest = sha::Impl::hash_bytes(data.data());
+        MultiTestSpec::ShaDigest { data } => {
+            let digest = sha::Impl::hash_bytes(&data);
             env::commit(&digest);
         }
-        MultiTestSpecRef::Syscall(sendrecv) => {
+        MultiTestSpec::Syscall { count } => {
             let mut input: &[u8] = &[];
             let mut input_len: usize = 0;
 
-            for _ in 0..sendrecv.count() {
+            for _ in 0..count {
                 let host_data = env::send_recv_slice::<u8, u8>(SYS_MULTI_TEST, &input[..input_len]);
 
                 input = bytemuck::cast_slice(host_data);
                 input_len = input.len();
             }
         }
-        MultiTestSpecRef::DoRandom(_) => {
+        MultiTestSpec::DoRandom => {
             // Test random number generation in the zkvm
             let mut rand_buf = [0u8; 7];
             getrandom(rand_buf.as_mut_slice()).expect("random number generation failed");
             env::commit_slice(&rand_buf);
             assert_ne!(rand_buf, vec![0u8; rand_buf.len()].as_slice());
         }
-        MultiTestSpecRef::SysRead(sysread) => {
-            let mut orig = sysread.orig().to_vec();
-
-            for (pos, len) in sysread.pos_and_len() {
-                let num_read = unsafe {
-                    sys_read(
-                        sysread.fd(),
-                        orig.as_mut_ptr().add(pos as usize),
-                        len as usize,
-                    )
-                };
+        MultiTestSpec::SysRead {
+            mut orig,
+            fd,
+            pos_and_len,
+        } => {
+            for (pos, len) in pos_and_len {
+                let num_read =
+                    unsafe { sys_read(fd, orig.as_mut_ptr().add(pos as usize), len as usize) };
                 assert_eq!(num_read, len as usize);
             }
 
-            env::commit_slice(&risc0_zeroio::to_vec(&orig).unwrap());
+            env::commit(&orig);
         }
-        MultiTestSpecRef::PauseContinue(_) => {
+        MultiTestSpec::PauseContinue => {
             env::log("before");
             env::pause();
             env::log("after");
+        }
+        MultiTestSpec::CopyToStdout { fd } => {
+            // Unaligned buffer size to exercise things a little bit.
+            const BUF_SIZE: usize = 9;
+            let mut buf = [0u8; BUF_SIZE];
+            loop {
+                let nread = unsafe { sys_read(fd, buf.as_mut_ptr(), buf.len()) };
+                if nread == 0 {
+                    break;
+                }
+                unsafe { sys_write(fileno::STDOUT, buf.as_mut_ptr(), nread) }
+            }
+        }
+        MultiTestSpec::BusyLoop { cycles } => {
+            let mut last_cycles = env::get_cycle_count();
+
+            // Count all the cycles that have happened so far before we got to this point.
+            env::log("Busy loop starting!");
+            let mut tot_cycles = last_cycles;
+
+            while tot_cycles < cycles as usize {
+                let now_cycles = env::get_cycle_count();
+                if now_cycles <= last_cycles {
+                    // Cycle count may have reset or wrapped around.
+                    // Since we don't know which, just start counting
+                    // from zero.
+                    tot_cycles += now_cycles;
+                } else {
+                    tot_cycles += now_cycles - last_cycles;
+                }
+                last_cycles = now_cycles;
+            }
+            env::log("Busy loop complete");
         }
     }
 }

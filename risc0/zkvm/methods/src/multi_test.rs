@@ -17,8 +17,8 @@ extern crate alloc;
 
 use alloc::vec::Vec;
 
-use risc0_zeroio::{Deserialize, Serialize};
 use risc0_zkvm::declare_syscall;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum MultiTestSpec {
@@ -31,6 +31,9 @@ pub enum MultiTestSpec {
     EventTrace,
     Profiler,
     Fail,
+    CopyToStdout {
+        fd: u32,
+    },
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and
         /// output it; nonzero means write that value.
@@ -48,6 +51,10 @@ pub enum MultiTestSpec {
         pos_and_len: Vec<(u32, u32)>,
     },
     PauseContinue,
+    BusyLoop {
+        /// Busy loop until the guest has run for at least this number of cycles
+        cycles: u32,
+    },
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

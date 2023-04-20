@@ -21,12 +21,13 @@
 //!
 //! # Usage
 //!
-//! We provide two interfaces for SHA hashing.
-//! The first interface is based on [Rust Crypto](https://github.com/RustCrypto) wrappers and can be found in the [rust_crypto] module, along with documentation and usage notes.
+//! We provide two interfaces for SHA hashing. The first interface is based on
+//! [Rust Crypto](https://github.com/RustCrypto) wrappers and can be found in
+//! the [rust_crypto] module, along with documentation and usage notes.
 //!
 //! The other interface is to directly use an implementation of the [Sha256]
 //! trait defined in this module:
-//! ```
+//! ```rust
 //! use risc0_zkvm::sha::{Impl, Sha256};
 //!
 //! // Hash a u8 array
@@ -45,9 +46,9 @@
 //! assert_eq!(hash_hash, hash_hash_words);
 //! ```
 
-pub use risc0_zkp::core::sha::{
-    Block, Digest, Sha256, BLOCK_BYTES, BLOCK_WORDS, DIGEST_BYTES, DIGEST_WORDS, SHA256_INIT,
-    WORD_SIZE,
+pub use risc0_zkp::core::{
+    digest::{Digest, DIGEST_BYTES, DIGEST_WORDS},
+    hash::sha::{Block, Sha256, BLOCK_BYTES, BLOCK_WORDS, SHA256_INIT, WORD_SIZE},
 };
 
 // Pick the appropriate implementation of SHA-256 depending on whether we are
@@ -56,7 +57,7 @@ cfg_if::cfg_if! {
     if #[cfg(target_os = "zkvm")] {
         pub use crate::guest::sha::Impl;
     } else {
-        pub use risc0_zkp::core::sha_cpu::Impl;
+        pub use risc0_zkp::core::hash::sha::cpu::Impl;
     }
 }
 
@@ -94,7 +95,7 @@ pub mod rust_crypto {
     // crate meaning that copy was wasted. This is the result of prioritizing code
     // factoring and guest performance over host performance.
 
-    use risc0_zkp::core::sha::rust_crypto;
+    use risc0_zkp::core::hash::sha::rust_crypto;
     pub use rust_crypto::{Digest, Output};
 
     /// Sha256 is a [Rust Crypto] wrapper on the RISC Zero SHA-256

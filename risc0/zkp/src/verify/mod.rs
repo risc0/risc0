@@ -25,7 +25,7 @@ pub(crate) mod merkle;
 pub mod read_iop;
 
 use alloc::{vec, vec::Vec};
-use core::fmt;
+use core::fmt::{self};
 #[cfg(not(target_os = "zkvm"))]
 use core::marker::PhantomData;
 
@@ -35,14 +35,14 @@ use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use self::adapter::VerifyAdapter;
 #[cfg(not(target_os = "zkvm"))]
-pub use crate::core::config::HashSuite;
+pub use crate::core::hash::HashSuite;
 use crate::{
     adapter::{
         CircuitInfo, TapsProvider, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
     },
     core::{
-        config::{ConfigHash, ConfigRng},
         digest::Digest,
+        hash::{HashFn, Rng},
         log2_ceil,
     },
     taps::TapSet,
@@ -50,7 +50,7 @@ use crate::{
     FRI_FOLD, INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum VerificationError {
     ReceiptFormatError,
     ControlVerificationError,
@@ -78,9 +78,12 @@ impl fmt::Display for VerificationError {
     }
 }
 
+#[cfg(feature = "std")]
+impl std::error::Error for VerificationError {}
+
 pub trait VerifyHal {
-    type Hash: ConfigHash<Self::Field>;
-    type Rng: ConfigRng<Self::Field>;
+    type HashFn: HashFn<Self::Field>;
+    type Rng: Rng<Self::Field>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
@@ -154,7 +157,7 @@ mod host {
     }
 
     impl<'a, F: Field, HS: HashSuite<F>, C: PolyExt<F>> VerifyHal for CpuVerifyHal<'a, F, HS, C> {
-        type Hash = HS::Hash;
+        type HashFn = HS::HashFn;
         type Rng = HS::Rng;
         type Elem = F::Elem;
         type ExtElem = F::ExtElem;
@@ -268,18 +271,16 @@ mod host {
 
 /// Verify a seal is valid for the given circuit, code, and globals
 #[tracing::instrument(skip_all)]
-pub fn verify<'a, H, C, CheckCode, CheckGlobals>(
+pub fn verify<'a, H, C, CheckCode>(
     hal: &'a H,
     circuit: &C,
     seal: &'a [u32],
     check_code: CheckCode,
-    check_globals: CheckGlobals,
 ) -> Result<(), VerificationError>
 where
     H: VerifyHal,
     C: CircuitInfo + TapsProvider,
     CheckCode: Fn(u32, &Digest) -> Result<(), VerificationError>,
-    CheckGlobals: Fn(&[H::Elem]) -> Result<(), VerificationError>,
 {
     if seal.len() == 0 {
         return Err(VerificationError::ReceiptFormatError);
@@ -293,9 +294,6 @@ where
 
     // Read any execution state
     adapter.execute(&mut iop);
-
-    let io = adapter.out.ok_or(VerificationError::ReceiptFormatError)?;
-    check_globals(&io)?;
 
     // Get the size
     let po2 = adapter.po2();
@@ -358,7 +356,7 @@ where
     // Read the U coeffs (the interpolations of the taps) + commit their hash.
     let num_taps = taps.tap_size();
     let coeff_u = iop.read_field_elem_slice(num_taps + H::CHECK_SIZE);
-    let hash_u = *H::Hash::hash_ext_elem_slice(coeff_u);
+    let hash_u = *H::HashFn::hash_ext_elem_slice(coeff_u);
     iop.commit(&hash_u);
 
     // Now, convert U polynomials from coefficient form to evaluation form
@@ -468,7 +466,7 @@ where
         &mut iop,
         size,
         |iop: &mut ReadIOP<H::Field, _>, idx: usize| -> Result<H::ExtElem, VerificationError> {
-            hal.debug("fri_verify");
+            // hal.debug("fri_verify");
             let x = gen.pow(idx);
             let rows = [
                 accum_merkle.verify(iop, idx)?,

@@ -65,24 +65,11 @@ pub mod reg_abi {
     pub const REG_T4: usize = 29; // temporary
     pub const REG_T5: usize = 30; // temporary
     pub const REG_T6: usize = 31; // temporary
-    pub const REG_PC: usize = 32; // program counter
-    pub const REG_MAX: usize = 33; // maximum number of registers
+    pub const REG_MAX: usize = 32; // maximum number of registers
 }
 
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
-
-/// Compute `ceil(a / b)` via truncated integer division.
-#[allow(dead_code)]
-const fn div_ceil(a: u32, b: u32) -> u32 {
-    (a + b - 1) / b
-}
-
-/// Round `a` up to the nearest multipe of `b`.
-#[allow(dead_code)]
-const fn round_up(a: u32, b: u32) -> u32 {
-    div_ceil(a, b) * b
-}
 
 // TODO: We can probably use ffi::CStr::from_bytes_with_nul once it's
 // const-stablized instead of rolling our own structure:
@@ -95,7 +82,7 @@ pub struct SyscallName(*const u8);
 
 /// Construct a SyscallName declaration at compile time.
 ///
-/// ```
+/// ```rust
 /// use risc0_zkvm_platform::declare_syscall;
 ///
 /// declare_syscall!(SYS_MY_SYSTEM_CALL);

@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::error::Error;
-use std::str::FromStr;
-use std::sync::Arc;
+use std::{error::Error, str::FromStr, sync::Arc};
 
 use clap::Parser;
-use ethers::middleware::SignerMiddleware;
-use ethers::providers::{Http, Middleware, Provider, StreamExt};
-use ethers::signers::{LocalWallet, Signer};
-use ethers::types::{Address, U256};
+use ethers::{
+    middleware::SignerMiddleware,
+    providers::{Http, Middleware, Provider, StreamExt},
+    signers::{LocalWallet, Signer},
+    types::{Address, U256},
+};
 use hello_bonsai_contracts::HelloBonsai;
 
 #[derive(Parser, Debug)]
@@ -29,8 +29,8 @@ struct Args {
     /// Value of n to use as the input to the Fibonacci calculation.
     n: u32,
 
-    /// JSON RPC URL for an Ethereum node that will serve call and transaction requests.
-    /// Currently only HTTP(S) URLs are supported.
+    /// JSON RPC URL for an Ethereum node that will serve call and transaction
+    /// requests. Currently only HTTP(S) URLs are supported.
     #[clap(short = 'e', long, env, value_hint = clap::ValueHint::Url)]
     ethereum_node_url: String,
 

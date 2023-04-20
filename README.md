@@ -11,7 +11,7 @@
 [![Discord chat][discord-badge]][discord-url]
 [![Twitter][twitter-badge]][twitter-url]
 
-[crates-badge]: https://img.shields.io/badge/crates.io-v0.13-orange
+[crates-badge]: https://img.shields.io/badge/crates.io-v0.14-orange
 [crates-url]: https://crates.io/crates/risc0-zkvm
 [licence-badge]: https://img.shields.io/github/license/risc0/risc0?color=blue
 [licence-url]: https://github.com/risc0/risc0/blob/main/LICENSE
@@ -25,6 +25,10 @@
 [zk-proof]: https://en.wikipedia.org/wiki/Non-interactive_zero-knowledge_proof
 [risc-v]: https://en.wikipedia.org/wiki/RISC-V
 [crates.io]: https://crates.io
+[cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
+[website-getting-started]: https://www.risczero.com/docs
+[examples]: https://github.com/risc0/risc0/tree/main/examples
+[install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 
 > WARNING: This software is still experimental, we do not recommend it for
 > production use (see Security section).
@@ -91,119 +95,48 @@ other manner of problems.  Caveat emptor.
 
 ## Getting Started
 
-To get started building applications using the zkVM in Rust, we provide a
-[starter template](https://github.com/risc0/risc0-rust-starter) and a
-number of [working examples](https://github.com/risc0/risc0-rust-examples/).
-
-## Example
-
-Add a `methods` crate, which will act as a container for code that runs within
-the zkVM. This crate will be configured with a special build-script to enable
-cross-compilation of RISC-V code. The resulting ELF binary will be embedded
-within this crate so that it can be referenced as a dependency in your
-application.
+To start your own project, you can use our `cargo risczero` tool to write the
+initial boilerplate and set up a standard directory structure.
+First, [install Rust][install-rust] if you don't already have it, then install the `cargo risczero` tool:
 
 ```
-cargo new --lib methods
+cargo install cargo-risczero
 ```
 
-Adjust `methods/Cargo.toml` to include:
-
-```toml
-[build-dependencies]
-risc0-build = "0.13"
-
-[package.metadata.risc0]
-methods = ["guest"]
-```
-
-Adjust `methods/src/lib.rs` so that its contents are:
-
-```rust
-include!(concat!(env!("OUT_DIR"), "/methods.rs"));
-```
-
-Add a `methods/build.rs` build script with these contents:
-
-```rust
-fn main() {
-  risc0_build::embed_methods();
-}
-```
-
-Within the `methods` crate, create a `guest` crate. Rename the `main.rs` to
-something more appropriate.
+Then, create a new project (named `my_project` in this example):
 
 ```
-cargo new --bin methods/guest
-mv methods/guest/main.rs methods/guest/example.rs
+cargo risczero new my_project
 ```
 
-Add `risc0-zkvm` to the `methods/guest/Cargo.toml` file:
+More details and options for `cargo risczero` are given in
+[its README][cargo-risczero-readme].
 
-```toml
-[dependencies]
-risc0-zkvm = { version = "0.13", default-features = false }
-```
-
-Edit the code in `methods/guest/src/example.rs`:
-
-```rust
-#![no_main]
-#![no_std]
-
-risc0_zkvm::guest::entry!(main);
-
-pub fn main() {
-    // TODO: Implement your guest code here
-}
-```
-
-Add `risc0-zkvm` and the `methods` crate to your dependencies:
-
-```toml
-[dependencies]
-methods = { path = "methods" }
-risc0-zkvm = "0.13"
-```
-
-Call the prover from your application:
-
-```rust
-use methods::{EXAMPLE_ELF, EXAMPLE_ID};
-use risc0_zkvm::Prover;
-
-fn main() {
-  let mut prover = Prover::new(EXAMPLE_ELF, EXAMPLE_ID).unwrap();
-  let receipt = prover.run().unwrap();
-
-  // The receipt can be sent to another party, where they can:
-
-  receipt.verify(EXAMPLE_ID).unwrap();
-}
-```
+For more guidance on how to use RISC Zero, how RISC Zero projects are typically
+structured, and other resources useful to developers new to RISC Zero, see our
+[Getting Started page][website-getting-started].
 
 ## Rust Binaries
 
-| crate       | [crates.io]                                                                                       |
-| ----------- | ------------------------------------------------------------------------------------------------- |
-| risc0-r0vm  | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-r0vm)  |
-| risc0-tools | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-tools) |
+| crate          | [crates.io]                                                                                          |
+| -------------- | ---------------------------------------------------------------------------------------------------- |
+| cargo-risczero | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/cargo-risczero) |
+| risc0-r0vm     | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-r0vm)     |
+| risc0-tools    | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-tools)    |
 
 ## Rust Libraries
 
-| crate                | [crates.io]                                                                                                | [docs.rs](https://docs.rs)                                                                      |
-| -------------------- | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| risc0-build          | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-build)          | [![](https://img.shields.io/docsrs/risc0-build)](https://docs.rs/risc0-build)                   |
-| risc0-build-kernel   | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-build-kernel)   | [![](https://img.shields.io/docsrs/risc0-build-kernel)](https://docs.rs/risc0-build-kernel)     |
-| risc0-circuit-rv32im | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-circuit-rv32im) | [![](https://img.shields.io/docsrs/risc0-circuit-rv32im)](https://docs.rs/risc0-circuit-rv32im) |
-| risc0-core           | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-core)           | [![](https://img.shields.io/docsrs/risc0-core)](https://docs.rs/risc0-core)                     |
-| risc0-sys            | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-sys)            | [![](https://img.shields.io/docsrs/risc0-sys)](https://docs.rs/risc0-sys)                       |
-| risc0-zeroio         | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-zeroio)         | [![](https://img.shields.io/docsrs/risc0-zeroio)](https://docs.rs/risc0-zeroio)                 |
-| risc0-zeroio-derive  | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-zeroio-derive)  | [![](https://img.shields.io/docsrs/risc0-zeroio-derive)](https://docs.rs/risc0-zeroio-derive)   |
-| risc0-zkp            | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-zkp)            | [![](https://img.shields.io/docsrs/risc0-zkp)](https://docs.rs/risc0-zkp)                       |
-| risc0-zkvm           | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-zkvm)           | [![](https://img.shields.io/docsrs/risc0-zkvm)](https://docs.rs/risc0-zkvm)                     |
-| risc0-zkvm-platform  | [![x](https://img.shields.io/badge/crates.io-v0.13-orange)](https://crates.io/crates/risc0-zkvm-platform)  | [![](https://img.shields.io/docsrs/risc0-zkvm-platform)](https://docs.rs/risc0-zkvm-platform)   |
+| crate                    | [crates.io]                                                                                                    | [docs.rs](https://docs.rs)                                                                              |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| risc0-build              | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-build)              | [![](https://img.shields.io/docsrs/risc0-build)](https://docs.rs/risc0-build)                           |
+| risc0-build-kernel       | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-build-kernel)       | [![](https://img.shields.io/docsrs/risc0-build-kernel)](https://docs.rs/risc0-build-kernel)             |
+| risc0-circuit-rv32im     | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-circuit-rv32im)     | [![](https://img.shields.io/docsrs/risc0-circuit-rv32im)](https://docs.rs/risc0-circuit-rv32im)         |
+| risc0-circuit-rv32im-sys | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-circuit-rv32im-sys) | [![](https://img.shields.io/docsrs/risc0-circuit-rv32im-sys)](https://docs.rs/risc0-circuit-rv32im-sys) |
+| risc0-core               | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-core)               | [![](https://img.shields.io/docsrs/risc0-core)](https://docs.rs/risc0-core)                             |
+| risc0-sys                | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-sys)                | [![](https://img.shields.io/docsrs/risc0-sys)](https://docs.rs/risc0-sys)                               |
+| risc0-zkp                | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-zkp)                | [![](https://img.shields.io/docsrs/risc0-zkp)](https://docs.rs/risc0-zkp)                               |
+| risc0-zkvm               | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-zkvm)               | [![](https://img.shields.io/docsrs/risc0-zkvm)](https://docs.rs/risc0-zkvm)                             |
+| risc0-zkvm-platform      | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-zkvm-platform)      | [![](https://img.shields.io/docsrs/risc0-zkvm-platform)](https://docs.rs/risc0-zkvm-platform)           |
 
 ## `cargo risczero` tool
 
@@ -212,6 +145,7 @@ Included is a tool to manage RISC Zero project directories.
 ```bash
 # Installing from local source
 cargo install --path risc0/cargo-risczero
+
 # Install from crates.io
 cargo install cargo-risczero
 ```

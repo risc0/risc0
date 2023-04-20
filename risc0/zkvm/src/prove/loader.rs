@@ -23,12 +23,15 @@ use anyhow::Result;
 use log::{debug, trace};
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
-    adapter::TapsProvider, core::sha::SHA256_INIT, hal::Hal, prove::poly_group::PolyGroup,
+    adapter::TapsProvider,
+    core::{digest::Digest, hash::sha::SHA256_INIT},
+    hal::Hal,
+    prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 
-use crate::{ControlId, CIRCUIT};
+use crate::CIRCUIT;
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;
@@ -353,6 +356,30 @@ impl Loader {
         F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
     {
         let mut loader = LoaderImpl::new(step);
+        self.pre_steps(&mut loader)?;
+        loader.body()?;
+        self.post_steps(&mut loader)?;
+        Ok(loader.cycle)
+    }
+
+    /// Compute the number of cycles needed for initialization.
+    pub fn init_cycles(&self) -> usize {
+        let mut loader = LoaderImpl::new(|_, _| Ok(true));
+        self.pre_steps(&mut loader).unwrap();
+        loader.cycle
+    }
+
+    /// Compute the number of cycles needed for finalization.
+    pub fn fini_cycles(&self) -> usize {
+        let mut loader = LoaderImpl::new(|_, _| Ok(true));
+        self.post_steps(&mut loader).unwrap();
+        loader.cycle
+    }
+
+    fn pre_steps<F>(&self, loader: &mut LoaderImpl<F>) -> Result<()>
+    where
+        F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
+    {
         loader.bytes_init()?;
         loader.bytes_setup(Self::SETUP_CYCLES)?;
         loader.ram_init()?;
@@ -360,14 +387,20 @@ impl Loader {
             loader.ram_load(triple)?;
         }
         loader.reset(BabyBearElem::ONE)?;
-        loader.body()?;
-        loader.reset(BabyBearElem::ZERO)?;
-        loader.fini()?;
-        Ok(loader.cycle)
+        Ok(())
     }
 
-    /// Compute the [ControlId] associated with the given HAL
-    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> ControlId {
+    fn post_steps<F>(&self, loader: &mut LoaderImpl<F>) -> Result<()>
+    where
+        F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
+    {
+        loader.reset(BabyBearElem::ZERO)?;
+        loader.fini()?;
+        Ok(())
+    }
+
+    /// Compute the `ControlId` associated with the given HAL
+    pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> Vec<Digest> {
         let code_size = CIRCUIT.code_size();
 
         // Start with an empty table
@@ -390,7 +423,7 @@ impl Loader {
             table.push(code_group.merkle.root().clone());
         }
 
-        ControlId { table }
+        table
     }
 
     fn load_code(&self, code: &mut [BabyBearElem], max_cycles: usize) {

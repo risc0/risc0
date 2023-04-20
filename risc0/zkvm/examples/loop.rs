@@ -16,12 +16,14 @@ use std::{process::Command, time::Instant};
 
 use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
-use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
+use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::{
-    core::config::HashSuite,
+    core::hash::HashSuite,
     hal::{EvalCheck, Hal},
 };
-use risc0_zkvm::{prove::default_hal, serde::to_vec, ControlIdLocator, Prover, Receipt};
+use risc0_zkvm::{
+    prove::default_hal, serde::to_vec, ControlId, Executor, ExecutorEnv, Session, SessionReceipt,
+};
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
     BENCH_ELF,
@@ -49,11 +51,18 @@ fn main() {
         let (hal, eval) = default_hal();
 
         let start = Instant::now();
-        let (receipt, cycles) = top(hal.as_ref(), &eval, iterations);
-        let cycles = cycles.next_power_of_two();
+        let (session, receipt) = top(hal.as_ref(), &eval, iterations);
         let duration = start.elapsed();
 
-        let seal = receipt.get_seal_bytes().len();
+        let cycles = session
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + (1 << segment.po2));
+
+        let seal = receipt
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
         let usage = hal.get_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
 
@@ -74,17 +83,16 @@ fn main() {
         );
 
         for iterations in [
-            0,       // warm-up
-            1,       // 32K
-            2048,    // 64K
-            4096,    // 128K
-            16384,   // 256K
-            32768,   // 512K
-            65536,   // 1M
-            131072,  // 2M
-            262144,  // 4M
-            524288,  // 8M
-            1048576, // 16M
+            0,           // warm-up
+            1,           // 16, 64K
+            4 * 1024,    // 17, 128K
+            16 * 1024,   // 18, 256K
+            32 * 1024,   // 19, 512K
+            64 * 1024,   // 20, 1M
+            200 * 1024,  // 21, 2M
+            400 * 1024,  // 22, 4M
+            900 * 1024,  // 23, 8M
+            1400 * 1024, // 24, 16M
         ] {
             run_with_iterations(iterations);
         }
@@ -106,14 +114,18 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top<H, E>(hal: &H, eval: &E, iterations: u64) -> (Receipt, usize)
+fn top<H, E>(hal: &H, eval: &E, iterations: u64) -> (Session, SessionReceipt)
 where
-    H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::Hash: ControlIdLocator,
+    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
+    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
-    let mut prover = Prover::new(BENCH_ELF).unwrap();
-    prover.add_input_u32_slice(&to_vec(&spec).unwrap());
-    (prover.run_with_hal(hal, eval).unwrap(), prover.cycles)
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&spec).unwrap())
+        .build();
+    let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let receipt = session.prove(hal, eval).unwrap();
+    (session, receipt)
 }

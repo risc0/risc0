@@ -12,23 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Utilities for writing tests for Bonsai applications. Supports testing of applications that use
-//! the Bonsai proxy to make requests for processing by a RISC Zero guest by providing utilities to
-//! run a mock of Bonsai.
+//! Utilities for writing tests for Bonsai applications. Supports testing of
+//! applications that use the Bonsai proxy to make requests for processing by a
+//! RISC Zero guest by providing utilities to run a mock of Bonsai.
 
-use std::collections::HashMap;
-use std::error::Error;
-use std::future::Future;
-use std::ops::Deref;
-use std::sync::Arc;
+use std::{collections::HashMap, error::Error, future::Future, ops::Deref, sync::Arc};
 
-use ethers::core::k256::ecdsa::SigningKey;
-use ethers::prelude::*;
-use ethers::utils::{Ganache, GanacheInstance};
-use risc0_zkvm::sha::Digest;
-use risc0_zkvm::{Prover, ProverOpts};
-use tokio::sync::oneshot;
-use tokio::task::JoinHandle;
+use ethers::{
+    core::k256::ecdsa::SigningKey,
+    prelude::*,
+    utils::{Ganache, GanacheInstance},
+};
+use risc0_zkvm::{sha::Digest, Executor, ExecutorEnv};
+use tokio::{sync::oneshot, task::JoinHandle};
 
 abigen!(
     MockBonsaiProxy,
@@ -83,27 +79,24 @@ impl BonsaiMock {
             while let Some(event) = subscription.next().await {
                 let submit_request_log =
                     event.expect("error in getting next event from subscription");
-                let receipt = {
+                let session = {
                     let elf = registry
                         .get(&Digest::from(submit_request_log.image_id))
                         .expect(&format!(
                             "image ID not found in registry: {:x?}",
                             submit_request_log.image_id
                         ));
-                    let mut prover = Prover::new_with_opts(
-                        elf.as_ref(),
-                        ProverOpts::default().with_skip_seal(true),
-                    )
-                    .expect("failed to create prover");
-                    prover.add_input_u8_slice(submit_request_log.input.deref());
-                    prover.run().expect("failed to run guest")
+                    let input = submit_request_log.input;
+                    let env = ExecutorEnv::builder().add_input(input.deref()).build();
+                    let mut exec = Executor::from_elf(env, elf.as_ref()).unwrap();
+                    exec.run().unwrap()
                 };
 
                 mock_bonsai_proxy
                     .send_callback(
                         submit_request_log.callback_address,
                         submit_request_log.image_id.into(),
-                        receipt.journal.into(),
+                        session.journal.into(),
                     )
                     .send()
                     .await

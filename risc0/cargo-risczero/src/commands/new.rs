@@ -17,7 +17,6 @@ use std::path::PathBuf;
 use cargo_generate::{GenerateArgs, TemplatePath, Vcs};
 use clap::Parser;
 use const_format::concatcp;
-use convert_case::{Case, Casing};
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
 const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
@@ -34,6 +33,14 @@ pub struct NewCommand {
     /// GH repository URL.
     #[clap(value_parser, long, short, default_value = RISC0_GH_REPO)]
     pub template: String,
+
+    /// Location of the template
+    ///
+    /// The subdirectory location of the template used for generating the new
+    /// project. This path is relative to the base repository specified by
+    /// --template
+    #[clap(value_parser, long, default_value = RISC0_TEMPLATE_DIR)]
+    pub templ_subdir: String,
 
     /// template git tag.
     #[clap(value_parser, long, default_value = RISC0_RELEASE_TAG)]
@@ -66,19 +73,17 @@ pub struct NewCommand {
     ///
     /// Toggles the `#![no_std]` in the guest main() and the `std` feature flag
     /// on the `risc0_zkvm` crate.
-    #[clap(value_parser, long, global = true)]
+    #[clap(value_parser, long, global = false)]
     pub std: bool,
+
+    /// Use a path dependency for risc0.
+    #[clap(long)]
+    pub path: Option<PathBuf>,
 }
 
 impl NewCommand {
     /// Execute this command
     pub fn run(&self) {
-        let subfolder = if self.template == RISC0_GH_REPO {
-            Some(RISC0_TEMPLATE_DIR.to_string())
-        } else {
-            None
-        };
-
         let dest_dir = if let Some(dest_dir) = self.dest.clone() {
             dest_dir
         } else {
@@ -87,7 +92,7 @@ impl NewCommand {
 
         let mut template_path = TemplatePath {
             auto_path: Some(self.template.clone()),
-            subfolder,
+            subfolder: Some(self.templ_subdir.clone()),
             git: None,
             branch: None,
             path: None,
@@ -104,19 +109,33 @@ impl NewCommand {
         let risc0_version = std::env::var("CARGO_PKG_VERSION")
             .unwrap_or_else(|_| RISC0_DEFAULT_VERSION.to_string());
 
-        let mut template_variables = vec![format!("risc0_version={risc0_version}")];
+        let mut template_variables = Vec::new();
         if let Some(branch) = self.use_git_branch.as_ref() {
-            template_variables.push(format!("risc0_crate_branch={branch}"))
+            let spec =
+                format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{branch}\"");
+            template_variables.push(format!("risc0_build={spec}"));
+            template_variables.push(format!("risc0_zkvm={spec}"));
+        } else if let Some(path) = self.path.as_ref() {
+            let path = path.to_str().unwrap();
+            let build = format!("path = \"{path}/risc0/build\"");
+            let zkvm = format!("path = \"{path}/risc0/zkvm\"");
+            template_variables.push(format!("risc0_build={build}"));
+            template_variables.push(format!("risc0_zkvm={zkvm}"));
+        } else {
+            let spec = format!("version = \"{risc0_version}\"");
+            template_variables.push(format!("risc0_build={spec}"));
+            template_variables.push(format!("risc0_zkvm={spec}"));
         }
 
         if self.std {
-            template_variables.push(format!("risc0_std={}", self.std));
+            template_variables.push("risc0_std=true".to_string());
+            template_variables.push("risc0_feature_std=, features = ['std']".to_string());
         }
 
         cargo_generate::generate(GenerateArgs {
             template_path,
             list_favorites: false,
-            name: Some(self.name.to_case(Case::Snake)),
+            name: Some(self.name.clone()),
             force: true,
             verbose: true,
             template_values_file: None,
@@ -144,9 +163,11 @@ impl NewCommand {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::File;
-    use std::io::{BufRead, BufReader};
-    use std::path::Path;
+    use std::{
+        fs::File,
+        io::{BufRead, BufReader},
+        path::Path,
+    };
 
     use tempfile::{tempdir, TempDir};
 
@@ -190,6 +211,8 @@ mod tests {
             &template_path
                 .join("templates/rust-starter")
                 .to_string_lossy(),
+            "--templ-subdir",
+            "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
             proj_name,
@@ -202,13 +225,13 @@ mod tests {
         assert!(proj_path.exists());
         assert!(proj_path.join(".git").exists());
         assert!(find_in_file(
-            &format!("risc0-zkvm = \"{RISC0_DEFAULT_VERSION}\""),
+            &format!("risc0-zkvm = {{ version = \"{RISC0_DEFAULT_VERSION}\" }}"),
             &proj_path.join("host/Cargo.toml")
         ));
 
         assert!(find_in_file(
             "#![no_std]",
-            &proj_path.join("methods/guest/src/bin/method_name.rs")
+            &proj_path.join("methods/guest/src/main.rs")
         ));
     }
 
@@ -222,6 +245,8 @@ mod tests {
             &template_path
                 .join("templates/rust-starter")
                 .to_string_lossy(),
+            "--templ-subdir",
+            "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
             "--no-git",
@@ -252,6 +277,8 @@ mod tests {
             &template_path
                 .join("templates/rust-starter")
                 .to_string_lossy(),
+            "--templ-subdir",
+            "",
             "--dest",
             &tmpdir.path().to_string_lossy(),
             "--std",
@@ -264,7 +291,7 @@ mod tests {
 
         assert!(!find_in_file(
             "#![no_std]",
-            &proj_path.join("methods/guest/src/bin/method_name.rs")
+            &proj_path.join("methods/guest/src/main.rs")
         ));
         assert!(!find_in_file(
             "feature = ['std']",

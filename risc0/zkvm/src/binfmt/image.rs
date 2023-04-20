@@ -12,12 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::core::sha::{Digest, Sha256, BLOCK_BYTES, SHA256_INIT};
+use risc0_zkp::core::{
+    digest::Digest,
+    hash::sha::{Sha256, BLOCK_BYTES, SHA256_INIT},
+};
 use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE},
     syscall::DIGEST_BYTES,
     WORD_SIZE,
 };
+use serde::{Deserialize, Serialize};
 
 use crate::{binfmt::elf::Program, sha};
 
@@ -31,7 +35,7 @@ const fn round_up(a: u32, b: u32) -> u32 {
     div_ceil(a, b) * b
 }
 
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct PageTableInfo {
     pub page_size: u32,
     page_table_addr: u32,
@@ -40,7 +44,7 @@ pub struct PageTableInfo {
     pub root_idx: u32,
     root_page_addr: u32,
     num_pages: u32,
-    _num_root_entries: u32,
+    pub num_root_entries: u32,
     _layers: Vec<u32>,
 }
 
@@ -64,7 +68,7 @@ impl PageTableInfo {
         let root_addr = page_table_addr + page_table_size;
         let root_idx = root_addr / page_size;
         let root_page_addr = root_idx * page_size;
-        let _num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
+        let num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
         assert_eq!(root_idx, num_pages);
 
         log::debug!("root_page_addr: 0x{root_page_addr:08x}, root_addr: 0x{root_addr:08x}");
@@ -77,7 +81,7 @@ impl PageTableInfo {
             root_idx,
             root_page_addr,
             num_pages,
-            _num_root_entries,
+            num_root_entries,
             _layers: layers,
         }
     }
@@ -100,10 +104,10 @@ impl PageTableInfo {
 /// This is an image of the full memory state of the zkVM, including the data,
 /// text, inputs, page table, and system memory. In addition to the memory image
 /// proper, this includes some metadata about the page table.
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct MemoryImage {
     /// The memory image as a vector of bytes
-    pub image: Vec<u8>,
+    pub buf: Vec<u8>,
 
     /// Metadata about the structure of the page table
     pub info: PageTableInfo,
@@ -116,29 +120,35 @@ impl MemoryImage {
     /// execution not yet begun), and with the page table Merkle tree
     /// constructed.
     pub fn new(program: &Program, page_size: u32) -> Self {
-        let mut image = vec![0_u8; MEM_SIZE];
+        let mut buf = vec![0_u8; MEM_SIZE];
 
         // Load the ELF into the memory image.
         for (addr, data) in program.image.iter() {
             let addr = *addr as usize;
             let bytes = data.to_le_bytes();
             for i in 0..WORD_SIZE {
-                image[addr + i] = bytes[i];
+                buf[addr + i] = bytes[i];
             }
         }
 
         // Compute the page table hashes except for the very last root hash.
         let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
-        for i in 0..info.num_pages {
-            let page_addr = info.get_page_addr(i as u32);
-            let page = &image[page_addr as usize..page_addr as usize + page_size as usize];
+        let mut img = Self { buf, info };
+        img.hash_pages();
+        img
+    }
+
+    /// Calculate and update the image merkle tree within this image.
+    pub fn hash_pages(&mut self) {
+        for i in 0..self.info.num_pages {
+            let page_addr = self.info.get_page_addr(i as u32);
+            let page =
+                &self.buf[page_addr as usize..page_addr as usize + self.info.page_size as usize];
             let digest = hash_page(page);
-            let entry_addr = info.get_page_entry_addr(i as u32);
-            image[entry_addr as usize..entry_addr as usize + DIGEST_BYTES]
+            let entry_addr = self.info.get_page_entry_addr(i as u32);
+            self.buf[entry_addr as usize..entry_addr as usize + DIGEST_BYTES]
                 .copy_from_slice(digest.as_bytes());
         }
-
-        Self { image, info }
     }
 
     /// Verify the integrity of the MemoryImage.
@@ -152,10 +162,10 @@ impl MemoryImage {
         while page_idx < self.info.root_idx {
             let page_addr = self.info.get_page_addr(page_idx);
             let page =
-                &self.image[page_addr as usize..page_addr as usize + self.info.page_size as usize];
+                &self.buf[page_addr as usize..page_addr as usize + self.info.page_size as usize];
             let expected = hash_page(page);
             let entry_addr = self.info.get_page_entry_addr(page_idx);
-            let entry = &self.image[entry_addr as usize..entry_addr as usize + DIGEST_BYTES];
+            let entry = &self.buf[entry_addr as usize..entry_addr as usize + DIGEST_BYTES];
             let actual = Digest::try_from(entry)?;
             log::debug!(
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
@@ -167,9 +177,9 @@ impl MemoryImage {
         }
 
         let root_page_addr = self.info.root_page_addr;
-        let root_page_bytes = self.info._num_root_entries * DIGEST_BYTES as u32;
-        let root_page = &self.image
-            [root_page_addr as usize..root_page_addr as usize + root_page_bytes as usize];
+        let root_page_bytes = self.info.num_root_entries * DIGEST_BYTES as u32;
+        let root_page =
+            &self.buf[root_page_addr as usize..root_page_addr as usize + root_page_bytes as usize];
         let expected = hash_page(root_page);
         let root = self.get_root();
         if expected != root {
@@ -182,7 +192,7 @@ impl MemoryImage {
     /// Compute and return the root entry of the merkle tree.
     pub fn get_root(&self) -> Digest {
         let root_page_addr = self.info.root_page_addr;
-        let root_page = &self.image[root_page_addr as usize..self.info.root_addr as usize];
+        let root_page = &self.buf[root_page_addr as usize..self.info.root_addr as usize];
         hash_page(root_page)
     }
 }
@@ -239,7 +249,7 @@ mod tests {
         assert_eq!(info._layers, vec![6815744, 212992, 6656, 192]);
         assert_eq!(info.root_addr, 0xd6b5ac0);
         assert_eq!(info.root_page_addr, 0xd6b5800);
-        assert_eq!(info._num_root_entries, 22);
+        assert_eq!(info.num_root_entries, 22);
         assert_eq!(info.root_idx, 219862);
     }
 
@@ -327,7 +337,7 @@ mod tests {
         assert_eq!(info.root_addr, 0x1AC0);
         assert_eq!(info.root_page_addr, 0x1800);
         assert_eq!(
-            info._num_root_entries,
+            info.num_root_entries,
             (0x1A00 - 0x1800) / DIGEST_BYTES as u32 + 6
         );
     }
