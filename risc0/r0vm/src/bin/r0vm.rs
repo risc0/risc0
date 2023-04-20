@@ -40,6 +40,13 @@ struct Args {
     /// Add environment vairables in the form of NAME=value.
     #[clap(long, action = clap::ArgAction::Append)]
     env: Vec<String>,
+
+    /// Write "pprof" protobuf output of the guest's run to this file.
+    /// You can use google's pprof (<https://github.com/google/pprof>)
+    /// to read it.
+    #[cfg(feature = "profiler")]
+    #[clap(long)]
+    pprof_out: Option<PathBuf>,
 }
 
 fn encode_receipt(receipt: &SessionReceipt) -> Vec<u8> {
@@ -60,22 +67,38 @@ fn main() {
         );
     }
 
-    let mut builder = ExecutorEnv::builder();
-
-    for var in args.env.iter() {
-        let (name, value) = var
-            .split_once('=')
-            .expect("Environment variables should be of the form NAME=value");
-        builder.env_var(name, value);
+    #[cfg(feature = "profiler")]
+    let mut guest_prof: Option<risc0_zkvm::Profiler> = None;
+    #[cfg(feature = "profiler")]
+    if args.pprof_out.is_some() {
+        guest_prof =
+            Some(risc0_zkvm::Profiler::new(args.elf.to_str().unwrap(), &elf_contents).unwrap());
     }
 
-    if let Some(input) = args.initial_input.as_ref() {
-        builder.stdin(fs::File::open(input).unwrap());
-    }
+    let session = {
+        let mut builder = ExecutorEnv::builder();
 
-    let env = builder.build();
-    let mut exec = Executor::from_elf(env, &elf_contents).unwrap();
-    let session = exec.run().unwrap();
+        for var in args.env.iter() {
+            let (name, value) = var
+                .split_once('=')
+                .expect("Environment variables should be of the form NAME=value");
+            builder.env_var(name, value);
+        }
+
+        if let Some(input) = args.initial_input.as_ref() {
+            builder.stdin(fs::File::open(input).unwrap());
+        }
+
+        #[cfg(feature = "profiler")]
+        if let Some(ref mut profiler) = guest_prof {
+            builder.trace_callback(profiler.make_trace_callback());
+        }
+
+        let env = builder.build();
+        let mut exec = Executor::from_elf(env, &elf_contents).unwrap();
+        exec.run().unwrap()
+    };
+
     let receipt = session.prove().unwrap();
 
     let receipt_data = encode_receipt(&receipt);

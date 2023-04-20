@@ -30,8 +30,9 @@
 use std::collections::HashMap;
 
 use addr2line::{
+    fallible_iterator::FallibleIterator,
     object::{read::File, Object, ObjectSegment},
-    Context,
+    Context, LookupResult,
 };
 use anyhow::Result;
 use gimli::{EndianRcSlice, RunTimeEndian};
@@ -60,14 +61,16 @@ pub struct Profiler {
     profile: ProfileBuilder,
 }
 
-/// Represents a frame.  Prefer to export the whole profiler proto using
+/// Represents a frame. Prefer to export the whole profiler proto using
 /// profiler.as_protobuf().
 #[derive(Debug)]
 pub struct Frame {
     /// Function name
     pub name: String,
+
     /// Line number
     pub lineno: i64,
+
     /// Filename where this function is defined
     pub filename: String,
 }
@@ -81,17 +84,17 @@ fn decode_frame(fr: addr2line::Frame<EndianRcSlice<RunTimeEndian>>) -> Option<Fr
 }
 
 fn lookup_pc(pc: u32, ctx: &Context<EndianRcSlice<RunTimeEndian>>) -> Vec<Frame> {
-    use addr2line::fallible_iterator::FallibleIterator;
-    match ctx.find_frames(pc as u64) {
-        Ok(frames) => frames
-            .filter_map(|fr| Ok(decode_frame(fr)))
-            .collect::<Vec<Frame>>()
-            .unwrap(),
-        Err(err) => {
-            eprintln!("Error finding frames!  {:?}", err);
-            [].into()
-        }
-    }
+    let frames = match ctx.find_frames(pc as u64) {
+        LookupResult::Output(result) => result.unwrap(),
+        LookupResult::Load {
+            load: _,
+            continuation: _,
+        } => unimplemented!(),
+    };
+    frames
+        .filter_map(|frame| Ok(decode_frame(frame)))
+        .collect()
+        .unwrap()
 }
 
 impl Profiler {

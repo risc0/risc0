@@ -79,29 +79,33 @@ use crate::{
     ControlId, CIRCUIT,
 };
 
-/// TODO
+/// Represents the public state of a segment, needed for continuations and
+/// receipt verification.
 #[derive(Debug)]
 pub struct SystemState {
-    /// TODO
+    /// The program counter.
     pub pc: u32,
 
-    /// TODO
+    /// The `image_id` is the root hash of a merkle tree which confirms the
+    /// integrity of the memory image.
     pub image_id: Digest,
 }
 
-/// TODO
+/// Data associated with a receipt which is used for both input and
+/// output of global state.
 #[derive(Debug)]
 pub struct ReceiptMetadata {
-    /// TODO
+    /// The [SystemState] of a segment just before execution has begun.
     pub pre: SystemState,
 
-    /// TODO
+    /// The [SystemState] of a segment just after execution has completed.
     pub post: SystemState,
 
-    /// TODO
+    /// An internal flag used by the circuit to control whether dirty pages need
+    /// to be paged out.
     pub check_dirty: u32,
 
-    /// TODO
+    /// A [Digest] of the journal, from the viewpoint of the guest.
     pub output: Digest,
 }
 
@@ -212,7 +216,7 @@ impl SessionReceipt {
 }
 
 impl SegmentReceipt {
-    /// TODO
+    /// Get the [ReceiptMetadata] associated with the current receipt.
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
         ReceiptMetadata::decode(layout::OutBuffer(elems))

@@ -21,7 +21,7 @@ use risc0_zkvm_methods::{
 use risc0_zkvm_platform::{fileno, PAGE_SIZE, WORD_SIZE};
 use test_log::test;
 
-use super::{Executor, ExecutorEnv};
+use super::{Executor, ExecutorEnv, TraceEvent};
 use crate::{
     serde::{from_slice, to_vec},
     ExitCode, MemoryImage, Program,
@@ -311,4 +311,134 @@ fn fail() {
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("MultiTestSpec::Fail invoked"));
+}
+
+#[cfg(feature = "profiler")]
+#[test]
+fn profiler() {
+    use crate::{
+        binfmt::elf::Program,
+        exec::profiler::{Frame, Profiler},
+    };
+
+    let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
+    {
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&MultiTestSpec::Profiler).unwrap())
+            .trace_callback(prof.make_trace_callback())
+            .build();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        exec.run().unwrap();
+    }
+
+    prof.finalize();
+
+    // Gather up anything containing our profile_test functions.
+    // If the test doesn't pass, we don't want to display the
+    // whole profiling structure.
+    let occurences: Vec<_> = prof
+        .iter()
+        .filter(|(frames, _addr, _count)| frames.iter().any(|fr| fr.name.contains("profile_test")))
+        .collect();
+
+    assert!(!occurences.is_empty(), "{:#?}", Vec::from_iter(prof.iter()));
+
+    let elf_mem = Program::load_elf(MULTI_TEST_ELF, u32::MAX).unwrap().image;
+
+    assert!(
+        occurences.iter().any(|(fr, addr, _count)| {
+            match fr.as_slice() {
+                [fr1 @ Frame {
+                    name: name1,
+                    filename: fn1,
+                    ..
+                }, fr2 @ Frame {
+                    name: name2,
+                    filename: fn2,
+                    ..
+                }] => {
+                    println!("Inspecting frames:\n{fr1:?}\n{fr2:?}\n");
+                    if name1 != "profile_test_func2" || name2 != "profile_test_func1" {
+                        println!("Names did not match: {}, {}", name1, name2);
+                        return false;
+                    }
+                    if !fn1.ends_with("multi_test.rs") || !fn2.ends_with("multi_test.rs") {
+                        println!("Filenames did not match: {}, {}", fn1, fn2);
+                        return false;
+                    }
+                    // Check to make sure we hit the "nop" instruction
+                    match elf_mem.get(&(*addr as u32)) {
+                        None => {
+                            println!("Addr {addr} not present in elf");
+                            return false;
+                        }
+                        Some(0x00_00_00_13) => (),
+                        Some(inst) => {
+                            println!("Looking for 'nop'; got 0x{inst:08x}");
+                            return false;
+                        }
+                    }
+
+                    // All checks passed; this is the occurence we were looking for.
+                    true
+                }
+                _ => {
+                    println!("{:#?}", fr);
+                    false
+                }
+            }
+        }),
+        "{:#?}",
+        occurences
+    );
+}
+
+#[test]
+fn trace() {
+    let mut events: Vec<TraceEvent> = Vec::new();
+    {
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&MultiTestSpec::EventTrace).unwrap())
+            .trace_callback(|event| Ok(events.push(event)))
+            .build();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        exec.run().unwrap();
+    }
+    let occurances = events
+        .windows(4)
+        .filter_map(|window| {
+            if let &[TraceEvent::InstructionStart {
+                // li x5, 1337
+                cycle: cycle1,
+                pc: pc1,
+            }, TraceEvent::RegisterSet {
+                reg: 5,
+                value: 1337,
+            }, TraceEvent::InstructionStart {
+                // sw x5, 548(zero)
+                cycle: cycle2,
+                pc: pc2,
+            }, TraceEvent::RegisterSet {
+                reg: 6,
+                value: 0x08000000,
+            }] = window
+            {
+                assert_eq!(cycle1 + 1, cycle2, "li should take 1 cycles: {:#?}", window);
+                assert_eq!(
+                    pc1 + WORD_SIZE as u32,
+                    pc2,
+                    "program counter should advance one word: {:#?}",
+                    window
+                );
+                Some(())
+            } else {
+                None
+            }
+        })
+        .count();
+    assert_eq!(occurances, 1, "trace events: {:#?}", &events);
+    assert!(events.contains(&TraceEvent::MemorySet {
+        addr: 0x08000224,
+        value: 1337
+    }));
 }
