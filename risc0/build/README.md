@@ -54,3 +54,7 @@ of the host-side code:
 ```text
 use methods::{MULTIPLY_ELF, MULTIPLY_ID};
 ```
+
+# Crate Feature Flags
+
+There are currently no feature flags available for `build`.

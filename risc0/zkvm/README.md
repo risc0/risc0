@@ -27,3 +27,23 @@ channel](https://www.youtube.com/@risczero) has many more videos as well.
   see if there's a workaround, and if you're using a workaround, you can track
   when it gets resolved to a permanent solution.
 * And more on [the RISC Zero website](https://www.risczero.com/)!
+
+# Crate Feature Flags
+
+The following crate feature flags are available. They are configured in your `Cargo.toml`.
+
+* cuda
+  * Optional (default is CPU only)
+  * Turns on GPU acceleration for guest code with CUDA
+* metal
+  * Optional (default is CPU only)
+  * Turns on GPU acceleration for guest code with Metal
+* profiler
+  * Optional, experimental
+  * Use with `r0vm` binary tool to profile guest code
+  * Counts cycles during guest execution as an aid to code optimization
+* prove
+  * Enabled by default
+  * Disable this feature if you only need to use the verifier
+* std
+  * Optional support for stdlib in the guest, including `std::io` read and write in the guest
