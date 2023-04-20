@@ -18,12 +18,10 @@ risc0-zkp = { workspace = true }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
-fil-rustacuda = { version = "0.1", optional = true }
+cust = { version = "0.3", optional = true }
 log = "0.4"
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
-rustacuda_core = { version = "0.1", optional = true }
-rustacuda_derive = { version = "0.1", optional = true }
 metal = { version = "0.24", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
@@ -39,9 +37,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
 cuda = [
-  "dep:fil-rustacuda",
-  "dep:rustacuda_core",
-  "dep:rustacuda_derive",
+  "dep:cust",
   "prove",
   "risc0-circuit-rv32im-sys/cuda",
   "risc0-sys/cuda",

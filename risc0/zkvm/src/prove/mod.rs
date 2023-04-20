@@ -66,23 +66,27 @@ use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
 pub mod cuda {
-    use std::rc::Rc;
+    use std::sync::Arc;
 
     use risc0_circuit_rv32im::cuda::{CudaEvalCheckPoseidon, CudaEvalCheckSha256};
     use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
 
-    /// Returns the default SHA-256 HAL for the rv32im circuit.
-    pub fn default_hal() -> (Rc<CudaHalSha256>, CudaEvalCheckSha256) {
-        let hal = Rc::new(CudaHalSha256::new());
-        let eval = CudaEvalCheckSha256::new(hal.clone());
-        (hal, eval)
+    use super::HalEval;
+
+    /// Creates a HAL for the rv32im circuit that uses the SHA-256 hashing
+    /// function.
+    pub fn sha256_hal_eval() -> HalEval<CudaHalSha256, CudaEvalCheckSha256> {
+        let hal = Arc::new(CudaHalSha256::new());
+        let eval = Arc::new(CudaEvalCheckSha256::new(hal.clone()));
+        HalEval { hal, eval }
     }
 
-    /// Returns the default Poseidon HAL for the rv32im circuit.
-    pub fn default_poseidon_hal() -> (Rc<CudaHalPoseidon>, CudaEvalCheckPoseidon) {
-        let hal = Rc::new(CudaHalPoseidon::new());
-        let eval = CudaEvalCheckPoseidon::new(hal.clone());
-        (hal, eval)
+    /// Creates a HAL for the rv32im circuit that uses the Poseidon hashing
+    /// function.
+    pub fn poseidon_hal_eval() -> HalEval<CudaHalPoseidon, CudaEvalCheckPoseidon> {
+        let hal = Arc::new(CudaHalPoseidon::new());
+        let eval = Arc::new(CudaEvalCheckPoseidon::new(hal.clone()));
+        HalEval { hal, eval }
     }
 }
 
@@ -293,10 +297,20 @@ fn provers() -> HashMap<String, Arc<dyn Prover>> {
         let prover = Arc::new(LocalProver::new("cpu", cpu::sha256_hal_eval()));
         table.insert("cpu".to_string(), prover.clone());
         table.insert("$default".to_string(), prover);
-    }
-    {
+
         let prover = Arc::new(LocalProver::new("cpu:poseidon", cpu::poseidon_hal_eval()));
         table.insert("cpu:poseidon".to_string(), prover.clone());
+        table.insert("$poseidon".to_string(), prover);
+    }
+    #[cfg(feature = "cuda")]
+    {
+        let prover = Arc::new(LocalProver::new("cuda", cuda::sha256_hal_eval()));
+        table.insert("cuda".to_string(), prover.clone());
+        table.insert("$gpu".to_string(), prover.clone());
+        table.insert("$default".to_string(), prover);
+
+        let prover = Arc::new(LocalProver::new("cuda:poseidon", cuda::poseidon_hal_eval()));
+        table.insert("cuda:poseidon".to_string(), prover.clone());
         table.insert("$poseidon".to_string(), prover);
     }
     #[cfg(feature = "metal")]
