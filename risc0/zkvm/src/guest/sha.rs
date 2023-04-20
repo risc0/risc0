@@ -14,8 +14,7 @@
 
 //! Functions for computing SHA-256 hashes.
 
-use alloc::format;
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, format, vec::Vec};
 use core::{
     cell::UnsafeCell,
     mem::{self, MaybeUninit},

@@ -704,8 +704,7 @@ fn compute_launch_params(n_bits: u32, s_bits: u32, c_size: u32) -> (MTLSize, MTL
 mod tests {
     use test_log::test;
 
-    use super::MetalHalPoseidon;
-    use super::MetalHalSha256;
+    use super::{MetalHalPoseidon, MetalHalSha256};
     use crate::hal::testutil;
 
     #[test]

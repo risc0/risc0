@@ -12,16 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::error::Error;
-use std::ops::Deref;
-use std::str::FromStr;
-use std::sync::Arc;
+use std::{error::Error, ops::Deref, str::FromStr, sync::Arc};
 
 use clap::Parser;
-use ethers::middleware::SignerMiddleware;
-use ethers::providers::{Http, Middleware, Provider};
-use ethers::signers::{LocalWallet, Signer};
-use ethers::types::{Address, H256};
+use ethers::{
+    middleware::SignerMiddleware,
+    providers::{Http, Middleware, Provider},
+    signers::{LocalWallet, Signer},
+    types::{Address, H256},
+};
 use hello_bonsai_contracts::HelloBonsai;
 use hello_bonsai_methods::{FIBONACCI_ELF, FIBONACCI_ID};
 use reqwest::{Client, Url};
@@ -30,8 +29,8 @@ use risc0_zkvm::sha::{self, Digest, Sha256};
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
-    /// JSON RPC URL for an Ethereum node that will serve call and transaction requests.
-    /// Currently only HTTP(S) URLs are supported.
+    /// JSON RPC URL for an Ethereum node that will serve call and transaction
+    /// requests. Currently only HTTP(S) URLs are supported.
     #[clap(short = 'e', long, env, value_hint = clap::ValueHint::Url)]
     ethereum_node_url: String,
 

@@ -11,8 +11,8 @@ repository = { workspace = true }
 anyhow = "1.0"
 bytemuck = "1.12"
 clap = { version = "4.0", features = ["derive"] }
-env_logger = "0.10.0"
-risc0-zkvm = { workspace = true, features = ["default", "profiler", "binfmt"] }
+env_logger = "0.10"
+risc0-zkvm = { workspace = true, features = ["default", "binfmt"] }
 
 [dev-dependencies]
 anyhow = "1.0"
@@ -25,3 +25,4 @@ risc0-zkvm-platform = { workspace = true }
 cuda = ["risc0-zkvm/cuda"]
 default = []
 metal = ["risc0-zkvm/metal"]
+profiler = ["risc0-zkvm/profiler"]

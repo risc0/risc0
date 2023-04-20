@@ -16,7 +16,7 @@
 
 use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
-    Receipt,
+    SessionReceipt,
 };
 
 // This binary is here as a way to check which deps are included
@@ -26,7 +26,10 @@ use risc0_zkvm::{
 #[no_mangle]
 fn _start() {
     // TODO: use a real receipt and image_id
-    let receipt = Receipt::new(&[], &[]);
+    let receipt = SessionReceipt {
+        segments: Vec::new(),
+        journal: Vec::new(),
+    };
     let image_id = Digest::from([0; DIGEST_WORDS]);
-    receipt.verify(&image_id).unwrap();
+    receipt.verify(image_id).unwrap();
 }

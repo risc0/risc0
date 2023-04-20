@@ -16,6 +16,6 @@ fn main() {
     #[cfg(feature = "profiler")]
     {
         std::env::set_var("PROTOC", protobuf_src::protoc());
-        prost_build::compile_protos(&["src/prove/profile.proto"], &["src/prove/"]).unwrap();
+        prost_build::compile_protos(&["src/exec/profile.proto"], &["src/exec/"]).unwrap();
     }
 }

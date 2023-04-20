@@ -25,12 +25,11 @@ use risc0_core::field::{
     ExtElem,
 };
 
-pub use self::consts::CELLS;
 use self::consts::{
     MDS, PARTIAL_COMP_MATRIX, PARTIAL_COMP_OFFSET, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
     ROUND_CONSTANTS,
 };
-pub use self::rng::PoseidonRng;
+pub use self::{consts::CELLS, rng::PoseidonRng};
 use super::{HashFn, HashSuite};
 use crate::core::digest::{Digest, DIGEST_WORDS};
 
@@ -41,7 +40,7 @@ pub const CELLS_RATE: usize = 16;
 pub const CELLS_OUT: usize = 8;
 
 /// A hash implemention for Poseidon
-pub struct PoseidonHashFn {}
+pub struct PoseidonHashFn;
 
 impl HashFn<BabyBear> for PoseidonHashFn {
     type DigestPtr = Box<Digest>;
@@ -69,7 +68,7 @@ impl HashFn<BabyBear> for PoseidonHashFn {
 }
 
 /// A hash suite using Poseidon for both MT hashes and RNG
-pub struct PoseidonHashSuite {}
+pub struct PoseidonHashSuite;
 
 impl HashSuite<BabyBear> for PoseidonHashSuite {
     type HashFn = PoseidonHashFn;

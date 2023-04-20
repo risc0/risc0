@@ -96,7 +96,7 @@ pub struct SyscallName(*const u8);
 
 /// Construct a SyscallName declaration at compile time.
 ///
-/// ```
+/// ```rust
 /// use risc0_zkvm_platform::declare_syscall;
 ///
 /// declare_syscall!(SYS_MY_SYSTEM_CALL);

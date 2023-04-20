@@ -15,11 +15,23 @@
 use std::{array, collections::BTreeSet};
 
 use anyhow::Result;
-use risc0_zkvm_platform::{memory::SYSTEM, WORD_SIZE};
+use risc0_zkp::core::hash::sha::BLOCK_BYTES;
+use risc0_zkvm_platform::{memory::SYSTEM, PAGE_SIZE, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
-use super::{io::SyscallContext, OpCodeResult, SyscallRecord};
+use super::{io::SyscallContext, OpCodeResult, SyscallRecord, TraceEvent};
 use crate::{binfmt::image::PageTableInfo, session::PageFaults, MemoryImage};
+
+/// The number of blocks that fit within a single page.
+const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
+
+const SHA_INIT: usize = 5;
+const SHA_LOAD: usize = 16;
+const SHA_MAIN: usize = 52;
+
+const fn cycles_per_page(blocks_per_page: usize) -> usize {
+    1 + SHA_INIT + (SHA_LOAD + SHA_MAIN) * blocks_per_page
+}
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
 struct MemStore {
@@ -29,29 +41,32 @@ struct MemStore {
 
 pub struct MemoryMonitor {
     pub image: MemoryImage,
-    pub(crate) faults: PageFaults,
+    pub faults: PageFaults,
     pending_faults: PageFaults,
     pending_writes: BTreeSet<MemStore>,
     cycle: usize,
     op_result: Option<OpCodeResult>,
     pub syscalls: Vec<SyscallRecord>,
+    pub trace_writes: BTreeSet<TraceEvent>,
 }
 
 impl MemoryMonitor {
     pub fn new(image: MemoryImage) -> Self {
         Self {
             image,
-            faults: PageFaults::new(),
-            pending_faults: PageFaults::new(),
+            faults: PageFaults::default(),
+            pending_faults: PageFaults::default(),
             pending_writes: BTreeSet::new(),
             cycle: 0,
             op_result: None,
             syscalls: Vec::new(),
+            trace_writes: BTreeSet::new(),
         }
     }
 
     pub fn load_u8(&mut self, addr: u32) -> u8 {
         let info = &self.image.info;
+        // log::debug!("load_u8: 0x{addr:08x}");
         self.pending_faults.include(info, addr, IncludeDir::Read);
         self.image.buf[addr as usize]
     }
@@ -63,6 +78,7 @@ impl MemoryMonitor {
 
     pub fn load_u32(&mut self, addr: u32) -> u32 {
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
+        // log::debug!("load_u32: 0x{addr:08x}");
         u32::from_le_bytes(self.load_array(addr))
     }
 
@@ -91,31 +107,52 @@ impl MemoryMonitor {
         String::from_utf8(s).map_err(anyhow::Error::msg)
     }
 
-    pub fn store_u8(&mut self, addr: u32, data: u8) {
+    fn raw_store_u8(&mut self, addr: u32, data: u8) {
         let info = &self.image.info;
+        self.pending_faults.include(info, addr, IncludeDir::Read);
         self.pending_faults.include(info, addr, IncludeDir::Write);
         self.pending_writes.insert(MemStore { addr, data });
+    }
+
+    pub fn store_u8(&mut self, addr: u32, data: u8) {
+        self.raw_store_u8(addr, data);
+        self.trace_writes.insert(TraceEvent::MemorySet {
+            addr,
+            value: data as u32,
+        });
     }
 
     pub fn store_u16(&mut self, addr: u32, data: u16) {
         assert_eq!(addr % 2, 0, "unaligned store");
         self.store_region(addr, &data.to_le_bytes());
+        self.trace_writes.insert(TraceEvent::MemorySet {
+            addr,
+            value: data as u32,
+        });
     }
 
     pub fn store_u32(&mut self, addr: u32, data: u32) {
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
         self.store_region(addr, &data.to_le_bytes());
+        self.trace_writes.insert(TraceEvent::MemorySet {
+            addr,
+            value: data as u32,
+        });
     }
 
     pub fn store_region(&mut self, addr: u32, slice: &[u8]) {
         slice
             .iter()
             .enumerate()
-            .for_each(|(i, x)| self.store_u8(addr + i as u32, *x));
+            .for_each(|(i, x)| self.raw_store_u8(addr + i as u32, *x));
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {
-        self.store_u32(get_register_addr(idx), data);
+        self.store_region(get_register_addr(idx), &data.to_le_bytes());
+        self.trace_writes.insert(TraceEvent::RegisterSet {
+            reg: idx,
+            value: data,
+        });
     }
 
     pub fn save_op(&mut self, op_result: OpCodeResult) {
@@ -138,28 +175,61 @@ impl MemoryMonitor {
         if let Some(syscall) = op_result.syscall {
             self.syscalls.push(syscall);
         }
+        self.trace_writes.clear();
         // self.faults.dump();
     }
 
-    pub fn total_faults(&self) -> usize {
-        let reads = self.faults.reads.union(&self.pending_faults.reads).count();
-        let writes = self
-            .faults
-            .writes
-            .union(&self.pending_faults.writes)
-            .count();
+    pub fn pending_page_reads(&self) -> Vec<u32> {
+        self.pending_faults
+            .reads
+            .difference(&self.faults.reads)
+            .into_iter()
+            .cloned()
+            .collect()
+    }
+
+    pub fn total_page_read_cycles(&self) -> usize {
+        self.compute_page_cycles(self.faults.reads.union(&self.pending_faults.reads))
+    }
+
+    pub fn total_fault_cycles(&self) -> usize {
+        let reads = self.compute_page_cycles(self.faults.reads.iter());
+        let writes = self.compute_page_cycles(self.faults.writes.iter());
         reads + writes
     }
 
-    pub fn clear(&mut self) {
+    pub fn total_pending_fault_cycles(&self) -> usize {
+        let reads = self.compute_page_cycles(self.faults.reads.union(&self.pending_faults.reads));
+        let writes =
+            self.compute_page_cycles(self.faults.writes.union(&self.pending_faults.writes));
+        reads + writes
+    }
+
+    pub fn pending_page_read_cycles(&self) -> usize {
+        self.compute_page_cycles(self.pending_page_reads().iter())
+    }
+
+    fn compute_page_cycles<'a, I: Iterator<Item = &'a u32>>(&self, page_idxs: I) -> usize {
+        let root_idx = self.image.info.root_idx;
+        let num_root_entries = self.image.info.num_root_entries as usize;
+        page_idxs.fold(0, |acc, page_idx| {
+            acc + if *page_idx == root_idx {
+                cycles_per_page(num_root_entries / 2)
+            } else {
+                cycles_per_page(BLOCKS_PER_PAGE)
+            }
+        })
+    }
+
+    pub fn clear_segment(&mut self) {
         self.faults.clear();
-        self.pending_writes.clear();
-        self.pending_faults.clear();
         self.syscalls.clear();
     }
 
-    pub fn clear_pending_faults(&mut self) {
+    pub fn clear_session(&mut self) {
+        self.clear_segment();
         self.pending_faults.clear();
+        self.pending_writes.clear();
     }
 }
 
@@ -184,7 +254,7 @@ impl Memory for MemoryMonitor {
 
 impl SyscallContext for MemoryMonitor {
     fn get_cycle(&self) -> usize {
-        self.cycle
+        self.cycle + self.pending_page_read_cycles()
     }
 
     fn load_u32(&mut self, addr: u32) -> u32 {
@@ -206,13 +276,6 @@ enum IncludeDir {
 }
 
 impl PageFaults {
-    pub fn new() -> Self {
-        Self {
-            reads: BTreeSet::new(),
-            writes: BTreeSet::new(),
-        }
-    }
-
     fn include(&mut self, info: &PageTableInfo, addr: u32, dir: IncludeDir) {
         let mut addr = addr;
         loop {
@@ -247,7 +310,7 @@ impl PageFaults {
             log::debug!("  0x{:08X}", idx);
         }
         log::debug!("  writes>");
-        for idx in self.writes.iter().rev() {
+        for idx in self.writes.iter() {
             log::debug!("  0x{:08X}", idx);
         }
     }
