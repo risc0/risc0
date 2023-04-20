@@ -23,9 +23,7 @@ fn eval_check_size() {
     let generated = include_str!("../cxx/poly_fp.cpp");
     let lines = generated.lines().count();
 
-    // DO NOT MERGE: Update this value to be a close bound on the final circuit with
-    // BigInt multiplier.
-    const LINE_LIMIT: usize = 29500;
+    const LINE_LIMIT: usize = 28100;
 
     assert!(
         lines < LINE_LIMIT,
