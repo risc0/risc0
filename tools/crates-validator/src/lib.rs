@@ -237,6 +237,8 @@ impl Validator {
             cmd.arg(r0_template_path);
             cmd.arg("--templ-subdir");
             cmd.arg("");
+            cmd.arg("--path");
+            cmd.arg(r0_path);
         } else if let Some(branch) = &self.context.risc0_gh_branch {
             cmd.arg("--branch");
             cmd.arg(branch);
