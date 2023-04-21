@@ -17,7 +17,7 @@ blake2 = { version = "0.10.6", default-features = false }
 bytemuck = { version = "1.12", features = ["derive"] }
 cust = { version = "0.3", optional = true }
 digest = "0.10"
-ff = { version = "0.13", features = ["derive", "bits"] }
+ff = { version = "0.13", features = ["derive", "bits"], optional = true }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 lazy_static = { version = "1.4", optional = true }
 metal = { version = "0.24", optional = true }
@@ -52,6 +52,7 @@ cuda = [
 ]
 metal = ["dep:metal", "risc0-sys/metal"]
 prove = [
+  "dep:ff",
   "dep:lazy_static",
   "dep:ndarray",
   "dep:rand",
