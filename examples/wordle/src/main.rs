@@ -17,7 +17,6 @@ mod wordlist;
 use std::io;
 
 use risc0_zkvm::{
-    prove::default_hal,
     serde::{from_slice, to_vec},
     sha::Digest,
     Executor, ExecutorEnv, SessionReceipt,
@@ -50,8 +49,7 @@ impl<'a> Server<'a> {
             .build();
         let mut exec = Executor::from_elf(env, WORDLE_ELF).unwrap();
         let session = exec.run().unwrap();
-        let (hal, eval) = default_hal();
-        session.prove(hal.as_ref(), &eval).unwrap()
+        session.prove().unwrap()
     }
 }
 
