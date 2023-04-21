@@ -49,12 +49,13 @@ jobs:
       - run: rm -rf ./benchmark-data-repository || true
         shell: bash
       - name: Store benchmark result
-        uses: risc0/github-action-benchmark@v1
+        uses: risc0/github-action-benchmark@risc0
         with:
           name: "${{ matrix.os }}-${{ matrix.device }}"
           tool: 'cargo'
           github-token: ${{ secrets.BENCHMARK_TOKEN }}
           gh-repository: 'github.com/risc0/benchmarks'
+          gh-repository-dir: '${{ runner.temp }}/benchmark-data-repository'
           gh-pages-branch: main
           output-file-path: output.txt
           comment-always: false
