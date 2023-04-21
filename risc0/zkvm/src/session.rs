@@ -76,7 +76,7 @@ pub struct Session {
 /// call to the ZKP system. It does not necessarily represent an entire program;
 /// see [Session] for tracking memory transactions until a user-requested
 /// termination.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
