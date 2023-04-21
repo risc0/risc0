@@ -23,7 +23,7 @@ use super::log2_ceil;
 
 /// Reverses the bits in a 32-bit number.
 /// # Example
-/// ```
+/// ```rust
 /// # use risc0_zkp::core::ntt::bit_rev_32;
 /// #
 /// let a: u32 = 2^8 + 2^4 + 1;
@@ -54,7 +54,7 @@ pub fn bit_rev_32(mut x: u32) -> u32 {
 ///
 /// Reversed, these give `0, 10, 01, 11`, permuting the second and third
 /// values.
-/// ```
+/// ```rust
 /// # use risc0_zkp::core::ntt::bit_reverse;
 /// #
 /// let mut some_values = [1, 2, 3, 4];

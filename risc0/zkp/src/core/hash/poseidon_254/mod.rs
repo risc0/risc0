@@ -2,8 +2,10 @@
 //! security of 128 bits.
 pub(crate) mod consts;
 
-use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_core::field::{Elem, ExtElem};
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    Elem, ExtElem,
+};
 
 use self::consts::*;
 // use self::consts::{
@@ -13,9 +15,10 @@ use self::consts::*;
 //
 // pub use self::rng::PoseidonRng;
 use super::{HashFn, HashSuite, Rng};
-use crate::core::digest::Digest;
-use crate::ff::Field;
-use crate::ff::PrimeField;
+use crate::{
+    core::digest::Digest,
+    ff::{Field, PrimeField},
+};
 
 fn add_round_constants(cells: &mut [Fr; CELLS], round: usize) {
     for i in 0..CELLS {

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{ffi::CString, rc::Rc};
+use std::rc::Rc;
 
-use fil_rustacuda as rustacuda;
+use cust::prelude::*;
 use risc0_core::field::{
     baby_bear::{BabyBearElem, BabyBearExtElem},
     RootsOfUnity,
@@ -23,11 +23,10 @@ use risc0_zkp::{
     core::log2_ceil,
     hal::{
         cuda::{BufferImpl as CudaBuffer, CudaHal, CudaHash, CudaHashPoseidon, CudaHashSha256},
-        Buffer, EvalCheck,
+        Buffer, EvalCheck, Hal,
     },
     INV_RATE,
 };
-use rustacuda::{launch, prelude::*};
 
 use crate::{
     GLOBAL_MIX, GLOBAL_OUT, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
@@ -43,7 +42,7 @@ pub struct CudaEvalCheck<CH: CudaHash> {
 impl<CH: CudaHash> CudaEvalCheck<CH> {
     #[tracing::instrument(name = "CudaEvalCheck::new", skip_all)]
     pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
-        let module = Module::load_from_bytes(KERNELS_FATBIN).unwrap();
+        let module = Module::from_fatbin(KERNELS_FATBIN, &[]).unwrap();
         Self { hal, module }
     }
 }
@@ -82,15 +81,14 @@ impl<'a, CH: CudaHash> EvalCheck<CudaHal<CH>> for CudaEvalCheck<CH> {
         let domain = steps * INV_RATE;
         let rou = BabyBearElem::ROU_FWD[po2 + EXP_PO2];
 
-        let poly_mix = CudaBuffer::copy_from("poly_mix", &[poly_mix]);
-        let rou = CudaBuffer::copy_from("rou", &[rou]);
-        let po2 = CudaBuffer::copy_from("po2", &[po2 as u32]);
-        let size = CudaBuffer::copy_from("size", &[domain as u32]);
+        let poly_mix = self.hal.copy_from_extelem("poly_mix", &[poly_mix]);
+        let rou = self.hal.copy_from_elem("rou", &[rou]);
+        let po2 = self.hal.copy_from_u32("po2", &[po2 as u32]);
+        let size = self.hal.copy_from_u32("size", &[domain as u32]);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
 
-        let kernel_name = CString::new("eval_check").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("eval_check").unwrap();
         let params = self.hal.compute_simple_params(domain);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(

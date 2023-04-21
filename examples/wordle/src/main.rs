@@ -19,7 +19,7 @@ use std::io;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
     sha::Digest,
-    Prover, Receipt,
+    Executor, ExecutorEnv, SessionReceipt,
 };
 use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
 use wordle_methods::{WORDLE_ELF, WORDLE_ID};
@@ -42,13 +42,14 @@ impl<'a> Server<'a> {
         game_state.correct_word_hash
     }
 
-    pub fn check_round(&self, guess_word: &str) -> Receipt {
-        let mut prover = Prover::new(WORDLE_ELF).expect("failed to construct prover");
-
-        prover.add_input_u32_slice(to_vec(self.secret_word).unwrap().as_slice());
-        prover.add_input_u32_slice(to_vec(&guess_word).unwrap().as_slice());
-
-        prover.run().unwrap()
+    pub fn check_round(&self, guess_word: &str) -> SessionReceipt {
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(self.secret_word).unwrap())
+            .add_input(&to_vec(&guess_word).unwrap())
+            .build();
+        let mut exec = Executor::from_elf(env, WORDLE_ELF).unwrap();
+        let session = exec.run().unwrap();
+        session.prove().unwrap()
     }
 }
 
@@ -62,9 +63,9 @@ struct Player {
 }
 
 impl Player {
-    pub fn check_receipt(&self, receipt: Receipt) -> WordFeedback {
+    pub fn check_receipt(&self, receipt: SessionReceipt) -> WordFeedback {
         receipt
-            .verify(&WORDLE_ID)
+            .verify(WORDLE_ID)
             .expect("receipt verification failed");
 
         let game_state: GameState = from_slice(&receipt.journal).unwrap();
@@ -134,11 +135,11 @@ mod tests {
 
     use crate::{Player, Server};
 
-    const TEST_GUESS_WRONG: &str = "roofs";
-    const TEST_GUESS_RIGHT: &str = "proof";
-
     #[test]
     fn main() {
+        const TEST_GUESS_WRONG: &str = "roofs";
+        const TEST_GUESS_RIGHT: &str = "proof";
+
         let server = Server::new("proof");
         let player = Player {
             hash: server.get_secret_word_hash(),

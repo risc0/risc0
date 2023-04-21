@@ -40,8 +40,7 @@
 //! );
 //! ```
 
-use alloc::format;
-use alloc::vec::Vec;
+use alloc::{format, vec::Vec};
 use core::fmt::{Debug, Formatter};
 
 use digest::{

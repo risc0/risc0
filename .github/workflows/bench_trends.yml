@@ -35,6 +35,7 @@ jobs:
             device: apple_m2_pro
 
     env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RUSTC_WRAPPER: sccache
 

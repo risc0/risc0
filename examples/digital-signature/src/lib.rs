@@ -16,12 +16,12 @@ pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, Signing
 use digital_signature_methods::{SIGN_ELF, SIGN_ID};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    Prover, Receipt, Result,
+    Executor, ExecutorEnv, Result, SessionReceipt,
 };
 use sha2::{Digest, Sha256};
 
 pub struct SignatureWithReceipt {
-    receipt: Receipt,
+    receipt: SessionReceipt,
 }
 
 impl SignatureWithReceipt {
@@ -41,34 +41,25 @@ impl SignatureWithReceipt {
     }
 
     pub fn verify(&self) -> Result<SignMessageCommit> {
-        self.receipt.verify(&SIGN_ID)?;
+        self.receipt.verify(SIGN_ID)?;
         self.get_commit()
     }
 }
 
 pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<SignatureWithReceipt> {
-    let mut pass_hasher = Sha256::new();
-    pass_hasher.update(pass_str);
-    let mut pass_hash = [0u8; 32];
-    pass_hash.copy_from_slice(&pass_hasher.finalize());
-
-    let mut msg_hasher = Sha256::new();
-    msg_hasher.update(msg_str);
-    let mut msg_hash = [0u8; 32];
-    msg_hash.copy_from_slice(&msg_hasher.finalize());
-
-    let pass = Passphrase { pass: pass_hash };
-    let msg = Message { msg: msg_hash };
-
     let params = SigningRequest {
-        passphrase: pass,
-        msg: msg,
+        passphrase: Passphrase {
+            pass: Sha256::digest(pass_str).try_into()?,
+        },
+        msg: Message {
+            msg: Sha256::digest(msg_str).try_into()?,
+        },
     };
-
-    let mut prover = Prover::new(SIGN_ELF)?;
-    let vec = to_vec(&params).unwrap();
-    prover.add_input_u32_slice(vec.as_slice());
-    let receipt = prover.run()?;
+    let vec = to_vec(&params)?;
+    let env = ExecutorEnv::builder().add_input(&vec).build();
+    let mut exec = Executor::from_elf(env, SIGN_ELF)?;
+    let session = exec.run()?;
+    let receipt = session.prove().unwrap();
     Ok(SignatureWithReceipt { receipt })
 }
 

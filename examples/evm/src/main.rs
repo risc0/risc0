@@ -21,11 +21,11 @@ use evm_core::{
     ether_trace::{Http, Provider},
     Env, EvmResult, EVM,
 };
-use evm_methods::{EVM_ELF, EVM_ID};
+use evm_methods::EVM_ELF;
 use log::info;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    Prover,
+    Executor, ExecutorEnv,
 };
 
 #[derive(Parser, Debug)]
@@ -71,16 +71,14 @@ async fn main() {
 
     let zkdb = trace_db.create_zkdb();
 
-    let mut prover = Prover::new(EVM_ELF).expect("Failed to construct prover");
-
-    prover.add_input_u32_slice(&to_vec(&env).unwrap());
-    prover.add_input_u32_slice(&to_vec(&zkdb).unwrap());
-
     info!("Running zkvm...");
-    let receipt = prover.run().expect("Failed to run guest");
-
-    info!("Verifying receipt...");
-    receipt.verify(&EVM_ID).expect("failed to verify receipt");
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&env).unwrap())
+        .add_input(&to_vec(&zkdb).unwrap())
+        .build();
+    let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let receipt = session.prove().unwrap();
 
     let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
     info!("exit reason: {:?}", res.exit_reason);

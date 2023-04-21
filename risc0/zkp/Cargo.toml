@@ -15,9 +15,9 @@ harness = false
 anyhow = { version = "1.0", default-features = false }
 blake2 = { version = "0.10.6", default-features = false }
 bytemuck = { version = "1.12", features = ["derive"] }
+cust = { version = "0.3", optional = true }
 digest = "0.10"
 ff = { version = "0.13", features = ["derive", "bits"] }
-fil-rustacuda = { version = "0.1", optional = true }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 lazy_static = { version = "1.4", optional = true }
 metal = { version = "0.24", optional = true }
@@ -26,8 +26,6 @@ rand_core = "0.6"
 risc0-core = { workspace = true }
 risc0-sys = { workspace = true, optional = true }
 risc0-zkvm-platform = { workspace = true }
-rustacuda_core = { version = "0.1", optional = true }
-rustacuda_derive = { version = "0.1", optional = true }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
@@ -49,9 +47,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 [features]
 default = ["prove"]
 cuda = [
-  "dep:fil-rustacuda",
-  "dep:rustacuda_core",
-  "dep:rustacuda_derive",
+  "dep:cust",
   "risc0-sys/cuda"
 ]
 metal = ["dep:metal", "risc0-sys/metal"]

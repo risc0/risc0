@@ -18,30 +18,21 @@ include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 
 #[cfg(test)]
 mod tests {
-    use std::error::Error;
+    use ethabi::{ethereum_types::U256, Token};
+    use risc0_zkvm::{Executor, ExecutorEnv};
 
-    use ethabi::ethereum_types::U256;
-    use ethabi::Token;
-    use risc0_zkvm::{Prover, ProverOpts};
-
-    use super::FIBONACCI_PATH;
+    use super::FIBONACCI_ELF;
 
     #[test]
-    fn fibonacci() -> Result<(), Box<dyn Error>> {
-        // Skip seal as it is not needed to test the guest code.
-        let mut prover = Prover::new_with_opts(
-            &std::fs::read(FIBONACCI_PATH)?,
-            ProverOpts::default().with_skip_seal(true),
-        )?;
-
-        prover.add_input_u8_slice(&ethabi::encode(&[Token::Uint(U256::from(10))]));
-
-        let receipt = prover.run()?;
-
+    fn fibonacci() {
+        let env = ExecutorEnv::builder()
+            .add_input(&ethabi::encode(&[Token::Uint(U256::from(10))]))
+            .build();
+        let mut exec = Executor::from_elf(env, FIBONACCI_ELF).unwrap();
+        let session = exec.run().unwrap();
         assert_eq!(
-            &receipt.journal,
+            &session.journal,
             &ethabi::encode(&[Token::Uint(U256::from(10)), Token::Uint(U256::from(89))])
         );
-        Ok(())
     }
 }

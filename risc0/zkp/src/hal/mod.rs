@@ -17,18 +17,20 @@
 pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
-pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
 use std::sync::Mutex;
 
+use bytemuck::Pod;
 use lazy_static::lazy_static;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    core::digest::Digest,
-    core::hash::{HashFn, HashSuite, Rng},
+    core::{
+        digest::Digest,
+        hash::{HashFn, HashSuite, Rng},
+    },
     INV_RATE,
 };
 
@@ -47,13 +49,10 @@ pub trait Buffer<T>: Clone {
 }
 
 pub trait Hal {
+    type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
-    type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
-    type BufferDigest: Buffer<Digest>;
-    type BufferElem: Buffer<Self::Elem>;
-    type BufferExtElem: Buffer<Self::ExtElem>;
-    type BufferU32: Buffer<u32>;
+    type Buffer<T: Clone + Pod>: Buffer<T>;
     type HashSuite: HashSuite<Self::Field>;
     type HashFn: HashFn<Self::Field>;
     type Rng: Rng<Self::Field>;
@@ -64,74 +63,95 @@ pub trait Hal {
         TRACKER.lock().unwrap().peak
     }
 
-    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::BufferDigest;
-    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::BufferElem;
-    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::BufferExtElem;
-    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::BufferU32;
+    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest>;
+    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem>;
+    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem>;
+    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32>;
 
-    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::BufferDigest;
-    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::BufferElem;
-    fn copy_from_extelem(&self, name: &'static str, slice: &[Self::ExtElem])
-        -> Self::BufferExtElem;
-    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::BufferU32;
+    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest>;
+    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem>;
+    fn copy_from_extelem(
+        &self,
+        name: &'static str,
+        slice: &[Self::ExtElem],
+    ) -> Self::Buffer<Self::ExtElem>;
+    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32>;
 
-    fn batch_expand(&self, output: &Self::BufferElem, input: &Self::BufferElem, count: usize);
+    fn batch_expand(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        count: usize,
+    );
 
-    fn batch_evaluate_ntt(&self, io: &Self::BufferElem, count: usize, expand_bits: usize);
+    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize);
 
-    fn batch_interpolate_ntt(&self, io: &Self::BufferElem, count: usize);
+    fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize);
 
-    fn batch_bit_reverse(&self, io: &Self::BufferElem, count: usize);
+    fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize);
 
     fn batch_evaluate_any(
         &self,
-        coeffs: &Self::BufferElem,
+        coeffs: &Self::Buffer<Self::Elem>,
         poly_count: usize,
-        which: &Self::BufferU32,
-        xs: &Self::BufferExtElem,
-        out: &Self::BufferExtElem,
+        which: &Self::Buffer<u32>,
+        xs: &Self::Buffer<Self::ExtElem>,
+        out: &Self::Buffer<Self::ExtElem>,
     );
 
-    fn zk_shift(&self, io: &Self::BufferElem, count: usize);
+    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, count: usize);
 
     fn mix_poly_coeffs(
         &self,
-        out: &Self::BufferExtElem,
+        out: &Self::Buffer<Self::ExtElem>,
         mix_start: &Self::ExtElem,
         mix: &Self::ExtElem,
-        input: &Self::BufferElem,
-        combos: &Self::BufferU32,
+        input: &Self::Buffer<Self::Elem>,
+        combos: &Self::Buffer<u32>,
         input_size: usize,
         count: usize,
     );
 
     fn eltwise_add_elem(
         &self,
-        output: &Self::BufferElem,
-        input1: &Self::BufferElem,
-        input2: &Self::BufferElem,
+        output: &Self::Buffer<Self::Elem>,
+        input1: &Self::Buffer<Self::Elem>,
+        input2: &Self::Buffer<Self::Elem>,
     );
 
-    fn eltwise_sum_extelem(&self, output: &Self::BufferElem, input: &Self::BufferExtElem);
+    fn eltwise_sum_extelem(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::ExtElem>,
+    );
 
-    fn eltwise_copy_elem(&self, output: &Self::BufferElem, input: &Self::BufferElem);
+    fn eltwise_copy_elem(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+    );
 
-    fn fri_fold(&self, output: &Self::BufferElem, input: &Self::BufferElem, mix: &Self::ExtElem);
+    fn fri_fold(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        mix: &Self::ExtElem,
+    );
 
-    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem);
+    fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>);
 
-    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize);
+    fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize);
 }
 
 pub trait EvalCheck<H: Hal> {
     /// Compute check polynomial.
     fn eval_check(
         &self,
-        check: &H::BufferElem,
+        check: &H::Buffer<H::Elem>,
         // Register groups, e.g. accum, code, data.  These should have one row for each cycle.
-        groups: &[&H::BufferElem],
+        groups: &[&H::Buffer<H::Elem>],
         // Globals.  These should have one row total.
-        globals: &[&H::BufferElem],
+        globals: &[&H::Buffer<H::Elem>],
         poly_mix: H::ExtElem,
         po2: usize,
         steps: usize,
@@ -162,14 +182,12 @@ impl MemoryTracker {
 #[allow(unused)]
 mod testutil {
     // TODO: Not fully generic over hash
-    use rand::thread_rng;
-    use rand::RngCore;
+    use rand::{thread_rng, RngCore};
     use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
 
     use super::{EvalCheck, Hal};
-    use crate::core::digest::Digest;
     use crate::{
-        core::log2_ceil,
+        core::{digest::Digest, log2_ceil},
         hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
     };

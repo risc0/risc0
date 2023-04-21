@@ -12,22 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
 };
-use risc0_zkvm::{Prover, ProverOpts};
+use risc0_zkvm::{
+    prove::{default_prover, Prover},
+    Executor, ExecutorEnv,
+};
 use risc0_zkvm_methods::FIB_ELF;
 
-fn prover_setup(iterations: u32, with_seal: bool) -> Prover<'static> {
-    let opts = ProverOpts::default().with_skip_seal(!with_seal);
-    let mut prover = Prover::new_with_opts(FIB_ELF, opts).unwrap();
-    prover.add_input_u32_slice(&[iterations]);
-    prover
+fn setup(iterations: u32) -> Executor<'static> {
+    let env = ExecutorEnv::builder().add_input(&[iterations]).build();
+    Executor::from_elf(env, FIB_ELF).unwrap()
 }
 
-fn prover_run(prover: &mut Prover) -> usize {
-    prover.run().unwrap();
-    prover.cycles
+fn run(prover: Rc<dyn Prover>, exec: &mut Executor, with_seal: bool) {
+    let session = exec.run().unwrap();
+    if with_seal {
+        prover.prove_session(&session).unwrap();
+    }
 }
 
 pub fn bench(c: &mut Criterion) {
@@ -35,7 +40,11 @@ pub fn bench(c: &mut Criterion) {
 
     for with_seal in [true, false] {
         for iterations in [100, 200] {
-            let cycles = prover_run(&mut prover_setup(iterations, with_seal));
+            let prover = default_prover();
+            let mut exec = setup(iterations);
+            let session = exec.run().unwrap();
+            let po2 = session.segments[0].po2;
+            let cycles = 1 << po2;
             group.sample_size(10);
             group.throughput(Throughput::Elements(cycles as u64));
             group.bench_with_input(
@@ -46,8 +55,8 @@ pub fn bench(c: &mut Criterion) {
                 &iterations,
                 |b, &iterations| {
                     b.iter_batched(
-                        || prover_setup(iterations, with_seal),
-                        |mut prover| black_box(prover_run(&mut prover)),
+                        || setup(iterations),
+                        |mut exec| black_box(run(prover.clone(), &mut exec, with_seal)),
                         BatchSize::SmallInput,
                     )
                 },
