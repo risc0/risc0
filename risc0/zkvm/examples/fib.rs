@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Arc;
+use std::rc::Rc;
 
 use clap::Parser;
 use risc0_zkvm::{
@@ -48,7 +48,7 @@ fn main() {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Arc<dyn Prover>, iterations: u32) -> (Session, SessionReceipt) {
+fn top(prover: Rc<dyn Prover>, iterations: u32) -> (Session, SessionReceipt) {
     let env = ExecutorEnv::builder().add_input(&[iterations]).build();
     let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();

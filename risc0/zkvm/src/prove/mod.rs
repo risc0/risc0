@@ -39,7 +39,7 @@ mod plonk;
 #[cfg(test)]
 mod tests;
 
-use std::{collections::HashMap, sync::Arc};
+use std::{collections::HashMap, rc::Rc};
 
 use anyhow::Result;
 use risc0_circuit_rv32im::{
@@ -66,7 +66,7 @@ use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
 pub mod cuda {
-    use std::sync::Arc;
+    use std::rc::Rc;
 
     use risc0_circuit_rv32im::cuda::{CudaEvalCheckPoseidon, CudaEvalCheckSha256};
     use risc0_zkp::hal::cuda::{CudaHalPoseidon, CudaHalSha256};
@@ -76,16 +76,16 @@ pub mod cuda {
     /// Creates a HAL for the rv32im circuit that uses the SHA-256 hashing
     /// function.
     pub fn sha256_hal_eval() -> HalEval<CudaHalSha256, CudaEvalCheckSha256> {
-        let hal = Arc::new(CudaHalSha256::new());
-        let eval = Arc::new(CudaEvalCheckSha256::new(hal.clone()));
+        let hal = Rc::new(CudaHalSha256::new());
+        let eval = Rc::new(CudaEvalCheckSha256::new(hal.clone()));
         HalEval { hal, eval }
     }
 
     /// Creates a HAL for the rv32im circuit that uses the Poseidon hashing
     /// function.
     pub fn poseidon_hal_eval() -> HalEval<CudaHalPoseidon, CudaEvalCheckPoseidon> {
-        let hal = Arc::new(CudaHalPoseidon::new());
-        let eval = Arc::new(CudaEvalCheckPoseidon::new(hal.clone()));
+        let hal = Rc::new(CudaHalPoseidon::new());
+        let eval = Rc::new(CudaEvalCheckPoseidon::new(hal.clone()));
         HalEval { hal, eval }
     }
 }
@@ -93,7 +93,7 @@ pub mod cuda {
 /// HAL creation functions for Metal.
 #[cfg(feature = "metal")]
 pub mod metal {
-    use std::sync::Arc;
+    use std::rc::Rc;
 
     use risc0_circuit_rv32im::metal::{MetalEvalCheck, MetalEvalCheckSha256};
     use risc0_zkp::hal::metal::{MetalHalPoseidon, MetalHalSha256, MetalHashPoseidon};
@@ -103,23 +103,23 @@ pub mod metal {
     /// Creates a HAL for the rv32im circuit that uses the SHA-256 hashing
     /// function.
     pub fn sha256_hal_eval() -> HalEval<MetalHalSha256, MetalEvalCheckSha256> {
-        let hal = Arc::new(MetalHalSha256::new());
-        let eval = Arc::new(MetalEvalCheckSha256::new(hal.clone()));
+        let hal = Rc::new(MetalHalSha256::new());
+        let eval = Rc::new(MetalEvalCheckSha256::new(hal.clone()));
         HalEval { hal, eval }
     }
 
     /// Creates a HAL for the rv32im circuit that uses the Poseidon hashing
     /// function.
     pub fn poseidon_hal_eval() -> HalEval<MetalHalPoseidon, MetalEvalCheck<MetalHashPoseidon>> {
-        let hal = Arc::new(MetalHalPoseidon::new());
-        let eval = Arc::new(MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone()));
+        let hal = Rc::new(MetalHalPoseidon::new());
+        let eval = Rc::new(MetalEvalCheck::<MetalHashPoseidon>::new(hal.clone()));
         HalEval { hal, eval }
     }
 }
 
 /// HAL creation functions for the CPU.
 pub mod cpu {
-    use std::sync::Arc;
+    use std::rc::Rc;
 
     use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitImpl};
     use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
@@ -136,8 +136,8 @@ pub mod cpu {
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
     pub fn sha256_hal_eval() -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitImpl>> {
-        let hal = Arc::new(BabyBearSha256CpuHal::new());
-        let eval = Arc::new(CpuEvalCheck::new(&CIRCUIT));
+        let hal = Rc::new(BabyBearSha256CpuHal::new());
+        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
 
@@ -151,8 +151,8 @@ pub mod cpu {
     /// multi-core CPUs.
     pub fn poseidon_hal_eval() -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitImpl>>
     {
-        let hal = Arc::new(BabyBearPoseidonCpuHal::new());
-        let eval = Arc::new(CpuEvalCheck::new(&CIRCUIT));
+        let hal = Rc::new(BabyBearPoseidonCpuHal::new());
+        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
 }
@@ -165,10 +165,10 @@ where
     E: EvalCheck<H>,
 {
     /// A [Hal] implementation.
-    pub hal: Arc<H>,
+    pub hal: Rc<H>,
 
     /// An [EvalCheck] implementation.
-    pub eval: Arc<E>,
+    pub eval: Rc<E>,
 }
 
 /// TODO
@@ -291,36 +291,36 @@ where
     }
 }
 
-fn provers() -> HashMap<String, Arc<dyn Prover>> {
-    let mut table: HashMap<String, Arc<dyn Prover>> = HashMap::new();
+fn provers() -> HashMap<String, Rc<dyn Prover>> {
+    let mut table: HashMap<String, Rc<dyn Prover>> = HashMap::new();
     {
-        let prover = Arc::new(LocalProver::new("cpu", cpu::sha256_hal_eval()));
+        let prover = Rc::new(LocalProver::new("cpu", cpu::sha256_hal_eval()));
         table.insert("cpu".to_string(), prover.clone());
         table.insert("$default".to_string(), prover);
 
-        let prover = Arc::new(LocalProver::new("cpu:poseidon", cpu::poseidon_hal_eval()));
+        let prover = Rc::new(LocalProver::new("cpu:poseidon", cpu::poseidon_hal_eval()));
         table.insert("cpu:poseidon".to_string(), prover.clone());
         table.insert("$poseidon".to_string(), prover);
     }
     #[cfg(feature = "cuda")]
     {
-        let prover = Arc::new(LocalProver::new("cuda", cuda::sha256_hal_eval()));
+        let prover = Rc::new(LocalProver::new("cuda", cuda::sha256_hal_eval()));
         table.insert("cuda".to_string(), prover.clone());
         table.insert("$gpu".to_string(), prover.clone());
         table.insert("$default".to_string(), prover);
 
-        let prover = Arc::new(LocalProver::new("cuda:poseidon", cuda::poseidon_hal_eval()));
+        let prover = Rc::new(LocalProver::new("cuda:poseidon", cuda::poseidon_hal_eval()));
         table.insert("cuda:poseidon".to_string(), prover.clone());
         table.insert("$poseidon".to_string(), prover);
     }
     #[cfg(feature = "metal")]
     {
-        let prover = Arc::new(LocalProver::new("metal", metal::sha256_hal_eval()));
+        let prover = Rc::new(LocalProver::new("metal", metal::sha256_hal_eval()));
         table.insert("metal".to_string(), prover.clone());
         table.insert("$gpu".to_string(), prover.clone());
         table.insert("$default".to_string(), prover);
 
-        let prover = Arc::new(LocalProver::new(
+        let prover = Rc::new(LocalProver::new(
             "metal:poseidon",
             metal::poseidon_hal_eval(),
         ));
@@ -332,7 +332,7 @@ fn provers() -> HashMap<String, Arc<dyn Prover>> {
 
 /// Return a default [Prover] based on environment variables, falling back to a
 /// default CPU-based prover.
-pub fn default_prover() -> Arc<dyn Prover> {
+pub fn default_prover() -> Rc<dyn Prover> {
     let provers = provers();
     if let Ok(requested) = std::env::var("RISC0_PROVER") {
         if let Some(prover) = provers.get(&requested) {
@@ -346,7 +346,7 @@ pub fn default_prover() -> Arc<dyn Prover> {
 }
 
 /// Return a [Prover] registered by with specified `name`.
-pub fn get_prover(name: &str) -> Arc<dyn Prover> {
+pub fn get_prover(name: &str) -> Rc<dyn Prover> {
     provers().get(name).unwrap().clone()
 }
 

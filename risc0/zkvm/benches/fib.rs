@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Arc;
+use std::rc::Rc;
 
 use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
@@ -28,7 +28,7 @@ fn setup(iterations: u32) -> Executor<'static> {
     Executor::from_elf(env, FIB_ELF).unwrap()
 }
 
-fn run(prover: Arc<dyn Prover>, exec: &mut Executor, with_seal: bool) {
+fn run(prover: Rc<dyn Prover>, exec: &mut Executor, with_seal: bool) {
     let session = exec.run().unwrap();
     if with_seal {
         prover.prove_session(&session).unwrap();

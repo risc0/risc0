@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Arc;
+use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_circuit_rv32im::cpu::CpuEvalCheck;
@@ -52,8 +52,8 @@ fn hashfn_poseidon() {
 #[test]
 fn hashfn_blake2b() {
     let hal_eval = HalEval {
-        hal: Arc::new(CpuHal::<BabyBear, Blake2bCpuHashSuite>::new()),
-        eval: Arc::new(CpuEvalCheck::new(&CIRCUIT)),
+        hal: Rc::new(CpuHal::<BabyBear, Blake2bCpuHashSuite>::new()),
+        eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build();

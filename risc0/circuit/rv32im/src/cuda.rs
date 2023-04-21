@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Arc;
+use std::rc::Rc;
 
 use cust::prelude::*;
 use risc0_core::field::{
@@ -35,13 +35,13 @@ use crate::{
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("RV32IM_CUDA_PATH"));
 
 pub struct CudaEvalCheck<CH: CudaHash> {
-    hal: Arc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
+    hal: Rc<CudaHal<CH>>, // retain a reference to ensure the context remains valid
     module: Module,
 }
 
 impl<CH: CudaHash> CudaEvalCheck<CH> {
     #[tracing::instrument(name = "CudaEvalCheck::new", skip_all)]
-    pub fn new(hal: Arc<CudaHal<CH>>) -> Self {
+    pub fn new(hal: Rc<CudaHal<CH>>) -> Self {
         let module = Module::from_fatbin(KERNELS_FATBIN, &[]).unwrap();
         Self { hal, module }
     }
@@ -114,7 +114,7 @@ pub type CudaEvalCheckPoseidon = CudaEvalCheck<CudaHashPoseidon>;
 
 #[cfg(test)]
 mod tests {
-    use std::sync::Arc;
+    use std::rc::Rc;
 
     use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, cuda::CudaHalSha256};
     use test_log::test;
@@ -127,7 +127,7 @@ mod tests {
         let circuit = crate::CircuitImpl::new();
         let cpu_hal = BabyBearSha256CpuHal::new();
         let cpu_eval = CpuEvalCheck::new(&circuit);
-        let gpu_hal = Arc::new(CudaHalSha256::new());
+        let gpu_hal = Rc::new(CudaHalSha256::new());
         let gpu_eval = super::CudaEvalCheck::new(gpu_hal.clone());
         crate::testutil::eval_check(&cpu_hal, cpu_eval, gpu_hal.as_ref(), gpu_eval, PO2);
     }
