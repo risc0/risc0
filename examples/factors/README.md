@@ -10,7 +10,7 @@ cargo run
 # Tutorial
 ## How to Recreate _Factors_
 
-This example is a good introduction for beginners to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place! We'll spend the rest of this readme walking you through how to recreate the factors example for yourself, assuming no prior knowledge of RISC Zero.
+This example is a good introduction for beginners new to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place! We'll spend the rest of this README walking you through how to recreate the factors example for yourself, assuming no prior knowledge of RISC Zero.
 
 ## Step 1: Create a new project
 
