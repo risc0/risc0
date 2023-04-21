@@ -27,7 +27,7 @@ mod tests;
 
 use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -165,7 +165,6 @@ impl<'a> Executor<'a> {
             .with_write_fd(fileno::JOURNAL, journal.clone());
 
         let mut run_loop = || -> Result<ExitCode> {
-            let mut idx = 0;
             loop {
                 if let Some(exit_code) = self.step()? {
                     let total_cycles = self.total_cycles();
@@ -184,9 +183,11 @@ impl<'a> Executor<'a> {
                         syscalls,
                         exit_code,
                         log2_ceil(total_cycles.next_power_of_two()),
-                        idx,
+                        self.segments
+                            .len()
+                            .try_into()
+                            .context("Too many segment to fit in u32")?,
                     ));
-                    idx += 1;
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),

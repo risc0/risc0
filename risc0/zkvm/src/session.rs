@@ -89,7 +89,7 @@ pub struct Segment {
     pub po2: usize,
 
     /// The index of this [Segment] within the [Session]
-    pub index: u64,
+    pub index: u32,
 }
 
 impl Session {
@@ -114,7 +114,7 @@ impl Segment {
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
         po2: usize,
-        index: u64,
+        index: u32,
     ) -> Self {
         Self {
             pre_image,

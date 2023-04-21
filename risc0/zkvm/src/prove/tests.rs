@@ -198,7 +198,7 @@ fn continuation() {
 
     let receipts = session.prove().unwrap();
     for (idx, receipt) in receipts.segments.iter().enumerate() {
-        assert_eq!(receipt.index, idx as u64);
+        assert_eq!(receipt.index, idx as u32);
     }
 }
 

@@ -136,7 +136,7 @@ pub struct SegmentReceipt {
     pub seal: Vec<u32>,
 
     /// Segment index within the [SessionReceipt]
-    pub index: u64,
+    pub index: u32,
 }
 
 impl SessionReceipt {
