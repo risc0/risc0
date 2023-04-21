@@ -60,6 +60,7 @@ jobs:
             feature: metal
             device: apple_m2_pro
     env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
@@ -72,7 +73,7 @@ jobs:
       - uses: ./.github/actions/sccache
       - run: npm install
         working-directory: templates/bonsai
-      - run: cargo test -F $FEATURE
+      - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
       - run: PATH=$PWD/node_modules/.bin:$PATH cargo test -F $FEATURE
@@ -100,3 +101,19 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+
+  check_template:
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - run: |
+          cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
+        shell: bash
+      - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
+      - run: ${{ runner.temp }}/template-test/target/release/host

@@ -44,7 +44,7 @@ pub struct PageTableInfo {
     pub root_idx: u32,
     root_page_addr: u32,
     num_pages: u32,
-    _num_root_entries: u32,
+    pub num_root_entries: u32,
     _layers: Vec<u32>,
 }
 
@@ -68,7 +68,7 @@ impl PageTableInfo {
         let root_addr = page_table_addr + page_table_size;
         let root_idx = root_addr / page_size;
         let root_page_addr = root_idx * page_size;
-        let _num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
+        let num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
         assert_eq!(root_idx, num_pages);
 
         log::debug!("root_page_addr: 0x{root_page_addr:08x}, root_addr: 0x{root_addr:08x}");
@@ -81,7 +81,7 @@ impl PageTableInfo {
             root_idx,
             root_page_addr,
             num_pages,
-            _num_root_entries,
+            num_root_entries,
             _layers: layers,
         }
     }
@@ -177,7 +177,7 @@ impl MemoryImage {
         }
 
         let root_page_addr = self.info.root_page_addr;
-        let root_page_bytes = self.info._num_root_entries * DIGEST_BYTES as u32;
+        let root_page_bytes = self.info.num_root_entries * DIGEST_BYTES as u32;
         let root_page =
             &self.buf[root_page_addr as usize..root_page_addr as usize + root_page_bytes as usize];
         let expected = hash_page(root_page);
@@ -249,7 +249,7 @@ mod tests {
         assert_eq!(info._layers, vec![6815744, 212992, 6656, 192]);
         assert_eq!(info.root_addr, 0xd6b5ac0);
         assert_eq!(info.root_page_addr, 0xd6b5800);
-        assert_eq!(info._num_root_entries, 22);
+        assert_eq!(info.num_root_entries, 22);
         assert_eq!(info.root_idx, 219862);
     }
 
@@ -337,7 +337,7 @@ mod tests {
         assert_eq!(info.root_addr, 0x1AC0);
         assert_eq!(info.root_page_addr, 0x1800);
         assert_eq!(
-            info._num_root_entries,
+            info.num_root_entries,
             (0x1A00 - 0x1800) / DIGEST_BYTES as u32 + 6
         );
     }

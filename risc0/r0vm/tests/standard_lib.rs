@@ -14,10 +14,10 @@
 
 use std::path::Path;
 
-use anyhow::Result;
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
-use risc0_zkvm::{receipt::insecure_skip_seal, Receipt};
+use risc0_zkvm::SessionReceipt;
+use risc0_zkvm_methods::STANDARD_LIB_ID;
 
 const STDIN_MSG: &str = "Hello world from stdin!\n";
 const EXPECTED_STDOUT_MSG: &str = "Hello world on stdout!\n";
@@ -27,28 +27,20 @@ fn expected_stdout() -> String {
     format!("{EXPECTED_STDOUT_MSG}{STDIN_MSG}")
 }
 
-fn load_receipt(p: &Path) -> Receipt {
+fn load_receipt(p: &Path) -> SessionReceipt {
     let data = std::fs::read(p).unwrap();
     risc0_zkvm::serde::from_slice(&data).unwrap()
 }
 
 #[test]
-fn stdio_outputs_in_receipt() -> Result<()> {
+fn stdio_outputs_in_receipt() {
     let temp = TempDir::new().unwrap();
     let receipt_file = temp.child("receipt.dat");
-    let image_id_file = temp.child("image_id.dat");
-    std::fs::write(
-        &image_id_file,
-        bytemuck::bytes_of(&risc0_zkvm_methods::STANDARD_LIB_ID),
-    )
-    .unwrap();
 
-    let mut cmd = Command::cargo_bin("r0vm")?;
+    let mut cmd = Command::cargo_bin("r0vm").unwrap();
 
     cmd.arg("--elf")
         .arg(risc0_zkvm_methods::STANDARD_LIB_PATH)
-        .arg("--image-id")
-        .arg(&*image_id_file)
         .arg("--receipt")
         .arg(&*receipt_file)
         .arg("--env")
@@ -61,50 +53,7 @@ fn stdio_outputs_in_receipt() -> Result<()> {
         .success();
 
     let receipt = load_receipt(&receipt_file);
-    assert!(insecure_skip_seal() || receipt.get_seal_bytes().len() > 0);
-    receipt
-        .verify(&risc0_zkvm_methods::STANDARD_LIB_ID)
-        .unwrap();
-
-    Ok(())
-}
-
-#[test]
-fn stdio_outputs_in_receipt_without_seal() -> Result<()> {
-    let temp = TempDir::new().unwrap();
-    let receipt_file = temp.child("receipt.dat");
-    let image_id_file = temp.child("image_id.dat");
-    std::fs::write(
-        &image_id_file,
-        bytemuck::bytes_of(&risc0_zkvm_methods::STANDARD_LIB_ID),
-    )
-    .unwrap();
-
-    let mut cmd = Command::cargo_bin("r0vm")?;
-
-    cmd.arg("--elf")
-        .arg(risc0_zkvm_methods::STANDARD_LIB_PATH)
-        .arg("--image-id")
-        .arg(&*image_id_file)
-        .arg("--receipt")
-        .arg(&*receipt_file)
-        .arg("--skip-seal")
-        .arg("--env")
-        .arg("TEST_MODE=STDIO")
-        .write_stdin(STDIN_MSG);
-    cmd.assert()
-        .stderr(EXPECTED_STDERR)
-        .stdout(expected_stdout())
-        .success();
-
-    let receipt = load_receipt(&receipt_file);
-    assert_eq!(receipt.get_seal_bytes().len(), 0);
-    assert!(
-        insecure_skip_seal()
-            || receipt
-                .verify(&risc0_zkvm_methods::STANDARD_LIB_ID)
-                .is_err()
-    );
-
-    Ok(())
+    assert_eq!(receipt.segments.len(), 1);
+    assert!(receipt.segments[0].get_seal_bytes().len() > 0);
+    receipt.verify(STANDARD_LIB_ID).unwrap();
 }

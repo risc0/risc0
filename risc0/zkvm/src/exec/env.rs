@@ -21,6 +21,7 @@ use std::{
     rc::Rc,
 };
 
+use anyhow::Result;
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
     fileno,
@@ -30,7 +31,10 @@ use risc0_zkvm_platform::{
     },
 };
 
-use super::io::{slice_io_from_fn, syscalls, PosixIo, SliceIo, Syscall, SyscallTable};
+use super::{
+    io::{slice_io_from_fn, syscalls, PosixIo, SliceIo, Syscall, SyscallTable},
+    TraceEvent,
+};
 
 /// The default segment limit specified in powers of 2 cycles. Choose this value
 /// to try and fit with 8GB of RAM.
@@ -49,11 +53,12 @@ pub struct ExecutorEnvBuilder<'a> {
 #[derive(Clone)]
 pub struct ExecutorEnv<'a> {
     env_vars: HashMap<String, String>,
-    segment_limit_po2: usize,
+    pub(crate) segment_limit_po2: usize,
     session_limit: usize,
     syscalls: SyscallTable<'a>,
     pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
     input: Vec<u8>,
+    pub(crate) trace_callback: Option<Rc<RefCell<dyn FnMut(TraceEvent) -> Result<()> + 'a>>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -91,6 +96,7 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
                 syscalls: Default::default(),
                 io: Default::default(),
                 input: Default::default(),
+                trace_callback: Default::default(),
             },
         }
     }
@@ -197,6 +203,15 @@ impl<'a> ExecutorEnvBuilder<'a> {
         f: impl Fn(&[u8]) -> Vec<u8> + 'a,
     ) -> &mut Self {
         self.slice_io(syscall, slice_io_from_fn(f));
+        self
+    }
+
+    /// Add a callback handler for raw trace messages.
+    pub fn trace_callback(
+        &mut self,
+        callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
+    ) -> &mut Self {
+        self.inner.trace_callback = Some(Rc::new(RefCell::new(callback)));
         self
     }
 }

@@ -15,10 +15,11 @@
 use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::{Arg, Command};
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::Prover;
-use shakmaty::fen::Fen;
-use shakmaty::{CastlingMode, Chess, FromSetup, Position, Setup};
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    Executor, ExecutorEnv, SessionReceipt,
+};
+use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
 
 fn main() {
     let matches =
@@ -36,18 +37,10 @@ fn main() {
         mv: mv.to_string(),
     };
 
-    // Make the prover.
-    let mut prover = Prover::new(CHECKMATE_ELF).unwrap();
-
-    prover.add_input_u32_slice(&to_vec(&inputs).expect("Should be serializable"));
-
-    // Run prover & generate receipt
-    let receipt = prover
-        .run()
-        .expect("Legal board state and checkmating move expected");
+    let receipt = chess(&inputs);
 
     // Verify receipt and parse it for committed data
-    receipt.verify(&CHECKMATE_ID).unwrap();
+    receipt.verify(CHECKMATE_ID).unwrap();
     let vec = receipt.journal;
     let committed_state: String = from_slice(&vec).unwrap();
     assert_eq!(inputs.board, committed_state);
@@ -62,32 +55,36 @@ fn main() {
     );
 }
 
+fn chess(inputs: &Inputs) -> SessionReceipt {
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(inputs).unwrap())
+        .build();
+
+    // Make the Executor.
+    let mut exec = Executor::from_elf(env, CHECKMATE_ELF).unwrap();
+
+    // Run the executor to produce a session.
+    let session = exec.run().unwrap();
+
+    // Prove the session to produce a receipt.
+    session.prove().unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use chess_core::Inputs;
-    use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
-    use risc0_zkvm::{serde::to_vec, Prover};
 
-    const TEST_BOARD: &str = "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
-    const TEST_MOVE: &str = "Qxf7";
+    use crate::chess;
 
     #[test]
     fn main() {
-        let inputs = Inputs {
+        const TEST_BOARD: &str =
+            "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
+        const TEST_MOVE: &str = "Qxf7";
+
+        chess(&Inputs {
             board: String::from(TEST_BOARD),
             mv: String::from(TEST_MOVE),
-        };
-
-        // Make the prover.
-        let mut prover = Prover::new(CHECKMATE_ELF).unwrap();
-        prover.add_input_u32_slice(&to_vec(&inputs).expect("Should be serializable"));
-
-        // Run prover & generate receipt
-        let receipt = prover
-            .run()
-            .expect("Legal board state and checkmating move expected");
-
-        // Verify receipt and parse it for committed data
-        receipt.verify(&CHECKMATE_ID).unwrap();
+        });
     }
 }

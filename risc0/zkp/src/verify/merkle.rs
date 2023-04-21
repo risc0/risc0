@@ -17,8 +17,9 @@ use core::marker::PhantomData;
 
 use super::VerifyHal;
 use crate::{
-    core::digest::Digest, core::hash::HashFn, merkle::MerkleTreeParams, verify::read_iop::ReadIOP,
-    verify::VerificationError,
+    core::{digest::Digest, hash::HashFn},
+    merkle::MerkleTreeParams,
+    verify::{read_iop::ReadIOP, VerificationError},
 };
 
 /// A struct against which we verify merkle branches, consisting of the
