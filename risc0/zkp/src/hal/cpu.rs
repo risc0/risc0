@@ -33,6 +33,7 @@ use crate::{
         hash::{
             blake2b::Blake2bCpuHashSuite,
             poseidon::PoseidonHashSuite,
+            poseidon_254::Poseidon254HashSuite,
             sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
             HashFn, HashSuite,
         },
@@ -48,6 +49,7 @@ pub struct CpuHal<F: Field, HS: HashSuite<F>> {
 
 pub type BabyBearSha256CpuHal = CpuHal<BabyBear, Sha256HashSuite<BabyBear, CpuImpl>>;
 pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, PoseidonHashSuite>;
+pub type BabyBearPoseidon254CpuHal = CpuHal<BabyBear, Poseidon254HashSuite>;
 pub type BabyBearBlake2bCpuHal = CpuHal<BabyBear, Blake2bCpuHashSuite>;
 
 impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
