@@ -165,6 +165,7 @@ impl<'a> Executor<'a> {
             .with_write_fd(fileno::JOURNAL, journal.clone());
 
         let mut run_loop = || -> Result<ExitCode> {
+            let mut idx = 0;
             loop {
                 if let Some(exit_code) = self.step()? {
                     let total_cycles = self.total_cycles();
@@ -183,7 +184,9 @@ impl<'a> Executor<'a> {
                         syscalls,
                         exit_code,
                         log2_ceil(total_cycles.next_power_of_two()),
+                        idx,
                     ));
+                    idx += 1;
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),

@@ -134,6 +134,9 @@ pub struct SegmentReceipt {
     /// [SegmentReceipt::verify]) to cryptographically prove that this Segment
     /// was faithfully executed.
     pub seal: Vec<u32>,
+
+    /// Segment index within the [SessionReceipt]
+    pub index: u64,
 }
 
 impl SessionReceipt {
