@@ -15,7 +15,7 @@
 use std::{fs, path::PathBuf};
 
 use clap::Parser;
-use risc0_zkvm::{prove::default_hal, Executor, ExecutorEnv, SessionReceipt};
+use risc0_zkvm::{Executor, ExecutorEnv, SessionReceipt};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -108,8 +108,7 @@ fn main() {
             .expect("Unable to write profiling output");
     }
 
-    let (hal, eval) = default_hal();
-    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+    let receipt = session.prove().unwrap();
 
     let receipt_data = encode_receipt(&receipt);
     if let Some(receipt_file) = args.receipt.as_ref() {

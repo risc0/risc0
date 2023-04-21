@@ -12,57 +12,61 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use anyhow::Result;
 use risc0_circuit_rv32im::cpu::CpuEvalCheck;
-use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
+use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
-    hal::{cpu::CpuHal, EvalCheck, Hal},
-    verify::{HashSuite, VerificationError},
+    hal::cpu::CpuHal,
+    verify::VerificationError,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
 use risc0_zkvm_platform::memory::HEAP;
 use serial_test::serial;
 use test_log::test;
 
-use super::{default_hal, default_poseidon_hal};
+use super::{get_prover, LocalProver, Prover};
 use crate::{
+    prove::HalEval,
     serde::{from_slice, to_vec},
-    ControlId, Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT,
+    Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT,
 };
 
-fn prove_nothing<H, E>(hal: &H, eval: &E) -> Result<SessionReceipt>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
-    E: EvalCheck<H>,
-{
+fn prove_nothing(name: &str) -> Result<SessionReceipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    session.prove(hal, eval)
+    let prover = get_prover(name);
+    prover.prove_session(&session)
 }
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn hashfn_poseidon() {
-    let (hal, eval) = default_poseidon_hal();
-    prove_nothing(hal.as_ref(), &eval).unwrap();
+    prove_nothing("$poseidon").unwrap();
 }
 
 #[test]
 fn hashfn_blake2b() {
-    let hal = CpuHal::<BabyBear, Blake2bCpuHashSuite>::new();
-    let eval = CpuEvalCheck::new(&CIRCUIT);
-    prove_nothing(&hal, &eval).unwrap();
+    let hal_eval = HalEval {
+        hal: Rc::new(CpuHal::<BabyBear, Blake2bCpuHashSuite>::new()),
+        eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
+    };
+    let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
+    let env = ExecutorEnv::builder().add_input(&input).build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let prover = LocalProver::new("cpu:blake2b", hal_eval);
+    prover.prove_session(&session).unwrap();
 }
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde() {
-    let (hal, eval) = default_hal();
-    let receipt = prove_nothing(hal.as_ref(), &eval).unwrap();
+    let receipt = prove_nothing("$default").unwrap();
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
     let decoded: SessionReceipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
@@ -72,8 +76,7 @@ fn receipt_serde() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
-    let (hal, eval) = default_hal();
-    let receipt = prove_nothing(hal.as_ref(), &eval).unwrap();
+    let receipt = prove_nothing("$default").unwrap();
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
@@ -92,8 +95,7 @@ fn sha_basics() {
         let env = ExecutorEnv::builder().add_input(&input).build();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let (hal, eval) = default_hal();
-        let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+        let receipt = session.prove().unwrap();
         hex::encode(Digest::try_from(receipt.journal.as_slice()).unwrap())
     }
 
@@ -130,8 +132,7 @@ fn memory_io() {
         let env = ExecutorEnv::builder().add_input(&input).build();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
         let session = exec.run()?;
-        let (hal, eval) = default_hal();
-        session.prove(hal.as_ref(), &eval)
+        session.prove()
     }
 
     // Double writes are fine
@@ -160,17 +161,16 @@ fn pause_continue() {
         .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
         .build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let (hal, eval) = default_hal();
 
     // Run until sys_pause
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Paused);
-    session.prove(hal.as_ref(), &eval).unwrap();
+    session.prove().unwrap();
 
     // Run until sys_halt
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
-    session.prove(hal.as_ref(), &eval).unwrap();
+    session.prove().unwrap();
 }
 
 #[test]
@@ -195,8 +195,7 @@ fn continuation() {
     }
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
-    let (hal, eval) = default_hal();
-    session.prove(hal.as_ref(), &eval).unwrap();
+    session.prove().unwrap();
 }
 
 // These tests come from:
@@ -204,7 +203,7 @@ fn continuation() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
-    use crate::{prove::default_hal, Executor, ExecutorEnv, MemoryImage, Program};
+    use crate::{Executor, ExecutorEnv, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
@@ -235,9 +234,7 @@ mod riscv {
             let env = ExecutorEnv::default();
             let mut exec = Executor::new(env, image, program.entry);
             let session = exec.run().unwrap();
-
-            let (hal, eval) = default_hal();
-            session.prove(hal.as_ref(), &eval).unwrap();
+            session.prove().unwrap();
         }
     }
 
