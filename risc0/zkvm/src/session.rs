@@ -87,6 +87,9 @@ pub struct Segment {
 
     /// The number of cycles in powers of 2.
     pub po2: usize,
+
+    /// The index of this [Segment] within the [Session]
+    pub index: u32,
 }
 
 impl Session {
@@ -102,6 +105,7 @@ impl Session {
 
 impl Segment {
     /// Create a new [Segment] from its constituent components.
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
@@ -110,6 +114,7 @@ impl Segment {
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
         po2: usize,
+        index: u32,
     ) -> Self {
         Self {
             pre_image,
@@ -119,6 +124,7 @@ impl Segment {
             syscalls,
             exit_code,
             po2,
+            index,
         }
     }
 }

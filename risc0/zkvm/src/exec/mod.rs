@@ -27,7 +27,7 @@ mod tests;
 
 use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -183,6 +183,10 @@ impl<'a> Executor<'a> {
                         syscalls,
                         exit_code,
                         log2_ceil(total_cycles.next_power_of_two()),
+                        self.segments
+                            .len()
+                            .try_into()
+                            .context("Too many segment to fit in u32")?,
                     ));
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),
