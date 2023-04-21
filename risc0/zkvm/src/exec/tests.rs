@@ -50,6 +50,7 @@ fn basic() {
     assert_eq!(session.segments[0].exit_code, ExitCode::Halted(0));
     assert_eq!(session.segments[0].pre_image.get_root(), pre_image_id);
     assert_ne!(session.segments[0].post_image_id, pre_image_id);
+    assert_eq!(session.segments[0].index, 0);
 }
 
 #[test]
@@ -85,6 +86,8 @@ fn system_split() {
         session.segments[1].pre_image.get_root(),
         session.segments[0].post_image_id
     );
+    assert_eq!(session.segments[0].index, 0);
+    assert_eq!(session.segments[1].index, 1);
 }
 
 #[test]
