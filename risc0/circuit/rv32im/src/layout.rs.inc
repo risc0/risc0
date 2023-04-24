@@ -10,7 +10,7 @@ impl risc0_zkp::layout::Component for BytesInitStep {
     }
 }
 
-// circuit/rv32im/global.h:28
+// circuit/rv32im/global.h:15
 pub struct U32Reg {
     pub byte: &'static [&'static OutReg; 4],
 }
