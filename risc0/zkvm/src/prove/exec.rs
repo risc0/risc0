@@ -418,7 +418,8 @@ impl MachineContext {
     ///   supports divisions that fit within a normal-width (i.e. not a
     ///   multiplicaition result) bigint. When b is a modulus and a is a
     ///   multiplication result of two numbers less than the modulus, this
-    ///   restriction is always satisfied.
+    ///   restriction is always satisfied. TODO(victor): Consider replacing the
+    ///   body of this method with an external BigInt implementation.
     fn bigint_divide(
         &self,
         a_elems: &[Elem; bigint::WIDTH_BYTES * 2],
