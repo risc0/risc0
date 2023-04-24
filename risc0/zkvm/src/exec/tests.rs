@@ -159,9 +159,9 @@ fn bigint_accel() {
     let input = to_vec(&MultiTestSpec::BigInt { x, y, modulus }).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let receipt = exec.run().unwrap();
+    let session = exec.run().unwrap();
     assert_eq!(
-        receipt.journal.as_slice(),
+        session.journal.as_slice(),
         bytemuck::cast_slice(expected.as_slice())
     );
 }

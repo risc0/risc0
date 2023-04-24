@@ -116,6 +116,36 @@ fn sha_basics() {
 }
 
 #[test]
+fn bigint_accel() {
+    let x = [1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 8u32];
+    let y = [9u32, 10u32, 11u32, 12u32, 13u32, 14u32, 15u32, 16u32];
+    // let zero = [0, 0, 0, 0, 0, 0, 0, 0];
+    // let one = [1, 0, 0, 0, 0, 0, 0, 0];
+    let modulus = [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32];
+    let expected = [
+        725175305u32,
+        3727701367u32,
+        3590724717u32,
+        3360403226u32,
+        4071262838u32,
+        2077883780u32,
+        2470597663u32,
+        13u32,
+    ];
+
+    let input = to_vec(&MultiTestSpec::BigInt { x, y, modulus }).unwrap();
+    let env = ExecutorEnv::builder().add_input(&input).build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let (hal, eval) = default_hal();
+    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+    assert_eq!(
+        receipt.journal.as_slice(),
+        bytemuck::cast_slice(expected.as_slice())
+    );
+}
+
+#[test]
 #[serial]
 fn memory_io() {
     fn run_memio(pairs: &[(usize, usize)]) -> Result<SessionReceipt> {
