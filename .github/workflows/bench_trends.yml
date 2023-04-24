@@ -44,17 +44,14 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
-      # Delete existing benchmark repo if it exists, hardcoded path:
-      # https://github.com/risc0/github-action-benchmark/blob/7eeba8924d4ed651010d72d7319b064fc0c10355/src/write.ts#L392
-      - run: rm -rf ./benchmark-data-repository || true
-        shell: bash
       - name: Store benchmark result
-        uses: risc0/github-action-benchmark@v1
+        uses: risc0/github-action-benchmark@risc0
         with:
           name: "${{ matrix.os }}-${{ matrix.device }}"
           tool: 'cargo'
           github-token: ${{ secrets.BENCHMARK_TOKEN }}
           gh-repository: 'github.com/risc0/benchmarks'
+          gh-repository-dir: '${{ runner.temp }}/benchmark-data-repository'
           gh-pages-branch: main
           output-file-path: output.txt
           comment-always: false
