@@ -4,7 +4,7 @@
 #![no_std]  // std support is experimental
 {% endunless %}
 
-use risc0_zkvm::guest::env;
+// use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
