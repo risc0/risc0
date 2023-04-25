@@ -149,7 +149,7 @@ impl<'a> Executor<'a> {
     /// Construct a new [Executor] from an ELF binary.
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         Ok(Self::new(env, image, program.entry))
     }
 
