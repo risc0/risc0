@@ -27,7 +27,7 @@ mod tests;
 
 use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -149,7 +149,7 @@ impl<'a> Executor<'a> {
     /// Construct a new [Executor] from an ELF binary.
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         Ok(Self::new(env, image, program.entry))
     }
 
@@ -183,6 +183,10 @@ impl<'a> Executor<'a> {
                         syscalls,
                         exit_code,
                         log2_ceil(total_cycles.next_power_of_two()),
+                        self.segments
+                            .len()
+                            .try_into()
+                            .context("Too many segment to fit in u32")?,
                     ));
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),

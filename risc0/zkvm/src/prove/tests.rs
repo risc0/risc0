@@ -165,7 +165,8 @@ fn pause_continue() {
     // Run until sys_pause
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Paused);
-    session.prove().unwrap();
+    let receipt = session.prove().unwrap();
+    assert_eq!(receipt.segments[0].index, 0);
 
     // Run until sys_halt
     let session = exec.run().unwrap();
@@ -195,7 +196,10 @@ fn continuation() {
     }
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
-    session.prove().unwrap();
+    let receipts = session.prove().unwrap();
+    for (idx, receipt) in receipts.segments.iter().enumerate() {
+        assert_eq!(receipt.index, idx as u32);
+    }
 }
 
 // These tests come from:
@@ -229,7 +233,7 @@ mod riscv {
             entry.read_to_end(&mut elf).unwrap();
 
             let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+            let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
             let env = ExecutorEnv::default();
             let mut exec = Executor::new(env, image, program.entry);

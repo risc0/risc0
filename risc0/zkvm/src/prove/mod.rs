@@ -283,7 +283,10 @@ where
 
         let seal = prover.finalize(&[&mix, &out], eval.as_ref());
 
-        let receipt = SegmentReceipt { seal };
+        let receipt = SegmentReceipt {
+            seal,
+            index: segment.index,
+        };
         let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
         receipt.verify_with_hal(&hal)?;
 

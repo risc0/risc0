@@ -21,6 +21,7 @@ use cust::{
     memory::UnifiedPointer,
     prelude::*,
 };
+use lazy_static::lazy_static;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem, RootsOfUnity,
@@ -41,6 +42,15 @@ use crate::{
 };
 
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("ZKP_CUDA_PATH"));
+
+lazy_static! {
+    static ref CONTEXT: Context = {
+        let device = Device::get_device(0).unwrap();
+        let context = Context::new(device).unwrap();
+        context.set_flags(ContextFlags::SCHED_AUTO).unwrap();
+        context
+    };
+}
 
 pub trait CudaHash {
     /// Which hash suite should the CPU use
@@ -324,13 +334,12 @@ impl<CH: CudaHash> CudaHal<CH> {
         let max_threads = device
             .get_attribute(DeviceAttribute::MaxThreadsPerBlock)
             .unwrap();
-        let context = Context::new(device).unwrap();
-        context.set_flags(ContextFlags::SCHED_AUTO).unwrap();
+        let _context = CONTEXT.clone();
         let module = Module::from_fatbin(KERNELS_FATBIN, &[]).unwrap();
         let mut hal = Self {
             max_threads: max_threads as u32,
             module,
-            _context: context,
+            _context,
             hash: None,
         };
         let hash = Box::new(CH::new(&hal));
