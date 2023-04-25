@@ -197,8 +197,8 @@ impl CircuitStepHandler<Elem> for MachineContext {
             "bigintDivide" => {
                 let (a, b) = args.split_at(bigint::WIDTH_BYTES * 2);
                 let (q, r) = self.bigint_divide(a.try_into()?, b.try_into()?)?;
-                outs[..bigint::WIDTH_BYTES * 2].copy_from_slice(&q[..]);
-                outs[bigint::WIDTH_BYTES * 2..].copy_from_slice(&r[..]);
+                outs[..bigint::WIDTH_BYTES].copy_from_slice(&q[..]);
+                outs[bigint::WIDTH_BYTES..].copy_from_slice(&r[..]);
                 Ok(())
             }
             "pageInfo" => {
@@ -432,7 +432,7 @@ impl MachineContext {
         // Setup working buffers of u64 elements. We use u64 values here because this
         // implementation does a lot of non-field opperations and so we need to take the
         // inputs out of Montgomery form.
-        let mut a = [0u64; bigint::WIDTH_BYTES * 2];
+        let mut a = [0u64; bigint::WIDTH_BYTES * 2 + 1];
         for (i, ai) in a_elems.iter().copied().enumerate() {
             a[i] = u64::from(ai)
         }
@@ -454,7 +454,7 @@ impl MachineContext {
             // FIXME: This routine should be updated to lift this restriction.
             anyhow::bail!("bigint divide: denominator must be at least 9 bits");
         }
-        let m = a.len() - n;
+        let m = a.len() - n - 1;
 
         // Shift (i.e. multiply by two) the inputs until the leading bit is 1.
         let mut shift_bits = 0u64;
@@ -470,7 +470,7 @@ impl MachineContext {
         if carry != 0 {
             panic!("bigint divide: final carry in input shift");
         }
-        for i in 0..(a.len() - 1) {
+        for i in 0..(a.len() - 2) {
             let tmp = (a[i] << shift_bits) + carry;
             a[i] = tmp & 0xFF;
             carry = tmp >> 8;
