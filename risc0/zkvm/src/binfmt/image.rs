@@ -111,6 +111,9 @@ pub struct MemoryImage {
 
     /// Metadata about the structure of the page table
     pub info: PageTableInfo,
+
+    /// Program Counter from [Program] entry point
+    pub pc: u32,
 }
 
 impl MemoryImage {
@@ -133,7 +136,11 @@ impl MemoryImage {
 
         // Compute the page table hashes except for the very last root hash.
         let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
-        let mut img = Self { buf, info };
+        let mut img = Self {
+            buf,
+            info,
+            pc: program.entry,
+        };
         img.hash_pages();
         img
     }
@@ -228,7 +235,10 @@ mod tests {
     fn check_integrity() {
         const PAGE_SIZE: u32 = 1024;
         let program = Program::load_elf(MULTI_TEST_ELF, TEXT.end() as u32).unwrap();
+        let prog_pc = program.entry;
         let image = MemoryImage::new(&program, PAGE_SIZE);
+        assert_eq!(image.pc, prog_pc);
+
         // This is useful in case one needs to manually inspect the memory image.
         // std::fs::write("/tmp/test.img", &image.image).unwrap();
         image.check(STACK.start() as u32).unwrap();
