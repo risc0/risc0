@@ -21,7 +21,9 @@
 extern crate alloc;
 
 #[cfg(feature = "binfmt")]
-pub mod binfmt;
+mod binfmt;
+#[cfg(feature = "prove")]
+mod bonsai_api;
 mod control_id;
 #[cfg(feature = "prove")]
 mod exec;

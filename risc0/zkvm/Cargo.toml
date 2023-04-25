@@ -38,6 +38,7 @@ tracing = { version = "0.1", default-features = false, features = ["attributes"]
 # Host dependencies
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 addr2line = { version = "0.20", optional = true }
+bincode = "1"
 elf = { version = "0.7", optional = true }
 generic-array = { version = "0.14", default-features = false, optional = true }
 getrandom = { version = "0.2", optional = true }
@@ -49,8 +50,20 @@ num-traits = { version = "0.2", default-features = false }
 prost = { version = "0.11", optional = true }
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
+reqwest = { version = "0.11.16", features = [ "blocking", "json" ] }
 rrs-lib = { version = "0.1", optional = true }
 sha2 = { version = "0.10", optional = true }
+serde_json = "1.0.96"
+serde_with = { version = "2.0.0", features = ["time_0_3"] }
+time = "0.3.11"
+utoipa = "3.3.0"
+sqlx = { version = "0.6.2", features = [
+    "runtime-tokio-rustls",
+    "time",
+    "uuid",
+    "migrate"
+] }
+validator = { version = "0.16.0", features = ["derive"] }
 
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
