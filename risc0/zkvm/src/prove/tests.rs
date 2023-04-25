@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
+use num_bigint::BigUint;
 use risc0_circuit_rv32im::cpu::CpuEvalCheck;
 use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
 use risc0_zkp::{
@@ -21,7 +22,7 @@ use risc0_zkp::{
     verify::{HashSuite, VerificationError},
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use risc0_zkvm_platform::memory::HEAP;
+use risc0_zkvm_platform::{memory::HEAP, syscall::bigint};
 use serial_test::serial;
 use test_log::test;
 
@@ -117,32 +118,56 @@ fn sha_basics() {
 
 #[test]
 fn bigint_accel() {
-    let x = [1u32, 2u32, 3u32, 4u32, 5u32, 6u32, 7u32, 8u32];
-    let y = [9u32, 10u32, 11u32, 12u32, 13u32, 14u32, 15u32, 16u32];
-    // let zero = [0, 0, 0, 0, 0, 0, 0, 0];
-    // let one = [1, 0, 0, 0, 0, 0, 0, 0];
-    let modulus = [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32];
-    let expected = [
-        725175305u32,
-        3727701367u32,
-        3590724717u32,
-        3360403226u32,
-        4071262838u32,
-        2077883780u32,
-        2470597663u32,
-        13u32,
+    let zero = [0, 0, 0, 0, 0, 0, 0, 0];
+    let one = [1, 0, 0, 0, 0, 0, 0, 0];
+
+    struct Case {
+        x: [u32; bigint::WIDTH_WORDS],
+        y: [u32; bigint::WIDTH_WORDS],
+        modulus: [u32; bigint::WIDTH_WORDS],
+    }
+
+    let cases = [
+        Case {
+            x: [1, 2, 3, 4, 5, 6, 7, 8],
+            y: [9, 10, 11, 12, 13, 14, 15, 16],
+            modulus: [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32],
+        },
+        Case {
+            x: [1, 2, 3, 4, 5, 6, 7, 8],
+            y: zero,
+            modulus: [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32],
+        },
+        Case {
+            x: [1, 2, 3, 4, 5, 6, 7, 8],
+            y: one,
+            modulus: [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32],
+        },
     ];
 
-    let input = to_vec(&MultiTestSpec::BigInt { x, y, modulus }).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let (hal, eval) = default_hal();
-    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
-    assert_eq!(
-        receipt.journal.as_slice(),
-        bytemuck::cast_slice(expected.as_slice())
-    );
+    for Case { x, y, modulus } in cases {
+        let expected = {
+            let z =
+                (BigUint::from_slice(&x) * BigUint::from_slice(&y)) % BigUint::from_slice(&modulus);
+            let mut vec = z.to_u32_digits();
+            if vec.len() > bigint::WIDTH_WORDS {
+                panic!("modular multiplication result larger than input modulus");
+            }
+            vec.resize(bigint::WIDTH_WORDS, 0);
+            vec
+        };
+
+        let input = to_vec(&MultiTestSpec::BigInt { x, y, modulus }).unwrap();
+        let env = ExecutorEnv::builder().add_input(&input).build();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let session = exec.run().unwrap();
+        let (hal, eval) = default_hal();
+        let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+        assert_eq!(
+            receipt.journal.as_slice(),
+            bytemuck::cast_slice(expected.as_slice())
+        );
+    }
 }
 
 #[test]
