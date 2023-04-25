@@ -40,7 +40,7 @@ fn basic() {
         entry: 0x4000,
         image,
     };
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.get_root();
 
     let mut exec = Executor::new(env, image, program.entry);
@@ -68,7 +68,7 @@ fn system_split() {
     image.insert(pc, 0x00000073); // ecall(halt)
 
     let program = Program { entry, image };
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.get_root();
 
     let mut exec = Executor::new(env, image, program.entry);

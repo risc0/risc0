@@ -233,7 +233,7 @@ mod riscv {
             entry.read_to_end(&mut elf).unwrap();
 
             let program = Program::load_elf(elf.as_slice(), MEM_SIZE as u32).unwrap();
-            let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+            let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
             let env = ExecutorEnv::default();
             let mut exec = Executor::new(env, image, program.entry);
