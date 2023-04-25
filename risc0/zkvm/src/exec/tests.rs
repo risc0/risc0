@@ -12,9 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::mem;
 use std::{collections::BTreeMap, io::Cursor, str::from_utf8, sync::Mutex};
 
 use num_bigint::BigUint;
+use num_traits::{One, Zero};
+use rand::{
+    distributions::{Distribution, Uniform},
+    Rng,
+};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
@@ -150,7 +156,35 @@ fn bigint_accel() {
         modulus: [u32; bigint::WIDTH_WORDS],
     }
 
-    let cases = [
+    struct BigIntTestCaseGenerator<R: Rng> {
+        pub rng: R,
+    }
+
+    impl<R: Rng> Iterator for BigIntTestCaseGenerator<R> {
+        type Item = Case;
+
+        fn next(&mut self) -> Option<Self::Item> {
+            let bigint_max = BigUint::one() << bigint::WIDTH_BITS;
+
+            let modulus = Uniform::new(&BigUint::one(), &bigint_max).sample(&mut self.rng);
+            let mut x = Uniform::new(&BigUint::zero(), &bigint_max).sample(&mut self.rng);
+            let mut y = Uniform::new(&BigUint::zero(), &modulus).sample(&mut self.rng);
+
+            // x and y come from slightly different ranges because at least one input must
+            // be less than the modulus, but it doesn't matter which one. Randomly swap.
+            if self.rng.gen::<bool>() {
+                mem::swap(&mut x, &mut y);
+            }
+
+            Some(Self::Item {
+                x: x.to_u32_digits().try_into().unwrap(),
+                y: y.to_u32_digits().try_into().unwrap(),
+                modulus: modulus.to_u32_digits().try_into().unwrap(),
+            })
+        }
+    }
+
+    let mut cases = vec![
         Case {
             x: [1, 2, 3, 4, 5, 6, 7, 8],
             y: [9, 10, 11, 12, 13, 14, 15, 16],
@@ -167,6 +201,11 @@ fn bigint_accel() {
             modulus: [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32],
         },
     ];
+
+    let generator = BigIntTestCaseGenerator {
+        rng: rand::thread_rng(),
+    };
+    cases.extend(generator.take(10));
 
     for Case { x, y, modulus } in cases {
         let expected = {
