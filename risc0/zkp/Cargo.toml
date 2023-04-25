@@ -48,9 +48,14 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 default = ["prove"]
 cuda = [
   "dep:cust",
-  "risc0-sys/cuda"
+  "prove",
+  "risc0-sys/cuda",
 ]
-metal = ["dep:metal", "risc0-sys/metal"]
+metal = [
+  "dep:metal",
+  "prove",
+  "risc0-sys/metal",
+]
 prove = [
   "dep:ff",
   "dep:lazy_static",
@@ -58,6 +63,6 @@ prove = [
   "dep:rand",
   "dep:rayon",
   "risc0-sys",
-  "std"
+  "std",
 ]
 std = ["anyhow/std"]
