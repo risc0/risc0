@@ -7,6 +7,11 @@ Welcome to the RISC Zero mdBook! This is very much an early stage work in progre
 * our [YouTube channel], and
 * our [Discord server].
 
+Here is an example of code that will be tested:
+```rust
+assert_eq!(2+2, 4);
+```
+
 [main GitHub repo]: https://github.com/risc0/risc0
 [links to our crates on docs.rs]: https://github.com/risc0/risc0#rust-libraries
 [website]: https://www.risczero.com/
