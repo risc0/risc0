@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
+use anyhow::{Context, Result};
 use risc0_zkp::core::{
     digest::Digest,
     hash::sha::{Sha256, BLOCK_BYTES, SHA256_INIT},
@@ -127,10 +127,9 @@ impl MemoryImage {
         for (addr, data) in program.image.iter() {
             let addr = *addr as usize;
             let bytes = data.to_le_bytes();
-            if (WORD_SIZE + addr) >= buf.len() {
-                bail!("Invalid Elf Program, address outside MEM_SIZE");
-            }
-            buf[addr..(WORD_SIZE + addr)].copy_from_slice(&bytes[..WORD_SIZE]);
+            buf.get_mut(addr..(WORD_SIZE + addr))
+                .context("Invalid Elf Program, address outside MEM_SIZE")?
+                .copy_from_slice(&bytes[..WORD_SIZE]);
         }
 
         // Compute the page table hashes except for the very last root hash.
