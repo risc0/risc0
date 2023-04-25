@@ -31,8 +31,8 @@ namespace risc0::circuit::rv32im {
 
 Fp step_verify_bytes(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
-  std::array<Fp, 32> host_args;
-  std::array<Fp, 32> host_outs;
+  std::array<Fp, 96> host_args;
+  std::array<Fp, 64> host_outs;
   // loc("cirgen/components/bytes.cpp":96:26)
   Fp x0(255);
   // loc("cirgen/components/bytes.cpp":37:25)
