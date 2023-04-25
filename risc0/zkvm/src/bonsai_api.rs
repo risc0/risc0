@@ -215,9 +215,8 @@ pub fn run_proof(bonsai_url: String, proof_id: i64) -> Result<SessionReceipt> {
         let res = client
             .get(format!("{bonsai_url}/{REQUEST_PATH}/{proof_id}"))
             .header(reqwest::header::CONTENT_TYPE, "application/json")
-            .send()
-            .unwrap();
-        proof_request = res.json::<ProofRequest>().unwrap();
+            .send()?;
+        proof_request = res.json::<ProofRequest>()?;
         if proof_request.receipt_hash.is_some() {
             break;
         }
@@ -228,10 +227,8 @@ pub fn run_proof(bonsai_url: String, proof_id: i64) -> Result<SessionReceipt> {
             "{bonsai_url}/{RECEIPT_PATH}/{}",
             proof_request.receipt_hash.unwrap().to_string()
         ))
-        .send()
-        .unwrap()
-        .bytes()
-        .unwrap()
+        .send()?
+        .bytes()?
         .to_vec();
     let session_receipt: Result<SessionReceipt> =
         bincode::deserialize(&receipt_bytes).context("unable to deserialize receipt");
