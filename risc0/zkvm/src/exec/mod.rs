@@ -217,6 +217,7 @@ impl<'a> Executor<'a> {
         self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
         self.pre_pc = self.pc;
+        self.pre_image.pc = self.pc;
         self.monitor.clear_segment();
     }
 
