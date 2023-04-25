@@ -167,8 +167,7 @@ impl<'a> Executor<'a> {
 
         // TODO: move this to the run() function once we switch the ELF registration to
         // use MemoryImages.
-        if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
-            let bonsai_url = std::env::var("BONSAI_DOGFOOD_URL").unwrap();
+        if let Ok(bonsai_url) = std::env::var("BONSAI_DOGFOOD_URL") {
             let proof_id = bonsai_api::register_proof(
                 elf,
                 bonsai_url.clone(),

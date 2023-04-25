@@ -227,13 +227,11 @@ where
     }
 
     fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
-        if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
+        if let Ok(bonsai_url) = std::env::var("BONSAI_DOGFOOD_URL") {
             log::debug!("running bonsai prove");
-            return bonsai_api::run_proof(
-                std::env::var("BONSAI_DOGFOOD_URL").unwrap(),
-                session.proof_id.unwrap(),
-            );
+            return bonsai_api::run_proof(bonsai_url, session.proof_id.unwrap());
         }
+
         log::debug!("prove_session: {}", self.name);
         let mut segments = Vec::new();
         for segment in session.segments.iter() {
