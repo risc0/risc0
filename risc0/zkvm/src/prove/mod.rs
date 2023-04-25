@@ -61,7 +61,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
-use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT};
+use crate::{bonsai_api, ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT};
 
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
@@ -227,6 +227,13 @@ where
     }
 
     fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
+        if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
+            println!("running bonsai prove");
+            return bonsai_api::run_proof(
+                std::env::var("BONSAI_DOGFOOD_URL").unwrap(),
+                session.proof_id.unwrap(),
+            );
+        }
         log::debug!("prove_session: {}", self.name);
         let mut segments = Vec::new();
         for segment in session.segments.iter() {

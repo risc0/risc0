@@ -57,7 +57,7 @@ pub struct ExecutorEnv<'a> {
     session_limit: usize,
     syscalls: SyscallTable<'a>,
     pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
-    input: Vec<u8>,
+    pub(crate) input: Vec<u8>,
     pub(crate) trace_callback: Option<Rc<RefCell<dyn FnMut(TraceEvent) -> Result<()> + 'a>>>,
 }
 

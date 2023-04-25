@@ -51,7 +51,7 @@ use serde::{Deserialize, Serialize};
 pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
 use self::monitor::MemoryMonitor;
 use crate::{
-    align_up,
+    align_up, bonsai_api,
     opcode::{MajorType, OpCode},
     ExitCode, Loader, MemoryImage, Program, Segment, Session,
 };
@@ -74,6 +74,7 @@ pub struct Executor<'a> {
     segment_cycle: usize,
     segments: Vec<Segment>,
     insn_counter: u32,
+    bonsai_proof_id: Option<i64>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -125,6 +126,17 @@ impl Write for Journal {
 impl<'a> Executor<'a> {
     /// Construct a new [Executor] from a [MemoryImage] and entry point.
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage, pc: u32) -> Self {
+        Self::new_with_id(env, image, pc, None)
+    }
+
+    /// Construct a new [Executor] from a [MemoryImage], entry point, along with
+    /// the proof ID generated from bonsai
+    fn new_with_id(
+        env: ExecutorEnv<'a>,
+        image: MemoryImage,
+        pc: u32,
+        bonsai_proof_id: Option<i64>,
+    ) -> Self {
         let pre_image = image.clone();
         let monitor = MemoryMonitor::new(image);
         let loader = Loader::new();
@@ -143,6 +155,7 @@ impl<'a> Executor<'a> {
             segment_cycle: init_cycles,
             segments: Vec::new(),
             insn_counter: 0,
+            bonsai_proof_id: bonsai_proof_id,
         }
     }
 
@@ -150,12 +163,47 @@ impl<'a> Executor<'a> {
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        Ok(Self::new(env, image, program.entry))
+        let mut bonsai_proof_id: Option<i64> = None;
+
+        // TODO: move this to the run() function once we switch the ELF registration to
+        // use MemoryImages.
+        if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
+            let bonsai_url = std::env::var("BONSAI_DOGFOOD_URL").unwrap();
+            let proof_id = bonsai_api::register_proof(
+                elf,
+                bonsai_url.clone(),
+                image.get_root(),
+                env.input.to_owned(),
+            )?;
+            log::debug!(
+                "session receipt: {:?}",
+                bonsai_api::run_proof(bonsai_url, proof_id)
+            );
+            bonsai_proof_id = Some(proof_id)
+        }
+        Ok(Self::new_with_id(
+            env,
+            image,
+            program.entry,
+            bonsai_proof_id,
+        ))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
     pub fn run(&mut self) -> Result<Session> {
+        // Bonsai only needs the proof ID to retrieve the SessionReceipt. So a "session"
+        // can be represented by a proof ID.
+        if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
+            println!("created special session");
+            return Ok(Session::new_with_proof_id(
+                Vec::new(),
+                Vec::new(),
+                ExitCode::Halted(0),
+                self.bonsai_proof_id,
+            ));
+        }
+
         self.monitor.clear_session();
 
         let journal = Journal::default();
