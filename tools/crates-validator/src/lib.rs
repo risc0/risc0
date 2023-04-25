@@ -12,12 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cell::RefCell;
-use std::collections::BTreeMap;
-use std::fs::File;
-use std::io::{BufRead, BufReader, Write};
-use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::{
+    cell::RefCell,
+    collections::BTreeMap,
+    fs::File,
+    io::{BufRead, BufReader, Write},
+    path::{Path, PathBuf},
+    process::Command,
+};
 
 use anyhow::{bail, Context, Result};
 use handlebars::Handlebars;
@@ -233,6 +235,10 @@ impl Validator {
             }
             cmd.arg("--template");
             cmd.arg(r0_template_path);
+            cmd.arg("--templ-subdir");
+            cmd.arg("");
+            cmd.arg("--path");
+            cmd.arg(r0_path);
         } else if let Some(branch) = &self.context.risc0_gh_branch {
             cmd.arg("--branch");
             cmd.arg(branch);
