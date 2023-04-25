@@ -195,7 +195,7 @@ impl<'a> Executor<'a> {
         // Bonsai only needs the proof ID to retrieve the SessionReceipt. So a "session"
         // can be represented by a proof ID.
         if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
-            println!("created special session");
+            log::debug!("created special session");
             return Ok(Session::new_with_proof_id(
                 Vec::new(),
                 Vec::new(),

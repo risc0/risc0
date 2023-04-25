@@ -228,7 +228,7 @@ where
 
     fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
         if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
-            println!("running bonsai prove");
+            log::debug!("running bonsai prove");
             return bonsai_api::run_proof(
                 std::env::var("BONSAI_DOGFOOD_URL").unwrap(),
                 session.proof_id.unwrap(),
