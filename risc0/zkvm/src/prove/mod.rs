@@ -382,7 +382,6 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
 pub fn default_prover() -> Rc<dyn Prover> {
     let provers = provers();
     if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
-        println!("give bonsai prover");
         if let Some(prover) = provers.get("$bonsai") {
             return prover.clone();
         }
