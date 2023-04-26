@@ -196,9 +196,8 @@ impl CircuitStepHandler<Elem> for MachineContext {
             }
             "bigintDivide" => {
                 let (a, b) = args.split_at(bigint::WIDTH_BYTES * 2);
-                let (q, r) = self.bigint_divide(a.try_into()?, b.try_into()?)?;
-                outs[..bigint::WIDTH_BYTES].copy_from_slice(&q[..]);
-                outs[bigint::WIDTH_BYTES..].copy_from_slice(&r[..]);
+                let q = self.bigint_divide(a.try_into()?, b.try_into()?)?;
+                outs.copy_from_slice(&q[..]);
                 Ok(())
             }
             "pageInfo" => {
@@ -404,27 +403,23 @@ impl MachineContext {
         (split_word8(quot), split_word8(rem))
     }
 
-    /// Division of two little-endian positive byte-limbed bigints. a = q * b +
-    /// r.
+    /// Division of two positive byte-limbed bigints. a = q * b + r.
     ///
     /// Assumes a and b are both normalized with limbs in range [0, 255].
-    /// Returns q and r as arrays of BabyBearElems.
+    /// Returns q as an array of BabyBearElems. (Drops r).
     /// Returns an error when:
     /// * Input denominator b is 0.
     /// * Input denominator b is less than 9 bits.
-    /// * Quotient result q is greater than [bigint::WIDTH_BYTES] limbs
-    ///   TODO(victor) make this true. In general a quotient can be up to as
-    ///   large as the numerator (e.g. divide by 1), but the circuit only
-    ///   supports divisions that fit within a normal-width (i.e. not a
-    ///   multiplicaition result) bigint. When b is a modulus and a is a
-    ///   multiplication result of two numbers less than the modulus, this
-    ///   restriction is always satisfied. TODO(victor): Consider replacing the
-    ///   body of this method with an external BigInt implementation.
+    /// * Quotient result q is greater than [bigint::WIDTH_BYTES] limbs. This
+    ///   will occur if the numerator `a` is the result of a multiplication of
+    ///   values `x` and `y` such that `floor(x * y / b) >=
+    ///   2^bigint::WIDTH_BITS`. If x and/or y is less than b (i.e. the modulus
+    ///   in bigint modular multiply) this constrain will be satisfied.
     fn bigint_divide(
         &self,
         a_elems: &[Elem; bigint::WIDTH_BYTES * 2],
         b_elems: &[Elem; bigint::WIDTH_BYTES],
-    ) -> Result<([Elem; bigint::WIDTH_BYTES], [Elem; bigint::WIDTH_BYTES])> {
+    ) -> Result<[Elem; bigint::WIDTH_BYTES]> {
         // This is a variant of school-book multiplication.
         // Reference the Handbook of Elliptic and Hyper-elliptic Cryptography alg.
         // 10.5.1
@@ -521,27 +516,12 @@ impl MachineContext {
             }
         }
 
-        // Undo the shift done in preprocessing the inputs.
-        // Shift has no effect on the quotient, but the remainder needs to be adjusted.
-        // Note that everthing past the first n limbs will be dropped.
-        let mask = (1 << shift_bits) - 1;
-        if a[0] & mask != 0 {
-            panic!("bigint divide: remainder has non-zero bits to be shifted out");
-        }
-        for i in 0..n {
-            a[i] = (a[i] >> shift_bits) + ((mask & a[i + 1]) << (8 - shift_bits));
-        }
-
-        // Write q and r into output arrays, converting back to field representation.
+        // Write q into output array, converting back to field representation.
         let mut q_elems = [Elem::ZERO; bigint::WIDTH_BYTES];
         for i in 0..bigint::WIDTH_BYTES {
             q_elems[i] = q[i].into();
         }
-        let mut r_elems = [Elem::ZERO; bigint::WIDTH_BYTES];
-        for i in 0..n {
-            r_elems[i] = a[i].into();
-        }
-        Ok((q_elems, r_elems))
+        Ok(q_elems)
     }
 
     fn log(&mut self, msg: &str, args: &[Elem]) {

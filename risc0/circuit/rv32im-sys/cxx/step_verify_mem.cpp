@@ -32,7 +32,7 @@ namespace risc0::circuit::rv32im {
 Fp step_verify_mem(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
   std::array<Fp, 96> host_args;
-  std::array<Fp, 64> host_outs;
+  std::array<Fp, 32> host_outs;
   // loc("cirgen/components/ram.cpp":23:14)
   Fp x0(33554431);
   // loc("cirgen/components/ram.cpp":22:13)

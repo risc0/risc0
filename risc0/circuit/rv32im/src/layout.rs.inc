@@ -10,7 +10,7 @@ impl risc0_zkp::layout::Component for BytesInitStep {
     }
 }
 
-// circuit/rv32im/global.h:28
+// circuit/rv32im/global.h:15
 pub struct U32Reg {
     pub byte: &'static [&'static OutReg; 4],
 }
@@ -43,15 +43,15 @@ impl risc0_zkp::layout::Component for SystemState {
 }
 
 // :0
-pub struct RamFiniStep {
+pub struct RamInitStep {
     pub check_dirty: &'static OutReg,
     pub post: &'static SystemState,
     pub pre: &'static SystemState,
     pub output: &'static [&'static U32Reg; 8],
 }
-impl risc0_zkp::layout::Component for RamFiniStep {
+impl risc0_zkp::layout::Component for RamInitStep {
     fn ty_name(&self) -> &'static str {
-        "RamFiniStep"
+        "RamInitStep"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -65,14 +65,14 @@ impl risc0_zkp::layout::Component for RamFiniStep {
 
 // cirgen/circuit/rv32im/top.cpp:60
 pub struct Mux {
-    pub body: &'static RamFiniStep,
+    pub body: &'static RamInitStep,
     pub bytes_fini: &'static BytesInitStep,
     pub bytes_init: &'static BytesInitStep,
     pub bytes_setup: &'static BytesInitStep,
-    pub ram_fini: &'static RamFiniStep,
-    pub ram_init: &'static RamFiniStep,
-    pub ram_load: &'static RamFiniStep,
-    pub reset: &'static RamFiniStep,
+    pub ram_fini: &'static RamInitStep,
+    pub ram_init: &'static RamInitStep,
+    pub ram_load: &'static RamInitStep,
+    pub reset: &'static RamInitStep,
 }
 impl risc0_zkp::layout::Component for Mux {
     fn ty_name(&self) -> &'static str {
@@ -718,7 +718,7 @@ pub const LAYOUT_MUX_BODY_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_BODY: RamFiniStep = RamFiniStep {
+pub const LAYOUT_MUX_BODY: RamInitStep = RamInitStep {
     check_dirty: &LAYOUT_MUX_BODY_CHECK_DIRTY,
     post: &LAYOUT_MUX_BODY_POST,
     pre: &LAYOUT_MUX_BODY_PRE,
@@ -1349,7 +1349,7 @@ pub const LAYOUT_MUX_RAM_FINI_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_RAM_FINI: RamFiniStep = RamFiniStep {
+pub const LAYOUT_MUX_RAM_FINI: RamInitStep = RamInitStep {
     check_dirty: &LAYOUT_MUX_RAM_FINI_CHECK_DIRTY,
     post: &LAYOUT_MUX_RAM_FINI_POST,
     pre: &LAYOUT_MUX_RAM_FINI_PRE,
@@ -1971,7 +1971,7 @@ pub const LAYOUT_MUX_RAM_INIT_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_RAM_INIT: RamFiniStep = RamFiniStep {
+pub const LAYOUT_MUX_RAM_INIT: RamInitStep = RamInitStep {
     check_dirty: &LAYOUT_MUX_RAM_INIT_CHECK_DIRTY,
     post: &LAYOUT_MUX_RAM_INIT_POST,
     pre: &LAYOUT_MUX_RAM_INIT_PRE,
@@ -2593,7 +2593,7 @@ pub const LAYOUT_MUX_RAM_LOAD_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_RAM_LOAD: RamFiniStep = RamFiniStep {
+pub const LAYOUT_MUX_RAM_LOAD: RamInitStep = RamInitStep {
     check_dirty: &LAYOUT_MUX_RAM_LOAD_CHECK_DIRTY,
     post: &LAYOUT_MUX_RAM_LOAD_POST,
     pre: &LAYOUT_MUX_RAM_LOAD_PRE,
@@ -3215,7 +3215,7 @@ pub const LAYOUT_MUX_RESET_OUTPUT_7_: U32Reg = U32Reg {
 };
 
 // :0
-pub const LAYOUT_MUX_RESET: RamFiniStep = RamFiniStep {
+pub const LAYOUT_MUX_RESET: RamInitStep = RamInitStep {
     check_dirty: &LAYOUT_MUX_RESET_CHECK_DIRTY,
     post: &LAYOUT_MUX_RESET_POST,
     pre: &LAYOUT_MUX_RESET_PRE,

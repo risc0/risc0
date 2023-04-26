@@ -32,7 +32,7 @@ namespace risc0::circuit::rv32im {
 Fp step_verify_accum(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) {
   size_t mask = steps - 1;
   std::array<Fp, 96> host_args;
-  std::array<Fp, 64> host_outs;
+  std::array<Fp, 32> host_outs;
   // loc("./cirgen/components/plonk.h":218:23)
   Fp x0(2013265910);
   // loc("./cirgen/components/onehot.h":46:19)
