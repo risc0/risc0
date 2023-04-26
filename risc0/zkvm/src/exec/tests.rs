@@ -12,26 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::mem;
 use std::{collections::BTreeMap, io::Cursor, str::from_utf8, sync::Mutex};
 
-use num_bigint::BigUint;
-use num_traits::{One, Zero};
-use rand::{
-    distributions::{Distribution, Uniform},
-    Rng,
-};
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
-use risc0_zkvm_platform::{fileno, syscall::bigint, PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::{fileno, PAGE_SIZE, WORD_SIZE};
 use test_log::test;
 
 use super::{Executor, ExecutorEnv, TraceEvent};
 use crate::{
     serde::{from_slice, to_vec},
-    ExitCode, MemoryImage, Program,
+    testutils, ExitCode, MemoryImage, Program,
 };
 
 #[test]
@@ -147,85 +140,21 @@ fn sha_accel() {
 
 #[test]
 fn bigint_accel() {
-    let zero = [0, 0, 0, 0, 0, 0, 0, 0];
-    let one = [1, 0, 0, 0, 0, 0, 0, 0];
+    let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+    for case in cases {
+        let input = to_vec(&MultiTestSpec::BigInt {
+            x: case.x,
+            y: case.y,
+            modulus: case.modulus,
+        })
+        .unwrap();
 
-    struct Case {
-        x: [u32; bigint::WIDTH_WORDS],
-        y: [u32; bigint::WIDTH_WORDS],
-        modulus: [u32; bigint::WIDTH_WORDS],
-    }
-
-    struct BigIntTestCaseGenerator<R: Rng> {
-        pub rng: R,
-    }
-
-    impl<R: Rng> Iterator for BigIntTestCaseGenerator<R> {
-        type Item = Case;
-
-        fn next(&mut self) -> Option<Self::Item> {
-            let bigint_max = BigUint::one() << bigint::WIDTH_BITS;
-
-            let modulus = Uniform::new(&BigUint::one(), &bigint_max).sample(&mut self.rng);
-            let mut x = Uniform::new(&BigUint::zero(), &bigint_max).sample(&mut self.rng);
-            let mut y = Uniform::new(&BigUint::zero(), &modulus).sample(&mut self.rng);
-
-            // x and y come from slightly different ranges because at least one input must
-            // be less than the modulus, but it doesn't matter which one. Randomly swap.
-            if self.rng.gen::<bool>() {
-                mem::swap(&mut x, &mut y);
-            }
-
-            Some(Self::Item {
-                x: x.to_u32_digits().try_into().unwrap(),
-                y: y.to_u32_digits().try_into().unwrap(),
-                modulus: modulus.to_u32_digits().try_into().unwrap(),
-            })
-        }
-    }
-
-    let mut cases = vec![
-        Case {
-            x: [1, 2, 3, 4, 5, 6, 7, 8],
-            y: [9, 10, 11, 12, 13, 14, 15, 16],
-            modulus: [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32],
-        },
-        Case {
-            x: [1, 2, 3, 4, 5, 6, 7, 8],
-            y: zero,
-            modulus: [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32],
-        },
-        Case {
-            x: [1, 2, 3, 4, 5, 6, 7, 8],
-            y: one,
-            modulus: [17u32, 18u32, 19u32, 20u32, 21u32, 22u32, 23u32, 24u32],
-        },
-    ];
-
-    let generator = BigIntTestCaseGenerator {
-        rng: rand::thread_rng(),
-    };
-    cases.extend(generator.take(10));
-
-    for Case { x, y, modulus } in cases {
-        let expected = {
-            let z =
-                (BigUint::from_slice(&x) * BigUint::from_slice(&y)) % BigUint::from_slice(&modulus);
-            let mut vec = z.to_u32_digits();
-            if vec.len() > bigint::WIDTH_WORDS {
-                panic!("modular multiplication result larger than input modulus");
-            }
-            vec.resize(bigint::WIDTH_WORDS, 0);
-            vec
-        };
-
-        let input = to_vec(&MultiTestSpec::BigInt { x, y, modulus }).unwrap();
         let env = ExecutorEnv::builder().add_input(&input).build();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
             session.journal.as_slice(),
-            bytemuck::cast_slice(expected.as_slice())
+            bytemuck::cast_slice(case.expected().as_slice())
         );
     }
 }
