@@ -68,7 +68,8 @@ pub struct Session {
     pub exit_code: ExitCode,
 
     /// The proof ID used for Bonsai execution
-    pub proof_id: Option<i64>,
+    #[serde(skip_serializing)]
+    pub(crate) proof_id: Option<i64>,
 }
 
 /// The execution trace of a portion of a program.
