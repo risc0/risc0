@@ -16,7 +16,6 @@ use anyhow::{anyhow, Context, Result};
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest as OtherDigest, Sha256};
-use utoipa::{self, ToSchema};
 use validator::Validate;
 
 use super::receipt::SessionReceipt;
@@ -29,72 +28,55 @@ const RECEIPT_PATH: &str = "v1/receipts";
 
 /// Proof request workload
 #[serde_with::serde_as]
-#[derive(
-    Debug, Deserialize, Serialize, Validate, ToSchema, sqlx::FromRow, Clone, PartialEq, Eq,
-)]
+#[derive(Debug, Deserialize, Serialize, Validate, Clone, PartialEq, Eq)]
 // TODO(Cardosaum): Add builder for ProofRequest ensuring all the values conform
 // to the specifications?
 #[serde(rename_all = "camelCase")]
 pub struct ProofRequest {
     /// An auto-increment integer as identifier
-    #[schema(example = 1)]
     pub id: i64,
     /// Enum metadata for describing the proving system version
-    #[schema(example = 1)]
     pub proving_system: i32,
     /// A 32-byte hash hex-encoded identifier for the program
-    #[schema(example = "e94abfe9b14e827d5d4251621c2fb287ea0334df86b332f07f89ebd4d463b883")]
     #[validate(length(equal = 64))]
     pub elf_hash: String,
     /// A 32-byte hash hex-encoded identifier for the image_id
-    #[schema(example = "03AC674216F3E15C761EE1A5E255F067953623C8B388B4459E13F978D7C846F4")]
     #[validate(length(equal = 64))]
     pub image_id: String,
     /// A 32-byte hash hex-encoded identifier for the input to the program
-    #[schema(example = "03AC674216F3E15C761EE1A5E255F067953623C8B388B4459E13F978D7C846F4")]
     #[validate(length(equal = 64))]
     pub input_hash: String,
     /// A 32-byte hash hex-encoded identifier for the proof corresponding to
     /// this request
-    #[schema(example = "caf884973ecb9ac28fefd9acb616a77c0c8efbf73f11a23a7ef3d9aa89e50160")]
     pub receipt_hash: Option<String>,
     /// ID of the smallest leaf within the aggregated rollup tree
-    #[schema(example = 3)]
     pub min_leaf_id: Option<i64>,
     /// ID of the parent proof request which rolls up this request
-    #[schema(example = 3)]
     pub rollup_id: Option<i64>,
     /// The rollup sub-tree height
-    #[schema(example = 1)]
     pub proof_height: i16,
     /// Leaf: H256(MethodID, Journal), Node: H256(left_rjc,right_rjc)
-    #[schema(example = "bd291172a0779b5cfcafbd5dbfa059d4c40d0b70df89fa379e2f37a5bdd35348")]
     pub rollup_journal_commitment: Option<String>,
     /// The time this request was created
     #[serde_as(as = "Rfc3339")]
-    #[schema(example = "2022-12-07T22:57:43.590055Z")]
     pub created_at: OffsetDateTime,
     /// Last prover to take this workload
-    #[schema(example = 213)]
     pub last_prover: Option<i32>,
     /// The time this request was last fetched by a worker for processing
     #[serde_as(as = "Option<Rfc3339>")]
-    #[schema(example = "2022-12-07T22:58:43.590055Z")]
     pub last_started_at: Option<OffsetDateTime>,
     /// The time this request was completed (and a 'receipt_hash' was provided)
     #[serde_as(as = "Option<Rfc3339>")]
-    #[schema(example = "2022-12-07T22:59:43.590055Z")]
     pub completed_at: Option<OffsetDateTime>,
     /// Description of the error this request has been marked with
     pub error: Option<String>,
 }
 
 /// Proof request to be created by image_id
-#[derive(Debug, Deserialize, Serialize, ToSchema, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Deserialize, Serialize, Clone, PartialEq, Eq, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateProofRequestByImageId {
     /// A 32-byte hash hex-encoded identifier for the image ID
-    #[schema(example = "e94abfe9b14e827d5d4251621c2fb287ea0334df86b332f07f89ebd4d463b883")]
     pub image_id: String,
     /// input to the program
     pub input: String,
@@ -103,26 +85,20 @@ pub struct CreateProofRequestByImageId {
 use time::{format_description::well_known::Rfc3339, OffsetDateTime};
 /// Response upon a proof request creation
 #[serde_with::serde_as]
-#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Serialize, ToSchema, sqlx::FromRow, Clone)]
+#[derive(Debug, PartialEq, Eq, Hash, Deserialize, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct CreateProofRequestResponse {
     /// An auto-increment integer as identifier
-    #[schema(example = 1)]
     pub id: i64,
     /// Enum metadata for describing the proving system version
-    #[schema(example = 1)]
     pub proving_system: i32,
     /// A 32-byte hash hex-encoded identifier for the program
-    #[schema(example = "e94abfe9b14e827d5d4251621c2fb287ea0334df86b332f07f89ebd4d463b883")]
     pub elf_hash: String,
     /// A 32-byte hash hex-encoded identifier for the image_id
-    #[schema(example = "E3B0C44298FC1C149AFBF4C8996FB92427AE41E4649B934CA495991B7852B855")]
     pub image_id: String,
     /// A 32-byte hash hex-encoded identifier for the input to the program
-    #[schema(example = "03AC674216F3E15C761EE1A5E255F067953623C8B388B4459E13F978D7C846F4")]
     pub input_hash: String,
     /// The time this request was created
-    #[schema(example = "2022-12-07T22:57:43.590055Z")]
     // `OffsetDateTime`'s default serialization format is not standard.
     #[serde_as(as = "Rfc3339")]
     pub created_at: OffsetDateTime,
