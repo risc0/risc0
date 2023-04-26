@@ -66,7 +66,6 @@ pub struct Executor<'a> {
     env: ExecutorEnv<'a>,
     pre_image: MemoryImage,
     monitor: MemoryMonitor,
-    pre_pc: u32,
     pc: u32,
     init_cycles: usize,
     fini_cycles: usize,
@@ -135,7 +134,6 @@ impl<'a> Executor<'a> {
             env,
             pre_image,
             monitor,
-            pre_pc: pc,
             pc,
             init_cycles,
             fini_cycles,
@@ -149,7 +147,7 @@ impl<'a> Executor<'a> {
     /// Construct a new [Executor] from an ELF binary.
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         Ok(Self::new(env, image, program.entry))
     }
 
@@ -178,7 +176,6 @@ impl<'a> Executor<'a> {
                     self.segments.push(Segment::new(
                         pre_image,
                         post_image_id,
-                        self.pre_pc,
                         faults,
                         syscalls,
                         exit_code,
@@ -216,7 +213,7 @@ impl<'a> Executor<'a> {
         self.body_cycles = 0;
         self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
-        self.pre_pc = self.pc;
+        self.pre_image.pc = self.pc;
         self.monitor.clear_segment();
     }
 

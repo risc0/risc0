@@ -80,7 +80,6 @@ pub struct Session {
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
-    pub(crate) pc: u32,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
@@ -105,11 +104,9 @@ impl Session {
 
 impl Segment {
     /// Create a new [Segment] from its constituent components.
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
-        pc: u32,
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
@@ -119,7 +116,6 @@ impl Segment {
         Self {
             pre_image,
             post_image_id,
-            pc,
             faults,
             syscalls,
             exit_code,
