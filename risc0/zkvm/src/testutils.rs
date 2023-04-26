@@ -15,6 +15,10 @@ pub struct BigIntTestCase {
     pub modulus: [u32; bigint::WIDTH_WORDS],
 }
 
+// NOTE: Testing here could be significantly improved by creating a less uniform
+// test case generator. It is likely more important to test inputs of different
+// byte-lengths, with zero and 0xff bytes, and other boundary values than
+// testing values in the middle.
 impl Distribution<BigIntTestCase> for Standard {
     fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BigIntTestCase {
         let bigint_max = BigUint::one() << bigint::WIDTH_BITS;
