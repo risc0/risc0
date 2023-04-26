@@ -437,6 +437,19 @@ impl MachineContext {
         }
         let mut q = [0u64; bigint::WIDTH_BYTES];
 
+        // Verify that the inputs are well-formed as byte-limbed BigInts.
+        // This would indicate a problem with the circuit, so we panic here.
+        for ai in a.iter().copied() {
+            if ai > 255 {
+                panic!("bigint divide: input a is not well-formed");
+            }
+        }
+        for bi in b.iter().copied() {
+            if bi > 255 {
+                panic!("bigint divide: input b is not well-formed");
+            }
+        }
+
         // Determine n, the width of the denominator, and check for divide by zero.
         let mut n = bigint::WIDTH_BYTES;
         while n > 0 && b[n - 1] == 0 {
@@ -465,7 +478,7 @@ impl MachineContext {
         if carry != 0 {
             panic!("bigint divide: final carry in input shift");
         }
-        for i in 0..(a.len() - 2) {
+        for i in 0..(a.len() - 1) {
             let tmp = (a[i] << shift_bits) + carry;
             a[i] = tmp & 0xFF;
             carry = tmp >> 8;
@@ -482,7 +495,7 @@ impl MachineContext {
                 q_approx -= 1;
             }
 
-            // Subtract from a multiples of the denominator.
+            // Subtract from `a` multiples of the denominator.
             let mut borrow = 0u64;
             for j in 0..=n {
                 let sub = q_approx * b[j] + borrow;

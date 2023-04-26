@@ -142,6 +142,7 @@ fn sha_accel() {
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
+        println!("Running BigInt circuit test case: {:x?}", case);
         let input = to_vec(&MultiTestSpec::BigInt {
             x: case.x,
             y: case.y,

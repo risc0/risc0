@@ -8,6 +8,7 @@ use rand::{
 };
 use risc0_zkvm_platform::syscall::bigint;
 
+#[derive(Debug)]
 pub struct BigIntTestCase {
     pub x: [u32; bigint::WIDTH_WORDS],
     pub y: [u32; bigint::WIDTH_WORDS],

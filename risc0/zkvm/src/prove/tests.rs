@@ -118,7 +118,11 @@ fn sha_basics() {
 #[test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+    // use rand::SeedableRng;
+    // let cases = testutils::generate_bigint_test_cases(&mut
+    // rand::rngs::StdRng::seed_from_u64(1), 1);
     for case in cases {
+        println!("Running BigInt circuit test case: {:08x?}", case);
         let input = to_vec(&MultiTestSpec::BigInt {
             x: case.x,
             y: case.y,
