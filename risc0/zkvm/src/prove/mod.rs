@@ -41,7 +41,7 @@ mod tests;
 
 use std::{collections::HashMap, rc::Rc};
 
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
     CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
@@ -186,6 +186,47 @@ pub trait Prover {
     fn get_name(&self) -> String;
 }
 
+/// An implementation of a [Prover] that runs remotely.
+pub struct RemoteProver {
+    name: String,
+}
+
+impl RemoteProver {
+    /// construct a remote prover. Unlike the [LocalProver], the hal is taken
+    /// care of by the remote prover.
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+        }
+    }
+}
+
+impl Prover for RemoteProver {
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn get_peak_memory_usage(&self) -> usize {
+        0
+    }
+
+    fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
+        log::debug!("prove_session: {}", self.name);
+        let bonsai_url = std::env::var("BONSAI_DOGFOOD_URL").unwrap();
+        let receipt = bonsai_api::run_proof(bonsai_url, session.proof_id.unwrap())?;
+        let image_id = session.root_image_id.unwrap();
+        receipt.verify(image_id)?;
+        Ok(receipt)
+    }
+
+    fn prove_segment(&self, _segment: &Segment) -> Result<SegmentReceipt> {
+        Err(anyhow!(
+            "this is unimplemented for prover [{}]",
+            self.get_name()
+        ))
+    }
+}
+
 /// An implementation of a [Prover] that runs locally.
 pub struct LocalProver<H, E>
 where
@@ -227,11 +268,6 @@ where
     }
 
     fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
-        if let Ok(bonsai_url) = std::env::var("BONSAI_DOGFOOD_URL") {
-            log::debug!("running bonsai prove");
-            return bonsai_api::run_proof(bonsai_url, session.proof_id.unwrap());
-        }
-
         log::debug!("prove_session: {}", self.name);
         let mut segments = Vec::new();
         for segment in session.segments.iter() {
@@ -309,6 +345,9 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
         let prover = Rc::new(LocalProver::new("cpu:poseidon", cpu::poseidon_hal_eval()));
         table.insert("cpu:poseidon".to_string(), prover.clone());
         table.insert("$poseidon".to_string(), prover);
+
+        let prover = Rc::new(RemoteProver::new("bonsai"));
+        table.insert("$bonsai".to_string(), prover.clone());
     }
     #[cfg(feature = "cuda")]
     {
@@ -342,6 +381,12 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
 /// default CPU-based prover.
 pub fn default_prover() -> Rc<dyn Prover> {
     let provers = provers();
+    if std::env::var("BONSAI_DOGFOOD_URL").is_ok() {
+        println!("give bonsai prover");
+        if let Some(prover) = provers.get("$bonsai") {
+            return prover.clone();
+        }
+    }
     if let Ok(requested) = std::env::var("RISC0_PROVER") {
         if let Some(prover) = provers.get(&requested) {
             return prover.clone();

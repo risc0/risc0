@@ -50,6 +50,11 @@ fn hashfn_poseidon() {
 }
 
 #[test]
+fn run_bonsai() {
+    prove_nothing("$bonsai").unwrap();
+}
+
+#[test]
 fn hashfn_blake2b() {
     let hal_eval = HalEval {
         hal: Rc::new(CpuHal::<BabyBear, Blake2bCpuHashSuite>::new()),

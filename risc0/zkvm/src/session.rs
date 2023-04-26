@@ -70,6 +70,10 @@ pub struct Session {
     /// The proof ID used for Bonsai execution
     #[serde(skip_serializing)]
     pub(crate) proof_id: Option<i64>,
+
+    /// The image ID of the original image
+    #[serde(skip_serializing)]
+    pub(crate) root_image_id: Option<Digest>,
 }
 
 /// The execution trace of a portion of a program.
@@ -100,7 +104,7 @@ impl Session {
     /// Construct a new [Session] from its constituent components. This assumes
     /// bonsai is not being used to generate the proofs.
     pub fn new(segments: Vec<Segment>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
-        Self::new_with_proof_id(segments, journal, exit_code, None)
+        Self::new_with_proof_id(segments, journal, exit_code, None, None)
     }
 
     /// Construct a new [Session] from its constituent components including a
@@ -111,12 +115,14 @@ impl Session {
         journal: Vec<u8>,
         exit_code: ExitCode,
         proof_id: Option<i64>,
+        root_image_id: Option<Digest>,
     ) -> Self {
         Self {
             segments,
             journal,
             exit_code,
             proof_id,
+            root_image_id,
         }
     }
 }

@@ -200,6 +200,7 @@ impl<'a> Executor<'a> {
                 Vec::new(),
                 ExitCode::Halted(0),
                 self.bonsai_proof_id,
+                Some(self.pre_image.get_root()),
             ));
         }
 
