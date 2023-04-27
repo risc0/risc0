@@ -91,7 +91,10 @@ impl MemoryMonitor {
     }
 
     pub fn load_registers<const N: usize>(&mut self, idxs: [usize; N]) -> [u32; N] {
-        idxs.map(|idx| self.load_register(idx))
+        idxs.map(|idx| {
+            let addr = get_register_addr(idx);
+            u32::from_le_bytes(array::from_fn(|idx| self.image.buf[addr as usize + idx]))
+        })
     }
 
     pub fn load_string(&mut self, mut addr: u32) -> Result<String> {
@@ -282,8 +285,16 @@ impl PageFaults {
             let page_idx = info.get_page_index(addr);
             let entry_addr = info.get_page_entry_addr(page_idx);
             match dir {
-                IncludeDir::Read => self.reads.insert(page_idx),
-                IncludeDir::Write => self.writes.insert(page_idx),
+                IncludeDir::Read => {
+                    if !self.reads.insert(page_idx) {
+                        break;
+                    }
+                }
+                IncludeDir::Write => {
+                    if !self.writes.insert(page_idx) {
+                        break;
+                    }
+                }
             };
             if page_idx == info.root_idx {
                 break;

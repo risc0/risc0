@@ -189,6 +189,7 @@ impl<'a> Executor<'a> {
                             .len()
                             .try_into()
                             .context("Too many segment to fit in u32")?,
+                        self.body_cycles,
                     ));
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),
