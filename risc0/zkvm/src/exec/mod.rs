@@ -28,6 +28,8 @@ mod tests;
 use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use anyhow::{anyhow, bail, Context, Result};
+use num_bigint::BigUint;
+use num_traits::Zero;
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -40,7 +42,7 @@ use risc0_zkvm_platform::{
     fileno,
     memory::MEM_SIZE,
     syscall::{
-        ecall, halt,
+        bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
     },
     PAGE_SIZE, WORD_SIZE,
@@ -58,6 +60,9 @@ use crate::{
 
 /// The number of cycles required to compress a SHA-256 block.
 const SHA_CYCLES: usize = 72;
+
+/// Number of cycles required to complete a BigInt operation.
+const BIGINT_CYCLES: usize = 9;
 
 /// The Executor provides an implementation for the execution phase.
 ///
@@ -347,6 +352,7 @@ impl<'a> Executor<'a> {
             ecall::OUTPUT => self.ecall_output(),
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
+            ecall::BIGINT => self.ecall_bigint(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }
@@ -420,6 +426,54 @@ impl<'a> Executor<'a> {
             self.pc + WORD_SIZE as u32,
             None,
             SHA_CYCLES * count as usize,
+            None,
+        ))
+    }
+
+    // Computes the state transitions for the BIGINT ecall.
+    // Take reads inputs x, y, and N and writes output z = x * y mod N.
+    // Note that op is currently ignored but must be set to 0.
+    fn ecall_bigint(&mut self) -> Result<OpCodeResult> {
+        let [z_ptr, op, x_ptr, y_ptr, n_ptr] = self
+            .monitor
+            .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
+
+        let mut load_words = |ptr: u32| {
+            let mut arr = [0u32; bigint::WIDTH_WORDS];
+            for i in 0..bigint::WIDTH_WORDS {
+                arr[i] = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32);
+            }
+            arr
+        };
+
+        if op != 0 {
+            anyhow::bail!("ecall_bigint preflight: op must be set to 0");
+        }
+
+        // Load inputs.
+        let x = BigUint::from_slice(&load_words(x_ptr));
+        let y = BigUint::from_slice(&load_words(y_ptr));
+        let n = BigUint::from_slice(&load_words(n_ptr));
+
+        // Compute modular multiplication, or simply multiplication if n == 0.
+        let z = if n.is_zero() { x * y } else { (x * y) % n };
+
+        let mut z_vec = z.to_u32_digits();
+        if z_vec.len() > bigint::WIDTH_WORDS {
+            anyhow::bail!("ecall_bigint preflight: overflow in bigint multiplication");
+        }
+        // Add leading zeros, if necessary, to pad up to the ecall BigInt width.
+        z_vec.resize(bigint::WIDTH_WORDS, 0);
+
+        // Store result.
+        for (i, word) in z_vec.into_iter().enumerate() {
+            self.monitor.store_u32(z_ptr + (i * WORD_SIZE) as u32, word);
+        }
+
+        Ok(OpCodeResult::new(
+            self.pc + WORD_SIZE as u32,
+            None,
+            BIGINT_CYCLES,
             None,
         ))
     }
