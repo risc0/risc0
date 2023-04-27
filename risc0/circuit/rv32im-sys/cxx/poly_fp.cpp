@@ -14203,11 +14203,11 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7084{x80.tot + x80.mul * x7083, x80.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/bigint.cpp":242:17)
   MixState x7085{x7082.tot + x1015 * x7084.tot * x7082.mul, x7082.mul * x7084.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":245:48)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":246:48)
   auto x7086 = x982 + x1005;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":245:48)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":246:48)
   auto x7087 = x7086 + x1000;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":247:31)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":248:31)
   auto x7088 = x989 + x3746;
   // loc("cirgen/components/ram.cpp":168:3)
   auto x7089 = x425 - x7088;
@@ -14225,7 +14225,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7095{x7094.tot + x7094.mul * x978, x7094.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x7096{x7095.tot + x7095.mul * x980, x7095.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":247:31)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":248:31)
   auto x7097 = x7088 + x0;
   // loc("cirgen/components/ram.cpp":168:3)
   auto x7098 = x464 - x7097;
@@ -14243,7 +14243,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7104{x7103.tot + x7103.mul * x1049, x7103.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x7105{x7104.tot + x7104.mul * x1051, x7104.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":247:31)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":248:31)
   auto x7106 = x7088 + x3;
   // loc("cirgen/components/ram.cpp":168:3)
   auto x7107 = x503 - x7106;
@@ -14261,7 +14261,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7113{x7112.tot + x7112.mul * x1064, x7112.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x7114{x7113.tot + x7113.mul * x1066, x7113.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":247:31)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":248:31)
   auto x7115 = x7088 + x18;
   // loc("cirgen/components/ram.cpp":168:3)
   auto x7116 = x597 - x7115;
@@ -14279,1203 +14279,1203 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7122{x7121.tot + x7121.mul * x1292, x7121.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x7123{x7122.tot + x7122.mul * x1294, x7122.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":245:48)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":246:48)
   MixState x7124{x7085.tot + x7087 * x7123.tot * x7085.mul, x7085.mul * x7123.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7125 = x1032 - x185;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7126{x80.tot + x80.mul * x7125, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7127{x7124.tot + x982 * x7126.tot * x7124.mul, x7124.mul * x7126.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7128 = args[2][119 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7129 = x1032 - x7128;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7130{x80.tot + x80.mul * x7129, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7131{x7127.tot + x1000 * x7130.tot * x7127.mul, x7127.mul * x7130.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   auto x7132 = x982 + x1000;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7133 = x1136 - x413;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7134{x80.tot + x80.mul * x7133, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7135{x7131.tot + x7132 * x7134.tot * x7131.mul, x7131.mul * x7134.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7136 = x1239 - x196;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7137{x80.tot + x80.mul * x7136, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7138{x7135.tot + x982 * x7137.tot * x7135.mul, x7135.mul * x7137.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7139 = args[2][120 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7140 = x1239 - x7139;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7141{x80.tot + x80.mul * x7140, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7142{x7138.tot + x1000 * x7141.tot * x7138.mul, x7138.mul * x7141.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7143 = x1145 - x416;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7144{x80.tot + x80.mul * x7143, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7145{x7142.tot + x7132 * x7144.tot * x7142.mul, x7142.mul * x7144.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7146 = x1307 - x198;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7147{x80.tot + x80.mul * x7146, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7148{x7145.tot + x982 * x7147.tot * x7145.mul, x7145.mul * x7147.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7149 = args[2][121 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7150 = x1307 - x7149;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7151{x80.tot + x80.mul * x7150, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7152{x7148.tot + x1000 * x7151.tot * x7148.mul, x7148.mul * x7151.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7153 = x1255 - x458;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7154{x80.tot + x80.mul * x7153, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7155{x7152.tot + x7132 * x7154.tot * x7152.mul, x7152.mul * x7154.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7156 = x1328 - x200;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7157{x80.tot + x80.mul * x7156, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7158{x7155.tot + x982 * x7157.tot * x7155.mul, x7155.mul * x7157.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7159 = args[2][122 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7160 = x1328 - x7159;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7161{x80.tot + x80.mul * x7160, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7162{x7158.tot + x1000 * x7161.tot * x7158.mul, x7158.mul * x7161.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7163 = x1103 - x461;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7164{x80.tot + x80.mul * x7163, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7165{x7162.tot + x7132 * x7164.tot * x7162.mul, x7162.mul * x7164.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7166 = x1351 - x202;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7167{x80.tot + x80.mul * x7166, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7168{x7165.tot + x982 * x7167.tot * x7165.mul, x7165.mul * x7167.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7169 = args[2][126 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7170 = x1351 - x7169;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7171{x80.tot + x80.mul * x7170, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7172{x7168.tot + x1000 * x7171.tot * x7168.mul, x7168.mul * x7171.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7173 = x1109 - x452;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7174{x80.tot + x80.mul * x7173, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7175{x7172.tot + x7132 * x7174.tot * x7172.mul, x7172.mul * x7174.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7176 = x1373 - x204;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7177{x80.tot + x80.mul * x7176, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7178{x7175.tot + x982 * x7177.tot * x7175.mul, x7175.mul * x7177.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7179 = args[2][127 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7180 = x1373 - x7179;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7181{x80.tot + x80.mul * x7180, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7182{x7178.tot + x1000 * x7181.tot * x7178.mul, x7178.mul * x7181.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7183 = x1115 - x455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7184{x80.tot + x80.mul * x7183, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7185{x7182.tot + x7132 * x7184.tot * x7182.mul, x7182.mul * x7184.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7186 = x1395 - x206;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7187{x80.tot + x80.mul * x7186, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7188{x7185.tot + x982 * x7187.tot * x7185.mul, x7185.mul * x7187.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7189 = args[2][128 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7190 = x1395 - x7189;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7191{x80.tot + x80.mul * x7190, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7192{x7188.tot + x1000 * x7191.tot * x7188.mul, x7188.mul * x7191.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7193 = x1118 - x497;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7194{x80.tot + x80.mul * x7193, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7195{x7192.tot + x7132 * x7194.tot * x7192.mul, x7192.mul * x7194.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7196 = x1428 - x208;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7197{x80.tot + x80.mul * x7196, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7198{x7195.tot + x982 * x7197.tot * x7195.mul, x7195.mul * x7197.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7199 = args[2][129 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7200 = x1428 - x7199;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7201{x80.tot + x80.mul * x7200, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7202{x7198.tot + x1000 * x7201.tot * x7198.mul, x7198.mul * x7201.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7203 = x1121 - x500;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7204{x80.tot + x80.mul * x7203, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7205{x7202.tot + x7132 * x7204.tot * x7202.mul, x7202.mul * x7204.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7206 = x1461 - x210;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7207{x80.tot + x80.mul * x7206, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7208{x7205.tot + x982 * x7207.tot * x7205.mul, x7205.mul * x7207.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7209 = args[2][133 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7210 = x1461 - x7209;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7211{x80.tot + x80.mul * x7210, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7212{x7208.tot + x1000 * x7211.tot * x7208.mul, x7208.mul * x7211.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7213 = x1124 - x491;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7214{x80.tot + x80.mul * x7213, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7215{x7212.tot + x7132 * x7214.tot * x7212.mul, x7212.mul * x7214.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7216 = x1091 - x212;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7217{x80.tot + x80.mul * x7216, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7218{x7215.tot + x982 * x7217.tot * x7215.mul, x7215.mul * x7217.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7219 = args[2][134 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7220 = x1091 - x7219;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7221{x80.tot + x80.mul * x7220, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7222{x7218.tot + x1000 * x7221.tot * x7218.mul, x7218.mul * x7221.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7223 = x1146 - x494;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7224{x80.tot + x80.mul * x7223, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7225{x7222.tot + x7132 * x7224.tot * x7222.mul, x7222.mul * x7224.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7226 = x1092 - x214;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7227{x80.tot + x80.mul * x7226, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7228{x7225.tot + x982 * x7227.tot * x7225.mul, x7225.mul * x7227.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7229 = args[2][135 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7230 = x1092 - x7229;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7231{x80.tot + x80.mul * x7230, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7232{x7228.tot + x1000 * x7231.tot * x7228.mul, x7228.mul * x7231.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7233 = x1147 - x591;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7234{x80.tot + x80.mul * x7233, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7235{x7232.tot + x7132 * x7234.tot * x7232.mul, x7232.mul * x7234.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7236 = x1093 - x216;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7237{x80.tot + x80.mul * x7236, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7238{x7235.tot + x982 * x7237.tot * x7235.mul, x7235.mul * x7237.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7239 = args[2][136 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7240 = x1093 - x7239;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7241{x80.tot + x80.mul * x7240, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7242{x7238.tot + x1000 * x7241.tot * x7238.mul, x7238.mul * x7241.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7243 = x1148 - x594;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7244{x80.tot + x80.mul * x7243, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7245{x7242.tot + x7132 * x7244.tot * x7242.mul, x7242.mul * x7244.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7246 = x1094 - x218;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7247{x80.tot + x80.mul * x7246, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7248{x7245.tot + x982 * x7247.tot * x7245.mul, x7245.mul * x7247.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7249 = args[2][140 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7250 = x1094 - x7249;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7251{x80.tot + x80.mul * x7250, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7252{x7248.tot + x1000 * x7251.tot * x7248.mul, x7248.mul * x7251.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7253 = x1149 - x585;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7254{x80.tot + x80.mul * x7253, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7255{x7252.tot + x7132 * x7254.tot * x7252.mul, x7252.mul * x7254.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7256 = x1068 - x220;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7257{x80.tot + x80.mul * x7256, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7258{x7255.tot + x982 * x7257.tot * x7255.mul, x7255.mul * x7257.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7259 = args[2][141 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7260 = x1068 - x7259;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7261{x80.tot + x80.mul * x7260, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7262{x7258.tot + x1000 * x7261.tot * x7258.mul, x7258.mul * x7261.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7263 = x1177 - x588;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7264{x80.tot + x80.mul * x7263, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7265{x7262.tot + x7132 * x7264.tot * x7262.mul, x7262.mul * x7264.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7266 = x1085 - x222;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7267{x80.tot + x80.mul * x7266, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7268{x7265.tot + x982 * x7267.tot * x7265.mul, x7265.mul * x7267.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7269 = args[2][142 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7270 = x1085 - x7269;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7271{x80.tot + x80.mul * x7270, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7272{x7268.tot + x1000 * x7271.tot * x7268.mul, x7268.mul * x7271.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7273 = x1191 - x1278;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7274{x80.tot + x80.mul * x7273, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7275{x7272.tot + x7132 * x7274.tot * x7272.mul, x7272.mul * x7274.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   auto x7276 = x1127 - x224;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
   MixState x7277{x80.tot + x80.mul * x7276, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":370:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":373:20)
   MixState x7278{x7275.tot + x982 * x7277.tot * x7275.mul, x7275.mul * x7277.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
   auto x7279 = args[2][143 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   auto x7280 = x1127 - x7279;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
   MixState x7281{x80.tot + x80.mul * x7280, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":372:20)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":375:20)
   MixState x7282{x7278.tot + x1000 * x7281.tot * x7278.mul, x7278.mul * x7281.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   auto x7283 = x1198 - x1281;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
   MixState x7284{x80.tot + x80.mul * x7283, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
   MixState x7285{x7282.tot + x7132 * x7284.tot * x7282.mul, x7282.mul * x7284.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7286 = args[2][18 * steps + ((cycle - kInvRate * 5) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7287 = args[2][19 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7288 = x7287 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7289 = x7286 + x7288;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7290 = x7289 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7291 = x7290 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7292 = x7291 + x2898;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7293 = x3972 - x7292;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7294{x80.tot + x80.mul * x7293, x80.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7295 = args[2][20 * steps + ((cycle - kInvRate * 5) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7296 = args[2][21 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7297 = x7296 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7298 = x7295 + x7297;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7299 = x7298 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7300 = x3973 + x7290;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7301 = x7299 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7302 = x7301 + x2899;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7303 = x7300 - x7302;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7304{x7294.tot + x7294.mul * x7303, x7294.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7305 = args[2][22 * steps + ((cycle - kInvRate * 5) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7306 = args[2][23 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7307 = x7306 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7308 = x7305 + x7307;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7309 = x7308 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7310 = x3974 + x7299;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7311 = x7309 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7312 = x7311 + x2900;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7313 = x7310 - x7312;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7314{x7304.tot + x7304.mul * x7313, x7304.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7315 = args[2][24 * steps + ((cycle - kInvRate * 5) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7316 = args[2][25 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7317 = x7316 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7318 = x7315 + x7317;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7319 = x7318 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7320 = x3975 + x7309;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7321 = x7319 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7322 = x7321 + x2901;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7323 = x7320 - x7322;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7324{x7314.tot + x7314.mul * x7323, x7314.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7325 = args[2][26 * steps + ((cycle - kInvRate * 5) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7326 = args[2][27 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7327 = x7326 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7328 = x7325 + x7327;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7329 = x7328 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7330 = x3976 + x7319;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7331 = x7329 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7332 = x7331 + x2902;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7333 = x7330 - x7332;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7334{x7324.tot + x7324.mul * x7333, x7324.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7335 = args[2][28 * steps + ((cycle - kInvRate * 5) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7336 = args[2][29 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7337 = x7336 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7338 = x7335 + x7337;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7339 = x7338 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7340 = x3977 + x7329;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7341 = x7339 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7342 = x7341 + x2903;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7343 = x7340 - x7342;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7344{x7334.tot + x7334.mul * x7343, x7334.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7345 = args[2][30 * steps + ((cycle - kInvRate * 5) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7346 = args[2][31 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7347 = x7346 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7348 = x7345 + x7347;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7349 = x7348 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7350 = x3978 + x7339;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7351 = x7349 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7352 = x7351 + x2904;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7353 = x7350 - x7352;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7354{x7344.tot + x7344.mul * x7353, x7344.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7355 = args[2][32 * steps + ((cycle - kInvRate * 5) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7356 = args[2][33 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7357 = x7356 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7358 = x7355 + x7357;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7359 = x7358 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7360 = x3979 + x7349;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7361 = x7359 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7362 = x7361 + x2905;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7363 = x7360 - x7362;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7364{x7354.tot + x7354.mul * x7363, x7354.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7365 = args[2][18 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7366 = args[2][19 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7367 = x7366 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7368 = x7365 + x7367;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7369 = x7368 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7370 = x3980 + x7359;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7371 = x7369 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7372 = x7371 + x2906;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7373 = x7370 - x7372;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7374{x7364.tot + x7364.mul * x7373, x7364.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7375 = args[2][20 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7376 = args[2][21 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7377 = x7376 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7378 = x7375 + x7377;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7379 = x7378 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7380 = x3981 + x7369;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7381 = x7379 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7382 = x7381 + x2907;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7383 = x7380 - x7382;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7384{x7374.tot + x7374.mul * x7383, x7374.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7385 = args[2][22 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7386 = args[2][23 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7387 = x7386 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7388 = x7385 + x7387;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7389 = x7388 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7390 = x3982 + x7379;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7391 = x7389 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7392 = x7391 + x2908;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7393 = x7390 - x7392;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7394{x7384.tot + x7384.mul * x7393, x7384.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7395 = args[2][24 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7396 = args[2][25 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7397 = x7396 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7398 = x7395 + x7397;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7399 = x7398 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7400 = x4079 + x7389;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7401 = x7399 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7402 = x7401 + x2909;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7403 = x7400 - x7402;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7404{x7394.tot + x7394.mul * x7403, x7394.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7405 = args[2][26 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7406 = args[2][27 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7407 = x7406 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7408 = x7405 + x7407;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7409 = x7408 - x68;
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7410 = args[2][30 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7411 = x4080 + x7399;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7412 = x7409 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7413 = x7412 + x7410;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7414 = x7411 - x7413;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7415{x7404.tot + x7404.mul * x7414, x7404.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7416 = args[2][28 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7417 = args[2][29 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7418 = x7417 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7419 = x7416 + x7418;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7420 = x7419 - x68;
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7421 = args[2][31 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7422 = x4081 + x7409;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7423 = x7420 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7424 = x7423 + x7421;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7425 = x7422 - x7424;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7426{x7415.tot + x7415.mul * x7425, x7415.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7427 = args[2][30 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7428 = args[2][31 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7429 = x7428 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7430 = x7427 + x7429;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7431 = x7430 - x68;
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7432 = args[2][32 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7433 = x4082 + x7420;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7434 = x7431 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7435 = x7434 + x7432;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7436 = x7433 - x7435;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7437{x7426.tot + x7426.mul * x7436, x7426.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7438 = args[2][32 * steps + ((cycle - kInvRate * 4) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7439 = args[2][33 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7440 = x7439 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7441 = x7438 + x7440;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7442 = x7441 - x68;
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7443 = args[2][33 * steps + ((cycle - kInvRate * 1) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7444 = x4083 + x7431;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7445 = x7442 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7446 = x7445 + x7443;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7447 = x7444 - x7446;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7448{x7437.tot + x7437.mul * x7447, x7437.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7449 = args[2][18 * steps + ((cycle - kInvRate * 3) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7450 = args[2][19 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7451 = x7450 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7452 = x7449 + x7451;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7453 = x7452 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7454 = x4084 + x7442;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7455 = x7453 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7456 = x7455 + x185;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7457 = x7454 - x7456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7458{x7448.tot + x7448.mul * x7457, x7448.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7459 = args[2][20 * steps + ((cycle - kInvRate * 3) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7460 = args[2][21 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7461 = x7460 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7462 = x7459 + x7461;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7463 = x7462 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7464 = x4085 + x7453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7465 = x7463 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7466 = x7465 + x196;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7467 = x7464 - x7466;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7468{x7458.tot + x7458.mul * x7467, x7458.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7469 = args[2][22 * steps + ((cycle - kInvRate * 3) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7470 = args[2][23 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7471 = x7470 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7472 = x7469 + x7471;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7473 = x7472 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7474 = x4086 + x7463;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7475 = x7473 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7476 = x7475 + x198;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7477 = x7474 - x7476;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7478{x7468.tot + x7468.mul * x7477, x7468.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7479 = args[2][24 * steps + ((cycle - kInvRate * 3) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7480 = args[2][25 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7481 = x7480 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7482 = x7479 + x7481;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7483 = x7482 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7484 = x2910 + x7473;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7485 = x7483 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7486 = x7485 + x200;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7487 = x7484 - x7486;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7488{x7478.tot + x7478.mul * x7487, x7478.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7489 = args[2][26 * steps + ((cycle - kInvRate * 3) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7490 = args[2][27 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7491 = x7490 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7492 = x7489 + x7491;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7493 = x7492 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7494 = x2911 + x7483;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7495 = x7493 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7496 = x7495 + x202;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7497 = x7494 - x7496;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7498{x7488.tot + x7488.mul * x7497, x7488.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7499 = args[2][28 * steps + ((cycle - kInvRate * 3) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7500 = args[2][29 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7501 = x7500 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7502 = x7499 + x7501;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7503 = x7502 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7504 = x2644 + x7493;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7505 = x7503 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7506 = x7505 + x204;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7507 = x7504 - x7506;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7508{x7498.tot + x7498.mul * x7507, x7498.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7509 = args[2][30 * steps + ((cycle - kInvRate * 3) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7510 = args[2][31 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7511 = x7510 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7512 = x7509 + x7511;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7513 = x7512 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7514 = x2645 + x7503;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7515 = x7513 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7516 = x7515 + x206;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7517 = x7514 - x7516;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7518{x7508.tot + x7508.mul * x7517, x7508.mul * (*mix)};
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7519 = args[2][32 * steps + ((cycle - kInvRate * 3) & mask)];
   // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
   auto x7520 = args[2][33 * steps + ((cycle - kInvRate * 3) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7521 = x7520 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7522 = x7519 + x7521;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7523 = x7522 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7524 = x2646 + x7513;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7525 = x7523 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7526 = x7525 + x208;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7527 = x7524 - x7526;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7528{x7518.tot + x7518.mul * x7527, x7518.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7529 = x5660 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7530 = x5659 + x7529;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7531 = x7530 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7532 = x2647 + x7523;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7533 = x7531 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7534 = x7533 + x210;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7535 = x7532 - x7534;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7536{x7528.tot + x7528.mul * x7535, x7528.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7537 = x5662 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7538 = x5661 + x7537;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7539 = x7538 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7540 = x2648 + x7531;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7541 = x7539 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7542 = x7541 + x212;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7543 = x7540 - x7542;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7544{x7536.tot + x7536.mul * x7543, x7536.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7545 = x5664 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7546 = x5663 + x7545;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7547 = x7546 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7548 = x2649 + x7539;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7549 = x7547 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7550 = x7549 + x214;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7551 = x7548 - x7550;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7552{x7544.tot + x7544.mul * x7551, x7544.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7553 = x5666 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7554 = x5665 + x7553;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7555 = x7554 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7556 = x2650 + x7547;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7557 = x7555 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7558 = x7557 + x216;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7559 = x7556 - x7558;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7560{x7552.tot + x7552.mul * x7559, x7552.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7561 = x5668 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7562 = x5667 + x7561;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7563 = x7562 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7564 = x2651 + x7555;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7565 = x7563 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7566 = x7565 + x218;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7567 = x7564 - x7566;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7568{x7560.tot + x7560.mul * x7567, x7560.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7569 = x5670 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7570 = x5669 + x7569;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7571 = x7570 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7572 = x4087 + x7563;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7573 = x7571 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7574 = x7573 + x220;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7575 = x7572 - x7574;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7576{x7568.tot + x7568.mul * x7575, x7568.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7577 = x5672 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7578 = x5671 + x7577;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7579 = x7578 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7580 = x4088 + x7571;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7581 = x7579 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7582 = x7581 + x222;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7583 = x7580 - x7582;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7584{x7576.tot + x7576.mul * x7583, x7576.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
   auto x7585 = x5674 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
   auto x7586 = x5673 + x7585;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
   auto x7587 = x7586 - x68;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7588 = x4089 + x7579;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7589 = x7587 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7590 = x7589 + x224;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7591 = x7588 - x7590;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7592{x7584.tot + x7584.mul * x7591, x7584.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
   auto x7593 = args[2][212 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7594 = x1032 + x7587;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7595 = x7593 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7596 = x7594 - x7595;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7597{x7592.tot + x7592.mul * x7596, x7592.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
   auto x7598 = args[2][213 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7599 = x1239 + x7593;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7600 = x7598 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7601 = x7599 - x7600;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7602{x7597.tot + x7597.mul * x7601, x7597.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
   auto x7603 = args[2][214 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7604 = x1307 + x7598;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7605 = x7603 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7606 = x7604 - x7605;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7607{x7602.tot + x7602.mul * x7606, x7602.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
   auto x7608 = args[2][215 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7609 = x1328 + x7603;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7610 = x7608 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7611 = x7609 - x7610;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7612{x7607.tot + x7607.mul * x7611, x7607.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
   auto x7613 = args[2][216 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7614 = x1351 + x7608;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7615 = x7613 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7616 = x7614 - x7615;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7617{x7612.tot + x7612.mul * x7616, x7612.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
   auto x7618 = args[2][217 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7619 = x1373 + x7613;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7620 = x7618 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7621 = x7619 - x7620;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7622{x7617.tot + x7617.mul * x7621, x7617.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
   auto x7623 = args[2][218 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7624 = x1395 + x7618;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7625 = x7623 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7626 = x7624 - x7625;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7627{x7622.tot + x7622.mul * x7626, x7622.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
   auto x7628 = args[2][219 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7629 = x1428 + x7623;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7630 = x7628 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7631 = x7629 - x7630;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7632{x7627.tot + x7627.mul * x7631, x7627.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7633 = x1461 + x7628;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7634 = x4186 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7635 = x7633 - x7634;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7636{x7632.tot + x7632.mul * x7635, x7632.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7637 = x1091 + x4186;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7638 = x4187 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7639 = x7637 - x7638;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7640{x7636.tot + x7636.mul * x7639, x7636.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7641 = x1092 + x4187;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7642 = x4188 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7643 = x7641 - x7642;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7644{x7640.tot + x7640.mul * x7643, x7640.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7645 = x1093 + x4188;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7646 = x7645 - x4689;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7647{x7644.tot + x7644.mul * x7646, x7644.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7648 = x1094 + x4189;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7649 = x4190 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7650 = x7648 - x7649;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7651{x7647.tot + x7647.mul * x7650, x7647.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7652 = x1068 + x4190;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7653 = x4191 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7654 = x7652 - x7653;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7655{x7651.tot + x7651.mul * x7654, x7651.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7656 = x1085 + x4191;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7657 = x4192 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7658 = x7656 - x7657;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7659{x7655.tot + x7655.mul * x7658, x7655.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7660 = x1127 + x4192;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7661 = x4193 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7662 = x7660 - x7661;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7663{x7659.tot + x7659.mul * x7662, x7659.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7664 = x1136 + x4193;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7665 = x4154 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7666 = x7664 - x7665;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7667{x7663.tot + x7663.mul * x7666, x7663.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7668 = x1145 + x4154;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7669 = x4155 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7670 = x7668 - x7669;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7671{x7667.tot + x7667.mul * x7670, x7667.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7672 = x1255 + x4155;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7673 = x4156 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7674 = x7672 - x7673;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7675{x7671.tot + x7671.mul * x7674, x7671.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7676 = x1103 + x4156;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7677 = x4157 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7678 = x7676 - x7677;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7679{x7675.tot + x7675.mul * x7678, x7675.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7680 = x1109 + x4157;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7681 = x4158 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7682 = x7680 - x7681;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7683{x7679.tot + x7679.mul * x7682, x7679.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7684 = x1115 + x4158;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7685 = x4159 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7686 = x7684 - x7685;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7687{x7683.tot + x7683.mul * x7686, x7683.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7688 = x1118 + x4159;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7689 = x4160 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7690 = x7688 - x7689;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7691{x7687.tot + x7687.mul * x7690, x7687.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7692 = x1121 + x4160;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7693 = x4161 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7694 = x7692 - x7693;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7695{x7691.tot + x7691.mul * x7694, x7691.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7696 = x1124 + x4161;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7697 = x4122 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7698 = x7696 - x7697;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7699{x7695.tot + x7695.mul * x7698, x7695.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7700 = x1146 + x4122;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7701 = x4123 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7702 = x7700 - x7701;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7703{x7699.tot + x7699.mul * x7702, x7699.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7704 = x1147 + x4123;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7705 = x4124 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7706 = x7704 - x7705;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7707{x7703.tot + x7703.mul * x7706, x7703.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7708 = x1148 + x4124;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7709 = x4125 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7710 = x7708 - x7709;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7711{x7707.tot + x7707.mul * x7710, x7707.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7712 = x1149 + x4125;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7713 = x4126 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7714 = x7712 - x7713;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7715{x7711.tot + x7711.mul * x7714, x7711.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7716 = x1177 + x4126;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
   auto x7717 = x4127 * x5;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7718 = x7716 - x7717;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7719{x7715.tot + x7715.mul * x7718, x7715.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   auto x7720 = x1191 + x4127;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
   MixState x7721{x7719.tot + x7719.mul * x7720, x7719.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":389:14)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":393:14)
   MixState x7722{x7285.tot + x1030 * x7721.tot * x7285.mul, x7285.mul * x7721.mul};
   // loc("cirgen/components/u32.cpp":34:5)
   auto x7723 = x413 - x185;
@@ -15599,13 +15599,13 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7782{x7781.tot + x7781.mul * x1292, x7781.mul * (*mix)};
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x7783{x7782.tot + x7782.mul * x1294, x7782.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":430:18)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":434:18)
   MixState x7784{x7722.tot + x996 * x7783.tot * x7722.mul, x7722.mul * x7783.mul};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":449:18)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":453:18)
   auto x7785 = x0 - x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":451:5)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":455:5)
   MixState x7786{x748.tot + x748.mul * x3413, x748.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":449:18)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":453:18)
   MixState x7787{x7784.tot + x7785 * x7786.tot * x7784.mul, x7784.mul * x7786.mul};
   // loc("./cirgen/components/bits.h":68:23)
   MixState x7788{x80.tot + x80.mul * x1267, x80.mul * (*mix)};
@@ -15613,9 +15613,9 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x7789{x7788.tot + x7788.mul * x715, x7788.mul * (*mix)};
   // loc("cirgen/circuit/rv32im/body.cpp":23:7)
   MixState x7790{x7789.tot + x7789.mul * x718, x7789.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":455:5)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":459:5)
   MixState x7791{x7790.tot + x7790.mul * x964, x7790.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":453:14)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":457:14)
   MixState x7792{x7787.tot + x1030 * x7791.tot * x7787.mul, x7787.mul * x7791.mul};
   // loc("./cirgen/components/mux.h":49:25)
   MixState x7793{x6974.tot + x419 * x7792.tot * x6974.mul, x6974.mul * x7792.mul};
@@ -28937,8245 +28937,8245 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x14451{x14450.tot + x14450.mul * x13915, x14450.mul * (*mix)};
   // loc("./cirgen/components/bits.h":24:25)
   MixState x14452{x14451.tot + x14451.mul * x13917, x14451.mul * (*mix)};
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[0](Reg)"("cirgen/circuit/rv32im/bigint.cpp":473:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[0](Reg)"("cirgen/circuit/rv32im/bigint.cpp":478:25))
   auto x14453 = args[3][36];
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[1](Reg)"("cirgen/circuit/rv32im/bigint.cpp":473:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[1](Reg)"("cirgen/circuit/rv32im/bigint.cpp":478:25))
   auto x14454 = args[3][37];
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[2](Reg)"("cirgen/circuit/rv32im/bigint.cpp":473:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[2](Reg)"("cirgen/circuit/rv32im/bigint.cpp":478:25))
   auto x14455 = args[3][38];
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[3](Reg)"("cirgen/circuit/rv32im/bigint.cpp":473:25))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/FpExtReg/elem[3](Reg)"("cirgen/circuit/rv32im/bigint.cpp":478:25))
   auto x14456 = args[3][39];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14457 = x4036 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14458 = x4036 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14459 = x4036 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14460 = x4036 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14461 = x14457 + x4037;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14462 = x4138 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14463 = x4138 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14464 = x4138 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14465 = x4138 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14466 = x14462 + x4139;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14467 = x14461 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14468 = x14458 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14469 = x14459 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14470 = x14468 + x14469;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14471 = x14460 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14472 = x14470 + x14471;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14473 = x14472 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14474 = x14467 + x14473;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14475 = x14461 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14476 = x14458 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14477 = x14475 + x14476;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14478 = x14459 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14479 = x14460 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14480 = x14478 + x14479;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14481 = x14480 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14482 = x14477 + x14481;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14483 = x14461 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14484 = x14458 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14485 = x14483 + x14484;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14486 = x14459 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14487 = x14485 + x14486;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14488 = x14460 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14489 = x14488 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14490 = x14487 + x14489;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14491 = x14461 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14492 = x14458 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14493 = x14491 + x14492;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14494 = x14459 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14495 = x14493 + x14494;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14496 = x14460 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14497 = x14495 + x14496;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14498 = x14474 + x4038;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14499 = x14466 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14500 = x14463 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14501 = x14464 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14502 = x14500 + x14501;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14503 = x14465 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14504 = x14502 + x14503;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14505 = x14504 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14506 = x14499 + x14505;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14507 = x14466 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14508 = x14463 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14509 = x14507 + x14508;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14510 = x14464 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14511 = x14465 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14512 = x14510 + x14511;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14513 = x14512 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14514 = x14509 + x14513;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14515 = x14466 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14516 = x14463 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14517 = x14515 + x14516;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14518 = x14464 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14519 = x14517 + x14518;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14520 = x14465 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14521 = x14520 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14522 = x14519 + x14521;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14523 = x14466 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14524 = x14463 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14525 = x14523 + x14524;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14526 = x14464 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14527 = x14525 + x14526;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14528 = x14465 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14529 = x14527 + x14528;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14530 = x14506 + x4140;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14531 = x14498 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14532 = x14482 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14533 = x14490 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14534 = x14532 + x14533;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14535 = x14497 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14536 = x14534 + x14535;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14537 = x14536 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14538 = x14531 + x14537;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14539 = x14498 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14540 = x14482 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14541 = x14539 + x14540;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14542 = x14490 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14543 = x14497 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14544 = x14542 + x14543;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14545 = x14544 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14546 = x14541 + x14545;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14547 = x14498 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14548 = x14482 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14549 = x14547 + x14548;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14550 = x14490 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14551 = x14549 + x14550;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14552 = x14497 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14553 = x14552 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14554 = x14551 + x14553;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14555 = x14498 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14556 = x14482 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14557 = x14555 + x14556;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14558 = x14490 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14559 = x14557 + x14558;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14560 = x14497 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14561 = x14559 + x14560;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14562 = x14538 + x4039;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14563 = x14530 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14564 = x14514 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14565 = x14522 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14566 = x14564 + x14565;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14567 = x14529 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14568 = x14566 + x14567;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14569 = x14568 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14570 = x14563 + x14569;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14571 = x14530 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14572 = x14514 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14573 = x14571 + x14572;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14574 = x14522 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14575 = x14529 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14576 = x14574 + x14575;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14577 = x14576 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14578 = x14573 + x14577;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14579 = x14530 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14580 = x14514 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14581 = x14579 + x14580;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14582 = x14522 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14583 = x14581 + x14582;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14584 = x14529 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14585 = x14584 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14586 = x14583 + x14585;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14587 = x14530 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14588 = x14514 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14589 = x14587 + x14588;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14590 = x14522 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14591 = x14589 + x14590;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14592 = x14529 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14593 = x14591 + x14592;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14594 = x14570 + x4141;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14595 = x14562 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14596 = x14546 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14597 = x14554 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14598 = x14596 + x14597;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14599 = x14561 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14600 = x14598 + x14599;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14601 = x14600 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14602 = x14595 + x14601;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14603 = x14562 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14604 = x14546 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14605 = x14603 + x14604;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14606 = x14554 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14607 = x14561 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14608 = x14606 + x14607;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14609 = x14608 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14610 = x14605 + x14609;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14611 = x14562 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14612 = x14546 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14613 = x14611 + x14612;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14614 = x14554 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14615 = x14613 + x14614;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14616 = x14561 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14617 = x14616 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14618 = x14615 + x14617;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14619 = x14562 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14620 = x14546 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14621 = x14619 + x14620;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14622 = x14554 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14623 = x14621 + x14622;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14624 = x14561 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14625 = x14623 + x14624;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14626 = x14602 + x4040;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14627 = x14594 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14628 = x14578 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14629 = x14586 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14630 = x14628 + x14629;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14631 = x14593 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14632 = x14630 + x14631;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14633 = x14632 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14634 = x14627 + x14633;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14635 = x14594 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14636 = x14578 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14637 = x14635 + x14636;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14638 = x14586 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14639 = x14593 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14640 = x14638 + x14639;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14641 = x14640 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14642 = x14637 + x14641;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14643 = x14594 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14644 = x14578 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14645 = x14643 + x14644;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14646 = x14586 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14647 = x14645 + x14646;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14648 = x14593 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14649 = x14648 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14650 = x14647 + x14649;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14651 = x14594 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14652 = x14578 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14653 = x14651 + x14652;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14654 = x14586 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14655 = x14653 + x14654;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14656 = x14593 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14657 = x14655 + x14656;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14658 = x14634 + x4142;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14659 = x14626 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14660 = x14610 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14661 = x14618 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14662 = x14660 + x14661;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14663 = x14625 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14664 = x14662 + x14663;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14665 = x14664 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14666 = x14659 + x14665;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14667 = x14626 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14668 = x14610 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14669 = x14667 + x14668;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14670 = x14618 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14671 = x14625 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14672 = x14670 + x14671;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14673 = x14672 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14674 = x14669 + x14673;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14675 = x14626 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14676 = x14610 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14677 = x14675 + x14676;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14678 = x14618 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14679 = x14677 + x14678;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14680 = x14625 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14681 = x14680 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14682 = x14679 + x14681;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14683 = x14626 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14684 = x14610 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14685 = x14683 + x14684;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14686 = x14618 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14687 = x14685 + x14686;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14688 = x14625 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14689 = x14687 + x14688;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14690 = x14666 + x4041;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14691 = x14658 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14692 = x14642 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14693 = x14650 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14694 = x14692 + x14693;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14695 = x14657 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14696 = x14694 + x14695;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14697 = x14696 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14698 = x14691 + x14697;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14699 = x14658 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14700 = x14642 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14701 = x14699 + x14700;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14702 = x14650 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14703 = x14657 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14704 = x14702 + x14703;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14705 = x14704 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14706 = x14701 + x14705;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14707 = x14658 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14708 = x14642 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14709 = x14707 + x14708;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14710 = x14650 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14711 = x14709 + x14710;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14712 = x14657 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14713 = x14712 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14714 = x14711 + x14713;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14715 = x14658 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14716 = x14642 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14717 = x14715 + x14716;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14718 = x14650 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14719 = x14717 + x14718;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14720 = x14657 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14721 = x14719 + x14720;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14722 = x14698 + x4143;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14723 = x14690 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14724 = x14674 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14725 = x14682 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14726 = x14724 + x14725;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14727 = x14689 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14728 = x14726 + x14727;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14729 = x14728 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14730 = x14723 + x14729;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14731 = x14690 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14732 = x14674 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14733 = x14731 + x14732;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14734 = x14682 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14735 = x14689 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14736 = x14734 + x14735;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14737 = x14736 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14738 = x14733 + x14737;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14739 = x14690 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14740 = x14674 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14741 = x14739 + x14740;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14742 = x14682 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14743 = x14741 + x14742;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14744 = x14689 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14745 = x14744 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14746 = x14743 + x14745;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14747 = x14690 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14748 = x14674 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14749 = x14747 + x14748;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14750 = x14682 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14751 = x14749 + x14750;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14752 = x14689 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14753 = x14751 + x14752;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14754 = x14730 + x4042;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14755 = x14722 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14756 = x14706 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14757 = x14714 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14758 = x14756 + x14757;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14759 = x14721 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14760 = x14758 + x14759;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14761 = x14760 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14762 = x14755 + x14761;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14763 = x14722 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14764 = x14706 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14765 = x14763 + x14764;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14766 = x14714 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14767 = x14721 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14768 = x14766 + x14767;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14769 = x14768 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14770 = x14765 + x14769;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14771 = x14722 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14772 = x14706 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14773 = x14771 + x14772;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14774 = x14714 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14775 = x14773 + x14774;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14776 = x14721 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14777 = x14776 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14778 = x14775 + x14777;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14779 = x14722 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14780 = x14706 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14781 = x14779 + x14780;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14782 = x14714 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14783 = x14781 + x14782;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14784 = x14721 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14785 = x14783 + x14784;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14786 = x14762 + x4144;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14787 = x14754 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14788 = x14738 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14789 = x14746 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14790 = x14788 + x14789;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14791 = x14753 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14792 = x14790 + x14791;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14793 = x14792 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14794 = x14787 + x14793;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14795 = x14754 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14796 = x14738 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14797 = x14795 + x14796;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14798 = x14746 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14799 = x14753 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14800 = x14798 + x14799;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14801 = x14800 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14802 = x14797 + x14801;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14803 = x14754 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14804 = x14738 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14805 = x14803 + x14804;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14806 = x14746 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14807 = x14805 + x14806;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14808 = x14753 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14809 = x14808 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14810 = x14807 + x14809;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14811 = x14754 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14812 = x14738 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14813 = x14811 + x14812;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14814 = x14746 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14815 = x14813 + x14814;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14816 = x14753 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14817 = x14815 + x14816;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14818 = x14794 + x4043;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14819 = x14786 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14820 = x14770 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14821 = x14778 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14822 = x14820 + x14821;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14823 = x14785 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14824 = x14822 + x14823;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14825 = x14824 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14826 = x14819 + x14825;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14827 = x14786 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14828 = x14770 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14829 = x14827 + x14828;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14830 = x14778 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14831 = x14785 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14832 = x14830 + x14831;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14833 = x14832 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14834 = x14829 + x14833;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14835 = x14786 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14836 = x14770 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14837 = x14835 + x14836;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14838 = x14778 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14839 = x14837 + x14838;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14840 = x14785 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14841 = x14840 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14842 = x14839 + x14841;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14843 = x14786 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14844 = x14770 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14845 = x14843 + x14844;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14846 = x14778 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14847 = x14845 + x14846;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14848 = x14785 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14849 = x14847 + x14848;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14850 = x14826 + x4145;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14851 = x14818 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14852 = x14802 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14853 = x14810 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14854 = x14852 + x14853;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14855 = x14817 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14856 = x14854 + x14855;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14857 = x14856 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14858 = x14851 + x14857;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14859 = x14818 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14860 = x14802 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14861 = x14859 + x14860;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14862 = x14810 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14863 = x14817 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14864 = x14862 + x14863;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14865 = x14864 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14866 = x14861 + x14865;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14867 = x14818 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14868 = x14802 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14869 = x14867 + x14868;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14870 = x14810 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14871 = x14869 + x14870;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14872 = x14817 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14873 = x14872 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14874 = x14871 + x14873;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14875 = x14818 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14876 = x14802 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14877 = x14875 + x14876;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14878 = x14810 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14879 = x14877 + x14878;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14880 = x14817 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14881 = x14879 + x14880;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14882 = x14858 + x4044;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14883 = x14850 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14884 = x14834 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14885 = x14842 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14886 = x14884 + x14885;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14887 = x14849 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14888 = x14886 + x14887;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14889 = x14888 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14890 = x14883 + x14889;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14891 = x14850 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14892 = x14834 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14893 = x14891 + x14892;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14894 = x14842 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14895 = x14849 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14896 = x14894 + x14895;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14897 = x14896 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14898 = x14893 + x14897;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14899 = x14850 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14900 = x14834 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14901 = x14899 + x14900;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14902 = x14842 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14903 = x14901 + x14902;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14904 = x14849 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14905 = x14904 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14906 = x14903 + x14905;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14907 = x14850 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14908 = x14834 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14909 = x14907 + x14908;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14910 = x14842 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14911 = x14909 + x14910;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14912 = x14849 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14913 = x14911 + x14912;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14914 = x14890 + x4146;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14915 = x14882 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14916 = x14866 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14917 = x14874 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14918 = x14916 + x14917;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14919 = x14881 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14920 = x14918 + x14919;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14921 = x14920 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14922 = x14915 + x14921;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14923 = x14882 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14924 = x14866 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14925 = x14923 + x14924;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14926 = x14874 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14927 = x14881 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14928 = x14926 + x14927;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14929 = x14928 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14930 = x14925 + x14929;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14931 = x14882 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14932 = x14866 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14933 = x14931 + x14932;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14934 = x14874 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14935 = x14933 + x14934;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14936 = x14881 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14937 = x14936 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14938 = x14935 + x14937;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14939 = x14882 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14940 = x14866 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14941 = x14939 + x14940;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14942 = x14874 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14943 = x14941 + x14942;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14944 = x14881 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14945 = x14943 + x14944;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14946 = x14922 + x4045;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14947 = x14914 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14948 = x14898 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14949 = x14906 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14950 = x14948 + x14949;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14951 = x14913 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14952 = x14950 + x14951;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14953 = x14952 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14954 = x14947 + x14953;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14955 = x14914 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14956 = x14898 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14957 = x14955 + x14956;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14958 = x14906 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14959 = x14913 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14960 = x14958 + x14959;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14961 = x14960 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14962 = x14957 + x14961;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14963 = x14914 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14964 = x14898 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14965 = x14963 + x14964;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14966 = x14906 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14967 = x14965 + x14966;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14968 = x14913 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14969 = x14968 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14970 = x14967 + x14969;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14971 = x14914 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14972 = x14898 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14973 = x14971 + x14972;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14974 = x14906 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14975 = x14973 + x14974;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14976 = x14913 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14977 = x14975 + x14976;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x14978 = x14954 + x4147;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14979 = x14946 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14980 = x14930 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14981 = x14938 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14982 = x14980 + x14981;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14983 = x14945 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14984 = x14982 + x14983;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14985 = x14984 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14986 = x14979 + x14985;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14987 = x14946 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14988 = x14930 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14989 = x14987 + x14988;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14990 = x14938 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14991 = x14945 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14992 = x14990 + x14991;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14993 = x14992 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14994 = x14989 + x14993;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14995 = x14946 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14996 = x14930 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14997 = x14995 + x14996;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14998 = x14938 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x14999 = x14997 + x14998;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15000 = x14945 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15001 = x15000 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15002 = x14999 + x15001;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15003 = x14946 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15004 = x14930 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15005 = x15003 + x15004;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15006 = x14938 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15007 = x15005 + x15006;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15008 = x14945 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15009 = x15007 + x15008;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15010 = x14986 + x4046;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15011 = x14978 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15012 = x14962 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15013 = x14970 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15014 = x15012 + x15013;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15015 = x14977 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15016 = x15014 + x15015;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15017 = x15016 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15018 = x15011 + x15017;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15019 = x14978 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15020 = x14962 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15021 = x15019 + x15020;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15022 = x14970 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15023 = x14977 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15024 = x15022 + x15023;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15025 = x15024 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15026 = x15021 + x15025;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15027 = x14978 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15028 = x14962 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15029 = x15027 + x15028;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15030 = x14970 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15031 = x15029 + x15030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15032 = x14977 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15033 = x15032 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15034 = x15031 + x15033;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15035 = x14978 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15036 = x14962 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15037 = x15035 + x15036;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15038 = x14970 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15039 = x15037 + x15038;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15040 = x14977 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15041 = x15039 + x15040;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15042 = x15018 + x4148;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15043 = x15010 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15044 = x14994 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15045 = x15002 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15046 = x15044 + x15045;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15047 = x15009 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15048 = x15046 + x15047;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15049 = x15048 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15050 = x15043 + x15049;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15051 = x15010 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15052 = x14994 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15053 = x15051 + x15052;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15054 = x15002 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15055 = x15009 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15056 = x15054 + x15055;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15057 = x15056 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15058 = x15053 + x15057;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15059 = x15010 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15060 = x14994 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15061 = x15059 + x15060;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15062 = x15002 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15063 = x15061 + x15062;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15064 = x15009 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15065 = x15064 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15066 = x15063 + x15065;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15067 = x15010 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15068 = x14994 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15069 = x15067 + x15068;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15070 = x15002 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15071 = x15069 + x15070;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15072 = x15009 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15073 = x15071 + x15072;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15074 = x15050 + x4133;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15075 = x15042 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15076 = x15026 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15077 = x15034 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15078 = x15076 + x15077;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15079 = x15041 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15080 = x15078 + x15079;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15081 = x15080 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15082 = x15075 + x15081;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15083 = x15042 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15084 = x15026 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15085 = x15083 + x15084;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15086 = x15034 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15087 = x15041 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15088 = x15086 + x15087;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15089 = x15088 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15090 = x15085 + x15089;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15091 = x15042 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15092 = x15026 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15093 = x15091 + x15092;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15094 = x15034 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15095 = x15093 + x15094;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15096 = x15041 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15097 = x15096 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15098 = x15095 + x15097;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15099 = x15042 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15100 = x15026 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15101 = x15099 + x15100;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15102 = x15034 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15103 = x15101 + x15102;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15104 = x15041 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15105 = x15103 + x15104;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15106 = x15082 + x4149;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15107 = x15074 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15108 = x15058 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15109 = x15066 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15110 = x15108 + x15109;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15111 = x15073 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15112 = x15110 + x15111;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15113 = x15112 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15114 = x15107 + x15113;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15115 = x15074 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15116 = x15058 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15117 = x15115 + x15116;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15118 = x15066 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15119 = x15073 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15120 = x15118 + x15119;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15121 = x15120 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15122 = x15117 + x15121;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15123 = x15074 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15124 = x15058 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15125 = x15123 + x15124;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15126 = x15066 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15127 = x15125 + x15126;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15128 = x15073 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15129 = x15128 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15130 = x15127 + x15129;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15131 = x15074 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15132 = x15058 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15133 = x15131 + x15132;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15134 = x15066 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15135 = x15133 + x15134;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15136 = x15073 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15137 = x15135 + x15136;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15138 = x15114 + x4134;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15139 = x15106 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15140 = x15090 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15141 = x15098 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15142 = x15140 + x15141;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15143 = x15105 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15144 = x15142 + x15143;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15145 = x15144 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15146 = x15139 + x15145;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15147 = x15106 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15148 = x15090 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15149 = x15147 + x15148;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15150 = x15098 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15151 = x15105 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15152 = x15150 + x15151;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15153 = x15152 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15154 = x15149 + x15153;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15155 = x15106 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15156 = x15090 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15157 = x15155 + x15156;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15158 = x15098 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15159 = x15157 + x15158;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15160 = x15105 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15161 = x15160 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15162 = x15159 + x15161;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15163 = x15106 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15164 = x15090 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15165 = x15163 + x15164;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15166 = x15098 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15167 = x15165 + x15166;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15168 = x15105 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15169 = x15167 + x15168;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15170 = x15146 + x4150;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15171 = x15138 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15172 = x15122 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15173 = x15130 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15174 = x15172 + x15173;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15175 = x15137 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15176 = x15174 + x15175;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15177 = x15176 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15178 = x15171 + x15177;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15179 = x15138 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15180 = x15122 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15181 = x15179 + x15180;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15182 = x15130 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15183 = x15137 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15184 = x15182 + x15183;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15185 = x15184 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15186 = x15181 + x15185;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15187 = x15138 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15188 = x15122 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15189 = x15187 + x15188;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15190 = x15130 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15191 = x15189 + x15190;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15192 = x15137 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15193 = x15192 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15194 = x15191 + x15193;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15195 = x15138 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15196 = x15122 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15197 = x15195 + x15196;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15198 = x15130 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15199 = x15197 + x15198;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15200 = x15137 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15201 = x15199 + x15200;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15202 = x15178 + x4135;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15203 = x15170 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15204 = x15154 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15205 = x15162 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15206 = x15204 + x15205;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15207 = x15169 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15208 = x15206 + x15207;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15209 = x15208 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15210 = x15203 + x15209;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15211 = x15170 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15212 = x15154 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15213 = x15211 + x15212;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15214 = x15162 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15215 = x15169 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15216 = x15214 + x15215;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15217 = x15216 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15218 = x15213 + x15217;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15219 = x15170 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15220 = x15154 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15221 = x15219 + x15220;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15222 = x15162 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15223 = x15221 + x15222;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15224 = x15169 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15225 = x15224 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15226 = x15223 + x15225;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15227 = x15170 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15228 = x15154 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15229 = x15227 + x15228;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15230 = x15162 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15231 = x15229 + x15230;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15232 = x15169 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15233 = x15231 + x15232;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15234 = x15210 + x4151;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15235 = x15202 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15236 = x15186 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15237 = x15194 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15238 = x15236 + x15237;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15239 = x15201 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15240 = x15238 + x15239;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15241 = x15240 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15242 = x15235 + x15241;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15243 = x15202 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15244 = x15186 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15245 = x15243 + x15244;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15246 = x15194 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15247 = x15201 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15248 = x15246 + x15247;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15249 = x15248 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15250 = x15245 + x15249;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15251 = x15202 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15252 = x15186 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15253 = x15251 + x15252;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15254 = x15194 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15255 = x15253 + x15254;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15256 = x15201 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15257 = x15256 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15258 = x15255 + x15257;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15259 = x15202 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15260 = x15186 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15261 = x15259 + x15260;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15262 = x15194 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15263 = x15261 + x15262;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15264 = x15201 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15265 = x15263 + x15264;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15266 = x15242 + x4136;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15267 = x15234 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15268 = x15218 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15269 = x15226 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15270 = x15268 + x15269;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15271 = x15233 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15272 = x15270 + x15271;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15273 = x15272 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15274 = x15267 + x15273;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15275 = x15234 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15276 = x15218 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15277 = x15275 + x15276;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15278 = x15226 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15279 = x15233 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15280 = x15278 + x15279;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15281 = x15280 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15282 = x15277 + x15281;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15283 = x15234 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15284 = x15218 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15285 = x15283 + x15284;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15286 = x15226 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15287 = x15285 + x15286;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15288 = x15233 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15289 = x15288 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15290 = x15287 + x15289;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15291 = x15234 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15292 = x15218 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15293 = x15291 + x15292;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15294 = x15226 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15295 = x15293 + x15294;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15296 = x15233 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15297 = x15295 + x15296;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15298 = x15274 + x4152;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15299 = x15266 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15300 = x15250 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15301 = x15258 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15302 = x15300 + x15301;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15303 = x15265 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15304 = x15302 + x15303;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15305 = x15304 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15306 = x15299 + x15305;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15307 = x15266 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15308 = x15250 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15309 = x15307 + x15308;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15310 = x15258 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15311 = x15265 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15312 = x15310 + x15311;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15313 = x15312 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15314 = x15309 + x15313;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15315 = x15266 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15316 = x15250 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15317 = x15315 + x15316;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15318 = x15258 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15319 = x15317 + x15318;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15320 = x15265 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15321 = x15320 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15322 = x15319 + x15321;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15323 = x15266 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15324 = x15250 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15325 = x15323 + x15324;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15326 = x15258 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15327 = x15325 + x15326;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15328 = x15265 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15329 = x15327 + x15328;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15330 = x15306 + x4137;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15331 = x15298 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15332 = x15282 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15333 = x15290 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15334 = x15332 + x15333;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15335 = x15297 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15336 = x15334 + x15335;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15337 = x15336 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15338 = x15331 + x15337;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15339 = x15298 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15340 = x15282 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15341 = x15339 + x15340;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15342 = x15290 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15343 = x15297 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15344 = x15342 + x15343;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15345 = x15344 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15346 = x15341 + x15345;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15347 = x15298 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15348 = x15282 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15349 = x15347 + x15348;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15350 = x15290 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15351 = x15349 + x15350;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15352 = x15297 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15353 = x15352 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15354 = x15351 + x15353;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15355 = x15298 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15356 = x15282 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15357 = x15355 + x15356;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15358 = x15290 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15359 = x15357 + x15358;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15360 = x15297 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15361 = x15359 + x15360;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15362 = x15338 + x4153;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15363 = x15330 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15364 = x15314 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15365 = x15322 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15366 = x15364 + x15365;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15367 = x15329 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15368 = x15366 + x15367;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15369 = x15368 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15370 = x15363 + x15369;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15371 = x15330 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15372 = x15314 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15373 = x15371 + x15372;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15374 = x15322 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15375 = x15329 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15376 = x15374 + x15375;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15377 = x15376 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15378 = x15373 + x15377;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15379 = x15330 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15380 = x15314 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15381 = x15379 + x15380;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15382 = x15322 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15383 = x15381 + x15382;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15384 = x15329 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15385 = x15384 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15386 = x15383 + x15385;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15387 = x15330 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15388 = x15314 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15389 = x15387 + x15388;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15390 = x15322 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15391 = x15389 + x15390;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15392 = x15329 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15393 = x15391 + x15392;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15394 = x15370 + x4004;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15395 = x15362 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15396 = x15346 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15397 = x15354 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15398 = x15396 + x15397;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15399 = x15361 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15400 = x15398 + x15399;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15401 = x15400 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15402 = x15395 + x15401;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15403 = x15362 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15404 = x15346 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15405 = x15403 + x15404;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15406 = x15354 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15407 = x15361 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15408 = x15406 + x15407;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15409 = x15408 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15410 = x15405 + x15409;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15411 = x15362 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15412 = x15346 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15413 = x15411 + x15412;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15414 = x15354 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15415 = x15413 + x15414;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15416 = x15361 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15417 = x15416 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15418 = x15415 + x15417;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15419 = x15362 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15420 = x15346 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15421 = x15419 + x15420;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15422 = x15354 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15423 = x15421 + x15422;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15424 = x15361 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15425 = x15423 + x15424;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15426 = x15402 + x4106;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15427 = x15394 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15428 = x15378 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15429 = x15386 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15430 = x15428 + x15429;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15431 = x15393 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15432 = x15430 + x15431;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15433 = x15432 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15434 = x15427 + x15433;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15435 = x15394 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15436 = x15378 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15437 = x15435 + x15436;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15438 = x15386 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15439 = x15393 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15440 = x15438 + x15439;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15441 = x15440 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15442 = x15437 + x15441;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15443 = x15394 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15444 = x15378 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15445 = x15443 + x15444;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15446 = x15386 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15447 = x15445 + x15446;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15448 = x15393 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15449 = x15448 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15450 = x15447 + x15449;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15451 = x15394 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15452 = x15378 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15453 = x15451 + x15452;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15454 = x15386 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15455 = x15453 + x15454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15456 = x15393 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15457 = x15455 + x15456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15458 = x15434 + x4005;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15459 = x15426 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15460 = x15410 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15461 = x15418 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15462 = x15460 + x15461;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15463 = x15425 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15464 = x15462 + x15463;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15465 = x15464 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15466 = x15459 + x15465;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15467 = x15426 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15468 = x15410 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15469 = x15467 + x15468;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15470 = x15418 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15471 = x15425 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15472 = x15470 + x15471;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15473 = x15472 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15474 = x15469 + x15473;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15475 = x15426 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15476 = x15410 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15477 = x15475 + x15476;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15478 = x15418 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15479 = x15477 + x15478;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15480 = x15425 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15481 = x15480 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15482 = x15479 + x15481;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15483 = x15426 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15484 = x15410 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15485 = x15483 + x15484;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15486 = x15418 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15487 = x15485 + x15486;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15488 = x15425 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15489 = x15487 + x15488;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15490 = x15466 + x4107;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15491 = x15458 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15492 = x15442 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15493 = x15450 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15494 = x15492 + x15493;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15495 = x15457 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15496 = x15494 + x15495;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15497 = x15496 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15498 = x15491 + x15497;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15499 = x15458 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15500 = x15442 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15501 = x15499 + x15500;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15502 = x15450 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15503 = x15457 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15504 = x15502 + x15503;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15505 = x15504 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15506 = x15501 + x15505;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15507 = x15458 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15508 = x15442 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15509 = x15507 + x15508;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15510 = x15450 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15511 = x15509 + x15510;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15512 = x15457 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15513 = x15512 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15514 = x15511 + x15513;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15515 = x15458 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15516 = x15442 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15517 = x15515 + x15516;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15518 = x15450 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15519 = x15517 + x15518;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15520 = x15457 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15521 = x15519 + x15520;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15522 = x15498 + x4006;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15523 = x15490 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15524 = x15474 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15525 = x15482 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15526 = x15524 + x15525;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15527 = x15489 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15528 = x15526 + x15527;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15529 = x15528 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15530 = x15523 + x15529;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15531 = x15490 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15532 = x15474 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15533 = x15531 + x15532;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15534 = x15482 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15535 = x15489 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15536 = x15534 + x15535;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15537 = x15536 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15538 = x15533 + x15537;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15539 = x15490 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15540 = x15474 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15541 = x15539 + x15540;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15542 = x15482 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15543 = x15541 + x15542;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15544 = x15489 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15545 = x15544 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15546 = x15543 + x15545;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15547 = x15490 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15548 = x15474 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15549 = x15547 + x15548;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15550 = x15482 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15551 = x15549 + x15550;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15552 = x15489 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15553 = x15551 + x15552;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15554 = x15530 + x4108;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15555 = x15522 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15556 = x15506 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15557 = x15514 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15558 = x15556 + x15557;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15559 = x15521 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15560 = x15558 + x15559;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15561 = x15560 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15562 = x15555 + x15561;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15563 = x15522 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15564 = x15506 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15565 = x15563 + x15564;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15566 = x15514 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15567 = x15521 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15568 = x15566 + x15567;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15569 = x15568 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15570 = x15565 + x15569;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15571 = x15522 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15572 = x15506 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15573 = x15571 + x15572;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15574 = x15514 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15575 = x15573 + x15574;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15576 = x15521 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15577 = x15576 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15578 = x15575 + x15577;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15579 = x15522 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15580 = x15506 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15581 = x15579 + x15580;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15582 = x15514 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15583 = x15581 + x15582;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15584 = x15521 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15585 = x15583 + x15584;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15586 = x15562 + x4007;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15587 = x15554 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15588 = x15538 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15589 = x15546 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15590 = x15588 + x15589;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15591 = x15553 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15592 = x15590 + x15591;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15593 = x15592 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15594 = x15587 + x15593;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15595 = x15554 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15596 = x15538 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15597 = x15595 + x15596;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15598 = x15546 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15599 = x15553 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15600 = x15598 + x15599;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15601 = x15600 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15602 = x15597 + x15601;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15603 = x15554 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15604 = x15538 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15605 = x15603 + x15604;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15606 = x15546 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15607 = x15605 + x15606;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15608 = x15553 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15609 = x15608 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15610 = x15607 + x15609;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15611 = x15554 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15612 = x15538 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15613 = x15611 + x15612;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15614 = x15546 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15615 = x15613 + x15614;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15616 = x15553 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15617 = x15615 + x15616;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15618 = x15594 + x4109;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15619 = x15586 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15620 = x15570 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15621 = x15578 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15622 = x15620 + x15621;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15623 = x15585 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15624 = x15622 + x15623;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15625 = x15624 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15626 = x15619 + x15625;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15627 = x15586 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15628 = x15570 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15629 = x15627 + x15628;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15630 = x15578 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15631 = x15585 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15632 = x15630 + x15631;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15633 = x15632 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15634 = x15629 + x15633;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15635 = x15586 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15636 = x15570 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15637 = x15635 + x15636;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15638 = x15578 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15639 = x15637 + x15638;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15640 = x15585 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15641 = x15640 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15642 = x15639 + x15641;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15643 = x15586 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15644 = x15570 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15645 = x15643 + x15644;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15646 = x15578 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15647 = x15645 + x15646;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15648 = x15585 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15649 = x15647 + x15648;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15650 = x15626 + x4008;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15651 = x15618 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15652 = x15602 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15653 = x15610 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15654 = x15652 + x15653;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15655 = x15617 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15656 = x15654 + x15655;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15657 = x15656 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15658 = x15651 + x15657;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15659 = x15618 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15660 = x15602 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15661 = x15659 + x15660;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15662 = x15610 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15663 = x15617 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15664 = x15662 + x15663;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15665 = x15664 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15666 = x15661 + x15665;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15667 = x15618 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15668 = x15602 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15669 = x15667 + x15668;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15670 = x15610 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15671 = x15669 + x15670;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15672 = x15617 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15673 = x15672 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15674 = x15671 + x15673;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15675 = x15618 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15676 = x15602 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15677 = x15675 + x15676;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15678 = x15610 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15679 = x15677 + x15678;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15680 = x15617 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15681 = x15679 + x15680;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15682 = x15658 + x4110;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15683 = x15650 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15684 = x15634 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15685 = x15642 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15686 = x15684 + x15685;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15687 = x15649 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15688 = x15686 + x15687;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15689 = x15688 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15690 = x15683 + x15689;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15691 = x15650 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15692 = x15634 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15693 = x15691 + x15692;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15694 = x15642 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15695 = x15649 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15696 = x15694 + x15695;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15697 = x15696 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15698 = x15693 + x15697;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15699 = x15650 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15700 = x15634 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15701 = x15699 + x15700;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15702 = x15642 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15703 = x15701 + x15702;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15704 = x15649 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15705 = x15704 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15706 = x15703 + x15705;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15707 = x15650 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15708 = x15634 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15709 = x15707 + x15708;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15710 = x15642 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15711 = x15709 + x15710;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15712 = x15649 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15713 = x15711 + x15712;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15714 = x15690 + x4009;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15715 = x15682 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15716 = x15666 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15717 = x15674 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15718 = x15716 + x15717;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15719 = x15681 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15720 = x15718 + x15719;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15721 = x15720 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15722 = x15715 + x15721;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15723 = x15682 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15724 = x15666 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15725 = x15723 + x15724;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15726 = x15674 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15727 = x15681 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15728 = x15726 + x15727;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15729 = x15728 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15730 = x15725 + x15729;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15731 = x15682 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15732 = x15666 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15733 = x15731 + x15732;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15734 = x15674 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15735 = x15733 + x15734;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15736 = x15681 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15737 = x15736 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15738 = x15735 + x15737;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15739 = x15682 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15740 = x15666 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15741 = x15739 + x15740;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15742 = x15674 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15743 = x15741 + x15742;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15744 = x15681 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15745 = x15743 + x15744;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15746 = x15722 + x4111;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15747 = x15714 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15748 = x15698 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15749 = x15706 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15750 = x15748 + x15749;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15751 = x15713 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15752 = x15750 + x15751;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15753 = x15752 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15754 = x15747 + x15753;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15755 = x15714 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15756 = x15698 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15757 = x15755 + x15756;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15758 = x15706 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15759 = x15713 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15760 = x15758 + x15759;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15761 = x15760 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15762 = x15757 + x15761;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15763 = x15714 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15764 = x15698 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15765 = x15763 + x15764;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15766 = x15706 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15767 = x15765 + x15766;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15768 = x15713 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15769 = x15768 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15770 = x15767 + x15769;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15771 = x15714 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15772 = x15698 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15773 = x15771 + x15772;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15774 = x15706 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15775 = x15773 + x15774;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15776 = x15713 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15777 = x15775 + x15776;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15778 = x15754 + x4010;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15779 = x15746 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15780 = x15730 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15781 = x15738 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15782 = x15780 + x15781;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15783 = x15745 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15784 = x15782 + x15783;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15785 = x15784 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15786 = x15779 + x15785;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15787 = x15746 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15788 = x15730 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15789 = x15787 + x15788;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15790 = x15738 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15791 = x15745 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15792 = x15790 + x15791;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15793 = x15792 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15794 = x15789 + x15793;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15795 = x15746 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15796 = x15730 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15797 = x15795 + x15796;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15798 = x15738 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15799 = x15797 + x15798;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15800 = x15745 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15801 = x15800 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15802 = x15799 + x15801;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15803 = x15746 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15804 = x15730 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15805 = x15803 + x15804;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15806 = x15738 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15807 = x15805 + x15806;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15808 = x15745 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15809 = x15807 + x15808;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15810 = x15786 + x4112;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15811 = x15778 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15812 = x15762 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15813 = x15770 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15814 = x15812 + x15813;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15815 = x15777 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15816 = x15814 + x15815;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15817 = x15816 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15818 = x15811 + x15817;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15819 = x15778 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15820 = x15762 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15821 = x15819 + x15820;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15822 = x15770 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15823 = x15777 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15824 = x15822 + x15823;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15825 = x15824 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15826 = x15821 + x15825;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15827 = x15778 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15828 = x15762 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15829 = x15827 + x15828;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15830 = x15770 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15831 = x15829 + x15830;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15832 = x15777 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15833 = x15832 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15834 = x15831 + x15833;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15835 = x15778 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15836 = x15762 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15837 = x15835 + x15836;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15838 = x15770 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15839 = x15837 + x15838;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15840 = x15777 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15841 = x15839 + x15840;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15842 = x15818 + x4011;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15843 = x15810 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15844 = x15794 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15845 = x15802 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15846 = x15844 + x15845;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15847 = x15809 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15848 = x15846 + x15847;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15849 = x15848 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15850 = x15843 + x15849;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15851 = x15810 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15852 = x15794 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15853 = x15851 + x15852;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15854 = x15802 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15855 = x15809 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15856 = x15854 + x15855;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15857 = x15856 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15858 = x15853 + x15857;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15859 = x15810 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15860 = x15794 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15861 = x15859 + x15860;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15862 = x15802 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15863 = x15861 + x15862;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15864 = x15809 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15865 = x15864 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15866 = x15863 + x15865;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15867 = x15810 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15868 = x15794 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15869 = x15867 + x15868;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15870 = x15802 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15871 = x15869 + x15870;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15872 = x15809 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15873 = x15871 + x15872;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15874 = x15850 + x4113;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15875 = x15842 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15876 = x15826 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15877 = x15834 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15878 = x15876 + x15877;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15879 = x15841 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15880 = x15878 + x15879;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15881 = x15880 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15882 = x15875 + x15881;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15883 = x15842 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15884 = x15826 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15885 = x15883 + x15884;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15886 = x15834 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15887 = x15841 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15888 = x15886 + x15887;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15889 = x15888 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15890 = x15885 + x15889;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15891 = x15842 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15892 = x15826 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15893 = x15891 + x15892;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15894 = x15834 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15895 = x15893 + x15894;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15896 = x15841 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15897 = x15896 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15898 = x15895 + x15897;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15899 = x15842 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15900 = x15826 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15901 = x15899 + x15900;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15902 = x15834 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15903 = x15901 + x15902;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15904 = x15841 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15905 = x15903 + x15904;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15906 = x15882 + x4012;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15907 = x15874 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15908 = x15858 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15909 = x15866 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15910 = x15908 + x15909;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15911 = x15873 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15912 = x15910 + x15911;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15913 = x15912 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15914 = x15907 + x15913;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15915 = x15874 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15916 = x15858 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15917 = x15915 + x15916;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15918 = x15866 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15919 = x15873 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15920 = x15918 + x15919;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15921 = x15920 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15922 = x15917 + x15921;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15923 = x15874 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15924 = x15858 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15925 = x15923 + x15924;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15926 = x15866 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15927 = x15925 + x15926;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15928 = x15873 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15929 = x15928 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15930 = x15927 + x15929;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15931 = x15874 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15932 = x15858 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15933 = x15931 + x15932;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15934 = x15866 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15935 = x15933 + x15934;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15936 = x15873 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15937 = x15935 + x15936;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15938 = x15914 + x4114;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15939 = x15906 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15940 = x15890 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15941 = x15898 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15942 = x15940 + x15941;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15943 = x15905 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15944 = x15942 + x15943;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15945 = x15944 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15946 = x15939 + x15945;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15947 = x15906 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15948 = x15890 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15949 = x15947 + x15948;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15950 = x15898 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15951 = x15905 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15952 = x15950 + x15951;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15953 = x15952 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15954 = x15949 + x15953;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15955 = x15906 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15956 = x15890 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15957 = x15955 + x15956;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15958 = x15898 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15959 = x15957 + x15958;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15960 = x15905 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15961 = x15960 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15962 = x15959 + x15961;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15963 = x15906 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15964 = x15890 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15965 = x15963 + x15964;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15966 = x15898 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15967 = x15965 + x15966;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15968 = x15905 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15969 = x15967 + x15968;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x15970 = x15946 + x4013;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15971 = x15938 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15972 = x15922 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15973 = x15930 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15974 = x15972 + x15973;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15975 = x15937 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15976 = x15974 + x15975;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15977 = x15976 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15978 = x15971 + x15977;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15979 = x15938 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15980 = x15922 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15981 = x15979 + x15980;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15982 = x15930 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15983 = x15937 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15984 = x15982 + x15983;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15985 = x15984 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15986 = x15981 + x15985;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15987 = x15938 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15988 = x15922 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15989 = x15987 + x15988;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15990 = x15930 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15991 = x15989 + x15990;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15992 = x15937 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15993 = x15992 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15994 = x15991 + x15993;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15995 = x15938 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15996 = x15922 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15997 = x15995 + x15996;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15998 = x15930 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x15999 = x15997 + x15998;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16000 = x15937 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16001 = x15999 + x16000;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16002 = x15978 + x4115;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16003 = x15970 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16004 = x15954 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16005 = x15962 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16006 = x16004 + x16005;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16007 = x15969 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16008 = x16006 + x16007;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16009 = x16008 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16010 = x16003 + x16009;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16011 = x15970 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16012 = x15954 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16013 = x16011 + x16012;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16014 = x15962 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16015 = x15969 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16016 = x16014 + x16015;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16017 = x16016 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16018 = x16013 + x16017;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16019 = x15970 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16020 = x15954 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16021 = x16019 + x16020;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16022 = x15962 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16023 = x16021 + x16022;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16024 = x15969 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16025 = x16024 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16026 = x16023 + x16025;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16027 = x15970 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16028 = x15954 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16029 = x16027 + x16028;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16030 = x15962 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16031 = x16029 + x16030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16032 = x15969 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16033 = x16031 + x16032;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16034 = x16010 + x4014;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16035 = x16002 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16036 = x15986 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16037 = x15994 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16038 = x16036 + x16037;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16039 = x16001 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16040 = x16038 + x16039;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16041 = x16040 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16042 = x16035 + x16041;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16043 = x16002 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16044 = x15986 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16045 = x16043 + x16044;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16046 = x15994 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16047 = x16001 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16048 = x16046 + x16047;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16049 = x16048 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16050 = x16045 + x16049;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16051 = x16002 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16052 = x15986 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16053 = x16051 + x16052;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16054 = x15994 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16055 = x16053 + x16054;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16056 = x16001 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16057 = x16056 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16058 = x16055 + x16057;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16059 = x16002 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16060 = x15986 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16061 = x16059 + x16060;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16062 = x15994 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16063 = x16061 + x16062;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16064 = x16001 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16065 = x16063 + x16064;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16066 = x16042 + x4116;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16067 = x16034 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16068 = x16018 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16069 = x16026 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16070 = x16068 + x16069;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16071 = x16033 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16072 = x16070 + x16071;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16073 = x16072 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16074 = x16067 + x16073;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16075 = x16034 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16076 = x16018 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16077 = x16075 + x16076;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16078 = x16026 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16079 = x16033 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16080 = x16078 + x16079;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16081 = x16080 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16082 = x16077 + x16081;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16083 = x16034 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16084 = x16018 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16085 = x16083 + x16084;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16086 = x16026 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16087 = x16085 + x16086;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16088 = x16033 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16089 = x16088 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16090 = x16087 + x16089;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16091 = x16034 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16092 = x16018 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16093 = x16091 + x16092;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16094 = x16026 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16095 = x16093 + x16094;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16096 = x16033 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16097 = x16095 + x16096;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16098 = x16074 + x4101;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16099 = x16066 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16100 = x16050 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16101 = x16058 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16102 = x16100 + x16101;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16103 = x16065 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16104 = x16102 + x16103;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16105 = x16104 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16106 = x16099 + x16105;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16107 = x16066 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16108 = x16050 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16109 = x16107 + x16108;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16110 = x16058 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16111 = x16065 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16112 = x16110 + x16111;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16113 = x16112 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16114 = x16109 + x16113;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16115 = x16066 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16116 = x16050 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16117 = x16115 + x16116;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16118 = x16058 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16119 = x16117 + x16118;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16120 = x16065 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16121 = x16120 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16122 = x16119 + x16121;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16123 = x16066 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16124 = x16050 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16125 = x16123 + x16124;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16126 = x16058 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16127 = x16125 + x16126;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16128 = x16065 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16129 = x16127 + x16128;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16130 = x16106 + x4117;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16131 = x16098 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16132 = x16082 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16133 = x16090 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16134 = x16132 + x16133;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16135 = x16097 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16136 = x16134 + x16135;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16137 = x16136 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16138 = x16131 + x16137;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16139 = x16098 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16140 = x16082 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16141 = x16139 + x16140;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16142 = x16090 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16143 = x16097 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16144 = x16142 + x16143;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16145 = x16144 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16146 = x16141 + x16145;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16147 = x16098 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16148 = x16082 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16149 = x16147 + x16148;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16150 = x16090 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16151 = x16149 + x16150;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16152 = x16097 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16153 = x16152 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16154 = x16151 + x16153;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16155 = x16098 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16156 = x16082 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16157 = x16155 + x16156;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16158 = x16090 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16159 = x16157 + x16158;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16160 = x16097 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16161 = x16159 + x16160;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16162 = x16138 + x4102;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16163 = x16130 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16164 = x16114 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16165 = x16122 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16166 = x16164 + x16165;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16167 = x16129 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16168 = x16166 + x16167;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16169 = x16168 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16170 = x16163 + x16169;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16171 = x16130 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16172 = x16114 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16173 = x16171 + x16172;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16174 = x16122 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16175 = x16129 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16176 = x16174 + x16175;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16177 = x16176 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16178 = x16173 + x16177;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16179 = x16130 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16180 = x16114 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16181 = x16179 + x16180;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16182 = x16122 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16183 = x16181 + x16182;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16184 = x16129 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16185 = x16184 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16186 = x16183 + x16185;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16187 = x16130 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16188 = x16114 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16189 = x16187 + x16188;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16190 = x16122 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16191 = x16189 + x16190;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16192 = x16129 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16193 = x16191 + x16192;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16194 = x16170 + x4118;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16195 = x16162 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16196 = x16146 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16197 = x16154 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16198 = x16196 + x16197;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16199 = x16161 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16200 = x16198 + x16199;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16201 = x16200 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16202 = x16195 + x16201;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16203 = x16162 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16204 = x16146 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16205 = x16203 + x16204;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16206 = x16154 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16207 = x16161 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16208 = x16206 + x16207;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16209 = x16208 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16210 = x16205 + x16209;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16211 = x16162 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16212 = x16146 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16213 = x16211 + x16212;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16214 = x16154 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16215 = x16213 + x16214;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16216 = x16161 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16217 = x16216 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16218 = x16215 + x16217;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16219 = x16162 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16220 = x16146 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16221 = x16219 + x16220;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16222 = x16154 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16223 = x16221 + x16222;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16224 = x16161 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16225 = x16223 + x16224;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16226 = x16202 + x4103;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16227 = x16194 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16228 = x16178 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16229 = x16186 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16230 = x16228 + x16229;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16231 = x16193 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16232 = x16230 + x16231;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16233 = x16232 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16234 = x16227 + x16233;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16235 = x16194 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16236 = x16178 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16237 = x16235 + x16236;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16238 = x16186 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16239 = x16193 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16240 = x16238 + x16239;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16241 = x16240 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16242 = x16237 + x16241;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16243 = x16194 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16244 = x16178 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16245 = x16243 + x16244;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16246 = x16186 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16247 = x16245 + x16246;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16248 = x16193 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16249 = x16248 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16250 = x16247 + x16249;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16251 = x16194 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16252 = x16178 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16253 = x16251 + x16252;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16254 = x16186 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16255 = x16253 + x16254;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16256 = x16193 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16257 = x16255 + x16256;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16258 = x16234 + x4119;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16259 = x16226 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16260 = x16210 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16261 = x16218 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16262 = x16260 + x16261;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16263 = x16225 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16264 = x16262 + x16263;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16265 = x16264 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16266 = x16259 + x16265;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16267 = x16226 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16268 = x16210 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16269 = x16267 + x16268;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16270 = x16218 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16271 = x16225 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16272 = x16270 + x16271;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16273 = x16272 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16274 = x16269 + x16273;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16275 = x16226 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16276 = x16210 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16277 = x16275 + x16276;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16278 = x16218 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16279 = x16277 + x16278;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16280 = x16225 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16281 = x16280 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16282 = x16279 + x16281;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16283 = x16226 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16284 = x16210 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16285 = x16283 + x16284;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16286 = x16218 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16287 = x16285 + x16286;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16288 = x16225 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16289 = x16287 + x16288;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16290 = x16266 + x4104;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16291 = x16258 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16292 = x16242 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16293 = x16250 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16294 = x16292 + x16293;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16295 = x16257 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16296 = x16294 + x16295;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16297 = x16296 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16298 = x16291 + x16297;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16299 = x16258 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16300 = x16242 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16301 = x16299 + x16300;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16302 = x16250 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16303 = x16257 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16304 = x16302 + x16303;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16305 = x16304 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16306 = x16301 + x16305;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16307 = x16258 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16308 = x16242 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16309 = x16307 + x16308;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16310 = x16250 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16311 = x16309 + x16310;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16312 = x16257 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16313 = x16312 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16314 = x16311 + x16313;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16315 = x16258 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16316 = x16242 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16317 = x16315 + x16316;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16318 = x16250 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16319 = x16317 + x16318;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16320 = x16257 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16321 = x16319 + x16320;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16322 = x16298 + x4120;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16323 = x16290 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16324 = x16274 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16325 = x16282 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16326 = x16324 + x16325;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16327 = x16289 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16328 = x16326 + x16327;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16329 = x16328 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16330 = x16323 + x16329;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16331 = x16290 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16332 = x16274 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16333 = x16331 + x16332;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16334 = x16282 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16335 = x16289 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16336 = x16334 + x16335;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16337 = x16336 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16338 = x16333 + x16337;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16339 = x16290 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16340 = x16274 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16341 = x16339 + x16340;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16342 = x16282 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16343 = x16341 + x16342;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16344 = x16289 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16345 = x16344 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16346 = x16343 + x16345;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16347 = x16290 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16348 = x16274 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16349 = x16347 + x16348;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16350 = x16282 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16351 = x16349 + x16350;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16352 = x16289 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16353 = x16351 + x16352;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":473:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":478:16)
   auto x16354 = x16330 + x4105;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16355 = x16322 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16356 = x16306 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16357 = x16314 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16358 = x16356 + x16357;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16359 = x16321 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16360 = x16358 + x16359;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16361 = x16360 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16362 = x16355 + x16361;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16363 = x16322 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16364 = x16306 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16365 = x16363 + x16364;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16366 = x16314 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16367 = x16321 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16368 = x16366 + x16367;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16369 = x16368 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16370 = x16365 + x16369;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16371 = x16322 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16372 = x16306 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16373 = x16371 + x16372;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16374 = x16314 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16375 = x16373 + x16374;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16376 = x16321 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16377 = x16376 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16378 = x16375 + x16377;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16379 = x16322 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16380 = x16306 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16381 = x16379 + x16380;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16382 = x16314 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16383 = x16381 + x16382;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16384 = x16321 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16385 = x16383 + x16384;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":475:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":480:16)
   auto x16386 = x16362 + x4121;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16387 = args[2][180 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16388 = x16387 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16389 = x3972 + x16388;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16390 = args[2][181 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16391 = x16390 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16392 = x16389 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16393 = x16389 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16394 = x16389 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16395 = x16389 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16396 = x3973 + x16391;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16397 = x16392 + x16396;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16398 = args[2][182 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16399 = x16398 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16400 = x16397 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16401 = x16393 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16402 = x16394 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16403 = x16401 + x16402;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16404 = x16395 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16405 = x16403 + x16404;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16406 = x16405 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16407 = x16400 + x16406;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16408 = x16397 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16409 = x16393 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16410 = x16408 + x16409;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16411 = x16394 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16412 = x16395 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16413 = x16411 + x16412;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16414 = x16413 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16415 = x16410 + x16414;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16416 = x16397 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16417 = x16393 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16418 = x16416 + x16417;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16419 = x16394 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16420 = x16418 + x16419;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16421 = x16395 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16422 = x16421 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16423 = x16420 + x16422;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16424 = x16397 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16425 = x16393 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16426 = x16424 + x16425;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16427 = x16394 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16428 = x16426 + x16427;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16429 = x16395 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16430 = x16428 + x16429;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16431 = x3974 + x16399;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16432 = x16407 + x16431;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16433 = args[2][183 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16434 = x16433 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16435 = x16432 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16436 = x16415 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16437 = x16423 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16438 = x16436 + x16437;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16439 = x16430 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16440 = x16438 + x16439;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16441 = x16440 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16442 = x16435 + x16441;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16443 = x16432 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16444 = x16415 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16445 = x16443 + x16444;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16446 = x16423 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16447 = x16430 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16448 = x16446 + x16447;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16449 = x16448 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16450 = x16445 + x16449;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16451 = x16432 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16452 = x16415 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16453 = x16451 + x16452;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16454 = x16423 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16455 = x16453 + x16454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16456 = x16430 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16457 = x16456 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16458 = x16455 + x16457;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16459 = x16432 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16460 = x16415 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16461 = x16459 + x16460;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16462 = x16423 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16463 = x16461 + x16462;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16464 = x16430 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16465 = x16463 + x16464;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16466 = x3975 + x16434;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16467 = x16442 + x16466;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16468 = args[2][184 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16469 = x16468 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16470 = x16467 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16471 = x16450 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16472 = x16458 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16473 = x16471 + x16472;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16474 = x16465 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16475 = x16473 + x16474;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16476 = x16475 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16477 = x16470 + x16476;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16478 = x16467 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16479 = x16450 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16480 = x16478 + x16479;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16481 = x16458 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16482 = x16465 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16483 = x16481 + x16482;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16484 = x16483 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16485 = x16480 + x16484;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16486 = x16467 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16487 = x16450 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16488 = x16486 + x16487;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16489 = x16458 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16490 = x16488 + x16489;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16491 = x16465 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16492 = x16491 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16493 = x16490 + x16492;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16494 = x16467 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16495 = x16450 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16496 = x16494 + x16495;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16497 = x16458 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16498 = x16496 + x16497;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16499 = x16465 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16500 = x16498 + x16499;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16501 = x3976 + x16469;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16502 = x16477 + x16501;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16503 = args[2][185 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16504 = x16503 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16505 = x16502 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16506 = x16485 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16507 = x16493 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16508 = x16506 + x16507;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16509 = x16500 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16510 = x16508 + x16509;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16511 = x16510 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16512 = x16505 + x16511;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16513 = x16502 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16514 = x16485 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16515 = x16513 + x16514;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16516 = x16493 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16517 = x16500 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16518 = x16516 + x16517;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16519 = x16518 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16520 = x16515 + x16519;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16521 = x16502 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16522 = x16485 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16523 = x16521 + x16522;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16524 = x16493 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16525 = x16523 + x16524;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16526 = x16500 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16527 = x16526 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16528 = x16525 + x16527;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16529 = x16502 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16530 = x16485 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16531 = x16529 + x16530;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16532 = x16493 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16533 = x16531 + x16532;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16534 = x16500 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16535 = x16533 + x16534;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16536 = x3977 + x16504;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16537 = x16512 + x16536;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16538 = args[2][186 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16539 = x16538 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16540 = x16537 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16541 = x16520 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16542 = x16528 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16543 = x16541 + x16542;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16544 = x16535 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16545 = x16543 + x16544;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16546 = x16545 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16547 = x16540 + x16546;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16548 = x16537 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16549 = x16520 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16550 = x16548 + x16549;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16551 = x16528 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16552 = x16535 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16553 = x16551 + x16552;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16554 = x16553 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16555 = x16550 + x16554;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16556 = x16537 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16557 = x16520 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16558 = x16556 + x16557;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16559 = x16528 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16560 = x16558 + x16559;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16561 = x16535 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16562 = x16561 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16563 = x16560 + x16562;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16564 = x16537 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16565 = x16520 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16566 = x16564 + x16565;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16567 = x16528 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16568 = x16566 + x16567;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16569 = x16535 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16570 = x16568 + x16569;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16571 = x3978 + x16539;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16572 = x16547 + x16571;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16573 = args[2][187 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16574 = x16573 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16575 = x16572 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16576 = x16555 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16577 = x16563 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16578 = x16576 + x16577;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16579 = x16570 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16580 = x16578 + x16579;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16581 = x16580 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16582 = x16575 + x16581;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16583 = x16572 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16584 = x16555 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16585 = x16583 + x16584;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16586 = x16563 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16587 = x16570 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16588 = x16586 + x16587;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16589 = x16588 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16590 = x16585 + x16589;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16591 = x16572 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16592 = x16555 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16593 = x16591 + x16592;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16594 = x16563 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16595 = x16593 + x16594;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16596 = x16570 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16597 = x16596 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16598 = x16595 + x16597;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16599 = x16572 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16600 = x16555 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16601 = x16599 + x16600;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16602 = x16563 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16603 = x16601 + x16602;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16604 = x16570 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16605 = x16603 + x16604;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16606 = x3979 + x16574;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16607 = x16582 + x16606;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16608 = args[2][188 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16609 = x16608 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16610 = x16607 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16611 = x16590 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16612 = x16598 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16613 = x16611 + x16612;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16614 = x16605 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16615 = x16613 + x16614;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16616 = x16615 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16617 = x16610 + x16616;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16618 = x16607 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16619 = x16590 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16620 = x16618 + x16619;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16621 = x16598 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16622 = x16605 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16623 = x16621 + x16622;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16624 = x16623 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16625 = x16620 + x16624;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16626 = x16607 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16627 = x16590 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16628 = x16626 + x16627;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16629 = x16598 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16630 = x16628 + x16629;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16631 = x16605 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16632 = x16631 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16633 = x16630 + x16632;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16634 = x16607 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16635 = x16590 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16636 = x16634 + x16635;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16637 = x16598 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16638 = x16636 + x16637;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16639 = x16605 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16640 = x16638 + x16639;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16641 = x3980 + x16609;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16642 = x16617 + x16641;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16643 = args[2][189 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16644 = x16643 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16645 = x16642 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16646 = x16625 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16647 = x16633 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16648 = x16646 + x16647;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16649 = x16640 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16650 = x16648 + x16649;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16651 = x16650 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16652 = x16645 + x16651;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16653 = x16642 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16654 = x16625 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16655 = x16653 + x16654;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16656 = x16633 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16657 = x16640 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16658 = x16656 + x16657;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16659 = x16658 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16660 = x16655 + x16659;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16661 = x16642 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16662 = x16625 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16663 = x16661 + x16662;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16664 = x16633 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16665 = x16663 + x16664;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16666 = x16640 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16667 = x16666 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16668 = x16665 + x16667;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16669 = x16642 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16670 = x16625 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16671 = x16669 + x16670;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16672 = x16633 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16673 = x16671 + x16672;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16674 = x16640 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16675 = x16673 + x16674;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16676 = x3981 + x16644;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16677 = x16652 + x16676;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16678 = args[2][190 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16679 = x16678 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16680 = x16677 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16681 = x16660 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16682 = x16668 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16683 = x16681 + x16682;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16684 = x16675 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16685 = x16683 + x16684;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16686 = x16685 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16687 = x16680 + x16686;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16688 = x16677 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16689 = x16660 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16690 = x16688 + x16689;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16691 = x16668 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16692 = x16675 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16693 = x16691 + x16692;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16694 = x16693 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16695 = x16690 + x16694;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16696 = x16677 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16697 = x16660 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16698 = x16696 + x16697;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16699 = x16668 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16700 = x16698 + x16699;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16701 = x16675 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16702 = x16701 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16703 = x16700 + x16702;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16704 = x16677 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16705 = x16660 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16706 = x16704 + x16705;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16707 = x16668 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16708 = x16706 + x16707;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16709 = x16675 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16710 = x16708 + x16709;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16711 = x3982 + x16679;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16712 = x16687 + x16711;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16713 = args[2][191 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16714 = x16713 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16715 = x16712 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16716 = x16695 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16717 = x16703 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16718 = x16716 + x16717;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16719 = x16710 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16720 = x16718 + x16719;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16721 = x16720 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16722 = x16715 + x16721;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16723 = x16712 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16724 = x16695 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16725 = x16723 + x16724;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16726 = x16703 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16727 = x16710 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16728 = x16726 + x16727;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16729 = x16728 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16730 = x16725 + x16729;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16731 = x16712 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16732 = x16695 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16733 = x16731 + x16732;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16734 = x16703 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16735 = x16733 + x16734;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16736 = x16710 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16737 = x16736 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16738 = x16735 + x16737;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16739 = x16712 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16740 = x16695 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16741 = x16739 + x16740;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16742 = x16703 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16743 = x16741 + x16742;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16744 = x16710 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16745 = x16743 + x16744;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16746 = x4079 + x16714;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16747 = x16722 + x16746;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16748 = args[2][192 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16749 = x16748 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16750 = x16747 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16751 = x16730 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16752 = x16738 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16753 = x16751 + x16752;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16754 = x16745 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16755 = x16753 + x16754;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16756 = x16755 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16757 = x16750 + x16756;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16758 = x16747 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16759 = x16730 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16760 = x16758 + x16759;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16761 = x16738 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16762 = x16745 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16763 = x16761 + x16762;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16764 = x16763 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16765 = x16760 + x16764;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16766 = x16747 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16767 = x16730 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16768 = x16766 + x16767;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16769 = x16738 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16770 = x16768 + x16769;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16771 = x16745 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16772 = x16771 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16773 = x16770 + x16772;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16774 = x16747 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16775 = x16730 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16776 = x16774 + x16775;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16777 = x16738 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16778 = x16776 + x16777;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16779 = x16745 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16780 = x16778 + x16779;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16781 = x4080 + x16749;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16782 = x16757 + x16781;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16783 = args[2][193 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16784 = x16783 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16785 = x16782 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16786 = x16765 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16787 = x16773 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16788 = x16786 + x16787;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16789 = x16780 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16790 = x16788 + x16789;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16791 = x16790 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16792 = x16785 + x16791;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16793 = x16782 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16794 = x16765 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16795 = x16793 + x16794;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16796 = x16773 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16797 = x16780 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16798 = x16796 + x16797;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16799 = x16798 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16800 = x16795 + x16799;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16801 = x16782 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16802 = x16765 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16803 = x16801 + x16802;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16804 = x16773 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16805 = x16803 + x16804;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16806 = x16780 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16807 = x16806 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16808 = x16805 + x16807;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16809 = x16782 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16810 = x16765 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16811 = x16809 + x16810;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16812 = x16773 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16813 = x16811 + x16812;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16814 = x16780 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16815 = x16813 + x16814;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16816 = x4081 + x16784;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16817 = x16792 + x16816;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16818 = args[2][194 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16819 = x16818 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16820 = x16817 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16821 = x16800 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16822 = x16808 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16823 = x16821 + x16822;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16824 = x16815 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16825 = x16823 + x16824;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16826 = x16825 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16827 = x16820 + x16826;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16828 = x16817 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16829 = x16800 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16830 = x16828 + x16829;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16831 = x16808 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16832 = x16815 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16833 = x16831 + x16832;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16834 = x16833 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16835 = x16830 + x16834;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16836 = x16817 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16837 = x16800 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16838 = x16836 + x16837;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16839 = x16808 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16840 = x16838 + x16839;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16841 = x16815 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16842 = x16841 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16843 = x16840 + x16842;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16844 = x16817 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16845 = x16800 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16846 = x16844 + x16845;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16847 = x16808 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16848 = x16846 + x16847;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16849 = x16815 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16850 = x16848 + x16849;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16851 = x4082 + x16819;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16852 = x16827 + x16851;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16853 = args[2][195 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16854 = x16853 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16855 = x16852 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16856 = x16835 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16857 = x16843 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16858 = x16856 + x16857;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16859 = x16850 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16860 = x16858 + x16859;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16861 = x16860 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16862 = x16855 + x16861;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16863 = x16852 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16864 = x16835 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16865 = x16863 + x16864;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16866 = x16843 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16867 = x16850 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16868 = x16866 + x16867;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16869 = x16868 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16870 = x16865 + x16869;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16871 = x16852 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16872 = x16835 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16873 = x16871 + x16872;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16874 = x16843 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16875 = x16873 + x16874;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16876 = x16850 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16877 = x16876 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16878 = x16875 + x16877;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16879 = x16852 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16880 = x16835 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16881 = x16879 + x16880;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16882 = x16843 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16883 = x16881 + x16882;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16884 = x16850 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16885 = x16883 + x16884;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16886 = x4083 + x16854;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16887 = x16862 + x16886;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16888 = args[2][196 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16889 = x16888 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16890 = x16887 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16891 = x16870 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16892 = x16878 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16893 = x16891 + x16892;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16894 = x16885 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16895 = x16893 + x16894;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16896 = x16895 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16897 = x16890 + x16896;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16898 = x16887 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16899 = x16870 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16900 = x16898 + x16899;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16901 = x16878 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16902 = x16885 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16903 = x16901 + x16902;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16904 = x16903 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16905 = x16900 + x16904;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16906 = x16887 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16907 = x16870 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16908 = x16906 + x16907;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16909 = x16878 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16910 = x16908 + x16909;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16911 = x16885 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16912 = x16911 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16913 = x16910 + x16912;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16914 = x16887 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16915 = x16870 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16916 = x16914 + x16915;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16917 = x16878 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16918 = x16916 + x16917;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16919 = x16885 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16920 = x16918 + x16919;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16921 = x4084 + x16889;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16922 = x16897 + x16921;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16923 = args[2][197 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16924 = x16923 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16925 = x16922 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16926 = x16905 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16927 = x16913 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16928 = x16926 + x16927;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16929 = x16920 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16930 = x16928 + x16929;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16931 = x16930 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16932 = x16925 + x16931;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16933 = x16922 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16934 = x16905 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16935 = x16933 + x16934;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16936 = x16913 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16937 = x16920 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16938 = x16936 + x16937;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16939 = x16938 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16940 = x16935 + x16939;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16941 = x16922 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16942 = x16905 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16943 = x16941 + x16942;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16944 = x16913 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16945 = x16943 + x16944;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16946 = x16920 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16947 = x16946 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16948 = x16945 + x16947;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16949 = x16922 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16950 = x16905 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16951 = x16949 + x16950;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16952 = x16913 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16953 = x16951 + x16952;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16954 = x16920 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16955 = x16953 + x16954;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16956 = x4085 + x16924;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16957 = x16932 + x16956;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16958 = args[2][198 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16959 = x16958 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16960 = x16957 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16961 = x16940 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16962 = x16948 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16963 = x16961 + x16962;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16964 = x16955 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16965 = x16963 + x16964;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16966 = x16965 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16967 = x16960 + x16966;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16968 = x16957 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16969 = x16940 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16970 = x16968 + x16969;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16971 = x16948 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16972 = x16955 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16973 = x16971 + x16972;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16974 = x16973 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16975 = x16970 + x16974;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16976 = x16957 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16977 = x16940 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16978 = x16976 + x16977;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16979 = x16948 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16980 = x16978 + x16979;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16981 = x16955 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16982 = x16981 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16983 = x16980 + x16982;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16984 = x16957 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16985 = x16940 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16986 = x16984 + x16985;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16987 = x16948 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16988 = x16986 + x16987;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16989 = x16955 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16990 = x16988 + x16989;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x16991 = x4086 + x16959;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16992 = x16967 + x16991;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x16993 = args[2][199 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x16994 = x16993 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16995 = x16992 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16996 = x16975 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16997 = x16983 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16998 = x16996 + x16997;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x16999 = x16990 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17000 = x16998 + x16999;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17001 = x17000 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17002 = x16995 + x17001;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17003 = x16992 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17004 = x16975 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17005 = x17003 + x17004;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17006 = x16983 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17007 = x16990 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17008 = x17006 + x17007;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17009 = x17008 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17010 = x17005 + x17009;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17011 = x16992 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17012 = x16975 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17013 = x17011 + x17012;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17014 = x16983 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17015 = x17013 + x17014;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17016 = x16990 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17017 = x17016 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17018 = x17015 + x17017;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17019 = x16992 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17020 = x16975 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17021 = x17019 + x17020;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17022 = x16983 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17023 = x17021 + x17022;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17024 = x16990 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17025 = x17023 + x17024;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17026 = x2910 + x16994;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17027 = x17002 + x17026;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17028 = args[2][200 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17029 = x17028 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17030 = x17027 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17031 = x17010 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17032 = x17018 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17033 = x17031 + x17032;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17034 = x17025 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17035 = x17033 + x17034;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17036 = x17035 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17037 = x17030 + x17036;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17038 = x17027 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17039 = x17010 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17040 = x17038 + x17039;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17041 = x17018 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17042 = x17025 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17043 = x17041 + x17042;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17044 = x17043 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17045 = x17040 + x17044;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17046 = x17027 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17047 = x17010 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17048 = x17046 + x17047;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17049 = x17018 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17050 = x17048 + x17049;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17051 = x17025 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17052 = x17051 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17053 = x17050 + x17052;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17054 = x17027 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17055 = x17010 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17056 = x17054 + x17055;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17057 = x17018 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17058 = x17056 + x17057;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17059 = x17025 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17060 = x17058 + x17059;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17061 = x2911 + x17029;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17062 = x17037 + x17061;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17063 = args[2][201 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17064 = x17063 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17065 = x17062 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17066 = x17045 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17067 = x17053 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17068 = x17066 + x17067;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17069 = x17060 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17070 = x17068 + x17069;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17071 = x17070 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17072 = x17065 + x17071;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17073 = x17062 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17074 = x17045 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17075 = x17073 + x17074;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17076 = x17053 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17077 = x17060 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17078 = x17076 + x17077;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17079 = x17078 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17080 = x17075 + x17079;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17081 = x17062 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17082 = x17045 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17083 = x17081 + x17082;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17084 = x17053 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17085 = x17083 + x17084;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17086 = x17060 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17087 = x17086 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17088 = x17085 + x17087;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17089 = x17062 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17090 = x17045 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17091 = x17089 + x17090;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17092 = x17053 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17093 = x17091 + x17092;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17094 = x17060 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17095 = x17093 + x17094;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17096 = x2644 + x17064;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17097 = x17072 + x17096;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17098 = args[2][202 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17099 = x17098 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17100 = x17097 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17101 = x17080 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17102 = x17088 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17103 = x17101 + x17102;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17104 = x17095 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17105 = x17103 + x17104;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17106 = x17105 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17107 = x17100 + x17106;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17108 = x17097 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17109 = x17080 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17110 = x17108 + x17109;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17111 = x17088 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17112 = x17095 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17113 = x17111 + x17112;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17114 = x17113 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17115 = x17110 + x17114;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17116 = x17097 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17117 = x17080 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17118 = x17116 + x17117;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17119 = x17088 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17120 = x17118 + x17119;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17121 = x17095 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17122 = x17121 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17123 = x17120 + x17122;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17124 = x17097 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17125 = x17080 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17126 = x17124 + x17125;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17127 = x17088 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17128 = x17126 + x17127;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17129 = x17095 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17130 = x17128 + x17129;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17131 = x2645 + x17099;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17132 = x17107 + x17131;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17133 = args[2][203 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17134 = x17133 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17135 = x17132 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17136 = x17115 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17137 = x17123 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17138 = x17136 + x17137;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17139 = x17130 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17140 = x17138 + x17139;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17141 = x17140 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17142 = x17135 + x17141;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17143 = x17132 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17144 = x17115 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17145 = x17143 + x17144;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17146 = x17123 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17147 = x17130 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17148 = x17146 + x17147;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17149 = x17148 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17150 = x17145 + x17149;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17151 = x17132 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17152 = x17115 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17153 = x17151 + x17152;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17154 = x17123 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17155 = x17153 + x17154;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17156 = x17130 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17157 = x17156 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17158 = x17155 + x17157;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17159 = x17132 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17160 = x17115 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17161 = x17159 + x17160;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17162 = x17123 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17163 = x17161 + x17162;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17164 = x17130 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17165 = x17163 + x17164;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17166 = x2646 + x17134;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17167 = x17142 + x17166;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17168 = args[2][204 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17169 = x17168 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17170 = x17167 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17171 = x17150 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17172 = x17158 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17173 = x17171 + x17172;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17174 = x17165 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17175 = x17173 + x17174;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17176 = x17175 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17177 = x17170 + x17176;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17178 = x17167 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17179 = x17150 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17180 = x17178 + x17179;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17181 = x17158 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17182 = x17165 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17183 = x17181 + x17182;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17184 = x17183 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17185 = x17180 + x17184;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17186 = x17167 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17187 = x17150 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17188 = x17186 + x17187;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17189 = x17158 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17190 = x17188 + x17189;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17191 = x17165 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17192 = x17191 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17193 = x17190 + x17192;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17194 = x17167 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17195 = x17150 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17196 = x17194 + x17195;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17197 = x17158 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17198 = x17196 + x17197;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17199 = x17165 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17200 = x17198 + x17199;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17201 = x2647 + x17169;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17202 = x17177 + x17201;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17203 = args[2][205 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17204 = x17203 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17205 = x17202 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17206 = x17185 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17207 = x17193 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17208 = x17206 + x17207;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17209 = x17200 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17210 = x17208 + x17209;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17211 = x17210 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17212 = x17205 + x17211;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17213 = x17202 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17214 = x17185 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17215 = x17213 + x17214;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17216 = x17193 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17217 = x17200 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17218 = x17216 + x17217;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17219 = x17218 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17220 = x17215 + x17219;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17221 = x17202 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17222 = x17185 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17223 = x17221 + x17222;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17224 = x17193 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17225 = x17223 + x17224;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17226 = x17200 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17227 = x17226 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17228 = x17225 + x17227;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17229 = x17202 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17230 = x17185 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17231 = x17229 + x17230;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17232 = x17193 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17233 = x17231 + x17232;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17234 = x17200 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17235 = x17233 + x17234;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17236 = x2648 + x17204;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17237 = x17212 + x17236;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17238 = args[2][206 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17239 = x17238 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17240 = x17237 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17241 = x17220 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17242 = x17228 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17243 = x17241 + x17242;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17244 = x17235 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17245 = x17243 + x17244;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17246 = x17245 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17247 = x17240 + x17246;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17248 = x17237 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17249 = x17220 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17250 = x17248 + x17249;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17251 = x17228 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17252 = x17235 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17253 = x17251 + x17252;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17254 = x17253 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17255 = x17250 + x17254;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17256 = x17237 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17257 = x17220 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17258 = x17256 + x17257;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17259 = x17228 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17260 = x17258 + x17259;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17261 = x17235 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17262 = x17261 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17263 = x17260 + x17262;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17264 = x17237 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17265 = x17220 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17266 = x17264 + x17265;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17267 = x17228 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17268 = x17266 + x17267;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17269 = x17235 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17270 = x17268 + x17269;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17271 = x2649 + x17239;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17272 = x17247 + x17271;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17273 = args[2][207 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17274 = x17273 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17275 = x17272 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17276 = x17255 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17277 = x17263 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17278 = x17276 + x17277;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17279 = x17270 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17280 = x17278 + x17279;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17281 = x17280 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17282 = x17275 + x17281;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17283 = x17272 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17284 = x17255 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17285 = x17283 + x17284;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17286 = x17263 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17287 = x17270 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17288 = x17286 + x17287;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17289 = x17288 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17290 = x17285 + x17289;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17291 = x17272 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17292 = x17255 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17293 = x17291 + x17292;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17294 = x17263 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17295 = x17293 + x17294;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17296 = x17270 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17297 = x17296 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17298 = x17295 + x17297;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17299 = x17272 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17300 = x17255 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17301 = x17299 + x17300;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17302 = x17263 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17303 = x17301 + x17302;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17304 = x17270 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17305 = x17303 + x17304;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17306 = x2650 + x17274;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17307 = x17282 + x17306;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17308 = args[2][208 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17309 = x17308 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17310 = x17307 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17311 = x17290 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17312 = x17298 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17313 = x17311 + x17312;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17314 = x17305 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17315 = x17313 + x17314;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17316 = x17315 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17317 = x17310 + x17316;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17318 = x17307 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17319 = x17290 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17320 = x17318 + x17319;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17321 = x17298 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17322 = x17305 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17323 = x17321 + x17322;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17324 = x17323 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17325 = x17320 + x17324;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17326 = x17307 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17327 = x17290 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17328 = x17326 + x17327;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17329 = x17298 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17330 = x17328 + x17329;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17331 = x17305 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17332 = x17331 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17333 = x17330 + x17332;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17334 = x17307 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17335 = x17290 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17336 = x17334 + x17335;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17337 = x17298 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17338 = x17336 + x17337;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17339 = x17305 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17340 = x17338 + x17339;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17341 = x2651 + x17309;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17342 = x17317 + x17341;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17343 = args[2][209 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17344 = x17343 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17345 = x17342 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17346 = x17325 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17347 = x17333 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17348 = x17346 + x17347;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17349 = x17340 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17350 = x17348 + x17349;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17351 = x17350 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17352 = x17345 + x17351;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17353 = x17342 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17354 = x17325 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17355 = x17353 + x17354;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17356 = x17333 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17357 = x17340 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17358 = x17356 + x17357;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17359 = x17358 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17360 = x17355 + x17359;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17361 = x17342 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17362 = x17325 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17363 = x17361 + x17362;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17364 = x17333 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17365 = x17363 + x17364;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17366 = x17340 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17367 = x17366 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17368 = x17365 + x17367;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17369 = x17342 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17370 = x17325 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17371 = x17369 + x17370;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17372 = x17333 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17373 = x17371 + x17372;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17374 = x17340 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17375 = x17373 + x17374;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17376 = x4087 + x17344;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17377 = x17352 + x17376;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17378 = args[2][210 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17379 = x17378 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17380 = x17377 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17381 = x17360 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17382 = x17368 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17383 = x17381 + x17382;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17384 = x17375 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17385 = x17383 + x17384;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17386 = x17385 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17387 = x17380 + x17386;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17388 = x17377 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17389 = x17360 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17390 = x17388 + x17389;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17391 = x17368 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17392 = x17375 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17393 = x17391 + x17392;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17394 = x17393 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17395 = x17390 + x17394;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17396 = x17377 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17397 = x17360 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17398 = x17396 + x17397;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17399 = x17368 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17400 = x17398 + x17399;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17401 = x17375 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17402 = x17401 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17403 = x17400 + x17402;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17404 = x17377 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17405 = x17360 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17406 = x17404 + x17405;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17407 = x17368 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17408 = x17406 + x17407;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17409 = x17375 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17410 = x17408 + x17409;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17411 = x4088 + x17379;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17412 = x17387 + x17411;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17413 = args[2][211 * steps + ((cycle - kInvRate * 5) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17414 = x17413 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17415 = x17412 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17416 = x17395 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17417 = x17403 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17418 = x17416 + x17417;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17419 = x17410 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17420 = x17418 + x17419;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17421 = x17420 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17422 = x17415 + x17421;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17423 = x17412 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17424 = x17395 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17425 = x17423 + x17424;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17426 = x17403 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17427 = x17410 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17428 = x17426 + x17427;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17429 = x17428 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17430 = x17425 + x17429;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17431 = x17412 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17432 = x17395 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17433 = x17431 + x17432;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17434 = x17403 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17435 = x17433 + x17434;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17436 = x17410 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17437 = x17436 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17438 = x17435 + x17437;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17439 = x17412 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17440 = x17395 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17441 = x17439 + x17440;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17442 = x17403 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17443 = x17441 + x17442;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17444 = x17410 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17445 = x17443 + x17444;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17446 = x4089 + x17414;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17447 = x17422 + x17446;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17448 = args[2][180 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17449 = x17448 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17450 = x17447 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17451 = x17430 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17452 = x17438 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17453 = x17451 + x17452;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17454 = x17445 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17455 = x17453 + x17454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17456 = x17455 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17457 = x17450 + x17456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17458 = x17447 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17459 = x17430 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17460 = x17458 + x17459;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17461 = x17438 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17462 = x17445 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17463 = x17461 + x17462;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17464 = x17463 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17465 = x17460 + x17464;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17466 = x17447 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17467 = x17430 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17468 = x17466 + x17467;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17469 = x17438 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17470 = x17468 + x17469;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17471 = x17445 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17472 = x17471 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17473 = x17470 + x17472;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17474 = x17447 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17475 = x17430 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17476 = x17474 + x17475;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17477 = x17438 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17478 = x17476 + x17477;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17479 = x17445 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17480 = x17478 + x17479;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17481 = x1032 + x17449;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17482 = x17457 + x17481;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17483 = args[2][181 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17484 = x17483 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17485 = x17482 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17486 = x17465 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17487 = x17473 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17488 = x17486 + x17487;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17489 = x17480 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17490 = x17488 + x17489;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17491 = x17490 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17492 = x17485 + x17491;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17493 = x17482 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17494 = x17465 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17495 = x17493 + x17494;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17496 = x17473 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17497 = x17480 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17498 = x17496 + x17497;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17499 = x17498 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17500 = x17495 + x17499;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17501 = x17482 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17502 = x17465 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17503 = x17501 + x17502;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17504 = x17473 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17505 = x17503 + x17504;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17506 = x17480 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17507 = x17506 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17508 = x17505 + x17507;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17509 = x17482 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17510 = x17465 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17511 = x17509 + x17510;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17512 = x17473 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17513 = x17511 + x17512;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17514 = x17480 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17515 = x17513 + x17514;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17516 = x1239 + x17484;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17517 = x17492 + x17516;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17518 = args[2][182 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17519 = x17518 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17520 = x17517 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17521 = x17500 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17522 = x17508 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17523 = x17521 + x17522;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17524 = x17515 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17525 = x17523 + x17524;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17526 = x17525 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17527 = x17520 + x17526;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17528 = x17517 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17529 = x17500 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17530 = x17528 + x17529;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17531 = x17508 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17532 = x17515 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17533 = x17531 + x17532;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17534 = x17533 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17535 = x17530 + x17534;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17536 = x17517 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17537 = x17500 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17538 = x17536 + x17537;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17539 = x17508 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17540 = x17538 + x17539;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17541 = x17515 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17542 = x17541 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17543 = x17540 + x17542;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17544 = x17517 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17545 = x17500 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17546 = x17544 + x17545;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17547 = x17508 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17548 = x17546 + x17547;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17549 = x17515 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17550 = x17548 + x17549;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17551 = x1307 + x17519;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17552 = x17527 + x17551;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17553 = args[2][183 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17554 = x17553 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17555 = x17552 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17556 = x17535 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17557 = x17543 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17558 = x17556 + x17557;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17559 = x17550 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17560 = x17558 + x17559;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17561 = x17560 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17562 = x17555 + x17561;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17563 = x17552 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17564 = x17535 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17565 = x17563 + x17564;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17566 = x17543 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17567 = x17550 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17568 = x17566 + x17567;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17569 = x17568 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17570 = x17565 + x17569;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17571 = x17552 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17572 = x17535 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17573 = x17571 + x17572;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17574 = x17543 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17575 = x17573 + x17574;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17576 = x17550 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17577 = x17576 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17578 = x17575 + x17577;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17579 = x17552 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17580 = x17535 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17581 = x17579 + x17580;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17582 = x17543 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17583 = x17581 + x17582;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17584 = x17550 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17585 = x17583 + x17584;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17586 = x1328 + x17554;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17587 = x17562 + x17586;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17588 = args[2][184 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17589 = x17588 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17590 = x17587 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17591 = x17570 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17592 = x17578 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17593 = x17591 + x17592;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17594 = x17585 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17595 = x17593 + x17594;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17596 = x17595 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17597 = x17590 + x17596;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17598 = x17587 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17599 = x17570 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17600 = x17598 + x17599;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17601 = x17578 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17602 = x17585 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17603 = x17601 + x17602;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17604 = x17603 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17605 = x17600 + x17604;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17606 = x17587 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17607 = x17570 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17608 = x17606 + x17607;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17609 = x17578 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17610 = x17608 + x17609;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17611 = x17585 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17612 = x17611 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17613 = x17610 + x17612;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17614 = x17587 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17615 = x17570 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17616 = x17614 + x17615;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17617 = x17578 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17618 = x17616 + x17617;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17619 = x17585 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17620 = x17618 + x17619;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17621 = x1351 + x17589;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17622 = x17597 + x17621;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17623 = args[2][185 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17624 = x17623 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17625 = x17622 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17626 = x17605 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17627 = x17613 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17628 = x17626 + x17627;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17629 = x17620 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17630 = x17628 + x17629;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17631 = x17630 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17632 = x17625 + x17631;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17633 = x17622 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17634 = x17605 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17635 = x17633 + x17634;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17636 = x17613 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17637 = x17620 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17638 = x17636 + x17637;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17639 = x17638 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17640 = x17635 + x17639;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17641 = x17622 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17642 = x17605 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17643 = x17641 + x17642;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17644 = x17613 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17645 = x17643 + x17644;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17646 = x17620 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17647 = x17646 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17648 = x17645 + x17647;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17649 = x17622 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17650 = x17605 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17651 = x17649 + x17650;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17652 = x17613 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17653 = x17651 + x17652;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17654 = x17620 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17655 = x17653 + x17654;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17656 = x1373 + x17624;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17657 = x17632 + x17656;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17658 = args[2][186 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17659 = x17658 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17660 = x17657 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17661 = x17640 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17662 = x17648 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17663 = x17661 + x17662;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17664 = x17655 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17665 = x17663 + x17664;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17666 = x17665 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17667 = x17660 + x17666;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17668 = x17657 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17669 = x17640 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17670 = x17668 + x17669;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17671 = x17648 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17672 = x17655 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17673 = x17671 + x17672;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17674 = x17673 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17675 = x17670 + x17674;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17676 = x17657 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17677 = x17640 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17678 = x17676 + x17677;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17679 = x17648 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17680 = x17678 + x17679;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17681 = x17655 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17682 = x17681 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17683 = x17680 + x17682;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17684 = x17657 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17685 = x17640 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17686 = x17684 + x17685;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17687 = x17648 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17688 = x17686 + x17687;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17689 = x17655 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17690 = x17688 + x17689;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17691 = x1395 + x17659;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17692 = x17667 + x17691;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17693 = args[2][187 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17694 = x17693 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17695 = x17692 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17696 = x17675 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17697 = x17683 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17698 = x17696 + x17697;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17699 = x17690 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17700 = x17698 + x17699;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17701 = x17700 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17702 = x17695 + x17701;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17703 = x17692 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17704 = x17675 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17705 = x17703 + x17704;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17706 = x17683 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17707 = x17690 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17708 = x17706 + x17707;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17709 = x17708 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17710 = x17705 + x17709;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17711 = x17692 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17712 = x17675 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17713 = x17711 + x17712;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17714 = x17683 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17715 = x17713 + x17714;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17716 = x17690 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17717 = x17716 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17718 = x17715 + x17717;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17719 = x17692 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17720 = x17675 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17721 = x17719 + x17720;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17722 = x17683 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17723 = x17721 + x17722;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17724 = x17690 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17725 = x17723 + x17724;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17726 = x1428 + x17694;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17727 = x17702 + x17726;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17728 = args[2][188 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17729 = x17728 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17730 = x17727 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17731 = x17710 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17732 = x17718 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17733 = x17731 + x17732;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17734 = x17725 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17735 = x17733 + x17734;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17736 = x17735 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17737 = x17730 + x17736;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17738 = x17727 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17739 = x17710 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17740 = x17738 + x17739;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17741 = x17718 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17742 = x17725 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17743 = x17741 + x17742;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17744 = x17743 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17745 = x17740 + x17744;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17746 = x17727 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17747 = x17710 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17748 = x17746 + x17747;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17749 = x17718 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17750 = x17748 + x17749;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17751 = x17725 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17752 = x17751 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17753 = x17750 + x17752;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17754 = x17727 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17755 = x17710 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17756 = x17754 + x17755;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17757 = x17718 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17758 = x17756 + x17757;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17759 = x17725 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17760 = x17758 + x17759;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17761 = x1461 + x17729;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17762 = x17737 + x17761;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17763 = args[2][189 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17764 = x17763 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17765 = x17762 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17766 = x17745 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17767 = x17753 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17768 = x17766 + x17767;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17769 = x17760 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17770 = x17768 + x17769;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17771 = x17770 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17772 = x17765 + x17771;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17773 = x17762 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17774 = x17745 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17775 = x17773 + x17774;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17776 = x17753 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17777 = x17760 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17778 = x17776 + x17777;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17779 = x17778 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17780 = x17775 + x17779;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17781 = x17762 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17782 = x17745 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17783 = x17781 + x17782;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17784 = x17753 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17785 = x17783 + x17784;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17786 = x17760 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17787 = x17786 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17788 = x17785 + x17787;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17789 = x17762 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17790 = x17745 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17791 = x17789 + x17790;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17792 = x17753 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17793 = x17791 + x17792;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17794 = x17760 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17795 = x17793 + x17794;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17796 = x1091 + x17764;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17797 = x17772 + x17796;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17798 = args[2][190 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17799 = x17798 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17800 = x17797 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17801 = x17780 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17802 = x17788 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17803 = x17801 + x17802;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17804 = x17795 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17805 = x17803 + x17804;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17806 = x17805 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17807 = x17800 + x17806;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17808 = x17797 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17809 = x17780 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17810 = x17808 + x17809;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17811 = x17788 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17812 = x17795 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17813 = x17811 + x17812;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17814 = x17813 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17815 = x17810 + x17814;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17816 = x17797 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17817 = x17780 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17818 = x17816 + x17817;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17819 = x17788 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17820 = x17818 + x17819;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17821 = x17795 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17822 = x17821 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17823 = x17820 + x17822;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17824 = x17797 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17825 = x17780 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17826 = x17824 + x17825;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17827 = x17788 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17828 = x17826 + x17827;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17829 = x17795 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17830 = x17828 + x17829;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17831 = x1092 + x17799;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17832 = x17807 + x17831;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17833 = args[2][191 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17834 = x17833 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17835 = x17832 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17836 = x17815 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17837 = x17823 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17838 = x17836 + x17837;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17839 = x17830 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17840 = x17838 + x17839;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17841 = x17840 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17842 = x17835 + x17841;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17843 = x17832 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17844 = x17815 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17845 = x17843 + x17844;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17846 = x17823 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17847 = x17830 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17848 = x17846 + x17847;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17849 = x17848 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17850 = x17845 + x17849;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17851 = x17832 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17852 = x17815 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17853 = x17851 + x17852;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17854 = x17823 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17855 = x17853 + x17854;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17856 = x17830 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17857 = x17856 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17858 = x17855 + x17857;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17859 = x17832 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17860 = x17815 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17861 = x17859 + x17860;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17862 = x17823 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17863 = x17861 + x17862;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17864 = x17830 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17865 = x17863 + x17864;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17866 = x1093 + x17834;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17867 = x17842 + x17866;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17868 = args[2][192 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17869 = x17868 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17870 = x17867 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17871 = x17850 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17872 = x17858 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17873 = x17871 + x17872;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17874 = x17865 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17875 = x17873 + x17874;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17876 = x17875 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17877 = x17870 + x17876;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17878 = x17867 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17879 = x17850 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17880 = x17878 + x17879;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17881 = x17858 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17882 = x17865 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17883 = x17881 + x17882;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17884 = x17883 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17885 = x17880 + x17884;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17886 = x17867 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17887 = x17850 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17888 = x17886 + x17887;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17889 = x17858 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17890 = x17888 + x17889;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17891 = x17865 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17892 = x17891 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17893 = x17890 + x17892;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17894 = x17867 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17895 = x17850 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17896 = x17894 + x17895;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17897 = x17858 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17898 = x17896 + x17897;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17899 = x17865 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17900 = x17898 + x17899;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17901 = x1094 + x17869;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17902 = x17877 + x17901;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17903 = args[2][193 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17904 = x17903 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17905 = x17902 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17906 = x17885 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17907 = x17893 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17908 = x17906 + x17907;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17909 = x17900 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17910 = x17908 + x17909;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17911 = x17910 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17912 = x17905 + x17911;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17913 = x17902 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17914 = x17885 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17915 = x17913 + x17914;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17916 = x17893 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17917 = x17900 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17918 = x17916 + x17917;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17919 = x17918 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17920 = x17915 + x17919;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17921 = x17902 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17922 = x17885 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17923 = x17921 + x17922;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17924 = x17893 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17925 = x17923 + x17924;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17926 = x17900 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17927 = x17926 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17928 = x17925 + x17927;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17929 = x17902 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17930 = x17885 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17931 = x17929 + x17930;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17932 = x17893 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17933 = x17931 + x17932;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17934 = x17900 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17935 = x17933 + x17934;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17936 = x1068 + x17904;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17937 = x17912 + x17936;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17938 = args[2][194 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17939 = x17938 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17940 = x17937 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17941 = x17920 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17942 = x17928 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17943 = x17941 + x17942;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17944 = x17935 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17945 = x17943 + x17944;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17946 = x17945 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17947 = x17940 + x17946;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17948 = x17937 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17949 = x17920 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17950 = x17948 + x17949;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17951 = x17928 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17952 = x17935 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17953 = x17951 + x17952;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17954 = x17953 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17955 = x17950 + x17954;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17956 = x17937 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17957 = x17920 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17958 = x17956 + x17957;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17959 = x17928 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17960 = x17958 + x17959;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17961 = x17935 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17962 = x17961 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17963 = x17960 + x17962;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17964 = x17937 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17965 = x17920 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17966 = x17964 + x17965;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17967 = x17928 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17968 = x17966 + x17967;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17969 = x17935 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17970 = x17968 + x17969;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x17971 = x1085 + x17939;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17972 = x17947 + x17971;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x17973 = args[2][195 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x17974 = x17973 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17975 = x17972 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17976 = x17955 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17977 = x17963 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17978 = x17976 + x17977;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17979 = x17970 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17980 = x17978 + x17979;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17981 = x17980 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17982 = x17975 + x17981;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17983 = x17972 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17984 = x17955 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17985 = x17983 + x17984;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17986 = x17963 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17987 = x17970 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17988 = x17986 + x17987;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17989 = x17988 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17990 = x17985 + x17989;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17991 = x17972 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17992 = x17955 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17993 = x17991 + x17992;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17994 = x17963 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17995 = x17993 + x17994;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17996 = x17970 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17997 = x17996 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17998 = x17995 + x17997;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x17999 = x17972 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18000 = x17955 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18001 = x17999 + x18000;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18002 = x17963 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18003 = x18001 + x18002;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18004 = x17970 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18005 = x18003 + x18004;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18006 = x1127 + x17974;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18007 = x17982 + x18006;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18008 = args[2][196 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18009 = x18008 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18010 = x18007 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18011 = x17990 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18012 = x17998 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18013 = x18011 + x18012;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18014 = x18005 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18015 = x18013 + x18014;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18016 = x18015 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18017 = x18010 + x18016;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18018 = x18007 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18019 = x17990 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18020 = x18018 + x18019;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18021 = x17998 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18022 = x18005 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18023 = x18021 + x18022;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18024 = x18023 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18025 = x18020 + x18024;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18026 = x18007 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18027 = x17990 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18028 = x18026 + x18027;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18029 = x17998 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18030 = x18028 + x18029;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18031 = x18005 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18032 = x18031 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18033 = x18030 + x18032;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18034 = x18007 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18035 = x17990 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18036 = x18034 + x18035;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18037 = x17998 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18038 = x18036 + x18037;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18039 = x18005 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18040 = x18038 + x18039;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18041 = x1136 + x18009;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18042 = x18017 + x18041;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18043 = args[2][197 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18044 = x18043 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18045 = x18042 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18046 = x18025 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18047 = x18033 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18048 = x18046 + x18047;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18049 = x18040 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18050 = x18048 + x18049;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18051 = x18050 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18052 = x18045 + x18051;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18053 = x18042 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18054 = x18025 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18055 = x18053 + x18054;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18056 = x18033 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18057 = x18040 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18058 = x18056 + x18057;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18059 = x18058 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18060 = x18055 + x18059;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18061 = x18042 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18062 = x18025 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18063 = x18061 + x18062;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18064 = x18033 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18065 = x18063 + x18064;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18066 = x18040 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18067 = x18066 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18068 = x18065 + x18067;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18069 = x18042 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18070 = x18025 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18071 = x18069 + x18070;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18072 = x18033 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18073 = x18071 + x18072;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18074 = x18040 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18075 = x18073 + x18074;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18076 = x1145 + x18044;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18077 = x18052 + x18076;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18078 = args[2][198 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18079 = x18078 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18080 = x18077 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18081 = x18060 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18082 = x18068 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18083 = x18081 + x18082;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18084 = x18075 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18085 = x18083 + x18084;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18086 = x18085 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18087 = x18080 + x18086;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18088 = x18077 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18089 = x18060 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18090 = x18088 + x18089;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18091 = x18068 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18092 = x18075 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18093 = x18091 + x18092;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18094 = x18093 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18095 = x18090 + x18094;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18096 = x18077 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18097 = x18060 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18098 = x18096 + x18097;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18099 = x18068 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18100 = x18098 + x18099;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18101 = x18075 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18102 = x18101 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18103 = x18100 + x18102;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18104 = x18077 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18105 = x18060 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18106 = x18104 + x18105;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18107 = x18068 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18108 = x18106 + x18107;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18109 = x18075 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18110 = x18108 + x18109;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18111 = x1255 + x18079;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18112 = x18087 + x18111;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18113 = args[2][199 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18114 = x18113 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18115 = x18112 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18116 = x18095 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18117 = x18103 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18118 = x18116 + x18117;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18119 = x18110 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18120 = x18118 + x18119;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18121 = x18120 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18122 = x18115 + x18121;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18123 = x18112 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18124 = x18095 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18125 = x18123 + x18124;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18126 = x18103 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18127 = x18110 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18128 = x18126 + x18127;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18129 = x18128 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18130 = x18125 + x18129;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18131 = x18112 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18132 = x18095 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18133 = x18131 + x18132;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18134 = x18103 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18135 = x18133 + x18134;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18136 = x18110 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18137 = x18136 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18138 = x18135 + x18137;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18139 = x18112 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18140 = x18095 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18141 = x18139 + x18140;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18142 = x18103 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18143 = x18141 + x18142;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18144 = x18110 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18145 = x18143 + x18144;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18146 = x1103 + x18114;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18147 = x18122 + x18146;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18148 = args[2][200 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18149 = x18148 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18150 = x18147 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18151 = x18130 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18152 = x18138 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18153 = x18151 + x18152;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18154 = x18145 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18155 = x18153 + x18154;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18156 = x18155 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18157 = x18150 + x18156;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18158 = x18147 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18159 = x18130 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18160 = x18158 + x18159;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18161 = x18138 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18162 = x18145 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18163 = x18161 + x18162;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18164 = x18163 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18165 = x18160 + x18164;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18166 = x18147 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18167 = x18130 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18168 = x18166 + x18167;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18169 = x18138 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18170 = x18168 + x18169;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18171 = x18145 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18172 = x18171 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18173 = x18170 + x18172;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18174 = x18147 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18175 = x18130 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18176 = x18174 + x18175;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18177 = x18138 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18178 = x18176 + x18177;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18179 = x18145 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18180 = x18178 + x18179;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18181 = x1109 + x18149;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18182 = x18157 + x18181;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18183 = args[2][201 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18184 = x18183 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18185 = x18182 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18186 = x18165 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18187 = x18173 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18188 = x18186 + x18187;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18189 = x18180 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18190 = x18188 + x18189;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18191 = x18190 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18192 = x18185 + x18191;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18193 = x18182 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18194 = x18165 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18195 = x18193 + x18194;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18196 = x18173 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18197 = x18180 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18198 = x18196 + x18197;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18199 = x18198 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18200 = x18195 + x18199;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18201 = x18182 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18202 = x18165 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18203 = x18201 + x18202;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18204 = x18173 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18205 = x18203 + x18204;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18206 = x18180 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18207 = x18206 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18208 = x18205 + x18207;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18209 = x18182 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18210 = x18165 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18211 = x18209 + x18210;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18212 = x18173 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18213 = x18211 + x18212;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18214 = x18180 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18215 = x18213 + x18214;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18216 = x1115 + x18184;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18217 = x18192 + x18216;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18218 = args[2][202 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18219 = x18218 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18220 = x18217 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18221 = x18200 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18222 = x18208 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18223 = x18221 + x18222;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18224 = x18215 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18225 = x18223 + x18224;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18226 = x18225 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18227 = x18220 + x18226;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18228 = x18217 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18229 = x18200 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18230 = x18228 + x18229;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18231 = x18208 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18232 = x18215 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18233 = x18231 + x18232;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18234 = x18233 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18235 = x18230 + x18234;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18236 = x18217 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18237 = x18200 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18238 = x18236 + x18237;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18239 = x18208 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18240 = x18238 + x18239;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18241 = x18215 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18242 = x18241 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18243 = x18240 + x18242;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18244 = x18217 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18245 = x18200 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18246 = x18244 + x18245;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18247 = x18208 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18248 = x18246 + x18247;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18249 = x18215 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18250 = x18248 + x18249;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18251 = x1118 + x18219;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18252 = x18227 + x18251;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18253 = args[2][203 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18254 = x18253 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18255 = x18252 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18256 = x18235 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18257 = x18243 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18258 = x18256 + x18257;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18259 = x18250 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18260 = x18258 + x18259;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18261 = x18260 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18262 = x18255 + x18261;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18263 = x18252 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18264 = x18235 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18265 = x18263 + x18264;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18266 = x18243 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18267 = x18250 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18268 = x18266 + x18267;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18269 = x18268 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18270 = x18265 + x18269;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18271 = x18252 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18272 = x18235 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18273 = x18271 + x18272;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18274 = x18243 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18275 = x18273 + x18274;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18276 = x18250 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18277 = x18276 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18278 = x18275 + x18277;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18279 = x18252 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18280 = x18235 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18281 = x18279 + x18280;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18282 = x18243 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18283 = x18281 + x18282;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18284 = x18250 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18285 = x18283 + x18284;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18286 = x1121 + x18254;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18287 = x18262 + x18286;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18288 = args[2][204 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18289 = x18288 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18290 = x18287 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18291 = x18270 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18292 = x18278 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18293 = x18291 + x18292;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18294 = x18285 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18295 = x18293 + x18294;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18296 = x18295 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18297 = x18290 + x18296;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18298 = x18287 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18299 = x18270 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18300 = x18298 + x18299;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18301 = x18278 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18302 = x18285 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18303 = x18301 + x18302;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18304 = x18303 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18305 = x18300 + x18304;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18306 = x18287 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18307 = x18270 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18308 = x18306 + x18307;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18309 = x18278 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18310 = x18308 + x18309;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18311 = x18285 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18312 = x18311 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18313 = x18310 + x18312;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18314 = x18287 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18315 = x18270 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18316 = x18314 + x18315;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18317 = x18278 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18318 = x18316 + x18317;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18319 = x18285 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18320 = x18318 + x18319;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18321 = x1124 + x18289;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18322 = x18297 + x18321;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18323 = args[2][205 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18324 = x18323 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18325 = x18322 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18326 = x18305 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18327 = x18313 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18328 = x18326 + x18327;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18329 = x18320 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18330 = x18328 + x18329;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18331 = x18330 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18332 = x18325 + x18331;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18333 = x18322 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18334 = x18305 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18335 = x18333 + x18334;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18336 = x18313 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18337 = x18320 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18338 = x18336 + x18337;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18339 = x18338 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18340 = x18335 + x18339;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18341 = x18322 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18342 = x18305 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18343 = x18341 + x18342;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18344 = x18313 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18345 = x18343 + x18344;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18346 = x18320 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18347 = x18346 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18348 = x18345 + x18347;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18349 = x18322 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18350 = x18305 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18351 = x18349 + x18350;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18352 = x18313 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18353 = x18351 + x18352;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18354 = x18320 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18355 = x18353 + x18354;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18356 = x1146 + x18324;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18357 = x18332 + x18356;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18358 = args[2][206 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18359 = x18358 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18360 = x18357 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18361 = x18340 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18362 = x18348 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18363 = x18361 + x18362;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18364 = x18355 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18365 = x18363 + x18364;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18366 = x18365 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18367 = x18360 + x18366;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18368 = x18357 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18369 = x18340 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18370 = x18368 + x18369;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18371 = x18348 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18372 = x18355 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18373 = x18371 + x18372;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18374 = x18373 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18375 = x18370 + x18374;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18376 = x18357 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18377 = x18340 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18378 = x18376 + x18377;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18379 = x18348 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18380 = x18378 + x18379;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18381 = x18355 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18382 = x18381 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18383 = x18380 + x18382;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18384 = x18357 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18385 = x18340 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18386 = x18384 + x18385;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18387 = x18348 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18388 = x18386 + x18387;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18389 = x18355 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18390 = x18388 + x18389;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18391 = x1147 + x18359;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18392 = x18367 + x18391;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18393 = args[2][207 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18394 = x18393 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18395 = x18392 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18396 = x18375 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18397 = x18383 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18398 = x18396 + x18397;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18399 = x18390 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18400 = x18398 + x18399;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18401 = x18400 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18402 = x18395 + x18401;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18403 = x18392 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18404 = x18375 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18405 = x18403 + x18404;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18406 = x18383 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18407 = x18390 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18408 = x18406 + x18407;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18409 = x18408 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18410 = x18405 + x18409;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18411 = x18392 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18412 = x18375 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18413 = x18411 + x18412;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18414 = x18383 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18415 = x18413 + x18414;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18416 = x18390 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18417 = x18416 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18418 = x18415 + x18417;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18419 = x18392 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18420 = x18375 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18421 = x18419 + x18420;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18422 = x18383 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18423 = x18421 + x18422;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18424 = x18390 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18425 = x18423 + x18424;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18426 = x1148 + x18394;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18427 = x18402 + x18426;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18428 = args[2][208 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18429 = x18428 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18430 = x18427 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18431 = x18410 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18432 = x18418 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18433 = x18431 + x18432;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18434 = x18425 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18435 = x18433 + x18434;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18436 = x18435 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18437 = x18430 + x18436;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18438 = x18427 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18439 = x18410 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18440 = x18438 + x18439;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18441 = x18418 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18442 = x18425 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18443 = x18441 + x18442;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18444 = x18443 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18445 = x18440 + x18444;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18446 = x18427 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18447 = x18410 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18448 = x18446 + x18447;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18449 = x18418 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18450 = x18448 + x18449;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18451 = x18425 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18452 = x18451 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18453 = x18450 + x18452;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18454 = x18427 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18455 = x18410 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18456 = x18454 + x18455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18457 = x18418 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18458 = x18456 + x18457;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18459 = x18425 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18460 = x18458 + x18459;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18461 = x1149 + x18429;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18462 = x18437 + x18461;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18463 = args[2][209 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18464 = x18463 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18465 = x18462 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18466 = x18445 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18467 = x18453 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18468 = x18466 + x18467;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18469 = x18460 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18470 = x18468 + x18469;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18471 = x18470 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18472 = x18465 + x18471;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18473 = x18462 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18474 = x18445 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18475 = x18473 + x18474;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18476 = x18453 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18477 = x18460 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18478 = x18476 + x18477;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18479 = x18478 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18480 = x18475 + x18479;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18481 = x18462 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18482 = x18445 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18483 = x18481 + x18482;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18484 = x18453 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18485 = x18483 + x18484;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18486 = x18460 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18487 = x18486 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18488 = x18485 + x18487;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18489 = x18462 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18490 = x18445 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18491 = x18489 + x18490;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18492 = x18453 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18493 = x18491 + x18492;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18494 = x18460 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18495 = x18493 + x18494;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18496 = x1177 + x18464;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18497 = x18472 + x18496;
-  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":487:97))
+  // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":492:97))
   auto x18498 = args[2][210 * steps + ((cycle - kInvRate * 4) & mask)];
-  // loc("cirgen/circuit/rv32im/bigint.cpp":487:97)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":492:97)
   auto x18499 = x18498 * x1030;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18500 = x18497 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18501 = x18480 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18502 = x18488 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18503 = x18501 + x18502;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18504 = x18495 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18505 = x18503 + x18504;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18506 = x18505 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18507 = x18500 + x18506;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18508 = x18497 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18509 = x18480 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18510 = x18508 + x18509;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18511 = x18488 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18512 = x18495 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18513 = x18511 + x18512;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18514 = x18513 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18515 = x18510 + x18514;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18516 = x18497 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18517 = x18480 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18518 = x18516 + x18517;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18519 = x18488 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18520 = x18518 + x18519;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18521 = x18495 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18522 = x18521 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18523 = x18520 + x18522;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18524 = x18497 * x14456;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18525 = x18480 * x14455;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18526 = x18524 + x18525;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18527 = x18488 * x14454;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18528 = x18526 + x18527;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18529 = x18495 * x14453;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18530 = x18528 + x18529;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:37)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:37)
   auto x18531 = x1191 + x18499;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":490:16)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":495:16)
   auto x18532 = x18507 + x18531;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18533 = x16354 * x16386;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18534 = x16338 * x16385;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18535 = x16346 * x16378;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18536 = x18534 + x18535;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18537 = x16353 * x16370;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18538 = x18536 + x18537;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18539 = x18538 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18540 = x18533 + x18539;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18541 = x16354 * x16370;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18542 = x16338 * x16386;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18543 = x18541 + x18542;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18544 = x16346 * x16385;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18545 = x16353 * x16378;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18546 = x18544 + x18545;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18547 = x18546 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18548 = x18543 + x18547;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18549 = x16354 * x16378;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18550 = x16338 * x16370;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18551 = x18549 + x18550;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18552 = x16346 * x16386;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18553 = x18551 + x18552;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18554 = x16353 * x16385;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18555 = x18554 * x79;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18556 = x18553 + x18555;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18557 = x16354 * x16385;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18558 = x16338 * x16378;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18559 = x18557 + x18558;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18560 = x16346 * x16370;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18561 = x18559 + x18560;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18562 = x16353 * x16386;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18563 = x18561 + x18562;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18564 = x18540 - x18532;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   MixState x18565{x80.tot + x80.mul * x18564, x80.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18566 = x18548 - x18515;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   MixState x18567{x18565.tot + x18565.mul * x18566, x18565.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18568 = x18556 - x18523;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   MixState x18569{x18567.tot + x18567.mul * x18568, x18567.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   auto x18570 = x18563 - x18530;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":494:8)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":499:8)
   MixState x18571{x18569.tot + x18569.mul * x18570, x18569.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/bigint.cpp":464:15)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":469:15)
   MixState x18572{x14452.tot + x1017 * x18571.tot * x14452.mul, x14452.mul * x18571.mul};
   // loc("cirgen/compiler/edsl/component.cpp":39:15)
   MixState x18573{x14438.tot + x419 * x18572.tot * x14438.mul, x14438.mul * x18572.mul};

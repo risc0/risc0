@@ -33,7 +33,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
   size_t mask = steps - 1;
   std::array<Fp, 96> host_args;
   std::array<Fp, 32> host_outs;
-  // loc("cirgen/circuit/rv32im/bigint.cpp":296:50)
+  // loc("cirgen/circuit/rv32im/bigint.cpp":298:50)
   Fp x0(65280);
   // loc("cirgen/circuit/rv32im/bigint.cpp":128:38)
   Fp x1(8388608);
@@ -54430,17 +54430,17 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           reg = x13421;
         }
       }
-      // loc("cirgen/circuit/rv32im/bigint.cpp":245:48)
+      // loc("cirgen/circuit/rv32im/bigint.cpp":246:48)
       auto x13422 = x13333 + x13327;
-      // loc("cirgen/circuit/rv32im/bigint.cpp":245:48)
+      // loc("cirgen/circuit/rv32im/bigint.cpp":246:48)
       auto x13423 = x13422 + x13336;
       if (x13423 != 0) {
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
         auto x13424 = args[2][171 * steps + ((cycle - 0) & mask)];
         assert(x13424 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":247:40)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":248:40)
         auto x13425 = x13330 * x78;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":247:31)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":248:31)
         auto x13426 = x13424 + x13425;
         {
           host_args.at(0) = x13426;
@@ -54529,7 +54529,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x13434);
           reg = x13434;
         }
-        // loc("cirgen/circuit/rv32im/bigint.cpp":247:31)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":248:31)
         auto x13435 = x13426 + x95;
         {
           host_args.at(0) = x13435;
@@ -54618,7 +54618,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x13443);
           reg = x13443;
         }
-        // loc("cirgen/circuit/rv32im/bigint.cpp":247:31)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":248:31)
         auto x13444 = x13426 + x92;
         {
           host_args.at(0) = x13444;
@@ -54707,7 +54707,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x13452);
           reg = x13452;
         }
-        // loc("cirgen/circuit/rv32im/bigint.cpp":247:31)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":248:31)
         auto x13453 = x13426 + x77;
         {
           host_args.at(0) = x13453;
@@ -54796,7 +54796,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x13461);
           reg = x13461;
         }
-        // loc("cirgen/circuit/rv32im/bigint.cpp":250:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":251:10)
         auto x13462 = x13424 * x78;
         // loc("./cirgen/components/u32.h":25:12)
         auto x13463 = x13432 * x90;
@@ -64868,9 +64868,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
             auto x18458 = x18083 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
             auto x18459 = Fp(x18458.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -64884,9 +64884,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
             auto x18461 = x18131 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
             auto x18462 = Fp(x18461.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -64902,9 +64902,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
             auto x18464 = x18179 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
             auto x18465 = Fp(x18464.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -64918,9 +64918,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
             auto x18467 = x18227 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
             auto x18468 = Fp(x18467.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -64998,11 +64998,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:32)
             auto x18474 = x18083 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:31)
             auto x18475 = Fp(x18474.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:30)
             auto x18476 = x18475 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65016,11 +65016,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:32)
             auto x18478 = x18131 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:31)
             auto x18479 = Fp(x18478.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:30)
             auto x18480 = x18479 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65036,11 +65036,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:32)
             auto x18482 = x18179 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:31)
             auto x18483 = Fp(x18482.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:30)
             auto x18484 = x18483 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65054,11 +65054,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:32)
             auto x18486 = x18227 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:31)
             auto x18487 = Fp(x18486.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:30)
             auto x18488 = x18487 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65136,9 +65136,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
             auto x18494 = x18089 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
             auto x18495 = Fp(x18494.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65152,9 +65152,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
             auto x18497 = x18137 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
             auto x18498 = Fp(x18497.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65170,9 +65170,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
             auto x18500 = x18185 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
             auto x18501 = Fp(x18500.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65186,9 +65186,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
             auto x18503 = x18233 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
             auto x18504 = Fp(x18503.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65266,11 +65266,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:32)
             auto x18510 = x18089 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:31)
             auto x18511 = Fp(x18510.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:30)
             auto x18512 = x18511 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65284,11 +65284,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:32)
             auto x18514 = x18137 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:31)
             auto x18515 = Fp(x18514.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:30)
             auto x18516 = x18515 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65304,11 +65304,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:32)
             auto x18518 = x18185 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:31)
             auto x18519 = Fp(x18518.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:30)
             auto x18520 = x18519 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65322,11 +65322,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:32)
             auto x18522 = x18233 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:31)
             auto x18523 = Fp(x18522.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:30)
             auto x18524 = x18523 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65404,9 +65404,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
             auto x18530 = x18095 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
             auto x18531 = Fp(x18530.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65420,9 +65420,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
             auto x18533 = x18143 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
             auto x18534 = Fp(x18533.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65438,9 +65438,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
             auto x18536 = x18191 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
             auto x18537 = Fp(x18536.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65454,9 +65454,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
             auto x18539 = x18239 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
             auto x18540 = Fp(x18539.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65534,11 +65534,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:32)
             auto x18546 = x18095 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:31)
             auto x18547 = Fp(x18546.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:30)
             auto x18548 = x18547 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65552,11 +65552,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:32)
             auto x18550 = x18143 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:31)
             auto x18551 = Fp(x18550.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:30)
             auto x18552 = x18551 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65572,11 +65572,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:32)
             auto x18554 = x18191 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:31)
             auto x18555 = Fp(x18554.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:30)
             auto x18556 = x18555 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65590,11 +65590,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:32)
             auto x18558 = x18239 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:31)
             auto x18559 = Fp(x18558.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:30)
             auto x18560 = x18559 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65672,9 +65672,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
             auto x18566 = x18101 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
             auto x18567 = Fp(x18566.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65688,9 +65688,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
             auto x18569 = x18149 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
             auto x18570 = Fp(x18569.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65706,9 +65706,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
             auto x18572 = x18197 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
             auto x18573 = Fp(x18572.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65722,9 +65722,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
             auto x18575 = x18245 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
             auto x18576 = Fp(x18575.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65802,11 +65802,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:32)
             auto x18582 = x18101 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:31)
             auto x18583 = Fp(x18582.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:30)
             auto x18584 = x18583 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65820,11 +65820,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:32)
             auto x18586 = x18149 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:31)
             auto x18587 = Fp(x18586.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:30)
             auto x18588 = x18587 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65840,11 +65840,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:32)
             auto x18590 = x18197 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:31)
             auto x18591 = Fp(x18590.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:30)
             auto x18592 = x18591 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65858,11 +65858,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:32)
             auto x18594 = x18245 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:31)
             auto x18595 = Fp(x18594.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:30)
             auto x18596 = x18595 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65940,9 +65940,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
             auto x18602 = x18107 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
             auto x18603 = Fp(x18602.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65956,9 +65956,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
             auto x18605 = x18155 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
             auto x18606 = Fp(x18605.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65974,9 +65974,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
             auto x18608 = x18203 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
             auto x18609 = Fp(x18608.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -65990,9 +65990,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
             auto x18611 = x18251 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
             auto x18612 = Fp(x18611.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66070,11 +66070,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:32)
             auto x18618 = x18107 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:31)
             auto x18619 = Fp(x18618.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:30)
             auto x18620 = x18619 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66088,11 +66088,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:32)
             auto x18622 = x18155 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:31)
             auto x18623 = Fp(x18622.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:30)
             auto x18624 = x18623 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66108,11 +66108,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:32)
             auto x18626 = x18203 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:31)
             auto x18627 = Fp(x18626.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:30)
             auto x18628 = x18627 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66126,11 +66126,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:32)
             auto x18630 = x18251 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:31)
             auto x18631 = Fp(x18630.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:30)
             auto x18632 = x18631 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66208,9 +66208,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
             auto x18638 = x18113 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
             auto x18639 = Fp(x18638.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66224,9 +66224,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
             auto x18641 = x18161 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
             auto x18642 = Fp(x18641.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66242,9 +66242,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
             auto x18644 = x18209 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
             auto x18645 = Fp(x18644.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66258,9 +66258,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
             auto x18647 = x18257 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
             auto x18648 = Fp(x18647.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66338,11 +66338,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:32)
             auto x18654 = x18113 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:31)
             auto x18655 = Fp(x18654.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:30)
             auto x18656 = x18655 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66356,11 +66356,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:32)
             auto x18658 = x18161 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:31)
             auto x18659 = Fp(x18658.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:30)
             auto x18660 = x18659 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66376,11 +66376,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:32)
             auto x18662 = x18209 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:31)
             auto x18663 = Fp(x18662.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:30)
             auto x18664 = x18663 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66394,11 +66394,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:32)
             auto x18666 = x18257 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:31)
             auto x18667 = Fp(x18666.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:30)
             auto x18668 = x18667 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66476,9 +66476,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
             auto x18674 = x18119 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
             auto x18675 = Fp(x18674.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66492,9 +66492,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
             auto x18677 = x18167 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
             auto x18678 = Fp(x18677.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66510,9 +66510,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
             auto x18680 = x18215 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
             auto x18681 = Fp(x18680.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66526,9 +66526,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
             auto x18683 = x18263 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
             auto x18684 = Fp(x18683.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66606,11 +66606,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:32)
             auto x18690 = x18119 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:31)
             auto x18691 = Fp(x18690.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:30)
             auto x18692 = x18691 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66624,11 +66624,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:32)
             auto x18694 = x18167 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:31)
             auto x18695 = Fp(x18694.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:30)
             auto x18696 = x18695 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66644,11 +66644,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:32)
             auto x18698 = x18215 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:31)
             auto x18699 = Fp(x18698.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:30)
             auto x18700 = x18699 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66662,11 +66662,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:32)
             auto x18702 = x18263 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:31)
             auto x18703 = Fp(x18702.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:30)
             auto x18704 = x18703 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66744,9 +66744,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
             auto x18710 = x18125 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":294:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
             auto x18711 = Fp(x18710.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66760,9 +66760,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
             auto x18713 = x18173 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":302:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
             auto x18714 = Fp(x18713.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66778,9 +66778,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
             auto x18716 = x18221 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":312:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
             auto x18717 = Fp(x18716.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66794,9 +66794,9 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
             auto x18719 = x18269 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":320:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
             auto x18720 = Fp(x18719.asUInt32() & x91.asUInt32());
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66874,11 +66874,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:32)
             auto x18726 = x18125 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:31)
             auto x18727 = Fp(x18726.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":296:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":298:30)
             auto x18728 = x18727 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66892,11 +66892,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:32)
             auto x18730 = x18173 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:31)
             auto x18731 = Fp(x18730.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":304:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":306:30)
             auto x18732 = x18731 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66912,11 +66912,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:32)
             auto x18734 = x18221 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:31)
             auto x18735 = Fp(x18734.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":314:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":316:30)
             auto x18736 = x18735 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66930,11 +66930,11 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:32)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:32)
             auto x18738 = x18269 + x11;
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:31)
             auto x18739 = Fp(x18738.asUInt32() & x0.asUInt32());
-            // loc("cirgen/circuit/rv32im/bigint.cpp":322:30)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":324:30)
             auto x18740 = x18739 * x89;
             {
               // loc("cirgen/components/bytes.cpp":96:21)
@@ -66976,7 +66976,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":340:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":343:31)
             {
               auto& reg = args[2][212 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18275);
@@ -66984,7 +66984,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":341:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":344:27)
             {
               auto& reg = args[2][212 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18323);
@@ -66994,7 +66994,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":345:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
             {
               auto& reg = args[2][212 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18371);
@@ -67002,7 +67002,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":351:11)
             {
               auto& reg = args[2][212 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18419);
@@ -67012,7 +67012,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":340:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":343:31)
             {
               auto& reg = args[2][213 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18281);
@@ -67020,7 +67020,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":341:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":344:27)
             {
               auto& reg = args[2][213 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18329);
@@ -67030,7 +67030,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":345:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
             {
               auto& reg = args[2][213 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18377);
@@ -67038,7 +67038,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":351:11)
             {
               auto& reg = args[2][213 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18425);
@@ -67048,7 +67048,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":340:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":343:31)
             {
               auto& reg = args[2][214 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18287);
@@ -67056,7 +67056,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":341:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":344:27)
             {
               auto& reg = args[2][214 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18335);
@@ -67066,7 +67066,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":345:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
             {
               auto& reg = args[2][214 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18383);
@@ -67074,7 +67074,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":351:11)
             {
               auto& reg = args[2][214 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18431);
@@ -67084,7 +67084,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":340:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":343:31)
             {
               auto& reg = args[2][215 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18293);
@@ -67092,7 +67092,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":341:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":344:27)
             {
               auto& reg = args[2][215 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18341);
@@ -67102,7 +67102,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":345:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
             {
               auto& reg = args[2][215 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18389);
@@ -67110,7 +67110,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":351:11)
             {
               auto& reg = args[2][215 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18437);
@@ -67120,7 +67120,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":340:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":343:31)
             {
               auto& reg = args[2][216 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18299);
@@ -67128,7 +67128,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":341:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":344:27)
             {
               auto& reg = args[2][216 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18347);
@@ -67138,7 +67138,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":345:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
             {
               auto& reg = args[2][216 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18395);
@@ -67146,7 +67146,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":351:11)
             {
               auto& reg = args[2][216 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18443);
@@ -67156,7 +67156,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":340:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":343:31)
             {
               auto& reg = args[2][217 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18305);
@@ -67164,7 +67164,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":341:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":344:27)
             {
               auto& reg = args[2][217 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18353);
@@ -67174,7 +67174,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":345:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
             {
               auto& reg = args[2][217 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18401);
@@ -67182,7 +67182,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":351:11)
             {
               auto& reg = args[2][217 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18449);
@@ -67192,7 +67192,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":340:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":343:31)
             {
               auto& reg = args[2][218 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18311);
@@ -67200,7 +67200,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":341:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":344:27)
             {
               auto& reg = args[2][218 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18359);
@@ -67210,7 +67210,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":345:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
             {
               auto& reg = args[2][218 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18407);
@@ -67218,7 +67218,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":351:11)
             {
               auto& reg = args[2][218 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18455);
@@ -67228,7 +67228,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":340:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":343:31)
             {
               auto& reg = args[2][219 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18317);
@@ -67236,7 +67236,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":341:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":344:27)
             {
               auto& reg = args[2][219 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18365);
@@ -67246,7 +67246,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13336 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":345:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
             {
               auto& reg = args[2][219 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18413);
@@ -67254,7 +67254,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":348:11)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":351:11)
             {
               auto& reg = args[2][219 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x94);
@@ -67264,7 +67264,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][180 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16031);
@@ -67272,7 +67272,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][180 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17115);
@@ -67282,7 +67282,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][180 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18016);
@@ -67290,7 +67290,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][180 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18048);
@@ -67300,7 +67300,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][181 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16034);
@@ -67308,7 +67308,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][181 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17174);
@@ -67318,7 +67318,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][181 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18017);
@@ -67326,7 +67326,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][181 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18049);
@@ -67336,7 +67336,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][182 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16039);
@@ -67344,7 +67344,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][182 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17231);
@@ -67354,7 +67354,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][182 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18018);
@@ -67362,7 +67362,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][182 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18050);
@@ -67372,7 +67372,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][183 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16046);
@@ -67380,7 +67380,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][183 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17286);
@@ -67390,7 +67390,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][183 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18019);
@@ -67398,7 +67398,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][183 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18051);
@@ -67408,7 +67408,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][184 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16055);
@@ -67416,7 +67416,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][184 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17339);
@@ -67426,7 +67426,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][184 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18020);
@@ -67434,7 +67434,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][184 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18052);
@@ -67444,7 +67444,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][185 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16066);
@@ -67452,7 +67452,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][185 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17390);
@@ -67462,7 +67462,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][185 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18021);
@@ -67470,7 +67470,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][185 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18053);
@@ -67480,7 +67480,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][186 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16079);
@@ -67488,7 +67488,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][186 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17439);
@@ -67498,7 +67498,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][186 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18022);
@@ -67506,7 +67506,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][186 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18054);
@@ -67516,7 +67516,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][187 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16094);
@@ -67524,7 +67524,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][187 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17486);
@@ -67534,7 +67534,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][187 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18023);
@@ -67542,7 +67542,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][187 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18055);
@@ -67552,7 +67552,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][188 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16111);
@@ -67560,7 +67560,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][188 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17531);
@@ -67570,7 +67570,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][188 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18024);
@@ -67578,7 +67578,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][188 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18056);
@@ -67588,7 +67588,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][189 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16130);
@@ -67596,7 +67596,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][189 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17574);
@@ -67606,7 +67606,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][189 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18025);
@@ -67614,7 +67614,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][189 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18057);
@@ -67624,7 +67624,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][190 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16151);
@@ -67632,7 +67632,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][190 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17615);
@@ -67642,7 +67642,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][190 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18026);
@@ -67650,7 +67650,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][190 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18058);
@@ -67660,7 +67660,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][191 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16174);
@@ -67668,7 +67668,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][191 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17654);
@@ -67678,7 +67678,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][191 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18027);
@@ -67686,7 +67686,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][191 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18059);
@@ -67696,7 +67696,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][192 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16199);
@@ -67704,7 +67704,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][192 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17691);
@@ -67714,7 +67714,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][192 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18028);
@@ -67722,7 +67722,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][192 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18060);
@@ -67732,7 +67732,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][193 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16226);
@@ -67740,7 +67740,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][193 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17726);
@@ -67750,7 +67750,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][193 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18029);
@@ -67758,7 +67758,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][193 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18061);
@@ -67768,7 +67768,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][194 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16255);
@@ -67776,7 +67776,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][194 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17759);
@@ -67786,7 +67786,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][194 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18030);
@@ -67794,7 +67794,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][194 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18062);
@@ -67804,7 +67804,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][195 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16286);
@@ -67812,7 +67812,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][195 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17790);
@@ -67822,7 +67822,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][195 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18031);
@@ -67830,7 +67830,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][195 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18063);
@@ -67840,7 +67840,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][196 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16319);
@@ -67848,7 +67848,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][196 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17819);
@@ -67858,7 +67858,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][196 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18032);
@@ -67866,7 +67866,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][196 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18064);
@@ -67876,7 +67876,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][197 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16354);
@@ -67884,7 +67884,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][197 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17846);
@@ -67894,7 +67894,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][197 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18033);
@@ -67902,7 +67902,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][197 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18065);
@@ -67912,7 +67912,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][198 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16391);
@@ -67920,7 +67920,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][198 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17871);
@@ -67930,7 +67930,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][198 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18034);
@@ -67938,7 +67938,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][198 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18066);
@@ -67948,7 +67948,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][199 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16430);
@@ -67956,7 +67956,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][199 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17894);
@@ -67966,7 +67966,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][199 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18035);
@@ -67974,7 +67974,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][199 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18067);
@@ -67984,7 +67984,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][200 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16471);
@@ -67992,7 +67992,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][200 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17915);
@@ -68002,7 +68002,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][200 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18036);
@@ -68010,7 +68010,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][200 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18068);
@@ -68020,7 +68020,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][201 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16514);
@@ -68028,7 +68028,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][201 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17934);
@@ -68038,7 +68038,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][201 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18037);
@@ -68046,7 +68046,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][201 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18069);
@@ -68056,7 +68056,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][202 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16559);
@@ -68064,7 +68064,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][202 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17951);
@@ -68074,7 +68074,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][202 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18038);
@@ -68082,7 +68082,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][202 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18070);
@@ -68092,7 +68092,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][203 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16606);
@@ -68100,7 +68100,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][203 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17966);
@@ -68110,7 +68110,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][203 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18039);
@@ -68118,7 +68118,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][203 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18071);
@@ -68128,7 +68128,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][204 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16655);
@@ -68136,7 +68136,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][204 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17979);
@@ -68146,7 +68146,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][204 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18040);
@@ -68154,7 +68154,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][204 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18072);
@@ -68164,7 +68164,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][205 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16706);
@@ -68172,7 +68172,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][205 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17990);
@@ -68182,7 +68182,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][205 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18041);
@@ -68190,7 +68190,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][205 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18073);
@@ -68200,7 +68200,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][206 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16759);
@@ -68208,7 +68208,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][206 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17999);
@@ -68218,7 +68218,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][206 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18042);
@@ -68226,7 +68226,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][206 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18074);
@@ -68236,7 +68236,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][207 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16814);
@@ -68244,7 +68244,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][207 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18006);
@@ -68254,7 +68254,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][207 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18043);
@@ -68262,7 +68262,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][207 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18075);
@@ -68272,7 +68272,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][208 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16871);
@@ -68280,7 +68280,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][208 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18011);
@@ -68290,7 +68290,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][208 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18044);
@@ -68298,7 +68298,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][208 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18076);
@@ -68308,7 +68308,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][209 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16930);
@@ -68316,7 +68316,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][209 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18014);
@@ -68326,7 +68326,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][209 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18045);
@@ -68334,7 +68334,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][209 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18077);
@@ -68344,7 +68344,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][210 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x16991);
@@ -68352,7 +68352,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][210 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18015);
@@ -68362,7 +68362,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][210 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18046);
@@ -68370,7 +68370,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][210 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18078);
@@ -68380,7 +68380,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13327 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":357:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":360:31)
             {
               auto& reg = args[2][211 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x17054);
@@ -68388,7 +68388,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":358:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":361:27)
             {
               auto& reg = args[2][211 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x94);
@@ -68398,7 +68398,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
         if (x13328 != 0) {
           if (x13376 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":361:31)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":364:31)
             {
               auto& reg = args[2][211 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x18047);
@@ -68406,7 +68406,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
             }
           }
           if (x13330 != 0) {
-            // loc("cirgen/circuit/rv32im/bigint.cpp":362:27)
+            // loc("cirgen/circuit/rv32im/bigint.cpp":365:27)
             {
               auto& reg = args[2][211 * steps + cycle];
               assert(reg == Fp::invalid() || reg == x94);
@@ -68419,7 +68419,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18744 = args[2][18 * steps + ((cycle - 0) & mask)];
         assert(x18744 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][180 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18744);
@@ -68430,20 +68430,20 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18745 = args[2][119 * steps + ((cycle - 2) & mask)];
         assert(x18745 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][180 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18745);
           reg = x18745;
         }
       }
-      // loc("cirgen/circuit/rv32im/bigint.cpp":376:35)
+      // loc("cirgen/circuit/rv32im/bigint.cpp":379:35)
       auto x18746 = x13333 + x13336;
       if (x18746 != 0) {
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18747 = args[2][119 * steps + ((cycle - 0) & mask)];
         assert(x18747 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][196 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18747);
@@ -68454,7 +68454,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18748 = args[2][19 * steps + ((cycle - 0) & mask)];
         assert(x18748 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][181 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18748);
@@ -68465,7 +68465,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18749 = args[2][120 * steps + ((cycle - 2) & mask)];
         assert(x18749 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][181 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18749);
@@ -68476,7 +68476,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18750 = args[2][120 * steps + ((cycle - 0) & mask)];
         assert(x18750 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][197 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18750);
@@ -68487,7 +68487,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18751 = args[2][20 * steps + ((cycle - 0) & mask)];
         assert(x18751 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][182 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18751);
@@ -68498,7 +68498,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18752 = args[2][121 * steps + ((cycle - 2) & mask)];
         assert(x18752 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][182 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18752);
@@ -68509,7 +68509,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18753 = args[2][121 * steps + ((cycle - 0) & mask)];
         assert(x18753 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][198 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18753);
@@ -68520,7 +68520,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18754 = args[2][21 * steps + ((cycle - 0) & mask)];
         assert(x18754 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][183 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18754);
@@ -68531,7 +68531,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18755 = args[2][122 * steps + ((cycle - 2) & mask)];
         assert(x18755 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][183 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18755);
@@ -68542,7 +68542,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18756 = args[2][122 * steps + ((cycle - 0) & mask)];
         assert(x18756 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][199 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18756);
@@ -68553,7 +68553,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18757 = args[2][22 * steps + ((cycle - 0) & mask)];
         assert(x18757 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][184 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18757);
@@ -68564,7 +68564,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18758 = args[2][126 * steps + ((cycle - 2) & mask)];
         assert(x18758 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][184 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18758);
@@ -68575,7 +68575,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18759 = args[2][126 * steps + ((cycle - 0) & mask)];
         assert(x18759 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][200 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18759);
@@ -68586,7 +68586,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18760 = args[2][23 * steps + ((cycle - 0) & mask)];
         assert(x18760 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][185 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18760);
@@ -68597,7 +68597,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18761 = args[2][127 * steps + ((cycle - 2) & mask)];
         assert(x18761 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][185 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18761);
@@ -68608,7 +68608,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18762 = args[2][127 * steps + ((cycle - 0) & mask)];
         assert(x18762 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][201 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18762);
@@ -68619,7 +68619,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18763 = args[2][24 * steps + ((cycle - 0) & mask)];
         assert(x18763 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][186 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18763);
@@ -68630,7 +68630,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18764 = args[2][128 * steps + ((cycle - 2) & mask)];
         assert(x18764 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][186 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18764);
@@ -68641,7 +68641,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18765 = args[2][128 * steps + ((cycle - 0) & mask)];
         assert(x18765 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][202 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18765);
@@ -68652,7 +68652,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18766 = args[2][25 * steps + ((cycle - 0) & mask)];
         assert(x18766 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][187 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18766);
@@ -68663,7 +68663,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18767 = args[2][129 * steps + ((cycle - 2) & mask)];
         assert(x18767 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][187 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18767);
@@ -68674,7 +68674,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18768 = args[2][129 * steps + ((cycle - 0) & mask)];
         assert(x18768 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][203 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18768);
@@ -68685,7 +68685,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18769 = args[2][26 * steps + ((cycle - 0) & mask)];
         assert(x18769 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][188 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18769);
@@ -68696,7 +68696,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18770 = args[2][133 * steps + ((cycle - 2) & mask)];
         assert(x18770 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][188 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18770);
@@ -68707,7 +68707,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18771 = args[2][133 * steps + ((cycle - 0) & mask)];
         assert(x18771 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][204 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18771);
@@ -68718,7 +68718,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18772 = args[2][27 * steps + ((cycle - 0) & mask)];
         assert(x18772 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][189 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18772);
@@ -68729,7 +68729,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18773 = args[2][134 * steps + ((cycle - 2) & mask)];
         assert(x18773 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][189 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18773);
@@ -68740,7 +68740,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18774 = args[2][134 * steps + ((cycle - 0) & mask)];
         assert(x18774 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][205 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18774);
@@ -68751,7 +68751,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18775 = args[2][28 * steps + ((cycle - 0) & mask)];
         assert(x18775 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][190 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18775);
@@ -68762,7 +68762,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18776 = args[2][135 * steps + ((cycle - 2) & mask)];
         assert(x18776 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][190 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18776);
@@ -68773,7 +68773,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18777 = args[2][135 * steps + ((cycle - 0) & mask)];
         assert(x18777 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][206 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18777);
@@ -68784,7 +68784,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18778 = args[2][29 * steps + ((cycle - 0) & mask)];
         assert(x18778 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][191 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18778);
@@ -68795,7 +68795,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18779 = args[2][136 * steps + ((cycle - 2) & mask)];
         assert(x18779 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][191 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18779);
@@ -68806,7 +68806,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18780 = args[2][136 * steps + ((cycle - 0) & mask)];
         assert(x18780 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][207 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18780);
@@ -68817,7 +68817,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18781 = args[2][30 * steps + ((cycle - 0) & mask)];
         assert(x18781 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][192 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18781);
@@ -68828,7 +68828,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18782 = args[2][140 * steps + ((cycle - 2) & mask)];
         assert(x18782 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][192 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18782);
@@ -68839,7 +68839,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[0](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18783 = args[2][140 * steps + ((cycle - 0) & mask)];
         assert(x18783 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][208 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18783);
@@ -68850,7 +68850,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18784 = args[2][31 * steps + ((cycle - 0) & mask)];
         assert(x18784 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][193 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18784);
@@ -68861,7 +68861,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18785 = args[2][141 * steps + ((cycle - 2) & mask)];
         assert(x18785 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][193 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18785);
@@ -68872,7 +68872,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[1](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18786 = args[2][141 * steps + ((cycle - 0) & mask)];
         assert(x18786 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][209 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18786);
@@ -68883,7 +68883,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18787 = args[2][32 * steps + ((cycle - 0) & mask)];
         assert(x18787 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][194 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18787);
@@ -68894,7 +68894,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18788 = args[2][142 * steps + ((cycle - 2) & mask)];
         assert(x18788 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][194 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18788);
@@ -68905,7 +68905,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[2](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18789 = args[2][142 * steps + ((cycle - 0) & mask)];
         assert(x18789 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][210 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18789);
@@ -68916,7 +68916,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18790 = args[2][33 * steps + ((cycle - 0) & mask)];
         assert(x18790 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":370:24)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":373:24)
         {
           auto& reg = args[2][195 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18790);
@@ -68927,7 +68927,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18791 = args[2][143 * steps + ((cycle - 2) & mask)];
         assert(x18791 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":373:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":376:7)
         {
           auto& reg = args[2][195 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18791);
@@ -68938,7 +68938,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/RamBody/PlonkBody/RamPlonkElement/U32Reg/byte[3](Reg)"("./cirgen/compiler/edsl/component.h":154:27))
         auto x18792 = args[2][143 * steps + ((cycle - 0) & mask)];
         assert(x18792 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":377:7)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":380:7)
         {
           auto& reg = args[2][211 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x18792);
@@ -68952,1329 +68952,1329 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18794 = args[2][19 * steps + ((cycle - 5) & mask)];
         assert(x18794 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18795 = x18794 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18796 = x18793 + x18795;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18797 = x18796 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18798 = args[2][18 * steps + ((cycle - 1) & mask)];
         assert(x18798 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18799 = args[2][180 * steps + ((cycle - 1) & mask)];
         assert(x18799 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18800 = x18797 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18801 = x18800 + x18798;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18802 = x18799 - x18801;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18802 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18802 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18803 = args[2][20 * steps + ((cycle - 5) & mask)];
         assert(x18803 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18804 = args[2][21 * steps + ((cycle - 5) & mask)];
         assert(x18804 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18805 = x18804 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18806 = x18803 + x18805;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18807 = x18806 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18808 = args[2][19 * steps + ((cycle - 1) & mask)];
         assert(x18808 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18809 = args[2][181 * steps + ((cycle - 1) & mask)];
         assert(x18809 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18810 = x18809 + x18797;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18811 = x18807 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18812 = x18811 + x18808;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18813 = x18810 - x18812;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18813 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18813 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18814 = args[2][22 * steps + ((cycle - 5) & mask)];
         assert(x18814 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18815 = args[2][23 * steps + ((cycle - 5) & mask)];
         assert(x18815 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18816 = x18815 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18817 = x18814 + x18816;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18818 = x18817 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18819 = args[2][20 * steps + ((cycle - 1) & mask)];
         assert(x18819 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18820 = args[2][182 * steps + ((cycle - 1) & mask)];
         assert(x18820 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18821 = x18820 + x18807;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18822 = x18818 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18823 = x18822 + x18819;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18824 = x18821 - x18823;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18824 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18824 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18825 = args[2][24 * steps + ((cycle - 5) & mask)];
         assert(x18825 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18826 = args[2][25 * steps + ((cycle - 5) & mask)];
         assert(x18826 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18827 = x18826 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18828 = x18825 + x18827;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18829 = x18828 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18830 = args[2][21 * steps + ((cycle - 1) & mask)];
         assert(x18830 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18831 = args[2][183 * steps + ((cycle - 1) & mask)];
         assert(x18831 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18832 = x18831 + x18818;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18833 = x18829 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18834 = x18833 + x18830;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18835 = x18832 - x18834;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18835 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18835 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18836 = args[2][26 * steps + ((cycle - 5) & mask)];
         assert(x18836 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18837 = args[2][27 * steps + ((cycle - 5) & mask)];
         assert(x18837 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18838 = x18837 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18839 = x18836 + x18838;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18840 = x18839 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18841 = args[2][22 * steps + ((cycle - 1) & mask)];
         assert(x18841 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18842 = args[2][184 * steps + ((cycle - 1) & mask)];
         assert(x18842 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18843 = x18842 + x18829;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18844 = x18840 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18845 = x18844 + x18841;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18846 = x18843 - x18845;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18846 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18846 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18847 = args[2][28 * steps + ((cycle - 5) & mask)];
         assert(x18847 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18848 = args[2][29 * steps + ((cycle - 5) & mask)];
         assert(x18848 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18849 = x18848 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18850 = x18847 + x18849;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18851 = x18850 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18852 = args[2][23 * steps + ((cycle - 1) & mask)];
         assert(x18852 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18853 = args[2][185 * steps + ((cycle - 1) & mask)];
         assert(x18853 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18854 = x18853 + x18840;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18855 = x18851 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18856 = x18855 + x18852;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18857 = x18854 - x18856;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18857 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18857 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18858 = args[2][30 * steps + ((cycle - 5) & mask)];
         assert(x18858 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18859 = args[2][31 * steps + ((cycle - 5) & mask)];
         assert(x18859 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18860 = x18859 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18861 = x18858 + x18860;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18862 = x18861 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18863 = args[2][24 * steps + ((cycle - 1) & mask)];
         assert(x18863 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18864 = args[2][186 * steps + ((cycle - 1) & mask)];
         assert(x18864 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18865 = x18864 + x18851;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18866 = x18862 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18867 = x18866 + x18863;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18868 = x18865 - x18867;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18868 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18868 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18869 = args[2][32 * steps + ((cycle - 5) & mask)];
         assert(x18869 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18870 = args[2][33 * steps + ((cycle - 5) & mask)];
         assert(x18870 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18871 = x18870 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18872 = x18869 + x18871;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18873 = x18872 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18874 = args[2][25 * steps + ((cycle - 1) & mask)];
         assert(x18874 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18875 = args[2][187 * steps + ((cycle - 1) & mask)];
         assert(x18875 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18876 = x18875 + x18862;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18877 = x18873 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18878 = x18877 + x18874;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18879 = x18876 - x18878;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18879 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18879 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18880 = args[2][18 * steps + ((cycle - 4) & mask)];
         assert(x18880 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18881 = args[2][19 * steps + ((cycle - 4) & mask)];
         assert(x18881 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18882 = x18881 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18883 = x18880 + x18882;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18884 = x18883 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18885 = args[2][26 * steps + ((cycle - 1) & mask)];
         assert(x18885 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18886 = args[2][188 * steps + ((cycle - 1) & mask)];
         assert(x18886 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18887 = x18886 + x18873;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18888 = x18884 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18889 = x18888 + x18885;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18890 = x18887 - x18889;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18890 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18890 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18891 = args[2][20 * steps + ((cycle - 4) & mask)];
         assert(x18891 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18892 = args[2][21 * steps + ((cycle - 4) & mask)];
         assert(x18892 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18893 = x18892 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18894 = x18891 + x18893;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18895 = x18894 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18896 = args[2][27 * steps + ((cycle - 1) & mask)];
         assert(x18896 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18897 = args[2][189 * steps + ((cycle - 1) & mask)];
         assert(x18897 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18898 = x18897 + x18884;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18899 = x18895 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18900 = x18899 + x18896;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18901 = x18898 - x18900;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18901 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18901 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18902 = args[2][22 * steps + ((cycle - 4) & mask)];
         assert(x18902 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18903 = args[2][23 * steps + ((cycle - 4) & mask)];
         assert(x18903 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18904 = x18903 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18905 = x18902 + x18904;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18906 = x18905 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18907 = args[2][28 * steps + ((cycle - 1) & mask)];
         assert(x18907 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18908 = args[2][190 * steps + ((cycle - 1) & mask)];
         assert(x18908 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18909 = x18908 + x18895;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18910 = x18906 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18911 = x18910 + x18907;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18912 = x18909 - x18911;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18912 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18912 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18913 = args[2][24 * steps + ((cycle - 4) & mask)];
         assert(x18913 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18914 = args[2][25 * steps + ((cycle - 4) & mask)];
         assert(x18914 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18915 = x18914 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18916 = x18913 + x18915;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18917 = x18916 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18918 = args[2][29 * steps + ((cycle - 1) & mask)];
         assert(x18918 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18919 = args[2][191 * steps + ((cycle - 1) & mask)];
         assert(x18919 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18920 = x18919 + x18906;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18921 = x18917 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18922 = x18921 + x18918;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18923 = x18920 - x18922;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18923 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18923 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18924 = args[2][26 * steps + ((cycle - 4) & mask)];
         assert(x18924 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18925 = args[2][27 * steps + ((cycle - 4) & mask)];
         assert(x18925 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18926 = x18925 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18927 = x18924 + x18926;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18928 = x18927 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18929 = args[2][30 * steps + ((cycle - 1) & mask)];
         assert(x18929 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18930 = args[2][192 * steps + ((cycle - 1) & mask)];
         assert(x18930 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18931 = x18930 + x18917;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18932 = x18928 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18933 = x18932 + x18929;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18934 = x18931 - x18933;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18934 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18934 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18935 = args[2][28 * steps + ((cycle - 4) & mask)];
         assert(x18935 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18936 = args[2][29 * steps + ((cycle - 4) & mask)];
         assert(x18936 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18937 = x18936 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18938 = x18935 + x18937;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18939 = x18938 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18940 = args[2][31 * steps + ((cycle - 1) & mask)];
         assert(x18940 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18941 = args[2][193 * steps + ((cycle - 1) & mask)];
         assert(x18941 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18942 = x18941 + x18928;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18943 = x18939 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18944 = x18943 + x18940;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18945 = x18942 - x18944;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18945 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18945 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18946 = args[2][30 * steps + ((cycle - 4) & mask)];
         assert(x18946 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18947 = args[2][31 * steps + ((cycle - 4) & mask)];
         assert(x18947 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18948 = x18947 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18949 = x18946 + x18948;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18950 = x18949 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18951 = args[2][32 * steps + ((cycle - 1) & mask)];
         assert(x18951 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18952 = args[2][194 * steps + ((cycle - 1) & mask)];
         assert(x18952 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18953 = x18952 + x18939;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18954 = x18950 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18955 = x18954 + x18951;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18956 = x18953 - x18955;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18956 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18956 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18957 = args[2][32 * steps + ((cycle - 4) & mask)];
         assert(x18957 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18958 = args[2][33 * steps + ((cycle - 4) & mask)];
         assert(x18958 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18959 = x18958 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18960 = x18957 + x18959;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18961 = x18960 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18962 = args[2][33 * steps + ((cycle - 1) & mask)];
         assert(x18962 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18963 = args[2][195 * steps + ((cycle - 1) & mask)];
         assert(x18963 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18964 = x18963 + x18950;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18965 = x18961 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18966 = x18965 + x18962;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18967 = x18964 - x18966;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18967 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18967 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18968 = args[2][18 * steps + ((cycle - 3) & mask)];
         assert(x18968 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18969 = args[2][19 * steps + ((cycle - 3) & mask)];
         assert(x18969 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18970 = x18969 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18971 = x18968 + x18970;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18972 = x18971 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18973 = args[2][18 * steps + ((cycle - 0) & mask)];
         assert(x18973 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18974 = args[2][196 * steps + ((cycle - 1) & mask)];
         assert(x18974 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18975 = x18974 + x18961;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18976 = x18972 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18977 = x18976 + x18973;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18978 = x18975 - x18977;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18978 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18978 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18979 = args[2][20 * steps + ((cycle - 3) & mask)];
         assert(x18979 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18980 = args[2][21 * steps + ((cycle - 3) & mask)];
         assert(x18980 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18981 = x18980 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18982 = x18979 + x18981;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18983 = x18982 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18984 = args[2][19 * steps + ((cycle - 0) & mask)];
         assert(x18984 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18985 = args[2][197 * steps + ((cycle - 1) & mask)];
         assert(x18985 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18986 = x18985 + x18972;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18987 = x18983 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18988 = x18987 + x18984;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18989 = x18986 - x18988;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x18989 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x18989 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18990 = args[2][22 * steps + ((cycle - 3) & mask)];
         assert(x18990 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18991 = args[2][23 * steps + ((cycle - 3) & mask)];
         assert(x18991 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x18992 = x18991 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x18993 = x18990 + x18992;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x18994 = x18993 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x18995 = args[2][20 * steps + ((cycle - 0) & mask)];
         assert(x18995 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x18996 = args[2][198 * steps + ((cycle - 1) & mask)];
         assert(x18996 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x18997 = x18996 + x18983;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18998 = x18994 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x18999 = x18998 + x18995;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19000 = x18997 - x18999;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19000 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19000 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19001 = args[2][24 * steps + ((cycle - 3) & mask)];
         assert(x19001 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19002 = args[2][25 * steps + ((cycle - 3) & mask)];
         assert(x19002 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19003 = x19002 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19004 = x19001 + x19003;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19005 = x19004 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19006 = args[2][21 * steps + ((cycle - 0) & mask)];
         assert(x19006 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19007 = args[2][199 * steps + ((cycle - 1) & mask)];
         assert(x19007 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19008 = x19007 + x18994;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19009 = x19005 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19010 = x19009 + x19006;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19011 = x19008 - x19010;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19011 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19011 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19012 = args[2][26 * steps + ((cycle - 3) & mask)];
         assert(x19012 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19013 = args[2][27 * steps + ((cycle - 3) & mask)];
         assert(x19013 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19014 = x19013 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19015 = x19012 + x19014;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19016 = x19015 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19017 = args[2][22 * steps + ((cycle - 0) & mask)];
         assert(x19017 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19018 = args[2][200 * steps + ((cycle - 1) & mask)];
         assert(x19018 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19019 = x19018 + x19005;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19020 = x19016 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19021 = x19020 + x19017;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19022 = x19019 - x19021;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19022 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19022 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19023 = args[2][28 * steps + ((cycle - 3) & mask)];
         assert(x19023 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19024 = args[2][29 * steps + ((cycle - 3) & mask)];
         assert(x19024 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19025 = x19024 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19026 = x19023 + x19025;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19027 = x19026 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19028 = args[2][23 * steps + ((cycle - 0) & mask)];
         assert(x19028 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19029 = args[2][201 * steps + ((cycle - 1) & mask)];
         assert(x19029 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19030 = x19029 + x19016;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19031 = x19027 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19032 = x19031 + x19028;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19033 = x19030 - x19032;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19033 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19033 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19034 = args[2][30 * steps + ((cycle - 3) & mask)];
         assert(x19034 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19035 = args[2][31 * steps + ((cycle - 3) & mask)];
         assert(x19035 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19036 = x19035 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19037 = x19034 + x19036;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19038 = x19037 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19039 = args[2][24 * steps + ((cycle - 0) & mask)];
         assert(x19039 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19040 = args[2][202 * steps + ((cycle - 1) & mask)];
         assert(x19040 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19041 = x19040 + x19027;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19042 = x19038 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19043 = x19042 + x19039;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19044 = x19041 - x19043;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19044 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19044 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19045 = args[2][32 * steps + ((cycle - 3) & mask)];
         assert(x19045 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19046 = args[2][33 * steps + ((cycle - 3) & mask)];
         assert(x19046 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19047 = x19046 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19048 = x19045 + x19047;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19049 = x19048 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19050 = args[2][25 * steps + ((cycle - 0) & mask)];
         assert(x19050 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19051 = args[2][203 * steps + ((cycle - 1) & mask)];
         assert(x19051 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19052 = x19051 + x19038;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19053 = x19049 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19054 = x19053 + x19050;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19055 = x19052 - x19054;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19055 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19055 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19056 = args[2][18 * steps + ((cycle - 2) & mask)];
         assert(x19056 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19057 = args[2][19 * steps + ((cycle - 2) & mask)];
         assert(x19057 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19058 = x19057 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19059 = x19056 + x19058;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19060 = x19059 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19061 = args[2][26 * steps + ((cycle - 0) & mask)];
         assert(x19061 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19062 = args[2][204 * steps + ((cycle - 1) & mask)];
         assert(x19062 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19063 = x19062 + x19049;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19064 = x19060 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19065 = x19064 + x19061;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19066 = x19063 - x19065;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19066 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19066 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19067 = args[2][20 * steps + ((cycle - 2) & mask)];
         assert(x19067 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19068 = args[2][21 * steps + ((cycle - 2) & mask)];
         assert(x19068 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19069 = x19068 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19070 = x19067 + x19069;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19071 = x19070 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19072 = args[2][27 * steps + ((cycle - 0) & mask)];
         assert(x19072 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19073 = args[2][205 * steps + ((cycle - 1) & mask)];
         assert(x19073 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19074 = x19073 + x19060;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19075 = x19071 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19076 = x19075 + x19072;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19077 = x19074 - x19076;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19077 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19077 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19078 = args[2][22 * steps + ((cycle - 2) & mask)];
         assert(x19078 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19079 = args[2][23 * steps + ((cycle - 2) & mask)];
         assert(x19079 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19080 = x19079 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19081 = x19078 + x19080;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19082 = x19081 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19083 = args[2][28 * steps + ((cycle - 0) & mask)];
         assert(x19083 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19084 = args[2][206 * steps + ((cycle - 1) & mask)];
         assert(x19084 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19085 = x19084 + x19071;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19086 = x19082 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19087 = x19086 + x19083;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19088 = x19085 - x19087;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19088 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19088 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19089 = args[2][24 * steps + ((cycle - 2) & mask)];
         assert(x19089 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19090 = args[2][25 * steps + ((cycle - 2) & mask)];
         assert(x19090 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19091 = x19090 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19092 = x19089 + x19091;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19093 = x19092 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19094 = args[2][29 * steps + ((cycle - 0) & mask)];
         assert(x19094 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19095 = args[2][207 * steps + ((cycle - 1) & mask)];
         assert(x19095 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19096 = x19095 + x19082;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19097 = x19093 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19098 = x19097 + x19094;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19099 = x19096 - x19098;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19099 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19099 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19100 = args[2][26 * steps + ((cycle - 2) & mask)];
         assert(x19100 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19101 = args[2][27 * steps + ((cycle - 2) & mask)];
         assert(x19101 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19102 = x19101 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19103 = x19100 + x19102;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19104 = x19103 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19105 = args[2][30 * steps + ((cycle - 0) & mask)];
         assert(x19105 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19106 = args[2][208 * steps + ((cycle - 1) & mask)];
         assert(x19106 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19107 = x19106 + x19093;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19108 = x19104 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19109 = x19108 + x19105;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19110 = x19107 - x19109;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19110 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19110 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19111 = args[2][28 * steps + ((cycle - 2) & mask)];
         assert(x19111 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19112 = args[2][29 * steps + ((cycle - 2) & mask)];
         assert(x19112 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19113 = x19112 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19114 = x19111 + x19113;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19115 = x19114 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19116 = args[2][31 * steps + ((cycle - 0) & mask)];
         assert(x19116 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19117 = args[2][209 * steps + ((cycle - 1) & mask)];
         assert(x19117 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19118 = x19117 + x19104;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19119 = x19115 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19120 = x19119 + x19116;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19121 = x19118 - x19120;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19121 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19121 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19122 = args[2][30 * steps + ((cycle - 2) & mask)];
         assert(x19122 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19123 = args[2][31 * steps + ((cycle - 2) & mask)];
         assert(x19123 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19124 = x19123 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19125 = x19122 + x19124;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19126 = x19125 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19127 = args[2][32 * steps + ((cycle - 0) & mask)];
         assert(x19127 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19128 = args[2][210 * steps + ((cycle - 1) & mask)];
         assert(x19128 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19129 = x19128 + x19115;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19130 = x19126 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19131 = x19130 + x19127;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19132 = x19129 - x19131;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19132 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19132 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19133 = args[2][32 * steps + ((cycle - 2) & mask)];
         assert(x19133 != Fp::invalid());
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19134 = args[2][33 * steps + ((cycle - 2) & mask)];
         assert(x19134 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":401:67)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":405:67)
         auto x19135 = x19134 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:63)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:63)
         auto x19136 = x19133 + x19135;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":400:16)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":404:16)
         auto x19137 = x19136 - x11;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19138 = args[2][33 * steps + ((cycle - 0) & mask)];
         assert(x19138 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19139 = args[2][211 * steps + ((cycle - 1) & mask)];
         assert(x19139 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19140 = x19139 + x19126;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19141 = x19137 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19142 = x19141 + x19138;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19143 = x19140 - x19142;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19143 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19143 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19144 = args[2][212 * steps + ((cycle - 5) & mask)];
         assert(x19144 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19145 = args[2][180 * steps + ((cycle - 0) & mask)];
         assert(x19145 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19146 = x19145 + x19137;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19147 = x19144 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19148 = x19146 - x19147;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19148 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19148 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19149 = args[2][213 * steps + ((cycle - 5) & mask)];
         assert(x19149 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19150 = args[2][181 * steps + ((cycle - 0) & mask)];
         assert(x19150 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19151 = x19150 + x19144;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19152 = x19149 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19153 = x19151 - x19152;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19153 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19153 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19154 = args[2][214 * steps + ((cycle - 5) & mask)];
         assert(x19154 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19155 = args[2][182 * steps + ((cycle - 0) & mask)];
         assert(x19155 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19156 = x19155 + x19149;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19157 = x19154 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19158 = x19156 - x19157;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19158 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19158 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19159 = args[2][215 * steps + ((cycle - 5) & mask)];
         assert(x19159 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19160 = args[2][183 * steps + ((cycle - 0) & mask)];
         assert(x19160 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19161 = x19160 + x19154;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19162 = x19159 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19163 = x19161 - x19162;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19163 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19163 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19164 = args[2][216 * steps + ((cycle - 5) & mask)];
         assert(x19164 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19165 = args[2][184 * steps + ((cycle - 0) & mask)];
         assert(x19165 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19166 = x19165 + x19159;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19167 = x19164 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19168 = x19166 - x19167;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19168 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19168 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19169 = args[2][217 * steps + ((cycle - 5) & mask)];
         assert(x19169 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19170 = args[2][185 * steps + ((cycle - 0) & mask)];
         assert(x19170 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19171 = x19170 + x19164;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19172 = x19169 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19173 = x19171 - x19172;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19173 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19173 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19174 = args[2][218 * steps + ((cycle - 5) & mask)];
         assert(x19174 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19175 = args[2][186 * steps + ((cycle - 0) & mask)];
         assert(x19175 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19176 = x19175 + x19169;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19177 = x19174 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19178 = x19176 - x19177;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19178 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19178 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19179 = args[2][219 * steps + ((cycle - 5) & mask)];
         assert(x19179 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19180 = args[2][187 * steps + ((cycle - 0) & mask)];
         assert(x19180 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19181 = x19180 + x19174;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19182 = x19179 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19183 = x19181 - x19182;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19183 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19183 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19184 = args[2][212 * steps + ((cycle - 4) & mask)];
         assert(x19184 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19185 = args[2][188 * steps + ((cycle - 0) & mask)];
         assert(x19185 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19186 = x19185 + x19179;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19187 = x19184 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19188 = x19186 - x19187;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19188 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19188 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19189 = args[2][213 * steps + ((cycle - 4) & mask)];
         assert(x19189 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19190 = args[2][189 * steps + ((cycle - 0) & mask)];
         assert(x19190 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19191 = x19190 + x19184;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19192 = x19189 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19193 = x19191 - x19192;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19193 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19193 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19194 = args[2][214 * steps + ((cycle - 4) & mask)];
         assert(x19194 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19195 = args[2][190 * steps + ((cycle - 0) & mask)];
         assert(x19195 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19196 = x19195 + x19189;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19197 = x19194 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19198 = x19196 - x19197;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19198 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19198 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19199 = args[2][215 * steps + ((cycle - 4) & mask)];
         assert(x19199 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19200 = args[2][191 * steps + ((cycle - 0) & mask)];
         assert(x19200 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19201 = x19200 + x19194;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19202 = x19199 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19203 = x19201 - x19202;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19203 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19203 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19204 = args[2][216 * steps + ((cycle - 4) & mask)];
         assert(x19204 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19205 = args[2][192 * steps + ((cycle - 0) & mask)];
         assert(x19205 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19206 = x19205 + x19199;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19207 = x19204 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19208 = x19206 - x19207;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19208 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19208 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19209 = args[2][217 * steps + ((cycle - 4) & mask)];
         assert(x19209 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19210 = args[2][193 * steps + ((cycle - 0) & mask)];
         assert(x19210 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19211 = x19210 + x19204;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19212 = x19209 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19213 = x19211 - x19212;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19213 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19213 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19214 = args[2][218 * steps + ((cycle - 4) & mask)];
         assert(x19214 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19215 = args[2][194 * steps + ((cycle - 0) & mask)];
         assert(x19215 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19216 = x19215 + x19209;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19217 = x19214 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19218 = x19216 - x19217;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19218 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19218 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19219 = args[2][219 * steps + ((cycle - 4) & mask)];
         assert(x19219 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19220 = args[2][195 * steps + ((cycle - 0) & mask)];
         assert(x19220 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19221 = x19220 + x19214;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19222 = x19219 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19223 = x19221 - x19222;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19223 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19223 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19224 = args[2][212 * steps + ((cycle - 3) & mask)];
         assert(x19224 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19225 = args[2][196 * steps + ((cycle - 0) & mask)];
         assert(x19225 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19226 = x19225 + x19219;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19227 = x19224 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19228 = x19226 - x19227;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19228 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19228 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19229 = args[2][213 * steps + ((cycle - 3) & mask)];
         assert(x19229 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19230 = args[2][197 * steps + ((cycle - 0) & mask)];
         assert(x19230 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19231 = x19230 + x19224;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19232 = x19229 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19233 = x19231 - x19232;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19233 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19233 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19234 = args[2][214 * steps + ((cycle - 3) & mask)];
         assert(x19234 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19235 = args[2][198 * steps + ((cycle - 0) & mask)];
         assert(x19235 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19236 = x19235 + x19229;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19237 = x19234 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19238 = x19236 - x19237;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19238 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19238 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19239 = args[2][215 * steps + ((cycle - 3) & mask)];
         assert(x19239 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19240 = args[2][199 * steps + ((cycle - 0) & mask)];
         assert(x19240 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19241 = x19240 + x19234;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19242 = x19239 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19243 = x19241 - x19242;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19243 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19243 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19244 = args[2][216 * steps + ((cycle - 3) & mask)];
         assert(x19244 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19245 = args[2][200 * steps + ((cycle - 0) & mask)];
         assert(x19245 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19246 = x19245 + x19239;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19247 = x19244 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19248 = x19246 - x19247;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19248 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19248 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19249 = args[2][217 * steps + ((cycle - 3) & mask)];
         assert(x19249 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19250 = args[2][201 * steps + ((cycle - 0) & mask)];
         assert(x19250 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19251 = x19250 + x19244;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19252 = x19249 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19253 = x19251 - x19252;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19253 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19253 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19254 = args[2][218 * steps + ((cycle - 3) & mask)];
         assert(x19254 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19255 = args[2][202 * steps + ((cycle - 0) & mask)];
         assert(x19255 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19256 = x19255 + x19249;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19257 = x19254 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19258 = x19256 - x19257;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19258 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19258 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19259 = args[2][219 * steps + ((cycle - 3) & mask)];
         assert(x19259 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19260 = args[2][203 * steps + ((cycle - 0) & mask)];
         assert(x19260 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19261 = x19260 + x19254;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19262 = x19259 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19263 = x19261 - x19262;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19263 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19263 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19264 = args[2][212 * steps + ((cycle - 2) & mask)];
         assert(x19264 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19265 = args[2][204 * steps + ((cycle - 0) & mask)];
         assert(x19265 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19266 = x19265 + x19259;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19267 = x19264 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19268 = x19266 - x19267;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19268 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19268 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19269 = args[2][213 * steps + ((cycle - 2) & mask)];
         assert(x19269 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19270 = args[2][205 * steps + ((cycle - 0) & mask)];
         assert(x19270 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19271 = x19270 + x19264;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19272 = x19269 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19273 = x19271 - x19272;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19273 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19273 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19274 = args[2][214 * steps + ((cycle - 2) & mask)];
         assert(x19274 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19275 = args[2][206 * steps + ((cycle - 0) & mask)];
         assert(x19275 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19276 = x19275 + x19269;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19277 = x19274 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19278 = x19276 - x19277;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19278 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19278 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19279 = args[2][215 * steps + ((cycle - 2) & mask)];
         assert(x19279 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19280 = args[2][207 * steps + ((cycle - 0) & mask)];
         assert(x19280 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19281 = x19280 + x19274;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19282 = x19279 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19283 = x19281 - x19282;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19283 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19283 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19284 = args[2][216 * steps + ((cycle - 2) & mask)];
         assert(x19284 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19285 = args[2][208 * steps + ((cycle - 0) & mask)];
         assert(x19285 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19286 = x19285 + x19279;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19287 = x19284 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19288 = x19286 - x19287;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19288 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":411:64))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19288 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":415:64))
         auto x19289 = args[2][217 * steps + ((cycle - 2) & mask)];
         assert(x19289 != Fp::invalid());
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19290 = args[2][209 * steps + ((cycle - 0) & mask)];
         assert(x19290 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19291 = x19290 + x19284;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:26)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:26)
         auto x19292 = x19289 * x90;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19293 = x19291 - x19292;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19293 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
-        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":421:66))
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19293 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
+        // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("cirgen/circuit/rv32im/bigint.cpp":425:66))
         auto x19294 = args[2][210 * steps + ((cycle - 0) & mask)];
         assert(x19294 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
         auto x19295 = x19294 + x19289;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":424:10)
-        if (x19295 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:424");
+        // loc("cirgen/circuit/rv32im/bigint.cpp":428:10)
+        if (x19295 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/bigint.cpp:428");
       }
       if (x13328 != 0) {
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/14(BigIntCycle)/Reg"("./cirgen/compiler/edsl/edsl.h":116:61))
         auto x19296 = args[2][171 * steps + ((cycle - 0) & mask)];
         assert(x19296 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/bigint.cpp":434:34)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":438:34)
         auto x19297 = x13330 * x78;
-        // loc("cirgen/circuit/rv32im/bigint.cpp":434:25)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":438:25)
         auto x19298 = x19296 + x19297;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19299 = args[2][18 * steps + ((cycle - 0) & mask)];
@@ -70375,7 +70375,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x19306);
           reg = x19306;
         }
-        // loc("cirgen/circuit/rv32im/bigint.cpp":434:25)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":438:25)
         auto x19307 = x19298 + x95;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19308 = args[2][22 * steps + ((cycle - 0) & mask)];
@@ -70476,7 +70476,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x19315);
           reg = x19315;
         }
-        // loc("cirgen/circuit/rv32im/bigint.cpp":434:25)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":438:25)
         auto x19316 = x19298 + x92;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19317 = args[2][26 * steps + ((cycle - 0) & mask)];
@@ -70577,7 +70577,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x19324);
           reg = x19324;
         }
-        // loc("cirgen/circuit/rv32im/bigint.cpp":434:25)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":438:25)
         auto x19325 = x19298 + x77;
         // loc("Top/mux(Mux)/body(BodyStep)/BytesBody/PlonkBody/BytesPlonkElement/Reg"("cirgen/components/bytes.cpp":92:10))
         auto x19326 = args[2][30 * steps + ((cycle - 0) & mask)];
@@ -70678,7 +70678,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
           assert(reg == Fp::invalid() || reg == x19333);
           reg = x19333;
         }
-        // loc("cirgen/circuit/rv32im/bigint.cpp":441:10)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":445:10)
         auto x19334 = x19296 * x78;
         // loc("./cirgen/components/u32.h":25:12)
         auto x19335 = x19304 * x90;
@@ -70735,7 +70735,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         host_args.at(4) = x19358;
         host(ctx, "log", "  Writing: ioAddr = 0x%x, data = { %u, %u, %u, %u }", host_args.data(), 5, host_outs.data(), 0);
       }
-      // loc("cirgen/circuit/rv32im/bigint.cpp":449:18)
+      // loc("cirgen/circuit/rv32im/bigint.cpp":453:18)
       auto x19359 = x95 - x13342;
       if (x19359 != 0) {
         // loc("cirgen/circuit/rv32im/body.cpp":14:23)
@@ -70836,7 +70836,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x19382 = x19380 * x19381;
         // loc("cirgen/circuit/rv32im/body.cpp":23:7)
         if (x19382 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/body.cpp:23");
-        // loc("cirgen/circuit/rv32im/bigint.cpp":451:5)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":455:5)
         {
           auto& reg = args[2][99 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x65);
@@ -70844,7 +70844,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         }
       }
       if (x13342 != 0) {
-        // loc("cirgen/circuit/rv32im/bigint.cpp":454:19)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":458:19)
         auto x19383 = x754 + x78;
         // loc("cirgen/circuit/rv32im/body.cpp":14:23)
         auto x19384 = x19383 + x78;
@@ -70944,7 +70944,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         auto x19406 = x19404 * x19405;
         // loc("cirgen/circuit/rv32im/body.cpp":23:7)
         if (x19406 != 0) throw std::runtime_error("eqz failed at: cirgen/circuit/rv32im/body.cpp:23");
-        // loc("cirgen/circuit/rv32im/bigint.cpp":455:5)
+        // loc("cirgen/circuit/rv32im/bigint.cpp":459:5)
         {
           auto& reg = args[2][99 * steps + cycle];
           assert(reg == Fp::invalid() || reg == x63);
