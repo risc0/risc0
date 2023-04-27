@@ -29,6 +29,7 @@ use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use anyhow::{anyhow, bail, Result};
 use num_bigint::BigUint;
+use num_traits::Zero;
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -448,12 +449,12 @@ impl<'a> Executor<'a> {
         let y = BigUint::from_slice(&load_words(y_ptr));
         let n = BigUint::from_slice(&load_words(n_ptr));
 
-        // Compute modular multiplication.
-        let z = (x * y) % n;
+        // Compute modular multiplication, or simply multiplication if n == 0.
+        let z = if n.is_zero() { x * y } else { (x * y) % n };
 
         let mut z_vec = z.to_u32_digits();
         if z_vec.len() > bigint::WIDTH_WORDS {
-            panic!("modular multiplication result larger than input modulus");
+            anyhow::bail!("ecall_bigint preflight: overflow in bigint multiplication");
         }
         // Add leading zeros, if necessary, to pad up to the ecall BigInt width.
         z_vec.resize(bigint::WIDTH_WORDS, 0);

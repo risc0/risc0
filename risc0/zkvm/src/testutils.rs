@@ -43,8 +43,12 @@ impl Distribution<BigIntTestCase> for Standard {
 
 impl BigIntTestCase {
     pub fn expected(&self) -> [u32; bigint::WIDTH_WORDS] {
-        let z = (BigUint::from_slice(&self.x) * BigUint::from_slice(&self.y))
-            % BigUint::from_slice(&self.modulus);
+        let modulus = BigUint::from_slice(&self.modulus);
+        let z = if modulus.is_zero() {
+            BigUint::from_slice(&self.x) * BigUint::from_slice(&self.y)
+        } else {
+            (BigUint::from_slice(&self.x) * BigUint::from_slice(&self.y)) % modulus
+        };
         let mut vec = z.to_u32_digits();
         if vec.len() > bigint::WIDTH_WORDS {
             panic!("modular multiplication result larger than input modulus");
@@ -80,6 +84,11 @@ pub fn generate_bigint_test_cases(rng: &mut impl Rng, rand_count: usize) -> Vec<
             x: one,
             y: [9, 10, 11, 12, 13, 14, 15, 16],
             modulus: [1, 2, 3, 4, 5, 6, 7, 8],
+        },
+        BigIntTestCase {
+            x: [1, 2, 3, 4, 0, 0, 0, 0],
+            y: [9, 10, 11, 12, 0, 0, 0, 0],
+            modulus: zero,
         },
     ];
 
