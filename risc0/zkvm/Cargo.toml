@@ -44,7 +44,7 @@ getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.27", optional = true }
 lazy-regex = { version = "2.3", optional = true }
 log = "0.4"
-num-bigint = { version = "0.4.3", default-features = false, features = ["rand"],  optional = true }
+num-bigint = { version = "0.4.3", default-features = false, features = ["rand"], optional = true }
 num-derive = "0.3"
 num-traits = { version = "0.2", default-features = false }
 prost = { version = "0.11", optional = true }
