@@ -194,9 +194,9 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 );
                 Ok(())
             }
-            "bigintDivide" => {
+            "bigintQuotient" => {
                 let (a, b) = args.split_at(bigint::WIDTH_BYTES * 2);
-                let q = self.bigint_divide(a.try_into()?, b.try_into()?)?;
+                let q = self.bigint_quotient(a.try_into()?, b.try_into()?)?;
                 outs.copy_from_slice(&q[..]);
                 Ok(())
             }
@@ -407,6 +407,9 @@ impl MachineContext {
     ///
     /// Assumes a and b are both normalized with limbs in range [0, 255].
     /// Returns q as an array of BabyBearElems. (Drops r).
+    ///     When the denominator is zero, returns zero to facilitate use of the
+    ///     BigInt modular multiply circuit as an unreduced "checked
+    ///     multiply" circuit.
     /// Returns an error when:
     /// * Input denominator b is 0.
     /// * Input denominator b is less than 9 bits.
@@ -415,7 +418,7 @@ impl MachineContext {
     ///   values `x` and `y` such that `floor(x * y / b) >=
     ///   2^bigint::WIDTH_BITS`. If x and/or y is less than b (i.e. the modulus
     ///   in bigint modular multiply) this constrain will be satisfied.
-    fn bigint_divide(
+    fn bigint_quotient(
         &self,
         a_elems: &[Elem; bigint::WIDTH_BYTES * 2],
         b_elems: &[Elem; bigint::WIDTH_BYTES],
@@ -441,12 +444,12 @@ impl MachineContext {
         // This would indicate a problem with the circuit, so we panic here.
         for ai in a.iter().copied() {
             if ai > 255 {
-                panic!("bigint divide: input a is not well-formed");
+                panic!("bigint quotient: input a is not well-formed");
             }
         }
         for bi in b.iter().copied() {
             if bi > 255 {
-                panic!("bigint divide: input b is not well-formed");
+                panic!("bigint quotient: input b is not well-formed");
             }
         }
 
@@ -456,11 +459,14 @@ impl MachineContext {
             n -= 1;
         }
         if n == 0 {
-            anyhow::bail!("bigint divide: divide by zero");
+            // Divide by zero is strictly undefined, but the BigInt multiplier circuit uses
+            // a modulus of zero as a special case to support "checked multiply"
+            // of up to 256-bits. Return zero here to facilitate this.
+            return Ok([Elem::ZERO; bigint::WIDTH_BYTES]);
         }
         if n < 2 {
             // FIXME: This routine should be updated to lift this restriction.
-            anyhow::bail!("bigint divide: denominator must be at least 9 bits");
+            anyhow::bail!("bigint quotient: denominator must be at least 9 bits");
         }
         let m = a.len() - n - 1;
 
@@ -476,7 +482,7 @@ impl MachineContext {
             carry = tmp >> 8;
         }
         if carry != 0 {
-            panic!("bigint divide: final carry in input shift");
+            panic!("bigint quotient: final carry in input shift");
         }
         for i in 0..(a.len() - 1) {
             let tmp = (a[i] << shift_bits) + carry;
@@ -518,14 +524,14 @@ impl MachineContext {
                 }
                 // Adding back one multiple of b should go from negative back to positive.
                 if borrow - carry != 0 {
-                    panic!("bigint divide: underflow in bigint division");
+                    panic!("bigint quotient: underflow in bigint division");
                 }
             }
 
             if i < q.len() {
                 q[i] = q_approx;
             } else if q_approx != 0 {
-                anyhow::bail!("bigint divide: quotient exceeds allowed size");
+                anyhow::bail!("bigint quotient: quotient exceeds allowed size");
             }
         }
 
