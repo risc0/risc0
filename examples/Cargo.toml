@@ -16,6 +16,7 @@ members = [
     "waldo/core",
     "wordle",
     "wordle/core",
+    "wasm",
 ]
 
 # Always optimize; otherwise tests take excessively long.
