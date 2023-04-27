@@ -432,9 +432,9 @@ impl<'a> Executor<'a> {
 
     // Computes the state transitions for the BIGINT ecall.
     // Take reads inputs x, y, and N and writes output z = x * y mod N.
-    // Note that op is currently ignored.
+    // Note that op is currently ignored but must be set to 0.
     fn ecall_bigint(&mut self) -> Result<OpCodeResult> {
-        let [z_ptr, _op, x_ptr, y_ptr, n_ptr] = self
+        let [z_ptr, op, x_ptr, y_ptr, n_ptr] = self
             .monitor
             .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
 
@@ -445,6 +445,10 @@ impl<'a> Executor<'a> {
             }
             arr
         };
+
+        if op != 0 {
+            anyhow::bail!("ecall_bigint preflight: op must be set to 0");
+        }
 
         // Load inputs.
         let x = BigUint::from_slice(&load_words(x_ptr));
