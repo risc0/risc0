@@ -135,9 +135,7 @@ fn bigint_accel() {
         let env = ExecutorEnv::builder().add_input(&input).build();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
-        let (hal, eval) = default_hal();
-        let receipt = session.prove(hal.as_ref(), &eval).unwrap();
-
+        let receipt = session.prove().unwrap();
         assert_eq!(
             receipt.journal.as_slice(),
             bytemuck::cast_slice(case.expected().as_slice())
