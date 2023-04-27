@@ -24,7 +24,6 @@ use evm_core::{
 use evm_methods::EVM_ELF;
 use log::info;
 use risc0_zkvm::{
-    prove::default_hal,
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv,
 };
@@ -79,9 +78,7 @@ async fn main() {
         .build();
     let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
     let session = exec.run().unwrap();
-
-    let (hal, eval) = default_hal();
-    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+    let receipt = session.prove().unwrap();
 
     let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
     info!("exit reason: {:?}", res.exit_reason);

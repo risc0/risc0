@@ -76,17 +76,19 @@ pub struct Session {
 /// call to the ZKP system. It does not necessarily represent an entire program;
 /// see [Session] for tracking memory transactions until a user-requested
 /// termination.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
-    pub(crate) pc: u32,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
 
     /// The number of cycles in powers of 2.
     pub po2: usize,
+
+    /// The index of this [Segment] within the [Session]
+    pub index: u32,
 }
 
 impl Session {
@@ -105,20 +107,20 @@ impl Segment {
     pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
-        pc: u32,
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
         po2: usize,
+        index: u32,
     ) -> Self {
         Self {
             pre_image,
             post_image_id,
-            pc,
             faults,
             syscalls,
             exit_code,
             po2,
+            index,
         }
     }
 }

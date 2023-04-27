@@ -15,7 +15,6 @@
 use json_core::Outputs;
 use json_methods::SEARCH_JSON_ELF;
 use risc0_zkvm::{
-    prove::default_hal,
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv,
 };
@@ -38,9 +37,7 @@ fn search_json(data: &str) -> Outputs {
 
     let mut exec = Executor::from_elf(env, SEARCH_JSON_ELF).unwrap();
     let session = exec.run().unwrap();
-
-    let (hal, eval) = default_hal();
-    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+    let receipt = session.prove().unwrap();
 
     from_slice(&receipt.journal).unwrap()
 }

@@ -27,7 +27,7 @@ mod tests;
 
 use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
 use num_bigint::BigUint;
 use num_traits::Zero;
 use risc0_zkp::{
@@ -71,7 +71,6 @@ pub struct Executor<'a> {
     env: ExecutorEnv<'a>,
     pre_image: MemoryImage,
     monitor: MemoryMonitor,
-    pre_pc: u32,
     pc: u32,
     init_cycles: usize,
     fini_cycles: usize,
@@ -140,7 +139,6 @@ impl<'a> Executor<'a> {
             env,
             pre_image,
             monitor,
-            pre_pc: pc,
             pc,
             init_cycles,
             fini_cycles,
@@ -154,7 +152,7 @@ impl<'a> Executor<'a> {
     /// Construct a new [Executor] from an ELF binary.
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         Ok(Self::new(env, image, program.entry))
     }
 
@@ -183,11 +181,14 @@ impl<'a> Executor<'a> {
                     self.segments.push(Segment::new(
                         pre_image,
                         post_image_id,
-                        self.pre_pc,
                         faults,
                         syscalls,
                         exit_code,
                         log2_ceil(total_cycles.next_power_of_two()),
+                        self.segments
+                            .len()
+                            .try_into()
+                            .context("Too many segment to fit in u32")?,
                     ));
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),
@@ -217,7 +218,7 @@ impl<'a> Executor<'a> {
         self.body_cycles = 0;
         self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
-        self.pre_pc = self.pc;
+        self.pre_image.pc = self.pc;
         self.monitor.clear_segment();
     }
 

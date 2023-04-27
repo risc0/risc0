@@ -40,7 +40,7 @@ fn basic() {
         entry: 0x4000,
         image,
     };
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.get_root();
 
     let mut exec = Executor::new(env, image, program.entry);
@@ -50,6 +50,7 @@ fn basic() {
     assert_eq!(session.segments[0].exit_code, ExitCode::Halted(0));
     assert_eq!(session.segments[0].pre_image.get_root(), pre_image_id);
     assert_ne!(session.segments[0].post_image_id, pre_image_id);
+    assert_eq!(session.segments[0].index, 0);
 }
 
 #[test]
@@ -67,7 +68,7 @@ fn system_split() {
     image.insert(pc, 0x00000073); // ecall(halt)
 
     let program = Program { entry, image };
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.get_root();
 
     let mut exec = Executor::new(env, image, program.entry);
@@ -85,6 +86,8 @@ fn system_split() {
         session.segments[1].pre_image.get_root(),
         session.segments[0].post_image_id
     );
+    assert_eq!(session.segments[0].index, 0);
+    assert_eq!(session.segments[1].index, 1);
 }
 
 #[test]
