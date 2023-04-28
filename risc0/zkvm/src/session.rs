@@ -59,13 +59,20 @@ pub struct Session {
     /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
     /// or [SessionLimit](ExitCode::SessionLimit), and all other [Segment]s (if
     /// any) will have [ExitCode::SystemSplit].
-    pub segments: Vec<Segment>,
+    pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
     pub journal: Vec<u8>,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+}
+
+/// TODO
+#[typetag::serde(tag = "type")]
+pub trait SegmentRef {
+    /// TODO
+    fn resolve(&self) -> anyhow::Result<Segment>;
 }
 
 /// The execution trace of a portion of a program.
@@ -93,12 +100,20 @@ pub struct Segment {
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
-    pub fn new(segments: Vec<Segment>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
+    pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
         Self {
             segments,
             journal,
             exit_code,
         }
+    }
+
+    /// TODO
+    pub fn resolve(&self) -> anyhow::Result<Vec<Segment>> {
+        self.segments
+            .iter()
+            .map(|segment_ref| segment_ref.resolve())
+            .collect()
     }
 }
 
@@ -122,5 +137,25 @@ impl Segment {
             po2,
             index,
         }
+    }
+}
+
+/// TODO
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SimpleSegmentRef {
+    segment: Segment,
+}
+
+#[typetag::serde]
+impl SegmentRef for SimpleSegmentRef {
+    fn resolve(&self) -> anyhow::Result<Segment> {
+        Ok(self.segment.clone())
+    }
+}
+
+impl SimpleSegmentRef {
+    /// TODO
+    pub fn new(segment: Segment) -> Self {
+        Self { segment }
     }
 }

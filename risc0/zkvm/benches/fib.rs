@@ -43,7 +43,8 @@ pub fn bench(c: &mut Criterion) {
             let prover = default_prover();
             let mut exec = setup(iterations);
             let session = exec.run().unwrap();
-            let po2 = session.segments[0].po2;
+            let segments = session.resolve().unwrap();
+            let po2 = segments[0].po2;
             let cycles = 1 << po2;
             group.sample_size(10);
             group.throughput(Throughput::Elements(cycles as u64));

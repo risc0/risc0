@@ -40,7 +40,8 @@ fn main() {
     let prover = default_prover();
 
     let (session, receipt) = top(prover, args.iterations);
-    let po2 = session.segments[0].po2;
+    let segments = session.resolve().unwrap();
+    let po2 = segments[0].po2;
     let seal = receipt.segments[0].get_seal_bytes().len();
     let journal = receipt.journal.len();
     let total = seal + journal;
