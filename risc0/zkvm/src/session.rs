@@ -68,10 +68,14 @@ pub struct Session {
     pub exit_code: ExitCode,
 }
 
-/// TODO
+/// A reference to a [Segment].
+///
+/// This allows implementors to determine the best way to represent this in an
+/// pluggable manner. See the [SimpleSegmentRef] for a very basic
+/// implmentation.
 #[typetag::serde(tag = "type")]
-pub trait SegmentRef {
-    /// TODO
+pub trait SegmentRef: Send {
+    /// Resolve this reference into an actual [Segment].
     fn resolve(&self) -> anyhow::Result<Segment>;
 }
 
@@ -111,7 +115,8 @@ impl Session {
         }
     }
 
-    /// TODO
+    /// A convenience method that resolves all [SegmentRef]s and returns the
+    /// associated [Segment]s.
     pub fn resolve(&self) -> anyhow::Result<Vec<Segment>> {
         self.segments
             .iter()
@@ -145,7 +150,9 @@ impl Segment {
     }
 }
 
-/// TODO
+/// A very basic implementation of a [SegmentRef].
+///
+/// The [Segment] itself is stored in this implementation.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct SimpleSegmentRef {
     segment: Segment,
@@ -159,7 +166,7 @@ impl SegmentRef for SimpleSegmentRef {
 }
 
 impl SimpleSegmentRef {
-    /// TODO
+    /// Construct a [SimpleSegmentRef] with the specified [Segment].
     pub fn new(segment: Segment) -> Self {
         Self { segment }
     }
