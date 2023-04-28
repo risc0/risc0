@@ -159,14 +159,14 @@ impl<'a> Executor<'a> {
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
     pub fn run(&mut self) -> Result<Session> {
-        self.run_with_callback(|segment| Box::new(SimpleSegmentRef::new(segment)))
+        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
     pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
-        F: FnMut(Segment) -> Box<dyn SegmentRef>,
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
         self.monitor.clear_session();
 
@@ -200,7 +200,7 @@ impl<'a> Executor<'a> {
                             .context("Too many segments to fit in u32")?,
                         self.body_cycles,
                     );
-                    let segment_ref = callback(segment);
+                    let segment_ref = callback(segment)?;
                     self.segments.push(segment_ref);
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),
