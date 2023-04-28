@@ -24,7 +24,7 @@ use test_log::test;
 use super::{Executor, ExecutorEnv, TraceEvent};
 use crate::{
     serde::{from_slice, to_vec},
-    ExitCode, MemoryImage, Program,
+    testutils, ExitCode, MemoryImage, Program,
 };
 
 #[test]
@@ -138,6 +138,28 @@ fn sha_accel() {
     let env = ExecutorEnv::builder().add_input(&input).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
+}
+
+#[test]
+fn bigint_accel() {
+    let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+    for case in cases {
+        println!("Running BigInt circuit test case: {:x?}", case);
+        let input = to_vec(&MultiTestSpec::BigInt {
+            x: case.x,
+            y: case.y,
+            modulus: case.modulus,
+        })
+        .unwrap();
+
+        let env = ExecutorEnv::builder().add_input(&input).build();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let session = exec.run().unwrap();
+        assert_eq!(
+            session.journal.as_slice(),
+            bytemuck::cast_slice(case.expected().as_slice())
+        );
+    }
 }
 
 #[test]

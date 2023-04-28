@@ -96,6 +96,9 @@ pub struct Segment {
 
     /// The index of this [Segment] within the [Session]
     pub index: u32,
+
+    /// The number of cycles used to execute instructions.
+    pub insn_cycles: usize,
 }
 
 impl Session {
@@ -127,6 +130,7 @@ impl Segment {
         exit_code: ExitCode,
         po2: usize,
         index: u32,
+        insn_cycles: usize,
     ) -> Self {
         Self {
             pre_image,
@@ -136,6 +140,7 @@ impl Segment {
             exit_code,
             po2,
             index,
+            insn_cycles,
         }
     }
 }

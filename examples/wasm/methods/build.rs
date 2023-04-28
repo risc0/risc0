@@ -12,16 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This code is automatically generated
-
-use risc0_zkp::adapter::CircuitInfo;
-
-use super::CircuitImpl;
-
-impl CircuitInfo for CircuitImpl {
-    #[rustfmt::skip]
-    const OUTPUT_SIZE: usize = 105;
-
-    #[rustfmt::skip]
-    const MIX_SIZE: usize = 40;
+fn main() {
+    risc0_build::embed_methods();
 }
