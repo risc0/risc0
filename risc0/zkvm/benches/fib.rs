@@ -37,9 +37,9 @@ pub fn bench(c: &mut Criterion) {
         for iterations in [100, 1000, 10_000] {
             let mut exec = setup(iterations);
             let session = exec.run().unwrap();
+            let segments = session.resolve().unwrap();
             let (exec_cycles, prove_cycles) =
-                session
-                    .segments
+                segments
                     .iter()
                     .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
                         (

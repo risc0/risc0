@@ -214,9 +214,10 @@ fn continuation() {
         .build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    assert_eq!(session.segments.len(), COUNT);
+    let segments = session.resolve().unwrap();
+    assert_eq!(segments.len(), COUNT);
 
-    let (final_segment, segments) = session.segments.split_last().unwrap();
+    let (final_segment, segments) = segments.split_last().unwrap();
     for segment in segments {
         assert!(std::matches!(segment.exit_code, ExitCode::SystemSplit(_)));
     }

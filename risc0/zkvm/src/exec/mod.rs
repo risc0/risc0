@@ -55,7 +55,7 @@ use self::monitor::MemoryMonitor;
 use crate::{
     align_up,
     opcode::{MajorType, OpCode},
-    ExitCode, Loader, MemoryImage, Program, Segment, Session,
+    ExitCode, Loader, MemoryImage, Program, Segment, SegmentRef, Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -76,7 +76,7 @@ pub struct Executor<'a> {
     fini_cycles: usize,
     body_cycles: usize,
     segment_cycle: usize,
-    segments: Vec<Segment>,
+    segments: Vec<Box<dyn SegmentRef>>,
     insn_counter: u32,
 }
 
@@ -159,6 +159,15 @@ impl<'a> Executor<'a> {
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
     pub fn run(&mut self) -> Result<Session> {
+        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    }
+
+    /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
+    /// reached, producing a [Session] as a result.
+    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    where
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
+    {
         self.monitor.clear_session();
 
         let journal = Journal::default();
@@ -178,7 +187,7 @@ impl<'a> Executor<'a> {
                     let post_image_id = self.monitor.image.get_root();
                     let syscalls = take(&mut self.monitor.syscalls);
                     let faults = take(&mut self.monitor.faults);
-                    self.segments.push(Segment::new(
+                    let segment = Segment::new(
                         pre_image,
                         post_image_id,
                         faults,
@@ -188,9 +197,11 @@ impl<'a> Executor<'a> {
                         self.segments
                             .len()
                             .try_into()
-                            .context("Too many segment to fit in u32")?,
+                            .context("Too many segments to fit in u32")?,
                         self.body_cycles,
-                    ));
+                    );
+                    let segment_ref = callback(segment)?;
+                    self.segments.push(segment_ref);
                     match exit_code {
                         ExitCode::SystemSplit(_) => self.split(),
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),
@@ -209,9 +220,11 @@ impl<'a> Executor<'a> {
         };
 
         let exit_code = run_loop()?;
-        let mut segments = Vec::new();
-        std::mem::swap(&mut segments, &mut self.segments);
-        Ok(Session::new(segments, journal.buf.take(), exit_code))
+        Ok(Session::new(
+            take(&mut self.segments),
+            journal.buf.take(),
+            exit_code,
+        ))
     }
 
     fn split(&mut self) {
