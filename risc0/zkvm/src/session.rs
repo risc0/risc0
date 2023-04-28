@@ -59,13 +59,24 @@ pub struct Session {
     /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
     /// or [SessionLimit](ExitCode::SessionLimit), and all other [Segment]s (if
     /// any) will have [ExitCode::SystemSplit].
-    pub segments: Vec<Segment>,
+    pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
     pub journal: Vec<u8>,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+}
+
+/// A reference to a [Segment].
+///
+/// This allows implementors to determine the best way to represent this in an
+/// pluggable manner. See the [SimpleSegmentRef] for a very basic
+/// implmentation.
+#[typetag::serde(tag = "type")]
+pub trait SegmentRef: Send {
+    /// Resolve this reference into an actual [Segment].
+    fn resolve(&self) -> anyhow::Result<Segment>;
 }
 
 /// The execution trace of a portion of a program.
@@ -96,12 +107,21 @@ pub struct Segment {
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
-    pub fn new(segments: Vec<Segment>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
+    pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
         Self {
             segments,
             journal,
             exit_code,
         }
+    }
+
+    /// A convenience method that resolves all [SegmentRef]s and returns the
+    /// associated [Segment]s.
+    pub fn resolve(&self) -> anyhow::Result<Vec<Segment>> {
+        self.segments
+            .iter()
+            .map(|segment_ref| segment_ref.resolve())
+            .collect()
     }
 }
 
@@ -127,5 +147,27 @@ impl Segment {
             index,
             insn_cycles,
         }
+    }
+}
+
+/// A very basic implementation of a [SegmentRef].
+///
+/// The [Segment] itself is stored in this implementation.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SimpleSegmentRef {
+    segment: Segment,
+}
+
+#[typetag::serde]
+impl SegmentRef for SimpleSegmentRef {
+    fn resolve(&self) -> anyhow::Result<Segment> {
+        Ok(self.segment.clone())
+    }
+}
+
+impl SimpleSegmentRef {
+    /// Construct a [SimpleSegmentRef] with the specified [Segment].
+    pub fn new(segment: Segment) -> Self {
+        Self { segment }
     }
 }
