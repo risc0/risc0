@@ -37,6 +37,9 @@ pub mod serde;
 mod session;
 pub mod sha;
 
+#[cfg(test)]
+mod testutils;
+
 pub use anyhow::Result;
 use risc0_zkp::core::hash::{
     blake2b::{Blake2b, Blake2bHashFn},

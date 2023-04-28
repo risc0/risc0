@@ -1,15 +1,3 @@
-// :0
-pub struct BytesInitStep {}
-impl risc0_zkp::layout::Component for BytesInitStep {
-    fn ty_name(&self) -> &'static str {
-        "BytesInitStep"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        Ok(())
-    }
-}
-
 // circuit/rv32im/global.h:28
 pub struct U32Reg {
     pub byte: &'static [&'static OutReg; 4],
@@ -21,6 +9,18 @@ impl risc0_zkp::layout::Component for U32Reg {
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         v.visit_component("byte", self.byte)?;
+        Ok(())
+    }
+}
+
+// :0
+pub struct BytesSetupStep {}
+impl risc0_zkp::layout::Component for BytesSetupStep {
+    fn ty_name(&self) -> &'static str {
+        "BytesSetupStep"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
         Ok(())
     }
 }
@@ -66,9 +66,9 @@ impl risc0_zkp::layout::Component for RamFiniStep {
 // cirgen/circuit/rv32im/top.cpp:60
 pub struct Mux {
     pub body: &'static RamFiniStep,
-    pub bytes_fini: &'static BytesInitStep,
-    pub bytes_init: &'static BytesInitStep,
-    pub bytes_setup: &'static BytesInitStep,
+    pub bytes_fini: &'static BytesSetupStep,
+    pub bytes_init: &'static BytesSetupStep,
+    pub bytes_setup: &'static BytesSetupStep,
     pub ram_fini: &'static RamFiniStep,
     pub ram_init: &'static RamFiniStep,
     pub ram_load: &'static RamFiniStep,
@@ -735,13 +735,13 @@ pub const LAYOUT_MUX_BODY: RamFiniStep = RamFiniStep {
 };
 
 // :0
-pub const LAYOUT_MUX_BYTES_FINI: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_BYTES_FINI: BytesSetupStep = BytesSetupStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_INIT: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_BYTES_INIT: BytesSetupStep = BytesSetupStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_SETUP: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_BYTES_SETUP: BytesSetupStep = BytesSetupStep {};
 
 // :0
 pub const LAYOUT_MUX_RAM_FINI_CHECK_DIRTY: OutReg = OutReg { offset: 72 };

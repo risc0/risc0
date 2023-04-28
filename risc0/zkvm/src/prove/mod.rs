@@ -368,10 +368,10 @@ impl Segment {
 
     fn prepare_globals(&self) -> Vec<Elem> {
         let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
-        log::debug!("run> pc: 0x{:08x}", self.pc);
+        log::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
 
         // initialize PC
-        let pc_bytes = self.pc.to_le_bytes();
+        let pc_bytes = self.pre_image.pc.to_le_bytes();
         for i in 0..WORD_SIZE {
             io[i] = (pc_bytes[i] as u32).into();
         }

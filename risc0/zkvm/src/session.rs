@@ -80,7 +80,6 @@ pub struct Session {
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
-    pub(crate) pc: u32,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
     pub(crate) exit_code: ExitCode,
@@ -90,6 +89,9 @@ pub struct Segment {
 
     /// The index of this [Segment] within the [Session]
     pub index: u32,
+
+    /// The number of cycles used to execute instructions.
+    pub insn_cycles: usize,
 }
 
 impl Session {
@@ -105,26 +107,25 @@ impl Session {
 
 impl Segment {
     /// Create a new [Segment] from its constituent components.
-    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
-        pc: u32,
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
         po2: usize,
         index: u32,
+        insn_cycles: usize,
     ) -> Self {
         Self {
             pre_image,
             post_image_id,
-            pc,
             faults,
             syscalls,
             exit_code,
             po2,
             index,
+            insn_cycles,
         }
     }
 }
