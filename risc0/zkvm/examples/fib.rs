@@ -59,17 +59,16 @@ fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
     let env = ExecutorEnv::builder().add_input(&[iterations]).build();
     let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
+    let segments = session.resolve().unwrap();
 
-    let (cycles, insn_cycles) =
-        session
-            .segments
-            .iter()
-            .fold((0, 0), |(cycles, insn_cycles), segment| {
-                (
-                    cycles + (1 << segment.po2),
-                    insn_cycles + segment.insn_cycles,
-                )
-            });
+    let (cycles, insn_cycles) = segments
+        .iter()
+        .fold((0, 0), |(cycles, insn_cycles), segment| {
+            (
+                cycles + (1 << segment.po2),
+                insn_cycles + segment.insn_cycles,
+            )
+        });
 
     let seal = if skip_prover {
         0
@@ -82,7 +81,7 @@ fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
     };
 
     Metrics {
-        segments: session.segments.len(),
+        segments: segments.len(),
         insn_cycles,
         cycles,
         seal,

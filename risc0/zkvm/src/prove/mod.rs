@@ -229,14 +229,15 @@ where
     fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
         log::debug!("prove_session: {}", self.name);
         let mut segments = Vec::new();
-        for segment in session.segments.iter() {
-            segments.push(self.prove_segment(segment)?);
+        for segment_ref in session.segments.iter() {
+            let segment = segment_ref.resolve()?;
+            segments.push(self.prove_segment(&segment)?);
         }
         let receipt = SessionReceipt {
             segments,
             journal: session.journal.clone(),
         };
-        let image_id = session.segments[0].pre_image.get_root();
+        let image_id = session.segments[0].resolve()?.pre_image.get_root();
         let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
         receipt.verify_with_hal(&hal, image_id)?;
         Ok(receipt)
