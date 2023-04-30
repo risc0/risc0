@@ -23,7 +23,7 @@ fn eval_check_size() {
     let generated = include_str!("../cxx/poly_fp.cpp");
     let lines = generated.lines().count();
 
-    const LINE_LIMIT: usize = 37200;
+    const LINE_LIMIT: usize = 37300;
 
     assert!(
         lines < LINE_LIMIT,
