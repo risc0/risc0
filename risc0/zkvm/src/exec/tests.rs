@@ -83,6 +83,7 @@ fn system_split() {
     assert_eq!(segments.len(), 2);
     assert!(std::matches!(
         segments[0].exit_code,
+        ExitCode::SystemSplit,
     ));
     assert_eq!(segments[0].pre_image.get_root(), pre_image_id);
     assert_ne!(segments[0].post_image_id, pre_image_id);
