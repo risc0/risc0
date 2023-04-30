@@ -190,7 +190,7 @@ fn pause_continue() {
 
     // Run until sys_pause
     let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Paused);
+    assert_eq!(session.exit_code, ExitCode::Paused(0));
     let receipt = session.prove().unwrap();
     assert_eq!(receipt.segments[0].index, 0);
 
@@ -218,7 +218,7 @@ fn continuation() {
 
     let (final_segment, segments) = session.segments.split_last().unwrap();
     for segment in segments {
-        assert!(std::matches!(segment.exit_code, ExitCode::SystemSplit(_)));
+        assert!(std::matches!(segment.exit_code, ExitCode::SystemSplit));
     }
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 

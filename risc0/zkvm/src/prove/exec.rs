@@ -36,7 +36,7 @@ use crate::{
     binfmt::image::MemoryImage,
     opcode::{MajorType, OpCode},
     session::PageFaults,
-    ExitCode, Segment,
+    Segment,
 };
 
 #[allow(dead_code)]
@@ -153,7 +153,7 @@ pub struct MachineContext {
     // This is just for diagnostics: tracks which words have been paged in.
     resident_words: BTreeSet<u32>,
 
-    exit_code: ExitCode,
+    split_insn: Option<u32>,
 
     insn_counter: u32,
 }
@@ -281,7 +281,7 @@ impl MachineContext {
             is_halted: false,
             is_flushing: false,
             resident_words: BTreeSet::new(),
-            exit_code: segment.exit_code,
+            split_insn: segment.split_insn,
             insn_counter: 0,
         }
     }
@@ -323,7 +323,7 @@ impl MachineContext {
             }
         }
 
-        if let ExitCode::SystemSplit(split_insn) = self.exit_code {
+        if let Some(split_insn) = self.split_insn {
             if self.insn_counter == split_insn {
                 if !self.is_flushing {
                     log::debug!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);

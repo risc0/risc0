@@ -20,26 +20,7 @@ use alloc::collections::BTreeSet;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-use crate::{exec::SyscallRecord, MemoryImage};
-
-/// Indicates how a [Segment] or [Session]'s execution has terminated
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum ExitCode {
-    /// This indicates when a system-initiated split has occured due to the
-    /// segment limit being exceeded.
-    SystemSplit(u32),
-
-    /// This indicates that the session limit has been reached.
-    SessionLimit,
-
-    /// A user may manually pause a session so that it can be resumed at a later
-    /// time.
-    Paused,
-
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
-    Halted(u32),
-}
+use crate::{exec::SyscallRecord, receipt::ExitCode, MemoryImage};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -82,6 +63,7 @@ pub struct Segment {
     pub(crate) post_image_id: Digest,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
+    pub(crate) split_insn: Option<u32>,
     pub(crate) exit_code: ExitCode,
 
     /// The number of cycles in powers of 2.
@@ -113,6 +95,7 @@ impl Segment {
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
+        split_insn: Option<u32>,
         po2: usize,
         index: u32,
         insn_cycles: usize,
@@ -123,6 +106,7 @@ impl Segment {
             faults,
             syscalls,
             exit_code,
+            split_insn,
             po2,
             index,
             insn_cycles,
