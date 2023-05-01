@@ -79,6 +79,25 @@ use crate::{
     ControlId, CIRCUIT,
 };
 
+/// Indicates how a Segment or Session's execution has terminated
+#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+pub enum ExitCode {
+    /// This indicates when a system-initiated split has occured due to the
+    /// segment limit being exceeded.
+    SystemSplit,
+
+    /// This indicates that the session limit has been reached.
+    SessionLimit,
+
+    /// A user may manually pause a session so that it can be resumed at a later
+    /// time, along with the user returned code.
+    Paused(u32),
+
+    /// This indicates normal termination of a program with an interior exit
+    /// code returned from the guest.
+    Halted(u32),
+}
+
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
 #[derive(Debug)]
@@ -101,9 +120,11 @@ pub struct ReceiptMetadata {
     /// The [SystemState] of a segment just after execution has completed.
     pub post: SystemState,
 
-    /// An internal flag used by the circuit to control whether dirty pages need
-    /// to be paged out.
-    pub check_dirty: u32,
+    /// The exit code for a segment
+    pub exit_code: ExitCode,
+
+    /// A [Digest] of the input, from the viewpoint of the guest.
+    pub input: Digest,
 
     /// A [Digest] of the journal, from the viewpoint of the guest.
     pub output: Digest,
@@ -290,19 +311,32 @@ impl SystemState {
 impl ReceiptMetadata {
     fn decode(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
-        let pre = SystemState::decode(io, body.pre)?;
-        let post = SystemState::decode(io, body.post)?;
-        let bytes: Vec<u8> = io
-            .tree(body.output)
+        let pre = SystemState::decode(io, body.global.pre)?;
+        let post = SystemState::decode(io, body.global.post)?;
+        let input_bytes: Vec<u8> = io
+            .tree(body.global.input)
             .get_bytes()
             .or(Err(VerificationError::ReceiptFormatError))?;
-        let output = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        let check_dirty = io.get_u64(body.check_dirty) as u32;
-
+        let input = Digest::try_from(input_bytes).or(Err(VerificationError::ReceiptFormatError))?;
+        let output_bytes: Vec<u8> = io
+            .tree(body.global.output)
+            .get_bytes()
+            .or(Err(VerificationError::ReceiptFormatError))?;
+        let output =
+            Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
+        let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
+        let user_exit = io.get_u64(body.global.user_exit_code) as u32;
+        let exit_code = match sys_exit {
+            0 => ExitCode::Halted(user_exit),
+            1 => ExitCode::Paused(user_exit),
+            2 => ExitCode::SystemSplit,
+            _ => return Err(VerificationError::ReceiptFormatError),
+        };
         Ok(Self {
             pre,
             post,
-            check_dirty,
+            exit_code,
+            input,
             output,
         })
     }
