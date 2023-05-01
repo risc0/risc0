@@ -24,7 +24,10 @@ use log::{debug, trace};
 use risc0_core::field::{baby_bear::BabyBearElem, Elem};
 use risc0_zkp::{
     adapter::TapsProvider,
-    core::{digest::Digest, hash::sha::SHA256_INIT},
+    core::{
+        digest::{Digest, DIGEST_WORDS},
+        hash::sha::SHA256_INIT,
+    },
     hal::Hal,
     prove::poly_group::PolyGroup,
     MAX_CYCLES_PO2, MIN_CYCLES_PO2, ZK_CYCLES,
@@ -37,14 +40,15 @@ use crate::CIRCUIT;
 const SETUP_STEP_REGS: usize = 84;
 
 // The number of cycles needed after the body phase.
-// 2: Reset(fini)
+// 4: Reset(fini)
 // 1: RamFini
 // 1: BytesFini
-const FINI_TAILROOM: usize = 4;
+const FINI_TAILROOM: usize = 6;
 
 const SHA_K_OFFSET: usize = memory::PRE_LOAD.start();
 const SHA_K_SIZE: usize = 64;
 const SHA_INIT_OFFSET: usize = SHA_K_OFFSET + SHA_K_SIZE * WORD_SIZE;
+const ZEROS_OFFSET: usize = SHA_INIT_OFFSET + DIGEST_WORDS * WORD_SIZE;
 
 static SHA_K: [u32; SHA_K_SIZE] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -59,6 +63,7 @@ static SHA_K: [u32; SHA_K_SIZE] = [
 
 /// These are the columns of the control group.
 /// Entries of each column are elements of the Baby Bear Field.
+#[derive(Copy, Clone)]
 enum ControlIndex {
     Cycle,
     BytesInit,
@@ -178,18 +183,24 @@ where
     }
 
     /// Reset Phase
-    pub fn reset(&mut self, phase: BabyBearElem) -> Result<bool> {
+    pub fn reset(&mut self, phase: u32) -> Result<bool> {
+        let phase_enum = match phase {
+            0 => ControlIndex::Data1Lo,
+            1 => ControlIndex::Data1Hi,
+            2 => ControlIndex::Data2Lo,
+            _ => unimplemented!("Invalid phase"),
+        };
         debug!("RESET");
         self.start();
         self.code[ControlIndex::Reset] = BabyBearElem::ONE;
         self.code[ControlIndex::Info] = BabyBearElem::ONE; // isFirst
-        self.code[ControlIndex::Data1Lo] = phase; // isInit
+        self.code[phase_enum] = BabyBearElem::ONE;
         self.next()?;
 
         self.start();
         self.code[ControlIndex::Reset] = BabyBearElem::ONE;
         self.code[ControlIndex::Info] = BabyBearElem::ZERO; // isFirst
-        self.code[ControlIndex::Data1Lo] = phase; // isInit
+        self.code[phase_enum] = BabyBearElem::ONE;
         self.next()
     }
 
@@ -340,6 +351,11 @@ impl Loader {
             image.insert((SHA_INIT_OFFSET + i * WORD_SIZE) as u32, *word);
         }
 
+        // Setup ZEROS
+        for i in 0..DIGEST_WORDS {
+            image.insert((ZEROS_OFFSET + i * WORD_SIZE) as u32, 0);
+        }
+
         Self {
             system: TripleWordIter::new(&image).collect(),
         }
@@ -386,7 +402,7 @@ impl Loader {
         for triple in &self.system {
             loader.ram_load(triple)?;
         }
-        loader.reset(BabyBearElem::ONE)?;
+        loader.reset(0)?;
         Ok(())
     }
 
@@ -394,7 +410,8 @@ impl Loader {
     where
         F: FnMut(&[BabyBearElem], usize) -> Result<bool>,
     {
-        loader.reset(BabyBearElem::ZERO)?;
+        loader.reset(1)?;
+        loader.reset(2)?;
         loader.fini()?;
         Ok(())
     }

@@ -66,6 +66,10 @@ fn system_split() {
         image.insert(pc, 0x1234b137); // lui x2, 0x1234b000
         pc += WORD_SIZE as u32;
     }
+    image.insert(pc, 0x000055b7); // lui a1, 0x00005000
+    pc += WORD_SIZE as u32;
+    image.insert(pc, 0xc0058593); // addi a1, a1, -0x400
+    pc += WORD_SIZE as u32;
     image.insert(pc, 0x00000073); // ecall(halt)
 
     let program = Program { entry, image };
@@ -77,10 +81,7 @@ fn system_split() {
     let segments = session.resolve().unwrap();
 
     assert_eq!(segments.len(), 2);
-    assert!(std::matches!(
-        segments[0].exit_code,
-        ExitCode::SystemSplit(_)
-    ));
+    assert!(std::matches!(segments[0].exit_code, ExitCode::SystemSplit));
     assert_eq!(segments[0].pre_image.get_root(), pre_image_id);
     assert_ne!(segments[0].post_image_id, pre_image_id);
     assert_eq!(segments[1].exit_code, ExitCode::Halted(0));

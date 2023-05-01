@@ -371,11 +371,19 @@ impl Segment {
         let mut io = vec![Elem::INVALID; CircuitImpl::OUTPUT_SIZE];
         log::debug!("run> pc: 0x{:08x}", self.pre_image.pc);
 
+        // initialize Input
+        let mut offset = 0;
+        for i in 0..DIGEST_WORDS * WORD_SIZE {
+            io[offset + i] = Elem::ZERO;
+        }
+        offset += DIGEST_WORDS * WORD_SIZE;
+
         // initialize PC
         let pc_bytes = self.pre_image.pc.to_le_bytes();
         for i in 0..WORD_SIZE {
-            io[i] = (pc_bytes[i] as u32).into();
+            io[offset + i] = (pc_bytes[i] as u32).into();
         }
+        offset += WORD_SIZE;
 
         // initialize ImageID
         let image_id = self.pre_image.get_root();
@@ -383,7 +391,7 @@ impl Segment {
         for i in 0..DIGEST_WORDS {
             let bytes = image_id[i].to_le_bytes();
             for j in 0..WORD_SIZE {
-                io[(i + 1) * WORD_SIZE + j] = (bytes[j] as u32).into();
+                io[offset + i * WORD_SIZE + j] = (bytes[j] as u32).into();
             }
         }
 

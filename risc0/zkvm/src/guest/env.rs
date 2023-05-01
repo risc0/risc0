@@ -21,8 +21,8 @@ use risc0_zkp::core::digest::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
     fileno, memory, syscall,
     syscall::{
-        nr::SYS_LOG, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_output, sys_pause,
-        sys_read, sys_read_words, sys_write, syscall_0, syscall_2, SyscallName,
+        nr::SYS_LOG, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read,
+        sys_read_words, sys_write, syscall_0, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -69,15 +69,17 @@ pub(crate) fn init() {
     unsafe { HASHER = Some(Sha256::new()) };
 }
 
-pub(crate) fn finalize() {
+pub(crate) fn finalize(halt: bool, user_exit: u8) {
     unsafe {
         let hasher = core::mem::take(&mut HASHER);
         let output = hasher.unwrap_unchecked().finalize();
-        let words = bytemuck::cast_slice(output.as_slice());
-        for i in 0..DIGEST_WORDS {
-            sys_output(i as u32, words[i]);
+        let words: &[u32; 8] = bytemuck::cast_slice(output.as_slice()).try_into().unwrap();
+
+        if (halt) {
+            sys_halt(user_exit, words)
+        } else {
+            sys_pause(user_exit, words)
         }
-        sys_halt()
     }
 }
 
@@ -194,7 +196,10 @@ pub fn stdin() -> FdReader {
 /// Execution may be continued at a later time.
 pub fn pause() {
     // SAFETY: This should be safe to call.
-    unsafe { sys_pause() };
+    unsafe {
+        finalize(false, 0);
+        init();
+    };
 }
 
 /// Reads and deserializes objects

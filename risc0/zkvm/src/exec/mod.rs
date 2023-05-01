@@ -55,7 +55,8 @@ use self::monitor::MemoryMonitor;
 use crate::{
     align_up,
     opcode::{MajorType, OpCode},
-    ExitCode, Loader, MemoryImage, Program, Segment, SegmentRef, Session, SimpleSegmentRef,
+    receipt::ExitCode,
+    Loader, MemoryImage, Program, Segment, SegmentRef, Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
@@ -78,6 +79,7 @@ pub struct Executor<'a> {
     segment_cycle: usize,
     segments: Vec<Box<dyn SegmentRef>>,
     insn_counter: u32,
+    split_insn: Option<u32>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -146,6 +148,7 @@ impl<'a> Executor<'a> {
             segment_cycle: init_cycles,
             segments: Vec::new(),
             insn_counter: 0,
+            split_insn: None,
         }
     }
 
@@ -193,6 +196,7 @@ impl<'a> Executor<'a> {
                         faults,
                         syscalls,
                         exit_code,
+                        self.split_insn,
                         log2_ceil(total_cycles.next_power_of_two()),
                         self.segments
                             .len()
@@ -203,10 +207,10 @@ impl<'a> Executor<'a> {
                     let segment_ref = callback(segment)?;
                     self.segments.push(segment_ref);
                     match exit_code {
-                        ExitCode::SystemSplit(_) => self.split(),
+                        ExitCode::SystemSplit => self.split(),
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),
-                        ExitCode::Paused => {
-                            log::debug!("Paused: {}", self.segment_cycle);
+                        ExitCode::Paused(inner) => {
+                            log::debug!("Paused({inner}): {}", self.segment_cycle);
                             self.split();
                             return Ok(exit_code);
                         }
@@ -304,7 +308,8 @@ impl<'a> Executor<'a> {
         //     self.total_cycles()
         // );
         let exit_code = if total_pending_cycles > segment_limit {
-            Some(ExitCode::SystemSplit(self.insn_counter))
+            self.split_insn = Some(self.insn_counter);
+            Some(ExitCode::SystemSplit)
         } else {
             self.advance(opcode, op_result)
         };
@@ -362,7 +367,7 @@ impl<'a> Executor<'a> {
     fn ecall(&mut self) -> Result<OpCodeResult> {
         match self.monitor.load_register(REG_T0) {
             ecall::HALT => self.ecall_halt(),
-            ecall::OUTPUT => self.ecall_output(),
+            ecall::INPUT => self.ecall_input(),
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
             ecall::BIGINT => self.ecall_bigint(),
@@ -371,17 +376,23 @@ impl<'a> Executor<'a> {
     }
 
     fn ecall_halt(&mut self) -> Result<OpCodeResult> {
-        let halt_type = self.monitor.load_register(REG_A0);
+        let tot_reg = self.monitor.load_register(REG_A0);
+        let output_ptr = self.monitor.load_register(REG_A1);
+        let halt_type = tot_reg & 0xff;
+        let user_exit = (tot_reg >> 8) & 0xff;
+        self.monitor
+            .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(output_ptr);
+
         match halt_type {
             halt::TERMINATE => Ok(OpCodeResult::new(
                 self.pc,
-                Some(ExitCode::Halted(0)),
+                Some(ExitCode::Halted(user_exit)),
                 0,
                 None,
             )),
             halt::PAUSE => Ok(OpCodeResult::new(
                 self.pc + WORD_SIZE as u32,
-                Some(ExitCode::Paused),
+                Some(ExitCode::Paused(user_exit)),
                 0,
                 None,
             )),
@@ -389,8 +400,11 @@ impl<'a> Executor<'a> {
         }
     }
 
-    fn ecall_output(&mut self) -> Result<OpCodeResult> {
-        log::debug!("ecall(output)");
+    fn ecall_input(&mut self) -> Result<OpCodeResult> {
+        log::debug!("ecall(input)");
+        let in_addr = self.monitor.load_register(REG_A0);
+        self.monitor
+            .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr);
         Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0, None))
     }
 

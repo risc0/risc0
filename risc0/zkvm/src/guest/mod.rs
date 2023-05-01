@@ -171,7 +171,7 @@ unsafe extern "C" fn __start() {
     }
     __main();
 
-    env::finalize();
+    env::finalize(true, 0);
 }
 
 #[cfg(target_os = "zkvm")]
