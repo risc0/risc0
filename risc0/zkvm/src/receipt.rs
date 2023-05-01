@@ -79,7 +79,7 @@ use crate::{
     ControlId, CIRCUIT,
 };
 
-/// Indicates how a [Segment] or [Session]'s execution has terminated
+/// Indicates how a Segment or Session's execution has terminated
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum ExitCode {
     /// This indicates when a system-initiated split has occured due to the

@@ -1,8 +1,8 @@
 // :0
-pub struct RamFiniStep {}
-impl risc0_zkp::layout::Component for RamFiniStep {
+pub struct RamLoadStep {}
+impl risc0_zkp::layout::Component for RamLoadStep {
     fn ty_name(&self) -> &'static str {
-        "RamFiniStep"
+        "RamLoadStep"
     }
     #[allow(unused_variables)]
     fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
@@ -25,7 +25,7 @@ impl risc0_zkp::layout::Component for U32Reg {
     }
 }
 
-// circuit/rv32im/global.h:38
+// circuit/rv32im/global.h:33
 pub struct GlobalDigest {
     pub word: &'static [&'static U32Reg; 8],
 }
@@ -40,7 +40,7 @@ impl risc0_zkp::layout::Component for GlobalDigest {
     }
 }
 
-// circuit/rv32im/global.h:34
+// circuit/rv32im/global.h:35
 pub struct SystemState {
     pub image_id: &'static GlobalDigest,
     pub pc: &'static U32Reg,
@@ -100,13 +100,13 @@ impl risc0_zkp::layout::Component for BodyStep {
 // cirgen/circuit/rv32im/top.cpp:60
 pub struct Mux {
     pub body: &'static BodyStep,
-    pub bytes_fini: &'static RamFiniStep,
-    pub bytes_init: &'static RamFiniStep,
-    pub bytes_setup: &'static RamFiniStep,
-    pub ram_fini: &'static RamFiniStep,
-    pub ram_init: &'static RamFiniStep,
-    pub ram_load: &'static RamFiniStep,
-    pub reset: &'static RamFiniStep,
+    pub bytes_fini: &'static RamLoadStep,
+    pub bytes_init: &'static RamLoadStep,
+    pub bytes_setup: &'static RamLoadStep,
+    pub ram_fini: &'static RamLoadStep,
+    pub ram_init: &'static RamLoadStep,
+    pub ram_load: &'static RamLoadStep,
+    pub reset: &'static RamLoadStep,
 }
 impl risc0_zkp::layout::Component for Mux {
     fn ty_name(&self) -> &'static str {
@@ -984,25 +984,25 @@ pub const LAYOUT_MUX_BODY: BodyStep = BodyStep {
 };
 
 // :0
-pub const LAYOUT_MUX_BYTES_FINI: RamFiniStep = RamFiniStep {};
+pub const LAYOUT_MUX_BYTES_FINI: RamLoadStep = RamLoadStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_INIT: RamFiniStep = RamFiniStep {};
+pub const LAYOUT_MUX_BYTES_INIT: RamLoadStep = RamLoadStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_SETUP: RamFiniStep = RamFiniStep {};
+pub const LAYOUT_MUX_BYTES_SETUP: RamLoadStep = RamLoadStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_FINI: RamFiniStep = RamFiniStep {};
+pub const LAYOUT_MUX_RAM_FINI: RamLoadStep = RamLoadStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_INIT: RamFiniStep = RamFiniStep {};
+pub const LAYOUT_MUX_RAM_INIT: RamLoadStep = RamLoadStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_LOAD: RamFiniStep = RamFiniStep {};
+pub const LAYOUT_MUX_RAM_LOAD: RamLoadStep = RamLoadStep {};
 
 // :0
-pub const LAYOUT_MUX_RESET: RamFiniStep = RamFiniStep {};
+pub const LAYOUT_MUX_RESET: RamLoadStep = RamLoadStep {};
 
 // cirgen/circuit/rv32im/top.cpp:60
 pub const LAYOUT_MUX: Mux = Mux {

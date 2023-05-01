@@ -1791,7 +1791,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   MixState x878{x748.tot + x85 * x877.tot * x748.mul, x748.mul * x877.mul};
   // loc("Top/mux(Mux)/body(BodyStep)/Mux/15(HaltCycle)/Reg"("cirgen/circuit/rv32im/body.cpp":83:53))
   auto x879 = args[2][118 * steps + ((cycle - kInvRate * 2) & mask)];
-  // loc("cirgen/circuit/rv32im/body.cpp":87:20)
+  // loc("cirgen/circuit/rv32im/body.cpp":87:45)
   auto x880 = x879 + x17;
   // loc("cirgen/components/ram.cpp":168:3)
   auto x881 = x420 - x880;
@@ -1833,7 +1833,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x899 = x898 - x417;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x900{x897.tot + x897.mul * x899, x897.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/body.cpp":87:20)
+  // loc("cirgen/circuit/rv32im/body.cpp":87:45)
   auto x901 = x880 + x0;
   // loc("cirgen/components/ram.cpp":168:3)
   auto x902 = x459 - x901;
@@ -1875,7 +1875,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x920 = x919 - x456;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x921{x918.tot + x918.mul * x920, x918.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/body.cpp":87:20)
+  // loc("cirgen/circuit/rv32im/body.cpp":87:45)
   auto x922 = x880 + x3;
   // loc("cirgen/components/ram.cpp":168:3)
   auto x923 = x498 - x922;
@@ -1917,7 +1917,7 @@ Fp4 poly_fp(size_t cycle, size_t steps, Fp4* mix, Fp** args) {
   auto x941 = x940 - x495;
   // loc("cirgen/components/u32.cpp":34:5)
   MixState x942{x939.tot + x939.mul * x941, x939.mul * (*mix)};
-  // loc("cirgen/circuit/rv32im/body.cpp":87:20)
+  // loc("cirgen/circuit/rv32im/body.cpp":87:45)
   auto x943 = x880 + x18;
   // loc("cirgen/components/ram.cpp":168:3)
   auto x944 = x592 - x943;

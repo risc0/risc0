@@ -3849,7 +3849,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         // loc("Top/mux(Mux)/body(BodyStep)/Mux/15(HaltCycle)/Reg"("cirgen/circuit/rv32im/body.cpp":83:53))
         auto x697 = args[2][118 * steps + ((cycle - 2) & mask)];
         assert(x697 != Fp::invalid());
-        // loc("cirgen/circuit/rv32im/body.cpp":87:20)
+        // loc("cirgen/circuit/rv32im/body.cpp":87:45)
         auto x698 = x697 + x79;
         {
           host_args.at(0) = x698;
@@ -3946,7 +3946,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         args[1][124] = x705;
         // loc("cirgen/components/u32.cpp":34:5)
         args[1][125] = x706;
-        // loc("cirgen/circuit/rv32im/body.cpp":87:20)
+        // loc("cirgen/circuit/rv32im/body.cpp":87:45)
         auto x707 = x698 + x96;
         {
           host_args.at(0) = x707;
@@ -4043,7 +4043,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         args[1][128] = x714;
         // loc("cirgen/components/u32.cpp":34:5)
         args[1][129] = x715;
-        // loc("cirgen/circuit/rv32im/body.cpp":87:20)
+        // loc("cirgen/circuit/rv32im/body.cpp":87:45)
         auto x716 = x698 + x93;
         {
           host_args.at(0) = x716;
@@ -4140,7 +4140,7 @@ Fp step_exec(void* ctx, HostBridge host, size_t steps, size_t cycle, Fp** args) 
         args[1][132] = x723;
         // loc("cirgen/components/u32.cpp":34:5)
         args[1][133] = x724;
-        // loc("cirgen/circuit/rv32im/body.cpp":87:20)
+        // loc("cirgen/circuit/rv32im/body.cpp":87:45)
         auto x725 = x698 + x78;
         {
           host_args.at(0) = x725;
