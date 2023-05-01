@@ -62,12 +62,6 @@ use crate::{
 /// The number of cycles required to compress a SHA-256 block.
 const SHA_CYCLES: usize = 72;
 
-/// Number of cycles required to load an inputs from globals
-const INPUT_CYCLES: usize = 4;
-
-/// Number of cycles required to prepare for halt
-const HALT_CYCLES: usize = 4;
-
 /// Number of cycles required to complete a BigInt operation.
 const BIGINT_CYCLES: usize = 9;
 
@@ -393,13 +387,13 @@ impl<'a> Executor<'a> {
             halt::TERMINATE => Ok(OpCodeResult::new(
                 self.pc,
                 Some(ExitCode::Halted(user_exit)),
-                HALT_CYCLES,
+                0,
                 None,
             )),
             halt::PAUSE => Ok(OpCodeResult::new(
                 self.pc + WORD_SIZE as u32,
                 Some(ExitCode::Paused(user_exit)),
-                HALT_CYCLES,
+                0,
                 None,
             )),
             _ => bail!("Illegal halt type: {halt_type}"),
@@ -411,12 +405,7 @@ impl<'a> Executor<'a> {
         let in_addr = self.monitor.load_register(REG_A0);
         self.monitor
             .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr);
-        Ok(OpCodeResult::new(
-            self.pc + WORD_SIZE as u32,
-            None,
-            INPUT_CYCLES,
-            None,
-        ))
+        Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0, None))
     }
 
     fn ecall_sha(&mut self) -> Result<OpCodeResult> {
