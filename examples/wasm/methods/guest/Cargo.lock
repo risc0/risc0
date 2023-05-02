@@ -95,14 +95,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ea835d29036a4087793836fa931b08837ad5e957da9e23886b29586fb9b6650"
 
 [[package]]
-name = "externc-libm"
-version = "0.1.0"
-source = "git+https://github.com/HaruxOS/externc-libm#873e2ee216f59f20521599adf7669ccc9014b60d"
-dependencies = [
- "libm",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -260,6 +252,7 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
+ "libm",
  "log",
  "num-derive",
  "num-traits",
@@ -392,7 +385,6 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 name = "wasm-interp"
 version = "0.1.0"
 dependencies = [
- "externc-libm",
  "risc0-zkvm",
  "wasmi",
 ]
