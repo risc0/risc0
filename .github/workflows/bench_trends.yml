@@ -50,7 +50,7 @@ jobs:
           name: "${{ matrix.os }}-${{ matrix.device }}"
           tool: 'cargo'
           github-token: ${{ secrets.BENCHMARK_TOKEN }}
-          gh-repository: 'github.com/risc0/benchmarks'
+          gh-repository: 'github.com/risc0/ghpages'
           gh-repository-dir: '${{ runner.temp }}/benchmark-data-repository'
           gh-pages-branch: main
           output-file-path: output.txt

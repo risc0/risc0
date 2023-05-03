@@ -39,6 +39,9 @@ pub mod serde;
 mod session;
 pub mod sha;
 
+#[cfg(test)]
+mod testutils;
+
 pub use anyhow::Result;
 use risc0_zkp::core::hash::{
     blake2b::{Blake2b, Blake2bHashFn},
@@ -51,13 +54,13 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 pub use self::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
-pub use self::receipt::{SegmentReceipt, SessionReceipt};
+pub use self::receipt::{ExitCode, SegmentReceipt, SessionReceipt};
 #[cfg(feature = "prove")]
 pub use self::{
     exec::io::{Syscall, SyscallContext},
     exec::{Executor, ExecutorEnv, ExecutorEnvBuilder},
     prove::loader::Loader,
-    session::{ExitCode, Segment, Session},
+    session::{Segment, SegmentRef, Session, SimpleSegmentRef},
 };
 use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 

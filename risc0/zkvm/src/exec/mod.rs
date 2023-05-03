@@ -28,6 +28,8 @@ mod tests;
 use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use anyhow::{anyhow, bail, Context, Result};
+use num_bigint::BigUint;
+use num_traits::Zero;
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -40,7 +42,7 @@ use risc0_zkvm_platform::{
     fileno,
     memory::MEM_SIZE,
     syscall::{
-        ecall, halt,
+        bigint, ecall, halt,
         reg_abi::{REG_A0, REG_A1, REG_A2, REG_A3, REG_A4, REG_T0},
     },
     PAGE_SIZE, WORD_SIZE,
@@ -53,11 +55,15 @@ use self::monitor::MemoryMonitor;
 use crate::{
     align_up, bonsai_api,
     opcode::{MajorType, OpCode},
-    ExitCode, Loader, MemoryImage, Program, Segment, Session,
+    receipt::ExitCode,
+    Loader, MemoryImage, Program, Segment, SegmentRef, Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.
 const SHA_CYCLES: usize = 72;
+
+/// Number of cycles required to complete a BigInt operation.
+const BIGINT_CYCLES: usize = 9;
 
 /// The Executor provides an implementation for the execution phase.
 ///
@@ -66,14 +72,14 @@ pub struct Executor<'a> {
     env: ExecutorEnv<'a>,
     pre_image: MemoryImage,
     monitor: MemoryMonitor,
-    pre_pc: u32,
     pc: u32,
     init_cycles: usize,
     fini_cycles: usize,
     body_cycles: usize,
     segment_cycle: usize,
-    segments: Vec<Segment>,
+    segments: Vec<Box<dyn SegmentRef>>,
     insn_counter: u32,
+    split_insn: Option<u32>,
     bonsai_proof_id: Option<i64>,
 }
 
@@ -147,7 +153,6 @@ impl<'a> Executor<'a> {
             env,
             pre_image,
             monitor,
-            pre_pc: pc,
             pc,
             init_cycles,
             fini_cycles,
@@ -155,6 +160,7 @@ impl<'a> Executor<'a> {
             segment_cycle: init_cycles,
             segments: Vec::new(),
             insn_counter: 0,
+            split_insn: None,
             bonsai_proof_id: bonsai_proof_id,
         }
     }
@@ -204,6 +210,15 @@ impl<'a> Executor<'a> {
             ));
         }
 
+        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    }
+
+    /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
+    /// reached, producing a [Session] as a result.
+    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    where
+        F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
+    {
         self.monitor.clear_session();
 
         let journal = Journal::default();
@@ -223,24 +238,27 @@ impl<'a> Executor<'a> {
                     let post_image_id = self.monitor.image.get_root();
                     let syscalls = take(&mut self.monitor.syscalls);
                     let faults = take(&mut self.monitor.faults);
-                    self.segments.push(Segment::new(
+                    let segment = Segment::new(
                         pre_image,
                         post_image_id,
-                        self.pre_pc,
                         faults,
                         syscalls,
                         exit_code,
+                        self.split_insn,
                         log2_ceil(total_cycles.next_power_of_two()),
                         self.segments
                             .len()
                             .try_into()
-                            .context("Too many segment to fit in u32")?,
-                    ));
+                            .context("Too many segments to fit in u32")?,
+                        self.body_cycles,
+                    );
+                    let segment_ref = callback(segment)?;
+                    self.segments.push(segment_ref);
                     match exit_code {
-                        ExitCode::SystemSplit(_) => self.split(),
+                        ExitCode::SystemSplit => self.split(),
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),
-                        ExitCode::Paused => {
-                            log::debug!("Paused: {}", self.segment_cycle);
+                        ExitCode::Paused(inner) => {
+                            log::debug!("Paused({inner}): {}", self.segment_cycle);
                             self.split();
                             return Ok(exit_code);
                         }
@@ -254,9 +272,11 @@ impl<'a> Executor<'a> {
         };
 
         let exit_code = run_loop()?;
-        let mut segments = Vec::new();
-        std::mem::swap(&mut segments, &mut self.segments);
-        Ok(Session::new(segments, journal.buf.take(), exit_code))
+        Ok(Session::new(
+            take(&mut self.segments),
+            journal.buf.take(),
+            exit_code,
+        ))
     }
 
     fn split(&mut self) {
@@ -264,7 +284,7 @@ impl<'a> Executor<'a> {
         self.body_cycles = 0;
         self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
-        self.pre_pc = self.pc;
+        self.pre_image.pc = self.pc;
         self.monitor.clear_segment();
     }
 
@@ -336,7 +356,8 @@ impl<'a> Executor<'a> {
         //     self.total_cycles()
         // );
         let exit_code = if total_pending_cycles > segment_limit {
-            Some(ExitCode::SystemSplit(self.insn_counter))
+            self.split_insn = Some(self.insn_counter);
+            Some(ExitCode::SystemSplit)
         } else {
             self.advance(opcode, op_result)
         };
@@ -394,25 +415,32 @@ impl<'a> Executor<'a> {
     fn ecall(&mut self) -> Result<OpCodeResult> {
         match self.monitor.load_register(REG_T0) {
             ecall::HALT => self.ecall_halt(),
-            ecall::OUTPUT => self.ecall_output(),
+            ecall::INPUT => self.ecall_input(),
             ecall::SOFTWARE => self.ecall_software(),
             ecall::SHA => self.ecall_sha(),
+            ecall::BIGINT => self.ecall_bigint(),
             ecall => bail!("Unknown ecall {ecall:?}"),
         }
     }
 
     fn ecall_halt(&mut self) -> Result<OpCodeResult> {
-        let halt_type = self.monitor.load_register(REG_A0);
+        let tot_reg = self.monitor.load_register(REG_A0);
+        let output_ptr = self.monitor.load_register(REG_A1);
+        let halt_type = tot_reg & 0xff;
+        let user_exit = (tot_reg >> 8) & 0xff;
+        self.monitor
+            .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(output_ptr);
+
         match halt_type {
             halt::TERMINATE => Ok(OpCodeResult::new(
                 self.pc,
-                Some(ExitCode::Halted(0)),
+                Some(ExitCode::Halted(user_exit)),
                 0,
                 None,
             )),
             halt::PAUSE => Ok(OpCodeResult::new(
                 self.pc + WORD_SIZE as u32,
-                Some(ExitCode::Paused),
+                Some(ExitCode::Paused(user_exit)),
                 0,
                 None,
             )),
@@ -420,8 +448,11 @@ impl<'a> Executor<'a> {
         }
     }
 
-    fn ecall_output(&mut self) -> Result<OpCodeResult> {
-        log::debug!("ecall(output)");
+    fn ecall_input(&mut self) -> Result<OpCodeResult> {
+        log::debug!("ecall(input)");
+        let in_addr = self.monitor.load_register(REG_A0);
+        self.monitor
+            .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr);
         Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0, None))
     }
 
@@ -470,6 +501,54 @@ impl<'a> Executor<'a> {
             self.pc + WORD_SIZE as u32,
             None,
             SHA_CYCLES * count as usize,
+            None,
+        ))
+    }
+
+    // Computes the state transitions for the BIGINT ecall.
+    // Take reads inputs x, y, and N and writes output z = x * y mod N.
+    // Note that op is currently ignored but must be set to 0.
+    fn ecall_bigint(&mut self) -> Result<OpCodeResult> {
+        let [z_ptr, op, x_ptr, y_ptr, n_ptr] = self
+            .monitor
+            .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
+
+        let mut load_words = |ptr: u32| {
+            let mut arr = [0u32; bigint::WIDTH_WORDS];
+            for i in 0..bigint::WIDTH_WORDS {
+                arr[i] = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32);
+            }
+            arr
+        };
+
+        if op != 0 {
+            anyhow::bail!("ecall_bigint preflight: op must be set to 0");
+        }
+
+        // Load inputs.
+        let x = BigUint::from_slice(&load_words(x_ptr));
+        let y = BigUint::from_slice(&load_words(y_ptr));
+        let n = BigUint::from_slice(&load_words(n_ptr));
+
+        // Compute modular multiplication, or simply multiplication if n == 0.
+        let z = if n.is_zero() { x * y } else { (x * y) % n };
+
+        let mut z_vec = z.to_u32_digits();
+        if z_vec.len() > bigint::WIDTH_WORDS {
+            anyhow::bail!("ecall_bigint preflight: overflow in bigint multiplication");
+        }
+        // Add leading zeros, if necessary, to pad up to the ecall BigInt width.
+        z_vec.resize(bigint::WIDTH_WORDS, 0);
+
+        // Store result.
+        for (i, word) in z_vec.into_iter().enumerate() {
+            self.monitor.store_u32(z_ptr + (i * WORD_SIZE) as u32, word);
+        }
+
+        Ok(OpCodeResult::new(
+            self.pc + WORD_SIZE as u32,
+            None,
+            BIGINT_CYCLES,
             None,
         ))
     }

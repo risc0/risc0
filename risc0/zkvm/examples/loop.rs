@@ -49,10 +49,10 @@ fn main() {
 
         let start = Instant::now();
         let (session, receipt) = top(prover.clone(), iterations);
+        let segments = session.resolve().unwrap();
         let duration = start.elapsed();
 
-        let cycles = session
-            .segments
+        let cycles = segments
             .iter()
             .fold(0, |acc, segment| acc + (1 << segment.po2));
 

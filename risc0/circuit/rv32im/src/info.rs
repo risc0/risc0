@@ -20,8 +20,8 @@ use super::CircuitImpl;
 
 impl CircuitInfo for CircuitImpl {
     #[rustfmt::skip]
-    const OUTPUT_SIZE: usize = 105;
+    const OUTPUT_SIZE: usize = 138;
 
     #[rustfmt::skip]
-    const MIX_SIZE: usize = 36;
+    const MIX_SIZE: usize = 40;
 }

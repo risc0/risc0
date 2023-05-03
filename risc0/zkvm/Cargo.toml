@@ -45,6 +45,7 @@ getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.27", optional = true }
 lazy-regex = { version = "2.3", optional = true }
 log = "0.4"
+num-bigint = { version = "0.4.3", default-features = false, features = ["rand"], optional = true }
 num-derive = "0.3"
 num-traits = { version = "0.2", default-features = false }
 prost = { version = "0.11", optional = true }
@@ -55,6 +56,7 @@ rrs-lib = { version = "0.1", optional = true }
 sha2 = { version = "0.10", optional = true }
 serde_with = { version = "2.0.0", features = ["time_0_3"] }
 time = "0.3.11"
+typetag = { version = "0.2", optional = true }
 validator = { version = "0.16.0", features = ["derive"] }
 
 [dev-dependencies]
@@ -90,10 +92,12 @@ prove = [
   "dep:generic-array",
   "dep:getrandom",
   "dep:lazy-regex",
+  "dep:num-bigint",
   "dep:rand",
   "dep:rayon",
   "dep:rrs-lib",
   "dep:sha2",
+  "dep:typetag",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",
   "std",

@@ -31,7 +31,7 @@ use super::{get_prover, LocalProver, Prover};
 use crate::{
     prove::HalEval,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT,
+    testutils, Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT,
 };
 
 fn prove_nothing(name: &str) -> Result<SessionReceipt> {
@@ -123,6 +123,32 @@ fn sha_basics() {
 }
 
 #[test]
+fn bigint_accel() {
+    let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+    // use rand::SeedableRng;
+    // let cases = testutils::generate_bigint_test_cases(&mut
+    // rand::rngs::StdRng::seed_from_u64(1), 1);
+    for case in cases {
+        println!("Running BigInt circuit test case: {:08x?}", case);
+        let input = to_vec(&MultiTestSpec::BigInt {
+            x: case.x,
+            y: case.y,
+            modulus: case.modulus,
+        })
+        .unwrap();
+
+        let env = ExecutorEnv::builder().add_input(&input).build();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let session = exec.run().unwrap();
+        let receipt = session.prove().unwrap();
+        assert_eq!(
+            receipt.journal.as_slice(),
+            bytemuck::cast_slice(case.expected().as_slice())
+        );
+    }
+}
+
+#[test]
 #[serial]
 fn memory_io() {
     fn run_memio(pairs: &[(usize, usize)]) -> Result<SessionReceipt> {
@@ -169,7 +195,7 @@ fn pause_continue() {
 
     // Run until sys_pause
     let session = exec.run().unwrap();
-    assert_eq!(session.exit_code, ExitCode::Paused);
+    assert_eq!(session.exit_code, ExitCode::Paused(0));
     let receipt = session.prove().unwrap();
     assert_eq!(receipt.segments[0].index, 0);
 
@@ -193,11 +219,12 @@ fn continuation() {
         .build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    assert_eq!(session.segments.len(), COUNT);
+    let segments = session.resolve().unwrap();
+    assert_eq!(segments.len(), COUNT);
 
-    let (final_segment, segments) = session.segments.split_last().unwrap();
+    let (final_segment, segments) = segments.split_last().unwrap();
     for segment in segments {
-        assert!(std::matches!(segment.exit_code, ExitCode::SystemSplit(_)));
+        assert!(std::matches!(segment.exit_code, ExitCode::SystemSplit));
     }
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 

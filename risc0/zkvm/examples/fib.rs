@@ -17,17 +17,29 @@ use std::rc::Rc;
 use clap::Parser;
 use risc0_zkvm::{
     prove::{default_prover, Prover},
-    Executor, ExecutorEnv, Session, SessionReceipt,
+    Executor, ExecutorEnv,
 };
 use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(Parser)]
-#[clap()]
+#[command()]
 struct Args {
     /// Number of iterations.
-    #[clap(long)]
+    #[arg(short, long)]
     iterations: u32,
+
+    #[arg(short, long, default_value_t = false)]
+    skip_prover: bool,
+}
+
+#[derive(Debug)]
+#[allow(unused)]
+struct Metrics {
+    segments: usize,
+    insn_cycles: usize,
+    cycles: usize,
+    seal: usize,
 }
 
 fn main() {
@@ -38,20 +50,40 @@ fn main() {
 
     let args = Args::parse();
     let prover = default_prover();
-
-    let (session, receipt) = top(prover, args.iterations);
-    let po2 = session.segments[0].po2;
-    let seal = receipt.segments[0].get_seal_bytes().len();
-    let journal = receipt.journal.len();
-    let total = seal + journal;
-    println!("Po2: {po2}, Seal: {seal} bytes, Journal: {journal} bytes, Total: {total} bytes");
+    let metrics = top(prover, args.iterations, args.skip_prover);
+    println!("{metrics:?}");
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u32) -> (Session, SessionReceipt) {
+fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
     let env = ExecutorEnv::builder().add_input(&[iterations]).build();
     let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = prover.prove_session(&session).unwrap();
-    (session, receipt)
+    let segments = session.resolve().unwrap();
+
+    let (cycles, insn_cycles) = segments
+        .iter()
+        .fold((0, 0), |(cycles, insn_cycles), segment| {
+            (
+                cycles + (1 << segment.po2),
+                insn_cycles + segment.insn_cycles,
+            )
+        });
+
+    let seal = if skip_prover {
+        0
+    } else {
+        let receipt = prover.prove_session(&session).unwrap();
+        receipt
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
+    };
+
+    Metrics {
+        segments: segments.len(),
+        insn_cycles,
+        cycles,
+        seal,
+    }
 }
