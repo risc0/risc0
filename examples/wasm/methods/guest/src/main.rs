@@ -17,7 +17,6 @@
 
 risc0_zkvm::guest::entry!(main);
 
-use externc_libm::math::fmod;
 use risc0_zkvm::guest::env;
 use wasmi::{Caller, Engine, Func, Linker, Module, Store};
 

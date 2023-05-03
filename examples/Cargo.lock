@@ -3083,6 +3083,7 @@ dependencies = [
  "getrandom",
  "hex",
  "lazy-regex",
+ "libm",
  "log",
  "num-bigint 0.4.3",
  "num-derive",

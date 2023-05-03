@@ -7,5 +7,4 @@ edition = "2021"
 
 [dependencies]
 evm-core = { path = "../../core", default-features = false }
-externc-libm = { git = "https://github.com/HaruxOS/externc-libm" }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [ "std" ] }

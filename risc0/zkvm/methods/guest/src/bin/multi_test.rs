@@ -186,5 +186,10 @@ pub fn main() {
             }
             env::commit_slice(&result);
         }
+        MultiTestSpec::LibM => {
+            use core::hint::black_box;
+            let f = black_box(1.0_f32);
+            black_box(f.min(1.0));
+        }
     }
 }
