@@ -132,7 +132,7 @@ pub fn register_proof(
     let elf_hash = hex::encode(hasher.finalize());
     let elf_url = format!("{bonsai_url}/{REGISTER_ELF_PATH}/{elf_hash}");
 
-    log::debug!("Uploading elf with hash {elf_hash}");
+    log::info!("Uploading elf with hash {elf_hash}");
 
     // If the ELF already exists, the endpoint will return 200 without adding it to
     // the registry it.
@@ -154,7 +154,7 @@ pub fn register_proof(
         input: hex::encode(input.to_vec()),
     };
 
-    log::debug!("proof request {:?}", proof_request);
+    log::info!("proof request {:?}", proof_request);
     let resp = client
         .post(format!("{bonsai_url}/{REQUEST_PROOF_PATH}"))
         .header(reqwest::header::CONTENT_TYPE, "application/json")
@@ -185,7 +185,7 @@ pub fn run_proof(bonsai_url: String, proof_id: i64) -> Result<SessionReceipt> {
     // to get the receipt using the proof id. For now, we need the receipt hash.
     // Once we are able to use the proof ID to get the receipt, we can get rid of
     // this call.
-    log::debug!("Getting receipt hash for proof request {}", proof_id);
+    log::info!("Getting receipt hash for proof request {}", proof_id);
     let mut proof_request: ProofRequest;
     loop {
         let res = client
