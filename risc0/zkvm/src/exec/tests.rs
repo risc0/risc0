@@ -91,6 +91,16 @@ fn system_split() {
 }
 
 #[test]
+fn libm_build() {
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&MultiTestSpec::LibM).unwrap())
+        .build();
+
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run().expect("Could not get receipt");
+}
+
+#[test]
 fn host_syscall() {
     let expected: Vec<Vec<u8>> = vec![
         "".into(),
