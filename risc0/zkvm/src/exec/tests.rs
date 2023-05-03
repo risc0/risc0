@@ -91,8 +91,6 @@ fn system_split() {
 }
 
 #[test]
-#[cfg_attr(feature = "insecure_skip_seal", ignore)]
-#[cfg_attr(feature = "cuda", serial)]
 fn libm_build() {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&MultiTestSpec::LibM).unwrap())
