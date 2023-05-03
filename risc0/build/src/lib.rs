@@ -382,7 +382,18 @@ fn build_guest_package<P>(
 
     let mut cmd = Command::new(cargo);
     let mut child = cmd
-        .env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic")
+        .env(
+            "CARGO_ENCODED_RUSTFLAGS",
+            [
+                // Replace atomic ops with nonatomic versions since the guest is single threaded.
+                "-C",
+                "passes=loweratomic",
+                // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
+                "-Z",
+                "remap-cwd-prefix=.",
+            ]
+            .join("\x1f"),
+        )
         .env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib)
         .args(args)
         .stderr(Stdio::piped())

@@ -25,7 +25,6 @@ pub mod binfmt;
 mod control_id;
 #[cfg(feature = "prove")]
 mod exec;
-#[cfg(any(target_os = "zkvm", doc))]
 pub mod guest;
 #[cfg(feature = "prove")]
 mod opcode;
