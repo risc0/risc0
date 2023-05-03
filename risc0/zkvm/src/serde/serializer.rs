@@ -164,12 +164,12 @@ impl<'a, W: WordWrite> serde::ser::Serializer for &'a mut Serializer<W> {
         self.serialize_u32(((v >> 32) & 0xFFFFFFFF) as u32)
     }
 
-    fn serialize_f32(self, _v: f32) -> Result<()> {
-        Err(Error::NotSupported)
+    fn serialize_f32(self, v: f32) -> Result<()> {
+        self.serialize_u32(v.to_bits())
     }
 
-    fn serialize_f64(self, _v: f64) -> Result<()> {
-        Err(Error::NotSupported)
+    fn serialize_f64(self, v: f64) -> Result<()> {
+        self.serialize_u64(f64::to_bits(v))
     }
 
     fn serialize_char(self, v: char) -> Result<()> {
@@ -443,8 +443,10 @@ mod tests {
             u16: u16,
             i32: i32,
             u32: u32,
+            f32: f32,
             i64: i64,
             u64: u64,
+            f64: f64,
         }
 
         let expected = [
@@ -455,10 +457,13 @@ mod tests {
             5,
             -6_i32 as u32,
             6,
+            f32::to_bits(3.14f32),
             -7_i32 as u32,
             0xffffffff,
             7,
             0x00000000,
+            f64::to_bits(2.71).checked_rem(0x100000000).unwrap() as u32,
+            f64::to_bits(2.71).checked_shr(32).unwrap() as u32,
         ];
 
         let input = Test {
@@ -469,8 +474,10 @@ mod tests {
             u16: 5,
             i32: -6,
             u32: 6,
+            f32: 3.14,
             i64: -7,
             u64: 7,
+            f64: 2.71,
         };
         assert_eq!(expected, to_vec(&input).unwrap().as_slice());
     }
