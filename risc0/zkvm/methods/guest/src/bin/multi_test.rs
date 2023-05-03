@@ -186,5 +186,11 @@ pub fn main() {
             }
             env::commit_slice(&result);
         }
+        MultiTestSpec::Float => {
+            let f1: f32 = env::read();
+            assert_eq!(f1, 3.14f32);
+            let f2: f64 = env::read();
+            assert_eq!(f2, 2.71f64);
+        }
     }
 }

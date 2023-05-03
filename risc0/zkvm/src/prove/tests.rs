@@ -44,6 +44,20 @@ fn prove_nothing(name: &str) -> Result<SessionReceipt> {
 }
 
 #[test]
+fn fp_inputs() {
+    let input = to_vec(&MultiTestSpec::Float).unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&input)
+        .add_input(&to_vec(&3.14f32).unwrap())
+        .add_input(&to_vec(&2.71f64).unwrap())
+        .build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let prover = get_prover("$default");
+    prover.prove_session(&session).unwrap();
+}
+
+#[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn hashfn_poseidon() {
     prove_nothing("$poseidon").unwrap();
