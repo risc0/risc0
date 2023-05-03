@@ -143,7 +143,7 @@ fn bigint_accel() {
         let receipt = session.prove().unwrap();
         assert_eq!(
             receipt.journal.as_slice(),
-            bytemuck::cast_slice(case.expected().as_slice())
+            bytemuck::cast_slice::<u32, u8>(case.expected().as_slice())
         );
     }
 }
