@@ -24,7 +24,7 @@ use test_log::test;
 use super::{Executor, ExecutorEnv, TraceEvent};
 use crate::{
     serde::{from_slice, to_vec},
-    ExitCode, MemoryImage, Program,
+    testutils, ExitCode, MemoryImage, Program,
 };
 
 #[test]
@@ -40,16 +40,18 @@ fn basic() {
         entry: 0x4000,
         image,
     };
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.get_root();
 
     let mut exec = Executor::new(env, image, program.entry);
     let session = exec.run().unwrap();
+    let segments = session.resolve().unwrap();
 
-    assert_eq!(session.segments.len(), 1);
-    assert_eq!(session.segments[0].exit_code, ExitCode::Halted(0));
-    assert_eq!(session.segments[0].pre_image.get_root(), pre_image_id);
-    assert_ne!(session.segments[0].post_image_id, pre_image_id);
+    assert_eq!(segments.len(), 1);
+    assert_eq!(segments[0].exit_code, ExitCode::Halted(0));
+    assert_eq!(segments[0].pre_image.get_root(), pre_image_id);
+    assert_ne!(segments[0].post_image_id, pre_image_id);
+    assert_eq!(segments[0].index, 0);
 }
 
 #[test]
@@ -64,27 +66,28 @@ fn system_split() {
         image.insert(pc, 0x1234b137); // lui x2, 0x1234b000
         pc += WORD_SIZE as u32;
     }
+    image.insert(pc, 0x000055b7); // lui a1, 0x00005000
+    pc += WORD_SIZE as u32;
+    image.insert(pc, 0xc0058593); // addi a1, a1, -0x400
+    pc += WORD_SIZE as u32;
     image.insert(pc, 0x00000073); // ecall(halt)
 
     let program = Program { entry, image };
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.get_root();
 
     let mut exec = Executor::new(env, image, program.entry);
     let session = exec.run().unwrap();
+    let segments = session.resolve().unwrap();
 
-    assert_eq!(session.segments.len(), 2);
-    assert!(std::matches!(
-        session.segments[0].exit_code,
-        ExitCode::SystemSplit(_)
-    ));
-    assert_eq!(session.segments[0].pre_image.get_root(), pre_image_id);
-    assert_ne!(session.segments[0].post_image_id, pre_image_id);
-    assert_eq!(session.segments[1].exit_code, ExitCode::Halted(0));
-    assert_eq!(
-        session.segments[1].pre_image.get_root(),
-        session.segments[0].post_image_id
-    );
+    assert_eq!(segments.len(), 2);
+    assert!(std::matches!(segments[0].exit_code, ExitCode::SystemSplit));
+    assert_eq!(segments[0].pre_image.get_root(), pre_image_id);
+    assert_ne!(segments[0].post_image_id, pre_image_id);
+    assert_eq!(segments[1].exit_code, ExitCode::Halted(0));
+    assert_eq!(segments[1].pre_image.get_root(), segments[0].post_image_id);
+    assert_eq!(segments[0].index, 0);
+    assert_eq!(segments[1].index, 1);
 }
 
 #[test]
@@ -136,6 +139,28 @@ fn sha_accel() {
     let env = ExecutorEnv::builder().add_input(&input).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
+}
+
+#[test]
+fn bigint_accel() {
+    let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
+    for case in cases {
+        println!("Running BigInt circuit test case: {:x?}", case);
+        let input = to_vec(&MultiTestSpec::BigInt {
+            x: case.x,
+            y: case.y,
+            modulus: case.modulus,
+        })
+        .unwrap();
+
+        let env = ExecutorEnv::builder().add_input(&input).build();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let session = exec.run().unwrap();
+        assert_eq!(
+            session.journal.as_slice(),
+            bytemuck::cast_slice(case.expected().as_slice())
+        );
+    }
 }
 
 #[test]

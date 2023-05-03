@@ -38,18 +38,21 @@ impl<'a, C: PolyFp<BabyBear>> CpuEvalCheck<'a, C> {
     }
 }
 
-impl<
-        'a,
-        C: PolyFp<BabyBear> + Sync,
-        H: Hal<BufferElem = CpuBuffer<BabyBearElem>, ExtElem = BabyBearExtElem>,
-    > EvalCheck<H> for CpuEvalCheck<'a, C>
+impl<'a, C, H> EvalCheck<H> for CpuEvalCheck<'a, C>
+where
+    C: PolyFp<BabyBear> + Sync,
+    H: Hal<
+        Elem = BabyBearElem,
+        ExtElem = BabyBearExtElem,
+        Buffer<<H as Hal>::Elem> = CpuBuffer<BabyBearElem>,
+    >,
 {
     #[tracing::instrument(skip_all)]
     fn eval_check(
         &self,
-        check: &CpuBuffer<BabyBearElem>,
-        groups: &[&CpuBuffer<BabyBearElem>],
-        globals: &[&CpuBuffer<BabyBearElem>],
+        check: &H::Buffer<BabyBearElem>,
+        groups: &[&H::Buffer<BabyBearElem>],
+        globals: &[&H::Buffer<BabyBearElem>],
         poly_mix: BabyBearExtElem,
         po2: usize,
         steps: usize,

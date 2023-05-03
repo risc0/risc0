@@ -27,7 +27,7 @@ use crate::{
 pub struct MerkleTreeProver<H: Hal> {
     params: MerkleTreeParams,
     // The retained matrix of values
-    matrix: H::BufferElem,
+    matrix: H::Buffer<H::Elem>,
     // A heap style array where node N has children 2*N and 2*N+1.  The size of
     // this buffer is (1 << (layers + 1)) and begins at offset 1 (zero is unused
     // to make indexing nicer).
@@ -50,7 +50,13 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// rows: `domain = steps * INV_RATE`, `steps` is always a power of 2.
     /// cols: `count = circuit_cols`
     #[tracing::instrument(name = "MerkleTreeProver", skip_all)]
-    pub fn new(hal: &H, matrix: &H::BufferElem, rows: usize, cols: usize, queries: usize) -> Self {
+    pub fn new(
+        hal: &H,
+        matrix: &H::Buffer<H::Elem>,
+        rows: usize,
+        cols: usize,
+        queries: usize,
+    ) -> Self {
         assert_eq!(matrix.size(), rows * cols);
         let params = MerkleTreeParams::new(rows, cols, queries);
         // Allocate nodes

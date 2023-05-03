@@ -71,7 +71,7 @@ impl Risc0Method {
 
         let elf = fs::read(&self.elf_path).unwrap();
         let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
         image.get_root()
     }
 
@@ -86,6 +86,7 @@ impl Risc0Method {
         }
 
         let upper = self.name.to_uppercase();
+        let upper = upper.replace('-', "_");
         let image_id: [u32; DIGEST_WORDS] = self.make_image_id().into();
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(

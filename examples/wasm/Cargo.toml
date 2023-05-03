@@ -1,0 +1,15 @@
+[package]
+name = "wasm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+risc0-zkvm = { path = "../../risc0/zkvm" }
+serde = "1.0"
+wasm-methods = { path = "methods" }
+wat = "1.0"
+
+[features]
+cuda = ["risc0-zkvm/cuda"]
+default = []
+metal = ["risc0-zkvm/metal"]

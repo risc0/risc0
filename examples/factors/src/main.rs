@@ -14,7 +14,6 @@
 
 use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
 use risc0_zkvm::{
-    prove::default_hal,
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv, SessionReceipt,
 };
@@ -33,8 +32,6 @@ fn main() {
 
 // Multiply them inside the ZKP
 fn factors(a: u64, b: u64) -> (SessionReceipt, u64) {
-    let (hal, eval) = default_hal();
-
     let env = ExecutorEnv::builder()
         // Send a & b to the guest
         .add_input(&to_vec(&a).unwrap())
@@ -48,7 +45,7 @@ fn factors(a: u64, b: u64) -> (SessionReceipt, u64) {
     let session = exec.run().unwrap();
 
     // Prove the session to produce a receipt.
-    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+    let receipt = session.prove().unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
     let c: u64 = from_slice(&receipt.journal).expect(

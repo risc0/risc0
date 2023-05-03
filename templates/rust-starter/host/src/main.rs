@@ -2,17 +2,14 @@
 // is `multiply`, replace `METHOD_NAME_ELF` with `MULTIPLY_ELF` and replace
 // `METHOD_NAME_ID` with `MULTIPLY_ID`
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
-use risc0_zkvm::{prove::default_hal, Executor, ExecutorEnv};
-// TODO: Uncomment the `use` line below for serialization helper functions for
-// communication with the guest
-// use risc0_zkvm::serde::{from_slice, to_vec}
+use risc0_zkvm::{Executor, ExecutorEnv};
+use risc0_zkvm::serde::{from_slice, to_vec};
 
 fn main() {
     let env = ExecutorEnv::default();
     let mut exec = Executor::from_elf(env, METHOD_NAME_ELF).unwrap();
     let session = exec.run().unwrap();
-    let (hal, eval) = default_hal();
-    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+    let receipt = session.prove().unwrap();
 
     // TODO: Implement code for transmitting or serializing the receipt for
     // other parties to verify here

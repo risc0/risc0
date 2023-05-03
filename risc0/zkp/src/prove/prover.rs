@@ -36,7 +36,7 @@ pub struct Prover<'a, H: Hal> {
     po2: usize,
 }
 
-fn make_coeffs<H: Hal>(hal: &H, buf: H::BufferElem, count: usize) -> H::BufferElem {
+fn make_coeffs<H: Hal>(hal: &H, buf: H::Buffer<H::Elem>, count: usize) -> H::Buffer<H::Elem> {
     // Do interpolate
     hal.batch_interpolate_ntt(&buf, count);
     // Convert f(x) -> f(3x), which effective multiplies cofficent c_i by 3^i.
@@ -77,7 +77,7 @@ impl<'a, H: Hal> Prover<'a, H> {
     /// Commits a given buffer to the IOP; the values must not subsequently
     /// change.
     #[tracing::instrument(skip_all)]
-    pub fn commit_group(&mut self, tap_group_index: usize, buf: H::BufferElem) {
+    pub fn commit_group(&mut self, tap_group_index: usize, buf: H::Buffer<H::Elem>) {
         let group_size = self.taps.group_size(tap_group_index);
         assert_eq!(buf.size() % group_size, 0);
         assert_eq!(buf.size() / group_size, self.cycles);
@@ -107,7 +107,7 @@ impl<'a, H: Hal> Prover<'a, H> {
 
     /// Generates the proof and returns the seal.
     #[tracing::instrument(skip_all)]
-    pub fn finalize<E>(mut self, globals: &[&H::BufferElem], eval: &E) -> Vec<u32>
+    pub fn finalize<E>(mut self, globals: &[&H::Buffer<H::Elem>], eval: &E) -> Vec<u32>
     where
         E: EvalCheck<H>,
     {
