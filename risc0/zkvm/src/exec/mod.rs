@@ -28,8 +28,7 @@ mod tests;
 use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use anyhow::{anyhow, bail, Context, Result};
-use num_bigint::BigUint;
-use num_traits::Zero;
+use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -465,12 +464,12 @@ impl<'a> Executor<'a> {
             .monitor
             .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
 
-        let mut load_words = |ptr: u32| {
+        let mut load_words = |ptr: u32| -> [u8; bigint::WIDTH_BYTES] {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
             for i in 0..bigint::WIDTH_WORDS {
-                arr[i] = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32);
+                arr[i] = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32).to_le();
             }
-            arr
+            bytemuck::cast(arr)
         };
 
         if op != 0 {
@@ -478,23 +477,27 @@ impl<'a> Executor<'a> {
         }
 
         // Load inputs.
-        let x = BigUint::from_slice(&load_words(x_ptr));
-        let y = BigUint::from_slice(&load_words(y_ptr));
-        let n = BigUint::from_slice(&load_words(n_ptr));
+        let x = U256::from_le_bytes(load_words(x_ptr));
+        let y = U256::from_le_bytes(load_words(y_ptr));
+        let n = U256::from_le_bytes(load_words(n_ptr));
 
         // Compute modular multiplication, or simply multiplication if n == 0.
-        let z = if n.is_zero() { x * y } else { (x * y) % n };
-
-        let mut z_vec = z.to_u32_digits();
-        if z_vec.len() > bigint::WIDTH_WORDS {
-            anyhow::bail!("ecall_bigint preflight: overflow in bigint multiplication");
-        }
-        // Add leading zeros, if necessary, to pad up to the ecall BigInt width.
-        z_vec.resize(bigint::WIDTH_WORDS, 0);
+        let z: U256 = if n == U256::ZERO {
+            x.checked_mul(&y).unwrap()
+        } else {
+            let (w_lo, w_hi) = x.mul_wide(&y);
+            let w = w_hi.concat(&w_lo);
+            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
+            z.resize()
+        };
 
         // Store result.
-        for (i, word) in z_vec.into_iter().enumerate() {
-            self.monitor.store_u32(z_ptr + (i * WORD_SIZE) as u32, word);
+        for (i, word) in bytemuck::cast::<_, [u32; bigint::WIDTH_WORDS]>(z.to_le_bytes())
+            .into_iter()
+            .enumerate()
+        {
+            self.monitor
+                .store_u32(z_ptr + (i * WORD_SIZE) as u32, word.to_le());
         }
 
         Ok(OpCodeResult::new(
