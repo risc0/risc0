@@ -138,6 +138,18 @@ structured, and other resources useful to developers new to RISC Zero, see our
 | risc0-zkvm               | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-zkvm)               | [![](https://img.shields.io/docsrs/risc0-zkvm)](https://docs.rs/risc0-zkvm)                             |
 | risc0-zkvm-platform      | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-zkvm-platform)      | [![](https://img.shields.io/docsrs/risc0-zkvm-platform)](https://docs.rs/risc0-zkvm-platform)           |
 
+## Feature flags
+
+The following feature flags are present in one or more of the crates listed above:
+
+| Feature | Target(s)  | Implies | Description | Crates |
+| --- | --- | --- | ---- | --- |
+| cuda |windows, linux| prove, std | Turns on CUDA GPU acceleration for the prover | rv32im, zkp, zkvm |
+metal |macos|prove|Turns on Metal GPU acceleration for the prover | rv32im, zkp, zkvm |
+profiler|all|--|Counts cycles during guest execution as an aid to code optimization| zkvm |
+prove|all except rv32im|std| Disable this feature if you want to use the `guest` module in guest-side code| rv32im, zkp, zkvm |
+std|all|--|Support for stdlib in the guest, including `std::io` read and write in the guest| rv32im, zkp, zkvm |
+
 ## `cargo risczero` tool
 
 Included is a tool to manage RISC Zero project directories.
