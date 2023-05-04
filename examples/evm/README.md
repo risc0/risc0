@@ -6,7 +6,6 @@ Currently, this demo accepts an Ethereum transaction hash and replays the transa
 
 ## Limitations
 
-* While we build in support for elliptic curve precompiles using the [k256](https://crates.io/crates/k256) crate, running them within the zkVM is expensive enough to trigger our cycle count limit. So, this is not compatible with all Ethereum transactions.
 * It currently defaults to the revm default forkid which is BERLIN. Older transactions might vary in results.
 * This demo only runs pre-existing transactions by tx_hash.
 
