@@ -36,7 +36,7 @@ Note that in order to use `risc0-zkvm` in the guest, you must disable default fe
 
 | Feature | Target(s)  | Implies | Description |
 | --- | --- | --- | ---- |
-| cuda |windows, linux| prove, std | Turns on CUDA GPU acceleration for the prover |
+| cuda || prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed. |
 metal |macos|prove|Turns on Metal GPU acceleration for the prover
 profiler|all|--|Tracks where cycles are spent during guest execution as an aid to code optimization
 prove|all except rv32im|std| Disable this feature if you want to use the `guest` module in guest-side code

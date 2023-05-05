@@ -7,7 +7,7 @@ The following [crate feature flags](https://doc.rust-lang.org/cargo/reference/fe
 
 | Feature | Target(s)  | Implies | Description |
 | --- | --- | --- | ---- |
-| cuda |windows, linux| prove, std | Turns on CUDA GPU acceleration for the prover |
+| cuda || prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed. |
 metal |macos|prove|Turns on Metal GPU acceleration for the prover
 prove|all except rv32im|std| Disable this feature if you want to use the `guest` module in guest-side code
 std|all|--|Support for stdlib in the guest
