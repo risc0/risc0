@@ -16,7 +16,7 @@ use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{prove::default_hal, serde, Executor, ExecutorEnv};
+use risc0_zkvm::{serde, Executor, ExecutorEnv};
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
     merkle::SYS_VECTOR_ORACLE,
@@ -126,9 +126,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Make the Executor, loading the image crop method binary.
     let mut exec = Executor::from_elf(env, IMAGE_CROP_ELF)?;
     let session = exec.run()?;
-
-    let (hal, eval) = default_hal();
-    let receipt = session.prove(hal.as_ref(), &eval)?;
+    let receipt = session.prove()?;
 
     // Save the receipt to disk so it can be sent to the verifier.
     fs::write(&args.receipt, bincode::serialize(&receipt)?)?;

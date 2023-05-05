@@ -71,7 +71,7 @@ impl Risc0Method {
 
         let elf = fs::read(&self.elf_path).unwrap();
         let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
-        let image = MemoryImage::new(&program, PAGE_SIZE as u32);
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
         image.get_root()
     }
 
@@ -86,6 +86,7 @@ impl Risc0Method {
         }
 
         let upper = self.name.to_uppercase();
+        let upper = upper.replace('-', "_");
         let image_id: [u32; DIGEST_WORDS] = self.make_image_id().into();
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
@@ -381,7 +382,18 @@ fn build_guest_package<P>(
 
     let mut cmd = Command::new(cargo);
     let mut child = cmd
-        .env("CARGO_ENCODED_RUSTFLAGS", "-C\x1fpasses=loweratomic")
+        .env(
+            "CARGO_ENCODED_RUSTFLAGS",
+            [
+                // Replace atomic ops with nonatomic versions since the guest is single threaded.
+                "-C",
+                "passes=loweratomic",
+                // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
+                "-Z",
+                "remap-cwd-prefix=.",
+            ]
+            .join("\x1f"),
+        )
         .env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib)
         .args(args)
         .stderr(Stdio::piped())

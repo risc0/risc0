@@ -15,12 +15,7 @@
 use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
 };
-use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
-use risc0_zkp::{
-    hal::{EvalCheck, Hal},
-    verify::HashSuite,
-};
-use risc0_zkvm::{prove::default_hal, ControlId, Executor, ExecutorEnv};
+use risc0_zkvm::{prove::default_prover, Executor, ExecutorEnv};
 use risc0_zkvm_methods::FIB_ELF;
 
 fn setup(iterations: u32) -> Executor<'static> {
@@ -28,44 +23,74 @@ fn setup(iterations: u32) -> Executor<'static> {
     Executor::from_elf(env, FIB_ELF).unwrap()
 }
 
-fn run<H, E>(hal: &H, eval: &E, exec: &mut Executor, with_seal: bool)
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
-    E: EvalCheck<H>,
-{
-    let session = exec.run().unwrap();
-    if with_seal {
-        session.prove(hal, eval).unwrap();
-    }
+enum Scope {
+    Execute,
+    Prove,
+    Total,
 }
 
 pub fn bench(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
 
-    for with_seal in [true, false] {
-        for iterations in [100, 200] {
-            let (hal, eval) = default_hal();
+    let prover = default_prover();
+    for scope in [Scope::Execute, Scope::Prove, Scope::Total] {
+        for iterations in [100, 1000, 10_000] {
             let mut exec = setup(iterations);
             let session = exec.run().unwrap();
-            let po2 = session.segments[0].po2;
-            let cycles = 1 << po2;
+            let segments = session.resolve().unwrap();
+            let (exec_cycles, prove_cycles) =
+                segments
+                    .iter()
+                    .fold((0, 0), |(exec_cycles, prove_cycles), segment| {
+                        (
+                            exec_cycles + segment.insn_cycles,
+                            prove_cycles + (1 << segment.po2),
+                        )
+                    });
             group.sample_size(10);
-            group.throughput(Throughput::Elements(cycles as u64));
-            group.bench_with_input(
-                BenchmarkId::from_parameter(format!(
-                    "{iterations}/{}",
-                    if with_seal { "proof" } else { "run" }
-                )),
-                &iterations,
-                |b, &iterations| {
-                    b.iter_batched(
-                        || setup(iterations),
-                        |mut exec| black_box(run(hal.as_ref(), &eval, &mut exec, with_seal)),
-                        BatchSize::SmallInput,
-                    )
-                },
-            );
+            match scope {
+                Scope::Execute => {
+                    let id = BenchmarkId::from_parameter(format!("{iterations}/execute"));
+                    group.throughput(Throughput::Elements(exec_cycles as u64));
+                    group.bench_with_input(id, &iterations, |b, &iterations| {
+                        b.iter_batched(
+                            || setup(iterations),
+                            |mut exec| black_box(exec.run().unwrap()),
+                            BatchSize::SmallInput,
+                        )
+                    });
+                }
+                Scope::Prove => {
+                    let id = BenchmarkId::from_parameter(format!("{iterations}/prove"));
+                    group.throughput(Throughput::Elements(prove_cycles as u64));
+                    group.bench_with_input(id, &iterations, |b, &iterations| {
+                        b.iter_batched(
+                            || {
+                                let mut exec = setup(iterations);
+                                exec.run().unwrap()
+                            },
+                            |session| black_box(prover.prove_session(&session).unwrap()),
+                            BatchSize::SmallInput,
+                        )
+                    });
+                }
+                Scope::Total => {
+                    let id = BenchmarkId::from_parameter(format!("{iterations}/total"));
+                    group.throughput(Throughput::Elements(exec_cycles as u64));
+                    group.bench_with_input(id, &iterations, |b, &iterations| {
+                        b.iter_batched(
+                            || setup(iterations),
+                            |mut exec| {
+                                black_box({
+                                    let session = exec.run().unwrap();
+                                    prover.prove_session(&session).unwrap()
+                                })
+                            },
+                            BatchSize::SmallInput,
+                        )
+                    });
+                }
+            };
         }
     }
 

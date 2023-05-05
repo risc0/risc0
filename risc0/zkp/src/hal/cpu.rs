@@ -33,6 +33,7 @@ use crate::{
         hash::{
             blake2b::Blake2bCpuHashSuite,
             poseidon::PoseidonHashSuite,
+            poseidon_254::Poseidon254HashSuite,
             sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
             HashFn, HashSuite,
         },
@@ -48,6 +49,7 @@ pub struct CpuHal<F: Field, HS: HashSuite<F>> {
 
 pub type BabyBearSha256CpuHal = CpuHal<BabyBear, Sha256HashSuite<BabyBear, CpuImpl>>;
 pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, PoseidonHashSuite>;
+pub type BabyBearPoseidon254CpuHal = CpuHal<BabyBear, Poseidon254HashSuite>;
 pub type BabyBearBlake2bCpuHal = CpuHal<BabyBear, Blake2bCpuHashSuite>;
 
 impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
@@ -261,26 +263,27 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
 }
 
 impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
+    type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Field = F;
-    type BufferElem = CpuBuffer<Self::Elem>;
-    type BufferExtElem = CpuBuffer<Self::ExtElem>;
-    type BufferDigest = CpuBuffer<Digest>;
-    type BufferU32 = CpuBuffer<u32>;
+    type Buffer<T: Clone + Pod> = CpuBuffer<T>;
     type HashSuite = HS;
     type HashFn = HS::HashFn;
     type Rng = HS::Rng;
 
-    fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::BufferElem {
+    fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         CpuBuffer::new(size)
     }
 
-    fn copy_from_elem(&self, _name: &'static str, slice: &[Self::Elem]) -> Self::BufferElem {
+    fn copy_from_elem(
+        &self,
+        _name: &'static str,
+        slice: &[Self::Elem],
+    ) -> Self::Buffer<Self::Elem> {
         CpuBuffer::copy_from(slice)
     }
 
-    fn alloc_extelem(&self, _name: &'static str, size: usize) -> Self::BufferExtElem {
+    fn alloc_extelem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
         CpuBuffer::new(size)
     }
 
@@ -288,28 +291,33 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         &self,
         _name: &'static str,
         slice: &[Self::ExtElem],
-    ) -> Self::BufferExtElem {
+    ) -> Self::Buffer<Self::ExtElem> {
         CpuBuffer::copy_from(slice)
     }
 
-    fn alloc_digest(&self, _name: &'static str, size: usize) -> Self::BufferDigest {
+    fn alloc_digest(&self, _name: &'static str, size: usize) -> Self::Buffer<Digest> {
         CpuBuffer::new(size)
     }
 
-    fn copy_from_digest(&self, _name: &'static str, slice: &[Digest]) -> Self::BufferDigest {
+    fn copy_from_digest(&self, _name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
         CpuBuffer::copy_from(slice)
     }
 
-    fn alloc_u32(&self, _name: &'static str, size: usize) -> Self::BufferU32 {
+    fn alloc_u32(&self, _name: &'static str, size: usize) -> Self::Buffer<u32> {
         CpuBuffer::new(size)
     }
 
-    fn copy_from_u32(&self, _name: &'static str, slice: &[u32]) -> Self::BufferU32 {
+    fn copy_from_u32(&self, _name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
         CpuBuffer::copy_from(slice)
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_expand(&self, output: &Self::BufferElem, input: &Self::BufferElem, count: usize) {
+    fn batch_expand(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        count: usize,
+    ) {
         let out_size = output.size() / count;
         let in_size = input.size() / count;
         let expand_bits = log2_ceil(out_size / in_size);
@@ -326,7 +334,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_evaluate_ntt(&self, io: &Self::BufferElem, count: usize, expand_bits: usize) {
+    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         io.as_slice_mut()
@@ -337,7 +345,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_interpolate_ntt(&self, io: &Self::BufferElem, count: usize) {
+    fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         io.as_slice_mut()
@@ -348,7 +356,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_bit_reverse(&self, io: &Self::BufferElem, count: usize) {
+    fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         io.as_slice_mut()
@@ -361,11 +369,11 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     #[tracing::instrument(skip_all)]
     fn batch_evaluate_any(
         &self,
-        coeffs: &Self::BufferElem,
+        coeffs: &Self::Buffer<Self::Elem>,
         poly_count: usize,
-        which: &Self::BufferU32,
-        xs: &Self::BufferExtElem,
-        out: &Self::BufferExtElem,
+        which: &Self::Buffer<u32>,
+        xs: &Self::Buffer<Self::ExtElem>,
+        out: &Self::Buffer<Self::ExtElem>,
     ) {
         let po2 = log2_ceil(coeffs.size() / poly_count);
         assert_eq!(poly_count * (1 << po2), coeffs.size());
@@ -393,7 +401,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn zk_shift(&self, io: &Self::BufferElem, poly_count: usize) {
+    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));
@@ -411,11 +419,11 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     #[tracing::instrument(skip_all)]
     fn mix_poly_coeffs(
         &self,
-        output: &Self::BufferExtElem,
+        output: &Self::Buffer<Self::ExtElem>,
         mix_start: &Self::ExtElem,
         mix: &Self::ExtElem,
-        input: &Self::BufferElem,
-        combos: &Self::BufferU32,
+        input: &Self::Buffer<Self::Elem>,
+        combos: &Self::Buffer<u32>,
         input_size: usize,
         count: usize,
     ) {
@@ -459,9 +467,9 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     #[tracing::instrument(skip_all)]
     fn eltwise_add_elem(
         &self,
-        output: &Self::BufferElem,
-        input1: &Self::BufferElem,
-        input2: &Self::BufferElem,
+        output: &Self::Buffer<Self::Elem>,
+        input1: &Self::Buffer<Self::Elem>,
+        input2: &Self::Buffer<Self::Elem>,
     ) {
         assert_eq!(output.size(), input1.size());
         assert_eq!(output.size(), input2.size());
@@ -476,7 +484,11 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn eltwise_sum_extelem(&self, output: &Self::BufferElem, input: &Self::BufferExtElem) {
+    fn eltwise_sum_extelem(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::ExtElem>,
+    ) {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         let to_add = input.size() / count;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
@@ -500,7 +512,11 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn eltwise_copy_elem(&self, output: &Self::BufferElem, input: &Self::BufferElem) {
+    fn eltwise_copy_elem(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+    ) {
         let count = output.size();
         assert_eq!(count, input.size());
         let mut output = output.as_slice_mut();
@@ -513,7 +529,12 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn fri_fold(&self, output: &Self::BufferElem, input: &Self::BufferElem, mix: &Self::ExtElem) {
+    fn fri_fold(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        mix: &Self::ExtElem,
+    ) {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
@@ -540,7 +561,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+    fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
         let row_size = output.size();
         let col_size = matrix.size() / output.size();
         assert_eq!(matrix.size(), col_size * row_size);
@@ -553,7 +574,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         });
     }
 
-    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+    fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {
         assert!(io.size() >= 2 * input_size);
         assert_eq!(input_size, 2 * output_size);
         let io = io.as_slice_sync();
@@ -600,7 +621,7 @@ mod tests {
     fn test_binary<H, HF, CF>(hal: &H, hal_fn: HF, cpu_fn: CF, count: usize)
     where
         H: Hal,
-        HF: Fn(&H::BufferElem, &H::BufferElem, &H::BufferElem),
+        HF: Fn(&H::Buffer<H::Elem>, &H::Buffer<H::Elem>, &H::Buffer<H::Elem>),
         CF: Fn(&H::Elem, &H::Elem) -> H::Elem,
     {
         let a = hal.alloc_elem("a", count);

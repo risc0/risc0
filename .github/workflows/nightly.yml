@@ -44,7 +44,6 @@ jobs:
           target/release/main \
           -p ${{ runner.temp }}/crate-validation/profiles.json \
           -j ${{ runner.temp }}/crate-validation/profile-results.json &> ${{ runner.temp }}/crate-validation/crate-results.log
-      # &> ${{ runner.temp }}/crate-validation/crate-results.log
         shell: bash
         working-directory: tools/crates-validator/
 
@@ -55,14 +54,15 @@ jobs:
 
       - name: Upload artifact results
         uses: actions/upload-artifact@v3
+        if: always() # upload all artifacts even on failures
         with:
           name: crates-test-results
           path: ${{ runner.temp }}/crate-validation/
           retention-days: 2
 
-      - name: Commit results to risc0/benchmarks
+      - name: Commit results to risc0/ghpages
         run: |
-          git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/benchmarks.git" ${{ runner.temp }}/benchmarks/
+          git clone "https://x-access-token:${{ secrets.BENCHMARK_TOKEN }}@github.com/risc0/ghpages.git" ${{ runner.temp }}/benchmarks/
           cd ${{ runner.temp }}/benchmarks/
           cp ${{ runner.temp }}/crate-validation/profile-results.json ./dev/crate-validation/profiles.json
           git add .

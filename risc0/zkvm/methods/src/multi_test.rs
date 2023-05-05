@@ -18,6 +18,7 @@ extern crate alloc;
 use alloc::vec::Vec;
 
 use risc0_zkvm::declare_syscall;
+use risc0_zkvm_platform::syscall::bigint;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -50,11 +51,17 @@ pub enum MultiTestSpec {
         // Position and length to do reads
         pos_and_len: Vec<(u32, u32)>,
     },
+    BigInt {
+        x: [u32; bigint::WIDTH_WORDS],
+        y: [u32; bigint::WIDTH_WORDS],
+        modulus: [u32; bigint::WIDTH_WORDS],
+    },
     PauseContinue,
     BusyLoop {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u32,
     },
+    LibM,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

@@ -12,21 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, ffi::CString, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, marker::PhantomData, rc::Rc};
 
 use bytemuck::Pod;
-use fil_rustacuda as rustacuda;
+use cust::{
+    device::DeviceAttribute,
+    function::{BlockSize, GridSize},
+    memory::UnifiedPointer,
+    prelude::*,
+};
+use lazy_static::lazy_static;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     Elem, ExtElem, RootsOfUnity,
 };
-use rustacuda::{
-    device::DeviceAttribute,
-    function::{BlockSize, GridSize},
-    launch,
-    prelude::*,
-};
-use rustacuda_core::UnifiedPointer;
 
 use super::{Buffer, Hal, TRACKER};
 use crate::{
@@ -44,13 +43,25 @@ use crate::{
 
 const KERNELS_FATBIN: &[u8] = include_bytes!(env!("ZKP_CUDA_PATH"));
 
+lazy_static! {
+    static ref CONTEXT: Context = {
+        let device = Device::get_device(0).unwrap();
+        let context = Context::new(device).unwrap();
+        context.set_flags(ContextFlags::SCHED_AUTO).unwrap();
+        context
+    };
+}
+
 pub trait CudaHash {
     /// Which hash suite should the CPU use
     type HashSuite: HashSuite<BabyBear>;
+
     /// Create a hash implemention
     fn new(hal: &CudaHal<Self>) -> Self;
+
     /// Run the hash_fold function
     fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize);
+
     /// Run the hash_rows function
     fn hash_rows(
         &self,
@@ -60,7 +71,7 @@ pub trait CudaHash {
     );
 }
 
-pub struct CudaHashSha256 {}
+pub struct CudaHashSha256;
 
 impl CudaHash for CudaHashSha256 {
     type HashSuite = Sha256HashSuite<BabyBear, CpuImpl>;
@@ -71,8 +82,7 @@ impl CudaHash for CudaHashSha256 {
 
     fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("sha_fold").unwrap();
-        let kernel = hal.module.get_function(&kernel_name).unwrap();
+        let kernel = hal.module.get_function("sha_fold").unwrap();
         let params = hal.compute_simple_params(output_size);
         unsafe {
             // DevicePointers require that the underlying type of the pointer implements the
@@ -105,8 +115,7 @@ impl CudaHash for CudaHashSha256 {
         assert_eq!(matrix.size(), col_size * row_size);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("sha_rows").unwrap();
-        let kernel = hal.module.get_function(&kernel_name).unwrap();
+        let kernel = hal.module.get_function("sha_rows").unwrap();
         let params = hal.compute_simple_params(row_size);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -153,8 +162,7 @@ impl CudaHash for CudaHashPoseidon {
 
     fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("poseidon_fold").unwrap();
-        let kernel = hal.module.get_function(&kernel_name).unwrap();
+        let kernel = hal.module.get_function("poseidon_fold").unwrap();
         let params = hal.compute_simple_params(output_size);
         unsafe {
             // DevicePointers require that the underlying type of the pointer implements the
@@ -191,8 +199,7 @@ impl CudaHash for CudaHashPoseidon {
         assert_eq!(matrix.size(), col_size * row_size);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("poseidon_rows").unwrap();
-        let kernel = hal.module.get_function(&kernel_name).unwrap();
+        let kernel = hal.module.get_function("poseidon_rows").unwrap();
         let params = hal.compute_simple_params(row_size);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -215,7 +222,6 @@ pub struct CudaHal<Hash: CudaHash + ?Sized> {
     pub max_threads: u32,
     pub module: Module,
     hash: Option<Box<Hash>>,
-    // _context must come last so that it is destroyed last
     _context: Context,
 }
 
@@ -323,17 +329,17 @@ impl<T: Pod> Buffer<T> for BufferImpl<T> {
 impl<CH: CudaHash> CudaHal<CH> {
     #[tracing::instrument(name = "CudaHal::new", skip_all)]
     pub fn new() -> Self {
-        rustacuda::init(CudaFlags::empty()).unwrap();
+        cust::init(CudaFlags::empty()).unwrap();
         let device = Device::get_device(0).unwrap();
         let max_threads = device
             .get_attribute(DeviceAttribute::MaxThreadsPerBlock)
             .unwrap();
-        let context = Context::create_and_push(ContextFlags::SCHED_AUTO, device).unwrap();
-        let module = Module::load_from_bytes(KERNELS_FATBIN).unwrap();
+        let _context = CONTEXT.clone();
+        let module = Module::from_fatbin(KERNELS_FATBIN, &[]).unwrap();
         let mut hal = Self {
             max_threads: max_threads as u32,
             module,
-            _context: context,
+            _context,
             hash: None,
         };
         let hash = Box::new(CH::new(&hal));
@@ -382,28 +388,23 @@ impl<CH: CudaHash> CudaHal<CH> {
 
 #[allow(unused_variables)]
 impl<CH: CudaHash> Hal for CudaHal<CH> {
+    type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Field = BabyBear;
-
-    type BufferDigest = BufferImpl<Digest>;
-    type BufferElem = BufferImpl<Self::Elem>;
-    type BufferExtElem = BufferImpl<Self::ExtElem>;
-    type BufferU32 = BufferImpl<u32>;
-
+    type Buffer<T: Clone + Pod> = BufferImpl<T>;
     type HashSuite = CH::HashSuite;
     type HashFn = <CH::HashSuite as HashSuite<BabyBear>>::HashFn;
     type Rng = <CH::HashSuite as HashSuite<BabyBear>>::Rng;
 
-    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::BufferElem {
+    fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)
     }
 
-    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::BufferElem {
+    fn copy_from_elem(&self, name: &'static str, slice: &[Self::Elem]) -> Self::Buffer<Self::Elem> {
         BufferImpl::copy_from(name, slice)
     }
 
-    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::BufferExtElem {
+    fn alloc_extelem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::ExtElem> {
         BufferImpl::new(name, size)
     }
 
@@ -411,28 +412,33 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         &self,
         name: &'static str,
         slice: &[Self::ExtElem],
-    ) -> Self::BufferExtElem {
+    ) -> Self::Buffer<Self::ExtElem> {
         BufferImpl::copy_from(name, slice)
     }
 
-    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::BufferDigest {
+    fn alloc_digest(&self, name: &'static str, size: usize) -> Self::Buffer<Digest> {
         BufferImpl::new(name, size)
     }
 
-    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::BufferDigest {
+    fn copy_from_digest(&self, name: &'static str, slice: &[Digest]) -> Self::Buffer<Digest> {
         BufferImpl::copy_from(name, slice)
     }
 
-    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::BufferU32 {
+    fn alloc_u32(&self, name: &'static str, size: usize) -> Self::Buffer<u32> {
         BufferImpl::new(name, size)
     }
 
-    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::BufferU32 {
+    fn copy_from_u32(&self, name: &'static str, slice: &[u32]) -> Self::Buffer<u32> {
         BufferImpl::copy_from(name, slice)
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_expand(&self, output: &Self::BufferElem, input: &Self::BufferElem, poly_count: usize) {
+    fn batch_expand(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        poly_count: usize,
+    ) {
         let out_size = output.size() / poly_count;
         let in_size = input.size() / poly_count;
         let expand_bits = log2_ceil(out_size / in_size);
@@ -441,8 +447,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         assert_eq!(out_size, in_size * (1 << expand_bits));
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("batch_expand").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("batch_expand").unwrap();
         let params = self.compute_simple_params(out_size.try_into().unwrap());
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -459,7 +464,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_evaluate_ntt(&self, io: &Self::BufferElem, count: usize, expand_bits: usize) {
+    fn batch_evaluate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize, expand_bits: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         let n_bits = log2_ceil(row_size);
@@ -469,8 +474,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let rou = self.copy_from_elem("rou", Self::Elem::ROU_FWD);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("multi_ntt_fwd_step").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("multi_ntt_fwd_step").unwrap();
         for s_bits in 1 + expand_bits..=n_bits {
             let params = self.compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
             unsafe {
@@ -488,7 +492,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_interpolate_ntt(&self, io: &Self::BufferElem, count: usize) {
+    fn batch_interpolate_ntt(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         let n_bits = log2_ceil(row_size);
@@ -497,8 +501,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let rou = self.copy_from_elem("rou", Self::Elem::ROU_REV);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("multi_ntt_rev_step").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("multi_ntt_rev_step").unwrap();
         for s_bits in (1..=n_bits).rev() {
             let params = self.compute_launch_params(n_bits as u32, s_bits as u32, count as u32);
             unsafe {
@@ -516,8 +519,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
 
         let io_size = io.size().try_into().unwrap();
         let params = self.compute_simple_params(io_size);
-        let kernel_name = CString::new("eltwise_mul_factor_fp").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("eltwise_mul_factor_fp").unwrap();
         let norm = self.copy_from_elem("norm", &[Self::Elem::new(row_size as u32).inv()]);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -531,7 +533,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn batch_bit_reverse(&self, io: &Self::BufferElem, count: usize) {
+    fn batch_bit_reverse(&self, io: &Self::Buffer<Self::Elem>, count: usize) {
         let row_size = io.size() / count;
         assert_eq!(row_size * count, io.size());
         let bits = log2_ceil(row_size);
@@ -539,8 +541,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let io_size = io.size();
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("multi_bit_reverse").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("multi_bit_reverse").unwrap();
         let params = self.compute_simple_params(io_size);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -556,11 +557,11 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     #[tracing::instrument(skip_all)]
     fn batch_evaluate_any(
         &self,
-        coeffs: &Self::BufferElem,
+        coeffs: &Self::Buffer<Self::Elem>,
         poly_count: usize,
-        which: &Self::BufferU32,
-        xs: &Self::BufferExtElem,
-        out: &Self::BufferExtElem,
+        which: &Self::Buffer<u32>,
+        xs: &Self::Buffer<Self::ExtElem>,
+        out: &Self::Buffer<Self::ExtElem>,
     ) {
         let po2 = log2_ceil(coeffs.size() / poly_count);
         assert_eq!(poly_count * (1 << po2), coeffs.size());
@@ -570,8 +571,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let count = 1 << po2;
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("batch_evaluate_any").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("batch_evaluate_any").unwrap();
         let params = self.compute_simple_params(eval_count);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -588,14 +588,13 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn zk_shift(&self, io: &Self::BufferElem, poly_count: usize) {
+    fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
         assert_eq!(io.size(), poly_count * (1 << bits));
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("zk_shift").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("zk_shift").unwrap();
         let params = self.compute_simple_params(count);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -611,11 +610,11 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     #[tracing::instrument(skip_all)]
     fn mix_poly_coeffs(
         &self,
-        output: &Self::BufferExtElem,
+        output: &Self::Buffer<Self::ExtElem>,
         mix_start: &Self::ExtElem,
         mix: &Self::ExtElem,
-        input: &Self::BufferElem,
-        combos: &Self::BufferU32,
+        input: &Self::Buffer<Self::Elem>,
+        combos: &Self::Buffer<u32>,
         input_size: usize,
         count: usize,
     ) {
@@ -623,8 +622,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         let mix = self.copy_from_extelem("mix", &[*mix]);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("mix_poly_coeffs").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("mix_poly_coeffs").unwrap();
         let params = self.compute_simple_params(count);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -644,17 +642,16 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     #[tracing::instrument(skip_all)]
     fn eltwise_add_elem(
         &self,
-        output: &Self::BufferElem,
-        input1: &Self::BufferElem,
-        input2: &Self::BufferElem,
+        output: &Self::Buffer<Self::Elem>,
+        input1: &Self::Buffer<Self::Elem>,
+        input2: &Self::Buffer<Self::Elem>,
     ) {
         assert_eq!(output.size(), input1.size());
         assert_eq!(output.size(), input2.size());
         let count = output.size();
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("eltwise_add_fp").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("eltwise_add_fp").unwrap();
         let params = self.compute_simple_params(count);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -669,15 +666,18 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn eltwise_sum_extelem(&self, output: &Self::BufferElem, input: &Self::BufferExtElem) {
+    fn eltwise_sum_extelem(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::ExtElem>,
+    ) {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         let to_add = input.size() / count;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), count * to_add);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("eltwise_sum_fp4").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("eltwise_sum_fp4").unwrap();
         let params = self.compute_simple_params(output.size());
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -692,13 +692,16 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn eltwise_copy_elem(&self, output: &Self::BufferElem, input: &Self::BufferElem) {
+    fn eltwise_copy_elem(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+    ) {
         let count = output.size();
         assert_eq!(count, input.size());
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("eltwise_copy_fp").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("eltwise_copy_fp").unwrap();
         let params = self.compute_simple_params(count);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -712,15 +715,19 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn fri_fold(&self, output: &Self::BufferElem, input: &Self::BufferElem, mix: &Self::ExtElem) {
+    fn fri_fold(
+        &self,
+        output: &Self::Buffer<Self::Elem>,
+        input: &Self::Buffer<Self::Elem>,
+        mix: &Self::ExtElem,
+    ) {
         let count = output.size() / Self::ExtElem::EXT_SIZE;
         assert_eq!(output.size(), count * Self::ExtElem::EXT_SIZE);
         assert_eq!(input.size(), output.size() * FRI_FOLD);
         let mix = self.copy_from_extelem("mix", &[*mix]);
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel_name = CString::new("fri_fold").unwrap();
-        let kernel = self.module.get_function(&kernel_name).unwrap();
+        let kernel = self.module.get_function("fri_fold").unwrap();
         let params = self.compute_simple_params(count);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
@@ -735,13 +742,13 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
-    fn hash_fold(&self, io: &Self::BufferDigest, input_size: usize, output_size: usize) {
+    fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize) {
         assert_eq!(input_size, 2 * output_size);
         self.hash.as_ref().unwrap().hash_fold(self, io, output_size);
     }
 
     #[tracing::instrument(skip_all)]
-    fn hash_rows(&self, output: &Self::BufferDigest, matrix: &Self::BufferElem) {
+    fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
         self.hash.as_ref().unwrap().hash_rows(self, output, matrix);
     }
 }
@@ -784,13 +791,13 @@ mod tests {
 
     #[test]
     #[serial]
-    fn hash_rows() {
+    fn hash_rows_sha256() {
         testutil::hash_rows(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
-    fn hash_fold() {
+    fn hash_fold_sha256() {
         testutil::hash_fold(CudaHalSha256::new());
     }
 
@@ -803,8 +810,7 @@ mod tests {
     #[test]
     #[serial]
     fn hash_fold_poseidon() {
-        let hal = CudaHalPoseidon::new();
-        testutil::hash_fold(hal);
+        testutil::hash_fold(CudaHalPoseidon::new());
     }
 
     #[test]

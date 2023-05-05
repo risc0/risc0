@@ -60,6 +60,7 @@ jobs:
             feature: metal
             device: apple_m2_pro
     env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
       RUST_BACKTRACE: full
       RUSTC_WRAPPER: sccache
@@ -100,6 +101,13 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+      - name: Install mdbook
+        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: mdbook
+          version: "0.4"
+      - run: mdbook test
+        working-directory: docs/mdbook
 
   check_template:
     runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]

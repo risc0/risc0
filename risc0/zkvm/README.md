@@ -10,7 +10,7 @@ docs.rs](https://docs.rs/risc0-zkvm), we have additional (non-reference)
 resources for using our zkVM that you may also find helpful, especially if
 you're new to the RISC Zero zkVM. These include:
 
-* Our [Hello Multiply!](https://www.risczero.com/docs/examples/hello_multiply)
+* Our [Factors](https://github.com/risc0/risc0/tree/main/examples/factors#tutorial)
 tutorial, which walks you through writing your first zkVM project.
 * The [`cargo risczero` tool](https://crates.io/crates/cargo-risczero). It
 includes a `new` command which generates code for building and launching a zkVM

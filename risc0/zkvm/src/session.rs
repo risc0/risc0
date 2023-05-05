@@ -20,26 +20,7 @@ use alloc::collections::BTreeSet;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-use crate::{exec::SyscallRecord, MemoryImage};
-
-/// Indicates how a [Segment] or [Session]'s execution has terminated
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
-pub enum ExitCode {
-    /// This indicates when a system-initiated split has occured due to the
-    /// segment limit being exceeded.
-    SystemSplit(u32),
-
-    /// This indicates that the session limit has been reached.
-    SessionLimit,
-
-    /// A user may manually pause a session so that it can be resumed at a later
-    /// time.
-    Paused,
-
-    /// This indicates normal termination of a program with an interior exit
-    /// code returned from the guest.
-    Halted(u32),
-}
+use crate::{exec::SyscallRecord, receipt::ExitCode, MemoryImage};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -59,13 +40,24 @@ pub struct Session {
     /// an [ExitCode] of [Halted](ExitCode::Halted), [Paused](ExitCode::Paused),
     /// or [SessionLimit](ExitCode::SessionLimit), and all other [Segment]s (if
     /// any) will have [ExitCode::SystemSplit].
-    pub segments: Vec<Segment>,
+    pub segments: Vec<Box<dyn SegmentRef>>,
 
     /// The data publicly committed by the guest program.
     pub journal: Vec<u8>,
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+}
+
+/// A reference to a [Segment].
+///
+/// This allows implementors to determine the best way to represent this in an
+/// pluggable manner. See the [SimpleSegmentRef] for a very basic
+/// implmentation.
+#[typetag::serde(tag = "type")]
+pub trait SegmentRef: Send {
+    /// Resolve this reference into an actual [Segment].
+    fn resolve(&self) -> anyhow::Result<Segment>;
 }
 
 /// The execution trace of a portion of a program.
@@ -76,27 +68,42 @@ pub struct Session {
 /// call to the ZKP system. It does not necessarily represent an entire program;
 /// see [Session] for tracking memory transactions until a user-requested
 /// termination.
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Segment {
     pub(crate) pre_image: MemoryImage,
     pub(crate) post_image_id: Digest,
-    pub(crate) pc: u32,
     pub(crate) faults: PageFaults,
     pub(crate) syscalls: Vec<SyscallRecord>,
+    pub(crate) split_insn: Option<u32>,
     pub(crate) exit_code: ExitCode,
 
     /// The number of cycles in powers of 2.
     pub po2: usize,
+
+    /// The index of this [Segment] within the [Session]
+    pub index: u32,
+
+    /// The number of cycles used to execute instructions.
+    pub insn_cycles: usize,
 }
 
 impl Session {
     /// Construct a new [Session] from its constituent components.
-    pub fn new(segments: Vec<Segment>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
+    pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
         Self {
             segments,
             journal,
             exit_code,
         }
+    }
+
+    /// A convenience method that resolves all [SegmentRef]s and returns the
+    /// associated [Segment]s.
+    pub fn resolve(&self) -> anyhow::Result<Vec<Segment>> {
+        self.segments
+            .iter()
+            .map(|segment_ref| segment_ref.resolve())
+            .collect()
     }
 }
 
@@ -105,20 +112,46 @@ impl Segment {
     pub(crate) fn new(
         pre_image: MemoryImage,
         post_image_id: Digest,
-        pc: u32,
         faults: PageFaults,
         syscalls: Vec<SyscallRecord>,
         exit_code: ExitCode,
+        split_insn: Option<u32>,
         po2: usize,
+        index: u32,
+        insn_cycles: usize,
     ) -> Self {
         Self {
             pre_image,
             post_image_id,
-            pc,
             faults,
             syscalls,
             exit_code,
+            split_insn,
             po2,
+            index,
+            insn_cycles,
         }
+    }
+}
+
+/// A very basic implementation of a [SegmentRef].
+///
+/// The [Segment] itself is stored in this implementation.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct SimpleSegmentRef {
+    segment: Segment,
+}
+
+#[typetag::serde]
+impl SegmentRef for SimpleSegmentRef {
+    fn resolve(&self) -> anyhow::Result<Segment> {
+        Ok(self.segment.clone())
+    }
+}
+
+impl SimpleSegmentRef {
+    /// Construct a [SimpleSegmentRef] with the specified [Segment].
+    pub fn new(segment: Segment) -> Self {
+        Self { segment }
     }
 }
