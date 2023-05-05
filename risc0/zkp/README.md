@@ -12,7 +12,7 @@ The following [crate feature flags](https://doc.rust-lang.org/cargo/reference/fe
 | cuda |windows, linux| prove, std | Turns on CUDA GPU acceleration for the prover |
 metal |macos|prove|Turns on Metal GPU acceleration for the prover
 prove|all except rv32im|std| Disable this feature if you want to use the `guest` module in guest-side code
-std|all|--|Support for stdlib in the guest, including `std::io` read and write in the guest
+std|all|--|Support for stdlib in the guest
 
 
 * cuda
@@ -27,4 +27,4 @@ std|all|--|Support for stdlib in the guest, including `std::io` read and write i
   * Disable this feature if you want to use the `guest` module in guest-side code (or if you only need the verifier, for the sake of excluding unnecessary code)
   * Must be set when `metal` or `cuda` is selected
 * std
-  * Optional support for stdlib in the guest, including `std::io` read and write in the guest
+  * Optional support for stdlib in the guest
