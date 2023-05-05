@@ -24,7 +24,6 @@ use evm_core::{
 use evm_methods::EVM_ELF;
 use log::info;
 use risc0_zkvm::{
-    prove::default_hal,
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv,
 };
@@ -34,8 +33,12 @@ use risc0_zkvm::{
 struct Args {
     #[clap(short, long)]
     tx_hash: String,
+
     #[clap(short, long)]
     rpc_url: String,
+
+    #[clap(short, long)]
+    block_numb: Option<u64>,
 }
 
 #[tokio::main]
@@ -48,13 +51,18 @@ async fn main() {
     let client = Arc::new(client);
 
     let tx = client.get_transaction(tx_hash).await.unwrap().unwrap();
-    let block_numb = tx.block_number.unwrap();
+    let block_numb = if let Some(numb) = args.block_numb {
+        numb
+    } else {
+        let numb = tx.block_number.unwrap();
+        numb.as_u64() - 1
+    };
     info!("Running TX: 0x{:x} at block {}", tx_hash, block_numb);
 
     let mut env = Env::default();
-    env.block.number = U256::from(block_numb.as_u64()).into();
+    env.block.number = U256::from(block_numb).into();
     env.tx = evm_core::ether_trace::txenv_from_tx(tx);
-    let trace_db = evm_core::ether_trace::TraceTx::new(client, Some(block_numb.as_u64())).unwrap();
+    let trace_db = evm_core::ether_trace::TraceTx::new(client, Some(block_numb)).unwrap();
 
     let mut evm = EVM::new();
     evm.database(trace_db);
@@ -79,9 +87,7 @@ async fn main() {
         .build();
     let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
     let session = exec.run().unwrap();
-
-    let (hal, eval) = default_hal();
-    let receipt = session.prove(hal.as_ref(), &eval).unwrap();
+    let receipt = session.prove().unwrap();
 
     let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
     info!("exit reason: {:?}", res.exit_reason);

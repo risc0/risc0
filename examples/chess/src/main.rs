@@ -16,7 +16,6 @@ use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::{Arg, Command};
 use risc0_zkvm::{
-    prove::default_hal,
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv, SessionReceipt,
 };
@@ -68,8 +67,7 @@ fn chess(inputs: &Inputs) -> SessionReceipt {
     let session = exec.run().unwrap();
 
     // Prove the session to produce a receipt.
-    let (hal, eval) = default_hal();
-    session.prove(hal.as_ref(), &eval).unwrap()
+    session.prove().unwrap()
 }
 
 #[cfg(test)]

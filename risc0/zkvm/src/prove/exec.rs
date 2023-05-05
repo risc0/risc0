@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use core::cmp;
 use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use anyhow::{anyhow, Result};
@@ -24,7 +25,7 @@ use risc0_zkp::adapter::CircuitStepHandler;
 use risc0_zkvm_platform::{
     memory::SYSTEM,
     syscall::{
-        ecall, halt,
+        bigint, ecall, halt,
         reg_abi::{REG_A0, REG_T0},
     },
     WORD_SIZE,
@@ -35,7 +36,7 @@ use crate::{
     binfmt::image::MemoryImage,
     opcode::{MajorType, OpCode},
     session::PageFaults,
-    ExitCode, Segment,
+    Segment,
 };
 
 #[allow(dead_code)]
@@ -152,7 +153,7 @@ pub struct MachineContext {
     // This is just for diagnostics: tracks which words have been paged in.
     resident_words: BTreeSet<u32>,
 
-    exit_code: ExitCode,
+    split_insn: Option<u32>,
 
     insn_counter: u32,
 }
@@ -191,6 +192,12 @@ impl CircuitStepHandler<Elem> for MachineContext {
                     (args[4], args[5], args[6], args[7]),
                     args[8],
                 );
+                Ok(())
+            }
+            "bigintQuotient" => {
+                let (a, b) = args.split_at(bigint::WIDTH_BYTES * 2);
+                let q = self.bigint_quotient(a.try_into()?, b.try_into()?)?;
+                outs.copy_from_slice(&q[..]);
                 Ok(())
             }
             "pageInfo" => {
@@ -274,7 +281,7 @@ impl MachineContext {
             is_halted: false,
             is_flushing: false,
             resident_words: BTreeSet::new(),
-            exit_code: segment.exit_code,
+            split_insn: segment.split_insn,
             insn_counter: 0,
         }
     }
@@ -316,7 +323,7 @@ impl MachineContext {
             }
         }
 
-        if let ExitCode::SystemSplit(split_insn) = self.exit_code {
+        if let Some(split_insn) = self.split_insn {
             if self.insn_counter == split_insn {
                 if !self.is_flushing {
                     log::debug!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
@@ -394,6 +401,146 @@ impl MachineContext {
         }
         // log::debug!("  quot: {quot}, rem: {rem}");
         (split_word8(quot), split_word8(rem))
+    }
+
+    /// Division of two positive byte-limbed bigints. a = q * b + r.
+    ///
+    /// Assumes a and b are both normalized with limbs in range [0, 255].
+    /// Returns q as an array of BabyBearElems. (Drops r).
+    ///     When the denominator is zero, returns zero to facilitate use of the
+    ///     BigInt modular multiply circuit as an unreduced "checked
+    ///     multiply" circuit.
+    /// Returns an error when:
+    /// * Input denominator b is 0.
+    /// * Input denominator b is less than 9 bits.
+    /// * Quotient result q is greater than [bigint::WIDTH_BYTES] limbs. This
+    ///   will occur if the numerator `a` is the result of a multiplication of
+    ///   values `x` and `y` such that `floor(x * y / b) >=
+    ///   2^bigint::WIDTH_BITS`. If x and/or y is less than b (i.e. the modulus
+    ///   in bigint modular multiply) this constrain will be satisfied.
+    fn bigint_quotient(
+        &self,
+        a_elems: &[Elem; bigint::WIDTH_BYTES * 2],
+        b_elems: &[Elem; bigint::WIDTH_BYTES],
+    ) -> Result<[Elem; bigint::WIDTH_BYTES]> {
+        // This is a variant of school-book multiplication.
+        // Reference the Handbook of Elliptic and Hyper-elliptic Cryptography alg.
+        // 10.5.1
+
+        // Setup working buffers of u64 elements. We use u64 values here because this
+        // implementation does a lot of non-field opperations and so we need to take the
+        // inputs out of Montgomery form.
+        let mut a = [0u64; bigint::WIDTH_BYTES * 2 + 1];
+        for (i, ai) in a_elems.iter().copied().enumerate() {
+            a[i] = u64::from(ai)
+        }
+        let mut b = [0u64; bigint::WIDTH_BYTES + 1];
+        for (i, bi) in b_elems.iter().copied().enumerate() {
+            b[i] = u64::from(bi)
+        }
+        let mut q = [0u64; bigint::WIDTH_BYTES];
+
+        // Verify that the inputs are well-formed as byte-limbed BigInts.
+        // This would indicate a problem with the circuit, so we panic here.
+        for ai in a.iter().copied() {
+            if ai > 255 {
+                panic!("bigint quotient: input a is not well-formed");
+            }
+        }
+        for bi in b.iter().copied() {
+            if bi > 255 {
+                panic!("bigint quotient: input b is not well-formed");
+            }
+        }
+
+        // Determine n, the width of the denominator, and check for divide by zero.
+        let mut n = bigint::WIDTH_BYTES;
+        while n > 0 && b[n - 1] == 0 {
+            n -= 1;
+        }
+        if n == 0 {
+            // Divide by zero is strictly undefined, but the BigInt multiplier circuit uses
+            // a modulus of zero as a special case to support "checked multiply"
+            // of up to 256-bits. Return zero here to facilitate this.
+            return Ok([Elem::ZERO; bigint::WIDTH_BYTES]);
+        }
+        if n < 2 {
+            // FIXME: This routine should be updated to lift this restriction.
+            anyhow::bail!("bigint quotient: denominator must be at least 9 bits");
+        }
+        let m = a.len() - n - 1;
+
+        // Shift (i.e. multiply by two) the inputs until the leading bit is 1.
+        let mut shift_bits = 0u64;
+        while (b[n - 1] & (0x80 >> shift_bits)) == 0 {
+            shift_bits += 1;
+        }
+        let mut carry = 0u64;
+        for i in 0..n {
+            let tmp = (b[i] << shift_bits) + carry;
+            b[i] = tmp & 0xFF;
+            carry = tmp >> 8;
+        }
+        if carry != 0 {
+            panic!("bigint quotient: final carry in input shift");
+        }
+        for i in 0..(a.len() - 1) {
+            let tmp = (a[i] << shift_bits) + carry;
+            a[i] = tmp & 0xFF;
+            carry = tmp >> 8;
+        }
+        a[a.len() - 1] = carry;
+
+        for i in (0..=m).rev() {
+            // Approximate how many multiples of b can be subtracted. May overestimate by up
+            // to one.
+            let mut q_approx = cmp::min(((a[i + n] << 8) + a[i + n - 1]) / b[n - 1], 255);
+            while (q_approx * ((b[n - 1] << 8) + b[n - 2]))
+                > ((a[i + n] << 16) + (a[i + n - 1] << 8) + a[i + n - 2])
+            {
+                q_approx -= 1;
+            }
+
+            // Subtract from `a` multiples of the denominator.
+            let mut borrow = 0u64;
+            for j in 0..=n {
+                let sub = q_approx * b[j] + borrow;
+                if a[i + j] < (sub & 0xFF) {
+                    a[i + j] += 0x100 - (sub & 0xFF);
+                    borrow = (sub >> 8) + 1;
+                } else {
+                    a[i + j] -= sub & 0xFF;
+                    borrow = sub >> 8;
+                }
+            }
+            if borrow > 0 {
+                // Oops, went negative. Add back one multiple of b.
+                q_approx -= 1;
+                let mut carry = 0u64;
+                for j in 0..=n {
+                    let tmp = a[i + j] + b[j] + carry;
+                    a[i + j] = tmp & 0xFF;
+                    carry = tmp >> 8;
+                }
+                // Adding back one multiple of b should go from negative back to positive.
+                if borrow - carry != 0 {
+                    panic!("bigint quotient: underflow in bigint division");
+                }
+            }
+
+            if i < q.len() {
+                q[i] = q_approx;
+            } else if q_approx != 0 {
+                anyhow::bail!("bigint quotient: quotient exceeds allowed size");
+            }
+        }
+
+        // Write q into output array, converting back to field representation.
+        let mut q_elems = [Elem::ZERO; bigint::WIDTH_BYTES];
+        for i in 0..bigint::WIDTH_BYTES {
+            q_elems[i] = q[i].into();
+        }
+        Ok(q_elems)
     }
 
     fn log(&mut self, msg: &str, args: &[Elem]) {

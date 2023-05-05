@@ -30,7 +30,7 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
     fileno,
-    syscall::{sys_read, sys_write},
+    syscall::{bigint, sys_bigint, sys_read, sys_write},
 };
 
 risc0_zkvm::entry!(main);
@@ -178,6 +178,18 @@ pub fn main() {
                 last_cycles = now_cycles;
             }
             env::log("Busy loop complete");
+        }
+        MultiTestSpec::BigInt { x, y, modulus } => {
+            let mut result = [0u32; bigint::WIDTH_WORDS];
+            unsafe {
+                sys_bigint(&mut result, bigint::OP_MULTIPLY, &x, &y, &modulus);
+            }
+            env::commit_slice(&result);
+        }
+        MultiTestSpec::LibM => {
+            use core::hint::black_box;
+            let f = black_box(1.0_f32);
+            black_box(f.min(1.0));
         }
     }
 }

@@ -12,22 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::rc::Rc;
+
 use clap::Parser;
-use risc0_core::field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem};
-use risc0_zkp::{
-    core::hash::HashSuite,
-    hal::{EvalCheck, Hal},
+use risc0_zkvm::{
+    prove::{default_prover, Prover},
+    Executor, ExecutorEnv,
 };
-use risc0_zkvm::{prove::default_hal, ControlId, Executor, ExecutorEnv, Session, SessionReceipt};
 use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
 
 #[derive(Parser)]
-#[clap()]
+#[command()]
 struct Args {
     /// Number of iterations.
-    #[clap(long)]
+    #[arg(short, long)]
     iterations: u32,
+
+    #[arg(short, long, default_value_t = false)]
+    skip_prover: bool,
+}
+
+#[derive(Debug)]
+#[allow(unused)]
+struct Metrics {
+    segments: usize,
+    insn_cycles: usize,
+    cycles: usize,
+    seal: usize,
 }
 
 fn main() {
@@ -37,26 +49,41 @@ fn main() {
         .init();
 
     let args = Args::parse();
-    let (hal, eval) = default_hal();
-
-    let (session, receipt) = top(hal.as_ref(), &eval, args.iterations);
-    let po2 = session.segments[0].po2;
-    let seal = receipt.segments[0].get_seal_bytes().len();
-    let journal = receipt.journal.len();
-    let total = seal + journal;
-    println!("Po2: {po2}, Seal: {seal} bytes, Journal: {journal} bytes, Total: {total} bytes");
+    let prover = default_prover();
+    let metrics = top(prover, args.iterations, args.skip_prover);
+    println!("{metrics:?}");
 }
 
 #[tracing::instrument(skip_all)]
-fn top<H, E>(hal: &H, eval: &E, iterations: u32) -> (Session, SessionReceipt)
-where
-    H: Hal<Field = BabyBear, Elem = BabyBearElem, ExtElem = BabyBearExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
-    E: EvalCheck<H>,
-{
+fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
     let env = ExecutorEnv::builder().add_input(&[iterations]).build();
     let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = session.prove(hal, eval).unwrap();
-    (session, receipt)
+    let segments = session.resolve().unwrap();
+
+    let (cycles, insn_cycles) = segments
+        .iter()
+        .fold((0, 0), |(cycles, insn_cycles), segment| {
+            (
+                cycles + (1 << segment.po2),
+                insn_cycles + segment.insn_cycles,
+            )
+        });
+
+    let seal = if skip_prover {
+        0
+    } else {
+        let receipt = prover.prove_session(&session).unwrap();
+        receipt
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
+    };
+
+    Metrics {
+        segments: segments.len(),
+        insn_cycles,
+        cycles,
+        seal,
+    }
 }

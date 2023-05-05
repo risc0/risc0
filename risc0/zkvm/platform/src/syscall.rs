@@ -20,9 +20,10 @@ use crate::WORD_SIZE;
 
 pub mod ecall {
     pub const HALT: u32 = 0;
-    pub const OUTPUT: u32 = 1;
+    pub const INPUT: u32 = 1;
     pub const SOFTWARE: u32 = 2;
     pub const SHA: u32 = 3;
+    pub const BIGINT: u32 = 4;
 }
 
 pub mod halt {
@@ -70,6 +71,19 @@ pub mod reg_abi {
 
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
+
+pub mod bigint {
+    pub const OP_MULTIPLY: u32 = 0;
+
+    /// BigInt width, in bits, handled by the BigInt accelerator circuit.
+    pub const WIDTH_BITS: usize = 256;
+
+    /// BigInt width, in bytes, handled by the BigInt accelerator circuit.
+    pub const WIDTH_BYTES: usize = WIDTH_BITS / 8;
+
+    /// BigInt width, in words, handled by the BigInt accelerator circuit.
+    pub const WIDTH_WORDS: usize = WIDTH_BYTES / crate::WORD_SIZE;
+}
 
 // TODO: We can probably use ffi::CStr::from_bytes_with_nul once it's
 // const-stablized instead of rolling our own structure:
@@ -198,13 +212,14 @@ impl_syscall!(syscall_5, a3, a4, a5, a6, a7);
 
 #[inline(always)]
 #[no_mangle]
-pub unsafe extern "C" fn sys_halt() -> ! {
+pub unsafe extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) -> ! {
     #[cfg(target_os = "zkvm")]
     {
         asm!(
             "ecall",
             in("t0") ecall::HALT,
-            in("a0") halt::TERMINATE,
+            in("a0") (halt::TERMINATE | ((user_exit as u32) << 8)),
+            in("a1") out_state,
         );
         unreachable!();
     }
@@ -214,33 +229,14 @@ pub unsafe extern "C" fn sys_halt() -> ! {
 
 #[inline(always)]
 #[no_mangle]
-pub unsafe extern "C" fn sys_pause() {
+pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) {
     #[cfg(target_os = "zkvm")]
     {
         asm!(
             "ecall",
             in("t0") ecall::HALT,
-            in("a0") halt::PAUSE,
-        );
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
-}
-
-#[inline(always)]
-#[no_mangle]
-pub unsafe extern "C" fn sys_output(output_id: u32, output_value: u32) {
-    assert!(
-        output_id < 9,
-        "Invalid output ID. Expected: 0 - 8. Actual {output_id}"
-    );
-    #[cfg(target_os = "zkvm")]
-    {
-        asm!(
-            "ecall",
-            in("t0") ecall::OUTPUT,
-            in("a0") output_id,
-            in("a1") output_value,
+            in("a0") (halt::PAUSE | ((user_exit as u32) << 8)),
+            in("a1") out_state,
         );
     }
     #[cfg(not(target_os = "zkvm"))]
@@ -288,6 +284,31 @@ pub unsafe fn sys_sha_buffer(
             in("a2") buf,
             in("a3") buf.add(DIGEST_BYTES),
             in("a4") count,
+        );
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
+}
+
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn sys_bigint(
+    result: *mut [u32; bigint::WIDTH_WORDS],
+    op: u32,
+    x: *const [u32; bigint::WIDTH_WORDS],
+    y: *const [u32; bigint::WIDTH_WORDS],
+    modulus: *const [u32; bigint::WIDTH_WORDS],
+) {
+    #[cfg(target_os = "zkvm")]
+    {
+        asm!(
+            "ecall",
+            in("t0") ecall::BIGINT,
+            in("a0") result,
+            in("a1") op,
+            in("a2") x,
+            in("a3") y,
+            in("a4") modulus,
         );
     }
     #[cfg(not(target_os = "zkvm"))]
