@@ -206,8 +206,8 @@ fn continuation() {
     const COUNT: usize = 7; // Number of total chunks to aim for.
     let segment_limit_po2 = 15; // 32k cycles
 
-    // -1000: Hack to work around non-det in rust compiles.
-    let mut cycles = (1 << segment_limit_po2) - 1000;
+    // -5000: Hack to work around non-det in rust compiles.
+    let cycles = (1 << segment_limit_po2) - 5000;
     let spec = &to_vec(&MultiTestSpec::BusyLoop { cycles }).unwrap();
     let env = ExecutorEnv::builder()
         .add_input(&spec)
