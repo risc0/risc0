@@ -464,7 +464,7 @@ impl<'a> Executor<'a> {
             .monitor
             .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
 
-        let mut load_words = |ptr: u32| -> [u8; bigint::WIDTH_BYTES] {
+        let mut load_bigint_le_bytes = |ptr: u32| -> [u8; bigint::WIDTH_BYTES] {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
             for i in 0..bigint::WIDTH_WORDS {
                 arr[i] = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32).to_le();
@@ -477,9 +477,9 @@ impl<'a> Executor<'a> {
         }
 
         // Load inputs.
-        let x = U256::from_le_bytes(load_words(x_ptr));
-        let y = U256::from_le_bytes(load_words(y_ptr));
-        let n = U256::from_le_bytes(load_words(n_ptr));
+        let x = U256::from_le_bytes(load_bigint_le_bytes(x_ptr));
+        let y = U256::from_le_bytes(load_bigint_le_bytes(y_ptr));
+        let n = U256::from_le_bytes(load_bigint_le_bytes(n_ptr));
 
         // Compute modular multiplication, or simply multiplication if n == 0.
         let z: U256 = if n == U256::ZERO {
