@@ -29,9 +29,8 @@ use risc0_zkvm::{
 };
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
-    fileno,
+    fileno, memory,
     syscall::{bigint, sys_bigint, sys_read, sys_write},
-    memory,
 };
 
 risc0_zkvm::entry!(main);
