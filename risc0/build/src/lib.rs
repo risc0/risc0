@@ -32,7 +32,7 @@ use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
     MemoryImage, Program,
 };
-use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, memory::TEXT, memory::DATA};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};
 use tempfile::tempdir_in;
@@ -391,6 +391,12 @@ fn build_guest_package<P>(
                 // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
                 "-Z",
                 "remap-cwd-prefix=.",
+                // Put the TEXT and DATA segments where we expect them
+                "-C",
+                &format!("link-arg=-Ttext=0x{:08X}", TEXT.start()),
+                // Put the TEXT segment where we expect it
+                "-C",
+                &format!("link-arg=-Tdata=0x{:08X}", DATA.start()),
             ]
             .join("\x1f"),
         )

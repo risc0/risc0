@@ -14,8 +14,6 @@
 
 use std::io::{stdin, stdout, Read, Write};
 
-risc0_zkvm::entry!(main);
-
 pub fn main() {
     let test_mode = std::env::var("TEST_MODE").unwrap();
 

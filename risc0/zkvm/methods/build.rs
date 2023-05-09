@@ -29,7 +29,7 @@ fn main() {
             "risc0-zkvm-methods-guest",
             GuestOptions {
                 features: Vec::new(),
-                std: false,
+                std: true,
             },
         ),
         (

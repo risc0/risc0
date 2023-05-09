@@ -12,15 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_std]
-#![no_main]
-
 extern crate alloc;
 use alloc::vec;
 
 use risc0_zkvm::guest::{env, env::Read};
-
-risc0_zkvm::entry!(main);
 
 pub fn main() {
     let mut len: u32 = 0;

@@ -14,9 +14,6 @@
 
 //! Runs different tests based on the supplied MultiTestSpec.
 
-#![no_main]
-#![no_std]
-
 extern crate alloc;
 use alloc::vec;
 use core::arch::asm;
@@ -33,7 +30,6 @@ use risc0_zkvm_platform::{
     syscall::{bigint, sys_bigint, sys_read, sys_write},
 };
 
-risc0_zkvm::entry!(main);
 
 #[inline(never)]
 #[no_mangle]
