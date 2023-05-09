@@ -128,11 +128,6 @@ mod handlers {
         let msg = ::alloc::format!("{}", panic_info);
         crate::guest::abort(&msg)
     }
-
-    #[alloc_error_handler]
-    fn alloc_fault(_layout: Layout) -> ! {
-        crate::guest::abort("Memory allocation failure")
-    }
 }
 
 /// Used for defining a main entrypoint.

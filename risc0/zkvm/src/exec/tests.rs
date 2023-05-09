@@ -477,3 +477,12 @@ fn trace() {
         value: 1337
     }));
 }
+
+#[test]
+fn oom() {
+    let spec = to_vec(&MultiTestSpec::Oom).unwrap();
+    let env = ExecutorEnv::builder().add_input(&spec).build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let err = exec.run().err().unwrap();
+    assert!(err.to_string().contains("Guest panicked: panicked at 'Out of memory!'"));
+}
