@@ -12,23 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo_risczero::{Cargo, RisczeroCmd};
 use clap::Parser;
-use tracing_subscriber::EnvFilter;
 
-fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .init();
+#[derive(Parser)]
+/// `cargo risczero build`
+pub struct BuildCommand {}
 
-    let Cargo::Risczero(args) = Cargo::parse();
-
-    match args.command {
-        RisczeroCmd::New(new) => {
-            new.run();
-        }
-        RisczeroCmd::Build(build) => {
-            build.run();
-        }
+impl BuildCommand {
+    /// Execute this command
+    pub fn run(&self) {
+        println!("hello cargo risczero build");
     }
 }

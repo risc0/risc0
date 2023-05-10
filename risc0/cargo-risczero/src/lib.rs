@@ -17,11 +17,13 @@
 
 use clap::{Parser, Subcommand};
 
-use crate::commands::new::NewCommand;
+use crate::commands::{build::BuildCommand, new::NewCommand};
 
 /// Implementations of the commands
 pub mod commands {
-    /// Create a new RISC Zero project
+    /// Build a crate for RISC Zero.
+    pub mod build;
+    /// Create a new RISC Zero project.
     pub mod new;
 }
 
@@ -47,6 +49,8 @@ pub struct Risczero {
 pub enum RisczeroCmd {
     /// Creates a new risczero starter project.
     New(NewCommand),
+    /// Build a crate for RISC Zero.
+    Build(BuildCommand),
 }
 
 #[cfg(test)]
