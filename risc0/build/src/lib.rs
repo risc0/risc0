@@ -338,6 +338,7 @@ pub fn build_guest_package(
     guest_build_env: &GuestBuildEnv,
     features: Vec<String>,
     std: bool,
+    test: bool,
 ) {
     let skip_var_name = "RISC0_SKIP_BUILD";
     println!("cargo:rerun-if-env-changed={}", skip_var_name);
@@ -352,8 +353,12 @@ pub fn build_guest_package(
         std_parts.push("std");
     }
     let build_std = format!("build-std={}", std_parts.join(","));
-    let mut args = vec![
-        "build",
+    let mut args = if !test {
+        vec!["build"]
+    } else {
+        vec!["test", "--no-run"]
+    };
+    args.extend(vec![
         "--release",
         "--target",
         guest_build_env.target_spec.to_str().unwrap(),
@@ -365,7 +370,7 @@ pub fn build_guest_package(
         pkg.manifest_path.as_str(),
         "--target-dir",
         target_dir.as_ref().to_str().unwrap(),
-    ];
+    ]);
     let features_str = features.join(",");
     if !features.is_empty() {
         args.push("--features");
@@ -504,6 +509,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             &guest_build_env,
             guest_options.features,
             guest_options.std,
+            false,
         );
 
         for method in guest_methods(&guest_pkg, &guest_dir) {

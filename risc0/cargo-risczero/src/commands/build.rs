@@ -19,14 +19,18 @@ use clap::Parser;
 #[derive(Parser)]
 /// `cargo risczero build`
 pub struct BuildCommand {
-    // TODO(victor): Determine most or all of these automatically.
-    /// Manifest directory path
+    /// Manifest directory path.
     #[clap(long, default_value = ".")]
     pub manifest_dir: PathBuf,
 
     /// Output directory for build artifacts.
+    /// Determined from package metadata if not supplied.
     #[clap(long)]
     pub target_dir: Option<PathBuf>,
+
+    /// Build the package using `cargo test --no-run`.
+    #[clap(long)]
+    pub test: bool,
 }
 
 impl BuildCommand {
@@ -56,6 +60,13 @@ impl BuildCommand {
         println!("guest_build_env: {guest_build_env:?}");
         println!("running build_guest_package");
 
-        risc0_build::build_guest_package(&pkg, &target_dir, &guest_build_env, vec![], true);
+        risc0_build::build_guest_package(
+            &pkg,
+            &target_dir,
+            &guest_build_env,
+            vec![],
+            true,
+            self.test,
+        );
     }
 }
