@@ -299,7 +299,7 @@ impl<'a> Executor<'a> {
         // otherwise, commit memory and hart
 
         let segment_limit = self.env.get_segment_limit();
-        let total_pending_cycles = self.total_pending_cycles(&opcode);
+        let total_pending_cycles = self.total_pending_cycles(&opcode, &op_result);
         // log::debug!(
         //     "cycle: {}, segment: {}, total: {}",
         //     self.segment_cycle,
@@ -343,7 +343,7 @@ impl<'a> Executor<'a> {
             + ZK_CYCLES
     }
 
-    fn total_pending_cycles(&self, opcode: &OpCode) -> usize {
+    fn total_pending_cycles(&self, opcode: &OpCode, op_result: &OpCodeResult) -> usize {
         // How many cycles are required for the entire segment?
         // This sum is based on:
         // - ensure we don't split in the middle of a SHA compress
@@ -353,6 +353,7 @@ impl<'a> Executor<'a> {
         self.init_cycles
             + self.monitor.total_pending_fault_cycles()
             + opcode.cycles
+            + op_result.extra_cycles
             + self.body_cycles
             + self.fini_cycles
             + SHA_CYCLES
