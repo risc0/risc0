@@ -458,7 +458,17 @@ fn trace() {
                 value: 0x08000000,
             }] = window
             {
-                assert_eq!(cycle1 + 1, cycle2, "li should take 1 cycles: {:#?}", window);
+                // Note: it's possible that these instructions could lie between page
+                // boundaries. If that is the case, it means that the difference between cycle2
+                // and cycle1 could be multiples of page-in, which takes up 1094 cycles. Once we
+                // figure out a way to get reproducible builds, we should restrict the
+                // difference of cycles to a single number rather than taking the mod.
+                assert_eq!(
+                    (cycle2 - cycle1) % 1094,
+                    1,
+                    "li should take multiples of page-in cycles + 1: {:#?}",
+                    window
+                );
                 assert_eq!(
                     pc1 + WORD_SIZE as u32,
                     pc2,
