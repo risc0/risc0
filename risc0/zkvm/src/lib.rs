@@ -47,7 +47,7 @@ use risc0_zkp::core::hash::{
 };
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
-#[cfg(feature = "_binfmt")]
+#[cfg(feature = "binfmt")]
 pub use self::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
