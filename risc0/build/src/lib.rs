@@ -151,7 +151,7 @@ pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
         .manifest_path(&manifest_path)
         .no_deps()
         .exec()
-        .unwrap();
+        .expect("cargo metadata command failed");
     let mut matching: Vec<Package> = manifest_meta
         .packages
         .into_iter()
@@ -175,6 +175,19 @@ pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
         std::process::exit(-1);
     }
     matching.pop().unwrap()
+}
+
+/// Returns the given cargo Package from the metadata.
+#[doc(hidden)]
+pub fn get_target_dir(manifest_dir: impl AsRef<Path>) -> PathBuf {
+    let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
+    MetadataCommand::new()
+        .manifest_path(&manifest_path)
+        .no_deps()
+        .exec()
+        .expect("cargo metadata command failed")
+        .target_directory
+        .into()
 }
 
 /// When called from a build.rs, returns the current package being built.
