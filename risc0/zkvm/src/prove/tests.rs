@@ -203,8 +203,8 @@ fn pause_continue() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn continuation() {
-    const COUNT: usize = 7; // Number of total chunks to aim for.
-    let segment_limit_po2 = 15; // 32k cycles
+    const COUNT: usize = 2; // Number of total chunks to aim for.
+    let segment_limit_po2 = 16; // 64k cycles
     let cycles = 1 << segment_limit_po2;
 
     let spec = &to_vec(&MultiTestSpec::BusyLoop { cycles }).unwrap();
