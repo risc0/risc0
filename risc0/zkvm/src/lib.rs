@@ -20,7 +20,7 @@
 
 extern crate alloc;
 
-#[cfg(feature = "_binfmt")]
+#[cfg(feature = "binfmt")]
 pub mod binfmt;
 mod control_id;
 #[cfg(feature = "prove")]
