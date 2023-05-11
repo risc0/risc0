@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{
-    env::temp_dir,
-    str::FromStr,
-    sync::Arc,
-};
+use std::{env::temp_dir, str::FromStr, sync::Arc};
 
 use clap::Parser;
 use ethers_core::types::{H256, U256};
@@ -91,7 +87,9 @@ async fn main() {
         .build();
     let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
     let segment_dir = temp_dir();
-    let session = exec.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &segment_dir)?))).unwrap();
+    let session = exec
+        .run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &segment_dir)?)))
+        .unwrap();
     let receipt = session.prove().unwrap();
 
     let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
