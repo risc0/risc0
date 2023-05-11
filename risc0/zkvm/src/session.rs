@@ -182,7 +182,9 @@ impl SegmentRef for FileSegmentRef {
 }
 
 impl FileSegmentRef {
-    /// Construct a [FileSegmentRef] with the specified [Segment].
+    /// Construct a [FileSegmentRef]
+    ///
+    /// This builds a FileSegmentRef that stores `segment` in a file at `path`.
     pub fn new(segment: &Segment, path: &Path) -> anyhow::Result<Self> {
         let path = path.join(format!("{}.bincode", segment.index));
         let mut file = File::create(&path)?;
