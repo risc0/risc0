@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use chess_core::Inputs;
 use risc0_zkvm::guest::env;
 use shakmaty::{fen::Fen, san::San, CastlingMode, Chess, FromSetup, Move, Position, Setup};
-
-risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
     let inputs: Inputs = env::read();

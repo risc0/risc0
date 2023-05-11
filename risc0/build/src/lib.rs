@@ -32,13 +32,12 @@ use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
     MemoryImage, Program,
 };
-use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};
 use tempfile::tempdir_in;
 use zip::ZipArchive;
 
-const LINKER_SCRIPT: &str = include_str!("../risc0.ld");
 const TARGET_JSON: &str = include_str!("../riscv32im-risc0-zkvm-elf.json");
 
 #[derive(Debug, Deserialize)]
@@ -70,7 +69,7 @@ impl Risc0Method {
         }
 
         let elf = fs::read(&self.elf_path).unwrap();
-        let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
+        let program = Program::load_elf(&elf, memory::MEM_SIZE as u32).unwrap();
         let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
         image.get_root()
     }
@@ -142,19 +141,17 @@ fn sha_digest_with_hex(data: &[u8]) -> (Vec<u8>, String) {
 }
 
 /// Returns the given cargo Package from the metadata.
-fn get_package<P>(manifest_dir: P) -> Package
-where
-    P: AsRef<Path>,
-{
+#[doc(hidden)]
+pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
     let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
     let manifest_meta = MetadataCommand::new()
         .manifest_path(&manifest_path)
         .no_deps()
         .exec()
-        .unwrap();
-    let mut matching: Vec<&Package> = manifest_meta
+        .expect("cargo metadata command failed");
+    let mut matching: Vec<Package> = manifest_meta
         .packages
-        .iter()
+        .into_iter()
         .filter(|pkg| {
             let std_path: &Path = pkg.manifest_path.as_ref();
             std_path == &manifest_path
@@ -174,7 +171,20 @@ where
         );
         std::process::exit(-1);
     }
-    matching.pop().unwrap().clone()
+    matching.pop().unwrap()
+}
+
+/// Returns the given cargo Package from the metadata.
+#[doc(hidden)]
+pub fn get_target_dir(manifest_dir: impl AsRef<Path>) -> PathBuf {
+    let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
+    MetadataCommand::new()
+        .manifest_path(&manifest_path)
+        .no_deps()
+        .exec()
+        .expect("cargo metadata command failed")
+        .target_directory
+        .into()
 }
 
 /// When called from a build.rs, returns the current package being built.
@@ -195,10 +205,7 @@ fn guest_packages(pkg: &Package) -> Vec<Package> {
 }
 
 /// Returns all methods associated with the given riscv guest package.
-fn guest_methods<P>(pkg: &Package, target_dir: P) -> Vec<Risc0Method>
-where
-    P: AsRef<Path>,
-{
+fn guest_methods(pkg: &Package, target_dir: impl AsRef<Path>) -> Vec<Risc0Method> {
     pkg.targets
         .iter()
         .filter(|target| target.kind.iter().any(|kind| kind == "bin"))
@@ -214,23 +221,17 @@ where
 }
 
 #[derive(Debug)]
-struct GuestBuildEnv {
+#[doc(hidden)]
+pub struct GuestBuildEnv {
     target_spec: PathBuf,
     rust_lib_src: PathBuf,
 }
 
-fn setup_guest_build_env<P>(out_dir: P) -> GuestBuildEnv
-where
-    P: AsRef<Path>,
-{
+#[doc(hidden)]
+pub fn setup_guest_build_env(out_dir: impl AsRef<Path>) -> GuestBuildEnv {
     // RISCV target specification
     let target_spec_path = out_dir.as_ref().join("riscv32im-risc0-zkvm-elf.json");
-    let linker_script: String = LINKER_SCRIPT.escape_default().to_string();
-    fs::write(
-        &target_spec_path,
-        TARGET_JSON.replace("<LINKER-SCRIPT>", &linker_script),
-    )
-    .unwrap();
+    fs::write(&target_spec_path, TARGET_JSON).unwrap();
 
     // Rust standard library.  If any of the RUST_LIB_MAP changed, we
     // want to have a different hash so that we make sure we recompile.
@@ -325,17 +326,17 @@ where
     fs::rename(&tmp_dest_base, dest_base.as_ref()).unwrap();
 }
 
-// Builds a package that targets the riscv guest into the specified target
-// directory.
-fn build_guest_package<P>(
+/// Builds a package that targets the riscv guest into the specified target
+/// directory.
+#[doc(hidden)]
+pub fn build_guest_package(
     pkg: &Package,
-    target_dir: P,
+    target_dir: impl AsRef<Path>,
     guest_build_env: &GuestBuildEnv,
     features: Vec<String>,
     std: bool,
-) where
-    P: AsRef<Path>,
-{
+    cargo_command: &[&str],
+) {
     let skip_var_name = "RISC0_SKIP_BUILD";
     println!("cargo:rerun-if-env-changed={}", skip_var_name);
     if env::var(skip_var_name).is_ok() {
@@ -349,8 +350,8 @@ fn build_guest_package<P>(
         std_parts.push("std");
     }
     let build_std = format!("build-std={}", std_parts.join(","));
-    let mut args = vec![
-        "build",
+    let mut args: Vec<&str> = cargo_command.into();
+    args.extend(&[
         "--release",
         "--target",
         guest_build_env.target_spec.to_str().unwrap(),
@@ -362,7 +363,7 @@ fn build_guest_package<P>(
         pkg.manifest_path.as_str(),
         "--target-dir",
         target_dir.as_ref().to_str().unwrap(),
-    ];
+    ]);
     let features_str = features.join(",");
     if !features.is_empty() {
         args.push("--features");
@@ -391,6 +392,16 @@ fn build_guest_package<P>(
                 // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
                 "-Z",
                 "remap-cwd-prefix=.",
+                // Put the TEXT and DATA segments where we expect them
+                "-C",
+                &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT.start()),
+                // Put the TEXT segment where we expect it
+                "-C",
+                &format!("link-arg=-Tdata=0x{:08X}", memory::DATA.start()),
+                // Apparently not having an entry point is only a linker warning(!), so
+                // error out in this case.
+                "-C",
+                "link-arg=--fatal-warnings",
             ]
             .join("\x1f"),
         )
@@ -459,6 +470,7 @@ impl Default for GuestOptions {
 /// Specify custom options for a guest package by defining its [GuestOptions].
 /// See [embed_methods].
 pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestOptions>) {
+    // Determine the output directory, in the target folder, for the guest binary.
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_dir = out_dir
@@ -472,11 +484,13 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
         .unwrap()
         .join("riscv-guest");
 
+    // Read the cargo metadata for info from `[package.metadata.risc0]`.
     let pkg = current_package();
     let guest_packages = guest_packages(&pkg);
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
+    // Get additional sources needed e.g. target JSON and Rust standard lib source.
     let guest_build_env = setup_guest_build_env(&out_dir);
 
     for guest_pkg in guest_packages {
@@ -492,6 +506,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             &guest_build_env,
             guest_options.features,
             guest_options.std,
+            &["build"],
         );
 
         for method in guest_methods(&guest_pkg, &guest_dir) {

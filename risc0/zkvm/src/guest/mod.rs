@@ -66,6 +66,7 @@ use core::{arch::asm, mem, ptr};
 #[cfg(target_os = "zkvm")]
 use getrandom::{register_custom_getrandom, Error};
 use risc0_zkvm_platform::{
+    memory,
     syscall::{nr::SYS_PANIC, sys_panic, sys_rand},
     WORD_SIZE,
 };
@@ -154,27 +155,32 @@ macro_rules! entry {
 #[cfg(target_os = "zkvm")]
 #[no_mangle]
 unsafe extern "C" fn __start() {
-    extern "C" {
-        static mut __bss_begin: *mut u32;
-        static mut __bss_end: *mut u32;
-    }
-
-    let mut bss = __bss_begin;
-    while bss < __bss_end {
-        ptr::write_volatile(bss, mem::zeroed());
-        bss = bss.offset(1);
-    }
-
     env::init();
 
-    extern "Rust" {
-        fn __main();
+    #[cfg(not(feature = "std"))]
+    {
+        extern "Rust" {
+            fn __main();
+        }
+        __main()
     }
-    __main();
+
+    #[cfg(feature = "std")]
+    {
+        extern "C" {
+            fn main();
+        }
+        main()
+    }
 
     env::finalize(true, 0);
 }
 
+static STACK_START: usize = memory::STACK.end();
+
+/// Entry point; sets up global pointer and stack pointer and passes
+/// to zkvm_start.  TODO: when asm_const is stablized, use that here
+/// instead of defining a symbol and dereferencing it.
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(
     r#"
@@ -185,9 +191,11 @@ _start:
     .option norelax;
     la gp, __global_pointer$;
     .option pop;
-    la sp, __stack_init$;
-    jal ra, __start
-"#
+    la sp, {0}
+    lw sp, 0(sp)
+    jal ra, __start;
+"#,
+    sym STACK_START
 );
 
 /// Require that accesses to behind the given pointer before the memory

@@ -7,6 +7,7 @@ Cargo extension to help create, manage, and test [RISC Zero](https://github.com/
 ```bash
 ## Install from crates.io
 cargo install cargo-risczero
+
 ## Installing from local source
 cargo install --path risc0/cargo-risczero
 ```

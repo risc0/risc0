@@ -12,15 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_zkvm::{
     guest::{env, memory_barrier, sha},
     sha::Sha256,
 };
 use risc0_zkvm_methods::bench::{BenchmarkSpec, SpecWithIters};
-
-risc0_zkvm::entry!(main);
 
 pub fn main() {
     let SpecWithIters(spec, iters) = env::read();
