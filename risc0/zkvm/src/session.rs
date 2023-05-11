@@ -16,12 +16,16 @@
 //! execution traces between the execution phase and the proving phase.
 
 use alloc::collections::BTreeSet;
+use std::{
+    env::temp_dir,
+    fs::File,
+    io::{Read, Write},
+    path::PathBuf,
+};
 
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
-use alloc::boxed::Box;
 use serde_json;
-use std::{env::temp_dir, fs::File, path::PathBuf, io::Read, io::Write};
 
 use crate::{exec::SyscallRecord, receipt::ExitCode, MemoryImage};
 
@@ -160,14 +164,12 @@ impl SimpleSegmentRef {
 }
 
 /// A basic implementation of a [SegmentRef] using local temporary files
-/// 
+///
 /// The [Segment] is stored in a local temporary file in this implementation,
 /// and the SegmentRef holds the filename.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct TempFileSegmentRef {
-    // TODO
     path: PathBuf,
-    // segment: Segment,
 }
 
 #[typetag::serde]
