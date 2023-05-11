@@ -90,7 +90,8 @@ async fn main() {
         .add_input(&to_vec(&zkdb).unwrap())
         .build();
     let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
-    let session = exec.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &temp_dir())?))).unwrap();
+    let segment_dir = temp_dir();
+    let session = exec.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &segment_dir)?))).unwrap();
     let receipt = session.prove().unwrap();
 
     let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
