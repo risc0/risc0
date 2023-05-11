@@ -19,6 +19,9 @@ use alloc::collections::BTreeSet;
 
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
+use alloc::boxed::Box;
+use serde_json;
+use std::{env::temp_dir, fs::File, path::PathBuf, io::Read, io::Write};
 
 use crate::{exec::SyscallRecord, receipt::ExitCode, MemoryImage};
 
@@ -153,5 +156,39 @@ impl SimpleSegmentRef {
     /// Construct a [SimpleSegmentRef] with the specified [Segment].
     pub fn new(segment: Segment) -> Self {
         Self { segment }
+    }
+}
+
+/// A basic implementation of a [SegmentRef] using local temporary files
+/// 
+/// The [Segment] is stored in a local temporary file in this implementation,
+/// and the SegmentRef holds the filename.
+#[derive(Clone, Serialize, Deserialize)]
+pub struct TempFileSegmentRef {
+    // TODO
+    path: PathBuf,
+    // segment: Segment,
+}
+
+#[typetag::serde]
+impl SegmentRef for TempFileSegmentRef {
+    fn resolve(&self) -> anyhow::Result<Segment> {
+        let mut contents = String::new();
+        let mut file = File::open(&self.path)?;
+        file.read_to_string(&mut contents)?;
+        let segment: Segment = serde_json::from_str(&contents)?;
+        Ok(segment)
+    }
+}
+
+impl TempFileSegmentRef {
+    /// Construct a [TempFileSegmentRef] with the specified [Segment].
+    pub fn new(segment: Segment) -> anyhow::Result<Self> {
+        let mut path = temp_dir();
+        path.push(segment.post_image_id.to_string());
+        let mut file = File::create(&path)?;
+        let serialized = serde_json::to_string(&segment)?;
+        file.write(serialized.as_bytes())?;
+        Ok(Self { path })
     }
 }
