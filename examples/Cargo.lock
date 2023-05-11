@@ -3076,6 +3076,7 @@ name = "risc0-zkvm"
 version = "0.14.0"
 dependencies = [
  "anyhow",
+ "bincode",
  "bytemuck",
  "cfg-if",
  "elf",
@@ -3096,7 +3097,6 @@ dependencies = [
  "risc0-zkvm-platform",
  "rrs-lib",
  "serde",
- "serde_json",
  "sha2",
  "tracing",
  "typetag",

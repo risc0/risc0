@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{str::FromStr, sync::Arc};
+use std::{
+    env::temp_dir,
+    str::FromStr,
+    sync::Arc,
+};
 
 use clap::Parser;
 use ethers_core::types::{H256, U256};
@@ -25,7 +29,7 @@ use evm_methods::EVM_ELF;
 use log::info;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, TempFileSegmentRef,
+    Executor, ExecutorEnv, FileSegmentRef,
 };
 
 #[derive(Parser, Debug)]
@@ -86,7 +90,7 @@ async fn main() {
         .add_input(&to_vec(&zkdb).unwrap())
         .build();
     let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
-    let session = exec.run_with_callback(|segment| Ok(Box::new(TempFileSegmentRef::new(segment)?))).unwrap();
+    let session = exec.run_with_callback(|segment| Ok(Box::new(FileSegmentRef::new(&segment, &temp_dir())?))).unwrap();
     let receipt = session.prove().unwrap();
 
     let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");

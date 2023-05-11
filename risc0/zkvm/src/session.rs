@@ -17,15 +17,13 @@
 
 use alloc::collections::BTreeSet;
 use std::{
-    env::temp_dir,
     fs::File,
     io::{Read, Write},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
-use serde_json;
 
 use crate::{exec::SyscallRecord, receipt::ExitCode, MemoryImage};
 
@@ -163,34 +161,33 @@ impl SimpleSegmentRef {
     }
 }
 
-/// A basic implementation of a [SegmentRef] using local temporary files
+/// A basic implementation of a [SegmentRef] that saves the segment to a file
 ///
-/// The [Segment] is stored in a local temporary file in this implementation,
+/// The [Segment] is stored in a user-specified file in this implementation,
 /// and the SegmentRef holds the filename.
 #[derive(Clone, Serialize, Deserialize)]
-pub struct TempFileSegmentRef {
+pub struct FileSegmentRef {
     path: PathBuf,
 }
 
 #[typetag::serde]
-impl SegmentRef for TempFileSegmentRef {
+impl SegmentRef for FileSegmentRef {
     fn resolve(&self) -> anyhow::Result<Segment> {
-        let mut contents = String::new();
+        let mut contents = Vec::new();
         let mut file = File::open(&self.path)?;
-        file.read_to_string(&mut contents)?;
-        let segment: Segment = serde_json::from_str(&contents)?;
+        file.read_to_end(&mut contents)?;
+        let segment: Segment = bincode::deserialize(&contents)?;
         Ok(segment)
     }
 }
 
-impl TempFileSegmentRef {
-    /// Construct a [TempFileSegmentRef] with the specified [Segment].
-    pub fn new(segment: Segment) -> anyhow::Result<Self> {
-        let mut path = temp_dir();
-        path.push(segment.post_image_id.to_string());
+impl FileSegmentRef {
+    /// Construct a [FileSegmentRef] with the specified [Segment].
+    pub fn new(segment: &Segment, path: &Path) -> anyhow::Result<Self> {
+        let path = path.join(format!("{}.bincode", segment.index));
         let mut file = File::create(&path)?;
-        let serialized = serde_json::to_string(&segment)?;
-        file.write(serialized.as_bytes())?;
+        let contents = bincode::serialize(&segment)?;
+        file.write(&contents)?;
         Ok(Self { path })
     }
 }
