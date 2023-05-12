@@ -1170,6 +1170,7 @@ dependencies = [
  "log",
  "risc0-zkvm",
  "serde",
+ "tempfile",
  "tokio",
 ]
 
@@ -3075,6 +3076,7 @@ name = "risc0-zkvm"
 version = "0.14.0"
 dependencies = [
  "anyhow",
+ "bincode",
  "bytemuck",
  "cfg-if",
  "crypto-bigint 0.5.1",
