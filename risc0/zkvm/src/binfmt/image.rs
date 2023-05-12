@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{Context, Result};
+use std::collections::BTreeMap;
+
+use anyhow::Result;
 use risc0_zkp::core::{
     digest::Digest,
     hash::sha::{Sha256, BLOCK_BYTES, SHA256_INIT},
@@ -20,7 +22,6 @@ use risc0_zkp::core::{
 use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE},
     syscall::DIGEST_BYTES,
-    WORD_SIZE,
 };
 use serde::{Deserialize, Serialize};
 
@@ -47,6 +48,8 @@ pub struct PageTableInfo {
     num_pages: u32,
     pub num_root_entries: u32,
     _layers: Vec<u32>,
+    /// Hash of an uninitialized page containing all zeros.
+    zero_page_hash: Digest,
 }
 
 impl PageTableInfo {
@@ -71,6 +74,7 @@ impl PageTableInfo {
         let root_page_addr = root_idx * page_size;
         let num_root_entries = (root_addr - root_page_addr) / DIGEST_BYTES as u32;
         assert_eq!(root_idx, num_pages);
+        let zero_page_hash = hash_page_bytes(&vec![0_u8; page_size as usize]);
 
         log::debug!("root_page_addr: 0x{root_page_addr:08x}, root_addr: 0x{root_addr:08x}");
 
@@ -84,6 +88,7 @@ impl PageTableInfo {
             num_pages,
             num_root_entries,
             _layers: layers,
+            zero_page_hash,
         }
     }
 
@@ -107,8 +112,8 @@ impl PageTableInfo {
 /// proper, this includes some metadata about the page table.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct MemoryImage {
-    /// The memory image as a vector of bytes
-    pub buf: Vec<u8>,
+    /// Sparse memory memory image as a map from page index to page.
+    pages: BTreeMap<u32, Vec<u8>>,
 
     /// Metadata about the structure of the page table
     pub info: PageTableInfo,
@@ -118,30 +123,64 @@ pub struct MemoryImage {
 }
 
 impl MemoryImage {
+    /// Writes the given byte array in this memory image at the given
+    /// address.  The caller is responsible for ensuring the bytes do
+    /// not overlap a page boundry.
+    pub fn store_region_in_page(&mut self, addr: u32, bytes: &[u8]) {
+        let page_idx = self.info.get_page_index(addr);
+        let page = self.pages.entry(page_idx).or_insert_with(|| {
+            if addr as usize >= MEM_SIZE {
+                panic!("address {addr:08X} outside MEM_SIZE")
+            }
+            vec![0_u8; self.info.page_size as usize]
+        });
+        let page_start = self.info.get_page_addr(page_idx);
+        page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()]
+            .clone_from_slice(bytes);
+    }
+
+    /// Reads the given byte array in this memory image at the given
+    /// address  The caller is responsible for ensuring the bytes do
+    /// not overlap a page boundry.
+    pub fn load_region_in_page(&self, addr: u32, bytes: &mut [u8]) {
+        let page_idx = self.info.get_page_index(addr);
+        let page_start = self.info.get_page_addr(page_idx);
+
+        if let Some(page) = self.pages.get(&page_idx) {
+            bytes.clone_from_slice(
+                &page[(addr - page_start) as usize..(addr - page_start) as usize + bytes.len()],
+            );
+        } else {
+            assert!(
+                addr as usize <= MEM_SIZE,
+                "address {addr:08X} outside MEM_SIZE ({MEM_SIZE:08X})"
+            );
+            bytes.fill(0);
+        }
+    }
+
     /// Construct the initial memory image for `program`
     ///
     /// The result is a MemoryImage with the ELF of `program` loaded (but
     /// execution not yet begun), and with the page table Merkle tree
     /// constructed.
     pub fn new(program: &Program, page_size: u32) -> Result<Self> {
-        let mut buf = vec![0_u8; MEM_SIZE];
-
-        // Load the ELF into the memory image.
-        for (addr, data) in program.image.iter() {
-            let addr = *addr as usize;
-            let bytes = data.to_le_bytes();
-            buf.get_mut(addr..(WORD_SIZE + addr))
-                .context("Invalid Elf Program, address outside MEM_SIZE")?
-                .copy_from_slice(&bytes[..WORD_SIZE]);
-        }
-
         // Compute the page table hashes except for the very last root hash.
         let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
         let mut img = Self {
-            buf,
+            pages: BTreeMap::new(),
             info,
             pc: program.entry,
         };
+
+        // Load the ELF into the memory image.
+        for (&addr, &data) in program.image.iter() {
+            if addr as usize >= MEM_SIZE {
+                anyhow::bail!("Invalid Elf Program, address outside MEM_SIZE");
+            }
+            img.store_region_in_page(addr, &data.to_le_bytes());
+        }
+
         img.hash_pages();
         Ok(img)
     }
@@ -149,13 +188,17 @@ impl MemoryImage {
     /// Calculate and update the image merkle tree within this image.
     pub fn hash_pages(&mut self) {
         for i in 0..self.info.num_pages {
-            let page_addr = self.info.get_page_addr(i as u32);
-            let page =
-                &self.buf[page_addr as usize..page_addr as usize + self.info.page_size as usize];
-            let digest = hash_page(page);
+            let digest = self.hash_page(i);
             let entry_addr = self.info.get_page_entry_addr(i as u32);
-            self.buf[entry_addr as usize..entry_addr as usize + DIGEST_BYTES]
-                .copy_from_slice(digest.as_bytes());
+            self.store_region_in_page(entry_addr, digest.as_bytes());
+        }
+    }
+
+    fn hash_page(&self, page_idx: u32) -> Digest {
+        if let Some(page) = self.pages.get(&page_idx) {
+            hash_page_bytes(page)
+        } else {
+            self.info.zero_page_hash
         }
     }
 
@@ -169,11 +212,10 @@ impl MemoryImage {
         let mut page_idx = self.info.get_page_index(addr);
         while page_idx < self.info.root_idx {
             let page_addr = self.info.get_page_addr(page_idx);
-            let page =
-                &self.buf[page_addr as usize..page_addr as usize + self.info.page_size as usize];
-            let expected = hash_page(page);
+            let expected = self.hash_page(page_idx);
             let entry_addr = self.info.get_page_entry_addr(page_idx);
-            let entry = &self.buf[entry_addr as usize..entry_addr as usize + DIGEST_BYTES];
+            let mut entry = [0_u8; DIGEST_BYTES];
+            self.load_region_in_page(entry_addr, &mut entry);
             let actual = Digest::try_from(entry)?;
             log::debug!(
                 "page_idx: {page_idx}, page_addr: 0x{page_addr:08x} entry_addr: 0x{entry_addr:08x}"
@@ -186,9 +228,9 @@ impl MemoryImage {
 
         let root_page_addr = self.info.root_page_addr;
         let root_page_bytes = self.info.num_root_entries * DIGEST_BYTES as u32;
-        let root_page =
-            &self.buf[root_page_addr as usize..root_page_addr as usize + root_page_bytes as usize];
-        let expected = hash_page(root_page);
+        let mut root_page = vec![0_u8; root_page_bytes as usize];
+        self.load_region_in_page(root_page_addr, &mut root_page);
+        let expected = hash_page_bytes(&root_page);
         let root = self.get_root();
         if expected != root {
             anyhow::bail!("Invalid root hash: {} != {}", expected, root);
@@ -199,13 +241,15 @@ impl MemoryImage {
 
     /// Compute and return the root entry of the merkle tree.
     pub fn get_root(&self) -> Digest {
-        let root_page_addr = self.info.root_page_addr;
-        let root_page = &self.buf[root_page_addr as usize..self.info.root_addr as usize];
-        hash_page(root_page)
+        let root_page = self
+            .pages
+            .get(&self.info.root_idx)
+            .expect("Missing root page?");
+        hash_page_bytes(&root_page[..(self.info.root_addr - self.info.root_page_addr) as usize])
     }
 }
 
-fn hash_page(page: &[u8]) -> Digest {
+fn hash_page_bytes(page: &[u8]) -> Digest {
     let mut state = SHA256_INIT;
     assert!(page.len() % BLOCK_BYTES == 0);
     for block in page.chunks_exact(BLOCK_BYTES) {
