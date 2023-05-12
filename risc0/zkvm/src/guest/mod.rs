@@ -143,11 +143,16 @@ mod handlers {
 #[macro_export]
 macro_rules! entry {
     ($path:path) => {
-        #[no_mangle]
-        fn __main() {
-            // type check the given path
-            let f: fn() = $path;
-            f()
+        // Type check the given path
+        const ZKVM_ENTRY: fn() = $path;
+
+        // Include generated main in a module so we don't conflict
+        // with any other definitions of "main" in this file.
+        mod zkvm_generated_main {
+            #[no_mangle]
+            fn main() {
+                super::ZKVM_ENTRY()
+            }
         }
     };
 }
@@ -157,15 +162,6 @@ macro_rules! entry {
 unsafe extern "C" fn __start() {
     env::init();
 
-    #[cfg(not(feature = "std"))]
-    {
-        extern "Rust" {
-            fn __main();
-        }
-        __main()
-    }
-
-    #[cfg(feature = "std")]
     {
         extern "C" {
             fn main();
