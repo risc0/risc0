@@ -13,6 +13,7 @@ evm-methods = { path = "methods" }
 log = "0.4"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
+tempfile = "3.5"
 tokio = "1.23"
 
 [features]
