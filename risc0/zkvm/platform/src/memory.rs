@@ -53,11 +53,13 @@ impl Region {
     }
 }
 
-// These should match the linker script in `risc0/build/risc0.ld`.
-pub const STACK: Region = Region::new(0x0000_0400, mb(8) - kb(1));
-pub const DATA: Region = Region::new(0x0008_0000, mb(24));
-pub const HEAP: Region = Region::new(0x0200_0000, mb(80));
-pub const TEXT: Region = Region::new(0x0700_0000, mb(80));
+/// Program (text, data, and bss) gets loaded in at this location.  HEAP begins
+/// right afterwards.
+pub const TEXT_START: u32 = 0x0000_0400;
+/// Top of stack; stack grows down from this location.
+pub const STACK_TOP: u32 = 0x0BF_FFC00;
+/// Minimum mount of room to leave for the stack when allocating from the heap.
+pub const RESERVED_STACK: u32 = mb(1) as u32;
 pub const SYSTEM: Region = Region::new(0x0C00_0000, mb(16));
 pub const PAGE_TABLE: Region = Region::new(0x0D00_0000, mb(16));
 pub const PRE_LOAD: Region = Region::new(0x0D70_0000, mb(9));

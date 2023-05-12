@@ -176,7 +176,7 @@ unsafe extern "C" fn __start() {
     env::finalize(true, 0);
 }
 
-static STACK_START: usize = memory::STACK.end();
+static STACK_TOP: u32 = memory::STACK_TOP;
 
 /// Entry point; sets up global pointer and stack pointer and passes
 /// to zkvm_start.  TODO: when asm_const is stablized, use that here
@@ -195,7 +195,7 @@ _start:
     lw sp, 0(sp)
     jal ra, __start;
 "#,
-    sym STACK_START
+    sym STACK_TOP
 );
 
 /// Require that accesses to behind the given pointer before the memory
