@@ -28,7 +28,10 @@ fn main() {
             new.run();
         }
         RisczeroCmd::Build(build) => {
-            build.run();
+            build.run("build");
+        }
+        RisczeroCmd::Test(build) => {
+            build.run("test");
         }
     }
 }

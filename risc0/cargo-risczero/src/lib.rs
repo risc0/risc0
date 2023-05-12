@@ -51,6 +51,8 @@ pub enum RisczeroCmd {
     New(NewCommand),
     /// Build a crate for RISC Zero.
     Build(BuildCommand),
+    /// Build and test a crate for RISC Zero.
+    Test(BuildCommand),
 }
 
 #[cfg(test)]

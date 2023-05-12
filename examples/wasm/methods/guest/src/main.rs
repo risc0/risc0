@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
 #![allow(unused_imports)]
-
-risc0_zkvm::guest::entry!(main);
 
 use risc0_zkvm::guest::env;
 use wasmi::{Caller, Engine, Func, Linker, Module, Store};

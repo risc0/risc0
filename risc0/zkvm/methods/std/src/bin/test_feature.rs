@@ -15,6 +15,8 @@
 #[allow(unused_imports)]
 use std::compile_error;
 
+use risc0_zkvm as _;
+
 pub fn main() {
     #[cfg(not(all(feature = "test_feature1", feature = "test_feature2")))]
     compile_error!("Test feature was not found.");

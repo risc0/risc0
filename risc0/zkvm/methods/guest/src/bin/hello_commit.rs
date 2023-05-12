@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![no_std]
+#![no_main]
+
 use risc0_zkvm::guest::env;
+
+risc0_zkvm::entry!(main);
 
 pub fn main() {
     env::commit(b"hello world");

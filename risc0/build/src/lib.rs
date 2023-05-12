@@ -32,10 +32,7 @@ use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
     MemoryImage, Program,
 };
-use risc0_zkvm_platform::{
-    memory::{DATA, MEM_SIZE, TEXT},
-    PAGE_SIZE,
-};
+use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};
 use tempfile::tempdir_in;
@@ -72,7 +69,7 @@ impl Risc0Method {
         }
 
         let elf = fs::read(&self.elf_path).unwrap();
-        let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
+        let program = Program::load_elf(&elf, memory::MEM_SIZE as u32).unwrap();
         let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
         image.get_root()
     }
@@ -338,7 +335,7 @@ pub fn build_guest_package(
     guest_build_env: &GuestBuildEnv,
     features: Vec<String>,
     std: bool,
-    test: bool,
+    cargo_command: &[&str],
 ) {
     let skip_var_name = "RISC0_SKIP_BUILD";
     println!("cargo:rerun-if-env-changed={}", skip_var_name);
@@ -353,12 +350,8 @@ pub fn build_guest_package(
         std_parts.push("std");
     }
     let build_std = format!("build-std={}", std_parts.join(","));
-    let mut args = if !test {
-        vec!["build"]
-    } else {
-        vec!["test", "--no-run"]
-    };
-    args.extend(vec![
+    let mut args: Vec<&str> = cargo_command.into();
+    args.extend(&[
         "--release",
         "--target",
         guest_build_env.target_spec.to_str().unwrap(),
@@ -401,10 +394,14 @@ pub fn build_guest_package(
                 "remap-cwd-prefix=.",
                 // Put the TEXT and DATA segments where we expect them
                 "-C",
-                &format!("link-arg=-Ttext=0x{:08X}", TEXT.start()),
+                &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT.start()),
                 // Put the TEXT segment where we expect it
                 "-C",
-                &format!("link-arg=-Tdata=0x{:08X}", DATA.start()),
+                &format!("link-arg=-Tdata=0x{:08X}", memory::DATA.start()),
+                // Apparently not having an entry point is only a linker warning(!), so
+                // error out in this case.
+                "-C",
+                "link-arg=--fatal-warnings",
             ]
             .join("\x1f"),
         )
@@ -509,7 +506,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             &guest_build_env,
             guest_options.features,
             guest_options.std,
-            false,
+            &["build"],
         );
 
         for method in guest_methods(&guest_pkg, &guest_dir) {

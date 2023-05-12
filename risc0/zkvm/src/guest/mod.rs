@@ -154,30 +154,26 @@ macro_rules! entry {
 
 #[cfg(target_os = "zkvm")]
 #[no_mangle]
-extern "C" fn zkvm_start() {
+unsafe extern "C" fn __start() {
     env::init();
 
-    extern "C" {
-        fn main();
+    #[cfg(not(feature = "std"))]
+    {
+        extern "Rust" {
+            fn __main();
+        }
+        __main()
     }
-    unsafe {
-        main();
+
+    #[cfg(feature = "std")]
+    {
+        extern "C" {
+            fn main();
+        }
+        main()
     }
 
     env::finalize(true, 0);
-}
-
-/// Require that accesses to behind the given pointer before the memory
-/// barrier don't get optimized away or reordered to after the memory
-/// barrier.
-pub fn memory_barrier<T>(ptr: *const T) {
-    // SAFETY: This passes a pointer in, but does nothing with it.
-    #[cfg(target_os = "zkvm")]
-    unsafe {
-        asm!("/* {0} */", in(reg) (ptr))
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst)
 }
 
 static STACK_START: usize = memory::STACK.end();
@@ -197,7 +193,20 @@ _start:
     .option pop;
     la sp, {0}
     lw sp, 0(sp)
-    jal ra, zkvm_start;
+    jal ra, __start;
 "#,
     sym STACK_START
 );
+
+/// Require that accesses to behind the given pointer before the memory
+/// barrier don't get optimized away or reordered to after the memory
+/// barrier.
+pub fn memory_barrier<T>(ptr: *const T) {
+    // SAFETY: This passes a pointer in, but does nothing with it.
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        asm!("/* {0} */", in(reg) (ptr))
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst)
+}

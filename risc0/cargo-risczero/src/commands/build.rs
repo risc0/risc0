@@ -28,14 +28,13 @@ pub struct BuildCommand {
     #[clap(long)]
     pub target_dir: Option<PathBuf>,
 
-    /// Build the package using `cargo test --no-run`.
-    #[clap(long)]
-    pub test: bool,
+    /// Additional arguments to pass to "cargo build" on the guest
+    pub args: Vec<String>,
 }
 
 impl BuildCommand {
     /// Execute this command
-    pub fn run(&self) {
+    pub fn run(&self, subcommand: &str) {
         let manifest_dir = match fs::canonicalize(&self.manifest_dir) {
             Ok(path) => path,
             Err(ref err) => panic!(
@@ -56,9 +55,12 @@ impl BuildCommand {
         let pkg = risc0_build::get_package(&manifest_dir);
         let guest_build_env = risc0_build::setup_guest_build_env(&target_dir);
 
+        let mut build_args = vec![subcommand];
+        build_args.extend(self.args.iter().map(AsRef::<str>::as_ref));
+
         println!("pkg.name: {}", &pkg.name);
         println!("guest_build_env: {guest_build_env:?}");
-        println!("running build_guest_package");
+        println!("running build_guest_package with additional arguments: {build_args:?}");
 
         risc0_build::build_guest_package(
             &pkg,
@@ -66,7 +68,7 @@ impl BuildCommand {
             &guest_build_env,
             vec![],
             true,
-            self.test,
+            &build_args,
         );
     }
 }

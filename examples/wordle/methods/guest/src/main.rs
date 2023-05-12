@@ -12,13 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
 use wordle_core::{GameState, LetterFeedback, WordFeedback, WORD_LENGTH};
-
-risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
     let secret: String = env::read();
