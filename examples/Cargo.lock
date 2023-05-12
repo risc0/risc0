@@ -1170,6 +1170,7 @@ dependencies = [
  "log",
  "risc0-zkvm",
  "serde",
+ "tempfile",
  "tokio",
 ]
 
@@ -2234,7 +2235,6 @@ dependencies = [
  "autocfg",
  "num-integer",
  "num-traits",
- "rand",
 ]
 
 [[package]]
@@ -3076,8 +3076,10 @@ name = "risc0-zkvm"
 version = "0.14.0"
 dependencies = [
  "anyhow",
+ "bincode",
  "bytemuck",
  "cfg-if",
+ "crypto-bigint 0.5.1",
  "elf",
  "generic-array",
  "getrandom",
@@ -3085,7 +3087,6 @@ dependencies = [
  "lazy-regex",
  "libm",
  "log",
- "num-bigint 0.4.3",
  "num-derive",
  "num-traits",
  "rand",

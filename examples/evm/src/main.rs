@@ -25,8 +25,9 @@ use evm_methods::EVM_ELF;
 use log::info;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv,
+    Executor, ExecutorEnv, FileSegmentRef,
 };
+use tempfile::tempdir;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -86,7 +87,15 @@ async fn main() {
         .add_input(&to_vec(&zkdb).unwrap())
         .build();
     let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
-    let session = exec.run().unwrap();
+    let segment_dir = tempdir().unwrap();
+    let session = exec
+        .run_with_callback(|segment| {
+            Ok(Box::new(FileSegmentRef::new(
+                &segment,
+                &segment_dir.path(),
+            )?))
+        })
+        .unwrap();
     let receipt = session.prove().unwrap();
 
     let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");

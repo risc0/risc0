@@ -14,7 +14,6 @@
 
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![cfg_attr(not(feature = "std"), feature(alloc_error_handler))]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(missing_docs)]
 
@@ -57,7 +56,7 @@ pub use self::{
     exec::io::{Syscall, SyscallContext},
     exec::{Executor, ExecutorEnv, ExecutorEnvBuilder},
     prove::loader::Loader,
-    session::{Segment, SegmentRef, Session, SimpleSegmentRef},
+    session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef},
 };
 use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 
