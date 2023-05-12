@@ -68,7 +68,9 @@ impl MemoryMonitor {
         let info = &self.image.info;
         // log::debug!("load_u8: 0x{addr:08x}");
         self.pending_faults.include(info, addr, IncludeDir::Read);
-        self.image.buf[addr as usize]
+        let mut b = [0_u8];
+        self.image.load_region_in_page(addr, &mut b);
+        b[0]
     }
 
     pub fn load_u16(&mut self, addr: u32) -> u16 {
@@ -93,7 +95,9 @@ impl MemoryMonitor {
     pub fn load_registers<const N: usize>(&mut self, idxs: [usize; N]) -> [u32; N] {
         idxs.map(|idx| {
             let addr = get_register_addr(idx);
-            u32::from_le_bytes(array::from_fn(|idx| self.image.buf[addr as usize + idx]))
+            let mut b = [0_u8; WORD_SIZE];
+            self.image.load_region_in_page(addr, &mut b);
+            u32::from_le_bytes(b)
         })
     }
 
@@ -169,7 +173,7 @@ impl MemoryMonitor {
     // commit all pending activity
     pub fn commit(&mut self, cycle: usize) {
         for op in self.pending_writes.iter() {
-            self.image.buf[op.addr as usize] = op.data;
+            self.image.store_region_in_page(op.addr, &[op.data]);
         }
         self.pending_writes.clear();
         self.faults.append(&mut self.pending_faults);
