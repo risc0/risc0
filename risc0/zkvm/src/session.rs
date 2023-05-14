@@ -16,6 +16,11 @@
 //! execution traces between the execution phase and the proving phase.
 
 use alloc::collections::BTreeSet;
+use std::{
+    fs::File,
+    io::{Read, Write},
+    path::{Path, PathBuf},
+};
 
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
@@ -153,5 +158,40 @@ impl SimpleSegmentRef {
     /// Construct a [SimpleSegmentRef] with the specified [Segment].
     pub fn new(segment: Segment) -> Self {
         Self { segment }
+    }
+}
+
+/// A basic implementation of a [SegmentRef] that saves the segment to a file
+///
+/// The [Segment] is stored in a user-specified file in this implementation,
+/// and the SegmentRef holds the filename.
+///
+/// There is an example of using [FileSegmentRef] in [our EVM example](https://github.com/risc0/risc0/blob/main/examples/evm/src/main.rs).
+#[derive(Clone, Serialize, Deserialize)]
+pub struct FileSegmentRef {
+    path: PathBuf,
+}
+
+#[typetag::serde]
+impl SegmentRef for FileSegmentRef {
+    fn resolve(&self) -> anyhow::Result<Segment> {
+        let mut contents = Vec::new();
+        let mut file = File::open(&self.path)?;
+        file.read_to_end(&mut contents)?;
+        let segment: Segment = bincode::deserialize(&contents)?;
+        Ok(segment)
+    }
+}
+
+impl FileSegmentRef {
+    /// Construct a [FileSegmentRef]
+    ///
+    /// This builds a FileSegmentRef that stores `segment` in a file at `path`.
+    pub fn new(segment: &Segment, path: &Path) -> anyhow::Result<Self> {
+        let path = path.join(format!("{}.bincode", segment.index));
+        let mut file = File::create(&path)?;
+        let contents = bincode::serialize(&segment)?;
+        file.write(&contents)?;
+        Ok(Self { path })
     }
 }
