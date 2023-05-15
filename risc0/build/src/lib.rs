@@ -392,12 +392,9 @@ pub fn build_guest_package(
                 // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
                 "-Z",
                 "remap-cwd-prefix=.",
-                // Put the TEXT and DATA segments where we expect them
+                // Specify where to start loading the program in memory.
                 "-C",
-                &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT.start()),
-                // Put the TEXT segment where we expect it
-                "-C",
-                &format!("link-arg=-Tdata=0x{:08X}", memory::DATA.start()),
+                &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT_START),
                 // Apparently not having an entry point is only a linker warning(!), so
                 // error out in this case.
                 "-C",

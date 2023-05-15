@@ -143,11 +143,16 @@ mod handlers {
 #[macro_export]
 macro_rules! entry {
     ($path:path) => {
-        #[no_mangle]
-        fn __main() {
-            // type check the given path
-            let f: fn() = $path;
-            f()
+        // Type check the given path
+        const ZKVM_ENTRY: fn() = $path;
+
+        // Include generated main in a module so we don't conflict
+        // with any other definitions of "main" in this file.
+        mod zkvm_generated_main {
+            #[no_mangle]
+            fn main() {
+                super::ZKVM_ENTRY()
+            }
         }
     };
 }
@@ -157,15 +162,6 @@ macro_rules! entry {
 unsafe extern "C" fn __start() {
     env::init();
 
-    #[cfg(not(feature = "std"))]
-    {
-        extern "Rust" {
-            fn __main();
-        }
-        __main()
-    }
-
-    #[cfg(feature = "std")]
     {
         extern "C" {
             fn main();
@@ -176,7 +172,7 @@ unsafe extern "C" fn __start() {
     env::finalize(true, 0);
 }
 
-static STACK_START: usize = memory::STACK.end();
+static STACK_TOP: u32 = memory::STACK_TOP;
 
 /// Entry point; sets up global pointer and stack pointer and passes
 /// to zkvm_start.  TODO: when asm_const is stablized, use that here
@@ -195,7 +191,7 @@ _start:
     lw sp, 0(sp)
     jal ra, __start;
 "#,
-    sym STACK_START
+    sym STACK_TOP
 );
 
 /// Require that accesses to behind the given pointer before the memory

@@ -12,9 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![no_main]
+
 use password_checker_core::PasswordRequest;
 use risc0_zkvm::guest::env;
 use risc0_zkvm::sha::{Impl, Sha256};
+
+risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
     let request: PasswordRequest = env::read();
