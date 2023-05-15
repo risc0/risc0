@@ -490,7 +490,6 @@ name = "waldo-core"
 version = "0.1.0"
 dependencies = [
  "bincode",
- "bytemuck",
  "divrem",
  "elsa",
  "image",
