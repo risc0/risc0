@@ -8,4 +8,3 @@ edition = "2021"
 [dependencies]
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
 wasmi = "0.29"
-externc-libm = { git = "https://github.com/HaruxOS/externc-libm" }

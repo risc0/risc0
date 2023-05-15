@@ -16,7 +16,6 @@
 #![allow(unused_imports)]
 
 use evm_core::{Env, EvmResult, ExecutionResult, ZkDb, EVM};
-use externc_libm::math::fmod;
 use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);

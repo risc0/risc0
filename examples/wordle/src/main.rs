@@ -22,7 +22,7 @@ use risc0_zkvm::{
     Executor, ExecutorEnv, SessionReceipt,
 };
 use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
-use wordle_methods::{WORDLE_ELF, WORDLE_ID};
+use wordle_methods::{WORDLE_GUEST_ELF, WORDLE_GUEST_ID};
 
 // The "server" is an agent in the Wordle game that checks the player's guesses.
 struct Server<'a> {
@@ -47,7 +47,7 @@ impl<'a> Server<'a> {
             .add_input(&to_vec(self.secret_word).unwrap())
             .add_input(&to_vec(&guess_word).unwrap())
             .build();
-        let mut exec = Executor::from_elf(env, WORDLE_ELF).unwrap();
+        let mut exec = Executor::from_elf(env, WORDLE_GUEST_ELF).unwrap();
         let session = exec.run().unwrap();
         session.prove().unwrap()
     }
@@ -65,7 +65,7 @@ struct Player {
 impl Player {
     pub fn check_receipt(&self, receipt: SessionReceipt) -> WordFeedback {
         receipt
-            .verify(WORDLE_ID)
+            .verify(WORDLE_GUEST_ID)
             .expect("receipt verification failed");
 
         let game_state: GameState = from_slice(&receipt.journal).unwrap();

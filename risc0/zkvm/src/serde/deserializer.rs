@@ -281,18 +281,18 @@ impl<'de, 'a, R: WordRead + 'de> serde::Deserializer<'de> for &'a mut Deserializ
         visitor.visit_u64(self.try_take_dword()?)
     }
 
-    fn deserialize_f32<V>(self, _visitor: V) -> Result<V::Value>
+    fn deserialize_f32<V>(self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
-        Err(Error::NotSupported)
+        visitor.visit_f32(f32::from_bits(self.try_take_word()?))
     }
 
-    fn deserialize_f64<V>(self, _visitor: V) -> Result<V::Value>
+    fn deserialize_f64<V>(self, visitor: V) -> Result<V::Value>
     where
         V: Visitor<'de>,
     {
-        Err(Error::NotSupported)
+        visitor.visit_f64(f64::from_bits(self.try_take_dword()?))
     }
 
     fn deserialize_char<V>(self, visitor: V) -> Result<V::Value>
@@ -506,8 +506,10 @@ mod tests {
             u16: u16,
             i32: i32,
             u32: u32,
+            f32: f32,
             i64: i64,
             u64: u64,
+            f64: f64,
         }
 
         let words = [
@@ -518,10 +520,13 @@ mod tests {
             5,
             -6_i32 as u32,
             6,
+            f32::to_bits(3.14f32),
             -7_i32 as u32,
             0xffffffff,
             7,
             0x00000000,
+            f64::to_bits(2.71).checked_rem(0x100000000).unwrap() as u32,
+            f64::to_bits(2.71).checked_shr(32).unwrap() as u32,
         ];
         let expected = Test {
             bool: true,
@@ -531,8 +536,10 @@ mod tests {
             u16: 5,
             i32: -6,
             u32: 6,
+            f32: 3.14,
             i64: -7,
             u64: 7,
+            f64: 2.71,
         };
         assert_eq!(expected, from_slice(&words).unwrap());
     }

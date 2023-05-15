@@ -91,6 +91,16 @@ fn system_split() {
 }
 
 #[test]
+fn libm_build() {
+    let env = ExecutorEnv::builder()
+        .add_input(&to_vec(&MultiTestSpec::LibM).unwrap())
+        .build();
+
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run().expect("Could not get receipt");
+}
+
+#[test]
 fn host_syscall() {
     let expected: Vec<Vec<u8>> = vec![
         "".into(),
@@ -448,7 +458,17 @@ fn trace() {
                 value: 0x08000000,
             }] = window
             {
-                assert_eq!(cycle1 + 1, cycle2, "li should take 1 cycles: {:#?}", window);
+                // Note: it's possible that these instructions could lie between page
+                // boundaries. If that is the case, it means that the difference between cycle2
+                // and cycle1 could be multiples of page-in, which takes up 1094 cycles. Once we
+                // figure out a way to get reproducible builds, we should restrict the
+                // difference of cycles to a single number rather than taking the mod.
+                assert_eq!(
+                    (cycle2 - cycle1) % 1094,
+                    1,
+                    "li should take multiples of page-in cycles + 1: {:#?}",
+                    window
+                );
                 assert_eq!(
                     pc1 + WORD_SIZE as u32,
                     pc2,
@@ -466,4 +486,15 @@ fn trace() {
         addr: 0x08000224,
         value: 1337
     }));
+}
+
+#[test]
+fn oom() {
+    let spec = to_vec(&MultiTestSpec::Oom).unwrap();
+    let env = ExecutorEnv::builder().add_input(&spec).build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let err = exec.run().err().unwrap();
+    assert!(err
+        .to_string()
+        .contains("Guest panicked: panicked at 'Out of memory!'"));
 }

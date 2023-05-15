@@ -63,6 +63,7 @@ pub mod sha;
 
 use core::{arch::asm, mem, ptr};
 
+#[cfg(target_os = "zkvm")]
 use getrandom::{register_custom_getrandom, Error};
 use risc0_zkvm_platform::{
     syscall::{nr::SYS_PANIC, sys_panic, sys_rand},
@@ -73,6 +74,7 @@ pub use crate::entry;
 
 /// This is a getrandom handler for the zkvm. It's intended to hook into a
 /// getrandom crate or a depdent of the getrandom crate used by the guest code.
+#[cfg(target_os = "zkvm")]
 pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
     if dest.is_empty() {
         return Ok(());
@@ -87,12 +89,16 @@ pub fn zkvm_getrandom(dest: &mut [u8]) -> Result<(), Error> {
     Ok(())
 }
 
+#[cfg(target_os = "zkvm")]
 register_custom_getrandom!(zkvm_getrandom);
 
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(include_str!("memset.s"));
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(include_str!("memcpy.s"));
+
+#[cfg(target_os = "zkvm")]
+mod libm_extern;
 
 fn _fault() -> ! {
     #[cfg(target_os = "zkvm")]
@@ -121,11 +127,6 @@ mod handlers {
     fn panic_fault(panic_info: &PanicInfo) -> ! {
         let msg = ::alloc::format!("{}", panic_info);
         crate::guest::abort(&msg)
-    }
-
-    #[alloc_error_handler]
-    fn alloc_fault(_layout: Layout) -> ! {
-        crate::guest::abort("Memory allocation failure")
     }
 }
 
@@ -194,5 +195,10 @@ _start:
 /// barrier.
 pub fn memory_barrier<T>(ptr: *const T) {
     // SAFETY: This passes a pointer in, but does nothing with it.
-    unsafe { asm!("/* {0} */", in(reg) (ptr)) }
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        asm!("/* {0} */", in(reg) (ptr))
+    }
+    #[cfg(not(target_os = "zkvm"))]
+    core::sync::atomic::fence(core::sync::atomic::Ordering::SeqCst)
 }

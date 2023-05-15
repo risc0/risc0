@@ -75,19 +75,11 @@ impl MemoryState {
     }
 
     #[track_caller]
-    fn load_u8(&self, addr: u32) -> u8 {
-        // log::debug!("load_u8: 0x{addr:08X}");
-        self.ram.buf[addr as usize]
-    }
-
-    #[track_caller]
     fn load_u32(&self, addr: u32) -> u32 {
         // log::debug!("load_u32: 0x{addr:08X}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
         let mut bytes = [0u8; WORD_SIZE];
-        for i in 0..WORD_SIZE {
-            bytes[i] = self.load_u8(addr + i as u32);
-        }
+        self.ram.load_region_in_page(addr, &mut bytes);
         u32::from_le_bytes(bytes)
     }
 
@@ -98,7 +90,7 @@ impl MemoryState {
     #[track_caller]
     fn store_u8(&mut self, addr: u32, value: u8) {
         // log::debug!("store_u8: 0x{addr:08X} <= 0x{value:08X}");
-        self.ram.buf[addr as usize] = value;
+        self.ram.store_region_in_page(addr, &[value]);
     }
 
     #[track_caller]

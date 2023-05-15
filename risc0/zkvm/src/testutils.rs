@@ -14,13 +14,27 @@
 
 use core::mem;
 
-use num_bigint::BigUint;
-use num_traits::{One, Zero};
-use rand::{
-    distributions::{Distribution, Standard, Uniform},
-    Rng,
+use crypto_bigint::{
+    rand_core::CryptoRngCore, CheckedMul, Encoding, NonZero, Random, RandomMod, U256, U512,
 };
 use risc0_zkvm_platform::syscall::bigint;
+
+// Convert to little-endian u32 array. Only reinterprettation on LE machines.
+fn bigint_to_arr(num: &U256) -> [u32; bigint::WIDTH_WORDS] {
+    let mut arr: [u32; bigint::WIDTH_WORDS] = bytemuck::cast(num.to_le_bytes());
+    for x in arr.iter_mut() {
+        *x = x.to_le();
+    }
+    arr
+}
+
+// Convert from little-endian u32 array. Only reinterprettation on LE machines.
+fn arr_to_bigint(mut arr: [u32; bigint::WIDTH_WORDS]) -> U256 {
+    for x in arr.iter_mut() {
+        *x = x.to_le();
+    }
+    U256::from_le_bytes(bytemuck::cast(arr))
+}
 
 #[derive(Debug)]
 pub struct BigIntTestCase {
@@ -29,52 +43,55 @@ pub struct BigIntTestCase {
     pub modulus: [u32; bigint::WIDTH_WORDS],
 }
 
-// NOTE: Testing here could be significantly improved by creating a less uniform
-// test case generator. It is likely more important to test inputs of different
-// byte-lengths, with zero and 0xff bytes, and other boundary values than
-// testing values in the middle.
-impl Distribution<BigIntTestCase> for Standard {
-    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BigIntTestCase {
-        let bigint_max = BigUint::one() << bigint::WIDTH_BITS;
+impl BigIntTestCase {
+    pub fn expected(&self) -> [u32; bigint::WIDTH_WORDS] {
+        // Load inputs.
+        let x = arr_to_bigint(self.x);
+        let y = arr_to_bigint(self.y);
+        let n = arr_to_bigint(self.modulus);
 
-        let modulus = Uniform::new(&BigUint::one(), &bigint_max).sample(rng);
-        let mut x = Uniform::new(&BigUint::zero(), &bigint_max).sample(rng);
-        let mut y = Uniform::new(&BigUint::zero(), &modulus).sample(rng);
+        // Compute modular multiplication, or simply multiplication if n == 0.
+        let z: U256 = if n == U256::ZERO {
+            x.checked_mul(&y).unwrap()
+        } else {
+            let (w_lo, w_hi) = x.mul_wide(&y);
+            let w = w_hi.concat(&w_lo);
+            let z = w.rem(&NonZero::<U512>::from_uint(n.resize()));
+            z.resize()
+        };
+
+        bigint_to_arr(&z)
+    }
+
+    // NOTE: Testing here could be significantly improved by creating a less uniform
+    // test case generator. It is likely more important to test inputs of different
+    // byte-lengths, with zero and 0xff bytes, and other boundary values than
+    // testing values in the middle.
+    fn sample(rng: &mut impl CryptoRngCore) -> BigIntTestCase {
+        let modulus = NonZero::<U256>::random(rng);
+        let mut x = U256::random(rng);
+        let mut y = U256::random_mod(rng, &modulus);
 
         // x and y come from slightly different ranges because at least one input must
         // be less than the modulus, but it doesn't matter which one. Randomly swap.
-        if rng.gen::<bool>() {
+        if (rng.next_u32() & 1) == 0 {
             mem::swap(&mut x, &mut y);
         }
 
         BigIntTestCase {
-            x: x.to_u32_digits().try_into().unwrap(),
-            y: y.to_u32_digits().try_into().unwrap(),
-            modulus: modulus.to_u32_digits().try_into().unwrap(),
+            x: bigint_to_arr(&x),
+            y: bigint_to_arr(&y),
+            modulus: bigint_to_arr(modulus.as_ref()),
         }
-    }
-}
-
-impl BigIntTestCase {
-    pub fn expected(&self) -> [u32; bigint::WIDTH_WORDS] {
-        let modulus = BigUint::from_slice(&self.modulus);
-        let z = if modulus.is_zero() {
-            BigUint::from_slice(&self.x) * BigUint::from_slice(&self.y)
-        } else {
-            (BigUint::from_slice(&self.x) * BigUint::from_slice(&self.y)) % modulus
-        };
-        let mut vec = z.to_u32_digits();
-        if vec.len() > bigint::WIDTH_WORDS {
-            panic!("modular multiplication result larger than input modulus");
-        }
-        vec.resize(bigint::WIDTH_WORDS, 0);
-        vec.try_into().unwrap()
     }
 }
 
 /// Generate the test cases for the BigInt accelerator circuit that are applied
 /// to both the simulator and circuit implementations.
-pub fn generate_bigint_test_cases(rng: &mut impl Rng, rand_count: usize) -> Vec<BigIntTestCase> {
+pub fn generate_bigint_test_cases(
+    rng: &mut impl CryptoRngCore,
+    rand_count: usize,
+) -> Vec<BigIntTestCase> {
     let zero = [0, 0, 0, 0, 0, 0, 0, 0];
     let one = [1, 0, 0, 0, 0, 0, 0, 0];
 
@@ -106,6 +123,6 @@ pub fn generate_bigint_test_cases(rng: &mut impl Rng, rand_count: usize) -> Vec<
         },
     ];
 
-    cases.extend(Standard.sample_iter(rng).take(rand_count));
+    cases.extend((0..rand_count).map(|_| BigIntTestCase::sample(rng)));
     cases
 }

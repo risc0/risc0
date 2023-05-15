@@ -61,6 +61,8 @@ pub enum MultiTestSpec {
         /// Busy loop until the guest has run for at least this number of cycles
         cycles: u32,
     },
+    LibM,
+    Oom,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

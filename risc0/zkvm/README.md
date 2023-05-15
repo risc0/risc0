@@ -27,3 +27,36 @@ channel](https://www.youtube.com/@risczero) has many more videos as well.
   see if there's a workaround, and if you're using a workaround, you can track
   when it gets resolved to a permanent solution.
 * And more on [the RISC Zero website](https://www.risczero.com/)!
+
+# Crate Feature Flags
+
+The following [crate feature flags](https://doc.rust-lang.org/cargo/reference/features.html) are available.
+
+Note that in order to use `risc0-zkvm` in the guest, you must disable default features (set `default-features=false`).
+
+| Feature | Target(s)  | Implies | Description |
+| --- | --- | --- | ---- |
+| cuda || prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed. |
+metal |macos|prove|Turns on Metal GPU acceleration for the prover
+profiler|all|--|Tracks where cycles are spent during guest execution as an aid to code optimization
+prove|all except rv32im|std| Disable this feature if you want to use the `guest` module in guest-side code
+std|all|--|Support for stdlib in the guest
+
+* cuda
+  * Optional (default is CPU only)
+  * Turns on CUDA GPU acceleration for the prover
+* metal
+  * Optional (default is CPU only)
+  * Turns on Metal GPU acceleration for the prover
+  * Only available for MacOS
+* profiler
+  * Optional
+  * Use with `r0vm` binary tool to profile guest code
+  * Counts cycles during guest execution as an aid to code optimization
+* prove
+  * Enabled by default
+  * Disable this feature if you want to use the `guest` module in guest-side code (or if you only need the verifier, for the sake of excluding unnecessary code)
+  * Must be set when `metal` or `cuda` is selected
+* std
+  * Optional support for stdlib in the guest
+

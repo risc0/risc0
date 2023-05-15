@@ -122,6 +122,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "201de327520df007757c1f0adce6e827fe8562fbc28bfd9c15571c66ca1f5f79"
 
 [[package]]
+name = "libm"
+version = "0.2.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "348108ab3fba42ec82ff6e9564fc4ca0247bdccdc68dd8af9764bbc79c3c8ffb"
+
+[[package]]
 name = "log"
 version = "0.4.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -234,6 +240,7 @@ dependencies = [
  "cfg-if",
  "getrandom",
  "hex",
+ "libm",
  "log",
  "num-derive",
  "num-traits",
@@ -351,17 +358,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
-name = "wordle"
-version = "0.1.0"
-dependencies = [
- "risc0-zkvm",
- "wordle-core",
-]
-
-[[package]]
 name = "wordle-core"
 version = "1.0.0"
 dependencies = [
  "risc0-zkvm",
  "serde",
+]
+
+[[package]]
+name = "wordle-guest"
+version = "0.1.0"
+dependencies = [
+ "risc0-zkvm",
+ "wordle-core",
 ]
