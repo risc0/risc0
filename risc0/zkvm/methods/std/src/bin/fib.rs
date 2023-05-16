@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
-use risc0_zkvm::guest::{entry, env};
-
-entry!(main);
+use risc0_zkvm::guest::env;
 
 pub fn main() {
     let iterations: u32 = env::read();

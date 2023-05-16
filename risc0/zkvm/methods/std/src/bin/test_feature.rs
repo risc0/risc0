@@ -12,12 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![no_main]
-
 #[allow(unused_imports)]
 use std::compile_error;
 
-risc0_zkvm::entry!(main);
+use risc0_zkvm as _;
 
 pub fn main() {
     #[cfg(not(all(feature = "test_feature1", feature = "test_feature2")))]

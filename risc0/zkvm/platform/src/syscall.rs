@@ -494,20 +494,44 @@ pub unsafe extern "C" fn sys_getenv(
     }
 }
 
-// Number of words remaining in the heap that haven't yet been allocated.
-static mut HEAP_WORDS_REMAINING: usize = crate::memory::HEAP.len_words();
-
 #[no_mangle]
 pub unsafe extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
-    // SAFETY: Single threaded, so nothing else can touch this while we're working.
-    let heap_words_remaining: &mut usize = unsafe { &mut HEAP_WORDS_REMAINING };
-    let new_words_remaining = heap_words_remaining
-        .checked_sub(nwords)
-        .expect("Out of memory!");
-    // SAFETY: We've already checked to make sure we haven't
-    // overflowed the heap, so the pointer arithmetic here should not
-    // cause any undefined behavior.
-    let ptr = unsafe { (crate::memory::HEAP.end() as *mut u32).sub(*heap_words_remaining) };
-    *heap_words_remaining = new_words_remaining;
-    ptr
+    #[cfg(target_os = "zkvm")]
+    {
+        extern "C" {
+            // This symbol is defined yb the loader and marks the end
+            // of all elf sections, so this is where we start our
+            // heap.
+            static _end: u32;
+        }
+
+        // Pointer to next heap address to use, or 0 if the heap has not yet been
+        // initialized.
+        static mut HEAP_POS: u32 = 0;
+
+        // SAFETY: Single threaded, so nothing else can touch this while we're working.
+        let heap_pos: &mut u32 = unsafe { &mut HEAP_POS };
+
+        if *heap_pos == 0 {
+            // Initialize heap to the end of the area loaded by the ELF.
+            *heap_pos = (&_end) as *const u32 as u32;
+        }
+
+        let ptr = *heap_pos as *mut u32;
+        let ptr_end = *heap_pos + (nwords * WORD_SIZE) as u32;
+
+        // Check to make sure we keep space between the heap and the
+        // stack so they don't accidentally step on each other.
+        let mut stack_pointer: u32;
+        unsafe { asm!("add {stack_pointer}, sp, zero", stack_pointer = out(reg) stack_pointer) };
+        if stack_pointer - crate::memory::RESERVED_STACK < ptr_end {
+            panic!("Out of memory!");
+        }
+
+        *heap_pos = ptr_end;
+        ptr
+    }
+
+    #[cfg(not(target_os = "zkvm"))]
+    unimplemented!()
 }
