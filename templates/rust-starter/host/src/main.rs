@@ -12,7 +12,12 @@ fn main() {
     let env = ExecutorEnv::default();
 
     // TODO: add guest input to the executor environment using
-    // ExecutorEnv::add_input()
+    // ExecutorEnvBuilder::add_input().
+    // To access this method, you'll need to use the alternate construction
+    // ExecutorEnv::builder(), which creates an ExecutorEnvBuilder. When you're
+    // done adding input, call ExecutorEnvBuilder::build().
+
+    // For example: let env = ExecutorEnv::builder().add_input(&vec).build();
 
     // Next, we make an executor, loading the (renamed) ELF binary.
     let mut exec = Executor::from_elf(env, METHOD_NAME_ELF).unwrap();
