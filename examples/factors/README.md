@@ -55,14 +55,14 @@ Don't worry about why these lines are included yet; for now, we're just being di
 Here are what the other two lines with `METHOD_NAME_ELF` and `METHOD_NAME_ID` should look like after updating:
 
 ```rust
-    let mut env =
-        ExecutorEnv::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
-
+fn main() {
+    // Here we make an executor, loading the (renamed) ELF binary.
+    let mut exec = Executor::from_elf(env, METHOD_NAME_ELF).unwrap();
 ...
-
-    receipt.verify(&MULTIPLY_ID).expect(
-        "Code you have proven should successfully verify; did you specify the correct image ID?",
-    );
+    // Optional: Verify receipt to confirm that recipients will also be able to
+    // verify your receipt
+    receipt.verify(METHOD_NAME_ID).unwrap();
+}
 ```
 
 ### Intermission: Build and run the project!
@@ -107,6 +107,9 @@ Currently, our host driver program creates an executor environment before constr
  ```rust
     // First, we construct an executor environment
       let env = ExecutorEnv::builder().build();
+
+          // TODO: add guest input to the executor environment using
+    // ExecutorEnv::add_input()
   ```
 
  Now we're ready to add inputs `a` and `b` to the executor environment before it gets built:
