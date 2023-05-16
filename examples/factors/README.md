@@ -32,9 +32,7 @@ cd factors
 
 ## Step 2: Give the guest program a name
 
-This project will call a program that executes on the guest zkVM.
-It's currently named `method_name`.
-We want to name it something that represents what the guest program does — let's call it `multiply`.
+This project will call a program that executes on the guest zkVM whose source is found in `factors/methods/guest/src/main.rs`.
 Edit `methods/guest/Cargo.toml`, changing the line `name = "method_name"` to instead read
 ```
 name = "multiply"
@@ -57,8 +55,8 @@ Don't worry about why these lines are included yet; for now, we're just being di
 Here are what the other two lines with `METHOD_NAME_ELF` and `METHOD_NAME_ID` should look like after updating:
 
 ```rust
-    let mut prover =
-        Prover::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
+    let mut env =
+        ExecutorEnv::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
 
 ...
 
@@ -83,38 +81,43 @@ fn main() {
     let b: u64 = 23;
 ```
 
-Currently, our host driver program creates and runs a prover.
-The `prover.run()` command will cause our guest program to execute:
+Currently, our host driver program creates an executor environment before constructing an executor. The `Executor::run()` command will produce a session. The `Session::prove()` command will cause our guest program to execute, producing a receipt:
 
 ```rust
-    // Make the prover.
-    let mut prover =
-        Prover::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
+    // First, we construct an executor environment
+    let env = ExecutorEnv::default();
 
-    // TODO: Implement communication with the guest here
+    // TODO: add guest input to the executor environment using
+    // ExecutorEnv::add_input()
 
-    // Run prover & generate receipt
-    let receipt = prover.run().expect(
-        "Code should be provable unless it had an error or exceeded the maximum cycle limit",
-    );
+    // Next, we make an executor, loading the (renamed) ELF binary.
+    let mut exec = Executor::from_elf(env, METHOD_NAME_ELF).unwrap();
+
+    // Run the executor to produce a session.
+    let session = exec.run().unwrap();
+
+    // Prove the session to produce a receipt.
+    let receipt = session.prove().unwrap();
 ```
  We'd like the host to make the values of `a` and `b` available to the guest prior to execution.
- Because the prover is responsible for managing guest-readable memory, we need to share them after the prover is created.
- To accomplish this, let's send our two values to the guest.
- We do this in between making the prover and running the prover (in place of the "`TODO`" in the previous code snippet).
+ Because the executor environment is responsible for managing guest-readable memory, we need to add these values as inputs after the environment is created. We do this in between making the executor environment and constructing the executor (in place of the "`TODO`" in the previous code snippet).
+
+ As a preliminary step, let's first move away from the default construction `ExecutorEnv::default()` and instead use `ExecutorEnv::builder()`, which supports adding guest input:
 
  ```rust
-    // Make the prover.
-    let mut prover =
-        Prover::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
+    // First, we construct an executor environment
+      let env = ExecutorEnv::builder().build();
+  ```
 
-    prover.add_input_u32_slice(&to_vec(&a).expect("should be serializable"));
-    prover.add_input_u32_slice(&to_vec(&b).expect("should be serializable"));
+ Now we're ready to add inputs `a` and `b` to the executor environment before it gets built:
 
-    // Run prover & generate receipt
-    let receipt = prover.run().expect(
-        "Code should be provable unless it had an error or exceeded the maximum cycle limit",
-    );
+ ```rust
+    // First, we construct an executor environment
+      let env = ExecutorEnv::builder()
+        // Send a & b to the guest
+        .add_input(&to_vec(&a).unwrap())
+        .add_input(&to_vec(&b).unwrap())
+        .build();
 ```
 
 You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
@@ -155,7 +158,7 @@ Use `env::read()` to load both numbers that the host provided:
 ```
 ### Confirm that factors are non-trivial
 
-Next, we'll add a line that panics if either chosen value is 1. This will leave us with a guest program that only completes if the product of `a` and `b` is genuinely composite. 
+Next, we'll add a line that panics if either chosen value is 1. This will leave us with a guest program that only completes if the product of `a` and `b` is genuinely composite.
 ```rust
     // Verify that neither of them are 1 (i.e. nontrivial factors)
     if a == 1 || b == 1 {
