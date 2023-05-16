@@ -55,7 +55,7 @@ Don't worry about why these lines are included yet; for now, we're just being di
 Here are what the other two lines with `METHOD_NAME_ELF` and `METHOD_NAME_ID` should look like after updating:
 
 ```rust
-fn main() {
+...
     // Here we make an executor, loading the (renamed) ELF binary.
     let mut exec = Executor::from_elf(env, METHOD_NAME_ELF).unwrap();
 ...
