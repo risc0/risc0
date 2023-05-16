@@ -55,7 +55,7 @@ entry point that runs the code of the method.  Additionally, one can compute for
 a given method its *image ID* which is a special type of cryptographic hash of
 the ELF file, and is required for verification.
 
-Next, the prover runs the method inside the zkVM.  The logical RISC-V machine
+Next, the host program runs and proves the method inside the zkVM.  The logical RISC-V machine
 running inside the zkVM is called the *guest* and the prover running the zkVM is
 called the *host*.  The guest and the host can communicate with each other
 during the execution of the method, but the host cannot modify the execution of
