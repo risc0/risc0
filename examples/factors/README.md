@@ -88,7 +88,7 @@ Currently, our host driver program creates an executor environment before constr
     let env = ExecutorEnv::default();
 
     // TODO: add guest input to the executor environment using
-    // ExecutorEnv::add_input()
+    // ExecutorEnvBuilder::add_input()
 
     // Next, we make an executor, loading the (renamed) ELF binary.
     let mut exec = Executor::from_elf(env, METHOD_NAME_ELF).unwrap();
@@ -109,7 +109,7 @@ Currently, our host driver program creates an executor environment before constr
       let env = ExecutorEnv::builder().build();
 
           // TODO: add guest input to the executor environment using
-    // ExecutorEnv::add_input()
+    // ExecutorEnvBuilder::add_input()
   ```
 
  Now we're ready to add inputs `a` and `b` to the executor environment before it gets built:
