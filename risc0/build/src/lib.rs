@@ -385,7 +385,11 @@ fn build_guest_package<P>(
                 // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
                 "-Z",
                 "remap-cwd-prefix=.",
-                // Specify where to start loading the program in memory.
+                // Specify where to start loading the program in
+                // memory.  The clang linker understands the same
+                // command line arguments as the GNU linker does; see
+                // https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_mono/ld.html#SEC3
+                // for details.
                 "-C",
                 &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT_START),
                 // Apparently not having an entry point is only a linker warning(!), so

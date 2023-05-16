@@ -502,6 +502,9 @@ pub unsafe extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
             // This symbol is defined yb the loader and marks the end
             // of all elf sections, so this is where we start our
             // heap.
+            //
+            // This is generated automatically by the linker; see
+            // https://lld.llvm.org/ELF/linker_script.html#sections-command
             static _end: u32;
         }
 
