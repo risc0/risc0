@@ -219,7 +219,7 @@ fn continuation() {
 
     let (final_segment, segments) = segments.split_last().unwrap();
     for segment in segments {
-        assert!(std::matches!(segment.exit_code, ExitCode::SystemSplit));
+        assert_eq!(segment.exit_code, ExitCode::SystemSplit);
     }
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 

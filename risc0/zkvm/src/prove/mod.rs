@@ -237,7 +237,7 @@ where
             segments,
             journal: session.journal.clone(),
         };
-        let image_id = session.segments[0].resolve()?.pre_image.get_root();
+        let image_id = session.segments[0].resolve()?.pre_image.compute_id();
         let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
         receipt.verify_with_hal(&hal, image_id)?;
         Ok(receipt)
@@ -386,10 +386,10 @@ impl Segment {
         offset += WORD_SIZE;
 
         // initialize ImageID
-        let image_id = self.pre_image.get_root();
-        let image_id = image_id.as_words();
+        let merkle_root = self.pre_image.compute_root_hash();
+        let merkle_root = merkle_root.as_words();
         for i in 0..DIGEST_WORDS {
-            let bytes = image_id[i].to_le_bytes();
+            let bytes = merkle_root[i].to_le_bytes();
             for j in 0..WORD_SIZE {
                 io[offset + i * WORD_SIZE + j] = (bytes[j] as u32).into();
             }

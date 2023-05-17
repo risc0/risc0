@@ -332,7 +332,7 @@ impl MachineContext {
             return Ok(MajorType::PageFault.as_u32().into());
         }
 
-        log::debug!(
+        log::trace!(
             "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
             cycle,
             pc,
@@ -675,7 +675,7 @@ impl MachineContext {
             .syscall_out_regs
             .pop_front()
             .ok_or(anyhow!("Invalid syscall records"))?;
-        log::debug!("syscall_fini: {:?}", syscall_out_regs);
+        log::trace!("syscall_fini: {:?}", syscall_out_regs);
         Ok(syscall_out_regs)
     }
 }

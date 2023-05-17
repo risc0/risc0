@@ -25,7 +25,7 @@ use risc0_zkvm_platform::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{binfmt::elf::Program, sha};
+use crate::{binfmt::elf::Program, receipt::compute_image_id, sha};
 
 /// Compute `ceil(a / b)` via truncated integer division.
 const fn div_ceil(a: u32, b: u32) -> u32 {
@@ -231,7 +231,7 @@ impl MemoryImage {
         let mut root_page = vec![0_u8; root_page_bytes as usize];
         self.load_region_in_page(root_page_addr, &mut root_page);
         let expected = hash_page_bytes(&root_page);
-        let root = self.get_root();
+        let root = self.compute_root_hash();
         if expected != root {
             anyhow::bail!("Invalid root hash: {} != {}", expected, root);
         }
@@ -239,13 +239,18 @@ impl MemoryImage {
         Ok(())
     }
 
-    /// Compute and return the root entry of the merkle tree.
-    pub fn get_root(&self) -> Digest {
+    /// Compute and return the root merkle entry of this image.
+    pub fn compute_root_hash(&self) -> Digest {
         let root_page = self
             .pages
             .get(&self.info.root_idx)
             .expect("Missing root page?");
         hash_page_bytes(&root_page[..(self.info.root_addr - self.info.root_page_addr) as usize])
+    }
+
+    /// Compute and return the ImageID of this image.
+    pub fn compute_id(&self) -> Digest {
+        compute_image_id(&self.compute_root_hash(), self.pc)
     }
 }
 

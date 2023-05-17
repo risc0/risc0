@@ -47,6 +47,7 @@ impl Digest {
     pub const fn new(data: [u32; DIGEST_WORDS]) -> Self {
         Self(data)
     }
+
     /// Returns a reference to the [Digest] as a slice of words.
     pub fn as_words(&self) -> &[u32] {
         &self.0
