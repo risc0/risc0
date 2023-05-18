@@ -89,7 +89,7 @@ impl OpCode {
         // log::debug!("decode: 0x{word:08X}");
 
         let decode_error_str = || {
-            format!("malformed rv32im instruction at {insn_pc:#x}: {insn:032b} ({opcode:07b}, {funct3:03b}, {rs2:05b}, {funct7:07b})")
+            format!("illegal instruction at {insn_pc:#x}: {insn:032b} ({opcode:07b}, {funct3:03b}, {rs2:05b}, {funct7:07b})")
         };
 
         Ok(match opcode {
@@ -99,7 +99,7 @@ impl OpCode {
                 0x2 => OpCode::new(insn, insn_pc, "LW", 26, 1),
                 0x4 => OpCode::new(insn, insn_pc, "LBU", 27, 1),
                 0x5 => OpCode::new(insn, insn_pc, "LHU", 28, 1),
-                _ => unreachable!("{}", decode_error_str()),
+                _ => bail!("{}", decode_error_str()),
             },
             0b0010011 => match funct3 {
                 0x0 => OpCode::new(insn, insn_pc, "ADDI", 7, 1),
@@ -110,18 +110,18 @@ impl OpCode {
                 0x5 => match funct7 {
                     0x00 => OpCode::new(insn, insn_pc, "SRLI", 46, 2),
                     0x20 => OpCode::new(insn, insn_pc, "SRAI", 47, 2),
-                    _ => unreachable!("{}", decode_error_str()),
+                    _ => bail!("{}", decode_error_str()),
                 },
                 0x6 => OpCode::new(insn, insn_pc, "ORI", 9, 2),
                 0x7 => OpCode::new(insn, insn_pc, "ANDI", 10, 2),
-                _ => unreachable!("{}", decode_error_str()),
+                _ => bail!("{}", decode_error_str()),
             },
             0b0010111 => OpCode::new(insn, insn_pc, "AUIPC", 22, 1),
             0b0100011 => match funct3 {
                 0x0 => OpCode::new(insn, insn_pc, "SB", 29, 1),
                 0x1 => OpCode::new(insn, insn_pc, "SH", 30, 1),
                 0x2 => OpCode::new(insn, insn_pc, "SW", 31, 1),
-                _ => unreachable!("{}", decode_error_str()),
+                _ => bail!("{}", decode_error_str()),
             },
             0b0110011 => match (funct3, funct7) {
                 (0x0, 0x00) => OpCode::new(insn, insn_pc, "ADD", 0, 1),
@@ -142,7 +142,7 @@ impl OpCode {
                 (0x5, 0x01) => OpCode::new(insn, insn_pc, "DIVU", 41, 2),
                 (0x6, 0x01) => OpCode::new(insn, insn_pc, "REM", 42, 2),
                 (0x7, 0x01) => OpCode::new(insn, insn_pc, "REMU", 43, 2),
-                _ => unreachable!("{}", decode_error_str()),
+                _ => bail!("{}", decode_error_str()),
             },
             0b0110111 => OpCode::new(insn, insn_pc, "LUI", 21, 1),
             0b1100011 => match funct3 {
@@ -152,11 +152,11 @@ impl OpCode {
                 0x5 => OpCode::new(insn, insn_pc, "BGE", 16, 1),
                 0x6 => OpCode::new(insn, insn_pc, "BLTU", 17, 1),
                 0x7 => OpCode::new(insn, insn_pc, "BGEU", 18, 1),
-                _ => unreachable!("{}", decode_error_str()),
+                _ => bail!("{}", decode_error_str()),
             },
             0b1100111 => match funct3 {
                 0x0 => OpCode::new(insn, insn_pc, "JALR", 20, 1),
-                _ => unreachable!("{}", decode_error_str()),
+                _ => bail!("{}", decode_error_str()),
             },
             0b1101111 => OpCode::new(insn, insn_pc, "JAL", 19, 1),
             0b1110011 => match funct3 {
@@ -167,11 +167,11 @@ impl OpCode {
                     (0x1, 0x0) => {
                         OpCode::with_major_minor(insn, insn_pc, "EBREAK", MajorType::ECall, 1, 1)
                     }
-                    _ => unreachable!("{}", decode_error_str()),
+                    _ => bail!("{}", decode_error_str()),
                 },
-                _ => unreachable!("{}", decode_error_str()),
+                _ => bail!("{}", decode_error_str()),
             },
-            _ => bail!("Illegal opcode: 0b{opcode:07b}"),
+            _ => bail!("{}", decode_error_str()),
         })
     }
 
