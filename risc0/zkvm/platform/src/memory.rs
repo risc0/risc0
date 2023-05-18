@@ -53,8 +53,8 @@ impl Region {
     }
 }
 
-/// Program (text, data, and bss) gets loaded in at this location.  HEAP begins
-/// right afterwards.
+/// Program (text followed by data and then bss) gets loaded in
+/// starting at this location.  HEAP begins right afterwards.
 pub const TEXT_START: u32 = 0x0000_0400;
 /// Top of stack; stack grows down from this location.
 pub const STACK_TOP: u32 = 0x0BF_FFC00;
