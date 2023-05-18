@@ -58,6 +58,7 @@ pub enum VerificationError {
     MerkleQueryOutOfRange { idx: usize, rows: usize },
     InvalidProof,
     JournalDigestMismatch,
+    UnexpectedExitCode,
 }
 
 impl fmt::Display for VerificationError {
@@ -74,6 +75,7 @@ impl fmt::Display for VerificationError {
             VerificationError::JournalDigestMismatch => {
                 write!(f, "Journal digest mismatch detected")
             }
+            VerificationError::UnexpectedExitCode => write!(f, "Unexpected exit_code"),
         }
     }
 }

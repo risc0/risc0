@@ -71,11 +71,20 @@ use anyhow::Result;
 use hex::FromHex;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zkp::{core::digest::Digest, layout::Buffer, verify::VerificationError, MIN_CYCLES_PO2};
+use risc0_zkp::{
+    core::{digest::Digest, hash::sha::SHA256_INIT},
+    layout::Buffer,
+    verify::VerificationError,
+    MIN_CYCLES_PO2,
+};
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::rust_crypto::{Digest as _, Sha256},
+    sha::{
+        self,
+        rust_crypto::{Digest as _, Sha256},
+    },
     ControlId, CIRCUIT,
 };
 
@@ -105,9 +114,9 @@ pub struct SystemState {
     /// The program counter.
     pub pc: u32,
 
-    /// The `image_id` is the root hash of a merkle tree which confirms the
+    /// The root hash of a merkle tree which confirms the
     /// integrity of the memory image.
-    pub image_id: Digest,
+    pub merkle_root: Digest,
 }
 
 /// Data associated with a receipt which is used for both input and
@@ -166,7 +175,7 @@ impl SessionReceipt {
     /// Uses the ZKP system to cryptographically verify that each constituent
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
-    /// given `_image_id` parameter.
+    /// given `image_id` parameter.
     #[cfg(not(target_os = "zkvm"))]
     #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
@@ -184,6 +193,7 @@ impl SessionReceipt {
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `_image_id` parameter.
+    /// given `image_id` parameter.
     #[must_use]
     pub fn verify_with_hal<H>(
         &self,
@@ -203,16 +213,21 @@ impl SessionReceipt {
         for receipt in receipts {
             receipt.verify_with_hal(hal)?;
             let metadata = receipt.get_metadata()?;
-            if prev_image_id != metadata.pre.image_id {
+            #[cfg(not(target_os = "zkvm"))]
+            log::debug!("metadata: {metadata:#?}");
+            if prev_image_id != metadata.pre.compute_image_id() {
                 return Err(VerificationError::ImageVerificationError);
             }
-            // assert_eq!(metadata.exit_code, ExitCode::SystemSplit);
-            prev_image_id = metadata.post.image_id;
+            if metadata.exit_code != ExitCode::SystemSplit {
+                return Err(VerificationError::UnexpectedExitCode);
+            }
+            prev_image_id = metadata.post.compute_image_id();
         }
         final_receipt.verify_with_hal(hal)?;
         let metadata = final_receipt.get_metadata()?;
-        // log::debug!("metadata: {metadata:#?}");
-        if prev_image_id != metadata.pre.image_id {
+        #[cfg(not(target_os = "zkvm"))]
+        log::debug!("final: {metadata:#?}");
+        if prev_image_id != metadata.pre.compute_image_id() {
             return Err(VerificationError::ImageVerificationError);
         }
 
@@ -235,8 +250,10 @@ impl SessionReceipt {
             return Err(VerificationError::JournalDigestMismatch);
         }
 
-        // assert_ne!(metadata.exit_code, ExitCode::SystemSplit);
-        // Ok(metadata.exit_code)
+        if metadata.exit_code == ExitCode::SystemSplit {
+            return Err(VerificationError::UnexpectedExitCode);
+        }
+
         Ok(())
     }
 }
@@ -307,8 +324,12 @@ impl SystemState {
             .tree(sys_state.pc)
             .get_u32()
             .or(Err(VerificationError::ReceiptFormatError))?;
-        let image_id = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        Ok(Self { pc, image_id })
+        let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
+        Ok(Self { pc, merkle_root })
+    }
+
+    fn compute_image_id(&self) -> Digest {
+        compute_image_id(&self.merkle_root, self.pc)
     }
 }
 
@@ -316,7 +337,14 @@ impl ReceiptMetadata {
     fn decode(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
         let pre = SystemState::decode(io, body.global.pre)?;
-        let post = SystemState::decode(io, body.global.post)?;
+        let mut post = SystemState::decode(io, body.global.post)?;
+        // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
+        // the PC with carry, the PC is always recorded as the current PC +
+        // 4. Thus we need to adjust the decoded PC for the post SystemState.
+        post.pc = post
+            .pc
+            .checked_sub(WORD_SIZE as u32)
+            .ok_or(VerificationError::ReceiptFormatError)?;
         let input_bytes: Vec<u8> = io
             .tree(body.global.input)
             .get_bytes()
@@ -344,4 +372,13 @@ impl ReceiptMetadata {
             output,
         })
     }
+}
+
+/// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
+pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
+    use risc0_zkp::core::{digest::DIGEST_WORDS, hash::sha::Sha256};
+    let mut pc_digest = [0u32; DIGEST_WORDS];
+    pc_digest[0] = pc;
+    let block2 = Digest::new(pc_digest);
+    *sha::Impl::compress(&SHA256_INIT, merkle_root, &block2)
 }
