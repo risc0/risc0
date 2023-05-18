@@ -264,10 +264,12 @@ pub extern "C" fn fmod(x: f64, y: f64) -> f64 {
     libm::fmod(x, y)
 }
 
+#[no_mangle]
 pub fn frexpf(x: f32) -> (f32, i32) {
     libm::frexpf(x)
 }
 
+#[no_mangle]
 pub fn frexp(x: f64) -> (f64, i32) {
     libm::frexp(x)
 }
@@ -332,14 +334,17 @@ pub extern "C" fn ldexp(x: f64, n: i32) -> f64 {
     libm::ldexp(x, n)
 }
 
+#[no_mangle]
 pub fn lgammaf_r(x: f32) -> (f32, i32) {
     libm::lgammaf_r(x)
 }
 
+#[no_mangle]
 pub fn lgammf(x: f32) -> f32 {
     libm::lgammaf(x)
 }
 
+#[no_mangle]
 pub fn lgamma_r(x: f64) -> (f64, i32) {
     libm::lgamma_r(x)
 }
@@ -389,10 +394,12 @@ pub extern "C" fn log(x: f64) -> f64 {
     libm::log(x)
 }
 
+#[no_mangle]
 pub fn modff(x: f32) -> (f32, f32) {
     libm::modff(x)
 }
 
+#[no_mangle]
 pub fn modf(x: f64) -> (f64, f64) {
     libm::modf(x)
 }
@@ -427,10 +434,12 @@ pub extern "C" fn remainder(x: f64, y: f64) -> f64 {
     libm::remainder(x, y)
 }
 
+#[no_mangle]
 pub fn remquof(x: f32, y: f32) -> (f32, i32) {
     libm::remquof(x, y)
 }
 
+#[no_mangle]
 pub fn remquo(x: f64, y: f64) -> (f64, i32) {
     libm::remquo(x, y)
 }
@@ -455,10 +464,12 @@ pub extern "C" fn scalbn(x: f64, n: i32) -> f64 {
     libm::scalbn(x, n)
 }
 
+#[no_mangle]
 pub fn sincosf(x: f32) -> (f32, f32) {
     libm::sincosf(x)
 }
 
+#[no_mangle]
 pub fn sincos(x: f64) -> (f64, f64) {
     libm::sincos(x)
 }

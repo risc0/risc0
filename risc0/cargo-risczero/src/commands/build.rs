@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs, path::PathBuf};
-
+use std::{fs, path::PathBuf, io, process::Stdio, io::Write};
+use tempfile::{TempDir,tempdir};
 use clap::Parser;
+use cargo_metadata::{Message,Artifact,ArtifactProfile};
+use risc0_zkvm::{ExecutorEnv,Executor};
 
 #[derive(Parser)]
 /// `cargo risczero build`
@@ -32,6 +34,17 @@ pub struct BuildCommand {
     pub args: Vec<String>,
 }
 
+static ZIP_CONTENTS : &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/cargo-risczero.zip"));
+
+fn get_zip_file(dir: &TempDir, filename: &str) -> PathBuf {
+    let mut zip = zip::ZipArchive::new(io::Cursor::new(ZIP_CONTENTS)).unwrap();
+    let mut file = zip.by_name(filename).unwrap();
+    let dest_path = dir.path().join(filename);
+    let mut  dest_file = fs::File::create(&dest_path).unwrap();
+    io::copy(&mut file, &mut dest_file).unwrap();
+    dest_path
+}
+
 impl BuildCommand {
     /// Execute this command
     pub fn run(&self, subcommand: &str) {
@@ -44,6 +57,11 @@ impl BuildCommand {
             ),
         };
 
+        let tmpdir = tempdir().unwrap();
+
+        let rust_runtime = get_zip_file(&tmpdir, "rust-runtime.a");
+        eprintln!("Runtime: {rust_runtime:?}");
+        
         let target_dir = &self
             .target_dir
             .clone()
@@ -52,23 +70,71 @@ impl BuildCommand {
         println!("target_dir: {}", target_dir.display());
         fs::create_dir_all(&target_dir).expect("failed to ensure target directory exists");
 
-        let pkg = risc0_build::get_package(&manifest_dir);
         let guest_build_env = risc0_build::setup_guest_build_env(&target_dir);
+        let mut cmd = guest_build_env.cargo_command(subcommand, true, 
+                                                    &["-C",&format!("link_arg={}", rust_runtime.to_str().unwrap()),
+]
 
-        let mut build_args = vec![subcommand];
-        build_args.extend(self.args.iter().map(AsRef::<str>::as_ref));
-
-        println!("pkg.name: {}", &pkg.name);
-        println!("guest_build_env: {guest_build_env:?}");
-        println!("running build_guest_package with additional arguments: {build_args:?}");
-
-        risc0_build::build_guest_package(
-            &pkg,
-            &target_dir,
-            &guest_build_env,
-            vec![],
-            true,
-            &build_args,
+                                                    
         );
+        cmd.   arg(         "--message-format=json");
+
+        println!("guest_build_env: {guest_build_env:?}");
+        println!("running {cmd:?}");
+
+        // Strip out --no-run if specified, since we always pass --no-run.
+        let mut no_run_flag = false;
+        if subcommand == "test" {
+            for arg in &self.args {
+                if arg == "--no-run" {
+                    no_run_flag = true;
+                } else {
+                    cmd.arg(&arg);
+                }
+            }
+            cmd.arg("--no-run");
+        } else {
+            cmd.args(&self.args);
+        }
+
+        
+        let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
+        let reader = std::io::BufReader::new(child.stdout.take().unwrap());
+        let mut tests : Vec<String> = Vec::new();
+        for message in Message::parse_stream(reader) {
+            match message.unwrap() {
+                Message::CompilerArtifact(Artifact{
+                    executable: Some(exec_path),
+                    profile: ArtifactProfile{test: true, ..}, ..
+                }
+                ) => {
+                    tests.push(exec_path.to_string());
+                },
+                Message::CompilerMessage(msg) => {
+                    write!(io::stderr(), "{}", msg).unwrap();
+                }
+                _ => (),
+            }
+        }
+
+        let output = child.wait().expect("Couldn't get cargo's exit status");
+        if !output.success() {
+            panic!("Unable to build static library")
+        }
+
+        if subcommand == "test" && !no_run_flag {
+            eprintln!("Tests: {tests:?}");
+
+            for t in &tests {
+                eprintln!("Running test {t}");
+                let env = ExecutorEnv::builder()
+                    .env_var("RUST_TEST_NOCAPTURE", "1")
+                    .session_limit(usize::MAX)
+                    .build();
+                let mut exec = Executor::from_elf(env, &fs::read(t).unwrap()).unwrap();
+                exec.run().unwrap();
+            }
+        }
+
     }
 }

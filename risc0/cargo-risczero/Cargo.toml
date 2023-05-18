@@ -17,11 +17,18 @@ cargo-generate = "0.18"
 clap = { version = "4.0", features = ["derive"] }
 const_format = "0.2"
 risc0-build = { workspace = true }
+tempfile = "3.3"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+zip = "0.6"
+cargo_metadata = "0.15"
+risc0-zkvm = { workspace = true, features = ["binfmt", "prove"] }
 
-[dev-dependencies]
-tempfile = "3.3"
+[build-dependencies]
+env_logger = "0.10"
+risc0-build = { workspace = true }
+zip = "0.6"
+
 
 [[bin]]
 path = "src/bin/main.rs"

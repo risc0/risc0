@@ -16,6 +16,5 @@
   "relocation-model": "static",
   "singlethread": true,
   "target-pointer-width": "32",
-  "vendor": "risc0",
-  "main-needs-argc-argv": false
+    "vendor": "risc0"
 }
