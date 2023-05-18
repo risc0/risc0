@@ -168,6 +168,7 @@ impl SessionReceipt {
     /// stitch together correctly, and that the initial memory image matches the
     /// given `_image_id` parameter.
     #[cfg(not(target_os = "zkvm"))]
+    #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
         let hal =
@@ -183,6 +184,7 @@ impl SessionReceipt {
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `_image_id` parameter.
+    #[must_use]
     pub fn verify_with_hal<H>(
         &self,
         hal: &H,
@@ -251,6 +253,7 @@ impl SegmentReceipt {
     /// Uses the ZKP system to cryptographically verify that the seal does
     /// validly indicate that this Segment was executed faithfully.
     #[cfg(not(target_os = "zkvm"))]
+    #[must_use]
     pub fn verify(&self) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
         let hal =
@@ -264,6 +267,7 @@ impl SegmentReceipt {
     ///
     /// Uses the ZKP system to cryptographically verify that the seal does
     /// validly indicate that this Segment was executed faithfully.
+    #[must_use]
     pub fn verify_with_hal<H>(&self, hal: &H) -> Result<(), VerificationError>
     where
         H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
