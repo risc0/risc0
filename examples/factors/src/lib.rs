@@ -18,17 +18,6 @@ use risc0_zkvm::{
 };
 
 #[doc = include_str!("../README.md")]
-#[cfg(doctest)]
-mod test_readme {
-    macro_rules! external_doc_test {
-        ($x:expr) => {
-            #[doc = $x]
-            extern "C" {}
-        };
-    }
-
-    external_doc_test!(include_str!("../README.md"));
-}
 
 // Multiply them inside the ZKP
 pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
