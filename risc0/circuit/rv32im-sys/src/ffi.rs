@@ -104,8 +104,7 @@ extern "C" {
         cycle: usize,
         steps: usize,
         poly_mix: *const BabyBearExtElem,
-        args_ptr: *const *const BabyBearElem,
-        args_len: usize,
+        args: *const *const BabyBearElem,
     ) -> BabyBearExtElem;
 }
 

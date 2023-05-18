@@ -268,7 +268,8 @@ pub unsafe extern "C" fn sys_sha_compress(
 }
 
 #[inline(always)]
-pub unsafe fn sys_sha_buffer(
+#[no_mangle]
+pub unsafe extern "C" fn sys_sha_buffer(
     out_state: *mut [u32; DIGEST_WORDS],
     in_state: *const [u32; DIGEST_WORDS],
     buf: *const u8,
