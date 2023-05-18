@@ -1,0 +1,19 @@
+[package]
+name = "bonsai-starter-methods-guest"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+# Must match RISC Zero version specified in the parent images project.
+[dependencies.risc0-zkvm]
+git = "https://github.com/risc0/risc0.git"
+rev = "4abdbb36ca26397c4b6d448b1fcf02539e80ae21"
+default-features = false
+
+[dependencies]
+ethabi = { version = "18.0", default-features = false }
+
+[profile.release]
+lto = true
+opt-level = 3
