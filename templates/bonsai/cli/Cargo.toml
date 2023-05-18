@@ -12,4 +12,4 @@ hex = "0.4"
 reqwest = "0.11"
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
-tokio = { version = "1.24", features = ["rt"] }
+tokio = { version = "1.24", features = ["full"] }
