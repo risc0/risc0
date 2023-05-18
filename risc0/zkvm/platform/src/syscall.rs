@@ -494,46 +494,51 @@ pub unsafe extern "C" fn sys_getenv(
     }
 }
 
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub unsafe extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
+    sys_alloc_aligned(WORD_SIZE * nwords, WORD_SIZE) as *mut u32
+}
+
 #[cfg(feature = "export-syscalls")]
 #[no_mangle]
-pub unsafe extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
+pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
     #[cfg(target_os = "zkvm")]
     {
         extern "C" {
             // This symbol marks the end of all elf sections, so this is where we start our
             // heap.
-            static _end: u32;
+            static _end: u8;
         }
 
         // Pointer to next heap address to use, or 0 if the heap has not yet been
         // initialized.
-        static mut HEAP_POS: u32 = 0;
+        static mut HEAP_POS: usize = 0;
 
         // SAFETY: Single threaded, so nothing else can touch this while we're working.
-        let heap_pos: &mut u32 = unsafe { &mut HEAP_POS };
+        let mut heap_pos  = unsafe { HEAP_POS };
 
-        if *heap_pos == 0 {
-            // Initialize heap to the end of the area loaded by the ELF.
-            let mut  end = (&_end) as *const u32 as usize;
-            // Start at beginning of next page
-            end = ((end / crate::PAGE_SIZE)  + 1) * crate::PAGE_SIZE ;
-            // Start at next word
-            *heap_pos = end as u32;
+        if heap_pos == 0 {
+            heap_pos = (&_end) as *const u8 as usize;
         }
 
-        let ptr = *heap_pos as *mut u32;
-        let ptr_end = *heap_pos + (nwords * WORD_SIZE) as u32;
+        let offset = heap_pos & (align - 1);
+        if offset != 0 {
+            heap_pos += align - offset;
+        }
+
+        let ptr = heap_pos as *mut u8;
+        heap_pos += bytes;
 
         // Check to make sure we keep space between the heap and the
         // stack so they don't accidentally step on each other.
-        let mut stack_pointer: u32;
+        let mut stack_pointer: usize;
         unsafe { asm!("add {stack_pointer}, sp, zero", stack_pointer = out(reg) stack_pointer) };
-        if stack_pointer - crate::memory::RESERVED_STACK < ptr_end {
+        if stack_pointer - (crate::memory::RESERVED_STACK as usize) < heap_pos {
             const MSG: &[u8] = "Out of memory!".as_bytes();
             sys_panic(MSG.as_ptr(), MSG.len());
         }
 
-        *heap_pos = ptr_end;
+                                                           unsafe { HEAP_POS = heap_pos };
         ptr
     }
 
@@ -543,5 +548,5 @@ pub unsafe extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
 
     // Make sure we only get one of these since it's stateful.
     #[cfg(not(feature = "export-syscalls"))]
-    extern "C" { pub  fn sys_alloc_words(nwords: usize) -> *mut u32;
+    extern "C" { pub  fn sys_alloc_aligned(nwords: usize, align: usize) -> *mut u8;
     }

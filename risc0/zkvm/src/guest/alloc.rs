@@ -30,7 +30,7 @@ unsafe impl GlobalAlloc for BumpPointerAlloc {
             .pad_to_align()
             .size()
             / WORD_SIZE;
-        syscall::sys_alloc_words(nwords) as *mut u8
+        syscall::sys_alloc_aligned(layout.size(), layout.align())
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {

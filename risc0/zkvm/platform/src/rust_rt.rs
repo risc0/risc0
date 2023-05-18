@@ -48,13 +48,7 @@ struct BumpPointerAlloc;
 #[cfg(target_os = "zkvm")]
 unsafe impl GlobalAlloc for BumpPointerAlloc {
     unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        let nwords = layout
-            .align_to(WORD_SIZE)
-            .expect("Unable to align allocation to word size")
-            .pad_to_align()
-            .size()
-            / WORD_SIZE;
-        syscall::sys_alloc_words(nwords) as *mut u8
+        syscall::sys_alloc_aligned(layout.align(), layout.size())
     }
 
     unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
