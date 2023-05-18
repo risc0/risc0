@@ -190,8 +190,10 @@ fn pause_continue() {
 
     // Run until sys_pause
     let session = exec.run().unwrap();
+    assert_eq!(session.segments.len(), 1);
     assert_eq!(session.exit_code, ExitCode::Paused(0));
     let receipt = session.prove().unwrap();
+    assert_eq!(receipt.segments.len(), 1);
     assert_eq!(receipt.segments[0].index, 0);
 
     // Run until sys_halt

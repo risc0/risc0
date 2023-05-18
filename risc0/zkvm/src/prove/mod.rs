@@ -244,7 +244,7 @@ where
     }
 
     fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt> {
-        log::debug!("prove_segment: {}", self.name);
+        log::debug!("prove_segment: {}, po2: {}", self.name, segment.po2);
         let (hal, eval) = (self.hal_eval.hal.as_ref(), &self.hal_eval.eval);
 
         let io = segment.prepare_globals();
