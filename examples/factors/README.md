@@ -155,9 +155,9 @@ We'd like the host to make the values of `a` and `b` available to the guest prio
     // First, we construct an executor environment
     let env = ExecutorEnv::builder()
     // Send a & b to the guest
-    .add_input(&to_vec(&a).unwrap())
-    .add_input(&to_vec(&b).unwrap())
-    .build();
+      .add_input(&to_vec(&a).unwrap())
+      .add_input(&to_vec(&b).unwrap())
+      .build();
 ```
 
 You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
