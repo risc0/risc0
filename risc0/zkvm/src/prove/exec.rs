@@ -193,7 +193,7 @@ impl CircuitStepHandler<Elem> for MachineContext {
                 Ok(())
             }
             "pageInfo" => {
-                (outs[0], outs[1], outs[2]) = self.page_info(args[0]);
+                (outs[0], outs[1], outs[2]) = self.page_info(cycle);
                 Ok(())
             }
             "ramWrite" => {
@@ -310,7 +310,12 @@ impl MachineContext {
             if minor == ecall::HALT {
                 let mode = self.memory.load_register(REG_A0);
                 if mode == halt::PAUSE {
-                    self.is_flushing = true;
+                    log::debug!("sys_pause[{cycle}]> pc: 0x{pc:08x}");
+                    if self.faults.writes.is_empty() {
+                        self.is_flushing = false;
+                    } else {
+                        self.is_flushing = true;
+                    }
                 }
             }
         }
@@ -332,7 +337,7 @@ impl MachineContext {
             return Ok(MajorType::PageFault.as_u32().into());
         }
 
-        log::debug!(
+        log::trace!(
             "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
             cycle,
             pc,
@@ -344,14 +349,14 @@ impl MachineContext {
         Ok(opcode.major.as_u32().into())
     }
 
-    fn page_info(&mut self, _pc: Elem) -> (Elem, Elem, Elem) {
+    fn page_info(&mut self, cycle: usize) -> (Elem, Elem, Elem) {
         if let Some(page_idx) = self.faults.reads.pop_last() {
             return (Elem::ONE, page_idx.into(), Elem::ZERO);
         }
 
         if self.is_flushing {
             if let Some(page_idx) = self.faults.writes.pop_first() {
-                log::debug!("page_write: 0x{page_idx:08x}");
+                log::debug!("[{cycle}] page_write: 0x{page_idx:08x}");
                 return (Elem::ZERO, page_idx.into(), Elem::ZERO);
             }
         }
@@ -675,7 +680,7 @@ impl MachineContext {
             .syscall_out_regs
             .pop_front()
             .ok_or(anyhow!("Invalid syscall records"))?;
-        log::debug!("syscall_fini: {:?}", syscall_out_regs);
+        log::trace!("syscall_fini: {:?}", syscall_out_regs);
         Ok(syscall_out_regs)
     }
 }

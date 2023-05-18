@@ -15,10 +15,9 @@
 //! Support for profiling the guest.
 //!
 //! This counts cycles spent at each location when executing the
-//! guest.  This is a preliminary experimental implementation.  It
-//! does not trace full stack traces, but only provides the top level
-//! stack frame.  (More than one stack frame may show up in the case
-//! of inlined functions).
+//! guest.  It does not trace full stack traces, but only provides the
+//! top level stack frame.  (More than one stack frame may show up
+//! in the case of inlined functions).
 
 // TODO:
 //
