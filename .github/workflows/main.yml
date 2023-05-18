@@ -31,14 +31,8 @@ jobs:
           node-version: 18
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
-      - run: cargo fmt --all --check --manifest-path templates/bonsai/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
-      - run: cargo sort --workspace --check templates/bonsai
-      - run: npm install
-        working-directory: templates/bonsai
-      - run: npm run ci
-        working-directory: templates/bonsai
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -71,13 +65,9 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
-      - run: npm install
-        working-directory: templates/bonsai
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
-      - run: PATH=$PWD/node_modules/.bin:$PATH cargo test -F $FEATURE
-        working-directory: templates/bonsai
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
