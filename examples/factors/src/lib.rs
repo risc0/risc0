@@ -49,6 +49,9 @@ pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
 
 #[cfg(test)]
 mod tests {
+
+    use super::*;
+
     #[test]
     fn test_factors() {
         const TEST_FACTOR_ONE: u64 = 17;
