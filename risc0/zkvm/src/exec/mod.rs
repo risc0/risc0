@@ -186,7 +186,8 @@ impl<'a> Executor<'a> {
                     assert!(total_cycles <= (1 << self.env.segment_limit_po2));
                     let pre_image = self.pre_image.clone();
                     self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
-                    let post_image_id = self.monitor.image.get_root();
+                    self.monitor.image.pc = self.pc;
+                    let post_image_id = self.monitor.image.compute_id();
                     let syscalls = take(&mut self.monitor.syscalls);
                     let faults = take(&mut self.monitor.faults);
                     let segment = Segment::new(
@@ -308,6 +309,7 @@ impl<'a> Executor<'a> {
         // );
         let exit_code = if total_pending_cycles > segment_limit {
             self.split_insn = Some(self.insn_counter);
+            log::debug!("split: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);
             Some(ExitCode::SystemSplit)
         } else {
             self.advance(opcode, op_result)
@@ -316,7 +318,7 @@ impl<'a> Executor<'a> {
     }
 
     fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
-        log::debug!(
+        log::trace!(
             "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
             self.segment_cycle,
             self.pc,
@@ -513,7 +515,7 @@ impl<'a> Executor<'a> {
         let [to_guest_ptr, to_guest_words, name_ptr] =
             self.monitor.load_registers([REG_A0, REG_A1, REG_A2]);
         let syscall_name = self.monitor.load_string(name_ptr)?;
-        log::debug!("Guest called syscall {syscall_name:?} requesting {to_guest_words} words back");
+        log::trace!("Guest called syscall {syscall_name:?} requesting {to_guest_words} words back");
 
         let chunks = align_up(to_guest_words as usize, WORD_SIZE);
         let mut to_guest = vec![0; to_guest_words as usize];
@@ -532,7 +534,7 @@ impl<'a> Executor<'a> {
         self.monitor.store_register(REG_A0, a0);
         self.monitor.store_register(REG_A1, a1);
 
-        log::debug!("Syscall returned a0: {a0:#X}, a1: {a1:#X}, chunks: {chunks}");
+        log::trace!("Syscall returned a0: {a0:#X}, a1: {a1:#X}, chunks: {chunks}");
 
         // One cycle for the ecall cycle, then one for each chunk or
         // portion thereof then one to save output (a0, a1)
