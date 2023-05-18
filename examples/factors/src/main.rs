@@ -14,10 +14,6 @@
 
 use factors::multiply_factors;
 use factors_methods::MULTIPLY_ID;
-use risc0_zkvm::{
-    serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, SessionReceipt,
-};
 
 #[cfg(doctest)]
 mod test_readme {
