@@ -309,4 +309,31 @@ mod tests {
             &proj_path.join("methods/guest/Cargo.toml")
         ));
     }
+
+    #[test]
+    fn generate_bonsai() {
+        let (tmpdir, template_path, proj_name) = make_test_env();
+
+        let new = NewCommand::parse_from([
+            "new",
+            "--template",
+            &template_path.to_string_lossy(),
+            "--bonsai",
+            "--dest",
+            &tmpdir.path().to_string_lossy(),
+            proj_name,
+        ]);
+
+        new.run();
+
+        let proj_path = tmpdir.path().join(proj_name);
+
+        assert!(proj_path.exists());
+        assert!(proj_path.join(".git").exists());
+
+        assert!(find_in_file(
+            "bonsai-starter-methods",
+            &proj_path.join("methods/Cargo.toml")
+        ));
+    }
 }
