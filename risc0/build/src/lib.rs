@@ -21,12 +21,12 @@ use std::{
     default::Default,
     env,
     fs::{self, File},
-    io::{BufRead,  BufReader,Write,stderr},
+    io::{stderr, BufRead, BufReader, Write},
     path::{Path, PathBuf},
     process::{Command, Stdio},
 };
 
-use cargo_metadata::{MetadataCommand, Package,Message};
+use cargo_metadata::{Message, MetadataCommand, Package};
 use downloader::{Download, Downloader};
 use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
@@ -348,29 +348,25 @@ impl GuestBuildEnv {
         ]);
 
         let mut rustflags = rustflags.to_vec();
-        let text_start =                 &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT_START);
-        rustflags.extend(
-            [
-                // Replace atomic ops with nonatomic versions since the guest is single threaded.
-                "-C",
-                "passes=loweratomic",
-                // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
-                "-Z",
-                "remap-cwd-prefix=.",
-                // Specify where to start loading the program in memory.
-                "-C",
-                text_start,
-                // Apparently not having an entry point is only a linker warning(!), so
-                // error out in this case.
-                "-C", 
-                "link-arg=--fatal-warnings",
-                "-C",
-                "panic=abort",
-            ]);
-                         cmd.env("CARGO_ENCODED_RUSTFLAGS",
-
-                                 rustflags.join("\x1f"));
-
+        let text_start = &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT_START);
+        rustflags.extend([
+            // Replace atomic ops with nonatomic versions since the guest is single threaded.
+            "-C",
+            "passes=loweratomic",
+            // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
+            "-Z",
+            "remap-cwd-prefix=.",
+            // Specify where to start loading the program in memory.
+            "-C",
+            text_start,
+            // Apparently not having an entry point is only a linker warning(!), so
+            // error out in this case.
+            "-C",
+            "link-arg=--fatal-warnings",
+            "-C",
+            "panic=abort",
+        ]);
+        cmd.env("CARGO_ENCODED_RUSTFLAGS", rustflags.join("\x1f"));
 
         // The RISC0_STANDARD_LIB variable can be set for testing purposes
         // to override the downloaded standard library.  It should point
@@ -394,20 +390,20 @@ impl GuestBuildEnv {
     }
 
     /// Builds a static library and returns the name of the resultant file.
-    fn build_staticlib(&self,guest_pkg: &str, features: &[&str]) -> String {
+    fn build_staticlib(&self, guest_pkg: &str, features: &[&str]) -> String {
         let guest_dir = get_guest_dir();
 
-    let mut cmd = self.cargo_command("rustc", /* std= */ false, &[]);
-    eprintln!("Building for guest: {:?}", cmd);
-    cmd.args(&[
-        "--release",
+        let mut cmd = self.cargo_command("rustc", /* std= */ false, &[]);
+        eprintln!("Building for guest: {:?}", cmd);
+        cmd.args(&[
+            "--release",
             "--package",
             guest_pkg,
-        "--target-dir",
-        guest_dir.to_str().unwrap(),
+            "--target-dir",
+            guest_dir.to_str().unwrap(),
             "--lib",
             "--message-format=json",
-        "--crate-type=staticlib",
+            "--crate-type=staticlib",
         ]);
         for feature in features {
             cmd.args(&["--features", feature]);
@@ -437,16 +433,13 @@ impl GuestBuildEnv {
             panic!("Unable to build static library")
         }
 
- match libs.as_slice() {
+        match libs.as_slice() {
             [] => panic!("No static library was built"),
             [lib] => lib.to_string(),
             _ => panic!("Multiple static libraries found: {:?}", libs.as_slice()),
+        }
     }
 }
-
-
- }
-
 
 /// Builds a package that targets the riscv guest into the specified target
 /// directory.
@@ -466,9 +459,8 @@ fn build_guest_package(
 
     fs::create_dir_all(target_dir.as_ref()).unwrap();
 
-    let mut cmd = guest_build_env.cargo_command("build", std, &[
-            "-C",&format!("link_arg={}", runtime_lib)
-]);
+    let mut cmd =
+        guest_build_env.cargo_command("build", std, &["-C", &format!("link_arg={}", runtime_lib)]);
     if !features.is_empty() {
         let features_str = features.join(",");
         cmd.args(&["--features", &features_str]);
@@ -551,7 +543,8 @@ fn get_guest_dir() -> PathBuf {
         .unwrap()
         .parent() // $profile
         .unwrap()
-        .join("riscv-guest").into()
+        .join("riscv-guest")
+        .into()
 }
 
 /// Embeds methods built for RISC-V for use by host-side dependencies.
@@ -624,4 +617,3 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
 pub fn embed_methods() {
     embed_methods_with_options(HashMap::new())
 }
-

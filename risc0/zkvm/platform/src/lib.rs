@@ -35,8 +35,7 @@ pub mod fileno {
     pub const JOURNAL: u32 = 3;
 }
 
-#[cfg(feature = "rust-runtime")]
-mod rust_rt;
 #[cfg(feature = "export-libm")]
 mod libm_extern;
-
+#[cfg(feature = "rust-runtime")]
+mod rust_rt;

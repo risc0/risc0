@@ -16,7 +16,7 @@
 use core::arch::asm;
 use core::{cmp::min, ptr::null_mut};
 
-use crate::{WORD_SIZE};
+use crate::WORD_SIZE;
 
 pub mod ecall {
     pub const HALT: u32 = 0;
@@ -515,7 +515,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
         static mut HEAP_POS: usize = 0;
 
         // SAFETY: Single threaded, so nothing else can touch this while we're working.
-        let mut heap_pos  = unsafe { HEAP_POS };
+        let mut heap_pos = unsafe { HEAP_POS };
 
         if heap_pos == 0 {
             heap_pos = (&_end) as *const u8 as usize;
@@ -538,7 +538,7 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
             sys_panic(MSG.as_ptr(), MSG.len());
         }
 
-                                                           unsafe { HEAP_POS = heap_pos };
+        unsafe { HEAP_POS = heap_pos };
         ptr
     }
 
@@ -546,7 +546,8 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     unimplemented!()
 }
 
-    // Make sure we only get one of these since it's stateful.
-    #[cfg(not(feature = "export-syscalls"))]
-    extern "C" { pub  fn sys_alloc_aligned(nwords: usize, align: usize) -> *mut u8;
-    }
+// Make sure we only get one of these since it's stateful.
+#[cfg(not(feature = "export-syscalls"))]
+extern "C" {
+    pub fn sys_alloc_aligned(nwords: usize, align: usize) -> *mut u8;
+}

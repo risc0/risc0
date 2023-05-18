@@ -1,8 +1,9 @@
-use crate::{WORD_SIZE, syscall};
 use core::{
     alloc::{GlobalAlloc, Layout},
-    panic::PanicInfo
+    panic::PanicInfo,
 };
+
+use crate::{syscall, WORD_SIZE};
 
 extern crate alloc;
 
@@ -35,13 +36,12 @@ _start:
     sym STACK_TOP
 );
 
-    #[panic_handler]
-    fn panic_fault(panic_info: &PanicInfo) -> ! {
-        let msg = alloc::format!("{}", panic_info);
-        let msg_bytes = msg.as_bytes();
-        unsafe { syscall::sys_panic(msg.as_ptr(), msg.len()) }
-    }
-
+#[panic_handler]
+fn panic_fault(panic_info: &PanicInfo) -> ! {
+    let msg = alloc::format!("{}", panic_info);
+    let msg_bytes = msg.as_bytes();
+    unsafe { syscall::sys_panic(msg.as_ptr(), msg.len()) }
+}
 
 struct BumpPointerAlloc;
 
