@@ -15,19 +15,26 @@
 //! Manages the output and cryptographic data for a proven computation
 //!
 //! Receipts are zero-knowledge proofs of computation. They attest that specific
-//! code was executed and generated the 
-//! 
-//! The primary component of this module is the [SessionReceipt]. A
-//! [SessionReceipt] contains the result of a zkVM guest execution and
-//! cryptographic proof of how it was generated. The prover can provide a
-//! [SessionReceipt] to an untrusting party to convince them that the results
-//! contained within the [SessionReceipt] came from running specific code.
-//! Conversely, a verifier can inspect a [SessionReceipt] to confirm that its
-//! results must have been generated from the expected code, even when this code
-//! was run by an untrused source.
+//! code was executed to generate the information contained in the receipt. The
+//! prover can provide a receipt to an untrusting party to convince them that
+//! the results contained within the receipt came from running specific code.
+//! Conversely, a verify can inspect a receipt to confirm that its results must
+//! have been generated from the expected code, even when this code was run by
+//! an untrusted source.
+//!
+//! There are two types of receipt, a [SessionReceipt] proving the execution of
+//! a [crate::Session], and a [SegmentReceipt] proving the execution of a
+//! [crate::Segment].
+//!
+//! Because [crate::Session]s are user-determined, whereas
+//! [crate::Segment]s are automatically generated, typical use cases will handle
+//! [SessionReceipt]s directly and [SegmentReceipt]s only indirectly as part of
+//! the [SessionReceipt]s that contain them (for instance, a by calling
+//! [SessionReceipt::verify], which will itself call [SegmentReceipt::verify]
+//! for each constinuent [SegmentReceipt]).
 //!
 //! # Usage
-//! To create a receipt, use [crate::Session::prove]:
+//! To create a [SessionReceipt], use [crate::Session::prove]:
 //! ```rust
 //! use risc0_zkvm::{Executor, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
@@ -143,6 +150,11 @@ pub struct ReceiptMetadata {
 }
 
 /// A receipt attesting to the execution of a Session.
+///
+/// A SessionReceipt attests that the `journal` was produced by executing a
+/// [crate::Session] based on a specified memory image. This image is _not_
+/// included in the receipt and must be provided by the verifier when calling
+/// [SessionReceipt::verify].
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SessionReceipt {
     /// The constituent [SegmentReceipt]s.
@@ -159,13 +171,18 @@ pub struct SessionReceipt {
 }
 
 /// A receipt attesting to the execution of a Segment.
+///
+/// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
+/// consistent with the [ReceiptMetadata] included in the receipt.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
     /// This data is used by the ZKP Verifier (as called by
     /// [SegmentReceipt::verify]) to cryptographically prove that this Segment
-    /// was faithfully executed.
+    /// was faithfully executed. It is largely opaque cryptographic data, but
+    /// contains a non-opaque metadata component, which can be conveniently
+    /// accessed with [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 
     /// Segment index within the [SessionReceipt]
