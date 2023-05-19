@@ -164,7 +164,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// const NEW_SESSION_LIMIT: usize = 32 * 1024 * 1024; // 32M cycles
     ///
     /// let env = ExecutorEnv::builder()
-    ///     .session_limit(NEW_SESSION_LIMIT)
+    ///     .session_limit(32 * 1024 * 1024) // 32M cycles
     ///     .build();
     /// ```
     pub fn session_limit(&mut self, limit: usize) -> &mut Self {
