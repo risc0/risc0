@@ -185,8 +185,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// vars.insert("VAR2".to_string(), "SOME_VALUE".to_string());
     ///
     /// let env = ExecutorEnv::builder()
-    /// .env_vars(vars)
-    /// .build();
+    ///     .env_vars(vars)
+    ///     .build();
     /// ```
     pub fn env_vars(&mut self, vars: HashMap<String, String>) -> &mut Self {
         self.inner.env_vars = vars;
