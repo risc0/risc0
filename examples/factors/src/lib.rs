@@ -41,7 +41,7 @@ pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
         "Journal output should deserialize into the same types (& order) that it was written",
     );
 
-    // Print an assertion
+    // Report the product
     println!("I know the factors of {}, and I can prove it!", c);
 
     (receipt, c)
