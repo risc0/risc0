@@ -14,6 +14,9 @@
 
 //! Manages the output and cryptographic data for a proven computation
 //!
+//! Receipts are zero-knowledge proofs of computation. They attest that specific
+//! code was executed and generated the 
+//! 
 //! The primary component of this module is the [SessionReceipt]. A
 //! [SessionReceipt] contains the result of a zkVM guest execution and
 //! cryptographic proof of how it was generated. The prover can provide a
