@@ -43,6 +43,6 @@ fn main() {
     let elf_contents = fs::read(args.elf).unwrap();
     let program = Program::load_elf(&elf_contents, MEM_SIZE as u32).unwrap();
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
-    let image_id = image.get_root();
+    let image_id = image.compute_id();
     std::fs::write(args.out, image_id.as_bytes()).unwrap();
 }
