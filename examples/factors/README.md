@@ -89,7 +89,7 @@ Use this command any time you'd like to check your progress.
 
 Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/src/main.rs`.
 
-In the starter template project, our host driver program creates an executor environment before constructing an executor.  When the `Executor::run()` command executes, it will produce a session. The `Session::prove()` command will cause our guest program to execute, producing a receipt:
+In the starter template project, our host driver program creates an executor environment before constructing an executor.  When `Executor::run()` is called, it will produce a session. Calling `Session::prove()` will cause our guest program to execute, producing a receipt:
 
 ```rust
     use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
