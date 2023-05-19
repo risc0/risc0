@@ -99,10 +99,7 @@ In the starter template project, our host driver program creates an executor env
     };
 
     // First, we construct an executor environment
-    let env = ExecutorEnv::default();
-
-    // First, we construct an executor environment
-    let env = ExecutorEnv::default();
+    let env = ExecutorEnv::builder().build();
 
     // Next, we make an executor, loading the (renamed) ELF binary.
     let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
@@ -128,19 +125,7 @@ fn main() {
 
 We'd like the host to make the values of `a` and `b` available to the guest prior to execution. We can do this by adding them to the the executor environment, which is responsible for managing guest-readable memory. When the `Executor` is constructed, it will have access to these guest inputs.
 
- we need to add these values as inputs after the environment is created. We do this in between making the executor environment and constructing the executor (in place of the "`TODO`" in the previous code snippet).
-
- As a preliminary step, let's first move away from the default construction `ExecutorEnv::default()` and instead use `ExecutorEnv::builder()`, which supports adding guest input:
-
- ```rust
-    use risc0_zkvm::ExecutorEnv;
-
-      // Getting ready to call ExecutorEnvBuilder::add_input()
-      let env = ExecutorEnv::builder().build();
-
-  ```
-
- Now we're ready to add inputs `a` and `b` to the executor environment before it gets built:
+ We need to add these values as inputs before the executor environment is built:
 
  ```rust
     use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
