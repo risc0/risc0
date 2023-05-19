@@ -501,3 +501,20 @@ fn oom() {
         .to_string()
         .contains("Guest panicked: panicked at 'Out of memory!'"));
 }
+
+#[test]
+fn session_limit_overflow() {
+    let segment_limit_po2 = 16; // 64k cycles
+    let cycles = 1 << segment_limit_po2;
+    let session_limit = 1; // the actual session count should be 2
+
+    let spec = &to_vec(&MultiTestSpec::BusyLoop { cycles }).unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&spec)
+        .segment_limit_po2(segment_limit_po2)
+        .session_limit(session_limit)
+        .build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let err = exec.run().err().unwrap();
+    assert!(err.to_string().contains("Session limit exceeded"));
+}
