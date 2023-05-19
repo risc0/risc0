@@ -143,7 +143,7 @@ We'd like the host to make the values of `a` and `b` available to the guest prio
  Now we're ready to add inputs `a` and `b` to the executor environment before it gets built:
 
  ```rust
-     use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
       serde::to_vec,
       Executor, ExecutorEnv,
@@ -231,10 +231,6 @@ For this step, we return to the main file for the host driver program at `factor
 
     // Prove the session to produce a receipt.
     let receipt = session.prove().unwrap();
-
-    // TODO: Implement code for transmitting or serializing the receipt for
-    // other parties to verify here
-
 ```
 
 In a real-world scenario, we'd want to hand the [receipt] to someone else, but reading it ourselves will be a nice way to check our project is working as expected.
