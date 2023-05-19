@@ -330,6 +330,7 @@ mod tests {
 
         assert!(proj_path.exists());
         assert!(proj_path.join(".git").exists());
+
         assert!(proj_path.join("lib").join("forge-std").exists());
         assert!(proj_path.join("lib").join("forge-std").join("lib").exists());
 
