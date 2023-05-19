@@ -130,6 +130,7 @@ impl Write for Journal {
 
 impl<'a> Executor<'a> {
     /// Construct a new [Executor] from a [MemoryImage] and entry point.
+    ///
     /// Before a guest program is proven, the [Executor] is responsible for
     /// deciding where a zkVM program should be split into [Segment]s and what
     /// work will be done in each segment. This is the execution phase:
