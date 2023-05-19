@@ -20,6 +20,7 @@ use const_format::concatcp;
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
 const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
+const RISC0_TEMPLATE_DIR_BONSAI: &str = "templates/bonsai-starter";
 const RISC0_DEFAULT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_DEFAULT_VERSION);
 
@@ -41,6 +42,12 @@ pub struct NewCommand {
     /// --template
     #[clap(value_parser, long, default_value = RISC0_TEMPLATE_DIR)]
     pub templ_subdir: String,
+
+    /// Overrides `templ-subdir` to the bonsai-starter template subdirectory
+    ///
+    /// Example `cargo risczero new my_bonsai_project --bonsai`
+    #[clap(value_parser, long, global = false)]
+    pub bonsai: bool,
 
     /// template git tag.
     #[clap(value_parser, long, default_value = RISC0_RELEASE_TAG)]
@@ -92,7 +99,11 @@ impl NewCommand {
 
         let mut template_path = TemplatePath {
             auto_path: Some(self.template.clone()),
-            subfolder: Some(self.templ_subdir.clone()),
+            subfolder: if self.bonsai {
+                Some(RISC0_TEMPLATE_DIR_BONSAI.to_string())
+            } else {
+                Some(self.templ_subdir.clone())
+            },
             git: None,
             branch: None,
             path: None,
@@ -296,6 +307,36 @@ mod tests {
         assert!(!find_in_file(
             "feature = ['std']",
             &proj_path.join("methods/guest/Cargo.toml")
+        ));
+    }
+
+    #[test]
+    fn generate_bonsai() {
+        let (tmpdir, template_path, proj_name) = make_test_env();
+
+        let new = NewCommand::parse_from([
+            "new",
+            "--template",
+            &template_path.to_string_lossy(),
+            "--bonsai",
+            "--dest",
+            &tmpdir.path().to_string_lossy(),
+            proj_name,
+        ]);
+
+        new.run();
+
+        let proj_path = tmpdir.path().join(proj_name);
+
+        assert!(proj_path.exists());
+        assert!(proj_path.join(".git").exists());
+
+        assert!(proj_path.join("lib").join("forge-std").exists());
+        assert!(proj_path.join("lib").join("forge-std").join("lib").exists());
+
+        assert!(find_in_file(
+            "bonsai-starter-methods",
+            &proj_path.join("methods/Cargo.toml")
         ));
     }
 }
