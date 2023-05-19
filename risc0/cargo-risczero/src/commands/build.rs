@@ -72,6 +72,8 @@ impl BuildCommand {
         fs::create_dir_all(&target_dir).expect("failed to ensure target directory exists");
 
         let guest_build_env = risc0_build::setup_guest_build_env(&target_dir);
+        println!("guest_build_env: {guest_build_env:?}");
+
         let mut cmd = guest_build_env.cargo_command(
             subcommand,
             true,
@@ -81,9 +83,6 @@ impl BuildCommand {
             ],
         );
         cmd.arg("--message-format=json");
-
-        println!("guest_build_env: {guest_build_env:?}");
-        println!("running {cmd:?}");
 
         // Strip out --no-run if specified, since we always pass --no-run.
         let mut no_run_flag = false;
@@ -100,6 +99,7 @@ impl BuildCommand {
             cmd.args(&self.args);
         }
 
+        println!("running {cmd:?}");
         let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
         let reader = std::io::BufReader::new(child.stdout.take().unwrap());
         let mut tests: Vec<String> = Vec::new();
@@ -129,10 +129,19 @@ impl BuildCommand {
 
             for t in &tests {
                 eprintln!("Running test {t}");
-                let env = ExecutorEnv::builder()
-                    .env_var("RUST_TEST_NOCAPTURE", "1")
+                let mut env_builder = ExecutorEnv::builder();
+
+                env_builder
                     .session_limit(usize::MAX)
-                    .build();
+                    .env_var("RUST_TEST_NOCAPTURE", "1")
+                    .env_var("ARGC", &(self.args.len() + 1).to_string())
+                    .env_var("ARGV_0", &t);
+
+                for (i, arg) in self.args.iter().enumerate() {
+                    env_builder.env_var(&format!("ARGV_{}", i + 1), &arg);
+                }
+
+                let env = env_builder.build();
                 let mut exec = Executor::from_elf(env, &fs::read(t).unwrap()).unwrap();
                 exec.run().unwrap();
             }
