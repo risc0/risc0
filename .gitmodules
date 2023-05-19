@@ -1,0 +1,9 @@
+[submodule "templates/bonsai-starter/lib/forge-std"]
+	path = templates/bonsai-starter/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "templates/bonsai-starter/lib/bonsai-lib-sol/lib/forge-std"]
+	path = templates/bonsai-starter/lib/bonsai-lib-sol/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "templates/bonsai-starter/lib/bonsai-lib-sol/lib/murky"]
+	path = templates/bonsai-starter/lib/bonsai-lib-sol/lib/murky
+	url = https://github.com/dmfxyz/murky
