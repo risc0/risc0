@@ -18,15 +18,15 @@ pragma solidity ^0.8.17;
 
 import {BonsaiTest} from "bonsai-lib-sol/BonsaiTest.sol";
 import {IBonsaiRelay} from "bonsai-lib-sol/IBonsaiRelay.sol";
-import {BonsaiStarter} from "../src/BonsaiStarter.sol";
+import {BonsaiStarterLowLevel} from "../src/BonsaiStarterLowLevel.sol";
 
-contract BonsaiStarterTest is BonsaiTest {
+contract BonsaiStarterLowLevelTest is BonsaiTest {
 
     function setUp() public withRelayMock { }
 
-    function testMockCall() public {
+    function testMockLowLevelCall() public {
         // Deploy a new starter instance
-        BonsaiStarter starter = new BonsaiStarter(
+        BonsaiStarterLowLevel starter = new BonsaiStarterLowLevel(
             IBonsaiRelay(MOCK_BONSAI_RELAY),
             queryImageId('FIBONACCI'));
 
@@ -40,7 +40,7 @@ contract BonsaiStarterTest is BonsaiTest {
         // Anticipate a callback invocation on the starter contract
         vm.expectCall(
             address(starter),
-            abi.encodeWithSelector(BonsaiStarter.storeResult.selector));
+            abi.encodeWithSelector(starter.bonsaiLowLevelCallbackReceiver.selector));
         // Relay the solution as a callback
         (bool success, ) = relayCallback();
         assertTrue(success, "Callback failed");

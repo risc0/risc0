@@ -36,7 +36,7 @@ contract BonsaiTestRelay is IBonsaiRelay, Test {
         return cbr_queue[cbr_idx++];
     }
 
-    function request_callback(
+    function requestCallback(
         bytes32 image_id,
         bytes calldata input,
         address callback_contract,

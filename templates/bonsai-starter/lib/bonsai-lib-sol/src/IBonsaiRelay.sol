@@ -17,7 +17,7 @@
 pragma solidity ^0.8.17;
 
 interface IBonsaiRelay {
-	function request_callback(
+	function requestCallback(
 		bytes32 image_id,
 		bytes calldata input,
 		address callback_contract,

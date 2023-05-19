@@ -20,7 +20,7 @@ pragma solidity ^0.8.17;
 
 /// @notice A base contract for writing a Bonsai app
 abstract contract BonsaiCallbackReceiver {
-  // Address of the Bonsai proxy contract.
+  // Address of the Bonsai relay contract.
   IBonsaiRelay public immutable bonsaiRelay;
 
   // Unexpected image id error
@@ -34,18 +34,26 @@ abstract contract BonsaiCallbackReceiver {
     bonsaiRelay = _bonsaiRelay;
   }
 
-  /// @notice Verify this is a callback by the relay contract using a journal from the expected image id
-  modifier onlyBonsaiCallback(bytes32 expectedImageId) {
-    // Verify that the call came from the Bonsai relay contract
+  /// @notice Verify that the call came from the Bonsai relay contract
+  function _verifyMessageSource() internal view {
     IBonsaiRelay foundRelayAddress = IBonsaiRelay(msg.sender);
     if (foundRelayAddress != bonsaiRelay) {
       revert UnauthorizedCallbackSource(bonsaiRelay, foundRelayAddress);
     }
-    // Verify that journal comes from the expected image id
+  }
+
+  /// @notice Verify that journal comes from the expected image id
+  function _verifyCallbackImageId(bytes32 expectedImageId) internal pure {
     bytes32 foundImageId = bytes32(msg.data[msg.data.length-32:]);
     if (expectedImageId != foundImageId) {
       revert UnexpectedImageId(expectedImageId, foundImageId);
     }
+  }
+
+  /// @notice Verify this is a callback by the relay contract using a journal from the expected image id
+  modifier onlyBonsaiCallback(bytes32 expectedImageId) {
+    _verifyMessageSource();
+    _verifyCallbackImageId(expectedImageId);
     // Pass validations and continue
     _;
   }

@@ -17,12 +17,12 @@
 pragma solidity ^0.8.17;
 
 import {IBonsaiRelay} from "bonsai-lib-sol/IBonsaiRelay.sol";
-import {BonsaiCallbackReceiver} from "bonsai-lib-sol/BonsaiCallbackReceiver.sol";
+import {BonsaiLowLevelCallbackReceiver} from "bonsai-lib-sol/BonsaiLowLevelCallbackReceiver.sol";
 
 /// @title A starter application using Bonsai through the on-chain proxy.
 /// @dev This contract demonstrates one pattern for offloading the computation of an expensive
 //       or difficult to implement function to a RISC Zero guest running on Bonsai.
-contract BonsaiStarter is BonsaiCallbackReceiver {
+contract BonsaiStarterLowLevel is BonsaiLowLevelCallbackReceiver {
   // Cache of the results calculated by our guest program in Bonsai.
   mapping(uint256 => uint256) public fibonnaciCache;
 
@@ -33,7 +33,7 @@ contract BonsaiStarter is BonsaiCallbackReceiver {
   constructor(
     IBonsaiRelay bonsaiRelay,
     bytes32 _fibImageId
-  ) BonsaiCallbackReceiver(bonsaiRelay) {
+  ) BonsaiLowLevelCallbackReceiver(bonsaiRelay) {
     fibImageId = _fibImageId;
   }
 
@@ -49,15 +49,19 @@ contract BonsaiStarter is BonsaiCallbackReceiver {
   }
 
   /// @notice Callback function logic for processing verified journals from Bonsai.
-  function storeResult(
-    uint256 n,
-    uint256 result
+  function bonsaiLowLevelCallback(
+    bytes calldata journal,
+    bytes32 imageId
   )
-    external
-    onlyBonsaiCallback(fibImageId)
+    override
+    internal
+    returns (bytes memory)
   {
+    require(imageId == fibImageId);
+    (uint256 n, uint256 result) = abi.decode(journal, (uint256, uint256));
     emit CalculateFibonacciCallback(n, result);
     fibonnaciCache[n] = result;
+    return new bytes(0);
   }
 
   /// @notice Sends a request to Bonsai to have have the nth Fibonacci number calculated.
@@ -69,7 +73,7 @@ contract BonsaiStarter is BonsaiCallbackReceiver {
       fibImageId,
       abi.encode(n),
       address(this),
-      this.storeResult.selector,
+      this.bonsaiLowLevelCallbackReceiver.selector,
       30000
     );
   }
