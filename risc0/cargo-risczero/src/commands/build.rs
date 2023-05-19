@@ -87,6 +87,7 @@ impl BuildCommand {
         // Strip out --no-run if specified, since we always pass --no-run.
         let mut no_run_flag = false;
         if subcommand == "test" {
+            cmd.arg("--no-run");
             for arg in &self.args {
                 if arg == "--no-run" {
                     no_run_flag = true;
@@ -94,7 +95,6 @@ impl BuildCommand {
                     cmd.arg(&arg);
                 }
             }
-            cmd.arg("--no-run");
         } else {
             cmd.args(&self.args);
         }
