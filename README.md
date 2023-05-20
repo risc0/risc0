@@ -11,7 +11,7 @@
 [![Discord chat][discord-badge]][discord-url]
 [![Twitter][twitter-badge]][twitter-url]
 
-[crates-badge]: https://img.shields.io/badge/crates.io-v0.14-orange
+[crates-badge]: https://img.shields.io/badge/crates.io-v0.15-orange
 [crates-url]: https://crates.io/crates/risc0-zkvm
 [licence-badge]: https://img.shields.io/github/license/risc0/risc0?color=blue
 [licence-url]: https://github.com/risc0/risc0/blob/main/LICENSE
@@ -120,47 +120,35 @@ structured, and other resources useful to developers new to RISC Zero, see our
 
 | crate          | [crates.io]                                                                                          |
 | -------------- | ---------------------------------------------------------------------------------------------------- |
-| cargo-risczero | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/cargo-risczero) |
-| risc0-r0vm     | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-r0vm)     |
-| risc0-tools    | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-tools)    |
+| cargo-risczero | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/cargo-risczero) |
+| risc0-r0vm     | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-r0vm)     |
+| risc0-tools    | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-tools)    |
 
 ## Rust Libraries
 
 | crate                    | [crates.io]                                                                                                    | [docs.rs](https://docs.rs)                                                                              |
 | ------------------------ | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| risc0-build              | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-build)              | [![](https://img.shields.io/docsrs/risc0-build)](https://docs.rs/risc0-build)                           |
-| risc0-build-kernel       | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-build-kernel)       | [![](https://img.shields.io/docsrs/risc0-build-kernel)](https://docs.rs/risc0-build-kernel)             |
-| risc0-circuit-rv32im     | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-circuit-rv32im)     | [![](https://img.shields.io/docsrs/risc0-circuit-rv32im)](https://docs.rs/risc0-circuit-rv32im)         |
-| risc0-circuit-rv32im-sys | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-circuit-rv32im-sys) | [![](https://img.shields.io/docsrs/risc0-circuit-rv32im-sys)](https://docs.rs/risc0-circuit-rv32im-sys) |
-| risc0-core               | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-core)               | [![](https://img.shields.io/docsrs/risc0-core)](https://docs.rs/risc0-core)                             |
-| risc0-sys                | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-sys)                | [![](https://img.shields.io/docsrs/risc0-sys)](https://docs.rs/risc0-sys)                               |
-| risc0-zkp                | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-zkp)                | [![](https://img.shields.io/docsrs/risc0-zkp)](https://docs.rs/risc0-zkp)                               |
-| risc0-zkvm               | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-zkvm)               | [![](https://img.shields.io/docsrs/risc0-zkvm)](https://docs.rs/risc0-zkvm)                             |
-| risc0-zkvm-platform      | [![x](https://img.shields.io/badge/crates.io-v0.14-orange)](https://crates.io/crates/risc0-zkvm-platform)      | [![](https://img.shields.io/docsrs/risc0-zkvm-platform)](https://docs.rs/risc0-zkvm-platform)           |
+| risc0-build              | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-build)              | [![](https://img.shields.io/docsrs/risc0-build)](https://docs.rs/risc0-build)                           |
+| risc0-build-kernel       | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-build-kernel)       | [![](https://img.shields.io/docsrs/risc0-build-kernel)](https://docs.rs/risc0-build-kernel)             |
+| risc0-circuit-rv32im     | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-circuit-rv32im)     | [![](https://img.shields.io/docsrs/risc0-circuit-rv32im)](https://docs.rs/risc0-circuit-rv32im)         |
+| risc0-circuit-rv32im-sys | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-circuit-rv32im-sys) | [![](https://img.shields.io/docsrs/risc0-circuit-rv32im-sys)](https://docs.rs/risc0-circuit-rv32im-sys) |
+| risc0-core               | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-core)               | [![](https://img.shields.io/docsrs/risc0-core)](https://docs.rs/risc0-core)                             |
+| risc0-sys                | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-sys)                | [![](https://img.shields.io/docsrs/risc0-sys)](https://docs.rs/risc0-sys)                               |
+| risc0-zkp                | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-zkp)                | [![](https://img.shields.io/docsrs/risc0-zkp)](https://docs.rs/risc0-zkp)                               |
+| risc0-zkvm               | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-zkvm)               | [![](https://img.shields.io/docsrs/risc0-zkvm)](https://docs.rs/risc0-zkvm)                             |
+| risc0-zkvm-platform      | [![x](https://img.shields.io/badge/crates.io-v0.15-orange)](https://crates.io/crates/risc0-zkvm-platform)      | [![](https://img.shields.io/docsrs/risc0-zkvm-platform)](https://docs.rs/risc0-zkvm-platform)           |
 
 ## Feature flags
 
 The following feature flags are present in one or more of the crates listed above:
 
-| Feature | Target(s)  | Implies | Description | Crates |
-| --- | --- | --- | ---- | --- |
-| cuda || prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed. | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
-metal |macos|prove|Turns on Metal GPU acceleration for the prover | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
-profiler|all|--|Counts cycles during guest execution as an aid to code optimization| risc0-zkvm |
-prove|all except rv32im|std| Disable this feature if you want to use the `guest` module in guest-side code| risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
-std|all|--|Support for stdlib in the guest| risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
-
-## `cargo risczero` tool
-
-Included is a tool to manage RISC Zero project directories.
-
-```bash
-# Installing from local source
-cargo install --path risc0/cargo-risczero
-
-# Install from crates.io
-cargo install cargo-risczero
-```
+| Feature  | Target(s)         | Implies    | Description                                                                           | Crates                                      |
+| -------- | ----------------- | ---------- | ------------------------------------------------------------------------------------- | ------------------------------------------- |
+| cuda     |                   | prove, std | Turns on CUDA GPU acceleration for the prover. Requires CUDA toolkit to be installed. | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
+| metal    | macos             | prove      | Turns on Metal GPU acceleration for the prover.                                       | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
+| profiler | all               |            | Counts cycles during guest execution as an aid to code optimization.                  | risc0-zkvm                                  |
+| prove    | all except rv32im | std        | Enables the prover, incompatible within the zkvm guest.                               | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
+| std      | all               |            | Support for the Rust stdlib.                                                          | risc0-circuit-rv32im, risc0-zkp, risc0-zkvm |
 
 ## License
 
