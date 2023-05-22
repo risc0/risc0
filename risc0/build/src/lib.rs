@@ -32,13 +32,12 @@ use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
     MemoryImage, Program,
 };
-use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};
 use tempfile::tempdir_in;
 use zip::ZipArchive;
 
-const LINKER_SCRIPT: &str = include_str!("../risc0.ld");
 const TARGET_JSON: &str = include_str!("../riscv32im-risc0-zkvm-elf.json");
 
 #[derive(Debug, Deserialize)]
@@ -70,7 +69,7 @@ impl Risc0Method {
         }
 
         let elf = fs::read(&self.elf_path).unwrap();
-        let program = Program::load_elf(&elf, MEM_SIZE as u32).unwrap();
+        let program = Program::load_elf(&elf, memory::MEM_SIZE as u32).unwrap();
         let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
         image.compute_id()
     }
@@ -225,12 +224,7 @@ where
 {
     // RISCV target specification
     let target_spec_path = out_dir.as_ref().join("riscv32im-risc0-zkvm-elf.json");
-    let linker_script: String = LINKER_SCRIPT.escape_default().to_string();
-    fs::write(
-        &target_spec_path,
-        TARGET_JSON.replace("<LINKER-SCRIPT>", &linker_script),
-    )
-    .unwrap();
+    fs::write(&target_spec_path, TARGET_JSON).unwrap();
 
     // Rust standard library.  If any of the RUST_LIB_MAP changed, we
     // want to have a different hash so that we make sure we recompile.
@@ -391,6 +385,17 @@ fn build_guest_package<P>(
                 // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
                 "-Z",
                 "remap-cwd-prefix=.",
+                // Specify where to start loading the program in
+                // memory.  The clang linker understands the same
+                // command line arguments as the GNU linker does; see
+                // https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_mono/ld.html#SEC3
+                // for details.
+                "-C",
+                &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT_START),
+                // Apparently not having an entry point is only a linker warning(!), so
+                // error out in this case.
+                "-C",
+                "link-arg=--fatal-warnings",
             ]
             .join("\x1f"),
         )
