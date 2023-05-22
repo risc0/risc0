@@ -41,6 +41,8 @@ Parts of this package are included in the driver program `src/main.rs`, so chang
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 ```
 
+to
+
 ```no_compile
 use factors_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 ```
