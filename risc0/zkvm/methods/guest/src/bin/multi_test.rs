@@ -193,8 +193,12 @@ pub fn main() {
         }
         MultiTestSpec::Oom => {
             use core::hint::black_box;
-            let len = memory::HEAP.len_bytes() + 1;
-            let _data = black_box(vec![0; len]);
+            // (STACK_TOP - RESERVED_STACK) is the top address the
+            // heap could ever grow to.  The heap starts after program
+            // data, so this is guaranteed to be larger than the
+            // available heap:
+            let len = (memory::STACK_TOP - memory::RESERVED_STACK) as usize;
+            let _data = black_box(vec![0_u8; len]);
         }
     }
 }
