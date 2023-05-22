@@ -30,7 +30,7 @@ let receipt = prover.run().unwrap();
 
 In 0.15, you’ll be creating an instance of type `Executor` that takes a program ELF and an environment `ExecutorEnv`. Initial guest inputs will be added to the environment. The setup process will happen in two steps:
 
-1. Build the `ExecutorEnv` environment. Notice that here we’re adding our starting inputs to the environment:
+- Build the `ExecutorEnv` environment. Notice that here we’re adding our starting inputs to the environment:
 
 ```bash
 let env = ExecutorEnv::builder()
