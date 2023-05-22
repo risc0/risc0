@@ -9,7 +9,6 @@
   "is-builtin": false,
   "linker": "rust-lld",
   "linker-flavor": "ld.lld",
-  "link-script": "<LINKER-SCRIPT>",
   "llvm-target": "riscv32",
   "max-atomic-width": 32,
   "os": "zkvm",
@@ -17,5 +16,6 @@
   "relocation-model": "static",
   "singlethread": true,
   "target-pointer-width": "32",
-  "vendor": "risc0"
+  "vendor": "risc0",
+  "main-needs-argc-argv": false
 }

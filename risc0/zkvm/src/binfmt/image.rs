@@ -269,7 +269,7 @@ fn hash_page_bytes(page: &[u8]) -> Digest {
 mod tests {
     use risc0_zkvm_methods::MULTI_TEST_ELF;
     use risc0_zkvm_platform::{
-        memory::{DATA, MEM_SIZE, PAGE_TABLE, STACK, SYSTEM, TEXT},
+        memory::{MEM_SIZE, PAGE_TABLE, STACK_TOP, SYSTEM, TEXT_START},
         syscall::DIGEST_BYTES,
     };
     use test_log::test;
@@ -284,17 +284,16 @@ mod tests {
     #[test]
     fn check_integrity() {
         const PAGE_SIZE: u32 = 1024;
-        let program = Program::load_elf(MULTI_TEST_ELF, TEXT.end() as u32).unwrap();
+        let program = Program::load_elf(MULTI_TEST_ELF, MEM_SIZE as u32).unwrap();
         let prog_pc = program.entry;
         let image = MemoryImage::new(&program, PAGE_SIZE).unwrap();
         assert_eq!(image.pc, prog_pc);
 
         // This is useful in case one needs to manually inspect the memory image.
         // std::fs::write("/tmp/test.img", &image.image).unwrap();
-        image.check(STACK.start() as u32).unwrap();
-        image.check(DATA.start() as u32).unwrap();
-        image.check(TEXT.start() as u32).unwrap();
-        image.check(TEXT.start() as u32 + 5000).unwrap();
+        image.check(TEXT_START).unwrap();
+        image.check(STACK_TOP).unwrap();
+        image.check(TEXT_START + 5000).unwrap();
         image.check(SYSTEM.start() as u32).unwrap();
         image.check(image.info.root_page_addr).unwrap();
     }
