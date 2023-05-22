@@ -38,7 +38,7 @@ let env = ExecutorEnv::builder()
 		.build();
 ```
 
-1. Construct an `Executor` using your program ELF and the instance of `ExecutorEnv`:
+- Construct an `Executor` using your program ELF and the instance of `ExecutorEnv`:
 
 ```bash
 let mut exec = Executor::from_elf(env, PROGRAM_ELF).unwrap();
