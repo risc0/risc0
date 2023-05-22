@@ -1,6 +1,6 @@
 # Migration Guide
 
-We have made substantial changes to our API, both in support of continuations and as part of more general upgrades. Essentially every project using the RISC Zero zkVM will need to make changes in order to upgrade to 0.15. This migration guide is intended to help you do so. Our examples have already been updated.
+We have made substantial changes to our API, both in support of continuations and as part of more general upgrades. Essentially every project using the RISC Zero zkVM will need to make changes in order to upgrade to 0.15. This migration guide is intended to help you do so. Our [examples](https://github.com/risc0/risc0/tree/main/examples) have already been updated.
 
 ## Host code update: code execution and receipt generation
 
