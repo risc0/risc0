@@ -163,13 +163,13 @@ impl<'a> Executor<'a> {
     /// configuration details.
     /// # Example
     /// ```
-    /// # use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
-    /// # use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
-    /// #
-    /// # let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
-    /// # let env = ExecutorEnv::builder()
-    /// #   .add_input(&to_vec(&spec).unwrap())
-    /// #   .build();
+    /// use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
+    /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
+    ///
+    /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
+    /// let env = ExecutorEnv::builder()
+    ///     .add_input(&to_vec(&spec).unwrap())
+    ///     .build();
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// ```
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
@@ -182,14 +182,14 @@ impl<'a> Executor<'a> {
     /// reached, producing a [Session] as a result.
     /// # Example
     /// ```
-    /// # use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
-    /// # use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
-    /// #
-    /// # let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
-    /// # let env = ExecutorEnv::builder()
-    /// #   .add_input(&to_vec(&spec).unwrap())
-    /// #   .build();
-    /// # let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
+    /// use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
+    /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
+    ///
+    /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
+    /// let env = ExecutorEnv::builder()
+    ///    .add_input(&to_vec(&spec).unwrap())
+    ///    .build();
+    /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// let session = exec.run().unwrap();
     /// ```
     pub fn run(&mut self) -> Result<Session> {

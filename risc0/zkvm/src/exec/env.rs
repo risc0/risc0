@@ -52,9 +52,7 @@ pub struct ExecutorEnvBuilder<'a> {
 /// The [super::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
-/// guest environment is set up prior to guest program execution. This
-/// includes initial guest program inputs, session size limits, segment size
-/// limits, and environment variables.
+/// guest environment is set up prior to guest program execution.
 #[derive(Clone)]
 pub struct ExecutorEnv<'a> {
     env_vars: HashMap<String, String>,
@@ -70,10 +68,9 @@ impl<'a> ExecutorEnv<'a> {
     /// Construct a [ExecutorEnvBuilder].
     /// # Example
     /// ```
-    /// # use risc0_zkvm::{
-    /// #   ExecutorEnv,
-    /// #   ExecutorEnvBuilder,
-    ///     serde::to_vec};
+    /// use risc0_zkvm::{
+    ///     ExecutorEnv,
+    ///     ExecutorEnvBuilder};
     ///
     /// let a: u64 = 400;
     ///
@@ -122,9 +119,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Finalize this builder to construct an [ExecutorEnv].
     /// # Example
     /// ```
-    /// # use risc0_zkvm::{
-    /// #   ExecutorEnv,
-    /// #   ExecutorEnvBuilder};
+    /// use risc0_zkvm::{
+    ///     ExecutorEnv,
+    ///     ExecutorEnvBuilder};
     ///
     /// let env = ExecutorEnv::builder().build();
     /// ```
@@ -157,9 +154,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Set a session limit, specified in number of cycles.
     /// # Example
     /// ```
-    /// # use risc0_zkvm::{
-    /// #   ExecutorEnv,
-    /// #   ExecutorEnvBuilder};
+    /// use risc0_zkvm::{
+    ///    ExecutorEnv,
+    ///    ExecutorEnvBuilder};
     ///
     /// const NEW_SESSION_LIMIT: usize = 32 * 1024 * 1024; // 32M cycles
     ///
@@ -175,10 +172,10 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Add environment variables to the guest environment.
     /// # Example
     /// ```
-    /// # use risc0_zkvm::{
-    /// #   ExecutorEnv,
-    /// #   ExecutorEnvBuilder};
-    /// # use std::collections::HashMap;
+    /// use risc0_zkvm::{
+    ///     ExecutorEnv,
+    ///     ExecutorEnvBuilder};
+    /// use std::collections::HashMap;
     ///
     /// let mut vars = HashMap::new();
     /// vars.insert("VAR1".to_string(), "SOME_VALUE".to_string());
@@ -199,7 +196,6 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// # use risc0_zkvm::{
     /// #   ExecutorEnv,
     /// #   ExecutorEnvBuilder};
-    /// # use std::collections::HashMap;
     ///
     /// let env = ExecutorEnv::builder()
     /// .env_var("VAR1", "SOME_VALUE")
@@ -213,29 +209,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add initial input that can be read by the guest from stdin.
-    /// This step must occur before the executor environment is built.
-    /// # Examples
-    /// ```
-    /// # use risc0_zkvm::{
-    /// #   ExecutorEnv,
-    /// #   ExecutorEnvBuilder,
-    ///     serde::to_vec};
-    ///
-    /// let a: u64 = 400;
-    ///
-    /// let env = ExecutorEnv::builder()
-    ///     .add_input(&to_vec(&a).unwrap())
-    ///     .build();
-    /// ```
-    ///
-    /// Most of the time, the best practice is to combine guest program inputs
-    /// into a single struct. For cases where you want to add inputs that
-    /// the guest will access using consecutive reads, you can call
-    /// `ExecutorEnvBuilder::add_input()` iteratively:
-    /// ```
-    /// # use risc0_zkvm::{
-    /// #   ExecutorEnv,
-    /// #   ExecutorEnvBuilder,
+    /// Calling `ExecutorEnvBuilder::add_input()` iteratively concatenates
+    /// inputs; the guest can access each input using consecutive reads. ```
+    /// use risc0_zkvm::{
+    ///     ExecutorEnv,
+    ///     ExecutorEnvBuilder,
     ///     serde::to_vec};
     ///
     /// let a: u64 = 400;
