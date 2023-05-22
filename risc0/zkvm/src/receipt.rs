@@ -14,17 +14,27 @@
 
 //! Manages the output and cryptographic data for a proven computation
 //!
-//! The primary component of this module is the [SessionReceipt]. A
-//! [SessionReceipt] contains the result of a zkVM guest execution and
-//! cryptographic proof of how it was generated. The prover can provide a
-//! [SessionReceipt] to an untrusting party to convince them that the results
-//! contained within the [SessionReceipt] came from running specific code.
-//! Conversely, a verifier can inspect a [SessionReceipt] to confirm that its
-//! results must have been generated from the expected code, even when this code
-//! was run by an untrused source.
+//! Receipts are zero-knowledge proofs of computation. They attest that specific
+//! code was executed to generate the information contained in the receipt. The
+//! prover can provide a receipt to an untrusting party to convince them that
+//! the results contained within the receipt came from running specific code.
+//! Conversely, a verify can inspect a receipt to confirm that its results must
+//! have been generated from the expected code, even when this code was run by
+//! an untrusted source.
+//!
+//! There are two types of receipt, a [SessionReceipt] proving the execution of
+//! a [crate::Session], and a [SegmentReceipt] proving the execution of a
+//! [crate::Segment].
+//!
+//! Because [crate::Session]s are user-determined, whereas
+//! [crate::Segment]s are automatically generated, typical use cases will handle
+//! [SessionReceipt]s directly and [SegmentReceipt]s only indirectly as part of
+//! the [SessionReceipt]s that contain them (for instance, a by calling
+//! [SessionReceipt::verify], which will itself call [SegmentReceipt::verify]
+//! for each constinuent [SegmentReceipt]).
 //!
 //! # Usage
-//! To create a receipt, use [crate::Session::prove]:
+//! To create a [SessionReceipt], use [crate::Session::prove]:
 //! ```rust
 //! use risc0_zkvm::{Executor, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
@@ -71,11 +81,20 @@ use anyhow::Result;
 use hex::FromHex;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zkp::{core::digest::Digest, layout::Buffer, verify::VerificationError, MIN_CYCLES_PO2};
+use risc0_zkp::{
+    core::{digest::Digest, hash::sha::SHA256_INIT},
+    layout::Buffer,
+    verify::VerificationError,
+    MIN_CYCLES_PO2,
+};
+use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    sha::rust_crypto::{Digest as _, Sha256},
+    sha::{
+        self,
+        rust_crypto::{Digest as _, Sha256},
+    },
     ControlId, CIRCUIT,
 };
 
@@ -105,9 +124,9 @@ pub struct SystemState {
     /// The program counter.
     pub pc: u32,
 
-    /// The `image_id` is the root hash of a merkle tree which confirms the
+    /// The root hash of a merkle tree which confirms the
     /// integrity of the memory image.
-    pub image_id: Digest,
+    pub merkle_root: Digest,
 }
 
 /// Data associated with a receipt which is used for both input and
@@ -131,6 +150,11 @@ pub struct ReceiptMetadata {
 }
 
 /// A receipt attesting to the execution of a Session.
+///
+/// A SessionReceipt attests that the `journal` was produced by executing a
+/// [crate::Session] based on a specified memory image. This image is _not_
+/// included in the receipt and must be provided by the verifier when calling
+/// [SessionReceipt::verify].
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SessionReceipt {
     /// The constituent [SegmentReceipt]s.
@@ -147,13 +171,18 @@ pub struct SessionReceipt {
 }
 
 /// A receipt attesting to the execution of a Segment.
+///
+/// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
+/// consistent with the [ReceiptMetadata] included in the receipt.
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
     /// This data is used by the ZKP Verifier (as called by
     /// [SegmentReceipt::verify]) to cryptographically prove that this Segment
-    /// was faithfully executed.
+    /// was faithfully executed. It is largely opaque cryptographic data, but
+    /// contains a non-opaque metadata component, which can be conveniently
+    /// accessed with [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 
     /// Segment index within the [SessionReceipt]
@@ -166,8 +195,9 @@ impl SessionReceipt {
     /// Uses the ZKP system to cryptographically verify that each constituent
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
-    /// given `_image_id` parameter.
+    /// given `image_id` parameter.
     #[cfg(not(target_os = "zkvm"))]
+    #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
         let hal =
@@ -183,6 +213,8 @@ impl SessionReceipt {
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `_image_id` parameter.
+    /// given `image_id` parameter.
+    #[must_use]
     pub fn verify_with_hal<H>(
         &self,
         hal: &H,
@@ -201,16 +233,21 @@ impl SessionReceipt {
         for receipt in receipts {
             receipt.verify_with_hal(hal)?;
             let metadata = receipt.get_metadata()?;
-            if prev_image_id != metadata.pre.image_id {
+            #[cfg(not(target_os = "zkvm"))]
+            log::debug!("metadata: {metadata:#?}");
+            if prev_image_id != metadata.pre.compute_image_id() {
                 return Err(VerificationError::ImageVerificationError);
             }
-            // assert_eq!(metadata.exit_code, ExitCode::SystemSplit);
-            prev_image_id = metadata.post.image_id;
+            if metadata.exit_code != ExitCode::SystemSplit {
+                return Err(VerificationError::UnexpectedExitCode);
+            }
+            prev_image_id = metadata.post.compute_image_id();
         }
         final_receipt.verify_with_hal(hal)?;
         let metadata = final_receipt.get_metadata()?;
-        // log::debug!("metadata: {metadata:#?}");
-        if prev_image_id != metadata.pre.image_id {
+        #[cfg(not(target_os = "zkvm"))]
+        log::debug!("final: {metadata:#?}");
+        if prev_image_id != metadata.pre.compute_image_id() {
             return Err(VerificationError::ImageVerificationError);
         }
 
@@ -233,8 +270,10 @@ impl SessionReceipt {
             return Err(VerificationError::JournalDigestMismatch);
         }
 
-        // assert_ne!(metadata.exit_code, ExitCode::SystemSplit);
-        // Ok(metadata.exit_code)
+        if metadata.exit_code == ExitCode::SystemSplit {
+            return Err(VerificationError::UnexpectedExitCode);
+        }
+
         Ok(())
     }
 }
@@ -251,6 +290,7 @@ impl SegmentReceipt {
     /// Uses the ZKP system to cryptographically verify that the seal does
     /// validly indicate that this Segment was executed faithfully.
     #[cfg(not(target_os = "zkvm"))]
+    #[must_use]
     pub fn verify(&self) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
         let hal =
@@ -264,6 +304,7 @@ impl SegmentReceipt {
     ///
     /// Uses the ZKP system to cryptographically verify that the seal does
     /// validly indicate that this Segment was executed faithfully.
+    #[must_use]
     pub fn verify_with_hal<H>(&self, hal: &H) -> Result<(), VerificationError>
     where
         H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
@@ -303,8 +344,12 @@ impl SystemState {
             .tree(sys_state.pc)
             .get_u32()
             .or(Err(VerificationError::ReceiptFormatError))?;
-        let image_id = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        Ok(Self { pc, image_id })
+        let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
+        Ok(Self { pc, merkle_root })
+    }
+
+    fn compute_image_id(&self) -> Digest {
+        compute_image_id(&self.merkle_root, self.pc)
     }
 }
 
@@ -312,7 +357,14 @@ impl ReceiptMetadata {
     fn decode(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
         let pre = SystemState::decode(io, body.global.pre)?;
-        let post = SystemState::decode(io, body.global.post)?;
+        let mut post = SystemState::decode(io, body.global.post)?;
+        // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
+        // the PC with carry, the PC is always recorded as the current PC +
+        // 4. Thus we need to adjust the decoded PC for the post SystemState.
+        post.pc = post
+            .pc
+            .checked_sub(WORD_SIZE as u32)
+            .ok_or(VerificationError::ReceiptFormatError)?;
         let input_bytes: Vec<u8> = io
             .tree(body.global.input)
             .get_bytes()
@@ -340,4 +392,13 @@ impl ReceiptMetadata {
             output,
         })
     }
+}
+
+/// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
+pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
+    use risc0_zkp::core::{digest::DIGEST_WORDS, hash::sha::Sha256};
+    let mut pc_digest = [0u32; DIGEST_WORDS];
+    pc_digest[0] = pc;
+    let block2 = Digest::new(pc_digest);
+    *sha::Impl::compress(&SHA256_INIT, merkle_root, &block2)
 }

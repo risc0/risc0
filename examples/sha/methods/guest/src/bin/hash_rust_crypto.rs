@@ -14,13 +14,15 @@
 
 #![no_main]
 
+// Also available as risc0_zkvm::sha::rust_crypto
 use risc0_zkvm::guest::env;
-use risc0_zkvm::sha::{Impl, Sha256};
+use sha2::{Digest as _, Sha256};
 
 risc0_zkvm::guest::entry!(main);
 
+// Example of using RustCrypto with RISC Zero accelerator support.
 pub fn main() {
     let data: String = env::read();
-    let sha = Impl::hash_bytes(&data.as_bytes());
-    env::commit(&*sha);
+    let digest = Sha256::digest(&data.as_bytes());
+    env::commit(&digest.as_slice());
 }
