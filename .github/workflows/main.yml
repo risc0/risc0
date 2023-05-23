@@ -49,13 +49,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [default]
-        device: [cpu]
+        # os: [Linux, macOS]
+        # feature: [default]
+        # device: [cpu]
         include:
-          # - os: Linux
-          #   feature: cuda
-          #   device: nvidia_rtx_a5000
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
           # - os: macOS
           #   feature: metal
           #   device: apple_m2_pro
