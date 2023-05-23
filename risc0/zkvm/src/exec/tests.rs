@@ -498,9 +498,11 @@ fn oom() {
     let env = ExecutorEnv::builder().add_input(&spec).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
-    assert!(err
-        .to_string()
-        .contains("Guest panicked: panicked at 'Out of memory!'"));
+    assert!(
+        err.to_string()
+            .contains("Guest panicked: panicked at 'Out of memory!'"),
+        "{err:?}"
+    );
 }
 
 fn run_session(

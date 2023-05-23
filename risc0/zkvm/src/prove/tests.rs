@@ -23,7 +23,7 @@ use risc0_zkp::{
     verify::VerificationError,
 };
 use risc0_zkvm_methods::{multi_test::MultiTestSpec, MULTI_TEST_ELF, MULTI_TEST_ID};
-use risc0_zkvm_platform::memory::HEAP;
+use risc0_zkvm_platform::{memory, WORD_SIZE};
 use serial_test::serial;
 use test_log::test;
 
@@ -161,23 +161,30 @@ fn memory_io() {
         session.prove()
     }
 
+    // Pick a memory position in the middle of the memory space, which is unlikely
+    // to be touched by either the stack or heap:
+    const POS: usize = crate::align_up(
+        (memory::TEXT_START + memory::STACK_TOP) as usize / 2,
+        WORD_SIZE,
+    );
+
     // Double writes are fine
-    run_memio(&[(HEAP.start(), 1), (HEAP.start(), 1)]).unwrap();
+    run_memio(&[(POS, 1), (POS, 1)]).unwrap();
 
     // Writes at different addresses are fine
-    run_memio(&[(HEAP.start(), 1), (HEAP.start() + 4, 2)]).unwrap();
+    run_memio(&[(POS, 1), (POS + 4, 2)]).unwrap();
 
     // Aligned write is fine
-    run_memio(&[(HEAP.start(), 1)]).unwrap();
+    run_memio(&[(POS, 1)]).unwrap();
 
     // Unaligned write is bad
-    run_memio(&[(HEAP.start() + 1001, 1)]).unwrap_err();
+    run_memio(&[(POS + 1001, 1)]).unwrap_err();
 
     // Aligned read is fine
-    run_memio(&[(HEAP.start(), 0)]).unwrap();
+    run_memio(&[(POS, 0)]).unwrap();
 
     // Unaligned read is bad
-    run_memio(&[(HEAP.start() + 1, 0)]).unwrap_err();
+    run_memio(&[(POS + 1, 0)]).unwrap_err();
 }
 
 #[test]
