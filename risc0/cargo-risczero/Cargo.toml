@@ -10,7 +10,7 @@ readme = "README.md"
 keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 
 [dependencies]
-bstr = "=1.4.0"
+bstr = "=1.5.0"
 # Note, due to tempfile = 3.3.0 in cargo-generate
 # we have to downgrade all uses of tempfile to 3.3 in our workspace due to:
 # https://github.com/rust-lang/cargo/issues/7880
