@@ -3,7 +3,7 @@
 The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
 
 To see this example in action, [install Rust] and use `cargo run` in this directory to run it:
-```
+```sh
 cargo run
 ```
 
@@ -15,7 +15,8 @@ This example is a good introduction for beginners new to RISC Zero; if you're lo
 ## Step 1: Create a new project
 
 First, [install Rust] if you don't already have it. Next you can create a RISC Zero zkVM project with boilerplate already filled out using our [`cargo risczero` tool]:
-```
+
+```sh
 ## Install from crates.io
 cargo install cargo-risczero
 
@@ -26,54 +27,94 @@ cd wherever/you/want
 cargo risczero new factors
 ```
 This will create a project named `factors` in the directory where you ran the `cargo risczero new` command. Now we can enter our new project's directory and start working on it!
-```
+```sh
 cd factors
 ```
 
-## Step 2: Give the guest program a name
+## Step 2: Give the methods package a name
 
-This project will call a program that executes on the guest zkVM.
-It's currently named `method_name`.
-We want to name it something that represents what the guest program does — let's call it `multiply`.
-Edit `methods/guest/Cargo.toml`, changing the line `name = "method_name"` to instead read
-```
-name = "multiply"
-```
+The methods package contains the program that executes on the guest zkVM as well as a few supporting libraries. Before we proceed, let's change its name in `methods/Cargo.toml` to match the name of our project, renaming `name = methods` to `name = factors-methods`.
 
-In order to access this guest code from the host driver program, the host program `factors/host/src/main.rs` includes two guest methods:
+Parts of this package are included in the driver program `src/main.rs`, so change the line
 
-```rust
+```no_compile
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 ```
 
-Both of these must be changed to reflect the new guest program name:
-```rust
-use methods::{MULTIPLY_ELF, MULTIPLY_ID};
-```
-(As an aside, if you add more than one callable guest program to your next RISC Zero zkVM project, you'll need to include these `ELF` and `ID` references once for each guest file.)
+to
 
-While we're at it, let's change the rest of the references in `factors/host/src/main.rs`.
-Don't worry about why these lines are included yet; for now, we're just being diligent not to leave dead references behind.
+```no_compile
+use factors_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
+```
+
+## Step 3: Give the guest program and its packages a name
+
+Take a moment to look inside the methods package directory. The `factors` project will call a program that executes on the guest zkVM whose source is found in `methods/guest/src/main.rs`. Our next step will be to name this guest program.
+
+
+Edit `methods/guest/Cargo.toml`, changing the line `name = "method_name"` to instead read `name = "multiply"`.
+
+
+In order to access guest code from the host driver program, the host program `host/src/main.rs` includes two guest methods: `METHOD_NAME_ELF` and `METHOD_NAME_ID`.
+
+```no_compile
+use factors_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
+
+```
+
+Both of these must be changed to reflect the new guest program name:
+
+```
+use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+```
+(As an aside, if you add more than one callable guest program to your next RISC Zero zkVM project, you'll need to include `ELF` and `ID` references once for each guest file.)
+
+While we're at it, let's update the references to `METHOD_NAME_ELF` and `METHOD_NAME_ID` in `factors/host/src/main.rs` to reflect our new program name. Don't worry about why these lines are included yet; for now, we're just being diligent not to leave dead references behind.
+
 Here are what the other two lines with `METHOD_NAME_ELF` and `METHOD_NAME_ID` should look like after updating:
 
-```rust
-    let mut prover =
-        Prover::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
+```no_compile
+    // Rename METHOD_NAME_ELF
+    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
 
-...
-
-    receipt.verify(&MULTIPLY_ID).expect(
-        "Code you have proven should successfully verify; did you specify the correct image ID?",
-    );
+    // Rename METHOD_NAME_ID
+    // receipt.verify(MULTIPLY_ID).unwrap();
 ```
 
-### Intermission: Build and run the project!
+### Step 4: Build and run the project!
 
 In the main project folder, build and run the project using `cargo run --release`.
 Nothing exciting will happen yet, but it should give you an error if you made one of the above changes incorrectly.
 Use this command any time you'd like to check your progress.
 
-## Step 3 (Host): Share two values with the guest
+## Concept break: How do we run and prove the guest program?
+
+Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/src/main.rs`.
+
+In the starter template project, our host driver program creates an executor environment before constructing an executor.  When `Executor::run()` is called, it will produce a session. Calling `Session::prove()` will cause our guest program to execute, producing a receipt:
+
+```rust
+    use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use risc0_zkvm::{
+      serde::{from_slice, to_vec},
+      Executor, ExecutorEnv,
+    };
+
+    // First, we construct an executor environment
+    let env = ExecutorEnv::builder().build();
+
+    // Next, we make an executor, loading the (renamed) ELF binary.
+    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
+
+    // We're not quite ready to run these steps yet
+    // let session = exec.run().unwrap();
+    // let receipt = session.prove().unwrap();
+    // receipt.verify(MULTIPLY_ID).unwrap();
+```
+
+
+
+## Step 5 (Host): Share two values with the guest
 
 In this step, we'll be continuing to modify `factors/src/main.rs`.
 Let's start by picking some aesthetically pleasing primes:
@@ -81,46 +122,35 @@ Let's start by picking some aesthetically pleasing primes:
 fn main() {
     let a: u64 = 17;
     let b: u64 = 23;
+}
 ```
 
-Currently, our host driver program creates and runs a prover.
-The `prover.run()` command will cause our guest program to execute:
+We'd like the host to make the values of `a` and `b` available to the guest prior to execution. We can do this by adding them to the the executor environment, which is responsible for managing guest-readable memory. When the `Executor` is constructed, it will have access to these guest inputs.
 
-```rust
-    // Make the prover.
-    let mut prover =
-        Prover::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
-
-    // TODO: Implement communication with the guest here
-
-    // Run prover & generate receipt
-    let receipt = prover.run().expect(
-        "Code should be provable unless it had an error or exceeded the maximum cycle limit",
-    );
-```
- We'd like the host to make the values of `a` and `b` available to the guest prior to execution.
- Because the prover is responsible for managing guest-readable memory, we need to share them after the prover is created.
- To accomplish this, let's send our two values to the guest.
- We do this in between making the prover and running the prover (in place of the "`TODO`" in the previous code snippet).
+ We need to add these values as inputs before the executor environment is built:
 
  ```rust
-    // Make the prover.
-    let mut prover =
-        Prover::new(MULTIPLY_ELF).expect("Prover should be constructed from valid ELF binary");
+    use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use risc0_zkvm::{
+      serde::to_vec,
+      Executor, ExecutorEnv,
+    };
 
-    prover.add_input_u32_slice(&to_vec(&a).expect("should be serializable"));
-    prover.add_input_u32_slice(&to_vec(&b).expect("should be serializable"));
+    let a: u64 = 17;
+    let b: u64 = 23;
 
-    // Run prover & generate receipt
-    let receipt = prover.run().expect(
-        "Code should be provable unless it had an error or exceeded the maximum cycle limit",
-    );
+    // First, we construct an executor environment
+    let env = ExecutorEnv::builder()
+    // Send a & b to the guest
+      .add_input(&to_vec(&a).unwrap())
+      .add_input(&to_vec(&b).unwrap())
+      .build();
 ```
 
 You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
 You will get a warning about `from_slice` being unused; this function is needed when reading the [journal], but the guest hasn't written to it yet, so the host can't read from it yet.
 
-## Step 4 (Guest): Multiply two values and commit their result
+## Step 6 (Guest): Multiply two values and commit their result
 
 Now it's time to start writing guest code, located in `methods/guest/src/main.rs`.
 This is the portion of the code that will be proven.
@@ -130,16 +160,18 @@ We'll then publicly commit their product to the [journal] portion of the [receip
 
 Here is the complete guest program.
 We'll break this down step by step below:
-```rust
+```no_compile
 pub fn main() {
     // Load the first number from the host
     let a: u64 = env::read();
     // Load the second number from the host
     let b: u64 = env::read();
+
     // Verify that neither of them are 1 (i.e. nontrivial factors)
     if a == 1 || b == 1 {
         panic!("Trivial factors")
     }
+
     // Compute the product while being careful with integer overflow
     let product = a.checked_mul(b).expect("Integer overflow");
     env::commit(&product);
@@ -149,14 +181,14 @@ pub fn main() {
 
 Use `env::read()` to load both numbers that the host provided:
 
-```rust
+```no_compile
     let a: u64 = env::read();
     let b: u64 = env::read();
 ```
 ### Confirm that factors are non-trivial
 
-Next, we'll add a line that panics if either chosen value is 1. This will leave us with a guest program that only completes if the product of `a` and `b` is genuinely composite. 
-```rust
+Next, we'll add a line that panics if either chosen value is 1. This will leave us with a guest program that only completes if the product of `a` and `b` is genuinely composite.
+```no_compile
     // Verify that neither of them are 1 (i.e. nontrivial factors)
     if a == 1 || b == 1 {
         panic!("Trivial factors")
@@ -166,7 +198,7 @@ Next, we'll add a line that panics if either chosen value is 1. This will leave 
 ## Compute and publish the product
 
 Now we can compute their product and `commit` it.
-```rust
+```no_compile
     let product = a.checked_mul(b).expect("Integer overflow");
     env::commit(&product);
 ```
@@ -176,19 +208,43 @@ Once committed to the journal, anyone with the [receipt] can read this value.
 Now you should be able to confirm your work again with `cargo run --release`.
 Once more, the program won't do anything, but it should run successfully and build with a single warning about `from_slice` being unused.
 
-## Step 5 (Host): Generate a receipt and read its journal contents
+## Step 7 (Host): Generate a receipt and read its journal contents
 
 For this step, we return to the main file for the host driver program at `factors/host/src/main.rs`, which currently has a placeholder comment asking to fill in with code for handling the [receipt]:
 
-```rust
-    // TODO: Implement code for transmitting or serializing the receipt for
-    // other parties to verify here
+```no_compile
+    // Run the executor to produce a session.
+    let session = exec.run().unwrap();
+
+    // Prove the session to produce a receipt.
+    let receipt = session.prove().unwrap();
 ```
 
 In a real-world scenario, we'd want to hand the [receipt] to someone else, but reading it ourselves will be a nice way to check our project is working as expected.
 So, let's extract the [journal]'s contents by replacing the "`TODO`" in the above code snippet with the following lines.
 
 ```rust
+    use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use risc0_zkvm::{
+      serde::{from_slice, to_vec},
+      Executor, ExecutorEnv,
+    };
+
+    let a: u64 = 17;
+    let b: u64 = 23;
+
+    let env = ExecutorEnv::builder()
+    // Send a & b to the guest
+    .add_input(&to_vec(&a).unwrap())
+    .add_input(&to_vec(&b).unwrap())
+    .build();
+
+    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
+    let session = exec.run().unwrap();
+
+    let receipt = session.prove().unwrap();
+    receipt.verify(MULTIPLY_ID).unwrap();
+
     // Extract journal of receipt (i.e. output c, where c = a * b)
     let c: u64 = from_slice(&receipt.journal).unwrap();
 
