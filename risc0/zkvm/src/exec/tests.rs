@@ -540,7 +540,7 @@ fn session_limit() {
     // make sure that it's ok to run with a limit that's higher the actual count
     assert!(run_session(1 << 16, 16, 10).is_ok());
 
-    let err = run_session(1 << 16, 15, 6).err().unwrap();
+    let err = run_session(1 << 16, 15, 3).err().unwrap();
     assert!(err.to_string().contains("Session limit exceeded"));
 
     assert!(run_session(1 << 16, 15, 10).is_ok());
