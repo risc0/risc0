@@ -198,8 +198,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// #   ExecutorEnvBuilder};
     ///
     /// let env = ExecutorEnv::builder()
-    /// .env_var("VAR1", "SOME_VALUE")
-    /// .build();
+    ///     .env_var("VAR1", "SOME_VALUE")
+    ///     .build();
     /// ```
     pub fn env_var(&mut self, name: &str, val: &str) -> &mut Self {
         self.inner
