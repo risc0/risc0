@@ -105,7 +105,7 @@ impl Risc0Method {
 pub const {upper}_ELF: &[u8] = &{elf_contents:?};
 pub const {upper}_ID: [u32; 8] = {image_id:?};
 pub const {upper}_PATH: &str = r#"{elf_path}"#;
-            "##
+"##
         )
     }
 
@@ -113,13 +113,13 @@ pub const {upper}_PATH: &str = r#"{elf_path}"#;
     fn guest_list_entry(&self) -> String {
         let upper = self.name.to_uppercase().replace('-', "_");
         format!(
-            "
+            r##"
     GuestListEntry {{
-        name: \"{upper}\",
+        name: "{upper}",
         elf: {upper}_ELF,
         image_id: {upper}_ID,
         path: {upper}_PATH,
-    }}"
+    }}"##
         )
     }
 }
@@ -545,7 +545,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
         methods_file
             .write_all(
                 format!(
-                    "pub const GUEST_LIST: &[GuestListEntry] = &[{}];",
+                    "\npub const GUEST_LIST: &[GuestListEntry] = &[{}];",
                     guest_list_entries.join(",")
                 )
                 .as_bytes(),
