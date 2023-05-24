@@ -512,7 +512,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
     let mut guest_list_entries = Vec::new();
     #[cfg(feature = "guest-list")]
     methods_file
-        .write_all(b"use risc0_build::GuestListEntry;")
+        .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
 
     let guest_build_env = setup_guest_build_env(&out_dir);
@@ -545,7 +545,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
         methods_file
             .write_all(
                 format!(
-                    "\npub const GUEST_LIST: &[GuestListEntry] = &[{}];",
+                    "\npub const GUEST_LIST: &[GuestListEntry] = &[{}];\n",
                     guest_list_entries.join(",")
                 )
                 .as_bytes(),
