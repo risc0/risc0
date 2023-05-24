@@ -119,8 +119,7 @@ pub const {upper}_PATH: &str = r#"{elf_path}"#;
         elf: {upper}_ELF,
         image_id: {upper}_ID,
         path: {upper}_PATH,
-    }}
-            "
+    }}"
         )
     }
 }
@@ -547,7 +546,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             .write_all(
                 format!(
                     "pub const GUEST_LIST: &[GuestListEntry] = &[{}];",
-                    guest_list_entries.join(",\n")
+                    guest_list_entries.join(",")
                 )
                 .as_bytes(),
             )
