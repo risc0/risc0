@@ -14,21 +14,20 @@ keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 # we have to downgrade all uses of tempfile to 3.3 in our workspace due to:
 # https://github.com/rust-lang/cargo/issues/7880
 cargo-generate = "0.18"
+cargo_metadata = "0.15"
 clap = { version = "4.0", features = ["derive"] }
 const_format = "0.2"
 risc0-build = { workspace = true }
+risc0-zkvm = { workspace = true, features = ["binfmt", "prove"] }
 tempfile = "3.3"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 zip = "0.6"
-cargo_metadata = "0.15"
-risc0-zkvm = { workspace = true, features = ["binfmt", "prove"] }
 
 [build-dependencies]
 env_logger = "0.10"
 risc0-build = { workspace = true }
 zip = "0.6"
-
 
 [[bin]]
 path = "src/bin/main.rs"

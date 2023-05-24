@@ -386,7 +386,7 @@ impl GuestBuildEnv {
     /// used to build programs for the zkvm which don't depend on
     /// risc0_zkvm.
     pub fn build_rust_runtime(&self) -> String {
-        self.build_staticlib("risc0-zkvm-platform", &["rust-runtime"])
+        self.build_staticlib("risc0-zkvm-platform", &["rust-runtime", "getrandom"])
     }
 
     /// Builds a static library and returns the name of the resultant file.

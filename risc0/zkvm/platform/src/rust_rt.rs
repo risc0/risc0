@@ -36,6 +36,7 @@ _start:
     sym STACK_TOP
 );
 
+#[cfg(target_os = "zkvm")]
 #[panic_handler]
 fn panic_fault(panic_info: &PanicInfo) -> ! {
     let msg = alloc::format!("{}", panic_info);
