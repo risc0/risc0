@@ -2,7 +2,7 @@ name: Benchmark Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, 'release-*' ]
     # Only run benchmarks on changes to following paths:
     paths:
       - 'risc0/**'
