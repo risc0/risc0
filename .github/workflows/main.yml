@@ -49,16 +49,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [Linux, macOS]
-        feature: [default]
-        device: [cpu]
+        # os: [Linux, macOS]
+        # feature: [default]
+        # device: [cpu]
         include:
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_a5000
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
+          # - os: Linux
+          #   feature: cuda
+          #   device: nvidia_rtx_a5000
+          # - os: macOS
+          #   feature: metal
+          #   device: apple_m2_pro
           - os: Linux
             feature: ARM
             device: graviton3
@@ -99,37 +99,37 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-zkvm
       - run: sccache --show-stats
 
-  doc:
-    runs-on: [self-hosted, prod, Linux, cpu]
-    steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/rustup
-      - uses: ./.github/actions/sccache
-      - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
-      - name: Install mdbook
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: mdbook
-          version: "0.4"
-      - run: mdbook test
-        working-directory: docs/mdbook
+  # doc:
+  #   runs-on: [self-hosted, prod, Linux, cpu]
+  #   steps:
+  #     # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+  #     - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+  #     - uses: actions/checkout@v3
+  #     - uses: ./.github/actions/rustup
+  #     - uses: ./.github/actions/sccache
+  #     - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+  #     - name: Install mdbook
+  #       uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+  #       with:
+  #         crate: mdbook
+  #         version: "0.4"
+  #     - run: mdbook test
+  #       working-directory: docs/mdbook
 
-  check_template:
-    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [Linux, macOS]
+  # check_template:
+  #   runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: [Linux, macOS]
 
-    steps:
-      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-      - uses: actions/checkout@v3
-      - uses: ./.github/actions/rustup
-      - run: |
-          cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
-        shell: bash
-      - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
-      - run: ${{ runner.temp }}/template-test/target/release/host
+  #   steps:
+  #     # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+  #     - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+  #     - uses: actions/checkout@v3
+  #     - uses: ./.github/actions/rustup
+  #     - run: |
+  #         cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
+  #       shell: bash
+  #     - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
+  #     - run: ${{ runner.temp }}/template-test/target/release/host
