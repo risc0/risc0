@@ -52,6 +52,19 @@ impl Risc0Metadata {
     }
 }
 
+#[cfg(feature = "guest-list")]
+/// Represents an item in the generated list of compiled guest binaries
+pub struct GuestListEntry {
+    /// The name of the guest binary
+    pub name: &'static str,
+    /// The compiled ELF guest binary
+    pub elf: &'static [u8],
+    /// The image id of the guest
+    pub image_id: [u32; 8],
+    /// The path to the ELF binary
+    pub path: &'static str,
+}
+
 #[derive(Debug)]
 struct Risc0Method {
     name: String,
@@ -84,8 +97,7 @@ impl Risc0Method {
             panic!("method path cannot include #: {}", elf_path);
         }
 
-        let upper = self.name.to_uppercase();
-        let upper = upper.replace('-', "_");
+        let upper = self.name.to_uppercase().replace('-', "_");
         let image_id: [u32; DIGEST_WORDS] = self.make_image_id().into();
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
@@ -94,6 +106,21 @@ pub const {upper}_ELF: &[u8] = &{elf_contents:?};
 pub const {upper}_ID: [u32; 8] = {image_id:?};
 pub const {upper}_PATH: &str = r#"{elf_path}"#;
             "##
+        )
+    }
+
+    #[cfg(feature = "guest-list")]
+    fn guest_list_entry(&self) -> String {
+        let upper = self.name.to_uppercase().replace('-', "_");
+        format!(
+            "
+    GuestListEntry {{
+        name: \"{upper}\",
+        elf: {upper}_ELF,
+        image_id: {upper}_ID,
+        path: {upper}_PATH,
+    }}
+            "
         )
     }
 }
@@ -482,6 +509,13 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
+    #[cfg(feature = "guest-list")]
+    let mut guest_list_entries = Vec::new();
+    #[cfg(feature = "guest-list")]
+    methods_file
+        .write_all(b"use risc0_build::GuestListEntry;")
+        .unwrap();
+
     let guest_build_env = setup_guest_build_env(&out_dir);
 
     for guest_pkg in guest_packages {
@@ -503,7 +537,21 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             methods_file
                 .write_all(method.rust_def().as_bytes())
                 .unwrap();
+
+            #[cfg(feature = "guest-list")]
+            guest_list_entries.push(method.guest_list_entry());
         }
+
+        #[cfg(feature = "guest-list")]
+        methods_file
+            .write_all(
+                format!(
+                    "pub const GUEST_LIST: &[GuestListEntry] = &[{}];",
+                    guest_list_entries.join(",\n")
+                )
+                .as_bytes(),
+            )
+            .unwrap();
     }
 
     // HACK: It's not particularly practical to figure out all the
