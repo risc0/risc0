@@ -8,6 +8,11 @@ runs:
         echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
 
+    - if: runner.os == 'Linux' && runner.arch == 'ARM64'
+      run: |
+        echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
+      shell: bash
+
     - if: runner.os == 'macOS' && runner.arch == 'X64'
       run: |
         echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
