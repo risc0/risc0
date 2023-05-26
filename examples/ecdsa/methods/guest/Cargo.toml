@@ -12,7 +12,7 @@ k256 = { version = "=0.13.0", features = ["serde"] }
 [patch.crates-io]
 # Placing these patch statement in the workspace Cargo.toml will add RISC Zero SHA-256 and bigint
 # multiplicaation accelerator support for all downstream usages of the following crates.
-# DO NOT MERGE: Use tagged git references instead of branches or local paths.
+# DO NOT MERGE: Use tagged git references instead of branches
 sha2 = { git = "https://github.com/risc0/RustCrypto-hashes", tag = "sha2-v0.10.6-risc0" }
-k256 = { path = "/Users/victorgraf/src/rust-crypto/elliptic-curves/k256" }
+k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", branch = "victor/use-risc0-accel"  }
 crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", branch = "victor/use-risc0-accel" }

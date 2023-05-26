@@ -875,6 +875,19 @@ dependencies = [
 
 [[package]]
 name = "ecdsa"
+version = "0.12.0"
+dependencies = [
+ "clap 4.2.1",
+ "ecdsa-methods",
+ "hex",
+ "k256 0.13.0",
+ "rand_core",
+ "risc0-zkvm",
+ "serde",
+]
+
+[[package]]
+name = "ecdsa"
 version = "0.14.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "413301934810f597c1d19ca71c8710e99a3f1ba28a0d2ebc01551a2daeea3c5c"
@@ -894,7 +907,15 @@ dependencies = [
  "der 0.7.1",
  "elliptic-curve 0.13.2",
  "rfc6979 0.4.0",
+ "serdect",
  "signature 2.0.0",
+]
+
+[[package]]
+name = "ecdsa-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]
@@ -943,6 +964,7 @@ dependencies = [
  "pkcs8",
  "rand_core",
  "sec1 0.7.1",
+ "serdect",
  "subtle",
  "zeroize",
 ]
@@ -1969,6 +1991,7 @@ dependencies = [
  "ecdsa 0.16.2",
  "elliptic-curve 0.13.2",
  "once_cell",
+ "serdect",
  "sha2",
  "signature 2.0.0",
 ]
@@ -2971,7 +2994,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "cargo_metadata",
  "directories",
@@ -2987,7 +3010,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "cc",
  "directories",
@@ -2999,7 +3022,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "cust",
@@ -3017,7 +3040,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "cc",
  "glob",
@@ -3028,7 +3051,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3036,7 +3059,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "cc",
  "glob",
@@ -3046,7 +3069,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3073,7 +3096,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "bincode",
@@ -3104,7 +3127,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.14.0"
+version = "0.15.0"
 
 [[package]]
 name = "rlp"
@@ -3293,6 +3316,7 @@ dependencies = [
  "der 0.7.1",
  "generic-array",
  "pkcs8",
+ "serdect",
  "subtle",
  "zeroize",
 ]
@@ -3381,6 +3405,16 @@ dependencies = [
  "form_urlencoded",
  "itoa",
  "ryu",
+ "serde",
+]
+
+[[package]]
+name = "serdect"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a84f14a19e9a014bb9f4512488d9829a68e04ecabffb0f9904cd1ace94598177"
+dependencies = [
+ "base16ct 0.2.0",
  "serde",
 ]
 

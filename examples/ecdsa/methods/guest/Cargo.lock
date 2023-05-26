@@ -233,6 +233,7 @@ dependencies = [
 [[package]]
 name = "k256"
 version = "0.13.0"
+source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?branch=victor/use-risc0-accel#9d818ff6bb73237443f5eebd3b68d6a43a27b765"
 dependencies = [
  "bytemuck",
  "cfg-if",
