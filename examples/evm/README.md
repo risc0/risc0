@@ -1,5 +1,7 @@
 # Mini zkEVM on RISC Zero
 
+***Check out our [blogpost](https://risczero.com/blog/continuations) on this example!***
+
 A demo of how to run an EVM engine within the Risc Zero zkVM. It uses the [revm](https://crates.io/crates/revm) crate as an EVM interpreter and does a pre-flight pass to capture all the relevant data from an Ethereum JSON-RPC interface.
 
 Currently, this demo accepts an Ethereum transaction hash and replays the transaction at the block it happened. It could be extended to run new transactions as well. The zkVM commits the revm state changes to the journal. A verifier of this tool's outputs could, in theory, check the proof and then just commit the state changes to the global state.
