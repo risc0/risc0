@@ -4,6 +4,7 @@ members = [
     "chess/core",
     "digital-signature",
     "digital-signature/core",
+    "ecdsa",
     "evm",
     "evm/core",
     "factors",
