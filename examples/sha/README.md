@@ -9,4 +9,4 @@ Notable details:
 
 For a video walkthrough of this example, we suggest [this video from Web3Dev - Web in Chains](https://www.youtube.com/watch?v=Nmxe8cnuO-0&list=PLcPzhUaCxlCjHQleuRhYN09zXgj6b_s-e&index=4).
 Thanks to Pawel from [Discord](https://discord.gg/risczero) for creating and sharing this content! 
-Note that the code snippets in this video are based on the 0.14 version of the zkVM. 
+Note that the code snippets in this video are based on the 0.14 version of the zkVM; our API has changed since then.
