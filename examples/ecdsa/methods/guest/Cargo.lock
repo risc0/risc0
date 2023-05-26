@@ -88,10 +88,10 @@ dependencies = [
 [[package]]
 name = "crypto-bigint"
 version = "0.5.2"
-source = "git+https://github.com/risc0/RustCrypto-crypto-bigint?branch=victor/use-risc0-accel#725b3bcb26c3498ca4f2924f9e7f843d4bd3045f"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf4c2f4e1afd912bc40bfd6fed5d9dc1f288e0ba01bfcc835cc5bc3eb13efe15"
 dependencies = [
  "generic-array",
- "getrandom",
  "rand_core",
  "subtle",
  "zeroize",
@@ -233,13 +233,12 @@ dependencies = [
 [[package]]
 name = "k256"
 version = "0.13.0"
-source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?branch=victor/use-risc0-accel#9d818ff6bb73237443f5eebd3b68d6a43a27b765"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "955890845095ccf31ef83ad41a05aabb4d8cc23dc3cac5a9f5c89cf26dd0da75"
 dependencies = [
- "bytemuck",
  "cfg-if",
  "ecdsa",
  "elliptic-curve",
- "getrandom",
  "once_cell",
  "serdect",
  "sha2",

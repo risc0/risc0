@@ -34,15 +34,6 @@ fn prove_ecdsa_verification(
 
     let mut exec = Executor::from_elf(env, ECDSA_VERIFY_ELF).unwrap();
     let session = exec.run().unwrap();
-    println!(
-        "Total insn cycles: {}",
-        session
-            .segments
-            .iter()
-            .map(|s| s.resolve().unwrap().insn_cycles)
-            .reduce(|sum, cycles| sum + cycles)
-            .unwrap()
-    );
     session.prove().unwrap()
 }
 
