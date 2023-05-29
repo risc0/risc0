@@ -60,7 +60,7 @@ pub struct GuestListEntry {
     /// The compiled ELF guest binary
     pub elf: &'static [u8],
     /// The image id of the guest
-    pub image_id: [u32; 8],
+    pub image_id: [u32; DIGEST_WORDS],
     /// The path to the ELF binary
     pub path: &'static str,
 }
