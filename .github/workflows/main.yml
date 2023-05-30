@@ -60,7 +60,7 @@ jobs:
           #   feature: metal
           #   device: apple_m2_pro
           - os: Linux
-            feature: cuda
+            feature: default
             device: graviton2
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
