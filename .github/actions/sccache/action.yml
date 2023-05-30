@@ -8,11 +8,6 @@ runs:
         echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
 
-    - if: runner.os == 'Linux' && runner.arch == 'ARM64'
-      run: |
-        echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
-      shell: bash
-
     - if: runner.os == 'macOS' && runner.arch == 'X64'
       run: |
         echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
@@ -23,7 +18,16 @@ runs:
         echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
       shell: bash
 
-    - env:
+    - if: runner.os == 'Linux' && runner.arch == 'ARM64'
+      run: |
+        curl -L "https://github.com/mozilla/sccache/releases/download/v0.4.0-pre.5/aarch64-unknown-linux-musl.tar.gz" | tar xz
+        mkdir -p $HOME/.local/bin
+        mv -f aarch64-unknown-linux-musl.tar.gz/sccache $HOME/.local/bin/sccache
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - if: runner.os != 'Linux' && runner.arch != 'ARM64'
+      env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
         SCCACHE_VERSION: v0.3.3
       run: |
