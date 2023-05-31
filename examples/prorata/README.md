@@ -2,7 +2,7 @@
 
 This example demonstrates using the zkVM for calculating pro rata distribution of a total dollar amount in a simple but realistic way, and then securely attesting to any given payee that their amount was correctly calculated. The example uses the off-the-shelf `rust_decimal` crate for numerically correct calculation including banker's rounding.
 
-Walking through this example requires around 16GB of RAM and under 20 minutes on a reasonably modern CPU like 8-core Ryzen 5800X.
+Walking through this example on Linux requires a minimum of around 12GB of RAM and takes under 20 minutes on a reasonably modern CPU like 8-core Ryzen 5800X. The slowest build step is single threaded so more cores shouldn't make too much difference.
 
 ### Building
 

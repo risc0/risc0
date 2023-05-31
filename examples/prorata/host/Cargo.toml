@@ -1,11 +1,11 @@
 [package]
-name = "host"
+name = "prorata-cli"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 methods = { path = "../methods" }
-risc0-zkvm = "0.15.1"
+risc0-zkvm = { path = "../../../risc0/zkvm" }
 serde = "1.0"
 rust_decimal = "1.29"
 rust_decimal_macros = "1.29"

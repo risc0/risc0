@@ -1,11 +1,12 @@
-use clap::{Parser, Subcommand};
-
 use ciborium;
+use clap::{Parser, Subcommand};
 use hex;
-use methods::{PRORATA_ELF, PRORATA_ID};
+use methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
 use prorata_core::QueryResult;
-use risc0_zkvm::serde::{from_slice, to_vec};
-use risc0_zkvm::{Executor, ExecutorEnv};
+use risc0_zkvm::{
+    serde::{from_slice, to_vec},
+    Executor, ExecutorEnv,
+};
 use rust_decimal::Decimal;
 
 #[derive(Parser)]
@@ -57,7 +58,8 @@ fn main() {
 }
 
 fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
-    // read the file in the path specified as args.input into a vec of u8 called recipients_csv
+    // read the file in the path specified as args.input into a vec of u8 called
+    // recipients_csv
     let recipients_csv = std::fs::read(&input).expect("Failed to read input file");
     let query = recipient;
 
@@ -73,12 +75,12 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
         .add_input(&to_vec(&query).unwrap())
         .build();
 
-    let mut exec = Executor::from_elf(env, PRORATA_ELF).unwrap();
+    let mut exec = Executor::from_elf(env, PRORATA_GUEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
 
     // Verify receipt to confirm that recipients will also be able to verify it
-    receipt.verify(PRORATA_ID).unwrap();
+    receipt.verify(PRORATA_GUEST_ID).unwrap();
 
     // create writer for file at output
     let writer = std::fs::File::create(output).expect("Failed to create output file");
@@ -88,7 +90,7 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
 fn verify(input: &str) {
     let reader = std::fs::File::open(input).expect("Failed to open input file");
     let receipt: risc0_zkvm::SessionReceipt = ciborium::de::from_reader(reader).unwrap();
-    match receipt.verify(PRORATA_ID) {
+    match receipt.verify(PRORATA_GUEST_ID) {
         Ok(_) => {
             println!("Receipt is valid");
             let result: QueryResult =
@@ -104,7 +106,7 @@ fn format_query_result(result: QueryResult) -> String {
     let mut s = Vec::<String>::new();
     match result.allocation {
         None => {
-            //append to s
+            // append to s
             s.push(format!("No allocation.\n").into());
         }
         Some(allocation) => {

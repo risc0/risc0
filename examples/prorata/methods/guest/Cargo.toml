@@ -1,5 +1,5 @@
 [package]
-name = "prorata"
+name = "prorata-guest"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 # If you want to try (experimental) std support, add `features = [ "std" ]` to risc0-zkvm
-risc0-zkvm = { version = "0.15.1", default-features = false, features = [
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [
     "std",
 ] }
 prorata-core = { path = "../../core" }
