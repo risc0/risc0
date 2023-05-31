@@ -1,0 +1,15 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cargo",
+			"command": "test",
+			"problemMatcher": [
+				"$rustc",
+				"$rust-panic"
+			],
+			"group": "build",
+			"label": "rust: cargo test"
+		}
+	]
+}

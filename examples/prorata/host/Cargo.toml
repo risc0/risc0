@@ -1,0 +1,17 @@
+[package]
+name = "host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+methods = { path = "../methods" }
+risc0-zkvm = "0.15.1"
+serde = "1.0"
+rust_decimal = "1.29"
+rust_decimal_macros = "1.29"
+prorata-core = { path = "../core" }
+bincode = "1.3.3"
+clap = { version = "4.3", features = ["derive"] }
+hex = "0.4.3"
+cbor = "0.4.1"
+ciborium = "0.2.1"
