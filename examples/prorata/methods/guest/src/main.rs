@@ -16,7 +16,7 @@
 // If you want to try std support, also update the guest Cargo.toml file
 // #![no_std]  // std support is experimental
 
-use prorata_core::{allocate_for_csv, AllocationQuery, AllocationQueryResult};
+use prorata_core::AllocationQuery;
 use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
@@ -27,7 +27,7 @@ pub fn main() {
 
     // use allocate_for() to compute the allocation for the requested target
     // recipient
-    let result: AllocationQueryResult = allocate_for_csv(query);
+    let result = query.compute_result();
 
     // commit the allocation and query to the journal
     env::commit(&result);

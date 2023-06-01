@@ -38,6 +38,24 @@ pub struct AllocationQuery {
     pub target: String,
 }
 
+// implement function compute_result for AllocationQuery
+impl AllocationQuery {
+    pub fn compute_result(&self) -> AllocationQueryResult {
+        let mut rdr = csv::Reader::from_reader(self.recipients_csv.as_slice());
+        let recipients: Vec<Recipient> = rdr.deserialize().map(|result| result.unwrap()).collect();
+
+        let mut hasher = Sha256::new();
+        hasher.update(&self.recipients_csv);
+        let recipients_csv_hash = hasher.finalize().to_vec();
+
+        AllocationQueryResult {
+            allocation: allocate_for(self.amount, recipients, &self.target),
+            total: self.amount,
+            csv_hash: recipients_csv_hash,
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct AllocationQueryResult {
     pub allocation: Option<Allocation>,
@@ -46,26 +64,29 @@ pub struct AllocationQueryResult {
 }
 
 pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> {
-    // Completely allocate the total funds `amount` by shares into dollars and
-    // cents amounts for each recipient.
-    //
-    // amount - total amount to distribute
-    // recipients - list of recipients with their share of the total amount
+    //! Completely allocate the total funds `amount` by shares into dollars and
+    //! cents amounts for each recipient.
+    //!
+    //! amount - total amount to distribute
+    //! recipients - list of recipients with their share of the total amount
 
-    // sort recipients in place by share descending
-    // deserialize the recipients from the csv into a variable called recipients
+    // Sort recipients in descending order of ownership share to provide
+    // consistent behavior regardless of input order.
+    // TODO: In the case of ties in ownership share this is not sufficient to
+    // give consistent behavior regardless of input order. Show an example of
+    // testing with a tool like proptest to detect before fixing.
     let mut recipients = recipients;
-
     recipients.sort_by(|a, b| b.share.cmp(&a.share));
-    let total_share: Decimal = recipients.iter().map(|r| r.share).sum();
 
-    // compute an allocation for each recipient
+    // Compute an allocation for each recipient.
+    let total_share: Decimal = recipients.iter().map(|r| r.share).sum();
     let mut allocations: Vec<Allocation> = Vec::new();
     let mut remainder = amount;
     for recipient in recipients {
         let allocation_amount = amount * recipient.share / total_share;
 
-        // round to two decimal places (dollars and cents)
+        // Round to two decimal places (dollars and cents) using banker's
+        // rounding.
         let allocation_amount =
             allocation_amount.round_dp_with_strategy(2, RoundingStrategy::MidpointNearestEven);
         allocations.push(Allocation {
@@ -75,10 +96,10 @@ pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> 
         remainder -= allocation_amount;
     }
 
-    // add any remainder to the first allocation so as to keep the total
-    // percentage error small
+    // Adjust the first allocation by any remainder so as to keep the percentage
+    // error small for each recipient while ensuring that funds are completely
+    // distributed.
     allocations.first_mut().unwrap().amount += remainder;
-    // remainder = Decimal::from(0);
 
     allocations
 }
@@ -102,21 +123,6 @@ pub fn allocate_for(
         }
     }
     None
-}
-
-pub fn allocate_for_csv(query: AllocationQuery) -> AllocationQueryResult {
-    let mut rdr = csv::Reader::from_reader(query.recipients_csv.as_slice());
-    let recipients: Vec<Recipient> = rdr.deserialize().map(|result| result.unwrap()).collect();
-
-    let mut hasher = Sha256::new();
-    hasher.update(&query.recipients_csv);
-    let recipients_csv_hash = hasher.finalize().to_vec();
-
-    AllocationQueryResult {
-        allocation: allocate_for(query.amount, recipients, &query.target),
-        total: query.amount,
-        csv_hash: recipients_csv_hash,
-    }
 }
 
 #[cfg(test)]
