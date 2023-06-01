@@ -11,6 +11,8 @@ members = [
     "json/core",
     "password-checker",
     "password-checker/core",
+    "prorata",
+    "prorata/core",
     "sha",
     "waldo",
     "waldo/core",
