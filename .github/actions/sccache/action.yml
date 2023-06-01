@@ -4,7 +4,7 @@ runs:
   using: composite
   steps:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
-      env:
+      run:
         SCCACHE_VERSION=v0.3.3
         SCCACHE_ARCH=x86_64-unknown-linux-musl
       shell: bash
@@ -13,7 +13,7 @@ runs:
       #   SCCACHE_VERSION=v0.3.3
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
-      env:
+      run:
         SCCACHE_VERSION=v0.3.3
         SCCACHE_ARCH=x86_64-apple-darwin
       shell: bash
@@ -22,7 +22,7 @@ runs:
       #   SCCACHE_VERSION=v0.3.3
 
     - if: runner.os == 'macOS' && runner.arch == 'ARM64'
-      env:
+      run:
         SCCACHE_VERSION=v0.3.3
         SCCACHE_ARCH=aarch64-apple-darwin
       shell: bash
@@ -31,7 +31,7 @@ runs:
       #   SCCACHE_VERSION=v0.3.3
 
     - if: runner.os == 'Linux' &&  runner.arch == 'ARM64'
-      env:
+      run:
         SCCACHE_VERSION=v0.4.0-pre.5
         SCCACHE_ARCH=aarch64-unknown-linux-musl
       shell: bash
