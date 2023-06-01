@@ -1,17 +1,17 @@
 # Pro Rata
 
-This example demonstrates using the zkVM for calculating pro rata distribution of a total dollar amount in a simple but realistic way, and then securely attesting to any given payee that their amount was correctly calculated. The example uses the off-the-shelf `rust_decimal` crate for numerically correct calculation including banker's rounding.
+This example demonstrates how to use the zkVM to calculate pro rata distribution of a dollar amount, and then securely attest to any given recipient that their amount was correctly calculated without disclosing the other payouts. Proof generation includes use of existing Rust crates like `csv` for robust CSV parsing and `rust_decimal` for robust decimal calculations including banker's rounding.
 
-Walking through this example on Linux requires a minimum of around 12GB of RAM and takes under 20 minutes on a reasonably modern CPU like 8-core Ryzen 5800X. The slowest build step is single threaded so more cores shouldn't make too much difference.
+Walking through this example on Linux requires a minimum of around 12GB of RAM and under 20 minutes including compile time on a reasonably modern CPU such as the 8-core Ryzen 5800X.
 
 ## Building
 
-To run tests and then build a runnable copy of the pro rata utility ("host" code).
+To run tests and then build a copy of the pro rata command line utility:
 
 ```
 > cargo test  # about 7 minutes
 > cargo build --release  # about 7 minutes, can run in parallel with above
-> target/release/host help
+> target/release/prorata-cli help  # verify binary was built
 Usage: host <COMMAND>
 ...
 ```
@@ -20,7 +20,7 @@ Usage: host <COMMAND>
 
 ### Preparing a CSV file of the allocations
 
-Format the allocations as a CSV with the columns `name` and `share` holding the respective holder and quantity of ownership. The share can either be a fraction, such as 0.25 for 25%, or a number of shares, such as 765. It might look something like this fictional cap table in `sample/ingen.csv`:
+Format the allocations as a CSV with the columns `name` and `share` holding the respective holder's name and quantity of ownership. The share can either be a fraction, such as 0.25 for 25%, or a number of shares, such as 765. It might look something like this cap table from `sample/ingen.csv`:
 
 ```csv
 name,share
@@ -34,11 +34,11 @@ Northern Trust Corporation,6950
 
 ### Certifying the input
 
-The first step in trusting an allocation is to know the cap table is correct. After an appropriate audit to make sure the cap table matches the records, an auditor then attests to its correctness. As an example our firm may use `gpg` to sign a statement saying the cap table referenced by hash has passed audit:
+The first step necessary for trusting an allocation is to know the cap table is correct. After an appropriate audit to make sure the cap table matches the records, an auditor then attests to its correctness. To convince an outside recipient of the authenticity of this attestation our auditors may use `gpg` to sign the statement saying the cap table referenced by hash has passed audit:
 
 ```
 > date > statement.txt
-> echo "We, the auditors, have examined the records and capitalization of InGen Corp. In our opinion the records are adequate and the cap table is free of material misstatement." >> statement.txt
+> echo "We, the auditors, have examined the records and capitalization of InGen Corp. In our opinion the records are adequate and the cap table referenced below is free of material misstatement." >> statement.txt
 > shasum -a 256 sample/ingen.csv >> statement.txt
 > gpg --no-default-keyring  --keyring sample/auditor.gpg --clear-sign < statement.txt > statement-signed.txt
 > cat statement-signed.txt
@@ -46,7 +46,7 @@ The first step in trusting an allocation is to know the cap table is correct. Af
 Hash: SHA512
 
 Wed 31 May 2023 05:47:01 PM UTC
-We, the auditors, have examined the records and capitalization of InGen Corp. In our opinion the records are adequate and the cap table is free of material misstatement.
+We, the auditors, have examined the records and capitalization of InGen Corp. In our opinion the records are adequate and the cap table referenced below is free of material misstatement.
 1042f70d38c9e980c14f449714952e04c8aab41967f2ffcafa02cda9ec9dce22  sample/ingen.csv
 -----BEGIN PGP SIGNATURE-----
 
@@ -60,7 +60,7 @@ Now we have a signed statement from the auditor that we may share with anyone to
 
 ### Computing an allocation
 
-Great news, InGen is doing a $1B distribution. Let's calculate how much will go to John Hammond and create a verifiable statement containing that information.
+Great news! InGen has agreed to be purchased by Masrani Global Corporation and is doing a $1B distribution as part of the sale. Let's calculate how much will go to John Hammond and create a verifiable statement to that effect.
 
 ```
 > target/release/prorata-cli allocate --input sample/ingen.csv --output hammond.receipt --recipient 'John Hammond' --amount 1000000000
@@ -89,18 +89,8 @@ gpg:          There is no indication that the signature belongs to the owner.
 Primary key fingerprint: 2546 61BE 3628 0E40 C859  3AED 66C8 763F 4D1A C1BD
 ```
 
-## Follow-on work
+Success.
 
-x package guest inputs into a struct
-  - consider fixing the factors example
-- review rust comment style and go towards // style & doc as possible
-- review naming/structure for readability (avoid one letter)
-- allow printing whole payout table
-- add script for auditor to sign original CSV, key generation goes in there
-- add example of more rigorous testing on `core` (proptest or similar)
-- split out build for the guest image (so that can be shared)
-- check for and document recommended way to serialize receipts (we should have)
+## Further reading
 
-Key generation
-gpg --no-default-keyring  --keyring sample/auditor.gpg --quick-gen-key audit@example.com
-
+TODO: link next steps here
