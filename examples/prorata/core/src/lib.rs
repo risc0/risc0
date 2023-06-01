@@ -21,19 +21,25 @@ pub struct Allocation {
 }
 
 #[derive(Serialize, Deserialize)]
-pub struct QueryResult {
+pub struct AllocationQuery {
+    pub amount: Decimal,
+    pub recipients_csv: Vec<u8>,
+    pub target: String,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct AllocationQueryResult {
     pub allocation: Option<Allocation>,
     pub total: Decimal,
     pub csv_hash: Vec<u8>,
 }
 
 pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> {
-    /* Completely allocate the total funds `amount` by shares into dollars and
-    cents amounts for each recipient.
-
-    amount - total amount to distribute
-    recipients - list of recipients with their share of the total amount
-    */
+    // Completely allocate the total funds `amount` by shares into dollars and
+    // cents amounts for each recipient.
+    //
+    // amount - total amount to distribute
+    // recipients - list of recipients with their share of the total amount
 
     // sort recipients in place by share descending
     // deserialize the recipients from the csv into a variable called recipients
@@ -71,13 +77,12 @@ pub fn allocate_for(
     recipients: Vec<Recipient>,
     target: &str,
 ) -> Option<Allocation> {
-    /* Allocate the total funds `amount` by shares into dollars and cents amounts
-    for the recipient with name `target`.
-
-    amount - total amount to distribute
-    recipients - list of recipients with their share of the total amount
-    target - name of the recipient to allocate for
-    */
+    // Allocate the total funds `amount` by shares into dollars and cents amounts
+    // for the recipient with name `target`.
+    //
+    // amount - total amount to distribute
+    // recipients - list of recipients with their share of the total amount
+    // target - name of the recipient to allocate for
 
     let allocations = allocate(amount, recipients);
     for allocation in allocations {
@@ -94,7 +99,11 @@ pub fn allocate_csv(amount: Decimal, recipients_csv: Vec<u8>) -> Vec<Allocation>
     allocate(amount, recipients)
 }
 
-pub fn allocate_for_csv(amount: Decimal, recipients_csv: Vec<u8>, target: &str) -> QueryResult {
+pub fn allocate_for_csv(
+    amount: Decimal,
+    recipients_csv: Vec<u8>,
+    target: &str,
+) -> AllocationQueryResult {
     let mut rdr = csv::Reader::from_reader(recipients_csv.as_slice());
     let recipients: Vec<Recipient> = rdr.deserialize().map(|result| result.unwrap()).collect();
 
@@ -102,7 +111,7 @@ pub fn allocate_for_csv(amount: Decimal, recipients_csv: Vec<u8>, target: &str) 
     hasher.update(&recipients_csv);
     let recipients_csv_hash = hasher.finalize().to_vec();
 
-    QueryResult {
+    AllocationQueryResult {
         allocation: allocate_for(amount, recipients, target),
         total: amount,
         csv_hash: recipients_csv_hash,
@@ -111,8 +120,9 @@ pub fn allocate_for_csv(amount: Decimal, recipients_csv: Vec<u8>, target: &str) 
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use rust_decimal_macros::dec;
+
+    use super::*;
 
     // basic test for allocate()
     #[test]

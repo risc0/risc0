@@ -2,7 +2,7 @@ use ciborium;
 use clap::{Parser, Subcommand};
 use hex;
 use methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
-use prorata_core::QueryResult;
+use prorata_core::{AllocationQuery, AllocationQueryResult};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv,
@@ -61,19 +61,18 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
     // read the file in the path specified as args.input into a vec of u8 called
     // recipients_csv
     let recipients_csv = std::fs::read(&input).expect("Failed to read input file");
-    let query = recipient; // TODO clean this up
 
-    println!("Query: {}", query);
+    println!("Query: {}", recipient);
 
     let env = ExecutorEnv::builder()
-        // TODO: investigate below and whether it's still valid
-        // Send a & b to the guest
-        // TODO: this is very ugly but to_vec() seems to be necessary otherwise
-        // we get a panic due to an alignment problem in bytemuck
-        // > thread 'main' panicked at 'cast_slice>TargetAlignmentGreaterAndInputNotAligned'
-        .add_input(&to_vec(amount).unwrap())
-        .add_input(&to_vec(&recipients_csv).unwrap())
-        .add_input(&to_vec(&query).unwrap())
+        .add_input(
+            &to_vec(&AllocationQuery {
+                amount: *amount,
+                recipients_csv,
+                target: recipient.to_owned(),
+            })
+            .unwrap(),
+        )
         .build();
 
     let mut exec = Executor::from_elf(env, PRORATA_GUEST_ELF).unwrap();
@@ -94,7 +93,7 @@ fn verify(input: &str) {
     match receipt.verify(PRORATA_GUEST_ID) {
         Ok(_) => {
             println!("Receipt is valid");
-            let result: QueryResult =
+            let result: AllocationQueryResult =
                 from_slice(&receipt.journal).expect("Failed to deserialize result");
             print!("{}", format_query_result(result));
         }
@@ -103,7 +102,7 @@ fn verify(input: &str) {
 }
 
 // todo should be able to gate this on std availability
-fn format_query_result(result: QueryResult) -> String {
+fn format_query_result(result: AllocationQueryResult) -> String {
     let mut s = Vec::<String>::new(); //
     match result.allocation {
         None => {
