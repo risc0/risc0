@@ -266,6 +266,7 @@ impl<'a> Executor<'a> {
     fn split(&mut self) {
         self.pre_image = self.monitor.image.clone();
         self.body_cycles = 0;
+        self.split_insn = None;
         self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
         self.pre_image.pc = self.pc;

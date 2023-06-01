@@ -227,7 +227,7 @@ where
     }
 
     fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
-        log::debug!("prove_session: {}", self.name);
+        log::info!("prove_session: {}", self.name);
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
@@ -244,7 +244,12 @@ where
     }
 
     fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt> {
-        log::debug!("prove_segment: {}, po2: {}", self.name, segment.po2);
+        log::info!(
+            "prove_segment[{}]: po2: {}, insn_cycles: {}",
+            segment.index,
+            segment.po2,
+            segment.insn_cycles,
+        );
         let (hal, eval) = (self.hal_eval.hal.as_ref(), &self.hal_eval.eval);
 
         let io = segment.prepare_globals();
