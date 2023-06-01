@@ -131,7 +131,7 @@ mod tests {
 
     use super::*;
 
-    // basic test for allocate()
+    // Basic test for allocate()
     #[test]
     fn test_allocate() {
         let recipients = vec![
@@ -162,7 +162,7 @@ mod tests {
         assert_eq!(sum, dec!(100.0));
     }
 
-    // basic test for allocate() with large share numbers
+    // Basic test for allocate() with large share numbers.
     #[test]
     fn test_allocate2() {
         let recipients = vec![
@@ -188,12 +188,12 @@ mod tests {
         assert_eq!(allocations[2].name, "C");
         assert_eq!(allocations[2].amount, dec!(25.00));
 
-        // check that allocations add to 100
+        // Check that allocations add to 100
         let sum: Decimal = allocations.iter().map(|a| a.amount).sum();
         assert_eq!(sum, dec!(100.0));
     }
 
-    // test allocate remaining penny()
+    /// Test allocation of remaining penny()
     #[test]
     fn test_allocate_remainder() {
         let recipients = vec![
@@ -213,14 +213,12 @@ mod tests {
         assert_eq!(allocations[1].name, "B");
         assert_eq!(allocations[1].amount, dec!(33.33));
 
-        // check that allocations add to 100
+        // Check that allocations add to 100
         let sum: Decimal = allocations.iter().map(|a| a.amount).sum();
         assert_eq!(sum, dec!(100.0));
     }
 
-    // TODO: add better test cases for allocate() to test rounding, stability, etc.
-
-    // basic test for allocate_for()
+    /// Basic test for allocate_for()
     #[test]
     fn test_allocate_for() {
         let recipients = vec![
@@ -241,7 +239,7 @@ mod tests {
         assert_eq!(allocation.amount, dec!(25.00));
     }
 
-    // test serialize and deserialize of Recipient struct to vec
+    /// Test serialize and deserialize of Recipient struct to vec
     #[test]
     fn test_serialize_deserialize() {
         let recipient = Recipient {
@@ -253,4 +251,9 @@ mod tests {
         assert_eq!(deserialized.name, "A");
         assert_eq!(deserialized.share, dec!(0.5));
     }
+
+    // TODO: Add better test cases for allocate() to test rounding, stability,
+    // etc.
+    // TODO: Add test for AllocationQuery behavior including CSV white space
+    // issues.
 }

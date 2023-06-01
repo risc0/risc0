@@ -120,7 +120,6 @@ fn format_query_result(result: AllocationQueryResult) -> String {
     let mut s = Vec::<String>::new(); //
     match result.allocation {
         None => {
-            // append to s
             s.push(format!("No allocation.\n").into());
         }
         Some(allocation) => {
