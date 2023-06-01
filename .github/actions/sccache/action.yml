@@ -5,36 +5,32 @@ runs:
   steps:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
-        echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=x86_64-unknown-linux-musl, VERSION=v0.3.3" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
       run: |
-        echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=x86_64-apple-darwin, VERSION=v0.3.3" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'ARM64'
       run: |
-        echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=aarch64-apple-darwin, VERSION=v0.3.3" >> $GITHUB_ENV
+      shell: bash
+
+    - if: runner.os == 'Linux' &&  runner.arch == 'ARM64'
+      run: |
+        echo "SCCACHE_ARCH=aarch64-unknown-linux-musl, VERSION=v0.4.0-pre.5" >> $GITHUB_ENV
       shell: bash
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
-        SCCACHE_VERSION: v0.3.3
+        SCCACHE_VERSION: $VERSION
       run: |
         SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
         mkdir -p $HOME/.local/bin
         mv -f $SCCACHE_FILE/sccache $HOME/.local/bin/sccache
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-      shell: bash
-
-  # if step above fails
-    - if: ${{ failure() && runner.os == 'Linux' &&  runner.arch == 'ARM64'}}
-      run: |
-        curl -L "https://github.com/mozilla/sccache/releases/download/v0.4.0-pre.5/sccache-v0.4.0-pre.5-aarch64-unknown-linux-musl.tar.gz" | tar xz
-        mkdir -p $HOME/.local/bin
-        mv -f sccache-v0.4.0-pre.5-aarch64-unknown-linux-musl/sccache $HOME/.local/bin/sccache
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
@@ -49,3 +45,10 @@ runs:
 
     - run: rm -f $HOME/.cargo/config
       shell: bash
+
+
+# v0.3.3
+        # curl -L "https://github.com/mozilla/sccache/releases/download/v0.4.0-pre.5/sccache-v0.4.0-pre.5-aarch64-unknown-linux-musl.tar.gz" | tar xz
+        # mkdir -p $HOME/.local/bin
+        # mv -f sccache-v0.4.0-pre.5-aarch64-unknown-linux-musl/sccache $HOME/.local/bin/sccache
+        # echo "$HOME/.local/bin" >> $GITHUB_PATH

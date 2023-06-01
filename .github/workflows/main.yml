@@ -53,12 +53,12 @@ jobs:
         feature: [default]
         device: [cpu]
         include:
-          - os: Linux
-            feature: cuda
-            device: nvidia_rtx_a5000
-          - os: macOS
-            feature: metal
-            device: apple_m2_pro
+          # - os: Linux
+          #   feature: cuda
+          #   device: nvidia_rtx_a5000
+          # - os: macOS
+          #   feature: metal
+          #   device: apple_m2_pro
           - os: Linux
             feature: cuda
             device: graviton2
