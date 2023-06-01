@@ -10,6 +10,8 @@ edition = "2021"
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [
     "std",
 ] }
-prorata-core = { path = "../../core" }
+prorata-core = { path = "../../core", default-features = false, features = [
+    "guest",
+] }
 bincode = "1.3.3"
 rust_decimal = "1.29.1"

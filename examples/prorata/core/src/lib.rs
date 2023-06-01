@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#[cfg(feature = "host")]
+use std::fmt;
+
 use csv;
+#[cfg(feature = "dep:hex")]
+use hex;
 use rust_decimal::{Decimal, RoundingStrategy};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -38,7 +43,6 @@ pub struct AllocationQuery {
     pub target: String,
 }
 
-// implement function compute_result for AllocationQuery
 impl AllocationQuery {
     pub fn compute_result(&self) -> AllocationQueryResult {
         let mut rdr = csv::Reader::from_reader(self.recipients_csv.as_slice());
@@ -61,6 +65,28 @@ pub struct AllocationQueryResult {
     pub allocation: Option<Allocation>,
     pub total: Decimal,
     pub csv_hash: Vec<u8>,
+}
+
+// This is an example of functionality that we compile only for the host.
+#[cfg(feature = "host")]
+impl fmt::Display for AllocationQueryResult {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.allocation {
+            None => {
+                write!(f, "No allocation.\n").unwrap();
+            }
+            Some(allocation) => {
+                write!(
+                    f,
+                    "Allocation for {}: {}\n",
+                    allocation.name, allocation.amount,
+                )
+                .unwrap();
+                write!(f, "Total: {}\n", &self.total).unwrap();
+            }
+        }
+        write!(f, "CSV hash: {}\n", hex::encode(&self.csv_hash))
+    }
 }
 
 pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> {

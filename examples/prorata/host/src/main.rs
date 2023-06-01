@@ -14,7 +14,6 @@
 
 use ciborium;
 use clap::{Parser, Subcommand};
-use hex;
 use methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
 use risc0_zkvm::{
@@ -109,30 +108,8 @@ fn verify(input: &str) {
             println!("Receipt is valid");
             let result: AllocationQueryResult =
                 from_slice(&receipt.journal).expect("Failed to deserialize result");
-            print!("{}", format_query_result(result));
+            print!("{}", result);
         }
         Err(e) => println!("Receipt is invalid: {}", e),
     }
-}
-
-// todo should be able to gate this on std availability
-fn format_query_result(result: AllocationQueryResult) -> String {
-    let mut s = Vec::<String>::new(); //
-    match result.allocation {
-        None => {
-            s.push(format!("No allocation.\n").into());
-        }
-        Some(allocation) => {
-            s.push(
-                format!(
-                    "Allocation for {}: {}\n",
-                    allocation.name, allocation.amount,
-                )
-                .into(),
-            );
-            s.push(format!("Total: {}\n", result.total).into());
-        }
-    }
-    s.push(format!("CSV hash: {}\n", hex::encode(result.csv_hash)).into());
-    s.concat().into()
 }
