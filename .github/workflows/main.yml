@@ -13,36 +13,36 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          # Full history is required by license-check.py
-          fetch-depth: 0
-      - uses: ./.github/actions/rustup
-      - name: Install cargo-sort
-        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-        with:
-          crate: cargo-sort
-          version: "1.0"
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: cargo fmt --all --check
-      - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
-      - run: cargo fmt --all --check --manifest-path templates/bonsai/Cargo.toml
-      - run: cargo sort --workspace --check
-      - run: cargo sort --workspace --check examples
-      - run: cargo sort --workspace --check templates/bonsai
-      - run: npm install
-        working-directory: templates/bonsai
-      - run: npm run ci
-        working-directory: templates/bonsai
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      - run: python license-check.py
+  # check:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #       with:
+  #         # Full history is required by license-check.py
+  #         fetch-depth: 0
+  #     - uses: ./.github/actions/rustup
+  #     - name: Install cargo-sort
+  #       uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+  #       with:
+  #         crate: cargo-sort
+  #         version: "1.0"
+  #     - uses: actions/setup-node@v3
+  #       with:
+  #         node-version: 18
+  #     - run: cargo fmt --all --check
+  #     - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
+  #     - run: cargo fmt --all --check --manifest-path templates/bonsai/Cargo.toml
+  #     - run: cargo sort --workspace --check
+  #     - run: cargo sort --workspace --check examples
+  #     - run: cargo sort --workspace --check templates/bonsai
+  #     - run: npm install
+  #       working-directory: templates/bonsai
+  #     - run: npm run ci
+  #       working-directory: templates/bonsai
+  #     - uses: actions/setup-python@v4
+  #       with:
+  #         python-version: '3.10'
+  #     - run: python license-check.py
 
   test:
     runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]

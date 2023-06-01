@@ -4,28 +4,40 @@ runs:
   using: composite
   steps:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
-      run: |
-        echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+      env:
         SCCACHE_VERSION=v0.3.3
+        SCCACHE_ARCH=x86_64-unknown-linux-musl
       shell: bash
+      # run: |
+      #   echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+      #   SCCACHE_VERSION=v0.3.3
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
-      run: |
-        echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
+      env:
         SCCACHE_VERSION=v0.3.3
+        SCCACHE_ARCH=x86_64-apple-darwin
       shell: bash
+      # run: |
+      #   echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
+      #   SCCACHE_VERSION=v0.3.3
 
     - if: runner.os == 'macOS' && runner.arch == 'ARM64'
-      run: |
-        echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
+      env:
         SCCACHE_VERSION=v0.3.3
+        SCCACHE_ARCH=aarch64-apple-darwin
       shell: bash
+      # run: |
+      #   echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
+      #   SCCACHE_VERSION=v0.3.3
 
     - if: runner.os == 'Linux' &&  runner.arch == 'ARM64'
-      run: |
-        echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
+      env:
         SCCACHE_VERSION=v0.4.0-pre.5
+        SCCACHE_ARCH=aarch64-unknown-linux-musl
       shell: bash
+      # run: |
+      #   echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
+      #   SCCACHE_VERSION=v0.4.0-pre.5
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
