@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, 'release-*', 'daisy/python-fix' ]
+    branches: [ main, 'release-*' ]
   pull_request:
     branches: [ main, 'release-*' ]
 
@@ -46,89 +46,89 @@ jobs:
           python-version: '3.10'
       - run: python license-check.py
 
-  # test:
-  #   runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: [Linux, macOS]
-  #       feature: [default]
-  #       device: [cpu]
-  #       include:
-  #         - os: Linux
-  #           feature: cuda
-  #           device: nvidia_rtx_a5000
-  #         - os: macOS
-  #           feature: metal
-  #           device: apple_m2_pro
-  #   env:
-  #     CUDA_LIBRARY_PATH: /usr/lib/cuda
-  #     FEATURE: ${{ matrix.feature }}
-  #     RUST_BACKTRACE: full
-  #     RUSTC_WRAPPER: sccache
-  #   steps:
-  #     # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-  #     - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-  #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/rustup
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: 18
-  #     - uses: ./.github/actions/sccache
-  #     - run: npm install
-  #       working-directory: templates/bonsai
-  #     - run: cargo test -F $FEATURE -F profiler
-  #     - run: cargo test -F $FEATURE --tests -- --ignored
-  #     - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
-  #     - run: PATH=$PWD/node_modules/.bin:$PATH cargo test -F $FEATURE
-  #       working-directory: templates/bonsai
-  #     - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
-  #       if: matrix.device == 'cpu'
-  #     - run: cargo check -F $FEATURE --benches
-  #     - run: cargo check -p bootstrap
-  #       if: matrix.device == 'cpu'
-  #     - run: cargo check -p risc0-build
-  #       if: matrix.device == 'cpu'
-  #     - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
-  #     - run: cargo check -p risc0-core
-  #       if: matrix.device == 'cpu'
-  #     - run: cargo check -F $FEATURE -p risc0-r0vm
-  #     - run: cargo check -F $FEATURE -p risc0-sys
-  #     - run: cargo check -F $FEATURE -p risc0-zkp
-  #     - run: cargo check -F $FEATURE -p risc0-zkvm
-  #     - run: sccache --show-stats
+  test:
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+    env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
+      FEATURE: ${{ matrix.feature }}
+      RUST_BACKTRACE: full
+      RUSTC_WRAPPER: sccache
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ./.github/actions/sccache
+      - run: npm install
+        working-directory: templates/bonsai
+      - run: cargo test -F $FEATURE -F profiler
+      - run: cargo test -F $FEATURE --tests -- --ignored
+      - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
+      - run: PATH=$PWD/node_modules/.bin:$PATH cargo test -F $FEATURE
+        working-directory: templates/bonsai
+      - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
+        if: matrix.device == 'cpu'
+      - run: cargo check -F $FEATURE --benches
+      - run: cargo check -p bootstrap
+        if: matrix.device == 'cpu'
+      - run: cargo check -p risc0-build
+        if: matrix.device == 'cpu'
+      - run: cargo check -F $FEATURE -p risc0-circuit-rv32im
+      - run: cargo check -p risc0-core
+        if: matrix.device == 'cpu'
+      - run: cargo check -F $FEATURE -p risc0-r0vm
+      - run: cargo check -F $FEATURE -p risc0-sys
+      - run: cargo check -F $FEATURE -p risc0-zkp
+      - run: cargo check -F $FEATURE -p risc0-zkvm
+      - run: sccache --show-stats
 
-  # doc:
-  #   runs-on: [self-hosted, prod, Linux, cpu]
-  #   steps:
-  #     # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-  #     - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-  #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/rustup
-  #     - uses: ./.github/actions/sccache
-  #     - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
-  #     - name: Install mdbook
-  #       uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
-  #       with:
-  #         crate: mdbook
-  #         version: "0.4"
-  #     - run: mdbook test
-  #       working-directory: docs/mdbook
+  doc:
+    runs-on: [self-hosted, prod, Linux, cpu]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: ./.github/actions/sccache
+      - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+      - name: Install mdbook
+        uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
+        with:
+          crate: mdbook
+          version: "0.4"
+      - run: mdbook test
+        working-directory: docs/mdbook
 
-  # check_template:
-  #   runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       os: [Linux, macOS]
+  check_template:
+    runs-on: [self-hosted, prod, cpu, "${{ matrix.os }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
 
-  #   steps:
-  #     # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
-  #     - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
-  #     - uses: actions/checkout@v3
-  #     - uses: ./.github/actions/rustup
-  #     - run: |
-  #         cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
-  #       shell: bash
-  #     - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
-  #     - run: ${{ runner.temp }}/template-test/target/release/host
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - run: |
+          cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
+        shell: bash
+      - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
+      - run: ${{ runner.temp }}/template-test/target/release/host
