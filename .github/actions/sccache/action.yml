@@ -29,7 +29,8 @@ runs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
-    - if: runner.os == 'Linux' && runner.arch == 'ARM64'
+  # if step above fails
+    - if: ${{ failure() && runner.os == 'Linux' &&  runner.arch == 'ARM64'}}
       run: |
         curl -L "https://github.com/mozilla/sccache/releases/download/v0.4.0-pre.5/sccache-v0.4.0-pre.5-aarch64-unknown-linux-musl.tar.gz" | tar xz
         mkdir -p $HOME/.local/bin
