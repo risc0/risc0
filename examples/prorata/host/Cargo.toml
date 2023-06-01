@@ -13,5 +13,4 @@ prorata-core = { path = "../core" }
 bincode = "1.3.3"
 clap = { version = "4.3", features = ["derive"] }
 hex = "0.4.3"
-cbor = "0.4.1"
 ciborium = "0.2.1"
