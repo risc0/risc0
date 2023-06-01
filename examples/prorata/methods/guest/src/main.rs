@@ -13,8 +13,6 @@
 // limitations under the License.
 
 #![no_main]
-// If you want to try std support, also update the guest Cargo.toml file
-// #![no_std]  // std support is experimental
 
 use prorata_core::AllocationQuery;
 use risc0_zkvm::guest::env;
@@ -22,13 +20,12 @@ use risc0_zkvm::guest::env;
 risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
-    // load the amount, recipients, and target user from the environment
+    // Load the amount, recipients, and target user sent from the host:
     let query: AllocationQuery = env::read();
 
-    // use allocate_for() to compute the allocation for the requested target
-    // recipient
+    // Compute the allocation for the requested target recipient:
     let result = query.compute_result();
 
-    // commit the allocation and query to the journal
+    // Commit the allocation and query to the journal for inclusion in the receipt:
     env::commit(&result);
 }

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//! The prorata host is a command-line tool that can be used to compute
+//! allocations and verify receipts.
+
 use ciborium;
 use clap::{Parser, Subcommand};
 use methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
@@ -70,12 +73,12 @@ fn main() {
     }
 }
 
+/// Compute an allocation for one recipient based on the ownership indicated in
+/// the input CSV file. The core operation is performed inside the zkVM and the
+/// resulting receipt is stored to disk.
 fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
-    // read the file in the path specified as args.input into a vec of u8 called
-    // recipients_csv
-    let recipients_csv = std::fs::read(&input).expect("Failed to read input file");
-
     println!("Query: {}", recipient);
+    let recipients_csv = std::fs::read(&input).expect("Failed to read input file");
 
     let env = ExecutorEnv::builder()
         .add_input(
@@ -90,19 +93,24 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
 
     let mut exec = Executor::from_elf(env, PRORATA_GUEST_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = session.prove().unwrap();
+    let receipt = session.prove().unwrap(); // Proof generation
 
-    // Verify receipt to confirm that recipients will also be able to verify it
+    // Verify receipt to confirm that it is correctly formed. Not strictly
+    // necessary.
     receipt.verify(PRORATA_GUEST_ID).unwrap();
 
-    // create writer for file at output
+    // Store the receipt to disk in CBOR format. Any serde-compatible library
+    // could be used here.
     let writer = std::fs::File::create(output).expect("Failed to create output file");
     ciborium::ser::into_writer(&receipt, writer).unwrap();
 }
 
+/// Verify an allocation read from a receipt on disk.
 fn verify(input: &str) {
     let reader = std::fs::File::open(input).expect("Failed to open input file");
     let receipt: risc0_zkvm::SessionReceipt = ciborium::de::from_reader(reader).unwrap();
+
+    // Proof verification below
     match receipt.verify(PRORATA_GUEST_ID) {
         Ok(_) => {
             println!("Receipt is valid");
