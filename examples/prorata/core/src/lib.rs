@@ -93,27 +93,17 @@ pub fn allocate_for(
     None
 }
 
-pub fn allocate_csv(amount: Decimal, recipients_csv: Vec<u8>) -> Vec<Allocation> {
-    let mut rdr = csv::Reader::from_reader(recipients_csv.as_slice());
-    let recipients: Vec<Recipient> = rdr.deserialize().map(|result| result.unwrap()).collect();
-    allocate(amount, recipients)
-}
-
-pub fn allocate_for_csv(
-    amount: Decimal,
-    recipients_csv: Vec<u8>,
-    target: &str,
-) -> AllocationQueryResult {
-    let mut rdr = csv::Reader::from_reader(recipients_csv.as_slice());
+pub fn allocate_for_csv(query: AllocationQuery) -> AllocationQueryResult {
+    let mut rdr = csv::Reader::from_reader(query.recipients_csv.as_slice());
     let recipients: Vec<Recipient> = rdr.deserialize().map(|result| result.unwrap()).collect();
 
     let mut hasher = Sha256::new();
-    hasher.update(&recipients_csv);
+    hasher.update(&query.recipients_csv);
     let recipients_csv_hash = hasher.finalize().to_vec();
 
     AllocationQueryResult {
-        allocation: allocate_for(amount, recipients, target),
-        total: amount,
+        allocation: allocate_for(query.amount, recipients, &query.target),
+        total: query.amount,
         csv_hash: recipients_csv_hash,
     }
 }
@@ -245,26 +235,5 @@ mod tests {
         let deserialized: Recipient = bincode::deserialize(&serialized).unwrap();
         assert_eq!(deserialized.name, "A");
         assert_eq!(deserialized.share, dec!(0.5));
-    }
-
-    // test allocate_csv()
-    #[test]
-    fn test_allocate_csv() {
-        let recipients_csv = b"name,share
-A,0.5
-B,0.25
-C,0.25";
-        let allocations = allocate_csv(dec!(100.0), recipients_csv.to_vec());
-        assert_eq!(allocations.len(), 3);
-        assert_eq!(allocations[0].name, "A");
-        assert_eq!(allocations[0].amount, dec!(50.00));
-        assert_eq!(allocations[1].name, "B");
-        assert_eq!(allocations[1].amount, dec!(25.00));
-        assert_eq!(allocations[2].name, "C");
-        assert_eq!(allocations[2].amount, dec!(25.00));
-
-        // check that allocations add to 100
-        let sum: Decimal = allocations.iter().map(|a| a.amount).sum();
-        assert_eq!(sum, dec!(100.0));
     }
 }

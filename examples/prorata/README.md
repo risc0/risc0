@@ -91,7 +91,7 @@ Primary key fingerprint: 2546 61BE 3628 0E40 C859  3AED 66C8 763F 4D1A C1BD
 
 ## Follow-on work
 
-- package guest inputs into a struct
+x package guest inputs into a struct
   - consider fixing the factors example
 - review rust comment style and go towards // style & doc as possible
 - review naming/structure for readability (avoid one letter)

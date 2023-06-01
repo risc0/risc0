@@ -14,8 +14,7 @@ pub fn main() {
 
     // use allocate_for() to compute the allocation for the requested target
     // recipient
-    let result: AllocationQueryResult =
-        allocate_for_csv(query.amount, query.recipients_csv, &query.target);
+    let result: AllocationQueryResult = allocate_for_csv(query);
 
     // commit the allocation and query to the journal
     env::commit(&result);
