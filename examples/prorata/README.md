@@ -4,13 +4,13 @@ This example demonstrates using the zkVM for calculating pro rata distribution o
 
 Walking through this example on Linux requires a minimum of around 12GB of RAM and takes under 20 minutes on a reasonably modern CPU like 8-core Ryzen 5800X. The slowest build step is single threaded so more cores shouldn't make too much difference.
 
-### Building
+## Building
 
 To run tests and then build a runnable copy of the pro rata utility ("host" code).
 
 ```
 > cargo test  # about 7 minutes
-> cargo build --release  # about 7 minutes
+> cargo build --release  # about 7 minutes, can run in parallel with above
 > target/release/host help
 Usage: host <COMMAND>
 ...
@@ -63,7 +63,7 @@ Now we have a signed statement from the auditor that we may share with anyone to
 Great news, InGen is doing a $1B distribution. Let's calculate how much will go to John Hammond and create a verifiable statement containing that information.
 
 ```
-> target/release/host allocate --input sample/ingen.csv --output hammond.receipt --recipient 'John Hammond' --amount 1000000000
+> target/release/prorata-cli allocate --input sample/ingen.csv --output hammond.receipt --recipient 'John Hammond' --amount 1000000000
 ```
 
 ### Verifying an allocation
@@ -71,7 +71,7 @@ Great news, InGen is doing a $1B distribution. Let's calculate how much will go 
 John receives the notice.
 
 ```
-> target/release/host verify --input hammond.receipt
+> target/release/prorata-cli verify --input hammond.receipt
 Query: John Hammond
 Allocation for John Hammond: 187068000
 CSV hash: 1042f70d38c9e980c14f449714952e04c8aab41967f2ffcafa02cda9ec9dce22
@@ -91,14 +91,16 @@ Primary key fingerprint: 2546 61BE 3628 0E40 C859  3AED 66C8 763F 4D1A C1BD
 
 ## Follow-on work
 
-- read the allocation table in as a CSV, attest to digest of whole file along with payout (instead of hardcoded)
-- wrap in command line interface
+- package guest inputs into a struct
+  - consider fixing the factors example
+- review rust comment style and go towards // style & doc as possible
+- review naming/structure for readability (avoid one letter)
 - allow printing whole payout table
-- add script for auditor to sign original CSV
+- add script for auditor to sign original CSV, key generation goes in there
 - add example of more rigorous testing on `core` (proptest or similar)
-- fleshed out readme with usage
 - split out build for the guest image (so that can be shared)
-- plumb the total amount through
+- check for and document recommended way to serialize receipts (we should have)
 
 Key generation
 gpg --no-default-keyring  --keyring sample/auditor.gpg --quick-gen-key audit@example.com
+

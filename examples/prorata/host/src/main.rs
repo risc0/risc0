@@ -61,11 +61,12 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
     // read the file in the path specified as args.input into a vec of u8 called
     // recipients_csv
     let recipients_csv = std::fs::read(&input).expect("Failed to read input file");
-    let query = recipient;
+    let query = recipient; // TODO clean this up
 
     println!("Query: {}", query);
 
     let env = ExecutorEnv::builder()
+        // TODO: investigate below and whether it's still valid
         // Send a & b to the guest
         // TODO: this is very ugly but to_vec() seems to be necessary otherwise
         // we get a panic due to an alignment problem in bytemuck
@@ -103,7 +104,7 @@ fn verify(input: &str) {
 
 // todo should be able to gate this on std availability
 fn format_query_result(result: QueryResult) -> String {
-    let mut s = Vec::<String>::new();
+    let mut s = Vec::<String>::new(); //
     match result.allocation {
         None => {
             // append to s
