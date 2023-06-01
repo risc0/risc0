@@ -125,6 +125,10 @@ impl Segment {
         index: u32,
         insn_cycles: usize,
     ) -> Self {
+        log::info!("segment[{index}]> reads: {}, writes: {}, exit_code: {exit_code:?}, split_insn: {split_insn:?}, po2: {po2}, insn_cycles: {insn_cycles}",
+            faults.reads.len(),
+            faults.writes.len(),
+        );
         Self {
             pre_image,
             post_image_id,
