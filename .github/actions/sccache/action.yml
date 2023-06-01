@@ -5,22 +5,32 @@ runs:
   steps:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
-        echo "SCCACHE_ARCH=x86_64-unknown-linux-musl, VERSION=v0.3.3" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+        echo VERSION=v0.3.3
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
       run: |
-        echo "SCCACHE_ARCH=x86_64-apple-darwin, VERSION=v0.3.3" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
+        VERSION=v0.3.3
+
+        echo $VERSION
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'ARM64'
       run: |
-        echo "SCCACHE_ARCH=aarch64-apple-darwin, VERSION=v0.3.3" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
+        VERSION=v0.3.3
+
+        echo $VERSION
       shell: bash
 
     - if: runner.os == 'Linux' &&  runner.arch == 'ARM64'
       run: |
-        echo "SCCACHE_ARCH=aarch64-unknown-linux-musl, VERSION=v0.4.0-pre.5" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
+        VERSION=v0.4.0-pre.5
+
+        echo $VERSION
       shell: bash
 
     - env:
