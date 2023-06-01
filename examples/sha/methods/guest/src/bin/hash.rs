@@ -12,17 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use factors::multiply_factors;
-use factors_methods::MULTIPLY_ID;
+#![no_main]
 
-fn main() {
-    // Pick two numbers
-    let (receipt, _) = multiply_factors(17, 23);
+use risc0_zkvm::{
+    guest::env,
+    sha::{Impl, Sha256},
+};
 
-    // Here is where one would send 'receipt' over the network...
+risc0_zkvm::guest::entry!(main);
 
-    // Verify receipt, panic if it's wrong
-    receipt.verify(MULTIPLY_ID).expect(
-        "Code you have proven should successfully verify; did you specify the correct image ID?",
-    );
+// Example of using the risc0_zkvm::sha module to hash data.
+pub fn main() {
+    let data: String = env::read();
+    let digest = Impl::hash_bytes(&data.as_bytes());
+    env::commit(&digest.as_bytes());
 }

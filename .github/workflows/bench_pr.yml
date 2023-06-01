@@ -2,7 +2,7 @@ name: Benchmark Check
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [ main, 'release-*' ]
     # Only run benchmarks on changes to following paths:
     paths:
       - 'risc0/**'
@@ -38,6 +38,8 @@ jobs:
       RUSTC_WRAPPER: sccache
 
     steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache

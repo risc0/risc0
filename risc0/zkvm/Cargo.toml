@@ -57,7 +57,7 @@ typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
-criterion = { version = "0.4", features = ["html_reports"] }
+criterion = { version = "0.5", features = ["html_reports"] }
 human-repr = "1.0"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
@@ -72,8 +72,8 @@ test-log = { version = "0.2", features = ["trace"] }
 
 [features]
 binfmt = ["dep:elf", "std"]
-cuda = ["risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
-metal = ["risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
+cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
+metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["prove"]
 profiler = [
   "dep:addr2line",

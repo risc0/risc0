@@ -35,7 +35,7 @@ pub mod fileno {
     pub const JOURNAL: u32 = 3;
 }
 
-#[cfg(all(feature = "getrandom", target_os = "zkvm"))]
+#[cfg(all(feature = "export-getrandom", target_os = "zkvm"))]
 mod getrandom;
 #[cfg(feature = "export-libm")]
 mod libm_extern;

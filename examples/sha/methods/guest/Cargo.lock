@@ -114,6 +114,7 @@ name = "hash"
 version = "0.1.0"
 dependencies = [
  "risc0-zkvm",
+ "sha2",
 ]
 
 [[package]]
@@ -201,7 +202,7 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "log",
@@ -213,7 +214,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -221,7 +222,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -240,7 +241,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.14.0"
+version = "0.15.0"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -261,7 +262,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.14.0"
+version = "0.15.0"
 
 [[package]]
 name = "serde"
@@ -286,8 +287,7 @@ dependencies = [
 [[package]]
 name = "sha2"
 version = "0.10.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82e6b795fe2e3b1e845bafcb27aa35405c4d47cdfc92af5fc8d3002f76cebdc0"
+source = "git+https://github.com/risc0/RustCrypto-hashes?tag=sha2-v0.10.6-risc0#e75cafd9f55da196061f6fadf8bc8a86778192b7"
 dependencies = [
  "cfg-if",
  "cpufeatures",

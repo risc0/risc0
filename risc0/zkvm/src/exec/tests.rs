@@ -14,6 +14,7 @@
 
 use std::{collections::BTreeMap, io::Cursor, str::from_utf8, sync::Mutex};
 
+use anyhow::Result;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
@@ -24,7 +25,7 @@ use test_log::test;
 use super::{Executor, ExecutorEnv, TraceEvent};
 use crate::{
     serde::{from_slice, to_vec},
-    testutils, ExitCode, MemoryImage, Program,
+    testutils, ExitCode, MemoryImage, Program, Session,
 };
 
 #[test]
@@ -502,4 +503,46 @@ fn oom() {
             .contains("Guest panicked: panicked at 'Out of memory!'"),
         "{err:?}"
     );
+}
+
+fn run_session(
+    loop_cycles: u32,
+    segment_limit_po2: usize,
+    session_count_limit: usize,
+) -> Result<Session> {
+    let session_cycles = (1 << segment_limit_po2) * session_count_limit;
+    let spec = &to_vec(&MultiTestSpec::BusyLoop {
+        cycles: loop_cycles,
+    })
+    .unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&spec)
+        .segment_limit_po2(segment_limit_po2)
+        .session_limit(session_cycles)
+        .build();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run()
+}
+
+#[test]
+fn session_limit() {
+    // This test should always fail if the last parameter is zero
+    let err = run_session(0, 16, 0).err().unwrap();
+    assert!(err.to_string().contains("Session limit exceeded"));
+
+    assert!(run_session(0, 16, 1).is_ok());
+
+    let err = run_session(1 << 16, 16, 1).err().unwrap();
+    assert!(err.to_string().contains("Session limit exceeded"));
+
+    // this should contain exactly 2 segments
+    assert!(run_session(1 << 16, 16, 2).is_ok());
+
+    // make sure that it's ok to run with a limit that's higher the actual count
+    assert!(run_session(1 << 16, 16, 10).is_ok());
+
+    let err = run_session(1 << 16, 15, 3).err().unwrap();
+    assert!(err.to_string().contains("Session limit exceeded"));
+
+    assert!(run_session(1 << 16, 15, 10).is_ok());
 }

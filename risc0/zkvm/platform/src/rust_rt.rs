@@ -3,7 +3,7 @@ use core::{
     panic::PanicInfo,
 };
 
-use crate::{syscall, WORD_SIZE};
+use crate::syscall;
 
 extern crate alloc;
 

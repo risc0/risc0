@@ -14,8 +14,9 @@
 
 //! The execution phase is implemented by this module.
 //!
-//! The result of the execution phase is [Session], which contains one or more
-//! [Segment]s, each which contains an execution trace of the specified program.
+//! The result of the execution phase is a [Session]. Each [Session] contains
+//! one or more [Segment]s, each of which contains an execution trace of the
+//! specified program.
 
 mod env;
 pub(crate) mod io;
@@ -129,6 +130,12 @@ impl Write for Journal {
 
 impl<'a> Executor<'a> {
     /// Construct a new [Executor] from a [MemoryImage] and entry point.
+    ///
+    /// Before a guest program is proven, the [Executor] is responsible for
+    /// deciding where a zkVM program should be split into [Segment]s and what
+    /// work will be done in each segment. This is the execution phase:
+    /// the guest program is executed to determine how its proof should be
+    /// divided into subparts.
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage, pc: u32) -> Self {
         let pre_image = image.clone();
         let monitor = MemoryMonitor::new(image);
@@ -151,7 +158,20 @@ impl<'a> Executor<'a> {
         }
     }
 
-    /// Construct a new [Executor] from an ELF binary.
+    /// Construct a new [Executor] from the ELF binary of the guest program you
+    /// want to run and an [ExecutorEnv] containing relevant environmental
+    /// configuration details.
+    /// # Example
+    /// ```
+    /// use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
+    /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
+    ///
+    /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
+    /// let env = ExecutorEnv::builder()
+    ///     .add_input(&to_vec(&spec).unwrap())
+    ///     .build();
+    /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
+    /// ```
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
@@ -160,6 +180,18 @@ impl<'a> Executor<'a> {
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
+    /// # Example
+    /// ```
+    /// use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
+    /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
+    ///
+    /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
+    /// let env = ExecutorEnv::builder()
+    ///    .add_input(&to_vec(&spec).unwrap())
+    ///    .build();
+    /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
+    /// let session = exec.run().unwrap();
+    /// ```
     pub fn run(&mut self) -> Result<Session> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
@@ -234,6 +266,7 @@ impl<'a> Executor<'a> {
     fn split(&mut self) {
         self.pre_image = self.monitor.image.clone();
         self.body_cycles = 0;
+        self.split_insn = None;
         self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
         self.pre_image.pc = self.pc;

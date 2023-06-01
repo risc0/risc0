@@ -267,7 +267,7 @@ pub unsafe extern "C" fn sys_sha_compress(
 
 #[inline(always)]
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
-pub unsafe fn sys_sha_buffer(
+pub unsafe extern "C" fn sys_sha_buffer(
     out_state: *mut [u32; DIGEST_WORDS],
     in_state: *const [u32; DIGEST_WORDS],
     buf: *const u8,
@@ -505,8 +505,12 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
     #[cfg(target_os = "zkvm")]
     {
         extern "C" {
-            // This symbol marks the end of all elf sections, so this is where we start our
+            // This symbol is defined by the loader and marks the end
+            // of all elf sections, so this is where we start our
             // heap.
+            //
+            // This is generated automatically by the linker; see
+            // https://lld.llvm.org/ELF/linker_script.html#sections-command
             static _end: u8;
         }
 

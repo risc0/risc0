@@ -52,6 +52,19 @@ impl Risc0Metadata {
     }
 }
 
+#[cfg(feature = "guest-list")]
+/// Represents an item in the generated list of compiled guest binaries
+pub struct GuestListEntry {
+    /// The name of the guest binary
+    pub name: &'static str,
+    /// The compiled ELF guest binary
+    pub elf: &'static [u8],
+    /// The image id of the guest
+    pub image_id: [u32; DIGEST_WORDS],
+    /// The path to the ELF binary
+    pub path: &'static str,
+}
+
 #[derive(Debug)]
 struct Risc0Method {
     name: String,
@@ -84,8 +97,7 @@ impl Risc0Method {
             panic!("method path cannot include #: {}", elf_path);
         }
 
-        let upper = self.name.to_uppercase();
-        let upper = upper.replace('-', "_");
+        let upper = self.name.to_uppercase().replace('-', "_");
         let image_id: [u32; DIGEST_WORDS] = self.make_image_id().into();
         let elf_contents = std::fs::read(&self.elf_path).unwrap();
         format!(
@@ -93,7 +105,21 @@ impl Risc0Method {
 pub const {upper}_ELF: &[u8] = &{elf_contents:?};
 pub const {upper}_ID: [u32; 8] = {image_id:?};
 pub const {upper}_PATH: &str = r#"{elf_path}"#;
-            "##
+"##
+        )
+    }
+
+    #[cfg(feature = "guest-list")]
+    fn guest_list_entry(&self) -> String {
+        let upper = self.name.to_uppercase().replace('-', "_");
+        format!(
+            r##"
+    GuestListEntry {{
+        name: "{upper}",
+        elf: {upper}_ELF,
+        image_id: {upper}_ID,
+        path: {upper}_PATH,
+    }}"##
         )
     }
 }
@@ -229,15 +255,15 @@ pub struct GuestBuildEnv {
 
 /// Create a build environment to build code for the guest,
 /// downloading the standard library if necessary.
-pub fn setup_guest_build_env(out_dir: &Path) -> GuestBuildEnv {
+pub fn setup_guest_build_env(out_dir: impl AsRef<Path>) -> GuestBuildEnv {
     // RISCV target specification
-    let target_spec_path = out_dir.join("riscv32im-risc0-zkvm-elf.json");
+    let target_spec_path = out_dir.as_ref().join("riscv32im-risc0-zkvm-elf.json");
     fs::write(&target_spec_path, TARGET_JSON).unwrap();
 
     // Rust standard library.  If any of the RUST_LIB_MAP changed, we
     // want to have a different hash so that we make sure we recompile.
     let (_, src_id_hash) = sha_digest_with_hex(format!("{:?}", RUST_LIB_MAP).as_bytes());
-    let rust_lib_path = out_dir.join(format!("rust-std_{}", src_id_hash));
+    let rust_lib_path = out_dir.as_ref().join(format!("rust-std_{}", src_id_hash));
     if !rust_lib_path.exists() {
         println!(
             "Standard library {} does not exist; downloading",
@@ -347,26 +373,34 @@ impl GuestBuildEnv {
             "build-std-features=compiler-builtins-mem",
         ]);
 
-        let mut rustflags = rustflags.to_vec();
-        let text_start = &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT_START);
-        rustflags.extend([
-            // Replace atomic ops with nonatomic versions since the guest is single threaded.
-            "-C",
-            "passes=loweratomic",
-            // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
-            "-Z",
-            "remap-cwd-prefix=.",
-            // Specify where to start loading the program in memory.
-            "-C",
-            text_start,
-            // Apparently not having an entry point is only a linker warning(!), so
-            // error out in this case.
-            "-C",
-            "link-arg=--fatal-warnings",
-            "-C",
-            "panic=abort",
-        ]);
-        cmd.env("CARGO_ENCODED_RUSTFLAGS", rustflags.join("\x1f"));
+        let rustflags_envvar = [
+            rustflags,
+            &[
+                // Replace atomic ops with nonatomic versions since the guest is single threaded.
+                "-C",
+                "passes=loweratomic",
+                // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
+                "-Z",
+                "remap-cwd-prefix=.",
+                // Specify where to start loading the program in
+                // memory.  The clang linker understands the same
+                // command line arguments as the GNU linker does; see
+                // https://ftp.gnu.org/old-gnu/Manuals/ld-2.9.1/html_mono/ld.html#SEC3
+                // for details.
+                "-C",
+                &format!("link-arg=-Ttext=0x{:08X}", memory::TEXT_START),
+                // Apparently not having an entry point is only a linker warning(!), so
+                // error out in this case.
+                "-C",
+                "link-arg=--fatal-warnings",
+                "-C",
+                "panic=abort",
+            ],
+        ]
+        .concat()
+        .join("\x1f");
+
+        cmd.env("CARGO_ENCODED_RUSTFLAGS", rustflags_envvar);
 
         // The RISC0_STANDARD_LIB variable can be set for testing purposes
         // to override the downloaded standard library.  It should point
@@ -386,7 +420,7 @@ impl GuestBuildEnv {
     /// used to build programs for the zkvm which don't depend on
     /// risc0_zkvm.
     pub fn build_rust_runtime(&self) -> String {
-        self.build_staticlib("risc0-zkvm-platform", &["rust-runtime", "getrandom"])
+        self.build_staticlib("risc0-zkvm-platform", &["rust-runtime"])
     }
 
     /// Builds a static library and returns the name of the resultant file.
@@ -560,7 +594,13 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
     let methods_path = out_dir.join("methods.rs");
     let mut methods_file = File::create(&methods_path).unwrap();
 
-    // Get additional sources needed e.g. target JSON and Rust standard lib source.
+    #[cfg(feature = "guest-list")]
+    let mut guest_list_entries = Vec::new();
+    #[cfg(feature = "guest-list")]
+    methods_file
+        .write_all(b"use risc0_build::GuestListEntry;\n")
+        .unwrap();
+
     let guest_build_env = setup_guest_build_env(&out_dir);
     let runtime_lib = guest_build_env.build_rust_runtime();
 
@@ -584,7 +624,21 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             methods_file
                 .write_all(method.rust_def().as_bytes())
                 .unwrap();
+
+            #[cfg(feature = "guest-list")]
+            guest_list_entries.push(method.guest_list_entry());
         }
+
+        #[cfg(feature = "guest-list")]
+        methods_file
+            .write_all(
+                format!(
+                    "\npub const GUEST_LIST: &[GuestListEntry] = &[{}];\n",
+                    guest_list_entries.join(",")
+                )
+                .as_bytes(),
+            )
+            .unwrap();
     }
 
     // HACK: It's not particularly practical to figure out all the
