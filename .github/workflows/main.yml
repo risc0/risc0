@@ -39,10 +39,8 @@ jobs:
         working-directory: templates/bonsai
       - run: npm run ci
         working-directory: templates/bonsai
-      - name: List Python Versions
-        run: ls /usr/bin/python*
-      - name: Remove Python 3.10
-        run: sudo apt-get remove python3.10
+      - name: Remove python from cache
+        run: rm -r /opt/hostedtoolcache/Python/*
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
