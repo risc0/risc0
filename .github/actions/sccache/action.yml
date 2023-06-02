@@ -6,29 +6,26 @@ runs:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
           echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
-          echo "SCCACHE_VERSION=v0.3.3" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
       run: |
         echo "SCCACHE_ARCH=x86_64-apple-darwin" >> $GITHUB_ENV
-        echo "SCCACHE_VERSION=v0.3.3" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'ARM64'
       run: |
         echo "SCCACHE_ARCH=aarch64-apple-darwin" >> $GITHUB_ENV
-        echo "SCCACHE_VERSION=v0.3.3" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'Linux' &&  runner.arch == 'ARM64'
       run: |
         echo "SCCACHE_ARCH=aarch64-unknown-linux-musl" >> $GITHUB_ENV
-        echo "SCCACHE_VERSION=v0.4.0-pre.5" >> $GITHUB_ENV
       shell: bash
 
     - env:
         SCCACHE_URL: https://github.com/mozilla/sccache/releases/download
+        SCCACHE_VERSION: v0.5.0
       run: |
         SCCACHE_FILE=sccache-$SCCACHE_VERSION-$SCCACHE_ARCH
         curl -L "$SCCACHE_URL/$SCCACHE_VERSION/$SCCACHE_FILE.tar.gz" | tar xz
