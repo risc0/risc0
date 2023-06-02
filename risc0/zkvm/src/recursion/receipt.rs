@@ -206,8 +206,7 @@ impl SegmentRecursionReceipt {
         use super::CircuitImpl;
 
         // Make the hal
-        let hal =
-            risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&CIRCUIT);
+        let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&CIRCUIT);
         let valid_ids = valid_control_ids();
         let check_code = |_po2: u32, control_id: &Digest| -> Result<(), VerificationError> {
             let Some(_) = valid_ids.iter().position(|elem| elem == control_id) else {
