@@ -9,9 +9,9 @@ Walking through this example on Linux requires a minimum of around 12GB of RAM a
 To run tests and then build a copy of the pro rata command line utility:
 
 ```
-> cargo test  # about 7 minutes
-> cargo build --release  # about 7 minutes, can run in parallel with above
-> target/release/prorata-cli help  # verify binary was built
+> cargo test --package prorata-cli # about 7 minutes
+> cargo build --package prorata-cli --release  # about 7 minutes, can run in parallel with above
+> cargo run --package prorata-cli help  # verify binary was built
 Usage: host <COMMAND>
 ...
 ```
@@ -71,7 +71,7 @@ Great news! InGen has agreed to be purchased by Masrani Global Corporation and i
 John receives the notice.
 
 ```
-> target/release/prorata-cli verify --input hammond.receipt
+> cargo run --package prorata-cli verify --input hammond.receipt
 Query: John Hammond
 Allocation for John Hammond: 187068000
 CSV hash: 1042f70d38c9e980c14f449714952e04c8aab41967f2ffcafa02cda9ec9dce22
