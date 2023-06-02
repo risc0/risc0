@@ -50,6 +50,9 @@ pub struct ExecutorEnvBuilder<'a> {
 }
 
 /// The [super::Executor] is configured from this object.
+///
+/// The executor environment holds configuration details that inform how the
+/// guest environment is set up prior to guest program execution.
 #[derive(Clone)]
 pub struct ExecutorEnv<'a> {
     env_vars: HashMap<String, String>,
@@ -63,6 +66,16 @@ pub struct ExecutorEnv<'a> {
 
 impl<'a> ExecutorEnv<'a> {
     /// Construct a [ExecutorEnvBuilder].
+    /// # Example
+    /// ```
+    /// use risc0_zkvm::{
+    ///     ExecutorEnv,
+    ///     ExecutorEnvBuilder};
+    ///
+    /// let a: u64 = 400;
+    ///
+    /// let env = ExecutorEnv::builder().build();
+    /// ```
     pub fn builder() -> ExecutorEnvBuilder<'a> {
         ExecutorEnvBuilder::default()
     }
@@ -104,6 +117,14 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
 
 impl<'a> ExecutorEnvBuilder<'a> {
     /// Finalize this builder to construct an [ExecutorEnv].
+    /// # Example
+    /// ```
+    /// use risc0_zkvm::{
+    ///     ExecutorEnv,
+    ///     ExecutorEnvBuilder};
+    ///
+    /// let env = ExecutorEnv::builder().build();
+    /// ```
     pub fn build(&mut self) -> ExecutorEnv<'a> {
         let mut result = self.clone();
         let getenv = syscalls::Getenv(self.inner.env_vars.clone());
@@ -131,18 +152,55 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Set a session limit, specified in number of cycles.
+    /// # Example
+    /// ```
+    /// use risc0_zkvm::{
+    ///    ExecutorEnv,
+    ///    ExecutorEnvBuilder};
+    ///
+    /// const NEW_SESSION_LIMIT: usize = 32 * 1024 * 1024; // 32M cycles
+    ///
+    /// let env = ExecutorEnv::builder()
+    ///     .session_limit(32 * 1024 * 1024) // 32M cycles
+    ///     .build();
+    /// ```
     pub fn session_limit(&mut self, limit: usize) -> &mut Self {
         self.inner.session_limit = limit;
         self
     }
 
     /// Add environment variables to the guest environment.
+    /// # Example
+    /// ```
+    /// use risc0_zkvm::{
+    ///     ExecutorEnv,
+    ///     ExecutorEnvBuilder};
+    /// use std::collections::HashMap;
+    ///
+    /// let mut vars = HashMap::new();
+    /// vars.insert("VAR1".to_string(), "SOME_VALUE".to_string());
+    /// vars.insert("VAR2".to_string(), "SOME_VALUE".to_string());
+    ///
+    /// let env = ExecutorEnv::builder()
+    ///     .env_vars(vars)
+    ///     .build();
+    /// ```
     pub fn env_vars(&mut self, vars: HashMap<String, String>) -> &mut Self {
         self.inner.env_vars = vars;
         self
     }
 
     /// Add an environment variable to the guest environment.
+    /// # Example
+    /// ```
+    /// # use risc0_zkvm::{
+    /// #   ExecutorEnv,
+    /// #   ExecutorEnvBuilder};
+    ///
+    /// let env = ExecutorEnv::builder()
+    ///     .env_var("VAR1", "SOME_VALUE")
+    ///     .build();
+    /// ```
     pub fn env_var(&mut self, name: &str, val: &str) -> &mut Self {
         self.inner
             .env_vars
@@ -151,6 +209,21 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add initial input that can be read by the guest from stdin.
+    /// Calling `ExecutorEnvBuilder::add_input()` iteratively concatenates
+    /// inputs; the guest can access each input using consecutive reads. ```
+    /// use risc0_zkvm::{
+    ///     ExecutorEnv,
+    ///     ExecutorEnvBuilder,
+    ///     serde::to_vec};
+    ///
+    /// let a: u64 = 400;
+    /// let b: u64 = 200;
+    ///
+    /// let env = ExecutorEnv::builder()
+    ///     .add_input(&to_vec(&a).unwrap())
+    ///     .add_input(&to_vec(&b).unwrap())
+    ///     .build();
+    /// ```
     pub fn add_input<T: Pod>(&mut self, slice: &[T]) -> &mut Self {
         self.inner
             .input

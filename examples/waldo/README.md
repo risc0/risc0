@@ -1,5 +1,7 @@
 # Where's Waldo
 
+***Check out our [blogpost](https://risczero.com/blog/waldo) about this example!***
+
 [Where's Waldo] is a [favorite analogy] for zero-knowledge proofs. In
 particular, there is this visual that if you take a Where's Waldo image and
 cover it up with a big piece of cardboard with a small cutout that just shows
