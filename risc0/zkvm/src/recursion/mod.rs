@@ -12,10 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //! this is the recusion module TODO
-pub(crate) mod control_id;
+use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
+mod control_id;
 mod info;
+mod poly_ext;
+mod taps;
+
 /// todo
 pub mod receipt;
 
 /// this is a fake struct to make the code work with generated info
-pub(crate) struct CircuitImpl;
+struct CircuitImpl;
+
+impl CircuitImpl {
+    pub const fn new() -> Self {
+        CircuitImpl
+    }
+}
+
+impl TapsProvider for CircuitImpl {
+    fn get_taps(&self) -> &'static TapSet<'static> {
+        taps::TAPSET
+    }
+}
+
+const CIRCUIT: CircuitImpl = CircuitImpl::new();
