@@ -17,7 +17,7 @@ libm = { version = "0.2", optional = true }
 [features]
 default = []
 # Build a rust runtime
-rust-runtime = ["export-syscalls", "export-libm"]
+rust-runtime = ["export-getrandom", "export-syscalls", "export-libm"]
 export-syscalls = []
 export-libm = ["dep:libm"]
 export-getrandom = ["dep:getrandom", "dep:bytemuck"]
