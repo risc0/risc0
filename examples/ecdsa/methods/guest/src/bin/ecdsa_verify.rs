@@ -18,20 +18,16 @@ use k256::{
 };
 use risc0_zkvm::guest::env;
 
-// Example of using the risc0_zkvm::sha module to hash data.
 fn main() {
     // Decode the verifying key, message, and signature from the inputs.
     let (encoded_verifying_key, message, signature): (EncodedPoint, Vec<u8>, Signature) =
         env::read();
     let verifying_key = VerifyingKey::from_encoded_point(&encoded_verifying_key).unwrap();
 
-    let start = env::get_cycle_count();
-
     // Verify the signature, panicking if verification fails.
-    assert!(verifying_key.verify(&message, &signature).is_ok());
-
-    let end = env::get_cycle_count();
-    println!("ECDSA signature verification took {} cycles", end - start);
+    verifying_key
+        .verify(&message, &signature)
+        .expect("ECDSA signature verification failed");
 
     // Commit to the journal the verifying key and messge that was signed.
     env::commit(&(encoded_verifying_key, message));

@@ -88,10 +88,10 @@ dependencies = [
 [[package]]
 name = "crypto-bigint"
 version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf4c2f4e1afd912bc40bfd6fed5d9dc1f288e0ba01bfcc835cc5bc3eb13efe15"
+source = "git+https://github.com/risc0/RustCrypto-crypto-bigint?branch=victor/use-risc0-accel#725b3bcb26c3498ca4f2924f9e7f843d4bd3045f"
 dependencies = [
  "generic-array",
+ "getrandom",
  "rand_core",
  "subtle",
  "zeroize",
@@ -148,6 +148,7 @@ dependencies = [
 name = "ecdsa-verify"
 version = "0.1.0"
 dependencies = [
+ "hex-literal",
  "k256",
  "risc0-zkvm",
 ]
@@ -222,6 +223,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
 
 [[package]]
+name = "hex-literal"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6fe2267d4ed49bc07b63801559be28c718ea06c4738b7a03c94df7386d2cde46"
+
+[[package]]
 name = "hmac"
 version = "0.12.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -232,9 +239,8 @@ dependencies = [
 
 [[package]]
 name = "k256"
-version = "0.13.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "955890845095ccf31ef83ad41a05aabb4d8cc23dc3cac5a9f5c89cf26dd0da75"
+version = "0.13.1"
+source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?branch=victor/use-risc0-accel#8d0a307008b19ac3cd2b9a271c3e0f7607e98dbc"
 dependencies = [
  "cfg-if",
  "ecdsa",
@@ -242,7 +248,6 @@ dependencies = [
  "once_cell",
  "serdect",
  "sha2",
- "signature",
 ]
 
 [[package]]

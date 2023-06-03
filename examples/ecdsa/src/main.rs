@@ -33,6 +33,7 @@ fn prove_ecdsa_verification(
         .build();
 
     let mut exec = Executor::from_elf(env, ECDSA_VERIFY_ELF).unwrap();
+    exec.run().unwrap();
     let session = exec.run().unwrap();
     session.prove().unwrap()
 }
