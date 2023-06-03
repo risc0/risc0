@@ -37,7 +37,7 @@ rayon = { version = "1.5", optional = true }
 sha2 = { version = "0.10", default-features = false, features = ["compress"] }
 
 [dev-dependencies]
-criterion = "0.4"
+criterion = "0.5"
 env_logger = "0.10"
 rand = { version = "0.8", features = ["small_rng"] }
 serial_test = "2.0"
