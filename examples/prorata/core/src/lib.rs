@@ -89,12 +89,12 @@ impl fmt::Display for AllocationQueryResult {
     }
 }
 
+/// Completely allocate the total funds `amount` by shares into dollars and
+/// cents amounts for each recipient.
+///
+/// amount - total amount to distribute
+/// recipients - list of recipients with their share of the total amount
 pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> {
-    //! Completely allocate the total funds `amount` by shares into dollars and
-    //! cents amounts for each recipient.
-    //!
-    //! amount - total amount to distribute
-    //! recipients - list of recipients with their share of the total amount
 
     // Sort recipients in descending order of ownership share to provide
     // consistent behavior regardless of input order.
@@ -130,17 +130,17 @@ pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> 
     allocations
 }
 
+/// Allocate the total funds `amount` by shares into dollars and cents amounts
+/// for the recipient with name `target`.
+///
+/// amount - total amount to distribute
+/// recipients - list of recipients with their share of the total amount
+/// target - name of the recipient to allocate for
 pub fn allocate_for(
     amount: Decimal,
     recipients: Vec<Recipient>,
     target: &str,
 ) -> Option<Allocation> {
-    // Allocate the total funds `amount` by shares into dollars and cents amounts
-    // for the recipient with name `target`.
-    //
-    // amount - total amount to distribute
-    // recipients - list of recipients with their share of the total amount
-    // target - name of the recipient to allocate for
 
     let allocations = allocate(amount, recipients);
     for allocation in allocations {
