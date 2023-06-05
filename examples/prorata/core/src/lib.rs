@@ -95,7 +95,6 @@ impl fmt::Display for AllocationQueryResult {
 /// amount - total amount to distribute
 /// recipients - list of recipients with their share of the total amount
 pub fn allocate(amount: Decimal, recipients: Vec<Recipient>) -> Vec<Allocation> {
-
     // Sort recipients in descending order of ownership share to provide
     // consistent behavior regardless of input order.
     // TODO: In the case of ties in ownership share this is not sufficient to
@@ -141,7 +140,6 @@ pub fn allocate_for(
     recipients: Vec<Recipient>,
     target: &str,
 ) -> Option<Allocation> {
-
     let allocations = allocate(amount, recipients);
     for allocation in allocations {
         if allocation.name == target {
