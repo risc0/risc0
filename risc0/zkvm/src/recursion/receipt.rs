@@ -270,7 +270,7 @@ impl SessionRollupReceipt {
 
 #[cfg(test)]
 mod tests {
-    use crate::receipt::tagged_struct;
+    use crate::recursion::receipt::tagged_struct;
     #[test]
     fn test_tagged_struct() {
         let digest1 = tagged_struct("foo", &[], &[1, 2013265920, 3]);

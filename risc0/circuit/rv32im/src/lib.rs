@@ -69,7 +69,6 @@ mod tests {
         hal::cpu::CpuBuffer,
     };
 
-    use crate::CircuitImpl;
     use crate::CircuitProveImpl;
 
     struct CustomStepMock {}
@@ -98,7 +97,6 @@ mod tests {
 
     #[test]
     fn step_exec() {
-        let circuit = CircuitImpl::new();
         let circuit_prover = CircuitProveImpl::new();
         let mut custom = CustomStepMock {};
         let ctx = CircuitStepContext { size: 0, cycle: 0 };
