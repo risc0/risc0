@@ -61,9 +61,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
-use crate::{
-    ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT,
-};
+use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT};
 
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
@@ -257,13 +255,7 @@ where
 
         let io = segment.prepare_globals();
         let machine = MachineContext::new(segment);
-        let mut executor = Executor::new(
-            &CIRCUIT,
-            machine,
-            segment.po2,
-            segment.po2,
-            &io,
-        );
+        let mut executor = Executor::new(&CIRCUIT, machine, segment.po2, segment.po2, &io);
 
         let loader = Loader::new();
         loader.load(|chunk, fini| executor.step(chunk, fini))?;

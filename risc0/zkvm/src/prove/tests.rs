@@ -31,7 +31,7 @@ use super::{get_prover, LocalProver, Prover};
 use crate::{
     prove::HalEval,
     serde::{from_slice, to_vec},
-    testutils, Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT_PROVE,
+    testutils, Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT,
 };
 
 fn prove_nothing(name: &str) -> Result<SessionReceipt> {
@@ -53,7 +53,7 @@ fn hashfn_poseidon() {
 fn hashfn_blake2b() {
     let hal_eval = HalEval {
         hal: Rc::new(CpuHal::<BabyBear, Blake2bCpuHashSuite>::new()),
-        eval: Rc::new(CpuEvalCheck::new(&CIRCUIT_PROVE)),
+        eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build();

@@ -19,8 +19,10 @@ use risc0_zkp::{
 };
 mod control_id;
 mod info;
-mod poly_ext;
-mod taps;
+/// todo
+pub mod poly_ext;
+/// todo
+pub mod taps;
 
 /// todo
 pub mod receipt;
@@ -41,7 +43,7 @@ impl TapsProvider for CircuitImpl {
     }
 }
 
+impl CircuitCoreDef<BabyBear> for CircuitImpl {}
+
 /// todo
 pub const CIRCUIT_CORE: CircuitImpl = CircuitImpl::new();
-
-impl CircuitCoreDef<BabyBear> for CircuitImpl {}

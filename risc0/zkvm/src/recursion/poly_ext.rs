@@ -21,6 +21,7 @@ use risc0_zkp::{
 
 use super::CircuitImpl;
 
+#[allow(missing_docs)]
 #[rustfmt::skip]
 pub const DEF: PolyExtStepDef = PolyExtStepDef {
     block: &[PolyExtStep::Const(0), // cirgen/circuit/recursion/micro.cpp:151
