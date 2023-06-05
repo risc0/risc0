@@ -61,7 +61,7 @@ jobs:
             device: apple_m2_pro
           - os: Linux
             feature: cuda
-            device: graviton2
+            device: nvidia_telsa_t4g
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
