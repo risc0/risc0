@@ -11,7 +11,7 @@ futures = { version = "0.3", optional = true }
 getrandom = { version = "0.2", features = ["custom"] }
 hashbrown = "0.13"
 primitive-types = { version = "0.12", features = ["serde"] }
-revm = { version = "3.0", default-features = false, features = ["std", "serde"] }
+revm = { version = "3.3", default-features = false, features = ["std", "serde"] }
 serde = "1.0"
 tokio = { version = "1.23", features = ["rt-multi-thread", "macros"], optional = true }
 
