@@ -677,7 +677,7 @@ dependencies = [
 [[package]]
 name = "radium"
 version = "0.7.1"
-source = "git+https://github.com/ferrilab/radium.git#723bed5abd75994ee4b7221b8b12c9f4e77ce408"
+source = "git+https://github.com/ferrilab/radium.git?rev=723bed5#723bed5abd75994ee4b7221b8b12c9f4e77ce408"
 
 [[package]]
 name = "rand"
