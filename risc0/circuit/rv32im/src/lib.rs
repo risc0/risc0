@@ -29,12 +29,13 @@ pub mod poly_ext;
 mod taps;
 
 use risc0_zkp::{
-    adapter::{CircuitCoreDef, TapsProvider},
-    field::baby_bear::BabyBear,
+    adapter::{CircuitCoreDef, CircuitInfo, MixState, PolyExt, TapsProvider},
+    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
     taps::TapSet,
 };
+
+use crate::poly_ext::DEF;
 pub struct CircuitImpl;
-pub struct CircuitProveImpl;
 
 pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
@@ -42,12 +43,6 @@ pub const REGISTER_GROUP_DATA: usize = 2;
 
 pub const GLOBAL_MIX: usize = 0;
 pub const GLOBAL_OUT: usize = 1;
-
-impl CircuitProveImpl {
-    pub const fn new() -> Self {
-        CircuitProveImpl
-    }
-}
 
 impl CircuitImpl {
     pub const fn new() -> Self {
@@ -62,6 +57,40 @@ impl TapsProvider for CircuitImpl {
 }
 
 impl CircuitCoreDef<BabyBear> for CircuitImpl {}
+
+pub struct CircuitProveImpl;
+
+impl CircuitProveImpl {
+    pub const fn new() -> Self {
+        CircuitProveImpl
+    }
+}
+
+impl CircuitInfo for CircuitProveImpl {
+    #[rustfmt::skip]
+    const OUTPUT_SIZE: usize = CircuitImpl::OUTPUT_SIZE;
+
+    #[rustfmt::skip]
+    const MIX_SIZE: usize = 40;
+}
+
+impl TapsProvider for CircuitProveImpl {
+    fn get_taps(&self) -> &'static TapSet<'static> {
+        taps::TAPSET
+    }
+}
+impl PolyExt<BabyBear> for CircuitProveImpl {
+    fn poly_ext(
+        &self,
+        mix: &BabyBearExtElem,
+        u: &[BabyBearExtElem],
+        args: &[&[BabyBearElem]],
+    ) -> MixState<BabyBearExtElem> {
+        DEF.step::<BabyBear>(mix, u, args)
+    }
+}
+
+impl<'a> CircuitCoreDef<BabyBear> for CircuitProveImpl {}
 
 #[cfg(test)]
 mod tests {

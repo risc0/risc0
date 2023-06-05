@@ -125,7 +125,10 @@ pub trait CircuitInfo {
 pub trait CircuitCoreDef<F: Field>: CircuitInfo + PolyExt<F> + TapsProvider {}
 
 /// traits implemented by generated rust code used in only the prover
-pub trait CircuitProveDef<F: Field>: CircuitStep<F::Elem> + PolyFp<F> + Sync {}
+pub trait CircuitProveDef<F: Field>:
+    CircuitStep<F::Elem> + PolyFp<F> + CircuitCoreDef<F> + Sync
+{
+}
 
 pub type Arg = usize;
 pub type Var = usize;
