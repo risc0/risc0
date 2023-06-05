@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //! this is the recusion module TODO
-use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
-use risc0_zkp::field::baby_bear::BabyBear;
-use risc0_zkp::adapter::CircuitCoreDef;
+use risc0_zkp::{
+    adapter::{CircuitCoreDef, TapsProvider},
+    field::baby_bear::BabyBear,
+    taps::TapSet,
+};
 mod control_id;
 mod info;
 mod poly_ext;

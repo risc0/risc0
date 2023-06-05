@@ -28,9 +28,11 @@ pub mod metal;
 pub mod poly_ext;
 mod taps;
 
-use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
-use risc0_zkp::adapter::CircuitCoreDef;
-use risc0_zkp::field::baby_bear::BabyBear;
+use risc0_zkp::{
+    adapter::{CircuitCoreDef, TapsProvider},
+    field::baby_bear::BabyBear,
+    taps::TapSet,
+};
 pub struct CircuitImpl;
 pub struct CircuitProveImpl;
 

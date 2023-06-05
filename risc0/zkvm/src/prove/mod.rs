@@ -61,7 +61,9 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
-use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT_PROVE, CIRCUIT_CORE};
+use crate::{
+    ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT_CORE, CIRCUIT_PROVE,
+};
 
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
@@ -123,6 +125,7 @@ pub mod cpu {
 
     use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitProveImpl};
     use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
+
     use super::HalEval;
     use crate::CIRCUIT_PROVE;
 
@@ -134,7 +137,8 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn sha256_hal_eval() -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitProveImpl>> {
+    pub fn sha256_hal_eval(
+    ) -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitProveImpl>> {
         let hal = Rc::new(BabyBearSha256CpuHal::new());
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT_PROVE));
         HalEval { hal, eval }
@@ -148,8 +152,8 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn poseidon_hal_eval() -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitProveImpl>>
-    {
+    pub fn poseidon_hal_eval(
+    ) -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitProveImpl>> {
         let hal = Rc::new(BabyBearPoseidonCpuHal::new());
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT_PROVE));
         HalEval { hal, eval }
@@ -253,7 +257,14 @@ where
 
         let io = segment.prepare_globals();
         let machine = MachineContext::new(segment);
-        let mut executor = Executor::new(&CIRCUIT_CORE, &CIRCUIT_PROVE, machine, segment.po2, segment.po2, &io);
+        let mut executor = Executor::new(
+            &CIRCUIT_CORE,
+            &CIRCUIT_PROVE,
+            machine,
+            segment.po2,
+            segment.po2,
+            &io,
+        );
 
         let loader = Loader::new();
         loader.load(|chunk, fini| executor.step(chunk, fini))?;

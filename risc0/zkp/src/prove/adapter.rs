@@ -19,7 +19,10 @@ use rayon::prelude::*;
 use risc0_core::field::{Elem, Field};
 
 use crate::{
-    adapter::{CircuitCoreDef, CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
+    adapter::{
+        CircuitCoreDef, CircuitProveDef, CircuitStepContext, CircuitStepHandler,
+        REGISTER_GROUP_ACCUM,
+    },
     core::hash::Rng,
     hal::cpu::CpuBuffer,
     prove::{

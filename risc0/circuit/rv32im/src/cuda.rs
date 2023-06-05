@@ -124,7 +124,7 @@ mod tests {
     #[test]
     fn eval_check() {
         const PO2: usize = 4;
-        let circuit = crate::CircuitImpl::new();
+        let circuit = crate::CircuitProveImpl::new();
         let cpu_hal = BabyBearSha256CpuHal::new();
         let cpu_eval = CpuEvalCheck::new(&circuit);
         let gpu_hal = Rc::new(CudaHalSha256::new());

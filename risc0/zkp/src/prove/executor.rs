@@ -22,8 +22,8 @@ use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{
-        CircuitCoreDef, CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_CODE,
-        REGISTER_GROUP_DATA,
+        CircuitCoreDef, CircuitProveDef, CircuitStepContext, CircuitStepHandler,
+        REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
     },
     hal::{
         cpu::{CpuBuffer, SyncSlice},
@@ -128,7 +128,9 @@ where
         };
         let args: &[SyncSlice<F::Elem>] =
             &[code_buf, self.io.as_slice_sync(), self.data.as_slice_sync()];
-        let result = self.circuit_prover.step_exec(&ctx, &mut self.handler, args)?;
+        let result = self
+            .circuit_prover
+            .step_exec(&ctx, &mut self.handler, args)?;
         // debug!("result: {:?}", result);
         self.halted = self.halted || result == F::Elem::ZERO;
         self.cycle += 1;

@@ -64,7 +64,8 @@ use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, S
 const CIRCUIT_CORE: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
 #[cfg(feature = "prove")]
-const CIRCUIT_PROVE: risc0_circuit_rv32im::CircuitProveImpl = risc0_circuit_rv32im::CircuitProveImpl::new();
+const CIRCUIT_PROVE: risc0_circuit_rv32im::CircuitProveImpl =
+    risc0_circuit_rv32im::CircuitProveImpl::new();
 
 /// Associate a specific CONTROL_ID with a HashFn.
 pub trait ControlId {

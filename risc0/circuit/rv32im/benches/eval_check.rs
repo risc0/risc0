@@ -16,7 +16,7 @@ use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 use risc0_circuit_rv32im::{
     cpu::CpuEvalCheck,
     testutil::{eval_check_impl, EvalCheckParams},
-    CircuitImpl,
+    CircuitProveImpl,
 };
 use risc0_zkp::hal::cpu::BabyBearSha256CpuHal;
 
@@ -25,7 +25,7 @@ pub fn eval_check(c: &mut Criterion) {
     group.sample_size(10);
     for po2 in [2, 8, 16].iter() {
         let params = EvalCheckParams::new(*po2);
-        let circuit = CircuitImpl::new();
+        let circuit = CircuitProveImpl::new();
         let hal = BabyBearSha256CpuHal::new();
         let eval = CpuEvalCheck::new(&circuit);
         group.bench_function(BenchmarkId::new("cpu", po2), |b| {
