@@ -90,7 +90,3 @@ Primary key fingerprint: 2546 61BE 3628 0E40 C859  3AED 66C8 763F 4D1A C1BD
 ```
 
 Success.
-
-## Further reading
-
-TODO: link next steps here
