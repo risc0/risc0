@@ -61,7 +61,7 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
-use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT};
+use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT_PROVE, CIRCUIT_CORE};
 
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
@@ -121,11 +121,10 @@ pub mod metal {
 pub mod cpu {
     use std::rc::Rc;
 
-    use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitImpl};
+    use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitProveImpl};
     use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
-
     use super::HalEval;
-    use crate::CIRCUIT;
+    use crate::CIRCUIT_PROVE;
 
     /// Creates a HAL for the rv32im circuit that uses the SHA-256 hashing
     /// function.
@@ -135,9 +134,9 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn sha256_hal_eval() -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitImpl>> {
+    pub fn sha256_hal_eval() -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitProveImpl>> {
         let hal = Rc::new(BabyBearSha256CpuHal::new());
-        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
+        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT_PROVE));
         HalEval { hal, eval }
     }
 
@@ -149,10 +148,10 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn poseidon_hal_eval() -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitImpl>>
+    pub fn poseidon_hal_eval() -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitProveImpl>>
     {
         let hal = Rc::new(BabyBearPoseidonCpuHal::new());
-        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
+        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT_PROVE));
         HalEval { hal, eval }
     }
 }
@@ -238,7 +237,7 @@ where
             journal: session.journal.clone(),
         };
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
+        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT_CORE);
         receipt.verify_with_hal(&hal, image_id)?;
         Ok(receipt)
     }
@@ -254,14 +253,14 @@ where
 
         let io = segment.prepare_globals();
         let machine = MachineContext::new(segment);
-        let mut executor = Executor::new(&CIRCUIT, machine, segment.po2, segment.po2, &io);
+        let mut executor = Executor::new(&CIRCUIT_CORE, &CIRCUIT_PROVE, machine, segment.po2, segment.po2, &io);
 
         let loader = Loader::new();
         loader.load(|chunk, fini| executor.step(chunk, fini))?;
         executor.finalize();
 
         let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
+        let mut prover = risc0_zkp::prove::Prover::new(hal, crate::CIRCUIT_CORE.get_taps());
 
         adapter.execute(prover.iop());
 
@@ -293,7 +292,7 @@ where
             seal,
             index: segment.index,
         };
-        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
+        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT_CORE);
         receipt.verify_with_hal(&hal)?;
 
         Ok(receipt)

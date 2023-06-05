@@ -34,7 +34,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{memory, WORD_SIZE};
 
-use crate::CIRCUIT;
+use crate::CIRCUIT_CORE;
 
 // TODO: get from circuit
 const SETUP_STEP_REGS: usize = 84;
@@ -87,7 +87,7 @@ struct ControlGroup(Vec<BabyBearElem>);
 
 impl ControlGroup {
     fn new() -> Self {
-        Self(vec![BabyBearElem::ZERO; CIRCUIT.code_size()])
+        Self(vec![BabyBearElem::ZERO; CIRCUIT_CORE.code_size()])
     }
 
     fn reset(&mut self) {
@@ -418,7 +418,7 @@ impl Loader {
 
     /// Compute the `ControlId` associated with the given HAL
     pub fn compute_control_id<H: Hal<Elem = BabyBearElem>>(&self, hal: &H) -> Vec<Digest> {
-        let code_size = CIRCUIT.code_size();
+        let code_size = CIRCUIT_CORE.code_size();
 
         // Start with an empty table
         let mut table = Vec::new();
@@ -444,7 +444,7 @@ impl Loader {
     }
 
     fn load_code(&self, code: &mut [BabyBearElem], max_cycles: usize) {
-        let code_size = CIRCUIT.code_size();
+        let code_size = CIRCUIT_CORE.code_size();
         let mut cycle = 0;
         self.load(|chunk, fini| {
             for i in 0..code_size {

@@ -19,7 +19,7 @@ use rayon::prelude::*;
 use risc0_core::field::{Elem, Field};
 
 use crate::{
-    adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
+    adapter::{CircuitCoreDef, CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
     core::hash::Rng,
     hal::cpu::CpuBuffer,
     prove::{
@@ -31,25 +31,27 @@ use crate::{
     ZK_CYCLES,
 };
 
-pub struct ProveAdapter<'a, F, C, S>
+pub struct ProveAdapter<'a, F, C, D, S>
 where
     F: Field,
-    C: 'static + CircuitDef<F>,
+    C: 'static + CircuitCoreDef<F>,
+    D: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
 {
-    exec: &'a mut Executor<F, C, S>,
+    exec: &'a mut Executor<F, C, D, S>,
     mix: CpuBuffer<F::Elem>,
     accum: CpuBuffer<F::Elem>,
     steps: usize,
 }
 
-impl<'a, F, C, CS> ProveAdapter<'a, F, C, CS>
+impl<'a, F, C, D, CS> ProveAdapter<'a, F, C, D, CS>
 where
     F: Field,
-    C: CircuitDef<F>,
+    C: 'static + CircuitCoreDef<F>,
+    D: 'static + CircuitProveDef<F>,
     CS: CircuitStepHandler<F::Elem>,
 {
-    pub fn new(exec: &'a mut Executor<F, C, CS>) -> Self {
+    pub fn new(exec: &'a mut Executor<F, C, D, CS>) -> Self {
         let steps = exec.steps;
         ProveAdapter {
             exec,
@@ -60,7 +62,7 @@ where
     }
 
     pub fn get_taps(&self) -> &'static TapSet<'static> {
-        self.exec.circuit.get_taps()
+        self.exec.circuit_core.get_taps()
     }
 
     /// Perform initial 'execution' setting code + data.
@@ -81,7 +83,7 @@ where
         let accum: Mutex<Accum<F::ExtElem>> = Mutex::new(Accum::new(self.steps));
         tracing::info_span!("step_compute_accum").in_scope(|| {
             // TODO: Add an way to be able to run this on cuda, metal, etc.
-            let c = &self.exec.circuit;
+            let c = &self.exec.circuit_prover;
             (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
                 || Handler::<F>::new(&accum),
                 |accum_handler, cycle| {
@@ -101,7 +103,7 @@ where
             accum.lock().unwrap().calc_prefix_products();
         });
         tracing::info_span!("step_verify_accum").in_scope(|| {
-            let c = &self.exec.circuit;
+            let c = &self.exec.circuit_prover;
             (0..self.steps - ZK_CYCLES).into_par_iter().for_each_init(
                 || Handler::<F>::new(&accum),
                 |accum_handler, cycle| {
@@ -127,7 +129,7 @@ where
         // Make and compute accum data
         let accum_size = self
             .exec
-            .circuit
+            .circuit_core
             .get_taps()
             .group_size(REGISTER_GROUP_ACCUM);
         self.accum = CpuBuffer::from_fn(self.steps * accum_size, |_| F::Elem::INVALID);

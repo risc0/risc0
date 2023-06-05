@@ -21,8 +21,9 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(not(target_os = "zkvm"))]
 use crate::receipt::compute_image_id;
+#[cfg(not(target_os = "zkvm"))]
+use crate::recursion::CIRCUIT_CORE;
 use crate::{
-    recursion::CIRCUIT,
     sha::{self},
     ControlId,
 };
@@ -206,7 +207,7 @@ impl SegmentRecursionReceipt {
         use super::CircuitImpl;
 
         // Make the hal
-        let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&CIRCUIT);
+        let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&CIRCUIT_CORE);
         let valid_ids = valid_control_ids();
         let check_code = |_po2: u32, control_id: &Digest| -> Result<(), VerificationError> {
             let Some(_) = valid_ids.iter().position(|elem| elem == control_id) else {
@@ -215,7 +216,7 @@ impl SegmentRecursionReceipt {
             Ok(())
         };
         // Verify the receipt itself is correct
-        risc0_zkp::verify::verify(&hal, &CIRCUIT, &self.seal, check_code)?;
+        risc0_zkp::verify::verify(&hal, &CIRCUIT_CORE, &self.seal, check_code)?;
         // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
             bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);

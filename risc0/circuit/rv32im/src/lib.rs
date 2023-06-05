@@ -29,8 +29,10 @@ pub mod poly_ext;
 mod taps;
 
 use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
-
+use risc0_zkp::adapter::CircuitCoreDef;
+use risc0_zkp::field::baby_bear::BabyBear;
 pub struct CircuitImpl;
+pub struct CircuitProveImpl;
 
 pub const REGISTER_GROUP_ACCUM: usize = 0;
 pub const REGISTER_GROUP_CODE: usize = 1;
@@ -38,6 +40,12 @@ pub const REGISTER_GROUP_DATA: usize = 2;
 
 pub const GLOBAL_MIX: usize = 0;
 pub const GLOBAL_OUT: usize = 1;
+
+impl CircuitProveImpl {
+    pub const fn new() -> Self {
+        CircuitProveImpl
+    }
+}
 
 impl CircuitImpl {
     pub const fn new() -> Self {
@@ -51,6 +59,8 @@ impl TapsProvider for CircuitImpl {
     }
 }
 
+impl CircuitCoreDef<BabyBear> for CircuitImpl {}
+
 #[cfg(test)]
 mod tests {
     use risc0_core::field::baby_bear::BabyBearElem;
@@ -60,6 +70,7 @@ mod tests {
     };
 
     use crate::CircuitImpl;
+    use crate::CircuitProveImpl;
 
     struct CustomStepMock {}
 
@@ -88,13 +99,14 @@ mod tests {
     #[test]
     fn step_exec() {
         let circuit = CircuitImpl::new();
+        let circuit_prover = CircuitProveImpl::new();
         let mut custom = CustomStepMock {};
         let ctx = CircuitStepContext { size: 0, cycle: 0 };
         let args0 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
         let args1 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
         let args2 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
         let args = [&args0, &args1, &args2].map(CpuBuffer::as_slice_sync);
-        circuit
+        circuit_prover
             .step_exec(&ctx, &mut custom, args.as_slice())
             .unwrap();
     }
