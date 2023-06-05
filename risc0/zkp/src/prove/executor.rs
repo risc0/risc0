@@ -22,7 +22,7 @@ use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{
-        CircuitCoreDef, CircuitProveDef, CircuitStepContext, CircuitStepHandler,
+        CircuitProveDef, CircuitStepContext, CircuitStepHandler,
         REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
     },
     hal::{
@@ -32,15 +32,13 @@ use crate::{
     MIN_PO2, ZK_CYCLES,
 };
 
-pub struct Executor<F, C, D, S>
+pub struct Executor<F, C, S>
 where
     F: Field,
-    C: 'static + CircuitCoreDef<F>,
-    D: 'static + CircuitProveDef<F>,
+    C: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
 {
-    pub circuit_core: &'static C,
-    pub circuit_prover: &'static D,
+    pub circuit: &'static C,
     // Circuit Step Handler
     pub handler: S,
     // Control Instructions
@@ -65,30 +63,27 @@ where
     pub cycle: usize,
 }
 
-impl<F, C, D, S> Executor<F, C, D, S>
+impl<F, C, S> Executor<F, C, S>
 where
     F: Field,
-    C: 'static + CircuitCoreDef<F>,
-    D: 'static + CircuitProveDef<F>,
+    C: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
 {
     pub fn new(
-        circuit_core: &'static C,
-        circuit_prover: &'static D,
+        circuit: &'static C,
         handler: S,
         min_po2: usize,
         max_po2: usize,
         io: &[F::Elem],
     ) -> Self {
         let po2 = max(min_po2, MIN_PO2);
-        let taps = circuit_core.get_taps();
+        let taps = circuit.get_taps();
         let code_size = taps.group_size(REGISTER_GROUP_CODE);
         let data_size = taps.group_size(REGISTER_GROUP_DATA);
         let steps = 1 << po2;
         debug!("po2: {po2}, steps: {steps}, code_size: {code_size}");
         Executor {
-            circuit_core,
-            circuit_prover,
+            circuit,
             handler,
             // Initialize trace to min_po2 size
             code: CpuBuffer::from_fn(steps * code_size, |_| F::Elem::ZERO),
@@ -129,7 +124,7 @@ where
         let args: &[SyncSlice<F::Elem>] =
             &[code_buf, self.io.as_slice_sync(), self.data.as_slice_sync()];
         let result = self
-            .circuit_prover
+            .circuit
             .step_exec(&ctx, &mut self.handler, args)?;
         // debug!("result: {:?}", result);
         self.halted = self.halted || result == F::Elem::ZERO;
@@ -196,7 +191,7 @@ where
                     cycle: i,
                     size: self.steps,
                 };
-                self.circuit_prover
+                self.circuit
                     .step_verify_mem(&ctx, &mut self.handler, args)
                     .unwrap();
             }
@@ -209,7 +204,7 @@ where
                     cycle: i,
                     size: self.steps,
                 };
-                self.circuit_prover
+                self.circuit
                     .step_verify_bytes(&ctx, &mut self.handler, args)
                     .unwrap();
             }

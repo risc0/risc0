@@ -62,7 +62,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
 use crate::{
-    ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT_CORE, CIRCUIT_PROVE,
+    ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT,
 };
 
 /// HAL creation functions for CUDA.
@@ -127,7 +127,7 @@ pub mod cpu {
     use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
 
     use super::HalEval;
-    use crate::CIRCUIT_PROVE;
+    use crate::CIRCUIT;
 
     /// Creates a HAL for the rv32im circuit that uses the SHA-256 hashing
     /// function.
@@ -140,7 +140,7 @@ pub mod cpu {
     pub fn sha256_hal_eval(
     ) -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitProveImpl>> {
         let hal = Rc::new(BabyBearSha256CpuHal::new());
-        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT_PROVE));
+        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
 
@@ -155,7 +155,7 @@ pub mod cpu {
     pub fn poseidon_hal_eval(
     ) -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitProveImpl>> {
         let hal = Rc::new(BabyBearPoseidonCpuHal::new());
-        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT_PROVE));
+        let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
 }
@@ -241,7 +241,7 @@ where
             journal: session.journal.clone(),
         };
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT_CORE);
+        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
         receipt.verify_with_hal(&hal, image_id)?;
         Ok(receipt)
     }
@@ -258,8 +258,7 @@ where
         let io = segment.prepare_globals();
         let machine = MachineContext::new(segment);
         let mut executor = Executor::new(
-            &CIRCUIT_CORE,
-            &CIRCUIT_PROVE,
+            &CIRCUIT,
             machine,
             segment.po2,
             segment.po2,
@@ -271,7 +270,7 @@ where
         executor.finalize();
 
         let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, crate::CIRCUIT_CORE.get_taps());
+        let mut prover = risc0_zkp::prove::Prover::new(hal, crate::CIRCUIT.get_taps());
 
         adapter.execute(prover.iop());
 
@@ -303,7 +302,7 @@ where
             seal,
             index: segment.index,
         };
-        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT_CORE);
+        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
         receipt.verify_with_hal(&hal)?;
 
         Ok(receipt)

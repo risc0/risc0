@@ -95,7 +95,7 @@ use crate::{
         self,
         rust_crypto::{Digest as _, Sha256},
     },
-    ControlId, CIRCUIT_CORE,
+    ControlId, CIRCUIT,
 };
 
 /// Indicates how a Segment or Session's execution has terminated
@@ -202,7 +202,7 @@ impl SessionReceipt {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
         let hal =
             risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
-                &crate::CIRCUIT_CORE,
+                &crate::CIRCUIT,
             );
         self.verify_with_hal(&hal, image_id)
     }
@@ -295,7 +295,7 @@ impl SegmentReceipt {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
         let hal =
             risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
-                &crate::CIRCUIT_CORE,
+                &crate::CIRCUIT,
             );
         self.verify_with_hal(&hal)
     }
@@ -322,7 +322,7 @@ impl SegmentReceipt {
             }
             Err(VerificationError::ControlVerificationError)
         };
-        risc0_zkp::verify::verify(hal, &CIRCUIT_CORE, &self.seal, check_code)
+        risc0_zkp::verify::verify(hal, &CIRCUIT, &self.seal, check_code)
     }
 
     /// Extracts the seal from the receipt, as a series of bytes.
