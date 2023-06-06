@@ -1,0 +1,24 @@
+[package]
+name = "prorata-core"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rust_decimal = { version = "1.29", features = ["serde-str"] }
+rust_decimal_macros = "1.29"
+serde = { version = "1.0", features = ["derive"] }
+csv = "1.1"
+sha2 = "0.10.6"
+
+# Host-only dependencies
+hex = { version = "0.4.3", optional = true }
+
+[dev-dependencies]
+bincode = "1.3.1"
+
+[features]
+default = ["host"]
+host = ["dep:hex"]
+guest = []
