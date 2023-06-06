@@ -131,4 +131,3 @@ jobs:
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
-# dummy commit
