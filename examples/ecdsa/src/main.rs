@@ -32,8 +32,7 @@ fn prove_ecdsa_verification(
         .add_input(&to_vec(&(verifying_key.to_encoded_point(true), message, signature)).unwrap())
         .build();
 
-    let mut exec = Executor::from_elf(env, ECDSA_VERIFY_ELF).unwrap();
-    exec.run().unwrap();
+    let exec = Executor::from_elf(env, ECDSA_VERIFY_ELF).unwrap();
     let session = exec.run().unwrap();
     session.prove().unwrap()
 }

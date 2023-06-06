@@ -192,13 +192,13 @@ impl<'a> Executor<'a> {
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// let session = exec.run().unwrap();
     /// ```
-    pub fn run(&mut self) -> Result<Session> {
+    pub fn run(self) -> Result<Session> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
+    pub fn run_with_callback<F>(mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
