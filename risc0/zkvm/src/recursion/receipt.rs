@@ -60,7 +60,8 @@ fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
 
 /// SystemState describes the system's memory during program execution
 ///
-/// An instance of this struct provides a program counter and an image ID that represents all values in memory at that moment.
+/// An instance of this struct provides a program counter and an image ID that
+/// represents all values in memory at that moment.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SystemState {
     /// the program counter
@@ -71,7 +72,8 @@ pub struct SystemState {
 
 /// The receipt metadata describes the system information about each receipt.
 ///
-/// This information is used to verify the integrity of the receipt as well as joining two receipts together using recursion.
+/// This information is used to verify the integrity of the receipt as well as
+/// joining two receipts together using recursion.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ReceiptMeta {
     /// hash of the input to this segment before execution
@@ -227,7 +229,8 @@ impl SegmentRecursionReceipt {
     }
 }
 
-/// A SessionRollupReceipt represents computational integrity for an entire [Session].
+/// A SessionRollupReceipt represents computational integrity for an entire
+/// [Session].
 ///
 /// This represents the receipt for an entire session where each segment proof
 /// has been rolled up using recursion.
