@@ -135,8 +135,7 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn sha256_hal_eval(
-    ) -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitImpl>> {
+    pub fn sha256_hal_eval() -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitImpl>> {
         let hal = Rc::new(BabyBearSha256CpuHal::new());
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
@@ -150,8 +149,8 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn poseidon_hal_eval(
-    ) -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitImpl>> {
+    pub fn poseidon_hal_eval() -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitImpl>>
+    {
         let hal = Rc::new(BabyBearPoseidonCpuHal::new());
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }

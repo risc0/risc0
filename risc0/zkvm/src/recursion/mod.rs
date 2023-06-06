@@ -27,7 +27,7 @@ pub mod taps;
 /// todo
 pub mod receipt;
 
-/// this is a fake struct to make the code work with generated info
+/// todo
 pub struct CircuitImpl;
 
 impl CircuitImpl {
