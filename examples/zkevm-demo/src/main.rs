@@ -17,17 +17,17 @@ use std::{str::FromStr, sync::Arc};
 use clap::Parser;
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
-use zkevm_core::{
-    ether_trace::{Http, Provider},
-    Env, EvmResult, EVM,
-};
-use zkevm_methods::EVM_ELF;
 use log::info;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv, FileSegmentRef,
 };
 use tempfile::tempdir;
+use zkevm_core::{
+    ether_trace::{Http, Provider},
+    Env, EvmResult, EVM,
+};
+use zkevm_methods::EVM_ELF;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
