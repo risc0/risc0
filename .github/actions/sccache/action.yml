@@ -5,7 +5,7 @@ runs:
   steps:
     - if: runner.os == 'Linux' && runner.arch == 'X64'
       run: |
-          echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
+        echo "SCCACHE_ARCH=x86_64-unknown-linux-musl" >> $GITHUB_ENV
       shell: bash
 
     - if: runner.os == 'macOS' && runner.arch == 'X64'
