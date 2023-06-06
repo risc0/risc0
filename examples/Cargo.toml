@@ -4,8 +4,6 @@ members = [
     "chess/core",
     "digital-signature",
     "digital-signature/core",
-    "evm",
-    "evm/core",
     "factors",
     "json",
     "json/core",
@@ -18,6 +16,8 @@ members = [
     "wasm",
     "wordle",
     "wordle/core",
+    "zkevm-demo",
+    "zkevm-demo/core",
 ]
 
 # Always optimize; otherwise tests take excessively long.
