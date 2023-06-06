@@ -29,12 +29,11 @@ pub mod poly_ext;
 mod taps;
 
 use risc0_zkp::{
-    adapter::{CircuitCoreDef, CircuitInfo, MixState, PolyExt, TapsProvider},
-    field::baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+    adapter::{CircuitCoreDef, TapsProvider},
+    field::baby_bear::BabyBear,
     taps::TapSet,
 };
 
-use crate::poly_ext::DEF;
 pub struct CircuitImpl;
 
 pub const REGISTER_GROUP_ACCUM: usize = 0;
@@ -58,40 +57,6 @@ impl TapsProvider for CircuitImpl {
 
 impl CircuitCoreDef<BabyBear> for CircuitImpl {}
 
-pub struct CircuitProveImpl;
-
-impl CircuitProveImpl {
-    pub const fn new() -> Self {
-        CircuitProveImpl
-    }
-}
-
-impl CircuitInfo for CircuitProveImpl {
-    #[rustfmt::skip]
-    const OUTPUT_SIZE: usize = CircuitImpl::OUTPUT_SIZE;
-
-    #[rustfmt::skip]
-    const MIX_SIZE: usize = 40;
-}
-
-impl TapsProvider for CircuitProveImpl {
-    fn get_taps(&self) -> &'static TapSet<'static> {
-        taps::TAPSET
-    }
-}
-impl PolyExt<BabyBear> for CircuitProveImpl {
-    fn poly_ext(
-        &self,
-        mix: &BabyBearExtElem,
-        u: &[BabyBearExtElem],
-        args: &[&[BabyBearElem]],
-    ) -> MixState<BabyBearExtElem> {
-        DEF.step::<BabyBear>(mix, u, args)
-    }
-}
-
-impl<'a> CircuitCoreDef<BabyBear> for CircuitProveImpl {}
-
 #[cfg(test)]
 mod tests {
     use risc0_core::field::baby_bear::BabyBearElem;
@@ -100,7 +65,7 @@ mod tests {
         hal::cpu::CpuBuffer,
     };
 
-    use crate::CircuitProveImpl;
+    use crate::CircuitImpl;
 
     struct CustomStepMock {}
 
@@ -128,14 +93,14 @@ mod tests {
 
     #[test]
     fn step_exec() {
-        let circuit_prover = CircuitProveImpl::new();
+        let circuit = CircuitImpl::new();
         let mut custom = CustomStepMock {};
         let ctx = CircuitStepContext { size: 0, cycle: 0 };
         let args0 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
         let args1 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
         let args2 = CpuBuffer::from_fn(20, |_| BabyBearElem::default());
         let args = [&args0, &args1, &args2].map(CpuBuffer::as_slice_sync);
-        circuit_prover
+        circuit
             .step_exec(&ctx, &mut custom, args.as_slice())
             .unwrap();
     }

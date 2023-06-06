@@ -27,9 +27,9 @@ use risc0_zkp::{
     hal::cpu::SyncSlice,
 };
 
-use crate::CircuitProveImpl;
+use crate::CircuitImpl;
 
-impl CircuitStep<BabyBearElem> for CircuitProveImpl {
+impl CircuitStep<BabyBearElem> for CircuitImpl {
     fn step_compute_accum<S: CircuitStepHandler<BabyBearElem>>(
         &self,
         ctx: &CircuitStepContext,
@@ -121,7 +121,7 @@ impl CircuitStep<BabyBearElem> for CircuitProveImpl {
     }
 }
 
-impl PolyFp<BabyBear> for CircuitProveImpl {
+impl PolyFp<BabyBear> for CircuitImpl {
     fn poly_fp(
         &self,
         cycle: usize,
@@ -136,7 +136,7 @@ impl PolyFp<BabyBear> for CircuitProveImpl {
     }
 }
 
-impl<'a> CircuitProveDef<BabyBear> for CircuitProveImpl {}
+impl<'a> CircuitProveDef<BabyBear> for CircuitImpl {}
 
 pub(crate) fn call_step<S, F>(
     ctx: &CircuitStepContext,

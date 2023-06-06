@@ -61,8 +61,7 @@ pub use self::{
 };
 use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 
-const CIRCUIT: risc0_circuit_rv32im::CircuitProveImpl =
-    risc0_circuit_rv32im::CircuitProveImpl::new();
+const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
 /// Associate a specific CONTROL_ID with a HashFn.
 pub trait ControlId {

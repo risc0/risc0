@@ -108,7 +108,7 @@ mod tests {
     fn eval_check() {
         // The number of cycles, choose a number that doesn't make tests take too long.
         const PO2: usize = 4;
-        let circuit = crate::CircuitProveImpl::new();
+        let circuit = crate::CircuitImpl::new();
         let cpu_hal = BabyBearSha256CpuHal::new();
         let cpu_eval = CpuEvalCheck::new(&circuit);
         let gpu_hal = Rc::new(MetalHalSha256::new());

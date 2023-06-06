@@ -121,7 +121,7 @@ pub mod metal {
 pub mod cpu {
     use std::rc::Rc;
 
-    use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitProveImpl};
+    use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitImpl};
     use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
 
     use super::HalEval;
@@ -136,7 +136,7 @@ pub mod cpu {
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
     pub fn sha256_hal_eval(
-    ) -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitProveImpl>> {
+    ) -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitImpl>> {
         let hal = Rc::new(BabyBearSha256CpuHal::new());
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
@@ -151,7 +151,7 @@ pub mod cpu {
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
     pub fn poseidon_hal_eval(
-    ) -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitProveImpl>> {
+    ) -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitImpl>> {
         let hal = Rc::new(BabyBearPoseidonCpuHal::new());
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
@@ -262,7 +262,7 @@ where
         executor.finalize();
 
         let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, crate::CIRCUIT.get_taps());
+        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
 
         adapter.execute(prover.iop());
 
