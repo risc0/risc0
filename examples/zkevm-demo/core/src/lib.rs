@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use hashbrown::HashMap;
 pub use primitive_types::{H256, U256};
 // Re-export revm members for external usage.
 pub use revm::{
