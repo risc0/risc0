@@ -20,7 +20,7 @@ digest = "0.10"
 ff = { version = "0.13", features = ["derive", "bits"], optional = true }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 lazy_static = { version = "1.4", optional = true }
-metal = { version = "0.24", optional = true }
+metal = { version = "0.25", optional = true }
 paste = "1.0"
 rand_core = "0.6"
 risc0-core = { workspace = true }
