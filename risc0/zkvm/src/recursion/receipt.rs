@@ -153,7 +153,7 @@ impl ReceiptMeta {
             output: read_sha_halfs(flat),
         }
     }
-    /// encode a [ReceptMeta] to a list of [u32]'s
+    /// encode a [ReceiptMeta] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) {
         write_sha_halfs(flat, &self.input);
         self.pre.encode(flat);
@@ -177,7 +177,7 @@ impl ReceiptMeta {
     }
 }
 
-/// This struct represents a receipt for one or more [SegmentReceipt]s joined
+/// This struct represents a receipt for one or more [crate::SegmentReceipt]s joined
 /// through recursion.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SegmentRecursionReceipt {
@@ -230,7 +230,7 @@ impl SegmentRecursionReceipt {
 }
 
 /// A SessionRollupReceipt represents computational integrity for an entire
-/// [Session].
+/// [crate::Session].
 ///
 /// This represents the receipt for an entire session where each segment proof
 /// has been rolled up using recursion.
