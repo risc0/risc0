@@ -177,8 +177,8 @@ impl ReceiptMeta {
     }
 }
 
-/// This struct represents a receipt for one or more [crate::SegmentReceipt]s joined
-/// through recursion.
+/// This struct represents a receipt for one or more [crate::SegmentReceipt]s
+/// joined through recursion.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SegmentRecursionReceipt {
     /// the cryptographic seal of this receipt
