@@ -18,6 +18,6 @@ use risc0_zkvm::{Executor, ExecutorEnv};
 fn main() {
     let env = ExecutorEnv::builder().build();
 
-    let mut exec = Executor::from_elf(env, BENCHMARK_ELF).unwrap();
+    let exec = Executor::from_elf(env, BENCHMARK_ELF).unwrap();
     std::hint::black_box(exec.run().unwrap());
 }
