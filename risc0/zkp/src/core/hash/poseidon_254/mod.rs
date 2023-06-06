@@ -199,7 +199,7 @@ impl Rng<BabyBear> for Poseidon254Rng {
         let div2 = Fr::from(2).invert().unwrap();
         let mul2 = BabyBearElem::from(2 as u32);
         let mut mul = BabyBearElem::ONE;
-        for _ in 0..254 {
+        for _ in 0..160 {
             let low_bit = source.is_odd().unwrap_u8();
             source -= Fr::from(low_bit as u64);
             source *= div2;
@@ -219,4 +219,36 @@ pub struct Poseidon254HashSuite {}
 impl HashSuite<BabyBear> for Poseidon254HashSuite {
     type HashFn = Poseidon254HashFn;
     type Rng = Poseidon254Rng;
+}
+
+#[cfg(test)]
+mod tests {
+    use test_log::test;
+
+    use super::*;
+
+    #[test]
+    fn p254_test_vectors() {
+        let mut input = Vec::<BabyBearElem>::new();
+        let mut output = Vec::<BabyBearElem>::new();
+        for i in 1..6 {
+            input.push(BabyBearElem::from(i as u32));
+        }
+        let mut iop = Poseidon254Rng::new();
+        let digest1 = *Poseidon254HashFn::hash_elem_slice(&input);
+        let digest2 = *Poseidon254HashFn::hash_pair(&digest1, &digest1);
+        let digest3 = *Poseidon254HashFn::hash_pair(&digest1, &digest2);
+        iop.mix(&digest3);
+        output.push(BabyBearElem::from(iop.random_bits(7)));
+        output.push(BabyBearElem::from(iop.random_elem()));
+        for _ in 0..23 {
+            input.push(iop.random_elem());
+        }
+        iop.mix(&*Poseidon254HashFn::hash_elem_slice(&input));
+        output.push(BabyBearElem::from(iop.random_elem()));
+        log::info!("Output = {:?}", &output);
+        assert!(output[0].as_u32() == 5);
+        assert!(output[1].as_u32() == 328085114);
+        assert!(output[2].as_u32() == 726238606);
+    }
 }
