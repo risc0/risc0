@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{hint::black_box, ops::Add};
+use core::{hint::black_box, ops::Add};
 
 use hex_literal::hex;
 use k256::{
@@ -24,25 +24,17 @@ use k256::{
 };
 use risc0_zkvm::guest::env;
 
-fn bench(name: &str, func: impl Fn()) {
+fn bench<T>(name: &str, func: impl Fn() -> T) {
     // Run the inner function twice, only logging the cycles in the second run, in
-    // order to ensure the code and memory has been paged-in.
-    bench_inner(name, &func, true);
-    bench_inner(name, &func, false);
-}
+    // order to exclude paged-in operations from the benchmark count.
+    black_box(func());
 
-#[inline(never)]
-fn bench_inner(name: &str, func: impl FnOnce(), silent: bool) {
-    black_box({
-        let start = env::get_cycle_count();
+    let start = env::get_cycle_count();
 
-        black_box(func());
+    black_box(func());
 
-        let end = env::get_cycle_count();
-        if !silent {
-            println!("{}: {} cycles", name, end - start)
-        };
-    })
+    let end = env::get_cycle_count();
+    println!("{}: {} cycles", name, end - start)
 }
 
 fn benchmark_field() {
@@ -60,24 +52,12 @@ fn benchmark_field() {
         .unwrap(),
     );
 
-    bench("add", || {
-        black_box(x.add(&y));
-    });
-    bench("mul", || {
-        black_box(x.mul(&y));
-    });
-    bench("mul_single", || {
-        black_box(x.mul_single(42));
-    });
-    bench("square", || {
-        black_box(x.square());
-    });
-    bench("negate", || {
-        black_box(x.negate(0));
-    });
-    bench("invert", || {
-        black_box(x.invert().unwrap());
-    });
+    bench("add", || x.add(&y));
+    bench("mul", || x.mul(&y));
+    bench("mul_single", || x.mul_single(42));
+    bench("square", || x.square());
+    bench("negate", || x.negate(0));
+    bench("invert", || x.invert().unwrap());
 }
 
 fn benchmark_scalar() {
@@ -90,24 +70,12 @@ fn benchmark_scalar() {
         "98973615F3B819529D885BBED9A69BC66A678D00289A8B1F3A0FF19801C10CDD"
     ))));
 
-    bench("add", || {
-        black_box(x.add(&y));
-    });
-    bench("mul", || {
-        black_box(x.mul(&y));
-    });
-    bench("square", || {
-        black_box(x.square());
-    });
-    bench("negate", || {
-        black_box(x.negate());
-    });
-    bench("invert", || {
-        black_box(x.invert().unwrap());
-    });
-    bench("invert_vartime", || {
-        black_box(x.invert_vartime().unwrap());
-    });
+    bench("add", || x.add(&y));
+    bench("mul", || x.mul(&y));
+    bench("square", || x.square());
+    bench("negate", || x.negate());
+    bench("invert", || x.invert().unwrap());
+    bench("invert_vartime", || x.invert_vartime().unwrap());
 }
 
 fn benchmark_group() {
@@ -121,15 +89,13 @@ fn benchmark_group() {
     ))));
 
     bench("lincomb", || {
-        black_box(
-            ProjectivePoint::lincomb(
-                &ProjectivePoint::GENERATOR,
-                &x,
-                &ProjectivePoint::GENERATOR,
-                &y,
-            )
-            .to_affine(),
-        );
+        ProjectivePoint::lincomb(
+            &ProjectivePoint::GENERATOR,
+            &x,
+            &ProjectivePoint::GENERATOR,
+            &y,
+        )
+        .to_affine()
     });
 }
 
