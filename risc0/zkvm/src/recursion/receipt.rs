@@ -28,21 +28,6 @@ use crate::{
     ControlId,
 };
 
-/// TODO
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct RecursionReceipt {
-    /// todo
-    pub control_id: Digest,
-    /// todo
-    pub allowed_code: Digest,
-    /// todo
-    pub output_digest: Digest,
-    /// todo
-    pub seal: Vec<u32>,
-    /// todo
-    pub output: Vec<u32>,
-}
-
 /// todo
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
@@ -57,8 +42,7 @@ pub fn valid_control_ids() -> Vec<Digest> {
     all_ids
 }
 
-/// todo
-pub fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
+fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     let tag_digest: Digest = *sha::Impl::hash_bytes(tag.as_bytes());
     let mut all = Vec::<u8>::new();
     all.extend_from_slice(tag_digest.as_bytes());
