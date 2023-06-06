@@ -6,8 +6,8 @@ edition = "2021"
 [workspace]
 
 [dependencies]
-evm-core = { path = "../../core", default-features = false }
 risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [ "std" ] }
+zkevm-core = { path = "../../core", default-features = false }
 
 [patch.crates-io]
 radium = { git = 'https://github.com/ferrilab/radium.git', rev = "723bed5" }

@@ -15,8 +15,8 @@
 #![no_main]
 #![allow(unused_imports)]
 
-use evm_core::{Env, EvmResult, ExecutionResult, ZkDb, EVM};
 use risc0_zkvm::guest::env;
+use zkevm_core::{Env, EvmResult, ExecutionResult, ZkDb, EVM};
 
 risc0_zkvm::guest::entry!(main);
 
