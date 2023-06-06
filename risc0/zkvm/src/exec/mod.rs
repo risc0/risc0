@@ -277,7 +277,7 @@ impl<'a> Executor<'a> {
     ///
     /// This can be directly used by debuggers.
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
-        if self.session_cycle() > self.env.get_session_limit().unwrap_or(usize::MAX) {
+        if self.session_cycle() > self.env.get_session_limit().unwrap_or(usize::MAX - 1) {
             return Ok(Some(ExitCode::SessionLimit));
         }
 
