@@ -15,6 +15,7 @@ Currently, this demo accepts an Ethereum transaction hash and replays the transa
 
 ```bash
 cargo build --release
+
 # or with CUDA acceleration for the prover
 cargo build --release -F cuda
 ```
@@ -23,13 +24,14 @@ cargo build --release -F cuda
 
 ```bash
 RUST_LOG=info cargo run --release -- -t 0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7 -r <RPC_URL_HERE>
+
 # With GPU:
 RUST_LOG=info cargo run --release -F cuda -- -t 0x671a3b40ecb7d51b209e68392df2d38c098aae03febd3a88be0f1fa77725bbd7 -r <RPC_URL_HERE>
 ```
 
 ## Testing
 
-The RPC URL used by tests is: https://cloudflare-eth.com/.
+The RPC URL used by tests is: https://rpc.flashbots.net/.
 
 ```bash
 cargo test
