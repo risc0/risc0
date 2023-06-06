@@ -518,7 +518,7 @@ fn run_session(
     let env = ExecutorEnv::builder()
         .add_input(&spec)
         .segment_limit_po2(segment_limit_po2)
-        .session_limit(session_cycles)
+        .session_limit(Some(session_cycles))
         .build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run()
