@@ -254,18 +254,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "evm-core"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "getrandom",
- "hashbrown 0.13.2",
- "primitive-types",
- "revm",
- "serde",
-]
-
-[[package]]
 name = "ff"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -469,8 +457,8 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 name = "methods-guest"
 version = "0.1.0"
 dependencies = [
- "evm-core",
  "risc0-zkvm",
+ "zkevm-core",
 ]
 
 [[package]]
@@ -1174,3 +1162,14 @@ name = "zeroize"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a0956f1ba7c7909bfb66c2e9e4124ab6f6482560f6628b5aaeba39207c9aad9"
+
+[[package]]
+name = "zkevm-core"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "getrandom",
+ "primitive-types",
+ "revm",
+ "serde",
+]
