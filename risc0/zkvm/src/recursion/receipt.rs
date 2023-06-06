@@ -28,7 +28,8 @@ use crate::{
     ControlId,
 };
 
-/// todo
+/// This function gets valid control ID's from the posidon and recursion
+/// circuits
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
     use risc0_zkp::core::hash::poseidon::PoseidonHashFn;
@@ -57,29 +58,31 @@ fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     *sha::Impl::hash_bytes(&all)
 }
 
-/// todo
+/// SystemState describes the system's memory during program execution
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SystemState {
-    /// todo
+    /// the program counter
     pub pc: u32,
-    /// todo
+    /// the image ID represents a snapshot of all memory regions
     pub image_id: Digest,
 }
 
-/// todo
+/// The receipt metadata that contains information about each receipt.
+/// This information is used to verify the integrity and is useful for
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ReceiptMeta {
-    /// todo
+    /// hash of the input to this segment before execution
     pub input: Digest,
-    /// todo
+    /// System State before the segment execution
     pub pre: SystemState,
-    /// todo
+    /// System State after the segment execution
     pub post: SystemState,
-    /// todo
+    /// The system's exit state at the end of this segment
     pub sys_exit: u8,
-    /// todo
+    /// The system's exit status derived from a sys_pause instruction at the end
+    /// of this segment
     pub user_exit: u8,
-    /// todo
+    /// hash of the output
     pub output: Digest,
 }
 
@@ -116,26 +119,25 @@ fn write_u32_bytes(flat: &mut Vec<u32>, word: u32) {
 }
 
 impl SystemState {
-    /// todo
-    pub fn decode(flat: &mut VecDeque<u32>) -> Self {
+    fn decode(flat: &mut VecDeque<u32>) -> Self {
         Self {
             pc: read_u32_bytes(flat),
             image_id: read_sha_halfs(flat),
         }
     }
-    /// todo
-    pub fn encode(&self, flat: &mut Vec<u32>) {
+
+    fn encode(&self, flat: &mut Vec<u32>) {
         write_u32_bytes(flat, self.pc);
         write_sha_halfs(flat, &self.image_id);
     }
-    /// todo
-    pub fn digest(&self) -> Digest {
+
+    fn digest(&self) -> Digest {
         tagged_struct("risc0.SystemState", &[self.image_id], &[self.pc])
     }
 }
 
 impl ReceiptMeta {
-    /// todo
+    /// decode a [ReceiptMeta] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Self {
         Self {
             input: read_sha_halfs(flat),
@@ -146,7 +148,7 @@ impl ReceiptMeta {
             output: read_sha_halfs(flat),
         }
     }
-    /// todo
+    /// encode a [ReceptMeta] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) {
         write_sha_halfs(flat, &self.input);
         self.pre.encode(flat);
@@ -155,8 +157,8 @@ impl ReceiptMeta {
         flat.push(self.user_exit as u32);
         write_sha_halfs(flat, &self.output);
     }
-    /// todo
-    pub fn digest(&self) -> Digest {
+
+    fn digest(&self) -> Digest {
         tagged_struct(
             "risc0.ReceiptMeta",
             &[
@@ -170,19 +172,21 @@ impl ReceiptMeta {
     }
 }
 
-/// todo
+/// This struct represents a receipt for one or more [SegmentReceipt]s combined
+/// through recursion.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SegmentRecursionReceipt {
-    /// todo
+    /// the cryptographic seal of this receipt
     pub seal: Vec<u32>,
-    /// todo
+    /// the control ID of this receipt
     pub control_id: Digest,
-    /// todo
+    /// the receipt metadata containing states of the system during the segment
+    /// executions
     pub meta: ReceiptMeta,
 }
 
 impl SegmentRecursionReceipt {
-    /// todo
+    /// verify the integrity of this receipt
     #[cfg(not(target_os = "zkvm"))]
     pub fn verify(&self) -> Result<(), VerificationError> {
         use risc0_core::field::baby_bear::BabyBearElem;
@@ -220,22 +224,24 @@ impl SegmentRecursionReceipt {
     }
 }
 
-/// todo
+/// This represents the receipt for an entire session where each segment proof
+/// has been rolled up using recursion.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SessionRollupReceipt {
-    /// todo
+    /// receipt that represents all sessions joined via recursion
     pub receipt: SegmentRecursionReceipt,
-    /// todo
+    /// the journal of the entire session
     pub journal: Vec<u8>,
 }
 
 impl SessionRollupReceipt {
-    /// todo
+    /// Create a new session receipt
     pub fn new(receipt: SegmentRecursionReceipt, journal: Vec<u8>) -> Self {
         Self { receipt, journal }
     }
 
-    /// todo
+    /// Verify the integrity of the receipt by using the segment receipt and the
+    /// journal
     #[cfg(not(target_os = "zkvm"))]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         self.receipt.verify()?;
