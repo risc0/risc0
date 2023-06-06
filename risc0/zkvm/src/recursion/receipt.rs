@@ -239,8 +239,10 @@ impl SegmentRecursionReceipt {
 /// todo
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SessionRollupReceipt {
-    receipt: SegmentRecursionReceipt,
-    journal: Vec<u8>,
+    /// todo
+    pub receipt: SegmentRecursionReceipt,
+    /// todo
+    pub journal: Vec<u8>,
 }
 
 impl SessionRollupReceipt {
