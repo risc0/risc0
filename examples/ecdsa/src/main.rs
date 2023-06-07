@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use ecdsa_methods::ECDSA_VERIFY_ELF;
+use ecdsa_methods::{ECDSA_VERIFY_ELF, ECDSA_VERIFY_ID};
 use k256::{
     ecdsa::{signature::Signer, Signature, SigningKey, VerifyingKey},
     EncodedPoint,
@@ -23,6 +23,10 @@ use risc0_zkvm::{
     Executor, ExecutorEnv, SessionReceipt,
 };
 
+/// Given an secp256k1 verifier key (i.e. public key), message and signature,
+/// runs the ECDSA verifier inside the zkVM and returns a receipt, including a
+/// journal and seal attesting to the fact that the prover knows a valid
+/// signature from the committed public key over the committed message.
 fn prove_ecdsa_verification(
     verifying_key: &VerifyingKey,
     message: &[u8],
@@ -38,17 +42,16 @@ fn prove_ecdsa_verification(
 }
 
 fn main() {
-    // Signing
+    // Generate a random secp256k1 keypair and sign the message.
     let signing_key = SigningKey::random(&mut OsRng); // Serialize with `::to_bytes()`
-    let message = b"ECDSA proves knowledge of a secret number in the context of a single message";
-
-    // Note: The signature type must be annotated or otherwise inferable as
-    // `Signer` has many impls of the `Signer` trait (for both regular and
-    // recoverable signature types).
+    let message = b"This is a message that will be signed, and verified within the zkVM";
     let signature: Signature = signing_key.sign(message);
 
+    // Run signature verified in the zkVM guest and get the resulting receipt.
     let receipt = prove_ecdsa_verification(signing_key.verifying_key(), message, &signature);
 
+    // Verify the receipt and then access the journal.
+    receipt.verify(ECDSA_VERIFY_ID).unwrap();
     let (receipt_verifying_key, receipt_message) =
         from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.journal)
             .unwrap()

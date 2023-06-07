@@ -24,6 +24,7 @@ use k256::{
 };
 use risc0_zkvm::guest::env;
 
+/// Basic function for benchamrking an operation.
 fn bench<T>(name: &str, func: impl Fn() -> T) {
     // Run the inner function twice, only logging the cycles in the second run, in
     // order to exclude paged-in operations from the benchmark count.
@@ -37,6 +38,7 @@ fn bench<T>(name: &str, func: impl Fn() -> T) {
     println!("{}: {} cycles", name, end - start)
 }
 
+/// Benchmark key operations in the secp256k1 base field.
 fn benchmark_field() {
     println!("Field operations:");
     let x = black_box(
@@ -60,6 +62,7 @@ fn benchmark_field() {
     bench("invert", || x.invert().unwrap());
 }
 
+/// Benchmark operations in the secp256k1 scalar field.
 fn benchmark_scalar() {
     println!("");
     println!("Scalar operations:");
@@ -78,6 +81,7 @@ fn benchmark_scalar() {
     bench("invert_vartime", || x.invert_vartime().unwrap());
 }
 
+/// Benchmark secp256k1 elliptic curve group opertaions.
 fn benchmark_group() {
     println!("");
     println!("Group operations:");
@@ -88,6 +92,7 @@ fn benchmark_group() {
         "2a3f714fcddea4984f228c4d1dbd41a79b470b1546c68f6bb268a04aa0394bac"
     ))));
 
+    // NOTE: Accounts for >95% of the total cycle count for ECDSA verification.
     bench("lincomb", || {
         ProjectivePoint::lincomb(
             &ProjectivePoint::GENERATOR,

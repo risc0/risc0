@@ -19,4 +19,6 @@ k256 = { git = "https://github.com/risc0/RustCrypto-elliptic-curves", branch = "
 crypto-bigint = { git = "https://github.com/risc0/RustCrypto-crypto-bigint", branch = "victor/use-risc0-accel" }
 
 [profile.release]
+# Emperically observed to result in the best performance for this binary (in particular, better than
+# "fat"). It's often a good idea to experiment with different optimization levels and options.
 lto = "thin"

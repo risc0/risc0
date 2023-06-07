@@ -24,10 +24,15 @@ fn main() {
         env::read();
     let verifying_key = VerifyingKey::from_encoded_point(&encoded_verifying_key).unwrap();
 
+    let start = env::get_cycle_count();
+
     // Verify the signature, panicking if verification fails.
     verifying_key
         .verify(&message, &signature)
         .expect("ECDSA signature verification failed");
+
+    let end = env::get_cycle_count();
+    println!("ECDSA verify: {} cycles", end - start);
 
     // Commit to the journal the verifying key and messge that was signed.
     env::commit(&(encoded_verifying_key, message));
