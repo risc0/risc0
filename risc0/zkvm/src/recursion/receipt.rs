@@ -14,7 +14,7 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use risc0_zkp::core::{digest::Digest, hash::sha::Sha256};
+use risc0_zkp::core::digest::Digest;
 #[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::{adapter::CircuitInfo, verify::VerificationError};
 use serde::{Deserialize, Serialize};
@@ -22,11 +22,12 @@ use serde::{Deserialize, Serialize};
 #[cfg(not(target_os = "zkvm"))]
 use crate::receipt::compute_image_id;
 #[cfg(not(target_os = "zkvm"))]
-use crate::recursion::CIRCUIT_CORE;
-use crate::{
-    sha::{self},
-    ControlId,
-};
+use crate::recursion::circuit_impl::CIRCUIT_CORE;
+use crate::ControlId;
+#[cfg(not(target_os = "zkvm"))]
+use crate::sha::{self};
+#[cfg(not(target_os = "zkvm"))]
+use risc0_zkp::core::hash::sha::Sha256;
 
 /// This function gets valid control ID's from the posidon and recursion
 /// circuits
@@ -43,6 +44,7 @@ pub fn valid_control_ids() -> Vec<Digest> {
     all_ids
 }
 
+#[cfg(not(target_os = "zkvm"))]
 fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     let tag_digest: Digest = *sha::Impl::hash_bytes(tag.as_bytes());
     let mut all = Vec::<u8>::new();
@@ -136,6 +138,7 @@ impl SystemState {
         write_sha_halfs(flat, &self.image_id);
     }
 
+    #[cfg(not(target_os = "zkvm"))]
     fn digest(&self) -> Digest {
         tagged_struct("risc0.SystemState", &[self.image_id], &[self.pc])
     }
@@ -163,6 +166,7 @@ impl ReceiptMeta {
         write_sha_halfs(flat, &self.output);
     }
 
+    #[cfg(not(target_os = "zkvm"))]
     fn digest(&self) -> Digest {
         tagged_struct(
             "risc0.ReceiptMeta",

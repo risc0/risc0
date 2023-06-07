@@ -16,16 +16,17 @@
 //!
 //! This module implements receipts that are generated from the recursion
 //! circuit as well as verification functions for each type of receipt.
+#[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::{
     adapter::{CircuitCoreDef, TapsProvider},
-    field::baby_bear::BabyBear,
-    taps::TapSet,
 };
 mod control_id;
 mod info;
 mod poly_ext;
 mod receipt;
 mod taps;
+#[cfg(not(target_os = "zkvm"))]
+mod circuit_impl;
 
 pub use poly_ext::DEF;
 pub use receipt::{valid_control_ids, ReceiptMeta, SegmentRecursionReceipt, SessionRollupReceipt};
@@ -35,19 +36,3 @@ pub use taps::TAPSET;
 /// circuit definition. The only reason this is private is to facilitate getting
 /// the values from the `info` module from the recursion prover.
 pub struct CircuitImpl;
-
-impl CircuitImpl {
-    const fn new() -> Self {
-        CircuitImpl
-    }
-}
-
-impl TapsProvider for CircuitImpl {
-    fn get_taps(&self) -> &'static TapSet<'static> {
-        taps::TAPSET
-    }
-}
-
-impl CircuitCoreDef<BabyBear> for CircuitImpl {}
-
-pub(crate) const CIRCUIT_CORE: CircuitImpl = CircuitImpl::new();
