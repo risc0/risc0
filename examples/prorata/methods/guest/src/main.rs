@@ -13,28 +13,19 @@
 // limitations under the License.
 
 #![no_main]
-#![allow(unused_imports)]
 
-use evm_core::{Env, EvmResult, ExecutionResult, ZkDb, EVM};
+use prorata_core::AllocationQuery;
 use risc0_zkvm::guest::env;
 
 risc0_zkvm::guest::entry!(main);
 
 pub fn main() {
-    let env: Env = env::read();
-    let db: ZkDb = env::read();
+    // Load the amount, recipients, and target user sent from the host:
+    let query: AllocationQuery = env::read();
 
-    let mut evm = EVM::new();
-    evm.database(db);
-    evm.env = env;
-    let res = evm.transact().unwrap();
-    if let ExecutionResult::Success { reason, .. } = res.result {
-        env::commit(&EvmResult {
-            exit_reason: reason,
-            state: res.state,
-        });
-    } else {
-        panic!("Unexpected result");
-    }
-    env::log("");
+    // Compute the allocation for the requested target recipient:
+    let result = query.compute_result();
+
+    // Commit the allocation and query to the journal for inclusion in the receipt:
+    env::commit(&result);
 }

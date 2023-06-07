@@ -17,17 +17,17 @@ use std::{str::FromStr, sync::Arc};
 use clap::Parser;
 use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
-use evm_core::{
-    ether_trace::{Http, Provider},
-    Env, EvmResult, EVM,
-};
-use evm_methods::EVM_ELF;
 use log::info;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv, FileSegmentRef,
 };
 use tempfile::tempdir;
+use zkevm_core::{
+    ether_trace::{Http, Provider},
+    Env, EvmResult, EVM,
+};
+use zkevm_methods::EVM_ELF;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -62,8 +62,8 @@ async fn main() {
 
     let mut env = Env::default();
     env.block.number = U256::from(block_numb).into();
-    env.tx = evm_core::ether_trace::txenv_from_tx(tx);
-    let trace_db = evm_core::ether_trace::TraceTx::new(client, Some(block_numb)).unwrap();
+    env.tx = zkevm_core::ether_trace::txenv_from_tx(tx);
+    let trace_db = zkevm_core::ether_trace::TraceTx::new(client, Some(block_numb)).unwrap();
 
     let mut evm = EVM::new();
     evm.database(trace_db);

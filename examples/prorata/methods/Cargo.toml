@@ -1,5 +1,5 @@
 [package]
-name = "evm-methods"
+name = "methods"
 version = "0.1.0"
 edition = "2021"
 

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub use hashbrown::HashMap;
 pub use primitive_types::{H256, U256};
 // Re-export revm members for external usage.
 pub use revm::{
@@ -270,8 +269,8 @@ mod tests {
         let client = Arc::new(client);
 
         let tx = client.get_transaction(tx_hash).await.unwrap().unwrap();
-        let block_numb = tx.block_number.unwrap();
-        assert_eq!(block_numb, ethers_core::types::U64::from(16424130));
+        let block_numb = tx.block_number.unwrap() - 1;
+        assert_eq!(block_numb, ethers_core::types::U64::from(16424130 - 1));
 
         let mut env = Env::default();
         env.block.number = U256::from(block_numb.as_u64()).into();
