@@ -16,6 +16,8 @@ use alloc::{collections::VecDeque, vec::Vec};
 
 use risc0_zkp::core::digest::Digest;
 #[cfg(not(target_os = "zkvm"))]
+use risc0_zkp::core::hash::sha::Sha256;
+#[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::{adapter::CircuitInfo, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
@@ -23,11 +25,9 @@ use serde::{Deserialize, Serialize};
 use crate::receipt::compute_image_id;
 #[cfg(not(target_os = "zkvm"))]
 use crate::recursion::circuit_impl::CIRCUIT_CORE;
-use crate::ControlId;
 #[cfg(not(target_os = "zkvm"))]
 use crate::sha::{self};
-#[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::core::hash::sha::Sha256;
+use crate::ControlId;
 
 /// This function gets valid control ID's from the posidon and recursion
 /// circuits

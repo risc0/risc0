@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::recursion::TAPSET;
-use risc0_zkp::taps::TapSet;
-use crate::recursion::TapsProvider;
-use crate::recursion::CircuitCoreDef;
-use risc0_zkp::field::baby_bear::BabyBear;
-use crate::recursion::CircuitImpl;
+use risc0_zkp::{field::baby_bear::BabyBear, taps::TapSet};
+
+use crate::recursion::{CircuitCoreDef, CircuitImpl, TapsProvider, TAPSET};
 
 impl CircuitImpl {
     const fn new() -> Self {

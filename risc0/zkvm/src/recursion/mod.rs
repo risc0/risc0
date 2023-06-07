@@ -17,16 +17,14 @@
 //! This module implements receipts that are generated from the recursion
 //! circuit as well as verification functions for each type of receipt.
 #[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::{
-    adapter::{CircuitCoreDef, TapsProvider},
-};
+use risc0_zkp::adapter::{CircuitCoreDef, TapsProvider};
+#[cfg(not(target_os = "zkvm"))]
+mod circuit_impl;
 mod control_id;
 mod info;
 mod poly_ext;
 mod receipt;
 mod taps;
-#[cfg(not(target_os = "zkvm"))]
-mod circuit_impl;
 
 pub use poly_ext::DEF;
 pub use receipt::{valid_control_ids, ReceiptMeta, SegmentRecursionReceipt, SessionRollupReceipt};
