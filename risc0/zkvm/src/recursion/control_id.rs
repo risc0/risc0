@@ -1,0 +1,43 @@
+// Copyright 2023 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+pub const RECURSION_CONTROL_IDS: [&'static str; 27] = [
+    "bf863a557b076e050f2bbb07f2fdbf433592595e5bd6783f33264e45f8fb2f5e",
+    "e803571b60a58d0b2bc03c0b77843672f85d5e0029e650102ecdd86c882e0f07",
+    "6cc844708f26060c859bf8369d62042bc40a4a39a1d45556b046ac710c113a44",
+    "201a022b0c00f269a2642954d9bc50600fccd261d9a5f14ad6e512386edc6a40",
+    "60465e0b678fa2231e6f4f74ea6786497eae7019ff746158c57d563ae9e5e015",
+    "ba9aa10592a94a582e081d4180a83b70ad83e552c055081e4704f95f3132903b",
+    "5e2afd43e98ce42ae1e45b21b7816362ea07c14b451e586ebc3abc61d7927963",
+    "163238734416f738562cc56eaf341643ac95815a5aa00771fa0ee109e5c8521f",
+    "0090fe6d3e5c57563bab8a6417396834c281341de3ad14267e62a275eb63742a",
+    "a3372a0f17ec1f325398ac292c04491f5c23502ac6a58e3d2340730d83847023",
+    "69b7401da9f7cb60245bf06a869c1651af26844a89e6b353fd21ce2f2f831339",
+    "f3de611d2dcf6513c80f1917b02234500422166318c6635b0c4e260053d73467",
+    "b559182374741a2d2d684d41f12ab534b0496222aef9f160850687474d066a3d",
+    "b5061e48ce0cb04823f9f63810838460d71aad3cda52df77fa8f7402ccb0e132",
+    "85bdb1317ba858651b30114bb9941f0af456fb2a28ab1f5a338dfa4d37e47e69",
+    "542ed0378fad6368e764ef3b8b8da543a876d46b2b8a8f5c739a69437552bd40",
+    "fb8fd507b2717d6f73843d16053b90087ededb3a4e851a771b8857589af43369",
+    "557a443f21ff0d15174c2849a9a4f618815d561414d7e9490f14b7208086cb6a",
+    "d441e538b20dd60a7d81de2e4a731f6493bc7b4c029093336f0b4117dc6f574a",
+    "88ac0d189774a6439abce033047f620c62379d66d52e18425c4e2705b2b5c613",
+    "84a0a81fc34d6d631d91aa4d80aa38525d733c56cba506175f9b94540627ef00",
+    "b8445500b4838e3bdca70d3906c1cc711ce03c325094152743e4da5cedaaaa05",
+    "b4ef2c6628e8c81f900b311a4f1bde46918f062f18a01064bdb274229175c46b",
+    "b536a45fae0e2370e71aeb567f55452a791c63636bb4195c6b456003554c386d",
+    "951b9b4dc2f8e564a74991239b4f4a66c52e22583017861d49d8cb611c56aa5a",
+    "93ddfd13ad326c73317033379bda035dd1e97a056aaed01c5beca909d764d213",
+    "c495e5215c2b2655906b25535fa78c105feef057aaae700cd417ad47c5acfb59",
+];

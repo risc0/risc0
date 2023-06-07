@@ -19,7 +19,7 @@ use rayon::prelude::*;
 use risc0_core::field::{Elem, Field};
 
 use crate::{
-    adapter::{CircuitDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
+    adapter::{CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
     core::hash::Rng,
     hal::cpu::CpuBuffer,
     prove::{
@@ -34,7 +34,7 @@ use crate::{
 pub struct ProveAdapter<'a, F, C, S>
 where
     F: Field,
-    C: 'static + CircuitDef<F>,
+    C: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
 {
     exec: &'a mut Executor<F, C, S>,
@@ -46,7 +46,7 @@ where
 impl<'a, F, C, CS> ProveAdapter<'a, F, C, CS>
 where
     F: Field,
-    C: CircuitDef<F>,
+    C: 'static + CircuitProveDef<F>,
     CS: CircuitStepHandler<F::Elem>,
 {
     pub fn new(exec: &'a mut Executor<F, C, CS>) -> Self {

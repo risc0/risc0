@@ -143,9 +143,13 @@ impl KernelBuild {
             "fatbin",
             CUDA_INCS,
             |_out_dir, out_path, sys_inc_dir| {
+                println!("cargo:rerun-if-env-changed=RISC0_CUDA_OPT");
+                println!("cargo:rerun-if-env-changed=NVCC_PREPEND_FLAGS");
+                println!("cargo:rerun-if-env-changed=NVCC_APPEND_FLAGS");
+
                 let mut cmd = Command::new("nvcc");
                 cmd.arg("--fatbin");
-                cmd.arg("-o").arg(&out_path);
+                cmd.arg("-o").arg(out_path);
                 cmd.args(self.files.iter());
                 cmd.arg("-I").arg(sys_inc_dir);
 
