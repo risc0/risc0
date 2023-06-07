@@ -20,6 +20,12 @@ let client = Client::from_env()?;
 // Upload the ELF file of the guest to the prover
 let elf_path = Path::new(METHOD_NAME_PATH);
 let img_id = client.upload_img_file(elf_path)?;
+// Optionally you can upload a MemoryImage as well, but bincode encoded:
+// let program = Program::load_elf(METHOD_NAME_ELF, MEM_SIZE as u32)?;
+// let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
+// let image = bincode::serialize(&image).context("Failed to serialize memoryimg")?;
+// client.upload_img(image)?
+
 // Upload the serialized input
 let input_id = client.upload_input(input_data)?;
 // Start the prover session by referencing the img_id and input_id

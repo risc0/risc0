@@ -12,12 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
-
 use std::{fs::File, path::Path};
 
-/// Bonsai SDK for interacting with the REST api
 use anyhow::{bail, Context, Result};
 use reqwest::{blocking::Client as BlockingClient, header};
 
@@ -179,6 +175,10 @@ impl Client {
     // - /images
 
     /// Upload a image buffer to the /images/ route
+    ///
+    /// The image data can be either:
+    /// * ELF file bytes
+    /// * bincode encoded MemoryImage
     pub fn upload_img(&self, buf: Vec<u8>) -> Result<String> {
         let upload_data = self.get_upload_url("images")?;
         self.put_data(&upload_data.url, buf)?;
@@ -186,6 +186,10 @@ impl Client {
     }
 
     /// Upload a image file to the /images/ route
+    ///
+    /// The image data can be either:
+    /// * ELF file bytes
+    /// * bincode encoded MemoryImage
     pub fn upload_img_file(&self, path: &Path) -> Result<String> {
         let upload_data = self.get_upload_url("images")?;
 
