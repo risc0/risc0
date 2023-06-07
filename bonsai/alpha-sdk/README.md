@@ -8,9 +8,12 @@ A library to handle HTTP REST requests to the Bonsai-alpha prover interface
 use std::time::Duration;
 use bonsai_alpha_sdk::Client;
 use anyhow::{Result, Context};
+use risc0_zkvm::serde::to_vec;
 
 // serialize a given input for the guest
-let input_data = bincode::serialize(&input_data)?;
+let input_data = to_vec(&input_data).unwrap();
+let input_data = bytemuck::cast_slice(&input_data).to_vec();
+
 // Construct the bonsai_sdk client from the BONSAI_ENDPOINT env var
 let client = Client::from_env()?;
 
