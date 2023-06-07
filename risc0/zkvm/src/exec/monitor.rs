@@ -16,7 +16,7 @@ use std::{array, collections::BTreeSet};
 
 use anyhow::Result;
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
-use risc0_zkvm_platform::{memory::SYSTEM, PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::{memory::SYSTEM, syscall::reg_abi::REG_MAX, PAGE_SIZE, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
 use super::{io::SyscallContext, OpCodeResult, SyscallRecord, TraceEvent};
@@ -93,11 +93,15 @@ impl MemoryMonitor {
     }
 
     pub fn load_registers<const N: usize>(&mut self, idxs: [usize; N]) -> [u32; N] {
+        let mut bytes = [0_u8; WORD_SIZE * REG_MAX];
+        self.image
+            .load_region_in_page(SYSTEM.start() as u32, &mut bytes);
         idxs.map(|idx| {
-            let addr = get_register_addr(idx);
-            let mut b = [0_u8; WORD_SIZE];
-            self.image.load_region_in_page(addr, &mut b);
-            u32::from_le_bytes(b)
+            u32::from_le_bytes(
+                bytes[idx * WORD_SIZE..(idx + 1) * WORD_SIZE]
+                    .try_into()
+                    .unwrap(),
+            )
         })
     }
 
