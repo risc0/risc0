@@ -28,7 +28,11 @@ pub mod metal;
 pub mod poly_ext;
 mod taps;
 
-use risc0_zkp::{adapter::TapsProvider, taps::TapSet};
+use risc0_zkp::{
+    adapter::{CircuitCoreDef, TapsProvider},
+    field::baby_bear::BabyBear,
+    taps::TapSet,
+};
 
 pub struct CircuitImpl;
 
@@ -50,6 +54,8 @@ impl TapsProvider for CircuitImpl {
         taps::TAPSET
     }
 }
+
+impl CircuitCoreDef<BabyBear> for CircuitImpl {}
 
 #[cfg(test)]
 mod tests {
