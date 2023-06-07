@@ -22,7 +22,7 @@ use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{
-        CircuitDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_CODE,
+        CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_CODE,
         REGISTER_GROUP_DATA,
     },
     hal::{
@@ -35,7 +35,7 @@ use crate::{
 pub struct Executor<F, C, S>
 where
     F: Field,
-    C: 'static + CircuitDef<F>,
+    C: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
 {
     pub circuit: &'static C,
@@ -66,7 +66,7 @@ where
 impl<F, C, S> Executor<F, C, S>
 where
     F: Field,
-    C: 'static + CircuitDef<F>,
+    C: 'static + CircuitProveDef<F>,
     S: CircuitStepHandler<F::Elem>,
 {
     pub fn new(
