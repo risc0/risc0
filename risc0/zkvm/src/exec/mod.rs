@@ -74,12 +74,12 @@ pub struct Executor<'a> {
     monitor: MemoryMonitor,
     pc: u32,
     init_cycles: usize,
-    fini_cycles: usize,
     body_cycles: usize,
     segment_cycle: usize,
     segments: Vec<Box<dyn SegmentRef>>,
     insn_counter: u32,
     split_insn: Option<u32>,
+    const_cycles: usize,
     exit_code: Option<ExitCode>,
 }
 
@@ -143,6 +143,7 @@ impl<'a> Executor<'a> {
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
+        let const_cycles = init_cycles + fini_cycles + SHA_CYCLES + ZK_CYCLES;
 
         Self {
             env,
@@ -150,12 +151,12 @@ impl<'a> Executor<'a> {
             monitor,
             pc,
             init_cycles,
-            fini_cycles,
             body_cycles: 0,
             segment_cycle: init_cycles,
             segments: Vec::new(),
             insn_counter: 0,
             split_insn: None,
+            const_cycles,
             exit_code: None,
         }
     }
@@ -377,12 +378,7 @@ impl<'a> Executor<'a> {
     }
 
     fn total_cycles(&self) -> usize {
-        self.init_cycles
-            + self.monitor.total_fault_cycles()
-            + self.body_cycles
-            + self.fini_cycles
-            + SHA_CYCLES
-            + ZK_CYCLES
+        self.const_cycles + self.monitor.total_fault_cycles() + self.body_cycles
     }
 
     fn total_pending_cycles(&self, opcode: &OpCode, op_result: &OpCodeResult) -> usize {
@@ -392,14 +388,11 @@ impl<'a> Executor<'a> {
         // - each page fault requires 1 PageFault cycle + CYCLES_PER_PAGE cycles
         // - leave room for fini_cycles
         // - leave room for ZK cycles
-        self.init_cycles
+        self.const_cycles
             + self.monitor.total_pending_fault_cycles()
             + opcode.cycles
             + op_result.extra_cycles
             + self.body_cycles
-            + self.fini_cycles
-            + SHA_CYCLES
-            + ZK_CYCLES
     }
 
     fn session_cycle(&self) -> usize {
