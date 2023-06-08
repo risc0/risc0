@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, 'release-*' ]
   pull_request:
-    branches: [ main, 'release-*',daisy/test_x64 ]
+    branches: [ main, 'release-*']
 
   workflow_dispatch:
 
