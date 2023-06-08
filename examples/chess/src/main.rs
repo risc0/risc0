@@ -58,7 +58,8 @@ fn main() {
 fn chess(inputs: &Inputs) -> SessionReceipt {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(inputs).unwrap())
-        .build();
+        .build()
+        .unwrap();
 
     // Make the Executor.
     let mut exec = Executor::from_elf(env, CHECKMATE_ELF).unwrap();

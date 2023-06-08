@@ -116,7 +116,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let env = ExecutorEnv::builder()
         .add_input(&serde::to_vec(&input)?)
         .io_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback())
-        .build();
+        .build()
+        .unwrap();
 
     // Run prover and generate receipt
     println!(
