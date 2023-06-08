@@ -500,7 +500,7 @@ pub unsafe extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
     #[cfg(target_os = "zkvm")]
     {
         extern "C" {
-            // This symbol is defined yb the loader and marks the end
+            // This symbol is defined by the loader and marks the end
             // of all elf sections, so this is where we start our
             // heap.
             //
