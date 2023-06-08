@@ -22,19 +22,19 @@
 //! have been generated from the expected code, even when this code was run by
 //! an untrusted source.
 //!
-//! There are two types of receipt, a [SessionReceipt] proving the execution of
+//! There are two types of receipt, a [SessionFlatReceipt] proving the execution of
 //! a [crate::Session], and a [SegmentReceipt] proving the execution of a
 //! [crate::Segment].
 //!
 //! Because [crate::Session]s are user-determined, whereas
 //! [crate::Segment]s are automatically generated, typical use cases will handle
-//! [SessionReceipt]s directly and [SegmentReceipt]s only indirectly as part of
-//! the [SessionReceipt]s that contain them (for instance, a by calling
-//! [SessionReceipt::verify], which will itself call [SegmentReceipt::verify]
+//! [SessionFlatReceipt]s directly and [SegmentReceipt]s only indirectly as part of
+//! the [SessionFlatReceipt]s that contain them (for instance, a by calling
+//! [SessionFlatReceipt::verify], which will itself call [SegmentReceipt::verify]
 //! for each constinuent [SegmentReceipt]).
 //!
 //! # Usage
-//! To create a [SessionReceipt], use [crate::Session::prove]:
+//! To create a [SessionFlatReceipt], use [crate::Session::prove]:
 //! ```rust
 //! use risc0_zkvm::{Executor, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
@@ -48,13 +48,13 @@
 //! # }
 //! ```
 //!
-//! To confirm that a [SessionReceipt] was honestly generated, use
-//! [SessionReceipt::verify] and supply the ImageID of the code that should have
+//! To confirm that a [SessionFlatReceipt] was honestly generated, use
+//! [SessionFlatReceipt::verify] and supply the ImageID of the code that should have
 //! been executed as a parameter. (See
 //! [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
 //! information about how ImageIDs are generated.)
 //! ```rust
-//! use risc0_zkvm::SessionReceipt;
+//! use risc0_zkvm::SessionFlatReceipt;
 //!
 //! # use risc0_zkvm::{Executor, ExecutorEnv};
 //! # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
@@ -69,11 +69,11 @@
 //! # }
 //! ```
 //!
-//! The public outputs of the [SessionReceipt] are contained in the
-//! [SessionReceipt::journal]. We provide serialization tools in the zkVM
+//! The public outputs of the [SessionFlatReceipt] are contained in the
+//! [SessionFlatReceipt::journal]. We provide serialization tools in the zkVM
 //! [serde](crate::serde) module, which can be used to read data from the
 //! journal as the same type it was written to the journal. If you prefer, you
-//! can also directly access the [SessionReceipt::journal] as a `Vec<u8>`.
+//! can also directly access the [SessionFlatReceipt::journal] as a `Vec<u8>`.
 
 use alloc::vec::Vec;
 
@@ -149,24 +149,43 @@ pub struct ReceiptMetadata {
     pub output: Digest,
 }
 
+///  todo
+pub trait SessionReceipt {
+    /// Verifies the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
+    /// stitch together correctly, and that the initial memory image matches the
+    /// given `image_id` parameter.
+    #[cfg(not(target_os = "zkvm"))]
+    #[must_use]
+    fn verify(&self, image_id: Digest) -> Result<(), VerificationError>;
+
+    /// All session receipts have a journal
+    fn get_journal(&self) -> &Vec<u8>;
+
+    /// this provides a way to serialize a receipt
+    fn encode(&self) -> Vec<u8>;
+}
+
 /// A receipt attesting to the execution of a Session.
 ///
-/// A SessionReceipt attests that the `journal` was produced by executing a
+/// A SessionFlatReceipt attests that the `journal` was produced by executing a
 /// [crate::Session] based on a specified memory image. This image is _not_
 /// included in the receipt and must be provided by the verifier when calling
-/// [SessionReceipt::verify].
+/// [SessionFlatReceipt::verify].
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
-pub struct SessionReceipt {
+pub struct SessionFlatReceipt {
     /// The constituent [SegmentReceipt]s.
     ///
-    /// Together these can be used by [SessionReceipt::verify] to
+    /// Together these can be used by [SessionFlatReceipt::verify] to
     /// cryptographically prove that this full Session was faithfully executed.
     pub segments: Vec<SegmentReceipt>,
 
     /// The public data written by the guest in this Session.
     ///
     /// This data is cryptographically authenticated in
-    /// [SessionReceipt::verify].
+    /// [SessionFlatReceipt::verify].
     pub journal: Vec<u8>,
 }
 
@@ -185,11 +204,11 @@ pub struct SegmentReceipt {
     /// accessed with [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 
-    /// Segment index within the [SessionReceipt]
+    /// Segment index within the [SessionFlatReceipt]
     pub index: u32,
 }
 
-impl SessionReceipt {
+impl SessionReceipt for SessionFlatReceipt {
     /// Verifies the integrity of this receipt.
     ///
     /// Uses the ZKP system to cryptographically verify that each constituent
@@ -198,7 +217,7 @@ impl SessionReceipt {
     /// given `image_id` parameter.
     #[cfg(not(target_os = "zkvm"))]
     #[must_use]
-    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
+    fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
         let hal =
             risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
@@ -207,6 +226,16 @@ impl SessionReceipt {
         self.verify_with_hal(&hal, image_id)
     }
 
+    fn get_journal(&self) -> &Vec<u8> {
+        &self.journal
+    }
+
+    fn encode(&self) -> Vec<u8> {
+        bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
+    }
+}
+
+impl SessionFlatReceipt {
     /// Verifies the integrity of this receipt.
     ///
     /// Uses the ZKP system to cryptographically verify that each constituent

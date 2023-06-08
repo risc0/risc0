@@ -31,10 +31,10 @@ use super::{get_prover, LocalProver, Prover};
 use crate::{
     prove::HalEval,
     serde::{from_slice, to_vec},
-    testutils, Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT,
+    testutils, Executor, ExecutorEnv, ExitCode, SessionFlatReceipt, CIRCUIT,
 };
 
-fn prove_nothing(name: &str) -> Result<SessionReceipt> {
+fn prove_nothing(name: &str) -> Result<SessionFlatReceipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
@@ -68,7 +68,7 @@ fn hashfn_blake2b() {
 fn receipt_serde() {
     let receipt = prove_nothing("$default").unwrap();
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
-    let decoded: SessionReceipt = from_slice(&encoded).unwrap();
+    let decoded: SessionFlatReceipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
     decoded.verify(MULTI_TEST_ID).unwrap();
 }
@@ -146,7 +146,7 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
-    fn run_memio(pairs: &[(usize, usize)]) -> Result<SessionReceipt> {
+    fn run_memio(pairs: &[(usize, usize)]) -> Result<SessionFlatReceipt> {
         let spec = MultiTestSpec::ReadWriteMem {
             values: pairs
                 .iter()

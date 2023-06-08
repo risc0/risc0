@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use alloc::{collections::VecDeque, vec::Vec};
+use crate::receipt::SessionReceipt;
 
 use risc0_zkp::core::digest::Digest;
 #[cfg(not(target_os = "zkvm"))]
@@ -246,19 +247,13 @@ pub struct SessionRollupReceipt {
     pub journal: Vec<u8>,
 }
 
-impl SessionRollupReceipt {
-    /// Create a new session receipt
-    pub fn new(receipt: SegmentRecursionReceipt, journal: Vec<u8>) -> Self {
-        Self { receipt, journal }
-    }
-
+impl SessionReceipt for SessionRollupReceipt {
     /// Verify the integrity of the receipt by using the segment receipt and the
     /// journal
     #[cfg(not(target_os = "zkvm"))]
-    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
+    fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
         self.receipt.verify()?;
         let journal_digest = sha::Impl::hash_bytes(&self.journal);
-        let image_id = image_id.into();
         let pre_img = &self.receipt.meta.pre;
         if image_id != compute_image_id(&pre_img.image_id, pre_img.pc) {
             return Err(VerificationError::ImageVerificationError);
@@ -269,6 +264,21 @@ impl SessionRollupReceipt {
         }
 
         Ok(())
+    }
+
+    fn get_journal(&self) -> &Vec<u8> {
+        &self.journal
+    }
+
+    fn encode(&self) -> Vec<u8> {
+        bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
+    }
+}
+
+impl SessionRollupReceipt {
+    /// Create a new session receipt
+    pub fn new(receipt: SegmentRecursionReceipt, journal: Vec<u8>) -> Self {
+        Self { receipt, journal }
     }
 }
 

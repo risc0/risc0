@@ -19,7 +19,7 @@ use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
     prove::{default_prover, Prover},
     serde::to_vec,
-    Executor, ExecutorEnv, Session, SessionReceipt,
+    Executor, ExecutorEnv, Session, SessionFlatReceipt,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -111,7 +111,7 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, SessionReceipt) {
+fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, SessionFlatReceipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
