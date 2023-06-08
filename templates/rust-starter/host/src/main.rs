@@ -9,7 +9,7 @@ use risc0_zkvm::{
 
 fn main() {
     // First, we construct an executor environment
-    let env = ExecutorEnv::builder().build();
+    let env = ExecutorEnv::builder().build().unwrap();
 
     // TODO: add guest input to the executor environment using
     // ExecutorEnvBuilder::add_input().
