@@ -34,9 +34,16 @@ const fn cycles_per_page(blocks_per_page: usize) -> usize {
 }
 
 #[derive(Eq, Ord, PartialEq, PartialOrd)]
+enum MemData {
+    U8(u8),
+    U16(u16),
+    U32(u32),
+}
+
+#[derive(Eq, Ord, PartialEq, PartialOrd)]
 struct MemStore {
     addr: u32,
-    data: u8,
+    data: MemData,
 }
 
 pub struct MemoryMonitor {
@@ -68,20 +75,28 @@ impl MemoryMonitor {
         let info = &self.image.info;
         // log::debug!("load_u8: 0x{addr:08x}");
         self.pending_faults.include(info, addr, IncludeDir::Read);
-        let mut b = [0_u8];
-        self.image.load_region_in_page(addr, &mut b);
-        b[0]
+        let mut bytes = [0_u8];
+        self.image.load_region_in_page(addr, &mut bytes);
+        bytes[0]
     }
 
     pub fn load_u16(&mut self, addr: u32) -> u16 {
         assert_eq!(addr % 2, 0, "unaligned load");
-        u16::from_le_bytes(self.load_array(addr))
+        let info = &self.image.info;
+        self.pending_faults.include(info, addr, IncludeDir::Read);
+        let mut bytes = [0_u8; 2];
+        self.image.load_region_in_page(addr, &mut bytes);
+        u16::from_le_bytes(bytes)
     }
 
     pub fn load_u32(&mut self, addr: u32) -> u32 {
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
         // log::debug!("load_u32: 0x{addr:08x}");
-        u32::from_le_bytes(self.load_array(addr))
+        let info = &self.image.info;
+        self.pending_faults.include(info, addr, IncludeDir::Read);
+        let mut bytes = [0_u8; WORD_SIZE];
+        self.image.load_region_in_page(addr, &mut bytes);
+        u32::from_le_bytes(bytes)
     }
 
     pub fn load_array<const N: usize>(&mut self, addr: u32) -> [u8; N] {
@@ -108,11 +123,11 @@ impl MemoryMonitor {
     pub fn load_string(&mut self, mut addr: u32) -> Result<String> {
         let mut s: Vec<u8> = Vec::new();
         loop {
-            let b = self.load_u8(addr);
-            if b == 0 {
+            let bytes = self.load_u8(addr);
+            if bytes == 0 {
                 break;
             }
-            s.push(b);
+            s.push(bytes);
             addr += 1;
         }
         String::from_utf8(s).map_err(anyhow::Error::msg)
@@ -122,7 +137,10 @@ impl MemoryMonitor {
         let info = &self.image.info;
         self.pending_faults.include(info, addr, IncludeDir::Read);
         self.pending_faults.include(info, addr, IncludeDir::Write);
-        self.pending_writes.insert(MemStore { addr, data });
+        self.pending_writes.insert(MemStore {
+            addr,
+            data: MemData::U8(data),
+        });
     }
 
     pub fn store_u8(&mut self, addr: u32, data: u8) {
@@ -135,7 +153,13 @@ impl MemoryMonitor {
 
     pub fn store_u16(&mut self, addr: u32, data: u16) {
         assert_eq!(addr % 2, 0, "unaligned store");
-        self.store_region(addr, &data.to_le_bytes());
+        let info = &self.image.info;
+        self.pending_faults.include(info, addr, IncludeDir::Read);
+        self.pending_faults.include(info, addr, IncludeDir::Write);
+        self.pending_writes.insert(MemStore {
+            addr,
+            data: MemData::U16(data),
+        });
         self.trace_writes.insert(TraceEvent::MemorySet {
             addr,
             value: data as u32,
@@ -144,7 +168,13 @@ impl MemoryMonitor {
 
     pub fn store_u32(&mut self, addr: u32, data: u32) {
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
-        self.store_region(addr, &data.to_le_bytes());
+        let info = &self.image.info;
+        self.pending_faults.include(info, addr, IncludeDir::Read);
+        self.pending_faults.include(info, addr, IncludeDir::Write);
+        self.pending_writes.insert(MemStore {
+            addr,
+            data: MemData::U32(data),
+        });
         self.trace_writes.insert(TraceEvent::MemorySet {
             addr,
             value: data as u32,
@@ -159,7 +189,14 @@ impl MemoryMonitor {
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {
-        self.store_region(get_register_addr(idx), &data.to_le_bytes());
+        let addr = get_register_addr(idx);
+        let info = &self.image.info;
+        self.pending_faults.include(info, addr, IncludeDir::Read);
+        self.pending_faults.include(info, addr, IncludeDir::Write);
+        self.pending_writes.insert(MemStore {
+            addr,
+            data: MemData::U32(data),
+        });
         self.trace_writes.insert(TraceEvent::RegisterSet {
             reg: idx,
             value: data,
@@ -177,7 +214,17 @@ impl MemoryMonitor {
     // commit all pending activity
     pub fn commit(&mut self, cycle: usize) {
         for op in self.pending_writes.iter() {
-            self.image.store_region_in_page(op.addr, &[op.data]);
+            match op.data {
+                MemData::U8(data) => self
+                    .image
+                    .store_region_in_page(op.addr, &data.to_le_bytes()),
+                MemData::U16(data) => self
+                    .image
+                    .store_region_in_page(op.addr, &data.to_le_bytes()),
+                MemData::U32(data) => self
+                    .image
+                    .store_region_in_page(op.addr, &data.to_le_bytes()),
+            }
         }
         self.pending_writes.clear();
         self.faults.append(&mut self.pending_faults);
@@ -188,15 +235,6 @@ impl MemoryMonitor {
         }
         self.trace_writes.clear();
         // self.faults.dump();
-    }
-
-    pub fn pending_page_reads(&self) -> Vec<u32> {
-        self.pending_faults
-            .reads
-            .difference(&self.faults.reads)
-            .into_iter()
-            .cloned()
-            .collect()
     }
 
     pub fn total_page_read_cycles(&self) -> usize {
@@ -217,7 +255,8 @@ impl MemoryMonitor {
     }
 
     pub fn pending_page_read_cycles(&self) -> usize {
-        self.compute_page_cycles(self.pending_page_reads().iter())
+        let pending_page_reads = self.pending_faults.reads.difference(&self.faults.reads);
+        self.compute_page_cycles(pending_page_reads)
     }
 
     fn compute_page_cycles<'a, I: Iterator<Item = &'a u32>>(&self, page_idxs: I) -> usize {
