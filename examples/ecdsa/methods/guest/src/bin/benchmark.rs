@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![no_main]
+
 use core::{hint::black_box, ops::Add};
 
 use hex_literal::hex;
@@ -103,6 +105,8 @@ fn benchmark_group() {
         .to_affine()
     });
 }
+
+risc0_zkvm::guest::entry!(main);
 
 fn main() {
     benchmark_field();

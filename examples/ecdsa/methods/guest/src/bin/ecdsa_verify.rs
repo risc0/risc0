@@ -12,11 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![no_main]
+
 use k256::{
     ecdsa::{signature::Verifier, Signature, VerifyingKey},
     EncodedPoint,
 };
 use risc0_zkvm::guest::env;
+
+risc0_zkvm::guest::entry!(main);
 
 fn main() {
     // Decode the verifying key, message, and signature from the inputs.

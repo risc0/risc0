@@ -5,11 +5,11 @@ edition = "2021"
 
 [dependencies]
 clap = "4.0"
+ecdsa-methods = { path = "methods" }
+k256 = { version = "0.13", features = ["serde"] }
+rand_core = "0.6.4"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
-ecdsa-methods = { path = "methods" }
-rand_core = "0.6.4"
-k256 = { version = "0.13", features = ["serde"] }
 
 [dev-dependencies]
 hex = "0.4"
