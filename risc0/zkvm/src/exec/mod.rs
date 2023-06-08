@@ -80,6 +80,7 @@ pub struct Executor<'a> {
     segments: Vec<Box<dyn SegmentRef>>,
     insn_counter: u32,
     split_insn: Option<u32>,
+    exit_code: Option<ExitCode>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -155,6 +156,7 @@ impl<'a> Executor<'a> {
             segments: Vec::new(),
             insn_counter: 0,
             split_insn: None,
+            exit_code: None,
         }
     }
 
@@ -192,16 +194,20 @@ impl<'a> Executor<'a> {
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// let session = exec.run().unwrap();
     /// ```
-    pub fn run(self) -> Result<Session> {
+    pub fn run(&mut self) -> Result<Session> {
         self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
     /// reached, producing a [Session] as a result.
-    pub fn run_with_callback<F>(mut self, mut callback: F) -> Result<Session>
+    pub fn run_with_callback<F>(&mut self, mut callback: F) -> Result<Session>
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
+        if let Some(ExitCode::Halted(_)) = self.exit_code {
+            bail!("cannot resume an execution which exited with ExitCode::Halted");
+        }
+
         self.monitor.clear_session();
 
         let journal = Journal::default();
@@ -256,6 +262,7 @@ impl<'a> Executor<'a> {
         };
 
         let exit_code = run_loop()?;
+        self.exit_code = Some(exit_code);
         Ok(Session::new(
             take(&mut self.segments),
             journal.buf.take(),
