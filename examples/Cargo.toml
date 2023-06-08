@@ -4,19 +4,20 @@ members = [
     "chess/core",
     "digital-signature",
     "digital-signature/core",
-    "evm",
-    "evm/core",
     "factors",
     "json",
     "json/core",
     "password-checker",
     "password-checker/core",
+    "prorata/host",
     "sha",
     "waldo",
     "waldo/core",
     "wasm",
     "wordle",
     "wordle/core",
+    "zkevm-demo",
+    "zkevm-demo/core",
 ]
 
 # Always optimize; otherwise tests take excessively long.

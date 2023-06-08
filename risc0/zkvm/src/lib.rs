@@ -30,6 +30,7 @@ mod opcode;
 #[cfg(feature = "prove")]
 pub mod prove;
 pub mod receipt;
+pub mod recursion;
 pub mod serde;
 #[cfg(feature = "prove")]
 mod session;
