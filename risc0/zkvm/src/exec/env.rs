@@ -69,6 +69,8 @@ impl<'a> ExecutorEnv<'a> {
     ///     ExecutorEnv,
     ///     ExecutorEnvBuilder};
     ///
+    /// let a: u64 = 400;
+    ///
     /// let env = ExecutorEnv::builder().build();
     /// ```
     pub fn builder() -> ExecutorEnvBuilder<'a> {
