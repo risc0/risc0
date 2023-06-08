@@ -373,7 +373,8 @@ fn profiler() {
         let env = ExecutorEnv::builder()
             .add_input(&to_vec(&MultiTestSpec::Profiler).unwrap())
             .trace_callback(prof.make_trace_callback())
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         exec.run().unwrap();
     }

@@ -169,7 +169,8 @@ impl<'a> Executor<'a> {
     /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
     /// let env = ExecutorEnv::builder()
     ///     .add_input(&to_vec(&spec).unwrap())
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// ```
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
@@ -188,7 +189,8 @@ impl<'a> Executor<'a> {
     /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
     /// let env = ExecutorEnv::builder()
     ///    .add_input(&to_vec(&spec).unwrap())
-    ///    .build();
+    ///    .build()
+    ///    .unwrap();
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// let session = exec.run().unwrap();
     /// ```
