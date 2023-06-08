@@ -92,7 +92,7 @@ impl<'a> ExecutorEnv<'a> {
 
 impl<'a> Default for ExecutorEnv<'a> {
     fn default() -> Self {
-        Self::builder().build()
+        Self::builder().build().unwrap()
     }
 }
 
@@ -112,6 +112,23 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
     }
 }
 
+/// [ExecutorEnvBuilder] errors.
+#[derive(Debug)]
+pub enum ExecutorEnvBuilderErr {
+    /// Segment limit PO2 falls outside supported range.
+    SegmentLimitPo2OutOfBounds { given: usize },
+}
+
+impl core::fmt::Display for ExecutorEnvBuilderErr {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        match self {
+            ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds { given } => {
+                write!(f, "Invalid segment_limit_po2: {given}",)
+            }
+        }
+    }
+}
+
 impl<'a> ExecutorEnvBuilder<'a> {
     /// Finalize this builder to construct an [ExecutorEnv].
     /// # Example
@@ -122,7 +139,17 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// let env = ExecutorEnv::builder().build();
     /// ```
-    pub fn build(&mut self) -> ExecutorEnv<'a> {
+    pub fn build(&mut self) -> Result<ExecutorEnv<'a>, ExecutorEnvBuilderErr> {
+        // Enforce segment_limit_po2 bounds
+        if self.inner.segment_limit_po2 < risc0_zkp::MIN_CYCLES_PO2
+            || self.inner.segment_limit_po2 > risc0_zkp::MAX_CYCLES_PO2
+        {
+            return Err(ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds {
+                given: self.inner.segment_limit_po2,
+            });
+        }
+
+        // Construct the executor environment
         let mut result = self.clone();
         let getenv = syscalls::Getenv(self.inner.env_vars.clone());
         if !self.inner.input.is_empty() {
@@ -139,15 +166,15 @@ impl<'a> ExecutorEnvBuilder<'a> {
             .syscall(SYS_READ, io.clone())
             .syscall(SYS_READ_AVAIL, io.clone())
             .syscall(SYS_WRITE, io);
-        result.inner.clone()
+        Ok(result.inner.clone())
     }
 
     /// Set a segment limit, specified in powers of 2 cycles.
     ///
-    /// If the given value exceeds [risc0_zkp::MAX_CYCLES_PO2], then the value
-    /// [risc0_zkp::MAX_CYCLES_PO2] is used instead.
+    /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
+    /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
     pub fn segment_limit_po2(&mut self, limit: usize) -> &mut Self {
-        self.inner.segment_limit_po2 = usize::min(limit, risc0_zkp::MAX_CYCLES_PO2);
+        self.inner.segment_limit_po2 = limit;
         self
     }
 
