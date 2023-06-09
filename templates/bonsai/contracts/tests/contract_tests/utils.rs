@@ -87,7 +87,10 @@ impl BonsaiMock {
                             submit_request_log.image_id
                         ));
                     let input = submit_request_log.input;
-                    let env = ExecutorEnv::builder().add_input(input.deref()).build().unwrap();
+                    let env = ExecutorEnv::builder()
+                        .add_input(input.deref())
+                        .build()
+                        .unwrap();
                     let mut exec = Executor::from_elf(env, elf.as_ref()).unwrap();
                     exec.run().unwrap()
                 };
