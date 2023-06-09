@@ -103,7 +103,7 @@ In the starter template project, our host driver program creates an executor env
     };
 
     // First, we construct an executor environment
-    let env = ExecutorEnv::builder().build();
+    let env = ExecutorEnv::builder().build().unwrap();
 
     // Next, we make an executor, loading the (renamed) ELF binary.
     let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
