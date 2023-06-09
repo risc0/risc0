@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use alloc::{collections::VecDeque, vec::Vec};
-use crate::receipt::SessionReceipt;
+use core::any::Any;
 
 use risc0_zkp::core::digest::Digest;
 #[cfg(not(target_os = "zkvm"))]
@@ -28,7 +28,7 @@ use crate::receipt::compute_image_id;
 use crate::recursion::circuit_impl::CIRCUIT_CORE;
 #[cfg(not(target_os = "zkvm"))]
 use crate::sha::{self};
-use crate::ControlId;
+use crate::{receipt::SessionReceipt, ControlId};
 
 /// This function gets valid control ID's from the posidon and recursion
 /// circuits
@@ -272,6 +272,10 @@ impl SessionReceipt for SessionRollupReceipt {
 
     fn encode(&self) -> Vec<u8> {
         bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
+    }
+
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

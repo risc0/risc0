@@ -39,7 +39,6 @@ mod plonk;
 #[cfg(test)]
 mod tests;
 
-use crate::receipt::SessionReceipt;
 use std::{collections::HashMap, rc::Rc};
 
 use anyhow::Result;
@@ -62,7 +61,10 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
-use crate::{ControlId, Segment, SegmentReceipt, Session, SessionFlatReceipt, CIRCUIT};
+use crate::{
+    receipt::SessionReceipt, ControlId, Segment, SegmentReceipt, Session, FlatSessionReceipt,
+    CIRCUIT,
+};
 
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
@@ -234,7 +236,7 @@ where
             let segment = segment_ref.resolve()?;
             segments.push(self.prove_segment(&segment)?);
         }
-        let receipt = SessionFlatReceipt {
+        let receipt = FlatSessionReceipt {
             segments,
             journal: session.journal.clone(),
         };

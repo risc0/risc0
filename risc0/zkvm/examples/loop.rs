@@ -18,8 +18,9 @@ use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
     prove::{default_prover, Prover},
+    receipt::SessionReceipt,
     serde::to_vec,
-    Executor, ExecutorEnv, Session, SessionFlatReceipt,
+    Executor, ExecutorEnv, Session, FlatSessionReceipt,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -57,6 +58,9 @@ fn main() {
             .fold(0, |acc, segment| acc + (1 << segment.po2));
 
         let seal = receipt
+            .as_any()
+            .downcast_ref::<FlatSessionReceipt>()
+            .unwrap()
             .segments
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
@@ -111,7 +115,7 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, SessionFlatReceipt) {
+fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Box<dyn SessionReceipt>) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
