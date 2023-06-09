@@ -56,7 +56,7 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
         },
     };
     let vec = to_vec(&params)?;
-    let env = ExecutorEnv::builder().add_input(&vec).build();
+    let env = ExecutorEnv::builder().add_input(&vec).build().unwrap();
     let mut exec = Executor::from_elf(env, SIGN_ELF)?;
     let session = exec.run()?;
     let receipt = session.prove().unwrap();

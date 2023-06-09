@@ -56,7 +56,10 @@ fn main() {
 
 #[tracing::instrument(skip_all)]
 fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
-    let env = ExecutorEnv::builder().add_input(&[iterations]).build();
+    let env = ExecutorEnv::builder()
+        .add_input(&[iterations])
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();

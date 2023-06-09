@@ -25,7 +25,8 @@ pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
         // Send a & b to the guest
         .add_input(&to_vec(&a).unwrap())
         .add_input(&to_vec(&b).unwrap())
-        .build();
+        .build()
+        .unwrap();
 
     // First, we make an executor, loading the 'multiply' ELF binary.
     let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();

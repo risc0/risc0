@@ -94,7 +94,7 @@ fn main() {
             builder.trace_callback(profiler.make_trace_callback());
         }
 
-        let env = builder.build();
+        let env = builder.build().unwrap();
         let mut exec = Executor::from_elf(env, &elf_contents).unwrap();
         exec.run().unwrap()
     };

@@ -46,7 +46,8 @@ impl<'a> Server<'a> {
         let env = ExecutorEnv::builder()
             .add_input(&to_vec(self.secret_word).unwrap())
             .add_input(&to_vec(&guess_word).unwrap())
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, WORDLE_GUEST_ELF).unwrap();
         let session = exec.run().unwrap();
         session.prove().unwrap()

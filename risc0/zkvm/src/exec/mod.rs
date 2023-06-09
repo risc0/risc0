@@ -170,7 +170,8 @@ impl<'a> Executor<'a> {
     /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
     /// let env = ExecutorEnv::builder()
     ///     .add_input(&to_vec(&spec).unwrap())
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// ```
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
@@ -189,7 +190,8 @@ impl<'a> Executor<'a> {
     /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
     /// let env = ExecutorEnv::builder()
     ///    .add_input(&to_vec(&spec).unwrap())
-    ///    .build();
+    ///    .build()
+    ///    .unwrap();
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// let session = exec.run().unwrap();
     /// ```
@@ -278,8 +280,10 @@ impl<'a> Executor<'a> {
     ///
     /// This can be directly used by debuggers.
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
-        if self.session_cycle() > self.env.get_session_limit() {
-            return Ok(Some(ExitCode::SessionLimit));
+        if let Some(limit) = self.env.get_session_limit() {
+            if self.session_cycle() >= limit {
+                return Ok(Some(ExitCode::SessionLimit));
+            }
         }
 
         let insn = self.monitor.load_u32(self.pc);
