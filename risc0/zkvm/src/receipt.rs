@@ -184,7 +184,7 @@ pub trait SessionReceipt: Debug {
 /// calling the [into] function.
 #[cfg(not(target_os = "zkvm"))]
 pub fn verify(
-    receipt: Box<dyn SessionReceipt>,
+    receipt: &dyn SessionReceipt,
     image_id: impl Into<Digest>,
 ) -> Result<(), VerificationError> {
     receipt.verify(image_id.into())
