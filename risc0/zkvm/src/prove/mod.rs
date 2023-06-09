@@ -62,7 +62,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
 use crate::{
-    receipt::SessionReceipt, ControlId, Segment, SegmentReceipt, Session, FlatSessionReceipt,
+    receipt::SessionReceipt, ControlId, FlatSessionReceipt, Segment, SegmentReceipt, Session,
     CIRCUIT,
 };
 

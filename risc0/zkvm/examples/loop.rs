@@ -20,7 +20,7 @@ use risc0_zkvm::{
     prove::{default_prover, Prover},
     receipt::SessionReceipt,
     serde::to_vec,
-    Executor, ExecutorEnv, Session, FlatSessionReceipt,
+    Executor, ExecutorEnv, FlatSessionReceipt, Session,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
