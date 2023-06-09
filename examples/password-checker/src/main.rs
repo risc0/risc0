@@ -45,7 +45,7 @@ fn password_checker(request: PasswordRequest) -> Digest {
 
     let receipt = session.prove().unwrap();
 
-    from_slice(&receipt.journal).unwrap()
+    from_slice(&receipt.get_journal()).unwrap()
 }
 
 #[cfg(test)]

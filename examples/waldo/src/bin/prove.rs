@@ -16,7 +16,7 @@ use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{serde, Executor, ExecutorEnv};
+use risc0_zkvm::{serde, Executor, ExecutorEnv, FlatSessionReceipt};
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
     merkle::SYS_VECTOR_ORACLE,
@@ -129,8 +129,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     let receipt = session.prove()?;
 
     // Save the receipt to disk so it can be sent to the verifier.
-    fs::write(&args.receipt, bincode::serialize(&receipt)?)?;
-
+    fs::write(
+        &args.receipt,
+        bincode::serialize(
+            receipt
+                .as_any()
+                .downcast_ref::<FlatSessionReceipt>()
+                .unwrap(),
+        )?,
+    )?;
     println!("Success! Saved the receipt to {}", &args.receipt.display());
 
     Ok(())
