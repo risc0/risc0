@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use alloc::{collections::VecDeque, vec::Vec};
-use core::any::Any;
 
 use risc0_zkp::core::digest::Digest;
 #[cfg(not(target_os = "zkvm"))]
@@ -274,7 +273,12 @@ impl SessionReceipt for SessionRollupReceipt {
         bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
     }
 
-    fn as_any(&self) -> &dyn Any {
+    fn get_seal_len(&self) -> usize {
+        bytemuck::cast_slice::<u32, u8>(self.receipt.seal.as_slice()).len()
+    }
+
+    #[cfg(test)]
+    fn as_any(&self) -> &dyn core::any::Any {
         self
     }
 }

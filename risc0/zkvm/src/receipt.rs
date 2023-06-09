@@ -76,7 +76,6 @@
 //! can also directly access the [FlatSessionReceipt::journal] as a `Vec<u8>`.
 
 use alloc::{fmt::Debug, vec::Vec};
-use core::any::Any;
 
 use anyhow::Result;
 use hex::FromHex;
@@ -173,8 +172,12 @@ pub trait SessionReceipt: Debug {
     /// this provides a way to serialize a receipt
     fn encode(&self) -> Vec<u8>;
 
+    /// get the length of the seal. This is used primarily for benchmarking
+    fn get_seal_len(&self) -> usize;
+
     /// this is used for downcasting, primarily used for testing
-    fn as_any(&self) -> &dyn Any;
+    #[cfg(test)]
+    fn as_any(&self) -> &dyn core::any::Any;
 }
 
 /// A free function that verifies the receipt
@@ -256,7 +259,14 @@ impl SessionReceipt for FlatSessionReceipt {
         bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
     }
 
-    fn as_any(&self) -> &dyn Any {
+    fn get_seal_len(&self) -> usize {
+        self.segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
+    }
+
+    #[cfg(test)]
+    fn as_any(&self) -> &dyn core::any::Any {
         self
     }
 }

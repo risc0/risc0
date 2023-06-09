@@ -20,7 +20,7 @@ use risc0_zkvm::{
     prove::{default_prover, Prover},
     receipt::SessionReceipt,
     serde::to_vec,
-    Executor, ExecutorEnv, FlatSessionReceipt, Session,
+    Executor, ExecutorEnv, Session,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -57,13 +57,7 @@ fn main() {
             .iter()
             .fold(0, |acc, segment| acc + (1 << segment.po2));
 
-        let seal = receipt
-            .as_any()
-            .downcast_ref::<FlatSessionReceipt>()
-            .unwrap()
-            .segments
-            .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
+        let seal = receipt.get_seal_len();
         let usage = prover.get_peak_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
 

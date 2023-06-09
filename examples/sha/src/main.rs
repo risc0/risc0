@@ -16,7 +16,7 @@ use clap::{Arg, Command};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
     sha::Digest,
-    verify, Executor, ExecutorEnv, SessionReceipt,
+    Executor, ExecutorEnv, SessionReceipt,
 };
 use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 
@@ -63,7 +63,9 @@ fn main() {
     let (digest, receipt) = provably_hash(message, false);
 
     // Verify the receipt, ensuring the prover knows a valid SHA-256 preimage.
-    verify(receipt, HASH_ID).expect("receipt verification failed");
+    receipt
+        .verify(HASH_ID.into())
+        .expect("receipt verification failed");
 
     println!("I provably know data whose SHA-256 hash is {}", digest);
 }

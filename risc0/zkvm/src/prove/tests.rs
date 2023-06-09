@@ -82,13 +82,14 @@ fn receipt_serde() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
+    use std::borrow::Borrow;
     let receipt = prove_nothing("$default").unwrap();
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
     }
     assert_eq!(
-        crate::verify(receipt, image_id).unwrap_err(),
+        crate::verify(receipt.borrow(), image_id).unwrap_err(),
         VerificationError::ImageVerificationError
     );
 }

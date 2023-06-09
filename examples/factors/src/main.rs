@@ -22,7 +22,7 @@ fn main() {
     // Here is where one would send 'receipt' over the network...
 
     // Verify receipt, panic if it's wrong
-    risc0_zkvm::verify(receipt, MULTIPLY_ID).expect(
+    receipt.verify(MULTIPLY_ID.into()).expect(
         "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
 }
