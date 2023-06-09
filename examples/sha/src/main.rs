@@ -77,7 +77,7 @@ mod tests {
     #[test]
     fn hash_abc() {
         let (digest, receipt) = super::provably_hash("abc", false);
-        receipt.verify(HASH_ID).unwrap();
+        receipt.verify(HASH_ID.into()).unwrap();
         assert_eq!(
             hex::encode(digest.as_bytes()),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
@@ -88,7 +88,7 @@ mod tests {
     #[test]
     fn hash_abc_rust_crypto() {
         let (digest, receipt) = super::provably_hash("abc", true);
-        receipt.verify(HASH_RUST_CRYPTO_ID).unwrap();
+        receipt.verify(HASH_RUST_CRYPTO_ID.into()).unwrap();
         assert_eq!(
             hex::encode(digest.as_bytes()),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
