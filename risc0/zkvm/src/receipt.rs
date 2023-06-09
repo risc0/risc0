@@ -150,10 +150,10 @@ pub struct ReceiptMetadata {
 }
 
 /// The [SessionReceipt] is implemented for receipts that represent
-/// [crate::Sessions]
+/// [crate::Session]
 ///
 /// There are several different flavors of receipts and this trait defines the
-/// the functions that all [Session] receipts have such as accessing the
+/// the functions that all [crate::Session] receipts have such as accessing the
 /// journal and a way to verify the receipt.
 pub trait SessionReceipt: Debug {
     /// Verifies the integrity of this receipt.
@@ -184,7 +184,7 @@ pub trait SessionReceipt: Debug {
 ///
 /// This function is a wrapper for [SessionReceipt::verify] that allows the
 /// caller to pass parameters that implement type conversion to [Digest] by
-/// calling the [into] function.
+/// calling the `into` function.
 #[cfg(not(target_os = "zkvm"))]
 pub fn verify(
     receipt: &dyn SessionReceipt,
