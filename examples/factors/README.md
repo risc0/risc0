@@ -239,7 +239,8 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
     // Send a & b to the guest
     .add_input(&to_vec(&a).unwrap())
     .add_input(&to_vec(&b).unwrap())
-    .build();
+    .build()
+    .unwrap();
 
     let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
     let session = exec.run().unwrap();
