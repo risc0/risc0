@@ -73,8 +73,19 @@ impl WordRead for &[u32] {
 /// possible, such as if `slice` is not the serialized form of an object of type
 /// `T`.
 pub fn from_slice<T: DeserializeOwned, P: Pod>(slice: &[P]) -> Result<T> {
-    let mut deserializer = Deserializer::new(bytemuck::cast_slice(slice));
-    T::deserialize(&mut deserializer)
+    match bytemuck::try_cast_slice(slice) {
+        Ok(slice) => {
+            let mut deserializer = Deserializer::new(slice);
+            T::deserialize(&mut deserializer)
+        }
+        // P is u8 or another value without word-alignment. Data must be copied.
+        Err(bytemuck::PodCastError::TargetAlignmentGreaterAndInputNotAligned) => {
+            let vec = bytemuck::allocation::pod_collect_to_vec::<P, u32>(slice);
+            let mut deserializer = Deserializer::new(vec.as_slice());
+            T::deserialize(&mut deserializer)
+        }
+        Err(ref e) => panic!("failed to cast or read slice as [u32]: {}", e),
+    }
 }
 
 /// Enables deserializing from a WordRead

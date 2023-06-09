@@ -33,7 +33,8 @@ use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, SessionReceipt) {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(input).unwrap())
-        .build();
+        .build()
+        .unwrap();
 
     let elf = if use_rust_crypto {
         HASH_RUST_CRYPTO_ELF
