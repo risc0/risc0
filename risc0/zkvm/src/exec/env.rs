@@ -137,7 +137,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///     ExecutorEnv,
     ///     ExecutorEnvBuilder};
     ///
-    /// let env = ExecutorEnv::builder().build();
+    /// let env = ExecutorEnv::builder().build().unwrap();
     /// ```
     pub fn build(&mut self) -> Result<ExecutorEnv<'a>, ExecutorEnvBuilderErr> {
         // Enforce segment_limit_po2 bounds
@@ -189,7 +189,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// let env = ExecutorEnv::builder()
     ///     .session_limit(Some(32 * 1024 * 1024)) // 32M cycles
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn session_limit(&mut self, limit: Option<usize>) -> &mut Self {
         self.inner.session_limit = limit;
@@ -210,7 +211,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// let env = ExecutorEnv::builder()
     ///     .env_vars(vars)
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn env_vars(&mut self, vars: HashMap<String, String>) -> &mut Self {
         self.inner.env_vars = vars;
@@ -226,7 +228,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// let env = ExecutorEnv::builder()
     ///     .env_var("VAR1", "SOME_VALUE")
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn env_var(&mut self, name: &str, val: &str) -> &mut Self {
         self.inner
@@ -249,7 +252,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// let env = ExecutorEnv::builder()
     ///     .add_input(&to_vec(&a).unwrap())
     ///     .add_input(&to_vec(&b).unwrap())
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn add_input<T: Pod>(&mut self, slice: &[T]) -> &mut Self {
         self.inner

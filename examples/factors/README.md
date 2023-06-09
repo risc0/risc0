@@ -146,7 +146,8 @@ We'd like the host to make the values of `a` and `b` available to the guest prio
     // Send a & b to the guest
       .add_input(&to_vec(&a).unwrap())
       .add_input(&to_vec(&b).unwrap())
-      .build();
+      .build()
+      .unwrap();
 ```
 
 You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
