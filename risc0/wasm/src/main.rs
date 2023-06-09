@@ -16,7 +16,7 @@
 
 use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
-    FlatSessionReceipt,
+    FlatSessionReceipt, SessionReceipt
 };
 
 // This binary is here as a way to check which deps are included
