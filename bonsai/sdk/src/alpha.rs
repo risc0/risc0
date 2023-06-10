@@ -64,6 +64,7 @@ pub mod responses {
 }
 
 /// Proof Session representation
+#[derive(Debug)]
 pub struct SessionId {
     /// Session UUID
     pub uuid: String,
