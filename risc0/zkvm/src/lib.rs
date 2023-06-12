@@ -51,7 +51,7 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 pub use self::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
-pub use self::receipt::{ExitCode, SessionFlatReceipt, SegmentReceipt, SessionReceipt};
+pub use self::receipt::{ExitCode, SegmentReceipt, SessionFlatReceipt, SessionReceipt};
 #[cfg(feature = "prove")]
 pub use self::{
     exec::io::{Syscall, SyscallContext},
