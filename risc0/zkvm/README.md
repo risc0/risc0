@@ -1,9 +1,9 @@
 The RISC Zero zkVM is a RISC-V virtual machine that produces [zero-knowledge
 proofs](https://en.wikipedia.org/wiki/Zero-knowledge_proof) of code it executes.
-By using the zkVM, a cryptographic [receipt](FlatSessionReceipt) is produced which
-anyone can [verify](FlatSessionReceipt::verify) was produced by the zkVM's guest
+By using the zkVM, a cryptographic [receipt](SessionFlatReceipt) is produced which
+anyone can [verify](SessionFlatReceipt::verify) was produced by the zkVM's guest
 code. No additional information about the code execution (such as, for example,
-the inputs provided) is revealed by publishing the [receipt](FlatSessionReceipt).
+the inputs provided) is revealed by publishing the [receipt](SessionFlatReceipt).
 
 In addition to [our reference documentation on
 docs.rs](https://docs.rs/risc0-zkvm), we have additional (non-reference)

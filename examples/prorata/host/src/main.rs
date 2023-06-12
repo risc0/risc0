@@ -22,7 +22,7 @@ use methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, FlatSessionReceipt, SessionReceipt,
+    Executor, ExecutorEnv, SessionFlatReceipt, SessionReceipt,
 };
 use rust_decimal::Decimal;
 
@@ -107,7 +107,7 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
 
 /// Verify an allocation read from a receipt on disk.
 fn verify(input: &str) {
-    let receipt: FlatSessionReceipt =
+    let receipt: SessionFlatReceipt =
         bincode::deserialize(&fs::read(PathBuf::from(input)).unwrap())
             .expect("Failed to read input file");
 

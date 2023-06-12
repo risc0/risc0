@@ -32,7 +32,7 @@ use crate::{
     prove::HalEval,
     receipt::SessionReceipt,
     serde::{from_slice, to_vec},
-    testutils, Executor, ExecutorEnv, ExitCode, FlatSessionReceipt, CIRCUIT,
+    testutils, Executor, ExecutorEnv, ExitCode, SessionFlatReceipt, CIRCUIT,
 };
 
 fn prove_nothing(name: &str) -> Result<Box<dyn SessionReceipt>> {
@@ -70,11 +70,11 @@ fn receipt_serde() {
     let receipt = prove_nothing("$default")
         .unwrap()
         .as_any()
-        .downcast_ref::<FlatSessionReceipt>()
+        .downcast_ref::<SessionFlatReceipt>()
         .unwrap()
         .clone();
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
-    let decoded: FlatSessionReceipt = from_slice(&encoded).unwrap();
+    let decoded: SessionFlatReceipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
     decoded.verify(MULTI_TEST_ID.into()).unwrap();
 }
@@ -210,7 +210,7 @@ fn pause_continue() {
         .prove()
         .unwrap()
         .as_any()
-        .downcast_ref::<FlatSessionReceipt>()
+        .downcast_ref::<SessionFlatReceipt>()
         .unwrap()
         .clone();
     assert_eq!(receipt.segments.len(), 1);
@@ -249,7 +249,7 @@ fn continuation() {
         .prove()
         .unwrap()
         .as_any()
-        .downcast_ref::<FlatSessionReceipt>()
+        .downcast_ref::<SessionFlatReceipt>()
         .unwrap()
         .clone();
     for (idx, receipt) in receipts.segments.iter().enumerate() {

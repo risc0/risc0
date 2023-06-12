@@ -62,7 +62,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
 use crate::{
-    receipt::SessionReceipt, ControlId, FlatSessionReceipt, Segment, SegmentReceipt, Session,
+    receipt::SessionReceipt, ControlId, SessionFlatReceipt, Segment, SegmentReceipt, Session,
     CIRCUIT,
 };
 
@@ -236,7 +236,7 @@ where
             let segment = segment_ref.resolve()?;
             segments.push(self.prove_segment(&segment)?);
         }
-        let receipt = FlatSessionReceipt {
+        let receipt = SessionFlatReceipt {
             segments,
             journal: session.journal.clone(),
         };
