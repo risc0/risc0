@@ -21,3 +21,5 @@ zip = "0.6"
 
 [features]
 guest-list = []
+# Fail to compile when warnings occur. Used in CI.
+deny_warnings = []

@@ -26,3 +26,5 @@ cuda = ["risc0-zkvm/cuda"]
 default = []
 metal = ["risc0-zkvm/metal"]
 profiler = ["risc0-zkvm/profiler"]
+# Fail to compile when warnings occur. Used in CI.
+deny_warnings = []

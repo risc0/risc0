@@ -20,6 +20,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(missing_docs)]
+#![cfg_attr(feature = "deny_warnings", deny(warnings))]
 
 extern crate alloc;
 

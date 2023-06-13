@@ -16,3 +16,5 @@ rand = { version = "0.8", features = ["small_rng"] }
 
 [features]
 std = []
+# Fail to compile when warnings occur. Used in CI.
+deny_warnings = []

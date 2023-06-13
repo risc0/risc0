@@ -15,6 +15,7 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(rustdoc::broken_intra_doc_links)]
+#![cfg_attr(feature = "deny_warnings", deny(warnings))]
 
 extern crate alloc;
 #[cfg(feature = "prove")]
