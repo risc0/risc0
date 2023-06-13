@@ -15,13 +15,14 @@
 //! The prorata host is a command-line tool that can be used to compute
 //! allocations and verify receipts.
 
-use ciborium;
+use std::{fs, path::PathBuf};
+
 use clap::{Parser, Subcommand};
 use methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv,
+    Executor, ExecutorEnv, SessionFlatReceipt, SessionReceipt,
 };
 use rust_decimal::Decimal;
 
@@ -89,7 +90,8 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
             })
             .unwrap(),
         )
-        .build();
+        .build()
+        .unwrap();
 
     let mut exec = Executor::from_elf(env, PRORATA_GUEST_ELF).unwrap();
     let session = exec.run().unwrap();
@@ -97,25 +99,25 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
 
     // Verify receipt to confirm that it is correctly formed. Not strictly
     // necessary.
-    receipt.verify(PRORATA_GUEST_ID).unwrap();
+    receipt.verify(PRORATA_GUEST_ID.into()).unwrap();
 
-    // Store the receipt to disk in CBOR format. Any serde-compatible library
-    // could be used here.
-    let writer = std::fs::File::create(output).expect("Failed to create output file");
-    ciborium::ser::into_writer(&receipt, writer).unwrap();
+    // Save the receipt to disk so it can be sent to the verifier.
+    let output_path = PathBuf::from(output);
+    fs::write(output_path, receipt.encode()).expect("Failed to write to output file");
 }
 
 /// Verify an allocation read from a receipt on disk.
 fn verify(input: &str) {
-    let reader = std::fs::File::open(input).expect("Failed to open input file");
-    let receipt: risc0_zkvm::SessionReceipt = ciborium::de::from_reader(reader).unwrap();
+    let receipt: SessionFlatReceipt =
+        bincode::deserialize(&fs::read(PathBuf::from(input)).unwrap())
+            .expect("Failed to read input file");
 
     // Proof verification below
-    match receipt.verify(PRORATA_GUEST_ID) {
+    match receipt.verify(PRORATA_GUEST_ID.into()) {
         Ok(_) => {
             println!("Receipt is valid");
             let result: AllocationQueryResult =
-                from_slice(&receipt.journal).expect("Failed to deserialize result");
+                from_slice(&receipt.get_journal()).expect("Failed to deserialize result");
             print!("{}", result);
         }
         Err(e) => println!("Receipt is invalid: {}", e),

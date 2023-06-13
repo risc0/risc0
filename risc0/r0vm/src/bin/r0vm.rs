@@ -15,7 +15,7 @@
 use std::{fs, path::PathBuf};
 
 use clap::Parser;
-use risc0_zkvm::{Executor, ExecutorEnv, SessionReceipt};
+use risc0_zkvm::{Executor, ExecutorEnv};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -47,10 +47,6 @@ struct Args {
     #[cfg(feature = "profiler")]
     #[clap(long)]
     pprof_out: Option<PathBuf>,
-}
-
-fn encode_receipt(receipt: &SessionReceipt) -> Vec<u8> {
-    bytemuck::cast_slice(risc0_zkvm::serde::to_vec(&receipt).unwrap().as_slice()).into()
 }
 
 fn main() {
@@ -94,7 +90,7 @@ fn main() {
             builder.trace_callback(profiler.make_trace_callback());
         }
 
-        let env = builder.build();
+        let env = builder.build().unwrap();
         let mut exec = Executor::from_elf(env, &elf_contents).unwrap();
         exec.run().unwrap()
     };
@@ -110,7 +106,7 @@ fn main() {
 
     let receipt = session.prove().unwrap();
 
-    let receipt_data = encode_receipt(&receipt);
+    let receipt_data = receipt.encode();
     if let Some(receipt_file) = args.receipt.as_ref() {
         fs::write(receipt_file, receipt_data.as_slice()).expect("Unable to write receipt file");
         if args.verbose > 0 {

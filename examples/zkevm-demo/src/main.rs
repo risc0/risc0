@@ -85,7 +85,8 @@ async fn main() {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&env).unwrap())
         .add_input(&to_vec(&zkdb).unwrap())
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
     let segment_dir = tempdir().unwrap();
     let session = exec
@@ -98,7 +99,8 @@ async fn main() {
         .unwrap();
     let receipt = session.prove().unwrap();
 
-    let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
+    let res: EvmResult =
+        from_slice(&receipt.get_journal()).expect("Failed to deserialize EvmResult");
     info!("exit reason: {:?}", res.exit_reason);
     info!("state updates: {}", res.state.len());
 }

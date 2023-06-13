@@ -27,7 +27,7 @@ use crate::receipt::compute_image_id;
 use crate::recursion::circuit_impl::CIRCUIT_CORE;
 #[cfg(not(target_os = "zkvm"))]
 use crate::sha::{self};
-use crate::ControlId;
+use crate::{receipt::SessionReceipt, ControlId};
 
 /// This function gets valid control ID's from the posidon and recursion
 /// circuits
@@ -246,19 +246,13 @@ pub struct SessionRollupReceipt {
     pub journal: Vec<u8>,
 }
 
-impl SessionRollupReceipt {
-    /// Create a new session receipt
-    pub fn new(receipt: SegmentRecursionReceipt, journal: Vec<u8>) -> Self {
-        Self { receipt, journal }
-    }
-
+impl SessionReceipt for SessionRollupReceipt {
     /// Verify the integrity of the receipt by using the segment receipt and the
     /// journal
     #[cfg(not(target_os = "zkvm"))]
-    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
+    fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
         self.receipt.verify()?;
         let journal_digest = sha::Impl::hash_bytes(&self.journal);
-        let image_id = image_id.into();
         let pre_img = &self.receipt.meta.pre;
         if image_id != compute_image_id(&pre_img.image_id, pre_img.pc) {
             return Err(VerificationError::ImageVerificationError);
@@ -269,6 +263,30 @@ impl SessionRollupReceipt {
         }
 
         Ok(())
+    }
+
+    fn get_journal(&self) -> &Vec<u8> {
+        &self.journal
+    }
+
+    fn encode(&self) -> Vec<u8> {
+        bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
+    }
+
+    fn get_seal_len(&self) -> usize {
+        bytemuck::cast_slice::<u32, u8>(self.receipt.seal.as_slice()).len()
+    }
+
+    #[cfg(test)]
+    fn as_any(&self) -> &dyn core::any::Any {
+        self
+    }
+}
+
+impl SessionRollupReceipt {
+    /// Create a new session receipt
+    pub fn new(receipt: SegmentRecursionReceipt, journal: Vec<u8>) -> Self {
+        Self { receipt, journal }
     }
 }
 

@@ -27,7 +27,8 @@ mod tests {
     fn fibonacci() {
         let env = ExecutorEnv::builder()
             .add_input(&ethabi::encode(&[Token::Uint(U256::from(10))]))
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, FIBONACCI_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(

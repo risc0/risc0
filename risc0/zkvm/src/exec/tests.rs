@@ -60,7 +60,8 @@ fn system_split() {
     let entry = 0x4000;
     let env = ExecutorEnv::builder()
         .segment_limit_po2(14) // 16K cycles
-        .build();
+        .build()
+        .unwrap();
     let mut image = BTreeMap::new();
     let mut pc = entry;
     for _ in 0..1000 {
@@ -98,7 +99,8 @@ fn system_split() {
 fn libm_build() {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&MultiTestSpec::LibM).unwrap())
-        .build();
+        .build()
+        .unwrap();
 
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().expect("Could not get receipt");
@@ -126,7 +128,8 @@ fn host_syscall() {
             actual.push(buf.into());
             expected[actual.len()].clone()
         })
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
     assert_eq!(*actual.lock().unwrap(), expected[..expected.len() - 1]);
@@ -142,7 +145,8 @@ fn host_syscall_callback_panic() {
         .io_callback(SYS_MULTI_TEST, |_buf: &[u8]| -> Vec<u8> {
             panic!("I am panicking from here!");
         })
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
 }
@@ -150,7 +154,7 @@ fn host_syscall_callback_panic() {
 #[test]
 fn sha_accel() {
     let input = to_vec(&MultiTestSpec::ShaConforms).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
 }
@@ -167,7 +171,7 @@ fn bigint_accel() {
         })
         .unwrap();
 
-        let env = ExecutorEnv::builder().add_input(&input).build();
+        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
@@ -180,7 +184,7 @@ fn bigint_accel() {
 #[test]
 fn sha_cycle_count() {
     let input = to_vec(&MultiTestSpec::ShaCycleCount).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
 }
@@ -196,7 +200,8 @@ fn stdio() {
             .read_fd(FD, MSG.as_bytes())
             .stdin(bytemuck::cast_slice(&spec))
             .stdout(&mut stdout)
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         exec.run().unwrap();
     }
@@ -239,7 +244,8 @@ fn posix_style_read() {
         let env = ExecutorEnv::builder()
             .read_fd(123, readbuf.as_slice())
             .add_input(&spec)
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
 
@@ -298,7 +304,8 @@ ENV_VAR2
 ENV_VAR3",
             ),
         )
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, STANDARD_LIB_ELF).unwrap();
     let session = exec.run().unwrap();
     let actual = session.journal.as_slice();
@@ -320,7 +327,7 @@ fn commit_hello_world() {
 #[test]
 fn random() {
     let spec = to_vec(&MultiTestSpec::DoRandom).unwrap();
-    let env = ExecutorEnv::builder().add_input(&spec).build();
+    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run().unwrap();
 }
@@ -331,7 +338,8 @@ fn slice_io() {
         let env = ExecutorEnv::builder()
             .add_input(&[slice.len() as u32])
             .add_input(slice)
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, SLICE_IO_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(session.journal, slice);
@@ -346,7 +354,7 @@ fn slice_io() {
 #[test]
 fn fail() {
     let spec = to_vec(&MultiTestSpec::Fail).unwrap();
-    let env = ExecutorEnv::builder().add_input(&spec).build();
+    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("MultiTestSpec::Fail invoked"));
@@ -365,7 +373,8 @@ fn profiler() {
         let env = ExecutorEnv::builder()
             .add_input(&to_vec(&MultiTestSpec::Profiler).unwrap())
             .trace_callback(prof.make_trace_callback())
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         exec.run().unwrap();
     }
@@ -439,7 +448,8 @@ fn trace() {
         let env = ExecutorEnv::builder()
             .add_input(&to_vec(&MultiTestSpec::EventTrace).unwrap())
             .trace_callback(|event| Ok(events.push(event)))
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         exec.run().unwrap();
     }
@@ -495,7 +505,7 @@ fn trace() {
 #[test]
 fn oom() {
     let spec = to_vec(&MultiTestSpec::Oom).unwrap();
-    let env = ExecutorEnv::builder().add_input(&spec).build();
+    let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("Out of memory!"), "{err:?}");
@@ -514,8 +524,9 @@ fn run_session(
     let env = ExecutorEnv::builder()
         .add_input(&spec)
         .segment_limit_po2(segment_limit_po2)
-        .session_limit(session_cycles)
-        .build();
+        .session_limit(Some(session_cycles))
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run()
 }

@@ -83,15 +83,16 @@ fn run_guest(iters: i32) -> i32 {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&wasm).unwrap())
         .add_input(&to_vec(&iters).unwrap())
-        .build();
+        .build()
+        .unwrap();
 
     let mut exec = Executor::from_elf(env, WASM_INTERP_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
-    receipt.verify(WASM_INTERP_ID).expect(
+    receipt.verify(WASM_INTERP_ID.into()).expect(
         "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
-    let result: i32 = from_slice(&receipt.journal).unwrap();
+    let result: i32 = from_slice(&receipt.get_journal()).unwrap();
 
     result
 }

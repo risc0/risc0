@@ -35,7 +35,8 @@ In 0.15, you’ll be creating an instance of type `Executor` that takes a progra
 ```bash
 let env = ExecutorEnv::builder()
 		.add_input(&to_vec(input).unwrap())
-		.build();
+		.build()
+                .unwrap();
 ```
 
 - Construct an `Executor` using your program ELF and the instance of `ExecutorEnv`:
@@ -93,7 +94,8 @@ As described in the above section on code execution and receipt generation, inpu
 let env = ExecutorEnv::builder()
         .add_input(&to_vec(input1).unwrap())
         .add_input(&to_vec(input2).unwrap())
-        .build();
+        .build()
+        .unwrap();
 ```
 
 If you are interested in providing the guest program with interactive I/O, `ExecutorEnvBuilder` includes a variety of other options; consult [its documentation](https://docs.rs/risc0-zkvm/latest/risc0_zkvm/struct.ExecutorEnvBuilder.html) for details.

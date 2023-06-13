@@ -38,14 +38,15 @@ fn main() {
 fn password_checker(request: PasswordRequest) -> Digest {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&request).unwrap())
-        .build();
+        .build()
+        .unwrap();
 
     let mut exec = Executor::from_elf(env, PW_CHECKER_ELF).unwrap();
     let session = exec.run().unwrap();
 
     let receipt = session.prove().unwrap();
 
-    from_slice(&receipt.journal).unwrap()
+    from_slice(&receipt.get_journal()).unwrap()
 }
 
 #[cfg(test)]

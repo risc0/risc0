@@ -116,7 +116,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let env = ExecutorEnv::builder()
         .add_input(&serde::to_vec(&input)?)
         .io_callback(SYS_VECTOR_ORACLE, img_merkle_tree.vector_oracle_callback())
-        .build();
+        .build()
+        .unwrap();
 
     // Run prover and generate receipt
     println!(
@@ -129,8 +130,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let receipt = session.prove()?;
 
     // Save the receipt to disk so it can be sent to the verifier.
-    fs::write(&args.receipt, bincode::serialize(&receipt)?)?;
-
+    fs::write(&args.receipt, receipt.encode())?;
     println!("Success! Saved the receipt to {}", &args.receipt.display());
 
     Ok(())

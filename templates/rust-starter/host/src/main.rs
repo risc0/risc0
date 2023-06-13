@@ -9,7 +9,7 @@ use risc0_zkvm::{
 
 fn main() {
     // First, we construct an executor environment
-    let env = ExecutorEnv::builder().build();
+    let env = ExecutorEnv::builder().build().unwrap();
 
     // TODO: add guest input to the executor environment using
     // ExecutorEnvBuilder::add_input().
@@ -17,7 +17,7 @@ fn main() {
     // ExecutorEnv::builder(), which creates an ExecutorEnvBuilder. When you're
     // done adding input, call ExecutorEnvBuilder::build().
 
-    // For example: let env = ExecutorEnv::builder().add_input(&vec).build();
+    // For example: let env = ExecutorEnv::builder().add_input(&vec).build().unwrap();
 
     // Next, we make an executor, loading the (renamed) ELF binary.
     let mut exec = Executor::from_elf(env, METHOD_NAME_ELF).unwrap();
@@ -33,5 +33,5 @@ fn main() {
 
     // Optional: Verify receipt to confirm that recipients will also be able to
     // verify your receipt
-    receipt.verify(METHOD_NAME_ID).unwrap();
+    receipt.verify(METHOD_NAME_ID.into()).unwrap();
 }

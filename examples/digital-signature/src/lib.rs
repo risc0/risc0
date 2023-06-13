@@ -21,12 +21,12 @@ use risc0_zkvm::{
 use sha2::{Digest, Sha256};
 
 pub struct SignatureWithReceipt {
-    receipt: SessionReceipt,
+    receipt: Box<dyn SessionReceipt>,
 }
 
 impl SignatureWithReceipt {
     pub fn get_commit(&self) -> Result<SignMessageCommit> {
-        let msg = &self.receipt.journal;
+        let msg = &self.receipt.get_journal();
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
@@ -41,7 +41,7 @@ impl SignatureWithReceipt {
     }
 
     pub fn verify(&self) -> Result<SignMessageCommit> {
-        self.receipt.verify(SIGN_ID)?;
+        self.receipt.verify(SIGN_ID.into())?;
         self.get_commit()
     }
 }
@@ -56,7 +56,7 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
         },
     };
     let vec = to_vec(&params)?;
-    let env = ExecutorEnv::builder().add_input(&vec).build();
+    let env = ExecutorEnv::builder().add_input(&vec).build().unwrap();
     let mut exec = Executor::from_elf(env, SIGN_ELF)?;
     let session = exec.run()?;
     let receipt = session.prove().unwrap();

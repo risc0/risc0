@@ -51,7 +51,7 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 pub use self::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
-pub use self::receipt::{ExitCode, SegmentReceipt, SessionReceipt};
+pub use self::receipt::{ExitCode, SegmentReceipt, SessionFlatReceipt, SessionReceipt};
 #[cfg(feature = "prove")]
 pub use self::{
     exec::io::{Syscall, SyscallContext},
@@ -60,6 +60,8 @@ pub use self::{
     session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef},
 };
 use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
+#[cfg(not(target_os = "zkvm"))]
+pub use crate::receipt::verify;
 
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
