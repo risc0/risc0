@@ -21,8 +21,8 @@ use const_format::concatcp;
 
 const RISC0_GH_REPO: &str = "https://github.com/risc0/risc0";
 const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
-const RISC0_DEFAULT_VERSION: &str = env!("CARGO_PKG_VERSION");
-const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_DEFAULT_VERSION);
+const RISC0_VERSION: &str = env!("CARGO_PKG_VERSION");
+const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_VERSION);
 
 #[derive(Parser)]
 /// `cargo risczero new`
@@ -107,11 +107,6 @@ impl NewCommand {
             template_path.tag = None;
         }
 
-        let risc0_version = std::env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| {
-            println!("CARGO_PKG_VERSION not set");
-            RISC0_DEFAULT_VERSION.to_string()
-        });
-
         let mut template_variables = Vec::new();
         if let Some(branch) = self.use_git_branch.as_ref() {
             let spec =
@@ -127,7 +122,7 @@ impl NewCommand {
             template_variables.push(format!("risc0_build={build}"));
             template_variables.push(format!("risc0_zkvm={zkvm}"));
         } else {
-            let spec = format!("version = \"{risc0_version}\"");
+            let spec = format!("version = \"{RISC0_VERSION}\"");
             template_variables.push(format!("risc0_build={spec}"));
             template_variables.push(format!("risc0_zkvm={spec}"));
         }
