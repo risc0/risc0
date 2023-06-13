@@ -48,7 +48,12 @@ fn get_zip_file(dir: &TempDir, filename: &str) -> anyhow::Result<PathBuf> {
 }
 
 impl BuildCommand {
-    /// Execute this command
+    /// Execute this command.
+    ///
+    /// subcommand specifies which cargo subcommand to run, e.g. "build" or
+    /// "test". If "test", this function will apply extra steps to approximate
+    /// the behavior of cargo test, running tests with the RISC Zero
+    /// executor.
     pub fn run(&self, subcommand: &str) -> anyhow::Result<()> {
         let manifest_dir = match fs::canonicalize(&self.manifest_dir) {
             Ok(path) => path,

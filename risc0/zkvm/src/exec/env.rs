@@ -242,7 +242,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
 
     /// Add initial input that can be read by the guest from stdin.
     /// Calling `ExecutorEnvBuilder::add_input()` iteratively concatenates
-    /// inputs; the guest can access each input using consecutive reads. ```
+    /// inputs; the guest can access each input using consecutive reads.
+    ///
+    /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
     ///     ExecutorEnvBuilder,
