@@ -2,7 +2,7 @@ name: Nightly Tasks
 
 on:
   schedule:
-    - cron: '7 0 * * *' # Nightly (ish) Pacific
+    - cron: '0 7 * * *' # Nightly (ish) Pacific
   workflow_dispatch:
     inputs:
       crate_count:
