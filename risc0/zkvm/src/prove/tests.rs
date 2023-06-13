@@ -37,7 +37,7 @@ use crate::{
 
 fn prove_nothing(name: &str) -> Result<Box<dyn SessionReceipt>> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let prover = get_prover(name);
@@ -57,7 +57,7 @@ fn hashfn_blake2b() {
         eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let prover = LocalProver::new("cpu:blake2b", hal_eval);
@@ -99,7 +99,7 @@ fn check_image_id() {
 fn sha_basics() {
     fn run_sha(msg: &str) -> String {
         let input = to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap();
-        let env = ExecutorEnv::builder().add_input(&input).build();
+        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
@@ -139,7 +139,7 @@ fn bigint_accel() {
         })
         .unwrap();
 
-        let env = ExecutorEnv::builder().add_input(&input).build();
+        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
@@ -162,7 +162,7 @@ fn memory_io() {
                 .collect(),
         };
         let input = to_vec(&spec)?;
-        let env = ExecutorEnv::builder().add_input(&input).build();
+        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
         let session = exec.run()?;
         session.prove()
@@ -199,7 +199,8 @@ fn memory_io() {
 fn pause_continue() {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
 
     // Run until sys_pause
@@ -233,7 +234,8 @@ fn continuation() {
     let env = ExecutorEnv::builder()
         .add_input(&spec)
         .segment_limit_po2(segment_limit_po2)
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();

@@ -33,7 +33,8 @@ fn main() {
 fn search_json(data: &str) -> Outputs {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&data).unwrap())
-        .build();
+        .build()
+        .unwrap();
 
     let mut exec = Executor::from_elf(env, SEARCH_JSON_ELF).unwrap();
     let session = exec.run().unwrap();

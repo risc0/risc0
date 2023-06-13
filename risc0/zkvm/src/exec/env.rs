@@ -40,9 +40,6 @@ use super::{
 /// to try and fit with 8GB of RAM.
 const DEFAULT_SEGMENT_LIMIT_PO2: usize = 20; // 1M cycles
 
-/// The default session limit specified in cycles.
-const DEFAULT_SESSION_LIMIT: usize = 64 * 1024 * 1024; // 64M cycles
-
 /// A builder pattern used to construct an [ExecutorEnv].
 #[derive(Clone)]
 pub struct ExecutorEnvBuilder<'a> {
@@ -57,7 +54,7 @@ pub struct ExecutorEnvBuilder<'a> {
 pub struct ExecutorEnv<'a> {
     env_vars: HashMap<String, String>,
     pub(crate) segment_limit_po2: usize,
-    session_limit: usize,
+    session_limit: Option<usize>,
     syscalls: SyscallTable<'a>,
     pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
     input: Vec<u8>,
@@ -84,7 +81,7 @@ impl<'a> ExecutorEnv<'a> {
         1 << self.segment_limit_po2
     }
 
-    pub(crate) fn get_session_limit(&self) -> usize {
+    pub(crate) fn get_session_limit(&self) -> Option<usize> {
         self.session_limit
     }
 
@@ -95,7 +92,7 @@ impl<'a> ExecutorEnv<'a> {
 
 impl<'a> Default for ExecutorEnv<'a> {
     fn default() -> Self {
-        Self::builder().build()
+        Self::builder().build().unwrap()
     }
 }
 
@@ -105,12 +102,29 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
             inner: ExecutorEnv {
                 env_vars: Default::default(),
                 segment_limit_po2: DEFAULT_SEGMENT_LIMIT_PO2,
-                session_limit: DEFAULT_SESSION_LIMIT,
+                session_limit: None,
                 syscalls: Default::default(),
                 io: Default::default(),
                 input: Default::default(),
                 trace_callback: Default::default(),
             },
+        }
+    }
+}
+
+/// [ExecutorEnvBuilder] errors.
+#[derive(Debug)]
+pub enum ExecutorEnvBuilderErr {
+    /// Segment limit PO2 falls outside supported range.
+    SegmentLimitPo2OutOfBounds { given: usize },
+}
+
+impl core::fmt::Display for ExecutorEnvBuilderErr {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        match self {
+            ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds { given } => {
+                write!(f, "Invalid segment_limit_po2: {given}",)
+            }
         }
     }
 }
@@ -123,9 +137,19 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///     ExecutorEnv,
     ///     ExecutorEnvBuilder};
     ///
-    /// let env = ExecutorEnv::builder().build();
+    /// let env = ExecutorEnv::builder().build().unwrap();
     /// ```
-    pub fn build(&mut self) -> ExecutorEnv<'a> {
+    pub fn build(&mut self) -> Result<ExecutorEnv<'a>, ExecutorEnvBuilderErr> {
+        // Enforce segment_limit_po2 bounds
+        if self.inner.segment_limit_po2 < risc0_zkp::MIN_CYCLES_PO2
+            || self.inner.segment_limit_po2 > risc0_zkp::MAX_CYCLES_PO2
+        {
+            return Err(ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds {
+                given: self.inner.segment_limit_po2,
+            });
+        }
+
+        // Construct the executor environment
         let mut result = self.clone();
         let getenv = syscalls::Getenv(self.inner.env_vars.clone());
         if !self.inner.input.is_empty() {
@@ -142,10 +166,13 @@ impl<'a> ExecutorEnvBuilder<'a> {
             .syscall(SYS_READ, io.clone())
             .syscall(SYS_READ_AVAIL, io.clone())
             .syscall(SYS_WRITE, io);
-        result.inner.clone()
+        Ok(result.inner.clone())
     }
 
     /// Set a segment limit, specified in powers of 2 cycles.
+    ///
+    /// Given value must be between [risc0_zkp::MIN_CYCLES_PO2] and
+    /// [risc0_zkp::MAX_CYCLES_PO2] (inclusive).
     pub fn segment_limit_po2(&mut self, limit: usize) -> &mut Self {
         self.inner.segment_limit_po2 = limit;
         self
@@ -161,10 +188,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// const NEW_SESSION_LIMIT: usize = 32 * 1024 * 1024; // 32M cycles
     ///
     /// let env = ExecutorEnv::builder()
-    ///     .session_limit(32 * 1024 * 1024) // 32M cycles
-    ///     .build();
+    ///     .session_limit(Some(32 * 1024 * 1024)) // 32M cycles
+    ///     .build()
+    ///     .unwrap();
     /// ```
-    pub fn session_limit(&mut self, limit: usize) -> &mut Self {
+    pub fn session_limit(&mut self, limit: Option<usize>) -> &mut Self {
         self.inner.session_limit = limit;
         self
     }
@@ -183,7 +211,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// let env = ExecutorEnv::builder()
     ///     .env_vars(vars)
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn env_vars(&mut self, vars: HashMap<String, String>) -> &mut Self {
         self.inner.env_vars = vars;
@@ -199,7 +228,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     ///
     /// let env = ExecutorEnv::builder()
     ///     .env_var("VAR1", "SOME_VALUE")
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn env_var(&mut self, name: &str, val: &str) -> &mut Self {
         self.inner
@@ -222,7 +252,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// let env = ExecutorEnv::builder()
     ///     .add_input(&to_vec(&a).unwrap())
     ///     .add_input(&to_vec(&b).unwrap())
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// ```
     pub fn add_input<T: Pod>(&mut self, slice: &[T]) -> &mut Self {
         self.inner

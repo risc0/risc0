@@ -19,7 +19,10 @@ use risc0_zkvm::{prove::default_prover, Executor, ExecutorEnv};
 use risc0_zkvm_methods::FIB_ELF;
 
 fn setup(iterations: u32) -> Executor<'static> {
-    let env = ExecutorEnv::builder().add_input(&[iterations]).build();
+    let env = ExecutorEnv::builder()
+        .add_input(&[iterations])
+        .build()
+        .unwrap();
     Executor::from_elf(env, FIB_ELF).unwrap()
 }
 

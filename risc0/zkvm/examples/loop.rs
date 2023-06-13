@@ -113,7 +113,8 @@ fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Box<dyn SessionRece
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = prover.prove_session(&session).unwrap();

@@ -90,7 +90,8 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
             })
             .unwrap(),
         )
-        .build();
+        .build()
+        .unwrap();
 
     let mut exec = Executor::from_elf(env, PRORATA_GUEST_ELF).unwrap();
     let session = exec.run().unwrap();

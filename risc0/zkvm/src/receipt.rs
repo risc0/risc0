@@ -41,7 +41,7 @@
 //!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
-//! let env = ExecutorEnv::builder().add_input(&[20]).build();
+//! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
 //! let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
 //! let session = exec.run().unwrap();
 //! let receipt = session.prove().unwrap();
@@ -61,7 +61,7 @@
 //!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
-//! # let env = ExecutorEnv::builder().add_input(&[20]).build();
+//! # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
 //! # let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
 //! # let session = exec.run().unwrap();
 //! # let receipt = session.prove().unwrap();

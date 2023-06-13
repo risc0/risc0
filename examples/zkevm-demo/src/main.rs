@@ -85,7 +85,8 @@ async fn main() {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&env).unwrap())
         .add_input(&to_vec(&zkdb).unwrap())
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
     let segment_dir = tempdir().unwrap();
     let session = exec
