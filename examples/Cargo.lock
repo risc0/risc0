@@ -979,19 +979,6 @@ dependencies = [
 
 [[package]]
 name = "ecdsa"
-version = "0.12.0"
-dependencies = [
- "clap 4.3.2",
- "ecdsa-methods",
- "hex",
- "k256",
- "rand_core",
- "risc0-zkvm",
- "serde",
-]
-
-[[package]]
-name = "ecdsa"
 version = "0.16.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0997c976637b606099b9985693efa3581e84e41f5c11ba5255f88711058ad428"
@@ -1003,6 +990,19 @@ dependencies = [
  "serdect",
  "signature",
  "spki",
+]
+
+[[package]]
+name = "ecdsa-example"
+version = "0.1.0"
+dependencies = [
+ "clap 4.3.2",
+ "ecdsa-methods",
+ "hex",
+ "k256",
+ "rand_core",
+ "risc0-zkvm",
+ "serde",
 ]
 
 [[package]]
@@ -2013,7 +2013,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cadb76004ed8e97623117f3df85b17aaa6626ab0b0831e6573f104df16cd1bcc"
 dependencies = [
  "cfg-if",
- "ecdsa 0.16.7",
+ "ecdsa",
  "elliptic-curve",
  "once_cell",
  "serdect",
