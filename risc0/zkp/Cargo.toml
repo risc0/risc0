@@ -66,5 +66,3 @@ prove = [
   "std",
 ]
 std = ["anyhow/std"]
-# Fail to compile when warnings occur. Used in CI.
-deny_warnings = []

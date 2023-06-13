@@ -16,7 +16,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![deny(rustdoc::broken_intra_doc_links)]
 #![deny(missing_docs)]
-#![cfg_attr(feature = "deny_warnings", deny(warnings))]
 
 extern crate alloc;
 

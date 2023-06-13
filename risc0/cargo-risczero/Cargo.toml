@@ -33,7 +33,3 @@ zip = "0.6"
 [[bin]]
 path = "src/bin/main.rs"
 name = "cargo-risczero"
-
-[features]
-# Fail to compile when warnings occur. Used in CI.
-deny_warnings = []
