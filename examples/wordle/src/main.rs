@@ -38,15 +38,16 @@ impl<'a> Server<'a> {
 
     pub fn get_secret_word_hash(&self) -> Digest {
         let receipt = self.check_round("_____");
-        let game_state: GameState = from_slice(&receipt.journal).unwrap();
+        let game_state: GameState = from_slice(&receipt.get_journal()).unwrap();
         game_state.correct_word_hash
     }
 
-    pub fn check_round(&self, guess_word: &str) -> SessionReceipt {
+    pub fn check_round(&self, guess_word: &str) -> Box<dyn SessionReceipt> {
         let env = ExecutorEnv::builder()
             .add_input(&to_vec(self.secret_word).unwrap())
             .add_input(&to_vec(&guess_word).unwrap())
-            .build();
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, WORDLE_GUEST_ELF).unwrap();
         let session = exec.run().unwrap();
         session.prove().unwrap()
@@ -63,12 +64,12 @@ struct Player {
 }
 
 impl Player {
-    pub fn check_receipt(&self, receipt: SessionReceipt) -> WordFeedback {
+    pub fn check_receipt(&self, receipt: Box<dyn SessionReceipt>) -> WordFeedback {
         receipt
-            .verify(WORDLE_GUEST_ID)
+            .verify(WORDLE_GUEST_ID.into())
             .expect("receipt verification failed");
 
-        let game_state: GameState = from_slice(&receipt.journal).unwrap();
+        let game_state: GameState = from_slice(&receipt.get_journal()).unwrap();
         if game_state.correct_word_hash != self.hash {
             panic!("The hash mismatched, so the server cheated!");
         }

@@ -30,13 +30,14 @@ use test_log::test;
 use super::{get_prover, LocalProver, Prover};
 use crate::{
     prove::HalEval,
+    receipt::SessionReceipt,
     serde::{from_slice, to_vec},
-    testutils, Executor, ExecutorEnv, ExitCode, SessionReceipt, CIRCUIT,
+    testutils, Executor, ExecutorEnv, ExitCode, SessionFlatReceipt, CIRCUIT,
 };
 
-fn prove_nothing(name: &str) -> Result<SessionReceipt> {
+fn prove_nothing(name: &str) -> Result<Box<dyn SessionReceipt>> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let prover = get_prover(name);
@@ -56,7 +57,7 @@ fn hashfn_blake2b() {
         eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
-    let env = ExecutorEnv::builder().add_input(&input).build();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let prover = LocalProver::new("cpu:blake2b", hal_eval);
@@ -66,23 +67,29 @@ fn hashfn_blake2b() {
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde() {
-    let receipt = prove_nothing("$default").unwrap();
+    let receipt = prove_nothing("$default")
+        .unwrap()
+        .as_any()
+        .downcast_ref::<SessionFlatReceipt>()
+        .unwrap()
+        .clone();
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
-    let decoded: SessionReceipt = from_slice(&encoded).unwrap();
+    let decoded: SessionFlatReceipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
-    decoded.verify(MULTI_TEST_ID).unwrap();
+    decoded.verify(MULTI_TEST_ID.into()).unwrap();
 }
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
+    use std::borrow::Borrow;
     let receipt = prove_nothing("$default").unwrap();
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
     }
     assert_eq!(
-        receipt.verify(image_id).unwrap_err(),
+        crate::verify(receipt.borrow(), image_id).unwrap_err(),
         VerificationError::ImageVerificationError
     );
 }
@@ -92,11 +99,11 @@ fn check_image_id() {
 fn sha_basics() {
     fn run_sha(msg: &str) -> String {
         let input = to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap();
-        let env = ExecutorEnv::builder().add_input(&input).build();
+        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
-        hex::encode(Digest::try_from(receipt.journal.as_slice()).unwrap())
+        hex::encode(Digest::try_from(receipt.get_journal().as_slice()).unwrap())
     }
 
     assert_eq!(
@@ -132,12 +139,12 @@ fn bigint_accel() {
         })
         .unwrap();
 
-        let env = ExecutorEnv::builder().add_input(&input).build();
+        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
         assert_eq!(
-            receipt.journal.as_slice(),
+            receipt.get_journal().as_slice(),
             bytemuck::cast_slice(case.expected().as_slice())
         );
     }
@@ -146,7 +153,7 @@ fn bigint_accel() {
 #[test]
 #[serial]
 fn memory_io() {
-    fn run_memio(pairs: &[(usize, usize)]) -> Result<SessionReceipt> {
+    fn run_memio(pairs: &[(usize, usize)]) -> Result<Box<dyn SessionReceipt>> {
         let spec = MultiTestSpec::ReadWriteMem {
             values: pairs
                 .iter()
@@ -155,7 +162,7 @@ fn memory_io() {
                 .collect(),
         };
         let input = to_vec(&spec)?;
-        let env = ExecutorEnv::builder().add_input(&input).build();
+        let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
         let session = exec.run()?;
         session.prove()
@@ -192,14 +199,21 @@ fn memory_io() {
 fn pause_continue() {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
 
     // Run until sys_pause
     let session = exec.run().unwrap();
     assert_eq!(session.segments.len(), 1);
     assert_eq!(session.exit_code, ExitCode::Paused(0));
-    let receipt = session.prove().unwrap();
+    let receipt = session
+        .prove()
+        .unwrap()
+        .as_any()
+        .downcast_ref::<SessionFlatReceipt>()
+        .unwrap()
+        .clone();
     assert_eq!(receipt.segments.len(), 1);
     assert_eq!(receipt.segments[0].index, 0);
 
@@ -220,7 +234,8 @@ fn continuation() {
     let env = ExecutorEnv::builder()
         .add_input(&spec)
         .segment_limit_po2(segment_limit_po2)
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
@@ -232,7 +247,13 @@ fn continuation() {
     }
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
-    let receipts = session.prove().unwrap();
+    let receipts = session
+        .prove()
+        .unwrap()
+        .as_any()
+        .downcast_ref::<SessionFlatReceipt>()
+        .unwrap()
+        .clone();
     for (idx, receipt) in receipts.segments.iter().enumerate() {
         assert_eq!(receipt.index, idx as u32);
     }

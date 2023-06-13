@@ -38,7 +38,8 @@ use risc0_zkvm_methods::{
 fn run_guest(spec: SpecWithIters) -> Duration {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
-        .build();
+        .build()
+        .unwrap();
     let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
 
     let start = Instant::now();

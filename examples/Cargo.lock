@@ -1231,46 +1231,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "evm"
-version = "0.1.0"
-dependencies = [
- "clap 4.3.2",
- "env_logger",
- "ethers-core",
- "ethers-providers",
- "evm-core",
- "evm-methods",
- "log",
- "risc0-zkvm",
- "serde",
- "tempfile",
- "tokio",
-]
-
-[[package]]
-name = "evm-core"
-version = "0.1.0"
-dependencies = [
- "bytes",
- "ethers-core",
- "ethers-providers",
- "futures",
- "getrandom",
- "hashbrown 0.13.2",
- "primitive-types",
- "revm",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "evm-methods"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
-]
-
-[[package]]
 name = "exr"
 version = "1.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1550,9 +1510,9 @@ dependencies = [
 
 [[package]]
 name = "getrandom"
-version = "0.2.9"
+version = "0.2.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c85e1d9ab2eadba7e5040d4e09cbd6d072b76a557ad64e797c2cb9d4da21d7e4"
+checksum = "be4136b2a15dd319360be1c07d9933517ccf0be8f16bf62a3bee4f0d618df427"
 dependencies = [
  "cfg-if",
  "js-sys",
@@ -2093,9 +2053,9 @@ checksum = "03087c2bad5e1034e8cace5926dec053fb3790248370865f5117a7d0213354c8"
 
 [[package]]
 name = "libc"
-version = "0.2.145"
+version = "0.2.146"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fc86cde3ff845662b8f4ef6cb50ea0e20c524eb3d29ae048287e06a1b3fa6a81"
+checksum = "f92be4933c13fd498862a9e02a3055f8a8d9c039ce33db97306fd5a6caa7f29b"
 
 [[package]]
 name = "libm"
@@ -4774,6 +4734,45 @@ dependencies = [
  "sha1",
  "time",
  "zstd",
+]
+
+[[package]]
+name = "zkevm-core"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "ethers-core",
+ "ethers-providers",
+ "futures",
+ "getrandom",
+ "primitive-types",
+ "revm",
+ "serde",
+ "tokio",
+]
+
+[[package]]
+name = "zkevm-demo"
+version = "0.1.0"
+dependencies = [
+ "clap 4.3.2",
+ "env_logger",
+ "ethers-core",
+ "ethers-providers",
+ "log",
+ "risc0-zkvm",
+ "serde",
+ "tempfile",
+ "tokio",
+ "zkevm-core",
+ "zkevm-methods",
+]
+
+[[package]]
+name = "zkevm-methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
 ]
 
 [[package]]

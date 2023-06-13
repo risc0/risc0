@@ -74,12 +74,12 @@ pub struct Executor<'a> {
     monitor: MemoryMonitor,
     pc: u32,
     init_cycles: usize,
-    fini_cycles: usize,
     body_cycles: usize,
     segment_cycle: usize,
     segments: Vec<Box<dyn SegmentRef>>,
     insn_counter: u32,
     split_insn: Option<u32>,
+    const_cycles: usize,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -142,6 +142,7 @@ impl<'a> Executor<'a> {
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
+        let const_cycles = init_cycles + fini_cycles + SHA_CYCLES + ZK_CYCLES;
 
         Self {
             env,
@@ -149,12 +150,12 @@ impl<'a> Executor<'a> {
             monitor,
             pc,
             init_cycles,
-            fini_cycles,
             body_cycles: 0,
             segment_cycle: init_cycles,
             segments: Vec::new(),
             insn_counter: 0,
             split_insn: None,
+            const_cycles,
         }
     }
 
@@ -169,7 +170,8 @@ impl<'a> Executor<'a> {
     /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
     /// let env = ExecutorEnv::builder()
     ///     .add_input(&to_vec(&spec).unwrap())
-    ///     .build();
+    ///     .build()
+    ///     .unwrap();
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// ```
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
@@ -188,7 +190,8 @@ impl<'a> Executor<'a> {
     /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
     /// let env = ExecutorEnv::builder()
     ///    .add_input(&to_vec(&spec).unwrap())
-    ///    .build();
+    ///    .build()
+    ///    .unwrap();
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// let session = exec.run().unwrap();
     /// ```
@@ -277,8 +280,10 @@ impl<'a> Executor<'a> {
     ///
     /// This can be directly used by debuggers.
     pub fn step(&mut self) -> Result<Option<ExitCode>> {
-        if self.session_cycle() > self.env.get_session_limit() {
-            return Ok(Some(ExitCode::SessionLimit));
+        if let Some(limit) = self.env.get_session_limit() {
+            if self.session_cycle() >= limit {
+                return Ok(Some(ExitCode::SessionLimit));
+            }
         }
 
         let insn = self.monitor.load_u32(self.pc);
@@ -370,12 +375,7 @@ impl<'a> Executor<'a> {
     }
 
     fn total_cycles(&self) -> usize {
-        self.init_cycles
-            + self.monitor.total_fault_cycles()
-            + self.body_cycles
-            + self.fini_cycles
-            + SHA_CYCLES
-            + ZK_CYCLES
+        self.const_cycles + self.monitor.total_fault_cycles() + self.body_cycles
     }
 
     fn total_pending_cycles(&self, opcode: &OpCode, op_result: &OpCodeResult) -> usize {
@@ -385,14 +385,11 @@ impl<'a> Executor<'a> {
         // - each page fault requires 1 PageFault cycle + CYCLES_PER_PAGE cycles
         // - leave room for fini_cycles
         // - leave room for ZK cycles
-        self.init_cycles
+        self.const_cycles
             + self.monitor.total_pending_fault_cycles()
             + opcode.cycles
             + op_result.extra_cycles
             + self.body_cycles
-            + self.fini_cycles
-            + SHA_CYCLES
-            + ZK_CYCLES
     }
 
     fn session_cycle(&self) -> usize {

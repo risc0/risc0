@@ -12,17 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use factors::multiply_factors;
-use factors_methods::MULTIPLY_ID;
+// This code is automatically generated
 
-fn main() {
-    // Pick two numbers
-    let (receipt, _) = multiply_factors(17, 23);
+use risc0_zkp::adapter::CircuitInfo;
 
-    // Here is where one would send 'receipt' over the network...
+use super::CircuitImpl;
 
-    // Verify receipt, panic if it's wrong
-    receipt.verify(MULTIPLY_ID.into()).expect(
-        "Code you have proven should successfully verify; did you specify the correct image ID?",
-    );
+impl CircuitInfo for CircuitImpl {
+    #[rustfmt::skip]
+    const OUTPUT_SIZE: usize = 32;
+
+    #[rustfmt::skip]
+    const MIX_SIZE: usize = 20;
 }

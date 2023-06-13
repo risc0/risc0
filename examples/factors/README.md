@@ -103,7 +103,7 @@ In the starter template project, our host driver program creates an executor env
     };
 
     // First, we construct an executor environment
-    let env = ExecutorEnv::builder().build();
+    let env = ExecutorEnv::builder().build().unwrap();
 
     // Next, we make an executor, loading the (renamed) ELF binary.
     let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
@@ -146,7 +146,8 @@ We'd like the host to make the values of `a` and `b` available to the guest prio
     // Send a & b to the guest
       .add_input(&to_vec(&a).unwrap())
       .add_input(&to_vec(&b).unwrap())
-      .build();
+      .build()
+      .unwrap();
 ```
 
 You can confirm your work with `cargo run --release` — the program still won't do anything, but it should compile and run successfully.
@@ -239,16 +240,17 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
     // Send a & b to the guest
     .add_input(&to_vec(&a).unwrap())
     .add_input(&to_vec(&b).unwrap())
-    .build();
+    .build()
+    .unwrap();
 
     let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
     let session = exec.run().unwrap();
 
     let receipt = session.prove().unwrap();
-    receipt.verify(MULTIPLY_ID).unwrap();
+    receipt.verify(MULTIPLY_ID.into()).unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
-    let c: u64 = from_slice(&receipt.journal).unwrap();
+    let c: u64 = from_slice(&receipt.get_journal()).unwrap();
 
     // Print an assertion
     println!("Hello, world! I know the factors of {}, and I can prove it!", c);
