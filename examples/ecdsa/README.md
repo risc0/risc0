@@ -19,12 +19,12 @@ transaction ledgers][3].
 ## Guest Acceleration
 
 ECDSA verification is relatively expensive in the zkVM guest. Using the [RustCrypto] `k256` crate
-with RISC Zero v0.15, it takes about 5M zkVM cycles† to verify a signature.
+with RISC Zero v0.15, it takes about 5M zkVM cycles[^1] to verify a signature.
 
 In order to speed this up, the zkVM implements a 256-bit big integer multiplication accelerator, which targets
 the main bottleneck for signature verification. Additionally, RISC Zero implements patched versions
 of the `crypto-bigint` and `k256` crates which use this accelerator. Using these patches, **ECDSA
-signature verification takes about 870k cycles**‡
+signature verification takes about 870k cycles**[^2]
 
 You can see an example of how to apply these patches in the [`methods/guest/Cargo.toml`][4] file.
 
@@ -33,11 +33,8 @@ other cryptographic primitives as well. Additionally, the [changes][5] made to `
 example of how to use the big integer accelerator circuit to speed up other cryptographic operations
 (e.g. P-256, or RSA).
 
----
-
-† About 126s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
-
-‡ About 17s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
+[^1]: About 126s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
+[^2]: About 17s to execute and prove on an M1 MacBook Pro using RISC Zero v0.15.
 
 [RustCrypto]: https://docs.rs/k256/latest/k256/
 [4]: methods/guest/Cargo.toml
