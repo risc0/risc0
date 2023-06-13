@@ -11,9 +11,6 @@ rand_core = "0.6.4"
 risc0-zkvm = { path = "../../risc0/zkvm" }
 serde = "1.0"
 
-[dev-dependencies]
-hex = "0.4"
-
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
