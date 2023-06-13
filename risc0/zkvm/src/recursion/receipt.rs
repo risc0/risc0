@@ -14,11 +14,11 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use risc0_zkp::core::digest::Digest;
+#[cfg(not(target_os = "zkvm"))]
+use risc0_zkp::adapter::CircuitInfo;
 #[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::core::hash::sha::Sha256;
-#[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::{adapter::CircuitInfo, verify::VerificationError};
+use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(target_os = "zkvm"))]
@@ -27,7 +27,7 @@ use crate::receipt::compute_image_id;
 use crate::recursion::circuit_impl::CIRCUIT_CORE;
 #[cfg(not(target_os = "zkvm"))]
 use crate::sha::{self};
-use crate::{receipt::SessionReceipt, ControlId};
+use crate::{receipt::SessionReceipt, ControlId, ExitCode};
 
 /// This function gets valid control ID's from the posidon and recursion
 /// circuits
@@ -85,10 +85,7 @@ pub struct ReceiptMeta {
     /// System State after the segment execution
     pub post: SystemState,
     /// The system's exit state at the end of this segment
-    pub sys_exit: u8,
-    /// The system's exit status derived from a sys_pause instruction at the end
-    /// of this segment
-    pub user_exit: u8,
+    pub exit_code: ExitCode,
     /// hash of the output
     pub output: Digest,
 }
@@ -146,29 +143,39 @@ impl SystemState {
 
 impl ReceiptMeta {
     /// decode a [ReceiptMeta] from a list of [u32]'s
-    pub fn decode(flat: &mut VecDeque<u32>) -> Self {
-        Self {
-            input: read_sha_halfs(flat),
-            pre: SystemState::decode(flat),
-            post: SystemState::decode(flat),
-            sys_exit: flat.pop_front().unwrap() as u8,
-            user_exit: flat.pop_front().unwrap() as u8,
-            output: read_sha_halfs(flat),
-        }
+    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, VerificationError> {
+        let input = read_sha_halfs(flat);
+        let pre = SystemState::decode(flat);
+        let post = SystemState::decode(flat);
+        let sys_exit = flat.pop_front().unwrap() as u32;
+        let user_exit = flat.pop_front().unwrap() as u32;
+        let exit_code = ReceiptMeta::make_exit_code(sys_exit, user_exit)?;
+        let output = read_sha_halfs(flat);
+
+        Ok(Self {
+            input,
+            pre,
+            post,
+            exit_code,
+            output,
+        })
     }
     /// encode a [ReceiptMeta] to a list of [u32]'s
-    pub fn encode(&self, flat: &mut Vec<u32>) {
+    pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), VerificationError> {
         write_sha_halfs(flat, &self.input);
         self.pre.encode(flat);
         self.post.encode(flat);
-        flat.push(self.sys_exit as u32);
-        flat.push(self.user_exit as u32);
+        let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
+        flat.push(sys_exit);
+        flat.push(user_exit);
         write_sha_halfs(flat, &self.output);
+        Ok(())
     }
 
     #[cfg(not(target_os = "zkvm"))]
-    fn digest(&self) -> Digest {
-        tagged_struct(
+    fn digest(&self) -> Result<Digest, VerificationError> {
+        let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
+        Ok(tagged_struct(
             "risc0.ReceiptMeta",
             &[
                 self.input,
@@ -176,8 +183,26 @@ impl ReceiptMeta {
                 self.post.digest(),
                 self.output,
             ],
-            &[self.sys_exit.into(), self.user_exit.into()],
-        )
+            &[sys_exit, user_exit],
+        ))
+    }
+
+    fn get_exit_code_pairs(&self) -> Result<(u32, u32), VerificationError> {
+        match self.exit_code {
+            ExitCode::Halted(user_exit) => return Ok((0, user_exit)),
+            ExitCode::Paused(user_exit) => return Ok((1, user_exit)),
+            ExitCode::SystemSplit => return Ok((2, 0)),
+            _ => return Err(VerificationError::ReceiptFormatError),
+        };
+    }
+
+    fn make_exit_code(sys_exit: u32, user_exit: u32) -> Result<ExitCode, VerificationError> {
+        match sys_exit {
+            0 => Ok(ExitCode::Halted(user_exit)),
+            1 => Ok(ExitCode::Paused(user_exit)),
+            2 => Ok(ExitCode::SystemSplit),
+            _ => Err(VerificationError::ReceiptFormatError),
+        }
     }
 }
 
@@ -225,7 +250,7 @@ impl SegmentRecursionReceipt {
         seal_meta.drain(0..16);
         // Verify the output hash matches that data
         let output_hash = read_sha_halfs(&mut seal_meta);
-        if output_hash != self.meta.digest() {
+        if output_hash != self.meta.digest()? {
             return Err(VerificationError::JournalDigestMismatch);
         }
         // Everything passed
