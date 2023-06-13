@@ -33,5 +33,5 @@ fn main() {
 
     // Optional: Verify receipt to confirm that recipients will also be able to
     // verify your receipt
-    receipt.verify(METHOD_NAME_ID).unwrap();
+    receipt.verify(METHOD_NAME_ID.into()).unwrap();
 }

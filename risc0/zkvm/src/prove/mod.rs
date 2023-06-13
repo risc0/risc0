@@ -61,7 +61,10 @@ use risc0_zkp::{
 use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
-use crate::{ControlId, Segment, SegmentReceipt, Session, SessionReceipt, CIRCUIT};
+use crate::{
+    receipt::SessionReceipt, ControlId, Segment, SegmentReceipt, Session, SessionFlatReceipt,
+    CIRCUIT,
+};
 
 /// HAL creation functions for CUDA.
 #[cfg(feature = "cuda")]
@@ -174,7 +177,7 @@ where
 /// TODO
 pub trait Prover {
     /// TODO
-    fn prove_session(&self, session: &Session) -> Result<SessionReceipt>;
+    fn prove_session(&self, session: &Session) -> Result<Box<dyn SessionReceipt>>;
 
     /// TODO
     fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt>;
@@ -226,21 +229,21 @@ where
         self.hal_eval.hal.get_memory_usage()
     }
 
-    fn prove_session(&self, session: &Session) -> Result<SessionReceipt> {
+    fn prove_session(&self, session: &Session) -> Result<Box<dyn SessionReceipt>> {
         log::info!("prove_session: {}", self.name);
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
             segments.push(self.prove_segment(&segment)?);
         }
-        let receipt = SessionReceipt {
+        let receipt = SessionFlatReceipt {
             segments,
             journal: session.journal.clone(),
         };
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
         let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
         receipt.verify_with_hal(&hal, image_id)?;
-        Ok(receipt)
+        Ok(Box::new(receipt))
     }
 
     fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt> {
@@ -361,7 +364,7 @@ pub fn get_prover(name: &str) -> Rc<dyn Prover> {
 
 impl Session {
     /// For each segment, call [Segment::prove] and collect the receipts.
-    pub fn prove(&self) -> Result<SessionReceipt> {
+    pub fn prove(&self) -> Result<Box<dyn SessionReceipt>> {
         default_prover().prove_session(self)
     }
 }

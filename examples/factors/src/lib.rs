@@ -20,7 +20,7 @@ use risc0_zkvm::{
 #[doc = include_str!("../README.md")]
 
 // Multiply them inside the ZKP
-pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
+pub fn multiply_factors(a: u64, b: u64) -> (Box<dyn SessionReceipt>, u64) {
     let env = ExecutorEnv::builder()
         // Send a & b to the guest
         .add_input(&to_vec(&a).unwrap())
@@ -38,7 +38,7 @@ pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
     let receipt = session.prove().unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
-    let c: u64 = from_slice(&receipt.journal).expect(
+    let c: u64 = from_slice(receipt.get_journal()).expect(
         "Journal output should deserialize into the same types (& order) that it was written",
     );
 

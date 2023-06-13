@@ -76,11 +76,7 @@ fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
     let seal = if skip_prover {
         0
     } else {
-        let receipt = prover.prove_session(&session).unwrap();
-        receipt
-            .segments
-            .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
+        prover.prove_session(&session).unwrap().get_seal_len()
     };
 
     Metrics {

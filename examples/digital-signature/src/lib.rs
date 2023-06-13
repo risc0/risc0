@@ -21,12 +21,12 @@ use risc0_zkvm::{
 use sha2::{Digest, Sha256};
 
 pub struct SignatureWithReceipt {
-    receipt: SessionReceipt,
+    receipt: Box<dyn SessionReceipt>,
 }
 
 impl SignatureWithReceipt {
     pub fn get_commit(&self) -> Result<SignMessageCommit> {
-        let msg = &self.receipt.journal;
+        let msg = &self.receipt.get_journal();
         Ok(from_slice(msg.as_slice()).unwrap())
     }
 
@@ -41,7 +41,7 @@ impl SignatureWithReceipt {
     }
 
     pub fn verify(&self) -> Result<SignMessageCommit> {
-        self.receipt.verify(SIGN_ID)?;
+        self.receipt.verify(SIGN_ID.into())?;
         self.get_commit()
     }
 }

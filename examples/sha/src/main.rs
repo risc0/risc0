@@ -30,7 +30,7 @@ use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 /// Zero accelerator. See `src/methods/guest/Cargo.toml` for the patch
 /// definition, which can be used to enable SHA-256 accelerrator support
 /// everywhere the [sha2] crate is used.
-fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, SessionReceipt) {
+fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Box<dyn SessionReceipt>) {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(input).unwrap())
         .build()
@@ -46,7 +46,7 @@ fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, SessionReceipt)
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
 
-    let digest = from_slice::<Vec<u8>, _>(&receipt.journal)
+    let digest = from_slice::<Vec<u8>, _>(&receipt.get_journal())
         .unwrap()
         .try_into()
         .unwrap();
@@ -65,7 +65,7 @@ fn main() {
 
     // Verify the receipt, ensuring the prover knows a valid SHA-256 preimage.
     receipt
-        .verify(HASH_ID)
+        .verify(HASH_ID.into())
         .expect("receipt verification failed");
 
     println!("I provably know data whose SHA-256 hash is {}", digest);
@@ -78,7 +78,7 @@ mod tests {
     #[test]
     fn hash_abc() {
         let (digest, receipt) = super::provably_hash("abc", false);
-        receipt.verify(HASH_ID).unwrap();
+        receipt.verify(HASH_ID.into()).unwrap();
         assert_eq!(
             hex::encode(digest.as_bytes()),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
@@ -89,7 +89,7 @@ mod tests {
     #[test]
     fn hash_abc_rust_crypto() {
         let (digest, receipt) = super::provably_hash("abc", true);
-        receipt.verify(HASH_RUST_CRYPTO_ID).unwrap();
+        receipt.verify(HASH_RUST_CRYPTO_ID.into()).unwrap();
         assert_eq!(
             hex::encode(digest.as_bytes()),
             "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
