@@ -129,6 +129,8 @@ impl core::fmt::Display for ExecutorEnvBuilderErr {
     }
 }
 
+impl std::error::Error for ExecutorEnvBuilderErr {}
+
 impl<'a> ExecutorEnvBuilder<'a> {
     /// Finalize this builder to construct an [ExecutorEnv].
     /// # Example

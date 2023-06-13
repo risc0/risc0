@@ -16,7 +16,7 @@ use cargo_risczero::{Cargo, RisczeroCmd};
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .init();
@@ -24,14 +24,8 @@ fn main() {
     let Cargo::Risczero(args) = Cargo::parse();
 
     match args.command {
-        RisczeroCmd::New(new) => {
-            new.run();
-        }
-        RisczeroCmd::Build(build) => {
-            build.run("build");
-        }
-        RisczeroCmd::Test(build) => {
-            build.run("test");
-        }
+        RisczeroCmd::New(new) => new.run(),
+        RisczeroCmd::Build(build) => build.run("build"),
+        RisczeroCmd::Test(build) => build.run("test"),
     }
 }

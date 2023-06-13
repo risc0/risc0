@@ -14,6 +14,7 @@
 
 use std::path::PathBuf;
 
+use anyhow::Context;
 use cargo_generate::{GenerateArgs, TemplatePath, Vcs};
 use clap::Parser;
 use const_format::concatcp;
@@ -83,11 +84,11 @@ pub struct NewCommand {
 
 impl NewCommand {
     /// Execute this command
-    pub fn run(&self) {
+    pub fn run(&self) -> anyhow::Result<()> {
         let dest_dir = if let Some(dest_dir) = self.dest.clone() {
             dest_dir
         } else {
-            std::env::current_dir().expect("Failed to fetch cwd")
+            std::env::current_dir().with_context(|| "failed to fetch cwd")?
         };
 
         let mut template_path = TemplatePath {
@@ -116,7 +117,9 @@ impl NewCommand {
             template_variables.push(format!("risc0_build={spec}"));
             template_variables.push(format!("risc0_zkvm={spec}"));
         } else if let Some(path) = self.path.as_ref() {
-            let path = path.to_str().unwrap();
+            let path = path
+                .to_str()
+                .with_context(|| "invalid path string for command executable")?;
             let build = format!("path = \"{path}/risc0/build\"");
             let zkvm = format!("path = \"{path}/risc0/zkvm\"");
             template_variables.push(format!("risc0_build={build}"));
@@ -157,7 +160,9 @@ impl NewCommand {
             overwrite: false,
             other_args: None,
         })
-        .expect("Failed to generate project");
+        .with_context(|| "failed to generate project")?;
+
+        Ok(())
     }
 }
 
@@ -173,26 +178,27 @@ mod tests {
 
     use super::*;
 
-    fn make_test_env() -> (TempDir, PathBuf, &'static str) {
-        let tmpdir = tempdir().expect("Failed to create tempdir");
-        let manifest_path =
-            std::env::var("CARGO_MANIFEST_DIR").expect("Missing CARGO_MANIFEST_DIR var");
+    fn make_test_env() -> anyhow::Result<(TempDir, PathBuf, &'static str)> {
+        let tmpdir = tempdir().with_context("failed to create tempdir")?;
+        let manifest_path = std::env::var("CARGO_MANIFEST_DIR")
+            .with_context(|| "missing CARGO_MANIFEST_DIR var")?;
         // NOTE: cargo run and cargo test have a slightly different idea of what the
         // manifest_dir is. https://github.com/rust-lang/cargo/issues/3946
         let template_path = Path::new(&manifest_path).join("../../");
-        (tmpdir, template_path, "my_project")
+        Ok((tmpdir, template_path, "my_project"))
     }
 
-    fn find_in_file(needle: &str, file: &Path) -> bool {
-        let file = File::open(file).unwrap();
+    fn find_in_file(needle: &str, file: &Path) -> anyhow::Result<bool> {
+        let file = File::open(file)?;
         let reader = BufReader::new(file);
         for line in reader.lines() {
-            let line_data = line.expect("Failed to readline");
+            let line_data =
+                line.with_context(|| format!("failed to readline from {file}", file.display()))?;
             if line_data.contains(needle) {
-                return true;
+                return Ok(true);
             }
         }
-        false
+        Ok(false)
     }
 
     #[test]

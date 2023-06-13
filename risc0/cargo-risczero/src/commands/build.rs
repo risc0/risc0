@@ -14,6 +14,7 @@
 
 use std::{fs, io, io::Write, path::PathBuf, process::Stdio};
 
+use anyhow::{anyhow, Context};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::Parser;
 use risc0_zkvm::{Executor, ExecutorEnv};
@@ -37,18 +38,18 @@ pub struct BuildCommand {
 
 static ZIP_CONTENTS: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/cargo-risczero.zip"));
 
-fn get_zip_file(dir: &TempDir, filename: &str) -> PathBuf {
-    let mut zip = zip::ZipArchive::new(io::Cursor::new(ZIP_CONTENTS)).unwrap();
-    let mut file = zip.by_name(filename).unwrap();
+fn get_zip_file(dir: &TempDir, filename: &str) -> anyhow::Result<PathBuf> {
+    let mut zip = zip::ZipArchive::new(io::Cursor::new(ZIP_CONTENTS))?;
+    let mut file = zip.by_name(filename)?;
     let dest_path = dir.path().join(filename);
-    let mut dest_file = fs::File::create(&dest_path).unwrap();
-    io::copy(&mut file, &mut dest_file).unwrap();
-    dest_path
+    let mut dest_file = fs::File::create(&dest_path)?;
+    io::copy(&mut file, &mut dest_file)?;
+    Ok(dest_path)
 }
 
 impl BuildCommand {
     /// Execute this command
-    pub fn run(&self, subcommand: &str) {
+    pub fn run(&self, subcommand: &str) -> anyhow::Result<()> {
         let manifest_dir = match fs::canonicalize(&self.manifest_dir) {
             Ok(path) => path,
             Err(ref err) => panic!(
@@ -58,9 +59,9 @@ impl BuildCommand {
             ),
         };
 
-        let tmpdir = tempdir().unwrap();
+        let tmpdir = tempdir()?;
 
-        let rust_runtime = get_zip_file(&tmpdir, "rust-runtime.a");
+        let rust_runtime = get_zip_file(&tmpdir, "rust-runtime.a")?;
         eprintln!("Runtime: {rust_runtime:?}");
 
         let target_dir = &self
@@ -69,7 +70,8 @@ impl BuildCommand {
             .unwrap_or_else(|| risc0_build::get_target_dir(&manifest_dir));
 
         println!("target_dir: {}", target_dir.display());
-        fs::create_dir_all(&target_dir).expect("failed to ensure target directory exists");
+        fs::create_dir_all(&target_dir)
+            .with_context(|| "failed to ensure target directory exists")?;
 
         let guest_build_env = risc0_build::setup_guest_build_env(&target_dir);
         println!("guest_build_env: {guest_build_env:?}");
@@ -79,7 +81,12 @@ impl BuildCommand {
             true,
             &[
                 "-C",
-                &format!("link_arg={}", rust_runtime.to_str().unwrap()),
+                &format!(
+                    "link_arg={}",
+                    rust_runtime
+                        .to_str()
+                        .expect("invalid path string for rust_runtime")
+                ),
             ],
         );
         cmd.arg("--message-format=json");
@@ -100,11 +107,16 @@ impl BuildCommand {
         }
 
         println!("running {cmd:?}");
-        let mut child = cmd.stdout(Stdio::piped()).spawn().unwrap();
-        let reader = std::io::BufReader::new(child.stdout.take().unwrap());
+        let mut child = cmd.stdout(Stdio::piped()).spawn()?;
+        let reader = std::io::BufReader::new(
+            child
+                .stdout
+                .take()
+                .ok_or(anyhow!("failed to read from cmd stdout"))?,
+        );
         let mut tests: Vec<String> = Vec::new();
         for message in Message::parse_stream(reader) {
-            match message.unwrap() {
+            match message? {
                 Message::CompilerArtifact(Artifact {
                     executable: Some(exec_path),
                     profile: ArtifactProfile { test: true, .. },
@@ -113,13 +125,15 @@ impl BuildCommand {
                     tests.push(exec_path.to_string());
                 }
                 Message::CompilerMessage(msg) => {
-                    write!(io::stderr(), "{}", msg).unwrap();
+                    write!(io::stderr(), "{}", msg)?;
                 }
                 _ => (),
             }
         }
 
-        let output = child.wait().expect("Couldn't get cargo's exit status");
+        let output = child
+            .wait()
+            .with_context(|| "Couldn't get cargo's exit status")?;
         if !output.success() {
             panic!("Unable to build static library")
         }
@@ -132,7 +146,6 @@ impl BuildCommand {
                 let mut env_builder = ExecutorEnv::builder();
 
                 env_builder
-                    .session_limit(usize::MAX)
                     .env_var("RUST_TEST_NOCAPTURE", "1")
                     .env_var("ARGC", &(self.args.len() + 1).to_string())
                     .env_var("ARGV_0", &t);
@@ -141,10 +154,11 @@ impl BuildCommand {
                     env_builder.env_var(&format!("ARGV_{}", i + 1), &arg);
                 }
 
-                let env = env_builder.build();
-                let mut exec = Executor::from_elf(env, &fs::read(t).unwrap()).unwrap();
-                exec.run().unwrap();
+                let env = env_builder.build()?;
+                let mut exec = Executor::from_elf(env, &fs::read(t)?)?;
+                exec.run()?;
             }
-        }
+        };
+        Ok(())
     }
 }
