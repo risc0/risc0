@@ -64,7 +64,7 @@ pub mod responses {
 }
 
 /// Proof Session representation
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct SessionId {
     /// Session UUID
     pub uuid: String,
@@ -107,6 +107,7 @@ fn construct_req_client(api_key: &str) -> Result<BlockingClient> {
 
     BlockingClient::builder()
         .default_headers(headers)
+        .pool_max_idle_per_host(0)
         .build()
         .context("Failed to build reqwest client")
 }
