@@ -31,7 +31,7 @@ pub struct NewCommand {
     #[arg()]
     pub name: String,
 
-    /// GH repository URL.
+    /// GitHub repository URL.
     #[clap(value_parser, long, short, default_value = RISC0_GH_REPO)]
     pub template: String,
 
@@ -107,8 +107,10 @@ impl NewCommand {
             template_path.tag = None;
         }
 
-        let risc0_version = std::env::var("CARGO_PKG_VERSION")
-            .unwrap_or_else(|_| RISC0_DEFAULT_VERSION.to_string());
+        let risc0_version = std::env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| {
+            println!("CARGO_PKG_VERSION not set");
+            RISC0_DEFAULT_VERSION.to_string()
+        });
 
         let mut template_variables = Vec::new();
         if let Some(branch) = self.use_git_branch.as_ref() {

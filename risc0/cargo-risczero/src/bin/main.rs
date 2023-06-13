@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo_risczero::{Cargo, RisczeroCmd};
+use cargo_risczero::{commands::build::BuildSubcommand, Cargo, RisczeroCmd};
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
 
@@ -25,7 +25,7 @@ fn main() -> anyhow::Result<()> {
 
     match args.command {
         RisczeroCmd::New(new) => new.run(),
-        RisczeroCmd::Build(build) => build.run("build"),
-        RisczeroCmd::Test(build) => build.run("test"),
+        RisczeroCmd::Build(build) => build.run(BuildSubcommand::Build),
+        RisczeroCmd::Test(build) => build.run(BuildSubcommand::Test),
     }
 }

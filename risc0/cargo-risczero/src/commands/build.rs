@@ -14,20 +14,40 @@
 
 use std::{fs, io, io::Write, path::PathBuf, process::Stdio};
 
-use anyhow::{anyhow, Context};
+use anyhow::{anyhow, bail, Context};
 use cargo_metadata::{Artifact, ArtifactProfile, Message};
 use clap::Parser;
 use risc0_zkvm::{Executor, ExecutorEnv};
 use tempfile::{tempdir, TempDir};
 
+/// Subcommands of cargo that are supported by this cargo risczero command.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum BuildSubcommand {
+    /// Invocation of `cargo risczero build` which calls `cargo build`.
+    Build,
+
+    /// Invocation of `cargo risczero build` which calls `cargo test --no-run`.
+    Test,
+}
+
+impl AsRef<str> for BuildSubcommand {
+    fn as_ref(&self) -> &'static str {
+        match &self {
+            Self::Build => "build",
+            Self::Test => "test",
+        }
+    }
+}
+
 #[derive(Parser)]
 /// `cargo risczero build`
 pub struct BuildCommand {
-    /// Manifest directory path.
-    #[clap(long, default_value = ".")]
-    pub manifest_dir: PathBuf,
+    /// Path to the Cargo.toml file for the crate to be built.
+    #[clap(long, default_value = "./Cargo.toml")]
+    pub manifest_path: PathBuf,
 
     /// Output directory for build artifacts.
+    ///
     /// Determined from package metadata if not supplied.
     #[clap(long)]
     pub target_dir: Option<PathBuf>,
@@ -54,35 +74,37 @@ impl BuildCommand {
     /// "test". If "test", this function will apply extra steps to approximate
     /// the behavior of cargo test, running tests with the RISC Zero
     /// executor.
-    pub fn run(&self, subcommand: &str) -> anyhow::Result<()> {
-        let manifest_dir = match fs::canonicalize(&self.manifest_dir) {
+    pub fn run(&self, subcommand: BuildSubcommand) -> anyhow::Result<()> {
+        // Determine the manifest directory and get it's canonical path.
+        let manifest_path = match fs::canonicalize(&self.manifest_path) {
             Ok(path) => path,
-            Err(ref err) => panic!(
-                "failed to resolve manifest directory `{}`: {}",
-                &self.manifest_dir.display(),
+            Err(ref err) => bail!(
+                "failed to resolve manifest path `{}`: {}",
+                &self.manifest_path.display(),
                 err
             ),
         };
 
+        // Unpack the rust-runtime.a file that is included in this binary.
         let tmpdir = tempdir()?;
 
         let rust_runtime = get_zip_file(&tmpdir, "rust-runtime.a")?;
         eprintln!("Runtime: {rust_runtime:?}");
 
+        // Determine the target directory where the build artifacts should be placed.
         let target_dir = &self
             .target_dir
             .clone()
-            .unwrap_or_else(|| risc0_build::get_target_dir(&manifest_dir));
+            .unwrap_or_else(|| risc0_build::get_target_dir(&manifest_path));
 
-        println!("target_dir: {}", target_dir.display());
         fs::create_dir_all(&target_dir)
             .with_context(|| "failed to ensure target directory exists")?;
 
         let guest_build_env = risc0_build::setup_guest_build_env(&target_dir);
-        println!("guest_build_env: {guest_build_env:?}");
 
+        // Build the cargo build/test command for building the crate.
         let mut cmd = guest_build_env.cargo_command(
-            subcommand,
+            subcommand.as_ref(),
             true,
             &[
                 "-C",
@@ -98,7 +120,7 @@ impl BuildCommand {
 
         // Strip out --no-run if specified, since we always pass --no-run.
         let mut no_run_flag = false;
-        if subcommand == "test" {
+        if subcommand == BuildSubcommand::Test {
             cmd.arg("--no-run");
             for arg in &self.args {
                 if arg == "--no-run" {
@@ -111,8 +133,10 @@ impl BuildCommand {
             cmd.args(&self.args);
         }
 
-        println!("running {cmd:?}");
+        eprintln!("running {cmd:?}");
         let mut child = cmd.stdout(Stdio::piped()).spawn()?;
+
+        // Parse stdout from the command and record any test binaries that get compiled.
         let reader = std::io::BufReader::new(
             child
                 .stdout
@@ -138,13 +162,15 @@ impl BuildCommand {
 
         let output = child
             .wait()
-            .with_context(|| "Couldn't get cargo's exit status")?;
+            .with_context(|| "couldn't get cargo's exit status")?;
         if !output.success() {
-            panic!("Unable to build static library")
+            bail!("failed to build crate")
         }
 
-        if subcommand == "test" && !no_run_flag {
-            eprintln!("Tests: {tests:?}");
+        // If we are running `cargo risczero test`, load each test binary into the
+        // executor and run them.
+        if subcommand == BuildSubcommand::Test && !no_run_flag {
+            eprintln!("Running tests: {tests:?}");
 
             for t in &tests {
                 eprintln!("Running test {t}");

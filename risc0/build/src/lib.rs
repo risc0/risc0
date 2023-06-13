@@ -15,6 +15,7 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
+#![cfg_attr(feature = "deny_warnings", deny(warnings))]
 
 use std::{
     collections::HashMap,
@@ -202,10 +203,9 @@ pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
 
 /// Returns the given cargo Package from the metadata.
 #[doc(hidden)]
-pub fn get_target_dir(manifest_dir: impl AsRef<Path>) -> PathBuf {
-    let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
+pub fn get_target_dir(manifest_path: impl AsRef<Path>) -> PathBuf {
     MetadataCommand::new()
-        .manifest_path(&manifest_path)
+        .manifest_path(manifest_path.as_ref())
         .no_deps()
         .exec()
         .expect("cargo metadata command failed")
