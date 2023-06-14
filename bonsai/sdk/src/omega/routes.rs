@@ -14,6 +14,9 @@
 
 //! The routes for the API.
 
+/// Route for `MemoryImage` related APIs.
 pub const IMAGE_ROUTE: &str = "/v1/images";
+/// Route for `Session` related APIs.
 pub const SESSION_ROUTE: &str = "/v1/sessions";
+/// Route for `Receipt` related APIs.
 pub const RECEIPT_ROUTE: &str = "/v1/receipts";

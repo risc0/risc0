@@ -247,7 +247,7 @@ mod tests {
     };
 
     use super::{
-        types::{ReceiptStatus, SessionStatus, H256},
+        super::types::{ReceiptStatus, SessionStatus, H256},
         *,
     };
 

@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::fmt::{self, Debug, Display, Formatter};
-use core::str::FromStr;
+use core::{
+    fmt::{self, Debug, Display, Formatter},
+    str::FromStr,
+};
 
 use hex::{FromHex, FromHexError};
 use risc0_zkvm::sha::Digest;
