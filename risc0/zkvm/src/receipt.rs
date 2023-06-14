@@ -131,7 +131,7 @@ pub struct SystemState {
 
 /// Data associated with a receipt which is used for both input and
 /// output of global state.
-#[derive(Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ReceiptMetadata {
     /// The [SystemState] of a segment just before execution has begun.
     pub pre: SystemState,
@@ -347,7 +347,7 @@ impl SegmentReceipt {
     /// Get the [ReceiptMetadata] associated with the current receipt.
     pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
-        ReceiptMetadata::decode(layout::OutBuffer(elems))
+        ReceiptMetadata::decode_from_io(layout::OutBuffer(elems))
     }
 
     /// Verifies the integrity of this receipt.
@@ -419,7 +419,7 @@ impl SystemState {
 }
 
 impl ReceiptMetadata {
-    fn decode(io: layout::OutBuffer) -> Result<Self, VerificationError> {
+    fn decode_from_io(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
         let pre = SystemState::decode_from_io(io, body.global.pre)?;
         let mut post = SystemState::decode_from_io(io, body.global.post)?;

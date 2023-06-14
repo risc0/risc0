@@ -28,7 +28,7 @@ use crate::recursion::circuit_impl::CIRCUIT_CORE;
 #[cfg(not(target_os = "zkvm"))]
 use crate::sha::{self};
 use crate::{
-    receipt::{SessionReceipt, SystemState},
+    receipt::{ReceiptMetadata, SessionReceipt, SystemState},
     ControlId, ExitCode,
 };
 
@@ -61,24 +61,6 @@ fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     let down_count: u16 = down.len().try_into().unwrap();
     all.extend_from_slice(&down_count.to_le_bytes());
     *sha::Impl::hash_bytes(&all)
-}
-
-/// The receipt metadata describes the system information about each receipt.
-///
-/// This information is used to verify the integrity of the receipt as well as
-/// joining two receipts together using recursion.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ReceiptMeta {
-    /// hash of the input to this segment before execution
-    pub input: Digest,
-    /// System State before the segment execution
-    pub pre: SystemState,
-    /// System State after the segment execution
-    pub post: SystemState,
-    /// The system's exit state at the end of this segment
-    pub exit_code: ExitCode,
-    /// hash of the output
-    pub output: Digest,
 }
 
 fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
@@ -132,7 +114,7 @@ impl SystemState {
     }
 }
 
-impl ReceiptMeta {
+impl ReceiptMetadata {
     /// decode a [ReceiptMeta] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, VerificationError> {
         let input = read_sha_halfs(flat);
@@ -140,7 +122,7 @@ impl ReceiptMeta {
         let post = SystemState::decode(flat);
         let sys_exit = flat.pop_front().unwrap() as u32;
         let user_exit = flat.pop_front().unwrap() as u32;
-        let exit_code = ReceiptMeta::make_exit_code(sys_exit, user_exit)?;
+        let exit_code = ReceiptMetadata::make_exit_code(sys_exit, user_exit)?;
         let output = read_sha_halfs(flat);
 
         Ok(Self {
@@ -207,7 +189,7 @@ pub struct SegmentRecursionReceipt {
     pub control_id: Digest,
     /// the receipt metadata containing states of the system during the segment
     /// executions
-    pub meta: ReceiptMeta,
+    pub meta: ReceiptMetadata,
 }
 
 impl SegmentRecursionReceipt {
