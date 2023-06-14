@@ -443,12 +443,7 @@ impl ReceiptMetadata {
             Digest::try_from(output_bytes).or(Err(VerificationError::ReceiptFormatError))?;
         let sys_exit = io.get_u64(body.global.sys_exit_code) as u32;
         let user_exit = io.get_u64(body.global.user_exit_code) as u32;
-        let exit_code = match sys_exit {
-            0 => ExitCode::Halted(user_exit),
-            1 => ExitCode::Paused(user_exit),
-            2 => ExitCode::SystemSplit,
-            _ => return Err(VerificationError::ReceiptFormatError),
-        };
+        let exit_code = ReceiptMetadata::make_exit_code(sys_exit, user_exit)?;
         Ok(Self {
             pre,
             post,
@@ -456,6 +451,27 @@ impl ReceiptMetadata {
             input,
             output,
         })
+    }
+
+    pub(crate) fn get_exit_code_pairs(&self) -> Result<(u32, u32), VerificationError> {
+        match self.exit_code {
+            ExitCode::Halted(user_exit) => return Ok((0, user_exit)),
+            ExitCode::Paused(user_exit) => return Ok((1, user_exit)),
+            ExitCode::SystemSplit => return Ok((2, 0)),
+            _ => return Err(VerificationError::ReceiptFormatError),
+        };
+    }
+
+    pub(crate) fn make_exit_code(
+        sys_exit: u32,
+        user_exit: u32,
+    ) -> Result<ExitCode, VerificationError> {
+        match sys_exit {
+            0 => Ok(ExitCode::Halted(user_exit)),
+            1 => Ok(ExitCode::Paused(user_exit)),
+            2 => Ok(ExitCode::SystemSplit),
+            _ => Err(VerificationError::ReceiptFormatError),
+        }
     }
 }
 

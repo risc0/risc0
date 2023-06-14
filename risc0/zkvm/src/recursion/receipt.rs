@@ -29,7 +29,7 @@ use crate::recursion::circuit_impl::CIRCUIT_CORE;
 use crate::sha::{self};
 use crate::{
     receipt::{ReceiptMetadata, SessionReceipt, SystemState},
-    ControlId, ExitCode,
+    ControlId,
 };
 
 /// This function gets valid control ID's from the posidon and recursion
@@ -158,24 +158,6 @@ impl ReceiptMetadata {
             ],
             &[sys_exit, user_exit],
         ))
-    }
-
-    fn get_exit_code_pairs(&self) -> Result<(u32, u32), VerificationError> {
-        match self.exit_code {
-            ExitCode::Halted(user_exit) => return Ok((0, user_exit)),
-            ExitCode::Paused(user_exit) => return Ok((1, user_exit)),
-            ExitCode::SystemSplit => return Ok((2, 0)),
-            _ => return Err(VerificationError::ReceiptFormatError),
-        };
-    }
-
-    fn make_exit_code(sys_exit: u32, user_exit: u32) -> Result<ExitCode, VerificationError> {
-        match sys_exit {
-            0 => Ok(ExitCode::Halted(user_exit)),
-            1 => Ok(ExitCode::Paused(user_exit)),
-            2 => Ok(ExitCode::SystemSplit),
-            _ => Err(VerificationError::ReceiptFormatError),
-        }
     }
 }
 
