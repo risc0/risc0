@@ -1,0 +1,18 @@
+[package]
+name = "bonsai-sdk"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+reqwest = { version = "0.11", features = ["json", "blocking"] }
+serde = { version = "1.0", features = ["derive"] }
+
+[dev-dependencies]
+env_logger = "0.9.0"
+httpmock = "0.6"
+uuid = { version = "1.3", features = ["v4"] }
+
+[lib]
+# Disables the doctest from the README because it imports external components and make requests
+doctest = false
