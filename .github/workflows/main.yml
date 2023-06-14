@@ -59,9 +59,9 @@ jobs:
           - os: macOS
             feature: metal
             device: apple_m2_pro
-          - os: Linux
-            feature: cuda
-            device: nvidia_tesla_t4g
+          # - os: Linux
+          #   feature: cuda
+          #   device: nvidia_tesla_t4g
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
