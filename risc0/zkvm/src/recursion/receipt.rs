@@ -15,18 +15,16 @@
 use alloc::{collections::VecDeque, vec::Vec};
 
 #[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::adapter::CircuitInfo;
-#[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::core::hash::sha::Sha256;
+use risc0_zkp::{adapter::CircuitInfo, core::hash::sha::Sha256};
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(target_os = "zkvm"))]
-use crate::receipt::compute_image_id;
-#[cfg(not(target_os = "zkvm"))]
-use crate::recursion::circuit_impl::CIRCUIT_CORE;
-#[cfg(not(target_os = "zkvm"))]
-use crate::sha::{self};
+use crate::{
+    receipt::compute_image_id,
+    recursion::circuit_impl::CIRCUIT_CORE,
+    sha::{self},
+};
 use crate::{
     receipt::{ReceiptMetadata, SessionReceipt, SystemState},
     ControlId,
