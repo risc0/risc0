@@ -69,7 +69,7 @@ pub struct SystemState {
     /// the program counter
     pub pc: u32,
     /// the image ID represents a snapshot of all memory regions
-    pub image_id: Digest,
+    pub merkle_root: Digest,
 }
 
 /// The receipt metadata describes the system information about each receipt.
@@ -126,18 +126,18 @@ impl SystemState {
     fn decode(flat: &mut VecDeque<u32>) -> Self {
         Self {
             pc: read_u32_bytes(flat),
-            image_id: read_sha_halfs(flat),
+            merkle_root: read_sha_halfs(flat),
         }
     }
 
     fn encode(&self, flat: &mut Vec<u32>) {
         write_u32_bytes(flat, self.pc);
-        write_sha_halfs(flat, &self.image_id);
+        write_sha_halfs(flat, &self.merkle_root);
     }
 
     #[cfg(not(target_os = "zkvm"))]
     fn digest(&self) -> Digest {
-        tagged_struct("risc0.SystemState", &[self.image_id], &[self.pc])
+        tagged_struct("risc0.SystemState", &[self.merkle_root], &[self.pc])
     }
 }
 
@@ -275,11 +275,11 @@ impl SessionReceipt for SessionRollupReceipt {
     /// Verify the integrity of the receipt by using the segment receipt and the
     /// journal
     #[cfg(not(target_os = "zkvm"))]
-    fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
+    fn verify(&self, merkle_root: Digest) -> Result<(), VerificationError> {
         self.receipt.verify()?;
         let journal_digest = sha::Impl::hash_bytes(&self.journal);
         let pre_img = &self.receipt.meta.pre;
-        if image_id != compute_image_id(&pre_img.image_id, pre_img.pc) {
+        if merkle_root != compute_image_id(&pre_img.merkle_root, pre_img.pc) {
             return Err(VerificationError::ImageVerificationError);
         }
 
