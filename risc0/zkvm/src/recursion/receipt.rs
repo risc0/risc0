@@ -113,7 +113,7 @@ impl SystemState {
 }
 
 impl ReceiptMetadata {
-    /// decode a [ReceiptMeta] from a list of [u32]'s
+    /// decode a [crate::ReceiptMetadata] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, VerificationError> {
         let input = read_sha_halfs(flat);
         let pre = SystemState::decode(flat);
@@ -131,7 +131,7 @@ impl ReceiptMetadata {
             output,
         })
     }
-    /// encode a [ReceiptMeta] to a list of [u32]'s
+    /// encode a [crate::ReceiptMetadata] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), VerificationError> {
         write_sha_halfs(flat, &self.input);
         self.pre.encode(flat);
