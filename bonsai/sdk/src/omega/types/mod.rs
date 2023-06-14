@@ -12,9 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
+//! The types required for the API.
 
-/// Bonsai Alpha SDK
-pub mod alpha;
-pub mod omega;
+mod h256;
+mod json;
+
+use uuid::Uuid;
+
+/// ID of a Memory Image.
+pub type ImageID = H256;
+
+/// ID of a proof.
+pub type ProofID = Uuid;
+
+/// ID of a session.
+pub type SessionID = Uuid;
+
+pub use h256::H256;
+pub use json::*;

@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
+#![doc = include_str!("./README.md")]
 
-/// Bonsai Alpha SDK
-pub mod alpha;
-pub mod omega;
+pub mod routes;
+pub mod types;
+
+pub mod client;
+pub use client::Client;
