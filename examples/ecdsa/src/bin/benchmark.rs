@@ -12,17 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use factors::multiply_factors;
-use factors_methods::MULTIPLY_ID;
+use ecdsa_methods::BENCHMARK_ELF;
+use risc0_zkvm::{Executor, ExecutorEnv};
 
+// Simple main to load and run the benchmark binary in the RISC Zero Executor.
 fn main() {
-    // Pick two numbers
-    let (receipt, _) = multiply_factors(17, 23);
+    let env = ExecutorEnv::builder().build().unwrap();
 
-    // Here is where one would send 'receipt' over the network...
-
-    // Verify receipt, panic if it's wrong
-    receipt.verify(MULTIPLY_ID.into()).expect(
-        "Code you have proven should successfully verify; did you specify the correct image ID?",
-    );
+    let mut exec = Executor::from_elf(env, BENCHMARK_ELF).unwrap();
+    std::hint::black_box(exec.run().unwrap());
 }

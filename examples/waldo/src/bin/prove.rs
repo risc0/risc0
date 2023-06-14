@@ -130,8 +130,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let receipt = session.prove()?;
 
     // Save the receipt to disk so it can be sent to the verifier.
-    fs::write(&args.receipt, bincode::serialize(&receipt)?)?;
-
+    fs::write(&args.receipt, receipt.encode())?;
     println!("Success! Saved the receipt to {}", &args.receipt.display());
 
     Ok(())

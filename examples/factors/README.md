@@ -247,10 +247,10 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
     let session = exec.run().unwrap();
 
     let receipt = session.prove().unwrap();
-    receipt.verify(MULTIPLY_ID).unwrap();
+    receipt.verify(MULTIPLY_ID.into()).unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
-    let c: u64 = from_slice(&receipt.journal).unwrap();
+    let c: u64 = from_slice(&receipt.get_journal()).unwrap();
 
     // Print an assertion
     println!("Hello, world! I know the factors of {}, and I can prove it!", c);

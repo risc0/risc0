@@ -80,6 +80,7 @@ pub struct Executor<'a> {
     insn_counter: u32,
     split_insn: Option<u32>,
     const_cycles: usize,
+    exit_code: Option<ExitCode>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -156,6 +157,7 @@ impl<'a> Executor<'a> {
             insn_counter: 0,
             split_insn: None,
             const_cycles,
+            exit_code: None,
         }
     }
 
@@ -205,6 +207,10 @@ impl<'a> Executor<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
+        if let Some(ExitCode::Halted(_)) = self.exit_code {
+            bail!("cannot resume an execution which exited with ExitCode::Halted");
+        }
+
         self.monitor.clear_session();
 
         let journal = Journal::default();
@@ -259,6 +265,7 @@ impl<'a> Executor<'a> {
         };
 
         let exit_code = run_loop()?;
+        self.exit_code = Some(exit_code);
         Ok(Session::new(
             take(&mut self.segments),
             journal.buf.take(),
