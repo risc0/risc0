@@ -120,17 +120,26 @@ impl BuildCommand {
 
         // Strip out --no-run if specified, since we always pass --no-run.
         let mut no_run_flag = false;
-        if subcommand == BuildSubcommand::Test {
-            cmd.arg("--no-run");
-            for arg in &self.args {
-                if arg == "--no-run" {
-                    no_run_flag = true;
-                } else {
-                    cmd.arg(&arg);
+        let mut test_args = vec![];
+        match subcommand {
+            BuildSubcommand::Test => {
+                let mut test_args_delimiter_seen = false;
+                cmd.arg("--no-run");
+                for arg in &self.args {
+                    if test_args_delimiter_seen {
+                        test_args.push(arg.clone());
+                    } else if arg == "--no-run" {
+                        no_run_flag = true;
+                    } else if arg == "--" {
+                        test_args_delimiter_seen = true;
+                    } else {
+                        cmd.arg(&arg);
+                    }
                 }
             }
-        } else {
-            cmd.args(&self.args);
+            BuildSubcommand::Build => {
+                cmd.args(&self.args);
+            }
         }
 
         eprintln!("running {cmd:?}");
@@ -178,10 +187,10 @@ impl BuildCommand {
 
                 env_builder
                     .env_var("RUST_TEST_NOCAPTURE", "1")
-                    .env_var("ARGC", &(self.args.len() + 1).to_string())
+                    .env_var("ARGC", &(test_args.len() + 1).to_string())
                     .env_var("ARGV_0", &t);
 
-                for (i, arg) in self.args.iter().enumerate() {
+                for (i, arg) in test_args.iter().enumerate() {
                     env_builder.env_var(&format!("ARGV_{}", i + 1), &arg);
                 }
 
