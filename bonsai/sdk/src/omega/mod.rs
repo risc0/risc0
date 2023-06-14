@@ -14,8 +14,17 @@
 
 #![doc = include_str!("./README.md")]
 
-pub mod routes;
+pub mod client;
 pub mod types;
 
-pub mod client;
 pub use client::Client;
+
+/// The routes for the API.
+pub mod routes {
+    /// Route for `MemoryImage` related APIs.
+    pub const IMAGE_ROUTE: &str = "/v1/images";
+    /// Route for `Session` related APIs.
+    pub const SESSION_ROUTE: &str = "/v1/sessions";
+    /// Route for `Receipt` related APIs.
+    pub const RECEIPT_ROUTE: &str = "/v1/receipts";
+}

@@ -1,6 +1,6 @@
 # Bonsai REST SDK
 
-A library to handle HTTP REST requests to the Bonsai API.
+A library to handle HTTP REST requests to the Bonsai Omega API.
 
 ## Example
 
