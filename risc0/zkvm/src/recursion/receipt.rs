@@ -27,7 +27,10 @@ use crate::receipt::compute_image_id;
 use crate::recursion::circuit_impl::CIRCUIT_CORE;
 #[cfg(not(target_os = "zkvm"))]
 use crate::sha::{self};
-use crate::{receipt::SessionReceipt, ControlId, ExitCode};
+use crate::{
+    receipt::{SessionReceipt, SystemState},
+    ControlId, ExitCode,
+};
 
 /// This function gets valid control ID's from the posidon and recursion
 /// circuits
@@ -58,18 +61,6 @@ fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     let down_count: u16 = down.len().try_into().unwrap();
     all.extend_from_slice(&down_count.to_le_bytes());
     *sha::Impl::hash_bytes(&all)
-}
-
-/// SystemState describes the system's memory during program execution
-///
-/// An instance of this struct provides a program counter and an image ID that
-/// represents all values in memory at that moment.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SystemState {
-    /// the program counter
-    pub pc: u32,
-    /// the image ID represents a snapshot of all memory regions
-    pub merkle_root: Digest,
 }
 
 /// The receipt metadata describes the system information about each receipt.

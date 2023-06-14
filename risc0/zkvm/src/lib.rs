@@ -62,7 +62,7 @@ pub use self::{
 use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 #[cfg(not(target_os = "zkvm"))]
 pub use crate::receipt::verify;
-
+pub use crate::receipt::SystemState;
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
 /// Associate a specific CONTROL_ID with a HashFn.

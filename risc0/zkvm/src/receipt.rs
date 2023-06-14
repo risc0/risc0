@@ -119,7 +119,7 @@ pub enum ExitCode {
 
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
-#[derive(Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SystemState {
     /// The program counter.
     pub pc: u32,
@@ -397,7 +397,7 @@ impl SegmentReceipt {
 }
 
 impl SystemState {
-    fn decode(
+    fn decode_from_io(
         io: layout::OutBuffer,
         sys_state: &layout::SystemState,
     ) -> Result<Self, VerificationError> {
@@ -421,8 +421,8 @@ impl SystemState {
 impl ReceiptMetadata {
     fn decode(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
-        let pre = SystemState::decode(io, body.global.pre)?;
-        let mut post = SystemState::decode(io, body.global.post)?;
+        let pre = SystemState::decode_from_io(io, body.global.pre)?;
+        let mut post = SystemState::decode_from_io(io, body.global.post)?;
         // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
         // the PC with carry, the PC is always recorded as the current PC +
         // 4. Thus we need to adjust the decoded PC for the post SystemState.
