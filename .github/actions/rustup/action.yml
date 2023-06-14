@@ -7,10 +7,10 @@ inputs:
     required: false
     default: 'stable'
     type: string
-  target:
-    description: 'Rust compiler targets to install'
+  targets:
+    description: 'Rust compiler targets to install, as a space-delimited list'
     required: false
-    default: 'default'
+    default: ''
     type: string
   components:
     description: 'List of components to install via rustup, as a space-delimited list'
@@ -27,11 +27,15 @@ runs:
         fi
       shell: bash
 
-    - run: rustup ${{ inputs.target }} ${{ inputs.toolchain }}
+    - run: rustup default ${{ inputs.toolchain }}
+      shell: bash
+
+    - if: ${{ inputs.targets != '' }}
+      run: rustup target add ${{ inputs.targets }}
       shell: bash
 
     - if: ${{ inputs.components != '' }}
-      run: rustup component add --toolchain ${{ inputs.toolchain }} ${{ inputs.components }}
+      run: rustup component add ${{ inputs.components }}
       shell: bash
 
     - run: echo CARGO_TERM_COLOR=always >> $GITHUB_ENV
