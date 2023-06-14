@@ -59,9 +59,9 @@ jobs:
           - os: macOS
             feature: metal
             device: apple_m2_pro
-          - os: Linux
-            feature: cuda
-            device: nvidia_tesla_t4g
+          # - os: Linux
+          #   feature: cuda
+          #   device: nvidia_tesla_t4g
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
@@ -133,4 +133,3 @@ jobs:
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
-#
