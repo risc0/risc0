@@ -3061,7 +3061,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "cargo_metadata",
  "directories",
@@ -3077,7 +3077,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "cc",
  "directories",
@@ -3089,7 +3089,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "anyhow",
  "cust",
@@ -3107,7 +3107,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "cc",
  "glob",
@@ -3118,7 +3118,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3126,7 +3126,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "cc",
  "glob",
@@ -3136,7 +3136,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3163,7 +3163,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.15.2"
+version = "0.15.3"
 dependencies = [
  "anyhow",
  "bincode",
@@ -3194,7 +3194,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.15.2"
+version = "0.15.3"
 
 [[package]]
 name = "rkyv"
