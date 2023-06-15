@@ -12,26 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::{
-    alloc::{GlobalAlloc, Layout},
-    cell::UnsafeCell,
-};
+//! The types required for the API.
 
-use risc0_zkvm_platform::{memory, syscall, WORD_SIZE};
+mod h256;
+mod json;
 
-struct BumpPointerAlloc;
+use uuid::Uuid;
 
-#[cfg(target_os = "zkvm")]
-unsafe impl GlobalAlloc for BumpPointerAlloc {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        syscall::sys_alloc_aligned(layout.size(), layout.align())
-    }
+/// ID of a Memory Image.
+pub type ImageID = H256;
 
-    unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
-        // this allocator never deallocates memory
-    }
-}
+/// ID of a proof.
+pub type ProofID = Uuid;
 
-#[cfg(target_os = "zkvm")]
-#[global_allocator]
-static HEAP: BumpPointerAlloc = BumpPointerAlloc;
+/// ID of a session.
+pub type SessionID = Uuid;
+
+pub use h256::H256;
+pub use json::*;

@@ -530,6 +530,9 @@ pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u
             heap_pos += align - offset;
         }
 
+        // Ensure all allocations are minimally aligned to a word boundary.
+        let align = usize::min(align, WORD_SIZE);
+
         let ptr = heap_pos as *mut u8;
         heap_pos += bytes;
 

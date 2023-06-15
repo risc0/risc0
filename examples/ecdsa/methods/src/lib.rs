@@ -12,26 +12,4 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use core::{
-    alloc::{GlobalAlloc, Layout},
-    cell::UnsafeCell,
-};
-
-use risc0_zkvm_platform::{memory, syscall, WORD_SIZE};
-
-struct BumpPointerAlloc;
-
-#[cfg(target_os = "zkvm")]
-unsafe impl GlobalAlloc for BumpPointerAlloc {
-    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
-        syscall::sys_alloc_aligned(layout.size(), layout.align())
-    }
-
-    unsafe fn dealloc(&self, _: *mut u8, _: Layout) {
-        // this allocator never deallocates memory
-    }
-}
-
-#[cfg(target_os = "zkvm")]
-#[global_allocator]
-static HEAP: BumpPointerAlloc = BumpPointerAlloc;
+include!(concat!(env!("OUT_DIR"), "/methods.rs"));
