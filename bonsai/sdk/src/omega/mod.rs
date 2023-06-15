@@ -12,10 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
+#![doc = include_str!("./README.md")]
 
-/// Bonsai Alpha SDK
-pub mod alpha;
-/// Bonsai Omega SDK
-pub mod omega;
+pub mod client;
+pub mod types;
+
+pub use client::Client;
+
+/// The routes for the API.
+pub mod routes {
+    /// Route for `MemoryImage` related APIs.
+    pub const IMAGE_ROUTE: &str = "/v1/images";
+    /// Route for `Session` related APIs.
+    pub const SESSION_ROUTE: &str = "/v1/sessions";
+    /// Route for `Receipt` related APIs.
+    pub const RECEIPT_ROUTE: &str = "/v1/receipts";
+}
