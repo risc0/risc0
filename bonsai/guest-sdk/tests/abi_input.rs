@@ -195,5 +195,10 @@ fn check_read_length(tokens: &[Token], types: &[ParamType]) -> bool {
     let buffered_length = buffer.len();
     dbg!(&byte_length);
     dbg!(&buffered_length);
-    byte_length == buffered_length
+    let result = byte_length == buffered_length;
+    if result {
+        // validate success scenarios
+        assert_eq!(ethabi::decode(types, &buffer).unwrap().as_slice(), tokens);
+    }
+    result
 }
