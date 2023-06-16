@@ -115,16 +115,20 @@ impl NewCommand {
                 format!("git = \"https://github.com/risc0/risc0.git\", branch = \"{branch}\"");
             template_variables.push(format!("risc0_build={spec}"));
             template_variables.push(format!("risc0_zkvm={spec}"));
+            template_variables.push(format!("risc0_zkp={spec}"));
         } else if let Some(path) = self.path.as_ref() {
             let path = path.to_str().unwrap();
             let build = format!("path = \"{path}/risc0/build\"");
             let zkvm = format!("path = \"{path}/risc0/zkvm\"");
+            let zkp = format!("path = \"{path}/risc0/zkp\"");
             template_variables.push(format!("risc0_build={build}"));
             template_variables.push(format!("risc0_zkvm={zkvm}"));
+            template_variables.push(format!("risc0_zkp={zkp}"));
         } else {
             let spec = format!("version = \"{risc0_version}\"");
             template_variables.push(format!("risc0_build={spec}"));
             template_variables.push(format!("risc0_zkvm={spec}"));
+            template_variables.push(format!("risc0_zkp={spec}"));
         }
 
         if self.std {

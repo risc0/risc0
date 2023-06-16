@@ -8,10 +8,9 @@ members = [
 [workspace.dependencies]
 hello-bonsai-methods = { path = "methods" }
 hello-bonsai-contracts = { path = "contracts" }
-risc0-zkp = { path = "../../risc0/zkp" }
-risc0-zkvm = { path = "../../risc0/zkvm" }
-risc0-build = { path = "../../risc0/build" }
-
+risc0-zkp = { {{ risc0_zkp }} }
+risc0-zkvm = { {{ risc0_zkvm }} }
+risc0-build = { {{ risc0_build }} }
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
 opt-level = 3
