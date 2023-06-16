@@ -21,17 +21,21 @@ use alloc::{boxed::Box, vec, vec::Vec};
 use ethabi::{ethereum_types::U256, ParamType, Token};
 use risc0_zkvm::guest::env;
 
+/// Represents a source of input bytes
 pub trait InputStream {
+    /// Read a slice from the input source into `slice`
     fn read_slice(&mut self, slice: &mut [u8]);
 }
 
 impl InputStream for () {
+    /// Read a slice from the guest environment
     fn read_slice(&mut self, slice: &mut [u8]) {
         env::read_slice(slice);
     }
 }
 
 impl InputStream for Vec<u8> {
+    /// Read a slice from the byte vector
     fn read_slice(&mut self, slice: &mut [u8]) {
         let n = slice.len();
         slice.copy_from_slice(&self[..n]);
@@ -39,11 +43,14 @@ impl InputStream for Vec<u8> {
     }
 }
 
+/// A structure which can use an input stream to read ethereum-abi-encoded data
 pub struct EthABIReader {
+    /// The reader to use for fetching input bytes
     reader: Box<dyn InputStream>,
 }
 
 impl Default for EthABIReader {
+    /// The default instantiation uses the guest environment
     fn default() -> Self {
         EthABIReader {
             reader: Box::new(()),
@@ -52,9 +59,13 @@ impl Default for EthABIReader {
 }
 
 impl EthABIReader {
+    /// Creates a new instance using the given `reader`
     pub fn new(reader: Box<dyn InputStream>) -> Self {
         EthABIReader { reader }
     }
+
+    /// Reads in the necessary input bytes from the `reader` into `buffer` to
+    /// decode all the given `types`.
     pub fn read_abi_encoded_input(
         &mut self,
         types: &[ParamType],
@@ -68,6 +79,8 @@ impl EthABIReader {
         relative_offset
     }
 
+    /// Reads in the necessary input bytes from the `reader` into `buffer` to
+    /// decode `abi_type`.
     fn read_abi_type(
         &mut self,
         abi_type: &ParamType,
@@ -153,6 +166,7 @@ impl EthABIReader {
         relative_offset + 32
     }
 
+    /// Keeps reading input from the `reader` until `buffer.len() >= length`.
     fn buffer_until(&mut self, buffer: &mut Vec<u8>, length: usize) {
         if length > buffer.len() {
             let slice_size = length - buffer.len();
@@ -163,6 +177,8 @@ impl EthABIReader {
         }
     }
 
+    /// Read the next 32-bytes into `buffer` and return the decoded integer
+    /// value.
     fn read_usize(
         &mut self,
         buffer: &mut Vec<u8>,
@@ -179,14 +195,22 @@ impl EthABIReader {
     }
 }
 
+/// Use the default `EthABIReader` to read in enough bytes to decode the
+/// abi-encoded data characterized by the signature in `types` using
+/// `ethabi::decode`.
 pub fn decode_eth_abi_input(types: &[ParamType]) -> Result<Vec<Token>, ethabi::Error> {
     ethabi::decode(types, &read_eth_abi_input(types))
 }
 
+/// Use the default `EthABIReader` to read in enough bytes to decode the
+/// abi-encoded data characterized by the signature in `types` using
+/// `ethabi::decode_whole`.
 pub fn decode_whole_eth_abi_input(types: &[ParamType]) -> Result<Vec<Token>, ethabi::Error> {
     ethabi::decode_whole(types, &read_eth_abi_input(types))
 }
 
+/// Use the default `EthABIReader` to read in enough bytes to decode the
+/// abi-encoded data characterized by the signature in `types`.
 fn read_eth_abi_input(types: &[ParamType]) -> Vec<u8> {
     let mut reader = EthABIReader::default();
     let mut input = Vec::new();
