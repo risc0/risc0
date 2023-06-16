@@ -1,0 +1,11 @@
+[package]
+name = "bonsai-guest-sdk"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ethabi = { version = "18.0", default-features = false }
+risc0-zkvm = { git = "https://github.com/risc0/risc0", branch = "release-0.15", default-features = false }
+
+[dev-dependencies]
+hex = "0.4"
