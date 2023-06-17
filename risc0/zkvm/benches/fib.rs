@@ -36,7 +36,7 @@ pub fn bench(c: &mut Criterion) {
 
     let prover = default_prover();
 
-    for iterations in [100, 1000, 10_000, 1_000_000] {
+    for iterations in [100, 1000, 10_000] {
         let mut exec = setup(iterations);
         let session = exec.run().unwrap();
         let segments = session.resolve().unwrap();
