@@ -534,6 +534,7 @@ fn run_session(
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     exec.run()
 }
+
 #[test]
 fn session_limit() {
     // This test should always fail if the last parameter is zero

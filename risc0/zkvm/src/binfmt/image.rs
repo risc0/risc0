@@ -45,7 +45,7 @@ pub struct PageTableInfo {
     root_addr: u32,
     pub root_idx: u32,
     root_page_addr: u32,
-    num_pages: u32,
+    pub num_pages: u32,
     pub num_root_entries: u32,
     _layers: Vec<u32>,
     /// Hash of an uninitialized page containing all zeros.
@@ -123,6 +123,41 @@ pub struct MemoryImage {
 }
 
 impl MemoryImage {
+    /// Construct the initial memory image for `program`
+    ///
+    /// The result is a MemoryImage with the ELF of `program` loaded (but
+    /// execution not yet begun), and with the page table Merkle tree
+    /// constructed.
+    pub fn new(program: &Program, page_size: u32) -> Result<Self> {
+        // Compute the page table hashes except for the very last root hash.
+        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
+        let mut img = Self {
+            pages: BTreeMap::new(),
+            info,
+            pc: program.entry,
+        };
+
+        // Load the ELF into the memory image.
+        for (&addr, &data) in program.image.iter() {
+            if addr as usize >= MEM_SIZE {
+                anyhow::bail!("Invalid Elf Program, address outside MEM_SIZE");
+            }
+            img.store_region_in_page(addr, &data.to_le_bytes());
+        }
+
+        img.hash_pages();
+        Ok(img)
+    }
+
+    /// TODO
+    pub fn load_page(&self, page_idx: u32) -> Vec<u8> {
+        log::info!("load_page: 0x{page_idx:08x}");
+        self.pages
+            .get(&page_idx)
+            .cloned()
+            .unwrap_or_else(|| vec![0; self.info.page_size as usize])
+    }
+
     /// Writes the given byte array in this memory image at the given
     /// address.  The caller is responsible for ensuring the bytes do
     /// not overlap a page boundry.
@@ -157,32 +192,6 @@ impl MemoryImage {
             );
             bytes.fill(0);
         }
-    }
-
-    /// Construct the initial memory image for `program`
-    ///
-    /// The result is a MemoryImage with the ELF of `program` loaded (but
-    /// execution not yet begun), and with the page table Merkle tree
-    /// constructed.
-    pub fn new(program: &Program, page_size: u32) -> Result<Self> {
-        // Compute the page table hashes except for the very last root hash.
-        let info = PageTableInfo::new(PAGE_TABLE.start() as u32, page_size);
-        let mut img = Self {
-            pages: BTreeMap::new(),
-            info,
-            pc: program.entry,
-        };
-
-        // Load the ELF into the memory image.
-        for (&addr, &data) in program.image.iter() {
-            if addr as usize >= MEM_SIZE {
-                anyhow::bail!("Invalid Elf Program, address outside MEM_SIZE");
-            }
-            img.store_region_in_page(addr, &data.to_le_bytes());
-        }
-
-        img.hash_pages();
-        Ok(img)
     }
 
     /// Calculate and update the image merkle tree within this image.

@@ -80,34 +80,29 @@ pub struct Executor<'a> {
     insn_counter: u32,
     split_insn: Option<u32>,
     const_cycles: usize,
+    pending_syscall: Option<SyscallRecord>,
+    syscalls: Vec<SyscallRecord>,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SyscallRecord {
     pub to_guest: Vec<u32>,
     pub regs: (u32, u32),
 }
 
 #[derive(Clone)]
-pub struct OpCodeResult {
+struct OpCodeResult {
     pc: u32,
     exit_code: Option<ExitCode>,
     extra_cycles: usize,
-    syscall: Option<SyscallRecord>,
 }
 
 impl OpCodeResult {
-    fn new(
-        pc: u32,
-        exit_code: Option<ExitCode>,
-        extra_cycles: usize,
-        syscall: Option<SyscallRecord>,
-    ) -> Self {
+    fn new(pc: u32, exit_code: Option<ExitCode>, extra_cycles: usize) -> Self {
         Self {
             pc,
             exit_code,
             extra_cycles,
-            syscall,
         }
     }
 }
@@ -138,7 +133,7 @@ impl<'a> Executor<'a> {
     /// divided into subparts.
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage, pc: u32) -> Self {
         let pre_image = image.clone();
-        let monitor = MemoryMonitor::new(image);
+        let monitor = MemoryMonitor::new(image, env.trace_callback.is_some());
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
@@ -156,6 +151,8 @@ impl<'a> Executor<'a> {
             insn_counter: 0,
             split_insn: None,
             const_cycles,
+            pending_syscall: None,
+            syscalls: Vec::new(),
         }
     }
 
@@ -223,7 +220,7 @@ impl<'a> Executor<'a> {
                     self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
                     self.monitor.image.pc = self.pc;
                     let post_image_id = self.monitor.image.compute_id();
-                    let syscalls = take(&mut self.monitor.syscalls);
+                    let syscalls = take(&mut self.syscalls);
                     let faults = take(&mut self.monitor.faults);
                     let segment = Segment::new(
                         pre_image,
@@ -289,10 +286,6 @@ impl<'a> Executor<'a> {
         let insn = self.monitor.load_u32(self.pc);
         let opcode = OpCode::decode(insn, self.pc)?;
 
-        if let Some(op_result) = self.monitor.restore_op() {
-            return Ok(self.advance(opcode, op_result));
-        }
-
         let op_result = if opcode.major == MajorType::ECall {
             self.ecall()?
         } else {
@@ -314,21 +307,8 @@ impl<'a> Executor<'a> {
                 self.monitor.store_register(idx, hart.registers[idx]);
             }
 
-            OpCodeResult::new(hart.pc, None, 0, None)
+            OpCodeResult::new(hart.pc, None, 0)
         };
-        self.monitor.save_op(op_result.clone());
-
-        if let Some(ref trace_callback) = self.env.trace_callback {
-            trace_callback.borrow_mut()(TraceEvent::InstructionStart {
-                cycle: self.session_cycle() as u32,
-                pc: self.pc,
-            })
-            .unwrap();
-
-            for event in self.monitor.trace_writes.iter() {
-                trace_callback.borrow_mut()(event.clone()).unwrap();
-            }
-        }
 
         // try to execute the next instruction
         // if the segment limit is exceeded:
@@ -338,7 +318,7 @@ impl<'a> Executor<'a> {
         // otherwise, commit memory and hart
 
         let segment_limit = self.env.get_segment_limit();
-        let total_pending_cycles = self.total_pending_cycles(&opcode, &op_result);
+        let total_pending_cycles = self.total_cycles() + opcode.cycles + op_result.extra_cycles;
         // log::debug!(
         //     "cycle: {}, segment: {}, total: {}",
         //     self.segment_cycle,
@@ -348,6 +328,7 @@ impl<'a> Executor<'a> {
         let exit_code = if total_pending_cycles > segment_limit {
             self.split_insn = Some(self.insn_counter);
             log::debug!("split: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);
+            self.monitor.undo();
             Some(ExitCode::SystemSplit)
         } else {
             self.advance(opcode, op_result)
@@ -364,31 +345,35 @@ impl<'a> Executor<'a> {
             opcode
         );
 
+        if let Some(ref trace_callback) = self.env.trace_callback {
+            trace_callback.borrow_mut()(TraceEvent::InstructionStart {
+                cycle: self.session_cycle() as u32,
+                pc: self.pc,
+            })
+            .unwrap();
+
+            for event in self.monitor.trace_events.iter() {
+                trace_callback.borrow_mut()(event.clone()).unwrap();
+            }
+        }
+
         self.pc = op_result.pc;
         self.insn_counter += 1;
         self.body_cycles += opcode.cycles + op_result.extra_cycles;
-        let total_page_read_cycles = self.monitor.total_page_read_cycles();
-        // log::debug!("total_page_read_cycles: {total_page_read_cycles}");
-        self.segment_cycle = self.init_cycles + total_page_read_cycles + self.body_cycles;
+        let page_read_cycles = self.monitor.page_read_cycles;
+        // log::debug!("page_read_cycles: {page_read_cycles}");
+        self.segment_cycle = self.init_cycles + page_read_cycles + self.body_cycles;
         self.monitor.commit(self.session_cycle());
+        if let Some(syscall) = self.pending_syscall.take() {
+            self.syscalls.push(syscall);
+        }
         op_result.exit_code
     }
 
     fn total_cycles(&self) -> usize {
-        self.const_cycles + self.monitor.total_fault_cycles() + self.body_cycles
-    }
-
-    fn total_pending_cycles(&self, opcode: &OpCode, op_result: &OpCodeResult) -> usize {
-        // How many cycles are required for the entire segment?
-        // This sum is based on:
-        // - ensure we don't split in the middle of a SHA compress
-        // - each page fault requires 1 PageFault cycle + CYCLES_PER_PAGE cycles
-        // - leave room for fini_cycles
-        // - leave room for ZK cycles
         self.const_cycles
-            + self.monitor.total_pending_fault_cycles()
-            + opcode.cycles
-            + op_result.extra_cycles
+            + self.monitor.page_read_cycles
+            + self.monitor.page_write_cycles
             + self.body_cycles
     }
 
@@ -420,13 +405,11 @@ impl<'a> Executor<'a> {
                 self.pc,
                 Some(ExitCode::Halted(user_exit)),
                 0,
-                None,
             )),
             halt::PAUSE => Ok(OpCodeResult::new(
                 self.pc + WORD_SIZE as u32,
                 Some(ExitCode::Paused(user_exit)),
                 0,
-                None,
             )),
             _ => bail!("Illegal halt type: {halt_type}"),
         }
@@ -437,7 +420,7 @@ impl<'a> Executor<'a> {
         let in_addr = self.monitor.load_register(REG_A0);
         self.monitor
             .load_array::<{ DIGEST_WORDS * WORD_SIZE }>(in_addr);
-        Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0, None))
+        Ok(OpCodeResult::new(self.pc + WORD_SIZE as u32, None, 0))
     }
 
     fn ecall_sha(&mut self) -> Result<OpCodeResult> {
@@ -485,7 +468,6 @@ impl<'a> Executor<'a> {
             self.pc + WORD_SIZE as u32,
             None,
             SHA_CYCLES * count as usize,
-            None,
         ))
     }
 
@@ -537,7 +519,6 @@ impl<'a> Executor<'a> {
             self.pc + WORD_SIZE as u32,
             None,
             BIGINT_CYCLES,
-            None,
         ))
     }
 
@@ -548,19 +529,31 @@ impl<'a> Executor<'a> {
         log::trace!("Guest called syscall {syscall_name:?} requesting {to_guest_words} words back");
 
         let chunks = align_up(to_guest_words as usize, WORD_SIZE);
-        let mut to_guest = vec![0; to_guest_words as usize];
 
-        let handler = self
-            .env
-            .get_syscall(&syscall_name)
-            .ok_or(anyhow!("Unknown syscall: {syscall_name:?}"))?;
-        let (a0, a1) =
-            handler
-                .borrow_mut()
-                .syscall(&syscall_name, &mut self.monitor, &mut to_guest)?;
+        let syscall = if let Some(syscall) = self.pending_syscall.clone() {
+            log::debug!("Replay syscall: {syscall:?}");
+            syscall
+        } else {
+            let mut to_guest = vec![0; to_guest_words as usize];
+            let handler = self
+                .env
+                .get_syscall(&syscall_name)
+                .ok_or(anyhow!("Unknown syscall: {syscall_name:?}"))?;
+            let (a0, a1) =
+                handler
+                    .borrow_mut()
+                    .syscall(&syscall_name, &mut self.monitor, &mut to_guest)?;
+            let syscall = SyscallRecord {
+                to_guest,
+                regs: (a0, a1),
+            };
+            self.pending_syscall = Some(syscall.clone());
+            syscall
+        };
 
+        let (a0, a1) = syscall.regs;
         self.monitor
-            .store_region(to_guest_ptr, bytemuck::cast_slice(&to_guest));
+            .store_region(to_guest_ptr, bytemuck::cast_slice(&syscall.to_guest));
         self.monitor.store_register(REG_A0, a0);
         self.monitor.store_register(REG_A1, a1);
 
@@ -572,10 +565,6 @@ impl<'a> Executor<'a> {
             self.pc + WORD_SIZE as u32,
             None,
             1 + chunks + 1,
-            Some(SyscallRecord {
-                to_guest,
-                regs: (a0, a1),
-            }),
         ))
     }
 }
