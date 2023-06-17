@@ -99,7 +99,8 @@ async fn main() {
         .unwrap();
     let receipt = session.prove().unwrap();
 
-    let res: EvmResult = from_slice(&receipt.journal).expect("Failed to deserialize EvmResult");
+    let res: EvmResult =
+        from_slice(&receipt.get_journal()).expect("Failed to deserialize EvmResult");
     info!("exit reason: {:?}", res.exit_reason);
     info!("state updates: {}", res.state.len());
 }

@@ -82,6 +82,7 @@ pub struct Executor<'a> {
     const_cycles: usize,
     pending_syscall: Option<SyscallRecord>,
     syscalls: Vec<SyscallRecord>,
+    exit_code: Option<ExitCode>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -153,6 +154,7 @@ impl<'a> Executor<'a> {
             const_cycles,
             pending_syscall: None,
             syscalls: Vec::new(),
+            exit_code: None,
         }
     }
 
@@ -202,6 +204,10 @@ impl<'a> Executor<'a> {
     where
         F: FnMut(Segment) -> Result<Box<dyn SegmentRef>>,
     {
+        if let Some(ExitCode::Halted(_)) = self.exit_code {
+            bail!("cannot resume an execution which exited with ExitCode::Halted");
+        }
+
         self.monitor.clear_session();
 
         let journal = Journal::default();
@@ -256,6 +262,7 @@ impl<'a> Executor<'a> {
         };
 
         let exit_code = run_loop()?;
+        self.exit_code = Some(exit_code);
         Ok(Session::new(
             take(&mut self.segments),
             journal.buf.take(),
