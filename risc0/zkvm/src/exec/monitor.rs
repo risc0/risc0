@@ -308,11 +308,13 @@ impl MemoryMonitor {
             match action {
                 Action::PageRead(page_idx, cycles) => {
                     log::debug!("undo: PageRead(0x{page_idx:08x}, {cycles})");
+                    self.resident[*page_idx as usize] = false;
                     self.faults.reads.remove(page_idx);
                     self.page_read_cycles -= cycles;
                 }
                 Action::PageWrite(page_idx, cycles) => {
                     log::debug!("undo: PageWrite(0x{page_idx:08x}, {cycles})");
+                    self.dirty[*page_idx as usize] = false;
                     self.faults.writes.remove(page_idx);
                     self.page_write_cycles -= cycles;
                 }
