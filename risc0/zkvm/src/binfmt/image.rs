@@ -149,9 +149,9 @@ impl MemoryImage {
         Ok(img)
     }
 
-    /// TODO
+    /// Load a page specified by page_idx. If no page is found, a zero page is
+    /// returned.
     pub fn load_page(&self, page_idx: u32) -> Vec<u8> {
-        log::info!("load_page: 0x{page_idx:08x}");
         self.pages
             .get(&page_idx)
             .cloned()

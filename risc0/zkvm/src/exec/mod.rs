@@ -26,7 +26,7 @@ pub(crate) mod profiler;
 #[cfg(test)]
 mod tests;
 
-use std::{array, cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
+use std::{cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
 use anyhow::{anyhow, bail, Context, Result};
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
@@ -139,7 +139,6 @@ impl<'a> Executor<'a> {
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();
         let const_cycles = init_cycles + fini_cycles + SHA_CYCLES + ZK_CYCLES;
-
         Self {
             env,
             pre_image,
@@ -223,9 +222,8 @@ impl<'a> Executor<'a> {
                     log::debug!("exit_code: {exit_code:?}, total_cycles: {total_cycles}");
                     assert!(total_cycles <= (1 << self.env.segment_limit_po2));
                     let pre_image = self.pre_image.clone();
-                    self.monitor.image.hash_pages(); // TODO: hash only the dirty pages
-                    self.monitor.image.pc = self.pc;
-                    let post_image_id = self.monitor.image.compute_id();
+                    let post_image = self.monitor.build_image(self.pc);
+                    let post_image_id = post_image.compute_id();
                     let syscalls = take(&mut self.syscalls);
                     let faults = take(&mut self.monitor.faults);
                     let segment = Segment::new(
@@ -245,11 +243,11 @@ impl<'a> Executor<'a> {
                     let segment_ref = callback(segment)?;
                     self.segments.push(segment_ref);
                     match exit_code {
-                        ExitCode::SystemSplit => self.split(),
+                        ExitCode::SystemSplit => self.split(post_image),
                         ExitCode::SessionLimit => bail!("Session limit exceeded"),
                         ExitCode::Paused(inner) => {
                             log::debug!("Paused({inner}): {}", self.segment_cycle);
-                            self.split();
+                            self.split(post_image);
                             return Ok(exit_code);
                         }
                         ExitCode::Halted(inner) => {
@@ -270,13 +268,12 @@ impl<'a> Executor<'a> {
         ))
     }
 
-    fn split(&mut self) {
-        self.pre_image = self.monitor.image.clone();
+    fn split(&mut self, pre_image: MemoryImage) {
+        self.pre_image = pre_image;
         self.body_cycles = 0;
         self.split_insn = None;
         self.insn_counter = 0;
         self.segment_cycle = self.init_cycles;
-        self.pre_image.pc = self.pc;
         self.monitor.clear_segment();
     }
 
@@ -296,7 +293,7 @@ impl<'a> Executor<'a> {
         let op_result = if opcode.major == MajorType::ECall {
             self.ecall()?
         } else {
-            let registers = self.monitor.load_registers(array::from_fn(|idx| idx));
+            let registers = self.monitor.load_registers();
             let mut hart = HartState {
                 registers,
                 pc: self.pc,
@@ -431,9 +428,11 @@ impl<'a> Executor<'a> {
     }
 
     fn ecall_sha(&mut self) -> Result<OpCodeResult> {
-        let [out_state_ptr, in_state_ptr, mut block1_ptr, mut block2_ptr, count] = self
-            .monitor
-            .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
+        let out_state_ptr = self.monitor.load_register(REG_A0);
+        let in_state_ptr = self.monitor.load_register(REG_A1);
+        let mut block1_ptr = self.monitor.load_register(REG_A2);
+        let mut block2_ptr = self.monitor.load_register(REG_A3);
+        let count = self.monitor.load_register(REG_A4);
 
         let in_state: [u8; DIGEST_BYTES] = self.monitor.load_array(in_state_ptr);
         let mut state: [u32; DIGEST_WORDS] = bytemuck::cast_slice(&in_state).try_into().unwrap();
@@ -482,9 +481,11 @@ impl<'a> Executor<'a> {
     // Take reads inputs x, y, and N and writes output z = x * y mod N.
     // Note that op is currently ignored but must be set to 0.
     fn ecall_bigint(&mut self) -> Result<OpCodeResult> {
-        let [z_ptr, op, x_ptr, y_ptr, n_ptr] = self
-            .monitor
-            .load_registers([REG_A0, REG_A1, REG_A2, REG_A3, REG_A4]);
+        let z_ptr = self.monitor.load_register(REG_A0);
+        let op = self.monitor.load_register(REG_A1);
+        let x_ptr = self.monitor.load_register(REG_A2);
+        let y_ptr = self.monitor.load_register(REG_A3);
+        let n_ptr = self.monitor.load_register(REG_A4);
 
         let mut load_bigint_le_bytes = |ptr: u32| -> [u8; bigint::WIDTH_BYTES] {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
@@ -530,8 +531,9 @@ impl<'a> Executor<'a> {
     }
 
     fn ecall_software(&mut self) -> Result<OpCodeResult> {
-        let [to_guest_ptr, to_guest_words, name_ptr] =
-            self.monitor.load_registers([REG_A0, REG_A1, REG_A2]);
+        let to_guest_ptr = self.monitor.load_register(REG_A0);
+        let to_guest_words = self.monitor.load_register(REG_A1);
+        let name_ptr = self.monitor.load_register(REG_A2);
         let syscall_name = self.monitor.load_string(name_ptr)?;
         log::trace!("Guest called syscall {syscall_name:?} requesting {to_guest_words} words back");
 
