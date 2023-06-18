@@ -40,6 +40,7 @@ const fn round_up(a: u32, b: u32) -> u32 {
 #[derive(Clone, Serialize, Deserialize)]
 pub struct PageTableInfo {
     pub page_size: u32,
+    page_size_po2: u32,
     page_table_addr: u32,
     _page_table_size: u32,
     root_addr: u32,
@@ -56,6 +57,7 @@ impl PageTableInfo {
     pub fn new(page_table_addr: u32, page_size: u32) -> Self {
         let max_mem = page_table_addr;
         assert!(max_mem >= page_size);
+        assert!(page_size > 0 && (page_size & (page_size - 1)) == 0);
 
         let mut layers = Vec::new();
         let mut page_table_size = 0u32;
@@ -80,6 +82,7 @@ impl PageTableInfo {
 
         Self {
             page_size,
+            page_size_po2: page_size.ilog2(),
             page_table_addr,
             _page_table_size: page_table_size,
             root_addr,
@@ -97,7 +100,7 @@ impl PageTableInfo {
     }
 
     pub fn get_page_index(&self, addr: u32) -> u32 {
-        addr / self.page_size
+        addr >> self.page_size_po2
     }
 
     pub fn get_page_entry_addr(&self, page_idx: u32) -> u32 {
