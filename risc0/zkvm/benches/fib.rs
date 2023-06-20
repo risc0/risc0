@@ -27,7 +27,6 @@ fn setup(iterations: u32) -> Executor<'static> {
 }
 
 enum Scope {
-    Execute,
     Prove,
     Total,
 }
@@ -36,7 +35,27 @@ pub fn bench(c: &mut Criterion) {
     let mut group = c.benchmark_group("fib");
 
     let prover = default_prover();
-    for scope in [Scope::Execute, Scope::Prove, Scope::Total] {
+
+    for iterations in [100, 1000, 10_000] {
+        let mut exec = setup(iterations);
+        let session = exec.run().unwrap();
+        let segments = session.resolve().unwrap();
+        let exec_cycles = segments
+            .iter()
+            .fold(0, |exec_cycles, segment| exec_cycles + segment.insn_cycles);
+        group.sample_size(10);
+        let id = BenchmarkId::from_parameter(format!("{iterations}/execute"));
+        group.throughput(Throughput::Elements(exec_cycles as u64));
+        group.bench_with_input(id, &iterations, |b, &iterations| {
+            b.iter_batched(
+                || setup(iterations),
+                |mut exec| black_box(exec.run().unwrap()),
+                BatchSize::SmallInput,
+            )
+        });
+    }
+
+    for scope in [Scope::Prove, Scope::Total] {
         for iterations in [100, 1000, 10_000] {
             let mut exec = setup(iterations);
             let session = exec.run().unwrap();
@@ -52,17 +71,6 @@ pub fn bench(c: &mut Criterion) {
                     });
             group.sample_size(10);
             match scope {
-                Scope::Execute => {
-                    let id = BenchmarkId::from_parameter(format!("{iterations}/execute"));
-                    group.throughput(Throughput::Elements(exec_cycles as u64));
-                    group.bench_with_input(id, &iterations, |b, &iterations| {
-                        b.iter_batched(
-                            || setup(iterations),
-                            |mut exec| black_box(exec.run().unwrap()),
-                            BatchSize::SmallInput,
-                        )
-                    });
-                }
                 Scope::Prove => {
                     let id = BenchmarkId::from_parameter(format!("{iterations}/prove"));
                     group.throughput(Throughput::Elements(prove_cycles as u64));
