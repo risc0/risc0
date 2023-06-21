@@ -39,6 +39,11 @@ pub fn main() {
                 risc0_zkvm::guest::env::commit_slice(msg.as_bytes());
             }
         }
+        "ARGS" => {
+            // Collect args into a vector and commit them to the journal.
+            let args: Vec<String> = std::env::args().collect();
+            risc0_zkvm::guest::env::commit(&args);
+        }
         _ => {
             panic!("Unknown test mode {test_mode}");
         }
