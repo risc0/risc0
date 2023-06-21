@@ -28,7 +28,6 @@ use anyhow::{bail, Context, Result};
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
     fileno,
-    memory::SYSTEM,
     syscall::{
         nr::{
             SYS_CYCLE_COUNT, SYS_LOG, SYS_PANIC, SYS_RANDOM, SYS_READ, SYS_READ_AVAIL, SYS_WRITE,
@@ -56,9 +55,7 @@ pub trait SyscallContext {
     fn get_cycle(&self) -> usize;
 
     /// Loads the value of the given register, e.g. REG_A0.
-    fn load_register(&mut self, num: usize) -> u32 {
-        self.load_u32((SYSTEM.start() + num * WORD_SIZE) as u32)
-    }
+    fn load_register(&mut self, idx: usize) -> u32;
 
     /// Loads bytes from the given region of memory.
     fn load_region(&mut self, addr: u32, size: u32) -> Vec<u8> {

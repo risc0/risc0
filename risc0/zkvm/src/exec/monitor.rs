@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{array, collections::BTreeSet};
+use std::{array, collections::BTreeSet, mem::take};
 
 use anyhow::Result;
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{memory::SYSTEM, syscall::reg_abi::REG_MAX, PAGE_SIZE, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
-use super::{io::SyscallContext, OpCodeResult, SyscallRecord, TraceEvent};
-use crate::{binfmt::image::PageTableInfo, session::PageFaults, MemoryImage};
+use super::{io::SyscallContext, TraceEvent};
+use crate::{session::PageFaults, MemoryImage};
 
 /// The number of blocks that fit within a single page.
 const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;
@@ -33,94 +33,181 @@ const fn cycles_per_page(blocks_per_page: usize) -> usize {
     1 + SHA_INIT + (SHA_LOAD + SHA_MAIN) * blocks_per_page
 }
 
-#[derive(Eq, Ord, PartialEq, PartialOrd)]
-enum MemData {
-    U8(u8),
-    U16(u16),
-    U32(u32),
+#[derive(Clone, Debug)]
+enum Action {
+    PageRead(u32, usize),
+    PageWrite(u32, usize),
+    StoreU8(u32, u8),
+    StoreU16(u32, u16),
+    StoreU32(u32, u32),
+    StoreReg(usize, u32),
 }
 
-#[derive(Eq, Ord, PartialEq, PartialOrd)]
-struct MemStore {
-    addr: u32,
-    data: MemData,
+#[derive(Clone)]
+struct Page {
+    buf: Vec<u8>,
+}
+
+impl Page {
+    fn load_bytes(&self, addr: u32, bytes: &mut [u8]) {
+        let addr = addr as usize;
+        bytes.clone_from_slice(&self.buf[addr..addr + bytes.len()]);
+    }
+
+    fn store_bytes(&mut self, addr: u32, bytes: &[u8]) {
+        let addr = addr as usize;
+        self.buf[addr..addr + bytes.len()].clone_from_slice(bytes);
+    }
 }
 
 pub struct MemoryMonitor {
-    pub image: MemoryImage,
+    image: MemoryImage,
     pub faults: PageFaults,
-    pending_faults: PageFaults,
-    pending_writes: BTreeSet<MemStore>,
-    cycle: usize,
-    op_result: Option<OpCodeResult>,
-    pub syscalls: Vec<SyscallRecord>,
-    pub trace_writes: BTreeSet<TraceEvent>,
+    session_cycle: usize,
+    pub trace_events: BTreeSet<TraceEvent>,
+    resident: Vec<bool>,
+    dirty: Vec<bool>,
+    pending_actions: Vec<Action>,
+    pub page_read_cycles: usize,
+    pub page_write_cycles: usize,
+    enable_trace: bool,
+    pages: Vec<Option<Page>>,
+    registers: [u32; REG_MAX],
 }
 
 impl MemoryMonitor {
-    pub fn new(image: MemoryImage) -> Self {
+    pub fn new(image: MemoryImage, enable_trace: bool) -> Self {
+        let num_pages = image.info.num_pages as usize + 1;
+        let resident = vec![false; num_pages];
+        let dirty = vec![false; num_pages];
+        let pages = vec![None; num_pages];
         Self {
             image,
             faults: PageFaults::default(),
-            pending_faults: PageFaults::default(),
-            pending_writes: BTreeSet::new(),
-            cycle: 0,
-            op_result: None,
-            syscalls: Vec::new(),
-            trace_writes: BTreeSet::new(),
+            session_cycle: 0,
+            trace_events: BTreeSet::new(),
+            resident,
+            dirty,
+            pending_actions: Vec::new(),
+            page_read_cycles: 0,
+            page_write_cycles: 0,
+            enable_trace,
+            pages,
+            registers: [0; REG_MAX],
         }
     }
 
     pub fn load_u8(&mut self, addr: u32) -> u8 {
-        let info = &self.image.info;
-        // log::debug!("load_u8: 0x{addr:08x}");
-        self.pending_faults.include(info, addr, IncludeDir::Read);
+        // log::trace!("load_u8: 0x{addr:08x}");
         let mut bytes = [0_u8];
-        self.image.load_region_in_page(addr, &mut bytes);
+        self.load_bytes(addr, &mut bytes);
         bytes[0]
     }
 
     pub fn load_u16(&mut self, addr: u32) -> u16 {
         assert_eq!(addr % 2, 0, "unaligned load");
-        let info = &self.image.info;
-        self.pending_faults.include(info, addr, IncludeDir::Read);
+        // log::trace!("load_u16: 0x{addr:08x}");
         let mut bytes = [0_u8; 2];
-        self.image.load_region_in_page(addr, &mut bytes);
+        self.load_bytes(addr, &mut bytes);
         u16::from_le_bytes(bytes)
     }
 
     pub fn load_u32(&mut self, addr: u32) -> u32 {
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned load");
-        // log::debug!("load_u32: 0x{addr:08x}");
-        let info = &self.image.info;
-        self.pending_faults.include(info, addr, IncludeDir::Read);
+        // log::trace!("load_u32: 0x{addr:08x}");
         let mut bytes = [0_u8; WORD_SIZE];
-        self.image.load_region_in_page(addr, &mut bytes);
+        self.load_bytes(addr, &mut bytes);
         u32::from_le_bytes(bytes)
     }
 
+    fn load_page(&mut self, addr: u32) {
+        let info = &self.image.info;
+        let page_idx = info.get_page_index(addr);
+        if self.resident[page_idx as usize] {
+            return;
+        }
+
+        let page_cycles = if page_idx == info.root_idx {
+            let num_root_entries = info.num_root_entries as usize;
+            cycles_per_page(num_root_entries / 2)
+        } else {
+            let entry_addr = info.get_page_entry_addr(page_idx);
+            self.load_page(entry_addr);
+            cycles_per_page(BLOCKS_PER_PAGE)
+        };
+
+        log::debug!("load_page: 0x{page_idx:08x}");
+        self.resident[page_idx as usize] = true;
+        self.pending_actions
+            .push(Action::PageRead(page_idx, page_cycles));
+        self.page_read_cycles += page_cycles;
+        self.faults.reads.insert(page_idx);
+    }
+
+    fn mark_page(&mut self, addr: u32) {
+        let info = &self.image.info;
+        let page_idx = info.get_page_index(addr);
+        if self.dirty[page_idx as usize] {
+            return;
+        }
+
+        let page_cycles = if page_idx == info.root_idx {
+            let num_root_entries = info.num_root_entries as usize;
+            cycles_per_page(num_root_entries / 2)
+        } else {
+            let entry_addr = info.get_page_entry_addr(page_idx);
+            self.mark_page(entry_addr);
+            cycles_per_page(BLOCKS_PER_PAGE)
+        };
+
+        log::debug!("mark_page: 0x{page_idx:08x}");
+        self.dirty[page_idx as usize] = true;
+        self.pending_actions
+            .push(Action::PageWrite(page_idx, page_cycles));
+        self.page_write_cycles += page_cycles;
+        self.faults.writes.insert(page_idx);
+    }
+
     pub fn load_array<const N: usize>(&mut self, addr: u32) -> [u8; N] {
+        // log::trace!("load_array: 0x{addr:08x}");
         array::from_fn(|idx| self.load_u8(addr + idx as u32))
     }
 
-    pub fn load_register(&mut self, idx: usize) -> u32 {
-        self.load_u32(get_register_addr(idx))
+    pub fn load_register(&self, idx: usize) -> u32 {
+        // log::trace!("load_register: x{idx}");
+        self.registers[idx]
     }
 
-    pub fn load_registers<const N: usize>(&mut self, idxs: [usize; N]) -> [u32; N] {
+    pub fn load_registers(&self) -> [u32; REG_MAX] {
+        self.registers.clone()
+    }
+
+    fn init_registers(&mut self) {
         let mut bytes = [0_u8; WORD_SIZE * REG_MAX];
-        self.image
-            .load_region_in_page(SYSTEM.start() as u32, &mut bytes);
-        idxs.map(|idx| {
-            u32::from_le_bytes(
+        self.load_bytes(SYSTEM.start() as u32, &mut bytes);
+        for idx in 0..REG_MAX {
+            self.registers[idx] = u32::from_le_bytes(
                 bytes[idx * WORD_SIZE..(idx + 1) * WORD_SIZE]
                     .try_into()
                     .unwrap(),
-            )
-        })
+            );
+        }
+    }
+
+    fn load_bytes(&mut self, addr: u32, bytes: &mut [u8]) {
+        self.load_page(addr);
+        let info = &self.image.info;
+        let page_idx = info.get_page_index(addr);
+        let offset = addr % info.page_size;
+        self.pages[page_idx as usize]
+            .get_or_insert_with(|| Page {
+                buf: self.image.load_page(page_idx),
+            })
+            .load_bytes(offset, bytes);
     }
 
     pub fn load_string(&mut self, mut addr: u32) -> Result<String> {
+        // log::trace!("load_string: 0x{addr:08x}");
         let mut s: Vec<u8> = Vec::new();
         loop {
             let bytes = self.load_u8(addr);
@@ -134,54 +221,56 @@ impl MemoryMonitor {
     }
 
     fn raw_store_u8(&mut self, addr: u32, data: u8) {
-        let info = &self.image.info;
-        self.pending_faults.include(info, addr, IncludeDir::Read);
-        self.pending_faults.include(info, addr, IncludeDir::Write);
-        self.pending_writes.insert(MemStore {
-            addr,
-            data: MemData::U8(data),
-        });
+        // log::trace!("raw_store_u8: 0x{addr:08x}");
+        let old = self.load_u8(addr);
+        self.pending_actions.push(Action::StoreU8(addr, old));
+        self.store_bytes(addr, &[data]);
+        self.mark_page(addr);
     }
 
     pub fn store_u8(&mut self, addr: u32, data: u8) {
+        // log::trace!("store_u8: 0x{addr:08x}");
         self.raw_store_u8(addr, data);
-        self.trace_writes.insert(TraceEvent::MemorySet {
-            addr,
-            value: data as u32,
-        });
+        if self.enable_trace {
+            self.trace_events.insert(TraceEvent::MemorySet {
+                addr,
+                value: data as u32,
+            });
+        }
     }
 
     pub fn store_u16(&mut self, addr: u32, data: u16) {
+        // log::trace!("store_u16: 0x{addr:08x}");
         assert_eq!(addr % 2, 0, "unaligned store");
-        let info = &self.image.info;
-        self.pending_faults.include(info, addr, IncludeDir::Read);
-        self.pending_faults.include(info, addr, IncludeDir::Write);
-        self.pending_writes.insert(MemStore {
-            addr,
-            data: MemData::U16(data),
-        });
-        self.trace_writes.insert(TraceEvent::MemorySet {
-            addr,
-            value: data as u32,
-        });
+        let old = self.load_u16(addr);
+        self.pending_actions.push(Action::StoreU16(addr, old));
+        self.store_bytes(addr, &data.to_le_bytes());
+        self.mark_page(addr);
+        if self.enable_trace {
+            self.trace_events.insert(TraceEvent::MemorySet {
+                addr,
+                value: data as u32,
+            });
+        }
     }
 
     pub fn store_u32(&mut self, addr: u32, data: u32) {
+        // log::trace!("store_u32: 0x{addr:08x}");
         assert_eq!(addr % WORD_SIZE as u32, 0, "unaligned store");
-        let info = &self.image.info;
-        self.pending_faults.include(info, addr, IncludeDir::Read);
-        self.pending_faults.include(info, addr, IncludeDir::Write);
-        self.pending_writes.insert(MemStore {
-            addr,
-            data: MemData::U32(data),
-        });
-        self.trace_writes.insert(TraceEvent::MemorySet {
-            addr,
-            value: data as u32,
-        });
+        let old = self.load_u32(addr);
+        self.pending_actions.push(Action::StoreU32(addr, old));
+        self.store_bytes(addr, &data.to_le_bytes());
+        self.mark_page(addr);
+        if self.enable_trace {
+            self.trace_events.insert(TraceEvent::MemorySet {
+                addr,
+                value: data as u32,
+            });
+        }
     }
 
     pub fn store_region(&mut self, addr: u32, slice: &[u8]) {
+        // log::trace!("store_region: 0x{addr:08x}");
         slice
             .iter()
             .enumerate()
@@ -189,97 +278,111 @@ impl MemoryMonitor {
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {
-        let addr = get_register_addr(idx);
+        // log::trace!("store_register: x{idx}");
+        let old = self.load_register(idx);
+        self.pending_actions.push(Action::StoreReg(idx, old));
+        self.registers[idx] = data;
+        self.mark_page(SYSTEM.start() as u32);
+        if self.enable_trace {
+            self.trace_events.insert(TraceEvent::RegisterSet {
+                reg: idx,
+                value: data,
+            });
+        }
+    }
+
+    fn store_bytes(&mut self, addr: u32, bytes: &[u8]) {
         let info = &self.image.info;
-        self.pending_faults.include(info, addr, IncludeDir::Read);
-        self.pending_faults.include(info, addr, IncludeDir::Write);
-        self.pending_writes.insert(MemStore {
-            addr,
-            data: MemData::U32(data),
-        });
-        self.trace_writes.insert(TraceEvent::RegisterSet {
-            reg: idx,
-            value: data,
-        });
+        let page_idx = info.get_page_index(addr);
+        let offset = addr % info.page_size;
+        self.pages[page_idx as usize]
+            .get_or_insert_with(|| Page {
+                buf: self.image.load_page(page_idx),
+            })
+            .store_bytes(offset, bytes);
     }
 
-    pub fn save_op(&mut self, op_result: OpCodeResult) {
-        self.op_result = Some(op_result);
-    }
-
-    pub fn restore_op(&self) -> Option<OpCodeResult> {
-        self.op_result.clone()
+    pub fn undo(&mut self) {
+        let pending_actions = take(&mut self.pending_actions);
+        for action in pending_actions.iter().rev() {
+            match action {
+                Action::PageRead(page_idx, cycles) => {
+                    log::debug!("undo: PageRead(0x{page_idx:08x}, {cycles})");
+                    self.resident[*page_idx as usize] = false;
+                    self.faults.reads.remove(page_idx);
+                    self.page_read_cycles -= cycles;
+                }
+                Action::PageWrite(page_idx, cycles) => {
+                    log::debug!("undo: PageWrite(0x{page_idx:08x}, {cycles})");
+                    self.dirty[*page_idx as usize] = false;
+                    self.faults.writes.remove(page_idx);
+                    self.page_write_cycles -= cycles;
+                }
+                Action::StoreU8(addr, data) => {
+                    log::debug!("undo: StoreU8(0x{addr:08x}, {data})");
+                    self.store_bytes(*addr, &data.to_le_bytes());
+                }
+                Action::StoreU16(addr, data) => {
+                    log::debug!("undo: StoreU16(0x{addr:08x}, {data})");
+                    self.store_bytes(*addr, &data.to_le_bytes());
+                }
+                Action::StoreU32(addr, data) => {
+                    log::debug!("undo: StoreU32(0x{addr:08x}, {data})");
+                    self.store_bytes(*addr, &data.to_le_bytes());
+                }
+                Action::StoreReg(idx, data) => {
+                    log::debug!("undo: StoreReg(x{idx}, {data})");
+                    self.registers[*idx] = *data;
+                }
+            }
+        }
     }
 
     // commit all pending activity
     pub fn commit(&mut self, cycle: usize) {
-        for op in self.pending_writes.iter() {
-            match op.data {
-                MemData::U8(data) => self
-                    .image
-                    .store_region_in_page(op.addr, &data.to_le_bytes()),
-                MemData::U16(data) => self
-                    .image
-                    .store_region_in_page(op.addr, &data.to_le_bytes()),
-                MemData::U32(data) => self
-                    .image
-                    .store_region_in_page(op.addr, &data.to_le_bytes()),
-            }
+        self.pending_actions.clear();
+        self.session_cycle = cycle;
+        if self.enable_trace {
+            self.trace_events.clear();
         }
-        self.pending_writes.clear();
-        self.faults.append(&mut self.pending_faults);
-        self.cycle = cycle;
-        let op_result = self.op_result.take().unwrap();
-        if let Some(syscall) = op_result.syscall {
-            self.syscalls.push(syscall);
-        }
-        self.trace_writes.clear();
         // self.faults.dump();
     }
 
-    pub fn total_page_read_cycles(&self) -> usize {
-        self.compute_page_cycles(self.faults.reads.union(&self.pending_faults.reads))
-    }
-
-    pub fn total_fault_cycles(&self) -> usize {
-        let reads = self.compute_page_cycles(self.faults.reads.iter());
-        let writes = self.compute_page_cycles(self.faults.writes.iter());
-        reads + writes
-    }
-
-    pub fn total_pending_fault_cycles(&self) -> usize {
-        let reads = self.compute_page_cycles(self.faults.reads.union(&self.pending_faults.reads));
-        let writes =
-            self.compute_page_cycles(self.faults.writes.union(&self.pending_faults.writes));
-        reads + writes
-    }
-
-    pub fn pending_page_read_cycles(&self) -> usize {
-        let pending_page_reads = self.pending_faults.reads.difference(&self.faults.reads);
-        self.compute_page_cycles(pending_page_reads)
-    }
-
-    fn compute_page_cycles<'a, I: Iterator<Item = &'a u32>>(&self, page_idxs: I) -> usize {
-        let root_idx = self.image.info.root_idx;
-        let num_root_entries = self.image.info.num_root_entries as usize;
-        page_idxs.fold(0, |acc, page_idx| {
-            acc + if *page_idx == root_idx {
-                cycles_per_page(num_root_entries / 2)
-            } else {
-                cycles_per_page(BLOCKS_PER_PAGE)
-            }
-        })
-    }
-
     pub fn clear_segment(&mut self) {
+        self.resident.fill(false);
+        self.dirty.fill(false);
+        self.pages.fill(None);
+        self.page_read_cycles = 0;
+        self.page_write_cycles = 0;
         self.faults.clear();
-        self.syscalls.clear();
+        self.init_registers();
     }
 
     pub fn clear_session(&mut self) {
         self.clear_segment();
-        self.pending_faults.clear();
-        self.pending_writes.clear();
+        self.session_cycle = 0;
+    }
+
+    pub fn build_image(&mut self, pc: u32) -> MemoryImage {
+        for page_idx in self.faults.writes.iter() {
+            if let Some(page) = self.pages[*page_idx as usize].as_ref() {
+                log::trace!("flush page: 0x{page_idx:08x}");
+                let info = &self.image.info;
+                let addr = info.get_page_addr(*page_idx);
+                self.image.store_region_in_page(addr, &page.buf);
+            }
+        }
+        let mut bytes = [0_u8; WORD_SIZE * REG_MAX];
+        for idx in 0..REG_MAX {
+            bytes[idx * WORD_SIZE..(idx + 1) * WORD_SIZE]
+                .copy_from_slice(&self.registers[idx].to_le_bytes());
+        }
+        self.image
+            .store_region_in_page(SYSTEM.start() as u32, &bytes);
+        let mut image = self.image.clone();
+        image.hash_pages(); // TODO: hash only the dirty pages
+        image.pc = pc;
+        image
     }
 }
 
@@ -304,7 +407,11 @@ impl Memory for MemoryMonitor {
 
 impl SyscallContext for MemoryMonitor {
     fn get_cycle(&self) -> usize {
-        self.cycle + self.pending_page_read_cycles()
+        self.session_cycle
+    }
+
+    fn load_register(&mut self, idx: usize) -> u32 {
+        self.registers[idx]
     }
 
     fn load_u32(&mut self, addr: u32) -> u32 {
@@ -316,48 +423,10 @@ impl SyscallContext for MemoryMonitor {
     }
 }
 
-fn get_register_addr(idx: usize) -> u32 {
-    (SYSTEM.start() + idx * WORD_SIZE) as u32
-}
-
-enum IncludeDir {
-    Read,
-    Write,
-}
-
 impl PageFaults {
-    fn include(&mut self, info: &PageTableInfo, addr: u32, dir: IncludeDir) {
-        let mut addr = addr;
-        loop {
-            let page_idx = info.get_page_index(addr);
-            let entry_addr = info.get_page_entry_addr(page_idx);
-            match dir {
-                IncludeDir::Read => {
-                    if !self.reads.insert(page_idx) {
-                        break;
-                    }
-                }
-                IncludeDir::Write => {
-                    if !self.writes.insert(page_idx) {
-                        break;
-                    }
-                }
-            };
-            if page_idx == info.root_idx {
-                break;
-            }
-            addr = entry_addr;
-        }
-    }
-
     fn clear(&mut self) {
         self.reads.clear();
         self.writes.clear();
-    }
-
-    fn append(&mut self, rhs: &mut Self) {
-        self.reads.append(&mut rhs.reads);
-        self.writes.append(&mut rhs.writes);
     }
 
     #[allow(dead_code)]

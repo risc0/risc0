@@ -17,5 +17,3 @@
 
 /// Bonsai Alpha SDK
 pub mod alpha;
-/// Bonsai Omega SDK
-pub mod omega;

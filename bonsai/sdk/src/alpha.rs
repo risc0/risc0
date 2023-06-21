@@ -115,25 +115,18 @@ fn construct_req_client(api_key: &str) -> Result<BlockingClient> {
 impl Client {
     /// Construct a [Client] from env var
     ///
-    /// Uses the BONSAI_ENDPOINT environment variables to construct a client
-    /// The BONSAI_ENDPOINT string packs both the API Url and API_KEY into the
-    /// same string with the following format:
-    /// <api_url>|<api_key>
+    /// Uses the BONSAI_API_URL and BONSAI_API_KEY environment variables to
+    /// construct a client
     pub fn from_env() -> Result<Self> {
-        let bonsai_endpoint =
-            std::env::var("BONSAI_ENDPOINT").context("Missing BONSAI_ENDPOINT env var")?;
+        let api_url = std::env::var("BONSAI_API_URL").context("Missing BONSAI_API_URL env var")?;
+        let api_key = std::env::var("BONSAI_API_KEY").context("Missing BONSAI_API_KEY env var")?;
 
-        let parts = bonsai_endpoint.split('|').collect::<Vec<&str>>();
-        if parts.len() != 2 {
-            bail!("Invalid BONSAI_ENDPOINT URL, must be in format: '<api_url>|<api_key>'");
-        }
+        let client = construct_req_client(&api_key)?;
 
-        let url = parts[0].to_string();
-        let key = parts[1].to_string();
-
-        let client = construct_req_client(&key)?;
-
-        Ok(Self { url, client })
+        Ok(Self {
+            url: api_url,
+            client,
+        })
     }
 
     /// Construct a [Client] from url + api key strings
@@ -333,7 +326,9 @@ mod tests {
     fn client_from_env() {
         let url = "http://127.0.0.1/stage".to_string();
         let apikey = TEST_KEY.to_string();
-        std::env::set_var("BONSAI_ENDPOINT", format!("{}|{}", url, apikey));
+        std::env::set_var("BONSAI_API_URL", url.clone());
+        std::env::set_var("BONSAI_API_KEY", apikey);
+
         let client = super::Client::from_env().unwrap();
 
         assert_eq!(client.url, url);
