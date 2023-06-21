@@ -24,7 +24,7 @@ use std::{
     rc::Rc,
 };
 
-use anyhow::{bail, Result};
+use anyhow::{bail, Context, Result};
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
     fileno,
@@ -221,7 +221,7 @@ impl<'a> PosixIo<'a> {
         let reader = self
             .read_fds
             .get_mut(&fd)
-            .expect(&format!("Bad read file descriptor {fd}"));
+            .with_context(|| format!("Bad read file descriptor {fd}"))?;
         let navail = reader.borrow_mut().fill_buf().unwrap().len() as u32;
         log::debug!("navail: {navail}");
         Ok((navail, 0))
@@ -245,7 +245,7 @@ impl<'a> PosixIo<'a> {
         let reader = self
             .read_fds
             .get_mut(&fd)
-            .expect(&format!("Bad read file descriptor {fd}"));
+            .with_context(|| format!("Bad read file descriptor {fd}"))?;
         // So that we don't have to deal with short reads, keep
         // reading until we get EOF or fill the buffer.
         let read_all = |mut buf: &mut [u8]| -> usize {
@@ -298,7 +298,7 @@ impl<'a> PosixIo<'a> {
         let writer = self
             .write_fds
             .get_mut(&fd)
-            .expect(&format!("Bad write file descriptor {fd}"));
+            .with_context(|| format!("Bad write file descriptor {fd}"))?;
 
         log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
 
@@ -383,15 +383,19 @@ impl<'a> SyscallTable<'a> {
 pub(crate) mod syscalls {
     use std::{cmp::min, collections::HashMap, str::from_utf8};
 
-    use anyhow::{bail, Result};
+    use anyhow::{anyhow, bail, Result};
     use risc0_zkvm_platform::{
-        syscall::reg_abi::{REG_A3, REG_A4},
+        syscall::{
+            nr,
+            reg_abi::{REG_A3, REG_A4},
+        },
         WORD_SIZE,
     };
 
     use super::{Syscall, SyscallContext};
 
     pub(crate) struct CycleCount;
+
     impl Syscall for CycleCount {
         fn syscall(
             &mut self,
@@ -404,6 +408,7 @@ pub(crate) mod syscalls {
     }
 
     pub(crate) struct Getenv(pub HashMap<String, String>);
+
     impl Syscall for Getenv {
         fn syscall(
             &mut self,
@@ -428,7 +433,41 @@ pub(crate) mod syscalls {
         }
     }
 
+    #[derive(Clone)]
+    pub(crate) struct Args(pub Vec<String>);
+
+    impl Syscall for Args {
+        fn syscall(
+            &mut self,
+            syscall: &str,
+            ctx: &mut dyn SyscallContext,
+            to_guest: &mut [u32],
+        ) -> Result<(u32, u32)> {
+            if syscall == nr::SYS_ARGC.as_str() {
+                Ok((self.0.len().try_into()?, 0))
+            } else if syscall == nr::SYS_ARGV.as_str() {
+                // Get the arg or return an error if out of bounds.
+                let arg_index = ctx.load_register(REG_A3);
+                let arg_val = self.0.get(arg_index as usize).ok_or_else(|| {
+                    anyhow!(
+                        "guest requested index {} from argv of len {}",
+                        arg_index,
+                        self.0.len()
+                    )
+                })?;
+
+                let nbytes = min(to_guest.len() * WORD_SIZE, arg_val.as_bytes().len());
+                let to_guest_u8s: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
+                to_guest_u8s[0..nbytes].clone_from_slice(&arg_val.as_bytes()[0..nbytes]);
+                Ok((arg_val.as_bytes().len() as u32, 0))
+            } else {
+                bail!("Unknown syscall {syscall}")
+            }
+        }
+    }
+
     pub(crate) struct Log;
+
     impl Syscall for Log {
         fn syscall(
             &mut self,
@@ -446,6 +485,7 @@ pub(crate) mod syscalls {
     }
 
     pub(crate) struct Panic;
+
     impl Syscall for Panic {
         fn syscall(
             &mut self,
@@ -462,6 +502,7 @@ pub(crate) mod syscalls {
     }
 
     pub(crate) struct Random;
+
     impl Syscall for Random {
         fn syscall(
             &mut self,

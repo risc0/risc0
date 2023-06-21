@@ -26,7 +26,7 @@ use bytemuck::Pod;
 use risc0_zkvm_platform::{
     fileno,
     syscall::{
-        nr::{SYS_GETENV, SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
+        nr::{SYS_ARGC, SYS_ARGV, SYS_GETENV, SYS_READ, SYS_READ_AVAIL, SYS_WRITE},
         SyscallName,
     },
 };
@@ -53,6 +53,7 @@ pub struct ExecutorEnvBuilder<'a> {
 #[derive(Clone)]
 pub struct ExecutorEnv<'a> {
     env_vars: HashMap<String, String>,
+    args: Vec<String>,
     pub(crate) segment_limit_po2: usize,
     session_limit: Option<usize>,
     syscalls: SyscallTable<'a>,
@@ -65,9 +66,7 @@ impl<'a> ExecutorEnv<'a> {
     /// Construct a [ExecutorEnvBuilder].
     /// # Example
     /// ```
-    /// use risc0_zkvm::{
-    ///     ExecutorEnv,
-    ///     ExecutorEnvBuilder};
+    /// use risc0_zkvm::ExecutorEnv;
     ///
     /// let a: u64 = 400;
     ///
@@ -101,6 +100,7 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
         Self {
             inner: ExecutorEnv {
                 env_vars: Default::default(),
+                args: Default::default(),
                 segment_limit_po2: DEFAULT_SEGMENT_LIMIT_PO2,
                 session_limit: None,
                 syscalls: Default::default(),
@@ -135,9 +135,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Finalize this builder to construct an [ExecutorEnv].
     /// # Example
     /// ```
-    /// use risc0_zkvm::{
-    ///     ExecutorEnv,
-    ///     ExecutorEnvBuilder};
+    /// # use risc0_zkvm::ExecutorEnv;
     ///
     /// let env = ExecutorEnv::builder().build().unwrap();
     /// ```
@@ -154,6 +152,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
         // Construct the executor environment
         let mut result = self.clone();
         let getenv = syscalls::Getenv(self.inner.env_vars.clone());
+        let args = syscalls::Args(self.inner.args.clone());
         if !self.inner.input.is_empty() {
             let reader = Cursor::new(self.inner.input.clone());
             result
@@ -164,6 +163,8 @@ impl<'a> ExecutorEnvBuilder<'a> {
         }
         let io = result.inner.io.clone();
         result
+            .syscall(SYS_ARGC, args.clone())
+            .syscall(SYS_ARGV, args.clone())
             .syscall(SYS_GETENV, getenv)
             .syscall(SYS_READ, io.clone())
             .syscall(SYS_READ_AVAIL, io.clone())
@@ -183,9 +184,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Set a session limit, specified in number of cycles.
     /// # Example
     /// ```
-    /// use risc0_zkvm::{
-    ///    ExecutorEnv,
-    ///    ExecutorEnvBuilder};
+    /// # use risc0_zkvm::ExecutorEnv;
     ///
     /// const NEW_SESSION_LIMIT: usize = 32 * 1024 * 1024; // 32M cycles
     ///
@@ -202,9 +201,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
     /// Add environment variables to the guest environment.
     /// # Example
     /// ```
-    /// use risc0_zkvm::{
-    ///     ExecutorEnv,
-    ///     ExecutorEnvBuilder};
+    /// # use risc0_zkvm::ExecutorEnv;
     /// use std::collections::HashMap;
     ///
     /// let mut vars = HashMap::new();
@@ -221,12 +218,25 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self
     }
 
+    /// Add an argument array to the guest environment.
+    /// # Example
+    /// ```
+    /// # use risc0_zkvm::ExecutorEnv;
+    ///
+    /// let env = ExecutorEnv::builder()
+    ///     .args(vec!["grep", "-c", "foo", "-"])
+    ///     .build()
+    ///     .unwrap();
+    /// ```
+    pub fn args(&mut self, args: Vec<String>) -> &mut Self {
+        self.inner.args = args;
+        self
+    }
+
     /// Add an environment variable to the guest environment.
     /// # Example
     /// ```
-    /// # use risc0_zkvm::{
-    /// #   ExecutorEnv,
-    /// #   ExecutorEnvBuilder};
+    /// # use risc0_zkvm::ExecutorEnv;
     ///
     /// let env = ExecutorEnv::builder()
     ///     .env_var("VAR1", "SOME_VALUE")
@@ -241,14 +251,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add initial input that can be read by the guest from stdin.
-    /// Calling `ExecutorEnvBuilder::add_input()` iteratively concatenates
+    /// Calling `EgxecutorEnvBuilder::add_input()` iteratively concatenates
     /// inputs; the guest can access each input using consecutive reads.
     ///
     /// ```
-    /// use risc0_zkvm::{
-    ///     ExecutorEnv,
-    ///     ExecutorEnvBuilder,
-    ///     serde::to_vec};
+    /// # use risc0_zkvm::ExecutorEnv;
+    /// use risc0_zkvm::serde::to_vec;
     ///
     /// let a: u64 = 400;
     /// let b: u64 = 200;

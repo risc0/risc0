@@ -119,6 +119,8 @@ macro_rules! declare_syscall {
 pub mod nr {
     declare_syscall!(pub SYS_CYCLE_COUNT);
     declare_syscall!(pub SYS_GETENV);
+    declare_syscall!(pub SYS_ARGC);
+    declare_syscall!(pub SYS_ARGV);
     declare_syscall!(pub SYS_LOG);
     declare_syscall!(pub SYS_PANIC);
     declare_syscall!(pub SYS_RANDOM);
@@ -468,11 +470,17 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_buf: *const u8, nbytes: usize)
 
 /// Retrieves the value of an environment variable, and stores as much
 /// of it as it can it in the memory at [out_words, out_words +
-/// out_nwords).  Returns the length of the value.
+/// out_nwords).
+///
+/// Returns the length of the value, in bytes, or usize::MAX if the variable is
+/// not set.
 ///
 /// This is normally called twice to read an environment variable:
 /// Once to get the length of the value, and once to fill in allocated
 /// memory.
+///
+/// NOTE: Repeated calls to sys_getenv are not guaranteed to result in the same
+/// data being returned. Returned data is entirely in the control of the host.
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
 pub unsafe extern "C" fn sys_getenv(
     out_words: *mut u32,
@@ -492,6 +500,39 @@ pub unsafe extern "C" fn sys_getenv(
     } else {
         a0 as usize
     }
+}
+
+/// Retrieves the count of arguments provided to program execution.
+///
+/// NOTE: Repeated calls to sys_argc are not guaranteed to result in the same
+/// data being returned. Returned data is entirely in the control of the host.
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub unsafe extern "C" fn sys_argc() -> usize {
+    let Return(a0, _) = syscall_0(nr::SYS_ARGC, null_mut(), 0);
+    a0 as usize
+}
+
+/// Retrieves the argument with arg_index, and stores as much
+/// of it as it can it in the memory at [out_words, out_words +
+/// out_nwords).
+///
+/// Returns the length, in bytes, of the argument string. If the requested
+/// argument index does not exist (i.e. `arg_index` >= argc) then this syscall
+/// will not return.
+///
+/// This is normally called twice to read an argument: Once to get the length of
+/// the value, and once to fill in allocated memory.
+///
+/// NOTE: Repeated calls to sys_argv are not guaranteed to result in the same
+/// data being returned. Returned data is entirely in the control of the host.
+#[cfg_attr(feature = "export-syscalls", no_mangle)]
+pub unsafe extern "C" fn sys_argv(
+    out_words: *mut u32,
+    out_nwords: usize,
+    arg_index: usize,
+) -> usize {
+    let Return(a0, _) = syscall_1(nr::SYS_ARGV, out_words, out_nwords, arg_index as u32);
+    a0 as usize
 }
 
 #[cfg_attr(feature = "export-syscalls", no_mangle)]
