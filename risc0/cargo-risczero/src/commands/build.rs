@@ -87,9 +87,7 @@ impl BuildCommand {
 
         // Unpack the rust-runtime.a file that is included in this binary.
         let tmpdir = tempdir()?;
-
         let rust_runtime = get_zip_file(&tmpdir, "rust-runtime.a")?;
-        eprintln!("Runtime: {rust_runtime:?}");
 
         // Determine the target directory where the build artifacts should be placed.
         let target_dir = &self
@@ -142,7 +140,7 @@ impl BuildCommand {
             }
         }
 
-        eprintln!("running {cmd:?}");
+        // Start the cargo command as a subprocess.
         let mut child = cmd.stdout(Stdio::piped()).spawn()?;
 
         // Parse stdout from the command and record any test binaries that get compiled.
@@ -183,18 +181,11 @@ impl BuildCommand {
 
             for t in &tests {
                 eprintln!("Running test {t}");
-                let mut env_builder = ExecutorEnv::builder();
-
-                env_builder
+                let env = ExecutorEnv::builder()
+                    .args(test_args.clone())
                     .env_var("RUST_TEST_NOCAPTURE", "1")
-                    .env_var("ARGC", &(test_args.len() + 1).to_string())
-                    .env_var("ARGV_0", &t);
+                    .build()?;
 
-                for (i, arg) in test_args.iter().enumerate() {
-                    env_builder.env_var(&format!("ARGV_{}", i + 1), &arg);
-                }
-
-                let env = env_builder.build()?;
                 let mut exec = Executor::from_elf(env, &fs::read(t)?)?;
                 exec.run()?;
             }

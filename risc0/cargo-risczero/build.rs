@@ -13,6 +13,8 @@ fn main() {
 
     println!("V12!");
 
+    // Build the rust-runtime.a file and place it in a zip archive for inclusion in
+    // the cargo-risczero binary.
     let out_dir_env = env::var_os("OUT_DIR").unwrap();
     let out_dir = Path::new(&out_dir_env); // $ROOT/target/$profile/build/$crate/out
     let guest_build_env = setup_guest_build_env(out_dir);

@@ -136,6 +136,7 @@ struct ZipMapEntry {
 // Sources for standard library, and where they should be mapped to.
 const RUST_LIB_MAP : &[ZipMapEntry] = &[
     ZipMapEntry {
+        // DO NOT MERGE: Update to commit from main branch
         filename: "ab9ea446d736062424eb33c54295ec6757ea016e.zip",
         zip_url: "https://github.com/risc0/rust/archive/ab9ea446d736062424eb33c54295ec6757ea016e.zip",
         src_prefix: "rust-ab9ea446d736062424eb33c54295ec6757ea016e/library",
