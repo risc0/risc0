@@ -14,7 +14,8 @@ use risc0_zkvm::serde::to_vec;
 let input_data = to_vec(&input_data).unwrap();
 let input_data = bytemuck::cast_slice(&input_data).to_vec();
 
-// Construct the bonsai_sdk client from the BONSAI_ENDPOINT env var
+// Construct the bonsai_sdk client from the `BONSAI_API_URL` and
+// `BONSAI_API_URL` env vars.
 let client = Client::from_env()?;
 
 // Upload the ELF file of the guest to the prover
