@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use cargo_risczero::{commands::build::BuildSubcommand, Cargo, RisczeroCmd};
+#[cfg(feature = "experimental")]
+use cargo_risczero::commands::build::BuildSubcommand;
+use cargo_risczero::{Cargo, RisczeroCmd};
 use clap::Parser;
 use tracing_subscriber::EnvFilter;
 
@@ -25,7 +27,9 @@ fn main() -> anyhow::Result<()> {
 
     match args.command {
         RisczeroCmd::New(new) => new.run(),
+        #[cfg(feature = "experimental")]
         RisczeroCmd::Build(build) => build.run(BuildSubcommand::Build),
+        #[cfg(feature = "experimental")]
         RisczeroCmd::Test(build) => build.run(BuildSubcommand::Test),
     }
 }

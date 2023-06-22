@@ -9,6 +9,10 @@ description = "RISC Zero CLI tools"
 readme = "README.md"
 keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 
+[[bin]]
+path = "src/bin/main.rs"
+name = "cargo-risczero"
+
 [dependencies]
 anyhow = "1.0"
 # Note, due to tempfile = 3.3.0 in cargo-generate
@@ -30,6 +34,5 @@ env_logger = "0.10"
 risc0-build = { workspace = true }
 zip = "0.6"
 
-[[bin]]
-path = "src/bin/main.rs"
-name = "cargo-risczero"
+[features]
+experimental = []
