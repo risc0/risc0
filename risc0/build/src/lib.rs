@@ -167,8 +167,8 @@ fn sha_digest_with_hex(data: &[u8]) -> (Vec<u8>, String) {
     )
 }
 
-/// Returns the given cargo Package from the metadata.
-#[doc(hidden)]
+/// Returns the given cargo Package from the metadata in the Cargo.toml manifest
+/// withing the provided `manifest_dir`.
 pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
     let manifest_path = manifest_dir.as_ref().join("Cargo.toml");
     let manifest_meta = MetadataCommand::new()
@@ -201,8 +201,8 @@ pub fn get_package(manifest_dir: impl AsRef<Path>) -> Package {
     matching.pop().unwrap()
 }
 
-/// Returns the given cargo Package from the metadata.
-#[doc(hidden)]
+/// Determines and returns the build target directory from the Cargo manifest at
+/// the given `manifest_path`.
 pub fn get_target_dir(manifest_path: impl AsRef<Path>) -> PathBuf {
     MetadataCommand::new()
         .manifest_path(manifest_path.as_ref())
