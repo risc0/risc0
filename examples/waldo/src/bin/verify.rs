@@ -70,7 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Load and verify the receipt file.
-    let receipt: SessionFlatReceipt = bincode::deserialize(&fs::read(&args.receipt)?)?;
+    let receipt: SessionFlatReceipt = crate::serde::from_slice(&fs::read(&args.receipt)?)?;
     receipt.verify(IMAGE_CROP_ID.into())?;
 
     // Check consistency of the journal against the input Where's Waldo image.
