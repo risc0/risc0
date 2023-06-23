@@ -1,0 +1,15 @@
+[package]
+name = "bevy-guest"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+bevy-core = { path = "../../core" }
+bevy_ecs = "0.9.1"
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = ["std"] }
+json = "0.12"
+
+[patch.crates-io]
+crossbeam-utils = { git = "https://github.com/risc0/crossbeam", rev = "b25eb50f8c193f36dacb6739692261ea96827bb7" }

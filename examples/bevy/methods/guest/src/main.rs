@@ -1,0 +1,73 @@
+// Copyright 2023 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#![no_main]
+risc0_zkvm::guest::entry!(main);
+
+
+use risc0_zkvm::guest::env;
+
+use bevy_ecs::world::World;
+use bevy_ecs::prelude::*;
+
+use bevy_core::Outputs;
+
+#[derive(Component)]
+struct Position { x: f32, y: f32 }
+#[derive(Component)]
+struct Velocity { x: f32, y: f32 }
+#[derive(StageLabel)]
+pub struct UpdateLabel;
+
+
+// This system moves each entity with a Position and Velocity component
+fn movement(mut query: Query<(&mut Position, &Velocity)>) {
+    for (mut position, velocity) in &mut query {
+        position.x += velocity.x;
+        position.y += velocity.y;
+    }
+}
+
+pub fn main() {
+    let turns:u32 = env::read();
+    let mut world = World::new();
+    let entity = world
+        .spawn((Position { x: 0.0, y: 0.0 }, Velocity { x: 1.0, y: 0.0 }))
+        .id();
+
+    let mut schedule = Schedule::default();
+
+    schedule.add_stage(UpdateLabel, SystemStage::single_threaded()
+        .with_system(movement)
+    );
+    {
+        let entity_ref = world.entity(entity);
+        let position = entity_ref.get::<Position>().unwrap();
+        assert!(position.x == 0.0);
+    }
+
+    // Run timesteps
+    for _ in 0..turns {
+        env::log("running timestep...");
+        schedule.run(&mut world);
+    }
+    {
+        let entity_ref = world.entity(entity);
+        let position = entity_ref.get::<Position>().unwrap();
+        let out = Outputs {
+            position: position.x, 
+        };
+        env::commit(&out);
+    }
+}

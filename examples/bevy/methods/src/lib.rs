@@ -11,15 +11,5 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// SPDX-License-Identifier: Apache-2.0
 
-pragma solidity ^0.8.16;
-
-interface IBonsaiApp {
-  /// @notice Callback function to be called by the Bonsai proxy when the result is ready.
-  /// @param _image_id The verified image ID for the RISC Zero guest that produced the journal.
-  ///        It must be checked to match the specific image ID of the associated RISC Zero guest.
-  /// @param journal Data committed by the guest program with the results and important context.
-  function callback(bytes32 _image_id, bytes calldata journal) external;
-}
+include!(concat!(env!("OUT_DIR"), "/methods.rs"));
