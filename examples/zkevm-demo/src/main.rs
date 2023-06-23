@@ -27,7 +27,7 @@ use zkevm_core::{
     ether_trace::{Http, Provider},
     Env, EvmResult, EVM,
 };
-use zkevm_methods::EVM_ELF;
+use zkevm_methods::{EVM_ELF, EVM_ID};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -98,6 +98,7 @@ async fn main() {
         })
         .unwrap();
     let receipt = session.prove().unwrap();
+    receipt.verify(EVM_ID.into()).unwrap();
 
     let res: EvmResult =
         from_slice(&receipt.get_journal()).expect("Failed to deserialize EvmResult");

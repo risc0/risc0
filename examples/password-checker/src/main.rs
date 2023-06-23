@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use password_checker_core::PasswordRequest;
-use password_checker_methods::PW_CHECKER_ELF;
+use password_checker_methods::{PW_CHECKER_ELF, PW_CHECKER_ID};
 use rand::prelude::*;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
@@ -45,6 +45,8 @@ fn password_checker(request: PasswordRequest) -> Digest {
     let session = exec.run().unwrap();
 
     let receipt = session.prove().unwrap();
+
+    receipt.verify(PW_CHECKER_ID.into()).unwrap();
 
     from_slice(&receipt.get_journal()).unwrap()
 }

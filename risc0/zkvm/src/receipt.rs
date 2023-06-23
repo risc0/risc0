@@ -162,6 +162,16 @@ pub trait SessionReceipt: Debug {
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `image_id` parameter.
+    ///
+    /// # Arguments
+    /// * `image_id` - identifier for the method or the boot image for zkVM
+    ///   operations
+    ///
+    /// # Examples
+    /// ```
+    /// use methods::METHOD_NAME_ID;
+    /// receipt.verify(METHOD_NAME_ID.into()).unwrap();
+    /// ```
     #[cfg(not(target_os = "zkvm"))]
     #[must_use]
     fn verify(&self, image_id: Digest) -> Result<(), VerificationError>;
