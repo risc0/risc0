@@ -26,7 +26,7 @@
 [risc-v]: https://en.wikipedia.org/wiki/RISC-V
 [crates.io]: https://crates.io
 [cargo-risczero-readme]: https://github.com/risc0/risc0/blob/main/risc0/cargo-risczero/README.md
-[website-getting-started]: https://www.risczero.com/docs
+[website-getting-started]: https://dev.risczero.com/zkvm/quickstart
 [examples]: https://github.com/risc0/risc0/tree/main/examples
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 
