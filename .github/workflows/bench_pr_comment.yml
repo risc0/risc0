@@ -55,5 +55,5 @@ jobs:
               issue_number: issue_number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: body
+              body: "### Testing 👋"
             })
