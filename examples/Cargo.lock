@@ -4309,7 +4309,6 @@ dependencies = [
 name = "waldo"
 version = "0.1.0"
 dependencies = [
- "bincode",
  "clap 4.3.2",
  "env_logger",
  "image",

@@ -14,20 +14,21 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use risc0_zkp::core::digest::Digest;
 #[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::core::hash::sha::Sha256;
-#[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::{adapter::CircuitInfo, verify::VerificationError};
+use risc0_zkp::{adapter::CircuitInfo, core::hash::sha::Sha256};
+use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(target_os = "zkvm"))]
-use crate::receipt::compute_image_id;
-#[cfg(not(target_os = "zkvm"))]
-use crate::recursion::circuit_impl::CIRCUIT_CORE;
-#[cfg(not(target_os = "zkvm"))]
-use crate::sha::{self};
-use crate::{receipt::SessionReceipt, ControlId};
+use crate::{
+    receipt::compute_image_id,
+    recursion::circuit_impl::CIRCUIT_CORE,
+    sha::{self},
+};
+use crate::{
+    receipt::{ReceiptMetadata, SessionReceipt, SystemState},
+    ControlId,
+};
 
 /// This function gets valid control ID's from the posidon and recursion
 /// circuits
@@ -58,39 +59,6 @@ fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     let down_count: u16 = down.len().try_into().unwrap();
     all.extend_from_slice(&down_count.to_le_bytes());
     *sha::Impl::hash_bytes(&all)
-}
-
-/// SystemState describes the system's memory during program execution
-///
-/// An instance of this struct provides a program counter and an image ID that
-/// represents all values in memory at that moment.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SystemState {
-    /// the program counter
-    pub pc: u32,
-    /// the image ID represents a snapshot of all memory regions
-    pub image_id: Digest,
-}
-
-/// The receipt metadata describes the system information about each receipt.
-///
-/// This information is used to verify the integrity of the receipt as well as
-/// joining two receipts together using recursion.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ReceiptMeta {
-    /// hash of the input to this segment before execution
-    pub input: Digest,
-    /// System State before the segment execution
-    pub pre: SystemState,
-    /// System State after the segment execution
-    pub post: SystemState,
-    /// The system's exit state at the end of this segment
-    pub sys_exit: u8,
-    /// The system's exit status derived from a sys_pause instruction at the end
-    /// of this segment
-    pub user_exit: u8,
-    /// hash of the output
-    pub output: Digest,
 }
 
 fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
@@ -129,46 +97,56 @@ impl SystemState {
     fn decode(flat: &mut VecDeque<u32>) -> Self {
         Self {
             pc: read_u32_bytes(flat),
-            image_id: read_sha_halfs(flat),
+            merkle_root: read_sha_halfs(flat),
         }
     }
 
     fn encode(&self, flat: &mut Vec<u32>) {
         write_u32_bytes(flat, self.pc);
-        write_sha_halfs(flat, &self.image_id);
+        write_sha_halfs(flat, &self.merkle_root);
     }
 
     #[cfg(not(target_os = "zkvm"))]
     fn digest(&self) -> Digest {
-        tagged_struct("risc0.SystemState", &[self.image_id], &[self.pc])
+        tagged_struct("risc0.SystemState", &[self.merkle_root], &[self.pc])
     }
 }
 
-impl ReceiptMeta {
-    /// decode a [ReceiptMeta] from a list of [u32]'s
-    pub fn decode(flat: &mut VecDeque<u32>) -> Self {
-        Self {
-            input: read_sha_halfs(flat),
-            pre: SystemState::decode(flat),
-            post: SystemState::decode(flat),
-            sys_exit: flat.pop_front().unwrap() as u8,
-            user_exit: flat.pop_front().unwrap() as u8,
-            output: read_sha_halfs(flat),
-        }
+impl ReceiptMetadata {
+    /// decode a [crate::ReceiptMetadata] from a list of [u32]'s
+    pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, VerificationError> {
+        let input = read_sha_halfs(flat);
+        let pre = SystemState::decode(flat);
+        let post = SystemState::decode(flat);
+        let sys_exit = flat.pop_front().unwrap() as u32;
+        let user_exit = flat.pop_front().unwrap() as u32;
+        let exit_code = ReceiptMetadata::make_exit_code(sys_exit, user_exit)?;
+        let output = read_sha_halfs(flat);
+
+        Ok(Self {
+            input,
+            pre,
+            post,
+            exit_code,
+            output,
+        })
     }
-    /// encode a [ReceiptMeta] to a list of [u32]'s
-    pub fn encode(&self, flat: &mut Vec<u32>) {
+    /// encode a [crate::ReceiptMetadata] to a list of [u32]'s
+    pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), VerificationError> {
         write_sha_halfs(flat, &self.input);
         self.pre.encode(flat);
         self.post.encode(flat);
-        flat.push(self.sys_exit as u32);
-        flat.push(self.user_exit as u32);
+        let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
+        flat.push(sys_exit);
+        flat.push(user_exit);
         write_sha_halfs(flat, &self.output);
+        Ok(())
     }
 
     #[cfg(not(target_os = "zkvm"))]
-    fn digest(&self) -> Digest {
-        tagged_struct(
+    fn digest(&self) -> Result<Digest, VerificationError> {
+        let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
+        Ok(tagged_struct(
             "risc0.ReceiptMeta",
             &[
                 self.input,
@@ -176,8 +154,8 @@ impl ReceiptMeta {
                 self.post.digest(),
                 self.output,
             ],
-            &[self.sys_exit.into(), self.user_exit.into()],
-        )
+            &[sys_exit, user_exit],
+        ))
     }
 }
 
@@ -191,7 +169,7 @@ pub struct SegmentRecursionReceipt {
     pub control_id: Digest,
     /// the receipt metadata containing states of the system during the segment
     /// executions
-    pub meta: ReceiptMeta,
+    pub meta: ReceiptMetadata,
 }
 
 impl SegmentRecursionReceipt {
@@ -225,7 +203,7 @@ impl SegmentRecursionReceipt {
         seal_meta.drain(0..16);
         // Verify the output hash matches that data
         let output_hash = read_sha_halfs(&mut seal_meta);
-        if output_hash != self.meta.digest() {
+        if output_hash != self.meta.digest()? {
             return Err(VerificationError::JournalDigestMismatch);
         }
         // Everything passed
@@ -250,11 +228,11 @@ impl SessionReceipt for SessionRollupReceipt {
     /// Verify the integrity of the receipt by using the segment receipt and the
     /// journal
     #[cfg(not(target_os = "zkvm"))]
-    fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
+    fn verify(&self, merkle_root: Digest) -> Result<(), VerificationError> {
         self.receipt.verify()?;
         let journal_digest = sha::Impl::hash_bytes(&self.journal);
         let pre_img = &self.receipt.meta.pre;
-        if image_id != compute_image_id(&pre_img.image_id, pre_img.pc) {
+        if merkle_root != compute_image_id(&pre_img.merkle_root, pre_img.pc) {
             return Err(VerificationError::ImageVerificationError);
         }
 
