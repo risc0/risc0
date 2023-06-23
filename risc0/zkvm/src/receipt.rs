@@ -168,7 +168,7 @@ pub trait SessionReceipt: Debug {
     ///   operations
     ///
     /// # Examples
-    /// ```
+    /// ```ignore
     /// use methods::METHOD_NAME_ID;
     /// receipt.verify(METHOD_NAME_ID.into()).unwrap();
     /// ```
