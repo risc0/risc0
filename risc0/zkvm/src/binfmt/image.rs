@@ -199,9 +199,15 @@ impl MemoryImage {
 
     /// Calculate and update the image merkle tree within this image.
     pub fn hash_pages(&mut self) {
-        for i in 0..self.info.num_pages {
-            let digest = self.hash_page(i);
-            let entry_addr = self.info.get_page_entry_addr(i as u32);
+        self.hash_pages_iter(0..self.info.num_pages);
+    }
+
+    /// Calculate and update the image merkle tree within this image based on
+    /// the supplied page indicies.
+    pub fn hash_pages_iter<I: Iterator<Item = u32>>(&mut self, iter: I) {
+        for page_idx in iter {
+            let digest = self.hash_page(page_idx);
+            let entry_addr = self.info.get_page_entry_addr(page_idx);
             self.store_region_in_page(entry_addr, digest.as_bytes());
         }
     }
