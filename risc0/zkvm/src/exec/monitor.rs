@@ -380,7 +380,7 @@ impl MemoryMonitor {
         self.image
             .store_region_in_page(SYSTEM.start() as u32, &bytes);
         let mut image = self.image.clone();
-        image.hash_pages(); // TODO: hash only the dirty pages
+        image.hash_pages_iter(self.faults.writes.iter().cloned());
         image.pc = pc;
         image
     }

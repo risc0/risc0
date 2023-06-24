@@ -1,4 +1,0 @@
-wrap_comments = true
-normalize_comments = true
-group_imports = "StdExternalCrate"
-imports_granularity = "Crate"
