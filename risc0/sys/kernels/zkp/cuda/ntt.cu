@@ -36,23 +36,34 @@ void multi_bit_reverse(Fp* io,
 }
 
 extern "C" __global__
-void batch_evaluate_any(Fp4* out,
-                        const Fp* coeffs,
-                        const uint32_t* which,
-                        const Fp4* xs,
-                        const uint32_t eval_count,
-                        const uint32_t count) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
-  if (idx < count) {
-    Fp4 tot;
-    Fp4 cur(1);
-    const uint32_t id = which[idx];
-    const Fp4& x = xs[idx];
-    for (uint32_t i = 0; i < eval_count; i++) {
-        tot += cur * coeffs[eval_count * id + i];
-        cur *= x;
+void multi_poly_eval(Fp4* out,
+                     const Fp* coeffs,
+                     const uint32_t* which,
+                     const Fp4* xs,
+                     const uint32_t deg) {
+  const Fp* cur_poly = coeffs + which[blockIdx.x] * deg;
+  Fp4 x = xs[blockIdx.x];
+  Fp4 stepx = pow(x, 256);
+  Fp4 powx = pow(x, threadIdx.x);
+  Fp4 tot;
+  for (size_t i = threadIdx.x; i < deg; i += 256) {
+    tot += powx * cur_poly[i];
+    powx *= stepx;
+  }
+  __shared__ uint32_t totsBuf[256 * 4];
+  Fp4* tots = reinterpret_cast<Fp4*>(totsBuf);
+  tots[threadIdx.x] = tot;
+  __syncthreads();
+  unsigned cur = 256;
+  while (cur) {
+    cur /= 2;
+    if (threadIdx.x < cur) {
+      tots[threadIdx.x] = Fp4(tots[threadIdx.x]) + Fp4(tots[threadIdx.x + cur]);
     }
-    out[idx] = tot;
+    __syncthreads();
+  }
+  if (threadIdx.x == 0) {
+    out[blockIdx.x] = tots[0];
   }
 }
 

@@ -564,15 +564,15 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         out: &Self::Buffer<Self::ExtElem>,
     ) {
         let po2 = log2_ceil(coeffs.size() / poly_count);
-        assert_eq!(poly_count * (1 << po2), coeffs.size());
+        let count = 1 << po2;
+        assert_eq!(poly_count * count, coeffs.size());
         let eval_count = which.size();
         assert_eq!(xs.size(), eval_count);
         assert_eq!(out.size(), eval_count);
-        let count = 1 << po2;
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
-        let kernel = self.module.get_function("batch_evaluate_any").unwrap();
-        let params = self.compute_simple_params(eval_count);
+        let kernel = self.module.get_function("multi_poly_eval").unwrap();
+        let params = self.compute_simple_params(out.size() * 256);
         unsafe {
             launch!(kernel<<<params.0, params.1, 0, stream>>>(
                 out.as_device_ptr(),
@@ -580,7 +580,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
                 which.as_device_ptr(),
                 xs.as_device_ptr(),
                 count,
-                eval_count
             ))
             .unwrap();
         }
