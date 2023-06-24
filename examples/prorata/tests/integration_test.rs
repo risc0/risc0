@@ -15,7 +15,7 @@
 use std::process::Command;
 
 #[test]
-fn test_zk_evm() {
+fn test_prorata() {
     let feature = if cfg!(feature = "metal") {
         "metal"
     } else if cfg!(feature = "cuda") {
@@ -25,7 +25,35 @@ fn test_zk_evm() {
     };
 
     Command::new("cargo")
-        .args(["run", "--release", "--features", feature])
+        .args([
+            "run",
+            "--release",
+            "--features",
+            feature,
+            "--package",
+            "prorata-cli",
+            "--",
+            "allocate",
+            "--input",
+            "sample/ingen.csv",
+            "--output",
+        ])
         .output()
-        .expect("failed to run sha example");
+        .expect("failed to run Waldo prove");
+
+    Command::new("cargo")
+        .args([
+            "run",
+            "--release",
+            "--features",
+            feature,
+            "--package",
+            "prorata-cli",
+            "--",
+            "verify",
+            "--input",
+            "hammond.receipt",
+        ])
+        .output()
+        .expect("failed to run Waldo verify");
 }

@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use json_core::Outputs;
-use json_methods::SEARCH_JSON_ELF;
+use json_methods::{SEARCH_JSON_ELF, SEARCH_JSON_ID};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
     Executor, ExecutorEnv,
@@ -39,6 +39,8 @@ fn search_json(data: &str) -> Outputs {
     let mut exec = Executor::from_elf(env, SEARCH_JSON_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
+
+    receipt.verify(SEARCH_JSON_ID.into()).unwrap();
 
     from_slice(receipt.get_journal()).unwrap()
 }

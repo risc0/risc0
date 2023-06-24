@@ -74,6 +74,7 @@ fn chess(inputs: &Inputs) -> Box<dyn SessionReceipt> {
 #[cfg(test)]
 mod tests {
     use chess_core::Inputs;
+    use chess_methods::CHECKMATE_ID;
 
     use crate::chess;
 
@@ -83,9 +84,15 @@ mod tests {
             "r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4";
         const TEST_MOVE: &str = "Qxf7";
 
-        chess(&Inputs {
+        let receipt = chess(&Inputs {
             board: String::from(TEST_BOARD),
             mv: String::from(TEST_MOVE),
         });
+
+        assert!(
+            receipt.verify(CHECKMATE_ID.into()).is_ok(),
+            "Receipt is invalid! {}",
+            receipt.verify(CHECKMATE_ID.into()).unwrap_err()
+        );
     }
 }

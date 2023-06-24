@@ -15,7 +15,7 @@
 use std::process::Command;
 
 #[test]
-fn test_zk_evm() {
+fn test_ecdsa() {
     let feature = if cfg!(feature = "metal") {
         "metal"
     } else if cfg!(feature = "cuda") {
@@ -27,5 +27,5 @@ fn test_zk_evm() {
     Command::new("cargo")
         .args(["run", "--release", "--features", feature])
         .output()
-        .expect("failed to run WASM example");
+        .expect("failed to run ecdsa example");
 }

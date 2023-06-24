@@ -15,7 +15,7 @@
 use std::process::Command;
 
 #[test]
-fn test_zk_evm() {
+fn test_factors() {
     let feature = if cfg!(feature = "metal") {
         "metal"
     } else if cfg!(feature = "cuda") {
