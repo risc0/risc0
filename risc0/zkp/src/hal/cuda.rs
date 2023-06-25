@@ -572,9 +572,13 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
 
         let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
         let kernel = self.module.get_function("multi_poly_eval").unwrap();
-        let params = self.compute_simple_params(out.size() * 256);
+        let threads_per_block = self.max_threads / 4;
+        const BYTES_PER_WORD: u32 = 4;
+        const WORDS_PER_FP4: u32 = 4;
+        let shared_size = threads_per_block * BYTES_PER_WORD * WORDS_PER_FP4;
+        let (grid, block) = self.compute_simple_params(out.size() * threads_per_block as usize);
         unsafe {
-            launch!(kernel<<<params.0, params.1, 0, stream>>>(
+            launch!(kernel<<<grid, block, shared_size, stream>>>(
                 out.as_device_ptr(),
                 coeffs.as_device_ptr(),
                 which.as_device_ptr(),
