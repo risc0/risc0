@@ -109,6 +109,9 @@ impl KernelBuild {
         for src in self.files.iter() {
             println!("cargo:rerun-if-changed={}", src.display());
         }
+        for dep in self.deps.iter() {
+            println!("cargo:rerun-if-changed={}", dep.display());
+        }
         match &self.kernel_type {
             KernelType::Cpp => self.compile_cpp(output),
             KernelType::Cuda => self.compile_cuda(output),
@@ -155,7 +158,7 @@ impl KernelBuild {
 
                 // Note: we default to -O1 because O3 can upwards of 5 hours (or more)
                 // to compile on the current CUDA toolchain. Using O1 only shows a ~10%
-                // decrease in performance but a compile time in int the minutes. Use
+                // decrease in performance but a compile time in the minutes. Use
                 // RISC0_CUDA_OPT=3 for any performance critical releases / builds / testing
                 let ptx_opt_level = env::var("RISC0_CUDA_OPT").unwrap_or_else(|_| "1".to_string());
                 cmd.arg(format!("--ptxas-options=-O{ptx_opt_level}"));
