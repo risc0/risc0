@@ -601,6 +601,10 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
             dst[gid] = src[gid * stride + idx];
         }
     }
+
+    fn has_unified_memory(&self) -> bool {
+        true
+    }
 }
 
 #[cfg(test)]

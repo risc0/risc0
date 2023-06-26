@@ -142,6 +142,8 @@ pub trait Hal {
 
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize);
 
+    fn has_unified_memory(&self) -> bool;
+
     fn gather_sample(
         &self,
         dst: &Self::Buffer<Self::Elem>,

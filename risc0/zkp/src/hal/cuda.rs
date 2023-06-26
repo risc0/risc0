@@ -618,6 +618,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
         stream.synchronize().unwrap();
     }
 
+    fn has_unified_memory(&self) -> bool {
+        false
+    }
+
     #[tracing::instrument(skip_all)]
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);

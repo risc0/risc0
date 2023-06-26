@@ -109,18 +109,26 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// wrong row is specified.
     pub fn prove(&self, hal: &H, iop: &mut WriteIOP<H::Field, H::Rng>, idx: usize) -> Vec<H::Elem> {
         assert!(idx < self.params.row_size);
-        let sample = hal.alloc_elem("sample", self.params.col_size);
-        hal.gather_sample(
-            &sample,
-            &self.matrix,
-            idx,
-            self.params.col_size,
-            self.params.row_size,
-        );
         let mut out = Vec::with_capacity(self.params.col_size);
-        sample.view(|view| {
-            out.extend_from_slice(view);
-        });
+        if hal.has_unified_memory() {
+            self.matrix.view(|view| {
+                for i in 0..self.params.col_size {
+                    out.push(view[idx + i * self.params.row_size]);
+                }
+            });
+        } else {
+            let sample = hal.alloc_elem("sample", self.params.col_size);
+            hal.gather_sample(
+                &sample,
+                &self.matrix,
+                idx,
+                self.params.col_size,
+                self.params.row_size,
+            );
+            sample.view(|view| {
+                out.extend_from_slice(view);
+            });
+        }
         iop.write_field_elem_slice::<H::Elem>(out.as_slice());
         let mut idx = idx + self.params.row_size;
         while idx >= 2 * self.params.top_size {

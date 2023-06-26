@@ -47,6 +47,7 @@ const KERNEL_NAMES: &[&str] = &[
     "eltwise_mul_factor_fp",
     "eltwise_sum_fp4",
     "fri_fold",
+    "gather_sample",
     "mix_poly_coeffs",
     "multi_bit_reverse",
     "multi_ntt_fwd_step",
@@ -78,7 +79,7 @@ pub trait MetalHash {
     );
 }
 
-pub struct MetalHashSha256 {}
+pub struct MetalHashSha256;
 
 impl MetalHash for MetalHashSha256 {
     type HashSuite = Sha256HashSuite<BabyBear, CpuImpl>;
@@ -685,6 +686,27 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
         let args = &[io.as_arg(), KernelArg::Integer(bits as u32)];
         self.dispatch_by_name("zk_shift", args, count as u64);
     }
+
+    fn gather_sample(
+        &self,
+        dst: &Self::Buffer<Self::Elem>,
+        src: &Self::Buffer<Self::Elem>,
+        idx: usize,
+        size: usize,
+        stride: usize,
+    ) {
+        let args = &[
+            dst.as_arg(),
+            src.as_arg(),
+            KernelArg::Integer(idx as u32),
+            KernelArg::Integer(stride as u32),
+        ];
+        self.dispatch_by_name("gather_sample", args, size as u64);
+    }
+
+    fn has_unified_memory(&self) -> bool {
+        self.device.has_unified_memory()
+    }
 }
 
 fn simple_launch_params(count: u32, threads_per_group: u32) -> (MTLSize, MTLSize) {
@@ -812,5 +834,10 @@ mod tests {
     #[test]
     fn zk_shift() {
         testutil::zk_shift(MetalHalSha256::new());
+    }
+
+    #[test]
+    fn gather_sample() {
+        testutil::gather_sample(MetalHalSha256::new());
     }
 }
