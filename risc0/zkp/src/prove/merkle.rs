@@ -26,12 +26,15 @@ use crate::{
 
 pub struct MerkleTreeProver<H: Hal> {
     params: MerkleTreeParams,
+
     // The retained matrix of values
     matrix: H::Buffer<H::Elem>,
+
     // A heap style array where node N has children 2*N and 2*N+1.  The size of
     // this buffer is (1 << (layers + 1)) and begins at offset 1 (zero is unused
     // to make indexing nicer).
     nodes: Vec<Digest>,
+
     // The root value
     root: Digest,
 }
@@ -104,14 +107,28 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
-    pub fn prove(&self, iop: &mut WriteIOP<H::Field, H::Rng>, idx: usize) -> Vec<H::Elem> {
+    pub fn prove(&self, hal: &H, iop: &mut WriteIOP<H::Field, H::Rng>, idx: usize) -> Vec<H::Elem> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);
-        self.matrix.view(|view| {
-            for i in 0..self.params.col_size {
-                out.push(view[idx + i * self.params.row_size]);
-            }
-        });
+        if hal.has_unified_memory() {
+            self.matrix.view(|view| {
+                for i in 0..self.params.col_size {
+                    out.push(view[idx + i * self.params.row_size]);
+                }
+            });
+        } else {
+            let sample = hal.alloc_elem("sample", self.params.col_size);
+            hal.gather_sample(
+                &sample,
+                &self.matrix,
+                idx,
+                self.params.col_size,
+                self.params.row_size,
+            );
+            sample.view(|view| {
+                out.extend_from_slice(view);
+            });
+        }
         iop.write_field_elem_slice::<H::Elem>(out.as_slice());
         let mut idx = idx + self.params.row_size;
         while idx >= 2 * self.params.top_size {
@@ -185,7 +202,7 @@ mod tests {
         let hal = CpuHal::<BabyBear, HS>::new();
         let prover = init_prover(&hal, rows, cols, queries);
         let mut iop = WriteIOP::<BabyBear, HS::Rng>::new();
-        prover.prove(&mut iop, rows);
+        prover.prove(&hal, &mut iop, rows);
     }
 
     fn bad_row_access_all(rows: usize, cols: usize, queries: usize) {
@@ -207,7 +224,7 @@ mod tests {
         prover.commit(&mut iop);
         for _query in 0..queries {
             let r_idx = iop.rng.random_bits(log2_ceil(rows)) as usize;
-            let col = prover.prove(&mut iop, r_idx);
+            let col = prover.prove(&hal, &mut iop, r_idx);
             for c_idx in 0..cols {
                 assert_eq!(
                     col[c_idx],

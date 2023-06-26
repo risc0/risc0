@@ -18,7 +18,7 @@ use bytemuck::Pod;
 use cust::{
     device::DeviceAttribute,
     function::{BlockSize, GridSize},
-    memory::UnifiedPointer,
+    memory::{DevicePointer, GpuBuffer},
     prelude::*,
 };
 use lazy_static::lazy_static;
@@ -230,7 +230,7 @@ pub type CudaHalPoseidon = CudaHal<CudaHashPoseidon>;
 
 struct RawBuffer {
     name: &'static str,
-    buf: UnifiedBuffer<u8>,
+    buf: DeviceBuffer<u8>,
 }
 
 impl RawBuffer {
@@ -239,7 +239,7 @@ impl RawBuffer {
         TRACKER.lock().unwrap().alloc(size);
         Self {
             name,
-            buf: unsafe { UnifiedBuffer::uninitialized(size).unwrap() },
+            buf: unsafe { DeviceBuffer::uninitialized(size).unwrap() },
         }
     }
 }
@@ -276,7 +276,7 @@ impl<T: Pod> BufferImpl<T> {
         assert!(bytes_len > 0);
         let mut buffer = RawBuffer::new(name, bytes_len);
         let bytes = bytemuck::cast_slice(slice);
-        buffer.buf.copy_from_slice(bytes);
+        buffer.buf.copy_from(bytes).unwrap();
         BufferImpl {
             buffer: Rc::new(RefCell::new(buffer)),
             size: slice.len(),
@@ -285,14 +285,14 @@ impl<T: Pod> BufferImpl<T> {
         }
     }
 
-    pub fn as_device_ptr(&self) -> UnifiedPointer<u8> {
-        let ptr = self.buffer.borrow_mut().buf.as_unified_ptr();
+    pub fn as_device_ptr(&self) -> DevicePointer<u8> {
+        let ptr = self.buffer.borrow_mut().buf.as_device_ptr();
         let offset = self.offset * std::mem::size_of::<T>();
         unsafe { ptr.offset(offset.try_into().unwrap()) }
     }
 
-    pub fn as_device_ptr_with_offset(&self, offset: usize) -> UnifiedPointer<u8> {
-        let ptr = self.buffer.borrow_mut().buf.as_unified_ptr();
+    pub fn as_device_ptr_with_offset(&self, offset: usize) -> DevicePointer<u8> {
+        let ptr = self.buffer.borrow_mut().buf.as_device_ptr();
         let offset = (self.offset + offset) * std::mem::size_of::<T>();
         unsafe { ptr.offset(offset.try_into().unwrap()) }
     }
@@ -315,14 +315,17 @@ impl<T: Pod> Buffer<T> for BufferImpl<T> {
 
     fn view<F: FnOnce(&[T])>(&self, f: F) {
         let buf = self.buffer.borrow_mut();
-        let slice = bytemuck::cast_slice(&buf.buf);
+        let host_buf = buf.buf.as_host_vec().unwrap();
+        let slice = bytemuck::cast_slice(&host_buf);
         f(&slice[self.offset..]);
     }
 
     fn view_mut<F: FnOnce(&mut [T])>(&self, f: F) {
         let mut buf = self.buffer.borrow_mut();
-        let slice = bytemuck::cast_slice_mut(&mut buf.buf);
+        let mut host_buf = buf.buf.as_host_vec().unwrap();
+        let slice = bytemuck::cast_slice_mut(&mut host_buf);
         f(&mut slice[self.offset..]);
+        buf.buf.copy_from(&host_buf).unwrap();
     }
 }
 
@@ -591,6 +594,35 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     }
 
     #[tracing::instrument(skip_all)]
+    fn gather_sample(
+        &self,
+        dst: &Self::Buffer<Self::Elem>,
+        src: &Self::Buffer<Self::Elem>,
+        idx: usize,
+        size: usize,
+        stride: usize,
+    ) {
+        let stream = Stream::new(StreamFlags::DEFAULT, None).unwrap();
+        let kernel = self.module.get_function("gather_sample").unwrap();
+        let (grid, block) = self.compute_simple_params(size);
+        unsafe {
+            launch!(kernel<<<grid, block, 0, stream>>>(
+                dst.as_device_ptr(),
+                src.as_device_ptr(),
+                idx,
+                size,
+                stride,
+            ))
+            .unwrap();
+        }
+        stream.synchronize().unwrap();
+    }
+
+    fn has_unified_memory(&self) -> bool {
+        false
+    }
+
+    #[tracing::instrument(skip_all)]
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, poly_count: usize) {
         let bits = log2_ceil(io.size() / poly_count);
         let count = io.size();
@@ -850,6 +882,12 @@ mod tests {
     #[serial]
     fn batch_evaluate_any() {
         testutil::batch_evaluate_any(CudaHalSha256::new());
+    }
+
+    #[test]
+    #[serial]
+    fn gather_sample() {
+        testutil::gather_sample(CudaHalSha256::new());
     }
 
     #[test]

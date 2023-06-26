@@ -115,14 +115,13 @@ impl<'a, H: Hal> Prover<'a, H> {
         // DEEP-ALI protocol.
         let poly_mix = self.iop.random_ext_elem();
         let domain = self.cycles * INV_RATE;
+        let ext_size = H::ExtElem::EXT_SIZE;
 
         // Now generate the check polynomial.
         // The check polynomial is the core of the STARK: if the constraints are
         // satisfied, the check polynomial will be a low-degree polynomial. See
         // DEEP-ALI paper for details on the construction of the check_poly.
-        let check_poly = self
-            .hal
-            .alloc_elem("check_poly", H::ExtElem::EXT_SIZE * domain);
+        let check_poly = self.hal.alloc_elem("check_poly", ext_size * domain);
 
         let groups: Vec<&_> = self
             .groups
@@ -152,8 +151,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         // roots of unity (which are the only thing that and values get multiplied
         // by) are in Fp, Fp4 values act like simple vectors of Fp for the
         // purposes of interpolate/evaluate.
-        self.hal
-            .batch_interpolate_ntt(&check_poly, H::ExtElem::EXT_SIZE);
+        self.hal.batch_interpolate_ntt(&check_poly, ext_size);
 
         // The next step is to convert the degree 4*n check polynomial into 4 degreen n
         // polynomials so that f(x) = g0(x^4) + g1(x^4) x + g2(x^4) x^2 + g3(x^4)
@@ -227,7 +225,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         }
 
         // Add in the coeffs of the check polynomials.
-        let z_pow = z.pow(H::ExtElem::EXT_SIZE);
+        let z_pow = z.pow(ext_size);
         let which = Vec::from_iter(0u32..H::CHECK_SIZE as u32);
         let xs = vec![z_pow; H::CHECK_SIZE];
         let out = self.hal.alloc_extelem("out", H::CHECK_SIZE);
@@ -332,24 +330,19 @@ impl<'a, H: Hal> Prover<'a, H> {
         // Additionally, it needs to be bit reversed to make everyone happy
         let final_poly_coeffs = self
             .hal
-            .alloc_elem("final_poly_coeffs", self.cycles * H::ExtElem::EXT_SIZE);
+            .alloc_elem("final_poly_coeffs", self.cycles * ext_size);
         self.hal.eltwise_sum_extelem(&final_poly_coeffs, &combos);
 
         // Finally do the FRI protocol to prove the degree of the polynomial
-        self.hal
-            .batch_bit_reverse(&final_poly_coeffs, H::ExtElem::EXT_SIZE);
-        debug!(
-            "FRI-proof, size = {}",
-            final_poly_coeffs.size() / H::ExtElem::EXT_SIZE
-        );
+        self.hal.batch_bit_reverse(&final_poly_coeffs, ext_size);
+        debug!("FRI-proof, size = {}", final_poly_coeffs.size() / ext_size);
 
         fri_prove(self.hal, &mut self.iop, &final_poly_coeffs, |iop, idx| {
             for pg in self.groups.iter() {
                 let pg = pg.as_ref().unwrap();
-
-                pg.merkle.prove(iop, idx);
+                pg.merkle.prove(self.hal, iop, idx);
             }
-            check_group.merkle.prove(iop, idx);
+            check_group.merkle.prove(self.hal, iop, idx);
         });
 
         // Return final proof

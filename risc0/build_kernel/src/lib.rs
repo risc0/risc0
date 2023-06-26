@@ -120,8 +120,8 @@ impl KernelBuild {
     }
 
     fn compile_cpp(&mut self, output: &str) {
-        // TODO: figure out how to use cached_compile
-        // self.cached_compile(output, "a", |out_dir, _out_path| {
+        // It's *highly* recommended to install `sccache` and use this combined with
+        // `RUSTC_WRAPPER=/path/to/sccache` to speed up rebuilds of C++ kernels
         cc::Build::new()
             .cpp(true)
             .debug(false)
@@ -131,13 +131,7 @@ impl KernelBuild {
             .flag_if_supported("-fno-var-tracking")
             .flag_if_supported("-fno-var-tracking-assignments")
             .flag_if_supported("-g0")
-            // .cargo_metadata(false)
-            // .out_dir(out_dir)
             .compile(output);
-        // });
-        // println!("cargo:rustc-link-lib=static={}", lib_name);
-        // println!("cargo:rustc-link-lib={}", stdlib);
-        // println!("cargo:rustc-link-search=native={}", dst.display());
     }
 
     fn compile_cuda(&mut self, output: &str) {
