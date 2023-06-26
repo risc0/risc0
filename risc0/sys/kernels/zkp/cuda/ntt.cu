@@ -83,6 +83,18 @@ void batch_expand(Fp* out,
 }
 
 extern "C" __global__
+void gather_sample(Fp* dst,
+                   const Fp* src,
+                   const uint32_t idx,
+                   const uint32_t size,
+                   const uint32_t stride) {
+  uint gid = blockIdx.x * blockDim.x + threadIdx.x;
+  if (gid < size) {
+      dst[gid] = src[gid * stride + idx];
+  }
+}
+
+extern "C" __global__
 void multi_ntt_fwd_step(Fp* io,
                         const Fp* rou,
                         const uint32_t nBits,

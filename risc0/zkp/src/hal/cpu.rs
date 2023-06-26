@@ -586,6 +586,21 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
             output.set(idx, *Self::HashFn::hash_pair(&in1, &in2));
         });
     }
+
+    fn gather_sample(
+        &self,
+        dst: &Self::Buffer<Self::Elem>,
+        src: &Self::Buffer<Self::Elem>,
+        idx: usize,
+        size: usize,
+        stride: usize,
+    ) {
+        let src = src.as_slice();
+        let mut dst = dst.as_slice_mut();
+        for gid in 0..size {
+            dst[gid] = src[gid * stride + idx];
+        }
+    }
 }
 
 #[cfg(test)]

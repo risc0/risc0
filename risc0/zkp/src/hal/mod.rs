@@ -141,6 +141,15 @@ pub trait Hal {
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>);
 
     fn hash_fold(&self, io: &Self::Buffer<Digest>, input_size: usize, output_size: usize);
+
+    fn gather_sample(
+        &self,
+        dst: &Self::Buffer<Self::Elem>,
+        src: &Self::Buffer<Self::Elem>,
+        idx: usize,
+        size: usize,
+        stride: usize,
+    );
 }
 
 pub trait EvalCheck<H: Hal> {
@@ -377,6 +386,32 @@ mod testutil {
             io_cpu.view(|c| {
                 for i in 0..g.len() {
                     assert_eq!(c[i], g[i]);
+                }
+            });
+        });
+    }
+
+    pub(crate) fn gather_sample<H: Hal>(hal: H) {
+        let mut rng = thread_rng();
+        let rows = 1000;
+        let cols = 900;
+        let idx = 400;
+        let src_size = rows * cols;
+        let src = hal.alloc_elem("src", src_size);
+        let dst = hal.alloc_elem("dst", rows);
+        src.view_mut(|buf| {
+            for x in 0..cols {
+                for y in 0..rows {
+                    let value = H::Elem::random(&mut rng);
+                    buf[y * cols + x] = value;
+                }
+            }
+        });
+        hal.gather_sample(&dst, &src, idx, rows, cols);
+        src.view(|src| {
+            dst.view(|dst| {
+                for y in 0..rows {
+                    assert_eq!(src[y * cols + idx], dst[y]);
                 }
             });
         });

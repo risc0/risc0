@@ -74,11 +74,11 @@ impl<H: Hal> ProveRoundInfo<H> {
         }
     }
 
-    pub fn prove_query(&mut self, iop: &mut WriteIOP<H::Field, H::Rng>, pos: &mut usize) {
+    pub fn prove_query(&mut self, hal: &H, iop: &mut WriteIOP<H::Field, H::Rng>, pos: &mut usize) {
         // Compute which group we are in
         let group = *pos % (self.domain / FRI_FOLD);
         // Generate the proof
-        self.merkle.prove(iop, group);
+        self.merkle.prove(hal, iop, group);
         // Update pos
         *pos = group;
     }
@@ -89,9 +89,9 @@ pub fn fri_prove<H: Hal, F>(
     hal: &H,
     iop: &mut WriteIOP<H::Field, H::Rng>,
     coeffs: &H::Buffer<H::Elem>,
-    mut f: F,
+    inner: F,
 ) where
-    F: FnMut(&mut WriteIOP<H::Field, H::Rng>, usize),
+    F: Fn(&mut WriteIOP<H::Field, H::Rng>, usize),
 {
     let ext_size = H::ExtElem::EXT_SIZE;
     let orig_domain = coeffs.size() / ext_size * INV_RATE;
@@ -118,10 +118,10 @@ pub fn fri_prove<H: Hal, F>(
         // Get a 'random' index.
         let mut pos = iop.random_bits(log2_ceil(orig_domain)) as usize;
         // Do the 'inner' proof for this index
-        f(iop, pos);
+        inner(iop, pos);
         // Write the per-round proofs
         for round in rounds.iter_mut() {
-            round.prove_query(iop, &mut pos);
+            round.prove_query(hal, iop, &mut pos);
         }
     }
 }
