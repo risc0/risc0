@@ -1,15 +1,3 @@
-// :0
-pub struct BytesInitStep {}
-impl risc0_zkp::layout::Component for BytesInitStep {
-    fn ty_name(&self) -> &'static str {
-        "BytesInitStep"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        Ok(())
-    }
-}
-
 // circuit/rv32im/global.h:15
 pub struct U32Reg {
     pub byte: &'static [&'static OutReg; 4],
@@ -25,7 +13,7 @@ impl risc0_zkp::layout::Component for U32Reg {
     }
 }
 
-// circuit/rv32im/global.h:38
+// circuit/rv32im/global.h:33
 pub struct GlobalDigest {
     pub word: &'static [&'static U32Reg; 8],
 }
@@ -40,7 +28,7 @@ impl risc0_zkp::layout::Component for GlobalDigest {
     }
 }
 
-// circuit/rv32im/global.h:34
+// circuit/rv32im/global.h:35
 pub struct SystemState {
     pub image_id: &'static GlobalDigest,
     pub pc: &'static U32Reg,
@@ -97,16 +85,28 @@ impl risc0_zkp::layout::Component for BodyStep {
     }
 }
 
+// :0
+pub struct BytesFiniStep {}
+impl risc0_zkp::layout::Component for BytesFiniStep {
+    fn ty_name(&self) -> &'static str {
+        "BytesFiniStep"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        Ok(())
+    }
+}
+
 // cirgen/circuit/rv32im/top.cpp:60
 pub struct Mux {
     pub body: &'static BodyStep,
-    pub bytes_fini: &'static BytesInitStep,
-    pub bytes_init: &'static BytesInitStep,
-    pub bytes_setup: &'static BytesInitStep,
-    pub ram_fini: &'static BytesInitStep,
-    pub ram_init: &'static BytesInitStep,
-    pub ram_load: &'static BytesInitStep,
-    pub reset: &'static BytesInitStep,
+    pub bytes_fini: &'static BytesFiniStep,
+    pub bytes_init: &'static BytesFiniStep,
+    pub bytes_setup: &'static BytesFiniStep,
+    pub ram_fini: &'static BytesFiniStep,
+    pub ram_init: &'static BytesFiniStep,
+    pub ram_load: &'static BytesFiniStep,
+    pub reset: &'static BytesFiniStep,
 }
 impl risc0_zkp::layout::Component for Mux {
     fn ty_name(&self) -> &'static str {
@@ -984,25 +984,25 @@ pub const LAYOUT_MUX_BODY: BodyStep = BodyStep {
 };
 
 // :0
-pub const LAYOUT_MUX_BYTES_FINI: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_BYTES_FINI: BytesFiniStep = BytesFiniStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_INIT: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_BYTES_INIT: BytesFiniStep = BytesFiniStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_SETUP: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_BYTES_SETUP: BytesFiniStep = BytesFiniStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_FINI: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_RAM_FINI: BytesFiniStep = BytesFiniStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_INIT: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_RAM_INIT: BytesFiniStep = BytesFiniStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_LOAD: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_RAM_LOAD: BytesFiniStep = BytesFiniStep {};
 
 // :0
-pub const LAYOUT_MUX_RESET: BytesInitStep = BytesInitStep {};
+pub const LAYOUT_MUX_RESET: BytesFiniStep = BytesFiniStep {};
 
 // cirgen/circuit/rv32im/top.cpp:60
 pub const LAYOUT_MUX: Mux = Mux {
