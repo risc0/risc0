@@ -306,38 +306,39 @@ where
 fn provers() -> HashMap<String, Rc<dyn Prover>> {
     let mut table: HashMap<String, Rc<dyn Prover>> = HashMap::new();
     {
-        let prover = Rc::new(LocalProver::new("cpu", cpu::sha256_hal_eval()));
-        table.insert("cpu".to_string(), prover.clone());
-        table.insert("$default".to_string(), prover);
+        let prover = Rc::new(LocalProver::new("cpu:sha256", cpu::sha256_hal_eval()));
+        table.insert("cpu:sha256".to_string(), prover.clone());
+        table.insert("$sha256".to_string(), prover);
 
         let prover = Rc::new(LocalProver::new("cpu:poseidon", cpu::poseidon_hal_eval()));
         table.insert("cpu:poseidon".to_string(), prover.clone());
-        table.insert("$poseidon".to_string(), prover);
+        table.insert("$poseidon".to_string(), prover.clone());
+        table.insert("cpu".to_string(), prover.clone());
+        table.insert("$default".to_string(), prover);
     }
     #[cfg(feature = "cuda")]
     {
-        let prover = Rc::new(LocalProver::new("cuda", cuda::sha256_hal_eval()));
-        table.insert("cuda".to_string(), prover.clone());
-        table.insert("$gpu".to_string(), prover.clone());
-        table.insert("$default".to_string(), prover);
+        let prover = Rc::new(LocalProver::new("cuda:sha256", cuda::sha256_hal_eval()));
+        table.insert("cuda:sha256".to_string(), prover.clone());
+        table.insert("$sha256".to_string(), prover);
 
         let prover = Rc::new(LocalProver::new("cuda:poseidon", cuda::poseidon_hal_eval()));
         table.insert("cuda:poseidon".to_string(), prover.clone());
-        table.insert("$poseidon".to_string(), prover);
+        table.insert("$poseidon".to_string(), prover.clone());
+        table.insert("$default".to_string(), prover);
     }
     #[cfg(feature = "metal")]
     {
-        let prover = Rc::new(LocalProver::new("metal", metal::sha256_hal_eval()));
-        table.insert("metal".to_string(), prover.clone());
-        table.insert("$gpu".to_string(), prover.clone());
-        table.insert("$default".to_string(), prover);
+        let prover = Rc::new(LocalProver::new("metal:sha256", metal::sha256_hal_eval()));
+        table.insert("metal:sha256".to_string(), prover.clone());
 
         let prover = Rc::new(LocalProver::new(
             "metal:poseidon",
             metal::poseidon_hal_eval(),
         ));
         table.insert("metal:poseidon".to_string(), prover.clone());
-        table.insert("$poseidon".to_string(), prover);
+        table.insert("$poseidon".to_string(), prover.clone());
+        table.insert("$default".to_string(), prover);
     }
     table
 }

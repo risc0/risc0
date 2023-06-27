@@ -243,11 +243,8 @@ impl SessionReceipt for SessionFlatReceipt {
     #[cfg(not(target_os = "zkvm"))]
     #[must_use]
     fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
-        use risc0_zkp::core::hash::sha::Sha256HashSuite;
-        let hal =
-            risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
-                &crate::CIRCUIT,
-            );
+        use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
+        let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&crate::CIRCUIT);
         self.verify_with_hal(&hal, image_id)
     }
 
@@ -357,11 +354,8 @@ impl SegmentReceipt {
     #[cfg(not(target_os = "zkvm"))]
     #[must_use]
     pub fn verify(&self) -> Result<(), VerificationError> {
-        use risc0_zkp::core::hash::sha::Sha256HashSuite;
-        let hal =
-            risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
-                &crate::CIRCUIT,
-            );
+        use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
+        let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&crate::CIRCUIT);
         self.verify_with_hal(&hal)
     }
 
