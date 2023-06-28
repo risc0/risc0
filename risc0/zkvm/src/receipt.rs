@@ -241,7 +241,7 @@ impl SessionReceipt {
         self.verify_with_hal(&hal, image_id)
     }
 
-    /// Encode the receipt to a Vec<u8>
+    /// Encode the receipt to a `Vec<u8>`
     pub fn encode(&self) -> Vec<u8> {
         bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
     }
