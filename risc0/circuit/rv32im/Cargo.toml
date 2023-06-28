@@ -22,7 +22,7 @@ cust = { version = "0.3", optional = true }
 log = "0.4"
 rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
-metal = { version = "0.24", optional = true }
+metal = { version = "0.25", optional = true }
 risc0-circuit-rv32im-sys = { workspace = true, optional = true }
 risc0-sys = { workspace = true, optional = true }
 
