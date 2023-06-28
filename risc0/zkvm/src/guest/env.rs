@@ -35,34 +35,6 @@ use crate::{
     sha::rust_crypto::{Digest as _, Output, Sha256},
 };
 
-struct Once<T> {
-    data: UnsafeCell<MaybeUninit<T>>,
-}
-
-unsafe impl<T: Send + Sync> Sync for Once<T> {}
-
-impl<T: Default> Once<T> {
-    const fn new() -> Self {
-        Once {
-            data: UnsafeCell::new(MaybeUninit::uninit()),
-        }
-    }
-
-    fn init(&self, value: T) {
-        unsafe { &mut *(self.data.get()) }.write(value);
-    }
-
-    fn get(&self) -> &mut T {
-        unsafe {
-            self.data
-                .get()
-                .as_mut()
-                .unwrap_unchecked()
-                .assume_init_mut()
-        }
-    }
-}
-
 static mut HASHER: Option<Sha256> = None;
 
 pub(crate) fn init() {
