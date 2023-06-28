@@ -180,10 +180,6 @@ pub trait SegmentReceipt: Debug {
 
     /// Extracts the seal from the receipt, as a series of bytes.
     fn get_seal_bytes(&self) -> &[u8];
-
-    //    /// this is used for downcasting, primarily used for testing
-    //    #[cfg(test)]
-    //    fn as_any(&self) -> &dyn core::any::Any;
 }
 
 /// A receipt attesting to the execution of a Session.
