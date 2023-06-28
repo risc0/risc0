@@ -17,7 +17,7 @@ use std::{fs::File, path::Path};
 use anyhow::{bail, Context, Result};
 use reqwest::{blocking::Client as BlockingClient, header};
 
-use self::responses::{CreateSessRes, ProofReq, SessionStatusRes, UploadRes};
+use self::responses::{CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, UploadRes};
 
 /// Collection of serialization object for the REST api
 pub mod responses {
@@ -30,6 +30,13 @@ pub mod responses {
         pub url: String,
         /// Generated UUID for this input
         pub uuid: String,
+    }
+
+    /// Response of a image upload request
+    #[derive(Deserialize, Serialize)]
+    pub struct ImgUploadRes {
+        /// Presigned URL to be supplied to a PUT request
+        pub url: String,
     }
 
     /// Session creation response
@@ -76,7 +83,7 @@ impl SessionId {
         Self { uuid }
     }
 
-    /// Retries the current status of the Session
+    /// Fetches the current status of the Session
     pub fn status(&self, client: &Client) -> Result<SessionStatusRes> {
         let url = format!("{}/sessions/status/{}", client.url, self.uuid);
         let res = client
@@ -152,6 +159,22 @@ impl Client {
             .context("Failed to deserialize upload response")
     }
 
+    fn get_image_upload_url(&self, image_id: &str) -> Result<ImgUploadRes> {
+        let res = self
+            .client
+            .get(format!("{}/images/upload/{}", self.url, image_id))
+            .send()
+            .context("Failed to fetch image upload url")?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            bail!("Request failed - server error: '{body}'");
+        }
+
+        res.json::<ImgUploadRes>()
+            .context("Failed to deserialize image upload response")
+    }
+
     /// Upload body to a given URL
     fn put_data<T: Into<reqwest::blocking::Body>>(&self, url: &str, body: T) -> Result<()> {
         let res = self
@@ -174,10 +197,10 @@ impl Client {
     /// The image data can be either:
     /// * ELF file bytes
     /// * bincode encoded MemoryImage
-    pub fn upload_img(&self, buf: Vec<u8>) -> Result<String> {
-        let upload_data = self.get_upload_url("images")?;
-        self.put_data(&upload_data.url, buf)?;
-        Ok(upload_data.uuid)
+    pub fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<()> {
+        let upload_res = self.get_image_upload_url(image_id)?;
+        self.put_data(&upload_res.url, buf)?;
+        Ok(())
     }
 
     /// Upload a image file to the /images/ route
@@ -185,13 +208,13 @@ impl Client {
     /// The image data can be either:
     /// * ELF file bytes
     /// * bincode encoded MemoryImage
-    pub fn upload_img_file(&self, path: &Path) -> Result<String> {
-        let upload_data = self.get_upload_url("images")?;
+    pub fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<()> {
+        let upload_data = self.get_image_upload_url(image_id)?;
 
         let fd = File::open(path).context("Unable to open supplied image file")?;
         self.put_data(&upload_data.url, fd)?;
 
-        Ok(upload_data.uuid)
+        Ok(())
     }
 
     // - /inputs
@@ -272,46 +295,7 @@ mod tests {
     use super::*;
 
     const TEST_KEY: &str = "TESTKEY";
-
-    fn run_upload_mock(route_path: &str) {
-        let data = vec![];
-
-        let server = MockServer::start();
-
-        let image_uuid = Uuid::new_v4();
-        let put_url = format!("http://{}/upload/{}", server.address(), image_uuid);
-        let response = UploadRes {
-            url: put_url,
-            uuid: image_uuid.to_string(),
-        };
-
-        let get_mock = server.mock(|when, then| {
-            when.method(GET)
-                .path(format!("/{route_path}/upload"))
-                .header("x-api-key", TEST_KEY);
-            then.status(200)
-                .header("content-type", "application/json")
-                .json_body_obj(&response);
-        });
-
-        let put_mock = server.mock(|when, then| {
-            when.method(PUT).path(format!("/upload/{}", image_uuid));
-            then.status(200);
-        });
-
-        let server_url = format!("http://{}", server.address());
-        let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
-            .expect("Failed to construct client");
-        let res = if route_path == "images" {
-            client.upload_img(data).expect("Failed to upload img")
-        } else {
-            client.upload_input(data).expect("Failed to upload input")
-        };
-
-        assert_eq!(res, response.uuid);
-        get_mock.assert();
-        put_mock.assert();
-    }
+    const TEST_ID: &str = "0x5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03";
 
     #[test]
     fn client_from_parts() {
@@ -336,12 +320,74 @@ mod tests {
 
     #[test]
     fn image_upload() {
-        run_upload_mock("images");
+        let data = vec![];
+
+        let server = MockServer::start();
+
+        let put_url = format!("http://{}/upload/{TEST_ID}", server.address());
+        let response = ImgUploadRes { url: put_url };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/images/upload/{TEST_ID}"))
+                .header("x-api-key", TEST_KEY);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let put_mock = server.mock(|when, then| {
+            when.method(PUT).path(format!("/upload/{TEST_ID}"));
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
+            .expect("Failed to construct client");
+        client
+            .upload_img(TEST_ID, data)
+            .expect("Failed to upload input");
+        get_mock.assert();
+        put_mock.assert();
     }
 
     #[test]
     fn input_upload() {
-        run_upload_mock("inputs");
+        env_logger::init();
+        let data = vec![];
+
+        let server = MockServer::start();
+
+        let input_uuid = Uuid::new_v4();
+        let put_url = format!("http://{}/upload/{}", server.address(), input_uuid);
+        let response = UploadRes {
+            url: put_url,
+            uuid: input_uuid.to_string(),
+        };
+
+        let get_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path("/inputs/upload")
+                .header("x-api-key", TEST_KEY);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let put_mock = server.mock(|when, then| {
+            when.method(PUT).path(format!("/upload/{}", input_uuid));
+            then.status(200);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
+            .expect("Failed to construct client");
+        let res = client.upload_input(data).expect("Failed to upload input");
+
+        assert_eq!(res, response.uuid);
+
+        get_mock.assert();
+        put_mock.assert();
     }
 
     #[test]
