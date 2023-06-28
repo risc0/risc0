@@ -40,7 +40,7 @@ fn main() {
     receipt.verify(BEVY_GUEST_ID.into()).unwrap();
 
     let outputs: Outputs =
-        from_slice(&receipt.get_journal()).expect("Journal should contain an outputs object");
+        from_slice(&receipt.journal).expect("Journal should contain an outputs object");
 
     assert_eq!(outputs.position, turns as f32);
     println!(

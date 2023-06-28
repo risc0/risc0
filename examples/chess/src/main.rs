@@ -41,7 +41,7 @@ fn main() {
 
     // Verify receipt and parse it for committed data
     receipt.verify(CHECKMATE_ID.into()).unwrap();
-    let vec = receipt.get_journal();
+    let vec = receipt.journal;
     let committed_state: String = from_slice(&vec).unwrap();
     assert_eq!(inputs.board, committed_state);
     let fen = Fen::from_ascii(committed_state.as_bytes()).unwrap();
@@ -55,7 +55,7 @@ fn main() {
     );
 }
 
-fn chess(inputs: &Inputs) -> Box<dyn SessionReceipt> {
+fn chess(inputs: &Inputs) -> SessionReceipt {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(inputs).unwrap())
         .build()

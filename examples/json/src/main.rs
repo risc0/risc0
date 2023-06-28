@@ -40,7 +40,7 @@ fn search_json(data: &str) -> Outputs {
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
 
-    from_slice(receipt.get_journal()).unwrap()
+    from_slice(&receipt.journal).unwrap()
 }
 
 #[cfg(test)]

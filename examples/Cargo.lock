@@ -1002,6 +1002,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "dyn_partial_eq"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a07039d197226c4b9a3810c4f165328fb4e715258a4b8584f143d38e9de04301"
+dependencies = [
+ "dyn_partial_eq_derive",
+]
+
+[[package]]
+name = "dyn_partial_eq_derive"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0e217c6c1435ebf9b88662354589d339192b8eaf506edd22951e75e045c8e8bd"
+dependencies = [
+ "quote 1.0.28",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "ecdsa"
 version = "0.16.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3216,6 +3235,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "crypto-bigint",
+ "dyn_partial_eq",
  "elf",
  "generic-array",
  "getrandom",

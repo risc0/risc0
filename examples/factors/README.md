@@ -10,8 +10,8 @@ cargo run
 # Tutorial
 ## How to Recreate _Factors_
 
-This example is a good introduction for beginners new to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place! 
-If you're looking for a higher level overview of the Factors example, check out the [Understanding Factors] explainer instead. 
+This example is a good introduction for beginners new to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place!
+If you're looking for a higher level overview of the Factors example, check out the [Understanding Factors] explainer instead.
 We'll spend the rest of this README walking you through how to recreate the factors example for yourself, assuming no prior knowledge of RISC Zero.
 
 ## Step 1: Create a new project
@@ -250,7 +250,7 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
     receipt.verify(MULTIPLY_ID.into()).unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
-    let c: u64 = from_slice(&receipt.get_journal()).unwrap();
+    let c: u64 = from_slice(&receipt.journal).unwrap();
 
     // Print an assertion
     println!("Hello, world! I know the factors of {}, and I can prove it!", c);

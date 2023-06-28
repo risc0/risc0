@@ -92,7 +92,7 @@ fn run_guest(iters: i32) -> i32 {
     receipt.verify(WASM_INTERP_ID.into()).expect(
         "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
-    let result: i32 = from_slice(&receipt.get_journal()).unwrap();
+    let result: i32 = from_slice(&receipt.journal).unwrap();
 
     result
 }

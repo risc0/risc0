@@ -30,7 +30,7 @@ use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 /// Zero accelerator. See `src/methods/guest/Cargo.toml` for the patch
 /// definition, which can be used to enable SHA-256 accelerrator support
 /// everywhere the [sha2] crate is used.
-fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Box<dyn SessionReceipt>) {
+fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, SessionReceipt) {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(input).unwrap())
         .build()
@@ -46,7 +46,7 @@ fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, Box<dyn Session
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
 
-    let digest = from_slice::<Vec<u8>, _>(&receipt.get_journal())
+    let digest = from_slice::<Vec<u8>, _>(&receipt.journal)
         .unwrap()
         .try_into()
         .unwrap();

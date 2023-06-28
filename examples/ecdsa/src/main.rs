@@ -31,7 +31,7 @@ fn prove_ecdsa_verification(
     verifying_key: &VerifyingKey,
     message: &[u8],
     signature: &Signature,
-) -> Box<dyn SessionReceipt> {
+) -> SessionReceipt {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&(verifying_key.to_encoded_point(true), message, signature)).unwrap())
         .build()
@@ -54,7 +54,7 @@ fn main() {
     // Verify the receipt and then access the journal.
     receipt.verify(ECDSA_VERIFY_ID.into()).unwrap();
     let (receipt_verifying_key, receipt_message) =
-        from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.get_journal())
+        from_slice::<(EncodedPoint, Vec<u8>), _>(&receipt.journal)
             .unwrap()
             .try_into()
             .unwrap();
