@@ -23,6 +23,7 @@ protobuf-src = { version = "1.1", optional = true }
 anyhow = { version = "1.0", default-features = false }
 bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 cfg-if = "1.0"
+dyn_partial_eq = "0.1.2"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 libm = "0.2"
@@ -32,6 +33,7 @@ risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
 tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+typetag = "0.2"
 
 # TODO(nils): Change these `target_os` checks to `target_vendor` checks when we
 # have a real target triple.
@@ -54,7 +56,6 @@ rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rrs-lib = { version = "0.1", optional = true }
 sha2 = { version = "0.10", optional = true }
-typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
@@ -95,7 +96,6 @@ prove = [
   "dep:rayon",
   "dep:rrs-lib",
   "dep:sha2",
-  "dep:typetag",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",
   "std",

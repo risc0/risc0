@@ -109,7 +109,7 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Box<dyn SessionReceipt>) {
+fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, SessionReceipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())

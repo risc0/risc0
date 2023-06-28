@@ -14,20 +14,20 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
+use dyn_partial_eq::DynPartialEq;
 #[cfg(not(target_os = "zkvm"))]
 use risc0_zkp::{adapter::CircuitInfo, core::hash::sha::Sha256};
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
+use crate::{
+    receipt::{ReceiptMetadata, SegmentReceipt, SystemState},
+    ControlId,
+};
 #[cfg(not(target_os = "zkvm"))]
 use crate::{
-    receipt::compute_image_id,
     recursion::circuit_impl::CIRCUIT_CORE,
     sha::{self},
-};
-use crate::{
-    receipt::{ReceiptMetadata, SessionReceipt, SystemState},
-    ControlId,
 };
 
 /// This function gets valid control ID's from the posidon and recursion
@@ -159,9 +159,9 @@ impl ReceiptMetadata {
     }
 }
 
-/// This struct represents a receipt for one or more [crate::SegmentReceipt]s
-/// joined through recursion.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+/// This struct represents a receipt for one or more
+/// [crate::SegmentBaseReceipt]s joined through recursion.
+#[derive(Clone, Debug, Serialize, Deserialize, DynPartialEq, PartialEq)]
 pub struct SegmentRecursionReceipt {
     /// the cryptographic seal of this receipt
     pub seal: Vec<u32>,
@@ -172,10 +172,11 @@ pub struct SegmentRecursionReceipt {
     pub meta: ReceiptMetadata,
 }
 
-impl SegmentRecursionReceipt {
+#[typetag::serde]
+impl SegmentReceipt for SegmentRecursionReceipt {
     /// verify the integrity of this receipt
     #[cfg(not(target_os = "zkvm"))]
-    pub fn verify(&self) -> Result<(), VerificationError> {
+    fn verify(&self) -> Result<(), VerificationError> {
         use risc0_core::field::baby_bear::BabyBearElem;
         use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
 
@@ -209,6 +210,14 @@ impl SegmentRecursionReceipt {
         // Everything passed
         Ok(())
     }
+
+    fn get_metadata(&self) -> anyhow::Result<ReceiptMetadata, VerificationError> {
+        Ok(self.meta.clone())
+    }
+
+    fn get_seal_bytes(&self) -> &[u8] {
+        bytemuck::cast_slice(self.seal.as_slice())
+    }
 }
 
 /// A SessionRollupReceipt represents computational integrity for an entire
@@ -222,50 +231,6 @@ pub struct SessionRollupReceipt {
     pub receipt: SegmentRecursionReceipt,
     /// the journal of the entire session
     pub journal: Vec<u8>,
-}
-
-impl SessionReceipt for SessionRollupReceipt {
-    /// Verify the integrity of the receipt by using the segment receipt and the
-    /// journal
-    #[cfg(not(target_os = "zkvm"))]
-    fn verify(&self, merkle_root: Digest) -> Result<(), VerificationError> {
-        self.receipt.verify()?;
-        let journal_digest = sha::Impl::hash_bytes(&self.journal);
-        let pre_img = &self.receipt.meta.pre;
-        if merkle_root != compute_image_id(&pre_img.merkle_root, pre_img.pc) {
-            return Err(VerificationError::ImageVerificationError);
-        }
-
-        if *journal_digest.as_ref() != self.receipt.meta.output {
-            return Err(VerificationError::JournalDigestMismatch);
-        }
-
-        Ok(())
-    }
-
-    fn get_journal(&self) -> &Vec<u8> {
-        &self.journal
-    }
-
-    fn encode(&self) -> Vec<u8> {
-        bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
-    }
-
-    fn get_seal_len(&self) -> usize {
-        bytemuck::cast_slice::<u32, u8>(self.receipt.seal.as_slice()).len()
-    }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn core::any::Any {
-        self
-    }
-}
-
-impl SessionRollupReceipt {
-    /// Create a new session receipt
-    pub fn new(receipt: SegmentRecursionReceipt, journal: Vec<u8>) -> Self {
-        Self { receipt, journal }
-    }
 }
 
 #[cfg(test)]

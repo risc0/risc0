@@ -16,7 +16,7 @@ use std::path::Path;
 
 use assert_cmd::Command;
 use assert_fs::{fixture::PathChild, TempDir};
-use risc0_zkvm::SessionFlatReceipt;
+use risc0_zkvm::SessionReceipt;
 use risc0_zkvm_methods::STANDARD_LIB_ID;
 
 const STDIN_MSG: &str = "Hello world from stdin!\n";
@@ -27,15 +27,13 @@ fn expected_stdout() -> String {
     format!("{EXPECTED_STDOUT_MSG}{STDIN_MSG}")
 }
 
-fn load_receipt(p: &Path) -> SessionFlatReceipt {
+fn load_receipt(p: &Path) -> SessionReceipt {
     let data = std::fs::read(p).unwrap();
     risc0_zkvm::serde::from_slice(&data).unwrap()
 }
 
 #[test]
 fn stdio_outputs_in_receipt() {
-    use risc0_zkvm::receipt::SessionReceipt;
-
     let temp = TempDir::new().unwrap();
     let receipt_file = temp.child("receipt.dat");
 
