@@ -176,7 +176,7 @@ pub struct SegmentRecursionReceipt {
 impl SegmentReceipt for SegmentRecursionReceipt {
     /// verify the integrity of this receipt
     #[cfg(not(target_os = "zkvm"))]
-    fn verify(&self) -> Result<(), VerificationError> {
+    fn verify(&self, _hashfn_name: String) -> Result<(), VerificationError> {
         use risc0_core::field::baby_bear::BabyBearElem;
         use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
 

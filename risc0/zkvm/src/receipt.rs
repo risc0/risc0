@@ -173,7 +173,7 @@ pub trait SegmentReceipt: Debug {
     /// Uses the ZKP system to cryptographically verify that the seal does
     /// validly indicate that this Segment was executed faithfully.
     #[cfg(not(target_os = "zkvm"))]
-    fn verify(&self) -> Result<(), VerificationError>;
+    fn verify(&self, hash_name: String) -> Result<(), VerificationError>;
 
     /// Gets the metadata for this receipt
     fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError>;
@@ -321,6 +321,9 @@ impl SessionReceipt {
     }
 }
 
+// Create registry
+// risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite,
+// _>::new(&crate::CIRCUIT);
 #[typetag::serde]
 impl SegmentReceipt for SegmentBaseReceipt {
     /// Verifies the integrity of this receipt.
@@ -329,7 +332,7 @@ impl SegmentReceipt for SegmentBaseReceipt {
     /// validly indicate that this Segment was executed faithfully.
     #[cfg(not(target_os = "zkvm"))]
     #[must_use]
-    fn verify(&self) -> Result<(), VerificationError> {
+    fn verify(&self, hashfn_name: String) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
         let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&crate::CIRCUIT);
         self.verify_with_hal(&hal)
@@ -461,4 +464,85 @@ pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     pc_digest[0] = pc;
     let block2 = Digest::new(pc_digest);
     *sha::Impl::compress(&SHA256_INIT, merkle_root, &block2)
+}
+
+/// todo
+pub struct Verifier {
+    /// Name of the hash function used to verify the proof. This should match
+    /// the hash function used to generate the proof
+    pub hash_name: String,
+}
+
+impl Verifier {
+    /// Create a new instance of the [Verifier] from the name of the hash
+    /// function.
+    pub fn new(hash_name: String) -> Self {
+        Verifier { hash_name }
+    }
+
+    /// Verifies the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these
+    /// [SegmentBaseReceipt]s stitch together correctly, and that the
+    /// initial memory image matches the given `image_id` parameter.
+    #[cfg(not(target_os = "zkvm"))]
+    #[must_use]
+    pub fn verify(
+        &self,
+        receipt: SessionReceipt,
+        image_id: Digest,
+    ) -> Result<(), VerificationError> {
+        let (final_receipt, receipts) = receipt
+            .segments
+            .as_slice()
+            .split_last()
+            .ok_or(VerificationError::ReceiptFormatError)?;
+        let mut prev_image_id = image_id.into();
+        for receipt in receipts {
+            receipt.verify(self.hash_name)?;
+            let metadata = receipt.get_metadata()?;
+            #[cfg(not(target_os = "zkvm"))]
+            log::debug!("metadata: {metadata:#?}");
+            if prev_image_id != metadata.pre.compute_image_id() {
+                return Err(VerificationError::ImageVerificationError);
+            }
+            if metadata.exit_code != ExitCode::SystemSplit {
+                return Err(VerificationError::UnexpectedExitCode);
+            }
+            prev_image_id = metadata.post.compute_image_id();
+        }
+        final_receipt.verify(self.hash_name)?;
+        let metadata = final_receipt.get_metadata()?;
+        #[cfg(not(target_os = "zkvm"))]
+        log::debug!("final: {metadata:#?}");
+        if prev_image_id != metadata.pre.compute_image_id() {
+            return Err(VerificationError::ImageVerificationError);
+        }
+
+        let digest = Sha256::digest(&receipt.journal);
+        let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
+        let output_words = metadata.output.as_words();
+        let is_journal_valid = || {
+            (receipt.journal.is_empty() && output_words.iter().all(|x| *x == 0))
+                || digest_words == output_words
+        };
+        if !is_journal_valid() {
+            #[cfg(not(target_os = "zkvm"))]
+            log::debug!(
+                "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
+                hex::encode(&receipt.journal),
+                hex::encode(bytemuck::cast_slice(digest_words)),
+                hex::encode(bytemuck::cast_slice(output_words)),
+                receipt.journal
+            );
+            return Err(VerificationError::JournalDigestMismatch);
+        }
+
+        if metadata.exit_code == ExitCode::SystemSplit {
+            return Err(VerificationError::UnexpectedExitCode);
+        }
+
+        Ok(())
+    }
 }
