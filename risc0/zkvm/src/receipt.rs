@@ -75,13 +75,17 @@
 //! journal as the same type it was written to the journal. If you prefer, you
 //! can also directly access the [SessionReceipt::journal] as a `Vec<u8>`.
 
-use alloc::{boxed::Box, fmt::Debug, vec::Vec};
+use alloc::{boxed::Box, fmt::Debug, string::String, vec::Vec};
 
 use anyhow::Result;
 use dyn_partial_eq::{dyn_partial_eq, DynPartialEq};
 use hex::FromHex;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBearElem;
+#[cfg(not(target_os = "zkvm"))]
+use risc0_zkp::core::hash::{
+    blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite,
+};
 use risc0_zkp::{
     core::{digest::Digest, hash::sha::SHA256_INIT},
     layout::Buffer,
@@ -173,7 +177,7 @@ pub trait SegmentReceipt: Debug {
     /// Uses the ZKP system to cryptographically verify that the seal does
     /// validly indicate that this Segment was executed faithfully.
     #[cfg(not(target_os = "zkvm"))]
-    fn verify(&self, hash_name: String) -> Result<(), VerificationError>;
+    fn verify(&self, hash_name: &String) -> Result<(), VerificationError>;
 
     /// Gets the metadata for this receipt
     fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError>;
@@ -232,7 +236,6 @@ impl SessionReceipt {
     #[cfg(not(target_os = "zkvm"))]
     #[must_use]
     pub fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
-        use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
         let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&crate::CIRCUIT);
         self.verify_with_hal(&hal, image_id)
     }
@@ -274,7 +277,7 @@ impl SessionReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?;
         let mut prev_image_id = image_id.into();
         for receipt in receipts {
-            receipt.verify()?;
+            receipt.verify(&"sha256".to_string())?;
             let metadata = receipt.get_metadata()?;
             #[cfg(not(target_os = "zkvm"))]
             log::debug!("metadata: {metadata:#?}");
@@ -286,7 +289,7 @@ impl SessionReceipt {
             }
             prev_image_id = metadata.post.compute_image_id();
         }
-        final_receipt.verify()?;
+        final_receipt.verify(&"sha256".to_string())?;
         let metadata = final_receipt.get_metadata()?;
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("final: {metadata:#?}");
@@ -321,9 +324,6 @@ impl SessionReceipt {
     }
 }
 
-// Create registry
-// risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite,
-// _>::new(&crate::CIRCUIT);
 #[typetag::serde]
 impl SegmentReceipt for SegmentBaseReceipt {
     /// Verifies the integrity of this receipt.
@@ -332,10 +332,22 @@ impl SegmentReceipt for SegmentBaseReceipt {
     /// validly indicate that this Segment was executed faithfully.
     #[cfg(not(target_os = "zkvm"))]
     #[must_use]
-    fn verify(&self, hashfn_name: String) -> Result<(), VerificationError> {
-        use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
-        let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&crate::CIRCUIT);
-        self.verify_with_hal(&hal)
+    fn verify(&self, hashfn_name: &String) -> Result<(), VerificationError> {
+        use risc0_zkp::{core::hash::poseidon::PoseidonHashSuite, verify::CpuVerifyHal};
+        match hashfn_name.as_str() {
+            "poseidon" => self.verify_with_hal(&CpuVerifyHal::<_, PoseidonHashSuite, _>::new(
+                &crate::CIRCUIT,
+            )),
+            "sha256" => self.verify_with_hal(&CpuVerifyHal::<
+                _,
+                Sha256HashSuite<_, crate::sha::Impl>,
+                _,
+            >::new(&crate::CIRCUIT)),
+            "blake2b" => self.verify_with_hal(&CpuVerifyHal::<_, Blake2bCpuHashSuite, _>::new(
+                &crate::CIRCUIT,
+            )),
+            _ => Err(VerificationError::InvalidHashFn),
+        }
     }
 
     /// Get the [ReceiptMetadata] associated with the current receipt.
@@ -500,7 +512,7 @@ impl Verifier {
             .ok_or(VerificationError::ReceiptFormatError)?;
         let mut prev_image_id = image_id.into();
         for receipt in receipts {
-            receipt.verify(self.hash_name)?;
+            receipt.verify(&self.hash_name)?;
             let metadata = receipt.get_metadata()?;
             #[cfg(not(target_os = "zkvm"))]
             log::debug!("metadata: {metadata:#?}");
@@ -512,7 +524,7 @@ impl Verifier {
             }
             prev_image_id = metadata.post.compute_image_id();
         }
-        final_receipt.verify(self.hash_name)?;
+        final_receipt.verify(&self.hash_name)?;
         let metadata = final_receipt.get_metadata()?;
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("final: {metadata:#?}");

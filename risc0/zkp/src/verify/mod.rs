@@ -57,6 +57,7 @@ pub enum VerificationError {
     ImageVerificationError,
     MerkleQueryOutOfRange { idx: usize, rows: usize },
     InvalidProof,
+    InvalidHashFn,
     JournalDigestMismatch,
     UnexpectedExitCode,
 }
@@ -72,6 +73,7 @@ impl fmt::Display for VerificationError {
                 "Requested Merkle validation on row {idx}, but only {rows} rows exist",
             ),
             VerificationError::InvalidProof => write!(f, "Verification indicates proof is invalid"),
+            VerificationError::InvalidHashFn => write!(f, "Invalid hash function"),
             VerificationError::JournalDigestMismatch => {
                 write!(f, "Journal digest mismatch detected")
             }
