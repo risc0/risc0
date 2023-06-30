@@ -47,7 +47,7 @@ gimli = { version = "0.27", optional = true }
 lazy-regex = { version = "2.3", optional = true }
 log = "0.4"
 crypto-bigint = { version = "0.5", default-features = false, features = ["rand"], optional = true }
-num-derive = "0.3"
+num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.11", optional = true }
 rand = { version = "0.8", optional = true }
