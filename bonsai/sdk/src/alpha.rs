@@ -17,7 +17,35 @@ use std::{fs::File, path::Path};
 use reqwest::{blocking::Client as BlockingClient, header};
 use thiserror::Error;
 
-use self::responses::{CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, UploadRes};
+use self::responses::{
+    CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, SnarkReq, SnarkStatusRes, UploadRes,
+};
+
+/// Bonsai Alpha SDK error classes
+#[derive(Debug, Error)]
+pub enum SdkErr {
+    /// The API already has the supplied imageID
+    #[error("the supplied imageId already exists")]
+    ImageIdExists,
+    /// Server side failure
+    #[error("server error `{0}`")]
+    InternalServerErr(String),
+    /// http reqwest errors
+    #[error("HTTP error from reqwest")]
+    HttpErr(#[from] reqwest::Error),
+    /// Header construction error
+    #[error("HTTP header failed to construct")]
+    HttpHeaderErr(#[from] reqwest::header::InvalidHeaderValue),
+    /// Missing BONSAI_API_KEY
+    #[error("missing BONSAI_API_KEY env var")]
+    MissingApiKey,
+    /// Missing BONSAI_API_URL
+    #[error("missing BONSAI_API_URL env var")]
+    MissingApiUrl,
+    /// Missing file
+    #[error("failed to find file on disk")]
+    FileNotFound(#[from] std::io::Error),
+}
 
 /// Collection of serialization object for the REST api
 pub mod responses {
@@ -68,6 +96,41 @@ pub mod responses {
         /// If the status == 'SUCCEEDED' then this should be present
         pub receipt_url: Option<String>,
     }
+
+    /// Snark proof request object
+    #[derive(Deserialize, Serialize)]
+    pub struct SnarkReq {
+        /// Existing Session ID from [SessionId]
+        pub session_id: String,
+    }
+
+    /// Snark Proof object
+    #[derive(Debug, Deserialize, Serialize, PartialEq)]
+    pub struct SnarkProof {
+        /// Proof 'a' value
+        pub a: Vec<String>,
+        /// Proof 'b' value
+        pub b: Vec<Vec<String>>,
+        /// Proof 'c' value
+        pub c: Vec<String>,
+        /// Proof public outputs
+        pub public: Vec<String>,
+    }
+
+    /// Session Status response
+    #[derive(Deserialize, Serialize)]
+    pub struct SnarkStatusRes {
+        /// Current status
+        ///
+        /// values: [RUNNING | SUCCEEDED | FAILED | TIMED_OUT | ABORTED |
+        /// SUCCEEDED]
+        pub status: String,
+        /// SNARK proof output
+        ///
+        /// Generated snark proof, following the snarkjs calldata format:
+        /// https://github.com/iden3/snarkjs#26-simulate-a-verification-call
+        pub output: Option<SnarkProof>,
+    }
 }
 
 /// Proof Session representation
@@ -75,32 +138,6 @@ pub mod responses {
 pub struct SessionId {
     /// Session UUID
     pub uuid: String,
-}
-
-/// Bonsai Alpha SDK error classes
-#[derive(Debug, Error)]
-pub enum SdkErr {
-    /// The API already has the supplied imageID
-    #[error("the supplied imageId already exists")]
-    ImageIdExists,
-    /// Server side failure
-    #[error("server error `{0}`")]
-    InternalServerErr(String),
-    /// http reqwest errors
-    #[error("HTTP error from reqwest")]
-    HttpErr(#[from] reqwest::Error),
-    /// Header construction error
-    #[error("HTTP header failed to construct")]
-    HttpHeaderErr(#[from] reqwest::header::InvalidHeaderValue),
-    /// Missing BONSAI_API_KEY
-    #[error("missing BONSAI_API_KEY env var")]
-    MissingApiKey,
-    /// Missing BONSAI_API_URL
-    #[error("missing BONSAI_API_URL env var")]
-    MissingApiUrl,
-    /// Missing file
-    #[error("failed to find file on disk")]
-    FileNotFound(#[from] std::io::Error),
 }
 
 impl SessionId {
@@ -119,6 +156,32 @@ impl SessionId {
             return Err(SdkErr::InternalServerErr(body));
         }
         Ok(res.json::<SessionStatusRes>()?)
+    }
+}
+
+/// Stark2Snark Session representation
+#[derive(Debug, Clone, PartialEq)]
+pub struct SnarkId {
+    /// Snark Session UUID
+    pub uuid: String,
+}
+
+impl SnarkId {
+    /// Construct a [SnarkId] from a UUID [String]
+    pub fn new(uuid: String) -> Self {
+        Self { uuid }
+    }
+
+    /// Fetches the current status of the Snark Session
+    pub fn status(&self, client: &Client) -> Result<SnarkStatusRes, SdkErr> {
+        let url = format!("{}/snark/status/{}", client.url, self.uuid);
+        let res = client.client.get(url).send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+        Ok(res.json::<SnarkStatusRes>()?)
     }
 }
 
@@ -145,8 +208,8 @@ impl Client {
     /// Uses the BONSAI_API_URL and BONSAI_API_KEY environment variables to
     /// construct a client
     pub fn from_env() -> Result<Self, SdkErr> {
-        let api_url = std::env::var("BONSAI_API_URL").or_else(|_| Err(SdkErr::MissingApiUrl))?;
-        let api_key = std::env::var("BONSAI_API_KEY").or_else(|_| Err(SdkErr::MissingApiKey))?;
+        let api_url = std::env::var("BONSAI_API_URL").map_err(|_| SdkErr::MissingApiUrl)?;
+        let api_key = std::env::var("BONSAI_API_KEY").map_err(|_| SdkErr::MissingApiKey)?;
 
         let client = construct_req_client(&api_key)?;
 
@@ -287,6 +350,30 @@ impl Client {
         let data = self.client.get(url).send()?.bytes()?;
 
         Ok(data.into())
+    }
+
+    // - /snark
+
+    /// Requests a SNARK proof be created from a existing sessionId
+    ///
+    /// Supply a completed sessionId to convert the risc0 STARK proof into
+    /// a SNARK proof that can be validated on ethereum-like blockchains
+    pub fn create_snark(&self, session_id: String) -> Result<SnarkId, SdkErr> {
+        let url = format!("{}/snark/create", self.url);
+
+        let snark_req = SnarkReq { session_id };
+
+        let res = self.client.post(url).json(&snark_req).send()?;
+
+        if !res.status().is_success() {
+            let body = res.text()?;
+            return Err(SdkErr::InternalServerErr(body));
+        }
+
+        // Reuse the session response because its the same member format
+        let res: CreateSessRes = res.json()?;
+
+        Ok(SnarkId::new(res.uuid))
     }
 }
 
@@ -479,6 +566,67 @@ mod tests {
         let status = session_id.status(&client).unwrap();
         assert_eq!(status.status, response.status);
         assert_eq!(status.receipt_url, None);
+
+        create_mock.assert();
+    }
+
+    #[test]
+    fn snark_create() {
+        let server = MockServer::start();
+
+        let request = SnarkReq {
+            session_id: Uuid::new_v4().to_string(),
+        };
+        let response = CreateSessRes {
+            uuid: Uuid::new_v4().to_string(),
+        };
+
+        let create_mock = server.mock(|when, then| {
+            when.method(POST)
+                .path("/snark/create")
+                .header("content-type", "application/json")
+                .header("x-api-key", TEST_KEY)
+                .json_body_obj(&request);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string()).unwrap();
+
+        let res = client.create_snark(request.session_id).unwrap();
+        assert_eq!(res.uuid, response.uuid);
+
+        create_mock.assert();
+    }
+
+    #[test]
+    fn snark_status() {
+        let server = MockServer::start();
+
+        let uuid = Uuid::new_v4().to_string();
+        let snark_id = SnarkId::new(uuid);
+        let response = SnarkStatusRes {
+            status: "RUNNING".to_string(),
+            output: None,
+        };
+
+        let create_mock = server.mock(|when, then| {
+            when.method(GET)
+                .path(format!("/snark/status/{}", snark_id.uuid))
+                .header("x-api-key", TEST_KEY);
+            then.status(200)
+                .header("content-type", "application/json")
+                .json_body_obj(&response);
+        });
+
+        let server_url = format!("http://{}", server.address());
+        let client = super::Client::from_parts(server_url, TEST_KEY.to_string()).unwrap();
+
+        let status = snark_id.status(&client).unwrap();
+        assert_eq!(status.status, response.status);
+        assert_eq!(status.output, None);
 
         create_mock.assert();
     }
