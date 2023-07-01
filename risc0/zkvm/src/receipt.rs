@@ -79,10 +79,13 @@ use alloc::{fmt::Debug, vec::Vec};
 
 use anyhow::Result;
 use hex::FromHex;
-use risc0_circuit_rv32im::layout;
-use risc0_core::field::baby_bear::BabyBearElem;
+use risc0_circuit_rv32im::{layout, CircuitImpl};
+use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
-    core::{digest::Digest, hash::sha::SHA256_INIT},
+    core::{
+        digest::Digest,
+        hash::{sha::SHA256_INIT, HashSuite},
+    },
     layout::Buffer,
     verify::VerificationError,
     MIN_CYCLES_PO2,
@@ -95,7 +98,7 @@ use crate::{
         self,
         rust_crypto::{Digest as _, Sha256},
     },
-    ControlId, CIRCUIT,
+    ControlId,
 };
 
 /// Indicates how a Segment or Session's execution has terminated
@@ -244,11 +247,9 @@ impl SessionReceipt for SessionFlatReceipt {
     #[must_use]
     fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
-        let hal =
-            risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
-                &crate::CIRCUIT,
-            );
-        self.verify_with_hal(&hal, image_id)
+
+        type HS = Sha256HashSuite<BabyBear, crate::sha::Impl>;
+        self.verify_with_hash::<HS>(image_id)
     }
 
     fn get_journal(&self) -> &Vec<u8> {
@@ -280,14 +281,10 @@ impl SessionFlatReceipt {
     /// given `_image_id` parameter.
     /// given `image_id` parameter.
     #[must_use]
-    pub fn verify_with_hal<H>(
-        &self,
-        hal: &H,
-        image_id: impl Into<Digest>,
-    ) -> Result<(), VerificationError>
+    pub fn verify_with_hash<HS>(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError>
     where
-        H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
-        H::HashFn: ControlId,
+        HS: HashSuite<BabyBear>,
+        HS::HashFn: ControlId,
     {
         let (final_receipt, receipts) = self
             .segments
@@ -296,7 +293,7 @@ impl SessionFlatReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?;
         let mut prev_image_id = image_id.into();
         for receipt in receipts {
-            receipt.verify_with_hal(hal)?;
+            receipt.verify_with_hash::<HS>()?;
             let metadata = receipt.get_metadata()?;
             #[cfg(not(target_os = "zkvm"))]
             log::debug!("metadata: {metadata:#?}");
@@ -308,7 +305,7 @@ impl SessionFlatReceipt {
             }
             prev_image_id = metadata.post.compute_image_id();
         }
-        final_receipt.verify_with_hal(hal)?;
+        final_receipt.verify_with_hash::<HS>()?;
         let metadata = final_receipt.get_metadata()?;
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("final: {metadata:#?}");
@@ -358,11 +355,9 @@ impl SegmentReceipt {
     #[must_use]
     pub fn verify(&self) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
-        let hal =
-            risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
-                &crate::CIRCUIT,
-            );
-        self.verify_with_hal(&hal)
+
+        type HS = Sha256HashSuite<BabyBear, crate::sha::Impl>;
+        self.verify_with_hash::<HS>()
     }
 
     /// Verifies the integrity of this receipt.
@@ -370,12 +365,12 @@ impl SegmentReceipt {
     /// Uses the ZKP system to cryptographically verify that the seal does
     /// validly indicate that this Segment was executed faithfully.
     #[must_use]
-    pub fn verify_with_hal<H>(&self, hal: &H) -> Result<(), VerificationError>
+    pub fn verify_with_hash<HS>(&self) -> Result<(), VerificationError>
     where
-        H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
-        H::HashFn: ControlId,
+        HS: HashSuite<BabyBear>,
+        HS::HashFn: ControlId,
     {
-        let control_id = &H::HashFn::CONTROL_ID;
+        let control_id = &HS::HashFn::CONTROL_ID;
         let check_code = |po2: u32, merkle_root: &Digest| -> Result<(), VerificationError> {
             let po2 = po2 as usize;
             let which = po2 - MIN_CYCLES_PO2;
@@ -387,7 +382,11 @@ impl SegmentReceipt {
             }
             Err(VerificationError::ControlVerificationError)
         };
-        risc0_zkp::verify::verify(hal, &CIRCUIT, &self.seal, check_code)
+        risc0_zkp::verify::verify::<BabyBear, CircuitImpl, HS, _>(
+            &crate::CIRCUIT,
+            &self.seal,
+            check_code,
+        )
     }
 
     /// Extracts the seal from the receipt, as a series of bytes.

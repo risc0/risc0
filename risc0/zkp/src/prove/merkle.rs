@@ -145,13 +145,12 @@ impl<H: Hal> MerkleTreeProver<H> {
 mod tests {
     use rand::Rng;
     use risc0_core::field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+        baby_bear::{BabyBear, BabyBearElem},
         Elem,
     };
 
     use super::*;
     use crate::{
-        adapter::{MixState, PolyExt},
         core::{
             hash::{
                 poseidon::PoseidonHashSuite,
@@ -161,25 +160,14 @@ mod tests {
             log2_ceil,
         },
         hal::cpu::CpuHal,
-        verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, CpuVerifyHal, VerificationError},
+        verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
     };
 
-    struct MockCircuit {}
-
-    impl PolyExt<BabyBear> for MockCircuit {
-        fn poly_ext(
-            &self,
-            _mix: &BabyBearExtElem,
-            _u: &[BabyBearExtElem],
-            _args: &[&[BabyBearElem]],
-        ) -> MixState<BabyBearExtElem> {
-            unimplemented!()
-        }
-    }
+    struct MockCircuit;
 
     type ShaSuite = Sha256HashSuite<BabyBear, CpuImpl>;
     type PoseidonSuite = PoseidonHashSuite;
-    type VerifierHal<'a, HS> = CpuVerifyHal<'a, BabyBear, HS, MockCircuit>;
+    type Verifier<'a, HS> = crate::verify::Verifier<'a, BabyBear, MockCircuit, HS>;
 
     fn init_prover<H: Hal>(
         hal: &H,
@@ -238,7 +226,7 @@ mod tests {
             iop.proof[manip_idx] ^= 1;
         }
         let mut r_iop = ReadIOP::<BabyBear, HS::Rng>::new(&iop.proof);
-        let verifier = MerkleTreeVerifier::<VerifierHal<HS>>::new(&mut r_iop, rows, cols, queries);
+        let verifier = MerkleTreeVerifier::<Verifier<HS>>::new(&mut r_iop, rows, cols, queries);
         assert_eq!(verifier.root(), prover.root());
         let mut err = false;
         for query in 0..queries {

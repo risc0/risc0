@@ -165,8 +165,10 @@ impl ReceiptMetadata {
 pub struct SegmentRecursionReceipt {
     /// the cryptographic seal of this receipt
     pub seal: Vec<u32>,
+
     /// the control ID of this receipt
     pub control_id: Digest,
+
     /// the receipt metadata containing states of the system during the segment
     /// executions
     pub meta: ReceiptMetadata,
@@ -176,22 +178,26 @@ impl SegmentRecursionReceipt {
     /// verify the integrity of this receipt
     #[cfg(not(target_os = "zkvm"))]
     pub fn verify(&self) -> Result<(), VerificationError> {
-        use risc0_core::field::baby_bear::BabyBearElem;
+        use risc0_core::field::baby_bear::{BabyBear, BabyBearElem};
         use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
 
         use super::CircuitImpl;
 
         // Make the hal
-        let hal = risc0_zkp::verify::CpuVerifyHal::<_, PoseidonHashSuite, _>::new(&CIRCUIT_CORE);
         let valid_ids = valid_control_ids();
-        let check_code = |_po2: u32, control_id: &Digest| -> Result<(), VerificationError> {
-            let Some(_) = valid_ids.iter().position(|elem| elem == control_id) else {
-                return Err(VerificationError::JournalDigestMismatch);
-            };
-            Ok(())
+        let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
+            valid_ids
+                .iter()
+                .find(|elem| *elem == control_id)
+                .map(|_| ())
+                .ok_or(VerificationError::ControlVerificationError)
         };
         // Verify the receipt itself is correct
-        risc0_zkp::verify::verify(&hal, &CIRCUIT_CORE, &self.seal, check_code)?;
+        risc0_zkp::verify::verify::<BabyBear, CircuitImpl, PoseidonHashSuite, _>(
+            &CIRCUIT_CORE,
+            &self.seal,
+            check_code,
+        )?;
         // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
             bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
@@ -220,6 +226,7 @@ impl SegmentRecursionReceipt {
 pub struct SessionRollupReceipt {
     /// receipt that represents all sessions joined via recursion
     pub receipt: SegmentRecursionReceipt,
+
     /// the journal of the entire session
     pub journal: Vec<u8>,
 }

@@ -56,7 +56,6 @@ use risc0_zkp::{
     hal::{EvalCheck, Hal},
     layout::Buffer,
     prove::{adapter::ProveAdapter, executor::Executor},
-    verify::CpuVerifyHal,
 };
 use risc0_zkvm_platform::WORD_SIZE;
 
@@ -241,8 +240,7 @@ where
             journal: session.journal.clone(),
         };
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
-        receipt.verify_with_hal(&hal, image_id)?;
+        receipt.verify_with_hash::<H::HashSuite>(image_id)?;
         Ok(Box::new(receipt))
     }
 
@@ -296,8 +294,7 @@ where
             seal,
             index: segment.index,
         };
-        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
-        receipt.verify_with_hal(&hal)?;
+        receipt.verify_with_hash::<H::HashSuite>()?;
 
         Ok(receipt)
     }
