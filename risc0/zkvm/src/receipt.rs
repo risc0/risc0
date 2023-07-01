@@ -278,7 +278,6 @@ impl SessionFlatReceipt {
     /// Uses the ZKP system to cryptographically verify that each constituent
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
-    /// given `_image_id` parameter.
     /// given `image_id` parameter.
     #[must_use]
     pub fn verify_with_hash<HS>(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError>

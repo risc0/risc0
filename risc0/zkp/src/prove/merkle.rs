@@ -160,7 +160,7 @@ mod tests {
             log2_ceil,
         },
         hal::cpu::CpuHal,
-        verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, VerificationError},
+        verify::{MerkleTreeVerifier, ReadIOP, VerificationError},
     };
 
     struct MockCircuit;

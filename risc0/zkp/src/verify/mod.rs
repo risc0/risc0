@@ -13,15 +13,10 @@
 // limitations under the License.
 
 //! Cryptographic algorithms for verifying a ZK proof of compute
-//!
-//! This module is not typically used directly. Instead, we recommend calling
-//! [`Receipt::verify`].
-//!
-//! [`Receipt::verify`]: https://docs.rs/risc0-zkvm/latest/risc0_zkvm/receipt/struct.Receipt.html#method.verify
 
 mod fri;
-pub(crate) mod merkle;
-pub mod read_iop;
+mod merkle;
+mod read_iop;
 
 use alloc::{vec, vec::Vec};
 use core::{
@@ -31,6 +26,8 @@ use core::{
     marker::PhantomData,
 };
 
+pub(crate) use merkle::MerkleTreeVerifier;
+pub(crate) use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
@@ -44,7 +41,6 @@ use crate::{
         log2_ceil,
     },
     taps::TapSet,
-    verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP},
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
@@ -98,7 +94,7 @@ struct TapCache<F: Field> {
     check_mix_pows: Vec<F::ExtElem>,
 }
 
-pub struct Verifier<'a, F, C, HS>
+pub(crate) struct Verifier<'a, F, C, HS>
 where
     F: Field,
 {
@@ -129,7 +125,7 @@ where
     C: CircuitInfo + PolyExt<F> + TapsProvider,
     HS: HashSuite<F>,
 {
-    pub fn new(circuit: &'a C) -> Self {
+    fn new(circuit: &'a C) -> Self {
         Self {
             circuit,
             po2: 0,
@@ -216,7 +212,7 @@ where
         ret
     }
 
-    pub fn verify<CheckCodeFn>(
+    fn verify<CheckCodeFn>(
         &mut self,
         seal: &'a [u32],
         check_code: CheckCodeFn,
@@ -449,8 +445,8 @@ where
     }
 }
 
-/// Verify a seal is valid for the given circuit, seal, and code checking
-/// function.
+/// Verify a seal is valid for the given circuit, and code checking function.
+#[must_use]
 #[tracing::instrument(skip_all)]
 pub fn verify<F, C, HS, CheckCode>(
     circuit: &C,
