@@ -54,8 +54,11 @@ pub const MIN_PO2: usize = core::log2_ceil(1 + ZK_CYCLES);
 
 /// Inverse of Reed-Solomon Expansion Rate
 pub const INV_RATE: usize = 4;
-/// FRI folding factor is 2 ^ FRI_FOLD_PO2
+
 const FRI_FOLD_PO2: usize = 4;
+
+/// FRI folding factor is 2 ^ FRI_FOLD_PO2
 pub const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
+
 /// FRI continues until the degree of the FRI polynomial reaches FRI_MIN_DEGREE
 const FRI_MIN_DEGREE: usize = 256;

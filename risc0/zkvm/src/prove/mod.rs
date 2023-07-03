@@ -52,7 +52,7 @@ use risc0_core::field::{
 };
 use risc0_zkp::{
     adapter::{CircuitInfo, TapsProvider},
-    core::{digest::DIGEST_WORDS, hash::HashSuite},
+    core::digest::DIGEST_WORDS,
     hal::{EvalCheck, Hal},
     layout::Buffer,
     prove::{adapter::ProveAdapter, executor::Executor},
@@ -61,8 +61,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
 use crate::{
-    receipt::SessionReceipt, ControlId, Segment, SegmentReceipt, Session, SessionFlatReceipt,
-    CIRCUIT,
+    receipt::SessionReceipt, Segment, SegmentReceipt, Session, SessionFlatReceipt, CIRCUIT,
 };
 
 /// HAL creation functions for CUDA.
@@ -124,7 +123,11 @@ pub mod cpu {
     use std::rc::Rc;
 
     use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitImpl};
-    use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_zkp::{
+        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+        hal::cpu::CpuHal,
+    };
 
     use super::HalEval;
     use crate::CIRCUIT;
@@ -137,8 +140,8 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn sha256_hal_eval() -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitImpl>> {
-        let hal = Rc::new(BabyBearSha256CpuHal::new());
+    pub fn sha256_hal_eval() -> HalEval<CpuHal<BabyBear>, CpuEvalCheck<'static, CircuitImpl>> {
+        let hal = Rc::new(CpuHal::new(Sha256HashSuite::new()));
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
@@ -151,9 +154,8 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn poseidon_hal_eval() -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(BabyBearPoseidonCpuHal::new());
+    pub fn poseidon_hal_eval() -> HalEval<CpuHal<BabyBear>, CpuEvalCheck<'static, CircuitImpl>> {
+        let hal = Rc::new(CpuHal::new(PoseidonHashSuite::new()));
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
@@ -192,7 +194,6 @@ pub trait Prover {
 pub struct LocalProver<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
     name: String,
@@ -202,7 +203,6 @@ where
 impl<H, E> LocalProver<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
     /// Construct a [LocalProver] with the given name and [HalEval].
@@ -217,7 +217,6 @@ where
 impl<H, E> Prover for LocalProver<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
     fn get_name(&self) -> String {
@@ -240,7 +239,7 @@ where
             journal: session.journal.clone(),
         };
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        receipt.verify_with_hash::<H::HashSuite>(image_id)?;
+        receipt.verify_with_hash(self.hal_eval.hal.get_hash_suite(), image_id)?;
         Ok(Box::new(receipt))
     }
 
@@ -294,7 +293,7 @@ where
             seal,
             index: segment.index,
         };
-        receipt.verify_with_hash::<H::HashSuite>()?;
+        receipt.verify_with_hash(self.hal_eval.hal.get_hash_suite())?;
 
         Ok(receipt)
     }

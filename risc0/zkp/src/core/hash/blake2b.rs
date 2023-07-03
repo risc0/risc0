@@ -26,11 +26,11 @@ use risc0_core::field::{
     Elem, ExtElem,
 };
 
-use super::{HashFn, HashSuite, Rng};
+use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::core::digest::Digest;
 
 /// Hash function trait.
-pub trait Blake2b {
+pub trait Blake2b: Send + Sync {
     /// A function producing a hash from a list of u8.
     fn blake2b<T: AsRef<[u8]>>(data: T) -> [u8; 32];
 }
@@ -54,31 +54,61 @@ impl Blake2b for Blake2bCpuImpl {
     }
 }
 
+struct Blake2bRngFactory<T: Blake2b> {
+    phantom: PhantomData<T>,
+}
+
+impl<T: Blake2b> Blake2bRngFactory<T> {
+    fn new() -> Self {
+        Self {
+            phantom: PhantomData,
+        }
+    }
+}
+
+impl<T: Blake2b + 'static> RngFactory<BabyBear> for Blake2bRngFactory<T> {
+    fn new_rng(&self) -> Box<dyn Rng<BabyBear>> {
+        let rng: Blake2bRng<T> = Blake2bRng::new();
+        Box::new(rng)
+    }
+}
+
 /// Blake2b HashSuite.
 /// We are using a generic hasher to allow different implementations.
 pub struct Blake2bHashSuite<T: Blake2b> {
-    hasher: PhantomData<T>,
+    phantom: PhantomData<T>,
 }
 
-impl<T: Blake2b> HashSuite<BabyBear> for Blake2bHashSuite<T> {
-    type HashFn = Blake2bHashFn<T>;
-    type Rng = Blake2bRng<T>;
+impl<T: Blake2b + 'static> Blake2bHashSuite<T> {
+    /// Create a new HashSuite
+    pub fn new() -> HashSuite<BabyBear> {
+        HashSuite {
+            hashfn: Box::new(Blake2bHashFn::<T>::new()),
+            rng: Box::new(Blake2bRngFactory::<T>::new()),
+        }
+    }
 }
 
 /// Blake2b HashFn.
-pub struct Blake2bHashFn<T: Blake2b> {
-    hasher: PhantomData<T>,
+struct Blake2bHashFn<T: Blake2b> {
+    phantom: PhantomData<T>,
+}
+
+impl<T: Blake2b> Blake2bHashFn<T> {
+    fn new() -> Self {
+        Self {
+            phantom: PhantomData,
+        }
+    }
 }
 
 impl<T: Blake2b> HashFn<BabyBear> for Blake2bHashFn<T> {
-    type DigestPtr = Box<Digest>;
-
-    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+    fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest> {
         let concat = [a.as_bytes().as_ref(), b.as_bytes()].concat();
         Box::new(Digest::from(T::blake2b(concat)))
     }
 
-    fn hash_elem_slice(slice: &[BabyBearElem]) -> Self::DigestPtr {
+    fn hash_elem_slice(&self, slice: &[BabyBearElem]) -> Box<Digest> {
         let mut data = Vec::<u8>::new();
         for el in slice {
             data.extend_from_slice(el.as_u32_montgomery().to_be_bytes().as_slice());
@@ -86,7 +116,7 @@ impl<T: Blake2b> HashFn<BabyBear> for Blake2bHashFn<T> {
         Box::new(Digest::from(T::blake2b(data)))
     }
 
-    fn hash_ext_elem_slice(slice: &[BabyBearExtElem]) -> Self::DigestPtr {
+    fn hash_ext_elem_slice(&self, slice: &[BabyBearExtElem]) -> Box<Digest> {
         let mut data = Vec::<u8>::new();
         for ext_el in slice {
             for el in ext_el.subelems() {
@@ -103,14 +133,16 @@ pub struct Blake2bRng<T: Blake2b> {
     hasher: PhantomData<T>,
 }
 
-impl<T: Blake2b> Rng<BabyBear> for Blake2bRng<T> {
+impl<T: Blake2b> Blake2bRng<T> {
     fn new() -> Self {
         Self {
             current: [0; 32],
             hasher: Default::default(),
         }
     }
+}
 
+impl<T: Blake2b> Rng<BabyBear> for Blake2bRng<T> {
     fn mix(&mut self, val: &Digest) {
         let concat = [self.current.as_ref(), val.as_bytes()].concat();
         self.current = T::blake2b(concat);

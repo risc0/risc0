@@ -23,7 +23,6 @@ use core::{
     cell::RefCell,
     fmt::{self},
     iter::zip,
-    marker::PhantomData,
 };
 
 pub(crate) use merkle::MerkleTreeVerifier;
@@ -31,15 +30,8 @@ pub(crate) use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
-    adapter::{
-        CircuitInfo, PolyExt, TapsProvider, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE,
-        REGISTER_GROUP_DATA,
-    },
-    core::{
-        digest::Digest,
-        hash::{HashFn, HashSuite, Rng},
-        log2_ceil,
-    },
+    adapter::{CircuitCoreDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
+    core::{digest::Digest, hash::HashSuite, log2_ceil},
     taps::TapSet,
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
@@ -77,14 +69,8 @@ impl fmt::Display for VerificationError {
 #[cfg(feature = "std")]
 impl std::error::Error for VerificationError {}
 
-pub(crate) trait VerifyParams {
-    type HashFn: HashFn<Self::Field>;
-    type Rng: Rng<Self::Field>;
-    type Elem: Elem + RootsOfUnity;
-    type ExtElem: ExtElem<SubElem = Self::Elem>;
-    type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
-
-    const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
+trait VerifyParams<F: Field> {
+    const CHECK_SIZE: usize = INV_RATE * F::ExtElem::EXT_SIZE;
 }
 
 struct TapCache<F: Field> {
@@ -94,46 +80,35 @@ struct TapCache<F: Field> {
     check_mix_pows: Vec<F::ExtElem>,
 }
 
-pub(crate) struct Verifier<'a, F, C, HS>
+pub(crate) struct Verifier<'a, F, C>
 where
     F: Field,
 {
     circuit: &'a C,
+    suite: &'a HashSuite<F>,
     po2: u32,
     steps: usize,
     out: Option<&'a [F::Elem]>,
     mix: Vec<F::Elem>,
     tap_cache: RefCell<Option<TapCache<F>>>,
-    phantom: PhantomData<HS>,
 }
 
-impl<'a, F, C, HS> VerifyParams for Verifier<'a, F, C, HS>
-where
-    F: Field,
-    HS: HashSuite<F>,
-{
-    type HashFn = HS::HashFn;
-    type Rng = HS::Rng;
-    type Field = F;
-    type Elem = F::Elem;
-    type ExtElem = F::ExtElem;
-}
+impl<'a, F: Field, C> VerifyParams<F> for Verifier<'a, F, C> {}
 
-impl<'a, F, C, HS> Verifier<'a, F, C, HS>
+impl<'a, F, C> Verifier<'a, F, C>
 where
     F: Field,
-    C: CircuitInfo + PolyExt<F> + TapsProvider,
-    HS: HashSuite<F>,
+    C: CircuitCoreDef<F>,
 {
-    fn new(circuit: &'a C) -> Self {
+    fn new(circuit: &'a C, suite: &'a HashSuite<F>) -> Self {
         Self {
             circuit,
+            suite,
             po2: 0,
             steps: 0,
             out: None,
             mix: Vec::new(),
             tap_cache: RefCell::new(None),
-            phantom: PhantomData,
         }
     }
 
@@ -225,9 +200,10 @@ where
         }
 
         let taps = self.circuit.get_taps();
+        let hashfn = self.suite.hashfn.as_ref();
 
         // Make IOP
-        let mut iop = ReadIOP::<'a, F, HS::Rng>::new(seal);
+        let mut iop = ReadIOP::new(seal, self.suite.rng.as_ref());
 
         // Read any execution state
         self.execute(&mut iop);
@@ -247,7 +223,7 @@ where
         // The code merkle tree contains the control instructions for the zkVM.
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("code_merkle");
-        let code_merkle = MerkleTreeVerifier::<Self>::new(&mut iop, domain, code_size, QUERIES);
+        let code_merkle = MerkleTreeVerifier::new(&mut iop, hashfn, domain, code_size, QUERIES);
         // log::debug!("codeRoot = {}", code_merkle.root());
         check_code(self.po2, code_merkle.root())?;
 
@@ -257,7 +233,7 @@ where
         // accesses sorted by location used by PLONK.
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("data_merkle");
-        let data_merkle = MerkleTreeVerifier::<Self>::new(&mut iop, domain, data_size, QUERIES);
+        let data_merkle = MerkleTreeVerifier::new(&mut iop, hashfn, domain, data_size, QUERIES);
         // log::debug!("dataRoot = {}", data_merkle.root());
 
         // Prep accumulation
@@ -277,7 +253,7 @@ where
         // implement a look-up table.
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("accum_merkle");
-        let accum_merkle = MerkleTreeVerifier::<Self>::new(&mut iop, domain, accum_size, QUERIES);
+        let accum_merkle = MerkleTreeVerifier::new(&mut iop, hashfn, domain, accum_size, QUERIES);
         // log::debug!("accumRoot = {}", accum_merkle.root());
 
         // Get a pseudorandom value with which to mix the constraint polynomials.
@@ -287,7 +263,7 @@ where
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("check_merkle");
         let check_merkle =
-            MerkleTreeVerifier::<Self>::new(&mut iop, domain, Self::CHECK_SIZE, QUERIES);
+            MerkleTreeVerifier::new(&mut iop, hashfn, domain, Self::CHECK_SIZE, QUERIES);
         // log::debug!("checkRoot = {}", check_merkle.root());
 
         // Get a pseudorandom DEEP query point
@@ -299,7 +275,7 @@ where
         // Read the U coeffs (the interpolations of the taps) + commit their hash.
         let num_taps = taps.tap_size();
         let coeff_u = iop.read_field_elem_slice(num_taps + Self::CHECK_SIZE);
-        let hash_u = *HS::HashFn::hash_ext_elem_slice(coeff_u);
+        let hash_u = self.suite.hashfn.hash_ext_elem_slice(coeff_u);
         iop.commit(&hash_u);
 
         // Now, convert U polynomials from coefficient form to evaluation form
@@ -410,11 +386,11 @@ where
             // log::debug!("fri_verify");
             let x = gen.pow(idx);
             let rows = [
-                accum_merkle.verify(iop, idx)?,
-                code_merkle.verify(iop, idx)?,
-                data_merkle.verify(iop, idx)?,
+                accum_merkle.verify(iop, hashfn, idx)?,
+                code_merkle.verify(iop, hashfn, idx)?,
+                data_merkle.verify(iop, hashfn, idx)?,
             ];
-            let check_row = check_merkle.verify(iop, idx)?;
+            let check_row = check_merkle.verify(iop, hashfn, idx)?;
             let ret = self.fri_eval_taps(taps, mix, &combo_u, check_row, back_one, x, z, rows);
             Ok(ret)
         })?;
@@ -422,7 +398,7 @@ where
         Ok(())
     }
 
-    fn execute(&mut self, iop: &mut ReadIOP<'a, F, HS::Rng>) {
+    fn execute(&mut self, iop: &mut ReadIOP<'a, F>) {
         // Read the outputs + size
         self.out = Some(iop.read_field_elem_slice(C::OUTPUT_SIZE));
         self.po2 = match iop.read_u32s(1) {
@@ -448,16 +424,16 @@ where
 /// Verify a seal is valid for the given circuit, and code checking function.
 #[must_use]
 #[tracing::instrument(skip_all)]
-pub fn verify<F, C, HS, CheckCode>(
+pub fn verify<F, C, CheckCode>(
     circuit: &C,
+    suite: &HashSuite<F>,
     seal: &[u32],
     check_code: CheckCode,
 ) -> Result<(), VerificationError>
 where
     F: Field,
-    C: CircuitInfo + PolyExt<F> + TapsProvider,
-    HS: HashSuite<F>,
+    C: CircuitCoreDef<F>,
     CheckCode: Fn(u32, &Digest) -> Result<(), VerificationError>,
 {
-    Verifier::<F, C, HS>::new(circuit).verify(seal, check_code)
+    Verifier::<F, C>::new(circuit, suite).verify(seal, check_code)
 }

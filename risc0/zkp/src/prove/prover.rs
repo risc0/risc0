@@ -16,10 +16,7 @@ use log::debug;
 use risc0_core::field::{Elem, ExtElem, RootsOfUnity};
 
 use crate::{
-    core::{
-        hash::HashFn,
-        poly::{poly_divide, poly_interpolate},
-    },
+    core::poly::{poly_divide, poly_interpolate},
     hal::{Buffer, EvalCheck, Hal},
     prove::{fri::fri_prove, poly_group::PolyGroup, write_iop::WriteIOP},
     taps::TapSet,
@@ -30,7 +27,7 @@ use crate::{
 pub struct Prover<'a, H: Hal> {
     hal: &'a H,
     taps: &'a TapSet<'a>,
-    iop: WriteIOP<H::Field, H::Rng>,
+    iop: WriteIOP<H::Field>,
     groups: Vec<Option<PolyGroup<H>>>,
     cycles: usize,
     po2: usize,
@@ -51,7 +48,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         Self {
             hal,
             taps,
-            iop: WriteIOP::new(),
+            iop: WriteIOP::new(hal.get_hash_suite().rng.as_ref()),
             groups: std::iter::repeat_with(|| None)
                 .take(taps.num_groups())
                 .collect(),
@@ -61,7 +58,7 @@ impl<'a, H: Hal> Prover<'a, H> {
     }
 
     /// Accesses the prover's IOP to commit or read random data.
-    pub fn iop(&mut self) -> &mut WriteIOP<H::Field, H::Rng> {
+    pub fn iop(&mut self) -> &mut WriteIOP<H::Field> {
         &mut self.iop
     }
 
@@ -239,7 +236,11 @@ impl<'a, H: Hal> Prover<'a, H> {
 
         debug!("Size of U = {}", coeff_u.len());
         self.iop.write_field_elem_slice(&coeff_u);
-        let hash_u = H::HashFn::hash_ext_elem_slice(coeff_u.as_slice());
+        let hash_u = self
+            .hal
+            .get_hash_suite()
+            .hashfn
+            .hash_ext_elem_slice(coeff_u.as_slice());
         self.iop.commit(&hash_u);
 
         // Set the mix mix value, which is used for FRI batching.

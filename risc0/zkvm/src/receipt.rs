@@ -78,7 +78,6 @@
 use alloc::{fmt::Debug, vec::Vec};
 
 use anyhow::Result;
-use hex::FromHex;
 use risc0_circuit_rv32im::{layout, CircuitImpl};
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
@@ -88,17 +87,16 @@ use risc0_zkp::{
     },
     layout::Buffer,
     verify::VerificationError,
-    MIN_CYCLES_PO2,
 };
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     sha::{
         self,
         rust_crypto::{Digest as _, Sha256},
     },
-    ControlId,
 };
 
 /// Indicates how a Segment or Session's execution has terminated
@@ -247,9 +245,7 @@ impl SessionReceipt for SessionFlatReceipt {
     #[must_use]
     fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
-
-        type HS = Sha256HashSuite<BabyBear, crate::sha::Impl>;
-        self.verify_with_hash::<HS>(image_id)
+        self.verify_with_hash(&Sha256HashSuite::new(), image_id)
     }
 
     fn get_journal(&self) -> &Vec<u8> {
@@ -280,11 +276,11 @@ impl SessionFlatReceipt {
     /// stitch together correctly, and that the initial memory image matches the
     /// given `image_id` parameter.
     #[must_use]
-    pub fn verify_with_hash<HS>(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError>
-    where
-        HS: HashSuite<BabyBear>,
-        HS::HashFn: ControlId,
-    {
+    pub fn verify_with_hash(
+        &self,
+        suite: &HashSuite<BabyBear>,
+        image_id: impl Into<Digest>,
+    ) -> Result<(), VerificationError> {
         let (final_receipt, receipts) = self
             .segments
             .as_slice()
@@ -292,7 +288,7 @@ impl SessionFlatReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?;
         let mut prev_image_id = image_id.into();
         for receipt in receipts {
-            receipt.verify_with_hash::<HS>()?;
+            receipt.verify_with_hash(suite)?;
             let metadata = receipt.get_metadata()?;
             #[cfg(not(target_os = "zkvm"))]
             log::debug!("metadata: {metadata:#?}");
@@ -304,7 +300,7 @@ impl SessionFlatReceipt {
             }
             prev_image_id = metadata.post.compute_image_id();
         }
-        final_receipt.verify_with_hash::<HS>()?;
+        final_receipt.verify_with_hash(suite)?;
         let metadata = final_receipt.get_metadata()?;
         #[cfg(not(target_os = "zkvm"))]
         log::debug!("final: {metadata:#?}");
@@ -354,9 +350,7 @@ impl SegmentReceipt {
     #[must_use]
     pub fn verify(&self) -> Result<(), VerificationError> {
         use risc0_zkp::core::hash::sha::Sha256HashSuite;
-
-        type HS = Sha256HashSuite<BabyBear, crate::sha::Impl>;
-        self.verify_with_hash::<HS>()
+        self.verify_with_hash(&Sha256HashSuite::new())
     }
 
     /// Verifies the integrity of this receipt.
@@ -364,25 +358,20 @@ impl SegmentReceipt {
     /// Uses the ZKP system to cryptographically verify that the seal does
     /// validly indicate that this Segment was executed faithfully.
     #[must_use]
-    pub fn verify_with_hash<HS>(&self) -> Result<(), VerificationError>
-    where
-        HS: HashSuite<BabyBear>,
-        HS::HashFn: ControlId,
-    {
-        let control_id = &HS::HashFn::CONTROL_ID;
-        let check_code = |po2: u32, merkle_root: &Digest| -> Result<(), VerificationError> {
-            let po2 = po2 as usize;
-            let which = po2 - MIN_CYCLES_PO2;
-            if which < control_id.len() {
-                let entry: Digest = Digest::from_hex(control_id[which]).unwrap();
-                if entry == *merkle_root {
-                    return Ok(());
-                }
-            }
-            Err(VerificationError::ControlVerificationError)
+    pub fn verify_with_hash(&self, suite: &HashSuite<BabyBear>) -> Result<(), VerificationError> {
+        use hex::FromHex;
+        let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
+            POSEIDON_CONTROL_ID
+                .into_iter()
+                .chain(SHA256_CONTROL_ID)
+                .chain(BLAKE2B_CONTROL_ID)
+                .find(|x| Digest::from_hex(x).unwrap() == *control_id)
+                .map(|_| ())
+                .ok_or(VerificationError::ControlVerificationError)
         };
-        risc0_zkp::verify::verify::<BabyBear, CircuitImpl, HS, _>(
+        risc0_zkp::verify::verify::<BabyBear, CircuitImpl, _>(
             &crate::CIRCUIT,
+            suite,
             &self.seal,
             check_code,
         )

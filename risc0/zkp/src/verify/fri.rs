@@ -16,11 +16,11 @@ use alloc::vec::Vec;
 
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
-use super::{Verifier, VerifyParams};
+use super::Verifier;
 use crate::{
-    adapter::{CircuitInfo, PolyExt, TapsProvider},
+    adapter::CircuitCoreDef,
     core::{
-        hash::{HashFn, HashSuite},
+        hash::HashFn,
         log2_ceil,
         ntt::{bit_reverse, interpolate_ntt},
     },
@@ -31,40 +31,47 @@ use crate::{
 /// VerifyRoundInfo contains the data against which the queries for a particular
 /// round are checked. This includes the Merkle tree top row data, as well as
 /// the size of the domain of the polynomial, and the mixing parameter.
-struct VerifyRoundInfo<'a, VP: VerifyParams> {
+struct VerifyRoundInfo<'a, F: Field> {
     domain: usize,
-    merkle: MerkleTreeVerifier<'a, VP>,
-    mix: VP::ExtElem,
+    merkle: MerkleTreeVerifier<'a>,
+    mix: F::ExtElem,
 }
 
-impl<'a, VP: VerifyParams> VerifyRoundInfo<'a, VP> {
-    pub fn new(iop: &mut ReadIOP<'a, VP::Field, VP::Rng>, in_domain: usize) -> Self {
+impl<'a, F: Field> VerifyRoundInfo<'a, F> {
+    pub fn new(iop: &mut ReadIOP<'a, F>, hashfn: &dyn HashFn<F>, in_domain: usize) -> Self {
         let domain = in_domain / FRI_FOLD;
         VerifyRoundInfo {
             domain,
-            merkle: MerkleTreeVerifier::new(iop, domain, FRI_FOLD * VP::ExtElem::EXT_SIZE, QUERIES),
+            merkle: MerkleTreeVerifier::new(
+                iop,
+                hashfn,
+                domain,
+                FRI_FOLD * F::ExtElem::EXT_SIZE,
+                QUERIES,
+            ),
             mix: iop.random_ext_elem(),
         }
     }
 }
 
-impl<'a, F, C, HS> Verifier<'a, F, C, HS>
+impl<'a, F, C> Verifier<'a, F, C>
 where
     F: Field,
-    C: CircuitInfo + PolyExt<F> + TapsProvider,
-    HS: HashSuite<F>,
+    C: CircuitCoreDef<F>,
 {
     fn verify_query(
         &self,
-        round: &mut VerifyRoundInfo<'a, Self>,
-        iop: &mut ReadIOP<'a, F, HS::Rng>,
+        round: &mut VerifyRoundInfo<'a, F>,
+        iop: &mut ReadIOP<'a, F>,
         pos: &mut usize,
         goal: &mut F::ExtElem,
     ) -> Result<(), VerificationError> {
         let quot = *pos / round.domain;
         let group = *pos % round.domain;
         // Get the column data
-        let data = round.merkle.verify(iop, group)?;
+        let data = round
+            .merkle
+            .verify(iop, self.suite.hashfn.as_ref(), group)?;
         let mut data_ext: Vec<F::ExtElem> = (0..FRI_FOLD)
             .map(|i| {
                 let mut inps = Vec::with_capacity(F::ExtElem::EXT_SIZE);
@@ -92,14 +99,14 @@ where
 
     pub fn fri_verify<InnerFn>(
         &self,
-        iop: &mut ReadIOP<'a, F, HS::Rng>,
+        iop: &mut ReadIOP<'a, F>,
         mut degree: usize,
         mut inner: InnerFn,
     ) -> Result<(), VerificationError>
     where
-        InnerFn:
-            FnMut(&mut ReadIOP<'a, F, HS::Rng>, usize) -> Result<F::ExtElem, VerificationError>,
+        InnerFn: FnMut(&mut ReadIOP<'a, F>, usize) -> Result<F::ExtElem, VerificationError>,
     {
+        let hashfn = self.suite.hashfn.as_ref();
         let orig_domain = INV_RATE * degree;
         let mut domain = orig_domain;
         // Prep the folding verfiers
@@ -107,7 +114,7 @@ where
             (log2_ceil((degree + FRI_FOLD - 1) / FRI_FOLD) + FRI_FOLD_PO2 - 1) / FRI_FOLD_PO2;
         let mut rounds = Vec::with_capacity(rounds_capacity);
         while degree > FRI_MIN_DEGREE {
-            rounds.push(VerifyRoundInfo::new(iop, domain));
+            rounds.push(VerifyRoundInfo::new(iop, hashfn, domain));
             domain /= FRI_FOLD;
             degree /= FRI_FOLD;
         }
@@ -122,7 +129,7 @@ where
         );
         // Grab the final coeffs + commit
         let final_coeffs = iop.read_field_elem_slice(F::ExtElem::EXT_SIZE * degree);
-        let final_digest = HS::HashFn::hash_elem_slice(final_coeffs);
+        let final_digest = hashfn.hash_elem_slice(final_coeffs);
         iop.commit(&final_digest);
         // Get the generator for the final polynomial evaluations
         let gen = <F::Elem as RootsOfUnity>::ROU_FWD[log2_ceil(domain)];

@@ -19,27 +19,23 @@ use risc0_zkp::{adapter::CircuitInfo, core::hash::sha::Sha256};
 use risc0_zkp::{core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
-#[cfg(not(target_os = "zkvm"))]
 use crate::{
-    receipt::compute_image_id,
-    recursion::circuit_impl::CIRCUIT_CORE,
-    sha::{self},
-};
-use crate::{
+    control_id::POSEIDON_CONTROL_ID,
     receipt::{ReceiptMetadata, SessionReceipt, SystemState},
-    ControlId,
+    recursion::control_id::RECURSION_CONTROL_IDS,
 };
+#[cfg(not(target_os = "zkvm"))]
+use crate::{receipt::compute_image_id, recursion::circuit_impl::CIRCUIT_CORE, sha};
 
-/// This function gets valid control ID's from the posidon and recursion
+/// This function gets valid control IDs from the poseidon and recursion
 /// circuits
 pub fn valid_control_ids() -> Vec<Digest> {
     use hex::FromHex;
-    use risc0_zkp::core::hash::poseidon::PoseidonHashFn;
     let mut all_ids = Vec::<Digest>::new();
-    for digest_str in PoseidonHashFn::CONTROL_ID {
+    for digest_str in POSEIDON_CONTROL_ID {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
-    for digest_str in crate::recursion::control_id::RECURSION_CONTROL_IDS {
+    for digest_str in RECURSION_CONTROL_IDS {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
     all_ids
@@ -193,8 +189,9 @@ impl SegmentRecursionReceipt {
                 .ok_or(VerificationError::ControlVerificationError)
         };
         // Verify the receipt itself is correct
-        risc0_zkp::verify::verify::<BabyBear, CircuitImpl, PoseidonHashSuite, _>(
+        risc0_zkp::verify::verify::<BabyBear, CircuitImpl, _>(
             &CIRCUIT_CORE,
+            &PoseidonHashSuite::new(),
             &self.seal,
             check_code,
         )?;

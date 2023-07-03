@@ -30,7 +30,7 @@ use self::consts::{
     ROUND_CONSTANTS,
 };
 pub use self::{consts::CELLS, rng::PoseidonRng};
-use super::{HashFn, HashSuite};
+use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::core::digest::{Digest, DIGEST_WORDS};
 
 /// The 'rate' of the sponge, i.e. how much we can safely add/remove per mixing.
@@ -40,12 +40,10 @@ pub const CELLS_RATE: usize = 16;
 pub const CELLS_OUT: usize = 8;
 
 /// A hash implemention for Poseidon
-pub struct PoseidonHashFn;
+struct PoseidonHashFn;
 
 impl HashFn<BabyBear> for PoseidonHashFn {
-    type DigestPtr = Box<Digest>;
-
-    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+    fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest> {
         let both: Vec<BabyBearElem> = a
             .as_words()
             .iter()
@@ -56,23 +54,36 @@ impl HashFn<BabyBear> for PoseidonHashFn {
         to_digest(unpadded_hash(both.iter()))
     }
 
-    fn hash_elem_slice(slice: &[BabyBearElem]) -> Self::DigestPtr {
+    fn hash_elem_slice(&self, slice: &[BabyBearElem]) -> Box<Digest> {
         to_digest(unpadded_hash(slice.iter()))
     }
 
-    fn hash_ext_elem_slice(slice: &[BabyBearExtElem]) -> Self::DigestPtr {
+    fn hash_ext_elem_slice(&self, slice: &[BabyBearExtElem]) -> Box<Digest> {
         to_digest(unpadded_hash(
             slice.iter().map(|ee| ee.subelems().iter()).flatten(),
         ))
     }
 }
 
+struct PoseidonRngFactory;
+
+impl RngFactory<BabyBear> for PoseidonRngFactory {
+    fn new_rng(&self) -> Box<dyn Rng<BabyBear>> {
+        Box::new(PoseidonRng::new())
+    }
+}
+
 /// A hash suite using Poseidon for both MT hashes and RNG
 pub struct PoseidonHashSuite;
 
-impl HashSuite<BabyBear> for PoseidonHashSuite {
-    type HashFn = PoseidonHashFn;
-    type Rng = PoseidonRng;
+impl PoseidonHashSuite {
+    /// Construct a new PoseidonHashSuite
+    pub fn new() -> HashSuite<BabyBear> {
+        HashSuite {
+            hashfn: Box::new(PoseidonHashFn {}),
+            rng: Box::new(PoseidonRngFactory {}),
+        }
+    }
 }
 
 fn to_digest(elems: [BabyBearElem; CELLS_OUT]) -> Box<Digest> {

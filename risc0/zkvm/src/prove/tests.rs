@@ -16,7 +16,6 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_circuit_rv32im::cpu::CpuEvalCheck;
-use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
     hal::cpu::CpuHal,
@@ -53,7 +52,7 @@ fn hashfn_poseidon() {
 #[test]
 fn hashfn_blake2b() {
     let hal_eval = HalEval {
-        hal: Rc::new(CpuHal::<BabyBear, Blake2bCpuHashSuite>::new()),
+        hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new())),
         eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
