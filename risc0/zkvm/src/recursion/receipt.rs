@@ -174,7 +174,7 @@ impl SegmentRecursionReceipt {
     /// verify the integrity of this receipt
     #[cfg(not(target_os = "zkvm"))]
     pub fn verify(&self) -> Result<(), VerificationError> {
-        use risc0_core::field::baby_bear::{BabyBear, BabyBearElem};
+        use risc0_core::field::baby_bear::BabyBearElem;
         use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
 
         use super::CircuitImpl;
@@ -189,7 +189,7 @@ impl SegmentRecursionReceipt {
                 .ok_or(VerificationError::ControlVerificationError)
         };
         // Verify the receipt itself is correct
-        risc0_zkp::verify::verify::<BabyBear, CircuitImpl, _>(
+        risc0_zkp::verify::verify(
             &CIRCUIT_CORE,
             &PoseidonHashSuite::new(),
             &self.seal,

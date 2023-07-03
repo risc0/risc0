@@ -78,7 +78,7 @@
 use alloc::{fmt::Debug, vec::Vec};
 
 use anyhow::Result;
-use risc0_circuit_rv32im::{layout, CircuitImpl};
+use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{
@@ -369,12 +369,7 @@ impl SegmentReceipt {
                 .map(|_| ())
                 .ok_or(VerificationError::ControlVerificationError)
         };
-        risc0_zkp::verify::verify::<BabyBear, CircuitImpl, _>(
-            &crate::CIRCUIT,
-            suite,
-            &self.seal,
-            check_code,
-        )
+        risc0_zkp::verify::verify(&crate::CIRCUIT, suite, &self.seal, check_code)
     }
 
     /// Extracts the seal from the receipt, as a series of bytes.
