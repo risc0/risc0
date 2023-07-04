@@ -50,7 +50,7 @@ struct Args {
     /// Optional input file path to an image mask to apply to Waldo.
     /// Grayscale pixel values will be subtracted from the cropped image of
     /// Waldo such that a black pixel in the mask will result in the
-    /// cooresponding image pixel being blacked out. Must be the same
+    /// corresponding image pixel being blacked out. Must be the same
     /// dimensions, in pixels, as the cut out x and y.
     #[clap(short = 'm', long, value_parser, value_hint = clap::ValueHint::FilePath)]
     mask: Option<PathBuf>,
