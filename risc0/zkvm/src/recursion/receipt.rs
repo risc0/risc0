@@ -14,18 +14,22 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-#[cfg(not(target_os = "zkvm"))]
-use risc0_zkp::{adapter::CircuitInfo, core::hash::sha::Sha256};
-use risc0_zkp::{core::digest::Digest, verify::VerificationError};
+use dyn_partial_eq::DynPartialEq;
+use risc0_core::field::baby_bear::BabyBearElem;
+use risc0_zkp::{
+    adapter::CircuitInfo,
+    core::{digest::Digest, hash::sha::Sha256},
+    verify::VerificationError,
+};
 use serde::{Deserialize, Serialize};
 
+use super::CircuitImpl;
 use crate::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{ReceiptMetadata, SessionReceipt, SystemState},
-    recursion::control_id::RECURSION_CONTROL_IDS,
+    receipt::{Receipt, ReceiptMetadata, SystemState, VerifierContext},
+    recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
+    sha,
 };
-#[cfg(not(target_os = "zkvm"))]
-use crate::{receipt::compute_image_id, recursion::circuit_impl::CIRCUIT_CORE, sha};
 
 /// This function gets valid control IDs from the poseidon and recursion
 /// circuits
@@ -41,7 +45,6 @@ pub fn valid_control_ids() -> Vec<Digest> {
     all_ids
 }
 
-#[cfg(not(target_os = "zkvm"))]
 fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     let tag_digest: Digest = *sha::Impl::hash_bytes(tag.as_bytes());
     let mut all = Vec::<u8>::new();
@@ -102,7 +105,6 @@ impl SystemState {
         write_sha_halfs(flat, &self.merkle_root);
     }
 
-    #[cfg(not(target_os = "zkvm"))]
     fn digest(&self) -> Digest {
         tagged_struct("risc0.SystemState", &[self.merkle_root], &[self.pc])
     }
@@ -127,6 +129,7 @@ impl ReceiptMetadata {
             output,
         })
     }
+
     /// encode a [crate::ReceiptMetadata] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), VerificationError> {
         write_sha_halfs(flat, &self.input);
@@ -139,7 +142,6 @@ impl ReceiptMetadata {
         Ok(())
     }
 
-    #[cfg(not(target_os = "zkvm"))]
     fn digest(&self) -> Result<Digest, VerificationError> {
         let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
         Ok(tagged_struct(
@@ -157,8 +159,8 @@ impl ReceiptMetadata {
 
 /// This struct represents a receipt for one or more [crate::SegmentReceipt]s
 /// joined through recursion.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SegmentRecursionReceipt {
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, DynPartialEq)]
+pub struct RollupReceipt {
     /// the cryptographic seal of this receipt
     pub seal: Vec<u32>,
 
@@ -170,35 +172,27 @@ pub struct SegmentRecursionReceipt {
     pub meta: ReceiptMetadata,
 }
 
-impl SegmentRecursionReceipt {
-    /// verify the integrity of this receipt
-    #[cfg(not(target_os = "zkvm"))]
-    pub fn verify(&self) -> Result<(), VerificationError> {
-        use risc0_core::field::baby_bear::BabyBearElem;
-        use risc0_zkp::core::hash::poseidon::PoseidonHashSuite;
-
-        use super::CircuitImpl;
-
-        // Make the hal
+#[typetag::serde]
+impl Receipt for RollupReceipt {
+    fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
         let valid_ids = valid_control_ids();
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             valid_ids
                 .iter()
-                .find(|elem| *elem == control_id)
+                .find(|x| *x == control_id)
                 .map(|_| ())
                 .ok_or(VerificationError::ControlVerificationError)
         };
+        let suite = ctx
+            .suites
+            .get("poseidon")
+            .ok_or(VerificationError::InvalidHashSuite)?;
         // Verify the receipt itself is correct
-        risc0_zkp::verify::verify(
-            &CIRCUIT_CORE,
-            &PoseidonHashSuite::new(),
-            &self.seal,
-            check_code,
-        )?;
+        risc0_zkp::verify::verify(&CIRCUIT_CORE, suite, &self.seal, check_code)?;
         // Extract the globals from the seal
         let output_elems: &[BabyBearElem] =
             bytemuck::cast_slice(&self.seal[..CircuitImpl::OUTPUT_SIZE]);
-        let mut seal_meta = VecDeque::<u32>::new();
+        let mut seal_meta = VecDeque::new();
         for elem in output_elems {
             seal_meta.push_back(elem.as_u32())
         }
@@ -212,63 +206,13 @@ impl SegmentRecursionReceipt {
         // Everything passed
         Ok(())
     }
-}
 
-/// A SessionRollupReceipt represents computational integrity for an entire
-/// [crate::Session].
-///
-/// This represents the receipt for an entire session where each segment proof
-/// has been rolled up using recursion.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct SessionRollupReceipt {
-    /// receipt that represents all sessions joined via recursion
-    pub receipt: SegmentRecursionReceipt,
-
-    /// the journal of the entire session
-    pub journal: Vec<u8>,
-}
-
-impl SessionReceipt for SessionRollupReceipt {
-    /// Verify the integrity of the receipt by using the segment receipt and the
-    /// journal
-    #[cfg(not(target_os = "zkvm"))]
-    fn verify(&self, merkle_root: Digest) -> Result<(), VerificationError> {
-        self.receipt.verify()?;
-        let journal_digest = sha::Impl::hash_bytes(&self.journal);
-        let pre_img = &self.receipt.meta.pre;
-        if merkle_root != compute_image_id(&pre_img.merkle_root, pre_img.pc) {
-            return Err(VerificationError::ImageVerificationError);
-        }
-
-        if *journal_digest.as_ref() != self.receipt.meta.output {
-            return Err(VerificationError::JournalDigestMismatch);
-        }
-
-        Ok(())
+    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+        Ok(self.meta.clone())
     }
 
-    fn get_journal(&self) -> &Vec<u8> {
-        &self.journal
-    }
-
-    fn encode(&self) -> Vec<u8> {
-        bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
-    }
-
-    fn get_seal_len(&self) -> usize {
-        bytemuck::cast_slice::<u32, u8>(self.receipt.seal.as_slice()).len()
-    }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn core::any::Any {
-        self
-    }
-}
-
-impl SessionRollupReceipt {
-    /// Create a new session receipt
-    pub fn new(receipt: SegmentRecursionReceipt, journal: Vec<u8>) -> Self {
-        Self { receipt, journal }
+    fn get_seal(&self) -> &[u32] {
+        &self.seal
     }
 }
 

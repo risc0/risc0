@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#[cfg(feature = "host")]
+#[cfg(not(target_os = "zkvm"))]
 use std::fmt;
 
 use csv;
-#[cfg(feature = "dep:hex")]
+#[cfg(not(target_os = "zkvm"))]
 use hex;
 use rust_decimal::{Decimal, RoundingStrategy};
 use serde::{Deserialize, Serialize};
@@ -68,7 +68,7 @@ pub struct AllocationQueryResult {
 }
 
 // This is an example of functionality that we compile only for the host.
-#[cfg(feature = "host")]
+#[cfg(not(target_os = "zkvm"))]
 impl fmt::Display for AllocationQueryResult {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self.allocation {

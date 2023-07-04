@@ -219,12 +219,13 @@ impl RngFactory<BabyBear> for PoseidonRngFactory {
 }
 
 /// A hash suite of the SNARK-friendly version of Poseidon
-pub struct Poseidon254HashSuite {}
+pub struct Poseidon254HashSuite;
 
 impl Poseidon254HashSuite {
     /// Construct a new Poseidon254HashSuite
     pub fn new() -> HashSuite<BabyBear> {
         HashSuite {
+            name: "poseidon254".into(),
             hashfn: Box::new(Poseidon254HashFn {}),
             rng: Box::new(PoseidonRngFactory {}),
         }

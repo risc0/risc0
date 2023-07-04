@@ -1,3 +1,15 @@
+// :0
+pub struct RamInitStep {}
+impl risc0_zkp::layout::Component for RamInitStep {
+    fn ty_name(&self) -> &'static str {
+        "RamInitStep"
+    }
+    #[allow(unused_variables)]
+    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
+        Ok(())
+    }
+}
+
 // circuit/rv32im/global.h:15
 pub struct U32Reg {
     pub byte: &'static [&'static OutReg; 4],
@@ -13,7 +25,7 @@ impl risc0_zkp::layout::Component for U32Reg {
     }
 }
 
-// circuit/rv32im/global.h:33
+// circuit/rv32im/global.h:38
 pub struct GlobalDigest {
     pub word: &'static [&'static U32Reg; 8],
 }
@@ -28,7 +40,7 @@ impl risc0_zkp::layout::Component for GlobalDigest {
     }
 }
 
-// circuit/rv32im/global.h:35
+// circuit/rv32im/global.h:34
 pub struct SystemState {
     pub image_id: &'static GlobalDigest,
     pub pc: &'static U32Reg,
@@ -85,28 +97,16 @@ impl risc0_zkp::layout::Component for BodyStep {
     }
 }
 
-// :0
-pub struct BytesFiniStep {}
-impl risc0_zkp::layout::Component for BytesFiniStep {
-    fn ty_name(&self) -> &'static str {
-        "BytesFiniStep"
-    }
-    #[allow(unused_variables)]
-    fn walk<V: risc0_zkp::layout::Visitor>(&self, v: &mut V) -> core::fmt::Result {
-        Ok(())
-    }
-}
-
 // cirgen/circuit/rv32im/top.cpp:60
 pub struct Mux {
     pub body: &'static BodyStep,
-    pub bytes_fini: &'static BytesFiniStep,
-    pub bytes_init: &'static BytesFiniStep,
-    pub bytes_setup: &'static BytesFiniStep,
-    pub ram_fini: &'static BytesFiniStep,
-    pub ram_init: &'static BytesFiniStep,
-    pub ram_load: &'static BytesFiniStep,
-    pub reset: &'static BytesFiniStep,
+    pub bytes_fini: &'static RamInitStep,
+    pub bytes_init: &'static RamInitStep,
+    pub bytes_setup: &'static RamInitStep,
+    pub ram_fini: &'static RamInitStep,
+    pub ram_init: &'static RamInitStep,
+    pub ram_load: &'static RamInitStep,
+    pub reset: &'static RamInitStep,
 }
 impl risc0_zkp::layout::Component for Mux {
     fn ty_name(&self) -> &'static str {
@@ -984,25 +984,25 @@ pub const LAYOUT_MUX_BODY: BodyStep = BodyStep {
 };
 
 // :0
-pub const LAYOUT_MUX_BYTES_FINI: BytesFiniStep = BytesFiniStep {};
+pub const LAYOUT_MUX_BYTES_FINI: RamInitStep = RamInitStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_INIT: BytesFiniStep = BytesFiniStep {};
+pub const LAYOUT_MUX_BYTES_INIT: RamInitStep = RamInitStep {};
 
 // :0
-pub const LAYOUT_MUX_BYTES_SETUP: BytesFiniStep = BytesFiniStep {};
+pub const LAYOUT_MUX_BYTES_SETUP: RamInitStep = RamInitStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_FINI: BytesFiniStep = BytesFiniStep {};
+pub const LAYOUT_MUX_RAM_FINI: RamInitStep = RamInitStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_INIT: BytesFiniStep = BytesFiniStep {};
+pub const LAYOUT_MUX_RAM_INIT: RamInitStep = RamInitStep {};
 
 // :0
-pub const LAYOUT_MUX_RAM_LOAD: BytesFiniStep = BytesFiniStep {};
+pub const LAYOUT_MUX_RAM_LOAD: RamInitStep = RamInitStep {};
 
 // :0
-pub const LAYOUT_MUX_RESET: BytesFiniStep = BytesFiniStep {};
+pub const LAYOUT_MUX_RESET: RamInitStep = RamInitStep {};
 
 // cirgen/circuit/rv32im/top.cpp:60
 pub const LAYOUT_MUX: Mux = Mux {

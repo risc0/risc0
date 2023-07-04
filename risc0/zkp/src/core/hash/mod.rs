@@ -20,7 +20,7 @@ pub mod poseidon;
 pub mod poseidon_254;
 pub mod sha;
 
-use alloc::boxed::Box;
+use alloc::{boxed::Box, string::String};
 
 use risc0_core::field::Field;
 
@@ -66,6 +66,9 @@ pub trait RngFactory<F: Field> {
 
 /// Make it easy compute both hash related traits from a single source
 pub struct HashSuite<F: Field> {
+    /// The name of this HashSuite.
+    pub name: String,
+
     /// Define the hash used by the HashSuite
     pub hashfn: Box<dyn HashFn<F>>,
 

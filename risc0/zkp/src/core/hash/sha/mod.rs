@@ -338,6 +338,7 @@ impl<F: Field> Sha256HashSuite<F> {
     /// Construct a Sha256HashSuite
     pub fn new() -> super::HashSuite<F> {
         super::HashSuite {
+            name: "sha-256".into(),
             hashfn: Box::new(Sha256HashFn {}),
             rng: Box::new(Sha256RngFactory {}),
         }

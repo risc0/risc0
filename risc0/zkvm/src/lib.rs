@@ -21,6 +21,7 @@ extern crate alloc;
 
 #[cfg(feature = "binfmt")]
 pub mod binfmt;
+#[cfg(not(target_os = "zkvm"))]
 mod control_id;
 #[cfg(feature = "prove")]
 mod exec;
@@ -29,7 +30,9 @@ pub mod guest;
 mod opcode;
 #[cfg(feature = "prove")]
 pub mod prove;
+#[cfg(not(target_os = "zkvm"))]
 pub mod receipt;
+#[cfg(not(target_os = "zkvm"))]
 pub mod recursion;
 pub mod serde;
 #[cfg(feature = "prove")]
@@ -44,9 +47,14 @@ pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
 pub use self::binfmt::{elf::Program, image::MemoryImage};
+#[cfg(not(target_os = "zkvm"))]
+pub use self::control_id::POSEIDON_CONTROL_ID;
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
-pub use self::receipt::{ExitCode, SegmentReceipt, SessionFlatReceipt, SessionReceipt};
+#[cfg(not(target_os = "zkvm"))]
+pub use self::receipt::{
+    ExitCode, ReceiptMetadata, SegmentReceipt, SessionReceipt, SystemState, VerifierContext,
+};
 #[cfg(feature = "prove")]
 pub use self::{
     exec::io::{Syscall, SyscallContext},
@@ -54,9 +62,8 @@ pub use self::{
     prove::loader::Loader,
     session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef},
 };
+
 #[cfg(not(target_os = "zkvm"))]
-pub use crate::receipt::verify;
-pub use crate::receipt::{ReceiptMetadata, SystemState};
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
 
 /// Align the given address `addr` upwards to alignment `align`.

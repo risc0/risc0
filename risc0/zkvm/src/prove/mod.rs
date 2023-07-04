@@ -23,7 +23,6 @@
 //! use risc0_zkvm::{Executor, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
-//!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
@@ -61,7 +60,8 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
 use crate::{
-    receipt::SessionReceipt, Segment, SegmentReceipt, Session, SessionFlatReceipt, CIRCUIT,
+    receipt::{Receipt, SessionReceipt, VerifierContext},
+    Segment, SegmentReceipt, Session, CIRCUIT,
 };
 
 /// HAL creation functions for CUDA.
@@ -178,10 +178,10 @@ where
 /// TODO
 pub trait Prover {
     /// TODO
-    fn prove_session(&self, session: &Session) -> Result<Box<dyn SessionReceipt>>;
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt>;
 
     /// TODO
-    fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt>;
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
 
     /// TODO
     fn get_peak_memory_usage(&self) -> usize;
@@ -227,23 +227,20 @@ where
         self.hal_eval.hal.get_memory_usage()
     }
 
-    fn prove_session(&self, session: &Session) -> Result<Box<dyn SessionReceipt>> {
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt> {
         log::info!("prove_session: {}", self.name);
-        let mut segments = Vec::new();
+        let mut segments: Vec<Box<dyn Receipt>> = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
-            segments.push(self.prove_segment(&segment)?);
+            segments.push(Box::new(self.prove_segment(ctx, &segment)?));
         }
-        let receipt = SessionFlatReceipt {
-            segments,
-            journal: session.journal.clone(),
-        };
+        let receipt = SessionReceipt::new(segments, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        receipt.verify_with_hash(self.hal_eval.hal.get_hash_suite(), image_id)?;
-        Ok(Box::new(receipt))
+        receipt.verify_with_context(ctx, image_id)?;
+        Ok(receipt)
     }
 
-    fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt> {
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         log::info!(
             "prove_segment[{}]: po2: {}, insn_cycles: {}",
             segment.index,
@@ -251,6 +248,7 @@ where
             segment.insn_cycles,
         );
         let (hal, eval) = (self.hal_eval.hal.as_ref(), &self.hal_eval.eval);
+        let hashfn = &hal.get_hash_suite().name;
 
         let io = segment.prepare_globals();
         let machine = MachineContext::new(segment);
@@ -292,8 +290,9 @@ where
         let receipt = SegmentReceipt {
             seal,
             index: segment.index,
+            hashfn: hashfn.clone(),
         };
-        receipt.verify_with_hash(self.hal_eval.hal.get_hash_suite())?;
+        receipt.verify_with_context(ctx)?;
 
         Ok(receipt)
     }
@@ -360,15 +359,15 @@ pub fn get_prover(name: &str) -> Rc<dyn Prover> {
 
 impl Session {
     /// For each segment, call [Segment::prove] and collect the receipts.
-    pub fn prove(&self) -> Result<Box<dyn SessionReceipt>> {
-        default_prover().prove_session(self)
+    pub fn prove(&self) -> Result<SessionReceipt> {
+        default_prover().prove_session(&VerifierContext::default(), self)
     }
 }
 
 impl Segment {
     /// Call the ZKP system to produce a [SegmentReceipt].
-    pub fn prove(&self) -> Result<SegmentReceipt> {
-        default_prover().prove_segment(self)
+    pub fn prove(&self, ctx: &VerifierContext) -> Result<SegmentReceipt> {
+        default_prover().prove_segment(ctx, self)
     }
 
     fn prepare_globals(&self) -> Vec<Elem> {

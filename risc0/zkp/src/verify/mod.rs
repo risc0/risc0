@@ -26,7 +26,7 @@ use core::{
 };
 
 pub(crate) use merkle::MerkleTreeVerifier;
-pub(crate) use read_iop::ReadIOP;
+pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
 
 use crate::{
@@ -45,6 +45,7 @@ pub enum VerificationError {
     InvalidProof,
     JournalDigestMismatch,
     UnexpectedExitCode,
+    InvalidHashSuite,
 }
 
 impl fmt::Display for VerificationError {
@@ -62,6 +63,7 @@ impl fmt::Display for VerificationError {
                 write!(f, "Journal digest mismatch detected")
             }
             VerificationError::UnexpectedExitCode => write!(f, "Unexpected exit_code"),
+            VerificationError::InvalidHashSuite => write!(f, "Invalid hash suite"),
         }
     }
 }
@@ -401,10 +403,7 @@ where
     fn execute(&mut self, iop: &mut ReadIOP<'a, F>) {
         // Read the outputs + size
         self.out = Some(iop.read_field_elem_slice(C::OUTPUT_SIZE));
-        self.po2 = match iop.read_u32s(1) {
-            &[po2] => po2,
-            _ => unreachable!(),
-        };
+        self.po2 = *iop.read_u32s(1).first().unwrap();
         self.steps = 1 << self.po2;
     }
 

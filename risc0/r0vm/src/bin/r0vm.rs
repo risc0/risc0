@@ -15,7 +15,7 @@
 use std::{fs, path::PathBuf};
 
 use clap::Parser;
-use risc0_zkvm::{Executor, ExecutorEnv};
+use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -106,9 +106,10 @@ fn main() {
 
     let receipt = session.prove().unwrap();
 
-    let receipt_data = receipt.encode();
+    let receipt_data = to_vec(&receipt).unwrap();
+    let receipt_bytes = bytemuck::cast_slice(&receipt_data);
     if let Some(receipt_file) = args.receipt.as_ref() {
-        fs::write(receipt_file, receipt_data.as_slice()).expect("Unable to write receipt file");
+        fs::write(receipt_file, receipt_bytes).expect("Unable to write receipt file");
         if args.verbose > 0 {
             eprintln!(
                 "Wrote {} bytes of receipt to {}",
