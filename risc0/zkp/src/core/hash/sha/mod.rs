@@ -20,6 +20,8 @@ pub mod cpu;
 mod rng;
 pub mod rust_crypto;
 
+#[cfg(not(target_os = "zkvm"))]
+use alloc::boxed::Box;
 use alloc::{format, vec::Vec};
 use core::{
     fmt::{Debug, Display, Formatter},

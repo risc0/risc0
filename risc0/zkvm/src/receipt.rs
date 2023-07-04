@@ -75,7 +75,8 @@
 //! journal as the same type it was written to the journal. If you prefer, you
 //! can also directly access the [SessionReceipt::journal] as a `Vec<u8>`.
 
-use std::{collections::HashMap, fmt::Debug, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
+use core::fmt::Debug;
 
 use anyhow::Result;
 use dyn_partial_eq::{dyn_partial_eq, DynPartialEq};
@@ -228,7 +229,7 @@ pub struct SegmentReceipt {
 /// Context available to the verification process.
 pub struct VerifierContext {
     /// A registry of hash functions to be used by the verification process.
-    pub suites: HashMap<String, HashSuite<BabyBear>>,
+    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
 }
 
 impl SessionReceipt {
@@ -432,7 +433,7 @@ pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
 impl Default for VerifierContext {
     fn default() -> Self {
         Self {
-            suites: HashMap::from([
+            suites: BTreeMap::from([
                 ("blake2b".into(), Blake2bCpuHashSuite::new()),
                 ("poseidon".into(), PoseidonHashSuite::new()),
                 ("sha-256".into(), Sha256HashSuite::new()),
