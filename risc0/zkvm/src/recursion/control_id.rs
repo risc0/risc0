@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-pub const RECURSION_CONTROL_IDS: [&'static str; 27] = [
+pub const RECURSION_CONTROL_IDS: [&'static str; 29] = [
+    "89857430b8b5872251f0b9342dd1eb326767e35af5db2e3e05cb95692f716c06",
+    "a2408a494714ff38b26cb419c295b9014db6f951628f7333d0e3a12d1ff88f39",
     "0bdfb159b1d8e91f0cb29936fd4647134bf4466f4e195a36f9cb7d32004d0e0c",
     "5c10b043948b8b6165e9f659d496c10b5710124c8483a727d83734381888ec2d",
     "6cc844708f26060c859bf8369d62042bc40a4a39a1d45556b046ac710c113a44",
