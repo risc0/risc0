@@ -234,7 +234,13 @@ where
         let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
+            for hook in &session.hooks {
+                hook.on_pre_prove_segment(&segment);
+            }
             segments.push(self.prove_segment(&segment)?);
+            for hook in &session.hooks {
+                hook.on_post_prove_segment(&segment);
+            }
         }
         let receipt = SessionFlatReceipt {
             segments,
