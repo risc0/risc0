@@ -116,7 +116,11 @@ pub type CudaEvalCheckPoseidon = CudaEvalCheck<CudaHashPoseidon>;
 mod tests {
     use std::rc::Rc;
 
-    use risc0_zkp::hal::{cpu::BabyBearSha256CpuHal, cuda::CudaHalSha256};
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_zkp::{
+        core::hash::sha::Sha256HashSuite,
+        hal::{cpu::CpuHal, cuda::CudaHalSha256},
+    };
     use test_log::test;
 
     use crate::cpu::CpuEvalCheck;
@@ -125,7 +129,7 @@ mod tests {
     fn eval_check() {
         const PO2: usize = 4;
         let circuit = crate::CircuitImpl::new();
-        let cpu_hal = BabyBearSha256CpuHal::new();
+        let cpu_hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new());
         let cpu_eval = CpuEvalCheck::new(&circuit);
         let gpu_hal = Rc::new(CudaHalSha256::new());
         let gpu_eval = super::CudaEvalCheck::new(gpu_hal.clone());

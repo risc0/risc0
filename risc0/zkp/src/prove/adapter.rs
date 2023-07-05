@@ -20,7 +20,6 @@ use risc0_core::field::{Elem, Field};
 
 use crate::{
     adapter::{CircuitProveDef, CircuitStepContext, CircuitStepHandler, REGISTER_GROUP_ACCUM},
-    core::hash::Rng,
     hal::cpu::CpuBuffer,
     prove::{
         accum::{Accum, Handler},
@@ -65,7 +64,7 @@ where
 
     /// Perform initial 'execution' setting code + data.
     /// Additionally, write any 'results' as needed.
-    pub fn execute<R: Rng<F>>(&mut self, iop: &mut WriteIOP<F, R>) {
+    pub fn execute(&mut self, iop: &mut WriteIOP<F>) {
         iop.write_field_elem_slice(&*self.exec.io.as_slice());
         iop.write_u32_slice(&[self.exec.po2 as u32]);
     }
@@ -121,7 +120,7 @@ where
 
     /// Perform 'accumulate' stage, using the iop for any RNG state.
     #[tracing::instrument(skip_all)]
-    pub fn accumulate<R: Rng<F>>(&mut self, iop: &mut WriteIOP<F, R>) {
+    pub fn accumulate(&mut self, iop: &mut WriteIOP<F>) {
         // Make the mixing values
         self.mix = CpuBuffer::from_fn(C::MIX_SIZE, |_| iop.random_elem());
         // Make and compute accum data

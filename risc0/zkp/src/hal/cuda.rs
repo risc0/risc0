@@ -33,7 +33,7 @@ use crate::{
         digest::Digest,
         hash::{
             poseidon::{self, PoseidonHashSuite},
-            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+            sha::Sha256HashSuite,
             HashSuite,
         },
         log2_ceil,
@@ -53,9 +53,6 @@ lazy_static! {
 }
 
 pub trait CudaHash {
-    /// Which hash suite should the CPU use
-    type HashSuite: HashSuite<BabyBear>;
-
     /// Create a hash implemention
     fn new(hal: &CudaHal<Self>) -> Self;
 
@@ -69,15 +66,20 @@ pub trait CudaHash {
         output: &BufferImpl<Digest>,
         matrix: &BufferImpl<BabyBearElem>,
     );
+
+    /// Return the HashSuite
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear>;
 }
 
-pub struct CudaHashSha256;
+pub struct CudaHashSha256 {
+    suite: HashSuite<BabyBear>,
+}
 
 impl CudaHash for CudaHashSha256 {
-    type HashSuite = Sha256HashSuite<BabyBear, CpuImpl>;
-
     fn new(_hal: &CudaHal<Self>) -> Self {
-        CudaHashSha256 {}
+        CudaHashSha256 {
+            suite: Sha256HashSuite::new(),
+        }
     }
 
     fn hash_fold(&self, hal: &CudaHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
@@ -128,9 +130,14 @@ impl CudaHash for CudaHashSha256 {
         }
         stream.synchronize().unwrap();
     }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
 }
 
 pub struct CudaHashPoseidon {
+    suite: HashSuite<BabyBear>,
     round_constants: BufferImpl<BabyBearElem>,
     mds: BufferImpl<BabyBearElem>,
     partial_comp_matrix: BufferImpl<BabyBearElem>,
@@ -138,8 +145,6 @@ pub struct CudaHashPoseidon {
 }
 
 impl CudaHash for CudaHashPoseidon {
-    type HashSuite = PoseidonHashSuite;
-
     fn new(hal: &CudaHal<Self>) -> Self {
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
@@ -153,6 +158,7 @@ impl CudaHash for CudaHashPoseidon {
             &*poseidon::consts::PARTIAL_COMP_OFFSET,
         );
         CudaHashPoseidon {
+            suite: PoseidonHashSuite::new(),
             round_constants,
             mds,
             partial_comp_matrix,
@@ -215,6 +221,10 @@ impl CudaHash for CudaHashPoseidon {
             .unwrap();
         }
         stream.synchronize().unwrap();
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
     }
 }
 
@@ -395,9 +405,6 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
     type Buffer<T: Clone + Pod> = BufferImpl<T>;
-    type HashSuite = CH::HashSuite;
-    type HashFn = <CH::HashSuite as HashSuite<BabyBear>>::HashFn;
-    type Rng = <CH::HashSuite as HashSuite<BabyBear>>::Rng;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)
@@ -786,6 +793,10 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     fn hash_rows(&self, output: &Self::Buffer<Digest>, matrix: &Self::Buffer<Self::Elem>) {
         self.hash.as_ref().unwrap().hash_rows(self, output, matrix);
     }
+
+    fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
+        self.hash.as_ref().unwrap().get_hash_suite()
+    }
 }
 
 fn div_ceil(a: u32, b: u32) -> u32 {
@@ -798,7 +809,10 @@ mod tests {
     use test_log::test;
 
     use super::{CudaHalPoseidon, CudaHalSha256};
-    use crate::hal::testutil;
+    use crate::{
+        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+        hal::testutil,
+    };
 
     #[test]
     #[should_panic]
@@ -821,67 +835,67 @@ mod tests {
     #[test]
     #[serial]
     fn eltwise_sum_extelem() {
-        testutil::eltwise_sum_extelem(CudaHalSha256::new());
+        testutil::eltwise_sum_extelem(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn hash_rows_sha256() {
-        testutil::hash_rows(CudaHalSha256::new());
+        testutil::hash_rows(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn hash_fold_sha256() {
-        testutil::hash_fold(CudaHalSha256::new());
+        testutil::hash_fold(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn hash_rows_poseidon() {
-        testutil::hash_rows(CudaHalPoseidon::new());
+        testutil::hash_rows(CudaHalPoseidon::new(), PoseidonHashSuite::new());
     }
 
     #[test]
     #[serial]
     fn hash_fold_poseidon() {
-        testutil::hash_fold(CudaHalPoseidon::new());
+        testutil::hash_fold(CudaHalPoseidon::new(), PoseidonHashSuite::new());
     }
 
     #[test]
     #[serial]
     fn fri_fold() {
-        testutil::fri_fold(CudaHalSha256::new());
+        testutil::fri_fold(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn batch_expand() {
-        testutil::batch_expand(CudaHalSha256::new());
+        testutil::batch_expand(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn batch_evaluate_ntt() {
-        testutil::batch_evaluate_ntt(CudaHalSha256::new());
+        testutil::batch_evaluate_ntt(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn batch_interpolate_ntt() {
-        testutil::batch_interpolate_ntt(CudaHalSha256::new());
+        testutil::batch_interpolate_ntt(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn batch_bit_reverse() {
-        testutil::batch_bit_reverse(CudaHalSha256::new());
+        testutil::batch_bit_reverse(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn batch_evaluate_any() {
-        testutil::batch_evaluate_any(CudaHalSha256::new());
+        testutil::batch_evaluate_any(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
@@ -893,12 +907,12 @@ mod tests {
     #[test]
     #[serial]
     fn zk_shift() {
-        testutil::zk_shift(CudaHalSha256::new());
+        testutil::zk_shift(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     #[serial]
     fn mix_poly_coeffs() {
-        testutil::mix_poly_coeffs(CudaHalSha256::new());
+        testutil::mix_poly_coeffs(CudaHalSha256::new(), Sha256HashSuite::new());
     }
 }

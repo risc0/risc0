@@ -14,7 +14,10 @@
 
 //! A Poseidon based CRNG used in Fiat-Shamir.
 
-use risc0_core::field::baby_bear::{BabyBear, Elem, ExtElem};
+use risc0_core::field::{
+    baby_bear::{BabyBear, BabyBearExtElem, Elem},
+    ExtElem,
+};
 
 use super::{consts::CELLS, poseidon_mix, CELLS_OUT, CELLS_RATE};
 use crate::core::{digest::Digest, hash::Rng};
@@ -28,13 +31,17 @@ pub struct PoseidonRng {
     pool_used: usize,
 }
 
-impl Rng<BabyBear> for PoseidonRng {
-    fn new() -> Self {
+impl PoseidonRng {
+    /// Construct a new PoseidonRng
+    pub fn new() -> Self {
         Self {
             cells: [Elem::new(0); CELLS],
             pool_used: 0,
         }
     }
+}
+
+impl Rng<BabyBear> for PoseidonRng {
     fn mix(&mut self, val: &Digest) {
         // if switching from squeezing, do a mix
         if self.pool_used != 0 {
@@ -48,6 +55,7 @@ impl Rng<BabyBear> for PoseidonRng {
         // Mix
         poseidon_mix(&mut self.cells);
     }
+
     fn random_bits(&mut self, bits: usize) -> u32 {
         let mut val = self.random_elem().as_u32();
         for _ in 0..3 {
@@ -58,6 +66,7 @@ impl Rng<BabyBear> for PoseidonRng {
         }
         ((1 << bits) - 1) & val
     }
+
     fn random_elem(&mut self) -> Elem {
         if self.pool_used == CELLS_RATE {
             poseidon_mix(&mut self.cells);
@@ -67,7 +76,8 @@ impl Rng<BabyBear> for PoseidonRng {
         self.pool_used += 1;
         out
     }
-    fn random_ext_elem(&mut self) -> ExtElem {
-        risc0_core::field::ExtElem::from_subelems((0..4).map(|_| self.random_elem()))
+
+    fn random_ext_elem(&mut self) -> BabyBearExtElem {
+        ExtElem::from_subelems((0..4).map(|_| self.random_elem()))
     }
 }

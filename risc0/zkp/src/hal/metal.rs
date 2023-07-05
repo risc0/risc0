@@ -30,7 +30,7 @@ use crate::{
         digest::Digest,
         hash::{
             poseidon::{self, PoseidonHashSuite},
-            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
+            sha::Sha256HashSuite,
             HashSuite,
         },
         log2_ceil,
@@ -61,9 +61,6 @@ const KERNEL_NAMES: &[&str] = &[
 ];
 
 pub trait MetalHash {
-    /// Which hash suite should the CPU use
-    type HashSuite: HashSuite<BabyBear>;
-
     /// Create a hash implemention
     fn new(hal: &MetalHal<Self>) -> Self;
 
@@ -77,15 +74,20 @@ pub trait MetalHash {
         output: &BufferImpl<Digest>,
         matrix: &BufferImpl<BabyBearElem>,
     );
+
+    /// Return the HashSuite
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear>;
 }
 
-pub struct MetalHashSha256;
+pub struct MetalHashSha256 {
+    suite: HashSuite<BabyBear>,
+}
 
 impl MetalHash for MetalHashSha256 {
-    type HashSuite = Sha256HashSuite<BabyBear, CpuImpl>;
-
     fn new(_hal: &MetalHal<Self>) -> Self {
-        MetalHashSha256 {}
+        MetalHashSha256 {
+            suite: Sha256HashSuite::new(),
+        }
     }
 
     fn hash_fold(&self, hal: &MetalHal<Self>, io: &BufferImpl<Digest>, output_size: usize) {
@@ -113,9 +115,14 @@ impl MetalHash for MetalHashSha256 {
         ];
         hal.dispatch_by_name("sha_rows", args, row_size as u64);
     }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
+    }
 }
 
 pub struct MetalHashPoseidon {
+    suite: HashSuite<BabyBear>,
     round_constants: BufferImpl<BabyBearElem>,
     mds: BufferImpl<BabyBearElem>,
     partial_comp_matrix: BufferImpl<BabyBearElem>,
@@ -123,8 +130,6 @@ pub struct MetalHashPoseidon {
 }
 
 impl MetalHash for MetalHashPoseidon {
-    type HashSuite = PoseidonHashSuite;
-
     fn new(hal: &MetalHal<Self>) -> Self {
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
@@ -138,6 +143,7 @@ impl MetalHash for MetalHashPoseidon {
             &*poseidon::consts::PARTIAL_COMP_OFFSET,
         );
         MetalHashPoseidon {
+            suite: PoseidonHashSuite::new(),
             round_constants,
             mds,
             partial_comp_matrix,
@@ -177,6 +183,10 @@ impl MetalHash for MetalHashPoseidon {
             KernelArg::Integer(col_size as u32),
         ];
         hal.dispatch_by_name("poseidon_rows", args, row_size as u64);
+    }
+
+    fn get_hash_suite(&self) -> &HashSuite<BabyBear> {
+        &self.suite
     }
 }
 
@@ -334,8 +344,7 @@ impl<MH: MetalHash> MetalHal<MH> {
             kernels,
             hash: None,
         };
-        let hash = Box::new(MH::new(&hal));
-        hal.hash = Some(hash);
+        hal.hash = Some(Box::new(MH::new(&hal)));
         hal
     }
 
@@ -401,9 +410,6 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type ExtElem = BabyBearExtElem;
     type Field = BabyBear;
     type Buffer<T: Clone + Pod> = BufferImpl<T>;
-    type HashSuite = MH::HashSuite;
-    type HashFn = <MH::HashSuite as HashSuite<BabyBear>>::HashFn;
-    type Rng = <MH::HashSuite as HashSuite<BabyBear>>::Rng;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
@@ -707,6 +713,10 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     fn has_unified_memory(&self) -> bool {
         self.device.has_unified_memory()
     }
+
+    fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
+        self.hash.as_ref().unwrap().get_hash_suite()
+    }
 }
 
 fn simple_launch_params(count: u32, threads_per_group: u32) -> (MTLSize, MTLSize) {
@@ -748,31 +758,34 @@ mod tests {
     use test_log::test;
 
     use super::{MetalHalPoseidon, MetalHalSha256};
-    use crate::hal::testutil;
+    use crate::{
+        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+        hal::testutil,
+    };
 
     #[test]
     fn batch_bit_reverse() {
-        testutil::batch_bit_reverse(MetalHalSha256::new());
+        testutil::batch_bit_reverse(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn batch_evaluate_any() {
-        testutil::batch_evaluate_any(MetalHalSha256::new());
+        testutil::batch_evaluate_any(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn batch_evaluate_ntt() {
-        testutil::batch_evaluate_ntt(MetalHalSha256::new());
+        testutil::batch_evaluate_ntt(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn batch_expand() {
-        testutil::batch_expand(MetalHalSha256::new());
+        testutil::batch_expand(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn batch_interpolate_ntt() {
-        testutil::batch_interpolate_ntt(MetalHalSha256::new());
+        testutil::batch_interpolate_ntt(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
@@ -793,47 +806,47 @@ mod tests {
 
     #[test]
     fn eltwise_sum_extelem() {
-        testutil::eltwise_sum_extelem(MetalHalSha256::new());
+        testutil::eltwise_sum_extelem(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn fri_fold() {
-        testutil::fri_fold(MetalHalSha256::new());
+        testutil::fri_fold(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn mix_poly_coeffs() {
-        testutil::mix_poly_coeffs(MetalHalSha256::new());
+        testutil::mix_poly_coeffs(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn hash_fold() {
-        testutil::hash_fold(MetalHalSha256::new());
+        testutil::hash_fold(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn hash_rows() {
-        testutil::hash_rows(MetalHalSha256::new());
+        testutil::hash_rows(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn hash_fold_poseidon() {
-        testutil::hash_fold(MetalHalPoseidon::new());
+        testutil::hash_fold(MetalHalPoseidon::new(), PoseidonHashSuite::new());
     }
 
     #[test]
     fn hash_rows_poseidon() {
-        testutil::hash_rows(MetalHalPoseidon::new());
+        testutil::hash_rows(MetalHalPoseidon::new(), PoseidonHashSuite::new());
     }
 
     #[test]
     fn slice() {
-        testutil::slice(MetalHalSha256::new());
+        testutil::slice(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]
     fn zk_shift() {
-        testutil::zk_shift(MetalHalSha256::new());
+        testutil::zk_shift(MetalHalSha256::new(), Sha256HashSuite::new());
     }
 
     #[test]

@@ -17,7 +17,7 @@ use std::rc::Rc;
 use clap::Parser;
 use risc0_zkvm::{
     prove::{default_prover, Prover},
-    Executor, ExecutorEnv,
+    Executor, ExecutorEnv, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
@@ -76,7 +76,13 @@ fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
     let seal = if skip_prover {
         0
     } else {
-        prover.prove_session(&session).unwrap().get_seal_len()
+        let ctx = VerifierContext::default();
+        prover
+            .prove_session(&ctx, &session)
+            .unwrap()
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
     };
 
     Metrics {

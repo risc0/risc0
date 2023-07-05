@@ -22,13 +22,7 @@ use risc0_core::field::{
 };
 
 use self::consts::*;
-// use self::consts::{
-// MDS, PARTIAL_COMP_MATRIX, PARTIAL_COMP_OFFSET, ROUNDS_HALF_FULL, ROUNDS_PARTIAL,
-// ROUND_CONSTANTS,
-// };
-//
-// pub use self::rng::PoseidonRng;
-use super::{HashFn, HashSuite, Rng};
+use super::{HashFn, HashSuite, Rng, RngFactory};
 use crate::{
     core::digest::Digest,
     ff::{Field, PrimeField},
@@ -96,7 +90,7 @@ fn poseidon_mix(cells: &mut [Fr; CELLS]) {
 }
 
 /// A hash implemention for Poseidon in a Snark friendly field
-pub struct Poseidon254HashFn {}
+struct Poseidon254HashFn;
 
 fn digest_to_fr(digest: &Digest) -> Fr {
     let mut repr: FrRepr = FrRepr::default();
@@ -141,9 +135,7 @@ where
 }
 
 impl HashFn<BabyBear> for Poseidon254HashFn {
-    type DigestPtr = Box<Digest>;
-
-    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
+    fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest> {
         let mut cells = [Fr::ZERO; CELLS];
         cells[1] = digest_to_fr(a);
         cells[2] = digest_to_fr(b);
@@ -151,11 +143,11 @@ impl HashFn<BabyBear> for Poseidon254HashFn {
         Box::new(fr_to_digest(&cells[0]))
     }
 
-    fn hash_elem_slice(slice: &[BabyBearElem]) -> Self::DigestPtr {
+    fn hash_elem_slice(&self, slice: &[BabyBearElem]) -> Box<Digest> {
         Box::new(unpadded_hash(slice.iter()))
     }
 
-    fn hash_ext_elem_slice(slice: &[BabyBearExtElem]) -> Self::DigestPtr {
+    fn hash_ext_elem_slice(&self, slice: &[BabyBearExtElem]) -> Box<Digest> {
         Box::new(unpadded_hash(
             slice.iter().map(|ee| ee.subelems().iter()).flatten(),
         ))
@@ -163,17 +155,20 @@ impl HashFn<BabyBear> for Poseidon254HashFn {
 }
 
 /// An rng implemention for Poseidon in a Snark friendly field
-pub struct Poseidon254Rng {
+struct Poseidon254Rng {
     // The cells of the sponge
     cells: [Fr; CELLS],
 }
 
-impl Rng<BabyBear> for Poseidon254Rng {
+impl Poseidon254Rng {
     fn new() -> Self {
         Self {
             cells: [Fr::ZERO; CELLS],
         }
     }
+}
+
+impl Rng<BabyBear> for Poseidon254Rng {
     fn mix(&mut self, val: &Digest) {
         self.cells[1] += digest_to_fr(val);
         poseidon_mix(&mut self.cells);
@@ -192,6 +187,7 @@ impl Rng<BabyBear> for Poseidon254Rng {
         }
         out
     }
+
     fn random_elem(&mut self) -> BabyBearElem {
         let mut source = self.cells[2];
         poseidon_mix(&mut self.cells);
@@ -208,17 +204,32 @@ impl Rng<BabyBear> for Poseidon254Rng {
         }
         out
     }
+
     fn random_ext_elem(&mut self) -> BabyBearExtElem {
         risc0_core::field::ExtElem::from_subelems((0..4).map(|_| self.random_elem()))
     }
 }
 
-/// A hash suite of the Snark friendly version of Poseidon
-pub struct Poseidon254HashSuite {}
+struct PoseidonRngFactory;
 
-impl HashSuite<BabyBear> for Poseidon254HashSuite {
-    type HashFn = Poseidon254HashFn;
-    type Rng = Poseidon254Rng;
+impl RngFactory<BabyBear> for PoseidonRngFactory {
+    fn new_rng(&self) -> Box<dyn Rng<BabyBear>> {
+        Box::new(Poseidon254Rng::new())
+    }
+}
+
+/// A hash suite of the SNARK-friendly version of Poseidon
+pub struct Poseidon254HashSuite;
+
+impl Poseidon254HashSuite {
+    /// Construct a new Poseidon254HashSuite
+    pub fn new() -> HashSuite<BabyBear> {
+        HashSuite {
+            name: "poseidon254".into(),
+            hashfn: Box::new(Poseidon254HashFn {}),
+            rng: Box::new(PoseidonRngFactory {}),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -235,16 +246,17 @@ mod tests {
             input.push(BabyBearElem::from(i as u32));
         }
         let mut iop = Poseidon254Rng::new();
-        let digest1 = *Poseidon254HashFn::hash_elem_slice(&input);
-        let digest2 = *Poseidon254HashFn::hash_pair(&digest1, &digest1);
-        let digest3 = *Poseidon254HashFn::hash_pair(&digest1, &digest2);
+        let hasher = Poseidon254HashFn {};
+        let digest1 = *hasher.hash_elem_slice(&input);
+        let digest2 = *hasher.hash_pair(&digest1, &digest1);
+        let digest3 = *hasher.hash_pair(&digest1, &digest2);
         iop.mix(&digest3);
         output.push(BabyBearElem::from(iop.random_bits(7)));
         output.push(BabyBearElem::from(iop.random_elem()));
         for _ in 0..23 {
             input.push(iop.random_elem());
         }
-        iop.mix(&*Poseidon254HashFn::hash_elem_slice(&input));
+        iop.mix(&*hasher.hash_elem_slice(&input));
         output.push(BabyBearElem::from(iop.random_elem()));
         log::info!("Output = {:?}", &output);
         assert!(output[0].as_u32() == 5);

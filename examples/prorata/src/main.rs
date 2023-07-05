@@ -18,11 +18,11 @@
 use std::{fs, path::PathBuf};
 
 use clap::{Parser, Subcommand};
-use methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
+use prorata_methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, SessionFlatReceipt, SessionReceipt,
+    Executor, ExecutorEnv, SessionReceipt,
 };
 use rust_decimal::Decimal;
 
@@ -99,25 +99,25 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
 
     // Verify receipt to confirm that it is correctly formed. Not strictly
     // necessary.
-    receipt.verify(PRORATA_GUEST_ID.into()).unwrap();
+    receipt.verify(PRORATA_GUEST_ID).unwrap();
 
     // Save the receipt to disk so it can be sent to the verifier.
     let output_path = PathBuf::from(output);
-    fs::write(output_path, receipt.encode()).expect("Failed to write to output file");
+    let receipt_data = bincode::serialize(&receipt).unwrap();
+    fs::write(output_path, receipt_data).expect("Failed to write to output file");
 }
 
 /// Verify an allocation read from a receipt on disk.
 fn verify(input: &str) {
-    let receipt: SessionFlatReceipt =
-        bincode::deserialize(&fs::read(PathBuf::from(input)).unwrap())
-            .expect("Failed to read input file");
+    let receipt_data = fs::read(PathBuf::from(input)).unwrap();
+    let receipt: SessionReceipt = bincode::deserialize(&receipt_data).unwrap();
 
     // Proof verification below
-    match receipt.verify(PRORATA_GUEST_ID.into()) {
+    match receipt.verify(PRORATA_GUEST_ID) {
         Ok(_) => {
             println!("Receipt is valid");
             let result: AllocationQueryResult =
-                from_slice(&receipt.get_journal()).expect("Failed to deserialize result");
+                from_slice(&receipt.journal).expect("Failed to deserialize result");
             print!("{}", result);
         }
         Err(e) => println!("Receipt is invalid: {}", e),
