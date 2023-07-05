@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fs::File, path::Path};
+use std::path::Path;
 
-use reqwest::{blocking::Client as BlockingClient, header};
+use reqwest::{header, Client as ReqwestClient};
 use thiserror::Error;
 
 use self::responses::{CreateSessRes, ImgUploadRes, ProofReq, SessionStatusRes, UploadRes};
@@ -110,30 +110,30 @@ impl SessionId {
     }
 
     /// Fetches the current status of the Session
-    pub fn status(&self, client: &Client) -> Result<SessionStatusRes, SdkErr> {
+    pub async fn status(&self, client: &Client) -> Result<SessionStatusRes, SdkErr> {
         let url = format!("{}/sessions/status/{}", client.url, self.uuid);
-        let res = client.client.get(url).send()?;
+        let res = client.client.get(url).send().await?;
 
         if !res.status().is_success() {
-            let body = res.text()?;
+            let body = res.text().await?;
             return Err(SdkErr::InternalServerErr(body));
         }
-        Ok(res.json::<SessionStatusRes>()?)
+        Ok(res.json::<SessionStatusRes>().await?)
     }
 }
 
 /// Represents a client of the REST api
 pub struct Client {
     pub(crate) url: String,
-    pub(crate) client: BlockingClient,
+    pub(crate) client: ReqwestClient,
 }
 
 /// Creates a [reqwest::Client] for internal connection pooling
-fn construct_req_client(api_key: &str) -> Result<BlockingClient, SdkErr> {
+fn construct_req_client(api_key: &str) -> Result<ReqwestClient, SdkErr> {
     let mut headers = header::HeaderMap::new();
     headers.insert("x-api-key", header::HeaderValue::from_str(api_key)?);
 
-    Ok(BlockingClient::builder()
+    Ok(ReqwestClient::builder()
         .default_headers(headers)
         .pool_max_idle_per_host(0)
         .build()?)
@@ -163,43 +163,45 @@ impl Client {
     }
 
     /// Fetch a upload presigned url for a given route
-    fn get_upload_url(&self, route: &str) -> Result<UploadRes, SdkErr> {
+    async fn get_upload_url(&self, route: &str) -> Result<UploadRes, SdkErr> {
         let res = self
             .client
             .get(format!("{}/{}/upload", self.url, route))
-            .send()?;
+            .send()
+            .await?;
 
         if !res.status().is_success() {
-            let body = res.text()?;
+            let body = res.text().await?;
             return Err(SdkErr::InternalServerErr(body));
         }
 
-        Ok(res.json::<UploadRes>()?)
+        Ok(res.json::<UploadRes>().await?)
     }
 
-    fn get_image_upload_url(&self, image_id: &str) -> Result<ImgUploadRes, SdkErr> {
+    async fn get_image_upload_url(&self, image_id: &str) -> Result<ImgUploadRes, SdkErr> {
         let res = self
             .client
             .get(format!("{}/images/upload/{}", self.url, image_id))
-            .send()?;
+            .send()
+            .await?;
 
         if res.status() == 204 {
             return Err(SdkErr::ImageIdExists);
         }
 
         if !res.status().is_success() {
-            let body = res.text()?;
+            let body = res.text().await?;
             return Err(SdkErr::InternalServerErr(body));
         }
 
-        Ok(res.json::<ImgUploadRes>()?)
+        Ok(res.json::<ImgUploadRes>().await?)
     }
 
     /// Upload body to a given URL
-    fn put_data<T: Into<reqwest::blocking::Body>>(&self, url: &str, body: T) -> Result<(), SdkErr> {
-        let res = self.client.put(url).body(body).send()?;
+    async fn put_data<T: Into<reqwest::Body>>(&self, url: &str, body: T) -> Result<(), SdkErr> {
+        let res = self.client.put(url).body(body).send().await?;
         if !res.status().is_success() {
-            let body = res.text()?;
+            let body = res.text().await?;
             return Err(SdkErr::InternalServerErr(body));
         }
 
@@ -213,9 +215,9 @@ impl Client {
     /// The image data can be either:
     /// * ELF file bytes
     /// * bincode encoded MemoryImage
-    pub fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<(), SdkErr> {
-        let upload_res = self.get_image_upload_url(image_id)?;
-        self.put_data(&upload_res.url, buf)?;
+    pub async fn upload_img(&self, image_id: &str, buf: Vec<u8>) -> Result<(), SdkErr> {
+        let upload_res = self.get_image_upload_url(image_id).await?;
+        self.put_data(&upload_res.url, buf).await?;
         Ok(())
     }
 
@@ -224,11 +226,11 @@ impl Client {
     /// The image data can be either:
     /// * ELF file bytes
     /// * bincode encoded MemoryImage
-    pub fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<(), SdkErr> {
-        let upload_data = self.get_image_upload_url(image_id)?;
+    pub async fn upload_img_file(&self, image_id: &str, path: &Path) -> Result<(), SdkErr> {
+        let upload_data = self.get_image_upload_url(image_id).await?;
 
-        let fd = File::open(path)?;
-        self.put_data(&upload_data.url, fd)?;
+        let file_bytes = std::fs::read(path)?;
+        self.put_data(&upload_data.url, file_bytes).await?;
 
         Ok(())
     }
@@ -236,18 +238,18 @@ impl Client {
     // - /inputs
 
     /// Upload a input buffer to the /inputs/ route
-    pub fn upload_input(&self, buf: Vec<u8>) -> Result<String, SdkErr> {
-        let upload_data = self.get_upload_url("inputs")?;
-        self.put_data(&upload_data.url, buf)?;
+    pub async fn upload_input(&self, buf: Vec<u8>) -> Result<String, SdkErr> {
+        let upload_data = self.get_upload_url("inputs").await?;
+        self.put_data(&upload_data.url, buf).await?;
         Ok(upload_data.uuid)
     }
 
     /// Upload a input file to the /inputs/ route
-    pub fn upload_input_file(&self, path: &Path) -> Result<String, SdkErr> {
-        let upload_data = self.get_upload_url("inputs")?;
+    pub async fn upload_input_file(&self, path: &Path) -> Result<String, SdkErr> {
+        let upload_data = self.get_upload_url("inputs").await?;
 
-        let fd = File::open(path)?;
-        self.put_data(&upload_data.url, fd)?;
+        let file_bytes = std::fs::read(path)?;
+        self.put_data(&upload_data.url, file_bytes).await?;
 
         Ok(upload_data.uuid)
     }
@@ -258,7 +260,11 @@ impl Client {
     ///
     /// Supply the image_id and input_id created from uploading those files in
     /// previous steps
-    pub fn create_session(&self, img_id: String, input_id: String) -> Result<SessionId, SdkErr> {
+    pub async fn create_session(
+        &self,
+        img_id: String,
+        input_id: String,
+    ) -> Result<SessionId, SdkErr> {
         let url = format!("{}/sessions/create", self.url);
 
         let req = ProofReq {
@@ -266,14 +272,14 @@ impl Client {
             input: input_id,
         };
 
-        let res = self.client.post(url).json(&req).send()?;
+        let res = self.client.post(url).json(&req).send().await?;
 
         if !res.status().is_success() {
-            let body = res.text()?;
+            let body = res.text().await?;
             return Err(SdkErr::InternalServerErr(body));
         }
 
-        let res: CreateSessRes = res.json()?;
+        let res: CreateSessRes = res.json().await?;
 
         Ok(SessionId::new(res.uuid))
     }
@@ -283,8 +289,8 @@ impl Client {
     /// Download a given url to a buffer
     ///
     /// Useful to download a [SessionId] receipt_url
-    pub fn download(&self, url: &str) -> Result<Vec<u8>, SdkErr> {
-        let data = self.client.get(url).send()?.bytes()?;
+    pub async fn download(&self, url: &str) -> Result<Vec<u8>, SdkErr> {
+        let data = self.client.get(url).send().await?.bytes().await?;
 
         Ok(data.into())
     }
@@ -321,8 +327,8 @@ mod tests {
         assert_eq!(client.url, url);
     }
 
-    #[test]
-    fn image_upload() {
+    #[tokio::test]
+    async fn image_upload() {
         let data = vec![];
 
         let server = MockServer::start();
@@ -349,14 +355,15 @@ mod tests {
             .expect("Failed to construct client");
         client
             .upload_img(TEST_ID, data)
+            .await
             .expect("Failed to upload input");
         get_mock.assert();
         put_mock.assert();
     }
 
-    #[test]
+    #[tokio::test]
     #[should_panic(expected = "value: ImageIdExists")]
-    fn image_upload_dup() {
+    async fn image_upload_dup() {
         let data = vec![];
 
         let server = MockServer::start();
@@ -379,11 +386,11 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
             .expect("Failed to construct client");
-        client.upload_img(TEST_ID, data).unwrap()
+        client.upload_img(TEST_ID, data).await.unwrap()
     }
 
-    #[test]
-    fn input_upload() {
+    #[tokio::test]
+    async fn input_upload() {
         env_logger::init();
         let data = vec![];
 
@@ -413,7 +420,10 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = super::Client::from_parts(server_url, TEST_KEY.to_string())
             .expect("Failed to construct client");
-        let res = client.upload_input(data).expect("Failed to upload input");
+        let res = client
+            .upload_input(data)
+            .await
+            .expect("Failed to upload input");
 
         assert_eq!(res, response.uuid);
 
@@ -421,8 +431,8 @@ mod tests {
         put_mock.assert();
     }
 
-    #[test]
-    fn session_create() {
+    #[tokio::test]
+    async fn session_create() {
         let server = MockServer::start();
 
         let request = ProofReq {
@@ -447,14 +457,17 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = super::Client::from_parts(server_url, TEST_KEY.to_string()).unwrap();
 
-        let res = client.create_session(request.img, request.input).unwrap();
+        let res = client
+            .create_session(request.img, request.input)
+            .await
+            .unwrap();
         assert_eq!(res.uuid, response.uuid);
 
         create_mock.assert();
     }
 
-    #[test]
-    fn session_status() {
+    #[tokio::test]
+    async fn session_status() {
         let server = MockServer::start();
 
         let uuid = Uuid::new_v4().to_string();
@@ -476,7 +489,7 @@ mod tests {
         let server_url = format!("http://{}", server.address());
         let client = super::Client::from_parts(server_url, TEST_KEY.to_string()).unwrap();
 
-        let status = session_id.status(&client).unwrap();
+        let status = session_id.status(&client).await.unwrap();
         assert_eq!(status.status, response.status);
         assert_eq!(status.receipt_url, None);
 
