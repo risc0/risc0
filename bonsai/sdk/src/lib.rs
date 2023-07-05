@@ -15,5 +15,11 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 
+mod async_impl;
+
 /// Bonsai Alpha SDK
-pub mod alpha;
+pub mod alpha {
+    pub use crate::async_impl::*;
+    #[cfg(feature = "sync")]
+    pub mod sync;
+}
