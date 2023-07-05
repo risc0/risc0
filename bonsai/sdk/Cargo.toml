@@ -19,4 +19,5 @@ uuid = { version = "1.3", features = ["v4"] }
 doctest = false
 
 [features]
+default = []
 sync = []
