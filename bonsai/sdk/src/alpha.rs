@@ -186,6 +186,7 @@ impl SnarkId {
 }
 
 /// Represents a client of the REST api
+#[derive(Clone)]
 pub struct Client {
     pub(crate) url: String,
     pub(crate) client: BlockingClient,
