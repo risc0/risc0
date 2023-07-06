@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use risc0_zkp::hal::cpu::{BabyBearBlake2bCpuHal, BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
+use risc0_zkp::{
+    core::hash::{blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+    field::baby_bear::BabyBear,
+    hal::cpu::CpuHal,
+};
 use risc0_zkvm::Loader;
 
 fn main() {
     let loader = Loader::new();
-    let control_id_sha256 = loader.compute_control_id(&BabyBearSha256CpuHal::new());
-    let control_id_poseidon = loader.compute_control_id(&BabyBearPoseidonCpuHal::new());
-    let control_id_blake2b = loader.compute_control_id(&BabyBearBlake2bCpuHal::new());
+    let control_id_sha256 =
+        loader.compute_control_id(&CpuHal::new(Sha256HashSuite::<BabyBear>::new()));
+    let control_id_poseidon = loader.compute_control_id(&CpuHal::new(PoseidonHashSuite::new()));
+    let control_id_blake2b = loader.compute_control_id(&CpuHal::new(Blake2bCpuHashSuite::new()));
     let contents = format!(
         include_str!("control_id.rs"),
         control_id_sha256[0],

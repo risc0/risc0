@@ -14,33 +14,31 @@
 
 //! A SHA-256 based CRNG used in Fiat-Shamir.
 
-use core::marker::PhantomData;
+use alloc::boxed::Box;
 
 use rand_core::{impls, Error, RngCore};
 use risc0_core::field::{Elem, Field};
 
-use super::{Digest, Sha256, DIGEST_WORDS};
+use super::{cpu::Impl, Digest, Sha256, DIGEST_WORDS};
 use crate::core::hash::Rng;
 
 /// A random number generator driven by a [Sha256].
 #[derive(Clone, Debug)]
-pub struct ShaRng<S: Sha256> {
+pub struct ShaRng {
     // Pool 0 receives new entropy and is where values are drawn from.
-    pool0: S::DigestPtr,
+    pool0: Box<Digest>,
     // Pool 1 provides secret state in the step function. It is never observable.
-    pool1: S::DigestPtr,
+    pool1: Box<Digest>,
     pool_used: usize,
-    phantom_sha: PhantomData<S>,
 }
 
-impl<S: Sha256> ShaRng<S> {
+impl ShaRng {
     /// Create a new [ShaRng] from a given [Sha256].
-    pub fn inner_new() -> ShaRng<S> {
+    pub fn new() -> Self {
         Self {
-            pool0: S::hash_bytes(b"Hello"),
-            pool1: S::hash_bytes(b"World"),
+            pool0: Impl::hash_bytes(b"Hello"),
+            pool1: Impl::hash_bytes(b"World"),
             pool_used: 0,
-            phantom_sha: PhantomData,
         }
     }
 
@@ -53,13 +51,13 @@ impl<S: Sha256> ShaRng<S> {
     }
 
     fn step(&mut self) {
-        self.pool0 = S::hash_pair(&self.pool0, &self.pool1);
-        self.pool1 = S::hash_pair(&self.pool0, &self.pool1);
+        self.pool0 = Impl::hash_pair(&self.pool0, &self.pool1);
+        self.pool1 = Impl::hash_pair(&self.pool0, &self.pool1);
         self.pool_used = 0;
     }
 }
 
-impl<S: Sha256> RngCore for ShaRng<S> {
+impl RngCore for ShaRng {
     fn next_u32(&mut self) -> u32 {
         if self.pool_used == DIGEST_WORDS {
             self.step();
@@ -83,39 +81,41 @@ impl<S: Sha256> RngCore for ShaRng<S> {
     }
 }
 
-impl<S: Sha256, F: Field> Rng<F> for ShaRng<S> {
-    fn new() -> Self {
-        Self::inner_new()
-    }
+impl<F: Field> Rng<F> for ShaRng {
     fn mix(&mut self, val: &Digest) {
         self.inner_mix(val);
     }
+
     fn random_bits(&mut self, bits: usize) -> u32 {
         ((1 << bits) - 1) & self.next_u32()
     }
+
     fn random_elem(&mut self) -> F::Elem {
         F::Elem::random(self)
     }
+
     fn random_ext_elem(&mut self) -> F::ExtElem {
         F::ExtElem::random(self)
     }
 }
 
-#[allow(missing_docs)]
-pub mod testutil {
+#[cfg(test)]
+mod tests {
     use rand_core::RngCore;
 
-    use super::{Sha256, ShaRng};
+    use super::ShaRng;
+    use crate::core::hash::sha::{cpu::Impl, Sha256};
 
     // Runs conformance test on a SHA implementation to make sure it
     // properly behaves for generating pseudo-random numbers.
-    pub fn test_sha_rng_impl<S: Sha256>() {
-        let mut x = ShaRng::<S>::inner_new();
+    #[test]
+    fn test_sha_rng_impl() {
+        let mut x = ShaRng::new();
         for _ in 0..10 {
             x.next_u32();
         }
         assert_eq!(x.next_u32(), 785921476);
-        x.inner_mix(&*S::hash_bytes(b"foo"));
+        x.inner_mix(&*Impl::hash_bytes(b"foo"));
         assert_eq!(x.next_u32(), 4167871101);
     }
 }

@@ -13,25 +13,25 @@
 // limitations under the License.
 
 use alloc::vec::Vec;
-use core::marker::PhantomData;
 
 use risc0_core::field::{Elem, Field};
 
-use crate::core::{digest::Digest, hash::Rng};
+use crate::core::{
+    digest::Digest,
+    hash::{Rng, RngFactory},
+};
 
-pub struct WriteIOP<F: Field, R: Rng<F>> {
+pub struct WriteIOP<F: Field> {
     pub proof: Vec<u32>,
-    pub rng: R,
-    phantom: PhantomData<F>,
+    pub rng: Box<dyn Rng<F>>,
 }
 
-impl<F: Field, R: Rng<F>> WriteIOP<F, R> {
+impl<F: Field> WriteIOP<F> {
     /// Create a new empty proof
-    pub fn new() -> Self {
+    pub fn new(rng: &dyn RngFactory<F>) -> Self {
         Self {
             proof: Vec::new(),
-            rng: R::new(),
-            phantom: PhantomData,
+            rng: rng.new_rng(),
         }
     }
 

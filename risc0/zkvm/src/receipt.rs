@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Manages the output and cryptographic data for a proven computation
+//! Manages the output and cryptographic data for a proven computation.
 //!
 //! Receipts are zero-knowledge proofs of computation. They attest that specific
 //! code was executed to generate the information contained in the receipt. The
@@ -22,19 +22,19 @@
 //! have been generated from the expected code, even when this code was run by
 //! an untrusted source.
 //!
-//! There are two types of receipt, a [SessionFlatReceipt] proving the execution
+//! There are two types of receipt, a [SessionReceipt] proving the execution
 //! of a [crate::Session], and a [SegmentReceipt] proving the execution of a
 //! [crate::Segment].
 //!
 //! Because [crate::Session]s are user-determined, whereas
 //! [crate::Segment]s are automatically generated, typical use cases will handle
-//! [SessionFlatReceipt]s directly and [SegmentReceipt]s only indirectly as part
-//! of the [SessionFlatReceipt]s that contain them (for instance, a by calling
-//! [SessionFlatReceipt::verify], which will itself call
+//! [SessionReceipt]s directly and [SegmentReceipt]s only indirectly as part
+//! of the [SessionReceipt]s that contain them (for instance, by calling
+//! [SessionReceipt::verify], which will itself call
 //! [SegmentReceipt::verify] for each constinuent [SegmentReceipt]).
 //!
 //! # Usage
-//! To create a [SessionFlatReceipt], use [crate::Session::prove]:
+//! To create a [SessionReceipt], use [crate::Session::prove]:
 //! ```rust
 //! use risc0_zkvm::{Executor, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
@@ -48,13 +48,13 @@
 //! # }
 //! ```
 //!
-//! To confirm that a [SessionFlatReceipt] was honestly generated, use
-//! [SessionFlatReceipt::verify] and supply the ImageID of the code that should
+//! To confirm that a [SessionReceipt] was honestly generated, use
+//! [SessionReceipt::verify] and supply the ImageID of the code that should
 //! have been executed as a parameter. (See
 //! [risc0_build](https://docs.rs/risc0-build/latest/risc0_build/) for more
 //! information about how ImageIDs are generated.)
 //! ```rust
-//! use risc0_zkvm::SessionFlatReceipt;
+//! use risc0_zkvm::SessionReceipt;
 //!
 //! # use risc0_zkvm::{Executor, ExecutorEnv};
 //! # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
@@ -65,37 +65,45 @@
 //! # let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
 //! # let session = exec.run().unwrap();
 //! # let receipt = session.prove().unwrap();
-//! receipt.verify(FIB_ID.into()).unwrap();
+//! receipt.verify(FIB_ID).unwrap();
 //! # }
 //! ```
 //!
-//! The public outputs of the [SessionFlatReceipt] are contained in the
-//! [SessionFlatReceipt::journal]. We provide serialization tools in the zkVM
+//! The public outputs of the [SessionReceipt] are contained in the
+//! [SessionReceipt::journal]. We provide serialization tools in the zkVM
 //! [serde](crate::serde) module, which can be used to read data from the
 //! journal as the same type it was written to the journal. If you prefer, you
-//! can also directly access the [SessionFlatReceipt::journal] as a `Vec<u8>`.
+//! can also directly access the [SessionReceipt::journal] as a `Vec<u8>`.
 
-use alloc::{fmt::Debug, vec::Vec};
+use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
+use core::fmt::Debug;
 
 use anyhow::Result;
-use hex::FromHex;
+use dyn_partial_eq::{dyn_partial_eq, DynPartialEq};
 use risc0_circuit_rv32im::layout;
-use risc0_core::field::baby_bear::BabyBearElem;
+use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
-    core::{digest::Digest, hash::sha::SHA256_INIT},
+    core::{
+        digest::Digest,
+        hash::{
+            blake2b::Blake2bCpuHashSuite,
+            poseidon::PoseidonHashSuite,
+            sha::{Sha256HashSuite, SHA256_INIT},
+            HashSuite,
+        },
+    },
     layout::Buffer,
     verify::VerificationError,
-    MIN_CYCLES_PO2,
 };
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
 use crate::{
+    control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
     sha::{
         self,
         rust_crypto::{Digest as _, Sha256},
     },
-    ControlId, CIRCUIT,
 };
 
 /// Indicates how a Segment or Session's execution has terminated
@@ -119,7 +127,7 @@ pub enum ExitCode {
 
 /// Represents the public state of a segment, needed for continuations and
 /// receipt verification.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct SystemState {
     /// The program counter.
     pub pc: u32,
@@ -131,7 +139,7 @@ pub struct SystemState {
 
 /// Data associated with a receipt which is used for both input and
 /// output of global state.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct ReceiptMetadata {
     /// The [SystemState] of a segment just before execution has begun.
     pub pre: SystemState,
@@ -149,76 +157,58 @@ pub struct ReceiptMetadata {
     pub output: Digest,
 }
 
-/// The [SessionReceipt] is implemented for receipts that represent
-/// [crate::Session]
-///
-/// There are several different flavors of receipts and this trait defines the
-/// the functions that all [crate::Session] receipts have such as accessing the
-/// journal and a way to verify the receipt.
-pub trait SessionReceipt: Debug {
-    /// Verifies the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
-    #[cfg(not(target_os = "zkvm"))]
-    #[must_use]
-    fn verify(&self, image_id: Digest) -> Result<(), VerificationError>;
-
-    /// All session receipts have a journal
-    fn get_journal(&self) -> &Vec<u8>;
-
-    /// this provides a way to serialize a receipt
-    fn encode(&self) -> Vec<u8>;
-
-    /// get the length of the seal. This is used primarily for benchmarking
-    fn get_seal_len(&self) -> usize;
-
-    /// this is used for downcasting, primarily used for testing
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn core::any::Any;
-}
-
-/// A free function that verifies the receipt
-///
-/// This function is a wrapper for [SessionReceipt::verify] that allows the
-/// caller to pass parameters that implement type conversion to [Digest] by
-/// calling the `into` function.
-#[cfg(not(target_os = "zkvm"))]
-pub fn verify(
-    receipt: &dyn SessionReceipt,
-    image_id: impl Into<Digest>,
-) -> Result<(), VerificationError> {
-    receipt.verify(image_id.into())
-}
-
 /// A receipt attesting to the execution of a Session.
 ///
-/// A SessionFlatReceipt attests that the `journal` was produced by executing a
+/// A SessionReceipt attests that the `journal` was produced by executing a
 /// [crate::Session] based on a specified memory image. This image is _not_
 /// included in the receipt and must be provided by the verifier when calling
-/// [SessionFlatReceipt::verify].
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
-pub struct SessionFlatReceipt {
-    /// The constituent [SegmentReceipt]s.
+/// [SessionReceipt::verify].
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct SessionReceipt {
+    /// The constituent [Receipt]s.
     ///
-    /// Together these can be used by [SessionFlatReceipt::verify] to
+    /// Together these can be used by [SessionReceipt::verify] to
     /// cryptographically prove that this full Session was faithfully executed.
-    pub segments: Vec<SegmentReceipt>,
+    pub segments: Vec<Box<dyn Receipt>>,
 
     /// The public data written by the guest in this Session.
     ///
     /// This data is cryptographically authenticated in
-    /// [SessionFlatReceipt::verify].
+    /// [SessionReceipt::verify].
     pub journal: Vec<u8>,
+}
+
+/// Provide common functionality implemented by all receipt types.
+#[dyn_partial_eq]
+#[typetag::serde(tag = "type")]
+pub trait Receipt: Debug {
+    /// Verify the integrity of this receipt.
+    #[must_use]
+    fn verify(&self) -> Result<(), VerificationError> {
+        self.verify_with_context(&VerifierContext::default())
+    }
+
+    /// Verify the integrity of this receipt.
+    #[must_use]
+    fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError>;
+
+    /// Return the metadata for this receipt.
+    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError>;
+
+    /// Return the seal for this receipt.
+    fn get_seal(&self) -> &[u32];
+
+    /// Return the seal for this receipt, as a slice of bytes.
+    fn get_seal_bytes(&self) -> &[u8] {
+        bytemuck::cast_slice(self.get_seal())
+    }
 }
 
 /// A receipt attesting to the execution of a Segment.
 ///
 /// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
 /// consistent with the [ReceiptMetadata] included in the receipt.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, DynPartialEq)]
 pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
@@ -229,66 +219,48 @@ pub struct SegmentReceipt {
     /// accessed with [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 
-    /// Segment index within the [SessionFlatReceipt]
+    /// Segment index within the [SessionReceipt]
     pub index: u32,
+
+    /// Name of the hash function used to create this receipt.
+    pub hashfn: String,
 }
 
-impl SessionReceipt for SessionFlatReceipt {
+/// Context available to the verification process.
+pub struct VerifierContext {
+    /// A registry of hash functions to be used by the verification process.
+    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
+}
+
+impl SessionReceipt {
+    /// Construct a new SessionReceipt
+    pub fn new(segments: Vec<Box<dyn Receipt>>, journal: Vec<u8>) -> Self {
+        Self { segments, journal }
+    }
+
     /// Verifies the integrity of this receipt.
     ///
     /// Uses the ZKP system to cryptographically verify that each constituent
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `image_id` parameter.
-    #[cfg(not(target_os = "zkvm"))]
     #[must_use]
-    fn verify(&self, image_id: Digest) -> Result<(), VerificationError> {
-        use risc0_zkp::core::hash::sha::Sha256HashSuite;
-        let hal =
-            risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
-                &crate::CIRCUIT,
-            );
-        self.verify_with_hal(&hal, image_id)
+    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
+        self.verify_with_context(&VerifierContext::default(), image_id)
     }
 
-    fn get_journal(&self) -> &Vec<u8> {
-        &self.journal
-    }
-
-    fn encode(&self) -> Vec<u8> {
-        bytemuck::cast_slice(crate::serde::to_vec(&self).unwrap().as_slice()).into()
-    }
-
-    fn get_seal_len(&self) -> usize {
-        self.segments
-            .iter()
-            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
-    }
-
-    #[cfg(test)]
-    fn as_any(&self) -> &dyn core::any::Any {
-        self
-    }
-}
-
-impl SessionFlatReceipt {
     /// Verifies the integrity of this receipt.
     ///
     /// Uses the ZKP system to cryptographically verify that each constituent
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
-    /// given `_image_id` parameter.
     /// given `image_id` parameter.
     #[must_use]
-    pub fn verify_with_hal<H>(
+    pub fn verify_with_context(
         &self,
-        hal: &H,
+        ctx: &VerifierContext,
         image_id: impl Into<Digest>,
-    ) -> Result<(), VerificationError>
-    where
-        H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
-        H::HashFn: ControlId,
-    {
+    ) -> Result<(), VerificationError> {
         let (final_receipt, receipts) = self
             .segments
             .as_slice()
@@ -296,9 +268,8 @@ impl SessionFlatReceipt {
             .ok_or(VerificationError::ReceiptFormatError)?;
         let mut prev_image_id = image_id.into();
         for receipt in receipts {
-            receipt.verify_with_hal(hal)?;
+            receipt.verify_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
-            #[cfg(not(target_os = "zkvm"))]
             log::debug!("metadata: {metadata:#?}");
             if prev_image_id != metadata.pre.compute_image_id() {
                 return Err(VerificationError::ImageVerificationError);
@@ -308,9 +279,8 @@ impl SessionFlatReceipt {
             }
             prev_image_id = metadata.post.compute_image_id();
         }
-        final_receipt.verify_with_hal(hal)?;
+        final_receipt.verify_with_context(ctx)?;
         let metadata = final_receipt.get_metadata()?;
-        #[cfg(not(target_os = "zkvm"))]
         log::debug!("final: {metadata:#?}");
         if prev_image_id != metadata.pre.compute_image_id() {
             return Err(VerificationError::ImageVerificationError);
@@ -324,7 +294,6 @@ impl SessionFlatReceipt {
                 || digest_words == output_words
         };
         if !is_journal_valid() {
-            #[cfg(not(target_os = "zkvm"))]
             log::debug!(
                 "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
                 hex::encode(&self.journal),
@@ -343,56 +312,33 @@ impl SessionFlatReceipt {
     }
 }
 
-impl SegmentReceipt {
-    /// Get the [ReceiptMetadata] associated with the current receipt.
-    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+#[typetag::serde]
+impl Receipt for SegmentReceipt {
+    fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
+        use hex::FromHex;
+        let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
+            POSEIDON_CONTROL_ID
+                .into_iter()
+                .chain(SHA256_CONTROL_ID)
+                .chain(BLAKE2B_CONTROL_ID)
+                .find(|x| Digest::from_hex(x).unwrap() == *control_id)
+                .map(|_| ())
+                .ok_or(VerificationError::ControlVerificationError)
+        };
+        let suite = ctx
+            .suites
+            .get(&self.hashfn)
+            .ok_or(VerificationError::InvalidHashSuite)?;
+        risc0_zkp::verify::verify(&crate::CIRCUIT, suite, &self.seal, check_code)
+    }
+
+    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
         ReceiptMetadata::decode_from_io(layout::OutBuffer(elems))
     }
 
-    /// Verifies the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that the seal does
-    /// validly indicate that this Segment was executed faithfully.
-    #[cfg(not(target_os = "zkvm"))]
-    #[must_use]
-    pub fn verify(&self) -> Result<(), VerificationError> {
-        use risc0_zkp::core::hash::sha::Sha256HashSuite;
-        let hal =
-            risc0_zkp::verify::CpuVerifyHal::<_, Sha256HashSuite<_, crate::sha::Impl>, _>::new(
-                &crate::CIRCUIT,
-            );
-        self.verify_with_hal(&hal)
-    }
-
-    /// Verifies the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that the seal does
-    /// validly indicate that this Segment was executed faithfully.
-    #[must_use]
-    pub fn verify_with_hal<H>(&self, hal: &H) -> Result<(), VerificationError>
-    where
-        H: risc0_zkp::verify::VerifyHal<Elem = BabyBearElem>,
-        H::HashFn: ControlId,
-    {
-        let control_id = &H::HashFn::CONTROL_ID;
-        let check_code = |po2: u32, merkle_root: &Digest| -> Result<(), VerificationError> {
-            let po2 = po2 as usize;
-            let which = po2 - MIN_CYCLES_PO2;
-            if which < control_id.len() {
-                let entry: Digest = Digest::from_hex(control_id[which]).unwrap();
-                if entry == *merkle_root {
-                    return Ok(());
-                }
-            }
-            Err(VerificationError::ControlVerificationError)
-        };
-        risc0_zkp::verify::verify(hal, &CIRCUIT, &self.seal, check_code)
-    }
-
-    /// Extracts the seal from the receipt, as a series of bytes.
-    pub fn get_seal_bytes(&self) -> &[u8] {
-        bytemuck::cast_slice(self.seal.as_slice())
+    fn get_seal(&self) -> &[u32] {
+        self.seal.as_slice()
     }
 }
 
@@ -482,4 +428,16 @@ pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     pc_digest[0] = pc;
     let block2 = Digest::new(pc_digest);
     *sha::Impl::compress(&SHA256_INIT, merkle_root, &block2)
+}
+
+impl Default for VerifierContext {
+    fn default() -> Self {
+        Self {
+            suites: BTreeMap::from([
+                ("blake2b".into(), Blake2bCpuHashSuite::new()),
+                ("poseidon".into(), PoseidonHashSuite::new()),
+                ("sha-256".into(), Sha256HashSuite::new()),
+            ]),
+        }
+    }
 }

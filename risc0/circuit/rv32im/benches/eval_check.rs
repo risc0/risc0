@@ -18,7 +18,8 @@ use risc0_circuit_rv32im::{
     testutil::{eval_check_impl, EvalCheckParams},
     CircuitImpl,
 };
-use risc0_zkp::hal::cpu::BabyBearSha256CpuHal;
+use risc0_core::field::baby_bear::BabyBear;
+use risc0_zkp::{core::hash::sha::Sha256HashSuite, hal::cpu::CpuHal};
 
 pub fn eval_check(c: &mut Criterion) {
     let mut group = c.benchmark_group("eval_check");
@@ -26,7 +27,7 @@ pub fn eval_check(c: &mut Criterion) {
     for po2 in [2, 8, 16].iter() {
         let params = EvalCheckParams::new(*po2);
         let circuit = CircuitImpl::new();
-        let hal = BabyBearSha256CpuHal::new();
+        let hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new());
         let eval = CpuEvalCheck::new(&circuit);
         group.bench_function(BenchmarkId::new("cpu", po2), |b| {
             b.iter(|| {

@@ -20,42 +20,30 @@ pub mod poseidon;
 pub mod poseidon_254;
 pub mod sha;
 
-use core::{fmt::Debug, ops::DerefMut};
+use alloc::{boxed::Box, string::String};
 
 use risc0_core::field::Field;
 
 use super::digest::Digest;
 
 /// A trait that sets the hashes and encodings used by the ZKP.
-pub trait HashFn<F: Field> {
-    /// A pointer to the digest created as the result of a hashing operation.
-    ///
-    /// This may either be a `Box<Digest>` or some other pointer in case the
-    /// implementation wants to manage its own memory. Semantically, holding the
-    /// `DigestPtr` denotes ownership of the underlying value. (e.g. `DigestPtr`
-    /// does not implement `Copy` and the owner of `DigestPtr` can create a
-    /// mutable reference to the underlying digest).
-    type DigestPtr: DerefMut<Target = Digest> + Debug;
-
+pub trait HashFn<F: Field>: Send + Sync {
     /// Generate a hash from a pair of [Digest].
-    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr;
+    fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest>;
 
     /// Generate a hash from a slice of field elements.  This may be unpadded so
     /// this is only safe to used when the size is known.
-    fn hash_elem_slice(slice: &[F::Elem]) -> Self::DigestPtr;
+    fn hash_elem_slice(&self, slice: &[F::Elem]) -> Box<Digest>;
 
     /// Generate a hash from a slice of extension field element.  This may be
     /// unpadded so this is only safe to used when the size is known.
-    fn hash_ext_elem_slice(slice: &[F::ExtElem]) -> Self::DigestPtr;
+    fn hash_ext_elem_slice(&self, slice: &[F::ExtElem]) -> Box<Digest>;
 }
 
 /// A trait that sets the PRNG used by Fiat-Shamir.  We allow specialization at
 /// this level rather than at RngCore because some hashes such as Posidon have
 /// elements distributed uniformly over the field natively.
 pub trait Rng<F: Field> {
-    /// Create a new RNG is a standard state, mix before using!
-    fn new() -> Self;
-
     /// Mix in randomness from a Fiat-Shamir commitment.
     fn mix(&mut self, val: &Digest);
 
@@ -70,11 +58,20 @@ pub trait Rng<F: Field> {
     fn random_ext_elem(&mut self) -> F::ExtElem;
 }
 
-/// Make it easy compute both hash related traits from a single source
-pub trait HashSuite<F: Field> {
-    /// Define the hash used by the HashSuite
-    type HashFn: HashFn<F>;
+/// Responsible for constructing new Rngs.
+pub trait RngFactory<F: Field> {
+    /// Construct a new Rng
+    fn new_rng(&self) -> Box<dyn Rng<F>>;
+}
 
-    /// Define the random mixer used by the HashSuite
-    type Rng: Rng<F>;
+/// Make it easy compute both hash related traits from a single source
+pub struct HashSuite<F: Field> {
+    /// The name of this HashSuite.
+    pub name: String,
+
+    /// Define the hash used by the HashSuite
+    pub hashfn: Box<dyn HashFn<F>>,
+
+    /// Define an RNG factory
+    pub rng: Box<dyn RngFactory<F>>,
 }

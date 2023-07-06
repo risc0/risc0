@@ -22,7 +22,7 @@ fn main() {
     // Here is where one would send 'receipt' over the network...
 
     // Verify receipt, panic if it's wrong
-    receipt.verify(MULTIPLY_ID.into()).expect(
+    receipt.verify(MULTIPLY_ID).expect(
         "Code you have proven should successfully verify; did you specify the correct image ID?",
     );
 }

@@ -16,6 +16,7 @@ const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYC
 
 pub type RawControlId = [&'static str; CONTROL_ID_ENTRIES];
 
+/// Control ID for SHA-256
 pub const SHA256_CONTROL_ID: RawControlId = [
     "6b372b865d86eaa17126479f96e9aab2f203b68c754d2bec856693e6b9f86cef", //
     "ea35a42be11a3387542464af8134b51c50db4028118a9752b8aa9282def42f61", //
@@ -32,6 +33,7 @@ pub const SHA256_CONTROL_ID: RawControlId = [
     "e51149bf1d6a6c1707c19b81a2cca76b7b874384abba56092a8a813759eff362", //
 ];
 
+/// Control ID for Poseidon
 pub const POSEIDON_CONTROL_ID: RawControlId = [
     "1faf9226e5bfc10b76889e2c6e5fe4285d603a0d4d461a44121d140d37a8db59", //
     "f97ded11de6f04011119df1d4ee4ea01a81f203dfb6d9e109ed2714676c89575", //
@@ -48,6 +50,7 @@ pub const POSEIDON_CONTROL_ID: RawControlId = [
     "81107f0900d24745915cbc3edf0103709cac2c5a670c6109d1624a57dd464d18", //
 ];
 
+/// Control ID for Blake2b
 pub const BLAKE2B_CONTROL_ID: RawControlId = [
     "10f9a9191b53b89113b7f53ce662ccc7fd0b2bff4db33a17ab37bd1d972cb794", //
     "456f36660b631ace0389d0641cf7c6a074e51a2ed607f1be325258de8569399d", //
