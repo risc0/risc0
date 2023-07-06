@@ -103,6 +103,12 @@ First, [install Rust][install-rust] if you don't already have it, then install t
 cargo install cargo-risczero
 ```
 
+For the above commands to build succesfully you will need to have installed the required dependencies. On a Linux system you can install them with:
+
+```bash
+sudo apt install curl build-essential libssl-dev pkgconf-bin
+```
+
 Then, create a new project (named `my_project` in this example):
 
 ```
