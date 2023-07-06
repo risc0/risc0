@@ -21,6 +21,7 @@ extern crate alloc;
 
 #[cfg(feature = "binfmt")]
 pub mod binfmt;
+#[cfg(not(target_os = "zkvm"))]
 mod control_id;
 #[cfg(feature = "prove")]
 mod exec;
@@ -29,7 +30,9 @@ pub mod guest;
 mod opcode;
 #[cfg(feature = "prove")]
 pub mod prove;
+#[cfg(not(target_os = "zkvm"))]
 pub mod receipt;
+#[cfg(not(target_os = "zkvm"))]
 pub mod recursion;
 pub mod serde;
 #[cfg(feature = "prove")]
@@ -40,18 +43,18 @@ pub mod sha;
 mod testutils;
 
 pub use anyhow::Result;
-use risc0_zkp::core::hash::{
-    blake2b::{Blake2b, Blake2bHashFn},
-    poseidon::PoseidonHashFn,
-    sha::{Sha256, Sha256HashFn},
-};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
 #[cfg(feature = "binfmt")]
 pub use self::binfmt::{elf::Program, image::MemoryImage};
+#[cfg(not(target_os = "zkvm"))]
+pub use self::control_id::POSEIDON_CONTROL_ID;
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
-pub use self::receipt::{ExitCode, SegmentReceipt, SessionFlatReceipt, SessionReceipt};
+#[cfg(not(target_os = "zkvm"))]
+pub use self::receipt::{
+    ExitCode, ReceiptMetadata, SegmentReceipt, SessionReceipt, SystemState, VerifierContext,
+};
 #[cfg(feature = "prove")]
 pub use self::{
     exec::io::{Syscall, SyscallContext},
@@ -59,29 +62,9 @@ pub use self::{
     prove::loader::Loader,
     session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef},
 };
-use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
+
 #[cfg(not(target_os = "zkvm"))]
-pub use crate::receipt::verify;
-pub use crate::receipt::{ReceiptMetadata, SystemState};
 const CIRCUIT: risc0_circuit_rv32im::CircuitImpl = risc0_circuit_rv32im::CircuitImpl::new();
-
-/// Associate a specific CONTROL_ID with a HashFn.
-pub trait ControlId {
-    /// The associated CONTROL_ID for a HashFn.
-    const CONTROL_ID: RawControlId;
-}
-
-impl<S: Sha256> ControlId for Sha256HashFn<S> {
-    const CONTROL_ID: RawControlId = SHA256_CONTROL_ID;
-}
-
-impl ControlId for PoseidonHashFn {
-    const CONTROL_ID: RawControlId = POSEIDON_CONTROL_ID;
-}
-
-impl<T: Blake2b> ControlId for Blake2bHashFn<T> {
-    const CONTROL_ID: RawControlId = BLAKE2B_CONTROL_ID;
-}
 
 /// Align the given address `addr` upwards to alignment `align`.
 ///

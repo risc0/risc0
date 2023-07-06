@@ -20,7 +20,7 @@ use risc0_zkvm::{
     prove::{default_prover, Prover},
     receipt::SessionReceipt,
     serde::to_vec,
-    Executor, ExecutorEnv, Session,
+    Executor, ExecutorEnv, Session, VerifierContext,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -57,7 +57,11 @@ fn main() {
             .iter()
             .fold(0, |acc, segment| acc + (1 << segment.po2));
 
-        let seal = receipt.get_seal_len();
+        let seal = receipt
+            .segments
+            .iter()
+            .fold(0, |acc, segment| acc + segment.get_seal_bytes().len());
+
         let usage = prover.get_peak_memory_usage();
         let throughput = (cycles as f64) / duration.as_secs_f64();
 
@@ -109,7 +113,7 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Box<dyn SessionReceipt>) {
+fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, SessionReceipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
@@ -117,6 +121,7 @@ fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Box<dyn SessionRece
         .unwrap();
     let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
-    let receipt = prover.prove_session(&session).unwrap();
+    let ctx = VerifierContext::default();
+    let receipt = prover.prove_session(&ctx, &session).unwrap();
     (session, receipt)
 }

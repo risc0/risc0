@@ -34,7 +34,7 @@ pub const DIGEST_BYTES: usize = DIGEST_WORDS * WORD_SIZE;
 /// Digest represents the results of a hashing function.  It is always 256 bits
 /// of storage although depending on the hash it may have additional structure
 /// (for example Poseidon's output is actually composed of field elements).  The
-/// storage is in u32's in part to simiplify alignment requirements, especially
+/// storage is in u32's in part to simplify alignment requirements, especially
 /// in the zkVM.
 #[derive(
     Copy, Clone, Eq, Ord, PartialOrd, PartialEq, Hash, Pod, Zeroable, Serialize, Deserialize,

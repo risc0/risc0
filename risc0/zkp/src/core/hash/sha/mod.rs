@@ -16,9 +16,12 @@
 
 #[cfg(not(target_os = "zkvm"))]
 pub mod cpu;
+#[cfg(not(target_os = "zkvm"))]
 mod rng;
 pub mod rust_crypto;
 
+#[cfg(not(target_os = "zkvm"))]
+use alloc::boxed::Box;
 use alloc::{format, vec::Vec};
 use core::{
     fmt::{Debug, Display, Formatter},
@@ -32,8 +35,6 @@ use risc0_core::field::Field;
 pub use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
-use self::rng::ShaRng;
-use super::{HashFn, HashSuite};
 use crate::core::digest::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 
 /// The number of words in the representation of a [Block].
@@ -301,34 +302,49 @@ impl Debug for Block {
 }
 
 /// Wrap a Sha256 trait as a HashFn trait
-pub struct Sha256HashFn<S: Sha256> {
-    phantom: PhantomData<S>,
+#[cfg(not(target_os = "zkvm"))]
+struct Sha256HashFn;
+
+#[cfg(not(target_os = "zkvm"))]
+impl<F: Field> super::HashFn<F> for Sha256HashFn {
+    fn hash_pair(&self, a: &Digest, b: &Digest) -> Box<Digest> {
+        cpu::Impl::hash_pair(a, b)
+    }
+
+    fn hash_elem_slice(&self, slice: &[F::Elem]) -> Box<Digest> {
+        cpu::Impl::hash_raw_pod_slice(slice)
+    }
+
+    fn hash_ext_elem_slice(&self, slice: &[F::ExtElem]) -> Box<Digest> {
+        cpu::Impl::hash_raw_pod_slice(slice)
+    }
 }
 
-impl<S: Sha256, F: Field> HashFn<F> for Sha256HashFn<S> {
-    type DigestPtr = S::DigestPtr;
+#[cfg(not(target_os = "zkvm"))]
+struct Sha256RngFactory;
 
-    fn hash_pair(a: &Digest, b: &Digest) -> Self::DigestPtr {
-        S::hash_pair(a, b)
-    }
-
-    fn hash_elem_slice(slice: &[F::Elem]) -> Self::DigestPtr {
-        S::hash_raw_pod_slice(slice)
-    }
-
-    fn hash_ext_elem_slice(slice: &[F::ExtElem]) -> Self::DigestPtr {
-        S::hash_raw_pod_slice(slice)
+#[cfg(not(target_os = "zkvm"))]
+impl<F: Field> super::RngFactory<F> for Sha256RngFactory {
+    fn new_rng(&self) -> Box<dyn super::Rng<F>> {
+        Box::new(rng::ShaRng::new())
     }
 }
 
 /// Make a hash suite from a Sha256 trait
-pub struct Sha256HashSuite<F: Field, S: Sha256> {
-    phantom: PhantomData<(F, S)>,
+pub struct Sha256HashSuite<F: Field> {
+    phantom: PhantomData<F>,
 }
 
-impl<F: Field, S: Sha256> HashSuite<F> for Sha256HashSuite<F, S> {
-    type HashFn = Sha256HashFn<S>;
-    type Rng = ShaRng<S>;
+#[cfg(not(target_os = "zkvm"))]
+impl<F: Field> Sha256HashSuite<F> {
+    /// Construct a Sha256HashSuite
+    pub fn new() -> super::HashSuite<F> {
+        super::HashSuite {
+            name: "sha-256".into(),
+            hashfn: Box::new(Sha256HashFn {}),
+            rng: Box::new(Sha256RngFactory {}),
+        }
+    }
 }
 
 #[allow(missing_docs)]
@@ -354,8 +370,6 @@ pub mod testutil {
         test_sha_basics::<S>();
         test_elems::<S>();
         test_extelems::<S>();
-
-        super::rng::testutil::test_sha_rng_impl::<S>();
     }
 
     fn test_sha_basics<S: Sha256>() {

@@ -16,7 +16,7 @@
 
 use risc0_zkvm::{
     sha::{Digest, DIGEST_WORDS},
-    SessionFlatReceipt, SessionReceipt
+    SessionReceipt,
 };
 
 // This binary is here as a way to check which deps are included
@@ -26,7 +26,7 @@ use risc0_zkvm::{
 #[no_mangle]
 fn _start() {
     // TODO: use a real receipt and image_id
-    let receipt = SessionFlatReceipt {
+    let receipt = SessionReceipt {
         segments: Vec::new(),
         journal: Vec::new(),
     };
