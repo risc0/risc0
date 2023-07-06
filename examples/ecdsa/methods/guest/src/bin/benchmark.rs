@@ -26,7 +26,7 @@ use k256::{
 };
 use risc0_zkvm::guest::env;
 
-/// Basic function for benchamrking an operation.
+/// Basic function for benchmarking an operation.
 fn bench<T>(name: &str, func: impl Fn() -> T) {
     // Run the inner function twice, only logging the cycles in the second run, in
     // order to exclude paged-in operations from the benchmark count.
@@ -83,7 +83,7 @@ fn benchmark_scalar() {
     bench("invert_vartime", || x.invert_vartime().unwrap());
 }
 
-/// Benchmark secp256k1 elliptic curve group opertaions.
+/// Benchmark secp256k1 elliptic curve group operations.
 fn benchmark_group() {
     println!("");
     println!("Group operations:");
