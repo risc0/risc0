@@ -364,23 +364,31 @@ impl MemoryMonitor {
     }
 
     pub fn build_image(&mut self, pc: u32) -> MemoryImage {
+        // Write all dirty pages back to the memory image.
         for page_idx in self.faults.writes.iter() {
             if let Some(page) = self.pages[*page_idx as usize].as_ref() {
-                log::trace!("flush page: 0x{page_idx:08x}");
+                log::debug!("flush page: 0x{page_idx:08x}");
                 let info = &self.image.info;
                 let addr = info.get_page_addr(*page_idx);
                 self.image.store_region_in_page(addr, &page.buf);
             }
         }
+
+        // Write the system register file to the system page.
         let mut bytes = [0_u8; WORD_SIZE * REG_MAX];
         for idx in 0..REG_MAX {
             bytes[idx * WORD_SIZE..(idx + 1) * WORD_SIZE]
                 .copy_from_slice(&self.registers[idx].to_le_bytes());
         }
-        self.image
-            .store_region_in_page(SYSTEM.start() as u32, &bytes);
+        let sys_addr = SYSTEM.start() as u32;
+        self.image.store_region_in_page(sys_addr, &bytes);
+
+        // Create a new MemoryImage with an updated pc and image_id.
         let mut image = self.image.clone();
-        image.hash_pages_iter(self.faults.writes.iter().cloned());
+        // FIXME: figure out why we need to hash all pages rather than just the dirty
+        // ones.
+        // image.hash_pages_iter(self.faults.writes.iter().cloned());
+        image.hash_pages();
         image.pc = pc;
         image
     }
