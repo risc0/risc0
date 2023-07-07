@@ -225,11 +225,11 @@ impl Prover for RemoteProver {
         };
 
         loop {
-            // The session has already been started in the executor. Poll bonsai to see if
+            // The session has already been started in the executor. Poll bonsai to check if
             // the proof request succeeded.
             let res = session.status(&client)?;
             if res.status == "RUNNING" {
-                std::thread::sleep(Duration::from_secs(15));
+                std::thread::sleep(Duration::from_secs(5));
                 continue;
             }
             if res.status == "SUCCEEDED" {
