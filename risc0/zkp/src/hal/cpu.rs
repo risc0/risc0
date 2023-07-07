@@ -16,7 +16,6 @@
 
 use core::{
     cell::{Ref, RefMut},
-    marker::PhantomData,
     ops::Range,
 };
 use std::{cell::RefCell, rc::Rc};
@@ -24,39 +23,26 @@ use std::{cell::RefCell, rc::Rc};
 use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
 use rayon::prelude::*;
-use risc0_core::field::{baby_bear::BabyBear, Elem, ExtElem, Field};
+use risc0_core::field::{Elem, ExtElem, Field};
 
 use super::{Buffer, Hal, TRACKER};
 use crate::{
     core::{
         digest::Digest,
-        hash::{
-            blake2b::Blake2bCpuHashSuite,
-            poseidon::PoseidonHashSuite,
-            poseidon_254::Poseidon254HashSuite,
-            sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
-            HashFn, HashSuite,
-        },
+        hash::HashSuite,
         log2_ceil,
         ntt::{bit_rev_32, bit_reverse, evaluate_ntt, expand, interpolate_ntt},
     },
     FRI_FOLD,
 };
 
-pub struct CpuHal<F: Field, HS: HashSuite<F>> {
-    phantom: PhantomData<(F, HS)>,
+pub struct CpuHal<F: Field> {
+    suite: HashSuite<F>,
 }
 
-pub type BabyBearSha256CpuHal = CpuHal<BabyBear, Sha256HashSuite<BabyBear, CpuImpl>>;
-pub type BabyBearPoseidonCpuHal = CpuHal<BabyBear, PoseidonHashSuite>;
-pub type BabyBearPoseidon254CpuHal = CpuHal<BabyBear, Poseidon254HashSuite>;
-pub type BabyBearBlake2bCpuHal = CpuHal<BabyBear, Blake2bCpuHashSuite>;
-
-impl<F: Field, HS: HashSuite<F>> CpuHal<F, HS> {
-    pub fn new() -> Self {
-        CpuHal {
-            phantom: PhantomData,
-        }
+impl<F: Field> CpuHal<F> {
+    pub fn new(suite: HashSuite<F>) -> Self {
+        Self { suite }
     }
 }
 
@@ -262,14 +248,11 @@ impl<T: Pod> Buffer<T> for CpuBuffer<T> {
     }
 }
 
-impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
+impl<F: Field> Hal for CpuHal<F> {
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
     type Buffer<T: Clone + Pod> = CpuBuffer<T>;
-    type HashSuite = HS;
-    type HashFn = HS::HashFn;
-    type Rng = HS::Rng;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         CpuBuffer::new(size)
@@ -570,7 +553,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
             let column: Vec<Self::Elem> =
                 (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
-            *output = *Self::HashFn::hash_elem_slice(column.as_slice());
+            *output = *self.suite.hashfn.hash_elem_slice(column.as_slice());
         });
     }
 
@@ -583,7 +566,7 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
         (0..output.size()).into_par_iter().for_each(|idx| {
             let in1 = input.get(2 * idx + 0);
             let in2 = input.get(2 * idx + 1);
-            output.set(idx, *Self::HashFn::hash_pair(&in1, &in2));
+            output.set(idx, *self.suite.hashfn.hash_pair(&in1, &in2));
         });
     }
 
@@ -605,19 +588,25 @@ impl<F: Field, HS: HashSuite<F>> Hal for CpuHal<F, HS> {
     fn has_unified_memory(&self) -> bool {
         true
     }
+
+    fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
+        &self.suite
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use hex::FromHex;
     use rand::thread_rng;
+    use risc0_core::field::baby_bear::BabyBear;
 
     use super::*;
+    use crate::core::hash::sha::Sha256HashSuite;
 
     #[test]
     #[should_panic]
     fn check_req() {
-        let hal = BabyBearSha256CpuHal::new();
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new());
         let a = hal.alloc_elem("a", 10);
         let b = hal.alloc_elem("b", 20);
         hal.eltwise_add_elem(&a, &b, &b);
@@ -625,7 +614,7 @@ mod tests {
 
     #[test]
     fn fp() {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new());
         const COUNT: usize = 1024 * 1024;
         test_binary(
             &hal,
@@ -666,7 +655,7 @@ mod tests {
     }
 
     fn do_hash_rows(rows: usize, cols: usize, expected: &[&str]) {
-        let hal: BabyBearSha256CpuHal = CpuHal::new();
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new());
         let matrix_size = rows * cols;
         let matrix = hal.alloc_elem("matrix", matrix_size);
         let output = hal.alloc_digest("output", rows);

@@ -87,7 +87,7 @@ impl<H: Hal> MerkleTreeProver<H> {
     }
 
     /// Write the 'top' of the merkle tree and commit to the root.
-    pub fn commit(&self, iop: &mut WriteIOP<H::Field, H::Rng>) {
+    pub fn commit(&self, iop: &mut WriteIOP<H::Field>) {
         let top_size = self.params.top_size;
         iop.write_pod_slice(&self.nodes[top_size..top_size * 2]);
         iop.commit(self.root());
@@ -107,7 +107,7 @@ impl<H: Hal> MerkleTreeProver<H> {
     /// It is presumed the verifier is given the index of the row from other
     /// parts of the protocol, and verification will of course fail if the
     /// wrong row is specified.
-    pub fn prove(&self, hal: &H, iop: &mut WriteIOP<H::Field, H::Rng>, idx: usize) -> Vec<H::Elem> {
+    pub fn prove(&self, hal: &H, iop: &mut WriteIOP<H::Field>, idx: usize) -> Vec<H::Elem> {
         assert!(idx < self.params.row_size);
         let mut out = Vec::with_capacity(self.params.col_size);
         if hal.has_unified_memory() {
@@ -145,41 +145,19 @@ impl<H: Hal> MerkleTreeProver<H> {
 mod tests {
     use rand::Rng;
     use risc0_core::field::{
-        baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem},
+        baby_bear::{BabyBear, BabyBearElem},
         Elem,
     };
 
     use super::*;
     use crate::{
-        adapter::{MixState, PolyExt},
         core::{
-            hash::{
-                poseidon::PoseidonHashSuite,
-                sha::{cpu::Impl as CpuImpl, Sha256HashSuite},
-                HashSuite, Rng as _,
-            },
+            hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite, HashSuite},
             log2_ceil,
         },
         hal::cpu::CpuHal,
-        verify::{merkle::MerkleTreeVerifier, read_iop::ReadIOP, CpuVerifyHal, VerificationError},
+        verify::{MerkleTreeVerifier, ReadIOP, VerificationError},
     };
-
-    struct MockCircuit {}
-
-    impl PolyExt<BabyBear> for MockCircuit {
-        fn poly_ext(
-            &self,
-            _mix: &BabyBearExtElem,
-            _u: &[BabyBearExtElem],
-            _args: &[&[BabyBearElem]],
-        ) -> MixState<BabyBearExtElem> {
-            unimplemented!()
-        }
-    }
-
-    type ShaSuite = Sha256HashSuite<BabyBear, CpuImpl>;
-    type PoseidonSuite = PoseidonHashSuite;
-    type VerifierHal<'a, HS> = CpuVerifyHal<'a, BabyBear, HS, MockCircuit>;
 
     fn init_prover<H: Hal>(
         hal: &H,
@@ -198,29 +176,32 @@ mod tests {
         MerkleTreeProver::new(hal, &matrix, rows, cols, queries)
     }
 
-    fn bad_row_access<HS: HashSuite<BabyBear>>(rows: usize, cols: usize, queries: usize) {
-        let hal = CpuHal::<BabyBear, HS>::new();
+    fn bad_row_access(suite: HashSuite<BabyBear>, rows: usize, cols: usize, queries: usize) {
+        let hal = CpuHal::new(suite);
         let prover = init_prover(&hal, rows, cols, queries);
-        let mut iop = WriteIOP::<BabyBear, HS::Rng>::new();
+        let mut iop = WriteIOP::new(hal.get_hash_suite().rng.as_ref());
         prover.prove(&hal, &mut iop, rows);
     }
 
     fn bad_row_access_all(rows: usize, cols: usize, queries: usize) {
-        bad_row_access::<ShaSuite>(rows, cols, queries);
-        bad_row_access::<PoseidonSuite>(rows, cols, queries);
+        bad_row_access(Sha256HashSuite::new(), rows, cols, queries);
+        bad_row_access(PoseidonHashSuite::new(), rows, cols, queries);
     }
 
-    fn possibly_bad_verify<HS: HashSuite<BabyBear>>(
+    fn possibly_bad_verify(
+        suite: HashSuite<BabyBear>,
         rows: usize,
         cols: usize,
         queries: usize,
         bad_query: usize,
         manipulate_proof: bool,
     ) {
-        let hal = CpuHal::<BabyBear, HS>::new();
+        let hal = CpuHal::new(suite);
+        let hashfn = hal.get_hash_suite().hashfn.as_ref();
+        let rng = hal.get_hash_suite().rng.as_ref();
         let prover = init_prover(&hal, rows, cols, queries);
 
-        let mut iop = WriteIOP::<BabyBear, HS::Rng>::new();
+        let mut iop = WriteIOP::new(rng);
         prover.commit(&mut iop);
         for _query in 0..queries {
             let r_idx = iop.rng.random_bits(log2_ceil(rows)) as usize;
@@ -237,8 +218,8 @@ mod tests {
             let manip_idx = rng.gen::<usize>() % iop.proof.len();
             iop.proof[manip_idx] ^= 1;
         }
-        let mut r_iop = ReadIOP::<BabyBear, HS::Rng>::new(&iop.proof);
-        let verifier = MerkleTreeVerifier::<VerifierHal<HS>>::new(&mut r_iop, rows, cols, queries);
+        let mut r_iop = ReadIOP::new(&iop.proof, rng);
+        let verifier = MerkleTreeVerifier::new(&mut r_iop, hashfn, rows, cols, queries);
         assert_eq!(verifier.root(), prover.root());
         let mut err = false;
         for query in 0..queries {
@@ -248,7 +229,7 @@ mod tests {
                     assert!(false, "Cannot test for bad query if there is only one row");
                 }
                 let r_idx = (r_idx + 1) % rows;
-                let verification = verifier.verify(&mut r_iop, r_idx);
+                let verification = verifier.verify(&mut r_iop, hashfn, r_idx);
                 match verification {
                     Ok(_) => assert!(
                         false,
@@ -263,7 +244,7 @@ mod tests {
                 err = true;
                 break;
             }
-            let col = verifier.verify(&mut r_iop, r_idx).unwrap();
+            let col = verifier.verify(&mut r_iop, hashfn, r_idx).unwrap();
             for c_idx in 0..cols {
                 assert_eq!(
                     col[c_idx],
@@ -283,8 +264,22 @@ mod tests {
         bad_query: usize,
         manipulate_proof: bool,
     ) {
-        possibly_bad_verify::<ShaSuite>(rows, cols, queries, bad_query, manipulate_proof);
-        possibly_bad_verify::<PoseidonSuite>(rows, cols, queries, bad_query, manipulate_proof);
+        possibly_bad_verify(
+            Sha256HashSuite::new(),
+            rows,
+            cols,
+            queries,
+            bad_query,
+            manipulate_proof,
+        );
+        possibly_bad_verify(
+            PoseidonHashSuite::new(),
+            rows,
+            cols,
+            queries,
+            bad_query,
+            manipulate_proof,
+        );
     }
 
     fn randomize_sizes() -> (usize, usize, usize) {

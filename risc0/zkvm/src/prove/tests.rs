@@ -16,7 +16,6 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use risc0_circuit_rv32im::cpu::CpuEvalCheck;
-use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{digest::Digest, hash::blake2b::Blake2bCpuHashSuite},
     hal::cpu::CpuHal,
@@ -30,18 +29,19 @@ use test_log::test;
 use super::{get_prover, LocalProver, Prover};
 use crate::{
     prove::HalEval,
-    receipt::SessionReceipt,
+    receipt::{SessionReceipt, VerifierContext},
     serde::{from_slice, to_vec},
-    testutils, Executor, ExecutorEnv, ExitCode, SessionFlatReceipt, CIRCUIT,
+    testutils, Executor, ExecutorEnv, ExitCode, SegmentReceipt, CIRCUIT,
 };
 
-fn prove_nothing(name: &str) -> Result<Box<dyn SessionReceipt>> {
+fn prove_nothing(name: &str) -> Result<SessionReceipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let prover = get_prover(name);
-    prover.prove_session(&session)
+    let ctx = VerifierContext::default();
+    prover.prove_session(&ctx, &session)
 }
 
 #[test]
@@ -53,7 +53,7 @@ fn hashfn_poseidon() {
 #[test]
 fn hashfn_blake2b() {
     let hal_eval = HalEval {
-        hal: Rc::new(CpuHal::<BabyBear, Blake2bCpuHashSuite>::new()),
+        hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new())),
         eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
@@ -61,35 +61,30 @@ fn hashfn_blake2b() {
     let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let prover = LocalProver::new("cpu:blake2b", hal_eval);
-    prover.prove_session(&session).unwrap();
+    let ctx = VerifierContext::default();
+    prover.prove_session(&ctx, &session).unwrap();
 }
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn receipt_serde() {
-    let receipt = prove_nothing("$default")
-        .unwrap()
-        .as_any()
-        .downcast_ref::<SessionFlatReceipt>()
-        .unwrap()
-        .clone();
+    let receipt = prove_nothing("$default").unwrap();
     let encoded: Vec<u32> = to_vec(&receipt).unwrap();
-    let decoded: SessionFlatReceipt = from_slice(&encoded).unwrap();
+    let decoded: SessionReceipt = from_slice(&encoded).unwrap();
     assert_eq!(decoded, receipt);
-    decoded.verify(MULTI_TEST_ID.into()).unwrap();
+    decoded.verify(MULTI_TEST_ID).unwrap();
 }
 
 #[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn check_image_id() {
-    use std::borrow::Borrow;
     let receipt = prove_nothing("$default").unwrap();
     let mut image_id: Digest = MULTI_TEST_ID.into();
     for word in image_id.as_mut_words() {
         *word = word.wrapping_add(1);
     }
     assert_eq!(
-        crate::verify(receipt.borrow(), image_id).unwrap_err(),
+        receipt.verify(image_id).unwrap_err(),
         VerificationError::ImageVerificationError
     );
 }
@@ -103,7 +98,7 @@ fn sha_basics() {
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
-        hex::encode(Digest::try_from(receipt.get_journal().as_slice()).unwrap())
+        hex::encode(Digest::try_from(receipt.journal).unwrap())
     }
 
     assert_eq!(
@@ -127,9 +122,6 @@ fn sha_basics() {
 #[test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
-    // use rand::SeedableRng;
-    // let cases = testutils::generate_bigint_test_cases(&mut
-    // rand::rngs::StdRng::seed_from_u64(1), 1);
     for case in cases {
         println!("Running BigInt circuit test case: {:08x?}", case);
         let input = to_vec(&MultiTestSpec::BigInt {
@@ -143,17 +135,16 @@ fn bigint_accel() {
         let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
-        assert_eq!(
-            receipt.get_journal().as_slice(),
-            bytemuck::cast_slice(case.expected().as_slice())
-        );
+        let expected = case.expected();
+        let expected: &[u8] = bytemuck::cast_slice(expected.as_slice());
+        assert_eq!(receipt.journal, expected);
     }
 }
 
 #[test]
 #[serial]
 fn memory_io() {
-    fn run_memio(pairs: &[(usize, usize)]) -> Result<Box<dyn SessionReceipt>> {
+    fn run_memio(pairs: &[(usize, usize)]) -> Result<SessionReceipt> {
         let spec = MultiTestSpec::ReadWriteMem {
             values: pairs
                 .iter()
@@ -207,15 +198,16 @@ fn pause_continue() {
     let session = exec.run().unwrap();
     assert_eq!(session.segments.len(), 1);
     assert_eq!(session.exit_code, ExitCode::Paused(0));
-    let receipt = session
-        .prove()
-        .unwrap()
-        .as_any()
-        .downcast_ref::<SessionFlatReceipt>()
-        .unwrap()
-        .clone();
+    let receipt = session.prove().unwrap();
     assert_eq!(receipt.segments.len(), 1);
-    assert_eq!(receipt.segments[0].index, 0);
+    assert_eq!(
+        receipt.segments[0]
+            .as_any()
+            .downcast_ref::<SegmentReceipt>()
+            .unwrap()
+            .index,
+        0
+    );
 
     // Run until sys_halt
     let session = exec.run().unwrap();
@@ -286,15 +278,16 @@ fn continuation() {
     }
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
-    let receipts = session
-        .prove()
-        .unwrap()
-        .as_any()
-        .downcast_ref::<SessionFlatReceipt>()
-        .unwrap()
-        .clone();
-    for (idx, receipt) in receipts.segments.iter().enumerate() {
-        assert_eq!(receipt.index, idx as u32);
+    let receipt = session.prove().unwrap();
+    for (idx, receipt) in receipt.segments.iter().enumerate() {
+        assert_eq!(
+            receipt
+                .as_any()
+                .downcast_ref::<SegmentReceipt>()
+                .unwrap()
+                .index,
+            idx as u32
+        );
     }
 }
 

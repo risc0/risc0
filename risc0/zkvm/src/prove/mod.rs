@@ -23,7 +23,6 @@
 //! use risc0_zkvm::{Executor, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
-//!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
@@ -52,18 +51,17 @@ use risc0_core::field::{
 };
 use risc0_zkp::{
     adapter::{CircuitInfo, TapsProvider},
-    core::{digest::DIGEST_WORDS, hash::HashSuite},
+    core::digest::DIGEST_WORDS,
     hal::{EvalCheck, Hal},
     layout::Buffer,
     prove::{adapter::ProveAdapter, executor::Executor},
-    verify::CpuVerifyHal,
 };
 use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
 use crate::{
-    receipt::SessionReceipt, ControlId, Segment, SegmentReceipt, Session, SessionFlatReceipt,
-    CIRCUIT,
+    receipt::{Receipt, SessionReceipt, VerifierContext},
+    Segment, SegmentReceipt, Session, CIRCUIT,
 };
 
 /// HAL creation functions for CUDA.
@@ -125,7 +123,11 @@ pub mod cpu {
     use std::rc::Rc;
 
     use risc0_circuit_rv32im::{cpu::CpuEvalCheck, CircuitImpl};
-    use risc0_zkp::hal::cpu::{BabyBearPoseidonCpuHal, BabyBearSha256CpuHal};
+    use risc0_core::field::baby_bear::BabyBear;
+    use risc0_zkp::{
+        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
+        hal::cpu::CpuHal,
+    };
 
     use super::HalEval;
     use crate::CIRCUIT;
@@ -138,8 +140,8 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn sha256_hal_eval() -> HalEval<BabyBearSha256CpuHal, CpuEvalCheck<'static, CircuitImpl>> {
-        let hal = Rc::new(BabyBearSha256CpuHal::new());
+    pub fn sha256_hal_eval() -> HalEval<CpuHal<BabyBear>, CpuEvalCheck<'static, CircuitImpl>> {
+        let hal = Rc::new(CpuHal::new(Sha256HashSuite::new()));
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
@@ -152,9 +154,8 @@ pub mod cpu {
     /// (Hardware Abstraction Layer) to accelerate computationally intensive
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
-    pub fn poseidon_hal_eval() -> HalEval<BabyBearPoseidonCpuHal, CpuEvalCheck<'static, CircuitImpl>>
-    {
-        let hal = Rc::new(BabyBearPoseidonCpuHal::new());
+    pub fn poseidon_hal_eval() -> HalEval<CpuHal<BabyBear>, CpuEvalCheck<'static, CircuitImpl>> {
+        let hal = Rc::new(CpuHal::new(PoseidonHashSuite::new()));
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
@@ -177,10 +178,10 @@ where
 /// TODO
 pub trait Prover {
     /// TODO
-    fn prove_session(&self, session: &Session) -> Result<Box<dyn SessionReceipt>>;
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt>;
 
     /// TODO
-    fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt>;
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
 
     /// TODO
     fn get_peak_memory_usage(&self) -> usize;
@@ -193,7 +194,6 @@ pub trait Prover {
 pub struct LocalProver<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
     name: String,
@@ -203,7 +203,6 @@ where
 impl<H, E> LocalProver<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
     /// Construct a [LocalProver] with the given name and [HalEval].
@@ -218,7 +217,6 @@ where
 impl<H, E> Prover for LocalProver<H, E>
 where
     H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    <<H as Hal>::HashSuite as HashSuite<BabyBear>>::HashFn: ControlId,
     E: EvalCheck<H>,
 {
     fn get_name(&self) -> String {
@@ -229,30 +227,26 @@ where
         self.hal_eval.hal.get_memory_usage()
     }
 
-    fn prove_session(&self, session: &Session) -> Result<Box<dyn SessionReceipt>> {
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt> {
         log::info!("prove_session: {}", self.name);
-        let mut segments = Vec::new();
+        let mut segments: Vec<Box<dyn Receipt>> = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
             for hook in &session.hooks {
                 hook.on_pre_prove_segment(&segment);
             }
-            segments.push(self.prove_segment(&segment)?);
+            segments.push(Box::new(self.prove_segment(ctx, &segment)?));
             for hook in &session.hooks {
                 hook.on_post_prove_segment(&segment);
             }
         }
-        let receipt = SessionFlatReceipt {
-            segments,
-            journal: session.journal.clone(),
-        };
+        let receipt = SessionReceipt::new(segments, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
-        receipt.verify_with_hal(&hal, image_id)?;
-        Ok(Box::new(receipt))
+        receipt.verify_with_context(ctx, image_id)?;
+        Ok(receipt)
     }
 
-    fn prove_segment(&self, segment: &Segment) -> Result<SegmentReceipt> {
+    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
         log::info!(
             "prove_segment[{}]: po2: {}, insn_cycles: {}",
             segment.index,
@@ -260,6 +254,7 @@ where
             segment.insn_cycles,
         );
         let (hal, eval) = (self.hal_eval.hal.as_ref(), &self.hal_eval.eval);
+        let hashfn = &hal.get_hash_suite().name;
 
         let io = segment.prepare_globals();
         let machine = MachineContext::new(segment);
@@ -301,9 +296,9 @@ where
         let receipt = SegmentReceipt {
             seal,
             index: segment.index,
+            hashfn: hashfn.clone(),
         };
-        let hal = CpuVerifyHal::<_, H::HashSuite, _>::new(&crate::CIRCUIT);
-        receipt.verify_with_hal(&hal)?;
+        receipt.verify_with_context(ctx)?;
 
         Ok(receipt)
     }
@@ -370,15 +365,15 @@ pub fn get_prover(name: &str) -> Rc<dyn Prover> {
 
 impl Session {
     /// For each segment, call [Segment::prove] and collect the receipts.
-    pub fn prove(&self) -> Result<Box<dyn SessionReceipt>> {
-        default_prover().prove_session(self)
+    pub fn prove(&self) -> Result<SessionReceipt> {
+        default_prover().prove_session(&VerifierContext::default(), self)
     }
 }
 
 impl Segment {
     /// Call the ZKP system to produce a [SegmentReceipt].
-    pub fn prove(&self) -> Result<SegmentReceipt> {
-        default_prover().prove_segment(self)
+    pub fn prove(&self, ctx: &VerifierContext) -> Result<SegmentReceipt> {
+        default_prover().prove_segment(ctx, self)
     }
 
     fn prepare_globals(&self) -> Vec<Elem> {

@@ -50,7 +50,7 @@ struct Args {
     /// Optional input file path to an image mask to apply to Waldo.
     /// Grayscale pixel values will be subtracted from the cropped image of
     /// Waldo such that a black pixel in the mask will result in the
-    /// cooresponding image pixel being blacked out. Must be the same
+    /// corresponding image pixel being blacked out. Must be the same
     /// dimensions, in pixels, as the cut out x and y.
     #[clap(short = 'm', long, value_parser, value_hint = clap::ValueHint::FilePath)]
     mask: Option<PathBuf>,
@@ -130,7 +130,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let receipt = session.prove()?;
 
     // Save the receipt to disk so it can be sent to the verifier.
-    fs::write(&args.receipt, receipt.encode())?;
+    fs::write(&args.receipt, bincode::serialize(&receipt).unwrap())?;
     println!("Success! Saved the receipt to {}", &args.receipt.display());
 
     Ok(())

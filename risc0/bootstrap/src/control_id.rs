@@ -16,6 +16,7 @@ const CONTROL_ID_ENTRIES: usize = risc0_zkp::MAX_CYCLES_PO2 - risc0_zkp::MIN_CYC
 
 pub type RawControlId = [&'static str; CONTROL_ID_ENTRIES];
 
+/// Control ID for SHA-256
 pub const SHA256_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
@@ -32,6 +33,7 @@ pub const SHA256_CONTROL_ID: RawControlId = [
     "{}", //
 ];
 
+/// Control ID for Poseidon
 pub const POSEIDON_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
@@ -48,6 +50,7 @@ pub const POSEIDON_CONTROL_ID: RawControlId = [
     "{}", //
 ];
 
+/// Control ID for Blake2b
 pub const BLAKE2B_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
