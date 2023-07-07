@@ -132,7 +132,7 @@ pub trait Exec {
 /// Construct a new [Exec] from the ELF binary of the guest program you
 /// want to run and an [ExecutorEnv] containing relevant environmental
 /// configuration details.
-pub fn make_exec_from_elf<'a>(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Box<dyn Exec + 'a>> {
+pub fn default_executor_from_elf<'a>(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Box<dyn Exec + 'a>> {
     let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
     let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
     if std::env::var("BONSAI_API_URL").is_ok() && std::env::var("BONSAI_API_KEY").is_ok() {
