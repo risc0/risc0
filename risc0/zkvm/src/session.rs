@@ -100,10 +100,11 @@ pub struct Segment {
 /// The Events of [Session]
 pub trait SessionEvents {
     /// Fired before the proving of a segment starts.
-    fn on_pre_prove_segment(&self, _: &Segment) {}
+    // The awkward let _ is required to suppress the unused variables warning
+    fn on_pre_prove_segment(&self, segment: &Segment) { let _ = segment; }
 
     /// Fired after the proving of a segment ends.
-    fn on_post_prove_segment(&self, _: &Segment) {}
+    fn on_post_prove_segment(&self, segment: &Segment) { let _ = segment; }
 }
 
 
