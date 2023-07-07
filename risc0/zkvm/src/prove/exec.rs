@@ -351,6 +351,7 @@ impl MachineContext {
 
     fn page_info(&mut self, cycle: usize) -> (Elem, Elem, Elem) {
         if let Some(page_idx) = self.faults.reads.pop_last() {
+            log::debug!("[{cycle}] page_read: 0x{page_idx:08x}");
             return (Elem::ONE, page_idx.into(), Elem::ZERO);
         }
 
