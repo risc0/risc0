@@ -252,6 +252,7 @@ impl Prover for RemoteProver {
         bail!("this is unimplemented for prover [{}]", self.get_name())
     }
 }
+
 /// An implementation of a [Prover] that runs locally.
 pub struct LocalProver<H, E>
 where
@@ -407,13 +408,13 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
 pub fn default_prover() -> Rc<dyn Prover> {
     let provers = provers();
 
-    if std::env::var("BONSAI_API_URL").is_ok() && std::env::var("BONSAI_API_KEY").is_ok() {
-        if let Some(prover) = provers.get("$bonsai") {
+    if let Ok(requested) = std::env::var("RISC0_PROVER") {
+        if let Some(prover) = provers.get(&requested) {
             return prover.clone();
         }
     }
-    if let Ok(requested) = std::env::var("RISC0_PROVER") {
-        if let Some(prover) = provers.get(&requested) {
+    if std::env::var("BONSAI_API_URL").is_ok() && std::env::var("BONSAI_API_KEY").is_ok() {
+        if let Some(prover) = provers.get("$bonsai") {
             return prover.clone();
         }
     }
