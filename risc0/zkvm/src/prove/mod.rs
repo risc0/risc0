@@ -40,7 +40,7 @@ mod tests;
 
 use std::{collections::HashMap, rc::Rc, time::Duration};
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, bail, Result};
 use bonsai_sdk::alpha as bonsai_sdk;
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
@@ -221,7 +221,7 @@ impl Prover for RemoteProver {
 
         let session = match &session.bonsai_session_id {
             Some(id) => bonsai_sdk::SessionId::new(id.clone()),
-            None => return Err(anyhow!("Session does not have a bonsai session ID")),
+            None => bail!("Session does not have a bonsai session ID"),
         };
 
         loop {
@@ -236,14 +236,14 @@ impl Prover for RemoteProver {
                 // Download the receipt, containing the output
                 let receipt_url = match res.receipt_url {
                     Some(url) => url,
-                    None => return Err(anyhow!("API error, missing receipt on completed session")),
+                    None => bail!("API error, missing receipt on completed session"),
                 };
 
                 let receipt_buf = client.download(&receipt_url)?;
                 let receipt: SessionReceipt = bincode::deserialize(&receipt_buf)?;
                 return Ok(receipt);
             } else {
-                return Err(anyhow!("Bonsai prover workflow exited: {}", res.status));
+                bail!("Bonsai prover workflow exited: {}", res.status);
             }
         }
     }

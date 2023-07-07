@@ -28,9 +28,8 @@ mod tests;
 
 use std::{cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
-use ::bonsai_sdk::alpha::SdkErr;
+use ::bonsai_sdk::{alpha as bonsai_sdk, alpha::SdkErr};
 use anyhow::{anyhow, bail, Context, Result};
-use bonsai_sdk::alpha as bonsai_sdk;
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
 use risc0_zkp::{
     core::{
