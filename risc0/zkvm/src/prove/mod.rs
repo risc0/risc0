@@ -249,10 +249,7 @@ impl Prover for RemoteProver {
     }
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
-        Err(anyhow!(
-            "this is unimplemented for prover [{}]",
-            self.get_name()
-        ))
+        bail!("this is unimplemented for prover [{}]", self.get_name())
     }
 }
 /// An implementation of a [Prover] that runs locally.
