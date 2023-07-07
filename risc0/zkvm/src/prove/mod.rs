@@ -20,7 +20,7 @@
 //! information.
 //!
 //! ```rust
-//! use risc0_zkvm::{Executor, ExecutorEnv};
+//! use risc0_zkvm::{LocalExecutorcutor, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
 //! # #[cfg(not(feature = "cuda"))]
