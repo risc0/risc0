@@ -57,7 +57,7 @@ pub use self::{
     exec::io::{Syscall, SyscallContext},
     exec::{Executor, ExecutorEnv, ExecutorEnvBuilder},
     prove::loader::Loader,
-    session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef, Events},
+    session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef, SessionEvents},
 };
 use crate::control_id::{RawControlId, BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID};
 #[cfg(not(target_os = "zkvm"))]

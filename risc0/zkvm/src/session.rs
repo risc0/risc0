@@ -55,7 +55,7 @@ pub struct Session {
 
     /// The hooks to be called during the proving phase.
     #[serde(skip)]
-    pub hooks: Vec<Box<dyn Events>>,
+    pub hooks: Vec<Box<dyn SessionEvents>>,
 
 }
 
@@ -98,7 +98,7 @@ pub struct Segment {
 }
 
 /// The Events of [Session]
-pub trait Events {
+pub trait SessionEvents {
     /// Fired before the proving of a segment starts.
     fn on_pre_prove_segment(&self, _: &Segment) {}
 
@@ -128,7 +128,7 @@ impl Session {
     }
 
     /// Add a hook to be called during the proving phase.
-    pub fn add_hook<E: Events + 'static>(&mut self, hook: E) {
+    pub fn add_hook<E: SessionEvents + 'static>(&mut self, hook: E) {
         self.hooks.push(Box::new(hook));
     }
 }
