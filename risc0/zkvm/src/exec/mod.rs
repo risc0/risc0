@@ -28,7 +28,9 @@ mod tests;
 
 use std::{cell::RefCell, fmt::Debug, io::Write, mem::take, rc::Rc};
 
+use ::bonsai_sdk::alpha::SdkErr;
 use anyhow::{anyhow, bail, Context, Result};
+use bonsai_sdk::alpha as bonsai_sdk;
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
 use risc0_zkp::{
     core::{
@@ -124,6 +126,72 @@ impl Write for Journal {
     }
 }
 
+pub trait Exec {
+    fn run(&mut self) -> Result<Session>;
+}
+
+/// Construct a new [Exec] from the ELF binary of the guest program you
+/// want to run and an [ExecutorEnv] containing relevant environmental
+/// configuration details.
+pub fn make_exec_from_elf<'a>(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Box<dyn Exec + 'a>> {
+    let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
+    let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
+    if std::env::var("BONSAI_API_URL").is_ok() && std::env::var("BONSAI_API_KEY").is_ok() {
+        Ok(Box::new(RemoteExec::new(env, image)))
+    } else {
+        Ok(Box::new(Executor::new(env, image, program.entry)))
+    }
+}
+
+pub struct RemoteExec<'a> {
+    env: ExecutorEnv<'a>,
+    image: MemoryImage,
+}
+
+impl<'a> RemoteExec<'a> {
+    fn new(env: ExecutorEnv<'a>, image: MemoryImage) -> Self {
+        Self { env, image }
+    }
+}
+
+impl<'a> Exec for RemoteExec<'a> {
+    fn run(&mut self) -> Result<Session> {
+        let client = bonsai_sdk::Client::from_env()?;
+
+        // upload the image
+        let image_id = hex::encode(self.image.compute_id());
+        let image = bincode::serialize(&self.image)?;
+
+        // ImageIdExists indicates that this image has already been uploaded to bonsai.
+        // If this is the case, simply move on to uploading the input.
+        match client.upload_img(&image_id, image) {
+            Ok(()) => (),
+            Err(SdkErr::ImageIdExists) => (),
+            Err(err) => return Err(err.into()),
+        }
+
+        // upload input data
+        let input_id = client.upload_input(self.env.input.clone())?;
+
+        // While this is the executor, we want to start a session on the bonsai prover.
+        // By doing so, we can return a session ID so that the prover can use it to
+        // retrieve the receipt.
+        let session = client.create_session(image_id, input_id)?;
+        Ok(Session::new_with_id(
+            Vec::new(),
+            Vec::new(),
+            ExitCode::Halted(0),
+            Some(session.uuid),
+        ))
+    }
+}
+
+impl<'a> Exec for Executor<'a> {
+    fn run(&mut self) -> Result<Session> {
+        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
+    }
+}
+
 impl<'a> Executor<'a> {
     /// Construct a new [Executor] from a [MemoryImage] and entry point.
     ///
@@ -176,25 +244,6 @@ impl<'a> Executor<'a> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         Ok(Self::new(env, image, program.entry))
-    }
-
-    /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
-    /// reached, producing a [Session] as a result.
-    /// # Example
-    /// ```
-    /// use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv, Session};
-    /// use risc0_zkvm_methods::{BENCH_ELF, bench::{BenchmarkSpec, SpecWithIters}};
-    ///
-    /// let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, 1);
-    /// let env = ExecutorEnv::builder()
-    ///    .add_input(&to_vec(&spec).unwrap())
-    ///    .build()
-    ///    .unwrap();
-    /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
-    /// let session = exec.run().unwrap();
-    /// ```
-    pub fn run(&mut self) -> Result<Session> {
-        self.run_with_callback(|segment| Ok(Box::new(SimpleSegmentRef::new(segment))))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
