@@ -40,7 +40,7 @@ mod tests;
 
 use std::{collections::HashMap, rc::Rc, time::Duration};
 
-use anyhow::{anyhow, bail, Result};
+use anyhow::{bail, Result};
 use bonsai_sdk::alpha as bonsai_sdk;
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
