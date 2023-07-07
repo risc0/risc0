@@ -106,7 +106,7 @@ cargo install cargo-risczero
 For the above commands to build successfully you will need to have installed the required dependencies. On a Ubuntu system you can install them with:
 
 ```bash
-sudo apt install curl build-essential libssl-dev pkgconf-bin
+sudo apt install curl build-essential libssl-dev pkgconf
 ```
 
 Then, create a new project (named `my_project` in this example):
