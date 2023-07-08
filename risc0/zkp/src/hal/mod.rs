@@ -189,12 +189,14 @@ impl MemoryTracker {
 #[cfg(test)]
 #[allow(unused)]
 mod testutil {
+    use std::rc::Rc;
+
     use rand::{thread_rng, RngCore};
     use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
 
-    use super::Hal;
+    use super::{dual::DualHal, Hal};
     use crate::{
-        core::{digest::Digest, hash::HashSuite},
+        core::digest::Digest,
         hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
     };
@@ -202,88 +204,59 @@ mod testutil {
     const COUNTS: [usize; 7] = [1, 9, 12, 1001, 1024, 1025, 1024 * 1024];
     const DATA_SIZE: usize = 223;
 
-    pub(crate) fn batch_bit_reverse<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    fn generate_elem<H: Hal, R: RngCore>(hal: &H, rng: &mut R, size: usize) -> H::Buffer<H::Elem> {
+        let values: Vec<H::Elem> = (0..size).map(|_| H::Elem::random(rng)).collect();
+        hal.copy_from_elem("values", &values)
+    }
+
+    fn generate_extelem<H: Hal, R: RngCore>(
+        hal: &H,
+        rng: &mut R,
+        size: usize,
+    ) -> H::Buffer<H::ExtElem> {
+        let values: Vec<H::ExtElem> = (0..size).map(|_| H::ExtElem::random(rng)).collect();
+        hal.copy_from_extelem("values", &values)
+    }
+
+    pub(crate) fn batch_bit_reverse<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
         let steps = 1 << 12;
         let count = DATA_SIZE;
         let domain = steps * INV_RATE;
         let io_size = count * domain;
 
-        let cpu_io = hal_cpu.alloc_elem("io", io_size);
-        let gpu_io = hal_gpu.alloc_elem("io", io_size);
-
-        cpu_io.view_mut(|c| {
-            gpu_io.view_mut(|g| {
-                for i in 0..io_size {
-                    let value = H::Elem::random(&mut rng);
-                    c[i] = value;
-                    g[i] = value;
-                }
-            });
-        });
-
-        hal_cpu.batch_bit_reverse(&cpu_io, count);
-        hal_gpu.batch_bit_reverse(&gpu_io, count);
-
-        gpu_io.view(|g| {
-            cpu_io.view(|c| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
+        let io = generate_elem(&hal, &mut rng, io_size);
+        hal.batch_bit_reverse(&io, count);
     }
 
-    pub(crate) fn batch_evaluate_any<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn batch_evaluate_any<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
-        let steps = 1 << 12;
-        let domain = steps * INV_RATE;
-        let coeffs_size = H::CHECK_SIZE * domain;
-
-        let poly_count = H::CHECK_SIZE;
+        let eval_size = 865;
+        let poly_count = 223;
+        let steps = 1 << 16;
+        let coeffs_size = steps * poly_count;
 
         let z = H::ExtElem::random(&mut rng);
         let z_pow = z.pow(H::ExtElem::EXT_SIZE);
 
-        let coeffs_cpu = hal_cpu.alloc_elem("coeffs", coeffs_size);
-        let which_cpu = hal_cpu.copy_from_u32("which", &vec![0; H::CHECK_SIZE]);
-        let xs_cpu = hal_cpu.copy_from_extelem("xs", &vec![z_pow; H::CHECK_SIZE]);
-        let out_cpu = hal_cpu.alloc_extelem("out", H::CHECK_SIZE);
+        let coeffs = generate_elem(&hal, &mut rng, coeffs_size);
+        let which = hal.copy_from_u32("which", &vec![0; eval_size]);
+        let xs = hal.copy_from_extelem("xs", &vec![z_pow; eval_size]);
+        let out = hal.alloc_extelem("out", eval_size);
 
-        let coeffs_gpu = hal_gpu.alloc_elem("coeffs", coeffs_size);
-        let which_gpu = hal_gpu.copy_from_u32("which", &vec![0; H::CHECK_SIZE]);
-        let xs_gpu = hal_gpu.copy_from_extelem("xs", &vec![z_pow; H::CHECK_SIZE]);
-        let out_gpu = hal_gpu.alloc_extelem("out", H::CHECK_SIZE);
-
-        coeffs_gpu.view_mut(|g| {
-            coeffs_cpu.view_mut(|c| {
-                for i in 0..coeffs_size {
-                    let value = H::Elem::random(&mut rng);
-                    g[i] = value;
-                    c[i] = value;
-                }
-            });
-        });
-
-        hal_cpu.batch_evaluate_any(&coeffs_cpu, poly_count, &which_cpu, &xs_cpu, &out_cpu);
-        hal_gpu.batch_evaluate_any(&coeffs_gpu, poly_count, &which_gpu, &xs_gpu, &out_gpu);
-
-        out_gpu.view(|g| {
-            out_cpu.view(|c| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
+        hal.batch_evaluate_any(&coeffs, poly_count as usize, &which, &xs, &out);
     }
 
-    pub(crate) fn batch_evaluate_ntt<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn batch_evaluate_ntt<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
         let count = DATA_SIZE;
         let expand_bits = 2;
@@ -291,34 +264,14 @@ mod testutil {
         let domain = steps * INV_RATE;
         let io_size = count * domain;
 
-        let io_cpu = hal_cpu.alloc_elem("io", io_size);
-        let io_gpu = hal_gpu.alloc_elem("io", io_size);
-
-        io_gpu.view_mut(|g| {
-            io_cpu.view_mut(|c| {
-                for i in 0..io_size {
-                    let value = H::Elem::random(&mut rng);
-                    g[i] = value;
-                    c[i] = value;
-                }
-            });
-        });
-
-        hal_cpu.batch_evaluate_ntt(&io_cpu, count, expand_bits);
-        hal_gpu.batch_evaluate_ntt(&io_gpu, count, expand_bits);
-
-        io_gpu.view(|g| {
-            io_cpu.view(|c| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
+        let io = generate_elem(&hal, &mut rng, io_size);
+        hal.batch_evaluate_ntt(&io, count, expand_bits);
     }
 
-    pub(crate) fn batch_expand<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn batch_expand<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
         let poly_count = DATA_SIZE;
         let steps = 1 << 16;
@@ -326,66 +279,23 @@ mod testutil {
         let input_size = poly_count * steps;
         let output_size = poly_count * domain;
 
-        let input_cpu = hal_cpu.alloc_elem("input", input_size);
-        let output_cpu = hal_cpu.alloc_elem("output", output_size);
-
-        let input_gpu = hal_gpu.alloc_elem("input", input_size);
-        let output_gpu = hal_gpu.alloc_elem("output", output_size);
-
-        input_gpu.view_mut(|g| {
-            input_cpu.view_mut(|c| {
-                for i in 0..input_size {
-                    let value = H::Elem::random(&mut rng);
-                    g[i] = value;
-                    c[i] = value;
-                }
-            });
-        });
-
-        hal_cpu.batch_expand(&output_cpu, &input_cpu, poly_count);
-        hal_gpu.batch_expand(&output_gpu, &input_gpu, poly_count);
-
-        output_gpu.view(|g| {
-            output_cpu.view(|c| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
+        let input = generate_elem(&hal, &mut rng, input_size);
+        let output = hal.alloc_elem("output", output_size);
+        hal.batch_expand(&output, &input, poly_count);
     }
 
-    pub(crate) fn batch_interpolate_ntt<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn batch_interpolate_ntt<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
         let count = DATA_SIZE;
         let steps = 1 << 16;
         let domain = steps * INV_RATE;
         let io_size = count * domain;
 
-        let io_cpu = hal_cpu.alloc_elem("io", io_size);
-        let io_gpu = hal_gpu.alloc_elem("io", io_size);
-
-        io_gpu.view_mut(|g| {
-            io_cpu.view_mut(|c| {
-                for i in 0..io_size {
-                    let value = H::Elem::random(&mut rng);
-                    g[i] = value;
-                    c[i] = value;
-                }
-            });
-        });
-
-        hal_cpu.batch_interpolate_ntt(&io_cpu, count);
-        hal_gpu.batch_interpolate_ntt(&io_gpu, count);
-
-        io_gpu.view(|g| {
-            io_cpu.view(|c| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
+        let io = generate_elem(&hal, &mut rng, io_size);
+        hal.batch_interpolate_ntt(&io, count);
     }
 
     pub(crate) fn gather_sample<H: Hal>(hal: H) {
@@ -414,10 +324,10 @@ mod testutil {
         });
     }
 
-    pub(crate) fn check_req<H: Hal>(hal_gpu: H) {
-        let a = hal_gpu.alloc_elem("a", 10);
-        let b = hal_gpu.alloc_elem("b", 20);
-        hal_gpu.eltwise_add_elem(&a, &b, &b);
+    pub(crate) fn check_req<H: Hal>(hal: H) {
+        let a = hal.alloc_elem("a", 10);
+        let b = hal.alloc_elem("b", 20);
+        hal.eltwise_add_elem(&a, &b, &b);
     }
 
     pub(crate) fn eltwise_add_elem<H: Hal>(hal_gpu: H) {
@@ -454,14 +364,8 @@ mod testutil {
     pub(crate) fn eltwise_copy_elem<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
         for count in COUNTS {
-            let input = hal_gpu.alloc_elem("input", count);
-            input.view_mut(|a| {
-                for i in 0..count {
-                    a[i] = H::Elem::random(&mut rng);
-                }
-            });
+            let input = generate_elem(&hal_gpu, &mut rng, count);
             let output = hal_gpu.alloc_elem("output", count);
-
             hal_gpu.eltwise_copy_elem(&output, &input);
             output.view(|output| {
                 input.view(|input| assert_eq!(output, input));
@@ -469,79 +373,37 @@ mod testutil {
         }
     }
 
-    pub(crate) fn eltwise_sum_extelem<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn eltwise_sum_extelem<H: Hal>(hal_gpu: H) {
         const COUNT: usize = 1024 * 1024;
 
-        let hal_cpu = CpuHal::new(suite);
-
-        let hal_in = hal_gpu.alloc_extelem("in", COUNT);
-        let cpu_in = hal_cpu.alloc_extelem("in", COUNT);
-
         let mut rng = thread_rng();
-        hal_in.view_mut(|in_mut| {
-            cpu_in.view_mut(|cpu_in| {
-                for i in 0..COUNT {
-                    let x = H::ExtElem::random(&mut rng);
-                    in_mut[i] = x;
-                    cpu_in[i] = x;
-                }
-            });
-        });
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
-        let cpu_out = hal_cpu.alloc_elem("out", COUNT);
-        hal_cpu.eltwise_sum_extelem(&cpu_out, &cpu_in);
-
-        let hal_out = hal_gpu.alloc_elem("out", COUNT);
-        hal_gpu.eltwise_sum_extelem(&hal_out, &hal_in);
-
-        assert_eq!(hal_out.size(), cpu_out.size());
-        hal_out.view(|g| {
-            cpu_out.view(|c| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
+        let input = generate_extelem(&hal, &mut rng, COUNT);
+        let output = hal.alloc_elem("output", COUNT);
+        hal.eltwise_sum_extelem(&output, &input);
     }
 
-    pub(crate) fn fri_fold<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn fri_fold<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
         for count in COUNTS {
             let output_size = count * H::ExtElem::EXT_SIZE;
             let input_size = output_size * FRI_FOLD;
-            let gpu_output = hal_gpu.alloc_elem("output", output_size);
-            let gpu_input = hal_gpu.alloc_elem("input", input_size);
-            let cpu_output = hal_cpu.alloc_elem("output", output_size);
-            let cpu_input = hal_cpu.alloc_elem("input", input_size);
 
+            let output = hal.alloc_elem("output", output_size);
             let mix = H::ExtElem::random(&mut rng);
-            gpu_input.view_mut(|g| {
-                cpu_input.view_mut(|c| {
-                    for i in 0..input_size {
-                        let value = H::Elem::random(&mut rng);
-                        c[i] = value;
-                        g[i] = value;
-                    }
-                });
-            });
-
-            hal_cpu.fri_fold(&cpu_output, &cpu_input, &mix);
-            hal_gpu.fri_fold(&gpu_output, &gpu_input, &mix);
-
-            gpu_output.view(|g| {
-                cpu_output.view(|c| {
-                    for i in 0..g.len() {
-                        assert_eq!(c[i], g[i]);
-                    }
-                });
-            });
+            let input = generate_elem(&hal, &mut rng, input_size);
+            hal.fri_fold(&output, &input, &mix);
         }
     }
 
-    pub(crate) fn mix_poly_coeffs<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn mix_poly_coeffs<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
         let combo_count = 100;
         let steps = 1 << 12;
@@ -552,187 +414,84 @@ mod testutil {
         let mix_start = H::ExtElem::random(&mut rng);
         let mix = H::ExtElem::random(&mut rng);
 
-        let gpu_output = hal_gpu.alloc_extelem("output", output_size);
-        let gpu_input = hal_gpu.alloc_elem("input", input_size);
-        let gpu_combos = hal_gpu.copy_from_u32("combos", &combos);
-        let cpu_output = hal_cpu.alloc_extelem("output", output_size);
-        let cpu_input = hal_cpu.alloc_elem("input", input_size);
-        let cpu_combos = hal_cpu.copy_from_u32("combos", &combos);
+        let output = hal.alloc_extelem("output", output_size);
+        let combos = hal.copy_from_u32("combos", &combos);
+        let input = generate_elem(&hal, &mut rng, input_size);
 
-        gpu_input.view_mut(|g| {
-            cpu_input.view_mut(|c| {
-                for i in 0..input_size {
-                    let value = H::Elem::random(&mut rng);
-                    g[i] = value;
-                    c[i] = value;
-                }
-            });
-        });
-
-        hal_cpu.mix_poly_coeffs(
-            &cpu_output,
+        hal.mix_poly_coeffs(
+            &output,
             &mix_start,
             &mix,
-            &cpu_input,
-            &cpu_combos,
+            &input,
+            &combos,
             H::CHECK_SIZE,
             steps,
         );
-        hal_gpu.mix_poly_coeffs(
-            &gpu_output,
-            &mix_start,
-            &mix,
-            &gpu_input,
-            &gpu_combos,
-            H::CHECK_SIZE,
-            steps,
-        );
-
-        gpu_output.view(|g| {
-            cpu_output.view(|c| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
     }
 
-    pub(crate) fn hash_fold<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn hash_fold<H: Hal>(hal_gpu: H) {
         const INPUTS: usize = 1024;
         const OUTPUTS: usize = INPUTS / 2;
-        let hal_cpu = CpuHal::new(suite);
         let mut rng = thread_rng();
-        let gpu_io = hal_gpu.alloc_digest("io", INPUTS * 2);
-        let cpu_io = hal_cpu.alloc_digest("io", INPUTS * 2);
-        gpu_io.view_mut(|g| {
-            cpu_io.view_mut(|c| {
-                for i in 0..INPUTS {
-                    let digest = Digest::from([
-                        rng.next_u32() / 3,
-                        rng.next_u32() / 3,
-                        rng.next_u32() / 3,
-                        rng.next_u32() / 3,
-                        rng.next_u32() / 3,
-                        rng.next_u32() / 3,
-                        rng.next_u32() / 3,
-                        rng.next_u32() / 3,
-                    ]);
-                    c[i + INPUTS] = digest;
-                    g[i + INPUTS] = digest;
-                }
-            });
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
+        let io = hal.alloc_digest("io", INPUTS * 2);
+        io.view_mut(|g| {
+            for i in 0..INPUTS {
+                g[i + INPUTS] = Digest::from([
+                    rng.next_u32() / 3,
+                    rng.next_u32() / 3,
+                    rng.next_u32() / 3,
+                    rng.next_u32() / 3,
+                    rng.next_u32() / 3,
+                    rng.next_u32() / 3,
+                    rng.next_u32() / 3,
+                    rng.next_u32() / 3,
+                ]);
+            }
         });
-        hal_cpu.hash_fold(&cpu_io, INPUTS, OUTPUTS);
-        hal_gpu.hash_fold(&gpu_io, INPUTS, OUTPUTS);
-
-        gpu_io.view(|g| {
-            cpu_io.view(|c| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
+        hal.hash_fold(&io, INPUTS, OUTPUTS);
     }
 
-    pub(crate) fn hash_rows<H: Hal<Elem = BabyBearElem>>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn hash_rows<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
         let rows = [1, 2, 3, 4, 10];
         let cols = [16, 32, 64, 128];
         for row_count in rows {
             for col_count in cols {
                 let matrix_size = row_count * col_count;
-                let matrix_gpu = hal_gpu.alloc_elem("matrix", matrix_size);
-                let matrix_cpu = hal_cpu.alloc_elem("matrix", matrix_size);
-                matrix_gpu.view_mut(|g| {
-                    matrix_cpu.view_mut(|c| {
-                        for i in 0..g.len() {
-                            let value = H::Elem::random(&mut rng);
-                            g[i] = value;
-                            c[i] = value;
-                        }
-                    });
-                });
-                let output_gpu = hal_gpu.alloc_digest("output", row_count);
-                let output_cpu = hal_cpu.alloc_digest("output", row_count);
-                hal_gpu.hash_rows(&output_gpu, &matrix_gpu);
-                hal_cpu.hash_rows(&output_cpu, &matrix_cpu);
-                output_gpu.view(|g| {
-                    output_cpu.view(|c| {
-                        for i in 0..g.len() {
-                            assert_eq!(c[i], g[i], "rows: {row_count}, cols: {col_count}, i: {i}");
-                        }
-                    });
-                });
+                let matrix = generate_elem(&hal, &mut rng, matrix_size);
+                let output = hal.alloc_digest("output", row_count);
+                hal.hash_rows(&output, &matrix);
             }
         }
     }
 
-    pub(crate) fn slice<H: Hal<Elem = BabyBearElem>>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn slice<H: Hal<Elem = BabyBearElem>>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
 
         let rows = 4096;
         let cols = 256;
         let matrix_size = rows * cols;
 
-        let cpu_nodes = hal_cpu.alloc_digest("nodes", rows * 2);
-        let cpu_matrix = hal_cpu.alloc_elem("matrix", matrix_size);
-
-        let gpu_nodes = hal_gpu.alloc_digest("nodes", rows * 2);
-        let gpu_matrix = hal_gpu.alloc_elem("matrix", matrix_size);
-
-        cpu_matrix.view_mut(|c| {
-            gpu_matrix.view_mut(|g| {
-                for i in 0..matrix_size {
-                    let value = H::Elem::random(&mut rng);
-                    c[i] = value;
-                    g[i] = value;
-                }
-            });
-        });
-
-        hal_cpu.hash_rows(&cpu_nodes.slice(rows, rows), &cpu_matrix);
-        hal_gpu.hash_rows(&gpu_nodes.slice(rows, rows), &gpu_matrix);
-
-        cpu_nodes.view(|c| {
-            gpu_nodes.view(|g| {
-                for i in 0..g.len() {
-                    assert_eq!(c[i], g[i]);
-                }
-            });
-        });
+        let nodes = hal.alloc_digest("nodes", rows * 2);
+        let matrix = generate_elem(&hal, &mut rng, matrix_size);
+        hal.hash_rows(&nodes.slice(rows, rows), &matrix);
     }
 
-    pub(crate) fn zk_shift<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
+    pub(crate) fn zk_shift<H: Hal>(hal_gpu: H) {
         let mut rng = thread_rng();
-        let hal_cpu = CpuHal::new(suite);
+        let hal_cpu = CpuHal::new(hal_gpu.get_hash_suite().clone());
+        let hal = DualHal::new(Rc::new(hal_cpu), Rc::new(hal_gpu));
         let counts = [(1000, (1 << 8)), (900, (1 << 12))];
         for (poly_count, steps) in counts {
             let count = poly_count * steps;
-            let cpu_io = hal_cpu.alloc_elem("io", count);
-            let gpu_io = hal_gpu.alloc_elem("io", count);
-
-            gpu_io.view_mut(|g| {
-                cpu_io.view_mut(|c| {
-                    for i in 0..count {
-                        let value = H::Elem::random(&mut rng);
-                        c[i] = value;
-                        g[i] = value;
-                    }
-                });
-            });
-
-            hal_cpu.zk_shift(&cpu_io, poly_count);
-            hal_gpu.zk_shift(&gpu_io, poly_count);
-
-            gpu_io.view(|g| {
-                cpu_io.view(|c| {
-                    for i in 0..g.len() {
-                        assert_eq!(c[i], g[i]);
-                    }
-                });
-            });
+            let io = generate_elem(&hal, &mut rng, count);
+            hal.zk_shift(&io, poly_count);
         }
     }
 }
