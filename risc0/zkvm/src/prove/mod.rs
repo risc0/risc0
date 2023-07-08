@@ -319,6 +319,28 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
         let prover = Rc::new(LocalProver::new("cuda:poseidon", cuda::poseidon_hal_eval()));
         table.insert("cuda:poseidon".to_string(), prover.clone());
         table.insert("$poseidon".to_string(), prover);
+        #[cfg(feature = "dual")]
+        {
+            use risc0_zkp::hal::dual::{DualEvalCheck, DualHal};
+
+            let lhs = cpu::sha256_hal_eval();
+            let rhs = cuda::sha256_hal_eval();
+            let dual = HalEval {
+                hal: Rc::new(DualHal::new(lhs.hal, rhs.hal)),
+                eval: Rc::new(DualEvalCheck::new(lhs.eval, rhs.eval)),
+            };
+            let prover = Rc::new(LocalProver::new("dual", dual));
+            table.insert("$default".to_string(), prover);
+
+            let lhs = cpu::poseidon_hal_eval();
+            let rhs = cuda::poseidon_hal_eval();
+            let dual = HalEval {
+                hal: Rc::new(DualHal::new(lhs.hal, rhs.hal)),
+                eval: Rc::new(DualEvalCheck::new(lhs.eval, rhs.eval)),
+            };
+            let prover = Rc::new(LocalProver::new("dual", dual));
+            table.insert("$poseidon".to_string(), prover);
+        }
     }
     #[cfg(feature = "metal")]
     {
@@ -333,6 +355,28 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
         ));
         table.insert("metal:poseidon".to_string(), prover.clone());
         table.insert("$poseidon".to_string(), prover);
+        #[cfg(feature = "dual")]
+        {
+            use risc0_zkp::hal::dual::{DualEvalCheck, DualHal};
+
+            let lhs = cpu::sha256_hal_eval();
+            let rhs = metal::sha256_hal_eval();
+            let dual = HalEval {
+                hal: Rc::new(DualHal::new(lhs.hal, rhs.hal)),
+                eval: Rc::new(DualEvalCheck::new(lhs.eval, rhs.eval)),
+            };
+            let prover = Rc::new(LocalProver::new("dual", dual));
+            table.insert("$default".to_string(), prover);
+
+            let lhs = cpu::poseidon_hal_eval();
+            let rhs = metal::poseidon_hal_eval();
+            let dual = HalEval {
+                hal: Rc::new(DualHal::new(lhs.hal, rhs.hal)),
+                eval: Rc::new(DualEvalCheck::new(lhs.eval, rhs.eval)),
+            };
+            let prover = Rc::new(LocalProver::new("dual", dual));
+            table.insert("$poseidon".to_string(), prover);
+        }
     }
     table
 }

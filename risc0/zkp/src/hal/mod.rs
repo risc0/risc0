@@ -17,6 +17,7 @@
 pub mod cpu;
 #[cfg(feature = "cuda")]
 pub mod cuda;
+pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
@@ -188,29 +189,25 @@ impl MemoryTracker {
 #[cfg(test)]
 #[allow(unused)]
 mod testutil {
-    // TODO: Not fully generic over hash
     use rand::{thread_rng, RngCore};
     use risc0_core::field::{baby_bear::BabyBearElem, Elem, ExtElem};
 
-    use super::{EvalCheck, Hal};
+    use super::Hal;
     use crate::{
-        core::{
-            digest::Digest,
-            hash::{sha::Sha256HashSuite, HashSuite},
-            log2_ceil,
-        },
+        core::{digest::Digest, hash::HashSuite},
         hal::{cpu::CpuHal, Buffer},
         FRI_FOLD, INV_RATE,
     };
 
     const COUNTS: [usize; 7] = [1, 9, 12, 1001, 1024, 1025, 1024 * 1024];
+    const DATA_SIZE: usize = 223;
 
     pub(crate) fn batch_bit_reverse<H: Hal>(hal_gpu: H, suite: HashSuite<H::Field>) {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(suite);
 
         let steps = 1 << 12;
-        let count = 203; // data_size
+        let count = DATA_SIZE;
         let domain = steps * INV_RATE;
         let io_size = count * domain;
 
@@ -248,8 +245,6 @@ mod testutil {
         let coeffs_size = H::CHECK_SIZE * domain;
 
         let poly_count = H::CHECK_SIZE;
-        let combos = vec![0; H::CHECK_SIZE];
-        let out_size = H::CHECK_SIZE;
 
         let z = H::ExtElem::random(&mut rng);
         let z_pow = z.pow(H::ExtElem::EXT_SIZE);
@@ -290,7 +285,7 @@ mod testutil {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(suite);
 
-        let count = 203; // data_size
+        let count = DATA_SIZE;
         let expand_bits = 2;
         let steps = 1 << 16;
         let domain = steps * INV_RATE;
@@ -325,7 +320,7 @@ mod testutil {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(suite);
 
-        let poly_count = 203; // data_size
+        let poly_count = DATA_SIZE;
         let steps = 1 << 16;
         let domain = steps * INV_RATE;
         let input_size = poly_count * steps;
@@ -363,7 +358,7 @@ mod testutil {
         let mut rng = thread_rng();
         let hal_cpu = CpuHal::new(suite);
 
-        let count = 203; // data_size
+        let count = DATA_SIZE;
         let steps = 1 << 16;
         let domain = steps * INV_RATE;
         let io_size = count * domain;
