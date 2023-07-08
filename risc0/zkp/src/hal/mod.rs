@@ -21,7 +21,7 @@ pub mod dual;
 #[cfg(feature = "metal")]
 pub mod metal;
 
-use std::sync::Mutex;
+use std::{fmt::Debug, sync::Mutex};
 
 use bytemuck::Pod;
 use lazy_static::lazy_static;
@@ -50,7 +50,7 @@ pub trait Hal {
     type Field: Field<Elem = Self::Elem, ExtElem = Self::ExtElem>;
     type Elem: Elem + RootsOfUnity;
     type ExtElem: ExtElem<SubElem = Self::Elem>;
-    type Buffer<T: Clone + Pod>: Buffer<T>;
+    type Buffer<T: Clone + Debug + PartialEq + Pod>: Buffer<T>;
 
     const CHECK_SIZE: usize = INV_RATE * Self::ExtElem::EXT_SIZE;
 

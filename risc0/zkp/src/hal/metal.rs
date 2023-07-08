@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, ffi::c_void, marker::PhantomData, mem, slice};
+use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice};
 
 use bytemuck::Pod;
 use metal::{
@@ -409,7 +409,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
     type Field = BabyBear;
-    type Buffer<T: Clone + Pod> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(&self.device, self.cmd_queue.clone(), size)

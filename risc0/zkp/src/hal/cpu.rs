@@ -18,7 +18,7 @@ use core::{
     cell::{Ref, RefMut},
     ops::Range,
 };
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, fmt::Debug, rc::Rc};
 
 use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
@@ -252,7 +252,7 @@ impl<F: Field> Hal for CpuHal<F> {
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Pod> = CpuBuffer<T>;
+    type Buffer<T: Clone + Debug + PartialEq + Pod> = CpuBuffer<T>;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         CpuBuffer::new(size)

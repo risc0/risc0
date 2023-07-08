@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
 use bytemuck::Pod;
 use cust::{
@@ -404,7 +404,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Buffer<T: Clone + Pod> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)

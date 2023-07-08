@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{marker::PhantomData, rc::Rc};
+use std::{fmt::Debug, marker::PhantomData, rc::Rc};
 
 use bytemuck::Pod;
 use risc0_core::field::Field;
@@ -33,6 +33,7 @@ where
 
 impl<T, L, R> BufferImpl<T, L, R>
 where
+    T: Debug + PartialEq,
     L: Buffer<T>,
     R: Buffer<T>,
 {
@@ -44,12 +45,19 @@ where
         }
     }
 
-    fn assert_eq(&self) {}
+    fn assert_eq(&self) {
+        self.lhs.view(|lhs| {
+            self.rhs.view(|rhs| {
+                assert_eq!(lhs.len(), rhs.len());
+                assert_eq!(lhs, rhs);
+            });
+        })
+    }
 }
 
 impl<T, L, R> Buffer<T> for BufferImpl<T, L, R>
 where
-    T: Clone + Pod,
+    T: Clone + Debug + PartialEq + Pod,
     L: Buffer<T>,
     R: Buffer<T>,
 {
@@ -106,7 +114,7 @@ where
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Pod> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
+    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T, L::Buffer<T>, R::Buffer<T>>;
 
     fn get_hash_suite(&self) -> &HashSuite<Self::Field> {
         self.lhs.get_hash_suite()
@@ -302,7 +310,7 @@ where
     }
 
     fn has_unified_memory(&self) -> bool {
-        self.lhs.has_unified_memory()
+        self.rhs.has_unified_memory()
     }
 
     fn gather_sample(
@@ -384,7 +392,7 @@ where
             &check.rhs,
             rhs_groups.as_slice(),
             rhs_globals.as_slice(),
-            bytemuck::cast(poly_mix),
+            poly_mix,
             po2,
             steps,
         );
