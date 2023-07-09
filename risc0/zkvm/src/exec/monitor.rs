@@ -368,6 +368,7 @@ impl MemoryMonitor {
         // Write all dirty pages back to the memory image.
         for page_idx in self.faults.writes.iter() {
             if let Some(page) = self.pages[*page_idx as usize].as_ref() {
+                log::debug!("flush page: 0x{page_idx:08x}");
                 let info = &self.image.info;
                 let addr = info.get_page_addr(*page_idx);
                 self.image.store_region_in_page(addr, &page.buf);
