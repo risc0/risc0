@@ -43,23 +43,23 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - uses: risc0/criterion-compare-action@fc0ce15e07388928ec938d3e2f7619032b793851
+      - uses: risc0/criterion-compare-action@1c422b4ef2d90fe915514a64fc06756cbd0c44d9
         id: criterion-cmp
         with:
           benchName: fib
           branchName: main
           features: ${{ matrix.feature }}
           prettyName: "${{ matrix.os }}-${{ matrix.feature }}"
-          outputMarkdown: true
+          outputMarkdown: ${{ runner.temp }}/pr-output/${{ matrix.os }}-${{ matrix.feature }}-output.md
 
-      - name: Create output dir
-        run: |
-          mkdir -p ${{ runner.temp }}/pr-output/
-          echo ${{ github.event.number }} > ${{ runner.temp }}/pr-output/NR
+      # - name: Create output dir
+      #   run: |
+      #     mkdir -p ${{ runner.temp }}/pr-output/
+      #     echo ${{ github.event.number }} > ${{ runner.temp }}/pr-output/NR
 
-      - name: Write compare markdown to file
-        run: |
-          echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ runner.temp }}/pr-output/${{ matrix.os }}-${{ matrix.feature }}-output.md
+      # - name: Write compare markdown to file
+      #   run: |
+      #     echo "${{ steps.criterion-cmp.outputs.markdown }}" > ${{ runner.temp }}/pr-output/${{ matrix.os }}-${{ matrix.feature }}-output.md
 
       - uses: actions/upload-artifact@v3
         with:
