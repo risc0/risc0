@@ -15,8 +15,9 @@
 use bevy_core::Outputs;
 use bevy_methods::{BEVY_GUEST_ELF, BEVY_GUEST_ID};
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv,
+    ExecutorEnv,
 };
 
 fn main() {
@@ -29,7 +30,7 @@ fn main() {
         .unwrap();
 
     // Next, we make an executor, loading the ELF binary.
-    let mut exec = Executor::from_elf(env, BEVY_GUEST_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, BEVY_GUEST_ELF).unwrap();
 
     // Run the executor to produce a session.
     let session = exec.run().unwrap();

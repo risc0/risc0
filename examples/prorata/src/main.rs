@@ -21,8 +21,9 @@ use clap::{Parser, Subcommand};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
 use prorata_methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, SessionReceipt,
+    ExecutorEnv, SessionReceipt,
 };
 use rust_decimal::Decimal;
 
@@ -93,7 +94,7 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
         .build()
         .unwrap();
 
-    let mut exec = Executor::from_elf(env, PRORATA_GUEST_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, PRORATA_GUEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap(); // Proof generation
 

@@ -52,6 +52,9 @@ pub struct Session {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// The session ID (used only for bonsai proving)
+    pub bonsai_session_id: Option<String>,
 }
 
 /// A reference to a [Segment].
@@ -95,10 +98,21 @@ pub struct Segment {
 impl Session {
     /// Construct a new [Session] from its constituent components.
     pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
+        Self::new_with_id(segments, journal, exit_code, None)
+    }
+
+    /// Construct a new [Session] from its constituent components.
+    pub fn new_with_id(
+        segments: Vec<Box<dyn SegmentRef>>,
+        journal: Vec<u8>,
+        exit_code: ExitCode,
+        bonsai_session_id: Option<String>,
+    ) -> Self {
         Self {
             segments,
             journal,
             exit_code,
+            bonsai_session_id,
         }
     }
 

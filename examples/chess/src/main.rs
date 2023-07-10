@@ -16,8 +16,9 @@ use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::{Arg, Command};
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, SessionReceipt,
+    ExecutorEnv, SessionReceipt,
 };
 use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
 
@@ -61,7 +62,7 @@ fn chess(inputs: &Inputs) -> SessionReceipt {
         .unwrap();
 
     // Make the Executor.
-    let mut exec = Executor::from_elf(env, CHECKMATE_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, CHECKMATE_ELF).unwrap();
 
     // Run the executor to produce a session.
     let session = exec.run().unwrap();

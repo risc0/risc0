@@ -15,8 +15,9 @@
 pub use digital_signature_core::{Message, Passphrase, SignMessageCommit, SigningRequest};
 use digital_signature_methods::{SIGN_ELF, SIGN_ID};
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, Result, SessionReceipt,
+    ExecutorEnv, Result, SessionReceipt,
 };
 use sha2::{Digest, Sha256};
 
@@ -56,7 +57,7 @@ pub fn sign(pass_str: impl AsRef<[u8]>, msg_str: impl AsRef<[u8]>) -> Result<Sig
     };
     let vec = to_vec(&params)?;
     let env = ExecutorEnv::builder().add_input(&vec).build().unwrap();
-    let mut exec = Executor::from_elf(env, SIGN_ELF)?;
+    let mut exec = default_executor_from_elf(env, SIGN_ELF)?;
     let session = exec.run()?;
     let receipt = session.prove().unwrap();
     Ok(SignatureWithReceipt { receipt })

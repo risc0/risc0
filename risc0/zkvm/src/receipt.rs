@@ -36,13 +36,13 @@
 //! # Usage
 //! To create a [SessionReceipt], use [crate::Session::prove]:
 //! ```rust
-//! use risc0_zkvm::{Executor, ExecutorEnv};
+//! use risc0_zkvm::{default_executor_from_elf, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
+//! let mut exec = default_executor_from_elf(env, FIB_ELF).unwrap();
 //! let session = exec.run().unwrap();
 //! let receipt = session.prove().unwrap();
 //! # }
@@ -56,13 +56,13 @@
 //! ```rust
 //! use risc0_zkvm::SessionReceipt;
 //!
-//! # use risc0_zkvm::{Executor, ExecutorEnv};
+//! # use risc0_zkvm::{default_executor_from_elf, ExecutorEnv};
 //! # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 //!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
 //! # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! # let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
+//! # let mut exec = default_executor_from_elf(env, FIB_ELF).unwrap();
 //! # let session = exec.run().unwrap();
 //! # let receipt = session.prove().unwrap();
 //! receipt.verify(FIB_ID).unwrap();
