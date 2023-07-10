@@ -15,7 +15,7 @@
 use criterion::{
     black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion, Throughput,
 };
-use risc0_zkvm::{prove::default_prover, ExecutorEnv, LocalExecutor, VerifierContext};
+use risc0_zkvm::{prove::default_prover, Executor, ExecutorEnv, LocalExecutor, VerifierContext};
 use risc0_zkvm_methods::FIB_ELF;
 
 fn setup(iterations: u32) -> LocalExecutor<'static> {
