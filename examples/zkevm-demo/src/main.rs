@@ -19,8 +19,9 @@ use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
 use log::info;
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    default_executor_from_elf, ExecutorEnv, FileSegmentRef,
+    ExecutorEnv, FileSegmentRef,
 };
 use tempfile::tempdir;
 use zkevm_core::{
