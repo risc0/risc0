@@ -19,9 +19,8 @@ use ethers_core::types::{H256, U256};
 use ethers_providers::Middleware;
 use log::info;
 use risc0_zkvm::{
-    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    ExecutorEnv, FileSegmentRef,
+    ExecutorEnv, FileSegmentRef, LocalExecutor,
 };
 use tempfile::tempdir;
 use zkevm_core::{
@@ -88,7 +87,7 @@ async fn main() {
         .add_input(&to_vec(&zkdb).unwrap())
         .build()
         .unwrap();
-    let mut exec = default_executor_from_elf(env, EVM_ELF).unwrap();
+    let mut exec = LocalExecutor::from_elf(env, EVM_ELF).unwrap();
     let segment_dir = tempdir().unwrap();
     let session = exec
         .run_with_callback(|segment| {
