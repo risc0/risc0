@@ -24,6 +24,7 @@ use test_log::test;
 
 use super::{ExecutorEnv, LocalExecutor, TraceEvent};
 use crate::{
+    exec::Executor,
     serde::{from_slice, to_vec},
     testutils, ExitCode, MemoryImage, Program, Session,
 };
@@ -176,7 +177,7 @@ fn bigint_accel() {
         let session = exec.run().unwrap();
         assert_eq!(
             session.journal.as_slice(),
-            bytemuck::cast_slice(case.expected().as_slice())
+            bytemuck::cast_slice::<u32, u8>(case.expected().as_slice())
         );
     }
 }

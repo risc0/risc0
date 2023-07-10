@@ -28,6 +28,7 @@ use test_log::test;
 
 use super::{get_prover, LocalProver, Prover};
 use crate::{
+    exec::Executor,
     prove::HalEval,
     receipt::{SessionReceipt, VerifierContext},
     serde::{from_slice, to_vec},
@@ -257,7 +258,7 @@ fn continuation() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
-    use crate::{ExecutorEnv, LocalExecutor, MemoryImage, Program};
+    use crate::{exec::Executor, ExecutorEnv, LocalExecutor, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
         use std::io::Read;

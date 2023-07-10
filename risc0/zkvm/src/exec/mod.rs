@@ -15,8 +15,8 @@
 //! The execution phase is implemented by this module.
 //!
 //! The result of the execution phase is a [Session]. Each [Session] contains
-//! one or more [Segment]s, each of which contains an execution trace of the
-//! specified program.
+//! one or more [crate::Segment]s, each of which contains an execution trace of
+//! the specified program.
 
 mod env;
 pub(crate) mod io;
@@ -38,7 +38,13 @@ use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
 use crate::{MemoryImage, Program, Session};
 
+/// [Executor] trait
+///
+/// This trait abstracts over different kinds of executors that run the guest
+/// code locally or remotely.
 pub trait Executor {
+    /// This will run the executor to get a [Session] which contain the results
+    /// of the execution.
     fn run(&mut self) -> Result<Session>;
 }
 
