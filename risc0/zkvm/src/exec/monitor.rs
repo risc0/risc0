@@ -127,6 +127,7 @@ impl MemoryMonitor {
             return;
         }
 
+        log::debug!("load_page: 0x{page_idx:08x}");
         let page_cycles = if page_idx == info.root_idx {
             let num_root_entries = info.num_root_entries as usize;
             cycles_per_page(num_root_entries / 2)
@@ -136,7 +137,6 @@ impl MemoryMonitor {
             cycles_per_page(BLOCKS_PER_PAGE)
         };
 
-        log::debug!("load_page: 0x{page_idx:08x}");
         self.resident[page_idx as usize] = true;
         self.pending_actions
             .push(Action::PageRead(page_idx, page_cycles));
@@ -151,6 +151,7 @@ impl MemoryMonitor {
             return;
         }
 
+        log::debug!("mark_page: 0x{page_idx:08x}");
         let page_cycles = if page_idx == info.root_idx {
             let num_root_entries = info.num_root_entries as usize;
             cycles_per_page(num_root_entries / 2)
@@ -160,7 +161,6 @@ impl MemoryMonitor {
             cycles_per_page(BLOCKS_PER_PAGE)
         };
 
-        log::debug!("mark_page: 0x{page_idx:08x}");
         self.dirty[page_idx as usize] = true;
         self.pending_actions
             .push(Action::PageWrite(page_idx, page_cycles));
@@ -345,7 +345,6 @@ impl MemoryMonitor {
         if self.enable_trace {
             self.trace_events.clear();
         }
-        // self.faults.dump();
     }
 
     pub fn clear_segment(&mut self) {
@@ -364,6 +363,8 @@ impl MemoryMonitor {
     }
 
     pub fn build_image(&mut self, pc: u32) -> MemoryImage {
+        // self.faults.dump();
+
         // Write all dirty pages back to the memory image.
         for page_idx in self.faults.writes.iter() {
             if let Some(page) = self.pages[*page_idx as usize].as_ref() {
@@ -383,14 +384,11 @@ impl MemoryMonitor {
         let sys_addr = SYSTEM.start() as u32;
         self.image.store_region_in_page(sys_addr, &bytes);
 
-        // Create a new MemoryImage with an updated pc and image_id.
-        let mut image = self.image.clone();
-        // FIXME: figure out why we need to hash all pages rather than just the dirty
-        // ones.
-        // image.hash_pages_iter(self.faults.writes.iter().cloned());
-        image.hash_pages();
-        image.pc = pc;
-        image
+        // Update the merkle tree and PC.
+        self.image
+            .hash_pages_iter(self.faults.writes.iter().cloned());
+        self.image.pc = pc;
+        self.image.clone()
     }
 }
 
