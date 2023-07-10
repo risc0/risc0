@@ -30,6 +30,7 @@ use risc0_zkvm_platform::{
         SyscallName,
     },
 };
+use thiserror::Error;
 
 use super::{
     io::{slice_io_from_fn, syscalls, PosixIo, SliceIo, Syscall, SyscallTable},
@@ -113,20 +114,11 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
 }
 
 /// [ExecutorEnvBuilder] errors.
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ExecutorEnvBuilderErr {
     /// Segment limit PO2 falls outside supported range.
-    SegmentLimitPo2OutOfBounds { given: usize },
-}
-
-impl core::fmt::Display for ExecutorEnvBuilderErr {
-    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        match self {
-            ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds { given } => {
-                write!(f, "Invalid segment_limit_po2: {given}",)
-            }
-        }
-    }
+    #[error("Invalid segment_limit_po2: {po2}")]
+    SegmentLimitPo2OutOfBounds { po2: usize },
 }
 
 impl<'a> ExecutorEnvBuilder<'a> {
@@ -145,7 +137,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
             || self.inner.segment_limit_po2 > risc0_zkp::MAX_CYCLES_PO2
         {
             return Err(ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds {
-                given: self.inner.segment_limit_po2,
+                po2: self.inner.segment_limit_po2,
             });
         }
 
