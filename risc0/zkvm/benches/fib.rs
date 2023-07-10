@@ -23,7 +23,7 @@ fn setup(iterations: u32) -> Executor<'static> {
         .add_input(&[iterations])
         .build()
         .unwrap();
-    Executor::from_elf(env, FIB_ELF).unwrap()
+    default_executor_from_elf(env, FIB_ELF).unwrap()
 }
 
 enum Scope {

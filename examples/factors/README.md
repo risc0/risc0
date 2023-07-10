@@ -77,7 +77,7 @@ Here are what the other two lines with `METHOD_NAME_ELF` and `METHOD_NAME_ID` sh
 
 ```no_compile
     // Rename METHOD_NAME_ELF
-    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, MULTIPLY_ELF).unwrap();
 
     // Rename METHOD_NAME_ID
     // receipt.verify(MULTIPLY_ID).unwrap();
@@ -98,15 +98,16 @@ In the starter template project, our host driver program creates an executor env
 ```rust
     use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
+      default_executor_from_elf,
       serde::{from_slice, to_vec},
-      Executor, ExecutorEnv,
+      ExecutorEnv,
     };
 
     // First, we construct an executor environment
     let env = ExecutorEnv::builder().build().unwrap();
 
     // Next, we make an executor, loading the (renamed) ELF binary.
-    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, MULTIPLY_ELF).unwrap();
 
     // We're not quite ready to run these steps yet
     // let session = exec.run().unwrap();
@@ -229,8 +230,9 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
 ```rust
     use factors_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
+      default_executor_from_elf,
       serde::{from_slice, to_vec},
-      Executor, ExecutorEnv,
+      ExecutorEnv,
     };
 
     let a: u64 = 17;
@@ -243,7 +245,7 @@ So, let's extract the [journal]'s contents by replacing the "`TODO`" in the abov
     .build()
     .unwrap();
 
-    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, MULTIPLY_ELF).unwrap();
     let session = exec.run().unwrap();
 
     let receipt = session.prove().unwrap();

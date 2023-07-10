@@ -15,8 +15,9 @@
 use json_core::Outputs;
 use json_methods::SEARCH_JSON_ELF;
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv,
+    ExecutorEnv,
 };
 
 fn main() {
@@ -36,7 +37,7 @@ fn search_json(data: &str) -> Outputs {
         .build()
         .unwrap();
 
-    let mut exec = Executor::from_elf(env, SEARCH_JSON_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, SEARCH_JSON_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
 

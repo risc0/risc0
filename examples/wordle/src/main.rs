@@ -17,9 +17,10 @@ mod wordlist;
 use std::io;
 
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
     sha::Digest,
-    Executor, ExecutorEnv, SessionReceipt,
+    ExecutorEnv, SessionReceipt,
 };
 use wordle_core::{GameState, WordFeedback, WORD_LENGTH};
 use wordle_methods::{WORDLE_GUEST_ELF, WORDLE_GUEST_ID};
@@ -48,7 +49,7 @@ impl<'a> Server<'a> {
             .add_input(&to_vec(&guess_word).unwrap())
             .build()
             .unwrap();
-        let mut exec = Executor::from_elf(env, WORDLE_GUEST_ELF).unwrap();
+        let mut exec = default_executor_from_elf(env, WORDLE_GUEST_ELF).unwrap();
         let session = exec.run().unwrap();
         session.prove().unwrap()
     }

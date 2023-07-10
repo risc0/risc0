@@ -13,8 +13,9 @@
 // limitations under the License.
 
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv,
+    ExecutorEnv,
 };
 use wasm_methods::{WASM_INTERP_ELF, WASM_INTERP_ID};
 
@@ -86,7 +87,7 @@ fn run_guest(iters: i32) -> i32 {
         .build()
         .unwrap();
 
-    let mut exec = Executor::from_elf(env, WASM_INTERP_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, WASM_INTERP_ELF).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
     receipt.verify(WASM_INTERP_ID).expect(
