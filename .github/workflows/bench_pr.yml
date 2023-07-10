@@ -43,7 +43,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
-      - uses: risc0/criterion-compare-action@1c422b4ef2d90fe915514a64fc06756cbd0c44d9
+      - uses: risc0/criterion-compare-action@261eabb3f33d4e9809ef2782f1986b1c3b9cd885
         id: criterion-cmp
         with:
           benchName: fib
