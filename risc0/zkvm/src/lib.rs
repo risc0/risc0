@@ -58,7 +58,7 @@ pub use self::receipt::{
 #[cfg(feature = "prove")]
 pub use self::{
     exec::io::{Syscall, SyscallContext},
-    exec::{Executor, ExecutorEnv, ExecutorEnvBuilder},
+    exec::{default_executor_from_elf, Executor, ExecutorEnv, ExecutorEnvBuilder, LocalExecutor},
     prove::loader::Loader,
     session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef},
 };

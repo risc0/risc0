@@ -17,7 +17,7 @@ use std::rc::Rc;
 use clap::Parser;
 use risc0_zkvm::{
     prove::{default_prover, Prover},
-    Executor, ExecutorEnv, VerifierContext,
+    Executor, ExecutorEnv, LocalExecutor, VerifierContext,
 };
 use risc0_zkvm_methods::FIB_ELF;
 use tracing_subscriber::{prelude::*, EnvFilter};
@@ -60,7 +60,7 @@ fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
         .add_input(&[iterations])
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
+    let mut exec = LocalExecutor::from_elf(env, FIB_ELF).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
 

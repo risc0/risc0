@@ -20,13 +20,13 @@
 //! information.
 //!
 //! ```rust
-//! use risc0_zkvm::{Executor, ExecutorEnv};
+//! use risc0_zkvm::{default_executor_from_elf, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
+//! let mut exec = default_executor_from_elf(env, FIB_ELF).unwrap();
 //! let session = exec.run().unwrap();
 //! let receipt = session.prove().unwrap();
 //! # }
@@ -38,9 +38,10 @@ mod plonk;
 #[cfg(test)]
 mod tests;
 
-use std::{collections::HashMap, rc::Rc};
+use std::{collections::HashMap, rc::Rc, time::Duration};
 
-use anyhow::Result;
+use anyhow::{bail, Result};
+use bonsai_sdk::alpha as bonsai_sdk;
 use risc0_circuit_rv32im::{
     layout::{OutBuffer, LAYOUT},
     CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
@@ -190,6 +191,68 @@ pub trait Prover {
     fn get_name(&self) -> String;
 }
 
+/// An implementation of a [Prover] that runs proof workloads remotely.
+pub struct RemoteProver {
+    name: String,
+}
+
+impl RemoteProver {
+    /// construct a remote prover. Unlike the [LocalProver], the hal is taken
+    /// care of by the remote prover.
+    pub fn new(name: &str) -> Self {
+        Self {
+            name: name.to_string(),
+        }
+    }
+}
+
+impl Prover for RemoteProver {
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn get_peak_memory_usage(&self) -> usize {
+        0
+    }
+
+    fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt> {
+        log::debug!("prove_session: {}", self.name);
+        let client = bonsai_sdk::Client::from_env()?;
+
+        let session = match &session.bonsai_session_id {
+            Some(id) => bonsai_sdk::SessionId::new(id.clone()),
+            None => bail!("Session does not have a bonsai session ID"),
+        };
+
+        loop {
+            // The session has already been started in the executor. Poll bonsai to check if
+            // the proof request succeeded.
+            let res = session.status(&client)?;
+            if res.status == "RUNNING" {
+                std::thread::sleep(Duration::from_secs(5));
+                continue;
+            }
+            if res.status == "SUCCEEDED" {
+                // Download the receipt, containing the output
+                let receipt_url = match res.receipt_url {
+                    Some(url) => url,
+                    None => bail!("API error, missing receipt on completed session"),
+                };
+
+                let receipt_buf = client.download(&receipt_url)?;
+                let receipt: SessionReceipt = bincode::deserialize(&receipt_buf)?;
+                return Ok(receipt);
+            } else {
+                bail!("Bonsai prover workflow exited: {}", res.status);
+            }
+        }
+    }
+
+    fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
+        bail!("this is unimplemented for prover [{}]", self.get_name())
+    }
+}
+
 /// An implementation of a [Prover] that runs locally.
 pub struct LocalProver<H, E>
 where
@@ -308,6 +371,9 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
         let prover = Rc::new(LocalProver::new("cpu:poseidon", cpu::poseidon_hal_eval()));
         table.insert("cpu:poseidon".to_string(), prover.clone());
         table.insert("$poseidon".to_string(), prover);
+
+        let prover = Rc::new(RemoteProver::new("bonsai"));
+        table.insert("$bonsai".to_string(), prover);
     }
     #[cfg(feature = "cuda")]
     {
@@ -341,8 +407,14 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
 /// default CPU-based prover.
 pub fn default_prover() -> Rc<dyn Prover> {
     let provers = provers();
+
     if let Ok(requested) = std::env::var("RISC0_PROVER") {
         if let Some(prover) = provers.get(&requested) {
+            return prover.clone();
+        }
+    }
+    if std::env::var("BONSAI_API_URL").is_ok() && std::env::var("BONSAI_API_KEY").is_ok() {
+        if let Some(prover) = provers.get("$bonsai") {
             return prover.clone();
         }
     }
