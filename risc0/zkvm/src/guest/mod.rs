@@ -54,22 +54,20 @@
 //!
 //! [^starter-ex]: The example is based on the [RISC Zero Rust Starter repository](https://github.com/risc0/risc0-rust-starter).
 
-#![allow(unused)]
 #![deny(missing_docs)]
 
 mod alloc;
 pub mod env;
 pub mod sha;
 
-use core::{arch::asm, mem, ptr};
+#[cfg(target_os = "zkvm")]
+use core::arch::asm;
 
 #[cfg(target_os = "zkvm")]
 use getrandom::{register_custom_getrandom, Error};
-use risc0_zkvm_platform::{
-    memory,
-    syscall::{nr::SYS_PANIC, sys_panic, sys_rand},
-    WORD_SIZE,
-};
+use risc0_zkvm_platform::syscall::sys_panic;
+#[cfg(target_os = "zkvm")]
+use risc0_zkvm_platform::{syscall::sys_rand, WORD_SIZE};
 
 pub use crate::entry;
 
@@ -101,28 +99,17 @@ core::arch::global_asm!(include_str!("memcpy.s"));
 #[cfg(target_os = "zkvm")]
 mod libm_extern;
 
-fn _fault() -> ! {
-    #[cfg(target_os = "zkvm")]
-    unsafe {
-        asm!("sw x0, 1(x0)")
-    };
-    unreachable!();
-}
-
 /// Aborts the guest with the given message.
 pub fn abort(msg: &str) -> ! {
     // A compliant host should fault when it receives this syscall.
     unsafe {
         sys_panic(msg.as_ptr(), msg.len());
     }
-
-    // As a fallback for non-compliant hosts, issue an illegal instruction.
-    _fault()
 }
 
 #[cfg(all(not(feature = "std"), target_os = "zkvm"))]
 mod handlers {
-    use core::{alloc::Layout, panic::PanicInfo};
+    use core::panic::PanicInfo;
 
     #[panic_handler]
     fn panic_fault(panic_info: &PanicInfo) -> ! {
@@ -172,11 +159,12 @@ unsafe extern "C" fn __start() {
     env::finalize(true, 0);
 }
 
-static STACK_TOP: u32 = memory::STACK_TOP;
+#[cfg(target_os = "zkvm")]
+static STACK_TOP: u32 = risc0_zkvm_platform::memory::STACK_TOP;
 
-/// Entry point; sets up global pointer and stack pointer and passes
-/// to zkvm_start.  TODO: when asm_const is stablized, use that here
-/// instead of defining a symbol and dereferencing it.
+// Entry point; sets up global pointer and stack pointer and passes
+// to zkvm_start.  TODO: when asm_const is stablized, use that here
+// instead of defining a symbol and dereferencing it.
 #[cfg(target_os = "zkvm")]
 core::arch::global_asm!(
     r#"
@@ -197,6 +185,7 @@ _start:
 /// Require that accesses to behind the given pointer before the memory
 /// barrier don't get optimized away or reordered to after the memory
 /// barrier.
+#[allow(unused_variables)]
 pub fn memory_barrier<T>(ptr: *const T) {
     // SAFETY: This passes a pointer in, but does nothing with it.
     #[cfg(target_os = "zkvm")]

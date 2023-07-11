@@ -14,6 +14,8 @@
 
 //! Functions for interacting with the host environment.
 
+#![allow(dead_code)]
+
 #[no_mangle]
 pub extern "C" fn acosf(x: f32) -> f32 {
     libm::acosf(x)
