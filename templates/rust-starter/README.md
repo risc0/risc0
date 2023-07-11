@@ -18,6 +18,19 @@ cargo run
 
 This is an empty template, and so there is no expected output (until you modify the code).
 
+### Running proofs remotely on Bonsai
+
+If you have access to the URL and API key to Bonsai you can run your proofs
+remotely. To prove in Bonsai mode, invoke `cargo run` with two additional
+environment variables:
+
+```
+BONSAI_API_KEY="YOUR_API_KEY" BONSAI_API_URL="BONSAI_URL" cargo run
+```
+
+At the time of writing, access to the URL and API key are limited to special
+events such as hackathons.
+
 ## How to create a project based on this template
 
 Search this template for the string `TODO`, and make the necessary changes to implement the required feature described by the `TODO` comment. Some of these changes will be complex, and so we have a number of instructional resources to assist you in learning how to write your own code for the RISC Zero zkVM:
