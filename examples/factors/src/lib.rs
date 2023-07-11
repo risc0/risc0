@@ -13,8 +13,9 @@
 // limitations under the License.
 use factors_methods::MULTIPLY_ELF;
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, SessionReceipt,
+    ExecutorEnv, SessionReceipt,
 };
 
 #[doc = include_str!("../README.md")]
@@ -29,7 +30,7 @@ pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
         .unwrap();
 
     // First, we make an executor, loading the 'multiply' ELF binary.
-    let mut exec = Executor::from_elf(env, MULTIPLY_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, MULTIPLY_ELF).unwrap();
 
     // Run the executor to produce a session.
     let session = exec.run().unwrap();

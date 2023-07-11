@@ -14,9 +14,10 @@
 
 use clap::{Arg, Command};
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
     sha::Digest,
-    Executor, ExecutorEnv, SessionReceipt,
+    ExecutorEnv, SessionReceipt,
 };
 use sha_methods::{HASH_ELF, HASH_ID, HASH_RUST_CRYPTO_ELF};
 
@@ -42,7 +43,7 @@ fn provably_hash(input: &str, use_rust_crypto: bool) -> (Digest, SessionReceipt)
         HASH_ELF
     };
 
-    let mut exec = Executor::from_elf(env, elf).unwrap();
+    let mut exec = default_executor_from_elf(env, elf).unwrap();
     let session = exec.run().unwrap();
     let receipt = session.prove().unwrap();
 

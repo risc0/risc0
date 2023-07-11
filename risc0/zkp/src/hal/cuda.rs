@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{cell::RefCell, marker::PhantomData, rc::Rc};
+use std::{cell::RefCell, fmt::Debug, marker::PhantomData, rc::Rc};
 
 use bytemuck::Pod;
 use cust::{
@@ -404,7 +404,7 @@ impl<CH: CudaHash> Hal for CudaHal<CH> {
     type Field = BabyBear;
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
-    type Buffer<T: Clone + Pod> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
 
     fn alloc_elem(&self, name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(name, size)
@@ -809,10 +809,7 @@ mod tests {
     use test_log::test;
 
     use super::{CudaHalPoseidon, CudaHalSha256};
-    use crate::{
-        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
-        hal::testutil,
-    };
+    use crate::hal::testutil;
 
     #[test]
     #[should_panic]
@@ -835,67 +832,67 @@ mod tests {
     #[test]
     #[serial]
     fn eltwise_sum_extelem() {
-        testutil::eltwise_sum_extelem(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::eltwise_sum_extelem(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn hash_rows_sha256() {
-        testutil::hash_rows(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::hash_rows(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn hash_fold_sha256() {
-        testutil::hash_fold(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::hash_fold(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn hash_rows_poseidon() {
-        testutil::hash_rows(CudaHalPoseidon::new(), PoseidonHashSuite::new());
+        testutil::hash_rows(CudaHalPoseidon::new());
     }
 
     #[test]
     #[serial]
     fn hash_fold_poseidon() {
-        testutil::hash_fold(CudaHalPoseidon::new(), PoseidonHashSuite::new());
+        testutil::hash_fold(CudaHalPoseidon::new());
     }
 
     #[test]
     #[serial]
     fn fri_fold() {
-        testutil::fri_fold(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::fri_fold(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn batch_expand() {
-        testutil::batch_expand(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_expand(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn batch_evaluate_ntt() {
-        testutil::batch_evaluate_ntt(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_evaluate_ntt(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn batch_interpolate_ntt() {
-        testutil::batch_interpolate_ntt(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_interpolate_ntt(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn batch_bit_reverse() {
-        testutil::batch_bit_reverse(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_bit_reverse(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn batch_evaluate_any() {
-        testutil::batch_evaluate_any(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_evaluate_any(CudaHalSha256::new());
     }
 
     #[test]
@@ -907,12 +904,12 @@ mod tests {
     #[test]
     #[serial]
     fn zk_shift() {
-        testutil::zk_shift(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::zk_shift(CudaHalSha256::new());
     }
 
     #[test]
     #[serial]
     fn mix_poly_coeffs() {
-        testutil::mix_poly_coeffs(CudaHalSha256::new(), Sha256HashSuite::new());
+        testutil::mix_poly_coeffs(CudaHalSha256::new());
     }
 }

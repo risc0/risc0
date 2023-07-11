@@ -334,6 +334,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bonsai-sdk"
+version = "0.2.0"
+dependencies = [
+ "reqwest",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "borsh"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3201,7 +3210,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "cargo_metadata",
  "directories",
@@ -3217,7 +3226,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-kernel"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "cc",
  "directories",
@@ -3229,7 +3238,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "anyhow",
  "cust",
@@ -3247,9 +3256,8 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im-sys"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
- "cc",
  "glob",
  "risc0-build-kernel",
  "risc0-core",
@@ -3258,7 +3266,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -3266,7 +3274,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-sys"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "cc",
  "glob",
@@ -3276,7 +3284,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "anyhow",
  "blake2",
@@ -3303,10 +3311,11 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.15.0"
+version = "0.16.0"
 dependencies = [
  "anyhow",
  "bincode",
+ "bonsai-sdk",
  "bytemuck",
  "cfg-if",
  "crypto-bigint",
@@ -3335,7 +3344,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.15.0"
+version = "0.16.0"
 
 [[package]]
 name = "rkyv"

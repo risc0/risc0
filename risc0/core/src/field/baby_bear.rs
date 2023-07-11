@@ -74,7 +74,7 @@ impl Default for Elem {
 }
 
 impl fmt::Debug for Elem {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
         write!(f, "{}", decode(self.0))
     }
 }
@@ -364,7 +364,7 @@ const EXT_SIZE: usize = 4;
 /// The irreducible polynomial `x^4 + 11` was chosen because `11` is
 /// the simplest choice of `BETA` for `x^4 + BETA` that makes this polynomial
 /// irreducible.
-#[derive(Eq, Clone, Copy, Debug, Pod, Zeroable)]
+#[derive(Eq, Clone, Copy, Pod, Zeroable)]
 #[repr(transparent)]
 pub struct ExtElem([Elem; EXT_SIZE]);
 
@@ -374,6 +374,16 @@ pub type BabyBearExtElem = ExtElem;
 impl Default for ExtElem {
     fn default() -> Self {
         Self::ZERO
+    }
+}
+
+impl fmt::Debug for ExtElem {
+    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "[{:?}, {:?}, {:?}, {:?}]",
+            self.0[0], self.0[1], self.0[2], self.0[3]
+        )
     }
 }
 

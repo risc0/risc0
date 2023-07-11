@@ -15,7 +15,7 @@
 use std::{fs, path::PathBuf};
 
 use clap::Parser;
-use risc0_zkvm::{serde::to_vec, Executor, ExecutorEnv};
+use risc0_zkvm::{default_executor_from_elf, serde::to_vec, ExecutorEnv};
 
 /// Runs a RISC-V ELF binary within the RISC Zero ZKVM.
 #[derive(Parser)]
@@ -91,7 +91,7 @@ fn main() {
         }
 
         let env = builder.build().unwrap();
-        let mut exec = Executor::from_elf(env, &elf_contents).unwrap();
+        let mut exec = default_executor_from_elf(env, &elf_contents).unwrap();
         exec.run().unwrap()
     };
 

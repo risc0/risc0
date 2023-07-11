@@ -47,7 +47,7 @@ pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
 
-/// The [super::Executor] is configured from this object.
+/// The [super::LocalExecutor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
 /// guest environment is set up prior to guest program execution.
@@ -58,7 +58,7 @@ pub struct ExecutorEnv<'a> {
     session_limit: Option<usize>,
     syscalls: SyscallTable<'a>,
     pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
-    input: Vec<u8>,
+    pub(crate) input: Vec<u8>,
     pub(crate) trace_callback: Option<Rc<RefCell<dyn FnMut(TraceEvent) -> Result<()> + 'a>>>,
 }
 

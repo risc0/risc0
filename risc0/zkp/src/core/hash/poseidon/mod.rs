@@ -18,7 +18,7 @@
 pub(crate) mod consts;
 mod rng;
 
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, rc::Rc, vec::Vec};
 
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem, BabyBearExtElem, Elem},
@@ -81,8 +81,8 @@ impl PoseidonHashSuite {
     pub fn new() -> HashSuite<BabyBear> {
         HashSuite {
             name: "poseidon".into(),
-            hashfn: Box::new(PoseidonHashFn {}),
-            rng: Box::new(PoseidonRngFactory {}),
+            hashfn: Rc::new(PoseidonHashFn {}),
+            rng: Rc::new(PoseidonRngFactory {}),
         }
     }
 }
