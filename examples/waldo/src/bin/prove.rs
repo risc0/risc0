@@ -16,7 +16,7 @@ use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView};
-use risc0_zkvm::{serde, Executor, ExecutorEnv};
+use risc0_zkvm::{default_executor_from_elf, serde, ExecutorEnv};
 use waldo_core::{
     image::{ImageMask, ImageMerkleTree, IMAGE_CHUNK_SIZE},
     merkle::SYS_VECTOR_ORACLE,
@@ -125,7 +125,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         input.crop_location, input.crop_dimensions,
     );
     // Make the Executor, loading the image crop method binary.
-    let mut exec = Executor::from_elf(env, IMAGE_CROP_ELF)?;
+    let mut exec = default_executor_from_elf(env, IMAGE_CROP_ELF)?;
     let session = exec.run()?;
     let receipt = session.prove()?;
 

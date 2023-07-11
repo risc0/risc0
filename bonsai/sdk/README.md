@@ -9,7 +9,7 @@ use anyhow::Result;
 use bonsai_sdk::alpha as bonsai_sdk;
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 use risc0_zkvm::{
-    recursion::SessionRollupReceipt, serde::to_vec, MemoryImage, Program, MEM_SIZE, PAGE_SIZE,
+    SessionReceipt, serde::to_vec, MemoryImage, Program, MEM_SIZE, PAGE_SIZE,
 };
 use std::time::Duration;
 
@@ -46,7 +46,7 @@ fn run_bonsai(input_data: Vec<u8>) -> Result<()> {
                 .expect("API error, missing receipt on completed session");
 
             let receipt_buf = client.download(&receipt_url)?;
-            let receipt: SessionRollupReceipt = bincode::deserialize(&receipt_buf)?;
+            let receipt: SessionReceipt = bincode::deserialize(&receipt_buf)?;
             receipt
                 .verify(METHOD_NAME_ID)
                 .expect("Receipt verification failed");
