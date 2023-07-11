@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, ffi::c_void, marker::PhantomData, mem, slice};
+use std::{collections::HashMap, ffi::c_void, fmt::Debug, marker::PhantomData, mem, slice};
 
 use bytemuck::Pod;
 use metal::{
@@ -409,7 +409,7 @@ impl<MH: MetalHash> Hal for MetalHal<MH> {
     type Elem = BabyBearElem;
     type ExtElem = BabyBearExtElem;
     type Field = BabyBear;
-    type Buffer<T: Clone + Pod> = BufferImpl<T>;
+    type Buffer<T: Clone + Debug + PartialEq + Pod> = BufferImpl<T>;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         BufferImpl::new(&self.device, self.cmd_queue.clone(), size)
@@ -758,34 +758,31 @@ mod tests {
     use test_log::test;
 
     use super::{MetalHalPoseidon, MetalHalSha256};
-    use crate::{
-        core::hash::{poseidon::PoseidonHashSuite, sha::Sha256HashSuite},
-        hal::testutil,
-    };
+    use crate::hal::testutil;
 
     #[test]
     fn batch_bit_reverse() {
-        testutil::batch_bit_reverse(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_bit_reverse(MetalHalSha256::new());
     }
 
     #[test]
     fn batch_evaluate_any() {
-        testutil::batch_evaluate_any(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_evaluate_any(MetalHalSha256::new());
     }
 
     #[test]
     fn batch_evaluate_ntt() {
-        testutil::batch_evaluate_ntt(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_evaluate_ntt(MetalHalSha256::new());
     }
 
     #[test]
     fn batch_expand() {
-        testutil::batch_expand(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_expand(MetalHalSha256::new());
     }
 
     #[test]
     fn batch_interpolate_ntt() {
-        testutil::batch_interpolate_ntt(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::batch_interpolate_ntt(MetalHalSha256::new());
     }
 
     #[test]
@@ -806,47 +803,47 @@ mod tests {
 
     #[test]
     fn eltwise_sum_extelem() {
-        testutil::eltwise_sum_extelem(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::eltwise_sum_extelem(MetalHalSha256::new());
     }
 
     #[test]
     fn fri_fold() {
-        testutil::fri_fold(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::fri_fold(MetalHalSha256::new());
     }
 
     #[test]
     fn mix_poly_coeffs() {
-        testutil::mix_poly_coeffs(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::mix_poly_coeffs(MetalHalSha256::new());
     }
 
     #[test]
-    fn hash_fold() {
-        testutil::hash_fold(MetalHalSha256::new(), Sha256HashSuite::new());
+    fn hash_fold_sha256() {
+        testutil::hash_fold(MetalHalSha256::new());
     }
 
     #[test]
-    fn hash_rows() {
-        testutil::hash_rows(MetalHalSha256::new(), Sha256HashSuite::new());
+    fn hash_rows_sha256() {
+        testutil::hash_rows(MetalHalSha256::new());
     }
 
     #[test]
     fn hash_fold_poseidon() {
-        testutil::hash_fold(MetalHalPoseidon::new(), PoseidonHashSuite::new());
+        testutil::hash_fold(MetalHalPoseidon::new());
     }
 
     #[test]
     fn hash_rows_poseidon() {
-        testutil::hash_rows(MetalHalPoseidon::new(), PoseidonHashSuite::new());
+        testutil::hash_rows(MetalHalPoseidon::new());
     }
 
     #[test]
     fn slice() {
-        testutil::slice(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::slice(MetalHalSha256::new());
     }
 
     #[test]
     fn zk_shift() {
-        testutil::zk_shift(MetalHalSha256::new(), Sha256HashSuite::new());
+        testutil::zk_shift(MetalHalSha256::new());
     }
 
     #[test]

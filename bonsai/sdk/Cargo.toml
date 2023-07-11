@@ -1,7 +1,11 @@
 [package]
 name = "bonsai-sdk"
-version = "0.1.0"
-edition = "2021"
+description = "Bonsai Software Development Kit"
+version = "0.2.0"
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
 
 [dependencies]
 reqwest = { version = "0.11", features = ["json", "blocking"] }

@@ -18,7 +18,7 @@ use core::{
     cell::{Ref, RefMut},
     ops::Range,
 };
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, fmt::Debug, rc::Rc};
 
 use bytemuck::Pod;
 use ndarray::{ArrayView, ArrayViewMut, Axis};
@@ -252,7 +252,7 @@ impl<F: Field> Hal for CpuHal<F> {
     type Field = F;
     type Elem = F::Elem;
     type ExtElem = F::ExtElem;
-    type Buffer<T: Clone + Pod> = CpuBuffer<T>;
+    type Buffer<T: Clone + Debug + PartialEq + Pod> = CpuBuffer<T>;
 
     fn alloc_elem(&self, _name: &'static str, size: usize) -> Self::Buffer<Self::Elem> {
         CpuBuffer::new(size)
@@ -550,10 +550,11 @@ impl<F: Field> Hal for CpuHal<F> {
         assert_eq!(matrix.size(), col_size * row_size);
         let mut output = output.as_slice_mut();
         let matrix = matrix.as_slice().to_vec(); // TODO: avoid copy
+        let hashfn = self.suite.hashfn.as_ref();
         output.par_iter_mut().enumerate().for_each(|(idx, output)| {
             let column: Vec<Self::Elem> =
                 (0..col_size).map(|i| matrix[i * row_size + idx]).collect();
-            *output = *self.suite.hashfn.hash_elem_slice(column.as_slice());
+            *output = *hashfn.hash_elem_slice(column.as_slice());
         });
     }
 
@@ -563,10 +564,11 @@ impl<F: Field> Hal for CpuHal<F> {
         let io = io.as_slice_sync();
         let output = io.slice(output_size, output_size);
         let input = io.slice(input_size, input_size);
+        let hashfn = self.suite.hashfn.as_ref();
         (0..output.size()).into_par_iter().for_each(|idx| {
             let in1 = input.get(2 * idx + 0);
             let in2 = input.get(2 * idx + 1);
-            output.set(idx, *self.suite.hashfn.hash_pair(&in1, &in2));
+            output.set(idx, *hashfn.hash_pair(&in1, &in2));
         });
     }
 

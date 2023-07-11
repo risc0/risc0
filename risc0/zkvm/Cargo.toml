@@ -76,6 +76,7 @@ test-log = { version = "0.2", features = ["trace"] }
 [features]
 binfmt = ["dep:elf", "std"]
 cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
+dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["prove"]
 profiler = [
