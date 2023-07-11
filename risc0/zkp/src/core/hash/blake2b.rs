@@ -13,7 +13,7 @@
 // limitations under the License.
 
 //! A Blake2b HashSuite.
-use alloc::{boxed::Box, vec::Vec};
+use alloc::{boxed::Box, rc::Rc, vec::Vec};
 use core::marker::PhantomData;
 
 use blake2::{
@@ -84,8 +84,8 @@ impl<T: Blake2b + 'static> Blake2bHashSuite<T> {
     pub fn new() -> HashSuite<BabyBear> {
         HashSuite {
             name: "blake2b".into(),
-            hashfn: Box::new(Blake2bHashFn::<T>::new()),
-            rng: Box::new(Blake2bRngFactory::<T>::new()),
+            hashfn: Rc::new(Blake2bHashFn::<T>::new()),
+            rng: Rc::new(Blake2bRngFactory::<T>::new()),
         }
     }
 }

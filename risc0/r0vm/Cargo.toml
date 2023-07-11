@@ -24,5 +24,6 @@ risc0-zkvm-platform = { workspace = true }
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
+dual = ["risc0-zkvm/dual"]
 metal = ["risc0-zkvm/metal"]
 profiler = ["risc0-zkvm/profiler"]
