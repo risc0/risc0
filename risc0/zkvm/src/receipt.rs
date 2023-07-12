@@ -86,9 +86,7 @@ use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite,
-            poseidon::PoseidonHashSuite,
-            sha::{Sha256HashSuite, SHA256_INIT},
+            blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite,
             HashSuite,
         },
     },
@@ -100,10 +98,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
-    sha::{
-        self,
-        rust_crypto::{Digest as _, Sha256},
-    },
+    sha::rust_crypto::{Digest as _, Sha256},
 };
 
 /// Indicates how a Segment or Session's execution has terminated
@@ -271,18 +266,18 @@ impl SessionReceipt {
             receipt.verify_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
             log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.compute_image_id() {
+            if prev_image_id != metadata.pre.digest() {
                 return Err(VerificationError::ImageVerificationError);
             }
             if metadata.exit_code != ExitCode::SystemSplit {
                 return Err(VerificationError::UnexpectedExitCode);
             }
-            prev_image_id = metadata.post.compute_image_id();
+            prev_image_id = metadata.post.digest();
         }
         final_receipt.verify_with_context(ctx)?;
         let metadata = final_receipt.get_metadata()?;
         log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.compute_image_id() {
+        if prev_image_id != metadata.pre.digest() {
             return Err(VerificationError::ImageVerificationError);
         }
 
@@ -358,10 +353,6 @@ impl SystemState {
         let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
         Ok(Self { pc, merkle_root })
     }
-
-    fn compute_image_id(&self) -> Digest {
-        compute_image_id(&self.merkle_root, self.pc)
-    }
 }
 
 impl ReceiptMetadata {
@@ -423,11 +414,11 @@ impl ReceiptMetadata {
 
 /// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
 pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
-    use risc0_zkp::core::{digest::DIGEST_WORDS, hash::sha::Sha256};
-    let mut pc_digest = [0u32; DIGEST_WORDS];
-    pc_digest[0] = pc;
-    let block2 = Digest::new(pc_digest);
-    *sha::Impl::compress(&SHA256_INIT, merkle_root, &block2)
+    SystemState {
+        merkle_root: merkle_root.clone(),
+        pc,
+    }
+    .digest()
 }
 
 impl Default for VerifierContext {
