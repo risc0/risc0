@@ -106,13 +106,14 @@ impl SystemState {
         write_sha_halfs(flat, &self.merkle_root);
     }
 
-    pub(crate) fn digest(&self) -> Digest {
+    /// Hash the [crate::SystemState] to get a digest of the struct.
+    pub fn digest(&self) -> Digest {
         tagged_struct("risc0.SystemState", &[self.merkle_root], &[self.pc])
     }
 }
 
 impl ReceiptMetadata {
-    /// decode a [crate::ReceiptMetadata] from a list of [u32]'s
+    /// Decode a [crate::ReceiptMetadata] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, VerificationError> {
         let input = read_sha_halfs(flat);
         let pre = SystemState::decode(flat);
@@ -131,7 +132,7 @@ impl ReceiptMetadata {
         })
     }
 
-    /// encode a [crate::ReceiptMetadata] to a list of [u32]'s
+    /// Encode a [crate::ReceiptMetadata] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), VerificationError> {
         write_sha_halfs(flat, &self.input);
         self.pre.encode(flat);
@@ -143,7 +144,8 @@ impl ReceiptMetadata {
         Ok(())
     }
 
-    pub(crate) fn digest(&self) -> Result<Digest, VerificationError> {
+    /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
+    pub fn digest(&self) -> Result<Digest, VerificationError> {
         let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
         Ok(tagged_struct(
             "risc0.ReceiptMeta",
