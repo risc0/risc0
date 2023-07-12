@@ -1,6 +1,6 @@
 # Cargo-risczero
 
-Cargo extension to help create, manage, and test [RISC Zero](https://github.com/risc0/risc0) projects.
+Cargo extension to help create, manage, and test [RISC Zero](https://github.com/risc0/risc0) projects. The default template generated from the `cargo risczero new` command supports both local and remote proving. Refer to the README in [the rust-starter template](https://github.com/risc0/risc0/tree/main/templates/rust-starter) for more information.
 
 ## Install
 
