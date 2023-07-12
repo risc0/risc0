@@ -45,15 +45,16 @@ pub fn valid_control_ids() -> Vec<Digest> {
     all_ids
 }
 
-fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
+/// Implementation of the struct hash described in the recursion predicates RFC.
+pub(crate) fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
     let tag_digest: Digest = *sha::Impl::hash_bytes(tag.as_bytes());
     let mut all = Vec::<u8>::new();
     all.extend_from_slice(tag_digest.as_bytes());
     for digest in down {
-        all.extend_from_slice((*digest).as_bytes());
+        all.extend_from_slice(digest.as_ref());
     }
-    for word in data {
-        all.extend_from_slice(&(*word).to_le_bytes());
+    for word in data.iter().copied() {
+        all.extend_from_slice(&word.to_le_bytes());
     }
     let down_count: u16 = down.len().try_into().unwrap();
     all.extend_from_slice(&down_count.to_le_bytes());
@@ -105,13 +106,14 @@ impl SystemState {
         write_sha_halfs(flat, &self.merkle_root);
     }
 
-    fn digest(&self) -> Digest {
+    /// Hash the [crate::SystemState] to get a digest of the struct.
+    pub fn digest(&self) -> Digest {
         tagged_struct("risc0.SystemState", &[self.merkle_root], &[self.pc])
     }
 }
 
 impl ReceiptMetadata {
-    /// decode a [crate::ReceiptMetadata] from a list of [u32]'s
+    /// Decode a [crate::ReceiptMetadata] from a list of [u32]'s
     pub fn decode(flat: &mut VecDeque<u32>) -> Result<Self, VerificationError> {
         let input = read_sha_halfs(flat);
         let pre = SystemState::decode(flat);
@@ -130,7 +132,7 @@ impl ReceiptMetadata {
         })
     }
 
-    /// encode a [crate::ReceiptMetadata] to a list of [u32]'s
+    /// Encode a [crate::ReceiptMetadata] to a list of [u32]'s
     pub fn encode(&self, flat: &mut Vec<u32>) -> Result<(), VerificationError> {
         write_sha_halfs(flat, &self.input);
         self.pre.encode(flat);
@@ -142,7 +144,8 @@ impl ReceiptMetadata {
         Ok(())
     }
 
-    fn digest(&self) -> Result<Digest, VerificationError> {
+    /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
+    pub fn digest(&self) -> Result<Digest, VerificationError> {
         let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
         Ok(tagged_struct(
             "risc0.ReceiptMeta",
