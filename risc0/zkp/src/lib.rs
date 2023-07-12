@@ -25,10 +25,12 @@ pub mod core;
 #[cfg(feature = "prove")]
 pub mod hal;
 pub mod layout;
+#[cfg(not(target_os = "zkvm"))]
 mod merkle;
 #[cfg(feature = "prove")]
 pub mod prove;
 pub mod taps;
+#[cfg(not(target_os = "zkvm"))]
 pub mod verify;
 
 #[cfg(not(feature = "prove"))]
@@ -61,4 +63,5 @@ const FRI_FOLD_PO2: usize = 4;
 pub const FRI_FOLD: usize = 1 << FRI_FOLD_PO2;
 
 /// FRI continues until the degree of the FRI polynomial reaches FRI_MIN_DEGREE
+#[cfg(not(target_os = "zkvm"))]
 const FRI_MIN_DEGREE: usize = 256;

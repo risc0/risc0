@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 risc0-zkp = { path = "../zkp", default-features = false }
-risc0-zkvm = { path = "../zkvm", default-features = false }
+risc0-zkvm = { path = "../zkvm", default-features = false, features = ["std"] }
