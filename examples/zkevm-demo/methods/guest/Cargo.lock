@@ -816,7 +816,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "log",
@@ -828,7 +828,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -836,7 +836,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -850,12 +850,13 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "sha2",
+ "thiserror",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -872,13 +873,14 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "thiserror",
  "tracing",
  "typetag",
 ]
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.16.0"
+version = "0.16.1"
 
 [[package]]
 name = "rlp"
