@@ -512,7 +512,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-circuit-rv32im"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "log",
@@ -524,7 +524,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -532,7 +532,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -546,12 +546,13 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "sha2",
+ "thiserror",
  "tracing",
 ]
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.16.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "bytemuck",
@@ -568,13 +569,14 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
+ "thiserror",
  "tracing",
  "typetag",
 ]
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.16.0"
+version = "0.16.1"
 
 [[package]]
 name = "rkyv"
@@ -725,6 +727,26 @@ name = "tap"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
+
+[[package]]
+name = "thiserror"
+version = "1.0.40"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "978c9a314bd8dc99be594bc3c175faaa9794be04a5a5e153caba6915336cebac"
+dependencies = [
+ "thiserror-impl",
+]
+
+[[package]]
+name = "thiserror-impl"
+version = "1.0.40"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f9456a42c5b0d803c8cd86e73dd7cc9edd429499f37a3550d286d5e86720569f"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.18",
+]
 
 [[package]]
 name = "tinyvec"
