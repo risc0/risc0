@@ -101,7 +101,8 @@ mod libm_extern;
 
 /// Aborts the guest with the given message.
 pub fn abort(msg: &str) -> ! {
-    // A compliant host should fault when it receives this syscall.
+    // SAFETY: A compliant host should fault when it receives this syscall.
+    // sys_panic will issue an invalid instruction for non-compliant hosts.
     unsafe {
         sys_panic(msg.as_ptr(), msg.len());
     }
