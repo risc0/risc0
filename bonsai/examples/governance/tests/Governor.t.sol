@@ -284,7 +284,7 @@ abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
     mapping(uint256 => BallotBox) internal ballotBoxes;
 
     function setUp() public withRelay {
-        useZkvmGuest = vm.envOr("TEST_USE_ZKVM", false) || proverMode != BonsaiTest.ProverMode.None;
+        useZkvmGuest = vm.envOr("TEST_USE_ZKVM", true);
         if (useZkvmGuest) {
             imageId = queryImageId("FINALIZE_VOTES");
         }
