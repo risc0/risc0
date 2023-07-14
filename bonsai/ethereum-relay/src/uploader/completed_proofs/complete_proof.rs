@@ -13,8 +13,10 @@
 // limitations under the License.
 
 use bonsai_proxy_contract::{CallbackRequestFilter, EthereumCallback};
-use bonsai_sdk::alpha::{Client, SessionId};
-use bonsai_sdk_async::{download, session_status};
+use bonsai_sdk::{
+    alpha::{Client, SessionId},
+    alpha_async::{download, session_status},
+};
 use risc0_zkvm::SessionReceipt;
 
 use crate::{api, uploader::completed_proofs::error::CompleteProofError};

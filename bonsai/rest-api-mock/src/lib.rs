@@ -90,7 +90,7 @@ mod test {
     use std::time::Duration;
 
     use anyhow::{bail, Result};
-    use bonsai_sdk_async;
+    use bonsai_sdk::alpha_async as bonsai_sdk;
     use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
     use risc0_zkvm_methods::HELLO_COMMIT_ELF;
 
@@ -101,8 +101,7 @@ mod test {
         bonsai_api_key: String,
         method: &[u8],
     ) -> Result<()> {
-        let client =
-            bonsai_sdk_async::get_client_from_parts(bonsai_api_url, bonsai_api_key).await?;
+        let client = bonsai_sdk::get_client_from_parts(bonsai_api_url, bonsai_api_key).await?;
 
         // create the memoryImg, upload it and return the imageId
         let img_id = {
@@ -110,17 +109,17 @@ mod test {
             let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
             let image_id = hex::encode(image.compute_id());
             let image = bincode::serialize(&image).expect("Failed to serialize memory img");
-            bonsai_sdk_async::put_image(client.clone(), image_id.clone(), image).await?;
+            bonsai_sdk::put_image(client.clone(), image_id.clone(), image).await?;
             image_id
         };
 
         // Prepare input data and upload it.
-        let input_id = bonsai_sdk_async::put_input(client.clone(), vec![]).await?;
+        let input_id = bonsai_sdk::put_input(client.clone(), vec![]).await?;
 
         // Start a session running the prover
-        let session = bonsai_sdk_async::create_session(client.clone(), img_id, input_id).await?;
+        let session = bonsai_sdk::create_session(client.clone(), img_id, input_id).await?;
         loop {
-            let res = bonsai_sdk_async::session_status(client.clone(), session.clone()).await?;
+            let res = bonsai_sdk::session_status(client.clone(), session.clone()).await?;
             if res.status == "RUNNING" {
                 std::thread::sleep(Duration::from_secs(15));
                 continue;
@@ -130,7 +129,7 @@ mod test {
                 let receipt_url = res
                     .receipt_url
                     .expect("API error, missing receipt on completed session");
-                bonsai_sdk_async::download(client.clone(), receipt_url)
+                bonsai_sdk::download(client.clone(), receipt_url)
                     .await
                     .unwrap();
             } else {

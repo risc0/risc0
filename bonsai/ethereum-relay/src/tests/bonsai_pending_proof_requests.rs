@@ -14,7 +14,7 @@
 
 #[cfg(test)]
 mod tests {
-    use bonsai_sdk_async::get_client_from_parts;
+    use bonsai_sdk::alpha_async::get_client_from_parts;
 
     use crate::{
         tests::utils::tests::get_test_bonsai_server,

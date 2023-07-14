@@ -15,8 +15,10 @@
 use std::time::Duration;
 
 use bonsai_proxy_contract::SnarkProof;
-use bonsai_sdk::alpha::{Client, SessionId, SnarkId};
-use bonsai_sdk_async::{create_snark, snark_status};
+use bonsai_sdk::{
+    alpha::{Client, SessionId, SnarkId},
+    alpha_async::{create_snark, snark_status},
+};
 use ethers::types::U256;
 
 use super::error::CompleteProofError;

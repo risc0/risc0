@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use bonsai_sdk::alpha::{
+use crate::alpha::{
     responses::{SessionStatusRes, SnarkStatusRes},
     Client, SdkErr, SessionId, SnarkId,
 };
