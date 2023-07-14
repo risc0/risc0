@@ -115,7 +115,7 @@ async fn main() -> anyhow::Result<()> {
                                 Token::Bytes(journal),
                                 Hash::from(<[u8; 32]>::from(receipt_metadata.post.digest()))
                                     .into_token(),
-                                tokenize_snark_proof(&snark_proof)?,
+                                Token::Bytes(ethers::abi::encode(&[tokenize_snark_proof(&snark_proof)?])),
                             ]
                         }
                         _ => anyhow::bail!(

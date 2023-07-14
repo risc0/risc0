@@ -17,14 +17,14 @@
 pragma solidity ^0.8.17;
 
 import {IBonsaiRelay} from "./IBonsaiRelay.sol";
-import {RiscZeroVerifier, Seal} from "./RiscZeroVerifier.sol";
+import {IRiscZeroVerifier} from "./IRiscZeroVerifier.sol";
 
 /// @notice Bonsai Relay contract supporting authenticated communication from zkVM guest programs.
-contract BonsaiRelay is IBonsaiRelay, RiscZeroVerifier {
+contract BonsaiRelay is IBonsaiRelay {
     /// @notice Data required to authorize a callback to be sent through the relay.
     struct CallbackAuthorization {
-        /// @notice Groth16 SNARK proof acting as the cryptographic seal over the execution results.
-        Seal seal;
+        /// @notice SNARK proof acting as the cryptographic seal over the execution results.
+        bytes seal;
         /// @notice Digest of the zkVM SystemState after execution.
         /// @dev The relay does not additionally check any property of this digest, but needs the
         /// digest in order to reconstruct the ReceiptMetadata hash to which the proof is linked.
@@ -43,6 +43,12 @@ contract BonsaiRelay is IBonsaiRelay, RiscZeroVerifier {
         bytes payload;
         /// @notice maximum amount of gas the callback function may use.
         uint64 gasLimit;
+    }
+
+    IRiscZeroVerifier internal immutable verifier;
+
+    constructor(IRiscZeroVerifier verifier_) {
+        verifier = verifier_;
     }
 
     /// @inheritdoc IBonsaiRelay
@@ -68,7 +74,7 @@ contract BonsaiRelay is IBonsaiRelay, RiscZeroVerifier {
         view
         returns (bool)
     {
-        return verify(auth.seal, imageId, auth.postStateDigest, journal);
+        return verifier.verify(auth.seal, imageId, auth.postStateDigest, sha256(journal));
     }
 
     /// @notice Submit a batch of callbacks, authorized by an attached SNARK proof.

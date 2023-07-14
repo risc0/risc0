@@ -1,24 +1,26 @@
 // Copyright 2023 RISC Zero, Inc.
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
+// The RiscZeroGroth16Verifier is a free software: you can redistribute it
+// and/or modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later version.
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+// The RiscZeroGroth16Verifier is distributed in the hope that it will be
+// useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+// Public License for more details.
 //
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// You should have received a copy of the GNU General Public License along with
+// the RiscZeroGroth16Verifier. If not, see <https://www.gnu.org/licenses/>.
 //
-// SPDX-License-Identifier: Apache-2.0
+// SPDX-License-Identifier: GPL-3.0
 
 pragma solidity ^0.8.9;
 
 import {SafeCast} from "openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {Groth16Verifier} from "./Groth16Verifier.sol";
+import {IRiscZeroVerifier, Receipt, ReceiptMetadata, ReceiptMetadataLib, ExitCode, SystemExitCode} from "../IRiscZeroVerifier.sol";
 
 /// @notice reverse the byte order of the uint256 value.
 /// @dev Soldity uses a big-endian ABI encoding. Reversing the byte order before encoding
@@ -61,57 +63,6 @@ function reverseByteOrderUint32(uint32 input) pure returns (uint32 v) {
     v = (v >> 16) | (v << 16);
 }
 
-/// @notice Indicator for the overall system at the end of execution covered by this proof.
-enum SystemExitCode {
-    Halted,
-    Paused,
-    SystemSplit
-}
-
-/// @notice Combination of system and user exit codes.
-/// @dev If system exit code is SystemSplit, the user exit code must be zero.
-struct ExitCode {
-    SystemExitCode system;
-    uint8 user;
-}
-
-/// @notice Data associated with a receipt which is used for both input and
-/// output of global state.
-struct ReceiptMetadata {
-    /// Digest of the SystemState of a segment just before execution has begun.
-    bytes32 preStateDigest;
-    /// Digest of the SystemState of a segment just after execution has completed.
-    bytes32 postStateDigest;
-    /// The exit code for a segment
-    ExitCode exitCode;
-    /// A digest of the input, from the viewpoint of the guest.
-    bytes32 input;
-    /// A digest of the journal, from the viewpoint of the guest.
-    bytes32 output;
-}
-
-library ReceiptMetadataLib {
-    bytes32 constant TAG_DIGEST = sha256("risc0.ReceiptMeta");
-
-    function digest(ReceiptMetadata memory meta) internal pure returns (bytes32) {
-        return sha256(
-            abi.encodePacked(
-                TAG_DIGEST,
-                // down
-                meta.input,
-                meta.preStateDigest,
-                meta.postStateDigest,
-                meta.output,
-                // data
-                uint32(meta.exitCode.system) << 24,
-                uint32(meta.exitCode.user) << 24,
-                // down.length
-                uint16(4) << 8
-            )
-        );
-    }
-}
-
 /// @notice A Groth16 seal over the claimed receipt metadata.
 struct Seal {
     uint256[2] a;
@@ -119,12 +70,7 @@ struct Seal {
     uint256[2] c;
 }
 
-struct Receipt {
-    Seal seal;
-    ReceiptMetadata meta;
-}
-
-contract RiscZeroVerifier is Groth16Verifier {
+contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     using ReceiptMetadataLib for ReceiptMetadata;
     using SafeCast for uint256;
 
@@ -145,33 +91,23 @@ contract RiscZeroVerifier is Groth16Verifier {
     /// @return true if the receipt passes the verification checks.
     function verify(Receipt memory receipt) public view returns (bool) {
         (uint256 meta0, uint256 meta1) = splitDigest(receipt.meta.digest());
+        Seal memory seal = abi.decode(receipt.seal, (Seal));
         return
-            this.verifyProof(receipt.seal.a, receipt.seal.b, receipt.seal.c, [CONTROL_ID_0, CONTROL_ID_1, meta0, meta1]);
-    }
-
-    /// @notice verify that the given receipt is a valid Groth16 RISC Zero recursion receipt with a
-    ///     journal output equal to the given journal.
-    /// @return true if the receipt passes the verification checks.
-    function verify(Receipt memory receipt, bytes calldata journal) public view returns (bool) {
-        // Verify that the Receipt's output field is equal to the journal hash.
-        if (receipt.meta.output != sha256(journal)) {
-            return false;
-        }
-        return verify(receipt);
+            this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, meta0, meta1]);
     }
 
     /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
     ///     given image ID, post-state digest, and journal. Asserts that the input hash
     //      is all-zeros (i.e. no committed input) and the exit code is (Halted, 0).
     /// @return true if the receipt passes the verification checks.
-    function verify(Seal memory seal, bytes32 imageId, bytes32 postStateDigest, bytes calldata journal)
+    function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalHash)
         public
         view
         returns (bool)
     {
         Receipt memory receipt = Receipt(
             seal,
-            ReceiptMetadata(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), sha256(journal))
+            ReceiptMetadata(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), journalHash)
         );
         return verify(receipt);
     }

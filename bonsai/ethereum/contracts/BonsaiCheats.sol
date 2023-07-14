@@ -23,7 +23,6 @@ import {Strings2} from "murky_differential_testing/test/utils/Strings2.sol";
 
 import {IBonsaiRelay} from "./IBonsaiRelay.sol";
 import {BonsaiTestRelay} from "./BonsaiTestRelay.sol";
-import {Seal} from "./RiscZeroVerifier.sol";
 
 /// @notice A base contract for testing a Bonsai callback receiver contract
 abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
@@ -47,7 +46,7 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
     ///     guest with imageId using input on the Bonsai proving service.
     function queryImageOutputAndSeal(bytes32 imageId, bytes memory input)
         internal
-        returns (bytes memory, bytes32, Seal memory)
+        returns (bytes memory, bytes32, bytes memory)
     {
         string[] memory imageRunnerInput = new string[](7);
         uint256 i = 0;
@@ -58,7 +57,7 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
         imageRunnerInput[i++] = "--prover-mode=bonsai";
         imageRunnerInput[i++] = abi.encodePacked(imageId).toHexString();
         imageRunnerInput[i++] = input.toHexString();
-        return abi.decode(vm.ffi(imageRunnerInput), (bytes, bytes32, Seal));
+        return abi.decode(vm.ffi(imageRunnerInput), (bytes, bytes32, bytes));
     }
 
     /// @notice Returns the image id of the guest with the specified name.

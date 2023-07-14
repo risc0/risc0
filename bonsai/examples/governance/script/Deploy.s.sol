@@ -20,6 +20,8 @@ import {Script} from "forge-std/Script.sol";
 import {console2} from "forge-std/console2.sol";
 import {BonsaiRelay} from "bonsai/BonsaiRelay.sol";
 import {BonsaiCheats} from "bonsai/BonsaiCheats.sol";
+import {RiscZeroGroth16Verifier} from "bonsai/groth16/RiscZeroGroth16Verifier.sol";
+import {IRiscZeroVerifier} from "bonsai/IRiscZeroVerifier.sol";
 import {IVotes} from "openzeppelin/contracts/governance/utils/IVotes.sol";
 
 import {BonsaiGovernor} from "../contracts/BonsaiGovernor.sol";
@@ -31,6 +33,9 @@ import {VoteToken} from "../contracts/VoteToken.sol";
 ///         Must be unlocked on the RPC provider node.
 ///     * DEPLOYER_PRIVATE_KEY private key of the wallet to be used for deployment.
 ///         Alternative to using DEPLOYER_ADDRESS.
+///     * DEPLOY_VERFIER_ADDRESS address of a predeployed IRiscZeroVerifier contract.
+///         If not specified and also DEPLOY_BONSAI_RELAY_ADDRESS is not specified,
+///         a new RiscZeroGroth16Verifier will be deployed.
 ///     * DEPLOY_BONSAI_RELAY_ADDRESS address of a predeployed BonsaiRelay contract.
 ///         If not specified, a new BonsaiRelay will be deployed.
 ///     * DEPLOY_VOTE_TOKEN_ADDRESS address of a predeployed IVotes contract.
@@ -64,21 +69,32 @@ contract Deploy is Script, BonsaiCheats {
 
         // Deploy a Relay contract instance. Relay is stateless and owner-less.
         BonsaiRelay bonsaiRelay;
-        address addr = vm.envOr("DEPLOY_BONSAI_RELAY_ADDRESS", address(0));
-        if (addr != address(0)) {
-            console2.log("Using BonsaiRelay at ", address(addr));
-            bonsaiRelay = BonsaiRelay(addr);
+        address relayAddr = vm.envOr("DEPLOY_BONSAI_RELAY_ADDRESS", address(0));
+        if (relayAddr != address(0)) {
+            console2.log("Using BonsaiRelay at ", address(relayAddr));
+            bonsaiRelay = BonsaiRelay(relayAddr);
         } else {
-            bonsaiRelay = new BonsaiRelay();
+            // Deploy an IRiscZeroVerifier contract instance. Relay is stateless and owner-less.
+            IRiscZeroVerifier verifier;
+            address verifierAddr = vm.envOr("DEPLOY_VERFIER_ADDRESS", address(0));
+            if (verifierAddr != address(0)) {
+                console2.log("Using IRiscZeroVerifier at ", address(verifierAddr));
+                verifier = IRiscZeroVerifier(verifierAddr);
+            } else {
+                verifier = new RiscZeroGroth16Verifier();
+                console2.log("Deployed RiscZeroGroth16Verifier to ", address(verifier));
+            }
+
+            bonsaiRelay = new BonsaiRelay(verifier);
             console2.log("Deployed BonsaiRelay to ", address(bonsaiRelay));
         }
 
         // Deploy the IVotes token used to grant voting rights.
         IVotes token;
-        addr = vm.envOr("DEPLOY_VOTE_TOKEN_ADDRESS", address(0));
-        if (addr != address(0)) {
-            console2.log("Using IVotes at ", address(addr));
-            token = IVotes(addr);
+        address tokenAddr = vm.envOr("DEPLOY_VOTE_TOKEN_ADDRESS", address(0));
+        if (tokenAddr != address(0)) {
+            console2.log("Using IVotes at ", address(tokenAddr));
+            token = IVotes(tokenAddr);
         } else {
             // Sender of the transactions will be the owner and controller of the VoteToken.
             token = new VoteToken();

@@ -1,20 +1,35 @@
+// Copyright 2023 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 // SPDX-License-Identifier: Apache-2.0
+
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 
 import {
-    RiscZeroVerifier,
-    Seal,
+    IRiscZeroVerifier,
     Receipt as RiscZeroReceipt,
     ReceiptMetadata,
     ReceiptMetadataLib,
     ExitCode,
     SystemExitCode
-} from "../contracts/RiscZeroVerifier.sol";
+} from "../contracts/IRiscZeroVerifier.sol";
+import {RiscZeroGroth16Verifier} from "../contracts/groth16/RiscZeroGroth16Verifier.sol";
 
-contract RiscZeroVerifierTest is Test {
+contract RiscZeroGroth16VerifierTest is Test {
     using ReceiptMetadataLib for ReceiptMetadata;
 
     bytes internal TEST_SEAL_BYTES =
@@ -22,7 +37,7 @@ contract RiscZeroVerifierTest is Test {
 
     // A known-good SNARK proof generated for the BonsaiGovernor contract by Bonsai.
     RiscZeroReceipt internal TEST_RECEIPT = RiscZeroReceipt(
-        abi.decode(TEST_SEAL_BYTES, (Seal)),
+        TEST_SEAL_BYTES,
         ReceiptMetadata(
             TEST_IMAGE_ID,
             bytes32(0xbab5928deaa6b9f89acecdc86a4b9f20fdf5bb5b631780cf67e7ad0afeace872),
@@ -37,23 +52,19 @@ contract RiscZeroVerifierTest is Test {
     bytes internal constant TEST_JOURNAL =
         hex"5818100a2105c60d4f73044fe09a9cb0ba9801a4f5775e79cbb8934b23caab653c7846705db9354810f597a10674ad845f1a11d31cdd54fa7ca011ebf45c67000000000040eb306043ba7f507c09693f6d68f07f50722b010000000142add52666c78960a219b157a1f4dbf806cbf703";
 
-    RiscZeroVerifier internal verifier;
+    IRiscZeroVerifier internal verifier;
 
     function setUp() external {
-        verifier = new RiscZeroVerifier();
+        verifier = new RiscZeroGroth16Verifier();
     }
 
     function testVerifyKnownGoodReceipt() external view {
         require(verifier.verify(TEST_RECEIPT), "verification failed");
     }
 
-    function testVerifyKnownGoodReceiptWithJournal() external view {
-        require(verifier.verify(TEST_RECEIPT, TEST_JOURNAL), "verification failed");
-    }
-
     function testVerifyKnownGoodImageIdAndJournal() external view {
         require(
-            verifier.verify(TEST_RECEIPT.seal, TEST_IMAGE_ID, TEST_RECEIPT.meta.postStateDigest, TEST_JOURNAL),
+            verifier.verify(TEST_RECEIPT.seal, TEST_IMAGE_ID, TEST_RECEIPT.meta.postStateDigest, sha256(TEST_JOURNAL)),
             "verification failed"
         );
     }
@@ -62,16 +73,8 @@ contract RiscZeroVerifierTest is Test {
     function testVerifyMangledReceipts() external view {
         RiscZeroReceipt memory mangled = TEST_RECEIPT;
 
-        mangled.seal.a[0] += 1;
-        require(!verifier.verify(mangled), "verification passed on mangled a value");
-        mangled = TEST_RECEIPT;
-
-        mangled.seal.b[0][0] += 1;
-        require(!verifier.verify(mangled), "verification passed on mangled b value");
-        mangled = TEST_RECEIPT;
-
-        mangled.seal.c[0] += 1;
-        require(!verifier.verify(mangled), "verification passed on mangled c value");
+        mangled.seal[0] ^= bytes1(uint8(1));
+        require(!verifier.verify(mangled), "verification passed on mangled seal value");
         mangled = TEST_RECEIPT;
 
         mangled.meta.preStateDigest ^= bytes32(uint256(1));

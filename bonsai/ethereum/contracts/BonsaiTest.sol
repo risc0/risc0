@@ -25,7 +25,8 @@ import {BonsaiRelay} from "./BonsaiRelay.sol";
 import {BonsaiRelayQueueWrapper} from "./BonsaiRelayQueueWrapper.sol";
 import {BonsaiTestRelay} from "./BonsaiTestRelay.sol";
 import {BonsaiCheats} from "./BonsaiCheats.sol";
-import {Seal} from "./RiscZeroVerifier.sol";
+import {IRiscZeroVerifier} from "./IRiscZeroVerifier.sol";
+import {RiscZeroGroth16Verifier} from "./groth16/RiscZeroGroth16Verifier.sol";
 
 /// @notice A base contract for testing a Bonsai callback receiver contract
 /// @dev Based on the BONSAI_PROVING environment, a real or a mock BonsaiRelay will be used:
@@ -82,7 +83,8 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
     modifier withRelay() {
         proverMode = parseProverMode(vm.envOr("BONSAI_PROVING", string("none")));
         if (proverMode == ProverMode.Bonsai) {
-            bonsaiVerifyingRelay = new BonsaiRelay();
+            IRiscZeroVerifier verifier = new RiscZeroGroth16Verifier();
+            bonsaiVerifyingRelay = new BonsaiRelay(verifier);
             bonsaiRelay = new BonsaiRelayQueueWrapper(bonsaiVerifyingRelay);
         } else {
             bonsaiTestRelay = new BonsaiTestRelay();
@@ -116,7 +118,7 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
         vm.pauseGasMetering();
 
         if (proverMode == ProverMode.Bonsai) {
-            (bytes memory journal, bytes32 postStateDigest, Seal memory seal) = queryImageOutputAndSeal(imageId, input);
+            (bytes memory journal, bytes32 postStateDigest, bytes memory seal) = queryImageOutputAndSeal(imageId, input);
             bytes memory payload = abi.encodePacked(functionSelector, journal, imageId);
             BonsaiRelay.Callback memory callback = BonsaiRelay.Callback(
                 BonsaiRelay.CallbackAuthorization(seal, postStateDigest), callbackContract, payload, gasLimit
