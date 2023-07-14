@@ -38,7 +38,7 @@ use uploader::{
 
 use crate::api::{server::serve, state::ApiState};
 
-static DEFAULT_FILTER: &str = "debug";
+static DEFAULT_FILTER: &str = "info";
 
 #[derive(Clone)]
 /// A relayer to integrate Ethereum with Bonsai.
