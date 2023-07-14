@@ -42,7 +42,7 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
     }
 
     BonsaiRelayQueueWrapper internal bonsaiRelay;
-    ProverMode proverMode;
+    ProverMode public proverMode;
 
     // Backing variables to store the address of the relay we are using.
     // Only one of these two state variables will be populated.
