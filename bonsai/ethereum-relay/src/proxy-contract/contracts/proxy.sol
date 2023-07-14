@@ -1,4 +1,4 @@
-// Copyright 2023 Risc0, Inc.
+// Copyright 2023 RISC Zero, Inc.
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
@@ -56,7 +56,7 @@ contract Proxy {
     function invoke_callback(Callback[] calldata callbacks) external returns (bool[] memory invocation_results) {
         require(msg.sender == owner, "Denied");
         invocation_results = new bool[](callbacks.length);
-        for (uint i = 0; i < callbacks.length; i++) {            
+        for (uint i = 0; i < callbacks.length; i++) {
             // invoke callback
             (invocation_results[i], ) =callbacks[i].callback_contract.call{gas: callbacks[i].gas_limit}(callbacks[i].payload);
         }

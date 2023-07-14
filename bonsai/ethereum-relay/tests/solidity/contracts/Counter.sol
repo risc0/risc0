@@ -1,4 +1,4 @@
-// Copyright 2023 Risc0, Inc.
+// Copyright 2023 RISC Zero, Inc.
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
@@ -9,7 +9,7 @@ interface Relay {
         address callback_contract,
         bytes4 function_selector,
         uint64 gas_limit
-    ) external; 
+    ) external;
 }
 
 contract Counter {
