@@ -15,12 +15,13 @@
 use std::{array, collections::BTreeSet, mem::take};
 
 use anyhow::Result;
+use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
 use risc0_zkvm_platform::{memory::SYSTEM, syscall::reg_abi::REG_MAX, PAGE_SIZE, WORD_SIZE};
 use rrs_lib::{MemAccessSize, Memory};
 
 use super::{io::SyscallContext, TraceEvent};
-use crate::{session::PageFaults, MemoryImage};
+use crate::session::PageFaults;
 
 /// The number of blocks that fit within a single page.
 const BLOCKS_PER_PAGE: usize = PAGE_SIZE / BLOCK_BYTES;

@@ -19,6 +19,7 @@ use std::{cell::RefCell, fmt::Debug, io::Write, rc::Rc};
 
 use anyhow::{anyhow, bail, Context, Result};
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
+use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::{
     core::{
         digest::{DIGEST_BYTES, DIGEST_WORDS},
@@ -45,7 +46,7 @@ use crate::{
     exec::monitor::MemoryMonitor,
     opcode::{MajorType, OpCode},
     receipt::ExitCode,
-    ExecutorEnv, Loader, MemoryImage, Program, Segment, SegmentRef, Session, SimpleSegmentRef,
+    ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
 };
 
 /// The number of cycles required to compress a SHA-256 block.

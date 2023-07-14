@@ -12,7 +12,7 @@ anyhow = "1.0"
 bytemuck = "1.12"
 clap = { version = "4.0", features = ["derive"] }
 env_logger = "0.10"
-risc0-zkvm = { workspace = true, features = ["default", "binfmt"] }
+risc0-zkvm = { workspace = true, features = ["default"] }
 
 [dev-dependencies]
 anyhow = "1.0"

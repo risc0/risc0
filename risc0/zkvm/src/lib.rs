@@ -19,8 +19,6 @@
 
 extern crate alloc;
 
-#[cfg(feature = "binfmt")]
-pub mod binfmt;
 #[cfg(not(target_os = "zkvm"))]
 mod control_id;
 #[cfg(feature = "prove")]
@@ -43,17 +41,17 @@ pub mod sha;
 mod testutils;
 
 pub use anyhow::Result;
+#[cfg(not(target_os = "zkvm"))]
+pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
 
-#[cfg(feature = "binfmt")]
-pub use self::binfmt::{elf::Program, image::MemoryImage};
 #[cfg(not(target_os = "zkvm"))]
 pub use self::control_id::POSEIDON_CONTROL_ID;
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
 #[cfg(not(target_os = "zkvm"))]
 pub use self::receipt::{
-    ExitCode, ReceiptMetadata, SegmentReceipt, SessionReceipt, SystemState, VerifierContext,
+    ExitCode, ReceiptMetadata, SegmentReceipt, SessionReceipt, VerifierContext,
 };
 #[cfg(feature = "prove")]
 pub use self::{
