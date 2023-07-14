@@ -20,7 +20,7 @@ pragma solidity ^0.8.17;
 import "forge-std/Script.sol";
 import "../relay/contracts/BonsaiRelay.sol";
 import "../contracts/BonsaiStarter.sol";
-import "bonsai-lib-sol/BonsaiCheats.sol";
+import "bonsai/BonsaiCheats.sol";
 
 contract Deploy is Script, BonsaiCheats {
     function run() external {

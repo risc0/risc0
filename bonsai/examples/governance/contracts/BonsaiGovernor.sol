@@ -7,8 +7,8 @@ import {GovernorSettings} from "openzeppelin/contracts/governance/extensions/Gov
 import {GovernorVotes, IVotes} from "openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import {GovernorVotesQuorumFraction} from "openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 
-import {BonsaiLowLevelCallbackReceiver} from "bonsai-lib-sol/BonsaiLowLevelCallbackReceiver.sol";
-import {IBonsaiRelay} from "bonsai-lib-sol/IBonsaiRelay.sol";
+import {BonsaiLowLevelCallbackReceiver} from "bonsai/BonsaiLowLevelCallbackReceiver.sol";
+import {IBonsaiRelay} from "bonsai/IBonsaiRelay.sol";
 
 import {BonsaiGovernorCounting} from "./BonsaiGovernorCounting.sol";
 import {IBonsaiGovernor} from "./IBonsaiGovernor.sol";
