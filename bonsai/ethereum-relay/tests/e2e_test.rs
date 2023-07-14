@@ -25,8 +25,10 @@ mod tests {
         Relayer,
     };
     use bonsai_proxy_contract::ProxyContract;
-    use bonsai_sdk::alpha::{Client as BonsaiClient, SdkErr};
-    use bonsai_sdk_async::{get_client_from_parts, put_image};
+    use bonsai_sdk::{
+        alpha::{Client as BonsaiClient, SdkErr},
+        alpha_async::{get_client_from_parts, put_image},
+    };
     use ethers::types::{Bytes, H256 as ethers_H256, U256};
     use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
     use risc0_zkvm_methods::{SLICE_IO_ELF, SLICE_IO_ID};

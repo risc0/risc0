@@ -17,3 +17,6 @@
 
 /// Bonsai Alpha SDK
 pub mod alpha;
+#[cfg(feature = "async")]
+/// Bonsai Alpha SDK async
+pub mod alpha_async;
