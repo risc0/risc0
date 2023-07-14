@@ -1,0 +1,77 @@
+name: test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUST_BACKTRACE: "1"
+
+jobs:
+  integration:
+    name: local mock relay integration tests
+    runs-on: [self-hosted, prod, Linux, X64]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - name: checkout dummy commit (submodule bug workaround)
+        run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+
+      - name: clone repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: install rust
+        uses: risc0/risc0/.github/actions/rustup@42266f0b6bd28de208b7c47b50dd4bcf241f76ce
+
+      - name: Install Foundry
+        uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+
+      - name: build solidity contracts
+        run: forge build
+
+      - name: build rust guest
+        run: cargo build
+
+      - name: run foundry tests with local exec
+        run: forge test -vvv
+
+  e2e:
+    name: end 2 end tests
+    runs-on: [self-hosted, prod, Linux, X64]
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - name: checkout dummy commit (submodule bug workaround)
+        run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+
+      - name: clone repository
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: install rust
+        uses: risc0/risc0/.github/actions/rustup@42266f0b6bd28de208b7c47b50dd4bcf241f76ce
+
+      - name: Install Foundry
+        uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+
+      - name: build solidity contracts
+        run: forge build
+
+      - name: build rust guest
+        run: cargo build
+
+      - name: run foundry tests with bonsai alpha proving
+        env:
+          BONSAI_API_URL: ${{ secrets.BONSAI_API_URL }}
+          BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
+          BONSAI_PROVING: bonsai
+        run: forge test -vvv
