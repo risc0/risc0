@@ -1,0 +1,26 @@
+[package]
+name = "bonsai-proxy-contract"
+version = "0.1.0"
+edition = "2021"
+
+[build-dependencies]
+anyhow = "1.0"
+ethers = { version = "=2.0.2", features = ["rustls", "ws"] }
+ethers-solc = "=1.0.2"
+
+[dependencies]
+ethers = { version = "=2.0.2", features = ["rustls", "ws"] }
+hex = "0.4.3"
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+tokio = { version = "1", features = ["macros", "rt"] }
+tracing = "0.1"
+tempfile = "3.3"
+
+[dev-dependencies]
+risc0-zkvm = { workspace = true, default-features = false }
+sha2 = "0.10"
+tempfile = "3.3"
+
+[features]
+default = []
+solidity_compile = []

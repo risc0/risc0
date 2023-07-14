@@ -1,0 +1,15 @@
+[package]
+name = "bonsai-sdk-async"
+description = "Async wrapper of the Bonsai Software Development Kit"
+version = "0.2.0"
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[dependencies]
+bonsai-sdk = { workspace = true }
+tokio = { version = "1.19", features = ["full", "sync"] }
+
+[dev-dependencies]
+
