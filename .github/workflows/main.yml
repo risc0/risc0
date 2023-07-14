@@ -69,6 +69,8 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+      - uses: ./.github/actions/solc
+      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
