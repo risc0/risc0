@@ -69,9 +69,14 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
-      - uses: ./.github/actions/solc
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
+      - name: Install svm
+        run: cargo install svm-rs
+      - name: Install Solidity 0.8.17
+        run: svm install 0.8.17
+      - name: Use Solidity 0.8.17
+        run: svm use 0.8.17
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
