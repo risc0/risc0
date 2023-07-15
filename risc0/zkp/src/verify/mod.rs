@@ -24,7 +24,6 @@ use core::{cell::RefCell, iter::zip};
 pub(crate) use merkle::MerkleTreeVerifier;
 pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
-use thiserror::Error;
 
 use crate::{
     adapter::{CircuitCoreDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
@@ -33,23 +32,23 @@ use crate::{
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum VerificationError {
-    #[error("invalid receipt format")]
+    // #[error("invalid receipt format")]
     ReceiptFormatError,
-    #[error("control_id mismatch")]
+    // #[error("control_id mismatch")]
     ControlVerificationError,
-    #[error("image_id mismatch")]
+    // #[error("image_id mismatch")]
     ImageVerificationError,
-    #[error("Requested Merkle validation on row {idx}, but only {rows} rows exist")]
+    // #[error("Requested Merkle validation on row {idx}, but only {rows} rows exist")]
     MerkleQueryOutOfRange { idx: usize, rows: usize },
-    #[error("Verification indicates proof is invalid")]
+    // #[error("Verification indicates proof is invalid")]
     InvalidProof,
-    #[error("Journal digest mismatch detected")]
+    // #[error("Journal digest mismatch detected")]
     JournalDigestMismatch,
-    #[error("Unexpected exit_code")]
+    // #[error("Unexpected exit_code")]
     UnexpectedExitCode,
-    #[error("Invalid hash suite")]
+    // #[error("Invalid hash suite")]
     InvalidHashSuite,
 }
 

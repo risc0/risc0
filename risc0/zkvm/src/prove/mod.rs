@@ -299,7 +299,9 @@ where
         }
         let receipt = SessionReceipt::new(segments, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        receipt.verify_with_context(ctx, image_id)?;
+        receipt
+            .verify_with_context(ctx, image_id)
+            .map_err(|e| anyhow::anyhow!(e))?;
         Ok(receipt)
     }
 
@@ -355,7 +357,9 @@ where
             index: segment.index,
             hashfn: hashfn.clone(),
         };
-        receipt.verify_with_context(ctx)?;
+        receipt
+            .verify_with_context(ctx)
+            .map_err(|e| anyhow::anyhow!(e))?;
 
         Ok(receipt)
     }
