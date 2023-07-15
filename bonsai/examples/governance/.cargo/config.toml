@@ -1,0 +1,32 @@
+[build]
+rustflags = [
+    "-Dclippy::correctness",
+    "-Dclippy::suspicious",
+    "-Wclippy::complexity",
+    "-Wclippy::perf",
+    "-Wclippy::style",
+    "-Wclippy::unwrap_used",
+    "-Wclippy::expect_used",
+    "-Dclippy::needless_return",
+    "-Dbad_style",
+    "-Dbare_trait_objects",
+    "-Ddead_code",
+    "-Dimproper_ctypes",
+    "-Dno_mangle_generic_items",
+    "-Dnon_shorthand_field_patterns",
+    "-Doverflowing_literals",
+    "-Dpath_statements",
+    "-Dpatterns_in_fns_without_body",
+    "-Dprivate_in_public",
+    "-Dtrivial_casts",
+    "-Dtrivial_numeric_casts",
+    "-Dunconditional_recursion",
+    "-Dunused_allocation",
+    "-Dunused_comparisons",
+    "-Wunused_extern_crates",
+    "-Dunused_parens",
+    "-Dwhile_true",
+]
+
+[net]
+git-fetch-with-cli = true
