@@ -92,16 +92,23 @@ impl<S: Storage> BonsaiPendingProofManager<S> {
         &self,
         pending_proof_result: Result<ProofRequestID, PendingProofError>,
     ) -> Result<(), BonsaiPendingProofManagerError> {
-        let completed_proof_id = pending_proof_result?;
+        let (completed_proof_id, state) = match pending_proof_result {
+            Ok(session_id) => (session_id, ProofRequestState::Completed),
+            Err(err) => (err.get_proof_request_id(), ProofRequestState::Failed),
+        };
 
         self.storage
             .transition_proof_request(completed_proof_id.clone(), ProofRequestState::Completed)
             .await?;
 
-        self.complete_proof_manager_notifier.notify_one();
-
         let log_id = completed_proof_id.clone();
-        info!(?log_id, "pending proof done");
+        match state {
+            ProofRequestState::Completed => {
+                self.complete_proof_manager_notifier.notify_one();
+                info!(?log_id, "pending proof done");
+            }
+            _ => info!(?log_id, "pending proof failed"),
+        }
 
         Ok(())
     }
