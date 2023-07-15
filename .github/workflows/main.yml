@@ -33,6 +33,7 @@ jobs:
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
+      - run: cargo sort --workspace --check bonsai/examples/governance
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -75,6 +76,8 @@ jobs:
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
+      - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
+        if: matrix.device == 'cpu'
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
