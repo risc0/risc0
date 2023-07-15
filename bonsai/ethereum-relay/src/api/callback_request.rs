@@ -52,7 +52,7 @@ pub(crate) async fn post_callback_request<S: Storage + Sync + Send + Clone>(
 impl From<CallbackRequest> for CallbackRequestFilter {
     fn from(val: CallbackRequest) -> Self {
         CallbackRequestFilter {
-            account: ethers::types::Address::default(),
+            account: val.callback_contract,
             image_id: val.image_id,
             input: val.input.into(),
             callback_contract: val.callback_contract,
