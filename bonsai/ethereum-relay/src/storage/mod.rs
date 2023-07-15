@@ -57,6 +57,7 @@ pub(crate) enum ProofRequestState {
     Pending,
     // Completed by Bonsai
     Completed,
+    Failed,
     PreparingOnchain,
     CompletedOnchain(H256),
 }
@@ -66,6 +67,7 @@ impl ProofRequestState {
         match (self, new_state) {
             (ProofRequestState::New, ProofRequestState::Pending)
             | (ProofRequestState::Pending, ProofRequestState::Completed)
+            | (ProofRequestState::Pending, ProofRequestState::Failed)
             | (ProofRequestState::Completed, ProofRequestState::PreparingOnchain)
             // Allow a revert from PreparingOnchain to Completed. This is useful if the service
             // crashes while preparing a request for sending on chain.

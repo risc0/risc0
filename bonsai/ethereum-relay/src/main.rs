@@ -70,7 +70,7 @@ async fn main() -> Result<()> {
     let args = Args::parse();
 
     let relayer = Relayer {
-        publish_mode: !args.publish_mode,
+        publish_mode: args.publish_mode,
         publish_port: args.port,
         bonsai_api_url: get_bonsai_url(),
         bonsai_api_key: get_bonsai_api_key(),
