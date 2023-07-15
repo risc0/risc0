@@ -33,7 +33,7 @@ use crate::{
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Error, PartialEq)]
 pub enum VerificationError {
     #[error("invalid receipt format")]
     ReceiptFormatError,
