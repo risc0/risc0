@@ -301,7 +301,7 @@ where
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
         receipt
             .verify_with_context(ctx, image_id)
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
         Ok(receipt)
     }
 
@@ -359,7 +359,7 @@ where
         };
         receipt
             .verify_with_context(ctx)
-            .map_err(|e| anyhow::anyhow!(e))?;
+            .map_err(|e| anyhow::anyhow!(e.to_string()))?;
 
         Ok(receipt)
     }
