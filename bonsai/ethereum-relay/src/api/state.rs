@@ -12,11 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
+use std::sync::Arc;
 
-/// Bonsai Alpha SDK
-pub mod alpha;
-#[cfg(feature = "async")]
-/// Bonsai Alpha SDK async
-pub mod alpha_async;
+use tokio::sync::Notify;
+
+use crate::storage::Storage;
+
+#[derive(Clone)]
+pub(crate) struct ApiState<S>
+where
+    S: Storage + Sync + Send + Clone,
+{
+    pub(crate) bonsai_url: String,
+    pub(crate) storage: S,
+    pub(crate) notifier: Arc<Notify>,
+}

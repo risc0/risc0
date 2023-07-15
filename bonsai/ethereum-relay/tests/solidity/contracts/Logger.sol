@@ -11,12 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+//
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
+contract Logger {
+    event Event(uint256 number);
+    uint256[] public logs;
 
-/// Bonsai Alpha SDK
-pub mod alpha;
-#[cfg(feature = "async")]
-/// Bonsai Alpha SDK async
-pub mod alpha_async;
+    function log(uint256 number) public {
+        logs.push(number);
+        emit Event(number);
+    }
+
+    function logSize() public view returns (uint256) {
+        return logs.length;
+    }
+}

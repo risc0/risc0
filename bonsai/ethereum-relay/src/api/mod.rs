@@ -12,11 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
+use self::error::Error;
 
-/// Bonsai Alpha SDK
-pub mod alpha;
-#[cfg(feature = "async")]
-/// Bonsai Alpha SDK async
-pub mod alpha_async;
+pub(crate) mod auth;
+pub(crate) mod bincode;
+pub(crate) mod callback_request;
+pub(crate) mod error;
+pub(crate) mod server;
+pub(crate) mod state;
+
+/// The routes for the API.
+pub mod routes {
+    /// Route for `Callback` related APIs.
+    pub const CALLBACK_ROUTE: &str = "/v1/callbacks";
+}
+
+pub(crate) type Result<T, E = Error> = ::std::result::Result<T, E>;

@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
-
-/// Bonsai Alpha SDK
-pub mod alpha;
-#[cfg(feature = "async")]
-/// Bonsai Alpha SDK async
-pub mod alpha_async;
+#[tokio::main]
+async fn main() {
+    let _ = bonsai_rest_api_mock::serve("8081".to_string()).await;
+}

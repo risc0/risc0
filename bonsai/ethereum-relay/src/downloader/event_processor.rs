@@ -12,11 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![doc = include_str!("../README.md")]
-#![deny(missing_docs)]
+#[async_trait::async_trait]
+pub(crate) trait EventProcessor {
+    type Event;
 
-/// Bonsai Alpha SDK
-pub mod alpha;
-#[cfg(feature = "async")]
-/// Bonsai Alpha SDK async
-pub mod alpha_async;
+    async fn process_event(&self, event: Self::Event) -> Result<(), crate::api::error::Error>;
+}
