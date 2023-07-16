@@ -72,7 +72,8 @@ jobs:
           node-version: 18
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
-      - uses: ./.github/actions/svm
+      - uses: ./.github/actions/rosetta
+      - run: cargo xtest install
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml

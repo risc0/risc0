@@ -1,0 +1,11 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+edition = { workspace = true }
+
+[dependencies]
+clap = { version = "4.0", features = ["derive"] }
+which = "4.4"
+
+[package.metadata.release]
+release = false

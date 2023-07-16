@@ -14,12 +14,10 @@ hex = "0.4.3"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt"] }
 tracing = "0.1"
-tempfile = "3.3"
 
 [dev-dependencies]
 risc0-zkvm = { workspace = true, default-features = false }
 sha2 = "0.10"
-tempfile = "3.3"
 
 [features]
 default = []
