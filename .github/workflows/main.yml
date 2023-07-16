@@ -75,7 +75,7 @@ jobs:
       - uses: ./.github/actions/rosetta
       - run: cargo xtask install
       - run: |
-          which solc && echo solc already installed || { cargo install svm-rs && svm install 0.8.20 && svm use 0.8.20 }
+          which solc && echo solc already installed || { cargo install svm-rs && svm install 0.8.20 && svm use 0.8.20; }
         shell: bash
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
