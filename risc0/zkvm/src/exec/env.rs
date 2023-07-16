@@ -64,7 +64,9 @@ pub struct ExecutorEnv<'a> {
 
 impl<'a> ExecutorEnv<'a> {
     /// Construct a [ExecutorEnvBuilder].
+    ///
     /// # Example
+    ///
     /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
@@ -123,7 +125,9 @@ pub enum ExecutorEnvBuilderErr {
 
 impl<'a> ExecutorEnvBuilder<'a> {
     /// Finalize this builder to construct an [ExecutorEnv].
+    ///
     /// # Example
+    ///
     /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
@@ -171,7 +175,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Set a session limit, specified in number of cycles.
+    ///
     /// # Example
+    ///
     /// ```
     /// use risc0_zkvm::{
     ///    ExecutorEnv,
@@ -190,7 +196,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add environment variables to the guest environment.
+    ///
     /// # Example
+    ///
     /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
@@ -212,7 +220,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add an environment variable to the guest environment.
+    ///
     /// # Example
+    ///
     /// ```
     /// # use risc0_zkvm::{
     /// #   ExecutorEnv,
@@ -231,8 +241,13 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add initial input that can be read by the guest from stdin.
-    /// Calling `ExecutorEnvBuilder::add_input()` iteratively concatenates
-    /// inputs; the guest can access each input using consecutive reads. ```
+    ///
+    /// Calling `add_input` iteratively concatenates inputs; the guest can
+    /// access each input using consecutive reads.
+    ///
+    /// # Example
+    ///
+    /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
     ///     ExecutorEnvBuilder,
@@ -283,16 +298,14 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add a handler for a syscall which inputs and outputs a slice
-    /// of plain old data. The guest can call these by invoking
-    /// `risc0_zkvm::guest::env::send_recv_slice`
+    /// of plain old data.
     pub fn slice_io(&mut self, syscall: SyscallName, handler: impl SliceIo + 'a) -> &mut Self {
         self.syscall(syscall, handler.to_syscall());
         self
     }
 
     /// Add a handler for a syscall which inputs and outputs a slice
-    /// of plain old data. The guest can call these callbacks by
-    /// invoking `risc0_zkvm::guest::env::send_recv_slice`.
+    /// of plain old data.
     pub fn io_callback(
         &mut self,
         syscall: SyscallName,

@@ -31,7 +31,7 @@
 //! [SessionReceipt]s directly and [SegmentReceipt]s only indirectly as part
 //! of the [SessionReceipt]s that contain them (for instance, by calling
 //! [SessionReceipt::verify], which will itself call
-//! [SegmentReceipt::verify] for each constinuent [SegmentReceipt]).
+//! [InnerReceipt::verify] for the interior [InnerReceipt]).
 //!
 //! # Usage
 //! To create a [SessionReceipt], use [crate::Session::prove]:
@@ -274,7 +274,7 @@ impl InnerReceipt {
         }
     }
 
-    /// Returns the [InnerReceipt::Segments] arm, will panic if invalid.
+    /// Returns the [InnerReceipt::Flat] arm, will panic if invalid.
     pub fn flat(&self) -> &[SegmentReceipt] {
         match self {
             InnerReceipt::Flat(x) => &x.0,
@@ -300,10 +300,11 @@ pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
     /// This data is used by the ZKP Verifier (as called by
-    /// [SegmentReceipt::verify]) to cryptographically prove that this Segment
-    /// was faithfully executed. It is largely opaque cryptographic data, but
-    /// contains a non-opaque metadata component, which can be conveniently
-    /// accessed with [SegmentReceipt::get_metadata].
+    /// [SegmentReceipt::verify_with_context]) to cryptographically prove that
+    /// this Segment was faithfully executed. It is largely opaque
+    /// cryptographic data, but contains a non-opaque metadata component,
+    /// which can be conveniently accessed with
+    /// [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 
     /// Segment index within the [SessionReceipt]
@@ -372,7 +373,8 @@ impl SegmentReceipt {
         risc0_zkp::verify::verify(&crate::CIRCUIT, suite, &self.seal, check_code)
     }
 
-    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+    /// Returns the [ReceiptMetadata] for this receipt.
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
         ReceiptMetadata::decode_from_io(layout::OutBuffer(elems))
     }
