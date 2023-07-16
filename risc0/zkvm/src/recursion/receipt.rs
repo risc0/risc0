@@ -14,7 +14,6 @@
 
 use alloc::{collections::VecDeque, vec::Vec};
 
-use dyn_partial_eq::DynPartialEq;
 use risc0_core::field::baby_bear::BabyBearElem;
 use risc0_zkp::{
     adapter::CircuitInfo,
@@ -26,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use super::CircuitImpl;
 use crate::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{Receipt, ReceiptMetadata, SystemState, VerifierContext},
+    receipt::{ReceiptMetadata, SystemState, VerifierContext},
     recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
     sha,
 };
@@ -162,8 +161,8 @@ impl ReceiptMetadata {
 
 /// This struct represents a receipt for one or more [crate::SegmentReceipt]s
 /// joined through recursion.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq, DynPartialEq)]
-pub struct RollupReceipt {
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SuccinctReceipt {
     /// the cryptographic seal of this receipt
     pub seal: Vec<u32>,
 
@@ -175,9 +174,9 @@ pub struct RollupReceipt {
     pub meta: ReceiptMetadata,
 }
 
-#[typetag::serde]
-impl Receipt for RollupReceipt {
-    fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
+impl SuccinctReceipt {
+    /// Verify the integrity of this receipt.
+    pub fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
         let valid_ids = valid_control_ids();
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             valid_ids
@@ -208,14 +207,6 @@ impl Receipt for RollupReceipt {
         }
         // Everything passed
         Ok(())
-    }
-
-    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
-        Ok(self.meta.clone())
-    }
-
-    fn get_seal(&self) -> &[u32] {
-        &self.seal
     }
 }
 
