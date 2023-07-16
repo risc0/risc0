@@ -12,9 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::process::Command;
-
 use clap::{Parser, Subcommand};
+use xshell::{cmd, Shell};
 
 #[derive(Parser)]
 struct Cli {
@@ -35,27 +34,17 @@ impl Commands {
     }
 
     fn cmd_install(&self) {
-        const SOLC_VERSION: &str = "0.8.20";
+        install_solc();
+    }
+}
 
-        if which::which("solc").is_err() {
-            assert!(Command::new("cargo")
-                .args(&["install", "--locked", "svm-rs"])
-                .status()
-                .unwrap()
-                .success());
-
-            assert!(Command::new("svm")
-                .args(&["install", SOLC_VERSION])
-                .status()
-                .unwrap()
-                .success());
-
-            assert!(Command::new("svm")
-                .args(&["use", SOLC_VERSION])
-                .status()
-                .unwrap()
-                .success());
-        }
+fn install_solc() {
+    const SOLC_VERSION: &str = "0.8.20";
+    if which::which("solc").is_err() {
+        let sh = Shell::new().unwrap();
+        cmd!(sh, "cargo install --locked svm-rs").run().unwrap();
+        cmd!(sh, "svm install {SOLC_VERSION}").run().unwrap();
+        cmd!(sh, "svm use {SOLC_VERSION}").run().unwrap();
     }
 }
 
