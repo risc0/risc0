@@ -19,7 +19,7 @@ clap = { version = "4.0", features = ["derive", "env"] }
 displaydoc = "0.2"
 ethers = { version = "=2.0.2", features = ["rustls", "ws"] }
 ethers-signers = { version = "=2.0.2", features = ["aws"] }
-ethers-solc = { version = "=2.0.2" }
+ethers-solc = { version = "=2.0.8" }
 futures = "0.3"
 hex = "0.4.3"
 hyper = "0.14"
