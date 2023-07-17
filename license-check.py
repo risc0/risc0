@@ -30,6 +30,8 @@ EXTENSIONS = [
 
 SKIP_DIRS = [
     str(Path.cwd()) + "/templates/rust-starter",
+    # Groth16 verifier implementaion uses circom generated code under GPL3.
+    str(Path.cwd()) + "/bonsai/ethereum/contracts/groth16",
 ]
 
 def check_header(expected_year, lines_actual):

@@ -33,6 +33,7 @@ jobs:
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
+      - run: cargo sort --workspace --check bonsai/examples/governance
       - uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -69,10 +70,15 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 18
+      - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/rosetta
+      - run: cargo xtask install
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
+      - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
+        if: matrix.device == 'cpu'
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches

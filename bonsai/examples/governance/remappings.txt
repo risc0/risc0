@@ -1,0 +1,4 @@
+murky_differential_testing/=lib/murky/differential_testing/
+forge-std/=lib/forge-std/src/
+openzeppelin/=lib/openzeppelin-contracts/
+bonsai/=../../ethereum/contracts/

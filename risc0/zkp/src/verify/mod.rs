@@ -19,12 +19,11 @@ mod merkle;
 mod read_iop;
 
 use alloc::{vec, vec::Vec};
-use core::{cell::RefCell, iter::zip};
+use core::{cell::RefCell, fmt, iter::zip};
 
 pub(crate) use merkle::MerkleTreeVerifier;
 pub use read_iop::ReadIOP;
 use risc0_core::field::{Elem, ExtElem, Field, RootsOfUnity};
-use thiserror::Error;
 
 use crate::{
     adapter::{CircuitCoreDef, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA},
@@ -33,25 +32,40 @@ use crate::{
     INV_RATE, MAX_CYCLES_PO2, QUERIES,
 };
 
-#[derive(Debug, Error, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum VerificationError {
-    #[error("invalid receipt format")]
     ReceiptFormatError,
-    #[error("control_id mismatch")]
     ControlVerificationError,
-    #[error("image_id mismatch")]
     ImageVerificationError,
-    #[error("Requested Merkle validation on row {idx}, but only {rows} rows exist")]
     MerkleQueryOutOfRange { idx: usize, rows: usize },
-    #[error("Verification indicates proof is invalid")]
     InvalidProof,
-    #[error("Journal digest mismatch detected")]
     JournalDigestMismatch,
-    #[error("Unexpected exit_code")]
     UnexpectedExitCode,
-    #[error("Invalid hash suite")]
     InvalidHashSuite,
 }
+
+impl fmt::Display for VerificationError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            VerificationError::ReceiptFormatError => write!(f, "invalid receipt format"),
+            VerificationError::ControlVerificationError => write!(f, "control_id mismatch"),
+            VerificationError::ImageVerificationError => write!(f, "image_id mismatch"),
+            VerificationError::MerkleQueryOutOfRange { idx, rows } => write!(
+                f,
+                "Requested Merkle validation on row {idx}, but only {rows} rows exist",
+            ),
+            VerificationError::InvalidProof => write!(f, "Verification indicates proof is invalid"),
+            VerificationError::JournalDigestMismatch => {
+                write!(f, "Journal digest mismatch detected")
+            }
+            VerificationError::UnexpectedExitCode => write!(f, "Unexpected exit_code"),
+            VerificationError::InvalidHashSuite => write!(f, "Invalid hash suite"),
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::error::Error for VerificationError {}
 
 trait VerifyParams<F: Field> {
     const CHECK_SIZE: usize = INV_RATE * F::ExtElem::EXT_SIZE;
