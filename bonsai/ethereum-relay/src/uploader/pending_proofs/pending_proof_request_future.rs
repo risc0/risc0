@@ -14,8 +14,10 @@
 
 use std::pin::Pin;
 
-use bonsai_sdk::alpha::{responses::SessionStatusRes, Client, SessionId};
-use bonsai_sdk_async::session_status;
+use bonsai_sdk::{
+    alpha::{responses::SessionStatusRes, Client, SessionId},
+    alpha_async::session_status,
+};
 use futures::{
     task::{Context, Poll},
     Future,

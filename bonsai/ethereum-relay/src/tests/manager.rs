@@ -17,7 +17,7 @@ pub(crate) mod tests {
     use std::{path::Path, sync::Arc};
 
     use bonsai_proxy_contract::CallbackRequestFilter;
-    use bonsai_sdk_async::get_client_from_parts;
+    use bonsai_sdk::alpha_async::get_client_from_parts;
     use ethers::{
         prelude::Middleware,
         types::{Address, Bytes, Filter, H256},

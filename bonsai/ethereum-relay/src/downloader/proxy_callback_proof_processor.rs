@@ -15,8 +15,10 @@
 use std::sync::Arc;
 
 use bonsai_proxy_contract::CallbackRequestFilter;
-use bonsai_sdk::alpha::Client;
-use bonsai_sdk_async::{create_session, put_input};
+use bonsai_sdk::{
+    alpha::Client,
+    alpha_async::{create_session, put_input},
+};
 use tokio::sync::Notify;
 use tracing::info;
 

@@ -21,8 +21,8 @@ mod uploader;
 
 use std::sync::Arc;
 
-use anyhow::{Context, Error, Result};
-use bonsai_sdk_async::get_client_from_parts;
+use anyhow::{Context, Result, Error};
+use bonsai_sdk::alpha_async::get_client_from_parts;
 use downloader::{
     proxy_callback_proof_processor::ProxyCallbackProofRequestProcessor,
     proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream,

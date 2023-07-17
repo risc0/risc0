@@ -14,8 +14,7 @@ axum = { version = "0.6.1", features = ["macros", "headers"] }
 bincode = "1.3.3"
 bonsai-proxy-contract = { path = "src/proxy-contract" }
 bonsai-rest-api-mock = { workspace = true }
-bonsai-sdk = { workspace = true }
-bonsai-sdk-async = { workspace = true }
+bonsai-sdk = { workspace = true, features = ["async"] }
 clap = { version = "4.0", features = ["derive", "env"] }
 displaydoc = "0.2"
 ethers = { version = "=2.0.2", features = ["rustls", "ws"] }
