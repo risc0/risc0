@@ -42,10 +42,9 @@ fn install_solc() {
     const SOLC_VERSION: &str = "0.8.20";
     let sh = Shell::new().unwrap();
     cmd!(sh, "cargo install --locked svm-rs").run().unwrap();
-    if which::which("solc").is_err() {
-        cmd!(sh, "svm install {SOLC_VERSION}").run().unwrap();
-        cmd!(sh, "svm use {SOLC_VERSION}").run().unwrap();
-    }
+    sh.remove_path("~/.svm").unwrap();
+    cmd!(sh, "svm install {SOLC_VERSION}").run().unwrap();
+    cmd!(sh, "svm use {SOLC_VERSION}").run().unwrap();
 }
 
 fn main() {
