@@ -21,13 +21,24 @@ mod uploader;
 
 use std::sync::Arc;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Error, Result};
 use bonsai_sdk_async::get_client_from_parts;
 use downloader::{
     proxy_callback_proof_processor::ProxyCallbackProofRequestProcessor,
     proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream,
 };
-use ethers::{core::types::Address, prelude::*};
+use ethers::{
+    core::{
+        k256::{ecdsa::SigningKey, SecretKey},
+        types::Address,
+    },
+    middleware::SignerMiddleware,
+    prelude::{k256::Secp256k1, *},
+    providers::{Provider, PubsubClient, Ws},
+    signers::AwsSigner,
+};
+use rusoto_core::Region;
+use rusoto_kms::KmsClient;
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
 use tracing::info;
@@ -39,6 +50,75 @@ use uploader::{
 use crate::api::{server::serve, state::ApiState};
 
 static DEFAULT_FILTER: &str = "debug";
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct EthersClientConfig {
+    pub eth_node_url: String,
+    pub eth_chain_id: u64,
+    pub wallet_key_identifier: String,
+    pub is_kms: bool,
+}
+
+impl EthersClientConfig {
+    pub fn new(
+        eth_node_url: String,
+        eth_chain_id: u64,
+        wallet_key_identifier: String,
+        is_kms: bool,
+    ) -> Self {
+        Self {
+            eth_node_url,
+            eth_chain_id,
+            wallet_key_identifier,
+            is_kms,
+        }
+    }
+
+    pub async fn get_client<S: Signer>(&self) -> Result<SignerMiddleware<Provider<Ws>, S>> {
+        let provider = self.provider().await?;
+        let signer = self.signer().await??;
+        let client = SignerMiddleware::new(provider, signer);
+        Ok(client)
+    }
+
+    pub async fn provider(&self) -> Result<Provider<Ws>> {
+        let provider = Provider::<Ws>::connect_with_reconnects(self.eth_node_url.clone(), 60)
+            .await
+            .context("Failed to connect to Ethereum node.")?;
+        Ok(provider)
+    }
+
+    pub async fn signer(&self) -> Result<Box<dyn Signer<Error = Error>>> {
+        if self.is_kms {
+            Ok(Box::new(self.get_signer_kms().await?))
+        } else {
+            Ok(Box::new(self.get_signer_private_key()))
+        }
+    }
+
+    async fn get_signer_kms(&self) -> Result<AwsSigner> {
+        let region = Region::default();
+        let kms_client = KmsClient::new(region);
+        let signer = AwsSigner::new(
+            kms_client,
+            self.wallet_key_identifier.clone(),
+            self.eth_chain_id,
+        )
+        .await
+        .context("Failed to create AWS signer.")?;
+        Ok(signer)
+    }
+
+    fn get_signer_private_key(&self) -> Result<Wallet<SigningKey>> {
+        let private_key = SecretKey::from_slice(
+            &hex::decode(&self.wallet_key_identifier).context("Failed to decode private key.")?,
+        )
+        .context("Failed to create private key.")?;
+        let signing_key = SigningKey::from(private_key);
+        let signer = LocalWallet::from(signing_key).with_chain_id(self.eth_chain_id);
+        Ok(signer)
+    }
+}
 
 #[derive(Clone)]
 /// A relayer to integrate Ethereum with Bonsai.
@@ -57,11 +137,10 @@ pub struct Relayer {
 
 impl Relayer {
     /// Run a [Relayer] with an Ethereum Client.
-    pub async fn run<M: Middleware + 'static>(self, ethers_client: Arc<M>) -> Result<()>
-where
-    <M as ethers::providers::Middleware>::Provider: PubsubClient,
-    <<M as ethers::providers::Middleware>::Provider as ethers::providers::PubsubClient>::NotificationStream: Sync,
-{
+    pub async fn run(self, ethers_client_config: EthersClientConfig) -> Result<()> {
+        // Setup Ethereum client
+        let ethers_client = Arc::new(ethers_client_config.get_client().await?);
+
         // try to load filter from `RUST_LOG` or use reasonably verbose defaults
         let filter = ::tracing_subscriber::EnvFilter::try_from_default_env()
             .unwrap_or_else(|_| DEFAULT_FILTER.into());
@@ -87,7 +166,7 @@ where
         );
 
         let downloader = ProxyCallbackProofRequestStream::new(
-            ethers_client.clone(),
+            ethers_client_config.clone(),
             self.relay_contract_address,
             proxy_callback_proof_request_processor.clone(),
         );

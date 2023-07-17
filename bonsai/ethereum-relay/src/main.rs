@@ -15,7 +15,7 @@
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use bonsai_ethereum_relay::Relayer;
+use bonsai_ethereum_relay::{Relayer, EthersClientConfig};
 use clap::Parser;
 use ethers::{
     core::{
@@ -77,26 +77,34 @@ async fn main() -> Result<()> {
         relay_contract_address: args.contract_address,
     };
 
-    if args.use_kms {
-        let kms_client = KmsClient::new(Region::default());
-        let ethers_client = create_ethers_client_proxy_kms(
-            &args.eth_node_url,
-            &args.wallet_key_identifier,
-            kms_client,
-            args.eth_chain_id,
-        )
-        .await?;
-        relayer.run(ethers_client).await
-    } else {
-        let ethers_client = create_ethers_client_private_key(
-            &args.eth_node_url,
-            &args.wallet_key_identifier,
-            args.eth_chain_id,
-        )
-        .await?;
+    let ethers_client_config = EthersClientConfig::new(
+        args.eth_node_url,
+        args.eth_chain_id,
+        args.wallet_key_identifier,
+        args.use_kms,);
 
-        relayer.run(ethers_client).await
-    }
+    relayer.run(ethers_client_config).await
+
+    // if args.use_kms {
+    //     let kms_client = KmsClient::new(Region::default());
+    //     let ethers_client = create_ethers_client_proxy_kms(
+    //         &args.eth_node_url,
+    //         &args.wallet_key_identifier,
+    //         kms_client,
+    //         args.eth_chain_id,
+    //     )
+    //     .await?;
+    //     relayer.run(ethers_client).await
+    // } else {
+    //     let ethers_client = create_ethers_client_private_key(
+    //         &args.eth_node_url,
+    //         &args.wallet_key_identifier,
+    //         args.eth_chain_id,
+    //     )
+    //     .await?;
+
+    //     relayer.run(ethers_client).await
+    // }
 }
 
 async fn create_ethers_client_private_key(

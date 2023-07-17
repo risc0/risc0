@@ -25,46 +25,57 @@ use ethers::{
 use futures::StreamExt;
 use tracing::{debug, error, warn};
 
-use crate::{api::error::Error, downloader::event_processor::EventProcessor};
+use crate::{api::error::Error, downloader::event_processor::EventProcessor, EthersClientConfig};
 
 pub(crate) struct ProxyCallbackProofRequestStream<
-    M: Middleware,
     EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send,
 > {
-    ethers_client: Arc<M>,
+    ethers_client_config: EthersClientConfig,
     proxy_contract_address: Address,
     event_processor: EP,
 }
 
-impl<M: Middleware, EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
-    ProxyCallbackProofRequestStream<M, EP>
-where
-    <M as Middleware>::Provider: PubsubClient,
+impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
+    ProxyCallbackProofRequestStream<EP>
 {
     pub(crate) fn new(
-        ethers_client: Arc<M>,
+        ethers_client_config: EthersClientConfig,
         proxy_contract_address: Address,
         event_processor: EP,
-    ) -> ProxyCallbackProofRequestStream<M, EP> {
+    ) -> ProxyCallbackProofRequestStream<EP> {
         Self {
-            ethers_client,
+            ethers_client_config,
             proxy_contract_address,
             event_processor,
         }
     }
 
-    pub(crate) async fn run(
-        self,
-    ) -> Result<(), Error> {
-        const WAIT_DURATION: Duration = Duration::from_millis(500);
+    pub(crate) async fn run(self) -> Result<(), Error> {
+        const WAIT_DURATION: Duration = Duration::from_secs(5);
         const EVENT_NAME: &str = "CallbackRequest(address,bytes32,bytes,address,bytes4,uint64)";
         let mut interval = tokio::time::interval(WAIT_DURATION);
         let filter = ethers::types::Filter::new()
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
+        let mut client = self.ethers_client_config.get_client().await?;
+        let mut reset_client = false;
 
         loop {
-            let logs = self.ethers_client.subscribe_logs(&filter).await;
+            if reset_client {
+                match self.ethers_client_config.get_client().await {
+                    Ok(new_client) => {
+                        client = new_client;
+                    }
+                    Err(error) => {
+                        error!(?error, "Failed to create new client");
+                        error!("Reconnecting in {WAIT_DURATION:?} seconds.");
+                        interval.tick().await;
+                        continue;
+                    }
+                };
+                reset_client = false;
+            }
+            let logs = client.subscribe_logs(&filter).await;
             match logs {
                 Ok(logs) => {
                     debug!("Successfully subscribed to logs");
@@ -76,6 +87,7 @@ where
                 Err(error) => {
                     error!(?error, "Failed to subscribe to logs");
                     error!("Reconnecting in {WAIT_DURATION:?} seconds.");
+                    reset_client = true;
                     interval.tick().await;
                 }
             };
@@ -84,7 +96,7 @@ where
 
     async fn process_logs(
         &self,
-        mut subscription_stream: SubscriptionStream<'_, <M as Middleware>::Provider, Log>,
+        mut subscription_stream: SubscriptionStream<'_, impl PubsubClient, Log>,
     ) -> Result<(), Error> {
         while let Some(log) = subscription_stream.next().await {
             let parsed_event: Result<CallbackRequestFilter, _> = ethers::contract::parse_log(log);
