@@ -75,9 +75,10 @@ jobs:
       - uses: ./.github/actions/rosetta
       - run: cargo xtask install
       - run: env
-      - run: svm list
-      - run: which solc
       - run: find ~/.cargo/bin
+      - run: which solc
+      - run: which svm
+      - run: svm list
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
