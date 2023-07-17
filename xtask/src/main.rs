@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use clap::{Parser, Subcommand};
+use semver::Version;
 use xshell::{cmd, Shell};
 
 #[derive(Parser)]
@@ -39,13 +40,23 @@ impl Commands {
 }
 
 fn install_solc() {
-    const SOLC_VERSION: &str = "0.8.20";
-    if which::which("solc").is_err() {
-        let sh = Shell::new().unwrap();
-        cmd!(sh, "cargo install --locked svm-rs").run().unwrap();
-        cmd!(sh, "svm install {SOLC_VERSION}").run().unwrap();
-        cmd!(sh, "svm use {SOLC_VERSION}").run().unwrap();
+    const SOLC_VERSION: Version = Version::new(0, 8, 20);
+
+    let sh = Shell::new().unwrap();
+    if cmd!(sh, "cargo install --locked svm-rs").run().is_err() {
+        cmd!(sh, "cargo install --force --locked svm-rs")
+            .run()
+            .unwrap();
     }
+    if !svm_lib::installed_versions()
+        .unwrap_or_default()
+        .contains(&SOLC_VERSION)
+    {
+        println!("svm install {SOLC_VERSION}");
+        svm_lib::blocking_install(&SOLC_VERSION).unwrap();
+    }
+    println!("svm use {SOLC_VERSION}");
+    svm_lib::use_version(&SOLC_VERSION).unwrap();
 }
 
 fn main() {
