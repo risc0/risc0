@@ -666,7 +666,6 @@ dependencies = [
  "risc0-zkvm-platform",
  "serde",
  "sha2",
- "thiserror",
  "tracing",
 ]
 
@@ -689,7 +688,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
- "thiserror",
  "tracing",
  "typetag",
 ]
