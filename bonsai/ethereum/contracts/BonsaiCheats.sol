@@ -36,7 +36,7 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
         imageRunnerInput[i++] = "run";
         imageRunnerInput[i++] = "-q";
         imageRunnerInput[i++] = "query";
-        imageRunnerInput[i++] = "--prover-mode=none";
+        imageRunnerInput[i++] = "--prover-mode=local";
         imageRunnerInput[i++] = abi.encodePacked(imageId).toHexString();
         imageRunnerInput[i++] = input.toHexString();
         return abi.decode(vm.ffi(imageRunnerInput), (bytes));

@@ -30,14 +30,13 @@ import {RiscZeroGroth16Verifier} from "./groth16/RiscZeroGroth16Verifier.sol";
 
 /// @notice A base contract for testing a Bonsai callback receiver contract
 /// @dev Based on the BONSAI_PROVING environment, a real or a mock BonsaiRelay will be used:
-///     * When BONSAI_PROVING=none a mock version of the relay is used, and proofs are not checked.
+///     * When BONSAI_PROVING=local a mock version of the relay is used, and proofs are not checked.
 ///     * When BONSAI_PROVING=bonsai the fully verifying version of the relay is used. SNARK proofs
 ///       of zkVM guest execution will be provided by Bonsai and verified on every callback.
 abstract contract BonsaiTest is Test, BonsaiCheats {
     using Strings2 for bytes;
 
     enum ProverMode {
-        None,
         Local,
         Bonsai
     }
@@ -65,9 +64,6 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
     }
 
     function parseProverMode(string memory str) private pure returns (ProverMode) {
-        if (keccak256(bytes(str)) == keccak256(bytes("none"))) {
-            return ProverMode.None;
-        }
         if (keccak256(bytes(str)) == keccak256(bytes("local"))) {
             return ProverMode.Local;
         }
@@ -81,7 +77,7 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
     /// @notice Instantiates a relay contract for testing.
     /// @dev Apply this modifier to the setUp function of your test.
     modifier withRelay() {
-        proverMode = parseProverMode(vm.envOr("BONSAI_PROVING", string("none")));
+        proverMode = parseProverMode(vm.envOr("BONSAI_PROVING", string("local")));
         if (proverMode == ProverMode.Bonsai) {
             IRiscZeroVerifier verifier = new RiscZeroGroth16Verifier();
             bonsaiVerifyingRelay = new BonsaiRelay(verifier);
