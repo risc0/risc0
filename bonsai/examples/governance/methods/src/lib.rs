@@ -18,7 +18,7 @@ include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 #[cfg(test)]
 mod test {
     use hex_literal::hex;
-    use risc0_zkvm::{Executor, ExecutorEnv};
+    use risc0_zkvm::{Executor, ExecutorEnv, LocalExecutor};
 
     use crate::FINALIZE_VOTES_ELF;
 
@@ -40,9 +40,12 @@ mod test {
     #[test]
     fn process_basic_finalization_input() {
         // Run the
-        let env = ExecutorEnv::builder().add_input(&TEST_INPUT).build();
+        let env = ExecutorEnv::builder()
+            .add_input(&TEST_INPUT)
+            .build()
+            .unwrap();
 
-        let mut exec = Executor::from_elf(env, FINALIZE_VOTES_ELF).unwrap();
+        let mut exec = LocalExecutor::from_elf(env, FINALIZE_VOTES_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(&session.journal, TEST_OUTPUT);
     }

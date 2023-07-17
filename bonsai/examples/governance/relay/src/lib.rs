@@ -15,7 +15,7 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bonsai_sdk_alpha::alpha::{responses::SnarkProof, Client, SdkErr};
+use bonsai_sdk::alpha::{responses::SnarkProof, Client, SdkErr};
 use clap::{builder::PossibleValue, ValueEnum};
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{

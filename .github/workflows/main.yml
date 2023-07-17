@@ -77,8 +77,7 @@ jobs:
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
-      - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
-        if: matrix.device == 'cpu'
+      - run: cargo test -F $FEATURE --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
