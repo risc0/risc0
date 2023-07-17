@@ -45,7 +45,7 @@ fn install_solc() {
     let sh = Shell::new().unwrap();
     cmd!(sh, "cargo install --locked svm-rs").run().unwrap();
     if !svm_lib::installed_versions()
-        .unwrap()
+        .unwrap_or_default()
         .contains(&SOLC_VERSION)
     {
         println!("svm install {SOLC_VERSION}");
