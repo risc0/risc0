@@ -56,8 +56,7 @@ contract Deploy is Script, BonsaiCheats {
             vm.startBroadcast(deployerKey);
         } else if (block.chainid == 31337) {
             // On an Anvil local testnet, use the first private key by default.
-            deployerKey =
-                uint256(0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80);
+            deployerKey = uint256(0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80);
             vm.startBroadcast(deployerKey);
         } else {
             revert("specify a deployer with either DEPLOYER_ADDRESS or DEPLOYER_PRIVATE_KEY");

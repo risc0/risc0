@@ -17,12 +17,12 @@ use std::io::Write;
 use anyhow::Context;
 use bonsai_ethereum_relay::{resolve_guest_entry, resolve_image_output, Output, ProverMode};
 use bonsai_sdk::alpha::responses::SnarkProof;
-use governance_methods::GUEST_LIST;
 use clap::{Parser, Subcommand};
 use ethers::{
     abi::{Hash, Token, Tokenizable},
     types::U256,
 };
+use governance_methods::GUEST_LIST;
 
 #[derive(Subcommand)]
 pub enum Command {
@@ -115,7 +115,9 @@ async fn main() -> anyhow::Result<()> {
                                 Token::Bytes(journal),
                                 Hash::from(<[u8; 32]>::from(receipt_metadata.post.digest()))
                                     .into_token(),
-                                Token::Bytes(ethers::abi::encode(&[tokenize_snark_proof(&snark_proof)?])),
+                                Token::Bytes(ethers::abi::encode(&[tokenize_snark_proof(
+                                    &snark_proof,
+                                )?])),
                             ]
                         }
                         _ => anyhow::bail!(

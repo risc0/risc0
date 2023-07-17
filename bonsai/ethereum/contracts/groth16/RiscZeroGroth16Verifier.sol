@@ -20,7 +20,14 @@ pragma solidity ^0.8.9;
 import {SafeCast} from "openzeppelin/contracts/utils/math/SafeCast.sol";
 
 import {Groth16Verifier} from "./Groth16Verifier.sol";
-import {IRiscZeroVerifier, Receipt, ReceiptMetadata, ReceiptMetadataLib, ExitCode, SystemExitCode} from "../IRiscZeroVerifier.sol";
+import {
+    IRiscZeroVerifier,
+    Receipt,
+    ReceiptMetadata,
+    ReceiptMetadataLib,
+    ExitCode,
+    SystemExitCode
+} from "../IRiscZeroVerifier.sol";
 
 /// @notice reverse the byte order of the uint256 value.
 /// @dev Soldity uses a big-endian ABI encoding. Reversing the byte order before encoding
@@ -92,8 +99,7 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     function verify(Receipt memory receipt) public view returns (bool) {
         (uint256 meta0, uint256 meta1) = splitDigest(receipt.meta.digest());
         Seal memory seal = abi.decode(receipt.seal, (Seal));
-        return
-            this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, meta0, meta1]);
+        return this.verifyProof(seal.a, seal.b, seal.c, [CONTROL_ID_0, CONTROL_ID_1, meta0, meta1]);
     }
 
     /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
@@ -106,8 +112,7 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
         returns (bool)
     {
         Receipt memory receipt = Receipt(
-            seal,
-            ReceiptMetadata(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), journalHash)
+            seal, ReceiptMetadata(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), journalHash)
         );
         return verify(receipt);
     }
