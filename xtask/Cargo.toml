@@ -7,6 +7,7 @@ edition = { workspace = true }
 clap = { version = "4.0", features = ["derive"] }
 semver = "1.0"
 svm-rs = { version = "0.2", features = ["blocking"] }
+xshell = "0.2"
 
 [package.metadata.release]
 release = false

@@ -14,6 +14,7 @@
 
 use clap::{Parser, Subcommand};
 use semver::Version;
+use xshell::{cmd, Shell};
 
 #[derive(Parser)]
 struct Cli {
@@ -41,8 +42,15 @@ impl Commands {
 fn install_solc() {
     const SOLC_VERSION: Version = Version::new(0, 8, 20);
 
-    println!("svm install {SOLC_VERSION}");
-    svm_lib::blocking_install(&SOLC_VERSION).unwrap();
+    let sh = Shell::new().unwrap();
+    cmd!(sh, "cargo install --locked svm-rs").run().unwrap();
+    if !svm_lib::installed_versions()
+        .unwrap()
+        .contains(&SOLC_VERSION)
+    {
+        println!("svm install {SOLC_VERSION}");
+        svm_lib::blocking_install(&SOLC_VERSION).unwrap();
+    }
     println!("svm use {SOLC_VERSION}");
     svm_lib::use_version(&SOLC_VERSION).unwrap();
 }
