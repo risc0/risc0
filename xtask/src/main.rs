@@ -13,6 +13,8 @@
 // limitations under the License.
 
 use clap::{Parser, Subcommand};
+use risc0_zkvm::{prove::default_prover, Executor, ExecutorEnv, LocalExecutor, VerifierContext};
+use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 use semver::Version;
 use xshell::{cmd, Shell};
 
@@ -25,17 +27,43 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Install,
+    GenReceipt,
 }
 
 impl Commands {
     fn run(&self) {
         match self {
             Commands::Install => self.cmd_install(),
+            Commands::GenReceipt => self.cmd_gen_receipt(),
         }
     }
 
     fn cmd_install(&self) {
         install_solc();
+        install_wasm_tools();
+    }
+
+    fn cmd_gen_receipt(&self) {
+        let iterations = 100;
+        let env = ExecutorEnv::builder()
+            .add_input(&[iterations])
+            .build()
+            .unwrap();
+        let mut exec = LocalExecutor::from_elf(env, FIB_ELF).unwrap();
+        let session = exec.run().unwrap();
+        let prover = default_prover();
+        let ctx = VerifierContext::default();
+        let receipt = prover.prove_session(&ctx, &session).unwrap();
+        let receipt_bytes = bincode::serialize(&receipt).unwrap();
+
+        let rust_code = format!(
+            r##"
+pub const FIB_ID: [u32; 8] = {FIB_ID:?};
+pub const FIB_RECEIPT: &[u8] = &{receipt_bytes:?};
+    "##
+        );
+
+        std::fs::write("risc0/zkvm/receipts/src/receipts.rs", rust_code).unwrap();
     }
 }
 
@@ -57,6 +85,11 @@ fn install_solc() {
     }
     println!("svm use {SOLC_VERSION}");
     svm_lib::use_version(&SOLC_VERSION).unwrap();
+}
+
+fn install_wasm_tools() {
+    let sh = Shell::new().unwrap();
+    cmd!(sh, "cargo install --locked wasm-pack").run().unwrap();
 }
 
 fn main() {
