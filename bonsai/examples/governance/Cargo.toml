@@ -5,13 +5,10 @@ members = [
 ]
 
 [workspace.dependencies]
-# Outside of the risc0 monorepo, use the following dependency definitions.
-# risc0-build = { git = "https://github.com/risc0/risc0", branch = "release-0.16" }
-# risc0-zkvm = { git = "https://github.com/risc0/risc0", branch = "release-0.16", default-features = false }
-# bonsai-sdk = { git = "https://github.com/risc0/risc0", branch = "release-0.16" }
-risc0-build = { path = "../../../risc0/build" }
-risc0-zkvm = { path = "../../../risc0/zkvm", default-features = false }
-bonsai-sdk = { path = "../../../bonsai/sdk" }
+risc0-build = { version = "0.16", path = "../../../risc0/build" }
+risc0-zkvm = { version = "0.16", path = "../../../risc0/zkvm", default-features = false }
+bonsai-sdk = { version = "0.2", path = "../../../bonsai/sdk" }
+bonsai-ethereum-relay = { version = "0.2", path = "../../../bonsai/ethereum-relay" }
 governance-methods = { path = "./methods" }
 
 # Always optimize; building and running the guest takes much longer without optimization.

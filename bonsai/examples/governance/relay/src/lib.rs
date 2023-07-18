@@ -25,19 +25,17 @@ use risc0_zkvm::{
 
 #[derive(Debug, Copy, Clone)]
 pub enum ProverMode {
-    None,
     Local,
     Bonsai,
 }
 
 impl ValueEnum for ProverMode {
     fn value_variants<'a>() -> &'a [Self] {
-        &[Self::None, Self::Local, Self::Bonsai]
+        &[Self::Local, Self::Bonsai]
     }
 
     fn to_possible_value(&self) -> Option<PossibleValue> {
         Some(match self {
-            Self::None => PossibleValue::new("none"),
             Self::Local => PossibleValue::new("local"),
             Self::Bonsai => PossibleValue::new("bonsai"),
         })
@@ -58,7 +56,7 @@ pub enum Output {
 
 /// Execute and prove the guest locally, on this machine, as opposed to sending
 /// the proof request to the Bonsai service.
-pub fn prove_locally(elf: &[u8], input: Vec<u8>, prove: bool) -> Result<Output> {
+pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
     // Execute the guest program, generating the session trace needed to prove the
     // computation.
     let env = ExecutorEnv::builder()
@@ -70,13 +68,6 @@ pub fn prove_locally(elf: &[u8], input: Vec<u8>, prove: bool) -> Result<Output> 
         .run()
         .context(format!("Failed to run executor {:?}", &input))?;
 
-    // Locally prove resulting journal
-    if prove {
-        session.prove().context("Failed to prove session")?;
-        // eprintln!("Completed proof locally");
-    } else {
-        // eprintln!("Completed execution without a proof locally");
-    }
     Ok(Output::Execution {
         journal: session.journal,
     })
@@ -221,7 +212,6 @@ pub async fn resolve_image_output(
         ProverMode::Bonsai => tokio::task::spawn_blocking(move || prove_alpha(elf, input))
             .await
             .context("Failed to run alpha sub-task")?,
-        ProverMode::Local => prove_locally(elf, input, true),
-        ProverMode::None => prove_locally(elf, input, false),
+        ProverMode::Local => execute_locally(elf, input),
     }
 }
