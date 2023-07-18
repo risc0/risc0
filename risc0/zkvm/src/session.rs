@@ -53,6 +53,10 @@ pub struct Session {
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
 
+    /// The hooks to be called during the proving phase.
+    #[serde(skip)]
+    pub hooks: Vec<Box<dyn SessionEvents>>,
+
     /// The session ID (used only for bonsai proving)
     pub bonsai_session_id: Option<String>,
 }
@@ -95,6 +99,17 @@ pub struct Segment {
     pub insn_cycles: usize,
 }
 
+/// The Events of [Session]
+pub trait SessionEvents {
+    /// Fired before the proving of a segment starts.
+    #[allow(unused)]
+    fn on_pre_prove_segment(&self, segment: &Segment) {}
+
+    /// Fired after the proving of a segment ends.
+    #[allow(unused)]
+    fn on_post_prove_segment(&self, segment: &Segment) {}
+}
+
 impl Session {
     /// Construct a new [Session] from its constituent components.
     pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
@@ -112,6 +127,7 @@ impl Session {
             segments,
             journal,
             exit_code,
+            hooks: Vec::new(),
             bonsai_session_id,
         }
     }
@@ -123,6 +139,11 @@ impl Session {
             .iter()
             .map(|segment_ref| segment_ref.resolve())
             .collect()
+    }
+
+    /// Add a hook to be called during the proving phase.
+    pub fn add_hook<E: SessionEvents + 'static>(&mut self, hook: E) {
+        self.hooks.push(Box::new(hook));
     }
 }
 
