@@ -8,19 +8,19 @@ edition = "2021"
 ethers-solc = "1.0.2"
 
 [dependencies]
-risc0-build = { workspace = true, features = ["guest-list"] }
-risc0-zkvm = { workspace = true, default-features = false, features = ["prove"] }
-bonsai-ethereum-relay = { workspace = true }
-bonsai-sdk = { workspace = true, features = ["async"] }
-methods = { workspace = true}
 
 anyhow = "1.0"
 bincode = "1.3"
+bonsai-ethereum-relay = { workspace = true }
+bonsai-sdk = { workspace = true, features = ["async"] }
 bytemuck = "1.13.1"
 clap = { version = "4.3", features = ["derive", "env"] }
 ethers = { version = "=2.0.2", features = ["rustls", "ws"] }
 ethers-signers = { version = "=2.0.2", features = ["aws"] }
 hex = "0.4.3"
+methods = { workspace = true }
+risc0-build = { workspace = true, features = ["guest-list"] }
+risc0-zkvm = { workspace = true, default-features = false, features = ["prove"] }
 tokio = { version = "1.19", features = ["full", "sync"] }
 
 [features]
