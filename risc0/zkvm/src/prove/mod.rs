@@ -295,7 +295,13 @@ where
         let mut segments: Vec<Box<dyn Receipt>> = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
+            for hook in &session.hooks {
+                hook.on_pre_prove_segment(&segment);
+            }
             segments.push(Box::new(self.prove_segment(ctx, &segment)?));
+            for hook in &session.hooks {
+                hook.on_post_prove_segment(&segment);
+            }
         }
         let receipt = SessionReceipt::new(segments, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();

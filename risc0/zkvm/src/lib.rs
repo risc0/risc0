@@ -60,7 +60,7 @@ pub use self::{
     exec::io::{Syscall, SyscallContext},
     exec::{default_executor_from_elf, Executor, ExecutorEnv, ExecutorEnvBuilder, LocalExecutor},
     prove::loader::Loader,
-    session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef},
+    session::{FileSegmentRef, Segment, SegmentRef, Session, SimpleSegmentRef, SessionEvents},
 };
 
 #[cfg(not(target_os = "zkvm"))]

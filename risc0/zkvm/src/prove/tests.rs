@@ -217,6 +217,44 @@ fn pause_continue() {
 }
 
 #[test]
+fn session_events() {
+    use crate::session::{SessionEvents, Segment};
+    use risc0_zkvm_methods::{HELLO_COMMIT_ELF};
+    use std::rc::Rc;
+    use std::cell::RefCell;
+
+    struct Logger {
+        on_pre_prove_segment_flag: Rc<RefCell<bool>>,
+        on_post_prove_segment_flag: Rc<RefCell<bool>>,
+    }
+    impl SessionEvents for Logger {
+
+        fn on_pre_prove_segment(&self, _: &Segment) {
+            self.on_pre_prove_segment_flag.replace(true);
+        }
+
+        fn on_post_prove_segment(&self, _: &Segment) {
+            self.on_post_prove_segment_flag.replace(true);
+        }
+    }
+
+
+    let mut exec = LocalExecutor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+    let mut session = exec.run().unwrap();
+    let on_pre_prove_segment_flag = Rc::new(RefCell::new(false));
+    let on_post_prove_segment_flag = Rc::new(RefCell::new(false));
+    let logger = Logger{
+        on_pre_prove_segment_flag: on_pre_prove_segment_flag.clone(),
+        on_post_prove_segment_flag: on_post_prove_segment_flag.clone(),
+    };
+    session.add_hook(logger);
+    session.prove().unwrap();
+    assert_eq!(session.hooks.len(), 1);
+    assert_eq!(on_pre_prove_segment_flag.take(), true);
+    assert_eq!(on_post_prove_segment_flag.take(), true);
+}
+
+#[test]
 #[cfg_attr(feature = "cuda", serial)]
 fn continuation() {
     const COUNT: usize = 2; // Number of total chunks to aim for.
