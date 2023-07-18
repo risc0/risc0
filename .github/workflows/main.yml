@@ -95,13 +95,14 @@ jobs:
       - run: sccache --show-stats
 
   doc:
-    runs-on: [self-hosted, prod, Linux, cpu]
+    runs-on: ubuntu-22.04-64c
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
+      - run: cargo xtask gen-receipt
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - name: Install mdbook
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
@@ -130,7 +131,7 @@ jobs:
       - run: ${{ runner.temp }}/template-test/target/release/host
 
   web:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04-64c
     env:
       RUSTC_WRAPPER: sccache
     steps:
