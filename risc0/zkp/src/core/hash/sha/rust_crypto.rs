@@ -168,4 +168,4 @@ impl<S: super::Sha256> Debug for Sha256VarCore<S> {
 }
 
 /// SHA-256 implementation cross-compatible with `sha2::Sha256`.
-pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
+pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32, O = NoOid>>;
