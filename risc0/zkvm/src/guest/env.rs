@@ -14,15 +14,12 @@
 
 //! Functions for interacting with the host environment.
 
-use core::{cell::UnsafeCell, default::Default, mem::MaybeUninit, ptr, ptr::null_mut, slice};
-
 use bytemuck::Pod;
-use risc0_zkp::core::digest::{Digest, DIGEST_BYTES, DIGEST_WORDS};
 use risc0_zkvm_platform::{
-    fileno, memory, syscall,
+    fileno, syscall,
     syscall::{
-        nr::SYS_LOG, sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read,
-        sys_read_words, sys_write, syscall_0, syscall_2, SyscallName,
+        sys_alloc_words, sys_cycle_count, sys_halt, sys_log, sys_pause, sys_read, sys_read_words,
+        sys_write, syscall_2, SyscallName,
     },
     WORD_SIZE,
 };
@@ -30,9 +27,8 @@ use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
     align_up,
-    guest::{memory_barrier, sha},
     serde::{Deserializer, Result as SerdeResult, Serializer, WordRead, WordWrite},
-    sha::rust_crypto::{Digest as _, Output, Sha256},
+    sha::rust_crypto::{Digest as _, Sha256},
 };
 
 static mut HASHER: Option<Sha256> = None;
@@ -47,7 +43,7 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
         let output = hasher.unwrap_unchecked().finalize();
         let words: &[u32; 8] = bytemuck::cast_slice(output.as_slice()).try_into().unwrap();
 
-        if (halt) {
+        if halt {
             sys_halt(user_exit, words)
         } else {
             sys_pause(user_exit, words)
@@ -78,7 +74,7 @@ pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> s
 pub fn send_recv_slice<T: Pod, U: Pod>(syscall_name: SyscallName, to_host: &[T]) -> &'static [U] {
     let syscall::Return(nelem, _) = syscall(syscall_name, bytemuck::cast_slice(to_host), &mut []);
     let nwords = align_up(core::mem::size_of::<T>() * nelem as usize, WORD_SIZE) / WORD_SIZE;
-    let from_host_buf = unsafe { slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
+    let from_host_buf = unsafe { core::slice::from_raw_parts_mut(sys_alloc_words(nwords), nwords) };
     syscall(syscall_name, &[], from_host_buf);
     &bytemuck::cast_slice(from_host_buf)[..nelem as usize]
 }
@@ -167,11 +163,8 @@ pub fn stdin() -> FdReader {
 ///
 /// Execution may be continued at a later time.
 pub fn pause() {
-    // SAFETY: This should be safe to call.
-    unsafe {
-        finalize(false, 0);
-        init();
-    };
+    finalize(false, 0);
+    init();
 }
 
 /// Reads and deserializes objects
@@ -233,9 +226,12 @@ impl Read for FdReader {
     fn read_slice<T: Pod>(&mut self, buf: &mut [T]) {
         if let Ok(words) = bytemuck::try_cast_slice_mut(buf) {
             // Reading words performs significantly better if we're word aligned.
-            self.read_words(words);
+            self.read_words(words).unwrap();
         } else {
-            self.read_bytes_all(bytemuck::cast_slice_mut(buf));
+            let bytes = bytemuck::cast_slice_mut(buf);
+            if self.read_bytes_all(bytes) != bytes.len() {
+                panic!("{:?}", crate::serde::Error::DeserializeUnexpectedEnd);
+            }
         }
     }
 }
@@ -339,7 +335,7 @@ impl<F: Fn(&[u8])> WordWrite for FdWriter<F> {
 
 #[cfg(feature = "std")]
 impl<F: Fn(&[u8])> std::io::Write for FdWriter<F> {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<(usize)> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         self.write_bytes(buf);
         Ok(buf.len())
     }
