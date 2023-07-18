@@ -75,17 +75,10 @@ jobs:
       - uses: ./.github/actions/rosetta
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
-      - run: |
-          npm install
-          npm test -- --firefox
-        working-directory: examples/browser-verify
-        if: matrix.device == 'cpu'
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
       - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
       - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
-        if: matrix.device == 'cpu'
-      - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
       - run: cargo check -p bootstrap
@@ -135,3 +128,26 @@ jobs:
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
+
+  web:
+    runs-on: ubuntu-latest
+    env:
+      RUSTC_WRAPPER: sccache
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: browser-actions/setup-firefox@v1
+      - run: firefox --version
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/rosetta
+      - run: cargo xtask install
+      - run: cargo xtask gen-receipt
+      - run: |
+          npm install
+          npm test -- --firefox
+        working-directory: examples/browser-verify
