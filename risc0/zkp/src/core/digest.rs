@@ -15,6 +15,8 @@
 //! A generic (cross hash) digest, which is always 256 bits and composed of 8
 //! words
 
+extern crate alloc;
+
 use alloc::{format, vec::Vec};
 use core::fmt::{Debug, Display, Formatter};
 

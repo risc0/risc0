@@ -14,6 +14,8 @@
 
 //! Simple SHA-256 wrappers.
 
+extern crate alloc;
+
 #[cfg(not(target_os = "zkvm"))]
 pub mod cpu;
 #[cfg(not(target_os = "zkvm"))]

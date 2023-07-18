@@ -40,6 +40,8 @@
 //! );
 //! ```
 
+extern crate alloc;
+
 use alloc::{format, vec::Vec};
 use core::fmt::{Debug, Formatter};
 

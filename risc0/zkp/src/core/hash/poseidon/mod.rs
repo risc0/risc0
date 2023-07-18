@@ -15,6 +15,8 @@
 //! An implementation of Poseidon targeting the Baby Bear field with a security
 //! of 128 bits.
 
+extern crate alloc;
+
 pub(crate) mod consts;
 mod rng;
 
