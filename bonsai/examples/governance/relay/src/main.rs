@@ -231,7 +231,7 @@ async fn main() -> anyhow::Result<()> {
                 publish_port: "8080".to_string(),
                 bonsai_api_url: bonsai_api_url
                     .unwrap_or_else(|| "http://localhost:8081".to_string()),
-                bonsai_api_key: bonsai_api_key.unwrap_or_else(|| "".to_string()),
+                bonsai_api_key: bonsai_api_key.unwrap_or_default(),
                 relay_contract_address: relay_address,
             };
             let _ = tokio::spawn(relayer.run(ethers_client.clone())).await;
