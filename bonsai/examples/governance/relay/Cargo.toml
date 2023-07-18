@@ -24,6 +24,7 @@ risc0-zkvm = { workspace = true, default-features = false, features = ["prove"] 
 tokio = { version = "1.19", features = ["full", "sync"] }
 
 [features]
+default = []
 solidity_compile = []
 metal = ["risc0-zkvm/metal"]
 cuda = ["risc0-zkvm/cuda"]
