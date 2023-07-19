@@ -364,10 +364,9 @@ fn fail() {
 #[cfg(feature = "profiler")]
 #[test]
 fn profiler() {
-    use crate::{
-        binfmt::elf::Program,
-        exec::profiler::{Frame, Profiler},
-    };
+    use risc0_binfmt::Program;
+
+    use crate::exec::profiler::{Frame, Profiler};
 
     let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
     {
