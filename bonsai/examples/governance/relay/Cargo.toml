@@ -8,7 +8,6 @@ edition = "2021"
 ethers-solc = "1.0.2"
 
 [dependencies]
-
 anyhow = "1.0"
 bincode = "1.3"
 bonsai-ethereum-relay = { workspace = true }

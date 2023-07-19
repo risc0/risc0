@@ -21,7 +21,6 @@ rustflags = [
     "-Dunconditional_recursion",
     "-Dunused_allocation",
     "-Dunused_comparisons",
-    "-Wunused_extern_crates",
     "-Dunused_parens",
     "-Dwhile_true",
 ]

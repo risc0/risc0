@@ -9,7 +9,7 @@ risc0-build = { version = "0.16", path = "../../../risc0/build" }
 risc0-zkvm = { version = "0.16", path = "../../../risc0/zkvm", default-features = false }
 bonsai-sdk = { version = "0.2", path = "../../../bonsai/sdk" }
 bonsai-ethereum-relay = { version = "0.2", path = "../../../bonsai/ethereum-relay" }
-methods = { path = "./methods" }
+methods = { path = "./methods", package = "governance-methods" }
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
