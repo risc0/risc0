@@ -59,9 +59,7 @@ impl Commands {
 
         let rust_code = format!(
             r##"
-#[rustfmt::skip]
 pub const FIB_ID: [u32; 8] = {FIB_ID:?};
-#[rustfmt::skip]
 pub const FIB_RECEIPT: &[u8] = &{receipt_bytes:?};
 "##
         );
