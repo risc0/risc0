@@ -16,6 +16,7 @@ use clap::{Parser, Subcommand};
 use risc0_zkvm::{prove::default_prover, Executor, ExecutorEnv, LocalExecutor, VerifierContext};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 use semver::Version;
+use which::which;
 use xshell::{cmd, Shell};
 
 #[derive(Parser)]
@@ -90,8 +91,10 @@ fn install_solc() {
 }
 
 fn install_wasm_tools() {
-    let sh = Shell::new().unwrap();
-    cmd!(sh, "cargo install --locked wasm-pack").run().unwrap();
+    if which("wask-pack").is_err() {
+        let sh = Shell::new().unwrap();
+        cmd!(sh, "cargo install --locked wasm-pack").run().unwrap();
+    }
 }
 
 fn main() {
