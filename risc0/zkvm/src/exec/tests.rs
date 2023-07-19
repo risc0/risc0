@@ -161,6 +161,14 @@ fn sha_accel() {
 }
 
 #[test]
+fn rsa_compat() {
+    let input = to_vec(&MultiTestSpec::RsaCompat).unwrap();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run().unwrap();
+}
+
+#[test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
