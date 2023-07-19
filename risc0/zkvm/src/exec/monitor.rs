@@ -17,7 +17,11 @@ use std::{array, collections::BTreeSet, mem::take};
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::hash::sha::BLOCK_BYTES;
-use risc0_zkvm_platform::{memory::SYSTEM, syscall::reg_abi::REG_MAX, PAGE_SIZE, WORD_SIZE};
+use risc0_zkvm_platform::{
+    memory::{SYSTEM, TEXT_START},
+    syscall::reg_abi::REG_MAX,
+    PAGE_SIZE, WORD_SIZE,
+};
 use rrs_lib::{MemAccessSize, Memory};
 
 use super::{io::SyscallContext, TraceEvent};
@@ -395,6 +399,9 @@ impl MemoryMonitor {
 
 impl Memory for MemoryMonitor {
     fn read_mem(&mut self, addr: u32, size: MemAccessSize) -> Option<u32> {
+        if addr < TEXT_START || addr as usize >= SYSTEM.start() {
+            return None;
+        }
         match size {
             MemAccessSize::Byte => Some(self.load_u8(addr) as u32),
             MemAccessSize::HalfWord => Some(self.load_u16(addr) as u32),
@@ -403,6 +410,9 @@ impl Memory for MemoryMonitor {
     }
 
     fn write_mem(&mut self, addr: u32, size: MemAccessSize, store_data: u32) -> bool {
+        if addr < TEXT_START || addr as usize >= SYSTEM.start() {
+            return false;
+        }
         match size {
             MemAccessSize::Byte => self.store_u8(addr, store_data as u8),
             MemAccessSize::HalfWord => self.store_u16(addr, store_data as u16),
