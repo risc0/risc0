@@ -29,6 +29,8 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
     using Strings2 for bytes;
 
     /// @notice Returns the journal resulting from running the guest with imageId using input.
+    /// @dev Runs the zkVM guest locally in execution-only mode and returns the committed journal.
+    ///     Does not produce a proof.
     function queryImageOutput(bytes32 imageId, bytes memory input) internal returns (bytes memory) {
         string[] memory imageRunnerInput = new string[](7);
         uint256 i = 0;
@@ -44,6 +46,10 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
 
     /// @notice Returns the journal, post state digest, and Groth16 seal, resulting from running the
     ///     guest with imageId using input on the Bonsai proving service.
+    /// @dev Uses the Bonsai proving service to run the guest and produce an on-chain verifiable
+    ///     SNARK attesting to the correctness of the journal output.
+    ///     URL and API key for Bonsai should be specified using the BONSAI_API_URL and
+    ///     BONSAI_API_KEY environment variables.
     function queryImageOutputAndSeal(bytes32 imageId, bytes memory input)
         internal
         returns (bytes memory, bytes32, bytes memory)
@@ -70,5 +76,32 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
         imageRunnerInput[i++] = "query";
         imageRunnerInput[i++] = binaryName;
         return abi.decode(vm.ffi(imageRunnerInput), (bytes32));
+    }
+
+    /// @notice Uploads the guest with the specified name to Bonsai.
+    ///     URL and API key for Bonsai should be specified using the BONSAI_API_URL and
+    ///     BONSAI_API_KEY environment variables.
+    function uploadImage(string memory binaryName) internal {
+        string[] memory imageRunnerInput = new string[](5);
+        uint i = 0;
+        imageRunnerInput[i++] = 'cargo';
+        imageRunnerInput[i++] = 'run';
+        imageRunnerInput[i++] = '-q';
+        imageRunnerInput[i++] = 'upload';
+        imageRunnerInput[i++] = binaryName;
+        vm.ffi(imageRunnerInput);
+    }
+
+    /// @notice Uploads all guest images defined in methods directory of this worksapce.
+    ///     URL and API key for Bonsai should be specified using the BONSAI_API_URL and
+    ///     BONSAI_API_KEY environment variables.
+    function uploadAllImages() internal {
+        string[] memory imageRunnerInput = new string[](4);
+        uint i = 0;
+        imageRunnerInput[i++] = 'cargo';
+        imageRunnerInput[i++] = 'run';
+        imageRunnerInput[i++] = '-q';
+        imageRunnerInput[i++] = 'upload';
+        vm.ffi(imageRunnerInput);
     }
 }
