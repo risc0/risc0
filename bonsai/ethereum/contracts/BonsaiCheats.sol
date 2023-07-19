@@ -89,11 +89,11 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
     ///     BONSAI_API_KEY environment variables.
     function uploadImage(string memory binaryName) internal returns (bytes32) {
         string[] memory imageRunnerInput = new string[](5);
-        uint i = 0;
-        imageRunnerInput[i++] = 'cargo';
-        imageRunnerInput[i++] = 'run';
-        imageRunnerInput[i++] = '-q';
-        imageRunnerInput[i++] = 'upload';
+        uint256 i = 0;
+        imageRunnerInput[i++] = "cargo";
+        imageRunnerInput[i++] = "run";
+        imageRunnerInput[i++] = "-q";
+        imageRunnerInput[i++] = "upload";
         imageRunnerInput[i++] = binaryName;
         bytes32[] memory imageIds = abi.decode(vm.ffi(imageRunnerInput), (bytes32[]));
         require(imageIds.length == uint256(1), "expected exactly one uploaded image ID");
@@ -103,13 +103,13 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
     /// @notice Uploads all guest images defined in methods directory of this worksapce.
     ///     URL and API key for Bonsai should be specified using the BONSAI_API_URL and
     ///     BONSAI_API_KEY environment variables.
-    function uploadAllImages() internal returns(bytes32[] memory) {
+    function uploadAllImages() internal returns (bytes32[] memory) {
         string[] memory imageRunnerInput = new string[](4);
-        uint i = 0;
-        imageRunnerInput[i++] = 'cargo';
-        imageRunnerInput[i++] = 'run';
-        imageRunnerInput[i++] = '-q';
-        imageRunnerInput[i++] = 'upload';
+        uint256 i = 0;
+        imageRunnerInput[i++] = "cargo";
+        imageRunnerInput[i++] = "run";
+        imageRunnerInput[i++] = "-q";
+        imageRunnerInput[i++] = "upload";
         return abi.decode(vm.ffi(imageRunnerInput), (bytes32[]));
     }
 
@@ -127,5 +127,4 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
         console2.log("invalid prover mode string: ", str);
         revert("invalid prover mode string");
     }
-
 }
