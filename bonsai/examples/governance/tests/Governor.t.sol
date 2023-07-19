@@ -93,7 +93,7 @@ contract Voter is Test {
         bytes32 digest = gov.voteHash(proposalId, support);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(delegateKey(), digest);
 
-        // Does not check that the VoteCast event is emitted becasue BonsaiGovernor does not emit this event.
+        // Does not check that the VoteCast event is emitted because BonsaiGovernor does not emit this event.
         gov.castVoteBySig(proposalId, support, v, r, s);
     }
 }
@@ -295,7 +295,7 @@ abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
     }
 
     /// @notice mapping of proposals to ballot boxes.
-    /// @dev ballots are persisted to storage because evnts can only ever be obtained once from vm.getRecordedLogs().
+    /// @dev ballots are persisted to storage because events can only ever be obtained once from vm.getRecordedLogs().
     mapping(uint256 => BallotBox) internal ballotBoxes;
 
     function setUp() public withRelay {
@@ -349,7 +349,7 @@ abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
         return (box.guestInput);
     }
 
-    /// @notice implments the vote finalization logic matching the zkVM guest.
+    /// @notice implements the vote finalization logic matching the zkVM guest.
     ///   Can be used to test the Governor contract with running the zkVM.
     function finalizeVotesSolidityImpl(bytes memory guestInput) internal returns (bytes memory) {
         // This function normally executes off-chain in the guest.
