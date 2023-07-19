@@ -18,6 +18,7 @@ risc0-zkp = { path = "../../../zkp", default-features = false }
 risc0-zkvm = { path = "../..", default-features = false }
 risc0-zkvm-methods = { path = "..", default-features = false }
 risc0-zkvm-platform = { path = "../../platform" }
+rsa = { version = "0.9", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 
 [profile.release]

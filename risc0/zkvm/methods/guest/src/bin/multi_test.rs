@@ -18,6 +18,7 @@
 #![no_std]
 
 extern crate alloc;
+
 use alloc::vec;
 use core::arch::asm;
 
@@ -32,6 +33,7 @@ use risc0_zkvm_platform::{
     fileno, memory,
     syscall::{bigint, sys_bigint, sys_read, sys_write},
 };
+use rsa::Pkcs1v15Sign;
 
 risc0_zkvm::entry!(main);
 
@@ -199,6 +201,10 @@ pub fn main() {
             // available heap:
             let len = (memory::STACK_TOP - memory::RESERVED_STACK) as usize;
             let _data = black_box(vec![0_u8; len]);
+        }
+        MultiTestSpec::RsaCompat => {
+            use risc0_zkp::core::hash::sha::rust_crypto::Sha256;
+            Pkcs1v15Sign::new::<Sha256<sha::Impl>>();
         }
     }
 }
