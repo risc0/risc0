@@ -63,6 +63,7 @@ pub enum MultiTestSpec {
     },
     LibM,
     Oom,
+    OutOfBounds,
     RsaCompat,
 }
 

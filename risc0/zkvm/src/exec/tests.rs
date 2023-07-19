@@ -561,3 +561,23 @@ fn session_limit() {
 
     assert!(run_session(1 << 16, 15, 10).is_ok());
 }
+
+#[test]
+fn memory_access() {
+    access_memory(0x0000_0000).err().unwrap();
+    access_memory(0x0C00_0000).err().unwrap();
+    access_memory(0x0B00_0000).unwrap();
+}
+
+#[cfg(test)]
+fn access_memory(addr: u32) -> Result<Session> {
+    let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
+    let addr = to_vec(&addr).unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&spec)
+        .add_input(&addr)
+        .build()
+        .unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run()
+}
