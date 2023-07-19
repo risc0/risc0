@@ -202,6 +202,8 @@ pub fn main() {
             let len = (memory::STACK_TOP - memory::RESERVED_STACK) as usize;
             let _data = black_box(vec![0_u8; len]);
         }
+        /// A compile-time test to ensure that the Sha256 type is
+        /// trait-compatible with RustCrypto Pkcs1v15Sign.
         MultiTestSpec::RsaCompat => {
             use risc0_zkp::core::hash::sha::rust_crypto::Sha256;
             Pkcs1v15Sign::new::<Sha256<sha::Impl>>();
