@@ -81,7 +81,7 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
     /// @notice Uploads the guest with the specified name to Bonsai.
     ///     URL and API key for Bonsai should be specified using the BONSAI_API_URL and
     ///     BONSAI_API_KEY environment variables.
-    function uploadImage(string memory binaryName) internal {
+    function uploadImage(string memory binaryName) internal returns (bytes32) {
         string[] memory imageRunnerInput = new string[](5);
         uint i = 0;
         imageRunnerInput[i++] = 'cargo';
@@ -89,19 +89,21 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
         imageRunnerInput[i++] = '-q';
         imageRunnerInput[i++] = 'upload';
         imageRunnerInput[i++] = binaryName;
-        vm.ffi(imageRunnerInput);
+        bytes32[] memory imageIds = abi.decode(vm.ffi(imageRunnerInput), (bytes32[]));
+        require(imageIds.length == uint256(1), "expected exactly one uploaded image ID");
+        return imageIds[0];
     }
 
     /// @notice Uploads all guest images defined in methods directory of this worksapce.
     ///     URL and API key for Bonsai should be specified using the BONSAI_API_URL and
     ///     BONSAI_API_KEY environment variables.
-    function uploadAllImages() internal {
+    function uploadAllImages() internal returns(bytes32[] memory) {
         string[] memory imageRunnerInput = new string[](4);
         uint i = 0;
         imageRunnerInput[i++] = 'cargo';
         imageRunnerInput[i++] = 'run';
         imageRunnerInput[i++] = '-q';
         imageRunnerInput[i++] = 'upload';
-        vm.ffi(imageRunnerInput);
+        return abi.decode(vm.ffi(imageRunnerInput), (bytes32[]));
     }
 }
