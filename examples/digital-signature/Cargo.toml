@@ -15,7 +15,7 @@ sha2 = "0.10"
 
 [dev-dependencies]
 test-log = "0.2"
-tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [features]
