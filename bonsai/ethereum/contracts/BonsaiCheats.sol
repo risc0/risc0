@@ -19,6 +19,7 @@ pragma solidity ^0.8.17;
 import {Test} from "forge-std/Test.sol";
 import {StdCheatsSafe} from "forge-std/StdCheats.sol";
 import {CommonBase} from "forge-std/Base.sol";
+import {console2} from "forge-std/console2.sol";
 import {Strings2} from "murky_differential_testing/test/utils/Strings2.sol";
 
 import {IBonsaiRelay} from "./IBonsaiRelay.sol";
@@ -27,6 +28,11 @@ import {BonsaiTestRelay} from "./BonsaiTestRelay.sol";
 /// @notice A base contract for testing a Bonsai callback receiver contract
 abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
     using Strings2 for bytes;
+
+    enum ProverMode {
+        Local,
+        Bonsai
+    }
 
     /// @notice Returns the journal resulting from running the guest with imageId using input.
     /// @dev Runs the zkVM guest locally in execution-only mode and returns the committed journal.
@@ -106,4 +112,20 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
         imageRunnerInput[i++] = 'upload';
         return abi.decode(vm.ffi(imageRunnerInput), (bytes32[]));
     }
+
+    function proverMode() internal returns (ProverMode) {
+        return parseProverMode(vm.envOr("BONSAI_PROVING", string("local")));
+    }
+
+    function parseProverMode(string memory str) private pure returns (ProverMode) {
+        if (keccak256(bytes(str)) == keccak256(bytes("local"))) {
+            return ProverMode.Local;
+        }
+        if (keccak256(bytes(str)) == keccak256(bytes("bonsai"))) {
+            return ProverMode.Bonsai;
+        }
+        console2.log("invalid prover mode string: ", str);
+        revert("invalid prover mode string");
+    }
+
 }

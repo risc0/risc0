@@ -36,13 +36,7 @@ import {RiscZeroGroth16Verifier} from "./groth16/RiscZeroGroth16Verifier.sol";
 abstract contract BonsaiTest is Test, BonsaiCheats {
     using Strings2 for bytes;
 
-    enum ProverMode {
-        Local,
-        Bonsai
-    }
-
     BonsaiRelayQueueWrapper internal bonsaiRelay;
-    ProverMode public proverMode;
 
     // Backing variables to store the address of the relay we are using.
     // Only one of these two state variables will be populated.
@@ -63,22 +57,10 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
         return BonsaiRelay(address(bonsaiRelay));
     }
 
-    function parseProverMode(string memory str) private pure returns (ProverMode) {
-        if (keccak256(bytes(str)) == keccak256(bytes("local"))) {
-            return ProverMode.Local;
-        }
-        if (keccak256(bytes(str)) == keccak256(bytes("bonsai"))) {
-            return ProverMode.Bonsai;
-        }
-        console2.log("invalid prover mode string: ", str);
-        revert("invalid prover mode string");
-    }
-
     /// @notice Instantiates a relay contract for testing.
     /// @dev Apply this modifier to the setUp function of your test.
     modifier withRelay() {
-        proverMode = parseProverMode(vm.envOr("BONSAI_PROVING", string("local")));
-        if (proverMode == ProverMode.Bonsai) {
+        if (proverMode() == ProverMode.Bonsai) {
             IRiscZeroVerifier verifier = new RiscZeroGroth16Verifier();
             bonsaiVerifyingRelay = new BonsaiRelay(verifier);
             bonsaiRelay = new BonsaiRelayQueueWrapper(bonsaiVerifyingRelay);
@@ -113,7 +95,7 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
     ) public {
         vm.pauseGasMetering();
 
-        if (proverMode == ProverMode.Bonsai) {
+        if (proverMode() == ProverMode.Bonsai) {
             (bytes memory journal, bytes32 postStateDigest, bytes memory seal) = queryImageOutputAndSeal(imageId, input);
             bytes memory payload = abi.encodePacked(functionSelector, journal, imageId);
             BonsaiRelay.Callback memory callback = BonsaiRelay.Callback(
