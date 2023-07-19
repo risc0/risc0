@@ -13,9 +13,6 @@
 // limitations under the License.
 
 //! A Blake2b HashSuite.
-
-extern crate alloc;
-
 use alloc::{boxed::Box, rc::Rc, vec::Vec};
 use core::marker::PhantomData;
 

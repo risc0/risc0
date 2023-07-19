@@ -14,8 +14,6 @@
 
 //! Traits to configure which cryptographic primitives the ZKP uses
 
-extern crate alloc;
-
 pub mod blake2b;
 pub mod poseidon;
 #[cfg(feature = "prove")]

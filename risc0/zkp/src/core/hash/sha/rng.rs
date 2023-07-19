@@ -14,8 +14,6 @@
 
 //! A SHA-256 based CRNG used in Fiat-Shamir.
 
-extern crate alloc;
-
 use alloc::boxed::Box;
 
 use rand_core::{impls, Error, RngCore};

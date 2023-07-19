@@ -16,6 +16,8 @@
 
 #![deny(missing_docs)]
 
+extern crate alloc;
+
 pub mod digest;
 pub mod hash;
 pub mod ntt;

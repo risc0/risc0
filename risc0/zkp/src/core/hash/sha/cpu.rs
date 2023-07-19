@@ -14,8 +14,6 @@
 
 //! Simple wrappers for a CPU-based SHA-256 implementation.
 
-extern crate alloc;
-
 use alloc::{boxed::Box, vec::Vec};
 use core::slice;
 

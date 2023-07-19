@@ -14,8 +14,6 @@
 
 //! Polynomial utilities (currently only those used in polynomial evaluation).
 
-extern crate alloc;
-
 use alloc::vec;
 
 use risc0_core::field::ExtElem;

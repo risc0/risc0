@@ -14,9 +14,6 @@
 
 //! An implementation of Poseidon targeting the Snark friendly field with a
 //! security of 128 bits.
-
-extern crate alloc;
-
 pub(crate) mod consts;
 
 use alloc::rc::Rc;
