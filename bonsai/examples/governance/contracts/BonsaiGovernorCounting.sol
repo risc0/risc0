@@ -172,7 +172,7 @@ abstract contract BonsaiGovernorCounting is Governor {
             address account = address(uint160(uint192(ballot)));
 
             // Look up the voting weight for the account associated with the ballot.
-            // NOTE: If a singature was invalid, it will likely result in a lookup for a random
+            // NOTE: If a signature was invalid, it will likely result in a lookup for a random
             // account, which will almost certainly has zero voting weight.
             uint256 weight = _getVotes(account, snapshot, params);
             if (support == uint8(VoteType.Against)) {
