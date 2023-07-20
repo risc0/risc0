@@ -18,7 +18,6 @@
 #![deny(missing_docs)]
 
 extern crate alloc;
-
 #[cfg(not(target_os = "zkvm"))]
 mod control_id;
 #[cfg(feature = "prove")]
