@@ -14,7 +14,7 @@
 
 use std::sync::Arc;
 
-use bonsai_proxy_contract::{Callback, ProxyContract};
+use bonsai_relay_contract::{BonsaiRelay, Callback};
 use bonsai_sdk::alpha::Client;
 use ethers::prelude::*;
 use futures::{stream::FuturesUnordered, StreamExt};
@@ -74,8 +74,8 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
             return Ok(());
         }
 
-        let proxy: ProxyContract<M> =
-            ProxyContract::new(self.proxy_contract_address, self.ethers_client.clone());
+        let proxy: BonsaiRelay<M> =
+            BonsaiRelay::new(self.proxy_contract_address, self.ethers_client.clone());
         let proof_batch: Vec<Callback> = self
             .ready_to_send_batch
             .clone()
@@ -85,7 +85,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
 
         info!("sending batch");
         let contract_call = proxy
-            .invoke_callback(proof_batch)
+            .invoke_callbacks(proof_batch)
             .gas(BONSAI_RELAY_GAS_LIMIT);
         let pending_tx =
             contract_call

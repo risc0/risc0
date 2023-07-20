@@ -15,23 +15,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-import "./proxy.sol";
+import "./BonsaiTestRelay.sol";
 
 contract CallbackDummy {
     uint256 public counter;
-    Proxy bonsai_proxy;
+    BonsaiTestRelay bonsai_test_relay;
     bytes32 image_id;
     address owner;
 
-    constructor(bytes32 _image_id, Proxy _bonsai_proxy) {
+    constructor(bytes32 _image_id, BonsaiTestRelay _bonsai_test_relay) {
         owner = msg.sender;
         image_id = _image_id;
-        bonsai_proxy = _bonsai_proxy;
+        bonsai_test_relay = _bonsai_test_relay;
     }
 
     // Direct callback function
     function call_me(uint256 number, bool guess, bytes32 callback_image_id) public returns (uint, bytes32, bool) {
-        require(msg.sender == address(bonsai_proxy), "only proxy contract is allowed for callback");
+        require(msg.sender == address(bonsai_test_relay), "only bonsai relay test contract is allowed for callback");
         require(image_id == callback_image_id, "image id mismatch");
 
         return call_me_internal(number, guess);

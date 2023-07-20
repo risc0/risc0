@@ -56,7 +56,7 @@ contract Proxy {
     }
 
     // Submit proofs
-    function invoke_callback(Callback[] calldata callbacks) external returns (bool[] memory invocation_results) {
+    function invoke_callbacks(Callback[] calldata callbacks) external returns (bool[] memory invocation_results) {
         emit ProofsSubmitted();
     }
 }

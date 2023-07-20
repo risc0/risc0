@@ -14,7 +14,7 @@
 
 use std::sync::PoisonError;
 
-use bonsai_proxy_contract::CallbackRequestFilter;
+use bonsai_relay_contract::bonsai_relay::CallbackRequestFilter;
 use ethers::types::H256;
 
 pub(crate) mod in_memory;

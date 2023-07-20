@@ -15,7 +15,7 @@
 use std::sync::Arc;
 
 use anyhow::anyhow;
-use bonsai_proxy_contract::CallbackRequestFilter;
+use bonsai_relay_contract::bonsai_relay::CallbackRequestFilter;
 use ethers::{
     providers::{Middleware, PubsubClient},
     types::Address,

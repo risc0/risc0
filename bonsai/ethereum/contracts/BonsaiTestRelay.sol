@@ -20,6 +20,19 @@ import {IBonsaiRelay} from "./IBonsaiRelay.sol";
 
 /// @notice A mock Bonsai relay for local testing
 contract BonsaiTestRelay is IBonsaiRelay {
+    /// @notice Callback data, provided by the Relay service.
+    struct TestCallback {
+        /// @notice address of the contract to receive the callback.
+        address callbackContract;
+        /// @notice payload containing the callback function selector, journal bytes, and image ID.
+        /// @dev payload is destructured and checked against the authorization data to ensure that
+        ///     the journal is a valid execution result of the zkVM guest defined by the image ID.
+        ///     The payload is then used directly as the calldata for the callback.
+        bytes payload;
+        /// @notice maximum amount of gas the callback function may use.
+        uint64 gasLimit;
+    }
+
     // An array of byte arrays storing the queue of callback requests received.
     function requestCallback(
         bytes32 imageId,
@@ -31,8 +44,24 @@ contract BonsaiTestRelay is IBonsaiRelay {
         emit CallbackRequest(msg.sender, imageId, input, callbackContract, functionSelector, gasLimit);
     }
 
-    function invokeCallback(address callbackContract, bytes calldata payload, uint64 gasLimit) external {
-        (bool success, bytes memory data) = callbackContract.call{gas: gasLimit}(payload);
+    /// @notice Submit a batch of test callbacks.
+    /// @dev This function is usually called by the Bonsai Relay. Note that this function does not
+    ///     revert when one of the inner test callbacks reverts.
+    /// @return invocationResults a list of booleans indicated if the calldata succeeded or failed.
+    function invokeCallbacks(TestCallback[] calldata callbacks) external returns (bool[] memory invocationResults) {
+        invocationResults = new bool[](callbacks.length);
+        for (uint256 i = 0; i < callbacks.length; i++) {
+            TestCallback calldata callback = callbacks[i];
+            // invoke callback
+            (invocationResults[i],) = callback.callbackContract.call{gas: callback.gasLimit}(callback.payload);
+        }
+    }
+
+    /// @notice Submit a single test callback.
+    /// @dev This function is usually called by the Bonsai Relay. This function reverts if the callback fails.
+    function invokeCallback(TestCallback calldata callback) external {
+        // invoke callback
+        (bool success, bytes memory data) = callback.callbackContract.call{gas: callback.gasLimit}(callback.payload);
         if (!success) {
             assembly {
                 revert(add(data, 32), mload(data))

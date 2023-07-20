@@ -18,27 +18,54 @@
 
 use ethers::prelude::*;
 
-abigen!(ProxyContract, "artifacts/proxy.sol/Proxy.json");
+abigen!(BonsaiRelay, "out/BonsaiRelay.sol/BonsaiRelay.json");
+abigen!(
+    BonsaiTestRelay,
+    "out/BonsaiTestRelay.sol/BonsaiTestRelay.json"
+);
 
 #[derive(Clone, Debug)]
-pub struct EthereumCallback {
-    pub proof: SnarkProof,
-    pub journal: Vec<u8>,
+pub struct BonsaiRelayCallback {
+    pub auth: CallbackAuthorization,
+    pub callback_request: bonsai_relay::CallbackRequestFilter,
+    pub payload: Vec<u8>,
     pub gas_limit: u64,
-    pub callback_request: CallbackRequestFilter,
 }
 
-impl From<EthereumCallback> for Callback {
-    fn from(value: EthereumCallback) -> Self {
+impl From<BonsaiRelayCallback> for Callback {
+    fn from(value: BonsaiRelayCallback) -> Self {
         let payload = [
             value.callback_request.function_selector.as_slice(),
-            value.journal.as_slice(),
+            value.payload.as_slice(),
+            value.callback_request.image_id.as_slice(),
+        ]
+        .concat();
+        Self {
+            auth: value.auth,
+            callback_contract: value.callback_request.callback_contract,
+            payload: payload.into(),
+            gas_limit: value.gas_limit,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct BonsaiTestRelayCallback {
+    pub callback_request: bonsai_relay::CallbackRequestFilter,
+    pub payload: Vec<u8>,
+    pub gas_limit: u64,
+}
+
+impl From<BonsaiTestRelayCallback> for TestCallback {
+    fn from(value: BonsaiTestRelayCallback) -> Self {
+        let payload = [
+            value.callback_request.function_selector.as_slice(),
+            value.payload.as_slice(),
             value.callback_request.image_id.as_slice(),
         ]
         .concat();
         Self {
             callback_contract: value.callback_request.callback_contract,
-            proof: value.proof,
             payload: payload.into(),
             gas_limit: value.gas_limit,
         }
@@ -59,12 +86,9 @@ mod tests {
     };
     use risc0_zkvm::SessionReceipt;
 
-    use crate::{CallbackRequestFilter, EthereumCallback, ProxyContract, SnarkProof};
+    use crate::{bonsai_relay, BonsaiTestRelay, BonsaiTestRelayCallback};
 
-    abigen!(
-        CallbackDummy,
-        "artifacts/callback_dummy.sol/CallbackDummy.json"
-    );
+    abigen!(CallbackDummy, "out/callback_dummy.sol/CallbackDummy.json");
 
     async fn get_client() -> (
         Option<AnvilInstance>,
@@ -129,15 +153,15 @@ mod tests {
         let (_anvil, client) = get_client().await;
         let wallet_address = client.address();
 
-        // Deploy Proxy
-        let proxy_contract = ProxyContract::deploy(client.clone(), ())
+        // Deploy Bonsai Test Relay contract
+        let test_relay_contract = BonsaiTestRelay::deploy(client.clone(), ())
             .expect("Failed to create Proxy deployment tx")
             .send()
             .await
             .expect("Failed to send Proxy deployment tx");
         assert_eq!(
             client
-                .get_balance(proxy_contract.address(), None)
+                .get_balance(test_relay_contract.address(), None)
                 .await
                 .unwrap(),
             U256::zero()
@@ -147,7 +171,7 @@ mod tests {
 
         // Deploy dummy Callback contract
         let dummy_callback =
-            CallbackDummy::deploy(client.clone(), (image_id, proxy_contract.address()))
+            CallbackDummy::deploy(client.clone(), (image_id, test_relay_contract.address()))
                 .unwrap()
                 .send()
                 .await
@@ -156,7 +180,7 @@ mod tests {
         let call_me_selector = CallMeCall::selector();
         // Create some dummy callback requests
         let callback_requests = vec![
-            CallbackRequestFilter {
+            bonsai_relay::CallbackRequestFilter {
                 account: wallet_address.into(),
                 image_id: image_id.clone(),
                 input: Vec::new().into(),
@@ -164,7 +188,7 @@ mod tests {
                 function_selector: call_me_selector.clone(),
                 gas_limit: 50000,
             },
-            CallbackRequestFilter {
+            bonsai_relay::CallbackRequestFilter {
                 account: wallet_address.into(),
                 image_id: image_id.clone(),
                 input: Vec::new().into(),
@@ -176,7 +200,7 @@ mod tests {
 
         // Send both proof requests to the proxy
         for request in callback_requests.clone() {
-            proxy_contract
+            test_relay_contract
                 .request_callback(
                     request.image_id,
                     request.input,
@@ -209,33 +233,24 @@ mod tests {
             journal: call_me_call.encode()[4..4 + 32 + 32].to_vec(),
         };
 
-        // Create dummy responses
-        let dummy_proof = SnarkProof {
-            a: [U256::zero(); 2],
-            b: [[U256::zero(); 2]; 2],
-            c: [U256::zero(); 2],
-            pub_signals: [U256::zero(); 4],
-        };
         let ethereum_callbacks = vec![
-            EthereumCallback {
-                journal: fake_receipt.journal.clone(),
+            BonsaiTestRelayCallback {
+                payload: fake_receipt.journal.clone(),
                 gas_limit: 50000,
                 callback_request: callback_requests[0].clone(),
-                proof: dummy_proof.clone(),
             },
-            EthereumCallback {
-                journal: fake_receipt.journal,
+            BonsaiTestRelayCallback {
+                payload: fake_receipt.journal,
                 gas_limit: 50000,
                 callback_request: callback_requests[1].clone(),
-                proof: dummy_proof.clone(),
             },
         ];
         dbg!(&ethereum_callbacks);
 
         // Submit responses
         let callbacks = ethereum_callbacks.into_iter().map(|p| p.into()).collect();
-        let invocation_transaction = proxy_contract
-            .invoke_callback(callbacks)
+        let invocation_transaction = test_relay_contract
+            .invoke_callbacks(callbacks)
             .send()
             .await
             .expect("Failed to submit proof bundle")
