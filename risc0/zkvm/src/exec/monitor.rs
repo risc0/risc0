@@ -429,18 +429,9 @@ impl Memory for MemoryMonitor {
             return None;
         }
         match size {
-            MemAccessSize::Byte => match self.load_u8(addr) {
-                Err(_) => None,
-                Ok(val) => Some(val as u32),
-            },
-            MemAccessSize::HalfWord => match self.load_u16(addr) {
-                Err(_) => None,
-                Ok(val) => Some(val as u32),
-            },
-            MemAccessSize::Word => match self.load_u32(addr) {
-                Err(_) => None,
-                Ok(val) => Some(val),
-            },
+            MemAccessSize::Byte => self.load_u8(addr).map(|x| x as u32).ok(),
+            MemAccessSize::HalfWord => self.load_u16(addr).map(|x| x as u32).ok(),
+            MemAccessSize::Word => self.load_u32(addr).map(|x| x as u32).ok(),
         }
     }
 
