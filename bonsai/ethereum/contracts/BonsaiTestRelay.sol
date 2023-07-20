@@ -20,6 +20,17 @@ import {IBonsaiRelay, Callback, CallbackAuthorization} from "./IBonsaiRelay.sol"
 
 /// @notice A mock Bonsai relay for local testing
 contract BonsaiTestRelay is IBonsaiRelay {
+    // BonsaiTestRelay should only be deployed for testing. If this contract is
+    // to be deployed to a test network other than Anvil, they should specify
+    // the expected chain ID to confirm they really do want to deploy it to
+    // that given network.
+    constructor(uint256 expectedChainId) {
+        require(
+            block.chainid == expectedChainId,
+            "chain ID mismatch. are you deploying BonsaiTestRelay the expected network?"
+        );
+    }
+
     // An array of byte arrays storing the queue of callback requests received.
     function requestCallback(
         bytes32 imageId,
