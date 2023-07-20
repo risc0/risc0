@@ -63,7 +63,7 @@ fn app(state: Arc<RwLock<BonsaiState>>, prover_handle: ProverHandle) -> Router {
 /// Note that this mock only performs execution, no proving.
 pub async fn serve(port: String) -> anyhow::Result<()> {
     let local_url = format!("http://localhost:{port}");
-    let bind_address = &format!("0.0.0.0:{port}");
+    let bind_address = &format!("127.0.0.1:{port}");
     let state = Arc::new(RwLock::new(BonsaiState::new(local_url)));
 
     let (sender, receiver) = mpsc::channel(8);
