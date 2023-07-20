@@ -108,6 +108,8 @@ Running `forge test` with the following environment variables will cause the sys
 The Bonsai proving service will produce a single STARK proof for the full computation, then compress the proof into a SNARK.
 The Bonsai relay service, run locally for the test, uploads this SNARK to authorize the callback to the Governance contract.
 
+***Note:*** *The Bonsai proving service is still in early Alpha. To request an API key [complete the form here](https://bonsai.xyz/apply).*
+
 ```bash
 export BONSAI_API_KEY="YOUR_API_KEY" # see form linked above
 export BONSAI_API_URL="BONSAI_URL" # provided with your api key
