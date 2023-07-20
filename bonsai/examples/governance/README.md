@@ -2,11 +2,12 @@
 
 ### Background
 
-Billions of dollars worth of assets are managed by DAO treasuries, to be put to use towards the DAO's mission.
+Billions of dollars worth of assets are managed by DAO treasuries, to be put to use towards the each DAO's mission.
 Governance, in one form or another, is widely deployed to help decide what actions will be aligned with the mission.
 
 Voting is core to most Governance systems, and one of the major challenges is the high gas costs associated with voting on-chain.
-DAO's a tradeoff between using fully on-chain systems like [Tally] and pay the high associated gas costs, or use an off-chain system with lower security guarantees.
+High gas costs make voting more expensive, and therefore less inclusive, making this a serious concern.
+DAO's a trade=off between using fully on-chain systems like [Tally] and pay the high associated gas costs, or use an off-chain system with lower security guarantees.
 
 ### Summary
 
@@ -31,7 +32,7 @@ Check out `methods/guest/src/bin/finalize_votes.rs` to see the full definition o
 
 Features currently in development can further decrease gas costs to make it possible to execute governance with L1 security, with only a fixed cost of ~300-400k gas per proposal, no matter how many votes. [^3]
 
-[^1]: When dicussing gas-per-vote we only count the gas spent executing Governor logic, and not e.g. intrisic gas for a transaction. We count it this way since both in the baseline and Bonsai Governor these costs can be amortized by batching transactions.
+[^1]: When discussing gas-per-vote we only count the gas spent executing Governor logic, and not e.g. intrinsic gas for a transaction. We count it this way since both in the baseline and Bonsai Governor these costs can be amortized by batching transactions.
 [^2]: Prover costs are not mentioned here because proving computation off-chain with RISC Zero costs less than 1\100th the cost of on-chain compute as of July 2023.
 [^3]: In particular, we are working on methods for verified L1 data access in the zkVM guest, which will allow lookup up voter weights inside the guest.
 
