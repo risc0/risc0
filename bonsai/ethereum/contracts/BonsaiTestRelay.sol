@@ -16,7 +16,7 @@
 
 pragma solidity ^0.8.17;
 
-import {IBonsaiRelay} from "./IBonsaiRelay.sol";
+import {IBonsaiRelay, Callback, CallbackAuthorization} from "./IBonsaiRelay.sol";
 
 /// @notice A mock Bonsai relay for local testing
 contract BonsaiTestRelay is IBonsaiRelay {
@@ -31,8 +31,46 @@ contract BonsaiTestRelay is IBonsaiRelay {
         emit CallbackRequest(msg.sender, imageId, input, callbackContract, functionSelector, gasLimit);
     }
 
-    function invokeCallback(address callbackContract, bytes calldata payload, uint64 gasLimit) external {
-        (bool success, bytes memory data) = callbackContract.call{gas: gasLimit}(payload);
+    /// @inheritdoc IBonsaiRelay
+    function callbackIsAuthorized(bytes32, bytes calldata, CallbackAuthorization calldata auth)
+        public
+        pure
+        returns (bool)
+    {
+        // Require that the seal be specifically empty.
+        // Reject if the caller may have sent a real seal.
+        return auth.seal.length == 0 && auth.postStateDigest == bytes32(0);
+    }
+
+    function parsePayload(bytes calldata payload) public pure returns (bytes32, bytes calldata) {
+        bytes32 imageId = bytes32(payload[payload.length - 32:]);
+        bytes calldata journal = payload[4:payload.length - 32];
+        return (imageId, journal);
+    }
+
+    /// @inheritdoc IBonsaiRelay
+    function invokeCallbacks(Callback[] calldata callbacks) external returns (bool[] memory invocationResults) {
+        invocationResults = new bool[](callbacks.length);
+        for (uint256 i = 0; i < callbacks.length; i++) {
+            Callback calldata callback = callbacks[i];
+
+            // Validate Callback authorization proof.
+            (bytes32 imageId, bytes calldata journal) = parsePayload(callback.payload);
+            require(callbackIsAuthorized(imageId, journal, callback.auth));
+
+            // invoke callback
+            (invocationResults[i],) = callback.callbackContract.call{gas: callback.gasLimit}(callback.payload);
+        }
+    }
+
+    /// @inheritdoc IBonsaiRelay
+    function invokeCallback(Callback calldata callback) external {
+        // Validate Callback authorization proof.
+        (bytes32 imageId, bytes calldata journal) = parsePayload(callback.payload);
+        require(callbackIsAuthorized(imageId, journal, callback.auth));
+
+        // invoke callback
+        (bool success, bytes memory data) = callback.callbackContract.call{gas: callback.gasLimit}(callback.payload);
         if (!success) {
             assembly {
                 revert(add(data, 32), mload(data))
