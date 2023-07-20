@@ -190,7 +190,11 @@ impl MemoryMonitor {
 
     pub fn load_array<const N: usize>(&mut self, addr: u32) -> Result<[u8; N]> {
         // log::trace!("load_array: 0x{addr:08x}");
-        array::try_from_fn(|idx| self.load_u8(addr + idx as u32))
+        let mut vals = Vec::new();
+        for i in 0..N {
+            vals.push(self.load_u8(addr + i as u32)?);
+        }
+        Ok(array::from_fn(|idx| vals[idx]))
     }
 
     pub fn load_register(&self, idx: usize) -> u32 {
