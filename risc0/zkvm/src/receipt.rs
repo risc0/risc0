@@ -119,6 +119,10 @@ pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest.
     Halted(u32),
+
+    /// This indicates termination of a program where the next instruction will
+    /// fail.
+    Fault(u32),
 }
 
 /// Data associated with a receipt which is used for both input and

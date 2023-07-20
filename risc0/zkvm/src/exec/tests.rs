@@ -667,7 +667,7 @@ fn memory_access() {
         LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
     }
 
-    access_memory(0x0000_0000).err().unwrap();
-    access_memory(0x0C00_0000).err().unwrap();
+    access_memory(0x0000_0000).unwrap();
+    access_memory(0x0C00_0000).unwrap();
     access_memory(0x0B00_0000).unwrap();
 }

@@ -15,7 +15,7 @@
 /// This module implements the LocalExecutor. The local executor runs the guest
 /// code locally.
 use std::mem::take;
-use std::{cell::RefCell, fmt::Debug, io::Write, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, fmt::Debug, io::Write, rc::Rc};
 
 use addr2line::{
     fallible_iterator::FallibleIterator,
@@ -33,6 +33,7 @@ use risc0_zkp::{
     },
     ZK_CYCLES,
 };
+use risc0_zkvm_fault::FAULT_CHECKER_ELF;
 use risc0_zkvm_platform::{
     fileno,
     memory::MEM_SIZE,
@@ -42,15 +43,17 @@ use risc0_zkvm_platform::{
     },
     PAGE_SIZE, WORD_SIZE,
 };
-use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
+use rrs_lib::{instruction_executor::InstructionExecutor, HartState, Memory};
 use serde::{Deserialize, Serialize};
 
 use super::{Executor, TraceEvent};
 use crate::{
     align_up,
     exec::monitor::MemoryMonitor,
+    mini_monitor::MiniMonitor,
     opcode::{MajorType, OpCode},
     receipt::ExitCode,
+    serde::to_vec,
     ExecutorEnv, Loader, Segment, SegmentRef, Session, SimpleSegmentRef,
 };
 
@@ -253,6 +256,10 @@ impl<'a> LocalExecutor<'a> {
                             log::debug!("Halted({inner}): {}", self.segment_cycle);
                             return Ok(exit_code);
                         }
+                        ExitCode::Fault(pc) => {
+                            log::debug!("Fault({pc}): {}", self.segment_cycle);
+                            return Ok(exit_code);
+                        }
                     };
                 };
             }
@@ -260,11 +267,47 @@ impl<'a> LocalExecutor<'a> {
 
         let exit_code = run_loop()?;
         self.exit_code = Some(exit_code);
+        if let ExitCode::Fault(pc) = exit_code {
+            let fault_check_segment = self.run_fault_checker(pc)?;
+            self.segments.push(fault_check_segment);
+        }
         Ok(Session::new(
             take(&mut self.segments),
             journal.buf.take(),
             exit_code,
         ))
+    }
+
+    fn run_fault_checker(&mut self, pc: u32) -> Result<Box<dyn SegmentRef>> {
+        // construct the system state
+        let mut memory_map: HashMap<u32, Option<u32>> = HashMap::new();
+
+        let registers = self.monitor.load_registers();
+        for register in registers {
+            let register_value = self
+                .monitor
+                .read_mem(register, rrs_lib::MemAccessSize::Word);
+            memory_map.insert(register, register_value);
+        }
+
+        // In order to determine if the next instruction will fault, we need to
+        // reconstruct the state of the RISC-V emulator and run it using rrs's step
+        // function.
+        memory_map.insert(pc, self.monitor.read_mem(pc, rrs_lib::MemAccessSize::Word));
+
+        let mini_monitor = MiniMonitor {
+            pc,
+            registers,
+            memory_map,
+        };
+        let env = ExecutorEnv::builder()
+            .add_input(&to_vec(&mini_monitor).unwrap())
+            .build()
+            .unwrap();
+
+        let mut exec = self::LocalExecutor::from_elf(env, FAULT_CHECKER_ELF).unwrap();
+        let mut session = exec.run().unwrap();
+        Ok(session.segments.pop().unwrap())
     }
 
     fn split(&mut self, pre_image: MemoryImage) -> Result<()> {
@@ -336,12 +379,13 @@ impl<'a> LocalExecutor<'a> {
                 last_register_write: None,
             };
 
-            InstructionExecutor {
+            let mut inst_exec = InstructionExecutor {
                 mem: &mut self.monitor,
                 hart_state: &mut hart,
+            };
+            if let Err(_) = inst_exec.step() {
+                return Ok(Some(ExitCode::Fault(self.pc)));
             }
-            .step()
-            .map_err(|err| anyhow!("InstructionExecutor failure: {:?}", err))?;
 
             if let Some(idx) = hart.last_register_write {
                 self.monitor.store_register(idx, hart.registers[idx]);

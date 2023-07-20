@@ -39,7 +39,11 @@ pub mod sha;
 #[cfg(test)]
 mod testutils;
 
+#[cfg(feature = "fault")]
+mod mini_monitor;
 pub use anyhow::Result;
+#[cfg(feature = "fault")]
+pub use mini_monitor::MiniMonitor;
 #[cfg(not(target_os = "zkvm"))]
 pub use risc0_binfmt::{MemoryImage, Program, SystemState};
 pub use risc0_zkvm_platform::{declare_syscall, memory::MEM_SIZE, PAGE_SIZE};
