@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use bonsai_proxy_contract::{CallbackRequestFilter, EthereumCallback};
+use bonsai_relay_contract::{
+    bonsai_relay::CallbackRequestFilter, BonsaiRelayCallback,
+};
 use bonsai_sdk::{
     alpha::{Client, SessionId},
     alpha_async::{download, session_status},
@@ -24,7 +26,7 @@ use crate::{api, uploader::completed_proofs::error::CompleteProofError};
 #[derive(Debug, Clone)]
 pub(crate) struct CompleteProof {
     pub bonsai_proof_id: SessionId,
-    pub ethereum_callback: EthereumCallback,
+    pub ethereum_callback: BonsaiRelayCallback,
 }
 
 pub(crate) async fn get_complete_proof(
@@ -71,9 +73,9 @@ pub(crate) async fn get_complete_proof(
 
     Ok(CompleteProof {
         bonsai_proof_id,
-        ethereum_callback: EthereumCallback {
-            proof,
-            journal: receipt.journal,
+        ethereum_callback: BonsaiRelayCallback::{
+            auth: bonsai_relay_contract::CallbackAuthorization(),
+            payload: receipt.journal,
             callback_request,
             gas_limit,
         },
