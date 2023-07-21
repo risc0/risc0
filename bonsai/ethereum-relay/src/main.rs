@@ -12,24 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::sync::Arc;
-
-use anyhow::{Context, Result};
-use bonsai_ethereum_relay::{Relayer, EthersClientConfig};
+use anyhow::Result;
+use bonsai_ethereum_relay::{EthersClientConfig, Relayer};
 use clap::Parser;
-use ethers::{
-    core::{
-        k256::{ecdsa::SigningKey, SecretKey},
-        types::Address,
-    },
-    middleware::SignerMiddleware,
-    prelude::*,
-    providers::{Provider, Ws},
-    signers::AwsSigner,
-};
-use rusoto_core::Region;
-use rusoto_kms::KmsClient;
+use ethers::core::types::Address;
 
+const BONSAI_API_URI: &str = "http://localhost:8081";
 const DEFAULT_SERVER_PORT: &str = "8080";
 
 #[derive(Parser, Debug)]
@@ -85,28 +73,6 @@ async fn main() -> Result<()> {
 
     relayer.run(client_config).await
 }
-
-async fn create_ethers_client_private_key(
-    eth_node_url: &str,
-    wallet_key_identifier: &str,
-    eth_chain_id: u64,
-) -> Result<Arc<SignerMiddleware<Provider<Ws>, LocalWallet>>> {
-    let web3_provider = Provider::<Ws>::connect(eth_node_url)
-        .await
-        .context("unable to connect to websocket")?;
-    let web3_wallet_sk_bytes = hex::decode(wallet_key_identifier)
-        .context("wallet_key_identifier should be valid hex string")?;
-    let web3_wallet_secret_key =
-        SecretKey::from_slice(&web3_wallet_sk_bytes).context("invalid private key")?;
-    let web3_wallet_signing_key = SigningKey::from(web3_wallet_secret_key);
-    let web3_wallet = LocalWallet::from(web3_wallet_signing_key);
-    Ok(Arc::new(SignerMiddleware::new(
-        web3_provider,
-        web3_wallet.with_chain_id(eth_chain_id),
-    )))
-}
-
-const BONSAI_API_URI: &str = "http://localhost:8081";
 
 fn get_bonsai_url() -> String {
     let endpoint = match std::env::var("BONSAI_API_URL") {

@@ -11,15 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use std::{sync::Arc, time::Duration};
+use std::{time::Duration};
 
 use bonsai_proxy_contract::CallbackRequestFilter;
 use ethers::{
-    core::k256::{ecdsa::SigningKey, SecretKey},
+    core::k256::{ecdsa::SigningKey, },
     middleware::SignerMiddleware,
     prelude::{*, signer::SignerMiddlewareError},
-    providers::{Middleware, MiddlewareError, Provider, PubsubClient, SubscriptionStream, Ws},
-    signers::AwsSigner,
+    providers::{Middleware , Provider, PubsubClient, SubscriptionStream, Ws},
     types::{Address, Log},
 };
 use futures::StreamExt;

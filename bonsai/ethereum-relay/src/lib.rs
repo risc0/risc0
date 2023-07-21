@@ -21,7 +21,7 @@ mod uploader;
 
 use std::{sync::Arc, time::Duration};
 
-use anyhow::{Context, Error, Result};
+use anyhow::{Context,  Result};
 use bonsai_sdk::alpha_async::get_client_from_parts;
 use downloader::{
     proxy_callback_proof_processor::ProxyCallbackProofRequestProcessor,
@@ -33,9 +33,8 @@ use ethers::{
         types::Address,
     },
     middleware::SignerMiddleware,
-    prelude::{k256::Secp256k1, *},
-    providers::{Provider, PubsubClient, Ws},
-    signers::AwsSigner,
+    prelude::{ *},
+    providers::{Provider, Ws},
 };
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
