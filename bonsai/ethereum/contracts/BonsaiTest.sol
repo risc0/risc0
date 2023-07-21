@@ -20,7 +20,7 @@ import {Test} from "forge-std/Test.sol";
 import {console2} from "forge-std/console2.sol";
 import {Strings2} from "lib/murky/differential_testing/test/utils/Strings2.sol";
 
-import {IBonsaiRelay} from "./IBonsaiRelay.sol";
+import {IBonsaiRelay, Callback, CallbackAuthorization} from "./IBonsaiRelay.sol";
 import {BonsaiRelay} from "./BonsaiRelay.sol";
 import {BonsaiRelayQueueWrapper} from "./BonsaiRelayQueueWrapper.sol";
 import {BonsaiTestRelay} from "./BonsaiTestRelay.sol";
@@ -43,20 +43,6 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
     BonsaiRelay private bonsaiVerifyingRelay;
     BonsaiTestRelay private bonsaiTestRelay;
 
-    /// @notice provides checked access to the BonsaiTestRelay reference.
-    /// @dev Reverts if the bonsai test relay is not initialized.
-    function getBonsaiTestRelay() internal view returns (BonsaiTestRelay) {
-        require(address(bonsaiTestRelay) != address(0), "bonsaiTestRelay is not initialized");
-        return BonsaiTestRelay(address(bonsaiRelay));
-    }
-
-    /// @notice provides checked access to the verifying BonsaiRelay reference.
-    /// @dev Reverts if the bonsai verifying relay is not initialized.
-    function getBonsaiVerifyingRelay() internal view returns (BonsaiRelay) {
-        require(address(bonsaiVerifyingRelay) != address(0), "bonsaiVerifyingRelay is not initialized");
-        return BonsaiRelay(address(bonsaiRelay));
-    }
-
     /// @notice Instantiates a relay contract for testing.
     /// @dev Apply this modifier to the setUp function of your test.
     modifier withRelay() {
@@ -65,7 +51,11 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
             bonsaiVerifyingRelay = new BonsaiRelay(verifier);
             bonsaiRelay = new BonsaiRelayQueueWrapper(bonsaiVerifyingRelay);
         } else {
-            bonsaiTestRelay = new BonsaiTestRelay();
+            // BonsaiTestRelay should only be deployed in test scenarios.
+            // Use a long and unweildy environment variable name for overriding
+            // the expected chain ID for the test relay so that it is hard to
+            // trigger without thinking about it.
+            bonsaiTestRelay = new BonsaiTestRelay(vm.envOr("TEST_BONSAI_TEST_RELAY_EXPECTED_CHAIN_ID", uint256(31337)));
             bonsaiRelay = new BonsaiRelayQueueWrapper(bonsaiTestRelay);
         }
         _;
@@ -95,24 +85,21 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
     ) public {
         vm.pauseGasMetering();
 
+        CallbackAuthorization memory auth;
+        bytes memory payload;
         if (proverMode() == ProverMode.Bonsai) {
             (bytes memory journal, bytes32 postStateDigest, bytes memory seal) = queryImageOutputAndSeal(imageId, input);
-            bytes memory payload = abi.encodePacked(functionSelector, journal, imageId);
-            BonsaiRelay.Callback memory callback = BonsaiRelay.Callback(
-                BonsaiRelay.CallbackAuthorization(seal, postStateDigest), callbackContract, payload, gasLimit
-            );
-            vm.resumeGasMetering();
-
-            getBonsaiVerifyingRelay().invokeCallback(callback);
+            payload = abi.encodePacked(functionSelector, journal, imageId);
+            auth = CallbackAuthorization(seal, postStateDigest);
         } else {
             bytes memory journal = queryImageOutput(imageId, input);
-            bytes memory payload = abi.encodePacked(functionSelector, journal, imageId);
-            BonsaiTestRelay.Callback memory callback = BonsaiTestRelay.Callback(
-                callbackContract, payload, gasLimit
-            );
-            vm.resumeGasMetering();
-
-            getBonsaiTestRelay().invokeCallback(callback);
+            payload = abi.encodePacked(functionSelector, journal, imageId);
+            // Set the seal to be the empty seal.
+            auth = CallbackAuthorization(new bytes(0), bytes32(0));
         }
+        Callback memory callback = Callback(auth, callbackContract, payload, gasLimit);
+        vm.resumeGasMetering();
+
+        bonsaiRelay.invokeCallback(callback);
     }
 }
