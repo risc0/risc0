@@ -37,8 +37,6 @@ use ethers::{
     providers::{Provider, PubsubClient, Ws},
     signers::AwsSigner,
 };
-use rusoto_core::Region;
-use rusoto_kms::KmsClient;
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
 use tracing::info;
@@ -56,7 +54,6 @@ pub struct EthersClientConfig {
     pub eth_node_url: String,
     pub eth_chain_id: u64,
     pub wallet_key_identifier: String,
-    pub use_kms: bool,
 }
 
 impl EthersClientConfig {
@@ -64,27 +61,19 @@ impl EthersClientConfig {
         eth_node_url: String,
         eth_chain_id: u64,
         wallet_key_identifier: String,
-        use_kms: bool,
     ) -> Self {
         Self {
             eth_node_url,
             eth_chain_id,
             wallet_key_identifier,
-            use_kms,
         }
     }
 
-    pub async fn get_client<M: Middleware, S: Signer>(&self) -> Result<SignerMiddleware<M, S>> {
+    pub async fn get_client(&self) -> Result<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>> {
         let provider = self.provider().await?;
-        if self.use_kms {
-            let signer = self.get_signer_kms().await?;
-            let client = SignerMiddleware::new(provider, signer);
-            Ok(client)
-        } else {
-            let signer = self.get_signer_private_key()?;
-            let client = SignerMiddleware::new(provider, signer);
-            Ok(client)
-        }
+        let signer = self.get_signer()?;
+        let client = SignerMiddleware::new(provider, signer);
+        Ok(client)
     }
 
     pub async fn provider(&self) -> Result<Provider<Ws>> {
@@ -94,20 +83,7 @@ impl EthersClientConfig {
         Ok(provider)
     }
 
-    pub(crate) async fn get_signer_kms(&self) -> Result<AwsSigner> {
-        let region = Region::default();
-        let kms_client = KmsClient::new(region);
-        let signer = AwsSigner::new(
-            kms_client,
-            self.wallet_key_identifier.clone(),
-            self.eth_chain_id,
-        )
-        .await
-        .context("Failed to create AWS signer.")?;
-        Ok(signer)
-    }
-
-    pub(crate) fn get_signer_private_key(&self) -> Result<Wallet<SigningKey>> {
+    pub fn get_signer(&self) -> Result<Wallet<SigningKey>> {
         let private_key = SecretKey::from_slice(
             &hex::decode(&self.wallet_key_identifier).context("Failed to decode private key.")?,
         )
@@ -135,10 +111,7 @@ pub struct Relayer {
 
 impl Relayer {
     /// Run a [Relayer] with an Ethereum Client.
-    pub async fn run(self, client_type: ClientType) -> Result<()> {
-        // Setup Ethereum client
-        let ethers_client = Arc::new(client_type.get_config().get_client().await?);
-
+    pub async fn run(self, client_config: EthersClientConfig) -> Result<()> {
         // try to load filter from `RUST_LOG` or use reasonably verbose defaults
         let filter = ::tracing_subscriber::EnvFilter::try_from_default_env()
             .unwrap_or_else(|_| DEFAULT_FILTER.into());
@@ -164,7 +137,7 @@ impl Relayer {
         );
 
         let downloader = ProxyCallbackProofRequestStream::new(
-            ethers_client_config.clone(),
+            client_config.clone(),
             self.relay_contract_address,
             proxy_callback_proof_request_processor.clone(),
         );
@@ -190,7 +163,7 @@ impl Relayer {
             send_batch_notifier.clone(),
             max_batch_size,
             self.relay_contract_address,
-            ethers_client.clone(),
+            client_config.clone(),
             send_batch_interval,
         );
 

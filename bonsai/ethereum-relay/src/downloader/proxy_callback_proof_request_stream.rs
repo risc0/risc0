@@ -25,12 +25,13 @@ use ethers::{
 use futures::StreamExt;
 use tracing::{debug, error, warn};
 
-use crate::{api::error::Error, downloader::event_processor::EventProcessor, EthersClientConfig};
+use crate::EthersClientConfig;
+use crate::{api::error::Error, downloader::event_processor::EventProcessor};
 
 pub(crate) struct ProxyCallbackProofRequestStream<
     EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send,
 > {
-    ethers_client_config: EthersClientConfig,
+    client_config: EthersClientConfig,
     proxy_contract_address: Address,
     event_processor: EP,
 }
@@ -39,12 +40,12 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
     ProxyCallbackProofRequestStream<EP>
 {
     pub(crate) fn new(
-        ethers_client_config: EthersClientConfig,
+        client_config: EthersClientConfig,
         proxy_contract_address: Address,
         event_processor: EP,
     ) -> ProxyCallbackProofRequestStream<EP> {
         Self {
-            ethers_client_config,
+            client_config,
             proxy_contract_address,
             event_processor,
         }
@@ -57,19 +58,18 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
         let filter = ethers::types::Filter::new()
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
-        let mut client = self.ethers_client_config.get_client().await?;
+        let mut client = self.client_config.get_client().await?;
         let mut reset_client = false;
 
         loop {
             if reset_client {
-                match self.ethers_client_config.get_client().await {
+                match self.client_config.get_client().await {
                     Ok(new_client) => {
                         client = new_client;
                     }
                     Err(error) => {
-                        error!(?error, "Failed to create new client");
-                        error!("Reconnecting in {WAIT_DURATION:?} seconds.");
                         interval.tick().await;
+                        error!(?error, "Failed to create new client");
                         continue;
                     }
                 };
@@ -85,10 +85,9 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                     )
                 }
                 Err(error) => {
-                    error!(?error, "Failed to subscribe to logs");
-                    error!("Reconnecting in {WAIT_DURATION:?} seconds.");
-                    reset_client = true;
                     interval.tick().await;
+                    reset_client = true;
+                    error!(?error, "Failed to subscribe to logs");
                 }
             };
         }

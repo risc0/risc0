@@ -15,9 +15,7 @@
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
-use bonsai_ethereum_relay::{
-    ClientType, EthersClientConfig, KmsClientConfig, PrivateKeyClientConfig, Relayer,
-};
+use bonsai_ethereum_relay::{Relayer, EthersClientConfig};
 use clap::Parser;
 use ethers::{
     core::{
@@ -79,19 +77,13 @@ async fn main() -> Result<()> {
         relay_contract_address: args.contract_address,
     };
 
-    let ethers_client_config = EthersClientConfig::new(
+    let client_config = EthersClientConfig::new(
         args.eth_node_url,
         args.eth_chain_id,
         args.wallet_key_identifier,
     );
 
-    // let client_config = if args.use_kms {
-    //     ClientType(KmsClientConfig::new(ethers_client_config))
-    // } else {
-    //     ClientType(PrivateKeyClientConfig::new(ethers_client_config))
-    // };
-    // relayer.run(client_config).await
-    todo!()
+    relayer.run(client_config).await
 }
 
 async fn create_ethers_client_private_key(
@@ -112,22 +104,6 @@ async fn create_ethers_client_private_key(
         web3_provider,
         web3_wallet.with_chain_id(eth_chain_id),
     )))
-}
-
-async fn create_ethers_client_proxy_kms(
-    eth_node_url: &str,
-    wallet_key_identifier: &str,
-    kms_client: KmsClient,
-    eth_chain_id: u64,
-) -> Result<Arc<SignerMiddleware<Provider<Ws>, AwsSigner>>> {
-    let web3_provider = Provider::<Ws>::connect(eth_node_url)
-        .await
-        .context("unable to connect to websocket")?;
-    let aws_signer = AwsSigner::new(kms_client, wallet_key_identifier, eth_chain_id)
-        .await
-        .context("error creating aws signer")?;
-
-    Ok(Arc::new(SignerMiddleware::new(web3_provider, aws_signer)))
 }
 
 const BONSAI_API_URI: &str = "http://localhost:8081";
