@@ -40,7 +40,7 @@ runs:
 
     - if: runner.os != 'macOS'
       name: Cache rust target + HAL_CACHE
-      uses: risc0/rust-cache@v2
+      uses: risc0/rust-cache@v2.5.1
       id: rust-cache
       with:
         key: ${{ inputs.key }}
