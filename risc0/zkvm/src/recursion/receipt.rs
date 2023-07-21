@@ -15,20 +15,16 @@
 use alloc::{collections::VecDeque, vec::Vec};
 
 use dyn_partial_eq::DynPartialEq;
+use risc0_binfmt::{read_sha_halfs, tagged_struct, write_sha_halfs, SystemState};
 use risc0_core::field::baby_bear::BabyBearElem;
-use risc0_zkp::{
-    adapter::CircuitInfo,
-    core::{digest::Digest, hash::sha::Sha256},
-    verify::VerificationError,
-};
+use risc0_zkp::{adapter::CircuitInfo, core::digest::Digest, verify::VerificationError};
 use serde::{Deserialize, Serialize};
 
 use super::CircuitImpl;
 use crate::{
     control_id::POSEIDON_CONTROL_ID,
-    receipt::{Receipt, ReceiptMetadata, SystemState, VerifierContext},
+    receipt::{Receipt, ReceiptMetadata, VerifierContext},
     recursion::{circuit_impl::CIRCUIT_CORE, control_id::RECURSION_CONTROL_IDS},
-    sha,
 };
 
 /// This function gets valid control IDs from the poseidon and recursion
@@ -43,73 +39,6 @@ pub fn valid_control_ids() -> Vec<Digest> {
         all_ids.push(Digest::from_hex(digest_str).unwrap());
     }
     all_ids
-}
-
-/// Implementation of the struct hash described in the recursion predicates RFC.
-pub(crate) fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
-    let tag_digest: Digest = *sha::Impl::hash_bytes(tag.as_bytes());
-    let mut all = Vec::<u8>::new();
-    all.extend_from_slice(tag_digest.as_bytes());
-    for digest in down {
-        all.extend_from_slice(digest.as_ref());
-    }
-    for word in data.iter().copied() {
-        all.extend_from_slice(&word.to_le_bytes());
-    }
-    let down_count: u16 = down.len().try_into().unwrap();
-    all.extend_from_slice(&down_count.to_le_bytes());
-    *sha::Impl::hash_bytes(&all)
-}
-
-fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
-    let mut bytes = Vec::<u8>::new();
-    for half in flat.drain(0..16) {
-        bytes.push((half & 0xff).try_into().unwrap());
-        bytes.push((half >> 8).try_into().unwrap());
-    }
-    bytes.try_into().unwrap()
-}
-
-fn read_u32_bytes(flat: &mut VecDeque<u32>) -> u32 {
-    u32::from_le_bytes(
-        flat.drain(0..4)
-            .map(|x| x as u8)
-            .collect::<Vec<u8>>()
-            .try_into()
-            .unwrap(),
-    )
-}
-
-fn write_sha_halfs(flat: &mut Vec<u32>, digest: &Digest) {
-    for x in digest.as_words() {
-        flat.push(*x & 0xffff);
-        flat.push(*x >> 16);
-    }
-}
-
-fn write_u32_bytes(flat: &mut Vec<u32>, word: u32) {
-    for x in word.to_le_bytes() {
-        flat.push(x as u32);
-    }
-}
-
-impl SystemState {
-    fn decode(flat: &mut VecDeque<u32>) -> Self {
-        Self {
-            pc: read_u32_bytes(flat),
-            merkle_root: read_sha_halfs(flat),
-        }
-    }
-
-    fn encode(&self, flat: &mut Vec<u32>) {
-        write_u32_bytes(flat, self.pc);
-        write_sha_halfs(flat, &self.merkle_root);
-    }
-
-    /// Hash the [crate::SystemState] to get a digest of the struct.
-    pub fn digest(&self) -> Digest {
-        tagged_struct("risc0.SystemState", &[self.merkle_root], &[self.pc])
-    }
 }
 
 impl ReceiptMetadata {
@@ -216,22 +145,5 @@ impl Receipt for RollupReceipt {
 
     fn get_seal(&self) -> &[u32] {
         &self.seal
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::recursion::receipt::tagged_struct;
-    #[test]
-    fn test_tagged_struct() {
-        let digest1 = tagged_struct("foo", &[], &[1, 2013265920, 3]);
-        let digest2 = tagged_struct("bar", &[digest1, digest1], &[2013265920, 5]);
-        let digest3 = tagged_struct(
-            "baz",
-            &[digest1, digest2, digest1],
-            &[6, 7, 2013265920, 9, 10],
-        );
-
-        println!("digest = {:?}", digest3);
     }
 }

@@ -1,0 +1,47 @@
+name: lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+  cargo-forge:
+    name: cargo lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: install rust
+        uses: risc0/risc0/.github/actions/rustup@42266f0b6bd28de208b7c47b50dd4bcf241f76ce
+
+      - name: install cargo-sort
+        uses: risc0/cargo-install@v1
+        with:
+          crate: cargo-sort
+          version: "^1.0.9"
+
+      - name: Install Foundry
+        uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
+
+      - name: lint methods rust code
+        run: cargo fmt --all -- --check
+
+      - name: lint guest rust code
+        working-directory: methods/guest
+        run: cargo fmt --all -- --check
+
+      - name: lint methods cargo files
+        run: cargo sort --workspace --check
+
+      - name: lint guest cargo files
+        working-directory: methods/guest
+        run: cargo sort --workspace --check
+
+      - name: check solidity code formatting
+        run: forge fmt --check

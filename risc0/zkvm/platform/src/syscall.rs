@@ -324,6 +324,12 @@ pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
 #[no_mangle]
 pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
     syscall_2(nr::SYS_PANIC, null_mut(), 0, msg_ptr as u32, len as u32);
+
+    // As a fallback for non-compliant hosts, issue an illegal instruction.
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        asm!("sw x0, 1(x0)")
+    };
     unreachable!()
 }
 

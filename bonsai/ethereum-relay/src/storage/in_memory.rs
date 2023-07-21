@@ -63,6 +63,7 @@ impl InMemoryStorage {
         match state {
             ProofRequestState::New => self.new_proofs.clone(),
             ProofRequestState::Pending => self.pending_proofs.clone(),
+            ProofRequestState::Failed => Arc::new(RwLock::new(HashMap::new())),
             ProofRequestState::Completed => self.completed_proofs.clone(),
             ProofRequestState::PreparingOnchain => self.preparing_onchain_proofs.clone(),
             ProofRequestState::CompletedOnchain(_) => Arc::new(RwLock::new(HashMap::new())),
