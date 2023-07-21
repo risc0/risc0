@@ -32,7 +32,7 @@ pub struct BonsaiRelayCallback {
     pub gas_limit: u64,
 }
 
-impl From<BonsaiRelayCallback> for Callback {
+impl From<BonsaiRelayCallback> for bonsai_relay::Callback {
     fn from(value: BonsaiRelayCallback) -> Self {
         let payload = [
             value.callback_request.function_selector.as_slice(),
@@ -49,31 +49,9 @@ impl From<BonsaiRelayCallback> for Callback {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct BonsaiTestRelayCallback {
-    pub callback_request: bonsai_relay::CallbackRequestFilter,
-    pub payload: Vec<u8>,
-    pub gas_limit: u64,
-}
-
-impl From<BonsaiTestRelayCallback> for TestCallback {
-    fn from(value: BonsaiTestRelayCallback) -> Self {
-        let payload = [
-            value.callback_request.function_selector.as_slice(),
-            value.payload.as_slice(),
-            value.callback_request.image_id.as_slice(),
-        ]
-        .concat();
-        Self {
-            callback_contract: value.callback_request.callback_contract,
-            payload: payload.into(),
-            gas_limit: value.gas_limit,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
+
     use std::{sync::Arc, time::Duration};
 
     use ethers::{
@@ -85,8 +63,6 @@ mod tests {
         utils::{hex, Anvil, AnvilInstance},
     };
     use risc0_zkvm::SessionReceipt;
-
-    use crate::{bonsai_relay, BonsaiTestRelay, BonsaiTestRelayCallback};
 
     abigen!(CallbackDummy, "out/callback_dummy.sol/CallbackDummy.json");
 
@@ -180,7 +156,7 @@ mod tests {
         let call_me_selector = CallMeCall::selector();
         // Create some dummy callback requests
         let callback_requests = vec![
-            bonsai_relay::CallbackRequestFilter {
+            bonsai_test_relay::CallbackRequestFilter {
                 account: wallet_address.into(),
                 image_id: image_id.clone(),
                 input: Vec::new().into(),
@@ -188,7 +164,7 @@ mod tests {
                 function_selector: call_me_selector.clone(),
                 gas_limit: 50000,
             },
-            bonsai_relay::CallbackRequestFilter {
+            bonsai_test_relay::CallbackRequestFilter {
                 account: wallet_address.into(),
                 image_id: image_id.clone(),
                 input: Vec::new().into(),
@@ -234,12 +210,12 @@ mod tests {
         };
 
         let ethereum_callbacks = vec![
-            BonsaiTestRelayCallback {
+            bonsai_test_relay::Callback {
                 payload: fake_receipt.journal.clone(),
                 gas_limit: 50000,
                 callback_request: callback_requests[0].clone(),
             },
-            BonsaiTestRelayCallback {
+            bonsai_test_relay::Callback {
                 payload: fake_receipt.journal,
                 gas_limit: 50000,
                 callback_request: callback_requests[1].clone(),

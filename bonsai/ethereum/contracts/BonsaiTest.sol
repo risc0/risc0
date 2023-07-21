@@ -107,7 +107,7 @@ abstract contract BonsaiTest is Test, BonsaiCheats {
         } else {
             bytes memory journal = queryImageOutput(imageId, input);
             bytes memory payload = abi.encodePacked(functionSelector, journal, imageId);
-            BonsaiTestRelay.TestCallback memory callback = BonsaiTestRelay.TestCallback(
+            BonsaiTestRelay.Callback memory callback = BonsaiTestRelay.Callback(
                 callbackContract, payload, gasLimit
             );
             vm.resumeGasMetering();

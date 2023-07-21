@@ -21,8 +21,7 @@ import {IBonsaiRelay} from "./IBonsaiRelay.sol";
 /// @notice A mock Bonsai relay for local testing
 contract BonsaiTestRelay is IBonsaiRelay {
     /// @notice Callback data, provided by the Relay service.
-    struct TestCallback {
-        /// @notice address of the contract to receive the callback.
+    struct Callback {
         address callbackContract;
         /// @notice payload containing the callback function selector, journal bytes, and image ID.
         /// @dev payload is destructured and checked against the authorization data to ensure that
@@ -48,10 +47,10 @@ contract BonsaiTestRelay is IBonsaiRelay {
     /// @dev This function is usually called by the Bonsai Relay. Note that this function does not
     ///     revert when one of the inner test callbacks reverts.
     /// @return invocationResults a list of booleans indicated if the calldata succeeded or failed.
-    function invokeCallbacks(TestCallback[] calldata callbacks) external returns (bool[] memory invocationResults) {
+    function invokeCallbacks(Callback[] calldata callbacks) external returns (bool[] memory invocationResults) {
         invocationResults = new bool[](callbacks.length);
         for (uint256 i = 0; i < callbacks.length; i++) {
-            TestCallback calldata callback = callbacks[i];
+            Callback calldata callback = callbacks[i];
             // invoke callback
             (invocationResults[i],) = callback.callbackContract.call{gas: callback.gasLimit}(callback.payload);
         }
@@ -59,7 +58,7 @@ contract BonsaiTestRelay is IBonsaiRelay {
 
     /// @notice Submit a single test callback.
     /// @dev This function is usually called by the Bonsai Relay. This function reverts if the callback fails.
-    function invokeCallback(TestCallback calldata callback) external {
+    function invokeCallback(Callback calldata callback) external {
         // invoke callback
         (bool success, bytes memory data) = callback.callbackContract.call{gas: callback.gasLimit}(callback.payload);
         if (!success) {
