@@ -17,7 +17,7 @@ use bonsai_proxy_contract::CallbackRequestFilter;
 use ethers::{
     core::k256::{ecdsa::SigningKey, SecretKey},
     middleware::SignerMiddleware,
-    prelude::*,
+    prelude::{*, signer::SignerMiddlewareError},
     providers::{Middleware, MiddlewareError, Provider, PubsubClient, SubscriptionStream, Ws},
     signers::AwsSigner,
     types::{Address, Log},
@@ -53,41 +53,42 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
     pub(crate) async fn run(self) -> Result<(), Error> {
         const WAIT_DURATION: Duration = Duration::from_secs(5);
         const EVENT_NAME: &str = "CallbackRequest(address,bytes32,bytes,address,bytes4,uint64)";
+        const MAX_RETRIES: usize = 60;
         let filter = ethers::types::Filter::new()
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
         let mut client = self.client_config.get_client().await?;
-        let mut reset_client = false;
+        let mut recreate_client = false;
 
         loop {
-            if reset_client {
-                match self.client_config.get_client().await {
-                    Ok(new_client) => {
-                        client = new_client;
-                    }
-                    Err(error) => {
-                        error!(?error, "Failed to create new client");
-                        tokio::time::sleep(WAIT_DURATION).await;
-                        continue;
-                    }
-                };
-                reset_client = false;
-            }
+            self.recreate_client(
+                &mut client,
+                &mut recreate_client,
+                MAX_RETRIES,
+                WAIT_DURATION,
+            )
+            .await?;
             let logs = client.subscribe_logs(&filter).await;
-            match logs {
-                Ok(logs) => {
-                    debug!("Successfully subscribed to logs");
-                    self.process_logs(logs).await.map_or_else(
-                        |error| error!(?error, "Failed to process logs"),
-                        |_| warn!("Proxy stream ended, reconnecting..."),
-                    )
-                }
-                Err(error) => {
-                    error!(?error, "Failed to subscribe to logs");
-                    reset_client = true;
-                }
-            };
+            self.match_logs(logs, &mut recreate_client).await?;
         }
+    }
+
+    async fn recreate_client(
+        &self,
+        client: &mut SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
+        recreate_flag: &mut bool,
+        max_retries: usize,
+        wait_duration: Duration,
+    ) -> Result<(), Error> {
+        if *recreate_flag {
+            debug!("Recreating client.");
+            *client = self
+                .client_config
+                .get_client_with_reconnects(max_retries, wait_duration)
+                .await?;
+            *recreate_flag = false;
+        };
+        Ok(())
     }
 
     async fn process_logs(
@@ -105,6 +106,30 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                 Err(error) => error!(?error, "Error parsing log"),
             }
         }
+        Ok(())
+    }
+
+    async fn match_logs(
+        &self,
+        logs: Result<SubscriptionStream<'_, impl PubsubClient, Log>, SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>>,
+        recreate_client_flag: &mut bool,
+    ) -> Result<(), Error> {
+        match logs {
+            Ok(logs) => {
+                debug!("Successfully subscribed to logs");
+                self.process_logs(logs).await.map_or_else(
+                    |error| error!(?error, "Failed to process logs"),
+                    |_| {
+                        warn!("Proxy stream ended, reconnecting...");
+                        *recreate_client_flag = true
+                    },
+                )
+            }
+            Err(error) => {
+                error!(?error, "Failed to subscribe to logs");
+                *recreate_client_flag = true;
+            }
+        };
         Ok(())
     }
 }

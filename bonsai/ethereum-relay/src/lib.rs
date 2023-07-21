@@ -19,7 +19,7 @@ mod storage;
 mod tests;
 mod uploader;
 
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
 
 use anyhow::{Context, Error, Result};
 use bonsai_sdk::alpha_async::get_client_from_parts;
@@ -39,7 +39,7 @@ use ethers::{
 };
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
-use tracing::info;
+use tracing::{debug, error, info};
 use uploader::{
     completed_proofs::manager::BonsaiCompleteProofManager,
     pending_proofs::manager::BonsaiPendingProofManager,
@@ -57,11 +57,7 @@ pub struct EthersClientConfig {
 }
 
 impl EthersClientConfig {
-    pub fn new(
-        eth_node_url: String,
-        eth_chain_id: u64,
-        wallet_key_identifier: String,
-    ) -> Self {
+    pub fn new(eth_node_url: String, eth_chain_id: u64, wallet_key_identifier: String) -> Self {
         Self {
             eth_node_url,
             eth_chain_id,
@@ -91,6 +87,27 @@ impl EthersClientConfig {
         let signing_key = SigningKey::from(private_key);
         let signer = LocalWallet::from(signing_key).with_chain_id(self.eth_chain_id);
         Ok(signer)
+    }
+
+    pub async fn get_client_with_reconnects(
+        &self,
+        max_retries: usize,
+        retry_time: Duration,
+    ) -> Result<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>> {
+        for _ in 0..max_retries {
+            let client = self.get_client().await;
+            if client.is_ok() {
+                return client;
+            } else {
+                debug!(
+                    "Failed to create client. Retrying in {} seconds.",
+                    retry_time.as_secs()
+                );
+                tokio::time::sleep(retry_time).await;
+            }
+        }
+        error!("Failed to create client.");
+        Err(anyhow::anyhow!("Failed to create client."))
     }
 }
 
