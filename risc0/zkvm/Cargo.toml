@@ -109,8 +109,6 @@ prove = [
   "dep:rrs-lib",
   "dep:sha2",
   "dep:thiserror",
-  "dep:typetag",
-  "fault",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",
   "std",
@@ -120,9 +118,6 @@ std = [
   "num-traits?/std",
   "risc0-circuit-rv32im/std",
   "risc0-zkp/std",
+  "dep:rrs-lib",
   "serde/std",
-]
-
-fault = [
-  "dep:rrs-lib"
 ]

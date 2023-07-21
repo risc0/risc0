@@ -12,25 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{collections::HashMap, env};
-
-use risc0_build::{embed_methods_with_options, GuestOptions};
+use std::env;
 
 fn main() {
-    env_logger::init();
-
     if env::var("CARGO_CFG_TARGET_OS").unwrap().contains("zkvm") {
         // Guest shouldn't recursively depend on itself.
         return;
     }
 
-    let map = HashMap::from([(
-        "risc0-zkvm-fault-guest",
-        GuestOptions {
-            features: Vec::new(),
-            std: true,
-        },
-    )]);
-
-    embed_methods_with_options(map);
+    risc0_build::embed_methods();
 }

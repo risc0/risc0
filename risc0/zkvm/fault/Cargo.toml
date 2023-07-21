@@ -4,7 +4,6 @@ version = { workspace = true }
 edition = { workspace = true }
 
 [build-dependencies]
-env_logger = "0.10"
 risc0-build = { workspace = true }
 
 [package.metadata.release]
@@ -14,4 +13,3 @@ release = false
 methods = ["guest"]
 
 [dependencies]
-serde = { version = "1.0", default-features = false, features = ["derive"] }
