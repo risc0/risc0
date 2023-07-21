@@ -256,8 +256,8 @@ impl<'a> LocalExecutor<'a> {
                             log::debug!("Halted({inner}): {}", self.segment_cycle);
                             return Ok(exit_code);
                         }
-                        ExitCode::Fault(pc) => {
-                            log::debug!("Fault({pc}): {}", self.segment_cycle);
+                        ExitCode::Fault => {
+                            log::debug!("Fault: {}", self.segment_cycle);
                             return Ok(exit_code);
                         }
                     };
@@ -267,8 +267,8 @@ impl<'a> LocalExecutor<'a> {
 
         let exit_code = run_loop()?;
         self.exit_code = Some(exit_code);
-        if let ExitCode::Fault(pc) = exit_code {
-            let fault_check_segment = self.run_fault_checker(pc)?;
+        if let ExitCode::Fault = exit_code {
+            let fault_check_segment = self.run_fault_checker()?;
             self.segments.push(fault_check_segment);
         }
         Ok(Session::new(
@@ -278,7 +278,8 @@ impl<'a> LocalExecutor<'a> {
         ))
     }
 
-    fn run_fault_checker(&mut self, pc: u32) -> Result<Box<dyn SegmentRef>> {
+    fn run_fault_checker(&mut self) -> Result<Box<dyn SegmentRef>> {
+        let pc = self.pc;
         // construct the system state
         let mut memory_map: HashMap<u32, Option<u32>> = HashMap::new();
 
@@ -384,7 +385,7 @@ impl<'a> LocalExecutor<'a> {
                 hart_state: &mut hart,
             };
             if let Err(_) = inst_exec.step() {
-                return Ok(Some(ExitCode::Fault(self.pc)));
+                return Ok(Some(ExitCode::Fault));
             }
 
             if let Some(idx) = hart.last_register_write {

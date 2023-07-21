@@ -122,7 +122,7 @@ pub enum ExitCode {
 
     /// This indicates termination of a program where the next instruction will
     /// fail.
-    Fault(u32),
+    Fault,
 }
 
 /// Data associated with a receipt which is used for both input and
