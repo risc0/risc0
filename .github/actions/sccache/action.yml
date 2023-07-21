@@ -1,5 +1,9 @@
 name: sccache install
 description: Install sccache
+inputs:
+  key:
+    required: true
+    default: rust-cache-${{ runner.os }}-${{ runner.arch }}
 runs:
   using: composite
   steps:
@@ -39,7 +43,7 @@ runs:
       uses: risc0/rust-cache@v2
       id: rust-cache
       with:
-        key: rust-cache-${{ runner.os }}-${{ runner.arch }}
+        key: ${{ inputs.key }}
         # TODO: this path will not work on windows.
         cache-directories: ~/.cache/risc0
 
