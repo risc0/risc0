@@ -109,6 +109,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "elf"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2b183d6ce6ca4cf30e3db37abf5b52568b5f9015c97d9fbdd7026aa5dcdd758"
+
+[[package]]
 name = "erased-serde"
 version = "0.3.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -232,6 +238,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
+name = "risc0-binfmt"
+version = "0.16.1"
+dependencies = [
+ "anyhow",
+ "elf",
+ "log",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im"
 version = "0.16.1"
 dependencies = [
@@ -283,6 +301,7 @@ dependencies = [
  "libm",
  "log",
  "num-derive",
+ "risc0-binfmt",
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",
