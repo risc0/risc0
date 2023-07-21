@@ -16,7 +16,7 @@ use std::sync::Arc;
 
 use bonsai_proxy_contract::{Callback, ProxyContract};
 use bonsai_sdk::alpha::Client;
-use ethers::prelude::{*, k256::ecdsa::SigningKey};
+use ethers::prelude::{k256::ecdsa::SigningKey, *};
 use futures::{stream::FuturesUnordered, StreamExt};
 use tokio::{sync::Notify, task::JoinHandle};
 use tracing::info;
@@ -26,7 +26,8 @@ use crate::{
     uploader::completed_proofs::{
         complete_proof::{get_complete_proof, CompleteProof},
         error::*,
-    }, EthersClientConfig,
+    },
+    EthersClientConfig,
 };
 
 const BONSAI_RELAY_GAS_LIMIT: u64 = 3000000;

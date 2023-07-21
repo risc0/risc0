@@ -11,14 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use std::{time::Duration};
+use std::time::Duration;
 
 use bonsai_proxy_contract::CallbackRequestFilter;
 use ethers::{
-    core::k256::{ecdsa::SigningKey, },
+    core::k256::ecdsa::SigningKey,
     middleware::SignerMiddleware,
-    prelude::{*, signer::SignerMiddlewareError},
-    providers::{Middleware , Provider, PubsubClient, SubscriptionStream, Ws},
+    prelude::{signer::SignerMiddlewareError, *},
+    providers::{Middleware, Provider, PubsubClient, SubscriptionStream, Ws},
     types::{Address, Log},
 };
 use futures::StreamExt;
@@ -110,7 +110,10 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
 
     async fn match_logs(
         &self,
-        logs: Result<SubscriptionStream<'_, impl PubsubClient, Log>, SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>>,
+        logs: Result<
+            SubscriptionStream<'_, impl PubsubClient, Log>,
+            SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>,
+        >,
         recreate_client_flag: &mut bool,
     ) -> Result<(), Error> {
         match logs {
