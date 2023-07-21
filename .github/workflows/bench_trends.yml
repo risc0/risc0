@@ -46,7 +46,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: rust-cache-bench-${{ matrix.os }}-${{ matrix.feature }}
+          key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
       - name: Store benchmark result
         uses: risc0/github-action-benchmark@risc0

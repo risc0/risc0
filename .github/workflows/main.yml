@@ -70,7 +70,7 @@ jobs:
       - uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
       - uses: ./.github/actions/sccache
         with:
-          key: rust-cache-test-${{ matrix.os }}-${{ matrix.feature }}
+          key: ${{ matrix.os }}-${{ matrix.feature }}
       - uses: ./.github/actions/rosetta
       - run: cargo xtask install
       - run: cargo test -F $FEATURE -F profiler
@@ -123,7 +123,7 @@ jobs:
           node-version: 18
       - uses: ./.github/actions/sccache
         with:
-          key: rust-cache-examples-${{ matrix.os }}-${{ matrix.feature }}
+          key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo test -F $FEATURE
         working-directory: examples
 
@@ -136,7 +136,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: rust-cache-doc
+          key: Linux
       - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - name: Install mdbook
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1

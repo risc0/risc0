@@ -44,7 +44,7 @@ jobs:
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
-          key: rust-cache-bench-${{ matrix.os }}-${{ matrix.feature }}
+          key: ${{ matrix.os }}-${{ matrix.feature }}
       - uses: risc0/criterion-compare-action@risc0
         id: criterion-cmp
         with:
