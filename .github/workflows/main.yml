@@ -120,6 +120,8 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
+      - run: cargo test -F $FEATURE
+        working-directory: examples
 
   doc:
     runs-on: [self-hosted, prod, Linux, cpu]
@@ -155,5 +157,3 @@ jobs:
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
-      - run: cargo test -F $FEATURE
-        working-directory: examples
