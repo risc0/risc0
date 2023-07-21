@@ -154,6 +154,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "elf"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2b183d6ce6ca4cf30e3db37abf5b52568b5f9015c97d9fbdd7026aa5dcdd758"
+
+[[package]]
 name = "elliptic-curve"
 version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -252,9 +258,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.139"
+version = "0.2.147"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "201de327520df007757c1f0adce6e827fe8562fbc28bfd9c15571c66ca1f5f79"
+checksum = "b4668fb0ea861c1df094127ac5f1da3409a82116a4ba74fca2e58ef927159bb3"
 
 [[package]]
 name = "libm"
@@ -357,6 +363,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-binfmt"
+version = "0.16.1"
+dependencies = [
+ "anyhow",
+ "elf",
+ "log",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im"
 version = "0.16.1"
 dependencies = [
@@ -408,6 +426,7 @@ dependencies = [
  "log",
  "num-derive",
  "num-traits",
+ "risc0-binfmt",
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",

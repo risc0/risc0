@@ -380,8 +380,7 @@ mod tests {
     };
     use test_log::test;
 
-    use super::MemoryImage;
-    use crate::{elf::Program, image::PageTableInfo, tagged_struct};
+    use crate::{elf::Program, image::PageTableInfo, tagged_struct, MemoryImage};
 
     fn page_table_size(max_mem: u32, page_size: u32) -> u32 {
         PageTableInfo::new(max_mem, page_size)._page_table_size

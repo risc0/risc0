@@ -14,11 +14,10 @@
 
 //! Manages formatted binaries used by the RISC Zero zkVM
 
-pub(crate) mod elf;
-pub(crate) mod image;
-pub use image::MemoryImage;
+mod elf;
+mod image;
 
 pub use crate::{
     elf::Program,
-    image::{read_sha_halfs, tagged_struct, write_sha_halfs, SystemState},
+    image::{read_sha_halfs, tagged_struct, write_sha_halfs, MemoryImage, SystemState},
 };
