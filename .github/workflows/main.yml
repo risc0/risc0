@@ -54,9 +54,6 @@ jobs:
           - os: macOS
             feature: metal
             device: apple_m2_pro
-          # - os: Linux
-          #   feature: cuda
-          #   device: nvidia_tesla_t4g
     env:
       CUDA_LIBRARY_PATH: /usr/lib/cuda
       FEATURE: ${{ matrix.feature }}
@@ -76,7 +73,6 @@ jobs:
       - run: cargo xtask install
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
-      - run: cargo test -F $FEATURE --manifest-path examples/Cargo.toml
       - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
         if: matrix.device == 'cpu'
       - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
@@ -94,6 +90,36 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
       - run: sccache --show-stats
+
+  examples:
+    runs-on: [self-hosted, prod, "${{ matrix.os }}", "${{ matrix.device }}"]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [Linux, macOS]
+        feature: [default]
+        device: [cpu]
+        include:
+          - os: Linux
+            feature: cuda
+            device: nvidia_rtx_a5000
+          - os: macOS
+            feature: metal
+            device: apple_m2_pro
+    env:
+      CUDA_LIBRARY_PATH: /usr/lib/cuda
+      FEATURE: ${{ matrix.feature }}
+      RUST_BACKTRACE: full
+      RUSTC_WRAPPER: sccache
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ./.github/actions/sccache
 
   doc:
     runs-on: [self-hosted, prod, Linux, cpu]
@@ -129,3 +155,5 @@ jobs:
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
+      - run: cargo test -F $FEATURE
+        working-directory: examples
