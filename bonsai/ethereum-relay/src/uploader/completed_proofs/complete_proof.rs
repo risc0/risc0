@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use bonsai_relay_contract::{
-    bonsai_relay::CallbackRequestFilter, BonsaiRelayCallback,
-};
+use bonsai_relay_contract::{bonsai_relay::CallbackRequestFilter, BonsaiRelayCallback};
 use bonsai_sdk::{
     alpha::{Client, SessionId},
     alpha_async::{download, session_status},
@@ -32,7 +30,7 @@ pub(crate) struct CompleteProof {
 pub(crate) async fn get_complete_proof(
     bonsai_client: Client,
     bonsai_proof_id: SessionId,
-    callback_request: CallbackRequestFilter,
+    callback_contract: CallbackRequestFilter,
 ) -> Result<CompleteProof, CompleteProofError> {
     let bonsai_response = session_status(bonsai_client.clone(), bonsai_proof_id.clone())
         .await
@@ -69,15 +67,15 @@ pub(crate) async fn get_complete_proof(
             id: bonsai_proof_id.clone(),
         })?;
 
-    let gas_limit = callback_request.gas_limit;
+    let gas_limit = callback_contract.gas_limit;
 
     Ok(CompleteProof {
         bonsai_proof_id,
-        ethereum_callback: BonsaiRelayCallback::{
+        ethereum_callback: BonsaiRelayCallback {
             auth: bonsai_relay_contract::CallbackAuthorization(),
             payload: receipt.journal,
-            callback_request,
             gas_limit,
+            callback_contract: todo!(),
         },
     })
 }

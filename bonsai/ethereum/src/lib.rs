@@ -26,8 +26,8 @@ abigen!(
 
 #[derive(Clone, Debug)]
 pub struct BonsaiRelayCallback {
-    pub auth: CallbackAuthorization,
-    pub callback_request: bonsai_relay::CallbackRequestFilter,
+    pub auth: bonsai_relay::CallbackAuthorization,
+    pub callback_contract: bonsai_relay::CallbackRequestFilter,
     pub payload: Vec<u8>,
     pub gas_limit: u64,
 }
@@ -35,16 +35,44 @@ pub struct BonsaiRelayCallback {
 impl From<BonsaiRelayCallback> for bonsai_relay::Callback {
     fn from(value: BonsaiRelayCallback) -> Self {
         let payload = [
-            value.callback_request.function_selector.as_slice(),
+            value.callback_contract.function_selector.as_slice(),
             value.payload.as_slice(),
-            value.callback_request.image_id.as_slice(),
+            value.callback_contract.image_id.as_slice(),
         ]
         .concat();
         Self {
             auth: value.auth,
-            callback_contract: value.callback_request.callback_contract,
+            callback_contract: value.callback_contract.callback_contract,
             payload: payload.into(),
             gas_limit: value.gas_limit,
+        }
+    }
+}
+
+impl From<BonsaiRelayCallback> for bonsai_test_relay::Callback {
+    fn from(value: BonsaiRelayCallback) -> Self {
+        let payload = [
+            value.callback_contract.function_selector.as_slice(),
+            value.payload.as_slice(),
+            value.callback_contract.image_id.as_slice(),
+        ]
+        .concat();
+        Self {
+            auth: value.auth.into(),
+            callback_contract: value.callback_contract.callback_contract,
+            payload: payload.into(),
+            gas_limit: value.gas_limit,
+        }
+    }
+}
+
+impl From<bonsai_relay::CallbackAuthorization> for bonsai_test_relay::CallbackAuthorization {
+    fn from(
+        value: bonsai_relay::CallbackAuthorization,
+    ) -> bonsai_test_relay::CallbackAuthorization {
+        bonsai_test_relay::CallbackAuthorization {
+            seal: value.seal,
+            post_state_digest: value.post_state_digest,
         }
     }
 }
@@ -63,6 +91,10 @@ mod tests {
         utils::{hex, Anvil, AnvilInstance},
     };
     use risc0_zkvm::SessionReceipt;
+
+    use crate::{
+        bonsai_relay, bonsai_relay::CallbackAuthorization, BonsaiRelayCallback, BonsaiTestRelay,
+    };
 
     abigen!(CallbackDummy, "out/callback_dummy.sol/CallbackDummy.json");
 
@@ -156,7 +188,7 @@ mod tests {
         let call_me_selector = CallMeCall::selector();
         // Create some dummy callback requests
         let callback_requests = vec![
-            bonsai_test_relay::CallbackRequestFilter {
+            bonsai_relay::CallbackRequestFilter {
                 account: wallet_address.into(),
                 image_id: image_id.clone(),
                 input: Vec::new().into(),
@@ -164,7 +196,7 @@ mod tests {
                 function_selector: call_me_selector.clone(),
                 gas_limit: 50000,
             },
-            bonsai_test_relay::CallbackRequestFilter {
+            bonsai_relay::CallbackRequestFilter {
                 account: wallet_address.into(),
                 image_id: image_id.clone(),
                 input: Vec::new().into(),
@@ -210,15 +242,23 @@ mod tests {
         };
 
         let ethereum_callbacks = vec![
-            bonsai_test_relay::Callback {
+            BonsaiRelayCallback {
+                auth: CallbackAuthorization {
+                    seal: Vec::new().into(),
+                    post_state_digest: U256::from(0).into(),
+                },
                 payload: fake_receipt.journal.clone(),
                 gas_limit: 50000,
-                callback_request: callback_requests[0].clone(),
+                callback_contract: callback_requests[0].clone(),
             },
-            bonsai_test_relay::Callback {
+            BonsaiRelayCallback {
+                auth: CallbackAuthorization {
+                    seal: Vec::new().into(),
+                    post_state_digest: U256::from(0).into(),
+                },
                 payload: fake_receipt.journal,
                 gas_limit: 50000,
-                callback_request: callback_requests[1].clone(),
+                callback_contract: callback_requests[1].clone(),
             },
         ];
         dbg!(&ethereum_callbacks);
