@@ -68,7 +68,7 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
             )
             .await?;
             let logs = client.subscribe_logs(&filter).await;
-            self.match_logs(logs, &mut recreate_client).await?;
+            self.match_logs(logs, &mut recreate_client).await;
         }
     }
 
@@ -115,7 +115,7 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
             SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>,
         >,
         recreate_client_flag: &mut bool,
-    ) -> Result<(), Error> {
+    ) {
         match logs {
             Ok(logs) => {
                 debug!("Successfully subscribed to logs");
@@ -131,7 +131,6 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                 error!(?error, "Failed to subscribe to logs");
                 *recreate_client_flag = true;
             }
-        };
-        Ok(())
+        }
     }
 }
