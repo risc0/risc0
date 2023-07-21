@@ -90,7 +90,7 @@ impl EthersClientConfig {
 
     pub async fn get_client_with_reconnects(
         &self,
-        max_retries: usize,
+        max_retries: u64,
         retry_time: Duration,
     ) -> Result<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>> {
         for _ in 0..max_retries {

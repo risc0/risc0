@@ -52,7 +52,7 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
     pub(crate) async fn run(self) -> Result<(), Error> {
         const WAIT_DURATION: Duration = Duration::from_secs(5);
         const EVENT_NAME: &str = "CallbackRequest(address,bytes32,bytes,address,bytes4,uint64)";
-        const MAX_RETRIES: usize = 60;
+        const MAX_RETRIES: u64 = 7 * 24 * 60 * 60 / WAIT_DURATION.as_secs(); // 1 week
         let filter = ethers::types::Filter::new()
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
@@ -76,7 +76,7 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
         &self,
         client: &mut SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
         recreate_flag: &mut bool,
-        max_retries: usize,
+        max_retries: u64,
         wait_duration: Duration,
     ) -> Result<(), Error> {
         if *recreate_flag {
