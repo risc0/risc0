@@ -42,6 +42,7 @@ addr2line = { version = "0.20", optional = true }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
 elf = { version = "0.7", optional = true }
+risc0-binfmt = { workspace = true }
 generic-array = { version = "0.14", default-features = false, optional = true }
 getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.27", optional = true }
@@ -74,7 +75,6 @@ tar = "0.4"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
-binfmt = ["dep:elf", "std"]
 cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
 dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
@@ -87,7 +87,6 @@ profiler = [
   "dep:protobuf-src"
 ]
 prove = [
-  "binfmt",
   "dep:bonsai-sdk",
   "dep:bincode",
   "dep:num-traits",

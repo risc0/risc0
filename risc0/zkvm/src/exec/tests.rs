@@ -161,6 +161,14 @@ fn sha_accel() {
 }
 
 #[test]
+fn rsa_compat() {
+    let input = to_vec(&MultiTestSpec::RsaCompat).unwrap();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run().unwrap();
+}
+
+#[test]
 fn bigint_accel() {
     let cases = testutils::generate_bigint_test_cases(&mut rand::thread_rng(), 10);
     for case in cases {
@@ -364,10 +372,9 @@ fn fail() {
 #[cfg(feature = "profiler")]
 #[test]
 fn profiler() {
-    use crate::{
-        binfmt::elf::Program,
-        exec::profiler::{Frame, Profiler},
-    };
+    use risc0_binfmt::Program;
+
+    use crate::exec::profiler::{Frame, Profiler};
 
     let mut prof = Profiler::new("multi_test.elf", MULTI_TEST_ELF).unwrap();
     {
@@ -553,4 +560,24 @@ fn session_limit() {
     assert!(err.to_string().contains("Session limit exceeded"));
 
     assert!(run_session(1 << 16, 15, 10).is_ok());
+}
+
+#[test]
+fn memory_access() {
+    access_memory(0x0000_0000).err().unwrap();
+    access_memory(0x0C00_0000).err().unwrap();
+    access_memory(0x0B00_0000).unwrap();
+}
+
+#[cfg(test)]
+fn access_memory(addr: u32) -> Result<Session> {
+    let spec = to_vec(&MultiTestSpec::OutOfBounds).unwrap();
+    let addr = to_vec(&addr).unwrap();
+    let env = ExecutorEnv::builder()
+        .add_input(&spec)
+        .add_input(&addr)
+        .build()
+        .unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    exec.run()
 }

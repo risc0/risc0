@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, VecDeque};
 
 use anyhow::Result;
 use risc0_zkp::core::{
     digest::Digest,
-    hash::sha::{Sha256, BLOCK_BYTES, SHA256_INIT},
+    hash::sha::{cpu::Impl, Sha256, BLOCK_BYTES, SHA256_INIT},
 };
 use risc0_zkvm_platform::{
     memory::{MEM_SIZE, PAGE_TABLE},
@@ -25,7 +25,95 @@ use risc0_zkvm_platform::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::{binfmt::elf::Program, receipt::compute_image_id, sha};
+use crate::elf::Program;
+
+/// Implementation of the struct hash described in the recursion predicates RFC.
+pub fn tagged_struct(tag: &str, down: &[Digest], data: &[u32]) -> Digest {
+    let tag_digest: Digest = *Impl::hash_bytes(tag.as_bytes());
+    let mut all = Vec::<u8>::new();
+    all.extend_from_slice(tag_digest.as_bytes());
+    for digest in down {
+        all.extend_from_slice(digest.as_ref());
+    }
+    for word in data.iter().copied() {
+        all.extend_from_slice(&word.to_le_bytes());
+    }
+    let down_count: u16 = down.len().try_into().unwrap();
+    all.extend_from_slice(&down_count.to_le_bytes());
+    *Impl::hash_bytes(&all)
+}
+
+/// Represents the public state of a segment, needed for continuations and
+/// receipt verification.
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct SystemState {
+    /// The program counter.
+    pub pc: u32,
+
+    /// The root hash of a merkle tree which confirms the
+    /// integrity of the memory image.
+    pub merkle_root: Digest,
+}
+
+impl SystemState {
+    pub fn decode(flat: &mut VecDeque<u32>) -> Self {
+        Self {
+            pc: read_u32_bytes(flat),
+            merkle_root: read_sha_halfs(flat),
+        }
+    }
+
+    pub fn encode(&self, flat: &mut Vec<u32>) {
+        write_u32_bytes(flat, self.pc);
+        write_sha_halfs(flat, &self.merkle_root);
+    }
+
+    /// Hash the [crate::SystemState] to get a digest of the struct.
+    pub fn digest(&self) -> Digest {
+        tagged_struct("risc0.SystemState", &[self.merkle_root], &[self.pc])
+    }
+}
+
+pub fn read_sha_halfs(flat: &mut VecDeque<u32>) -> Digest {
+    let mut bytes = Vec::<u8>::new();
+    for half in flat.drain(0..16) {
+        bytes.push((half & 0xff).try_into().unwrap());
+        bytes.push((half >> 8).try_into().unwrap());
+    }
+    bytes.try_into().unwrap()
+}
+
+fn read_u32_bytes(flat: &mut VecDeque<u32>) -> u32 {
+    u32::from_le_bytes(
+        flat.drain(0..4)
+            .map(|x| x as u8)
+            .collect::<Vec<u8>>()
+            .try_into()
+            .unwrap(),
+    )
+}
+
+pub fn write_sha_halfs(flat: &mut Vec<u32>, digest: &Digest) {
+    for x in digest.as_words() {
+        flat.push(*x & 0xffff);
+        flat.push(*x >> 16);
+    }
+}
+
+fn write_u32_bytes(flat: &mut Vec<u32>, word: u32) {
+    for x in word.to_le_bytes() {
+        flat.push(x as u32);
+    }
+}
+
+/// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
+pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
+    SystemState {
+        merkle_root: merkle_root.clone(),
+        pc,
+    }
+    .digest()
+}
 
 /// Compute `ceil(a / b)` via truncated integer division.
 const fn div_ceil(a: u32, b: u32) -> u32 {
@@ -278,7 +366,7 @@ fn hash_page_bytes(page: &[u8]) -> Digest {
     for block in page.chunks_exact(BLOCK_BYTES) {
         let block1 = Digest::try_from(&block[0..DIGEST_BYTES]).unwrap();
         let block2 = Digest::try_from(&block[DIGEST_BYTES..BLOCK_BYTES]).unwrap();
-        state = *sha::Impl::compress(&state, &block1, &block2);
+        state = *Impl::compress(&state, &block1, &block2);
     }
     state
 }
@@ -293,7 +381,7 @@ mod tests {
     use test_log::test;
 
     use super::MemoryImage;
-    use crate::binfmt::{elf::Program, image::PageTableInfo};
+    use crate::{elf::Program, image::PageTableInfo, tagged_struct};
 
     fn page_table_size(max_mem: u32, page_size: u32) -> u32 {
         PageTableInfo::new(max_mem, page_size)._page_table_size
@@ -426,5 +514,18 @@ mod tests {
         const PAGE_SIZE: u32 = 1024;
         let prog = Program::load_elf(data, MEM_SIZE as u32).unwrap();
         MemoryImage::new(&prog, PAGE_SIZE).unwrap();
+    }
+
+    #[test]
+    fn test_tagged_struct() {
+        let digest1 = tagged_struct("foo", &[], &[1, 2013265920, 3]);
+        let digest2 = tagged_struct("bar", &[digest1, digest1], &[2013265920, 5]);
+        let digest3 = tagged_struct(
+            "baz",
+            &[digest1, digest2, digest1],
+            &[6, 7, 2013265920, 9, 10],
+        );
+
+        println!("digest = {:?}", digest3);
     }
 }

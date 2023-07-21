@@ -147,7 +147,7 @@ fn main() {
     // Commit the proposal ID, ballot box hash, and 24-byte encoded ballots to the
     // journal.
     // NOTE: Padding bytes are inserted to maintain u32 word alignment. It is not
-    // well-established that this actually results in a more effecient program,
+    // well-established that this actually results in a more efficient program,
     // so this needs to be tested.
     env::commit_slice(&proposal_id[..]);
     env::commit_slice(&ballot_box_accum[..]);
