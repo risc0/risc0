@@ -25,8 +25,7 @@ use ethers::{
 use futures::StreamExt;
 use tracing::{debug, error, warn};
 
-use crate::EthersClientConfig;
-use crate::{api::error::Error, downloader::event_processor::EventProcessor};
+use crate::{api::error::Error, downloader::event_processor::EventProcessor, EthersClientConfig};
 
 pub(crate) struct ProxyCallbackProofRequestStream<
     EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send,
@@ -54,7 +53,6 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
     pub(crate) async fn run(self) -> Result<(), Error> {
         const WAIT_DURATION: Duration = Duration::from_secs(5);
         const EVENT_NAME: &str = "CallbackRequest(address,bytes32,bytes,address,bytes4,uint64)";
-        let mut interval = tokio::time::interval(WAIT_DURATION);
         let filter = ethers::types::Filter::new()
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
@@ -68,8 +66,8 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                         client = new_client;
                     }
                     Err(error) => {
-                        interval.tick().await;
                         error!(?error, "Failed to create new client");
+                        tokio::time::sleep(WAIT_DURATION).await;
                         continue;
                     }
                 };
@@ -85,9 +83,8 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                     )
                 }
                 Err(error) => {
-                    interval.tick().await;
-                    reset_client = true;
                     error!(?error, "Failed to subscribe to logs");
+                    reset_client = true;
                 }
             };
         }
