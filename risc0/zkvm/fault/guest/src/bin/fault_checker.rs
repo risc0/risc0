@@ -12,11 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use anyhow::{bail, Result};
 use risc0_zkvm::{guest::env, MiniMonitor};
 use rrs_lib::{instruction_executor::InstructionExecutor, HartState};
 
-pub fn main() -> Result<()> {
+pub fn main() {
     let mut mini_monitor: MiniMonitor = env::read();
     let regs = mini_monitor.registers;
     let pc = mini_monitor.pc;
@@ -29,8 +28,7 @@ pub fn main() -> Result<()> {
             last_register_write: None,
         },
     };
-    match instruction_executor.step() {
-        Err(_) => Ok(()),
-        _ => bail!("fault checker: instruction passed..."),
-    }
+    instruction_executor.step().expect_err(
+        "fault checker expected instruction at 0x{pc:08x} to fail. Actual execution was successful",
+    );
 }
