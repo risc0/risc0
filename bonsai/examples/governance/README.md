@@ -11,16 +11,17 @@ DAO's a trade=off between using fully on-chain systems like [Tally] and pay the 
 
 ### Summary
 
-In this showcase, we implement the Bonsai Governor to reduce gas costs of fully-verifiable on-chain voting by processing ballots in the zkVM, with proving in Bonsai.
+In this showcase, we implement the Bonsai Governor to reduce gas costs of fully-verifiable on-chain voting by processing ballots in the zkVM.
 We start from the [OpenZeppelin Governor] standard, which is used by DAOs such as Uniswap, ENS, Aave and many others.
 
 Key to this design is offloading compute that is expensive on-chain to the [RISC Zero] zkVM guest, with execution and proving being handled by Bonsai.
-In particular, this design optimizes voting operations, especially when casting a signed vote, by deferring signature verification and ensuring that voters can only vote once to the zkVM.
+In particular, this design optimizes voting operations, especially when casting a signed vote, by deferring signature verification and checking for double-voting to the zkVM.
 Instead of the verifying the signature, or adding the ballot to EVM state, both the `Governor.vote` and `Governor.voteBySig` methods simply log an `event` and add the ballot to a running hash accumulator.
+These event logs are collected later, by anybody in the world, passed to the zkVM for vote finalization with the results sent to the Bonsai Governor smart contract through the Bonsai relay.
 With this, we are able to reduce gas costs for voting, while maintaining the security guarantees of voting on L1.
 
 As a result, the Bonsai Governor uses about 66% less gas per vote[^1] compared with the baseline [OpenZeppelin Governor] implementation.
-This translates to significant savings for voters and DAOs.
+This translates to significant savings for voters and DAOs, and more inclusive voting as a result.
 
 At gas prices of July 2023, the baseline is about $6-9 per vote.
 With the Bonsai Governor, the gas cost is $2-3 per vote.
@@ -38,10 +39,10 @@ Features currently in development can further decrease gas costs to make it poss
 
 ### Security Considerations
 
-In Governance, any voting system needs to achieve two very important properties:
+Any voting system needs to achieve two very important properties:
 
-1. It must not be possible any actor to commit fraud by casting more votes than authorized.
-2. Every voter must be able to ensure their voter is counted, i.e. that their vote cannot be censored.
+1. It must not be possible any actor to commit *fraud* by casting more votes than authorized.
+2. Every voter must be able to ensure their voter is counted, i.e. that their vote *cannot be censored*.
 
 OpenZeppelin's Governor standard provides prevents fraud as long as the L1 execution is sound, a property ensured by the robust Ethereum full-node community.
 It is also censorship resistant as long as Ethereum is censorship-resistant, which is provided by the [mechanisms of Ethereum consensus].
