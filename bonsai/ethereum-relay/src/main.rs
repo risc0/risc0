@@ -80,12 +80,10 @@ fn get_bonsai_url() -> String {
         Err(_) => BONSAI_API_URI.to_string(),
     };
 
-    let bonsai_api_endpoint = endpoint
+    endpoint
         .is_empty()
         .then(|| BONSAI_API_URI.to_string())
-        .unwrap_or(endpoint);
-
-    bonsai_api_endpoint
+        .unwrap_or(endpoint)
 }
 
 fn get_bonsai_api_key() -> String {
