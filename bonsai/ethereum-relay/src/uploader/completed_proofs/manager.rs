@@ -14,7 +14,10 @@
 
 use std::sync::Arc;
 
-use bonsai_relay_contract::{BonsaiRelay, Callback};
+use bonsai_relay_contract::{
+    bonsai_relay::Callback as RelayCallback, bonsai_test_relay::Callback as TestRelayCallback,
+    BonsaiRelay, BonsaiTestRelay,
+};
 use bonsai_sdk::alpha::Client;
 use ethers::prelude::*;
 use futures::{stream::FuturesUnordered, StreamExt};
@@ -33,6 +36,7 @@ const BONSAI_RELAY_GAS_LIMIT: u64 = 3000000;
 
 pub(crate) struct BonsaiCompleteProofManager<S: Storage, M: Middleware> {
     client: Client,
+    bonsai_mode: bool,
     storage: S,
     new_complete_proofs_notifier: Arc<Notify>,
     ready_to_send_batch: Vec<CompleteProof>,
@@ -47,6 +51,7 @@ pub(crate) struct BonsaiCompleteProofManager<S: Storage, M: Middleware> {
 impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
     pub(crate) fn new(
         client: Client,
+        bonsai_mode: bool,
         storage: S,
         new_complete_proofs_notifier: Arc<Notify>,
         send_batch_notifier: Arc<Notify>,
@@ -57,6 +62,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
     ) -> Self {
         Self {
             client,
+            bonsai_mode,
             storage,
             new_complete_proofs_notifier,
             ready_to_send_batch: Vec::new(),
@@ -73,20 +79,39 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
         if self.ready_to_send_batch.is_empty() {
             return Ok(());
         }
+        let contract_call = match self.bonsai_mode {
+            true => {
+                let bonsay_relay: BonsaiRelay<M> =
+                    BonsaiRelay::new(self.proxy_contract_address, self.ethers_client.clone());
+                let proof_batch: Vec<RelayCallback> = self
+                    .ready_to_send_batch
+                    .clone()
+                    .into_iter()
+                    .map(|complete_proof| complete_proof.ethereum_callback.into())
+                    .collect();
 
-        let proxy: BonsaiRelay<M> =
-            BonsaiRelay::new(self.proxy_contract_address, self.ethers_client.clone());
-        let proof_batch: Vec<Callback> = self
-            .ready_to_send_batch
-            .clone()
-            .into_iter()
-            .map(|complete_proof| complete_proof.ethereum_callback.into())
-            .collect();
+                info!("sending batch");
+                bonsay_relay
+                    .invoke_callbacks(proof_batch)
+                    .gas(BONSAI_RELAY_GAS_LIMIT);
+            }
+            false => {
+                let bonsay_relay: BonsaiTestRelay<M> =
+                    BonsaiTestRelay::new(self.proxy_contract_address, self.ethers_client.clone());
+                let proof_batch: Vec<TestRelayCallback> = self
+                    .ready_to_send_batch
+                    .clone()
+                    .into_iter()
+                    .map(|complete_proof| complete_proof.ethereum_callback.into())
+                    .collect();
 
-        info!("sending batch");
-        let contract_call = proxy
-            .invoke_callbacks(proof_batch)
-            .gas(BONSAI_RELAY_GAS_LIMIT);
+                info!("sending batch");
+                bonsay_relay
+                    .invoke_callbacks(proof_batch)
+                    .gas(BONSAI_RELAY_GAS_LIMIT);
+            }
+        };
+
         let pending_tx =
             contract_call
                 .send()

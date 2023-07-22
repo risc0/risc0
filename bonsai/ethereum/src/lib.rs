@@ -16,6 +16,7 @@
 //! structures and procedures for programmatic deployment of and interaction
 //! with a `Proxy` contract instance on Ethereum.
 
+use bonsai_test_relay::CallbackAuthorization;
 use ethers::prelude::*;
 
 abigen!(BonsaiRelay, "out/BonsaiRelay.sol/BonsaiRelay.json");
@@ -58,7 +59,10 @@ impl From<BonsaiRelayCallback> for bonsai_test_relay::Callback {
         ]
         .concat();
         Self {
-            auth: value.auth.into(),
+            auth: CallbackAuthorization {
+                seal: vec![].into(),
+                post_state_digest: [0u8; 32],
+            },
             callback_contract: value.callback_contract.callback_contract,
             payload: payload.into(),
             gas_limit: value.gas_limit,
@@ -162,11 +166,12 @@ mod tests {
         let wallet_address = client.address();
 
         // Deploy Bonsai Test Relay contract
-        let test_relay_contract = BonsaiTestRelay::deploy(client.clone(), ())
-            .expect("Failed to create Proxy deployment tx")
-            .send()
-            .await
-            .expect("Failed to send Proxy deployment tx");
+        let test_relay_contract =
+            BonsaiTestRelay::deploy(client.clone(), client.get_chainid().await.unwrap())
+                .expect("Failed to create BonsaiTestRelay deployment tx")
+                .send()
+                .await
+                .expect("Failed to send BonsaiTestRelay deployment tx");
         assert_eq!(
             client
                 .get_balance(test_relay_contract.address(), None)
@@ -244,8 +249,8 @@ mod tests {
         let ethereum_callbacks = vec![
             BonsaiRelayCallback {
                 auth: CallbackAuthorization {
-                    seal: Vec::new().into(),
-                    post_state_digest: U256::from(0).into(),
+                    seal: vec![].into(),
+                    post_state_digest: [0u8; 32],
                 },
                 payload: fake_receipt.journal.clone(),
                 gas_limit: 50000,
@@ -253,8 +258,8 @@ mod tests {
             },
             BonsaiRelayCallback {
                 auth: CallbackAuthorization {
-                    seal: Vec::new().into(),
-                    post_state_digest: U256::from(0).into(),
+                    seal: vec![].into(),
+                    post_state_digest: [0u8; 32],
                 },
                 payload: fake_receipt.journal,
                 gas_limit: 50000,
