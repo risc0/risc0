@@ -33,6 +33,21 @@ pub struct BonsaiRelayCallback {
     pub gas_limit: u64,
 }
 
+#[derive(Clone, Debug)]
+pub struct BonsaiAuthorizationCallback {
+    pub seal: Vec<u8>,
+    pub post_state_digest: [u8; 32],
+}
+
+impl From<BonsaiAuthorizationCallback> for bonsai_relay::CallbackAuthorization {
+    fn from(value: BonsaiAuthorizationCallback) -> Self {
+        bonsai_relay::CallbackAuthorization {
+            seal: value.seal.into(),
+            post_state_digest: value.post_state_digest,
+        }
+    }
+}
+
 impl From<BonsaiRelayCallback> for bonsai_relay::Callback {
     fn from(value: BonsaiRelayCallback) -> Self {
         let payload = [

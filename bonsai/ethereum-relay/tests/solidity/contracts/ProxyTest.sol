@@ -19,44 +19,43 @@ contract Proxy {
     // Events
     event CallbackRequest(
         address account,
-        bytes32 image_id,
+        bytes32 imageId,
         bytes input,
-        address callback_contract,
-        bytes4 function_selector,
-        uint64 gas_limit
+        address callbackContract,
+        bytes4 functionSelector,
+        uint64 gasLimit
     );
 
     event ProofsSubmitted();
 
-    // Callback
-    struct Callback {
-        address callback_contract;
-        SnarkProof proof;
-        bytes payload;
-        uint64 gas_limit;
+    /// @notice Data required to authorize a callback to be sent through the relay.
+    struct CallbackAuthorization {
+        bytes seal;
+        bytes32 postStateDigest;
     }
-    // Snark Proof
-    struct SnarkProof {
-        uint[2] a;
-        uint[2][2] b;
-        uint[2] c;
-        uint[4] pubSignals;
+
+    /// @notice Callback data, provided by the Relay service.
+    struct Callback {
+        CallbackAuthorization auth;
+        address callbackContract;
+        bytes payload;
+        uint64 gasLimit;
     }
 
     // Submit request
     function requestCallback(
-        bytes32 image_id,
+        bytes32 imageId,
         bytes calldata input,
-        address callback_contract,
-        bytes4 function_selector,
-        uint64 gas_limit
+        address callbackContract,
+        bytes4 functionSelector,
+        uint64 gasLimit
     ) public {
         // Emit event
-        emit CallbackRequest(msg.sender, image_id, input, callback_contract, function_selector, gas_limit);
+        emit CallbackRequest(msg.sender, imageId, input, callbackContract, functionSelector, gasLimit);
     }
 
     // Submit proofs
-    function invoke_callbacks(Callback[] calldata callbacks) external returns (bool[] memory invocation_results) {
+    function invokeCallbacks(Callback[] calldata callbacks) external returns (bool[] memory invocationResults) {
         emit ProofsSubmitted();
     }
 }

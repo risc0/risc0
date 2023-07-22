@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use displaydoc::Display;
-use ethers::{abi::ethereum_types::FromStrRadixErr, prelude::ProviderError, types::H256};
+use ethers::{prelude::ProviderError, types::H256};
 use thiserror::Error;
 use tokio::task::JoinError;
 
@@ -76,18 +76,12 @@ pub(crate) enum CompleteProofError {
     SnarkUnknown { id: ProofID },
     /// invalid receipt
     InvalidReceipt { id: ProofID },
-    /// Ethereum unsigned integer from radix conversion
-    UintFromRadix {
-        source: FromStrRadixErr,
-        id: ProofID,
-    },
 }
 
 impl CompleteProofError {
     pub(crate) fn get_proof_request_id(self) -> ProofID {
         match self {
-            CompleteProofError::UintFromRadix { id, .. }
-            | CompleteProofError::SnarkAborted { id }
+            CompleteProofError::SnarkAborted { id }
             | CompleteProofError::SnarkFailed { id }
             | CompleteProofError::SnarkTimedOut { id }
             | CompleteProofError::SnarkUnknown { id }

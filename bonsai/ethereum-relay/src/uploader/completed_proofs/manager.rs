@@ -93,7 +93,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
                 info!("sending batch");
                 bonsay_relay
                     .invoke_callbacks(proof_batch)
-                    .gas(BONSAI_RELAY_GAS_LIMIT);
+                    .gas(BONSAI_RELAY_GAS_LIMIT)
             }
             false => {
                 let bonsay_relay: BonsaiTestRelay<M> =
@@ -108,7 +108,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
                 info!("sending batch");
                 bonsay_relay
                     .invoke_callbacks(proof_batch)
-                    .gas(BONSAI_RELAY_GAS_LIMIT);
+                    .gas(BONSAI_RELAY_GAS_LIMIT)
             }
         };
 

@@ -16,6 +16,7 @@
 pub(crate) mod tests {
     use std::{path::Path, sync::Arc};
 
+    use bonsai_relay_contract::bonsai_relay::CallbackRequestFilter;
     use bonsai_sdk::alpha_async::get_client_from_parts;
     use ethers::{
         prelude::Middleware,
@@ -129,6 +130,7 @@ pub(crate) mod tests {
 
         let mut manager = BonsaiCompleteProofManager::new(
             bonsai_client,
+            false,
             storage.clone(),
             new_complete_proofs_notifier.clone(),
             send_batch_notifier.clone(),

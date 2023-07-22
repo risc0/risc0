@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use bonsai_relay_contract::{bonsai_relay::CallbackRequestFilter, BonsaiRelayCallback};
+use bonsai_relay_contract::{
+    bonsai_relay::CallbackRequestFilter, BonsaiAuthorizationCallback, BonsaiRelayCallback,
+};
 use bonsai_sdk::{
     alpha::{Client, SessionId},
     alpha_async::{download, session_status},
@@ -60,7 +62,8 @@ pub(crate) async fn get_complete_proof(
     let snark_proof =
         super::snark::get_snark_proof(bonsai_client.clone(), snark_id, bonsai_proof_id.clone())
             .await?;
-    let proof = super::snark::encode_snark_proof(snark_proof, bonsai_proof_id.clone()).await?;
+    // let proof = super::snark::encode_snark_proof(snark_proof,
+    // bonsai_proof_id.clone()).await?;
 
     let receipt: SessionReceipt =
         bincode::deserialize(&receipt_buf).map_err(|_| CompleteProofError::InvalidReceipt {
@@ -68,14 +71,19 @@ pub(crate) async fn get_complete_proof(
         })?;
 
     let gas_limit = callback_contract.gas_limit;
+    let auth = BonsaiAuthorizationCallback {
+        seal: vec![],
+        post_state_digest: [0u8; 32],
+    };
+    let ethereum_callback = BonsaiRelayCallback {
+        auth: auth.into(),
+        payload: receipt.journal,
+        gas_limit,
+        callback_contract,
+    };
 
     Ok(CompleteProof {
         bonsai_proof_id,
-        ethereum_callback: BonsaiRelayCallback {
-            auth: bonsai_relay_contract::CallbackAuthorization(),
-            payload: receipt.journal,
-            gas_limit,
-            callback_contract: todo!(),
-        },
+        ethereum_callback,
     })
 }

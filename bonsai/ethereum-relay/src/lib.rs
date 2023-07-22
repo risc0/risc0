@@ -108,6 +108,7 @@ where
 
         let uploader_complete_proof_manager = BonsaiCompleteProofManager::new(
             bonsai_client.clone(),
+            true, // CHANGE THIS
             storage.clone(),
             new_complete_proof_notifier.clone(),
             send_batch_notifier.clone(),

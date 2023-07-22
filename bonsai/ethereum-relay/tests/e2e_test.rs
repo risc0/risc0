@@ -24,12 +24,13 @@ mod tests {
         },
         Relayer,
     };
-    use bonsai_proxy_contract::ProxyContract;
+    use bonsai_relay_contract::BonsaiTestRelay;
     use bonsai_sdk::{
         alpha::{Client as BonsaiClient, SdkErr},
         alpha_async::{get_client_from_parts, put_image},
     };
     use ethers::types::{Bytes, H256 as ethers_H256, U256};
+    use ethers_signers::Signer;
     use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
     use risc0_zkvm_methods::{SLICE_IO_ELF, SLICE_IO_ID};
     use tokio::time::{sleep, Duration};
@@ -75,11 +76,12 @@ mod tests {
         )
         .await
         .unwrap();
-        let proxy = ProxyContract::deploy(ethers_client.clone(), ())
-            .expect("should be able to deploy the proxy contract")
-            .send()
-            .await
-            .expect("deployment should succeed");
+        let bonsai_relay_contract =
+            BonsaiTestRelay::deploy(ethers_client.clone(), ethers_client.signer().chain_id())
+                .expect("should be able to deploy the proxy contract")
+                .send()
+                .await
+                .expect("deployment should succeed");
         let compiled_contract =
             utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
         let counter = utils::deploy_contract(
@@ -106,7 +108,7 @@ mod tests {
             publish_port: "8080".to_string(),
             bonsai_api_url: get_bonsai_url(),
             bonsai_api_key: get_api_key(),
-            relay_contract_address: proxy.address(),
+            relay_contract_address: bonsai_relay_contract.address(),
         };
 
         dbg!("starting bonsai relayer");
@@ -153,7 +155,7 @@ mod tests {
                     ethers_H256::from(image_id_bytes),
                     Bytes::from(input),
                     gas_limit,
-                    proxy.address(),
+                    bonsai_relay_contract.address(),
                 ),
             )
             .expect("request_callback should be a function")
@@ -202,11 +204,12 @@ mod tests {
         )
         .await
         .unwrap();
-        let proxy = ProxyContract::deploy(ethers_client.clone(), ())
-            .expect("should be able to deploy the proxy contract")
-            .send()
-            .await
-            .expect("deployment should succeed");
+        let bonsai_relay_contract =
+            BonsaiTestRelay::deploy(ethers_client.clone(), ethers_client.signer().chain_id())
+                .expect("should be able to deploy the proxy contract")
+                .send()
+                .await
+                .expect("deployment should succeed");
         let compiled_contract =
             utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
         let counter = utils::deploy_contract(
@@ -233,7 +236,7 @@ mod tests {
             publish_port: "8080".to_string(),
             bonsai_api_url: get_bonsai_url(),
             bonsai_api_key: get_api_key(),
-            relay_contract_address: proxy.address(),
+            relay_contract_address: bonsai_relay_contract.address(),
         };
 
         dbg!("starting bonsai relayer");
