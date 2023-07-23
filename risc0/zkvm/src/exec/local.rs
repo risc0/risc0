@@ -17,6 +17,11 @@
 use std::mem::take;
 use std::{cell::RefCell, fmt::Debug, io::Write, rc::Rc};
 
+use addr2line::{
+    fallible_iterator::FallibleIterator,
+    gimli::{EndianRcSlice, RunTimeEndian},
+    Frame, LookupResult, ObjectContext,
+};
 use anyhow::{anyhow, bail, Context, Result};
 use crypto_bigint::{CheckedMul, Encoding, NonZero, U256, U512};
 use risc0_binfmt::{MemoryImage, Program};
@@ -112,6 +117,7 @@ pub struct LocalExecutor<'a> {
     pending_syscall: Option<SyscallRecord>,
     syscalls: Vec<SyscallRecord>,
     exit_code: Option<ExitCode>,
+    obj_ctx: Option<ObjectContext>,
 }
 
 impl<'a> Executor for LocalExecutor<'a> {
@@ -129,6 +135,15 @@ impl<'a> LocalExecutor<'a> {
     /// the guest program is executed to determine how its proof should be
     /// divided into subparts.
     pub fn new(env: ExecutorEnv<'a>, image: MemoryImage, pc: u32) -> Self {
+        Self::with_obj_ctx(env, image, pc, None)
+    }
+
+    fn with_obj_ctx(
+        env: ExecutorEnv<'a>,
+        image: MemoryImage,
+        pc: u32,
+        obj_ctx: Option<ObjectContext>,
+    ) -> Self {
         let pre_image = image.clone();
         let monitor = MemoryMonitor::new(image, env.trace_callback.is_some());
         let loader = Loader::new();
@@ -150,6 +165,7 @@ impl<'a> LocalExecutor<'a> {
             pending_syscall: None,
             syscalls: Vec::new(),
             exit_code: None,
+            obj_ctx,
         }
     }
 
@@ -171,7 +187,13 @@ impl<'a> LocalExecutor<'a> {
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
         let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-        Ok(Self::new(env, image, program.entry))
+        let obj_ctx = if log::log_enabled!(log::Level::Trace) {
+            let file = addr2line::object::read::File::parse(elf)?;
+            Some(ObjectContext::new(&file)?)
+        } else {
+            None
+        };
+        Ok(Self::with_obj_ctx(env, image, program.entry, obj_ctx))
     }
 
     /// Run the executor until [ExitCode::Paused] or [ExitCode::Halted] is
@@ -267,13 +289,42 @@ impl<'a> LocalExecutor<'a> {
         let insn = self.monitor.load_u32(self.pc)?;
         let opcode = OpCode::decode(insn, self.pc)?;
 
-        log::trace!(
-            "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
-            self.segment_cycle,
-            self.pc,
-            opcode.insn,
-            opcode
-        );
+        let frame = if let Some(obj_ctx) = &self.obj_ctx {
+            let frames = match obj_ctx.find_frames(self.pc as u64) {
+                LookupResult::Output(result) => result.unwrap(),
+                _ => unimplemented!(),
+            };
+
+            fn decode_frame(frame: Frame<EndianRcSlice<RunTimeEndian>>) -> Option<String> {
+                Some(frame.function.as_ref()?.demangle().ok()?.to_string())
+            }
+
+            let names: Vec<String> = frames
+                .filter_map(|frame| Ok(decode_frame(frame)))
+                .collect()
+                .unwrap();
+            names.first().cloned()
+        } else {
+            None
+        };
+
+        if let Some(frame) = frame {
+            log::trace!(
+                "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}, {frame}",
+                self.segment_cycle,
+                self.pc,
+                opcode.insn,
+                opcode
+            );
+        } else {
+            log::trace!(
+                "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
+                self.segment_cycle,
+                self.pc,
+                opcode.insn,
+                opcode
+            );
+        }
 
         let op_result = if opcode.major == MajorType::ECall {
             self.ecall()?

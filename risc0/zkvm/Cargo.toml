@@ -87,6 +87,7 @@ profiler = [
   "dep:protobuf-src"
 ]
 prove = [
+  "dep:addr2line",
   "dep:bonsai-sdk",
   "dep:bincode",
   "dep:num-traits",

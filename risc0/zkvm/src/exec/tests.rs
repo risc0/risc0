@@ -429,9 +429,9 @@ fn slice_io() {
         assert_eq!(session.journal, slice);
     };
 
-    // run(b"");
+    run(b"");
     run(b"xyz");
-    // run(b"0000");
+    run(b"0000");
 }
 
 // Check that a compliant host will fault.
