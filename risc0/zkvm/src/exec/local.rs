@@ -267,6 +267,14 @@ impl<'a> LocalExecutor<'a> {
         let insn = self.monitor.load_u32(self.pc)?;
         let opcode = OpCode::decode(insn, self.pc)?;
 
+        log::trace!(
+            "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
+            self.segment_cycle,
+            self.pc,
+            opcode.insn,
+            opcode
+        );
+
         let op_result = if opcode.major == MajorType::ECall {
             self.ecall()?
         } else {
@@ -282,7 +290,7 @@ impl<'a> LocalExecutor<'a> {
                 hart_state: &mut hart,
             }
             .step()
-            .map_err(|err| anyhow!("{:?}", err))?;
+            .map_err(|err| anyhow!("InstructionExecutor failure: {:?}", err))?;
 
             if let Some(idx) = hart.last_register_write {
                 self.monitor.store_register(idx, hart.registers[idx]);
@@ -318,14 +326,6 @@ impl<'a> LocalExecutor<'a> {
     }
 
     fn advance(&mut self, opcode: OpCode, op_result: OpCodeResult) -> Option<ExitCode> {
-        log::trace!(
-            "[{}] pc: 0x{:08x}, insn: 0x{:08x} => {:?}",
-            self.segment_cycle,
-            self.pc,
-            opcode.insn,
-            opcode
-        );
-
         if let Some(ref trace_callback) = self.env.trace_callback {
             trace_callback.borrow_mut()(TraceEvent::InstructionStart {
                 cycle: self.session_cycle() as u32,

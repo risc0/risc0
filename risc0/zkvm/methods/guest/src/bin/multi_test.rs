@@ -31,7 +31,7 @@ use risc0_zkvm::{
 use risc0_zkvm_methods::multi_test::{MultiTestSpec, SYS_MULTI_TEST};
 use risc0_zkvm_platform::{
     fileno, memory,
-    syscall::{bigint, sys_bigint, sys_read, sys_write},
+    syscall::{bigint, sys_bigint, sys_read, sys_read_words, sys_write},
 };
 
 risc0_zkvm::entry!(main);
@@ -130,34 +130,38 @@ pub fn main() {
             assert_ne!(rand_buf, vec![0u8; rand_buf.len()].as_slice());
         }
         MultiTestSpec::SysRead {
-            mut orig,
+            mut buf,
             fd,
             pos_and_len,
         } => {
             for (pos, len) in pos_and_len {
                 let num_read =
-                    unsafe { sys_read(fd, orig.as_mut_ptr().add(pos as usize), len as usize) };
+                    unsafe { sys_read(fd, buf.as_mut_ptr().add(pos as usize), len as usize) };
                 assert_eq!(num_read, len as usize);
             }
-
-            env::commit(&orig);
+            env::commit(&buf);
         }
         MultiTestSpec::PauseContinue => {
             env::log("before");
             env::pause();
             env::log("after");
         }
-        MultiTestSpec::CopyToStdout { fd } => {
+        MultiTestSpec::EchoStdout { nbytes, fd } => {
             // Unaligned buffer size to exercise things a little bit.
-            const BUF_SIZE: usize = 9;
-            let mut buf = [0u8; BUF_SIZE];
+            let mut buf = vec![0u8; nbytes as usize];
             loop {
                 let nread = unsafe { sys_read(fd, buf.as_mut_ptr(), buf.len()) };
                 if nread == 0 {
                     break;
                 }
-                unsafe { sys_write(fileno::STDOUT, buf.as_mut_ptr(), nread) }
+                unsafe { sys_write(fileno::STDOUT, buf.as_ptr(), nread) }
             }
+        }
+        MultiTestSpec::EchoWords { fd, nwords } => {
+            let nwords = nwords as usize;
+            let mut buf = vec![0u32; nwords];
+            unsafe { sys_read_words(fd, buf.as_mut_ptr(), nwords) };
+            env::commit_slice(&buf);
         }
         MultiTestSpec::BusyLoop { cycles } => {
             let mut last_cycles = env::get_cycle_count();

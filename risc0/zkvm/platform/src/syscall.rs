@@ -71,6 +71,9 @@ pub mod reg_abi {
 
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
+pub const MAX_BUF_BYTES: usize = 64 * 1024;
+pub const MAX_BUF_WORDS: usize = MAX_BUF_BYTES / WORD_SIZE;
+pub const MAX_SHA_COMPRESS_ROUNDS: usize = 1000;
 
 pub mod bigint {
     pub const OP_MULTIPLY: u32 = 0;
@@ -277,15 +280,20 @@ pub unsafe extern "C" fn sys_sha_buffer(
 ) {
     #[cfg(target_os = "zkvm")]
     {
-        asm!(
-            "ecall",
-            in("t0") ecall::SHA,
-            in("a0") out_state,
-            in("a1") in_state,
-            in("a2") buf,
-            in("a3") buf.add(DIGEST_BYTES),
-            in("a4") count,
-        );
+        let mut count_remain = count;
+        while count_remain > 0 {
+            let count = min(count_remain, MAX_SHA_COMPRESS_ROUNDS as u32);
+            asm!(
+                "ecall",
+                in("t0") ecall::SHA,
+                in("a0") out_state,
+                in("a1") in_state,
+                in("a2") buf,
+                in("a3") buf.add(DIGEST_BYTES),
+                in("a4") count,
+            );
+            count_remain -= count;
+        }
     }
     #[cfg(not(target_os = "zkvm"))]
     unimplemented!()
@@ -353,7 +361,7 @@ pub unsafe extern "C" fn sys_cycle_count() -> usize {
 ///
 /// Users should prefer a higher-level abstraction.
 #[no_mangle]
-pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize) -> usize {
+pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize) -> usize {
     // The SYS_READ system call can do a given number of word-aligned reads
     // efficiently. The semantics of the system call are:
     //
@@ -387,34 +395,29 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize)
 
     // Determine how many bytes at the beginning of the buffer we have
     // to read in order to become word-aligned.
-    let ptr_offset = (recv_buf as usize) & (WORD_SIZE - 1);
-    let unaligned_at_start = if ptr_offset == 0 {
-        0
+    let ptr_offset = (recv_ptr as usize) & (WORD_SIZE - 1);
+    let (main_ptr, main_requested) = if ptr_offset == 0 {
+        (recv_ptr, nread)
     } else {
-        min(nread, WORD_SIZE - ptr_offset)
+        let unaligned_at_start = min(nread, WORD_SIZE - ptr_offset);
+        // Read unaligned bytes into "firstword".
+        let Return(nread_first, firstword) =
+            syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
+        debug_assert_eq!(nread_first as usize, unaligned_at_start);
+
+        // Align up to a word boundry to do the main copy.
+        let main_ptr = fill_from_word(recv_ptr, firstword, unaligned_at_start);
+        if nread == unaligned_at_start {
+            // We only read part of a word, and don't have to read any full words.
+            return nread;
+        }
+        (main_ptr, nread - unaligned_at_start)
     };
 
-    // Read unaligned bytes into "firstword".
-    let Return(nread_first, firstword) =
-        syscall_2(nr::SYS_READ, null_mut(), 0, fd, unaligned_at_start as u32);
-    debug_assert_eq!(nread_first as usize, unaligned_at_start);
-
-    // Align up to a word boundry to do the main copy.
-    let main_ptr = fill_from_word(recv_buf, firstword, unaligned_at_start);
-    if nread == unaligned_at_start {
-        // We only read part of a word, and don't have to read any full words.
-        return nread;
-    }
     // Copy in all of the word-aligned data
-    let main_requested = nread - unaligned_at_start;
     let main_words = main_requested / WORD_SIZE;
-    let Return(nread_main, lastword) = syscall_2(
-        nr::SYS_READ,
-        main_ptr as *mut u32,
-        main_words,
-        fd,
-        main_requested as u32,
-    );
+    let (nread_main, lastword) =
+        sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested);
     debug_assert_eq!(nread_main as usize, main_requested);
 
     // Copy in individual bytes after the word-aligned section.
@@ -449,28 +452,53 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_buf: *mut u8, nrequested: usize)
 /// `recv_buf' must be a word-aligned pointer and point to a region of
 /// `nwords' size.
 pub unsafe extern "C" fn sys_read_words(fd: u32, recv_buf: *mut u32, nwords: usize) -> usize {
-    let nbytes_requested = nwords * WORD_SIZE;
-    let Return(nread, _) = syscall_2(
-        nr::SYS_READ,
-        recv_buf,
-        nwords,
-        fd,
-        (nwords * WORD_SIZE) as u32,
-    );
-    assert!(nread as usize <= nbytes_requested);
-    nread as usize
+    sys_read_internal(fd, recv_buf, nwords, nwords * WORD_SIZE).0
+}
+
+fn sys_read_internal(fd: u32, recv_ptr: *mut u32, nwords: usize, nbytes: usize) -> (usize, u32) {
+    let mut nwords_remain = nwords;
+    let mut nbytes_remain = nbytes;
+    let mut nread_total_bytes = 0;
+    let mut recv_ptr = recv_ptr;
+    let mut final_word = 0;
+    while nbytes_remain > 0 {
+        let Return(nread_bytes, last_word) = unsafe {
+            syscall_2(
+                nr::SYS_READ,
+                recv_ptr,
+                min(nwords_remain, MAX_BUF_WORDS),
+                fd,
+                min(nbytes_remain, MAX_BUF_BYTES) as u32,
+            )
+        };
+        let nread_bytes = nread_bytes as usize;
+        let nread_words = nread_bytes / WORD_SIZE;
+        recv_ptr = unsafe { recv_ptr.add(nread_words) };
+        nwords_remain -= nread_words;
+        nbytes_remain -= nread_bytes;
+        nread_total_bytes += nread_bytes;
+        final_word = last_word;
+    }
+    (nread_total_bytes, final_word)
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn sys_write(fd: u32, write_buf: *const u8, nbytes: usize) {
-    syscall_3(
-        nr::SYS_WRITE,
-        null_mut(),
-        0,
-        fd,
-        write_buf as u32,
-        nbytes as u32,
-    );
+pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize) {
+    let mut nbytes_remain = nbytes;
+    let mut write_ptr = write_ptr;
+    while nbytes_remain > 0 {
+        let nbytes = min(nbytes_remain, MAX_BUF_BYTES);
+        syscall_3(
+            nr::SYS_WRITE,
+            null_mut(),
+            0,
+            fd,
+            write_ptr as u32,
+            nbytes as u32,
+        );
+        write_ptr = write_ptr.add(nbytes);
+        nbytes_remain -= nbytes;
+    }
 }
 
 /// Retrieves the value of an environment variable, and stores as much
