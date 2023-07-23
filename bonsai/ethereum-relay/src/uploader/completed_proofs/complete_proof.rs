@@ -19,8 +19,10 @@ use bonsai_sdk::{
     alpha::{Client, SessionId},
     alpha_async::{download, session_status},
 };
+use ethers::abi::{self, Hash};
 use risc0_zkvm::SessionReceipt;
 
+use super::snark::tokenize_snark_proof;
 use crate::{api, uploader::completed_proofs::error::CompleteProofError};
 
 #[derive(Debug, Clone)]
@@ -62,18 +64,32 @@ pub(crate) async fn get_complete_proof(
     let snark_proof =
         super::snark::get_snark_proof(bonsai_client.clone(), snark_id, bonsai_proof_id.clone())
             .await?;
-    // let proof = super::snark::encode_snark_proof(snark_proof,
-    // bonsai_proof_id.clone()).await?;
+    let seal = abi::encode(&[tokenize_snark_proof(&snark_proof).map_err(|_| {
+        CompleteProofError::SnarkFailed {
+            id: bonsai_proof_id.clone(),
+        }
+    })?]);
 
     let receipt: SessionReceipt =
         bincode::deserialize(&receipt_buf).map_err(|_| CompleteProofError::InvalidReceipt {
             id: bonsai_proof_id.clone(),
         })?;
+    let metadata = receipt
+        .segments
+        .last()
+        .ok_or(CompleteProofError::InvalidReceipt {
+            id: bonsai_proof_id.clone(),
+        })?
+        .get_metadata()
+        .map_err(|_| CompleteProofError::InvalidReceipt {
+            id: bonsai_proof_id.clone(),
+        })?;
+    let post_state_digest: [u8; 32] = Hash::from(<[u8; 32]>::from(metadata.post.digest())).into();
 
     let gas_limit = callback_contract.gas_limit;
     let auth = BonsaiAuthorizationCallback {
-        seal: vec![],
-        post_state_digest: [0u8; 32],
+        seal,
+        post_state_digest,
     };
     let ethereum_callback = BonsaiRelayCallback {
         auth: auth.into(),
