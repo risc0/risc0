@@ -33,6 +33,7 @@ pub(crate) struct CompleteProof {
 
 pub(crate) async fn get_complete_proof(
     bonsai_client: Client,
+    bonsai_mode: bool,
     bonsai_proof_id: SessionId,
     callback_contract: CallbackRequestFilter,
 ) -> Result<CompleteProof, CompleteProofError> {
@@ -74,17 +75,22 @@ pub(crate) async fn get_complete_proof(
         bincode::deserialize(&receipt_buf).map_err(|_| CompleteProofError::InvalidReceipt {
             id: bonsai_proof_id.clone(),
         })?;
-    let metadata = receipt
-        .segments
-        .last()
-        .ok_or(CompleteProofError::InvalidReceipt {
-            id: bonsai_proof_id.clone(),
-        })?
-        .get_metadata()
-        .map_err(|_| CompleteProofError::InvalidReceipt {
-            id: bonsai_proof_id.clone(),
-        })?;
-    let post_state_digest: [u8; 32] = Hash::from(<[u8; 32]>::from(metadata.post.digest())).into();
+    let post_state_digest: [u8; 32] = match bonsai_mode {
+        true => {
+            let metadata = receipt
+                .segments
+                .last()
+                .ok_or(CompleteProofError::InvalidReceipt {
+                    id: bonsai_proof_id.clone(),
+                })?
+                .get_metadata()
+                .map_err(|_| CompleteProofError::InvalidReceipt {
+                    id: bonsai_proof_id.clone(),
+                })?;
+            Hash::from(<[u8; 32]>::from(metadata.post.digest())).into()
+        }
+        false => [0u8; 32],
+    };
 
     let gas_limit = callback_contract.gas_limit;
     let auth = BonsaiAuthorizationCallback {

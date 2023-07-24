@@ -157,6 +157,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
         for request in completed_proof_requests.into_iter() {
             let completed_proof_request_handler = tokio::spawn(get_complete_proof(
                 self.client.clone(),
+                self.bonsai_mode,
                 request.proof_request_id.clone(),
                 request.callback_proof_request_event,
             ));
