@@ -71,9 +71,9 @@ pub mod reg_abi {
 
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
-pub const MAX_BUF_BYTES: usize = 64 * 1024;
+pub const MAX_BUF_BYTES: usize = 4 * 1024;
 pub const MAX_BUF_WORDS: usize = MAX_BUF_BYTES / WORD_SIZE;
-pub const MAX_SHA_COMPRESS_ROUNDS: usize = 1000;
+pub const MAX_SHA_COMPRESS_BLOCKS: usize = 1000;
 
 pub mod bigint {
     pub const OP_MULTIPLY: u32 = 0;
@@ -280,19 +280,23 @@ pub unsafe extern "C" fn sys_sha_buffer(
 ) {
     #[cfg(target_os = "zkvm")]
     {
+        let mut ptr = buf;
         let mut count_remain = count;
+        let mut in_state = in_state;
         while count_remain > 0 {
-            let count = min(count_remain, MAX_SHA_COMPRESS_ROUNDS as u32);
+            let count = min(count_remain, MAX_SHA_COMPRESS_BLOCKS as u32);
             asm!(
                 "ecall",
                 in("t0") ecall::SHA,
                 in("a0") out_state,
                 in("a1") in_state,
-                in("a2") buf,
-                in("a3") buf.add(DIGEST_BYTES),
+                in("a2") ptr,
+                in("a3") ptr.add(DIGEST_BYTES),
                 in("a4") count,
             );
             count_remain -= count;
+            ptr = ptr.add(2 * DIGEST_BYTES * count as usize);
+            in_state = out_state;
         }
     }
     #[cfg(not(target_os = "zkvm"))]
@@ -462,6 +466,10 @@ fn sys_read_internal(fd: u32, recv_ptr: *mut u32, nwords: usize, nbytes: usize) 
     let mut recv_ptr = recv_ptr;
     let mut final_word = 0;
     while nbytes_remain > 0 {
+        debug_assert!(
+            final_word == 0,
+            "host returned non-zero final word on a fully aligned read"
+        );
         let Return(nread_bytes, last_word) = unsafe {
             syscall_2(
                 nr::SYS_READ,

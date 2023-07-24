@@ -15,11 +15,13 @@
 use std::{collections::BTreeMap, io::Cursor, str::from_utf8, sync::Mutex};
 
 use anyhow::Result;
+use risc0_zkp::core::digest::Digest;
 use risc0_zkvm_methods::{
     multi_test::{MultiTestSpec, SYS_MULTI_TEST},
     HELLO_COMMIT_ELF, MULTI_TEST_ELF, SLICE_IO_ELF, STANDARD_LIB_ELF,
 };
 use risc0_zkvm_platform::{fileno, PAGE_SIZE, WORD_SIZE};
+use sha2::{Digest as _, Sha256};
 use test_log::test;
 
 use super::{ExecutorEnv, LocalExecutor, TraceEvent};
@@ -344,6 +346,18 @@ fn large_io_bytes() {
     }
     let actual: &[u32] = bytemuck::cast_slice(&stdout);
     assert_eq!(&buf, actual);
+}
+
+#[test]
+fn large_sha() {
+    let data = vec![0u8; 100_000];
+    let expected = hex::encode(Sha256::digest(&data));
+    let input = to_vec(&MultiTestSpec::ShaDigest { data }).unwrap();
+    let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let session = exec.run().unwrap();
+    let actual = hex::encode(Digest::try_from(session.journal).unwrap());
+    assert_eq!(expected, actual);
 }
 
 #[test]
