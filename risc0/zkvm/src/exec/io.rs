@@ -58,25 +58,25 @@ pub trait SyscallContext {
     fn load_register(&mut self, idx: usize) -> u32;
 
     /// Loads bytes from the given region of memory.
-    fn load_region(&mut self, addr: u32, size: u32) -> Vec<u8> {
+    fn load_region(&mut self, addr: u32, size: u32) -> Result<Vec<u8>> {
         let mut region = Vec::new();
         for addr in addr..addr + size {
-            region.push(self.load_u8(addr));
+            region.push(self.load_u8(addr)?);
         }
-        region
+        Ok(region)
     }
 
     /// Loads an individual word from memory.
-    fn load_u32(&mut self, addr: u32) -> u32;
+    fn load_u32(&mut self, addr: u32) -> Result<u32>;
 
     /// Loads an individual byte from memory.
-    fn load_u8(&mut self, addr: u32) -> u8;
+    fn load_u8(&mut self, addr: u32) -> Result<u8>;
 
     /// Loads a null-terminated string from memory.
     fn load_string(&mut self, mut addr: u32) -> Result<String> {
         let mut s: Vec<u8> = Vec::new();
         loop {
-            let b = self.load_u8(addr);
+            let b = self.load_u8(addr)?;
             if b == 0 {
                 break;
             }
@@ -141,7 +141,7 @@ impl<H: SliceIo> Syscall for SliceIoSyscall<H> {
         let mut stored_result = self.stored_result.borrow_mut();
         let buf_ptr = ctx.load_register(REG_A3);
         let buf_len = ctx.load_register(REG_A4);
-        let from_guest_bytes = ctx.load_region(buf_ptr, buf_len);
+        let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
         let from_guest: &[H::FromGuest] = bytemuck::cast_slice(from_guest_bytes.as_slice());
         match take(stored_result.deref_mut()) {
             None => {
@@ -291,7 +291,7 @@ impl<'a> PosixIo<'a> {
         let fd = ctx.load_register(REG_A3);
         let buf_ptr = ctx.load_register(REG_A4);
         let buf_len = ctx.load_register(REG_A5);
-        let from_guest_bytes = ctx.load_region(buf_ptr, buf_len);
+        let from_guest_bytes = ctx.load_region(buf_ptr, buf_len)?;
         let writer = self
             .write_fds
             .get_mut(&fd)
@@ -410,7 +410,7 @@ pub(crate) mod syscalls {
         ) -> Result<(u32, u32)> {
             let buf_ptr = ctx.load_register(REG_A3);
             let buf_len = ctx.load_register(REG_A4);
-            let from_guest = ctx.load_region(buf_ptr, buf_len);
+            let from_guest = ctx.load_region(buf_ptr, buf_len)?;
             let msg = from_utf8(&from_guest)?;
 
             match self.0.get(msg) {
@@ -435,7 +435,7 @@ pub(crate) mod syscalls {
         ) -> Result<(u32, u32)> {
             let buf_ptr = ctx.load_register(REG_A3);
             let buf_len = ctx.load_register(REG_A4);
-            let from_guest = ctx.load_region(buf_ptr, buf_len);
+            let from_guest = ctx.load_region(buf_ptr, buf_len)?;
             let msg = from_utf8(&from_guest)?;
             println!("R0VM[{}] {}", ctx.get_cycle(), msg);
             Ok((0, 0))
@@ -452,7 +452,7 @@ pub(crate) mod syscalls {
         ) -> Result<(u32, u32)> {
             let buf_ptr = ctx.load_register(REG_A3);
             let buf_len = ctx.load_register(REG_A4);
-            let from_guest = ctx.load_region(buf_ptr, buf_len);
+            let from_guest = ctx.load_region(buf_ptr, buf_len)?;
             let msg = from_utf8(&from_guest)?;
             bail!("Guest panicked: {msg}");
         }

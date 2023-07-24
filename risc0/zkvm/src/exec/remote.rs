@@ -16,9 +16,10 @@
 /// guest programs by using a remote proving service.
 use ::bonsai_sdk::{alpha as bonsai_sdk, alpha::SdkErr};
 use anyhow::Result;
+use risc0_binfmt::MemoryImage;
 
 use super::Executor;
-use crate::{receipt::ExitCode, ExecutorEnv, MemoryImage, Session};
+use crate::{receipt::ExitCode, ExecutorEnv, Session};
 
 pub struct RemoteExecutor<'a> {
     env: ExecutorEnv<'a>,

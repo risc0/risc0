@@ -63,6 +63,8 @@ pub enum MultiTestSpec {
     },
     LibM,
     Oom,
+    OutOfBounds,
+    RsaCompat,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

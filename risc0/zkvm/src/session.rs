@@ -22,10 +22,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-use crate::{exec::SyscallRecord, receipt::ExitCode, MemoryImage};
+use crate::{exec::SyscallRecord, receipt::ExitCode};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
