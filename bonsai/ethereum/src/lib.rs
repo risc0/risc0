@@ -24,6 +24,10 @@ abigen!(
     BonsaiTestRelay,
     "out/BonsaiTestRelay.sol/BonsaiTestRelay.json"
 );
+abigen!(
+    RiscZeroGroth16Verifier,
+    "out/RiscZeroGroth16Verifier.sol/RiscZeroGroth16Verifier.json"
+);
 
 #[derive(Clone, Debug)]
 pub struct BonsaiRelayCallback {
