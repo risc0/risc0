@@ -126,7 +126,7 @@ jobs:
       - run: cargo test -F $FEATURE
         working-directory: examples
       - run: cargo test -F $FEATURE
-        working-directory: bonsai/examples/governance/Cargo.toml
+        working-directory: bonsai/examples/governance
         if: matrix.device == 'cpu'
 
   doc:
