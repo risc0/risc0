@@ -80,7 +80,8 @@ impl EthersClientConfig {
 
     pub fn get_signer(&self) -> Result<Wallet<SigningKey>> {
         let private_key = SecretKey::from_slice(
-            &hex::decode(&self.wallet_key_identifier).context("Failed to decode private key.")?,
+            &hex::decode(self.wallet_key_identifier.trim_start_matches("0x"))
+                .context("Failed to decode private key.")?,
         )
         .context("Failed to create private key.")?;
         let signing_key = SigningKey::from(private_key);

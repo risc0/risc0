@@ -26,6 +26,8 @@ use ethers::{
     utils::AnvilInstance,
 };
 
+use crate::EthersClientConfig;
+
 const POLL_INTERVAL: std::time::Duration = std::time::Duration::from_secs(1);
 
 pub(crate) type Client<P> = Arc<SignerMiddleware<Provider<P>, LocalWallet>>;
@@ -35,19 +37,32 @@ pub(crate) type Client<P> = Arc<SignerMiddleware<Provider<P>, LocalWallet>>;
 /// [WALLET_KEY_IDENTIFIER]. If no key is set, returns a new [LocalWallet] from
 /// the given optional [anvil] instance.
 pub fn get_wallet(anvil: Option<&AnvilInstance>) -> Result<Wallet<SigningKey>> {
-    match std::env::var("WALLET_KEY_IDENTIFIER") {
-        Ok(test_private_key) => {
+    let wallet_key_identifier = get_wallet_key_identifier(anvil)?;
+    match anvil {
+        Some(anvil) => Ok(LocalWallet::from(anvil.keys()[0].clone()).with_chain_id(anvil.chain_id())),
+        None => {
             // Derive wallet
-            let wallet_sk_bytes = hex::decode(test_private_key.trim_start_matches("0x"))
+            let wallet_sk_bytes = hex::decode(wallet_key_identifier.trim_start_matches("0x"))
                 .context("Could not decode input wallet secret key.")?;
             let wallet_secret_key = SecretKey::from_slice(&wallet_sk_bytes)
                 .context("Failed to derive SecretKey instance from input.")?;
             let wallet_signing_key = SigningKey::from(wallet_secret_key);
             Ok(LocalWallet::from(wallet_signing_key))
         }
+    }
+}
+
+/// Returns a wallet key identifier defined by the env variable
+/// [WALLET_KEY_IDENTIFIER] or from the given optional [anvil] instance.
+pub fn get_wallet_key_identifier(anvil: Option<&AnvilInstance>) -> Result<String> {
+    match std::env::var("WALLET_KEY_IDENTIFIER") {
+        Ok(wallet_key_identifier) => Ok(wallet_key_identifier),
         _ => {
             let anvil = anvil.context("Anvil not instantiated.")?;
-            Ok(LocalWallet::from(anvil.keys()[0].clone()).with_chain_id(anvil.chain_id()))
+            let wallet_key_identifier_bytes = anvil.keys()[0].clone().to_bytes().to_vec();
+            let wallet_key_identifier = String::from_utf8(wallet_key_identifier_bytes)
+                .context("Could not decode input wallet key identifier.")?;
+            Ok(wallet_key_identifier)
         }
     }
 }
@@ -64,13 +79,19 @@ pub fn get_http_provider(anvil: Option<&AnvilInstance>) -> Result<Provider<Http>
         .interval(POLL_INTERVAL))
 }
 
-/// Returns an abstract provider for interacting with the Ethereum JSON RPC API
-/// over Websockets.
-pub async fn get_ws_provider(anvil: Option<&AnvilInstance>) -> Result<Provider<Ws>> {
+/// Returns the Websocket endpoint for the Ethereum JSON RPC API.
+pub async fn get_ws_provider_endpoint(anvil: Option<&AnvilInstance>) -> Result<String> {
     let endpoint = match std::env::var("ETHEREUM_HOST") {
         Ok(ethereum_host) => format!("ws://{ethereum_host}"),
         _ => anvil.context("Anvil not instantiated.")?.ws_endpoint(),
     };
+    Ok(endpoint)
+}
+
+/// Returns an abstract provider for interacting with the Ethereum JSON RPC API
+/// over Websockets.
+pub async fn get_ws_provider(anvil: Option<&AnvilInstance>) -> Result<Provider<Ws>> {
+    let endpoint = get_ws_provider_endpoint(anvil).await?;
     Ok(Provider::<Ws>::connect(&endpoint)
         .await
         .context("could not connect to {endpoint}")?
@@ -93,6 +114,20 @@ pub async fn get_ethers_client<P: JsonRpcClient>(
     )))
 }
 
+/// Returns an Ethereum Client Configuration struct.
+pub async fn get_ethers_client_config(anvil: Option<&AnvilInstance>) -> Result<EthersClientConfig> {
+        let provider = get_ws_provider(anvil).await.unwrap();
+        let eth_node_url = get_ws_provider_endpoint(anvil).await.unwrap();
+        let eth_chain_id = provider.get_chainid().await.unwrap().as_u64();
+        let wallet_key_identifier = get_wallet_key_identifier(anvil).unwrap();
+        let ethers_client_config = EthersClientConfig {
+            eth_node_url,
+            eth_chain_id,
+            wallet_key_identifier,
+        };
+        Ok(ethers_client_config)
+}
+
 /// Returns an empty Anvil builder. The default port is 8545. The mnemonic is
 /// chosen randomly.
 pub fn get_anvil() -> Option<AnvilInstance> {
@@ -112,7 +147,7 @@ pub async fn deploy_contract<T: Tokenize, M: Middleware, S: Signer>(
     constructor_args: T,
     contract_name: String,
     compiled: CompilerOutput,
-    signer: Arc<SignerMiddleware<M, S>>,
+    client_config: EthersClientConfig,
 ) -> Result<ethers::contract::Contract<SignerMiddleware<M, S>>> {
     let (abi, bytecode, _runtime_bytecode) = compiled
         .find(contract_name.clone())
@@ -122,8 +157,8 @@ pub async fn deploy_contract<T: Tokenize, M: Middleware, S: Signer>(
         ))?
         .into_parts_or_default();
 
-    let client = signer;
-    let factory = ContractFactory::new(abi, bytecode, client.clone());
+    let client = Arc::new(client_config.get_client().await.context("could not get client")?);
+    let factory: DeploymentTxFactory<Arc<SignerMiddleware<Provider<Ws>, _>>, _> = ContractFactory::new(abi, bytecode, client.clone());
     factory
         .deploy(constructor_args)
         .map_err(|err| {
