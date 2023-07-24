@@ -30,14 +30,14 @@ contract CallbackDummy {
     }
 
     // Direct callback function
-    function call_me(uint256 number, bool guess, bytes32 callback_image_id) public returns (uint, bytes32, bool) {
+    function call_me(uint256 number, bool guess, bytes32 callback_image_id) public returns (uint256, bytes32, bool) {
         require(msg.sender == address(bonsai_test_relay), "only bonsai relay test contract is allowed for callback");
         require(image_id == callback_image_id, "image id mismatch");
 
         return call_me_internal(number, guess);
     }
 
-    function call_me_internal(uint256 number, bool guess) internal returns (uint, bytes32, bool) {
+    function call_me_internal(uint256 number, bool guess) internal returns (uint256, bytes32, bool) {
         bytes32 result = sha256(abi.encodePacked(number));
         bool something = uint256(result) % 2 == 0;
         bool is_ok = guess && something;
