@@ -24,7 +24,7 @@ use std::{
     rc::Rc,
 };
 
-use anyhow::{bail, Result};
+use anyhow::{anyhow, bail, Result};
 use bytemuck::Pod;
 use risc0_zkvm_platform::{
     fileno,
@@ -218,7 +218,7 @@ impl<'a> PosixIo<'a> {
         let reader = self
             .read_fds
             .get_mut(&fd)
-            .expect(&format!("Bad read file descriptor {fd}"));
+            .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
         let navail = reader.borrow_mut().fill_buf().unwrap().len() as u32;
         log::debug!("navail: {navail}");
         Ok((navail, 0))
@@ -232,7 +232,10 @@ impl<'a> PosixIo<'a> {
         let fd = ctx.load_register(REG_A3);
         let nbytes = ctx.load_register(REG_A4) as usize;
 
-        log::debug!("sys_read, attempting to read {nbytes} bytes from fd {fd}");
+        log::debug!(
+            "sys_read, attempting to read {nbytes} bytes from fd {fd}, to_guest: {}",
+            to_guest.len()
+        );
 
         assert!(
             nbytes >= to_guest.len() * WORD_SIZE,
@@ -242,7 +245,8 @@ impl<'a> PosixIo<'a> {
         let reader = self
             .read_fds
             .get_mut(&fd)
-            .expect(&format!("Bad read file descriptor {fd}"));
+            .ok_or(anyhow!("Bad read file descriptor {fd}"))?;
+
         // So that we don't have to deal with short reads, keep
         // reading until we get EOF or fill the buffer.
         let read_all = |mut buf: &mut [u8]| -> usize {
@@ -255,11 +259,10 @@ impl<'a> PosixIo<'a> {
                 tot_nread += nread;
                 (_, buf) = buf.split_at_mut(nread);
             }
-
             tot_nread
         };
 
-        let to_guest_u8: &mut [u8] = bytemuck::cast_slice_mut(to_guest);
+        let to_guest_u8 = bytemuck::cast_slice_mut(to_guest);
         let nread_main = read_all(to_guest_u8);
         assert_eq!(
             nread_main,
@@ -295,7 +298,7 @@ impl<'a> PosixIo<'a> {
         let writer = self
             .write_fds
             .get_mut(&fd)
-            .expect(&format!("Bad write file descriptor {fd}"));
+            .ok_or(anyhow!("Bad write file descriptor {fd}"))?;
 
         log::debug!("Writing {buf_len} bytes to file descriptor {fd}");
 

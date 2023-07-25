@@ -27,8 +27,8 @@ fn expected_stdout() -> String {
     format!("{EXPECTED_STDOUT_MSG}{STDIN_MSG}")
 }
 
-fn load_receipt(p: &Path) -> SessionReceipt {
-    let data = std::fs::read(p).unwrap();
+fn load_receipt(path: &Path) -> SessionReceipt {
+    let data = std::fs::read(path).unwrap();
     risc0_zkvm::serde::from_slice(&data).unwrap()
 }
 
