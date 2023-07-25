@@ -71,6 +71,9 @@ pub mod reg_abi {
 
 pub const DIGEST_WORDS: usize = 8;
 pub const DIGEST_BYTES: usize = WORD_SIZE * DIGEST_WORDS;
+
+// Limit syscall buffers so that the Executor doesn't get into an infinite
+// split situation.
 pub const MAX_BUF_BYTES: usize = 4 * 1024;
 pub const MAX_BUF_WORDS: usize = MAX_BUF_BYTES / WORD_SIZE;
 pub const MAX_SHA_COMPRESS_BLOCKS: usize = 1000;
