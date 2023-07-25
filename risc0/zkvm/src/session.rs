@@ -207,7 +207,7 @@ impl SimpleSegmentRef {
 /// and the SegmentRef holds the filename.
 ///
 /// There is an example of using [FileSegmentRef] in [our EVM example]
-/// (https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs).
+/// (<https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs>).
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FileSegmentRef {
     path: PathBuf,

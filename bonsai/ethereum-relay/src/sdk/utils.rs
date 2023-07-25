@@ -32,8 +32,8 @@ pub(crate) type Client<P> = Arc<SignerMiddleware<Provider<P>, LocalWallet>>;
 
 /// Returns a [LocalWallet] derived from either a private key as a hex string,
 /// or an AWS KMS key identifier defined by the env variable
-/// [WALLET_KEY_IDENTIFIER]. If no key is set, returns a new [LocalWallet] from
-/// the given optional [anvil] instance.
+/// `WALLET_KEY_IDENTIFIER`. If no key is set, returns a new [LocalWallet] from
+/// the given optional `anvil` instance.
 pub fn get_wallet(anvil: Option<&AnvilInstance>) -> Result<Wallet<SigningKey>> {
     match std::env::var("WALLET_KEY_IDENTIFIER") {
         Ok(test_private_key) => {

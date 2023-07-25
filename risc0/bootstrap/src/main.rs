@@ -38,8 +38,6 @@ fn main() {
         control_id_sha256[8],
         control_id_sha256[9],
         control_id_sha256[10],
-        control_id_sha256[11],
-        control_id_sha256[12],
         control_id_poseidon[0],
         control_id_poseidon[1],
         control_id_poseidon[2],
@@ -51,8 +49,6 @@ fn main() {
         control_id_poseidon[8],
         control_id_poseidon[9],
         control_id_poseidon[10],
-        control_id_poseidon[11],
-        control_id_poseidon[12],
         control_id_blake2b[0],
         control_id_blake2b[1],
         control_id_blake2b[2],
@@ -64,8 +60,6 @@ fn main() {
         control_id_blake2b[8],
         control_id_blake2b[9],
         control_id_blake2b[10],
-        control_id_blake2b[11],
-        control_id_blake2b[12],
     );
     println!("{contents}");
     std::fs::write("risc0/zkvm/src/control_id.rs", contents).unwrap();
