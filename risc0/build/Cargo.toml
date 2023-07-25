@@ -8,7 +8,7 @@ homepage = { workspace = true }
 repository = { workspace = true }
 
 [dependencies]
-cargo_metadata = "0.15"
+cargo_metadata = "0.17"
 directories = "5.0"
 downloader = "0.2"
 risc0-binfmt = { workspace = true }
