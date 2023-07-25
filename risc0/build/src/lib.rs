@@ -50,17 +50,18 @@ impl Risc0Metadata {
     }
 }
 
-#[cfg(feature = "guest-list")]
 /// Represents an item in the generated list of compiled guest binaries
-pub struct GuestListEntry {
+#[cfg(feature = "guest-list")]
+#[derive(Debug, Clone)]
+pub struct GuestListEntry<'a> {
     /// The name of the guest binary
-    pub name: &'static str,
+    pub name: &'a str,
     /// The compiled ELF guest binary
-    pub elf: &'static [u8],
+    pub elf: &'a [u8],
     /// The image id of the guest
     pub image_id: [u32; DIGEST_WORDS],
     /// The path to the ELF binary
-    pub path: &'static str,
+    pub path: &'a str,
 }
 
 #[derive(Debug)]
