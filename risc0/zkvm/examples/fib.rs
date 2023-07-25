@@ -80,7 +80,8 @@ fn top(prover: Rc<dyn Prover>, iterations: u32, skip_prover: bool) -> Metrics {
         prover
             .prove_session(&ctx, &session)
             .unwrap()
-            .segments
+            .inner
+            .flat()
             .iter()
             .fold(0, |acc, segment| acc + segment.get_seal_bytes().len())
     };
