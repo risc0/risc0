@@ -285,6 +285,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self.write_fd(fileno::STDOUT, writer)
     }
 
+    /// Add a posix-style standard error.
+    pub fn stderr(&mut self, writer: impl Write + 'a) -> &mut Self {
+        self.write_fd(fileno::STDERR, writer)
+    }
+
     /// Add a posix-style file descriptor for reading.
     pub fn read_fd(&mut self, fd: u32, reader: impl BufRead + 'a) -> &mut Self {
         self.inner.io.borrow_mut().with_read_fd(fd, reader);

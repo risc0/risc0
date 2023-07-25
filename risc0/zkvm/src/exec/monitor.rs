@@ -306,7 +306,7 @@ impl MemoryMonitor {
     }
 
     pub fn store_register(&mut self, idx: usize, data: u32) {
-        // log::trace!("store_register: x{idx}");
+        // log::trace!("store_register: x{idx} <= 0x{data:08x}");
         let old = self.load_register(idx);
         self.pending_actions.push(Action::StoreReg(idx, old));
         self.registers[idx] = data;
@@ -425,6 +425,7 @@ impl MemoryMonitor {
 
 impl Memory for MemoryMonitor {
     fn read_mem(&mut self, addr: u32, size: MemAccessSize) -> Option<u32> {
+        // log::trace!("read_mem: 0x{addr:08x}");
         if addr < TEXT_START || addr as usize >= SYSTEM.start() {
             return None;
         }
@@ -436,6 +437,7 @@ impl Memory for MemoryMonitor {
     }
 
     fn write_mem(&mut self, addr: u32, size: MemAccessSize, store_data: u32) -> bool {
+        // log::trace!("write_mem: 0x{addr:08x} <= 0x{store_data:08x}");
         if addr < TEXT_START || addr as usize >= SYSTEM.start() {
             return false;
         }
