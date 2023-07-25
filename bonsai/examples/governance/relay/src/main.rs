@@ -135,7 +135,7 @@ async fn main() -> anyhow::Result<()> {
             let output_tokens = match &input {
                 // Input provided. Return the Ethereum ABI encoded journal and
                 Some(input) => {
-                    let output = resolve_image_output(input, guest_entry, prover_mode)
+                    let output = resolve_image_output(input, &guest_entry, prover_mode)
                         .await
                         .context("failed to resolve image output")?;
                     match (prover_mode, output) {
