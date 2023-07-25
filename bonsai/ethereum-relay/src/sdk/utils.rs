@@ -39,7 +39,9 @@ pub(crate) type Client<P> = Arc<SignerMiddleware<Provider<P>, LocalWallet>>;
 pub fn get_wallet(anvil: Option<&AnvilInstance>) -> Result<Wallet<SigningKey>> {
     let wallet_key_identifier = get_wallet_key_identifier(anvil)?;
     match anvil {
-        Some(anvil) => Ok(LocalWallet::from(anvil.keys()[0].clone()).with_chain_id(anvil.chain_id())),
+        Some(anvil) => {
+            Ok(LocalWallet::from(anvil.keys()[0].clone()).with_chain_id(anvil.chain_id()))
+        }
         None => {
             // Derive wallet
             let wallet_sk_bytes = hex::decode(wallet_key_identifier.trim_start_matches("0x"))
@@ -116,16 +118,16 @@ pub async fn get_ethers_client<P: JsonRpcClient>(
 
 /// Returns an Ethereum Client Configuration struct.
 pub async fn get_ethers_client_config(anvil: Option<&AnvilInstance>) -> Result<EthersClientConfig> {
-        let provider = get_ws_provider(anvil).await.unwrap();
-        let eth_node_url = get_ws_provider_endpoint(anvil).await.unwrap();
-        let eth_chain_id = provider.get_chainid().await.unwrap().as_u64();
-        let wallet_key_identifier = get_wallet_key_identifier(anvil).unwrap();
-        let ethers_client_config = EthersClientConfig {
-            eth_node_url,
-            eth_chain_id,
-            wallet_key_identifier,
-        };
-        Ok(ethers_client_config)
+    let provider = get_ws_provider(anvil).await.unwrap();
+    let eth_node_url = get_ws_provider_endpoint(anvil).await.unwrap();
+    let eth_chain_id = provider.get_chainid().await.unwrap().as_u64();
+    let wallet_key_identifier = get_wallet_key_identifier(anvil).unwrap();
+    let ethers_client_config = EthersClientConfig {
+        eth_node_url,
+        eth_chain_id,
+        wallet_key_identifier,
+    };
+    Ok(ethers_client_config)
 }
 
 /// Returns an empty Anvil builder. The default port is 8545. The mnemonic is
@@ -143,12 +145,12 @@ pub fn get_anvil() -> Option<AnvilInstance> {
 /// Notes:
 ///
 /// If there are no constructor arguments, you should pass () as the argument.
-pub async fn deploy_contract<T: Tokenize, M: Middleware, S: Signer>(
+pub async fn deploy_contract<T: Tokenize>(
     constructor_args: T,
     contract_name: String,
     compiled: CompilerOutput,
     client_config: EthersClientConfig,
-) -> Result<ethers::contract::Contract<SignerMiddleware<M, S>>> {
+) -> Result<ethers::contract::Contract<SignerMiddleware<Provider<Ws>, LocalWallet>>> {
     let (abi, bytecode, _runtime_bytecode) = compiled
         .find(contract_name.clone())
         .context(format!(
@@ -157,8 +159,13 @@ pub async fn deploy_contract<T: Tokenize, M: Middleware, S: Signer>(
         ))?
         .into_parts_or_default();
 
-    let client = Arc::new(client_config.get_client().await.context("could not get client")?);
-    let factory: DeploymentTxFactory<Arc<SignerMiddleware<Provider<Ws>, _>>, _> = ContractFactory::new(abi, bytecode, client.clone());
+    let client = Arc::new(
+        client_config
+            .get_client()
+            .await
+            .context("could not get client")?,
+    );
+    let factory = ContractFactory::new(abi, bytecode, client.clone());
     factory
         .deploy(constructor_args)
         .map_err(|err| {

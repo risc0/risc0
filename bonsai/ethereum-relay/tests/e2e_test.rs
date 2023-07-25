@@ -15,7 +15,7 @@
 #[cfg(test)]
 mod tests {
 
-    use std::{path::Path, time::SystemTime};
+    use std::{path::Path, time::SystemTime, sync::Arc};
 
     use bonsai_ethereum_relay::{
         sdk::{
@@ -67,14 +67,13 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn e2e_test_counter() {
-        // deploy the contracts
+        // Get Anvil
         let anvil = utils::get_anvil();
-        let ethers_client = utils::get_ethers_client(
-            utils::get_ws_provider(anvil.as_ref()).await.unwrap(),
-            utils::get_wallet(anvil.as_ref()).unwrap(),
-        )
-        .await
-        .unwrap();
+
+        // Get client config
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref()).await.expect("Failed to get ethers client config");
+        let ethers_client = Arc::new(ethers_client_config.get_client().await.expect("Failed to get ethers client"));
+
         let proxy = ProxyContract::deploy(ethers_client.clone(), ())
             .expect("should be able to deploy the proxy contract")
             .send()
@@ -86,7 +85,7 @@ mod tests {
             (),
             "Counter".to_string(),
             compiled_contract,
-            ethers_client.clone(),
+            ethers_client_config.clone(),
         )
         .await
         .unwrap();
@@ -110,7 +109,7 @@ mod tests {
         };
 
         dbg!("starting bonsai relayer");
-        tokio::spawn(relayer.run(ethers_client.clone()));
+        tokio::spawn(relayer.run(ethers_client_config.clone()));
 
         // wait for relay to start
         sleep(Duration::from_secs(2)).await;
@@ -194,14 +193,13 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn e2e_test_counter_publish_mode() {
-        // deploy the contracts
+        // Get Anvil
         let anvil = utils::get_anvil();
-        let ethers_client = utils::get_ethers_client(
-            utils::get_ws_provider(anvil.as_ref()).await.unwrap(),
-            utils::get_wallet(anvil.as_ref()).unwrap(),
-        )
-        .await
-        .unwrap();
+
+        // Get client config
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref()).await.expect("Failed to get ethers client config");
+        let ethers_client = Arc::new(ethers_client_config.get_client().await.expect("Failed to get ethers client"));
+
         let proxy = ProxyContract::deploy(ethers_client.clone(), ())
             .expect("should be able to deploy the proxy contract")
             .send()
@@ -213,7 +211,7 @@ mod tests {
             (),
             "Counter".to_string(),
             compiled_contract,
-            ethers_client.clone(),
+            ethers_client_config.clone(),
         )
         .await
         .unwrap();
@@ -237,7 +235,7 @@ mod tests {
         };
 
         dbg!("starting bonsai relayer");
-        tokio::spawn(relayer.run(ethers_client.clone()));
+        tokio::spawn(relayer.run(ethers_client_config.clone()));
 
         // wait for relay to start
         sleep(Duration::from_secs(2)).await;

@@ -35,7 +35,6 @@ pub(crate) mod tests {
             completed_proofs::manager::BonsaiCompleteProofManager,
             pending_proofs::manager::BonsaiPendingProofManager,
         },
-        EthersClientConfig,
     };
 
     #[tokio::test]
@@ -94,8 +93,7 @@ pub(crate) mod tests {
         let anvil = utils::get_anvil();
 
         // Get client config
-        let ethers_client_config = utils::get_ethers_client_config(anvil).await.expect("Failed to get ethers client config");
-        let ethers_client = ethers_client_config.get_client().await.expect("Failed to get client");
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref()).await.expect("Failed to get ethers client config");
 
         // Mock API server
         let (proof_id, server) = get_test_bonsai_server().await;
