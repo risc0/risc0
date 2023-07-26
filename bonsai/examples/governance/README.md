@@ -31,8 +31,8 @@ Check out `methods/guest/src/bin/finalize_votes.rs` to see the full definition o
 
 Features currently in development can further decrease gas costs to make it possible to execute governance with L1 security, with only a fixed cost of ~300-400k gas per proposal, no matter how many votes. [^3]
 
-[^1]: When dicussing gas-per-vote we only count the gas spent executing Governor logic, and not e.g. intrisic gas for a transaction. We count it this way since both in the baseline and Bonsai Governor these costs can be amortized by batching transactions.
-[^2]: Prover costs are not mentioned here because proving computation off-chain with RISC Zero costs less than 1\100th the cost of on-chain compute as of July 2023.
+[^1]: When discussing gas-per-vote we only count the gas spent executing Governor logic, and not e.g. intrisic gas for a transaction. We count it this way since both in the baseline and Bonsai Governor these costs can be amortized by batching transactions.
+[^2]: Prover costs are not mentioned here because proving computation off-chain with RISC Zero costs less than 1/100th the cost of on-chain compute as of July 2023.
 [^3]: In particular, we are working on methods for verified L1 data access in the zkVM guest, which will allow lookup up voter weights inside the guest.
 
 ### Security Considerations
