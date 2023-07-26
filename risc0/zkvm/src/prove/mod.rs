@@ -54,7 +54,10 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, WORD_SIZE};
 
-use self::{local::LocalProver, remote::RemoteProver};
+use self::{
+    local::{DevModeProver, LocalProver},
+    remote::RemoteProver,
+};
 use crate::{
     receipt::{Receipt, VerifierContext},
     ExecutorEnv, Segment, SegmentReceipt, Session,
@@ -225,6 +228,9 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
 
         let prover = Rc::new(RemoteProver::new("bonsai"));
         table.insert("$bonsai".to_string(), prover);
+
+        let prover = Rc::new(DevModeProver::new("devmode"));
+        table.insert("$devmode".to_string(), prover);
     }
     #[cfg(feature = "cuda")]
     {
@@ -305,6 +311,12 @@ pub fn default_prover() -> Rc<dyn Prover> {
 
     if let Ok(requested) = std::env::var("RISC0_PROVER") {
         if let Some(prover) = provers.get(&requested) {
+            return prover.clone();
+        }
+    }
+    if std::env::var("DEVMODE").is_ok() {
+        println!("PROVING IN DEVMODE");
+        if let Some(prover) = provers.get("$devmode") {
             return prover.clone();
         }
     }

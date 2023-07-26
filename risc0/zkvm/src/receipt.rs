@@ -252,8 +252,13 @@ impl InnerReceipt {
         match self {
             InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
             InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
-            // TODO: add support for dev-mode
-            InnerReceipt::Fake => Err(VerificationError::InvalidProof),
+            InnerReceipt::Fake => {
+                if ctx.dev_mode {
+                    Ok(())
+                } else {
+                    Err(VerificationError::InvalidProof)
+                }
+            }
         }
     }
 
@@ -301,6 +306,8 @@ pub struct SegmentReceipt {
 pub struct VerifierContext {
     /// A registry of hash functions to be used by the verification process.
     pub suites: BTreeMap<String, HashSuite<BabyBear>>,
+    /// DevMode facilitates development by generating a fake receipt
+    pub dev_mode: bool,
 }
 
 impl Receipt {
@@ -450,12 +457,23 @@ pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
 
 impl Default for VerifierContext {
     fn default() -> Self {
-        Self {
+        #[cfg(not(feature = "prove"))]
+        return Self {
             suites: BTreeMap::from([
                 ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
                 ("poseidon".into(), PoseidonHashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
-        }
+            dev_mode: false,
+        };
+        #[cfg(feature = "prove")]
+        return Self {
+            suites: BTreeMap::from([
+                ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
+                ("poseidon".into(), PoseidonHashSuite::new_suite()),
+                ("sha-256".into(), Sha256HashSuite::new_suite()),
+            ]),
+            dev_mode: std::env::var("DEVMODE").is_ok(),
+        };
     }
 }
