@@ -32,9 +32,6 @@ pub enum MultiTestSpec {
     EventTrace,
     Profiler,
     Fail,
-    CopyToStdout {
-        fd: u32,
-    },
     ReadWriteMem {
         /// Tuples of (address, value). Zero means read the value and
         /// output it; nonzero means write that value.
@@ -46,10 +43,18 @@ pub enum MultiTestSpec {
     DoRandom,
     SysRead {
         // Buffer to read to
-        orig: Vec<u8>,
+        buf: Vec<u8>,
         fd: u32,
         // Position and length to do reads
         pos_and_len: Vec<(u32, u32)>,
+    },
+    EchoStdout {
+        nbytes: u32,
+        fd: u32,
+    },
+    EchoWords {
+        fd: u32,
+        nwords: u32,
     },
     BigInt {
         x: [u32; bigint::WIDTH_WORDS],
@@ -63,6 +68,8 @@ pub enum MultiTestSpec {
     },
     LibM,
     Oom,
+    OutOfBounds,
+    RsaCompat,
 }
 
 declare_syscall!(pub SYS_MULTI_TEST);

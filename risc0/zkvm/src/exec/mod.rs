@@ -33,10 +33,11 @@ use std::fmt::Debug;
 use anyhow::Result;
 pub use local::{LocalExecutor, SyscallRecord};
 use remote::RemoteExecutor;
+use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
 
 pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
-use crate::{MemoryImage, Program, Session};
+use crate::Session;
 
 /// [Executor] trait
 ///

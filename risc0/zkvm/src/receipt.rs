@@ -79,6 +79,7 @@ use alloc::{collections::BTreeMap, string::String, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
+use risc0_binfmt::SystemState;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
@@ -118,18 +119,6 @@ pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest.
     Halted(u32),
-}
-
-/// Represents the public state of a segment, needed for continuations and
-/// receipt verification.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct SystemState {
-    /// The program counter.
-    pub pc: u32,
-
-    /// The root hash of a merkle tree which confirms the
-    /// integrity of the memory image.
-    pub merkle_root: Digest,
 }
 
 /// Data associated with a receipt which is used for both input and
@@ -385,29 +374,27 @@ impl SegmentReceipt {
     }
 }
 
-impl SystemState {
-    fn decode_from_io(
-        io: layout::OutBuffer,
-        sys_state: &layout::SystemState,
-    ) -> Result<Self, VerificationError> {
-        let bytes: Vec<u8> = io
-            .tree(sys_state.image_id)
-            .get_bytes()
-            .or(Err(VerificationError::ReceiptFormatError))?;
-        let pc = io
-            .tree(sys_state.pc)
-            .get_u32()
-            .or(Err(VerificationError::ReceiptFormatError))?;
-        let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        Ok(Self { pc, merkle_root })
-    }
+fn decode_system_state_from_io(
+    io: layout::OutBuffer,
+    sys_state: &layout::SystemState,
+) -> Result<SystemState, VerificationError> {
+    let bytes: Vec<u8> = io
+        .tree(sys_state.image_id)
+        .get_bytes()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let pc = io
+        .tree(sys_state.pc)
+        .get_u32()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
+    Ok(SystemState { pc, merkle_root })
 }
 
 impl ReceiptMetadata {
     fn decode_from_io(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
-        let pre = SystemState::decode_from_io(io, body.global.pre)?;
-        let mut post = SystemState::decode_from_io(io, body.global.post)?;
+        let pre = decode_system_state_from_io(io, body.global.pre)?;
+        let mut post = decode_system_state_from_io(io, body.global.post)?;
         // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
         // the PC with carry, the PC is always recorded as the current PC +
         // 4. Thus we need to adjust the decoded PC for the post SystemState.
