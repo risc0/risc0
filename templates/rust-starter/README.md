@@ -51,4 +51,4 @@ For a walk-through of how to build with this template, check out this [excerpt f
 ## Questions, Feedback, and Collaborations
 We'd love to hear from you on [Discord](https://discord.gg/risczero) or [Twitter](https://twitter.com/risczero).
 
-[Structure of a zkVM Application]: https://www.dev.risczero.com/zkvm/developer-guide/zkvm-app-structure
+[Structure of a zkVM Application]: https://dev.risczero.com/zkvm/developer-guide/zkvm-app-structure
