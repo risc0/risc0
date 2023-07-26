@@ -2,14 +2,12 @@ use std::{str::FromStr, time::Duration};
 
 use anyhow::{Context, Result};
 use ethers::{
-    core::{
-        k256::{ecdsa::SigningKey, SecretKey},
-    },
+    core::k256::{ecdsa::SigningKey, SecretKey},
     middleware::SignerMiddleware,
     prelude::*,
     providers::{Provider, Ws},
 };
-use tracing::{debug, error, };
+use tracing::{debug, error};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct WalletKey(SecretKey);
