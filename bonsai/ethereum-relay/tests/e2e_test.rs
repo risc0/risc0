@@ -15,7 +15,7 @@
 #[cfg(test)]
 mod tests {
 
-    use std::{path::Path, time::SystemTime, sync::Arc};
+    use std::{path::Path, sync::Arc, time::SystemTime};
 
     use bonsai_ethereum_relay::{
         sdk::{
@@ -71,8 +71,15 @@ mod tests {
         let anvil = utils::get_anvil();
 
         // Get client config
-        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref()).await.expect("Failed to get ethers client config");
-        let ethers_client = Arc::new(ethers_client_config.get_client().await.expect("Failed to get ethers client"));
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref())
+            .await
+            .expect("Failed to get ethers client config");
+        let ethers_client = Arc::new(
+            ethers_client_config
+                .get_client()
+                .await
+                .expect("Failed to get ethers client"),
+        );
 
         let proxy = ProxyContract::deploy(ethers_client.clone(), ())
             .expect("should be able to deploy the proxy contract")
@@ -197,8 +204,15 @@ mod tests {
         let anvil = utils::get_anvil();
 
         // Get client config
-        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref()).await.expect("Failed to get ethers client config");
-        let ethers_client = Arc::new(ethers_client_config.get_client().await.expect("Failed to get ethers client"));
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref())
+            .await
+            .expect("Failed to get ethers client config");
+        let ethers_client = Arc::new(
+            ethers_client_config
+                .get_client()
+                .await
+                .expect("Failed to get ethers client"),
+        );
 
         let proxy = ProxyContract::deploy(ethers_client.clone(), ())
             .expect("should be able to deploy the proxy contract")

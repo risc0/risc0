@@ -28,7 +28,9 @@ pub(crate) mod tests {
         let anvil = utils::get_anvil();
 
         // Get client config
-        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref()).await.expect("Failed to get ethers client config");
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref())
+            .await
+            .expect("Failed to get ethers client config");
 
         let provider = utils::get_http_provider(anvil.as_ref()).unwrap();
 
@@ -41,10 +43,14 @@ pub(crate) mod tests {
         ]);
         let compiled_contract =
             utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
-        let logger =
-            utils::deploy_contract((), "Logger".to_string(), compiled_contract, ethers_client_config.clone())
-                .await
-                .unwrap();
+        let logger = utils::deploy_contract(
+            (),
+            "Logger".to_string(),
+            compiled_contract,
+            ethers_client_config.clone(),
+        )
+        .await
+        .unwrap();
         let stream = EventStream::new(provider, logger.address()).from_block(0);
         for number in data.clone() {
             logger
@@ -70,7 +76,9 @@ pub(crate) mod tests {
         let anvil = utils::get_anvil();
 
         // Get client config
-        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref()).await.expect("Failed to get ethers client config");
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref())
+            .await
+            .expect("Failed to get ethers client config");
 
         let provider = utils::get_ws_provider(anvil.as_ref()).await.unwrap();
         let data: Vec<U256> = Vec::from([
@@ -83,10 +91,14 @@ pub(crate) mod tests {
 
         let compiled_contract =
             utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
-        let logger =
-            utils::deploy_contract((), "Logger".to_string(), compiled_contract, ethers_client_config.clone())
-                .await
-                .unwrap();
+        let logger = utils::deploy_contract(
+            (),
+            "Logger".to_string(),
+            compiled_contract,
+            ethers_client_config.clone(),
+        )
+        .await
+        .unwrap();
         for number in data.clone() {
             logger
                 .method::<_, ()>("log", number)
