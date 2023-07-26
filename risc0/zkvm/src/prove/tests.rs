@@ -28,16 +28,17 @@ use test_log::test;
 
 use super::{get_prover, LocalProver, Prover};
 use crate::{
+    exec::Executor,
     prove::HalEval,
     receipt::{SessionReceipt, VerifierContext},
     serde::{from_slice, to_vec},
-    testutils, Executor, ExecutorEnv, ExitCode, SegmentReceipt, CIRCUIT,
+    testutils, ExecutorEnv, ExitCode, LocalExecutor, CIRCUIT,
 };
 
 fn prove_nothing(name: &str) -> Result<SessionReceipt> {
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let prover = get_prover(name);
     let ctx = VerifierContext::default();
@@ -58,7 +59,7 @@ fn hashfn_blake2b() {
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let prover = LocalProver::new("cpu:blake2b", hal_eval);
     let ctx = VerifierContext::default();
@@ -95,7 +96,7 @@ fn sha_basics() {
     fn run_sha(msg: &str) -> String {
         let input = to_vec(&MultiTestSpec::ShaDigest { data: msg.into() }).unwrap();
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
         hex::encode(Digest::try_from(receipt.journal).unwrap())
@@ -132,7 +133,7 @@ fn bigint_accel() {
         .unwrap();
 
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         let receipt = session.prove().unwrap();
         let expected = case.expected();
@@ -154,7 +155,7 @@ fn memory_io() {
         };
         let input = to_vec(&spec)?;
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF)?;
+        let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF)?;
         let session = exec.run()?;
         session.prove()
     }
@@ -192,27 +193,59 @@ fn pause_continue() {
         .add_input(&to_vec(&MultiTestSpec::PauseContinue).unwrap())
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
 
     // Run until sys_pause
     let session = exec.run().unwrap();
     assert_eq!(session.segments.len(), 1);
     assert_eq!(session.exit_code, ExitCode::Paused(0));
     let receipt = session.prove().unwrap();
-    assert_eq!(receipt.segments.len(), 1);
-    assert_eq!(
-        receipt.segments[0]
-            .as_any()
-            .downcast_ref::<SegmentReceipt>()
-            .unwrap()
-            .index,
-        0
-    );
+    let segments = receipt.inner.flat();
+    assert_eq!(segments.len(), 1);
+    assert_eq!(segments[0].index, 0);
 
     // Run until sys_halt
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     session.prove().unwrap();
+}
+
+#[test]
+fn session_events() {
+    use std::{cell::RefCell, rc::Rc};
+
+    use risc0_zkvm_methods::HELLO_COMMIT_ELF;
+
+    use crate::session::{Segment, SessionEvents};
+
+    struct Logger {
+        on_pre_prove_segment_flag: Rc<RefCell<bool>>,
+        on_post_prove_segment_flag: Rc<RefCell<bool>>,
+    }
+
+    impl SessionEvents for Logger {
+        fn on_pre_prove_segment(&self, _: &Segment) {
+            self.on_pre_prove_segment_flag.replace(true);
+        }
+
+        fn on_post_prove_segment(&self, _: &Segment) {
+            self.on_post_prove_segment_flag.replace(true);
+        }
+    }
+
+    let mut exec = LocalExecutor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+    let mut session = exec.run().unwrap();
+    let on_pre_prove_segment_flag = Rc::new(RefCell::new(false));
+    let on_post_prove_segment_flag = Rc::new(RefCell::new(false));
+    let logger = Logger {
+        on_pre_prove_segment_flag: on_pre_prove_segment_flag.clone(),
+        on_post_prove_segment_flag: on_post_prove_segment_flag.clone(),
+    };
+    session.add_hook(logger);
+    session.prove().unwrap();
+    assert_eq!(session.hooks.len(), 1);
+    assert_eq!(on_pre_prove_segment_flag.take(), true);
+    assert_eq!(on_post_prove_segment_flag.take(), true);
 }
 
 #[test]
@@ -228,7 +261,7 @@ fn continuation() {
         .segment_limit_po2(segment_limit_po2)
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
     assert_eq!(segments.len(), COUNT);
@@ -240,15 +273,8 @@ fn continuation() {
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
     let receipt = session.prove().unwrap();
-    for (idx, receipt) in receipt.segments.iter().enumerate() {
-        assert_eq!(
-            receipt
-                .as_any()
-                .downcast_ref::<SegmentReceipt>()
-                .unwrap()
-                .index,
-            idx as u32
-        );
+    for (idx, receipt) in receipt.inner.flat().iter().enumerate() {
+        assert_eq!(receipt.index, idx as u32);
     }
 }
 
@@ -257,7 +283,7 @@ fn continuation() {
 // They were built using the toolchain from:
 // https://github.com/risc0/toolchain/releases/tag/2022.03.25
 mod riscv {
-    use crate::{Executor, ExecutorEnv, MemoryImage, Program};
+    use crate::{exec::Executor, ExecutorEnv, LocalExecutor, MemoryImage, Program};
 
     fn run_test(test_name: &str) {
         use std::io::Read;
@@ -286,7 +312,7 @@ mod riscv {
             let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
 
             let env = ExecutorEnv::default();
-            let mut exec = Executor::new(env, image, program.entry);
+            let mut exec = LocalExecutor::new(env, image, program.entry);
             let session = exec.run().unwrap();
             session.prove().unwrap();
         }

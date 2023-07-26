@@ -20,7 +20,7 @@ use ethers_providers::Middleware;
 use log::info;
 use risc0_zkvm::{
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv, FileSegmentRef,
+    ExecutorEnv, FileSegmentRef, LocalExecutor,
 };
 use tempfile::tempdir;
 use zkevm_core::{
@@ -87,7 +87,7 @@ async fn main() {
         .add_input(&to_vec(&zkdb).unwrap())
         .build()
         .unwrap();
-    let mut exec = Executor::from_elf(env, EVM_ELF).unwrap();
+    let mut exec = LocalExecutor::from_elf(env, EVM_ELF).unwrap();
     let segment_dir = tempdir().unwrap();
     let session = exec
         .run_with_callback(|segment| {

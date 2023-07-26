@@ -30,6 +30,7 @@ use risc0_zkvm_platform::{
         SyscallName,
     },
 };
+use thiserror::Error;
 
 use super::{
     io::{slice_io_from_fn, syscalls, PosixIo, SliceIo, Syscall, SyscallTable},
@@ -46,7 +47,7 @@ pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
 
-/// The [super::Executor] is configured from this object.
+/// The [super::LocalExecutor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
 /// guest environment is set up prior to guest program execution.
@@ -57,13 +58,15 @@ pub struct ExecutorEnv<'a> {
     session_limit: Option<usize>,
     syscalls: SyscallTable<'a>,
     pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
-    input: Vec<u8>,
+    pub(crate) input: Vec<u8>,
     pub(crate) trace_callback: Option<Rc<RefCell<dyn FnMut(TraceEvent) -> Result<()> + 'a>>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
     /// Construct a [ExecutorEnvBuilder].
+    ///
     /// # Example
+    ///
     /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
@@ -113,25 +116,18 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
 }
 
 /// [ExecutorEnvBuilder] errors.
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum ExecutorEnvBuilderErr {
     /// Segment limit PO2 falls outside supported range.
-    SegmentLimitPo2OutOfBounds { given: usize },
-}
-
-impl core::fmt::Display for ExecutorEnvBuilderErr {
-    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-        match self {
-            ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds { given } => {
-                write!(f, "Invalid segment_limit_po2: {given}",)
-            }
-        }
-    }
+    #[error("Invalid segment_limit_po2: {po2}")]
+    SegmentLimitPo2OutOfBounds { po2: usize },
 }
 
 impl<'a> ExecutorEnvBuilder<'a> {
     /// Finalize this builder to construct an [ExecutorEnv].
+    ///
     /// # Example
+    ///
     /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
@@ -145,7 +141,7 @@ impl<'a> ExecutorEnvBuilder<'a> {
             || self.inner.segment_limit_po2 > risc0_zkp::MAX_CYCLES_PO2
         {
             return Err(ExecutorEnvBuilderErr::SegmentLimitPo2OutOfBounds {
-                given: self.inner.segment_limit_po2,
+                po2: self.inner.segment_limit_po2,
             });
         }
 
@@ -179,7 +175,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Set a session limit, specified in number of cycles.
+    ///
     /// # Example
+    ///
     /// ```
     /// use risc0_zkvm::{
     ///    ExecutorEnv,
@@ -198,7 +196,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add environment variables to the guest environment.
+    ///
     /// # Example
+    ///
     /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
@@ -220,7 +220,9 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add an environment variable to the guest environment.
+    ///
     /// # Example
+    ///
     /// ```
     /// # use risc0_zkvm::{
     /// #   ExecutorEnv,
@@ -239,8 +241,13 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add initial input that can be read by the guest from stdin.
-    /// Calling `ExecutorEnvBuilder::add_input()` iteratively concatenates
-    /// inputs; the guest can access each input using consecutive reads. ```
+    ///
+    /// Calling `add_input` iteratively concatenates inputs; the guest can
+    /// access each input using consecutive reads.
+    ///
+    /// # Example
+    ///
+    /// ```
     /// use risc0_zkvm::{
     ///     ExecutorEnv,
     ///     ExecutorEnvBuilder,
@@ -278,6 +285,11 @@ impl<'a> ExecutorEnvBuilder<'a> {
         self.write_fd(fileno::STDOUT, writer)
     }
 
+    /// Add a posix-style standard error.
+    pub fn stderr(&mut self, writer: impl Write + 'a) -> &mut Self {
+        self.write_fd(fileno::STDERR, writer)
+    }
+
     /// Add a posix-style file descriptor for reading.
     pub fn read_fd(&mut self, fd: u32, reader: impl BufRead + 'a) -> &mut Self {
         self.inner.io.borrow_mut().with_read_fd(fd, reader);
@@ -291,16 +303,14 @@ impl<'a> ExecutorEnvBuilder<'a> {
     }
 
     /// Add a handler for a syscall which inputs and outputs a slice
-    /// of plain old data. The guest can call these by invoking
-    /// `risc0_zkvm::guest::env::send_recv_slice`
+    /// of plain old data.
     pub fn slice_io(&mut self, syscall: SyscallName, handler: impl SliceIo + 'a) -> &mut Self {
         self.syscall(syscall, handler.to_syscall());
         self
     }
 
     /// Add a handler for a syscall which inputs and outputs a slice
-    /// of plain old data. The guest can call these callbacks by
-    /// invoking `risc0_zkvm::guest::env::send_recv_slice`.
+    /// of plain old data.
     pub fn io_callback(
         &mut self,
         syscall: SyscallName,

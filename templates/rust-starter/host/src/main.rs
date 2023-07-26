@@ -3,8 +3,9 @@
 // `METHOD_NAME_ID` with `MULTIPLY_ID`
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
-    Executor, ExecutorEnv,
+    ExecutorEnv,
 };
 
 fn main() {
@@ -21,7 +22,7 @@ fn main() {
     // let env = ExecutorEnv::builder().add_input(&vec).build().unwrap();
 
     // Next, we make an executor, loading the (renamed) ELF binary.
-    let mut exec = Executor::from_elf(env, METHOD_NAME_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, METHOD_NAME_ELF).unwrap();
 
     // Run the executor to produce a session.
     let session = exec.run().unwrap();

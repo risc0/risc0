@@ -1,0 +1,12 @@
+[submodule "bonsai/examples/governance/lib/forge-std"]
+	path = bonsai/ethereum/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "bonsai/examples/governance/lib/murky"]
+	path = bonsai/ethereum/lib/murky
+	url = https://github.com/dmfxyz/murky
+[submodule "bonsai/examples/governance/lib/openzeppelin-contracts"]
+	path = bonsai/ethereum/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "bonsai/examples/governance/lib/solidity-bytes-utils"]
+	path = bonsai/ethereum/lib/solidity-bytes-utils
+	url = https://github.com/GNSPS/solidity-bytes-utils

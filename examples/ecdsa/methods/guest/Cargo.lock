@@ -130,25 +130,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "dyn_partial_eq"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a07039d197226c4b9a3810c4f165328fb4e715258a4b8584f143d38e9de04301"
-dependencies = [
- "dyn_partial_eq_derive",
-]
-
-[[package]]
-name = "dyn_partial_eq_derive"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0e217c6c1435ebf9b88662354589d339192b8eaf506edd22951e75e045c8e8bd"
-dependencies = [
- "quote",
- "syn 1.0.107",
-]
-
-[[package]]
 name = "ecdsa"
 version = "0.16.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -173,6 +154,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "elf"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e2b183d6ce6ca4cf30e3db37abf5b52568b5f9015c97d9fbdd7026aa5dcdd758"
+
+[[package]]
 name = "elliptic-curve"
 version = "0.13.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -190,15 +177,6 @@ dependencies = [
  "serdect",
  "subtle",
  "zeroize",
-]
-
-[[package]]
-name = "erased-serde"
-version = "0.3.26"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6984864d65d092d9e9ada107007a846a09f75d2e24046bcce9a38d14aa52052"
-dependencies = [
- "serde",
 ]
 
 [[package]]
@@ -266,12 +244,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "inventory"
-version = "0.3.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c38a87a1e0e2752433cd4b26019a469112a25fb43b30f5ee9b3b898925c5a0f9"
-
-[[package]]
 name = "k256"
 version = "0.13.1"
 source = "git+https://github.com/risc0/RustCrypto-elliptic-curves?tag=k256/v0.13.1-risc0#44b1fc2b317e76bb150636cf67d0fbdfcac39601"
@@ -286,9 +258,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.139"
+version = "0.2.147"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "201de327520df007757c1f0adce6e827fe8562fbc28bfd9c15571c66ca1f5f79"
+checksum = "b4668fb0ea861c1df094127ac5f1da3409a82116a4ba74fca2e58ef927159bb3"
 
 [[package]]
 name = "libm"
@@ -391,8 +363,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-binfmt"
+version = "0.16.1"
+dependencies = [
+ "anyhow",
+ "elf",
+ "log",
+ "risc0-zkp",
+ "risc0-zkvm-platform",
+ "serde",
+]
+
+[[package]]
 name = "risc0-circuit-rv32im"
-version = "0.15.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "log",
@@ -404,7 +388,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "0.15.0"
+version = "0.16.1"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -412,7 +396,7 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "0.15.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "blake2",
@@ -431,30 +415,29 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm"
-version = "0.15.0"
+version = "0.16.1"
 dependencies = [
  "anyhow",
  "bytemuck",
  "cfg-if",
- "dyn_partial_eq",
  "getrandom",
  "hex",
  "libm",
  "log",
  "num-derive",
  "num-traits",
+ "risc0-binfmt",
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",
  "risc0-zkvm-platform",
  "serde",
  "tracing",
- "typetag",
 ]
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "0.15.0"
+version = "0.16.1"
 
 [[package]]
 name = "sec1"
@@ -473,22 +456,22 @@ dependencies = [
 
 [[package]]
 name = "serde"
-version = "1.0.152"
+version = "1.0.168"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb7d1f0d3021d347a83e556fc4683dea2ea09d87bccdf88ff5c12545d89d5efb"
+checksum = "d614f89548720367ded108b3c843be93f3a341e22d5674ca0dd5cd57f34926af"
 dependencies = [
  "serde_derive",
 ]
 
 [[package]]
 name = "serde_derive"
-version = "1.0.152"
+version = "1.0.168"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af487d118eecd09402d70a5d72551860e788df87b464af30e5ea6a38c75c541e"
+checksum = "d4fe589678c688e44177da4f27152ee2d190757271dc7f1d5b6b9f68d869d641"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 1.0.107",
+ "syn 2.0.23",
 ]
 
 [[package]]
@@ -593,30 +576,6 @@ name = "typenum"
 version = "1.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "497961ef93d974e23eb6f433eb5fe1b7930b659f06d12dec6fc44a8f554c0bba"
-
-[[package]]
-name = "typetag"
-version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6a6898cc6f6a32698cc3e14d5632a14d2b23ed9f7b11e6b8e05ce685990acc22"
-dependencies = [
- "erased-serde",
- "inventory",
- "once_cell",
- "serde",
- "typetag-impl",
-]
-
-[[package]]
-name = "typetag-impl"
-version = "0.2.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c3e1c30cedd24fc597f7d37a721efdbdc2b1acae012c1ef1218f4c7c2c0f3e7"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.23",
-]
 
 [[package]]
 name = "unicode-ident"

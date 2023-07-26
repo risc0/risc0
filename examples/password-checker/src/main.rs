@@ -16,9 +16,10 @@ use password_checker_core::PasswordRequest;
 use password_checker_methods::PW_CHECKER_ELF;
 use rand::prelude::*;
 use risc0_zkvm::{
+    default_executor_from_elf,
     serde::{from_slice, to_vec},
     sha::Digest,
-    Executor, ExecutorEnv,
+    ExecutorEnv,
 };
 
 fn main() {
@@ -41,7 +42,7 @@ fn password_checker(request: PasswordRequest) -> Digest {
         .build()
         .unwrap();
 
-    let mut exec = Executor::from_elf(env, PW_CHECKER_ELF).unwrap();
+    let mut exec = default_executor_from_elf(env, PW_CHECKER_ELF).unwrap();
     let session = exec.run().unwrap();
 
     let receipt = session.prove().unwrap();

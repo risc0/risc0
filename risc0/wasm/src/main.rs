@@ -15,6 +15,7 @@
 #![no_main]
 
 use risc0_zkvm::{
+    receipt::InnerReceipt,
     sha::{Digest, DIGEST_WORDS},
     SessionReceipt,
 };
@@ -27,8 +28,8 @@ use risc0_zkvm::{
 fn _start() {
     // TODO: use a real receipt and image_id
     let receipt = SessionReceipt {
-        segments: Vec::new(),
-        journal: Vec::new(),
+        inner: InnerReceipt::Fake,
+        journal: vec![],
     };
     let image_id = Digest::from([0; DIGEST_WORDS]);
     receipt.verify(image_id).unwrap();

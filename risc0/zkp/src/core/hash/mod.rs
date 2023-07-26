@@ -20,7 +20,7 @@ pub mod poseidon;
 pub mod poseidon_254;
 pub mod sha;
 
-use alloc::{boxed::Box, string::String};
+use alloc::{boxed::Box, rc::Rc, string::String};
 
 use risc0_core::field::Field;
 
@@ -70,8 +70,18 @@ pub struct HashSuite<F: Field> {
     pub name: String,
 
     /// Define the hash used by the HashSuite
-    pub hashfn: Box<dyn HashFn<F>>,
+    pub hashfn: Rc<dyn HashFn<F>>,
 
     /// Define an RNG factory
-    pub rng: Box<dyn RngFactory<F>>,
+    pub rng: Rc<dyn RngFactory<F>>,
+}
+
+impl<F: Field> Clone for HashSuite<F> {
+    fn clone(&self) -> Self {
+        Self {
+            name: self.name.clone(),
+            hashfn: self.hashfn.clone(),
+            rng: self.rng.clone(),
+        }
+    }
 }

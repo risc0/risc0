@@ -31,18 +31,18 @@
 //! [SessionReceipt]s directly and [SegmentReceipt]s only indirectly as part
 //! of the [SessionReceipt]s that contain them (for instance, by calling
 //! [SessionReceipt::verify], which will itself call
-//! [SegmentReceipt::verify] for each constinuent [SegmentReceipt]).
+//! [InnerReceipt::verify] for the interior [InnerReceipt]).
 //!
 //! # Usage
 //! To create a [SessionReceipt], use [crate::Session::prove]:
 //! ```rust
-//! use risc0_zkvm::{Executor, ExecutorEnv};
+//! use risc0_zkvm::{default_executor_from_elf, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
+//! let mut exec = default_executor_from_elf(env, FIB_ELF).unwrap();
 //! let session = exec.run().unwrap();
 //! let receipt = session.prove().unwrap();
 //! # }
@@ -56,13 +56,13 @@
 //! ```rust
 //! use risc0_zkvm::SessionReceipt;
 //!
-//! # use risc0_zkvm::{Executor, ExecutorEnv};
+//! # use risc0_zkvm::{default_executor_from_elf, ExecutorEnv};
 //! # use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 //!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
 //! # let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! # let mut exec = Executor::from_elf(env, FIB_ELF).unwrap();
+//! # let mut exec = default_executor_from_elf(env, FIB_ELF).unwrap();
 //! # let session = exec.run().unwrap();
 //! # let receipt = session.prove().unwrap();
 //! receipt.verify(FIB_ID).unwrap();
@@ -75,20 +75,18 @@
 //! journal as the same type it was written to the journal. If you prefer, you
 //! can also directly access the [SessionReceipt::journal] as a `Vec<u8>`.
 
-use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
+use alloc::{collections::BTreeMap, string::String, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use dyn_partial_eq::{dyn_partial_eq, DynPartialEq};
+use risc0_binfmt::SystemState;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
 use risc0_zkp::{
     core::{
         digest::Digest,
         hash::{
-            blake2b::Blake2bCpuHashSuite,
-            poseidon::PoseidonHashSuite,
-            sha::{Sha256HashSuite, SHA256_INIT},
+            blake2b::Blake2bCpuHashSuite, poseidon::PoseidonHashSuite, sha::Sha256HashSuite,
             HashSuite,
         },
     },
@@ -100,10 +98,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
-    sha::{
-        self,
-        rust_crypto::{Digest as _, Sha256},
-    },
+    recursion::SuccinctReceipt,
+    sha::rust_crypto::{Digest as _, Sha256},
 };
 
 /// Indicates how a Segment or Session's execution has terminated
@@ -123,18 +119,6 @@ pub enum ExitCode {
     /// This indicates normal termination of a program with an interior exit
     /// code returned from the guest.
     Halted(u32),
-}
-
-/// Represents the public state of a segment, needed for continuations and
-/// receipt verification.
-#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
-pub struct SystemState {
-    /// The program counter.
-    pub pc: u32,
-
-    /// The root hash of a merkle tree which confirms the
-    /// integrity of the memory image.
-    pub merkle_root: Digest,
 }
 
 /// Data associated with a receipt which is used for both input and
@@ -165,11 +149,8 @@ pub struct ReceiptMetadata {
 /// [SessionReceipt::verify].
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct SessionReceipt {
-    /// The constituent [Receipt]s.
-    ///
-    /// Together these can be used by [SessionReceipt::verify] to
-    /// cryptographically prove that this full Session was faithfully executed.
-    pub segments: Vec<Box<dyn Receipt>>,
+    /// The polymorphic [InnerReceipt].
+    pub inner: InnerReceipt,
 
     /// The public data written by the guest in this Session.
     ///
@@ -178,29 +159,124 @@ pub struct SessionReceipt {
     pub journal: Vec<u8>,
 }
 
-/// Provide common functionality implemented by all receipt types.
-#[dyn_partial_eq]
-#[typetag::serde(tag = "type")]
-pub trait Receipt: Debug {
+/// An inner receipt can take the form of a collection of [SegmentReceipts] or a
+/// [SuccinctReceipt].
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub enum InnerReceipt {
+    /// The [SegmentReceipts].
+    Flat(SegmentReceipts),
+
+    /// The [SuccinctReceipt].
+    Succinct(SuccinctReceipt),
+
+    /// A fake receipt for testing and development.
+    Fake,
+}
+
+/// A wrapper around `Vec<SegmentReceipt>`.
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct SegmentReceipts(pub Vec<SegmentReceipt>);
+
+impl SegmentReceipts {
+    /// Verify the integrity of this receipt.
+    pub fn verify_with_context(
+        &self,
+        ctx: &VerifierContext,
+        image_id: Digest,
+        journal: &[u8],
+    ) -> Result<(), VerificationError> {
+        let (final_receipt, receipts) = self
+            .0
+            .as_slice()
+            .split_last()
+            .ok_or(VerificationError::ReceiptFormatError)?;
+        let mut prev_image_id = image_id.into();
+        for receipt in receipts {
+            receipt.verify_with_context(ctx)?;
+            let metadata = receipt.get_metadata()?;
+            log::debug!("metadata: {metadata:#?}");
+            if prev_image_id != metadata.pre.digest() {
+                return Err(VerificationError::ImageVerificationError);
+            }
+            if metadata.exit_code != ExitCode::SystemSplit {
+                return Err(VerificationError::UnexpectedExitCode);
+            }
+            prev_image_id = metadata.post.digest();
+        }
+        final_receipt.verify_with_context(ctx)?;
+        let metadata = final_receipt.get_metadata()?;
+        log::debug!("final: {metadata:#?}");
+        if prev_image_id != metadata.pre.digest() {
+            return Err(VerificationError::ImageVerificationError);
+        }
+
+        if metadata.exit_code == ExitCode::SystemSplit {
+            return Err(VerificationError::UnexpectedExitCode);
+        }
+
+        let digest = Sha256::digest(journal);
+        let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
+        let output_words = metadata.output.as_words();
+        let is_journal_valid = || {
+            (journal.is_empty() && output_words.iter().all(|x| *x == 0))
+                || digest_words == output_words
+        };
+        if !is_journal_valid() {
+            log::debug!(
+                "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
+                hex::encode(&journal),
+                hex::encode(bytemuck::cast_slice(digest_words)),
+                hex::encode(bytemuck::cast_slice(output_words)),
+                journal
+            );
+            return Err(VerificationError::JournalDigestMismatch);
+        }
+
+        Ok(())
+    }
+}
+
+impl InnerReceipt {
     /// Verify the integrity of this receipt.
     #[must_use]
-    fn verify(&self) -> Result<(), VerificationError> {
-        self.verify_with_context(&VerifierContext::default())
+    pub fn verify(
+        &self,
+        image_id: impl Into<Digest>,
+        journal: &[u8],
+    ) -> Result<(), VerificationError> {
+        self.verify_with_context(&VerifierContext::default(), image_id, journal)
     }
 
     /// Verify the integrity of this receipt.
     #[must_use]
-    fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError>;
+    pub fn verify_with_context(
+        &self,
+        ctx: &VerifierContext,
+        image_id: impl Into<Digest>,
+        journal: &[u8],
+    ) -> Result<(), VerificationError> {
+        match self {
+            InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
+            InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
+            // TODO: add support for dev-mode
+            InnerReceipt::Fake => Err(VerificationError::InvalidProof),
+        }
+    }
 
-    /// Return the metadata for this receipt.
-    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError>;
+    /// Returns the [InnerReceipt::Flat] arm, will panic if invalid.
+    pub fn flat(&self) -> &[SegmentReceipt] {
+        match self {
+            InnerReceipt::Flat(x) => &x.0,
+            _ => panic!(),
+        }
+    }
 
-    /// Return the seal for this receipt.
-    fn get_seal(&self) -> &[u32];
-
-    /// Return the seal for this receipt, as a slice of bytes.
-    fn get_seal_bytes(&self) -> &[u8] {
-        bytemuck::cast_slice(self.get_seal())
+    /// Returns the [InnerReceipt::Succinct] arm, will panic if invalid.
+    pub fn succinct(&self) -> &SuccinctReceipt {
+        match self {
+            InnerReceipt::Succinct(x) => x,
+            _ => panic!(),
+        }
     }
 }
 
@@ -208,15 +284,16 @@ pub trait Receipt: Debug {
 ///
 /// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
 /// consistent with the [ReceiptMetadata] included in the receipt.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, DynPartialEq)]
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub struct SegmentReceipt {
     /// The cryptographic data attesting to the validity of the code execution.
     ///
     /// This data is used by the ZKP Verifier (as called by
-    /// [SegmentReceipt::verify]) to cryptographically prove that this Segment
-    /// was faithfully executed. It is largely opaque cryptographic data, but
-    /// contains a non-opaque metadata component, which can be conveniently
-    /// accessed with [SegmentReceipt::get_metadata].
+    /// [SegmentReceipt::verify_with_context]) to cryptographically prove that
+    /// this Segment was faithfully executed. It is largely opaque
+    /// cryptographic data, but contains a non-opaque metadata component,
+    /// which can be conveniently accessed with
+    /// [SegmentReceipt::get_metadata].
     pub seal: Vec<u32>,
 
     /// Segment index within the [SessionReceipt]
@@ -234,11 +311,11 @@ pub struct VerifierContext {
 
 impl SessionReceipt {
     /// Construct a new SessionReceipt
-    pub fn new(segments: Vec<Box<dyn Receipt>>, journal: Vec<u8>) -> Self {
-        Self { segments, journal }
+    pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
+        Self { inner, journal }
     }
 
-    /// Verifies the integrity of this receipt.
+    /// Verify the integrity of this receipt.
     ///
     /// Uses the ZKP system to cryptographically verify that each constituent
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
@@ -249,7 +326,7 @@ impl SessionReceipt {
         self.verify_with_context(&VerifierContext::default(), image_id)
     }
 
-    /// Verifies the integrity of this receipt.
+    /// Verify the integrity of this receipt.
     ///
     /// Uses the ZKP system to cryptographically verify that each constituent
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
@@ -261,60 +338,13 @@ impl SessionReceipt {
         ctx: &VerifierContext,
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
-        let (final_receipt, receipts) = self
-            .segments
-            .as_slice()
-            .split_last()
-            .ok_or(VerificationError::ReceiptFormatError)?;
-        let mut prev_image_id = image_id.into();
-        for receipt in receipts {
-            receipt.verify_with_context(ctx)?;
-            let metadata = receipt.get_metadata()?;
-            log::debug!("metadata: {metadata:#?}");
-            if prev_image_id != metadata.pre.compute_image_id() {
-                return Err(VerificationError::ImageVerificationError);
-            }
-            if metadata.exit_code != ExitCode::SystemSplit {
-                return Err(VerificationError::UnexpectedExitCode);
-            }
-            prev_image_id = metadata.post.compute_image_id();
-        }
-        final_receipt.verify_with_context(ctx)?;
-        let metadata = final_receipt.get_metadata()?;
-        log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.compute_image_id() {
-            return Err(VerificationError::ImageVerificationError);
-        }
-
-        let digest = Sha256::digest(&self.journal);
-        let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
-        let output_words = metadata.output.as_words();
-        let is_journal_valid = || {
-            (self.journal.is_empty() && output_words.iter().all(|x| *x == 0))
-                || digest_words == output_words
-        };
-        if !is_journal_valid() {
-            log::debug!(
-                "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
-                hex::encode(&self.journal),
-                hex::encode(bytemuck::cast_slice(digest_words)),
-                hex::encode(bytemuck::cast_slice(output_words)),
-                self.journal
-            );
-            return Err(VerificationError::JournalDigestMismatch);
-        }
-
-        if metadata.exit_code == ExitCode::SystemSplit {
-            return Err(VerificationError::UnexpectedExitCode);
-        }
-
-        Ok(())
+        self.inner.verify_with_context(ctx, image_id, &self.journal)
     }
 }
 
-#[typetag::serde]
-impl Receipt for SegmentReceipt {
-    fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
+impl SegmentReceipt {
+    /// Verify the integrity of this receipt.
+    pub fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
         use hex::FromHex;
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             POSEIDON_CONTROL_ID
@@ -332,43 +362,39 @@ impl Receipt for SegmentReceipt {
         risc0_zkp::verify::verify(&crate::CIRCUIT, suite, &self.seal, check_code)
     }
 
-    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+    /// Returns the [ReceiptMetadata] for this receipt.
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
         ReceiptMetadata::decode_from_io(layout::OutBuffer(elems))
     }
 
-    fn get_seal(&self) -> &[u32] {
-        self.seal.as_slice()
+    /// Return the seal for this receipt, as a slice of bytes.
+    pub fn get_seal_bytes(&self) -> &[u8] {
+        bytemuck::cast_slice(&self.seal)
     }
 }
 
-impl SystemState {
-    fn decode_from_io(
-        io: layout::OutBuffer,
-        sys_state: &layout::SystemState,
-    ) -> Result<Self, VerificationError> {
-        let bytes: Vec<u8> = io
-            .tree(sys_state.image_id)
-            .get_bytes()
-            .or(Err(VerificationError::ReceiptFormatError))?;
-        let pc = io
-            .tree(sys_state.pc)
-            .get_u32()
-            .or(Err(VerificationError::ReceiptFormatError))?;
-        let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
-        Ok(Self { pc, merkle_root })
-    }
-
-    fn compute_image_id(&self) -> Digest {
-        compute_image_id(&self.merkle_root, self.pc)
-    }
+fn decode_system_state_from_io(
+    io: layout::OutBuffer,
+    sys_state: &layout::SystemState,
+) -> Result<SystemState, VerificationError> {
+    let bytes: Vec<u8> = io
+        .tree(sys_state.image_id)
+        .get_bytes()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let pc = io
+        .tree(sys_state.pc)
+        .get_u32()
+        .or(Err(VerificationError::ReceiptFormatError))?;
+    let merkle_root = Digest::try_from(bytes).or(Err(VerificationError::ReceiptFormatError))?;
+    Ok(SystemState { pc, merkle_root })
 }
 
 impl ReceiptMetadata {
     fn decode_from_io(io: layout::OutBuffer) -> Result<Self, VerificationError> {
         let body = layout::LAYOUT.mux.body;
-        let pre = SystemState::decode_from_io(io, body.global.pre)?;
-        let mut post = SystemState::decode_from_io(io, body.global.post)?;
+        let pre = decode_system_state_from_io(io, body.global.pre)?;
+        let mut post = decode_system_state_from_io(io, body.global.post)?;
         // In order to avoid extra logic in the rv32im circuit to perform arthimetic on
         // the PC with carry, the PC is always recorded as the current PC +
         // 4. Thus we need to adjust the decoded PC for the post SystemState.
@@ -423,11 +449,11 @@ impl ReceiptMetadata {
 
 /// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
 pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
-    use risc0_zkp::core::{digest::DIGEST_WORDS, hash::sha::Sha256};
-    let mut pc_digest = [0u32; DIGEST_WORDS];
-    pc_digest[0] = pc;
-    let block2 = Digest::new(pc_digest);
-    *sha::Impl::compress(&SHA256_INIT, merkle_root, &block2)
+    SystemState {
+        merkle_root: merkle_root.clone(),
+        pc,
+    }
+    .digest()
 }
 
 impl Default for VerifierContext {

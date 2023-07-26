@@ -22,10 +22,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-use crate::{exec::SyscallRecord, receipt::ExitCode, MemoryImage};
+use crate::{exec::SyscallRecord, receipt::ExitCode};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -52,6 +53,13 @@ pub struct Session {
 
     /// The [ExitCode] of the session.
     pub exit_code: ExitCode,
+
+    /// The hooks to be called during the proving phase.
+    #[serde(skip)]
+    pub hooks: Vec<Box<dyn SessionEvents>>,
+
+    /// The session ID (used only for bonsai proving)
+    pub bonsai_session_id: Option<String>,
 }
 
 /// A reference to a [Segment].
@@ -92,13 +100,36 @@ pub struct Segment {
     pub insn_cycles: usize,
 }
 
+/// The Events of [Session]
+pub trait SessionEvents {
+    /// Fired before the proving of a segment starts.
+    #[allow(unused)]
+    fn on_pre_prove_segment(&self, segment: &Segment) {}
+
+    /// Fired after the proving of a segment ends.
+    #[allow(unused)]
+    fn on_post_prove_segment(&self, segment: &Segment) {}
+}
+
 impl Session {
     /// Construct a new [Session] from its constituent components.
     pub fn new(segments: Vec<Box<dyn SegmentRef>>, journal: Vec<u8>, exit_code: ExitCode) -> Self {
+        Self::new_with_id(segments, journal, exit_code, None)
+    }
+
+    /// Construct a new [Session] from its constituent components.
+    pub fn new_with_id(
+        segments: Vec<Box<dyn SegmentRef>>,
+        journal: Vec<u8>,
+        exit_code: ExitCode,
+        bonsai_session_id: Option<String>,
+    ) -> Self {
         Self {
             segments,
             journal,
             exit_code,
+            hooks: Vec::new(),
+            bonsai_session_id,
         }
     }
 
@@ -109,6 +140,11 @@ impl Session {
             .iter()
             .map(|segment_ref| segment_ref.resolve())
             .collect()
+    }
+
+    /// Add a hook to be called during the proving phase.
+    pub fn add_hook<E: SessionEvents + 'static>(&mut self, hook: E) {
+        self.hooks.push(Box::new(hook));
     }
 }
 
@@ -171,7 +207,7 @@ impl SimpleSegmentRef {
 /// and the SegmentRef holds the filename.
 ///
 /// There is an example of using [FileSegmentRef] in [our EVM example]
-/// (https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs).
+/// (<https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs>).
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FileSegmentRef {
     path: PathBuf,
