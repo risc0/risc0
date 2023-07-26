@@ -19,9 +19,10 @@ pub struct WalletKey(SecretKey);
 impl TryFrom<String> for WalletKey {
     type Error = anyhow::Error;
     fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
-        let decoded = hex::decode(value.trim_start_matches("0x"))
-            .context("Failed to decode private key.")?;
-        let key = SecretKey::from_slice(&decoded).context("Failed to derive SecretKey instance.")?;
+        let decoded =
+            hex::decode(value.trim_start_matches("0x")).context("Failed to decode private key.")?;
+        let key =
+            SecretKey::from_slice(&decoded).context("Failed to derive SecretKey instance.")?;
         Ok(Self(key))
     }
 }
@@ -59,11 +60,7 @@ pub struct EthersClientConfig {
 }
 
 impl EthersClientConfig {
-    pub fn new(
-        eth_node_url: String,
-        eth_chain_id: u64,
-        wallet_key_identifier: WalletKey,
-    ) -> Self {
+    pub fn new(eth_node_url: String, eth_chain_id: u64, wallet_key_identifier: WalletKey) -> Self {
         Self {
             eth_node_url,
             eth_chain_id,

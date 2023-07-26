@@ -26,7 +26,7 @@ use ethers::{
     utils::AnvilInstance,
 };
 
-use crate::{EthersClientConfig, client_config::WalletKey};
+use crate::{client_config::WalletKey, EthersClientConfig};
 
 const POLL_INTERVAL: std::time::Duration = std::time::Duration::from_secs(1);
 
