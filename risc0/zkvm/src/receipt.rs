@@ -31,7 +31,7 @@
 //! [SessionReceipt]s directly and [SegmentReceipt]s only indirectly as part
 //! of the [SessionReceipt]s that contain them (for instance, by calling
 //! [SessionReceipt::verify], which will itself call
-//! [SegmentReceipt::verify] for each constinuent [SegmentReceipt]).
+//! [InnerReceipt::verify] for the interior [InnerReceipt]).
 //!
 //! # Usage
 //! To create a [SessionReceipt], use [crate::Session::prove]:
@@ -75,11 +75,10 @@
 //! journal as the same type it was written to the journal. If you prefer, you
 //! can also directly access the [SessionReceipt::journal] as a `Vec<u8>`.
 
-use alloc::{boxed::Box, collections::BTreeMap, string::String, vec::Vec};
+use alloc::{collections::BTreeMap, string::String, vec::Vec};
 use core::fmt::Debug;
 
 use anyhow::Result;
-use dyn_partial_eq::{dyn_partial_eq, DynPartialEq};
 use risc0_binfmt::SystemState;
 use risc0_circuit_rv32im::layout;
 use risc0_core::field::baby_bear::BabyBear;
@@ -99,6 +98,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     control_id::{BLAKE2B_CONTROL_ID, POSEIDON_CONTROL_ID, SHA256_CONTROL_ID},
+    recursion::SuccinctReceipt,
     sha::rust_crypto::{Digest as _, Sha256},
 };
 
@@ -149,11 +149,8 @@ pub struct ReceiptMetadata {
 /// [SessionReceipt::verify].
 #[derive(Debug, Deserialize, Serialize, PartialEq)]
 pub struct SessionReceipt {
-    /// The constituent [Receipt]s.
-    ///
-    /// Together these can be used by [SessionReceipt::verify] to
-    /// cryptographically prove that this full Session was faithfully executed.
-    pub segments: Vec<Box<dyn Receipt>>,
+    /// The polymorphic [InnerReceipt].
+    pub inner: InnerReceipt,
 
     /// The public data written by the guest in this Session.
     ///
@@ -162,91 +159,34 @@ pub struct SessionReceipt {
     pub journal: Vec<u8>,
 }
 
-/// Provide common functionality implemented by all receipt types.
-#[dyn_partial_eq]
-#[typetag::serde(tag = "type")]
-pub trait Receipt: Debug {
+/// An inner receipt can take the form of a collection of [SegmentReceipts] or a
+/// [SuccinctReceipt].
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub enum InnerReceipt {
+    /// The [SegmentReceipts].
+    Flat(SegmentReceipts),
+
+    /// The [SuccinctReceipt].
+    Succinct(SuccinctReceipt),
+
+    /// A fake receipt for testing and development.
+    Fake,
+}
+
+/// A wrapper around `Vec<SegmentReceipt>`.
+#[derive(Debug, Deserialize, Serialize, PartialEq)]
+pub struct SegmentReceipts(pub Vec<SegmentReceipt>);
+
+impl SegmentReceipts {
     /// Verify the integrity of this receipt.
-    #[must_use]
-    fn verify(&self) -> Result<(), VerificationError> {
-        self.verify_with_context(&VerifierContext::default())
-    }
-
-    /// Verify the integrity of this receipt.
-    #[must_use]
-    fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError>;
-
-    /// Return the metadata for this receipt.
-    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError>;
-
-    /// Return the seal for this receipt.
-    fn get_seal(&self) -> &[u32];
-
-    /// Return the seal for this receipt, as a slice of bytes.
-    fn get_seal_bytes(&self) -> &[u8] {
-        bytemuck::cast_slice(self.get_seal())
-    }
-}
-
-/// A receipt attesting to the execution of a Segment.
-///
-/// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
-/// consistent with the [ReceiptMetadata] included in the receipt.
-#[derive(Clone, Debug, Deserialize, Serialize, PartialEq, DynPartialEq)]
-pub struct SegmentReceipt {
-    /// The cryptographic data attesting to the validity of the code execution.
-    ///
-    /// This data is used by the ZKP Verifier (as called by
-    /// [SegmentReceipt::verify]) to cryptographically prove that this Segment
-    /// was faithfully executed. It is largely opaque cryptographic data, but
-    /// contains a non-opaque metadata component, which can be conveniently
-    /// accessed with [SegmentReceipt::get_metadata].
-    pub seal: Vec<u32>,
-
-    /// Segment index within the [SessionReceipt]
-    pub index: u32,
-
-    /// Name of the hash function used to create this receipt.
-    pub hashfn: String,
-}
-
-/// Context available to the verification process.
-pub struct VerifierContext {
-    /// A registry of hash functions to be used by the verification process.
-    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
-}
-
-impl SessionReceipt {
-    /// Construct a new SessionReceipt
-    pub fn new(segments: Vec<Box<dyn Receipt>>, journal: Vec<u8>) -> Self {
-        Self { segments, journal }
-    }
-
-    /// Verifies the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
-    #[must_use]
-    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
-        self.verify_with_context(&VerifierContext::default(), image_id)
-    }
-
-    /// Verifies the integrity of this receipt.
-    ///
-    /// Uses the ZKP system to cryptographically verify that each constituent
-    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
-    /// stitch together correctly, and that the initial memory image matches the
-    /// given `image_id` parameter.
-    #[must_use]
     pub fn verify_with_context(
         &self,
         ctx: &VerifierContext,
-        image_id: impl Into<Digest>,
+        image_id: Digest,
+        journal: &[u8],
     ) -> Result<(), VerificationError> {
         let (final_receipt, receipts) = self
-            .segments
+            .0
             .as_slice()
             .split_last()
             .ok_or(VerificationError::ReceiptFormatError)?;
@@ -270,35 +210,141 @@ impl SessionReceipt {
             return Err(VerificationError::ImageVerificationError);
         }
 
-        let digest = Sha256::digest(&self.journal);
+        if metadata.exit_code == ExitCode::SystemSplit {
+            return Err(VerificationError::UnexpectedExitCode);
+        }
+
+        let digest = Sha256::digest(journal);
         let digest_words: &[u32] = bytemuck::cast_slice(digest.as_slice());
         let output_words = metadata.output.as_words();
         let is_journal_valid = || {
-            (self.journal.is_empty() && output_words.iter().all(|x| *x == 0))
+            (journal.is_empty() && output_words.iter().all(|x| *x == 0))
                 || digest_words == output_words
         };
         if !is_journal_valid() {
             log::debug!(
                 "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
-                hex::encode(&self.journal),
+                hex::encode(&journal),
                 hex::encode(bytemuck::cast_slice(digest_words)),
                 hex::encode(bytemuck::cast_slice(output_words)),
-                self.journal
+                journal
             );
             return Err(VerificationError::JournalDigestMismatch);
-        }
-
-        if metadata.exit_code == ExitCode::SystemSplit {
-            return Err(VerificationError::UnexpectedExitCode);
         }
 
         Ok(())
     }
 }
 
-#[typetag::serde]
-impl Receipt for SegmentReceipt {
-    fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
+impl InnerReceipt {
+    /// Verify the integrity of this receipt.
+    #[must_use]
+    pub fn verify(
+        &self,
+        image_id: impl Into<Digest>,
+        journal: &[u8],
+    ) -> Result<(), VerificationError> {
+        self.verify_with_context(&VerifierContext::default(), image_id, journal)
+    }
+
+    /// Verify the integrity of this receipt.
+    #[must_use]
+    pub fn verify_with_context(
+        &self,
+        ctx: &VerifierContext,
+        image_id: impl Into<Digest>,
+        journal: &[u8],
+    ) -> Result<(), VerificationError> {
+        match self {
+            InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
+            InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
+            // TODO: add support for dev-mode
+            InnerReceipt::Fake => Err(VerificationError::InvalidProof),
+        }
+    }
+
+    /// Returns the [InnerReceipt::Flat] arm, will panic if invalid.
+    pub fn flat(&self) -> &[SegmentReceipt] {
+        match self {
+            InnerReceipt::Flat(x) => &x.0,
+            _ => panic!(),
+        }
+    }
+
+    /// Returns the [InnerReceipt::Succinct] arm, will panic if invalid.
+    pub fn succinct(&self) -> &SuccinctReceipt {
+        match self {
+            InnerReceipt::Succinct(x) => x,
+            _ => panic!(),
+        }
+    }
+}
+
+/// A receipt attesting to the execution of a Segment.
+///
+/// A SegmentReceipt attests that a [crate::Segment] was executed in a manner
+/// consistent with the [ReceiptMetadata] included in the receipt.
+#[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
+pub struct SegmentReceipt {
+    /// The cryptographic data attesting to the validity of the code execution.
+    ///
+    /// This data is used by the ZKP Verifier (as called by
+    /// [SegmentReceipt::verify_with_context]) to cryptographically prove that
+    /// this Segment was faithfully executed. It is largely opaque
+    /// cryptographic data, but contains a non-opaque metadata component,
+    /// which can be conveniently accessed with
+    /// [SegmentReceipt::get_metadata].
+    pub seal: Vec<u32>,
+
+    /// Segment index within the [SessionReceipt]
+    pub index: u32,
+
+    /// Name of the hash function used to create this receipt.
+    pub hashfn: String,
+}
+
+/// Context available to the verification process.
+pub struct VerifierContext {
+    /// A registry of hash functions to be used by the verification process.
+    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
+}
+
+impl SessionReceipt {
+    /// Construct a new SessionReceipt
+    pub fn new(inner: InnerReceipt, journal: Vec<u8>) -> Self {
+        Self { inner, journal }
+    }
+
+    /// Verify the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
+    /// stitch together correctly, and that the initial memory image matches the
+    /// given `image_id` parameter.
+    #[must_use]
+    pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
+        self.verify_with_context(&VerifierContext::default(), image_id)
+    }
+
+    /// Verify the integrity of this receipt.
+    ///
+    /// Uses the ZKP system to cryptographically verify that each constituent
+    /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
+    /// stitch together correctly, and that the initial memory image matches the
+    /// given `image_id` parameter.
+    #[must_use]
+    pub fn verify_with_context(
+        &self,
+        ctx: &VerifierContext,
+        image_id: impl Into<Digest>,
+    ) -> Result<(), VerificationError> {
+        self.inner.verify_with_context(ctx, image_id, &self.journal)
+    }
+}
+
+impl SegmentReceipt {
+    /// Verify the integrity of this receipt.
+    pub fn verify_with_context(&self, ctx: &VerifierContext) -> Result<(), VerificationError> {
         use hex::FromHex;
         let check_code = |_, control_id: &Digest| -> Result<(), VerificationError> {
             POSEIDON_CONTROL_ID
@@ -316,13 +362,15 @@ impl Receipt for SegmentReceipt {
         risc0_zkp::verify::verify(&crate::CIRCUIT, suite, &self.seal, check_code)
     }
 
-    fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+    /// Returns the [ReceiptMetadata] for this receipt.
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
         let elems = bytemuck::cast_slice(&self.seal);
         ReceiptMetadata::decode_from_io(layout::OutBuffer(elems))
     }
 
-    fn get_seal(&self) -> &[u32] {
-        self.seal.as_slice()
+    /// Return the seal for this receipt, as a slice of bytes.
+    pub fn get_seal_bytes(&self) -> &[u8] {
+        bytemuck::cast_slice(&self.seal)
     }
 }
 
