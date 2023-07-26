@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{path::Path, sync::Arc};
+use std::{fmt::Write, path::Path, sync::Arc};
 
 use anyhow::{anyhow, Context, Result};
 use ethers::{
@@ -26,7 +26,7 @@ use ethers::{
     utils::AnvilInstance,
 };
 
-use crate::EthersClientConfig;
+use crate::{EthersClientConfig, client_config::WalletKey};
 
 const POLL_INTERVAL: std::time::Duration = std::time::Duration::from_secs(1);
 
@@ -38,33 +38,18 @@ pub(crate) type Client<P> = Arc<SignerMiddleware<Provider<P>, LocalWallet>>;
 /// the given optional [anvil] instance.
 pub fn get_wallet(anvil: Option<&AnvilInstance>) -> Result<Wallet<SigningKey>> {
     let wallet_key_identifier = get_wallet_key_identifier(anvil)?;
-    match anvil {
-        Some(anvil) => {
-            Ok(LocalWallet::from(anvil.keys()[0].clone()).with_chain_id(anvil.chain_id()))
-        }
-        None => {
-            // Derive wallet
-            let wallet_sk_bytes = hex::decode(wallet_key_identifier.trim_start_matches("0x"))
-                .context("Could not decode input wallet secret key.")?;
-            let wallet_secret_key = SecretKey::from_slice(&wallet_sk_bytes)
-                .context("Failed to derive SecretKey instance from input.")?;
-            let wallet_signing_key = SigningKey::from(wallet_secret_key);
-            Ok(LocalWallet::from(wallet_signing_key))
-        }
-    }
+    let wallet_signing_key = SigningKey::from(wallet_key_identifier.get_key());
+    Ok(LocalWallet::from(wallet_signing_key))
 }
 
 /// Returns a wallet key identifier defined by the env variable
 /// [WALLET_KEY_IDENTIFIER] or from the given optional [anvil] instance.
-pub fn get_wallet_key_identifier(anvil: Option<&AnvilInstance>) -> Result<String> {
+pub fn get_wallet_key_identifier(anvil: Option<&AnvilInstance>) -> Result<WalletKey> {
     match std::env::var("WALLET_KEY_IDENTIFIER") {
-        Ok(wallet_key_identifier) => Ok(wallet_key_identifier),
+        Ok(wallet_key_identifier) => wallet_key_identifier.try_into(),
         _ => {
             let anvil = anvil.context("Anvil not instantiated.")?;
-            let wallet_key_identifier_bytes = anvil.keys()[0].clone().to_bytes().to_vec();
-            let wallet_key_identifier = String::from_utf8(wallet_key_identifier_bytes)
-                .context("Could not decode input wallet key identifier.")?;
-            Ok(wallet_key_identifier)
+            Ok(anvil.keys()[0].clone().into())
         }
     }
 }
@@ -151,6 +136,7 @@ pub async fn deploy_contract<T: Tokenize>(
     compiled: CompilerOutput,
     client_config: EthersClientConfig,
 ) -> Result<ethers::contract::Contract<SignerMiddleware<Provider<Ws>, LocalWallet>>> {
+    dbg!(&client_config);
     let (abi, bytecode, _runtime_bytecode) = compiled
         .find(contract_name.clone())
         .context(format!(

@@ -68,7 +68,7 @@ async fn main() -> Result<()> {
     let client_config = EthersClientConfig::new(
         args.eth_node_url,
         args.eth_chain_id,
-        args.wallet_key_identifier,
+        args.wallet_key_identifier.try_into()?,
     );
 
     relayer.run(client_config).await

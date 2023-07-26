@@ -13,16 +13,18 @@
 // limitations under the License.
 
 mod api;
+mod client_config;
 mod downloader;
 pub mod sdk;
 mod storage;
 mod tests;
 mod uploader;
 
-use std::{sync::Arc, time::Duration};
+use std::{str::FromStr, sync::Arc, time::Duration};
 
 use anyhow::{Context, Result};
 use bonsai_sdk::alpha_async::get_client_from_parts;
+pub use client_config::EthersClientConfig;
 use downloader::{
     proxy_callback_proof_processor::ProxyCallbackProofRequestProcessor,
     proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream,
@@ -47,69 +49,6 @@ use uploader::{
 use crate::api::{server::serve, state::ApiState};
 
 static DEFAULT_FILTER: &str = "info";
-
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
-pub struct EthersClientConfig {
-    pub eth_node_url: String,
-    pub eth_chain_id: u64,
-    pub wallet_key_identifier: String,
-}
-
-impl EthersClientConfig {
-    pub fn new(eth_node_url: String, eth_chain_id: u64, wallet_key_identifier: String) -> Self {
-        Self {
-            eth_node_url,
-            eth_chain_id,
-            wallet_key_identifier,
-        }
-    }
-
-    pub async fn get_client(&self) -> Result<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>> {
-        let provider = self.provider().await?;
-        let signer = self.get_signer()?;
-        let client = SignerMiddleware::new(provider, signer);
-        Ok(client)
-    }
-
-    pub async fn provider(&self) -> Result<Provider<Ws>> {
-        let provider = Provider::<Ws>::connect_with_reconnects(self.eth_node_url.clone(), 60)
-            .await
-            .context("Failed to connect to Ethereum node.")?;
-        Ok(provider)
-    }
-
-    pub fn get_signer(&self) -> Result<Wallet<SigningKey>> {
-        let private_key = SecretKey::from_slice(
-            &hex::decode(self.wallet_key_identifier.trim_start_matches("0x"))
-                .context("Failed to decode private key.")?,
-        )
-        .context("Failed to create private key.")?;
-        let signing_key = SigningKey::from(private_key);
-        let signer = LocalWallet::from(signing_key).with_chain_id(self.eth_chain_id);
-        Ok(signer)
-    }
-
-    pub async fn get_client_with_reconnects(
-        &self,
-        max_retries: u64,
-        retry_time: Duration,
-    ) -> Result<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>> {
-        for _ in 0..max_retries {
-            let client = self.get_client().await;
-            if client.is_ok() {
-                return client;
-            } else {
-                debug!(
-                    "Failed to create client. Retrying in {} seconds.",
-                    retry_time.as_secs()
-                );
-                tokio::time::sleep(retry_time).await;
-            }
-        }
-        error!("Failed to create client.");
-        Err(anyhow::anyhow!("Failed to create client."))
-    }
-}
 
 #[derive(Clone)]
 /// A relayer to integrate Ethereum with Bonsai.
