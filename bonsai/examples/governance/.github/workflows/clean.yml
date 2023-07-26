@@ -1,0 +1,18 @@
+name: clean
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cargo:
+    name: cargo clean
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: install rust
+        uses: risc0/risc0/.github/actions/rustup@42266f0b6bd28de208b7c47b50dd4bcf241f76ce
+
+      - name: cargo clean
+        run: cargo clean

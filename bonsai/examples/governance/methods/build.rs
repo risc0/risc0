@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Manages formatted binaries used by the RISC Zero zkVM
-
-pub(crate) mod elf;
-pub(crate) mod image;
+fn main() {
+    risc0_build::embed_methods();
+}

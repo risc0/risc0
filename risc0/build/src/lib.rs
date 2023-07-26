@@ -28,10 +28,8 @@ use std::{
 
 use cargo_metadata::{MetadataCommand, Package};
 use downloader::{Download, Downloader};
-use risc0_zkvm::{
-    sha::{Digest, DIGEST_WORDS},
-    MemoryImage, Program,
-};
+use risc0_binfmt::{MemoryImage, Program};
+use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
 use sha2::{Digest as ShaDigest, Sha256};

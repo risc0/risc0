@@ -61,7 +61,7 @@ use risc0_zkvm_platform::WORD_SIZE;
 
 use self::{exec::MachineContext, loader::Loader};
 use crate::{
-    receipt::{Receipt, SessionReceipt, VerifierContext},
+    receipt::{InnerReceipt, SegmentReceipts, SessionReceipt, VerifierContext},
     Segment, SegmentReceipt, Session, CIRCUIT,
 };
 
@@ -292,12 +292,19 @@ where
 
     fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt> {
         log::info!("prove_session: {}", self.name);
-        let mut segments: Vec<Box<dyn Receipt>> = Vec::new();
+        let mut segments = Vec::new();
         for segment_ref in session.segments.iter() {
             let segment = segment_ref.resolve()?;
-            segments.push(Box::new(self.prove_segment(ctx, &segment)?));
+            for hook in &session.hooks {
+                hook.on_pre_prove_segment(&segment);
+            }
+            segments.push(self.prove_segment(ctx, &segment)?);
+            for hook in &session.hooks {
+                hook.on_post_prove_segment(&segment);
+            }
         }
-        let receipt = SessionReceipt::new(segments, session.journal.clone());
+        let inner = InnerReceipt::Flat(SegmentReceipts(segments));
+        let receipt = SessionReceipt::new(inner, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
         receipt.verify_with_context(ctx, image_id)?;
         Ok(receipt)

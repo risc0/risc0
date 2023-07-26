@@ -26,12 +26,9 @@ cfg-if = "1.0"
 getrandom = { version = "0.2", features = ["custom"] }
 hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 libm = "0.2"
-risc0-circuit-rv32im = { workspace = true }
-risc0-core = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
 serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
-tracing = { version = "0.1", default-features = false, features = ["attributes"] }
 
 # TODO(nils): Change these `target_os` checks to `target_vendor` checks when we
 # have a real target triple.
@@ -41,12 +38,14 @@ tracing = { version = "0.1", default-features = false, features = ["attributes"]
 addr2line = { version = "0.20", optional = true }
 bincode = { version = "1.3", optional = true }
 bonsai-sdk = { workspace = true, optional = true }
-dyn_partial_eq = "0.1"
 elf = { version = "0.7", optional = true }
+risc0-binfmt = { workspace = true }
+risc0-circuit-rv32im = { workspace = true }
+risc0-core = { workspace = true }
 generic-array = { version = "0.14", default-features = false, optional = true }
 getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.27", optional = true }
-lazy-regex = { version = "2.3", optional = true }
+lazy-regex = { version = "2.4", optional = true }
 log = "0.4"
 crypto-bigint = { version = "0.5", default-features = false, features = ["rand"], optional = true }
 num-derive = "0.4"
@@ -56,8 +55,9 @@ rand = { version = "0.8", optional = true }
 rayon = { version = "1.5", optional = true }
 rrs-lib = { version = "0.1", optional = true }
 sha2 = { version = "0.10", optional = true }
-thiserror = "1.0"
-typetag = "0.2"
+thiserror = { version = "1.0", optional = true }
+tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
 clap = { version = "4.0", features = ["derive"] }
@@ -75,7 +75,6 @@ tar = "0.4"
 test-log = { version = "0.2", features = ["trace"] }
 
 [features]
-binfmt = ["dep:elf", "std"]
 cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
 dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
@@ -88,7 +87,7 @@ profiler = [
   "dep:protobuf-src"
 ]
 prove = [
-  "binfmt",
+  "dep:addr2line",
   "dep:bonsai-sdk",
   "dep:bincode",
   "dep:num-traits",
@@ -100,6 +99,8 @@ prove = [
   "dep:rayon",
   "dep:rrs-lib",
   "dep:sha2",
+  "dep:thiserror",
+  "dep:typetag",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",
   "std",

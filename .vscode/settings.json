@@ -34,5 +34,10 @@
     "stdexcept": "cpp",
     "array": "cpp"
   },
-  "rust-analyzer.showUnlinkedFileNotification": false
+  "rust-analyzer.showUnlinkedFileNotification": false,
+  "rust-analyzer.linkedProjects": [
+    "Cargo.toml",
+    "risc0/zkvm/methods/guest/Cargo.toml",
+    "risc0/zkvm/methods/std/Cargo.toml"
+  ]
 }

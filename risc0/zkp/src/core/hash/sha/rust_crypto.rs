@@ -45,6 +45,7 @@ use core::fmt::{Debug, Formatter};
 
 use digest::{
     block_buffer::Eager,
+    const_oid::{AssociatedOid, ObjectIdentifier},
     core_api::{
         AlgorithmName, Block, BlockSizeUser, Buffer, BufferKindUser, CoreWrapper,
         CtVariableCoreWrapper, OutputSizeUser, TruncSide, UpdateCore, VariableOutputCore,
@@ -167,5 +168,13 @@ impl<S: super::Sha256> Debug for Sha256VarCore<S> {
     }
 }
 
+#[doc(hidden)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Hash)]
+pub struct OidSha256;
+
+impl AssociatedOid for OidSha256 {
+    const OID: ObjectIdentifier = ObjectIdentifier::new_unwrap("2.16.840.1.101.3.4.2.1");
+}
+
 /// SHA-256 implementation cross-compatible with `sha2::Sha256`.
-pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32>>;
+pub type Sha256<S> = CoreWrapper<CtVariableCoreWrapper<Sha256VarCore<S>, U32, OidSha256>>;

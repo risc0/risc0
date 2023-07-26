@@ -32,7 +32,7 @@ use crate::{
     prove::HalEval,
     receipt::{SessionReceipt, VerifierContext},
     serde::{from_slice, to_vec},
-    testutils, ExecutorEnv, ExitCode, LocalExecutor, SegmentReceipt, CIRCUIT,
+    testutils, ExecutorEnv, ExitCode, LocalExecutor, CIRCUIT,
 };
 
 fn prove_nothing(name: &str) -> Result<SessionReceipt> {
@@ -200,20 +200,52 @@ fn pause_continue() {
     assert_eq!(session.segments.len(), 1);
     assert_eq!(session.exit_code, ExitCode::Paused(0));
     let receipt = session.prove().unwrap();
-    assert_eq!(receipt.segments.len(), 1);
-    assert_eq!(
-        receipt.segments[0]
-            .as_any()
-            .downcast_ref::<SegmentReceipt>()
-            .unwrap()
-            .index,
-        0
-    );
+    let segments = receipt.inner.flat();
+    assert_eq!(segments.len(), 1);
+    assert_eq!(segments[0].index, 0);
 
     // Run until sys_halt
     let session = exec.run().unwrap();
     assert_eq!(session.exit_code, ExitCode::Halted(0));
     session.prove().unwrap();
+}
+
+#[test]
+fn session_events() {
+    use std::{cell::RefCell, rc::Rc};
+
+    use risc0_zkvm_methods::HELLO_COMMIT_ELF;
+
+    use crate::session::{Segment, SessionEvents};
+
+    struct Logger {
+        on_pre_prove_segment_flag: Rc<RefCell<bool>>,
+        on_post_prove_segment_flag: Rc<RefCell<bool>>,
+    }
+
+    impl SessionEvents for Logger {
+        fn on_pre_prove_segment(&self, _: &Segment) {
+            self.on_pre_prove_segment_flag.replace(true);
+        }
+
+        fn on_post_prove_segment(&self, _: &Segment) {
+            self.on_post_prove_segment_flag.replace(true);
+        }
+    }
+
+    let mut exec = LocalExecutor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF).unwrap();
+    let mut session = exec.run().unwrap();
+    let on_pre_prove_segment_flag = Rc::new(RefCell::new(false));
+    let on_post_prove_segment_flag = Rc::new(RefCell::new(false));
+    let logger = Logger {
+        on_pre_prove_segment_flag: on_pre_prove_segment_flag.clone(),
+        on_post_prove_segment_flag: on_post_prove_segment_flag.clone(),
+    };
+    session.add_hook(logger);
+    session.prove().unwrap();
+    assert_eq!(session.hooks.len(), 1);
+    assert_eq!(on_pre_prove_segment_flag.take(), true);
+    assert_eq!(on_post_prove_segment_flag.take(), true);
 }
 
 #[test]
@@ -241,15 +273,8 @@ fn continuation() {
     assert_eq!(final_segment.exit_code, ExitCode::Halted(0));
 
     let receipt = session.prove().unwrap();
-    for (idx, receipt) in receipt.segments.iter().enumerate() {
-        assert_eq!(
-            receipt
-                .as_any()
-                .downcast_ref::<SegmentReceipt>()
-                .unwrap()
-                .index,
-            idx as u32
-        );
+    for (idx, receipt) in receipt.inner.flat().iter().enumerate() {
+        assert_eq!(receipt.index, idx as u32);
     }
 }
 

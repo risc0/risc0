@@ -17,6 +17,7 @@ use std::collections::{BTreeMap, BTreeSet, VecDeque};
 
 use anyhow::{anyhow, Result};
 use lazy_regex::{regex, Captures};
+use risc0_binfmt::MemoryImage;
 use risc0_core::field::{
     baby_bear::{BabyBear, BabyBearElem as Elem},
     Elem as _,
@@ -33,7 +34,6 @@ use risc0_zkvm_platform::{
 
 use super::plonk;
 use crate::{
-    binfmt::image::MemoryImage,
     opcode::{MajorType, OpCode},
     session::PageFaults,
     Segment,

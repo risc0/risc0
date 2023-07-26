@@ -1,0 +1,66 @@
+// Copyright 2023 RISC Zero, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+use anyhow::Context;
+use axum::{extract::DefaultBodyLimit, middleware::from_fn, routing::post, Router};
+use tower_http::trace::{DefaultOnRequest, TraceLayer};
+use tracing::Level;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
+
+use crate::{
+    api::{
+        auth::authorize,
+        callback_request::{__path_post_callback_request, post_callback_request},
+        routes::CALLBACK_ROUTE,
+        state::ApiState,
+    },
+    sdk::client::CallbackRequest,
+    storage::Storage,
+};
+
+pub(crate) fn app<S: Storage + Sync + Send + Clone + 'static>(state: ApiState<S>) -> Router {
+    #[derive(OpenApi)]
+    #[openapi(paths(post_callback_request,), components(schemas(CallbackRequest)))]
+    struct ApiDoc;
+
+    Router::new()
+        .route(CALLBACK_ROUTE, post(post_callback_request))
+        .layer(from_fn(authorize))
+        .with_state(state)
+        .layer(DefaultBodyLimit::max(256 * 1024 * 1024))
+        .layer(TraceLayer::new_for_http().on_request(
+            DefaultOnRequest::new().level(Level::TRACE), // make on_request less visible
+        ))
+        .merge(
+            Router::new().merge(
+                SwaggerUi::new("/swagger-ui").url("/api-doc/openapi.json", ApiDoc::openapi()),
+            ),
+        )
+}
+
+pub(crate) async fn serve<S: Storage + Sync + Send + Clone + 'static>(
+    state: ApiState<S>,
+    port: String,
+) -> anyhow::Result<()> {
+    let bind_address = &format!("0.0.0.0:{port}");
+    axum::Server::bind(
+        &bind_address
+            .parse()
+            .context("failed to parse bind address")?,
+    )
+    .serve(app(state).into_make_service())
+    .await
+    .context(format!("failed to serve API on {bind_address}"))
+}
