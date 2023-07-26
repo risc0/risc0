@@ -1,6 +1,6 @@
 # RISC Zero Rust Starter Template
 
-Welcome to the RISC Zero Rust Starter Template! This template is intended to give you a starting point for building a project using the RISC Zero zkVM. Throughout the code are comments labelled `TODO` in places where we expect projects will need to modify the code.
+Welcome to the RISC Zero Rust Starter Template! This template is intended to give you a starting point for building a project using the RISC Zero zkVM. Throughout the template (including in this README), you'll find comments labelled `TODO` in places where you'll need to make changes.
 To better understand the concepts behind this template, check out our [Structure of a zkVM Application] explainer.
 
 >TODO: Replace this README with a README for your project
