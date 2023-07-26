@@ -19,7 +19,8 @@ use std::{
 
 use anyhow::Context;
 use risc0_zkvm::{
-    Executor, ExecutorEnv, LocalExecutor, MemoryImage, Program, SessionReceipt, MEM_SIZE, PAGE_SIZE,
+    receipt::InnerReceipt, Executor, ExecutorEnv, LocalExecutor, MemoryImage, Program,
+    SessionReceipt, MEM_SIZE, PAGE_SIZE,
 };
 use tokio::sync::mpsc;
 
@@ -105,10 +106,9 @@ impl Prover {
                 let mut exec = LocalExecutor::new(env, mem_img, pc);
                 let session = exec.run()?;
 
-                let journal = session.journal;
                 let receipt = SessionReceipt {
-                    journal,
-                    segments: vec![],
+                    inner: InnerReceipt::Fake,
+                    journal: session.journal,
                 };
                 let receipt_bytes = bincode::serialize(&receipt)?;
                 self.storage

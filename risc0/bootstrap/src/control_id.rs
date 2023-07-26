@@ -29,8 +29,6 @@ pub const SHA256_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
     "{}", //
-    "{}", //
-    "{}", //
 ];
 
 /// Control ID for Poseidon
@@ -46,14 +44,10 @@ pub const POSEIDON_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
     "{}", //
-    "{}", //
-    "{}", //
 ];
 
 /// Control ID for Blake2b
 pub const BLAKE2B_CONTROL_ID: RawControlId = [
-    "{}", //
-    "{}", //
     "{}", //
     "{}", //
     "{}", //
