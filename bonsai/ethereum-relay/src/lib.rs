@@ -20,7 +20,7 @@ mod storage;
 mod tests;
 mod uploader;
 
-use std::{str::FromStr, sync::Arc, time::Duration};
+use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use bonsai_sdk::alpha_async::get_client_from_parts;
@@ -29,18 +29,10 @@ use downloader::{
     proxy_callback_proof_processor::ProxyCallbackProofRequestProcessor,
     proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream,
 };
-use ethers::{
-    core::{
-        k256::{ecdsa::SigningKey, SecretKey},
-        types::Address,
-    },
-    middleware::SignerMiddleware,
-    prelude::*,
-    providers::{Provider, Ws},
-};
+use ethers::core::types::Address;
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
-use tracing::{debug, error, info};
+use tracing::info;
 use uploader::{
     completed_proofs::manager::BonsaiCompleteProofManager,
     pending_proofs::manager::BonsaiPendingProofManager,

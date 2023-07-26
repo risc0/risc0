@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{fmt::Write, path::Path, sync::Arc};
+use std::{ path::Path, sync::Arc};
 
 use anyhow::{anyhow, Context, Result};
 use ethers::{
     abi::Tokenize,
     prelude::{
-        k256::{ecdsa::SigningKey, SecretKey},
+        k256::{ecdsa::SigningKey, },
         *,
     },
     providers::{Http, Provider, Ws},

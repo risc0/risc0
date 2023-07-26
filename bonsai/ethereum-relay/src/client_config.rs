@@ -1,17 +1,15 @@
-use std::{str::FromStr, sync::Arc, time::Duration};
+use std::{str::FromStr, time::Duration};
 
 use anyhow::{Context, Result};
-use bonsai_sdk::alpha_async::get_client_from_parts;
 use ethers::{
     core::{
         k256::{ecdsa::SigningKey, SecretKey},
-        types::Address,
     },
     middleware::SignerMiddleware,
     prelude::*,
     providers::{Provider, Ws},
 };
-use tracing::{debug, error, info};
+use tracing::{debug, error, };
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct WalletKey(SecretKey);
