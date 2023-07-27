@@ -109,6 +109,7 @@ prove = [
   "dep:rrs-lib",
   "dep:sha2",
   "dep:thiserror",
+  "dep:typetag",
   "risc0-circuit-rv32im/prove",
   "risc0-zkp/prove",
   "std",
