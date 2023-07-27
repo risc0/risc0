@@ -258,6 +258,7 @@ impl<'a> LocalExecutor<'a> {
                         }
                         ExitCode::Fault => {
                             log::debug!("Fault: {}", self.segment_cycle);
+                            self.split(post_image)?;
                             return Ok(exit_code);
                         }
                     };
@@ -268,8 +269,10 @@ impl<'a> LocalExecutor<'a> {
         let exit_code = run_loop()?;
         self.exit_code = Some(exit_code);
         if let ExitCode::Fault = exit_code {
-            let fault_check_segment = self.run_fault_checker()?;
-            self.segments.push(fault_check_segment);
+            let fault_check_segments = self.run_fault_checker()?;
+            for segment in fault_check_segments {
+                self.segments.push(segment);
+            }
         }
         Ok(Session::new(
             take(&mut self.segments),
@@ -278,7 +281,7 @@ impl<'a> LocalExecutor<'a> {
         ))
     }
 
-    fn run_fault_checker(&mut self) -> Result<Box<dyn SegmentRef>> {
+    fn run_fault_checker(&mut self) -> Result<Vec<Box<dyn SegmentRef>>> {
         let pc = self.pc;
         // construct the system state
         let mut memory_map: HashMap<u32, Option<u32>> = HashMap::new();
@@ -307,8 +310,8 @@ impl<'a> LocalExecutor<'a> {
             .unwrap();
 
         let mut exec = self::LocalExecutor::from_elf(env, FAULT_CHECKER_ELF).unwrap();
-        let mut session = exec.run().unwrap();
-        Ok(session.segments.pop().unwrap())
+        let session = exec.run().unwrap();
+        Ok(session.segments)
     }
 
     fn split(&mut self, pre_image: MemoryImage) -> Result<()> {
@@ -385,6 +388,9 @@ impl<'a> LocalExecutor<'a> {
                 hart_state: &mut hart,
             };
             if let Err(_) = inst_exec.step() {
+                self.split_insn = Some(self.insn_counter);
+                log::debug!("fault: [{}] pc: 0x{:08x}", self.segment_cycle, self.pc,);
+                self.monitor.undo()?;
                 return Ok(Some(ExitCode::Fault));
             }
 
