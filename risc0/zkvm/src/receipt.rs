@@ -93,6 +93,7 @@ use risc0_zkp::{
     layout::Buffer,
     verify::VerificationError,
 };
+use risc0_zkvm_fault::FAULT_CHECKER_ID;
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
@@ -210,7 +211,10 @@ impl SegmentReceipts {
         final_receipt.verify_with_context(ctx)?;
         let metadata = final_receipt.get_metadata()?;
         log::debug!("final: {metadata:#?}");
-        if prev_image_id != metadata.pre.digest() {
+        // If there's more than one segment, the last segment could be the fault checker
+        if prev_image_id != metadata.pre.digest()
+            && !(receipts.len() > 0 && metadata.pre.digest() == FAULT_CHECKER_ID.into())
+        {
             return Err(VerificationError::ImageVerificationError);
         }
 
