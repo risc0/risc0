@@ -15,7 +15,7 @@ We start from the [OpenZeppelin Governor] standard, which is used by DAOs such a
 
 Key to this design is offloading compute that is expensive on-chain to the [RISC Zero] zkVM guest, with execution and proving being handled by Bonsai.
 In particular, this design optimizes voting operations, especially when casting a signed vote, by deferring signature verification and ensuring that voters can only vote once to the zkVM.
-Instead of the verifying the signature, or adding the ballot to EVM state, both the `Governor.vote` and `Governor.voteBySig` methods simply log an `event` and add the ballot to a running hash accumulator.
+Instead of verifying the signature or adding the ballot to EVM state, both the `Governor.vote` and `Governor.voteBySig` methods simply log an `event` and add the ballot to a running hash accumulator.
 With this, we are able to reduce gas costs for voting, while maintaining the security guarantees of voting on L1.
 
 As a result, the Bonsai Governor uses about 66% less gas per vote[^1] compared with the baseline [OpenZeppelin Governor] implementation.
@@ -31,8 +31,8 @@ Check out `methods/guest/src/bin/finalize_votes.rs` to see the full definition o
 
 Features currently in development can further decrease gas costs to make it possible to execute governance with L1 security, with only a fixed cost of ~300-400k gas per proposal, no matter how many votes. [^3]
 
-[^1]: When dicussing gas-per-vote we only count the gas spent executing Governor logic, and not e.g. intrisic gas for a transaction. We count it this way since both in the baseline and Bonsai Governor these costs can be amortized by batching transactions.
-[^2]: Prover costs are not mentioned here because proving computation off-chain with RISC Zero costs less than 1\100th the cost of on-chain compute as of July 2023.
+[^1]: When discussing gas-per-vote we only count the gas spent executing Governor logic, and not e.g. intrisic gas for a transaction. We count it this way since both in the baseline and Bonsai Governor these costs can be amortized by batching transactions.
+[^2]: Prover costs are not mentioned here because proving computation off-chain with RISC Zero costs less than 1/100th the cost of on-chain compute as of July 2023.
 [^3]: In particular, we are working on methods for verified L1 data access in the zkVM guest, which will allow lookup up voter weights inside the guest.
 
 ### Security Considerations
