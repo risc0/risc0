@@ -15,7 +15,7 @@
 use bevy_core::Outputs;
 use bevy_methods::{BEVY_GUEST_ELF, BEVY_GUEST_ID};
 use risc0_zkvm::{
-    default_executor_from_elf,
+    default_prover,
     serde::{from_slice, to_vec},
     ExecutorEnv,
 };
@@ -29,15 +29,14 @@ fn main() {
         .build()
         .unwrap();
 
-    // Next, we make an executor, loading the ELF binary.
-    let mut exec = default_executor_from_elf(env, BEVY_GUEST_ELF).unwrap();
+    // Obtain the default prover.
+    let prover = default_prover();
 
-    // Run the executor to produce a session.
-    let session = exec.run().unwrap();
+    // Produce a receipt by proving the specified ELF binary.
+    let receipt = prover.prove_elf(env, BEVY_GUEST_ELF).unwrap();
 
-    // Prove the session to produce a receipt.
-    let receipt = session.prove().unwrap();
-
+    // The prover already runs a verify internally, but this is how other users
+    // would verify the receipt.
     receipt.verify(BEVY_GUEST_ID).unwrap();
 
     let outputs: Outputs =

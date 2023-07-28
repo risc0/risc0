@@ -21,9 +21,9 @@ use clap::{Parser, Subcommand};
 use prorata_core::{AllocationQuery, AllocationQueryResult};
 use prorata_methods::{PRORATA_GUEST_ELF, PRORATA_GUEST_ID};
 use risc0_zkvm::{
-    default_executor_from_elf,
+    default_prover,
     serde::{from_slice, to_vec},
-    ExecutorEnv, SessionReceipt,
+    ExecutorEnv, Receipt,
 };
 use rust_decimal::Decimal;
 
@@ -94,9 +94,11 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
         .build()
         .unwrap();
 
-    let mut exec = default_executor_from_elf(env, PRORATA_GUEST_ELF).unwrap();
-    let session = exec.run().unwrap();
-    let receipt = session.prove().unwrap(); // Proof generation
+    // Obtain the default prover.
+    let prover = default_prover();
+
+    // Produce a receipt by proving the specified ELF binary.
+    let receipt = prover.prove_elf(env, PRORATA_GUEST_ELF).unwrap();
 
     // Verify receipt to confirm that it is correctly formed. Not strictly
     // necessary.
@@ -111,7 +113,7 @@ fn allocate(input: &str, output: &str, recipient: &str, amount: &Decimal) {
 /// Verify an allocation read from a receipt on disk.
 fn verify(input: &str) {
     let receipt_data = fs::read(PathBuf::from(input)).unwrap();
-    let receipt: SessionReceipt = bincode::deserialize(&receipt_data).unwrap();
+    let receipt: Receipt = bincode::deserialize(&receipt_data).unwrap();
 
     // Proof verification below
     match receipt.verify(PRORATA_GUEST_ID) {

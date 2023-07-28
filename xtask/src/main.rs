@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use clap::{Parser, Subcommand};
-use risc0_zkvm::{prove::default_prover, Executor, ExecutorEnv, LocalExecutor, VerifierContext};
+use risc0_zkvm::{prove::default_prover, ExecutorEnv};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
 use semver::Version;
 use which::which;
@@ -50,11 +50,7 @@ impl Commands {
             .add_input(&[iterations])
             .build()
             .unwrap();
-        let mut exec = LocalExecutor::from_elf(env, FIB_ELF).unwrap();
-        let session = exec.run().unwrap();
-        let prover = default_prover();
-        let ctx = VerifierContext::default();
-        let receipt = prover.prove_session(&ctx, &session).unwrap();
+        let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
         let receipt_bytes = bincode::serialize(&receipt).unwrap();
 
         let rust_code = format!(
