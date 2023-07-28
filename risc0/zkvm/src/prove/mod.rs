@@ -20,49 +20,44 @@
 //! information.
 //!
 //! ```rust
-//! use risc0_zkvm::{default_executor_from_elf, ExecutorEnv};
+//! use risc0_zkvm::{default_prover, ExecutorEnv};
 //! use risc0_zkvm_methods::FIB_ELF;
 //!
 //! # #[cfg(not(feature = "cuda"))]
 //! # {
 //! let env = ExecutorEnv::builder().add_input(&[20]).build().unwrap();
-//! let mut exec = default_executor_from_elf(env, FIB_ELF).unwrap();
-//! let session = exec.run().unwrap();
-//! let receipt = session.prove().unwrap();
+//! let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
 //! # }
 //! ```
 
 mod exec;
 pub(crate) mod loader;
+mod local;
 mod plonk;
+mod remote;
 #[cfg(test)]
 mod tests;
 
-use std::{collections::HashMap, rc::Rc, time::Duration};
+use std::{collections::HashMap, rc::Rc};
 
-use anyhow::{bail, Result};
-use bonsai_sdk::alpha as bonsai_sdk;
-use risc0_circuit_rv32im::{
-    layout::{OutBuffer, LAYOUT},
-    CircuitImpl, REGISTER_GROUP_ACCUM, REGISTER_GROUP_CODE, REGISTER_GROUP_DATA,
-};
+use anyhow::Result;
+use risc0_binfmt::{MemoryImage, Program};
+use risc0_circuit_rv32im::CircuitImpl;
 use risc0_core::field::{
     baby_bear::{BabyBear, Elem, ExtElem},
     Elem as _,
 };
 use risc0_zkp::{
-    adapter::{CircuitInfo, TapsProvider},
+    adapter::CircuitInfo,
     core::digest::DIGEST_WORDS,
     hal::{EvalCheck, Hal},
-    layout::Buffer,
-    prove::{adapter::ProveAdapter, executor::Executor},
 };
-use risc0_zkvm_platform::WORD_SIZE;
+use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, WORD_SIZE};
 
-use self::{exec::MachineContext, loader::Loader};
+use self::{local::LocalProver, remote::RemoteProver};
 use crate::{
-    receipt::{InnerReceipt, SegmentReceipts, SessionReceipt, VerifierContext},
-    Segment, SegmentReceipt, Session, CIRCUIT,
+    receipt::{Receipt, VerifierContext},
+    ExecutorEnv, Segment, SegmentReceipt, Session,
 };
 
 /// HAL creation functions for CUDA.
@@ -176,196 +171,45 @@ where
     pub eval: Rc<E>,
 }
 
-/// TODO
+/// A Prover can execute a given [MemoryImage] and produce a [Receipt] that can
+/// be used to verify correct computation.
 pub trait Prover {
-    /// TODO
-    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt>;
+    /// Prove the specified [MemoryImage].
+    fn prove<'a>(
+        &self,
+        env: ExecutorEnv<'a>,
+        ctx: &VerifierContext,
+        image: MemoryImage,
+    ) -> Result<Receipt>;
 
-    /// TODO
+    /// Prove the specified ELF binary.
+    fn prove_elf<'a>(&self, env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Receipt> {
+        self.prove_elf_with_ctx(env, &VerifierContext::default(), elf)
+    }
+
+    /// Prove the specified [MemoryImage] with the specified [VerifierContext].
+    fn prove_elf_with_ctx<'a>(
+        &self,
+        env: ExecutorEnv<'a>,
+        ctx: &VerifierContext,
+        elf: &[u8],
+    ) -> Result<Receipt> {
+        let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
+        self.prove(env, ctx, image)
+    }
+
+    /// Prove the specified [Session].
+    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<Receipt>;
+
+    /// Prove the specified [Segment].
     fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt>;
 
-    /// TODO
+    /// Return the peak memory usage that this [Prover] has experienced.
     fn get_peak_memory_usage(&self) -> usize;
 
-    /// TODO
+    /// Return a name for this [Prover].
     fn get_name(&self) -> String;
-}
-
-/// An implementation of a [Prover] that runs proof workloads remotely.
-pub struct RemoteProver {
-    name: String,
-}
-
-impl RemoteProver {
-    /// construct a remote prover. Unlike the [LocalProver], the hal is taken
-    /// care of by the remote prover.
-    pub fn new(name: &str) -> Self {
-        Self {
-            name: name.to_string(),
-        }
-    }
-}
-
-impl Prover for RemoteProver {
-    fn get_name(&self) -> String {
-        self.name.clone()
-    }
-
-    fn get_peak_memory_usage(&self) -> usize {
-        0
-    }
-
-    fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt> {
-        log::debug!("prove_session: {}", self.name);
-        let client = bonsai_sdk::Client::from_env()?;
-
-        let session = match &session.bonsai_session_id {
-            Some(id) => bonsai_sdk::SessionId::new(id.clone()),
-            None => bail!("Session does not have a bonsai session ID"),
-        };
-
-        loop {
-            // The session has already been started in the executor. Poll bonsai to check if
-            // the proof request succeeded.
-            let res = session.status(&client)?;
-            if res.status == "RUNNING" {
-                std::thread::sleep(Duration::from_secs(5));
-                continue;
-            }
-            if res.status == "SUCCEEDED" {
-                // Download the receipt, containing the output
-                let receipt_url = match res.receipt_url {
-                    Some(url) => url,
-                    None => bail!("API error, missing receipt on completed session"),
-                };
-
-                let receipt_buf = client.download(&receipt_url)?;
-                let receipt: SessionReceipt = bincode::deserialize(&receipt_buf)?;
-                return Ok(receipt);
-            } else {
-                bail!("Bonsai prover workflow exited: {}", res.status);
-            }
-        }
-    }
-
-    fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
-        bail!("this is unimplemented for prover [{}]", self.get_name())
-    }
-}
-
-/// An implementation of a [Prover] that runs locally.
-pub struct LocalProver<H, E>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    E: EvalCheck<H>,
-{
-    name: String,
-    hal_eval: HalEval<H, E>,
-}
-
-impl<H, E> LocalProver<H, E>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    E: EvalCheck<H>,
-{
-    /// Construct a [LocalProver] with the given name and [HalEval].
-    pub fn new(name: &str, hal_eval: HalEval<H, E>) -> Self {
-        Self {
-            name: name.to_string(),
-            hal_eval,
-        }
-    }
-}
-
-impl<H, E> Prover for LocalProver<H, E>
-where
-    H: Hal<Field = BabyBear, Elem = Elem, ExtElem = ExtElem>,
-    E: EvalCheck<H>,
-{
-    fn get_name(&self) -> String {
-        self.name.clone()
-    }
-
-    fn get_peak_memory_usage(&self) -> usize {
-        self.hal_eval.hal.get_memory_usage()
-    }
-
-    fn prove_session(&self, ctx: &VerifierContext, session: &Session) -> Result<SessionReceipt> {
-        log::info!("prove_session: {}", self.name);
-        let mut segments = Vec::new();
-        for segment_ref in session.segments.iter() {
-            let segment = segment_ref.resolve()?;
-            for hook in &session.hooks {
-                hook.on_pre_prove_segment(&segment);
-            }
-            segments.push(self.prove_segment(ctx, &segment)?);
-            for hook in &session.hooks {
-                hook.on_post_prove_segment(&segment);
-            }
-        }
-        let inner = InnerReceipt::Flat(SegmentReceipts(segments));
-        let receipt = SessionReceipt::new(inner, session.journal.clone());
-        let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        receipt.verify_with_context(ctx, image_id)?;
-        Ok(receipt)
-    }
-
-    fn prove_segment(&self, ctx: &VerifierContext, segment: &Segment) -> Result<SegmentReceipt> {
-        log::info!(
-            "prove_segment[{}]: po2: {}, insn_cycles: {}",
-            segment.index,
-            segment.po2,
-            segment.insn_cycles,
-        );
-        let (hal, eval) = (self.hal_eval.hal.as_ref(), &self.hal_eval.eval);
-        let hashfn = &hal.get_hash_suite().name;
-
-        let io = segment.prepare_globals();
-        let machine = MachineContext::new(segment);
-        let mut executor = Executor::new(&CIRCUIT, machine, segment.po2, segment.po2, &io);
-
-        let loader = Loader::new();
-        loader.load(|chunk, fini| executor.step(chunk, fini))?;
-        executor.finalize();
-
-        let mut adapter = ProveAdapter::new(&mut executor);
-        let mut prover = risc0_zkp::prove::Prover::new(hal, CIRCUIT.get_taps());
-
-        adapter.execute(prover.iop());
-
-        prover.set_po2(adapter.po2() as usize);
-
-        prover.commit_group(
-            REGISTER_GROUP_CODE,
-            hal.copy_from_elem("code", &adapter.get_code().as_slice()),
-        );
-        prover.commit_group(
-            REGISTER_GROUP_DATA,
-            hal.copy_from_elem("data", &adapter.get_data().as_slice()),
-        );
-        adapter.accumulate(prover.iop());
-        prover.commit_group(
-            REGISTER_GROUP_ACCUM,
-            hal.copy_from_elem("accum", &adapter.get_accum().as_slice()),
-        );
-
-        let mix = hal.copy_from_elem("mix", &adapter.get_mix().as_slice());
-        let out_slice = &adapter.get_io().as_slice();
-
-        log::debug!("Globals: {:?}", OutBuffer(out_slice).tree(&LAYOUT));
-        let out = hal.copy_from_elem("out", &adapter.get_io().as_slice());
-
-        let seal = prover.finalize(&[&mix, &out], eval.as_ref());
-
-        let receipt = SegmentReceipt {
-            seal,
-            index: segment.index,
-            hashfn: hashfn.clone(),
-        };
-        receipt.verify_with_context(ctx)?;
-
-        Ok(receipt)
-    }
 }
 
 fn provers() -> HashMap<String, Rc<dyn Prover>> {
@@ -482,7 +326,7 @@ pub fn get_prover(name: &str) -> Rc<dyn Prover> {
 
 impl Session {
     /// For each segment, call [Segment::prove] and collect the receipts.
-    pub fn prove(&self) -> Result<SessionReceipt> {
+    pub fn prove(&self) -> Result<Receipt> {
         default_prover().prove_session(&VerifierContext::default(), self)
     }
 }
