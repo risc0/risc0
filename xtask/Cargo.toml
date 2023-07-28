@@ -9,7 +9,7 @@ clap = { version = "4.0", features = ["derive"] }
 risc0-zkvm = { workspace = true, features = ["default"] }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
 semver = "1.0"
-svm-rs = { version = "0.2", features = ["blocking"] }
+svm-rs = { version = "0.3", features = ["blocking"] }
 which = "4.4"
 xshell = "0.2"
 
