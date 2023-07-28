@@ -80,7 +80,7 @@ pub trait Sha256 {
     /// Generate a SHA-256 hash from a slice of words, padding to block size
     /// and adding the SHA-256 hash trailer, as specified in FIPS 180-4.
     fn hash_words(words: &[u32]) -> Self::DigestPtr {
-        Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
+        Self::hash_bytes(bytemuck::cast_slice(words))
     }
 
     /// Generate a hash from a pair of [Digest] using the SHA-256 compression

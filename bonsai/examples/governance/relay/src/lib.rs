@@ -15,7 +15,7 @@
 use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
-use bonsai_sdk_alpha::alpha::{responses::SnarkProof, Client, SdkErr};
+use bonsai_sdk::alpha::{responses::SnarkProof, Client, SdkErr};
 use clap::{builder::PossibleValue, ValueEnum};
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{
@@ -146,7 +146,8 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         }
     })()?;
     let metadata = receipt
-        .segments
+        .inner
+        .flat()
         .last()
         .ok_or(anyhow!("receipt contains no segments"))?
         .get_metadata()?;

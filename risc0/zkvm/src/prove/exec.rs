@@ -371,8 +371,8 @@ impl MachineContext {
         denom: (Elem, Elem, Elem, Elem),
         sign: Elem,
     ) -> ((Elem, Elem, Elem, Elem), (Elem, Elem, Elem, Elem)) {
-        let mut numer = merge_word8(numer) as u32;
-        let mut denom = merge_word8(denom) as u32;
+        let mut numer = merge_word8(numer);
+        let mut denom = merge_word8(denom);
         let sign: u32 = sign.into();
         // log::debug!("divide: [{sign}] {numer} / {denom}");
         let ones_comp = (sign == 2) as u32;

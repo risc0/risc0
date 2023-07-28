@@ -46,8 +46,8 @@ impl ReceiptMetadata {
         let input = read_sha_halfs(flat);
         let pre = SystemState::decode(flat);
         let post = SystemState::decode(flat);
-        let sys_exit = flat.pop_front().unwrap() as u32;
-        let user_exit = flat.pop_front().unwrap() as u32;
+        let sys_exit = flat.pop_front().unwrap();
+        let user_exit = flat.pop_front().unwrap();
         let exit_code = ReceiptMetadata::make_exit_code(sys_exit, user_exit)?;
         let output = read_sha_halfs(flat);
 
