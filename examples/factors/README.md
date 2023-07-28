@@ -106,6 +106,9 @@ In the starter template project, our host driver program creates an executor env
     // First, we construct an executor environment
     let env = ExecutorEnv::builder().build().unwrap();
 
+    // Obtain the default prover.
+    let prover = default_prover();
+
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, MULTIPLY_ELF).unwrap();
 
