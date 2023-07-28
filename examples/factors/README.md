@@ -218,7 +218,6 @@ For this step, we return to the main file for the host driver program at `factor
 ```no_compile
     // Run the prover to produce a receipt.
     let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
-
 ```
 
 In a real-world scenario, we'd want to hand the [receipt] to someone else, but reading it ourselves will be a nice way to check our project is working as expected.
