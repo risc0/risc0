@@ -35,8 +35,8 @@ fn main() {
     // Produce a receipt by proving the specified ELF binary.
     let receipt = prover.prove_elf(env, BEVY_GUEST_ELF).unwrap();
 
-    // The prover already runs a verify internally, but this is how other users
-    // would verify the receipt.
+    // The prover already runs a verify internally and so it's redundant to verify
+    // again here. However, this is how other users would verify the receipt:
     receipt.verify(BEVY_GUEST_ID).unwrap();
 
     let outputs: Outputs =
