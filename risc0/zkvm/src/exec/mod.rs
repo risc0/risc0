@@ -14,9 +14,9 @@
 
 //! The execution phase is implemented by this module.
 //!
-//! The result of the execution phase is a [Session]. Each [Session] contains
-//! one or more [crate::Segment]s, each of which contains an execution trace of
-//! the specified program.
+//! The result of the execution phase is a [crate::Session]. Each
+//! [crate::Session] contains one or more [crate::Segment]s, each of which
+//! contains an execution trace of the specified program.
 
 mod env;
 mod exec;
