@@ -17,8 +17,9 @@ use std::collections::HashMap;
 use rrs_lib::Memory;
 use serde::{Deserialize, Serialize};
 
-/// This is a minimal variant of the [crate::MemoryMonitor] struct used for the
-/// fault checker.
+/// This is a small implementation of a memory monitor used for the fault
+/// checker. It records all memory regions needed for a signle RISC-V
+/// instruction execution.
 #[derive(Serialize, Deserialize, Debug)]
 pub struct MiniMonitor {
     /// The program counter of the instruction to execute
