@@ -18,7 +18,7 @@ use wasm_bindgen_test::{wasm_bindgen_test, wasm_bindgen_test_configure};
 
 wasm_bindgen_test_configure!(run_in_browser);
 
-// This runs a unit test in the browser, so it can use browser APIs.
+// `test_verify` runs a unit test in the browser, so it can use browser APIs.
 #[wasm_bindgen_test]
 fn test_verify() {
     let receipt: Receipt = bincode::deserialize(FIB_RECEIPT).unwrap();
