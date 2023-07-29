@@ -135,25 +135,12 @@ async fn create_ethers_client_proxy_kms(
     Ok(Arc::new(SignerMiddleware::new(web3_provider, aws_signer)))
 }
 
-const BONSAI_API_URI: &str = "http://localhost:8081";
-
 fn get_bonsai_url() -> String {
-    let endpoint = match std::env::var("BONSAI_API_URL") {
-        Ok(endpoint) => endpoint,
-        Err(_) => BONSAI_API_URI.to_string(),
-    };
-
-    let bonsai_api_endpoint = endpoint
-        .is_empty()
-        .then(|| BONSAI_API_URI.to_string())
-        .unwrap_or(endpoint);
-
-    bonsai_api_endpoint
+    const DEFAULT_URI: &str = "http://localhost:8081";
+    std::env::var("BONSAI_API_URL").unwrap_or(DEFAULT_URI.to_string())
 }
 
 fn get_bonsai_api_key() -> String {
-    match std::env::var("BONSAI_API_KEY") {
-        Ok(api_key) => api_key,
-        _ => "test_key".to_string(),
-    }
+    const DEFAULT_KEY: &str = "test_key";
+    std::env::var("BONSAI_API_KEY").unwrap_or(DEFAULT_KEY.to_string())
 }

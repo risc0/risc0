@@ -17,7 +17,7 @@ use num_traits::FromPrimitive;
 use rrs_lib::{instruction_string_outputter::InstructionStringOutputter, process_instruction};
 
 #[allow(dead_code)]
-#[derive(Debug, num_derive::FromPrimitive, PartialEq)]
+#[derive(Copy, Clone, Debug, num_derive::FromPrimitive, PartialEq)]
 #[repr(u32)]
 pub enum MajorType {
     Compute0,
@@ -46,8 +46,8 @@ pub struct OpCode {
 }
 
 impl MajorType {
-    pub fn as_u32(self) -> u32 {
-        self as u32
+    pub fn as_u32(&self) -> u32 {
+        *self as u32
     }
 }
 

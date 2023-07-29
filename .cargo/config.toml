@@ -1,2 +1,5 @@
 [alias]
 xtask = "run --release --package xtask --"
+
+[build]
+rustflags = ["-Dclippy::all", "-Dwarnings"]

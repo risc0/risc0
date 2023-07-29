@@ -16,7 +16,7 @@
 use core::arch::asm;
 use core::{cmp::min, ptr::null_mut};
 
-use crate::WORD_SIZE;
+use crate::{memory::RESERVED_STACK, WORD_SIZE};
 
 pub mod ecall {
     pub const HALT: u32 = 0;
@@ -112,7 +112,7 @@ macro_rules! declare_syscall {
     ($(#[$meta:meta])*
      $vis:vis $name:ident) => {
         $(#[$meta])*
-        $vis const $name: $crate::syscall::SyscallName = unsafe {
+        $vis const $name: $crate::syscall::SyscallName = {
             $crate::syscall::SyscallName::from_bytes_with_nul(concat!(
                 module_path!(),
                 "::",
@@ -134,7 +134,7 @@ pub mod nr {
 }
 
 impl SyscallName {
-    pub const unsafe fn from_bytes_with_nul(ptr: *const u8) -> Self {
+    pub const fn from_bytes_with_nul(ptr: *const u8) -> Self {
         Self(ptr)
     }
 
@@ -167,6 +167,10 @@ macro_rules! impl_syscall {
        )?
      )?) => {
         /// Invoke a raw system call
+        ///
+        /// # Safety
+        ///
+        /// `from_host` must be aligned and dereferenceable.
         #[no_mangle]
         pub unsafe extern "C" fn $func_name(syscall: SyscallName,
                                  from_host: *mut u32,
@@ -216,39 +220,71 @@ impl_syscall!(syscall_3, a3, a4, a5);
 impl_syscall!(syscall_4, a3, a4, a5, a6);
 impl_syscall!(syscall_5, a3, a4, a5, a6, a7);
 
-#[inline(always)]
-#[no_mangle]
-pub unsafe extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) -> ! {
+fn ecall_1(t0: u32, a0: u32, a1: u32) {
     #[cfg(target_os = "zkvm")]
-    {
+    unsafe {
         asm!(
             "ecall",
-            in("t0") ecall::HALT,
-            in("a0") (halt::TERMINATE | ((user_exit as u32) << 8)),
-            in("a1") out_state,
-        );
-        unreachable!();
-    }
+            in("t0") t0,
+            in("a0") a0,
+            in("a1") a1,
+        )
+    };
     #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
+    {
+        core::hint::black_box((t0, a0, a1));
+        unimplemented!()
+    }
 }
 
+fn ecall_4(t0: u32, a0: u32, a1: u32, a2: u32, a3: u32, a4: u32) {
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        asm!(
+            "ecall",
+            in("t0") t0,
+            in("a0") a0,
+            in("a1") a1,
+            in("a2") a2,
+            in("a3") a3,
+            in("a4") a4,
+        )
+    };
+    #[cfg(not(target_os = "zkvm"))]
+    {
+        core::hint::black_box((t0, a0, a1, a2, a3, a4));
+        unimplemented!()
+    }
+}
+
+#[inline(always)]
+#[no_mangle]
+pub extern "C" fn sys_halt(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) -> ! {
+    ecall_1(
+        ecall::HALT,
+        halt::TERMINATE | ((user_exit as u32) << 8),
+        out_state as u32,
+    );
+    unreachable!();
+}
+
+/// # Safety
+///
+/// `out_state` must be aligned and dereferenceable.
 #[inline(always)]
 #[no_mangle]
 pub unsafe extern "C" fn sys_pause(user_exit: u8, out_state: *const [u32; DIGEST_WORDS]) {
-    #[cfg(target_os = "zkvm")]
-    {
-        asm!(
-            "ecall",
-            in("t0") ecall::HALT,
-            in("a0") (halt::PAUSE | ((user_exit as u32) << 8)),
-            in("a1") out_state,
-        );
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
+    ecall_1(
+        ecall::HALT,
+        halt::PAUSE | ((user_exit as u32) << 8),
+        out_state as u32,
+    );
 }
 
+/// # Safety
+///
+/// `out_state`, `in_state`, `block1_ptr`, and `block2_ptr` must be aligned and
+/// dereferenceable.
 #[inline(always)]
 #[no_mangle]
 pub unsafe extern "C" fn sys_sha_compress(
@@ -257,22 +293,19 @@ pub unsafe extern "C" fn sys_sha_compress(
     block1_ptr: *const [u32; DIGEST_WORDS],
     block2_ptr: *const [u32; DIGEST_WORDS],
 ) {
-    #[cfg(target_os = "zkvm")]
-    {
-        asm!(
-            "ecall",
-            in("t0") ecall::SHA,
-            in("a0") out_state,
-            in("a1") in_state,
-            in("a2") block1_ptr,
-            in("a3") block2_ptr,
-            in("a4") 1,
-        );
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
+    ecall_4(
+        ecall::SHA,
+        out_state as u32,
+        in_state as u32,
+        block1_ptr as u32,
+        block2_ptr as u32,
+        1,
+    );
 }
 
+/// # Safety
+///
+/// `out_state`, `in_state`, and `buf` must be aligned and dereferenceable.
 #[inline(always)]
 #[no_mangle]
 pub unsafe extern "C" fn sys_sha_buffer(
@@ -281,31 +314,28 @@ pub unsafe extern "C" fn sys_sha_buffer(
     buf: *const u8,
     count: u32,
 ) {
-    #[cfg(target_os = "zkvm")]
-    {
-        let mut ptr = buf;
-        let mut count_remain = count;
-        let mut in_state = in_state;
-        while count_remain > 0 {
-            let count = min(count_remain, MAX_SHA_COMPRESS_BLOCKS as u32);
-            asm!(
-                "ecall",
-                in("t0") ecall::SHA,
-                in("a0") out_state,
-                in("a1") in_state,
-                in("a2") ptr,
-                in("a3") ptr.add(DIGEST_BYTES),
-                in("a4") count,
-            );
-            count_remain -= count;
-            ptr = ptr.add(2 * DIGEST_BYTES * count as usize);
-            in_state = out_state;
-        }
+    let mut ptr = buf;
+    let mut count_remain = count;
+    let mut in_state = in_state;
+    while count_remain > 0 {
+        let count = min(count_remain, MAX_SHA_COMPRESS_BLOCKS as u32);
+        ecall_4(
+            ecall::SHA,
+            out_state as u32,
+            in_state as u32,
+            ptr as u32,
+            ptr.add(DIGEST_BYTES) as u32,
+            count,
+        );
+        count_remain -= count;
+        ptr = ptr.add(2 * DIGEST_BYTES * count as usize);
+        in_state = out_state;
     }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
 }
 
+/// # Safety
+///
+/// `result`, `x`, `y`, and `modulus` must be aligned and dereferenceable.
 #[inline(always)]
 #[no_mangle]
 pub unsafe extern "C" fn sys_bigint(
@@ -315,47 +345,48 @@ pub unsafe extern "C" fn sys_bigint(
     y: *const [u32; bigint::WIDTH_WORDS],
     modulus: *const [u32; bigint::WIDTH_WORDS],
 ) {
-    #[cfg(target_os = "zkvm")]
-    {
-        asm!(
-            "ecall",
-            in("t0") ecall::BIGINT,
-            in("a0") result,
-            in("a1") op,
-            in("a2") x,
-            in("a3") y,
-            in("a4") modulus,
-        );
-    }
-    #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
+    ecall_4(
+        ecall::BIGINT,
+        result as u32,
+        op,
+        x as u32,
+        y as u32,
+        modulus as u32,
+    );
 }
 
+/// # Safety
+///
+/// `recv_buf` must be aligned and dereferenceable.
 #[no_mangle]
 pub unsafe extern "C" fn sys_rand(recv_buf: *mut u32, words: usize) {
     syscall_0(nr::SYS_RANDOM, recv_buf, words);
 }
 
+/// # Safety
+///
+/// `msg_ptr` must be aligned and dereferenceable.
 #[no_mangle]
 pub unsafe extern "C" fn sys_panic(msg_ptr: *const u8, len: usize) -> ! {
     syscall_2(nr::SYS_PANIC, null_mut(), 0, msg_ptr as u32, len as u32);
 
     // As a fallback for non-compliant hosts, issue an illegal instruction.
     #[cfg(target_os = "zkvm")]
-    unsafe {
-        asm!("sw x0, 1(x0)")
-    };
+    asm!("sw x0, 1(x0)");
     unreachable!()
 }
 
+/// # Safety
+///
+/// `msg_ptr` must be aligned and dereferenceable.
 #[no_mangle]
 pub unsafe extern "C" fn sys_log(msg_ptr: *const u8, len: usize) {
     syscall_2(nr::SYS_LOG, null_mut(), 0, msg_ptr as u32, len as u32);
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn sys_cycle_count() -> usize {
-    let Return(a0, _) = syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0);
+pub extern "C" fn sys_cycle_count() -> usize {
+    let Return(a0, _) = unsafe { syscall_0(nr::SYS_CYCLE_COUNT, null_mut(), 0) };
     a0 as usize
 }
 
@@ -367,6 +398,10 @@ pub unsafe extern "C" fn sys_cycle_count() -> usize {
 /// read at least one byte.
 ///
 /// Users should prefer a higher-level abstraction.
+///
+/// # Safety
+///
+/// `recv_ptr` must be aligned and dereferenceable.
 #[no_mangle]
 pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize) -> usize {
     // The SYS_READ system call can do a given number of word-aligned reads
@@ -390,7 +425,7 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
         debug_assert!(nfill < 4, "nfill={nfill}");
         for _ in 0..nfill {
             *ptr = (word & 0xFF) as u8;
-            word = word >> 8;
+            word >>= 8;
             ptr = ptr.add(1);
         }
         ptr
@@ -456,10 +491,10 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
 ///
 /// # Safety
 ///
-/// `recv_buf' must be a word-aligned pointer and point to a region of
+/// `recv_ptr' must be a word-aligned pointer and point to a region of
 /// `nwords' size.
-pub unsafe extern "C" fn sys_read_words(fd: u32, recv_buf: *mut u32, nwords: usize) -> usize {
-    sys_read_internal(fd, recv_buf, nwords, nwords * WORD_SIZE).0
+pub unsafe extern "C" fn sys_read_words(fd: u32, recv_ptr: *mut u32, nwords: usize) -> usize {
+    sys_read_internal(fd, recv_ptr, nwords, nwords * WORD_SIZE).0
 }
 
 fn sys_read_internal(fd: u32, recv_ptr: *mut u32, nwords: usize, nbytes: usize) -> (usize, u32) {
@@ -493,6 +528,9 @@ fn sys_read_internal(fd: u32, recv_ptr: *mut u32, nwords: usize, nbytes: usize) 
     (nread_total_bytes, final_word)
 }
 
+/// # Safety
+///
+/// `write_ptr` must be aligned and dereferenceable.
 #[no_mangle]
 pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize) {
     let mut nbytes_remain = nbytes;
@@ -519,6 +557,10 @@ pub unsafe extern "C" fn sys_write(fd: u32, write_ptr: *const u8, nbytes: usize)
 /// This is normally called twice to read an environment variable:
 /// Once to get the length of the value, and once to fill in allocated
 /// memory.
+///
+/// # Safety
+///
+/// `out_words` and `varname` must be aligned and dereferenceable.
 #[no_mangle]
 pub unsafe extern "C" fn sys_getenv(
     out_words: *mut u32,
@@ -541,59 +583,58 @@ pub unsafe extern "C" fn sys_getenv(
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
+pub extern "C" fn sys_alloc_words(nwords: usize) -> *mut u32 {
     sys_alloc_aligned(WORD_SIZE * nwords, WORD_SIZE) as *mut u32
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
-    #[cfg(target_os = "zkvm")]
-    {
-        extern "C" {
-            // This symbol is defined by the loader and marks the end
-            // of all elf sections, so this is where we start our
-            // heap.
-            //
-            // This is generated automatically by the linker; see
-            // https://lld.llvm.org/ELF/linker_script.html#sections-command
-            static _end: u8;
-        }
-
-        // Pointer to next heap address to use, or 0 if the heap has not yet been
-        // initialized.
-        static mut HEAP_POS: usize = 0;
-
-        // SAFETY: Single threaded, so nothing else can touch this while we're working.
-        let mut heap_pos = unsafe { HEAP_POS };
-
-        if heap_pos == 0 {
-            heap_pos = (&_end) as *const u8 as usize;
-        }
-
-        let offset = heap_pos & (align - 1);
-        if offset != 0 {
-            heap_pos += align - offset;
-        }
-
-        // Ensure all allocations are minimally aligned to a word boundary.
-        let align = usize::min(align, WORD_SIZE);
-
-        let ptr = heap_pos as *mut u8;
-        heap_pos += bytes;
-
-        // Check to make sure we keep space between the heap and the
-        // stack so they don't accidentally step on each other.
-        let mut stack_pointer: usize;
-        unsafe { asm!("add {stack_pointer}, sp, zero", stack_pointer = out(reg) stack_pointer) };
-        if stack_pointer - (crate::memory::RESERVED_STACK as usize) < heap_pos {
-            const MSG: &[u8] = "Out of memory!".as_bytes();
-            sys_panic(MSG.as_ptr(), MSG.len());
-        }
-
-        unsafe { HEAP_POS = heap_pos };
-        ptr
+pub extern "C" fn sys_alloc_aligned(bytes: usize, align: usize) -> *mut u8 {
+    extern "C" {
+        // This symbol is defined by the loader and marks the end
+        // of all elf sections, so this is where we start our
+        // heap.
+        //
+        // This is generated automatically by the linker; see
+        // https://lld.llvm.org/ELF/linker_script.html#sections-command
+        static _end: u8;
     }
 
+    // Pointer to next heap address to use, or 0 if the heap has not yet been
+    // initialized.
+    static mut HEAP_POS: usize = 0;
+
+    // SAFETY: Single threaded, so nothing else can touch this while we're working.
+    let mut heap_pos = unsafe { HEAP_POS };
+
+    if heap_pos == 0 {
+        heap_pos = unsafe { (&_end) as *const u8 as usize };
+    }
+
+    let offset = heap_pos & (align - 1);
+    if offset != 0 {
+        heap_pos += align - offset;
+    }
+
+    // Ensure all allocations are minimally aligned to a word boundary.
+    let align = usize::min(align, WORD_SIZE);
+
+    let ptr = heap_pos as *mut u8;
+    heap_pos += bytes;
+
+    // Check to make sure we keep space between the heap and the
+    // stack so they don't accidentally step on each other.
+    let mut stack_pointer: usize;
+    #[cfg(target_os = "zkvm")]
+    unsafe {
+        asm!("add {stack_pointer}, sp, zero", stack_pointer = out(reg) stack_pointer)
+    };
     #[cfg(not(target_os = "zkvm"))]
-    unimplemented!()
+    let stack_pointer: usize = crate::memory::STACK_TOP as usize;
+    if stack_pointer - (RESERVED_STACK as usize) < heap_pos {
+        const MSG: &[u8] = "Out of memory!".as_bytes();
+        unsafe { sys_panic(MSG.as_ptr(), MSG.len()) };
+    }
+
+    unsafe { HEAP_POS = heap_pos };
+    ptr
 }

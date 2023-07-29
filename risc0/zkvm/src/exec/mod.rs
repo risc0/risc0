@@ -19,7 +19,7 @@
 //! contains an execution trace of the specified program.
 
 mod env;
-mod exec;
+mod executor;
 pub(crate) mod io;
 mod monitor;
 #[cfg(feature = "profiler")]
@@ -29,7 +29,7 @@ mod tests;
 
 use std::fmt::Debug;
 
-pub use exec::{Executor, SyscallRecord};
+pub use executor::{Executor, SyscallRecord};
 
 pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
 

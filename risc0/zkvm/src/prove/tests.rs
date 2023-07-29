@@ -49,7 +49,7 @@ fn hashfn_poseidon() {
 #[test]
 fn hashfn_blake2b() {
     let hal_eval = HalEval {
-        hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new())),
+        hal: Rc::new(CpuHal::new(Blake2bCpuHashSuite::new_suite())),
         eval: Rc::new(CpuEvalCheck::new(&CIRCUIT)),
     };
     let input = to_vec(&MultiTestSpec::DoNothing).unwrap();

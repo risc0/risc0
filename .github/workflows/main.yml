@@ -90,6 +90,11 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      - uses: risc0/clippy-action@main
+        with:
+          reporter: 'github-pr-check'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: --features $FEATURE --all-targets
       - run: sccache --show-stats
 
   examples:

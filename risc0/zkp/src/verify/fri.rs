@@ -91,7 +91,7 @@ where
 
         interpolate_ntt::<F::Elem, F::ExtElem>(&mut data_ext);
         bit_reverse(&mut data_ext);
-        *goal = self.poly_eval(&mut data_ext, round.mix * inv_wk);
+        *goal = self.poly_eval(&data_ext, round.mix * inv_wk);
 
         *pos = group;
         Ok(())
