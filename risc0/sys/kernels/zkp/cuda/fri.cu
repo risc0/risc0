@@ -31,7 +31,7 @@ void fri_fold(Fp* out,
               const Fp* in,
               const Fp4& mix,
               const uint32_t count) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     Fp4 tot;
     Fp4 curMix(1);

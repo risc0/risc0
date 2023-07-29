@@ -20,7 +20,7 @@ void eltwise_add_fp(Fp* out,
                     const Fp* x,
                     const Fp* y,
                     const uint32_t count) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     out[idx] = x[idx] + y[idx];
   }
@@ -30,7 +30,7 @@ extern "C" __global__
 void eltwise_mul_factor_fp(Fp* io,
                            const Fp& factor,
                            const uint32_t count) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     io[idx] = io[idx] * factor;
   }
@@ -40,7 +40,7 @@ extern "C" __global__
 void eltwise_copy_fp(Fp* out,
                      const Fp* in,
                      const uint32_t count) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
   // If the following check is not included, there is a SIGABRT that causes tests to fail
   // cuda-memcheck also throws lots of out of bounds read errors if this check is omitted
   if (idx < count) {
@@ -53,7 +53,7 @@ void eltwise_sum_fp4(Fp* out,
                      const Fp4* in,
                      const uint32_t to_add,
                      const uint32_t count) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     Fp4 tot;
     for (size_t i = 0; i < to_add; i++) {

@@ -18,7 +18,7 @@ extern "C" __global__
 void zk_shift(Fp* io,
               const uint32_t bits,
               const uint32_t count) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     uint32_t pos = idx & ((1 << bits) - 1);
     uint32_t posRev = __brev(pos) >> (32 - bits);

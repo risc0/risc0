@@ -23,7 +23,7 @@ void mix_poly_coeffs(Fp4* out,
                      const Fp4& mix,
                      const uint32_t inputSize,
                      const uint32_t count) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < count) {
     Fp4 cur = mixStart;
     for (size_t i = 0; i < inputSize; i++) {
