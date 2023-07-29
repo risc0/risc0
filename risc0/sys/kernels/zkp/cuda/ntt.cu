@@ -19,7 +19,7 @@ extern "C" __global__
 void multi_bit_reverse(Fp* io,
                        const uint32_t nBits,
                        const uint32_t count) {
-  uint totIdx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int totIdx = blockIdx.x * blockDim.x + threadIdx.x;
   if (totIdx < count) {
     uint32_t rowSize = 1 << nBits;
     uint32_t idx = totIdx & (rowSize - 1);
@@ -74,7 +74,7 @@ void batch_expand(Fp* out,
                   const uint32_t outSize,
                   const uint32_t inSize,
                   const uint32_t expandBits) {
-  uint idx = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx < outSize) {
     for (uint32_t i = 0; i < polyCount; i++) {
       out[i * outSize + idx] = in[i * inSize + (idx >> expandBits)];
@@ -88,7 +88,7 @@ void gather_sample(Fp* dst,
                    const uint32_t idx,
                    const uint32_t size,
                    const uint32_t stride) {
-  uint gid = blockIdx.x * blockDim.x + threadIdx.x;
+  unsigned int gid = blockIdx.x * blockDim.x + threadIdx.x;
   if (gid < size) {
       dst[gid] = src[gid * stride + idx];
   }
