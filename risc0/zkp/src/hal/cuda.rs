@@ -154,7 +154,7 @@ impl CudaHash for CudaHashPoseidon {
         let partial_comp_offset =
             hal.copy_from_elem("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
         CudaHashPoseidon {
-            suite: PoseidonHashSuite::new(),
+            suite: PoseidonHashSuite::new_suite(),
             round_constants,
             mds,
             partial_comp_matrix,
