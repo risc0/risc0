@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "bevy",
+    "browser-verify",
     "chess",
     "chess/core",
     "digital-signature",

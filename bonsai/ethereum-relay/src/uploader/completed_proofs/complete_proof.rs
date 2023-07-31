@@ -17,7 +17,7 @@ use bonsai_sdk::{
     alpha::{Client, SessionId},
     alpha_async::{download, session_status},
 };
-use risc0_zkvm::SessionReceipt;
+use risc0_zkvm::Receipt;
 
 use crate::{api, uploader::completed_proofs::error::CompleteProofError};
 
@@ -62,7 +62,7 @@ pub(crate) async fn get_complete_proof(
             .await?;
     let proof = super::snark::encode_snark_proof(snark_proof, bonsai_proof_id.clone()).await?;
 
-    let receipt: SessionReceipt =
+    let receipt: Receipt =
         bincode::deserialize(&receipt_buf).map_err(|_| CompleteProofError::InvalidReceipt {
             id: bonsai_proof_id.clone(),
         })?;

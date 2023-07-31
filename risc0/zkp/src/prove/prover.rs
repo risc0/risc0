@@ -177,7 +177,7 @@ impl<'a, H: Hal> Prover<'a, H> {
         //   LOG(1, "Z = " << Z);
 
         // Get rev rou for size
-        let back_one = H::ExtElem::from_subfield(&H::Elem::ROU_REV[self.po2 as usize]);
+        let back_one = H::ExtElem::from_subfield(&H::Elem::ROU_REV[self.po2]);
         let mut all_xs = Vec::new();
 
         // Now, we evaluate each group at the approriate points (relative to Z).

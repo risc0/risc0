@@ -14,56 +14,24 @@
 
 //! The execution phase is implemented by this module.
 //!
-//! The result of the execution phase is a [Session]. Each [Session] contains
-//! one or more [crate::Segment]s, each of which contains an execution trace of
-//! the specified program.
+//! The result of the execution phase is a [crate::Session]. Each
+//! [crate::Session] contains one or more [crate::Segment]s, each of which
+//! contains an execution trace of the specified program.
 
 mod env;
+mod exec;
 pub(crate) mod io;
-mod local;
 mod monitor;
 #[cfg(feature = "profiler")]
 pub(crate) mod profiler;
-mod remote;
 #[cfg(test)]
 mod tests;
 
 use std::fmt::Debug;
 
-use anyhow::Result;
-pub use local::{LocalExecutor, SyscallRecord};
-use remote::RemoteExecutor;
-use risc0_binfmt::{MemoryImage, Program};
-use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE};
+pub use exec::{Executor, SyscallRecord};
 
 pub use self::env::{ExecutorEnv, ExecutorEnvBuilder};
-use crate::Session;
-
-/// [Executor] trait
-///
-/// This trait abstracts over different kinds of executors that run the guest
-/// code locally or remotely.
-pub trait Executor {
-    /// This will run the executor to get a [Session] which contain the results
-    /// of the execution.
-    fn run(&mut self) -> Result<Session>;
-}
-
-/// Construct a new [Executor] from the ELF binary of the guest program you
-/// want to run and an [ExecutorEnv] containing relevant environmental
-/// configuration details.
-pub fn default_executor_from_elf<'a>(
-    env: ExecutorEnv<'a>,
-    elf: &[u8],
-) -> Result<Box<dyn Executor + 'a>> {
-    let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
-    let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
-    if std::env::var("BONSAI_API_URL").is_ok() && std::env::var("BONSAI_API_KEY").is_ok() {
-        Ok(Box::new(RemoteExecutor::new(env, image)))
-    } else {
-        Ok(Box::new(LocalExecutor::new(env, image, program.entry)))
-    }
-}
 
 /// An event traced from the running VM.
 #[derive(Clone, Eq, Ord, PartialEq, PartialOrd)]

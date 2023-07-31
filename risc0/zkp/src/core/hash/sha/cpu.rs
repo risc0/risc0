@@ -49,7 +49,7 @@ impl Sha256 for Impl {
     }
 
     fn hash_words(words: &[u32]) -> Self::DigestPtr {
-        Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
+        Self::hash_bytes(bytemuck::cast_slice(words))
     }
 
     #[inline]
