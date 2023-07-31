@@ -5,8 +5,9 @@ edition = "2021"
 
 [build-dependencies]
 anyhow = "1.0"
-ethers = { version = "=2.0.2", features = ["rustls", "ws"] }
-ethers-solc = "=1.0.2"
+# DO NOT MERGE: Find a way to get this to build from a published version.
+foundry-cli = { path = "/Users/victorgraf/src/foundry/cli", version = "0.2.0" }
+clap = { version = "4" }
 
 [dependencies]
 ethers = { version = "=2.0.2", features = ["rustls", "ws"] }

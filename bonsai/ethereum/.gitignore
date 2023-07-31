@@ -2,11 +2,6 @@
 cache/
 out/*
 
-!out/BonsaiRelay.sol/
-!out/BonsaiTestRelay.sol/
-!out/callback_dummy.sol/
-!out/RiscZeroGroth16Verifier.sol/
-
 # Ignores development broadcast logs
 !/broadcast
 /broadcast/*/31337/

@@ -19,10 +19,16 @@
 use bonsai_test_relay::CallbackAuthorization;
 use ethers::prelude::*;
 
+abigen!(IBonsaiRelay, "out/IBonsaiRelay.sol/IBonsaiRelay.json");
 abigen!(BonsaiRelay, "out/BonsaiRelay.sol/BonsaiRelay.json");
 abigen!(
     BonsaiTestRelay,
     "out/BonsaiTestRelay.sol/BonsaiTestRelay.json"
+);
+
+abigen!(
+    IRiscZeroVerifier,
+    "out/IRiscZeroVerifier.sol/IRiscZeroVerifier.json"
 );
 abigen!(
     RiscZeroGroth16Verifier,
@@ -119,7 +125,7 @@ mod tests {
         bonsai_relay, bonsai_relay::CallbackAuthorization, BonsaiRelayCallback, BonsaiTestRelay,
     };
 
-    abigen!(CallbackDummy, "out/callback_dummy.sol/CallbackDummy.json");
+    abigen!(CallbackDummy, "out/CallbackDummy.sol/CallbackDummy.json");
 
     async fn get_client() -> (
         Option<AnvilInstance>,
