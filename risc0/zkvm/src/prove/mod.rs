@@ -314,8 +314,9 @@ pub fn default_prover() -> Rc<dyn Prover> {
             return prover.clone();
         }
     }
+
     if std::env::var("DEVMODE").is_ok() {
-        println!("PROVING IN DEVMODE");
+        eprintln!("WARNING: proving in DevMode");
         if let Some(prover) = provers.get("$devmode") {
             return prover.clone();
         }
