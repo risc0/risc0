@@ -184,8 +184,8 @@ mod tests {
     }
 
     fn bad_row_access_all(rows: usize, cols: usize, queries: usize) {
-        bad_row_access(Sha256HashSuite::new(), rows, cols, queries);
-        bad_row_access(PoseidonHashSuite::new(), rows, cols, queries);
+        bad_row_access(Sha256HashSuite::new_suite(), rows, cols, queries);
+        bad_row_access(PoseidonHashSuite::new_suite(), rows, cols, queries);
     }
 
     fn possibly_bad_verify(
@@ -265,7 +265,7 @@ mod tests {
         manipulate_proof: bool,
     ) {
         possibly_bad_verify(
-            Sha256HashSuite::new(),
+            Sha256HashSuite::new_suite(),
             rows,
             cols,
             queries,
@@ -273,7 +273,7 @@ mod tests {
             manipulate_proof,
         );
         possibly_bad_verify(
-            PoseidonHashSuite::new(),
+            PoseidonHashSuite::new_suite(),
             rows,
             cols,
             queries,

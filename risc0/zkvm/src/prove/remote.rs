@@ -54,9 +54,9 @@ impl Prover for RemoteProver {
         bail!("this is unimplemented for prover [{}]", self.get_name())
     }
 
-    fn prove<'a>(
+    fn prove(
         &self,
-        env: ExecutorEnv<'a>,
+        env: ExecutorEnv<'_>,
         _ctx: &VerifierContext,
         image: MemoryImage,
     ) -> Result<Receipt> {
@@ -75,7 +75,7 @@ impl Prover for RemoteProver {
         }
 
         // upload input data
-        let input_id = client.upload_input(env.input.clone())?;
+        let input_id = client.upload_input(env.input)?;
 
         // While this is the executor, we want to start a session on the bonsai prover.
         // By doing so, we can return a session ID so that the prover can use it to

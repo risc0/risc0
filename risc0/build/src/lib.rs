@@ -91,7 +91,7 @@ impl Risc0Method {
         // Quick check for '#' to avoid injection of arbitrary Rust code into the the
         // method.rs file. This would not be a serious issue since it would only
         // affect the user that set the path, but it's good to add a check.
-        if let Some(_) = elf_path.to_string().find("#") {
+        if elf_path.to_string().contains('#') {
             panic!("method path cannot include #: {}", elf_path);
         }
 
@@ -180,10 +180,10 @@ where
         .iter()
         .filter(|pkg| {
             let std_path: &Path = pkg.manifest_path.as_ref();
-            std_path == &manifest_path
+            std_path == manifest_path
         })
         .collect();
-    if matching.len() == 0 {
+    if matching.is_empty() {
         eprintln!(
             "ERROR: No package found in {}",
             manifest_dir.as_ref().display()
@@ -264,7 +264,7 @@ where
     }
 
     GuestBuildEnv {
-        target_spec: target_spec_path.to_owned(),
+        target_spec: target_spec_path,
         rust_lib_src: rust_lib_path,
     }
 }
@@ -298,7 +298,7 @@ where
 
     for zm in zip_map.iter() {
         let src_prefix = Path::new(&zm.src_prefix);
-        let dst_prefix = tmp_dest_base.join(&zm.dst_prefix);
+        let dst_prefix = tmp_dest_base.join(zm.dst_prefix);
         fs::create_dir_all(&dst_prefix).unwrap();
 
         let zip_path = cache_dir.join(zm.filename);
@@ -513,7 +513,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
         .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
 
-    let guest_build_env = setup_guest_build_env(&out_dir);
+    let guest_build_env = setup_guest_build_env(out_dir);
 
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);

@@ -177,7 +177,7 @@ impl KernelBuild {
             |out_dir, out_path, sys_inc_dir| {
                 let mut air_paths = vec![];
                 for src in self.files.iter() {
-                    let out_path = out_dir.join(&src).with_extension("").with_extension("air");
+                    let out_path = out_dir.join(src).with_extension("").with_extension("air");
                     if let Some(parent) = out_path.parent() {
                         fs::create_dir_all(parent).unwrap();
                     }
@@ -203,7 +203,7 @@ impl KernelBuild {
                     .arg("metallib")
                     .args(air_paths)
                     .arg("-o")
-                    .arg(&out_path)
+                    .arg(out_path)
                     .status()
                     .unwrap();
                 if !result.success() {

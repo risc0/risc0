@@ -114,8 +114,8 @@ where
             self.expand()?;
         }
         let code_buf = self.code.as_slice_sync();
-        for i in 0..self.code_size {
-            code_buf.set(self.steps * i + self.cycle, code[i]);
+        for (i, code) in code.iter().enumerate().take(self.code_size) {
+            code_buf.set(self.steps * i + self.cycle, *code);
         }
         let ctx = CircuitStepContext {
             size: self.steps,
@@ -159,7 +159,7 @@ where
             let idx = i * self.steps;
             let src = buf.slice(idx, self.cycle);
             let tgt = new_buf.slice(idx * 2, self.cycle);
-            tgt.as_slice_mut().copy_from_slice(&*src.as_slice());
+            tgt.as_slice_mut().copy_from_slice(&src.as_slice());
         }
         new_buf
     }

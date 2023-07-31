@@ -111,6 +111,7 @@ where
     }
 
     // Compute the FRI verify taps sum.
+    #[allow(clippy::too_many_arguments)]
     fn fri_eval_taps(
         &self,
         taps: &TapSet<'static>,
@@ -193,7 +194,7 @@ where
     where
         CheckCodeFn: Fn(u32, &Digest) -> Result<(), VerificationError>,
     {
-        if seal.len() == 0 {
+        if seal.is_empty() {
             return Err(VerificationError::ReceiptFormatError);
         }
 
@@ -313,9 +314,8 @@ where
         let remap = [0, 2, 1, 3];
         let fp0 = F::Elem::ZERO;
         let fp1 = F::Elem::ONE;
-        for i in 0..4 {
-            let rmi = remap[i];
-            check += coeff_u[num_taps + rmi + 0]
+        for (i, rmi) in remap.iter().enumerate() {
+            check += coeff_u[num_taps + rmi]
                 * z.pow(i)
                 * F::ExtElem::from_subelems([fp1, fp0, fp0, fp0]);
             check += coeff_u[num_taps + rmi + 4]
@@ -408,8 +408,8 @@ where
     fn poly_eval(&self, coeffs: &[F::ExtElem], x: F::ExtElem) -> F::ExtElem {
         let mut mul_x = F::ExtElem::ONE;
         let mut tot = F::ExtElem::ZERO;
-        for i in 0..coeffs.len() {
-            tot += coeffs[i] * mul_x;
+        for coeff in coeffs {
+            tot += *coeff * mul_x;
             mul_x *= x;
         }
         tot

@@ -86,7 +86,7 @@ pub struct MetalHashSha256 {
 impl MetalHash for MetalHashSha256 {
     fn new(_hal: &MetalHal<Self>) -> Self {
         MetalHashSha256 {
-            suite: Sha256HashSuite::new(),
+            suite: Sha256HashSuite::new_suite(),
         }
     }
 
@@ -134,16 +134,12 @@ impl MetalHash for MetalHashPoseidon {
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
-        let partial_comp_matrix = hal.copy_from_elem(
-            "partial_comp_matrix",
-            &*poseidon::consts::PARTIAL_COMP_MATRIX,
-        );
-        let partial_comp_offset = hal.copy_from_elem(
-            "partial_comp_offset",
-            &*poseidon::consts::PARTIAL_COMP_OFFSET,
-        );
+        let partial_comp_matrix =
+            hal.copy_from_elem("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
+        let partial_comp_offset =
+            hal.copy_from_elem("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
         MetalHashPoseidon {
-            suite: PoseidonHashSuite::new(),
+            suite: PoseidonHashSuite::new_suite(),
             round_constants,
             mds,
             partial_comp_matrix,
@@ -262,7 +258,7 @@ impl<T> BufferImpl<T> {
         }
     }
 
-    pub fn as_arg<'a>(&'a self) -> KernelArg<'a> {
+    pub fn as_arg(&self) -> KernelArg<'_> {
         let offset = self.offset * mem::size_of::<T>();
         KernelArg::Buffer {
             buffer: &self.buffer.0,
@@ -270,7 +266,7 @@ impl<T> BufferImpl<T> {
         }
     }
 
-    pub fn as_arg_with_offset<'a>(&'a self, offset: usize) -> KernelArg<'a> {
+    pub fn as_arg_with_offset(&self, offset: usize) -> KernelArg<'_> {
         let offset = (self.offset + offset) * mem::size_of::<T>();
         KernelArg::Buffer {
             buffer: &self.buffer.0,
@@ -323,6 +319,12 @@ impl<T: Clone> Buffer<T> for BufferImpl<T> {
         self.buffer
             .0
             .did_modify_range(NSRange::new(offset as u64, size as u64));
+    }
+}
+
+impl<MH: MetalHash> Default for MetalHal<MH> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

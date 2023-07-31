@@ -186,7 +186,7 @@ impl SegmentReceipts {
             .as_slice()
             .split_last()
             .ok_or(VerificationError::ReceiptFormatError)?;
-        let mut prev_image_id = image_id.into();
+        let mut prev_image_id = image_id;
         for receipt in receipts {
             receipt.verify_with_context(ctx)?;
             let metadata = receipt.get_metadata()?;
@@ -220,7 +220,7 @@ impl SegmentReceipts {
         if !is_journal_valid() {
             log::debug!(
                 "journal: \"{}\", digest: 0x{}, output: 0x{}, {:?}",
-                hex::encode(&journal),
+                hex::encode(journal),
                 hex::encode(bytemuck::cast_slice(digest_words)),
                 hex::encode(bytemuck::cast_slice(output_words)),
                 journal
@@ -234,7 +234,6 @@ impl SegmentReceipts {
 
 impl InnerReceipt {
     /// Verify the integrity of this receipt.
-    #[must_use]
     pub fn verify(
         &self,
         image_id: impl Into<Digest>,
@@ -244,7 +243,6 @@ impl InnerReceipt {
     }
 
     /// Verify the integrity of this receipt.
-    #[must_use]
     pub fn verify_with_context(
         &self,
         ctx: &VerifierContext,
@@ -317,7 +315,6 @@ impl Receipt {
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `image_id` parameter.
-    #[must_use]
     pub fn verify(&self, image_id: impl Into<Digest>) -> Result<(), VerificationError> {
         self.verify_with_context(&VerifierContext::default(), image_id)
     }
@@ -328,7 +325,6 @@ impl Receipt {
     /// Segment has a valid receipt, and validates that these [SegmentReceipt]s
     /// stitch together correctly, and that the initial memory image matches the
     /// given `image_id` parameter.
-    #[must_use]
     pub fn verify_with_context(
         &self,
         ctx: &VerifierContext,
@@ -423,11 +419,11 @@ impl ReceiptMetadata {
 
     pub(crate) fn get_exit_code_pairs(&self) -> Result<(u32, u32), VerificationError> {
         match self.exit_code {
-            ExitCode::Halted(user_exit) => return Ok((0, user_exit)),
-            ExitCode::Paused(user_exit) => return Ok((1, user_exit)),
-            ExitCode::SystemSplit => return Ok((2, 0)),
-            _ => return Err(VerificationError::ReceiptFormatError),
-        };
+            ExitCode::Halted(user_exit) => Ok((0, user_exit)),
+            ExitCode::Paused(user_exit) => Ok((1, user_exit)),
+            ExitCode::SystemSplit => Ok((2, 0)),
+            _ => Err(VerificationError::ReceiptFormatError),
+        }
     }
 
     pub(crate) fn make_exit_code(
@@ -446,7 +442,7 @@ impl ReceiptMetadata {
 /// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
 pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     SystemState {
-        merkle_root: merkle_root.clone(),
+        merkle_root: *merkle_root,
         pc,
     }
     .digest()
@@ -456,9 +452,9 @@ impl Default for VerifierContext {
     fn default() -> Self {
         Self {
             suites: BTreeMap::from([
-                ("blake2b".into(), Blake2bCpuHashSuite::new()),
-                ("poseidon".into(), PoseidonHashSuite::new()),
-                ("sha-256".into(), Sha256HashSuite::new()),
+                ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
+                ("poseidon".into(), PoseidonHashSuite::new_suite()),
+                ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
         }
     }

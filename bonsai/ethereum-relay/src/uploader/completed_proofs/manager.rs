@@ -45,6 +45,7 @@ pub(crate) struct BonsaiCompleteProofManager<S: Storage, M: Middleware> {
 }
 
 impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
+    #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         client: Client,
         storage: S,

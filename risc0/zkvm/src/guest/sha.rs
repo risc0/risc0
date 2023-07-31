@@ -140,7 +140,7 @@ fn copy_and_update(
             // for in_state and out_state to point at the same place, and for
             // out_state to be uninitialized memory, and those preclude us
             // from using references.
-            if blocks.len() > 0 {
+            if !blocks.is_empty() {
                 unsafe {
                     sys_sha_buffer(
                         out_state.cast(),
@@ -172,7 +172,7 @@ pub(crate) fn update_u32(
             // for in_state and out_state to point at the same place, and for
             // out_state to be uninitialized memory, and those preclude us
             // from using references.
-            if blocks.len() > 0 {
+            if !blocks.is_empty() {
                 unsafe {
                     sys_sha_buffer(
                         out_state.cast(),
@@ -200,7 +200,7 @@ fn update_u8(out_state: *mut Digest, mut in_state: *const Digest, bytes: &[u8], 
             // for in_state and out_state to point at the same place, and for
             // out_state to be uninitialized memory, and those preclude us
             // from using references.
-            if blocks.len() > 0 {
+            if !blocks.is_empty() {
                 unsafe {
                     sys_sha_buffer(
                         out_state.cast(),

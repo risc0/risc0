@@ -47,6 +47,9 @@ pub struct ExecutorEnvBuilder<'a> {
     inner: ExecutorEnv<'a>,
 }
 
+/// A callback used to collect [TraceEvent]s.
+pub type TraceCallback<'a> = dyn FnMut(TraceEvent) -> Result<()> + 'a;
+
 /// The [super::Executor] is configured from this object.
 ///
 /// The executor environment holds configuration details that inform how the
@@ -59,7 +62,7 @@ pub struct ExecutorEnv<'a> {
     syscalls: SyscallTable<'a>,
     pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) input: Vec<u8>,
-    pub(crate) trace_callback: Option<Rc<RefCell<dyn FnMut(TraceEvent) -> Result<()> + 'a>>>,
+    pub(crate) trace_callback: Option<Rc<RefCell<TraceCallback<'a>>>>,
 }
 
 impl<'a> ExecutorEnv<'a> {
