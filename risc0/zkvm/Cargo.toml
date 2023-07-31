@@ -86,6 +86,7 @@ cuda = ["prove", "risc0-circuit-rv32im/cuda", "risc0-zkp/cuda"]
 dual = []
 metal = ["prove", "risc0-circuit-rv32im/metal", "risc0-zkp/metal"]
 default = ["prove"]
+disable-dev-mode = []
 profiler = [
   "dep:addr2line",
   "dep:gimli",

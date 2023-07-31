@@ -253,11 +253,11 @@ impl InnerReceipt {
             InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
             InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
             InnerReceipt::Fake => {
+                #[cfg(not(feature = "disable-dev-mode"))]
                 if ctx.dev_mode {
-                    Ok(())
-                } else {
-                    Err(VerificationError::InvalidProof)
+                    return Ok(());
                 }
+                Err(VerificationError::InvalidProof)
             }
         }
     }
@@ -303,11 +303,19 @@ pub struct SegmentReceipt {
 }
 
 /// Context available to the verification process.
+#[cfg(not(feature = "disable-dev-mode"))]
 pub struct VerifierContext {
     /// A registry of hash functions to be used by the verification process.
     pub suites: BTreeMap<String, HashSuite<BabyBear>>,
     /// DevMode facilitates development by generating a fake receipt
     pub dev_mode: bool,
+}
+
+/// Context available to the verification process.
+#[cfg(feature = "disable-dev-mode")]
+pub struct VerifierContext {
+    /// A registry of hash functions to be used by the verification process.
+    pub suites: BTreeMap<String, HashSuite<BabyBear>>,
 }
 
 impl Receipt {
@@ -455,25 +463,33 @@ pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     .digest()
 }
 
+#[cfg(not(feature = "disable-dev-mode"))]
 impl Default for VerifierContext {
     fn default() -> Self {
-        #[cfg(not(feature = "prove"))]
-        return Self {
+        let mut dev_mode = false;
+        if cfg!(feature = "prove") {
+            dev_mode = std::env::var("DEV_MODE").is_ok();
+        }
+        Self {
             suites: BTreeMap::from([
                 ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
                 ("poseidon".into(), PoseidonHashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
-            dev_mode: false,
-        };
-        #[cfg(feature = "prove")]
-        return Self {
+            dev_mode,
+        }
+    }
+}
+
+#[cfg(feature = "disable-dev-mode")]
+impl Default for VerifierContext {
+    fn default() -> Self {
+        Self {
             suites: BTreeMap::from([
                 ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
                 ("poseidon".into(), PoseidonHashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
             ]),
-            dev_mode: std::env::var("DEVMODE").is_ok(),
-        };
+        }
     }
 }

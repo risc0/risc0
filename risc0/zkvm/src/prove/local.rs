@@ -200,6 +200,7 @@ impl Prover for DevModeProver {
         receipt.verify_with_context(
             &VerifierContext {
                 suites: BTreeMap::new(),
+                #[cfg(not(feature = "disable-dev-mode"))]
                 dev_mode: true,
             },
             image_id,
