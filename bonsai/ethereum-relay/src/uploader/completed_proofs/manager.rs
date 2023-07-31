@@ -14,7 +14,7 @@
 
 use std::sync::Arc;
 
-use bonsai_relay_contract::{
+use bonsai_ethereum_contracts::{
     bonsai_relay::Callback as RelayCallback, bonsai_test_relay::Callback as TestRelayCallback,
     BonsaiRelay, BonsaiTestRelay,
 };

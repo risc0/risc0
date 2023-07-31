@@ -1,16 +1,17 @@
 [package]
-name = "bonsai-relay-contract"
+name = "bonsai-ethereum-contracts"
 version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
 anyhow = "1.0"
-# DO NOT MERGE: Find a way to get this to build from a published version.
-foundry-cli = { path = "/Users/victorgraf/src/foundry/cli", version = "0.2.0" }
+# Foundry does not have a robust versioning story. Commit below is picked as a known working commit.
+# Commits after July 17th have a minimum rust version of stable 1.70, which conflicts with the toolchain for risc0.
+foundry-cli = { git = "https://github.com/foundry-rs/foundry.git", rev = "8e365beee278975720ecd3eb529b5dd6d17cac3b" }
 clap = { version = "4" }
 
 [dependencies]
-ethers = { version = "=2.0.2", features = ["rustls", "ws"] }
+ethers = { version = "2.0", features = ["rustls", "ws"] }
 hex = "0.4.3"
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt"] }

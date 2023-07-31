@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use bonsai_relay_contract::{
+use bonsai_ethereum_contracts::{
     bonsai_relay::CallbackRequestFilter, BonsaiAuthorizationCallback, BonsaiRelayCallback,
 };
 use bonsai_sdk::{

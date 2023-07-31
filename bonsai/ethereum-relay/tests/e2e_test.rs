@@ -17,6 +17,7 @@ mod tests {
 
     use std::{path::Path, time::SystemTime};
 
+    use bonsai_ethereum_contracts::{BonsaiRelay, BonsaiTestRelay, RiscZeroGroth16Verifier};
     use bonsai_ethereum_relay::{
         sdk::{
             client::{CallbackRequest, Client},
@@ -24,7 +25,6 @@ mod tests {
         },
         Relayer,
     };
-    use bonsai_relay_contract::{BonsaiRelay, BonsaiTestRelay, RiscZeroGroth16Verifier};
     use bonsai_sdk::{
         alpha::{Client as BonsaiClient, SdkErr},
         alpha_async::{get_client_from_parts, put_image},
