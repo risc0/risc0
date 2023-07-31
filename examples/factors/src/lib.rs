@@ -11,17 +11,17 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use factors_methods::MULTIPLY_ELF;
-use risc0_zkvm::{
-    default_executor_from_elf,
-    serde::{from_slice, to_vec},
-    ExecutorEnv, SessionReceipt,
-};
 
 #[doc = include_str!("../README.md")]
+use factors_methods::MULTIPLY_ELF;
+use risc0_zkvm::{
+    default_prover,
+    serde::{from_slice, to_vec},
+    ExecutorEnv, Receipt,
+};
 
 // Multiply them inside the ZKP
-pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
+pub fn multiply_factors(a: u64, b: u64) -> (Receipt, u64) {
     let env = ExecutorEnv::builder()
         // Send a & b to the guest
         .add_input(&to_vec(&a).unwrap())
@@ -29,14 +29,11 @@ pub fn multiply_factors(a: u64, b: u64) -> (SessionReceipt, u64) {
         .build()
         .unwrap();
 
-    // First, we make an executor, loading the 'multiply' ELF binary.
-    let mut exec = default_executor_from_elf(env, MULTIPLY_ELF).unwrap();
+    // Obtain the default prover.
+    let prover = default_prover();
 
-    // Run the executor to produce a session.
-    let session = exec.run().unwrap();
-
-    // Prove the session to produce a receipt.
-    let receipt = session.prove().unwrap();
+    // Produce a receipt by proving the specified ELF binary.
+    let receipt = prover.prove_elf(env, MULTIPLY_ELF).unwrap();
 
     // Extract journal of receipt (i.e. output c, where c = a * b)
     let c: u64 = from_slice(&receipt.journal).expect(

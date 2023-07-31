@@ -1,11 +1,6 @@
 [workspace]
-default-members = [
-    "relay"
-]
-members = [
-    "methods",
-    "relay"
-]
+default-members = ["relay"]
+members = ["methods", "relay"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]

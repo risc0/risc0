@@ -195,7 +195,7 @@ impl Rng<BabyBear> for Poseidon254Rng {
         poseidon_mix(&mut self.cells);
         let mut out = BabyBearElem::ZERO;
         let div2 = Fr::from(2).invert().unwrap();
-        let mul2 = BabyBearElem::from(2 as u32);
+        let mul2 = BabyBearElem::from(2u32);
         let mut mul = BabyBearElem::ONE;
         for _ in 0..160 {
             let low_bit = source.is_odd().unwrap_u8();

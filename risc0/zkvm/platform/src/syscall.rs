@@ -425,10 +425,10 @@ pub unsafe extern "C" fn sys_read(fd: u32, recv_ptr: *mut u8, nrequested: usize)
     let main_words = main_requested / WORD_SIZE;
     let (nread_main, lastword) =
         sys_read_internal(fd, main_ptr as *mut u32, main_words, main_requested);
-    debug_assert_eq!(nread_main as usize, main_requested);
+    debug_assert_eq!(nread_main, main_requested);
 
     // Copy in individual bytes after the word-aligned section.
-    let unaligned_at_end = (main_requested as usize) % WORD_SIZE;
+    let unaligned_at_end = main_requested % WORD_SIZE;
     fill_from_word(
         main_ptr.add(main_words * WORD_SIZE),
         lastword,

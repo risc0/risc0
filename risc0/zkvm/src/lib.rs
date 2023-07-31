@@ -49,14 +49,12 @@ pub use self::control_id::POSEIDON_CONTROL_ID;
 #[cfg(feature = "profiler")]
 pub use self::exec::profiler::Profiler;
 #[cfg(not(target_os = "zkvm"))]
-pub use self::receipt::{
-    ExitCode, ReceiptMetadata, SegmentReceipt, SessionReceipt, VerifierContext,
-};
+pub use self::receipt::{ExitCode, Receipt, ReceiptMetadata, SegmentReceipt, VerifierContext};
 #[cfg(feature = "prove")]
 pub use self::{
     exec::io::{Syscall, SyscallContext},
-    exec::{default_executor_from_elf, Executor, ExecutorEnv, ExecutorEnvBuilder, LocalExecutor},
-    prove::loader::Loader,
+    exec::{Executor, ExecutorEnv, ExecutorEnvBuilder},
+    prove::{default_prover, loader::Loader},
     session::{FileSegmentRef, Segment, SegmentRef, Session, SessionEvents, SimpleSegmentRef},
 };
 

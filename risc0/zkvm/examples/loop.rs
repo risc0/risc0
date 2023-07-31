@@ -18,9 +18,9 @@ use clap::Parser;
 use human_repr::{HumanCount, HumanDuration};
 use risc0_zkvm::{
     prove::{default_prover, Prover},
-    receipt::SessionReceipt,
+    receipt::Receipt,
     serde::to_vec,
-    Executor, ExecutorEnv, LocalExecutor, Session, VerifierContext,
+    Executor, ExecutorEnv, Session, VerifierContext,
 };
 use risc0_zkvm_methods::{
     bench::{BenchmarkSpec, SpecWithIters},
@@ -114,13 +114,13 @@ fn run_with_iterations(iterations: usize) {
 }
 
 #[tracing::instrument(skip_all)]
-fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, SessionReceipt) {
+fn top(prover: Rc<dyn Prover>, iterations: u64) -> (Session, Receipt) {
     let spec = SpecWithIters(BenchmarkSpec::SimpleLoop, iterations);
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&spec).unwrap())
         .build()
         .unwrap();
-    let mut exec = LocalExecutor::from_elf(env, BENCH_ELF).unwrap();
+    let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     let session = exec.run().unwrap();
     let ctx = VerifierContext::default();
     let receipt = prover.prove_session(&ctx, &session).unwrap();

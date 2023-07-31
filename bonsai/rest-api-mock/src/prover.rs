@@ -19,8 +19,8 @@ use std::{
 
 use anyhow::Context;
 use risc0_zkvm::{
-    receipt::InnerReceipt, Executor, ExecutorEnv, LocalExecutor, MemoryImage, Program,
-    SessionReceipt, MEM_SIZE, PAGE_SIZE,
+    receipt::InnerReceipt, Executor, ExecutorEnv, MemoryImage, Program, Receipt, MEM_SIZE,
+    PAGE_SIZE,
 };
 use tokio::sync::mpsc;
 
@@ -102,11 +102,10 @@ impl Prover {
                     .map_err(|e| {
                         anyhow::anyhow!("failed to build executor environment: {:?}", e)
                     })?;
-                let pc = mem_img.pc;
-                let mut exec = LocalExecutor::new(env, mem_img, pc);
+                let mut exec = Executor::new(env, mem_img);
                 let session = exec.run()?;
 
-                let receipt = SessionReceipt {
+                let receipt = Receipt {
                     inner: InnerReceipt::Fake,
                     journal: session.journal,
                 };
