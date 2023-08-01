@@ -18,17 +18,8 @@ To link gameplay to a particular player, you may want to pair this demo with the
 zkVM applications are organized into a [host program] and a [guest program].
 The host program can be found in [`src/main.rs`](src/main.rs) and the guest program can be found in [`methods/guest/src/main.rs`](methods/guest/src/main.rs).
 
-Here, the guest program:
-- imports the `bevy` crate,
-- creates a `world` and `primary entity` using the `bevy` crate,
-- receives an integer as input,
-- moves the `primary entity` that number of units (forward, on the x-axis), and
-- writes the new position to the [journal].
-
 The [host] first [executes] the guest program and then [proves the execution] to construct a [receipt].
-
-The receipt can be passed to a third party, who can extract the new game state from the journal.
-The receipt can also be [verified] to ensure the integrity of the gameplay.
+The receipt can be passed to a third party, who can examine the [journal] to check the program's outputs and can [verify] the [receipt] to ensure the integrity of the [guest program]'s execution.
 
 ## More Resources
 For more information about building, running, and testing zkVM applications, see our [developer docs].
@@ -42,7 +33,7 @@ For more information about building, running, and testing zkVM applications, see
 [host program]: https://dev.risczero.com/terminology#host-program
 [proves the execution]: https://dev.risczero.com/terminology#prove
 [receipt]: https://dev.risczero.com/terminology#receipt
-[verified]: https://dev.risczero.com/terminology#verify
+[verify]: https://dev.risczero.com/terminology#verify
 [journal]: https://dev.risczero.com/terminology#journal
 [developer docs]: https://dev.risczero.com/zkvm
 [Bonsai application]: https://dev.bonsai.xyz
