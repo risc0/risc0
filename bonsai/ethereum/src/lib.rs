@@ -16,7 +16,6 @@
 //! structures and procedures for programmatic deployment of and interaction
 //! with a `Proxy` contract instance on Ethereum.
 
-use bonsai_test_relay::CallbackAuthorization;
 use ethers::prelude::*;
 
 abigen!(IBonsaiRelay, "out/IBonsaiRelay.sol/IBonsaiRelay.json");
@@ -35,77 +34,6 @@ abigen!(
     "out/RiscZeroGroth16Verifier.sol/RiscZeroGroth16Verifier.json"
 );
 
-#[derive(Clone, Debug)]
-pub struct BonsaiRelayCallback {
-    pub auth: bonsai_relay::CallbackAuthorization,
-    pub callback_contract: bonsai_relay::CallbackRequestFilter,
-    pub payload: Vec<u8>,
-    pub gas_limit: u64,
-}
-
-#[derive(Clone, Debug)]
-pub struct BonsaiAuthorizationCallback {
-    pub seal: Vec<u8>,
-    pub post_state_digest: [u8; 32],
-}
-
-impl From<BonsaiAuthorizationCallback> for bonsai_relay::CallbackAuthorization {
-    fn from(value: BonsaiAuthorizationCallback) -> Self {
-        bonsai_relay::CallbackAuthorization {
-            seal: value.seal.into(),
-            post_state_digest: value.post_state_digest,
-        }
-    }
-}
-
-impl From<BonsaiRelayCallback> for bonsai_relay::Callback {
-    fn from(value: BonsaiRelayCallback) -> Self {
-        let payload = [
-            value.callback_contract.function_selector.as_slice(),
-            value.payload.as_slice(),
-            value.callback_contract.image_id.as_slice(),
-        ]
-        .concat();
-        Self {
-            auth: value.auth,
-            callback_contract: value.callback_contract.callback_contract,
-            payload: payload.into(),
-            gas_limit: value.gas_limit,
-        }
-    }
-}
-
-impl From<BonsaiRelayCallback> for bonsai_test_relay::Callback {
-    fn from(value: BonsaiRelayCallback) -> Self {
-        let payload = [
-            value.callback_contract.function_selector.as_slice(),
-            value.payload.as_slice(),
-            value.callback_contract.image_id.as_slice(),
-        ]
-        .concat();
-        Self {
-            auth: CallbackAuthorization {
-                seal: vec![].into(),
-                post_state_digest: [0u8; 32],
-            },
-            callback_contract: value.callback_contract.callback_contract,
-            payload: payload.into(),
-            gas_limit: value.gas_limit,
-        }
-    }
-}
-
-impl From<bonsai_relay::CallbackAuthorization> for bonsai_test_relay::CallbackAuthorization {
-    fn from(
-        value: bonsai_relay::CallbackAuthorization,
-    ) -> bonsai_test_relay::CallbackAuthorization {
-        bonsai_test_relay::CallbackAuthorization {
-            seal: value.seal,
-            post_state_digest: value.post_state_digest,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
 
@@ -122,7 +50,7 @@ mod tests {
     use risc0_zkvm::SessionReceipt;
 
     use crate::{
-        bonsai_relay, bonsai_relay::CallbackAuthorization, BonsaiRelayCallback, BonsaiTestRelay,
+        i_bonsai_relay, i_bonsai_relay::CallbackAuthorization, BonsaiRelayCallback, BonsaiTestRelay,
     };
 
     abigen!(CallbackDummy, "out/CallbackDummy.sol/CallbackDummy.json");
@@ -218,7 +146,7 @@ mod tests {
         let call_me_selector = CallMeCall::selector();
         // Create some dummy callback requests
         let callback_requests = vec![
-            bonsai_relay::CallbackRequestFilter {
+            i_bonsai_relay::CallbackRequestFilter {
                 account: wallet_address.into(),
                 image_id: image_id.clone(),
                 input: Vec::new().into(),
@@ -226,7 +154,7 @@ mod tests {
                 function_selector: call_me_selector.clone(),
                 gas_limit: 50000,
             },
-            bonsai_relay::CallbackRequestFilter {
+            i_bonsai_relay::CallbackRequestFilter {
                 account: wallet_address.into(),
                 image_id: image_id.clone(),
                 input: Vec::new().into(),

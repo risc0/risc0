@@ -14,7 +14,7 @@
 
 use std::sync::Arc;
 
-use bonsai_ethereum_contracts::bonsai_relay::CallbackRequestFilter;
+use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use bonsai_sdk::{
     alpha::Client,
     alpha_async::{create_session, put_input},

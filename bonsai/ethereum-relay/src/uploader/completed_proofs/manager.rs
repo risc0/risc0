@@ -14,10 +14,7 @@
 
 use std::sync::Arc;
 
-use bonsai_ethereum_contracts::{
-    bonsai_relay::Callback as RelayCallback, bonsai_test_relay::Callback as TestRelayCallback,
-    BonsaiRelay, BonsaiTestRelay,
-};
+use bonsai_ethereum_contracts::{i_bonsai_relay::Callback, IBonsaiRelay};
 use bonsai_sdk::alpha::Client;
 use ethers::prelude::*;
 use futures::{stream::FuturesUnordered, StreamExt};
@@ -79,37 +76,20 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
         if self.ready_to_send_batch.is_empty() {
             return Ok(());
         }
-        let contract_call = match self.bonsai_mode {
-            true => {
-                let bonsay_relay: BonsaiRelay<M> =
-                    BonsaiRelay::new(self.proxy_contract_address, self.ethers_client.clone());
-                let proof_batch: Vec<RelayCallback> = self
-                    .ready_to_send_batch
-                    .clone()
-                    .into_iter()
-                    .map(|complete_proof| complete_proof.ethereum_callback.into())
-                    .collect();
+        let contract_call = {
+            let bonsay_relay =
+                IBonsaiRelay::<M>::new(self.proxy_contract_address, self.ethers_client.clone());
+            let proof_batch: Vec<Callback> = self
+                .ready_to_send_batch
+                .clone()
+                .into_iter()
+                .map(|complete_proof| complete_proof.ethereum_callback.into())
+                .collect();
 
-                info!("sending batch");
-                bonsay_relay
-                    .invoke_callbacks(proof_batch)
-                    .gas(BONSAI_RELAY_GAS_LIMIT)
-            }
-            false => {
-                let bonsay_relay: BonsaiTestRelay<M> =
-                    BonsaiTestRelay::new(self.proxy_contract_address, self.ethers_client.clone());
-                let proof_batch: Vec<TestRelayCallback> = self
-                    .ready_to_send_batch
-                    .clone()
-                    .into_iter()
-                    .map(|complete_proof| complete_proof.ethereum_callback.into())
-                    .collect();
-
-                info!("sending batch");
-                bonsay_relay
-                    .invoke_callbacks(proof_batch)
-                    .gas(BONSAI_RELAY_GAS_LIMIT)
-            }
+            info!("sending batch");
+            bonsay_relay
+                .invoke_callbacks(proof_batch)
+                .gas(BONSAI_RELAY_GAS_LIMIT)
         };
 
         let pending_tx =

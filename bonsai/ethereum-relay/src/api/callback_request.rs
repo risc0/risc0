@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use axum::{extract::State, Extension};
-use bonsai_ethereum_contracts::bonsai_relay::CallbackRequestFilter;
+use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use bonsai_sdk::alpha_async::get_client_from_parts;
 
 use super::{bincode::Bincode, state::ApiState, Error, Result};
