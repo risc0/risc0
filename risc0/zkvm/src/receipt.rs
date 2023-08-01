@@ -340,6 +340,20 @@ impl SessionReceipt {
     ) -> Result<(), VerificationError> {
         self.inner.verify_with_context(ctx, image_id, &self.journal)
     }
+
+    /// Extract the [ReceiptMetadata] from this receipt for an excution session.
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+        match self.inner {
+            InnerReceipt::Flat(ref segment_receipts) => segment_receipts
+                .0
+                .iter()
+                .last()
+                .ok_or(VerificationError::ReceiptFormatError)?
+                .get_metadata(),
+            InnerReceipt::Succinct(ref succint_recipt) => Ok(succint_recipt.meta.clone()),
+            InnerReceipt::Fake => unimplemented!("fake receipt does not implement metadata"),
+        }
+    }
 }
 
 impl SegmentReceipt {

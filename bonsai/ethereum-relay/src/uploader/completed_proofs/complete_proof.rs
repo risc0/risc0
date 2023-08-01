@@ -77,16 +77,12 @@ pub(crate) async fn get_complete_proof(
         })?;
     let post_state_digest: [u8; 32] = match bonsai_mode {
         true => {
-            let metadata = receipt
-                .segments
-                .last()
-                .ok_or(CompleteProofError::InvalidReceipt {
-                    id: bonsai_proof_id.clone(),
-                })?
-                .get_metadata()
-                .map_err(|_| CompleteProofError::InvalidReceipt {
-                    id: bonsai_proof_id.clone(),
-                })?;
+            let metadata =
+                receipt
+                    .get_metadata()
+                    .map_err(|_| CompleteProofError::InvalidReceipt {
+                        id: bonsai_proof_id.clone(),
+                    })?;
             metadata.post.digest().into()
         }
         false => [0u8; 32],
