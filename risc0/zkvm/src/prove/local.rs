@@ -195,6 +195,11 @@ impl Prover for DevModeProver {
             "WARNING: Proving in DevMode does not generate a valid receipt. \
             Receipts generated from this process are invalid and should never be used in production."
         );
+
+        if cfg!(feature = "disable-dev-mode") && std::env::var("DEV_MODE").is_ok() {
+            panic!("zkVM: dev mode is disabled. unset DEV_MODE environment variable to produce valid proofs")
+        }
+
         let receipt = Receipt::new(InnerReceipt::Fake, session.journal.clone());
         let image_id = session.segments[0].resolve()?.pre_image.compute_id();
         receipt.verify_with_context(

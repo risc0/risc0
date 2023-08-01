@@ -270,6 +270,29 @@ fn continuation() {
     }
 }
 
+fn run_dev_mode() {
+    use crate::receipt::InnerReceipt;
+    std::env::set_var("DEV_MODE", "1");
+    let receipt = prove_nothing("$devmode").unwrap();
+    assert_eq!(receipt.inner, InnerReceipt::Fake);
+    receipt.verify(MULTI_TEST_ID).unwrap();
+}
+
+#[test]
+#[should_panic(
+    expected = "zkVM: dev mode is disabled. unset DEV_MODE environment variable to produce valid proofs"
+)]
+#[cfg(feature = "disable-dev-mode")]
+fn dev_mode_panic() {
+    run_dev_mode()
+}
+
+#[test]
+#[cfg(not(feature = "disable-dev-mode"))]
+fn dev_mode() {
+    run_dev_mode()
+}
+
 // These tests come from:
 // https://github.com/riscv-software-src/riscv-tests
 // They were built using the toolchain from:

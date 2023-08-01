@@ -307,12 +307,6 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
 /// Return a default [Prover] based on environment variables, falling back to a
 /// default CPU-based prover.
 pub fn default_prover() -> Rc<dyn Prover> {
-    if cfg!(feature = "disable-dev-mode") && std::env::var("DEV_MODE").is_ok() {
-        panic!(
-            "zkVM: dev mode is disabled. unset DEV_MODE environment variable to produce valid proofs"
-        )
-    }
-
     let provers = provers();
 
     if let Ok(requested) = std::env::var("RISC0_PROVER") {
