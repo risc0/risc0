@@ -313,13 +313,21 @@ impl From<u64> for Elem {
 /// Wrapping addition of [Elem] using Baby Bear field modulus
 fn add(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_add(rhs);
-    return if x >= P { x - P } else { x };
+    if x >= P {
+        x - P
+    } else {
+        x
+    }
 }
 
 /// Wrapping subtraction of [Elem] using Baby Bear field modulus
 fn sub(lhs: u32, rhs: u32) -> u32 {
     let x = lhs.wrapping_sub(rhs);
-    return if x > P { x.wrapping_add(P) } else { x };
+    if x > P {
+        x.wrapping_add(P)
+    } else {
+        x
+    }
 }
 
 /// Wrapping multiplication of [Elem]  using Baby Bear field modulus
@@ -412,7 +420,7 @@ impl field::Elem for ExtElem {
             if n % 2 == 1 {
                 tot *= x;
             }
-            n = n / 2;
+            n /= 2;
             x *= x;
         }
         tot

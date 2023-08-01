@@ -2,11 +2,7 @@
 // is `multiply`, replace `METHOD_NAME_ELF` with `MULTIPLY_ELF` and replace
 // `METHOD_NAME_ID` with `MULTIPLY_ID`
 use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
-use risc0_zkvm::{
-    default_executor_from_elf,
-    serde::{from_slice, to_vec},
-    ExecutorEnv,
-};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 
 fn main() {
     // First, we construct an executor environment
@@ -21,14 +17,11 @@ fn main() {
     // For example:
     // let env = ExecutorEnv::builder().add_input(&vec).build().unwrap();
 
-    // Next, we make an executor, loading the (renamed) ELF binary.
-    let mut exec = default_executor_from_elf(env, METHOD_NAME_ELF).unwrap();
+    // Obtain the default prover.
+    let prover = default_prover();
 
-    // Run the executor to produce a session.
-    let session = exec.run().unwrap();
-
-    // Prove the session to produce a receipt.
-    let receipt = session.prove().unwrap();
+    // Produce a receipt by proving the specified ELF binary.
+    let receipt = prover.prove_elf(env, METHOD_NAME_ELF).unwrap();
 
     // TODO: Implement code for transmitting or serializing the receipt for
     // other parties to verify here

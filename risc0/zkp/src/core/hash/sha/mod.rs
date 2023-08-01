@@ -80,7 +80,7 @@ pub trait Sha256 {
     /// Generate a SHA-256 hash from a slice of words, padding to block size
     /// and adding the SHA-256 hash trailer, as specified in FIPS 180-4.
     fn hash_words(words: &[u32]) -> Self::DigestPtr {
-        Self::hash_bytes(bytemuck::cast_slice(words) as &[u8])
+        Self::hash_bytes(bytemuck::cast_slice(words))
     }
 
     /// Generate a hash from a pair of [Digest] using the SHA-256 compression
@@ -145,7 +145,7 @@ impl Block {
     /// are a SHA-256 digest.
     pub fn as_half_blocks(&self) -> (&Digest, &Digest) {
         match bytemuck::cast_slice::<_, Digest>(self.as_words()) {
-            &[ref half_block1, ref half_block2] => (half_block1, half_block2),
+            [half_block1, half_block2] => (half_block1, half_block2),
             _ => unreachable!("a block can always be decomposed into two digests"),
         }
     }
@@ -291,13 +291,13 @@ impl AsMut<[u32]> for Block {
 
 impl Display for Block {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&hex::encode(&self))
+        f.write_str(&hex::encode(self))
     }
 }
 
 impl Debug for Block {
     fn fmt(&self, f: &mut Formatter) -> core::fmt::Result {
-        f.write_str(&format!("Block({})", &hex::encode(&self)))
+        f.write_str(&format!("Block({})", &hex::encode(self)))
     }
 }
 
@@ -338,7 +338,7 @@ pub struct Sha256HashSuite<F: Field> {
 #[cfg(not(target_os = "zkvm"))]
 impl<F: Field> Sha256HashSuite<F> {
     /// Construct a Sha256HashSuite
-    pub fn new() -> super::HashSuite<F> {
+    pub fn new_suite() -> super::HashSuite<F> {
         use alloc::rc::Rc;
         super::HashSuite {
             name: "sha-256".into(),
@@ -385,14 +385,14 @@ pub mod testutil {
         );
         assert_eq!(
             hex::encode(
-                &S::hash_bytes(
+                S::hash_bytes(
                     "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq".as_bytes()
                 )
                 .deref()
             ),
             "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
         );
-        assert_eq!(hex::encode(&S::hash_bytes(
+        assert_eq!(hex::encode(S::hash_bytes(
             "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu" .as_bytes()).deref()),
             "cf5b16a778af8380036ce59e7b0492370b249b11e8f07a51afac45037afee9d1");
         // Test also the 'hexDigest' bit.
@@ -400,7 +400,7 @@ pub mod testutil {
         // >>> hashlib.sha256("Byzantium").hexdigest()
         // 'f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a'
         assert_eq!(
-            hex::encode(&S::hash_bytes(&"Byzantium".as_bytes()).deref()),
+            hex::encode(S::hash_bytes("Byzantium".as_bytes()).deref()),
             "f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a"
         );
     }
@@ -429,22 +429,18 @@ pub mod testutil {
         // >>> hashlib.sha256("Byzantium").hexdigest()
         // 'f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a'
         assert_eq!(
-            hex::encode(rust_crypto::Sha256::<S>::digest(&"Byzantium".as_bytes())),
+            hex::encode(rust_crypto::Sha256::<S>::digest("Byzantium".as_bytes())),
             "f75c763b4a52709ac294fc7bd7cf14dd45718c3d50b36f4732b05b8c6017492a"
         );
     }
 
     fn hash_elems<S: Sha256>(len: usize) -> Digest {
-        let items: Vec<BabyBearElem> = (0..len as u32)
-            .into_iter()
-            .map(|x| BabyBearElem::new(x))
-            .collect();
+        let items: Vec<BabyBearElem> = (0..len as u32).map(BabyBearElem::new).collect();
         *S::hash_raw_pod_slice(items.as_slice())
     }
 
     fn hash_extelems<S: Sha256>(len: usize) -> Digest {
         let items: Vec<BabyBearExtElem> = (0..len as u32)
-            .into_iter()
             .map(|x| {
                 BabyBearExtElem::new(
                     BabyBearElem::new(x * 4),

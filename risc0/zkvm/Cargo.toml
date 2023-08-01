@@ -28,7 +28,10 @@ hex = { version = "0.4.3", default-features = false, features = ["alloc"] }
 libm = "0.2"
 risc0-zkp = { workspace = true }
 risc0-zkvm-platform = { workspace = true }
-serde = { version = "1.0", default-features = false, features = ["alloc", "derive"] }
+serde = { version = "1.0", default-features = false, features = [
+  "alloc",
+  "derive",
+] }
 
 # TODO(nils): Change these `target_os` checks to `target_vendor` checks when we
 # have a real target triple.
@@ -47,7 +50,9 @@ getrandom = { version = "0.2", optional = true }
 gimli = { version = "0.27", optional = true }
 lazy-regex = { version = "2.4", optional = true }
 log = "0.4"
-crypto-bigint = { version = "0.5", default-features = false, features = ["rand"], optional = true }
+crypto-bigint = { version = "0.5", default-features = false, features = [
+  "rand",
+], optional = true }
 num-derive = "0.4"
 num-traits = { version = "0.2", default-features = false, optional = true }
 prost = { version = "0.11", optional = true }
@@ -56,7 +61,9 @@ rayon = { version = "1.5", optional = true }
 rrs-lib = { version = "0.1", optional = true }
 sha2 = { version = "0.10", optional = true }
 thiserror = { version = "1.0", optional = true }
-tracing = { version = "0.1", default-features = false, features = ["attributes"] }
+tracing = { version = "0.1", default-features = false, features = [
+  "attributes",
+] }
 typetag = { version = "0.2", optional = true }
 
 [dev-dependencies]
@@ -84,7 +91,7 @@ profiler = [
   "dep:gimli",
   "dep:prost",
   "dep:prost-build",
-  "dep:protobuf-src"
+  "dep:protobuf-src",
 ]
 prove = [
   "dep:addr2line",

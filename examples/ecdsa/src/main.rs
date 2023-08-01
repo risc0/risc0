@@ -19,9 +19,9 @@ use k256::{
 };
 use rand_core::OsRng;
 use risc0_zkvm::{
-    default_executor_from_elf,
+    default_prover,
     serde::{from_slice, to_vec},
-    ExecutorEnv, SessionReceipt,
+    ExecutorEnv, Receipt,
 };
 
 /// Given an secp256k1 verifier key (i.e. public key), message and signature,
@@ -32,15 +32,17 @@ fn prove_ecdsa_verification(
     verifying_key: &VerifyingKey,
     message: &[u8],
     signature: &Signature,
-) -> SessionReceipt {
+) -> Receipt {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(&(verifying_key.to_encoded_point(true), message, signature)).unwrap())
         .build()
         .unwrap();
 
-    let mut exec = default_executor_from_elf(env, ECDSA_VERIFY_ELF).unwrap();
-    let session = exec.run().unwrap();
-    session.prove().unwrap()
+    // Obtain the default prover.
+    let prover = default_prover();
+
+    // Produce a receipt by proving the specified ELF binary.
+    prover.prove_elf(env, ECDSA_VERIFY_ELF).unwrap()
 }
 
 fn main() {

@@ -32,6 +32,12 @@ pub struct ShaRng {
     pool_used: usize,
 }
 
+impl Default for ShaRng {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ShaRng {
     /// Create a new [ShaRng] from a given [Sha256].
     pub fn new() -> Self {
@@ -77,7 +83,8 @@ impl RngCore for ShaRng {
     }
 
     fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), Error> {
-        Ok(self.fill_bytes(dest))
+        self.fill_bytes(dest);
+        Ok(())
     }
 }
 

@@ -1,0 +1,17 @@
+[package]
+name = "browser-verify"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+risc0-zkvm = { path = "../../risc0/zkvm", default-features = false }
+risc0-zkvm-receipts = { path = "../../risc0/zkvm/receipts" }
+wasm-bindgen = "0.2"
+
+# These crates are used for running unit tests.
+[dev-dependencies]
+bincode = "1.3"
+wasm-bindgen-test = "0.3"

@@ -31,6 +31,12 @@ pub struct PoseidonRng {
     pool_used: usize,
 }
 
+impl Default for PoseidonRng {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl PoseidonRng {
     /// Construct a new PoseidonRng
     pub fn new() -> Self {

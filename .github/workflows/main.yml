@@ -74,9 +74,10 @@ jobs:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - uses: ./.github/actions/rosetta
       - run: cargo xtask install
+      - run: cargo xtask gen-receipt
       - run: cargo test -F $FEATURE -F profiler
       - run: cargo test -F $FEATURE --tests -- --ignored
-      - run: cargo build --manifest-path risc0/wasm/Cargo.toml --target wasm32-unknown-unknown
+      - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
       - run: cargo check -p bootstrap
@@ -90,6 +91,11 @@ jobs:
       - run: cargo check -F $FEATURE -p risc0-sys
       - run: cargo check -F $FEATURE -p risc0-zkp
       - run: cargo check -F $FEATURE -p risc0-zkvm
+      - uses: risc0/clippy-action@main
+        with:
+          reporter: 'github-pr-check'
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          clippy_flags: --features $FEATURE --all-targets
       - run: sccache --show-stats
 
   examples:
@@ -130,7 +136,7 @@ jobs:
         if: matrix.device == 'cpu'
 
   doc:
-    runs-on: [self-hosted, prod, Linux, cpu]
+    runs-on: ubuntu-22.04-64c
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
@@ -139,7 +145,8 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: Linux
-      - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
+      - run: cargo xtask gen-receipt
+      - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - name: Install mdbook
         uses: risc0/cargo-install@2cfb0024938d23011106cbf127b393bc83fddba1
         with:
@@ -165,3 +172,26 @@ jobs:
         shell: bash
       - run: cargo build --release --manifest-path ${{ runner.temp }}/template-test/Cargo.toml
       - run: ${{ runner.temp }}/template-test/target/release/host
+
+  web:
+    runs-on: ubuntu-22.04-64c
+    env:
+      RUSTC_WRAPPER: sccache
+    steps:
+      # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
+      - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
+      - uses: actions/checkout@v3
+      - uses: browser-actions/setup-firefox@v1
+      - run: firefox --version
+      - uses: ./.github/actions/rustup
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - uses: ./.github/actions/sccache
+      - uses: ./.github/actions/rosetta
+      - run: cargo xtask install
+      - run: cargo xtask gen-receipt
+      - run: |
+          npm install
+          npm test -- --firefox
+        working-directory: examples/browser-verify

@@ -20,7 +20,7 @@ use bonsai_sdk::{
     alpha_async::{download, session_status},
 };
 use ethers::abi;
-use risc0_zkvm::SessionReceipt;
+use risc0_zkvm::Receipt;
 
 use super::snark::tokenize_snark_proof;
 use crate::{api, uploader::completed_proofs::error::CompleteProofError};
@@ -35,7 +35,7 @@ pub(crate) async fn get_complete_proof(
     bonsai_client: Client,
     bonsai_mode: bool,
     bonsai_proof_id: SessionId,
-    callback_contract: CallbackRequestFilter,
+    callback_request: CallbackRequestFilter,
 ) -> Result<CompleteProof, CompleteProofError> {
     let bonsai_response = session_status(bonsai_client.clone(), bonsai_proof_id.clone())
         .await
@@ -71,7 +71,7 @@ pub(crate) async fn get_complete_proof(
         }
     })?]);
 
-    let receipt: SessionReceipt =
+    let receipt: Receipt =
         bincode::deserialize(&receipt_buf).map_err(|_| CompleteProofError::InvalidReceipt {
             id: bonsai_proof_id.clone(),
         })?;
@@ -89,12 +89,12 @@ pub(crate) async fn get_complete_proof(
     };
 
     let payload = [
-        callback_contract.function_selector.as_slice(),
+        callback_request.function_selector.as_slice(),
         receipt.journal.as_slice(),
-        callback_contract.image_id.as_slice(),
+        callback_request.image_id.as_slice(),
     ]
     .concat();
-    let gas_limit = callback_contract.gas_limit;
+    let gas_limit = callback_request.gas_limit;
 
     let auth = CallbackAuthorization {
         seal: seal.into(),
@@ -104,7 +104,7 @@ pub(crate) async fn get_complete_proof(
         auth: auth.into(),
         payload: payload.into(),
         gas_limit,
-        callback_contract: callback_contract.account,
+        callback_contract: callback_request.callback_contract.clone(),
     };
 
     Ok(CompleteProof {

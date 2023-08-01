@@ -1,8 +1,5 @@
 [workspace]
-members = [
-    "methods",
-    "relay"
-]
+members = ["methods", "relay"]
 
 [workspace.dependencies]
 risc0-build = { version = "0.16", path = "../../../risc0/build" }

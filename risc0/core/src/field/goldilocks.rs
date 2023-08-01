@@ -263,7 +263,7 @@ impl From<&Elem> for u64 {
 
 impl From<Elem> for u64 {
     fn from(x: Elem) -> Self {
-        x.0.into()
+        x.0
     }
 }
 
@@ -287,7 +287,11 @@ fn add(lhs: u64, rhs: u64) -> u64 {
 /// Wrapping subtraction of [Elem] using Goldilocks field modulus
 fn sub(lhs: u64, rhs: u64) -> u64 {
     let x = lhs.wrapping_sub(rhs);
-    return if x > lhs { x.wrapping_add(P) } else { x };
+    if x > lhs {
+        x.wrapping_add(P)
+    } else {
+        x
+    }
 }
 
 /// Wrapping multiplication of [Elem] using Goldilocks field modulus
@@ -361,7 +365,7 @@ impl field::Elem for ExtElem {
             if n % 2 == 1 {
                 tot *= x;
             }
-            n = n / 2;
+            n /= 2;
             x *= x;
         }
         tot
@@ -409,7 +413,7 @@ impl field::ExtElem for ExtElem {
     type SubElem = Elem;
 
     fn from_subfield(elem: &Elem) -> Self {
-        Self::from([elem.clone(), Elem::ZERO])
+        Self::from([*elem, Elem::ZERO])
     }
 
     fn from_subelems(elems: impl IntoIterator<Item = Self::SubElem>) -> Self {

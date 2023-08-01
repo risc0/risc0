@@ -149,7 +149,7 @@ impl<'a, T: Default + Clone + Pod> SyncSlice<'a, T> {
         SyncSlice {
             _buf: SyncSliceRef::FromSlice(self),
             ptr: unsafe { self.ptr.add(offset) },
-            size: size,
+            size,
         }
     }
 
@@ -190,7 +190,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         }
     }
 
-    pub fn as_slice<'a>(&'a self) -> Ref<'a, [T]> {
+    pub fn as_slice(&self) -> Ref<'_, [T]> {
         let vec = self.buf.borrow();
         Ref::map(vec, |vec| {
             let slice = bytemuck::cast_slice(&vec.0);
@@ -198,7 +198,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         })
     }
 
-    pub fn as_slice_mut<'a>(&'a self) -> RefMut<'a, [T]> {
+    pub fn as_slice_mut(&self) -> RefMut<'_, [T]> {
         let vec = self.buf.borrow_mut();
         RefMut::map(vec, |vec| {
             let slice = bytemuck::cast_slice_mut(&mut vec.0);
@@ -206,7 +206,7 @@ impl<T: Default + Clone + Pod> CpuBuffer<T> {
         })
     }
 
-    pub fn as_slice_sync<'a>(&'a self) -> SyncSlice<'a, T> {
+    pub fn as_slice_sync(&self) -> SyncSlice<'_, T> {
         SyncSlice::new(self.as_slice_mut())
     }
 }
@@ -395,7 +395,7 @@ impl<F: Field> Hal for CpuHal<F> {
                 let pos = idx & ((1 << bits) - 1);
                 let rev = bit_rev_32(pos as u32) >> (32 - bits);
                 let pow3 = Self::Elem::from_u64(3).pow(rev as usize);
-                *io = *io * pow3;
+                *io *= pow3;
             });
     }
 
@@ -566,7 +566,7 @@ impl<F: Field> Hal for CpuHal<F> {
         let input = io.slice(input_size, input_size);
         let hashfn = self.suite.hashfn.as_ref();
         (0..output.size()).into_par_iter().for_each(|idx| {
-            let in1 = input.get(2 * idx + 0);
+            let in1 = input.get(2 * idx);
             let in2 = input.get(2 * idx + 1);
             output.set(idx, *hashfn.hash_pair(&in1, &in2));
         });
@@ -608,7 +608,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn check_req() {
-        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new());
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
         let a = hal.alloc_elem("a", 10);
         let b = hal.alloc_elem("b", 20);
         hal.eltwise_add_elem(&a, &b, &b);
@@ -616,7 +616,7 @@ mod tests {
 
     #[test]
     fn fp() {
-        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new());
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
         const COUNT: usize = 1024 * 1024;
         test_binary(
             &hal,
@@ -657,7 +657,7 @@ mod tests {
     }
 
     fn do_hash_rows(rows: usize, cols: usize, expected: &[&str]) {
-        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new());
+        let hal: CpuHal<BabyBear> = CpuHal::new(Sha256HashSuite::new_suite());
         let matrix_size = rows * cols;
         let matrix = hal.alloc_elem("matrix", matrix_size);
         let output = hal.alloc_digest("output", rows);

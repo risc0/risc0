@@ -19,8 +19,7 @@ use bonsai_sdk::alpha::{responses::SnarkProof, Client, SdkErr};
 use clap::{builder::PossibleValue, ValueEnum};
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{
-    Executor, ExecutorEnv, LocalExecutor, MemoryImage, Program, ReceiptMetadata, SessionReceipt,
-    MEM_SIZE, PAGE_SIZE,
+    Executor, ExecutorEnv, MemoryImage, Program, Receipt, ReceiptMetadata, MEM_SIZE, PAGE_SIZE,
 };
 
 #[derive(Debug, Copy, Clone)]
@@ -63,7 +62,7 @@ pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         .add_input(&input)
         .build()
         .context("Failed to build exec env")?;
-    let mut exec = LocalExecutor::from_elf(env, elf).context("Failed to instantiate executor")?;
+    let mut exec = Executor::from_elf(env, elf).context("Failed to instantiate executor")?;
     let session = exec
         .run()
         .context(format!("Failed to run executor {:?}", &input))?;
@@ -101,7 +100,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         .context("Failed to create remote proving session")?;
 
     // Poll and await the result of the STARK rollup proving session.
-    let receipt: SessionReceipt = (|| {
+    let receipt: Receipt = (|| {
         loop {
             let res = match session.status(&client) {
                 Ok(res) => res,
@@ -122,8 +121,8 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
                                 .context("Missing 'receipt_url' on status response")?,
                         )
                         .context("Failed to download receipt")?;
-                    let receipt: SessionReceipt = bincode::deserialize(&receipt_buf)
-                        .context("Failed to deserialize SessionReceipt")?;
+                    let receipt: Receipt = bincode::deserialize(&receipt_buf)
+                        .context("Failed to deserialize Receipt")?;
                     // eprintln!("Completed STARK proof on bonsai alpha backend!");
                     return Ok(receipt);
                 }
@@ -137,7 +136,8 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
         }
     })()?;
     let metadata = receipt
-        .segments
+        .inner
+        .flat()
         .last()
         .ok_or(anyhow!("receipt contains no segments"))?
         .get_metadata()?;
