@@ -197,7 +197,8 @@ pub fn resolve_guest_entry<'a>(
                 guest_binary,
                 found_guests
             )
-        }).cloned()
+        })
+        .cloned()
 }
 
 pub async fn resolve_image_output(
