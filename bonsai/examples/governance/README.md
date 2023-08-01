@@ -2,12 +2,12 @@
 
 ### Background
 
-Billions of dollars worth of assets are managed by DAO treasuries, to be put to use towards the each DAO's mission.
+Billions of dollars worth of assets are managed by DAO treasuries, to be put to use towards each DAO's mission.
 Governance, in one form or another, is widely deployed to help decide what actions will be aligned with the mission.
 
 Voting is core to most Governance systems, and one of the major challenges is the high gas costs associated with voting on-chain.
 High gas costs make voting more expensive, and therefore less inclusive, making this a serious concern.
-DAO's a trade=off between using fully on-chain systems like [Tally] and pay the high associated gas costs, or use an off-chain system with lower security guarantees.
+There's a trade-off between using fully on-chain systems like [Tally] with high associated gas costs, or using an off-chain system with lower security guarantees.
 
 ### Summary
 
@@ -15,9 +15,9 @@ In this showcase, we implement the Bonsai Governor to reduce gas costs of fully-
 We start from the [OpenZeppelin Governor] standard, which is used by DAOs such as Uniswap, ENS, Aave and many others.
 
 Key to this design is offloading compute that is expensive on-chain to the [RISC Zero] zkVM guest, with execution and proving being handled by Bonsai.
-In particular, this design optimizes voting operations, especially when casting a signed vote, by deferring signature verification and checking for double-voting to the zkVM.
+In particular, this design optimizes voting operations, especially when casting a signed vote, by deferring signature verification and double-voting checks to the zkVM.
 Instead of the verifying the signature, or adding the ballot to EVM state, both the `Governor.vote` and `Governor.voteBySig` methods simply log an `event` and add the ballot to a running hash accumulator.
-These event logs are collected later, by anybody in the world, passed to the zkVM for vote finalization with the results sent to the Bonsai Governor smart contract through the Bonsai relay.
+These event logs are collected later, by anybody in the world, and passed to the zkVM for vote finalization with the results sent to the Bonsai Governor smart contract through the Bonsai relay.
 With this, we are able to reduce gas costs for voting, while maintaining the security guarantees of voting on L1.
 
 As a result, the Bonsai Governor uses about 66% less gas per vote[^1] compared with the baseline [OpenZeppelin Governor] implementation.
@@ -41,7 +41,7 @@ Features currently in development can further decrease gas costs to make it poss
 
 Any voting system needs to achieve two very important properties:
 
-1. It must not be possible any actor to commit *fraud* by casting more votes than authorized.
+1. It must not be possible for any actor to commit *fraud* by casting more votes than authorized.
 2. Every voter must be able to ensure their voter is counted, i.e. that their vote *cannot be censored*.
 
 OpenZeppelin's Governor standard provides prevents fraud as long as the L1 execution is sound, a property ensured by the robust Ethereum full-node community.

@@ -100,7 +100,7 @@ pub mod responses {
     /// Snark proof request object
     #[derive(Deserialize, Serialize)]
     pub struct SnarkReq {
-        /// Existing Session ID from [SessionId]
+        /// Existing Session ID from [super::SessionId]
         pub session_id: String,
     }
 
@@ -128,7 +128,7 @@ pub mod responses {
         /// SNARK proof output
         ///
         /// Generated snark proof, following the snarkjs calldata format:
-        /// https://github.com/iden3/snarkjs#26-simulate-a-verification-call
+        /// <https://github.com/iden3/snarkjs#26-simulate-a-verification-call>
         pub output: Option<SnarkProof>,
     }
 }

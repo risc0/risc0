@@ -22,10 +22,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use risc0_binfmt::MemoryImage;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-use crate::{exec::SyscallRecord, receipt::ExitCode, MemoryImage};
+use crate::{exec::SyscallRecord, receipt::ExitCode};
 
 #[derive(Clone, Default, Serialize, Deserialize, Debug)]
 pub struct PageFaults {
@@ -206,7 +207,7 @@ impl SimpleSegmentRef {
 /// and the SegmentRef holds the filename.
 ///
 /// There is an example of using [FileSegmentRef] in [our EVM example]
-/// (https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs).
+/// (<https://github.com/risc0/risc0/blob/main/examples/zkevm-demo/src/main.rs>).
 #[derive(Clone, Serialize, Deserialize)]
 pub struct FileSegmentRef {
     path: PathBuf,
