@@ -20,7 +20,6 @@ use clap::Parser;
 use foundry_cli::cmd::{forge, Cmd};
 
 fn main() -> anyhow::Result<()> {
-    // TODO: Add rerun-if-changed
     let cmd = forge::build::BuildArgs::try_parse_from(["--"].into_iter())?;
     let _ = cmd
         .run()
