@@ -276,6 +276,7 @@ fn run_dev_mode() {
     let receipt = prove_nothing("$devmode").unwrap();
     assert_eq!(receipt.inner, InnerReceipt::Fake);
     receipt.verify(MULTI_TEST_ID).unwrap();
+    std::env::remove_var("DEV_MODE");
 }
 
 #[test]
@@ -287,7 +288,10 @@ fn dev_mode_panic() {
     run_dev_mode()
 }
 
+// This test manipulates environment variables and must be run in isolation.
+// Otherwise, other tests could use the DEV_MODE environment variable and result in unexpected behavior
 #[test]
+#[ignore]
 #[cfg(not(feature = "disable-dev-mode"))]
 fn dev_mode() {
     run_dev_mode()

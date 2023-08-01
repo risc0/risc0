@@ -15,14 +15,13 @@
 use alloc::collections::BTreeMap;
 
 use anyhow::Result;
-use risc0_binfmt::{MemoryImage};
+use risc0_binfmt::MemoryImage;
+
 use crate::{
-    receipt::{Receipt, VerifierContext},
-    ExecutorEnv, Segment, SegmentReceipt, Session,
+    prove::Prover,
+    receipt::{InnerReceipt, Receipt, VerifierContext},
+    Executor, ExecutorEnv, Segment, SegmentReceipt, Session,
 };
-use crate::prove::Prover;
-use crate::Executor;
-use crate::receipt::InnerReceipt;
 
 /// An implementation of a [Prover] for development and testing purposes.
 pub struct DevModeProver {

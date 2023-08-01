@@ -58,10 +58,7 @@ use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, WORD_SIZE};
 
 #[cfg(not(feature = "disable-dev-mode"))]
 use self::dev_mode::DevModeProver;
-use self::{
-    local::LocalProver,
-    remote::RemoteProver,
-};
+use self::{local::LocalProver, remote::RemoteProver};
 use crate::{
     receipt::{Receipt, VerifierContext},
     ExecutorEnv, Segment, SegmentReceipt, Session,
@@ -235,7 +232,6 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
 
         let prover = Rc::new(RemoteProver::new("bonsai"));
         table.insert("$bonsai".to_string(), prover);
-
     }
     #[cfg(not(feature = "disable-dev-mode"))]
     {
