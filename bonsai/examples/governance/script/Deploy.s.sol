@@ -101,7 +101,6 @@ contract Deploy is Script, BonsaiCheats {
         }
 
         // Deploy the BonsaiGovernor.
-        // TODO(victor): Provide a way to upload the image here.
         bytes32 imageId = queryImageId("FINALIZE_VOTES");
         console2.log("Image ID for FINALIZE_VOTES is ", vm.toString(imageId));
         BonsaiGovernor gov = new BonsaiGovernor(token, bonsaiRelay, imageId);
