@@ -16,12 +16,12 @@
 pragma solidity ^0.8.17;
 
 interface Relay {
-    function requestCallback(
-        bytes32 image_id,
+     function requestCallback(
+        bytes32 imageId,
         bytes calldata input,
-        address callback_contract,
-        bytes4 function_selector,
-        uint64 gas_limit
+        address callbackContract,
+        bytes4 functionSelector,
+        uint64 gasLimit
     ) external;
 }
 

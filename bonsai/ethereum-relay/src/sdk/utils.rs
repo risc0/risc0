@@ -23,6 +23,7 @@ use ethers::{
     },
     providers::{Http, Provider, Ws},
     signers::{LocalWallet, Signer},
+    solc::{CompilerOutput, Solc},
     utils::AnvilInstance,
 };
 

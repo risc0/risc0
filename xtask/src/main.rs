@@ -39,6 +39,9 @@ impl Commands {
     }
 }
 
+// TODO(victor): Remove this as a dependency once the Bonsai codebase is
+// refactored to use Foundry for compiling all contracts, including test
+// contracts, instead of solc directly.
 fn install_solc() {
     const SOLC_VERSION: Version = Version::new(0, 8, 20);
 

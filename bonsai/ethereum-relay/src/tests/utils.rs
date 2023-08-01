@@ -14,7 +14,7 @@
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use bonsai_proxy_contract::CallbackRequestFilter;
+    use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
     use bonsai_sdk::alpha::{
         responses::{CreateSessRes, SessionStatusRes, SnarkProof, SnarkStatusRes},
         SessionId,
