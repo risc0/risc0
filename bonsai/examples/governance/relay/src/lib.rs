@@ -172,9 +172,9 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
 }
 
 pub fn resolve_guest_entry<'a>(
-    guest_list: &'a [GuestListEntry],
+    guest_list: &[GuestListEntry<'a>],
     guest_binary: &String,
-) -> Result<&'a GuestListEntry> {
+) -> Result<GuestListEntry<'a>> {
     // Search list for requested binary name
     let potential_guest_image_id: [u8; 32] =
         match hex::decode(guest_binary.to_lowercase().trim_start_matches("0x")) {
@@ -197,12 +197,12 @@ pub fn resolve_guest_entry<'a>(
                 guest_binary,
                 found_guests
             )
-        })
+        }).cloned()
 }
 
 pub async fn resolve_image_output(
     input: &str,
-    guest_entry: &GuestListEntry,
+    guest_entry: &GuestListEntry<'static>,
     prover_mode: ProverMode,
 ) -> Result<Output> {
     let input = hex::decode(input.trim_start_matches("0x")).context("Failed to decode input")?;
