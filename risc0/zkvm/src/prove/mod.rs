@@ -30,6 +30,8 @@
 //! # }
 //! ```
 
+#[cfg(not(feature = "disable-dev-mode"))]
+mod dev_mode;
 mod exec;
 pub(crate) mod loader;
 mod local;
@@ -54,8 +56,10 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, WORD_SIZE};
 
+#[cfg(not(feature = "disable-dev-mode"))]
+use self::dev_mode::DevModeProver;
 use self::{
-    local::{DevModeProver, LocalProver},
+    local::LocalProver,
     remote::RemoteProver,
 };
 use crate::{
@@ -216,6 +220,9 @@ pub trait Prover {
 }
 
 fn provers() -> HashMap<String, Rc<dyn Prover>> {
+    if cfg!(feature = "disable-dev-mode") && std::env::var("DEV_MODE").is_ok() {
+        panic!("zkVM: dev mode is disabled. unset DEV_MODE environment variable to produce valid proofs")
+    }
     let mut table: HashMap<String, Rc<dyn Prover>> = HashMap::new();
     {
         let prover = Rc::new(LocalProver::new("cpu", cpu::sha256_hal_eval()));
@@ -229,6 +236,9 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
         let prover = Rc::new(RemoteProver::new("bonsai"));
         table.insert("$bonsai".to_string(), prover);
 
+    }
+    #[cfg(not(feature = "disable-dev-mode"))]
+    {
         let prover = Rc::new(DevModeProver::new("devmode"));
         table.insert("$devmode".to_string(), prover);
     }
