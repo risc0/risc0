@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use alloc::collections::BTreeMap;
-
 use anyhow::Result;
 use risc0_binfmt::MemoryImage;
 
@@ -43,8 +41,7 @@ impl Prover for DevModeProver {
     }
 
     fn get_peak_memory_usage(&self) -> usize {
-        // note, we don't actually run the prover, so very little memory is consumed
-        // while generating the receipt
+        // we don't actually run the prover in dev mode.
         0
     }
 
@@ -60,15 +57,6 @@ impl Prover for DevModeProver {
         }
 
         let receipt = Receipt::new(InnerReceipt::Fake, session.journal.clone());
-        let image_id = session.segments[0].resolve()?.pre_image.compute_id();
-        receipt.verify_with_context(
-            &VerifierContext {
-                suites: BTreeMap::new(),
-                #[cfg(not(feature = "disable-dev-mode"))]
-                dev_mode: true,
-            },
-            image_id,
-        )?;
         Ok(receipt)
     }
 
