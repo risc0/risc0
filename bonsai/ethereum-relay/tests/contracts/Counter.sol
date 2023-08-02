@@ -16,7 +16,7 @@
 pragma solidity ^0.8.17;
 
 interface Relay {
-     function requestCallback(
+    function requestCallback(
         bytes32 imageId,
         bytes calldata input,
         address callbackContract,
@@ -29,17 +29,12 @@ contract Counter {
     uint256 public value = 0;
 
     // Submit request
-    function request_callback(
-        bytes32 image_id,
-        bytes calldata input,
-        uint64 gas_limit,
-        Relay relay
-    ) public {
+    function request_callback(bytes32 image_id, bytes calldata input, uint64 gas_limit, Relay relay) public {
         relay.requestCallback(image_id, input, address(this), this.callback.selector, gas_limit);
     }
 
     // Callback function expected to be invoked by the Bonsai Relay contract
-    function callback(uint256 increment) public  {
+    function callback(uint256 increment) public {
         value = value + increment;
     }
 }
