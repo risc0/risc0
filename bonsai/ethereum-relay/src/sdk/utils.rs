@@ -12,18 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{path::Path, sync::Arc};
+use std::sync::Arc;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use ethers::{
-    abi::Tokenize,
     prelude::{
         k256::{ecdsa::SigningKey, SecretKey},
         *,
     },
     providers::{Http, Provider, Ws},
     signers::{LocalWallet, Signer},
-    solc::{CompilerOutput, Solc},
     utils::AnvilInstance,
 };
 
@@ -101,52 +99,4 @@ pub fn get_anvil() -> Option<AnvilInstance> {
         Ok(_) => None,
         _ => Some(ethers::utils::Anvil::new().spawn()),
     }
-}
-
-/// Constructs the deployment transaction of the contract based on
-/// the provided constructor arguments and returns a Deployer instance.
-/// You must call send() in order to actually deploy the contract.
-/// Notes:
-///
-/// If there are no constructor arguments, you should pass () as the argument.
-pub async fn deploy_contract<T: Tokenize, M: Middleware, S: Signer>(
-    constructor_args: T,
-    contract_name: String,
-    compiled: CompilerOutput,
-    signer: Arc<SignerMiddleware<M, S>>,
-) -> Result<ethers::contract::Contract<SignerMiddleware<M, S>>> {
-    let (abi, bytecode, _runtime_bytecode) = compiled
-        .find(contract_name.clone())
-        .context(format!(
-            "could not find contract {} in compiler output",
-            contract_name.clone()
-        ))?
-        .into_parts_or_default();
-
-    let client = signer;
-    let factory = ContractFactory::new(abi, bytecode, client.clone());
-    factory
-        .deploy(constructor_args)
-        .map_err(|err| {
-            anyhow!(format!(
-                "constructing deploy transaction failed for {} - {}",
-                contract_name.clone(),
-                err
-            ))
-        })?
-        .send()
-        .await
-        .map_err(|err| {
-            anyhow!(format!(
-                "deployed failed for {} - {}",
-                contract_name.clone(),
-                err
-            ))
-        })
-}
-
-/// Convenience function for compiling all sources under the given path.
-pub fn compile_contracts(path: &Path) -> Result<CompilerOutput> {
-    let compiled = Solc::default().compile_source(path)?;
-    Ok(compiled)
 }

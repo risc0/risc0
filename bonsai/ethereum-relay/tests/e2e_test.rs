@@ -15,7 +15,10 @@
 #[cfg(test)]
 mod tests {
 
-    use std::{path::Path, time::SystemTime};
+    use ethers::prelude::*;
+    abigen!(Counter, "tests/out/Counter.sol/Counter.json");
+
+    use std::time::SystemTime;
 
     use bonsai_ethereum_contracts::{BonsaiRelay, BonsaiTestRelay, RiscZeroGroth16Verifier};
     use bonsai_ethereum_relay::{
@@ -34,6 +37,8 @@ mod tests {
     use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
     use risc0_zkvm_methods::{SLICE_IO_ELF, SLICE_IO_ID};
     use tokio::time::{sleep, Duration};
+
+    use crate::tests::counter::Counter;
 
     const BONSAI_API_URI: &str = "http://localhost:8081";
 
@@ -105,16 +110,12 @@ mod tests {
                     .address()
             }
         };
-        let compiled_contract =
-            utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
-        let counter = utils::deploy_contract(
-            (),
-            "Counter".to_string(),
-            compiled_contract,
-            ethers_client.clone(),
-        )
-        .await
-        .unwrap();
+
+        let counter = Counter::deploy(ethers_client.clone(), ())
+            .expect("should be able to deploy the Counter contract")
+            .send()
+            .await
+            .expect("deployment should succeed");
         assert_eq!(
             counter
                 .method::<_, U256>("value", ())
@@ -252,16 +253,11 @@ mod tests {
                     .address()
             }
         };
-        let compiled_contract =
-            utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
-        let counter = utils::deploy_contract(
-            (),
-            "Counter".to_string(),
-            compiled_contract,
-            ethers_client.clone(),
-        )
-        .await
-        .unwrap();
+        let counter = Counter::deploy(ethers_client.clone(), ())
+            .expect("should be able to deploy the Counter contract")
+            .send()
+            .await
+            .expect("deployment should succeed");
         assert_eq!(
             counter
                 .method::<_, U256>("value", ())
