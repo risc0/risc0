@@ -8,7 +8,6 @@ bincode = "1.3"
 clap = { version = "4.0", features = ["derive"] }
 risc0-zkvm = { workspace = true, features = ["default"] }
 risc0-zkvm-methods = { path = "../risc0/zkvm/methods" }
-semver = "1.0"
 which = "4.4"
 xshell = "0.2"
 

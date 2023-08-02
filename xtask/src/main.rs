@@ -15,7 +15,6 @@
 use clap::{Parser, Subcommand};
 use risc0_zkvm::{prove::default_prover, ExecutorEnv};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
-use semver::Version;
 use which::which;
 use xshell::{cmd, Shell};
 
