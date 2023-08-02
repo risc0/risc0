@@ -14,8 +14,6 @@
 
 //! Build Solidity contracts with Foundry when `cargo build` is invoked.
 
-#![feature(is_terminal)]
-
 use clap::Parser;
 use foundry_cli::cmd::{forge, Cmd};
 

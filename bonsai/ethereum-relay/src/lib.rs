@@ -108,7 +108,7 @@ where
 
         let uploader_complete_proof_manager = BonsaiCompleteProofManager::new(
             bonsai_client.clone(),
-            dev_mode(),
+            dev_mode()?,
             storage.clone(),
             new_complete_proof_notifier.clone(),
             send_batch_notifier.clone(),
@@ -132,7 +132,7 @@ where
             self.publish_port,
         ));
         let local_bonsai_handle = tokio::spawn(maybe_start_local_bonsai(
-            dev_mode(),
+            dev_mode()?,
             self.bonsai_api_url.clone(),
         ));
         let downloader_handle = tokio::spawn(downloader.run());
@@ -147,7 +147,7 @@ where
             err = server_handle, if self.publish_mode => {
                 panic!("{}", format!("server API exited: {:?}", err))
             }
-            err = local_bonsai_handle, if dev_mode() => {
+            err = local_bonsai_handle, if dev_mode()? => {
                 panic!("{}", format!("local Bonsai service exited: {:?}", err))
             }
             err = downloader_handle => {
@@ -184,9 +184,12 @@ async fn maybe_start_local_bonsai(dev_mode: bool, bonsai_url: String) -> anyhow:
     Ok(())
 }
 
-fn dev_mode() -> bool {
+/// Return true if RISC0_DEV_MODE is set ot a non-empty string.
+fn dev_mode() -> anyhow::Result<bool> {
     match std::env::var("RISC0_DEV_MODE") {
-        Ok(_) => true,
-        Err(_) => false,
+        Ok(val) if val.is_empty() => Ok(false),
+        Ok(_) => Ok(true),
+        Err(std::env::VarError::NotPresent) => Ok(false),
+        Err(e) => Err(e.into()),
     }
 }

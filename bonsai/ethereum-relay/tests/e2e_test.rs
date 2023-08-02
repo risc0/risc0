@@ -49,6 +49,7 @@ mod tests {
             std::env::set_var("RISC0_DEV_MODE", "TRUE");
             return true;
         }
+        std::env::remove_var("RISC0_DEV_MODE");
         false
     }
 
