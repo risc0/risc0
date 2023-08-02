@@ -14,7 +14,6 @@ concurrency:
 jobs:
   # Install foundry and use it to lint and test parts of the codebase that use Solidity.
   foundry:
-    name: cargo lint
     runs-on: ubuntu-latest
     steps:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
