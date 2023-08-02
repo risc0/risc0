@@ -42,8 +42,14 @@ mod tests {
 
     const BONSAI_API_URI: &str = "http://localhost:8081";
 
-    fn dev_mode(bonsai_url: String) -> bool {
-        bonsai_url.contains("localhost") || bonsai_url.contains("127.0.0.1")
+    fn dev_mode() -> bool {
+        // we only check the local bonsai_url here so that we don't need to set
+        // RISC0_DEV_MODE env variable on the main gh workflow
+        if get_bonsai_url().contains("localhost") || get_bonsai_url().contains("127.0.0.1") {
+            std::env::set_var("RISC0_DEV_MODE", "TRUE");
+            return true;
+        }
+        false
     }
 
     fn get_bonsai_url() -> String {
@@ -85,7 +91,7 @@ mod tests {
         )
         .await
         .unwrap();
-        let bonsai_relay_contract = match dev_mode(get_bonsai_url()) {
+        let bonsai_relay_contract = match dev_mode() {
             true => {
                 BonsaiTestRelay::deploy(ethers_client.clone(), ethers_client.signer().chain_id())
                     .expect("should be able to deploy the BonsaiTestRelay contract")
@@ -230,7 +236,7 @@ mod tests {
         )
         .await
         .unwrap();
-        let bonsai_relay_contract = match dev_mode(get_bonsai_url()) {
+        let bonsai_relay_contract = match dev_mode() {
             true => {
                 BonsaiTestRelay::deploy(ethers_client.clone(), ethers_client.signer().chain_id())
                     .expect("should be able to deploy the BonsaiTestRelay contract")

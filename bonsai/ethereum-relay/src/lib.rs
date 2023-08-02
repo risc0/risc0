@@ -108,7 +108,7 @@ where
 
         let uploader_complete_proof_manager = BonsaiCompleteProofManager::new(
             bonsai_client.clone(),
-            !dev_mode(self.bonsai_api_url.clone()),
+            dev_mode(),
             storage.clone(),
             new_complete_proof_notifier.clone(),
             send_batch_notifier.clone(),
@@ -132,7 +132,7 @@ where
             self.publish_port,
         ));
         let local_bonsai_handle = tokio::spawn(maybe_start_local_bonsai(
-            dev_mode(self.bonsai_api_url.clone()),
+            dev_mode(),
             self.bonsai_api_url.clone(),
         ));
         let downloader_handle = tokio::spawn(downloader.run());
@@ -147,7 +147,7 @@ where
             err = server_handle, if self.publish_mode => {
                 panic!("{}", format!("server API exited: {:?}", err))
             }
-            err = local_bonsai_handle, if dev_mode(self.bonsai_api_url) => {
+            err = local_bonsai_handle, if dev_mode() => {
                 panic!("{}", format!("local Bonsai service exited: {:?}", err))
             }
             err = downloader_handle => {
@@ -184,6 +184,9 @@ async fn maybe_start_local_bonsai(dev_mode: bool, bonsai_url: String) -> anyhow:
     Ok(())
 }
 
-fn dev_mode(bonsai_url: String) -> bool {
-    bonsai_url.contains("localhost") || bonsai_url.contains("127.0.0.1")
+fn dev_mode() -> bool {
+    match std::env::var("RISC0_DEV_MODE") {
+        Ok(_) => true,
+        Err(_) => false,
+    }
 }

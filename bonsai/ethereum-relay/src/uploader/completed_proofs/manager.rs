@@ -33,7 +33,7 @@ const BONSAI_RELAY_GAS_LIMIT: u64 = 3000000;
 
 pub(crate) struct BonsaiCompleteProofManager<S: Storage, M: Middleware> {
     client: Client,
-    bonsai_mode: bool,
+    dev_mode: bool,
     storage: S,
     new_complete_proofs_notifier: Arc<Notify>,
     ready_to_send_batch: Vec<CompleteProof>,
@@ -49,7 +49,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         client: Client,
-        bonsai_mode: bool,
+        dev_mode: bool,
         storage: S,
         new_complete_proofs_notifier: Arc<Notify>,
         send_batch_notifier: Arc<Notify>,
@@ -60,7 +60,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
     ) -> Self {
         Self {
             client,
-            bonsai_mode,
+            dev_mode,
             storage,
             new_complete_proofs_notifier,
             ready_to_send_batch: Vec::new(),
@@ -138,7 +138,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
         for request in completed_proof_requests.into_iter() {
             let completed_proof_request_handler = tokio::spawn(get_complete_proof(
                 self.client.clone(),
-                self.bonsai_mode,
+                self.dev_mode,
                 request.proof_request_id.clone(),
                 request.callback_proof_request_event,
             ));

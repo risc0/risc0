@@ -33,7 +33,7 @@ pub(crate) struct CompleteProof {
 
 pub(crate) async fn get_complete_proof(
     bonsai_client: Client,
-    bonsai_mode: bool,
+    dev_mode: bool,
     bonsai_proof_id: SessionId,
     callback_request: CallbackRequestFilter,
 ) -> Result<CompleteProof, CompleteProofError> {
@@ -65,8 +65,8 @@ pub(crate) async fn get_complete_proof(
     let snark_proof =
         super::snark::get_snark_proof(bonsai_client.clone(), snark_id, bonsai_proof_id.clone())
             .await?;
-    let seal = match snark_proof.a.len() == 0 {
-        true => vec![], // test mode
+    let seal = match dev_mode {
+        true => vec![],
         false => abi::encode(&[tokenize_snark_proof(&snark_proof).map_err(|_| {
             CompleteProofError::SnarkFailed {
                 id: bonsai_proof_id.clone(),
@@ -78,8 +78,8 @@ pub(crate) async fn get_complete_proof(
         bincode::deserialize(&receipt_buf).map_err(|_| CompleteProofError::InvalidReceipt {
             id: bonsai_proof_id.clone(),
         })?;
-    let post_state_digest: [u8; 32] = match bonsai_mode {
-        true => {
+    let post_state_digest: [u8; 32] = match dev_mode {
+        false => {
             let metadata =
                 receipt
                     .get_metadata()
@@ -88,7 +88,7 @@ pub(crate) async fn get_complete_proof(
                     })?;
             metadata.post.digest().into()
         }
-        false => [0u8; 32],
+        true => [0u8; 32],
     };
 
     let payload = [
