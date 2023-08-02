@@ -190,8 +190,9 @@ mod tests {
         let now = SystemTime::now();
         let max_seconds_to_wait = 120;
         let expected_value = U256::from(100);
+        let mut value = U256::from(0);
         while now.elapsed().expect("error occured getting time").as_secs() < max_seconds_to_wait {
-            let value = counter
+            value = counter
                 .method::<_, U256>("value", ())
                 .expect("value should be a function")
                 .call()
@@ -215,6 +216,7 @@ mod tests {
             );
             sleep(Duration::new(1, 0)).await
         }
+        assert_eq!(value, expected_value)
     }
 
     #[tokio::test]
@@ -325,8 +327,9 @@ mod tests {
         let now = SystemTime::now();
         let max_seconds_to_wait = 120;
         let expected_value = U256::from(100);
+        let mut value = U256::from(0);
         while now.elapsed().expect("error occured getting time").as_secs() < max_seconds_to_wait {
-            let value = counter
+            value = counter
                 .method::<_, U256>("value", ())
                 .expect("value should be a function")
                 .call()
@@ -350,5 +353,6 @@ mod tests {
             );
             sleep(Duration::new(1, 0)).await
         }
+        assert_eq!(value, expected_value)
     }
 }

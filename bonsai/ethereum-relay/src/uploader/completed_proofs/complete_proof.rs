@@ -65,11 +65,14 @@ pub(crate) async fn get_complete_proof(
     let snark_proof =
         super::snark::get_snark_proof(bonsai_client.clone(), snark_id, bonsai_proof_id.clone())
             .await?;
-    let seal = abi::encode(&[tokenize_snark_proof(&snark_proof).map_err(|_| {
-        CompleteProofError::SnarkFailed {
-            id: bonsai_proof_id.clone(),
-        }
-    })?]);
+    let seal = match snark_proof.a.len() == 0 {
+        true => vec![], // test mode
+        false => abi::encode(&[tokenize_snark_proof(&snark_proof).map_err(|_| {
+            CompleteProofError::SnarkFailed {
+                id: bonsai_proof_id.clone(),
+            }
+        })?]),
+    };
 
     let receipt: Receipt =
         bincode::deserialize(&receipt_buf).map_err(|_| CompleteProofError::InvalidReceipt {
