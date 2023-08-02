@@ -126,7 +126,7 @@ pub(crate) mod tests {
 
         let mut manager = BonsaiCompleteProofManager::new(
             bonsai_client,
-            false,
+            true,
             storage.clone(),
             new_complete_proofs_notifier.clone(),
             send_batch_notifier.clone(),
