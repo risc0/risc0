@@ -75,7 +75,6 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - uses: ./.github/actions/rosetta
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: cargo test -F $FEATURE -F profiler
@@ -191,7 +190,6 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
-      - uses: ./.github/actions/rosetta
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
