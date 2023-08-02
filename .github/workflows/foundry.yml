@@ -55,13 +55,3 @@ jobs:
           BONSAI_PROVING: local
         run: forge test -vvv
         working-directory: bonsai/examples/governance
-
-      # TODO(victor): Get an API key configured so we can enabled this rule.
-      #- name: run end-to-end tests in bonsai/examples/governance
-      #  env:
-      #    TEST_USE_ZKVM: true
-      #    BONSAI_PROVING: bonsai
-      #    BONSAI_API_URL: ${{ secrets.BONSAI_API_URL }}
-      #    BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
-      #  run: forge test -vvv --match-contract BasicBonsaiGovernorTest
-      #  working-directory: bonsai/examples/governance
