@@ -11,6 +11,3 @@ dist/
 rust-project.json
 target/
 tmp/
-
-# File lock used in Bonsai build scripts.
-.forge.lock
