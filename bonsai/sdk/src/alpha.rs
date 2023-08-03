@@ -403,24 +403,32 @@ mod tests {
     fn client_from_env() {
         let url = "http://127.0.0.1/stage".to_string();
         let apikey = TEST_KEY.to_string();
-        std::env::set_var("BONSAI_API_URL", url.clone());
-        std::env::set_var("BONSAI_API_KEY", apikey);
-
-        let client = super::Client::from_env().unwrap();
-
-        assert_eq!(client.url, url);
+        temp_env::with_vars(
+            vec![
+                ("BONSAI_API_URL", Some(url.clone())),
+                ("BONSAI_API_KEY", Some(apikey)),
+            ],
+            || {
+                let client = super::Client::from_env().unwrap();
+                assert_eq!(client.url, url);
+            },
+        );
     }
 
     #[test]
     fn client_test_slash_strip() {
         let url = "http://127.0.0.1/".to_string();
         let apikey = TEST_KEY.to_string();
-        std::env::set_var("BONSAI_API_URL", url);
-        std::env::set_var("BONSAI_API_KEY", apikey);
-
-        let client = super::Client::from_env().unwrap();
-
-        assert_eq!(client.url, "http://127.0.0.1");
+        temp_env::with_vars(
+            vec![
+                ("BONSAI_API_URL", Some(url)),
+                ("BONSAI_API_KEY", Some(apikey)),
+            ],
+            || {
+                let client = super::Client::from_env().unwrap();
+                assert_eq!(client.url, "http://127.0.0.1");
+            },
+        );
     }
 
     #[test]
