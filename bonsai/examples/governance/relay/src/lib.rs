@@ -16,29 +16,16 @@ use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
 use bonsai_sdk::alpha::{responses::SnarkProof, Client, SdkErr};
-use clap::{builder::PossibleValue, ValueEnum};
+use clap::ValueEnum;
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{
     Executor, ExecutorEnv, MemoryImage, Program, Receipt, ReceiptMetadata, MEM_SIZE, PAGE_SIZE,
 };
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, ValueEnum)]
 pub enum ProverMode {
     Local,
     Bonsai,
-}
-
-impl ValueEnum for ProverMode {
-    fn value_variants<'a>() -> &'a [Self] {
-        &[Self::Local, Self::Bonsai]
-    }
-
-    fn to_possible_value(&self) -> Option<PossibleValue> {
-        Some(match self {
-            Self::Local => PossibleValue::new("local"),
-            Self::Bonsai => PossibleValue::new("bonsai"),
-        })
-    }
 }
 
 /// Result of executing a guest image, possibly containing a proof.
@@ -135,12 +122,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
             }
         }
     })()?;
-    let metadata = receipt
-        .inner
-        .flat()
-        .last()
-        .ok_or(anyhow!("receipt contains no segments"))?
-        .get_metadata()?;
+    let metadata = receipt.get_metadata()?;
 
     let snark_session = client.create_snark(session.uuid)?;
     let snark_proof: SnarkProof = (|| loop {
