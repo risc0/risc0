@@ -38,6 +38,7 @@ pub(crate) struct MerkleTreeVerifier<'a> {
     top: &'a [Digest],
 
     // These are the rest of the tree.  These have the virtual indexes [1, top_size).
+    #[allow(clippy::vec_box)]
     rest: Vec<Box<Digest>>,
 }
 
@@ -130,7 +131,7 @@ impl<'a> MerkleTreeVerifier<'a> {
         if self.rest.is_empty() {
             &self.top[self.params.idx_to_top(1)]
         } else {
-            &*self.rest[self.params.idx_to_rest(1)]
+            &self.rest[self.params.idx_to_rest(1)]
         }
     }
 
@@ -143,7 +144,7 @@ impl<'a> MerkleTreeVerifier<'a> {
     ) -> Result<&'a [F::Elem], VerificationError> {
         if idx >= self.params.row_size {
             return Err(VerificationError::MerkleQueryOutOfRange {
-                idx: idx,
+                idx,
                 rows: self.params.row_size,
             });
         }
@@ -165,9 +166,9 @@ impl<'a> MerkleTreeVerifier<'a> {
             // Now ascend to the parent index, and compute the hash there.
             idx /= 2;
             if low_bit == 1 {
-                cur = hashfn.hash_pair(&other, &cur);
+                cur = hashfn.hash_pair(other, &cur);
             } else {
-                cur = hashfn.hash_pair(&cur, &other);
+                cur = hashfn.hash_pair(&cur, other);
             }
         }
         // Once we reduce to an index for which we have the hash, check that it's

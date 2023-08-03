@@ -150,9 +150,9 @@ where
         Ok(receipt)
     }
 
-    fn prove<'a>(
+    fn prove(
         &self,
-        env: ExecutorEnv<'a>,
+        env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         image: MemoryImage,
     ) -> Result<Receipt> {

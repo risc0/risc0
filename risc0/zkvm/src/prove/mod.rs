@@ -137,7 +137,7 @@ pub mod cpu {
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
     pub fn sha256_hal_eval() -> HalEval<CpuHal<BabyBear>, CpuEvalCheck<'static, CircuitImpl>> {
-        let hal = Rc::new(CpuHal::new(Sha256HashSuite::new()));
+        let hal = Rc::new(CpuHal::new(Sha256HashSuite::new_suite()));
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
@@ -151,7 +151,7 @@ pub mod cpu {
     /// operations. This function returns a HAL implementation that makes use of
     /// multi-core CPUs.
     pub fn poseidon_hal_eval() -> HalEval<CpuHal<BabyBear>, CpuEvalCheck<'static, CircuitImpl>> {
-        let hal = Rc::new(CpuHal::new(PoseidonHashSuite::new()));
+        let hal = Rc::new(CpuHal::new(PoseidonHashSuite::new_suite()));
         let eval = Rc::new(CpuEvalCheck::new(&CIRCUIT));
         HalEval { hal, eval }
     }
@@ -175,26 +175,26 @@ where
 /// be used to verify correct computation.
 pub trait Prover {
     /// Prove the specified [MemoryImage].
-    fn prove<'a>(
+    fn prove(
         &self,
-        env: ExecutorEnv<'a>,
+        env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         image: MemoryImage,
     ) -> Result<Receipt>;
 
     /// Prove the specified ELF binary.
-    fn prove_elf<'a>(&self, env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Receipt> {
+    fn prove_elf(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<Receipt> {
         self.prove_elf_with_ctx(env, &VerifierContext::default(), elf)
     }
 
     /// Prove the specified [MemoryImage] with the specified [VerifierContext].
-    fn prove_elf_with_ctx<'a>(
+    fn prove_elf_with_ctx(
         &self,
-        env: ExecutorEnv<'a>,
+        env: ExecutorEnv<'_>,
         ctx: &VerifierContext,
         elf: &[u8],
     ) -> Result<Receipt> {
-        let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
+        let program = Program::load_elf(elf, MEM_SIZE as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         self.prove(env, ctx, image)
     }

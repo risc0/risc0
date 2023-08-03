@@ -109,7 +109,7 @@ fn write_u32_bytes(flat: &mut Vec<u32>, word: u32) {
 /// Compute and return the ImageID of the given `(merkle_root, pc)` pair.
 pub fn compute_image_id(merkle_root: &Digest, pc: u32) -> Digest {
     SystemState {
-        merkle_root: merkle_root.clone(),
+        merkle_root: *merkle_root,
         pc,
     }
     .digest()

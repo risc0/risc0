@@ -22,9 +22,11 @@ use risc0_zkvm::Loader;
 fn main() {
     let loader = Loader::new();
     let control_id_sha256 =
-        loader.compute_control_id(&CpuHal::new(Sha256HashSuite::<BabyBear>::new()));
-    let control_id_poseidon = loader.compute_control_id(&CpuHal::new(PoseidonHashSuite::new()));
-    let control_id_blake2b = loader.compute_control_id(&CpuHal::new(Blake2bCpuHashSuite::new()));
+        loader.compute_control_id(&CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite()));
+    let control_id_poseidon =
+        loader.compute_control_id(&CpuHal::new(PoseidonHashSuite::new_suite()));
+    let control_id_blake2b =
+        loader.compute_control_id(&CpuHal::new(Blake2bCpuHashSuite::new_suite()));
     let contents = format!(
         include_str!("control_id.rs"),
         control_id_sha256[0],

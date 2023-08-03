@@ -60,7 +60,7 @@ impl HashFn<BabyBear> for PoseidonHashFn {
 
     fn hash_ext_elem_slice(&self, slice: &[BabyBearExtElem]) -> Box<Digest> {
         to_digest(unpadded_hash(
-            slice.iter().map(|ee| ee.subelems().iter()).flatten(),
+            slice.iter().flat_map(|ee| ee.subelems().iter()),
         ))
     }
 }
@@ -78,7 +78,7 @@ pub struct PoseidonHashSuite;
 
 impl PoseidonHashSuite {
     /// Construct a new PoseidonHashSuite
-    pub fn new() -> HashSuite<BabyBear> {
+    pub fn new_suite() -> HashSuite<BabyBear> {
         HashSuite {
             name: "poseidon".into(),
             hashfn: Rc::new(PoseidonHashFn {}),
@@ -105,12 +105,12 @@ fn sbox(x: Elem) -> Elem {
     let x2 = x * x;
     let x4 = x2 * x2;
     let x6 = x4 * x2;
-    return x6 * x;
+    x6 * x
 }
 
 fn do_full_sboxes(cells: &mut [Elem; CELLS]) {
-    for i in 0..CELLS {
-        cells[i] = sbox(cells[i]);
+    for cell in cells.iter_mut() {
+        *cell = sbox(*cell);
     }
 }
 

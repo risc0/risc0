@@ -203,7 +203,7 @@ impl MemoryMonitor {
     }
 
     pub fn load_registers(&self) -> [u32; REG_MAX] {
-        self.registers.clone()
+        self.registers
     }
 
     fn init_registers(&mut self) -> Result<()> {
@@ -430,7 +430,7 @@ impl Memory for MemoryMonitor {
         match size {
             MemAccessSize::Byte => self.load_u8(addr).map(|x| x as u32).ok(),
             MemAccessSize::HalfWord => self.load_u16(addr).map(|x| x as u32).ok(),
-            MemAccessSize::Word => self.load_u32(addr).map(|x| x).ok(),
+            MemAccessSize::Word => self.load_u32(addr).ok(),
         }
     }
 

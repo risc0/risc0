@@ -98,6 +98,7 @@ pub trait Hal {
 
     fn zk_shift(&self, io: &Self::Buffer<Self::Elem>, count: usize);
 
+    #[allow(clippy::too_many_arguments)]
     fn mix_poly_coeffs(
         &self,
         out: &Self::Buffer<Self::ExtElem>,

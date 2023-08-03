@@ -27,7 +27,7 @@ pub fn eval_check(c: &mut Criterion) {
     for po2 in [2, 8, 16].iter() {
         let params = EvalCheckParams::new(*po2);
         let circuit = CircuitImpl::new();
-        let hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new());
+        let hal = CpuHal::new(Sha256HashSuite::<BabyBear>::new_suite());
         let eval = CpuEvalCheck::new(&circuit);
         group.bench_function(BenchmarkId::new("cpu", po2), |b| {
             b.iter(|| {
