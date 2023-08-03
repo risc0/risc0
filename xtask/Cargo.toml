@@ -12,6 +12,7 @@ semver = "1.0"
 svm-rs = { version = "0.2", features = ["blocking"] }
 which = "4.4"
 xshell = "0.2"
+bytemuck = "1.12"
 
 [package.metadata.release]
 release = false

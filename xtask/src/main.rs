@@ -53,10 +53,17 @@ impl Commands {
         let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
         let receipt_bytes = bincode::serialize(&receipt).unwrap();
 
+        std::fs::write("risc0/zkvm/receipts/src/fib_receipt.bin", &receipt_bytes).unwrap();
+        std::fs::write(
+            "risc0/zkvm/receipts/src/fib_id.bin",
+            &bytemuck::cast::<[u32; 8], [u8; 32]>(FIB_ID),
+        )
+        .unwrap();
+
         let rust_code = format!(
             r##"
-pub const FIB_ID: [u32; 8] = {FIB_ID:?};
-pub const FIB_RECEIPT: &[u8] = &{receipt_bytes:?};
+pub const FIB_ID: [u8; 32] = *include_bytes!("fib_id.bin");
+pub const FIB_RECEIPT: &[u8] = include_bytes!("fib_receipt.bin");
 "##
         );
 
