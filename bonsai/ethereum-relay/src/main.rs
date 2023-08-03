@@ -87,8 +87,6 @@ fn get_bonsai_url() -> String {
 }
 
 fn get_bonsai_api_key() -> String {
-    match std::env::var("BONSAI_API_KEY") {
-        Ok(api_key) => api_key,
-        _ => "test_key".to_string(),
-    }
+    const DEFAULT_KEY: &str = "test_key";
+    std::env::var("BONSAI_API_KEY").unwrap_or(DEFAULT_KEY.to_string())
 }

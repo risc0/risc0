@@ -56,7 +56,7 @@ pub struct PolyGroup<H: Hal> {
     pub merkle: MerkleTreeProver<H>,
 }
 
-impl<'a, H: Hal> PolyGroup<H> {
+impl<H: Hal> PolyGroup<H> {
     #[tracing::instrument(name = "PolyGroup", skip_all, fields(name = _name))]
     pub fn new(
         hal: &H,

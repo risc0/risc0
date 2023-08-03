@@ -134,7 +134,7 @@ impl PolyFp<BabyBear> for CircuitImpl {
     }
 }
 
-impl<'a> CircuitProveDef<BabyBear> for CircuitImpl {}
+impl CircuitProveDef<BabyBear> for CircuitImpl {}
 
 pub(crate) fn call_step<S, F>(
     ctx: &CircuitStepContext,

@@ -178,7 +178,7 @@ impl<'a> Executor<'a> {
     /// let mut exec = Executor::from_elf(env, BENCH_ELF).unwrap();
     /// ```
     pub fn from_elf(env: ExecutorEnv<'a>, elf: &[u8]) -> Result<Self> {
-        let program = Program::load_elf(&elf, MEM_SIZE as u32)?;
+        let program = Program::load_elf(elf, MEM_SIZE as u32)?;
         let image = MemoryImage::new(&program, PAGE_SIZE as u32)?;
         let obj_ctx = if log::log_enabled!(log::Level::Trace) {
             let file = addr2line::object::read::File::parse(elf)?;
@@ -470,8 +470,8 @@ impl<'a> Executor<'a> {
         log::debug!("Initial sha state: {state:08x?}");
         for _ in 0..count {
             let mut block = [0u32; BLOCK_WORDS];
-            for i in 0..DIGEST_WORDS {
-                block[i] = self.monitor.load_u32(block1_ptr + (i * WORD_SIZE) as u32)?;
+            for (i, word) in block.iter_mut().enumerate() {
+                *word = self.monitor.load_u32(block1_ptr + (i * WORD_SIZE) as u32)?;
             }
             for i in 0..DIGEST_WORDS {
                 block[DIGEST_WORDS + i] =
@@ -516,8 +516,8 @@ impl<'a> Executor<'a> {
 
         let mut load_bigint_le_bytes = |ptr: u32| -> Result<[u8; bigint::WIDTH_BYTES]> {
             let mut arr = [0u32; bigint::WIDTH_WORDS];
-            for i in 0..bigint::WIDTH_WORDS {
-                arr[i] = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32)?.to_le();
+            for (i, word) in arr.iter_mut().enumerate() {
+                *word = self.monitor.load_u32(ptr + (i * WORD_SIZE) as u32)?.to_le();
             }
             Ok(bytemuck::cast(arr))
         };

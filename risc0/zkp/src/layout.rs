@@ -160,7 +160,7 @@ impl<'a, B: Buffer, C: Component> Tree<'a, B, C> {
         let mut gather = TreeGather::new(self.buf);
         self.component
             .walk(&mut gather)
-            .map_err(|err| anyhow::Error::msg(err))?;
+            .map_err(anyhow::Error::msg)?;
         Ok(gather.vals)
     }
 
@@ -168,7 +168,7 @@ impl<'a, B: Buffer, C: Component> Tree<'a, B, C> {
     pub fn get_bytes(&self) -> Result<Vec<u8>> {
         self.get_u64s()?
             .into_iter()
-            .map(|val| u8::try_from(val).map_err(|err| anyhow::Error::msg(err)))
+            .map(|val| u8::try_from(val).map_err(anyhow::Error::msg))
             .collect()
     }
 
@@ -179,7 +179,7 @@ impl<'a, B: Buffer, C: Component> Tree<'a, B, C> {
             self.get_bytes()?
                 .as_slice()
                 .try_into()
-                .map_err(|err| anyhow::Error::msg(err))?,
+                .map_err(anyhow::Error::msg)?,
         ))
     }
 }
@@ -189,7 +189,7 @@ impl<'a, B: Buffer, C: Component> Debug for Tree<'a, B, C> {
         let mut p = TreePrinter::new(self.buf, Vec::new(), "top");
         self.component.walk(&mut p)?;
         for line in p.lines {
-            write!(f, "{line}\n")?;
+            writeln!(f, "{line}")?;
         }
         Ok(())
     }
@@ -225,7 +225,7 @@ impl<'a, B: Buffer> Visitor for TreePrinter<'a, B> {
                 // U32regs print as hexadecimal.
                 let mut subtree = TreeGather::new(self.buf);
                 component.walk(&mut subtree)?;
-                if subtree.vals.iter().find(|&&x| x != 0).is_some() {
+                if subtree.vals.iter().any(|&x| x != 0) {
                     let mut msg = format!("{name}: ");
                     write!(msg, " 0x")?;
                     for val in subtree.vals {

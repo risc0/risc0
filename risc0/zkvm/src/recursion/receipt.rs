@@ -65,7 +65,7 @@ impl ReceiptMetadata {
         write_sha_halfs(flat, &self.input);
         self.pre.encode(flat);
         self.post.encode(flat);
-        let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
+        let (sys_exit, user_exit) = self.get_exit_code_pairs()?;
         flat.push(sys_exit);
         flat.push(user_exit);
         write_sha_halfs(flat, &self.output);
@@ -74,7 +74,7 @@ impl ReceiptMetadata {
 
     /// Hash the [crate::ReceiptMetadata] to get a digest of the struct.
     pub fn digest(&self) -> Result<Digest, VerificationError> {
-        let (sys_exit, user_exit) = self.get_exit_code_pairs()?.clone();
+        let (sys_exit, user_exit) = self.get_exit_code_pairs()?;
         Ok(tagged_struct(
             "risc0.ReceiptMeta",
             &[
