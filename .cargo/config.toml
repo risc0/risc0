@@ -4,6 +4,5 @@ xtask = "run --release --package xtask --"
 [build]
 rustflags = ["-Dclippy::all", "-Dwarnings"]
 
-# DO NOT MERGE: Workaround for cc issue
 [patch.crates-io]
 cc = { git = "https://github.com/rust-lang/cc-rs", rev = "e5bbdfa" }
