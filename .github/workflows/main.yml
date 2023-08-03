@@ -191,3 +191,9 @@ jobs:
           npm install
           npm test -- --firefox
         working-directory: examples/browser-verify
+      # Run tests for wasm bindings
+      - run: |
+          wasm-pack test --headless --firefox
+          wasm-pack build --target nodejs
+          node --test js_tests
+        working-directory: risc0/js
