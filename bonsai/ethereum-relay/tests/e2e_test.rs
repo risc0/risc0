@@ -135,8 +135,8 @@ mod tests {
 
         // run the bonsai relayer
         let relayer = Relayer {
-            publish_mode: false,
-            publish_port: "8080".to_string(),
+            rest_api: false,
+            rest_api_port: "8080".to_string(),
             bonsai_api_url: get_bonsai_url(),
             bonsai_api_key: get_api_key(),
             relay_contract_address: bonsai_relay_contract,
@@ -279,8 +279,8 @@ mod tests {
 
         // run the bonsai relayer
         let relayer = Relayer {
-            publish_mode: true,
-            publish_port: "8080".to_string(),
+            rest_api: true,
+            rest_api_port: "8080".to_string(),
             bonsai_api_url: get_bonsai_url(),
             bonsai_api_key: get_api_key(),
             relay_contract_address: bonsai_relay_contract,

@@ -1,31 +1,22 @@
 # Bonsai Ethereum Relay
 This repository provides the `bonsai-ethereum-relay`, a tool to integrate Ethereum with Bonsai. It is coupled with an Ethereum Smart Contract able to proxy the interaction from Ethereum to Bonsai and vice versa.
 
-## Usage
-```console
-Usage: bonsai-ethereum-relay [OPTIONS] --contract-address <CONTRACT_ADDRESS> --eth-node-url <ETH_NODE_URL> --wallet-key-identifier <WALLET_KEY_IDENTIFIER>
 
-Options:
-  -p, --port <PORT>
-          The port of the relay server API [default: 8080]
-      --publish-mode
-          Toggle to disable the relay server API
-      --contract-address <CONTRACT_ADDRESS>
-          Bonsai Relay contract address on Ethereum
-      --eth-node-url <ETH_NODE_URL>
-          Ethereum Node endpoint
-      --eth-chain-id <ETH_CHAIN_ID>
-          Ethereum chain ID [default: 5]
-  -w, --wallet-key-identifier <WALLET_KEY_IDENTIFIER>
-          Wallet Key Identifier. Can be a private key as a hex string, or an AWS KMS key identifier [env: WALLET_KEY_IDENTIFIER]
-      --use-kms
-          Toggle to use a KMS client
-  -h, --help
-          Print help
-  -V, --version
-          Print version
-```
+## Overview
+The picture below shows a simplified overview of how users can integrate Bonsai into their Ethereum smart contracts:
 
+![Bonsai Relay Diagram](images/bonsai_relay.png)
+
+1. Some user's logic execution of a given user smart contract gets delegated to be executed and proven on Bonsai. The [Bonsai Relay Contract](../ethereum/contracts/BonsaiRelay.sol) exposes an interface `Request Callback` that triggers an event that is caught by the `Ethereum Bonsai Relayer`.
+2. The relayer forwards the proof request to Bonsai.
+3. The relayer queries Bonsai to get a Snark proof of the requested computation as well as its result embedded into a journal.
+4. Both proof and journal are sent on-chain to the `Bonsai Relay Contract`, that verifies the correctness of the proof.
+5. Upon successful verification, the journal gets sent to the user contract via the specified callback function.
+
+## Interfaces
+The Bonsai Ethereum Relay provides both an *on-chain* (via Ethereum) and an *off-chain* (via HTTP REST API) interface to send `Callback requests`.
+
+### On-chain
 A typical flow works as follows:
 1. Deploy a Bonsai Relay Smart Contract on Ethereum at a given address `0xB..`.
 2. Start an instance of the relay tool configured with the option `--contract-address` defined as `0xB..`.
@@ -33,12 +24,12 @@ A typical flow works as follows:
 4. The corresponding `Image ID` and the Bonsai Relay Smart Contract `0xB..` can be used to construct and deploy the Smart Contract `A` to Ethereum.
 5. Send a transaction to Smart Contract `A` to trigger a `Callback request` event that the Bonsai Relay will catch and forward to Bonsai.
 6. Once Bonsai has generated a proof of execution, the Bonsai Relay will forward this proof along with the result of the computation to the Bonsai Relay Smart Contract.
-7. This triggers a verification of the proof on-chain, and only upon successful verification, the result of the computation will be forwarded to the original requester Smart Contract `A`.
+7. This triggers a verification of the proof on-chain, and only upon successful verification, the result of the computation will be forwarded to the original requester Smart Contract `A` via the `invoke_callback` function.
 
-### Publish mode
-As an alternative to trigger a `Callback request` from Ethereum as described by step 5, the request can be sent directly to the Bonsai Relay via an HTTP REST API. Then, the remaining steps will flow as above. The following example explains how to do that.
+### REST API
+As an alternative to sending a `Callback request` from Ethereum as described by step 5, the request can be sent directly to the Bonsai Relay via an HTTP REST API. Then, the remaining steps will flow as above. The following example explains how to do that.
 
-#### Example Usage
+#### Example
 The following example assumes that the Bonsai Relay is up and running with the server API enabled,
 and that the memory image of your `ELF` is already registered against Bonsai with a given `IMAGE_ID` as its identifier.
 
@@ -59,7 +50,7 @@ input[0] = 32;
 input[35] = 100;
 
 // Create a CallbackRequest for the your contract
-// example: (tests/solidity/contracts/Counter.sol).
+// example: (tests/contracts/Counter.sol).
 let image_id: [u8; 32] = bytemuck::cast(IMAGE_ID);
 let request = CallbackRequest {
     callback_contract: counter.address(),
@@ -78,3 +69,31 @@ relay_client
     .expect("Callback request failed");
 
 ```
+
+## Usage
+```console
+Usage: bonsai-ethereum-relay [OPTIONS] --contract-address <CONTRACT_ADDRESS> --eth-node-url <ETH_NODE_URL> --wallet-key-identifier <WALLET_KEY_IDENTIFIER>
+
+Options:
+  -p, --port <PORT>
+          The port of the relay REST API [default: 8080]
+      --rest-api
+          Toggle to disable the relay REST API
+      --contract-address <CONTRACT_ADDRESS>
+          Bonsai Relay contract address on Ethereum
+      --eth-node-url <ETH_NODE_URL>
+          Ethereum Node endpoint
+      --eth-chain-id <ETH_CHAIN_ID>
+          Ethereum chain ID [default: 5]
+  -w, --wallet-key-identifier <WALLET_KEY_IDENTIFIER>
+          Wallet Key Identifier. Can be a private key as a hex string, or an AWS KMS key identifier [env: WALLET_KEY_IDENTIFIER=]
+      --use-kms
+          Toggle to use a KMS client
+  -h, --help
+          Print help
+  -V, --version
+          Print version
+```
+
+### Dev Mode
+To easier the life of developers, the `Ethereum Bonsai Relay` provides a `dev-mode` consisting of a mock of Bonsai that only provides the journal of executing a given computation without any cryptographic proof. This mode can be used to speed-up testing and debugging by enabling the environmental variable `RISC0_DEV_MODE` when starting the relayer. Since there are no proofs within this mode, we also provide a [Bonsai Test Relay Contract](../ethereum/contracts/BonsaiTestRelay.sol) that skips the on-chain verification of the snark proof.

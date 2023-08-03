@@ -228,8 +228,8 @@ async fn main() -> anyhow::Result<()> {
                 create_ethers_client_private_key(&eth_node, &private_key, eth_chain_id).await?;
 
             let relayer = Relayer {
-                publish_mode: true,
-                publish_port: "8080".to_string(),
+                rest_api: true,
+                rest_api_port: "8080".to_string(),
                 bonsai_api_url: args.global_opts.bonsai_api_url.clone(),
                 bonsai_api_key: args.global_opts.bonsai_api_key.clone(),
                 relay_contract_address: relay_address,

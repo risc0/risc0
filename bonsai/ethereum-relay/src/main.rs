@@ -30,18 +30,18 @@ use ethers::{
 use rusoto_core::Region;
 use rusoto_kms::KmsClient;
 
-const DEFAULT_SERVER_PORT: &str = "8080";
+const DEFAULT_REST_API_PORT: &str = "8080";
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    /// The port of the relay server API
-    #[arg(short, long, default_value_t = DEFAULT_SERVER_PORT.to_string())]
+    /// The port of the relay REST API
+    #[arg(short, long, default_value_t = DEFAULT_REST_API_PORT.to_string())]
     port: String,
 
-    /// Toggle to disable the relay server API
+    /// Toggle to disable the relay REST API
     #[arg(long, default_value_t = true)]
-    publish_mode: bool,
+    rest_api: bool,
 
     /// Bonsai Relay contract address on Ethereum
     #[arg(long)]
@@ -70,8 +70,8 @@ async fn main() -> Result<()> {
     let args = Args::parse();
 
     let relayer = Relayer {
-        publish_mode: args.publish_mode,
-        publish_port: args.port,
+        rest_api: args.rest_api,
+        rest_api_port: args.port,
         bonsai_api_url: get_bonsai_url(),
         bonsai_api_key: get_bonsai_api_key(),
         relay_contract_address: args.contract_address,
