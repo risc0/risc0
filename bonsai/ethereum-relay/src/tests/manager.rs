@@ -86,7 +86,7 @@ pub(crate) mod tests {
 
     #[tokio::test]
     async fn integration_test_completed_proof_manager() {
-        abigen!(Proxy, "tests/out/ProxyTest.sol/Proxy.json");
+        abigen!(Proxy, "../ethereum/out/ProxyTest.sol/Proxy.json");
         use bonsai_ethereum_contracts::i_bonsai_relay;
         use ethers::prelude::*;
 
