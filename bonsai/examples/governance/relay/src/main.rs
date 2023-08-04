@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::io::Write;
+use std::{io::Write, sync::Arc};
 
 use anyhow::Context;
-use bonsai_ethereum_relay::{EthersClientConfig, Relayer};
-use bonsai_ethereum_relay_cli::{resolve_guest_entry, resolve_image_output, Output, ProverMode};
+use bonsai_ethereum_relay::Relayer;
+use bonsai_ethereum_relay_cli::{resolve_guest_entry, resolve_image_output, Output};
 use bonsai_sdk::{
     alpha::{responses::SnarkProof, SdkErr},
     alpha_async::{get_client_from_parts, put_image},
@@ -24,6 +24,8 @@ use bonsai_sdk::{
 use clap::{Args, Parser, Subcommand};
 use ethers::{
     abi::{Hash, Token, Tokenizable},
+    core::k256::{ecdsa::SigningKey, SecretKey},
+    prelude::*,
     types::{Address, U256},
 };
 use methods::GUEST_LIST;
@@ -43,13 +45,10 @@ enum Command {
         /// The input to provide to the guest binary
         input: Option<String>,
 
-        /// Mode for running the zkVM guest.
-        /// "local" specifies local execution, without producing an on-chain
-        /// verifiable SNARK.
-        /// "bonsai" specifies execution and proving with Bonsai, producing a
-        /// SNARK.
-        #[arg(long, value_enum, env = "BONSAI_PROVING", default_value_t = ProverMode::Local)]
-        prover_mode: ProverMode,
+        /// Toggle to enable dev_mode: only a local executor runs your 
+        /// zkVM program and no proof is generated.
+        #[arg(long, env, default_value_t = false)]
+        risc0_dev_mode: bool,
     },
     /// Upload the RISC-V ELF binary to Bonsai.
     Upload {
@@ -90,7 +89,7 @@ struct GlobalOpts {
     #[arg(long, env, global = true, default_value = "http://localhost:8081")]
     bonsai_api_url: String,
 
-    /// Bonsai API URL
+    /// Bonsai API key
     /// Defaults to empty, providing no authentication.
     #[arg(long, env, global = true, default_value = "")]
     bonsai_api_key: String,
@@ -143,7 +142,7 @@ async fn main() -> anyhow::Result<()> {
         Command::Query {
             guest_binary,
             input,
-            prover_mode,
+            risc0_dev_mode,
         } => {
             // Search list for requested binary name
             let guest_entry = resolve_guest_entry(GUEST_LIST, &guest_binary)
@@ -153,15 +152,15 @@ async fn main() -> anyhow::Result<()> {
             let output_tokens = match &input {
                 // Input provided. Return the Ethereum ABI encoded journal and
                 Some(input) => {
-                    let output = resolve_image_output(input, &guest_entry, prover_mode)
+                    let output = resolve_image_output(input, &guest_entry, risc0_dev_mode)
                         .await
                         .context("failed to resolve image output")?;
-                    match (prover_mode, output) {
-                        (ProverMode::Local, Output::Execution { journal }) => {
+                    match (risc0_dev_mode, output) {
+                        (true, Output::Execution { journal }) => {
                             vec![Token::Bytes(journal)]
                         }
                         (
-                            ProverMode::Bonsai,
+                            false,
                             Output::Bonsai {
                                 journal,
                                 receipt_metadata,
@@ -177,10 +176,9 @@ async fn main() -> anyhow::Result<()> {
                                 )?])),
                             ]
                         }
-                        _ => anyhow::bail!(
-                            "invalid prover mode and output combination: {:?}",
-                            prover_mode
-                        ),
+                        _ => {
+                            anyhow::bail!("invalid dev mode and output combination: {:?}", risc0_dev_mode)
+                        }
                     }
                 }
                 // No input. Return the Ethereum ABI encoded bytes32 image ID.
@@ -222,16 +220,17 @@ async fn main() -> anyhow::Result<()> {
             eth_chain_id,
             private_key,
         } => {
+            let ethers_client =
+                create_ethers_client_private_key(&eth_node, &private_key, eth_chain_id).await?;
+
             let relayer = Relayer {
-                rest_api: true,
-                rest_api_port: "8080".to_string(),
+                publish_mode: true,
+                publish_port: "8080".to_string(),
                 bonsai_api_url: args.global_opts.bonsai_api_url.clone(),
                 bonsai_api_key: args.global_opts.bonsai_api_key.clone(),
                 relay_contract_address: relay_address,
             };
-            let client_config =
-                EthersClientConfig::new(eth_node, eth_chain_id, private_key.try_into()?);
-            let server_handle = tokio::spawn(relayer.run(client_config));
+            let server_handle = tokio::spawn(relayer.run(ethers_client.clone()));
 
             // HACK: Wait 1 second to give local Bonsai a chance to start.
             std::thread::sleep(std::time::Duration::from_secs(1));
@@ -292,4 +291,24 @@ async fn upload_images(
     }
 
     Ok(image_ids)
+}
+
+async fn create_ethers_client_private_key(
+    eth_node: &str,
+    private_key: &str,
+    eth_chain_id: u64,
+) -> anyhow::Result<Arc<SignerMiddleware<Provider<Ws>, LocalWallet>>> {
+    let web3_provider = Provider::<Ws>::connect(eth_node)
+        .await
+        .context("unable to connect to websocket")?;
+    let web3_wallet_sk_bytes =
+        hex::decode(private_key).context("wallet_key_identifier should be valid hex string")?;
+    let web3_wallet_secret_key =
+        SecretKey::from_slice(&web3_wallet_sk_bytes).context("invalid private key")?;
+    let web3_wallet_signing_key = SigningKey::from(web3_wallet_secret_key);
+    let web3_wallet = LocalWallet::from(web3_wallet_signing_key);
+    Ok(Arc::new(SignerMiddleware::new(
+        web3_provider,
+        web3_wallet.with_chain_id(eth_chain_id),
+    )))
 }

@@ -16,17 +16,10 @@ use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
 use bonsai_sdk::alpha::{responses::SnarkProof, Client, SdkErr};
-use clap::ValueEnum;
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{
     Executor, ExecutorEnv, MemoryImage, Program, Receipt, ReceiptMetadata, MEM_SIZE, PAGE_SIZE,
 };
-
-#[derive(Debug, Copy, Clone, ValueEnum)]
-pub enum ProverMode {
-    Local,
-    Bonsai,
-}
 
 /// Result of executing a guest image, possibly containing a proof.
 pub enum Output {
@@ -186,15 +179,16 @@ pub fn resolve_guest_entry<'a>(
 pub async fn resolve_image_output(
     input: &str,
     guest_entry: &GuestListEntry<'static>,
-    prover_mode: ProverMode,
+    dev_mode: bool,
 ) -> Result<Output> {
     let input = hex::decode(input.trim_start_matches("0x")).context("Failed to decode input")?;
     let elf = guest_entry.elf;
 
-    match prover_mode {
-        ProverMode::Bonsai => tokio::task::spawn_blocking(move || prove_alpha(elf, input))
+    if dev_mode {
+        execute_locally(elf, input)
+    } else {
+        tokio::task::spawn_blocking(move || prove_alpha(elf, input))
             .await
-            .context("Failed to run alpha sub-task")?,
-        ProverMode::Local => execute_locally(elf, input),
+            .context("Failed to run alpha sub-task")?
     }
 }
