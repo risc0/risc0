@@ -229,11 +229,8 @@ async fn main() -> anyhow::Result<()> {
                 bonsai_api_key: args.global_opts.bonsai_api_key.clone(),
                 relay_contract_address: relay_address,
             };
-            let client_config = EthersClientConfig::new(
-                eth_node,
-                eth_chain_id,
-                private_key.try_into()?,
-            );
+            let client_config =
+                EthersClientConfig::new(eth_node, eth_chain_id, private_key.try_into()?);
             let server_handle = tokio::spawn(relayer.run(client_config));
 
             // HACK: Wait 1 second to give local Bonsai a chance to start.
