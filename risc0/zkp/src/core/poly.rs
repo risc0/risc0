@@ -23,8 +23,8 @@ use risc0_core::field::ExtElem;
 pub fn poly_eval<E: ExtElem>(coeffs: &[E], x: E) -> E {
     let mut mul = E::ONE;
     let mut tot = E::ZERO;
-    for i in 0..coeffs.len() {
-        tot += coeffs[i] * mul;
+    for coeff in coeffs {
+        tot += *coeff * mul;
         mul *= x;
     }
     tot
@@ -48,16 +48,16 @@ pub fn poly_interpolate<E: ExtElem>(out: &mut [E], x: &[E], fx: &[E], size: usiz
     // Compute ft = product of (x - x_i) for all i
     let mut ft = vec![E::ZERO; size + 1];
     ft[0] = E::ONE;
-    for i in 0..size {
+    for (i, x) in x.iter().enumerate().take(size) {
         for j in (0..i + 1).rev() {
             let value = ft[j];
             ft[j + 1] += value;
-            ft[j] *= -x[i];
+            ft[j] *= -*x;
         }
     }
     // Clear output
-    for i in 0..size {
-        out[i] = E::ZERO;
+    for x in &mut *out {
+        *x = E::ZERO;
     }
     for i in 0..size {
         // Compute fr = ft / (x - x_i)

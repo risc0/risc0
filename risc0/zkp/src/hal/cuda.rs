@@ -78,7 +78,7 @@ pub struct CudaHashSha256 {
 impl CudaHash for CudaHashSha256 {
     fn new(_hal: &CudaHal<Self>) -> Self {
         CudaHashSha256 {
-            suite: Sha256HashSuite::new(),
+            suite: Sha256HashSuite::new_suite(),
         }
     }
 
@@ -149,16 +149,12 @@ impl CudaHash for CudaHashPoseidon {
         let round_constants =
             hal.copy_from_elem("round_constants", poseidon::consts::ROUND_CONSTANTS);
         let mds = hal.copy_from_elem("mds", poseidon::consts::MDS);
-        let partial_comp_matrix = hal.copy_from_elem(
-            "partial_comp_matrix",
-            &*poseidon::consts::PARTIAL_COMP_MATRIX,
-        );
-        let partial_comp_offset = hal.copy_from_elem(
-            "partial_comp_offset",
-            &*poseidon::consts::PARTIAL_COMP_OFFSET,
-        );
+        let partial_comp_matrix =
+            hal.copy_from_elem("partial_comp_matrix", poseidon::consts::PARTIAL_COMP_MATRIX);
+        let partial_comp_offset =
+            hal.copy_from_elem("partial_comp_offset", poseidon::consts::PARTIAL_COMP_OFFSET);
         CudaHashPoseidon {
-            suite: PoseidonHashSuite::new(),
+            suite: PoseidonHashSuite::new_suite(),
             round_constants,
             mds,
             partial_comp_matrix,

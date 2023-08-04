@@ -49,7 +49,7 @@ fn build_cuda_kernels() {
         let out = format!("cuda_kernels_{name}");
         KernelBuild::new(KernelType::Cuda)
             .file(dir.join(src))
-            .include(&inc_path)
+            .include(inc_path)
             .deps(dep_paths)
             .compile(&out);
     }
@@ -76,7 +76,7 @@ fn build_metal_kernels() {
         let out = format!("metal_kernels_{name}");
         KernelBuild::new(KernelType::Metal)
             .files(src_paths)
-            .include(&inc_path)
+            .include(inc_path)
             .dep(inc_path.join("sha256.h"))
             .compile(&out);
     }

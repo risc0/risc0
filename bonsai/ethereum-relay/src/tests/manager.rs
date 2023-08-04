@@ -89,13 +89,13 @@ pub(crate) mod tests {
 
     #[tokio::test]
     async fn integration_test_completed_proof_manager() {
+        // Get Anvil
         let anvil = utils::get_anvil();
-        let ethers_client = utils::get_ethers_client(
-            utils::get_ws_provider(anvil.as_ref()).await.unwrap(),
-            utils::get_wallet(anvil.as_ref()).unwrap(),
-        )
-        .await
-        .unwrap();
+
+        // Get client config
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref())
+            .await
+            .expect("Failed to get ethers client config");
 
         // Mock API server
         let (proof_id, server) = get_test_bonsai_server().await;
@@ -107,7 +107,7 @@ pub(crate) mod tests {
             (),
             "Proxy".to_string(),
             compiled_contract,
-            ethers_client.clone(),
+            ethers_client_config.clone(),
         )
         .await
         .unwrap();
@@ -135,7 +135,7 @@ pub(crate) mod tests {
             send_batch_notifier.clone(),
             max_batch_size,
             proxy.address(),
-            ethers_client.clone(),
+            ethers_client_config.clone(),
             send_batch_interval,
         );
 
@@ -191,7 +191,10 @@ pub(crate) mod tests {
 
         // check that the event was emitted
         let filter = &Filter::new().address(proxy.address());
-        let logs = ethers_client
+        let logs = ethers_client_config
+            .get_client()
+            .await
+            .expect("Failed to get client")
             .get_logs(&filter)
             .await
             .expect("logs should be present");

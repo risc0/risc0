@@ -39,12 +39,12 @@ fn add_round_constants(cells: &mut [Fr; CELLS], round: usize) {
 fn sbox(x: Fr) -> Fr {
     let x2 = x * x;
     let x4 = x2 * x2;
-    return x4 * x4;
+    x4 * x4
 }
 
 fn do_full_sboxes(cells: &mut [Fr; CELLS]) {
-    for i in 0..CELLS {
-        cells[i] = sbox(cells[i]);
+    for cell in cells.iter_mut() {
+        *cell = sbox(*cell);
     }
 }
 
@@ -151,7 +151,7 @@ impl HashFn<BabyBear> for Poseidon254HashFn {
 
     fn hash_ext_elem_slice(&self, slice: &[BabyBearExtElem]) -> Box<Digest> {
         Box::new(unpadded_hash(
-            slice.iter().map(|ee| ee.subelems().iter()).flatten(),
+            slice.iter().flat_map(|ee| ee.subelems().iter()),
         ))
     }
 }
@@ -225,7 +225,7 @@ pub struct Poseidon254HashSuite;
 
 impl Poseidon254HashSuite {
     /// Construct a new Poseidon254HashSuite
-    pub fn new() -> HashSuite<BabyBear> {
+    pub fn new_suite() -> HashSuite<BabyBear> {
         HashSuite {
             name: "poseidon254".into(),
             hashfn: Rc::new(Poseidon254HashFn {}),

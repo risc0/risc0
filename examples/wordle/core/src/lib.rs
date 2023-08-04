@@ -51,6 +51,6 @@ impl WordFeedback {
             print!("{:}", guess_word.chars().nth(i).unwrap());
         }
         println!("\x1b[0m");
-        println!("");
+        println!();
     }
 }

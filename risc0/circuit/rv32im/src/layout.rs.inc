@@ -45,7 +45,7 @@ impl risc0_zkp::layout::Component for SystemState {
     }
 }
 
-// cirgen/circuit/rv32im/body.cpp:163
+// zirgen/circuit/rv32im/body.cpp:163
 pub struct Global {
     pub sys_exit_code: &'static OutReg,
     pub user_exit_code: &'static OutReg,
@@ -97,7 +97,7 @@ impl risc0_zkp::layout::Component for BytesFiniStep {
     }
 }
 
-// cirgen/circuit/rv32im/top.cpp:60
+// zirgen/circuit/rv32im/top.cpp:60
 pub struct Mux {
     pub body: &'static BodyStep,
     pub bytes_fini: &'static BytesFiniStep,
@@ -146,10 +146,10 @@ impl risc0_zkp::layout::Component for Top {
 // compiler/edsl/component.h:142
 pub const LAYOUT_HALTED: DataReg = DataReg { offset: 2 };
 
-// cirgen/circuit/rv32im/body.cpp:163
+// zirgen/circuit/rv32im/body.cpp:163
 pub const LAYOUT_MUX_BODY_GLOBAL_SYS_EXIT_CODE: OutReg = OutReg { offset: 104 };
 
-// cirgen/circuit/rv32im/body.cpp:163
+// zirgen/circuit/rv32im/body.cpp:163
 pub const LAYOUT_MUX_BODY_GLOBAL_USER_EXIT_CODE: OutReg = OutReg { offset: 105 };
 
 // circuit/rv32im/global.h:15
@@ -968,7 +968,7 @@ pub const LAYOUT_MUX_BODY_GLOBAL_PRE: SystemState = SystemState {
     pc: &LAYOUT_MUX_BODY_GLOBAL_PRE_PC,
 };
 
-// cirgen/circuit/rv32im/body.cpp:163
+// zirgen/circuit/rv32im/body.cpp:163
 pub const LAYOUT_MUX_BODY_GLOBAL: Global = Global {
     sys_exit_code: &LAYOUT_MUX_BODY_GLOBAL_SYS_EXIT_CODE,
     user_exit_code: &LAYOUT_MUX_BODY_GLOBAL_USER_EXIT_CODE,
@@ -1004,7 +1004,7 @@ pub const LAYOUT_MUX_RAM_LOAD: BytesFiniStep = BytesFiniStep {};
 // :0
 pub const LAYOUT_MUX_RESET: BytesFiniStep = BytesFiniStep {};
 
-// cirgen/circuit/rv32im/top.cpp:60
+// zirgen/circuit/rv32im/top.cpp:60
 pub const LAYOUT_MUX: Mux = Mux {
     body: &LAYOUT_MUX_BODY,
     bytes_fini: &LAYOUT_MUX_BYTES_FINI,

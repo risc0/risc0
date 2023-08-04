@@ -39,8 +39,10 @@ use crate::{
     Segment,
 };
 
+type Quad = (Elem, Elem, Elem, Elem);
+
 #[allow(dead_code)]
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 enum MemoryOp {
     PageIo,
     Read,
@@ -48,8 +50,8 @@ enum MemoryOp {
 }
 
 impl MemoryOp {
-    fn as_u32(self) -> u32 {
-        self as u32
+    fn as_u32(&self) -> u32 {
+        *self as u32
     }
 }
 
@@ -96,8 +98,8 @@ impl MemoryState {
     #[track_caller]
     fn store_region(&mut self, addr: u32, slice: &[u8]) {
         // log::trace!("store_region: 0x{addr:08X} <= {} bytes", slice.len());
-        for i in 0..slice.len() {
-            self.store_u8(addr + i as u32, slice[i]);
+        for (i, byte) in slice.iter().enumerate() {
+            self.store_u8(addr + i as u32, *byte);
         }
     }
 
@@ -113,7 +115,7 @@ fn get_register_addr(idx: usize) -> u32 {
     (SYSTEM.start() + idx * WORD_SIZE) as u32
 }
 
-fn split_word8(value: u32) -> (Elem, Elem, Elem, Elem) {
+fn split_word8(value: u32) -> Quad {
     (
         Elem::new(value & 0xff),
         Elem::new(value >> 8 & 0xff),
@@ -122,7 +124,7 @@ fn split_word8(value: u32) -> (Elem, Elem, Elem, Elem) {
     )
 }
 
-fn merge_word8((x0, x1, x2, x3): (Elem, Elem, Elem, Elem)) -> u32 {
+fn merge_word8((x0, x1, x2, x3): Quad) -> u32 {
     let x0: u32 = x0.into();
     let x1: u32 = x1.into();
     let x2: u32 = x2.into();
@@ -321,11 +323,9 @@ impl MachineContext {
         }
 
         if let Some(split_insn) = self.split_insn {
-            if self.insn_counter == split_insn {
-                if !self.is_flushing {
-                    log::info!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
-                    self.is_flushing = true;
-                }
+            if self.insn_counter == split_insn && !self.is_flushing {
+                log::info!("FLUSH[{}]> pc: 0x{pc:08x}", self.insn_counter);
+                self.is_flushing = true;
             }
         }
 
@@ -365,12 +365,7 @@ impl MachineContext {
         (Elem::ZERO, Elem::ZERO, Elem::ONE)
     }
 
-    fn divide(
-        &self,
-        numer: (Elem, Elem, Elem, Elem),
-        denom: (Elem, Elem, Elem, Elem),
-        sign: Elem,
-    ) -> ((Elem, Elem, Elem, Elem), (Elem, Elem, Elem, Elem)) {
+    fn divide(&self, numer: Quad, denom: Quad, sign: Elem) -> (Quad, Quad) {
         let mut numer = merge_word8(numer);
         let mut denom = merge_word8(denom);
         let sign: u32 = sign.into();
@@ -474,9 +469,9 @@ impl MachineContext {
             shift_bits += 1;
         }
         let mut carry = 0u64;
-        for i in 0..n {
-            let tmp = (b[i] << shift_bits) + carry;
-            b[i] = tmp & 0xFF;
+        for x in b.iter_mut().take(n) {
+            let tmp = (*x << shift_bits) + carry;
+            *x = tmp & 0xFF;
             carry = tmp >> 8;
         }
         if carry != 0 {
@@ -570,7 +565,7 @@ impl MachineContext {
                     format!("0x{:0width$x}", next_arg())
                 }
                 "d" => format!("{:width$}", next_arg() as i32),
-                "%" => format!("%"),
+                "%" => "%".to_string(),
                 "w" => {
                     let nexts = [next_arg(), next_arg(), next_arg(), next_arg()];
                     if nexts.iter().all(|v| *v <= 255) {
@@ -597,28 +592,27 @@ impl MachineContext {
         log::trace!("{}", formatted);
     }
 
-    fn ram_read(&mut self, cycle: usize, addr: Elem, op: Elem) -> (Elem, Elem, Elem, Elem) {
+    fn ram_read(&mut self, cycle: usize, addr: Elem, op: Elem) -> Quad {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
         let info = &self.memory.ram.info;
         if op == MemoryOp::PageIo.as_u32() {
             self.resident_words.insert(addr);
-        } else {
-            if !self.resident_words.contains(&addr) {
-                let addr = addr * WORD_SIZE as u32;
-                let page_idx = info.get_page_index(addr);
-                let entry_addr = info.get_page_entry_addr(page_idx);
-                log::debug!("[{cycle}] ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}, page_idx: {page_idx}");
-                panic!("Memory read before page in: 0x{addr:08x}");
-            }
+        } else if !self.resident_words.contains(&addr) {
+            let addr = addr * WORD_SIZE as u32;
+            let page_idx = info.get_page_index(addr);
+            let entry_addr = info.get_page_entry_addr(page_idx);
+            log::debug!("[{cycle}] ram_read: 0x{addr:08x}, op: {op:?}, entry_addr: 0x{entry_addr:08x}, page_idx: {page_idx}");
+            panic!("Memory read before page in: 0x{addr:08x}");
         }
+
         let addr = addr * WORD_SIZE as u32;
         let word = self.memory.load_u32(addr);
         // log::debug!("ram_read: 0x{addr:08X} -> 0x{word:08X}");
         split_word8(word)
     }
 
-    fn ram_write(&mut self, addr: Elem, data: (Elem, Elem, Elem, Elem), op: Elem) -> Result<()> {
+    fn ram_write(&mut self, addr: Elem, data: Quad, op: Elem) -> Result<()> {
         let addr: u32 = addr.into();
         let op: u32 = op.into();
         if op == MemoryOp::PageIo.as_u32() {

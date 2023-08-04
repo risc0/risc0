@@ -126,7 +126,7 @@ pub fn commit_slice<T: Pod>(slice: &[T]) {
 /// Return the number of processor cycles that have occured since the guest
 /// began.
 pub fn get_cycle_count() -> usize {
-    unsafe { sys_cycle_count() }
+    sys_cycle_count()
 }
 
 /// Print a message to the debug console.

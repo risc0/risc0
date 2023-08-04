@@ -66,7 +66,7 @@ fn benchmark_field() {
 
 /// Benchmark operations in the secp256k1 scalar field.
 fn benchmark_scalar() {
-    println!("");
+    println!();
     println!("Scalar operations:");
     let x = black_box(Scalar::reduce(U256::from_be_bytes(hex!(
         "2A3F714FCDDEA4984F228C4D1DBD41A79B470B1546C68F6BB268A04AA0394BAC"
@@ -85,7 +85,7 @@ fn benchmark_scalar() {
 
 /// Benchmark secp256k1 elliptic curve group operations.
 fn benchmark_group() {
-    println!("");
+    println!();
     println!("Group operations:");
     let x = black_box(Scalar::reduce(U256::from_be_bytes(hex!(
         "2a3f714fcddea4984f228c4d1dbd41a79b470b1546c68f6bb268a04aa0394bac"

@@ -332,6 +332,12 @@ pub struct Loader {
     system: Vec<TripleWord>,
 }
 
+impl Default for Loader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Loader {
     const SETUP_CYCLES: usize = setup_count(SETUP_STEP_REGS);
 
@@ -437,7 +443,7 @@ impl Loader {
             hal.zk_shift(&coeffs, code_size);
             // Make the poly-group & extract the root
             let code_group = PolyGroup::new(hal, coeffs, code_size, cycles, "code");
-            table.push(code_group.merkle.root().clone());
+            table.push(*code_group.merkle.root());
         }
 
         table
