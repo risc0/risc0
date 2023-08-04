@@ -13,6 +13,7 @@
 // limitations under the License.
 
 mod api;
+mod client_config;
 mod downloader;
 pub mod sdk;
 mod storage;
@@ -23,11 +24,12 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use bonsai_sdk::alpha_async::get_client_from_parts;
+pub use client_config::EthersClientConfig;
 use downloader::{
     proxy_callback_proof_processor::ProxyCallbackProofRequestProcessor,
     proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream,
 };
-use ethers::{core::types::Address, prelude::*};
+use ethers::core::types::Address;
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
 use tracing::info;
@@ -57,11 +59,7 @@ pub struct Relayer {
 
 impl Relayer {
     /// Run a [Relayer] with an Ethereum Client.
-    pub async fn run<M: Middleware + 'static>(self, ethers_client: Arc<M>) -> Result<()>
-where
-    <M as ethers::providers::Middleware>::Provider: PubsubClient,
-    <<M as ethers::providers::Middleware>::Provider as ethers::providers::PubsubClient>::NotificationStream: Sync,
-{
+    pub async fn run(self, client_config: EthersClientConfig) -> Result<()> {
         // try to load filter from `RUST_LOG` or use reasonably verbose defaults
         let filter = ::tracing_subscriber::EnvFilter::try_from_default_env()
             .unwrap_or_else(|_| DEFAULT_FILTER.into());
@@ -87,7 +85,7 @@ where
         );
 
         let downloader = ProxyCallbackProofRequestStream::new(
-            ethers_client.clone(),
+            client_config.clone(),
             self.relay_contract_address,
             proxy_callback_proof_request_processor.clone(),
         );
@@ -114,7 +112,7 @@ where
             send_batch_notifier.clone(),
             max_batch_size,
             self.relay_contract_address,
-            ethers_client.clone(),
+            client_config.clone(),
             send_batch_interval,
         );
 
