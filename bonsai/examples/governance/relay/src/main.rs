@@ -175,10 +175,7 @@ async fn main() -> anyhow::Result<()> {
                             ]
                         }
                         _ => {
-                            anyhow::bail!(
-                                "invalid dev mode and output combination: {:?}",
-                                dev_mode
-                            )
+                            anyhow::bail!("invalid dev mode and output combination: {:?}", dev_mode)
                         }
                     }
                 }
@@ -220,7 +217,6 @@ async fn main() -> anyhow::Result<()> {
             eth_node,
             eth_chain_id,
             private_key,
-
         } => {
             let relayer = Relayer {
                 rest_api: true,
