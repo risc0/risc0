@@ -79,8 +79,12 @@ impl<S: Storage> BonsaiCompleteProofManager<S> {
             return Ok(());
         }
         let contract_call = {
+            let ethers_client = self.ethers_client_config.get_client().await.unwrap();
             let bonsay_relay =
-                IBonsaiRelay::<M>::new(self.proxy_contract_address, self.ethers_client.clone());
+                IBonsaiRelay::<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>>::new(
+                    self.proxy_contract_address,
+                    Arc::new(ethers_client),
+                );
             let proof_batch: Vec<Callback> = self
                 .ready_to_send_batch
                 .clone()

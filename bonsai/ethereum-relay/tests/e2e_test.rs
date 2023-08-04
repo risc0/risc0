@@ -18,7 +18,7 @@ mod tests {
     use ethers::prelude::*;
     abigen!(Counter, "tests/out/Counter.sol/Counter.json");
 
-    use std::time::SystemTime;
+    use std::{sync::Arc, time::SystemTime};
 
     use bonsai_ethereum_contracts::{BonsaiRelay, BonsaiTestRelay, RiscZeroGroth16Verifier};
     use bonsai_ethereum_relay::{
@@ -33,7 +33,6 @@ mod tests {
         alpha_async::{get_client_from_parts, put_image},
     };
     use ethers::types::{Bytes, H256 as ethers_H256, U256};
-    use ethers_signers::Signer;
     use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
     use risc0_zkvm_methods::{SLICE_IO_ELF, SLICE_IO_ID};
     use tokio::time::{sleep, Duration};

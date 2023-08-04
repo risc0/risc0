@@ -16,16 +16,13 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use ethers::{
-    prelude::{
-        k256::{ecdsa::SigningKey, SecretKey},
-        *,
-    },
+    prelude::*,
     providers::{Http, Provider, Ws},
     signers::{LocalWallet, Signer},
     utils::AnvilInstance,
 };
 
-use crate::{client_config::WalletKey, EthersClientConfig};
+use crate::{client_config::WalletKey, sdk::utils::k256::ecdsa::SigningKey, EthersClientConfig};
 
 const POLL_INTERVAL: std::time::Duration = std::time::Duration::from_secs(1);
 

@@ -97,6 +97,13 @@ pub(crate) mod tests {
             .await
             .expect("Failed to get ethers client config");
 
+        let ethers_client = Arc::new(
+            ethers_client_config
+                .get_client()
+                .await
+                .expect("could not get client"),
+        );
+
         // Mock API server
         let (proof_id, server) = get_test_bonsai_server().await;
 

@@ -11,9 +11,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
-use anyhow::anyhow;
 use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use ethers::{
     core::k256::ecdsa::SigningKey,
