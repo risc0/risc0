@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![doc = include_str!("../README.md")]
+
+pub mod sdk;
+
+pub use sdk::{CallbackRequest, Client, ClientError};
+
 mod api;
 mod client_config;
 mod downloader;
-pub mod sdk;
 mod storage;
 mod tests;
 mod uploader;

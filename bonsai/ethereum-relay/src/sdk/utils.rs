@@ -39,7 +39,7 @@ pub fn get_wallet(anvil: Option<&AnvilInstance>) -> Result<Wallet<SigningKey>> {
 }
 
 /// Returns a wallet key identifier defined by the env variable
-/// [WALLET_KEY_IDENTIFIER] or from the given optional [anvil] instance.
+/// `WALLET_KEY_IDENTIFIER` or from the given optional `anvil` instance.
 pub fn get_wallet_key_identifier(anvil: Option<&AnvilInstance>) -> Result<WalletKey> {
     match std::env::var("WALLET_KEY_IDENTIFIER") {
         Ok(wallet_key_identifier) => wallet_key_identifier.try_into(),
