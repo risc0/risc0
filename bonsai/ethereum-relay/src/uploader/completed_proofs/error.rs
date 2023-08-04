@@ -29,6 +29,8 @@ pub(crate) enum BonsaiCompleteProofManagerError {
         #[source]
         source: Box<dyn std::error::Error + Send + Sync>,
     },
+    #[error("Ethers Client failed")]
+    EthersClient(#[from] anyhow::Error),
     #[error("Failed to operate on storage")]
     Storage {
         #[source]

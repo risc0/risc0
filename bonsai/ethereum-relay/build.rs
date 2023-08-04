@@ -20,7 +20,7 @@ use file_lock::{FileLock, FileOptions};
 use foundry_cli::cmd::{forge, Cmd};
 
 /// .forge.lock in the repo root. CWD in a build script is the crate dir.
-const FILE_LOCK_PATH: &'static str = "../../.forge.lock";
+const FILE_LOCK_PATH: &str = "../../.forge.lock";
 
 fn main() -> anyhow::Result<()> {
     // It is globally unsafe to run two forge processes at the same time -_-

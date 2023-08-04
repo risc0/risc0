@@ -104,10 +104,10 @@ pub(crate) async fn get_complete_proof(
         post_state_digest,
     };
     let ethereum_callback = Callback {
-        auth: auth.into(),
+        auth,
         payload: payload.into(),
         gas_limit,
-        callback_contract: callback_request.callback_contract.clone(),
+        callback_contract: callback_request.callback_contract,
     };
 
     Ok(CompleteProof {
