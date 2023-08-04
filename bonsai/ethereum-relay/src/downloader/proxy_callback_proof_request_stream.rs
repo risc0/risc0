@@ -11,8 +11,6 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-use std::time::Duration;
-
 use bonsai_proxy_contract::CallbackRequestFilter;
 use ethers::{
     core::k256::ecdsa::SigningKey,
@@ -50,21 +48,19 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
     }
 
     pub(crate) async fn run(self) -> Result<(), Error> {
-        const WAIT_DURATION: Duration = Duration::from_secs(5);
         const EVENT_NAME: &str = "CallbackRequest(address,bytes32,bytes,address,bytes4,uint64)";
-        const MAX_RETRIES: u64 = 7 * 24 * 60 * 60 / WAIT_DURATION.as_secs(); // 1 week
+
         let filter = ethers::types::Filter::new()
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
         let mut client = self.client_config.get_client().await?;
         let mut recreate_client = false;
+        let mut last_processed_block = client.get_block_number().await?;
 
         loop {
             self.recreate_client(
                 &mut client,
                 &mut recreate_client,
-                MAX_RETRIES,
-                WAIT_DURATION,
             )
             .await?;
             let logs = client.subscribe_logs(&filter).await;
@@ -76,14 +72,12 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
         &self,
         client: &mut SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
         recreate_flag: &mut bool,
-        max_retries: u64,
-        wait_duration: Duration,
     ) -> Result<(), Error> {
         if *recreate_flag {
             debug!("Recreating client.");
             *client = self
                 .client_config
-                .get_client_with_reconnects(max_retries, wait_duration)
+                .get_client_with_reconnects()
                 .await?;
             *recreate_flag = false;
         };

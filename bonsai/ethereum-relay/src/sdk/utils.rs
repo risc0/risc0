@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{path::Path, sync::Arc};
+use std::{path::Path, sync::Arc, time::Duration};
 
 use anyhow::{anyhow, Context, Result};
 use ethers::{
@@ -25,7 +25,9 @@ use ethers::{
 
 use crate::{client_config::WalletKey, EthersClientConfig};
 
-const POLL_INTERVAL: std::time::Duration = std::time::Duration::from_secs(1);
+const POLL_INTERVAL: Duration = Duration::from_secs(1);
+const WAIT_DURATION: Duration = Duration::from_secs(5);
+const MAX_RETRIES: u64 = 7 * 24 * 60 * 60 / WAIT_DURATION.as_secs(); // 1 week
 
 pub(crate) type Client<P> = Arc<SignerMiddleware<Provider<P>, LocalWallet>>;
 
@@ -104,11 +106,13 @@ pub async fn get_ethers_client_config(anvil: Option<&AnvilInstance>) -> Result<E
     let eth_node_url = get_ws_provider_endpoint(anvil).await.unwrap();
     let eth_chain_id = provider.get_chainid().await.unwrap().as_u64();
     let wallet_key_identifier = get_wallet_key_identifier(anvil).unwrap();
-    let ethers_client_config = EthersClientConfig {
+    let ethers_client_config = EthersClientConfig::new(
         eth_node_url,
         eth_chain_id,
         wallet_key_identifier,
-    };
+        MAX_RETRIES,
+        WAIT_DURATION,
+    );
     Ok(ethers_client_config)
 }
 

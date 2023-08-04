@@ -65,10 +65,14 @@ async fn main() -> Result<()> {
         relay_contract_address: args.contract_address,
     };
 
+    const WAIT_DURATION: Duration = Duration::from_secs(5);
+    const MAX_RETRIES: u64 = 7 * 24 * 60 * 60 / WAIT_DURATION.as_secs(); // 1 week
     let client_config = EthersClientConfig::new(
         args.eth_node_url,
         args.eth_chain_id,
         args.wallet_key_identifier.try_into()?,
+        MAX_RETRIES,
+        WAIT_DURATION
     );
 
     relayer.run(client_config).await

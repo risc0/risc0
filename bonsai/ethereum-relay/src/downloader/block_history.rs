@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+use std::{
+    cmp::{max, min},
+    sync::Arc,
+    time::Duration,
+};
+
 use anyhow::{anyhow, Result};
 use ethers::{
     core::types::{BlockNumber, Filter},
@@ -21,11 +27,6 @@ use ethers::{
     utils::__serde_json::Value,
 };
 use futures::FutureExt;
-use std::{
-    cmp::{max, min},
-    sync::Arc,
-    time::Duration,
-};
 use tokio::sync::mpsc;
 use tracing::{debug, error, info, trace, warn};
 
@@ -50,7 +51,38 @@ pub(crate) async fn recover_delay(
 }
 
 #[tracing::instrument]
-pub(crate) async fn process_logs_until_block(
+pub(crate) async fn get_latest_block_with_retry(
+    client_config: EthersClientConfig,
+) -> Result<BlockNumber> {
+    let client = client_config.get_client_with_reconnects().await?;
+    let provider = client.provider();
+    let mut retries = client_config.retries;
+    while retries > 0 {
+        match get_latest_block(provider).await {
+            Ok(Some(block)) => return Ok(block),
+            Ok(None) => {
+                debug!(
+                    "Block is still pending, sleeping for {:?}.",
+                    client_config.wait_time
+                );
+            }
+            Err(error) => {
+                error!(
+                    ?error,
+                    "Failed to get latest block, sleeping for {:?}.", client_config.wait_time
+                );
+            }
+        }
+        tokio::time::sleep(client_config.wait_time).await;
+        retries -= 1;
+    }
+    let error_message = "Failed to get latest block after {retries:?} retries.";
+    error!("{error_message}");
+    Err(anyhow!("{error_message}"))
+}
+
+
+async fn process_logs_until_block(
     client_config: EthersClientConfig,
     mut from: BlockNumber,
     to: BlockNumber,
@@ -115,8 +147,8 @@ fn hex_to_u64(hex: &str) -> Option<u64> {
 }
 
 fn parse_error_response(error: ProviderError) -> Option<(BlockNumber, BlockNumber)> {
-    error.as_error_response().and_then(|response| {
-        response.data.clone().and_then(|object| {
+    error.as_error_response().and_then(|&response| {
+        response.data.and_then(|object| {
             object.get("from").and_then(|from| {
                 object.get("to").and_then(|to| {
                     if let (Value::String(from), Value::String(to)) = (from, to) {
@@ -132,42 +164,12 @@ fn parse_error_response(error: ProviderError) -> Option<(BlockNumber, BlockNumbe
     })
 }
 
-#[tracing::instrument]
-pub(crate) async fn get_latest_block(client: &Provider<Ws>) -> Result<Option<BlockNumber>> {
+async fn get_latest_block(client: &Provider<Ws>) -> Result<Option<BlockNumber>> {
     Ok(client
         .get_block(BlockNumber::Latest)
         .await?
         .and_then(|block| block.number)
         .map(BlockNumber::Number))
-}
-
-#[tracing::instrument]
-pub(crate) async fn retry_getting_latest_block(client_config: EthersClientConfig) -> Result<BlockNumber> {
-    let client = client_config.get_client_with_reconnects().await?;
-    let provider = client.provider();
-    let mut retries = client_config.retries;
-    while retries > 0 {
-        match get_latest_block(provider).await {
-            Ok(Some(block)) => return Ok(block),
-            Ok(None) => {
-                debug!(
-                    "Block is still pending, sleeping for {:?}.",
-                    client_config.wait_time
-                );
-            }
-            Err(error) => {
-                error!(
-                    ?error,
-                    "Failed to get latest block, sleeping for {:?}.", client_config.wait_time
-                );
-            }
-        }
-        tokio::time::sleep(client_config.wait_time).await;
-        retries -= 1;
-    }
-    let error_message = "Failed to get latest block after {retries:?} retries.";
-    error!("{error_message}");
-    Err(anyhow!("{error_message}"))
 }
 
 fn update_from_and_offset_from_error_response(
