@@ -252,16 +252,14 @@ impl InnerReceipt {
         match self {
             InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
             InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
-            InnerReceipt::Fake => {
-                Self::verify_fake()
-            }
+            InnerReceipt::Fake => Self::verify_fake(),
         }
     }
 
     #[cfg(all(feature = "std"))]
     fn verify_fake() -> Result<(), VerificationError> {
         if cfg!(not(feature = "disable-dev-mode")) && std::env::var("DEV_MODE").is_ok() {
-            return Ok(())
+            return Ok(());
         }
         Err(VerificationError::InvalidProof)
     }
@@ -469,7 +467,7 @@ impl Default for VerifierContext {
                 ("blake2b".into(), Blake2bCpuHashSuite::new_suite()),
                 ("poseidon".into(), PoseidonHashSuite::new_suite()),
                 ("sha-256".into(), Sha256HashSuite::new_suite()),
-            ])
+            ]),
         }
     }
 }

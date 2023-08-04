@@ -289,7 +289,8 @@ fn dev_mode_panic() {
 }
 
 // This test manipulates environment variables and must be run in isolation.
-// Otherwise, other tests could use the DEV_MODE environment variable and result in unexpected behavior
+// Otherwise, other tests could use the DEV_MODE environment variable and result
+// in unexpected behavior
 #[test]
 #[ignore]
 #[cfg(not(feature = "disable-dev-mode"))]
