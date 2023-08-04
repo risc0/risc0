@@ -17,7 +17,7 @@ use bonsai_ethereum_relay::{EthersClientConfig, Relayer};
 use clap::Parser;
 use ethers::core::types::Address;
 
-const BONSAI_API_URL: &str = "http://localhost:8081";
+const DEFAULT_BONSAI_API_URL: &str = "http://localhost:8081";
 const DEFAULT_REST_API_PORT: &str = "8080";
 
 #[derive(Parser, Debug)]
@@ -51,6 +51,20 @@ struct Args {
     /// Toggle to use a KMS client
     #[arg(long)]
     use_kms: bool,
+
+    /// Bonsai API URL
+    #[arg(long, env, default_value_t = DEFAULT_BONSAI_API_URL.to_string())]
+    bonsai_api_url: String,
+
+    /// Bonsai API Key
+    /// Defaults to empty, providing no authentication.
+    #[arg(long, env, default_value = "")]
+    bonsai_api_key: String,
+
+    /// Toggle to enable dev_mode: only a local executor runs your
+    /// zkVM program and no proof is generated.
+    #[arg(long, env, default_value_t = false)]
+    risc0_dev_mode: bool,
 }
 
 #[tokio::main]
@@ -59,9 +73,10 @@ async fn main() -> Result<()> {
 
     let relayer = Relayer {
         rest_api: args.rest_api,
+        dev_mode: args.risc0_dev_mode,
         rest_api_port: args.port,
-        bonsai_api_url: get_bonsai_url(),
-        bonsai_api_key: get_bonsai_api_key(),
+        bonsai_api_url: args.bonsai_api_url,
+        bonsai_api_key: args.bonsai_api_key,
         relay_contract_address: args.contract_address,
     };
 
@@ -72,21 +87,4 @@ async fn main() -> Result<()> {
     );
 
     relayer.run(client_config).await
-}
-
-fn get_bonsai_url() -> String {
-    let endpoint = match std::env::var("BONSAI_API_URL") {
-        Ok(endpoint) => endpoint,
-        Err(_) => BONSAI_API_URL.to_string(),
-    };
-
-    endpoint
-        .is_empty()
-        .then(|| BONSAI_API_URL.to_string())
-        .unwrap_or(endpoint)
-}
-
-fn get_bonsai_api_key() -> String {
-    const DEFAULT_KEY: &str = "test_key";
-    std::env::var("BONSAI_API_KEY").unwrap_or(DEFAULT_KEY.to_string())
 }

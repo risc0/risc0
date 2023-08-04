@@ -29,11 +29,6 @@ import {BonsaiTestRelay} from "./BonsaiTestRelay.sol";
 abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
     using Strings2 for bytes;
 
-    enum ProverMode {
-        Local,
-        Bonsai
-    }
-
     /// @notice Returns the journal resulting from running the guest with imageId using input.
     /// @dev Runs the zkVM guest locally in execution-only mode and returns the committed journal.
     ///     Does not produce a proof.
@@ -111,20 +106,5 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
         imageRunnerInput[i++] = "-q";
         imageRunnerInput[i++] = "upload";
         return abi.decode(vm.ffi(imageRunnerInput), (bytes32[]));
-    }
-
-    function proverMode() internal returns (ProverMode) {
-        return parseProverMode(vm.envOr("BONSAI_PROVING", string("local")));
-    }
-
-    function parseProverMode(string memory str) private pure returns (ProverMode) {
-        if (keccak256(bytes(str)) == keccak256(bytes("local"))) {
-            return ProverMode.Local;
-        }
-        if (keccak256(bytes(str)) == keccak256(bytes("bonsai"))) {
-            return ProverMode.Bonsai;
-        }
-        console2.log("invalid prover mode string: ", str);
-        revert("invalid prover mode string");
     }
 }

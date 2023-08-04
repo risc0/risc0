@@ -39,15 +39,19 @@ mod tests {
 
     const BONSAI_API_URI: &str = "http://localhost:8081";
 
-    fn dev_mode() -> bool {
-        // we only check the local bonsai_url here so that we don't need to set
-        // RISC0_DEV_MODE env variable on the main gh workflow
-        if get_bonsai_url().contains("localhost") || get_bonsai_url().contains("127.0.0.1") {
-            std::env::set_var("RISC0_DEV_MODE", "TRUE");
-            return true;
+    /// Check for the RISC0_DEV_MODE environment variable:
+    /// * Return true if the value is "true" or it is not set.
+    /// * Return false if the value is "false".
+    ///
+    /// NOTE: Default is true, since this is a test environment.
+    fn dev_mode() -> anyhow::Result<bool> {
+        match std::env::var("RISC0_DEV_MODE") {
+            Ok(ref val) if val == "false" => Ok(false),
+            Ok(ref val) if val == "true" => Ok(true),
+            Err(std::env::VarError::NotPresent) | Ok(val) if val.is_empty() => Ok(true),
+            Ok(ref val) => anyhow!("invalid boolean value for RISC0_DEV_MODE: {}", val),
+            Err(e) => Err(e.into()),
         }
-        std::env::remove_var("RISC0_DEV_MODE");
-        false
     }
 
     fn get_bonsai_url() -> String {

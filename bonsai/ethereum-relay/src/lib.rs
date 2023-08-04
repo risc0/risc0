@@ -47,6 +47,8 @@ static DEFAULT_FILTER: &str = "info";
 pub struct Relayer {
     /// Toggle to enable the REST API on the relayer.
     pub rest_api: bool,
+    /// Toggle for generating real or fake receipts.
+    pub dev_mode: bool,
     /// Port serving the relayer REST API.
     pub rest_api_port: String,
     /// Bonsai API URL.
@@ -106,7 +108,7 @@ impl Relayer {
 
         let uploader_complete_proof_manager = BonsaiCompleteProofManager::new(
             bonsai_client.clone(),
-            dev_mode()?,
+            self.dev_mode,
             storage.clone(),
             new_complete_proof_notifier.clone(),
             send_batch_notifier.clone(),
@@ -130,7 +132,7 @@ impl Relayer {
             self.rest_api_port,
         ));
         let local_bonsai_handle = tokio::spawn(maybe_start_local_bonsai(
-            dev_mode()?,
+            self.dev_mode,
             self.bonsai_api_url.clone(),
         ));
         let downloader_handle = tokio::spawn(downloader.run());
@@ -145,7 +147,7 @@ impl Relayer {
             err = server_handle, if self.rest_api => {
                 panic!("{}", format!("server API exited: {:?}", err))
             }
-            err = local_bonsai_handle, if dev_mode()? => {
+            err = local_bonsai_handle, if self.dev_mode => {
                 panic!("{}", format!("local Bonsai service exited: {:?}", err))
             }
             err = downloader_handle => {
@@ -180,14 +182,4 @@ async fn maybe_start_local_bonsai(dev_mode: bool, bonsai_url: String) -> anyhow:
     }
 
     Ok(())
-}
-
-/// Return true if RISC0_DEV_MODE is set ot a non-empty string.
-fn dev_mode() -> anyhow::Result<bool> {
-    match std::env::var("RISC0_DEV_MODE") {
-        Ok(val) if val.is_empty() => Ok(false),
-        Ok(_) => Ok(true),
-        Err(std::env::VarError::NotPresent) => Ok(false),
-        Err(e) => Err(e.into()),
-    }
 }
