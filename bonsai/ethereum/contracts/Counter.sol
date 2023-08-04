@@ -15,21 +15,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.17;
 
-interface Relay {
-    function requestCallback(
-        bytes32 imageId,
-        bytes calldata input,
-        address callbackContract,
-        bytes4 functionSelector,
-        uint64 gasLimit
-    ) external;
-}
+import {IBonsaiRelay} from "./IBonsaiRelay.sol";
 
 contract Counter {
     uint256 public value = 0;
 
     // Submit request
-    function request_callback(bytes32 image_id, bytes calldata input, uint64 gas_limit, Relay relay) public {
+    function request_callback(bytes32 image_id, bytes calldata input, uint64 gas_limit, IBonsaiRelay relay) public {
         relay.requestCallback(image_id, input, address(this), this.callback.selector, gas_limit);
     }
 
