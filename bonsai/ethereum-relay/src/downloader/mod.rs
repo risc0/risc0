@@ -15,3 +15,4 @@
 pub(crate) mod event_processor;
 pub(crate) mod proxy_callback_proof_processor;
 pub(crate) mod proxy_callback_proof_request_stream;
+pub(crate) mod block_history;
