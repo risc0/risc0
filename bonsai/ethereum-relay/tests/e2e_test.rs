@@ -20,6 +20,7 @@ mod tests {
 
     use std::{sync::Arc, time::SystemTime};
 
+    use anyhow::anyhow;
     use bonsai_ethereum_contracts::{BonsaiRelay, BonsaiTestRelay, RiscZeroGroth16Verifier};
     use bonsai_ethereum_relay::{
         sdk::{
@@ -48,7 +49,7 @@ mod tests {
         match std::env::var("RISC0_DEV_MODE") {
             Ok(ref val) if val == "false" => Ok(false),
             Ok(ref val) if val == "true" => Ok(true),
-            Err(std::env::VarError::NotPresent) | Ok(val) if val.is_empty() => Ok(true),
+            Err(std::env::VarError::NotPresent) | Ok(ref val) if val.is_empty() => Ok(true),
             Ok(ref val) => anyhow!("invalid boolean value for RISC0_DEV_MODE: {}", val),
             Err(e) => Err(e.into()),
         }
@@ -97,7 +98,7 @@ mod tests {
                 .await
                 .expect("Failed to get ethers client"),
         );
-        let bonsai_relay_contract = match dev_mode() {
+        let bonsai_relay_contract = match dev_mode()? {
             true => {
                 BonsaiTestRelay::deploy(ethers_client.clone(), ethers_client.signer().chain_id())
                     .expect("should be able to deploy the BonsaiTestRelay contract")
