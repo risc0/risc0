@@ -89,7 +89,7 @@ struct GlobalOpts {
 
     /// Toggle to enable dev_mode: only a local executor runs your
     /// zkVM program and no proof is generated.
-    #[arg(long, env, default_value_t = false)]
+    #[arg(long, env, global = true, default_value_t = false)]
     risc0_dev_mode: bool,
 }
 
