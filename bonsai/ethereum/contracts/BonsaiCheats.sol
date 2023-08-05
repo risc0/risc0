@@ -55,7 +55,7 @@ abstract contract BonsaiCheats is StdCheatsSafe, CommonBase {
         internal
         returns (bytes memory, bytes32, bytes memory)
     {
-        string[] memory imageRunnerInput = new string[](7);
+        string[] memory imageRunnerInput = new string[](6);
         uint256 i = 0;
         imageRunnerInput[i++] = "cargo";
         imageRunnerInput[i++] = "run";
