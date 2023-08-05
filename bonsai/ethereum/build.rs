@@ -14,27 +14,13 @@
 
 //! Build Solidity contracts with Foundry when `cargo build` is invoked.
 
-use anyhow::Context;
 use clap::Parser;
-use file_lock::{FileLock, FileOptions};
 use foundry_cli::cmd::{forge, Cmd};
 
-/// .forge.lock in the repo root. CWD in a build script is the crate dir.
-const FILE_LOCK_PATH: &str = "../../.forge.lock";
-
 fn main() -> anyhow::Result<()> {
-    // It is globally unsafe to run two forge processes at the same time -_-
-    // This is because the two (or more) forge instances may try to install solc to
-    // a glabally shared directory, and if they race, one of the them may panic.
-    let options = FileOptions::new().write(true);
-    let lock = FileLock::lock(FILE_LOCK_PATH, true, options)
-        .context("failed to get file lock for Forge")?;
-
     let cmd = forge::build::BuildArgs::try_parse_from(["--"].into_iter())?;
     let _ = cmd
         .run()
         .map_err(|e| anyhow::anyhow!("{}", e.to_string()))?;
-
-    lock.unlock()?;
     Ok(())
 }
