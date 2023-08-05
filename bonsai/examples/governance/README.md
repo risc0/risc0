@@ -115,7 +115,7 @@ The Bonsai relay service, run locally for the test, uploads this SNARK to author
 ```bash
 export BONSAI_API_KEY="YOUR_API_KEY" # see form linked above
 export BONSAI_API_URL="BONSAI_URL" # provided with your api key
-BONSAI_PROVING=bonsai forge test --match-contract BasicBonsaiGovernorTest
+RISC0_DEV_MODE=false forge test --match-contract BasicBonsaiGovernorTest
 ```
 
 [Tally]: https://www.tally.xyz
