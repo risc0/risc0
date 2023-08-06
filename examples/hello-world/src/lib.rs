@@ -13,15 +13,20 @@
 // limitations under the License.
 
 #[doc = include_str!("../README.md")]
-use factors_methods::MULTIPLY_ELF;
+use hello-world_methods::MULTIPLY_ELF;
 use risc0_zkvm::{
     default_prover,
     serde::{from_slice, to_vec},
     ExecutorEnv, Receipt,
 };
 
-// Multiply them inside the ZKP
-pub fn multiply_factors(a: u64, b: u64) -> (Receipt, u64) {
+// This is a Hello World demo for the RISC Zero zkVM.
+// By running the demo, Alice can produce a receipt that proves that she knows
+// some numbers a and b, such that a*b == 391.
+// The factors a and b are kept secret.
+
+// Compute the product a*b inside the zkVM
+pub fn multiply(a: u64, b: u64) -> (Receipt, u64) {
     let env = ExecutorEnv::builder()
         // Send a & b to the guest
         .add_input(&to_vec(&a).unwrap())

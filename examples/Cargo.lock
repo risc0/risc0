@@ -1371,16 +1371,16 @@ dependencies = [
 ]
 
 [[package]]
-name = "factors"
+name = "hello-world"
 version = "0.1.0"
 dependencies = [
- "factors-methods",
+ "hello-world-methods",
  "risc0-zkvm",
  "serde",
 ]
 
 [[package]]
-name = "factors-methods"
+name = "hello-world-methods"
 version = "0.1.0"
 dependencies = [
  "risc0-build",

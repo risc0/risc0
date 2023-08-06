@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use factors::multiply_factors;
-use factors_methods::MULTIPLY_ID;
+use hello-world::multiply;
+use hello-world_methods::MULTIPLY_ID;
 
 fn main() {
     // Pick two numbers
-    let (receipt, _) = multiply_factors(17, 23);
+    let (receipt, _) = multiply(17, 23);
 
     // Here is where one would send 'receipt' over the network...
 

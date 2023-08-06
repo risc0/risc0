@@ -1,6 +1,15 @@
-# Factors
+# Hello World for the RISC Zero zkVM
 
-The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
+Welcome! This demo is designed to help you get started building applications for the RISC Zero [zkVM].
+
+This _hello-world_ example is a minimalistic RISC Zero zkVM [application].
+The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
+
+[zkVM]: https://dev.risczero.com/zkvm
+[application]: https://dev.risczero.com/zkvm/developer-guide/zkvm-app-structure
+
+## Quick Start
+
 
 To see this example in action, [install Rust] and use `cargo run` in this directory to run it:
 ```sh
