@@ -50,7 +50,7 @@ use methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 to
 
 ```no_compile
-use hello-world_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
+use hello_world_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 ```
 
 ## Step 3: Give the guest program and its packages a name
@@ -64,14 +64,14 @@ Edit `methods/guest/Cargo.toml`, changing the line `name = "method_name"` to ins
 In order to access guest code from the host driver program, the host program `host/src/main.rs` includes two guest methods: `METHOD_NAME_ELF` and `METHOD_NAME_ID`.
 
 ```no_compile
-use hello-world_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
+use hello_world_methods::{METHOD_NAME_ELF, METHOD_NAME_ID};
 
 ```
 
 Both of these must be changed to reflect the new guest program name:
 
 ```
-use hello-world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
 ```
 (As an aside, if you add more than one callable guest program to your next RISC Zero zkVM project, you'll need to include `ELF` and `ID` references once for each guest file.)
 
@@ -100,7 +100,7 @@ Our next objective is to provide the guest program with input. Before we impleme
 In the starter template project, our host driver program creates an executor environment before constructing a prover.  When `Prover::prove_elf()` is called, it will produce a receipt:
 
 ```rust
-    use hello-world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
       default_prover,
       serde::{from_slice, to_vec},
@@ -139,7 +139,7 @@ We'd like the host to make the values of `a` and `b` available to the guest prio
  We need to add these values as inputs before the executor environment is built:
 
  ```rust
-    use hello-world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{serde::to_vec, ExecutorEnv};
 
     let a: u64 = 17;
@@ -228,7 +228,7 @@ In a real-world scenario, we'd want to hand the [receipt] to someone else, but r
 So, let's extract the [journal]'s contents by replacing the "`TODO`" in the above code snippet with the following lines.
 
 ```rust
-    use hello-world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
+    use hello_world_methods::{MULTIPLY_ELF, MULTIPLY_ID};
     use risc0_zkvm::{
       default_prover,
       ExecutorEnv,

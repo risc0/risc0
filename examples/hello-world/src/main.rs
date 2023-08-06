@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use hello-world::multiply;
-use hello-world_methods::MULTIPLY_ID;
+use hello_world::multiply;
+use hello_world_methods::MULTIPLY_ID;
 
 fn main() {
     // Pick two numbers
