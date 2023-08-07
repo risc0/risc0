@@ -21,33 +21,28 @@ use std::{
 use anyhow::{anyhow, Result};
 use ethers::{
     core::types::{BlockNumber, Filter},
-    prelude::signer::SignerMiddlewareError,
+    prelude::{k256::ecdsa::SigningKey, signer::SignerMiddlewareError, SignerMiddleware},
     providers::{Middleware, MiddlewareError, Provider, ProviderError, StreamExt, Ws},
-    types::{Log, U64},
+    types::{Log, U64, },
     utils::__serde_json::Value,
 };
+use super::block_history;
+use ethers_signers::Wallet;
 use futures::FutureExt;
-use tokio::sync::mpsc;
+use tokio::sync::mpsc::{self, Sender};
 use tracing::{debug, error, info, trace, warn};
 
 use crate::EthersClientConfig;
 
 #[tracing::instrument]
-pub(crate) async fn recover_delay(
-    client_config: EthersClientConfig,
-    from: BlockNumber,
-    to: BlockNumber,
-    sender: mpsc::Sender<Log>,
-) -> Result<U64> {
-    if let (Some(from), Some(to)) = (from.as_number(), to.as_number()) {
-        if from > to {
+pub(crate) async fn recover_delay(state: State, sender: mpsc::Sender<Log>) -> Result<State> {
+    match (state.from.as_number(), state.to.as_number()) {
+        (Some(from), Some(to)) if from > to => {
             error!(?from, ?to, "Invalid block numbers.");
-            return Err(anyhow!(
-                "No delay to recover as `from` is bigger than `to`."
-            ));
+            Ok(state)
         }
-    };
-    process_logs_until_block(client_config, from, to, sender).await
+        _ => process_logs_until_block(state, sender).await,
+    }
 }
 
 #[tracing::instrument]
@@ -81,12 +76,13 @@ pub(crate) async fn get_latest_block_with_retry(
     Err(anyhow!("{error_message}"))
 }
 
-async fn process_logs_until_block(
-    client_config: EthersClientConfig,
-    mut from: BlockNumber,
-    to: BlockNumber,
-    sender: mpsc::Sender<Log>,
-) -> Result<U64> {
+async fn process_logs_until_block(state: State, sender: mpsc::Sender<Log>) -> Result<State> {
+    let State {
+        mut from,
+        to,
+        client_config,
+        ..
+    } = state.clone();
     let mut last_processed_block = from.as_number().unwrap_or_default();
     let mut offset = to;
     let mut done = false;
@@ -104,7 +100,11 @@ async fn process_logs_until_block(
         }
         if done {
             info!("Finished recovering delay.");
-            return Ok(last_processed_block);
+            return Ok(State {
+                from,
+                last_processed_block,
+                ..state
+            });
         }
         let filter = Filter::new()
             .event("Transfer(address,address,uint256)")
@@ -150,8 +150,8 @@ fn hex_to_u64(hex: &str) -> Option<u64> {
 }
 
 fn parse_error_response(error: ProviderError) -> Option<(BlockNumber, BlockNumber)> {
-    error.as_error_response().and_then(|&response| {
-        response.data.and_then(|object| {
+    error.as_error_response().and_then(|response| {
+        response.data.clone().and_then(|object| {
             object.get("from").and_then(|from| {
                 object.get("to").and_then(|to| {
                     if let (Value::String(from), Value::String(to)) = (from, to) {
@@ -282,4 +282,55 @@ fn match_block_numbers(
             warn!(?from, ?offset, ?to, "Unknown state of block numbers.");
         }
     }
+}
+
+#[derive(Clone, Debug)]
+// TODO: Remove this attribute
+#[allow(dead_code)]
+pub(crate) struct State {
+    pub client_config: EthersClientConfig,
+    pub client: SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
+    pub recreate_client: bool,
+    pub last_processed_block: U64,
+    pub latest_block: U64,
+    pub filter: Filter,
+    pub from: BlockNumber,
+    pub to: BlockNumber,
+}
+
+impl State {
+    pub async fn recreate_client(&self) -> Result<Self> {
+        let client = self.client_config.get_client_with_reconnects().await?;
+        Ok(Self {
+            client,
+            recreate_client: false,
+            ..self.clone()
+        })
+    }
+}
+
+#[tracing::instrument]
+pub(crate) async fn recover_lost_blocks(state: State, sender: Sender<Log>) -> Result<State> {
+    let latest_block = match block_history::get_latest_block(state.client.provider()).await {
+        Ok(Some(block)) => block.as_number().unwrap_or_default(),
+        Ok(None) => {
+            warn!("Latest block is not available, retrying...");
+            return Ok(State {
+                recreate_client: true,
+                ..state
+            });
+        }
+        Err(error) => {
+            error!(?error, "Failed to get latest block number");
+            return Ok(State {
+                recreate_client: true,
+                ..state
+            });
+        }
+    };
+    let state = State {
+        latest_block,
+        ..state
+    };
+    block_history::recover_delay(state, sender).await
 }

@@ -20,6 +20,8 @@ use std::{
 
 use axum::{http::StatusCode, response};
 use bonsai_sdk::alpha::SdkErr;
+use ethers::{prelude::{signer::SignerMiddlewareError, }, providers::{Provider, Ws}};
+use ethers_signers::LocalWallet;
 use tokio::task::JoinError;
 use validator::ValidationErrors;
 
@@ -47,6 +49,8 @@ pub(crate) enum Error {
     Storage(#[from] crate::storage::Error),
     #[error("Ethers parse error")]
     EthersParse(#[from] ethers::abi::Error),
+    #[error("Signer middleware error")]
+    SignerMiddleware(#[from] SignerMiddlewareError<Provider<Ws>, LocalWallet>),
     #[error("Unspecified error")]
     Unspecified(#[from] anyhow::Error),
 }
@@ -60,6 +64,7 @@ impl Error {
             Error::Unauthorized { .. } => StatusCode::UNAUTHORIZED,
             Error::Bincode { .. }
             | Error::Storage { .. }
+            | Error::SignerMiddleware { .. }
             | Error::EthersParse { .. }
             | Error::Unspecified { .. }
             | Error::Hex { .. }

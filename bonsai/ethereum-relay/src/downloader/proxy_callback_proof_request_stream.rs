@@ -11,21 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+use anyhow::Result;
 use bonsai_proxy_contract::CallbackRequestFilter;
 use ethers::{
-    core::k256::ecdsa::SigningKey,
-    middleware::SignerMiddleware,
-    prelude::{signer::SignerMiddlewareError, *},
-    providers::{Middleware, Provider, PubsubClient, SubscriptionStream, Ws},
-    types::{Address, Log},
+    providers::Middleware,
+    types::{Address, BlockNumber, Log},
 };
-use futures::StreamExt;
-use tokio::sync::mpsc::Sender;
-use tracing::{debug, error, warn};
+use tokio::sync::mpsc::Receiver;
+use tracing::{debug, error};
 
-use super::block_history;
+use super::{block_history, block_history::State};
 use crate::{api::error::Error, downloader::event_processor::EventProcessor, EthersClientConfig};
 
+#[derive(Debug)]
 pub(crate) struct ProxyCallbackProofRequestStream<
     EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send,
 > {
@@ -55,45 +54,63 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
         let filter = ethers::types::Filter::new()
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
-        let mut client = self.client_config.get_client().await?;
-        let mut recreate_client = false;
-        let mut last_processed_block = client.get_block_number().await?;
+        let client = self.client_config.get_client().await?;
+        let last_processed_block = client.get_block_number().await?;
+        let mut state = State {
+            client_config: self.client_config.clone(),
+            client,
+            recreate_client: false,
+            last_processed_block,
+            filter,
+            latest_block: last_processed_block,
+            from: BlockNumber::Number(last_processed_block),
+            to: BlockNumber::Latest,
+        };
 
         loop {
-            let (tx, mut rx) = tokio::sync::mpsc::channel(100);
-            last_processed_block = self
-                .recover_lost_blocks(
-                    &mut client,
-                    last_processed_block,
-                    &mut recreate_client,
-                    tx.clone(),
-                )
-                .await?;
-            self.recreate_client(&mut client, &mut recreate_client)
-                .await?;
-            let logs = client.subscribe_logs(&filter).await;
-            self.match_logs(logs, &mut recreate_client).await;
+            state = self.recreate_client(state.clone()).await?;
+            let state2 = state.clone();
+            // Recover block delay
+            {
+                let (tx, rx) = tokio::sync::mpsc::channel(100);
+                let recover_lost_blocks_handler = tokio::spawn(async move {
+                    block_history::recover_lost_blocks(state2, tx.clone()).await
+                });
+                self.process_logs(rx).await;
+                match recover_lost_blocks_handler.await {
+                    Ok(Ok(new_state)) => {
+                        state = new_state;
+                        debug!(?state, "Successfully recovered block delay.");
+                    }
+                    Ok(Err(error)) => {
+                        error!(?error, "Failed to recover block delay.");
+                    }
+                    Err(error) => {
+                        error!(?error, "Tokio Task `recover_last_blocks_handler` failed.");
+                    }
+                }
+            }
+            // state = State {
+            //     filter: state.filter.clone().from_block(BlockNumber::Number(state.last_processed_block)),
+            //     ..state
+            // };
+            // let logs = state.client.subscribe_logs(&state.filter).await;
+            // self.match_logs(logs, &mut recreate_client).await;
         }
     }
 
-    async fn recreate_client(
-        &self,
-        client: &mut SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
-        recreate_flag: &mut bool,
-    ) -> Result<(), Error> {
-        if *recreate_flag {
+    async fn recreate_client(&self, state: State) -> Result<State, Error> {
+        let state = if state.recreate_client {
             debug!("Recreating client.");
-            *client = self.client_config.get_client_with_reconnects().await?;
-            *recreate_flag = false;
+            state.recreate_client().await?
+        } else {
+            state
         };
-        Ok(())
+        Ok(state)
     }
 
-    async fn process_logs(
-        &self,
-        mut subscription_stream: SubscriptionStream<'_, impl PubsubClient, Log>,
-    ) -> Result<(), Error> {
-        while let Some(log) = subscription_stream.next().await {
+    async fn process_logs(&self, mut receiver: Receiver<Log>) {
+        while let Some(log) = receiver.recv().await {
             let parsed_event: Result<CallbackRequestFilter, _> = ethers::contract::parse_log(log);
             match parsed_event {
                 Ok(event) => {
@@ -104,61 +121,31 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                 Err(error) => error!(?error, "Error parsing log"),
             }
         }
-        Ok(())
     }
 
-    async fn match_logs(
-        &self,
-        logs: Result<
-            SubscriptionStream<'_, impl PubsubClient, Log>,
-            SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>,
-        >,
-        recreate_client_flag: &mut bool,
-    ) {
-        match logs {
-            Ok(logs) => {
-                debug!("Successfully subscribed to logs");
-                self.process_logs(logs).await.map_or_else(
-                    |error| error!(?error, "Failed to process logs"),
-                    |_| {
-                        warn!("Proxy stream ended, reconnecting...");
-                        *recreate_client_flag = true
-                    },
-                )
-            }
-            Err(error) => {
-                error!(?error, "Failed to subscribe to logs");
-                *recreate_client_flag = true;
-            }
-        }
-    }
-
-    async fn recover_lost_blocks(
-        &self,
-        client: &mut SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
-        last_processed_block: BlockNumber,
-        recreate_client_flag: &mut bool,
-        sender: Sender<Log>,
-    ) -> U64 {
-        let last_block = match block_history::get_latest_block(client.provider()).await {
-            Ok(Some(block)) => block,
-            Ok(None) => {
-                warn!("Latest block is not available, retrying...");
-                *recreate_client_flag = true;
-                return last_processed_block;
-            }
-            Err(error) => {
-                error!(?error, "Failed to get latest block number");
-                *recreate_client_flag = true;
-                return last_processed_block;
-            }
-        };
-        block_history::recover_delay(
-            self.client_config.clone(),
-            last_processed_block,
-            last_block,
-            sender,
-        )
-        .await
-    }
+    // async fn match_logs(
+    //     &self,
+    //     logs: Result<
+    //         SubscriptionStream<'_, impl PubsubClient, Log>,
+    //         SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>,
+    //     >,
+    //     recreate_client_flag: &mut bool,
+    // ) {
+    //     match logs {
+    //         Ok(logs) => {
+    //             debug!("Successfully subscribed to logs");
+    //             self.process_logs(logs).await.map_or_else(
+    //                 |error| error!(?error, "Failed to process logs"),
+    //                 |_| {
+    //                     warn!("Proxy stream ended, reconnecting...");
+    //                     *recreate_client_flag = true
+    //                 },
+    //             )
+    //         }
+    //         Err(error) => {
+    //             error!(?error, "Failed to subscribe to logs");
+    //             *recreate_client_flag = true;
+    //         }
+    //     }
+    // }
 }
