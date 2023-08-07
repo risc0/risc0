@@ -321,7 +321,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
         }
     }
     if cfg!(not(feature = "disable-dev-mode")) && std::env::var("RISC0_DEV_MODE").is_ok() {
-        eprintln!("WARNING: proving in dev mode");
+        eprintln!("WARNING: proving in dev mode. This will not generate valid, secure proofs.");
         if let Some(prover) = provers.get("$devmode") {
             return prover.clone();
         }
