@@ -19,7 +19,7 @@ Then, run the example with:
 Congratulations! You just constructed a zero-knowledge proof that the position defined [here] includes a mate-in-one.
 
 [install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
-(https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L28)
+[here](https://github.com/risc0/risc0/blob/main/examples/chess/src/main.rs#L29)
 
 ## Use Cases
 By using this demo as part of a [Bonsai application], you could build an app where on-chain payment depends on off-chain activity.
