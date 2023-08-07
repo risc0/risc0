@@ -56,7 +56,9 @@ To learn more about using Rust crates inside the zkVM, check out our [Rust Resou
 The [guest code] generates the `pos` that results from a given `move` on a given `board`, and then checks that `pos` is checkmate.
 The [host code] supplies the `move` and the `board`.
 
-Takes a move that is kept private and an initial board state that is published to the [journal]. There are default values for these, but you can also pass in an alternative move and/or board state as command line arguments. The move is in SAN format and the board state is in FEN format.
+The [host code] supplies a move that the [guest code] keeps private and an initial board state that the [guest code] publishes to the [journal]. There are default values for these, but you can also pass in an alternative move and/or board state as command line arguments. The move is in SAN format and the board state is in FEN format.
+
+The [guest code] checks that applying the move to the initial board state is legal and results in a checkmate. If not, the [guest code] asserts and no [journal] is produced.
 
 [Rust Resources]: https://dev.risczero.com/zkvm/developer-guide/rust-resources
 [zkVM application]: https://dev.risczero.com/zkvm/developer-guide/zkvm-app-structure
