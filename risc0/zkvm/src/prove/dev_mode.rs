@@ -22,6 +22,7 @@ use crate::{
 };
 
 /// An implementation of a [Prover] for development and testing purposes.
+///
 /// This DevModeProver does not produce an actual proof.
 /// Instead, the guest code is executed and a fake receipt is returned with
 /// accurate journal contents but no cryptographic information.
@@ -29,14 +30,16 @@ use crate::{
 /// if DevMode is turned on; verification will otherwise fail.
 ///
 /// CONVENIENT, BUT NOT MEANT FOR PRODUCTION
-/// Dev mode supports rapid development by allowing the developer to quickly iterate
-/// on code without being forced to wait for proving to complete. 
-/// However, it must not be used in production as it provides no security whatsoever.
+/// Dev mode supports rapid development by allowing the developer to quickly
+/// iterate on code without being forced to wait for proving to complete.
+/// However, it must not be used in production as it provides no security
+/// whatsoever.
 ///
 /// How to enable and disable dev mode:
-/// Dev mode is only used when the environment variable `DEV_MODE` is set. It can
-/// be fully disabled at compile time, regardless of environment variables,
-/// by setting the feature flag `disable-dev-mode` on the `risc0_zkvm` crate.
+/// Dev mode is only used when the environment variable `RISC0_DEV_MODE` is set.
+/// It can be fully disabled at compile time, regardless of environment
+/// variables, by setting the feature flag `disable-dev-mode` on the
+/// `risc0_zkvm` crate.
 pub struct DevModeProver {
     name: String,
 }

@@ -218,7 +218,10 @@ pub trait Prover {
 
 fn provers() -> HashMap<String, Rc<dyn Prover>> {
     if cfg!(feature = "disable-dev-mode") && std::env::var("RISC0_DEV_MODE").is_ok() {
-        panic!("zkVM: dev mode is disabled. unset RISC0_DEV_MODE environment variable to produce valid proofs")
+        panic!("zkVM: Inconsistent settings -- please resolve. \
+                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag. \
+                To produce valid proofs, unset the RISC0_DEV_MODE environment variable. \
+                To enable dev mode and accept INSECURE, invalid proofs, remove the `disable-dev-mode` feature flag.")
     }
     let mut table: HashMap<String, Rc<dyn Prover>> = HashMap::new();
     {

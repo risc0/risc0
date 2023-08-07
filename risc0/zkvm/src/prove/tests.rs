@@ -280,7 +280,7 @@ fn run_dev_mode() {
 
 #[test]
 #[should_panic(
-    expected = "zkVM: dev mode is disabled. unset RISC0_DEV_MODE environment variable to produce valid proofs"
+    expected = "zkVM: Inconsistent settings -- please resolve. The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag."
 )]
 #[cfg(feature = "disable-dev-mode")]
 fn dev_mode_panic() {
