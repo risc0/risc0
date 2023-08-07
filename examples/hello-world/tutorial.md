@@ -1,18 +1,21 @@
-# Tutorial: Building your first zkVM applicaation
+# Tutorial: Building your first zkVM application
 Welcome!
+
 This tutorial will walk you through building your first [zkVM application].
 By following the steps in this guide, you will:
 - Use the [cargo risczero] tool to create a blank [starter template]
-- Make the 7 changes necessary to create a functional zkVM application
-- Finish the tutorial with an exact copy of the [host] and [guest] programs from this [hello-world] example.
+- Make the handful of changes necessary to create a functional zkVM application
+- Finish the tutorial with an exact copy of the [host] and [guest] programs from the [hello-world] example.
 
-For more guides to building zkVM applications, check out our [developer docs].
+For more resources for building zkVM applications, check out our [developer docs].
 
 [zkVM application]: https://dev.risczero.com/zkvm
 [cargo risczero]: https://docs.rs/cargo-risczero/latest/cargo_risczero/
 [starter template]: https://github.com/risc0/risc0/tree/v0.16.0/templates/rust-starter
 [hello-world]: https://github.com/risc0/risc0/tree/v0.16.0/examples/hello-world
 [developer docs]: https://dev.risczero.com/zkvm
+[host]: https://dev.risczero.com/terminology#host-program
+[guest]: https://dev.risczero.com/terminology#guest-program
 
 ## Step 1: Create a new project
 
@@ -29,12 +32,12 @@ cd wherever/you/want
 ## Create a project from our starter template
 cargo risczero new hello-world
 ```
-This will create a project named `hello-world` in the directory where you ran the `[cargo risczero new]` command. Now we can enter our new project's directory and start working on it!
+This will create a project named `hello-world` in the directory where you ran the [`cargo risczero new`] command. Now we can enter our new project's directory and start working on it!
 ```sh
 cd hello-world
 ```
 
-[cargo risczero new]: TODO
+[`cargo risczero new`]: https://docs.rs/cargo-risczero/latest/cargo_risczero/#new
 [install Rust]: https://www.rust-lang.org/tools/install
 
 ## Step 2: Give the methods package a name
