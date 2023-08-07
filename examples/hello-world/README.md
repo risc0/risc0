@@ -43,6 +43,8 @@ The receipt can be passed to a third party, who can examine the [journal] to che
 [journal]: https://dev.risczero.com/terminology#journal
 
 ### What gets proven?
+The [receipt] proves that the [guest program] was executed correctly, and that the contents of `receipt.journal` match what was written by `env::commit()` during the execution of the guest program.
+
 By running the demo, Alice demonstrates that she knows two integers that multiply to give the number written in `receipt.journal`.
 Thus, Alice proves that the number written in `receipt.journal` is composite — and that she knows the factors — without revealing any further information.
 
