@@ -256,16 +256,11 @@ impl InnerReceipt {
         }
     }
 
-    #[cfg(all(feature = "std"))]
     fn verify_fake() -> Result<(), VerificationError> {
+        #[cfg(all(feature = "std"))]
         if cfg!(not(feature = "disable-dev-mode")) && std::env::var("DEV_MODE").is_ok() {
             return Ok(());
         }
-        Err(VerificationError::InvalidProof)
-    }
-
-    #[cfg(not(feature = "std"))]
-    fn verify_fake() -> Result<(), VerificationError> {
         Err(VerificationError::InvalidProof)
     }
 
