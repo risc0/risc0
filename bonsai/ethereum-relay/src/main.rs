@@ -74,7 +74,7 @@ async fn main() -> Result<()> {
         args.eth_chain_id,
         args.wallet_key_identifier.try_into()?,
         MAX_RETRIES,
-        WAIT_DURATION
+        WAIT_DURATION,
     );
 
     relayer.run(client_config).await

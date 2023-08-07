@@ -20,7 +20,10 @@ use std::{
 
 use axum::{http::StatusCode, response};
 use bonsai_sdk::alpha::SdkErr;
-use ethers::{prelude::{signer::SignerMiddlewareError, }, providers::{Provider, Ws}};
+use ethers::{
+    prelude::signer::SignerMiddlewareError,
+    providers::{Provider, Ws},
+};
 use ethers_signers::LocalWallet;
 use tokio::task::JoinError;
 use validator::ValidationErrors;

@@ -15,13 +15,14 @@
 use anyhow::Result;
 use bonsai_proxy_contract::CallbackRequestFilter;
 use ethers::{
-    providers::{Middleware, SubscriptionStream, PubsubClient, Ws, Provider},
-    types::{Address, BlockNumber, Log}, prelude::{signer::SignerMiddlewareError, k256::ecdsa::SigningKey},
+    prelude::{k256::ecdsa::SigningKey, signer::SignerMiddlewareError},
+    providers::{Middleware, Provider, PubsubClient, SubscriptionStream, Ws},
+    types::{Address, BlockNumber, Log},
 };
 use ethers_signers::Wallet;
 use futures::{Stream, StreamExt};
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, error, };
+use tracing::{debug, error};
 
 use super::{block_history, block_history::State};
 use crate::{api::error::Error, downloader::event_processor::EventProcessor, EthersClientConfig};

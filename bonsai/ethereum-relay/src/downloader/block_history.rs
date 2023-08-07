@@ -23,15 +23,15 @@ use ethers::{
     core::types::{BlockNumber, Filter},
     prelude::{k256::ecdsa::SigningKey, signer::SignerMiddlewareError, SignerMiddleware},
     providers::{Middleware, MiddlewareError, Provider, ProviderError, StreamExt, Ws},
-    types::{Log, U64, },
+    types::{Log, U64},
     utils::__serde_json::Value,
 };
-use super::block_history;
 use ethers_signers::Wallet;
 use futures::FutureExt;
 use tokio::sync::mpsc::{self, Sender};
 use tracing::{debug, error, info, trace, warn};
 
+use super::block_history;
 use crate::EthersClientConfig;
 
 // #[tracing::instrument]
@@ -64,15 +64,15 @@ pub(crate) async fn recover_delay(state: State, sender: mpsc::Sender<Log>) -> Re
 //             Err(error) => {
 //                 error!(
 //                     ?error,
-//                     "Failed to get latest block, sleeping for {:?}.", client_config.wait_time
-//                 );
+//                     "Failed to get latest block, sleeping for {:?}.",
+// client_config.wait_time                 );
 //             }
 //         }
 //         tokio::time::sleep(client_config.wait_time).await;
 //         retries -= 1;
 //     }
-//     let error_message = "Failed to get latest block after {retries:?} retries.";
-//     error!("{error_message}");
+//     let error_message = "Failed to get latest block after {retries:?}
+// retries.";     error!("{error_message}");
 //     Err(anyhow!("{error_message}"))
 // }
 

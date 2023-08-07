@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+pub(crate) mod block_history;
 pub(crate) mod event_processor;
 pub(crate) mod proxy_callback_proof_processor;
 pub(crate) mod proxy_callback_proof_request_stream;
-pub(crate) mod block_history;
