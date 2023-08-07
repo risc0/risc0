@@ -16,7 +16,7 @@ use std::sync::Arc;
 
 use bonsai_proxy_contract::{Callback, ProxyContract};
 use bonsai_sdk::alpha::Client;
-use ethers::prelude::*;
+use ethers::prelude::{k256::ecdsa::SigningKey, *};
 use futures::{stream::FuturesUnordered, StreamExt};
 use tokio::{sync::Notify, task::JoinHandle};
 use tracing::info;
@@ -27,24 +27,25 @@ use crate::{
         complete_proof::{get_complete_proof, CompleteProof},
         error::*,
     },
+    EthersClientConfig,
 };
 
 const BONSAI_RELAY_GAS_LIMIT: u64 = 3000000;
 
-pub(crate) struct BonsaiCompleteProofManager<S: Storage, M: Middleware> {
+pub(crate) struct BonsaiCompleteProofManager<S: Storage> {
     client: Client,
     storage: S,
     new_complete_proofs_notifier: Arc<Notify>,
     ready_to_send_batch: Vec<CompleteProof>,
     max_batch_size: usize,
     proxy_contract_address: Address,
-    ethers_client: Arc<M>,
+    ethers_client_config: EthersClientConfig,
     send_batch_notifier: Arc<Notify>,
     send_batch_interval: tokio::time::Interval,
     futures_set: FuturesUnordered<JoinHandle<Result<CompleteProof, CompleteProofError>>>,
 }
 
-impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
+impl<S: Storage> BonsaiCompleteProofManager<S> {
     #[allow(clippy::too_many_arguments)]
     pub(crate) fn new(
         client: Client,
@@ -53,7 +54,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
         send_batch_notifier: Arc<Notify>,
         max_batch_size: usize,
         proxy_contract_address: Address,
-        ethers_client: Arc<M>,
+        ethers_client_config: EthersClientConfig,
         send_batch_interval: tokio::time::Interval,
     ) -> Self {
         Self {
@@ -63,7 +64,7 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
             ready_to_send_batch: Vec::new(),
             max_batch_size,
             proxy_contract_address,
-            ethers_client,
+            ethers_client_config,
             send_batch_notifier,
             send_batch_interval,
             futures_set: FuturesUnordered::new(),
@@ -75,8 +76,9 @@ impl<S: Storage, M: Middleware + 'static> BonsaiCompleteProofManager<S, M> {
             return Ok(());
         }
 
-        let proxy: ProxyContract<M> =
-            ProxyContract::new(self.proxy_contract_address, self.ethers_client.clone());
+        let ethers_client = self.ethers_client_config.get_client().await.unwrap();
+        let proxy: ProxyContract<SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>> =
+            ProxyContract::new(self.proxy_contract_address, Arc::new(ethers_client));
         let proof_batch: Vec<Callback> = self
             .ready_to_send_batch
             .clone()
