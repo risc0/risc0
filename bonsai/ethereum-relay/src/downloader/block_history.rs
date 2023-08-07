@@ -133,7 +133,7 @@ async fn process_logs_until_block(state: State, sender: mpsc::Sender<Log>) -> Re
                 match_block_numbers(&mut from, &mut offset, to, &mut done);
             }
         };
-        debug!("End of iteration {iterations:?}\n");
+        debug!("End of iteration {iterations:?}");
         let end = std::time::Instant::now();
         if end - start < Duration::from_secs(1) {
             warn!("Processing logs took less than 1 second.");
