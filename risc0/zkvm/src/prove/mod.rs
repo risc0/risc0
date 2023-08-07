@@ -217,8 +217,8 @@ pub trait Prover {
 }
 
 fn provers() -> HashMap<String, Rc<dyn Prover>> {
-    if cfg!(feature = "disable-dev-mode") && std::env::var("DEV_MODE").is_ok() {
-        panic!("zkVM: dev mode is disabled. unset DEV_MODE environment variable to produce valid proofs")
+    if cfg!(feature = "disable-dev-mode") && std::env::var("RISC0_DEV_MODE").is_ok() {
+        panic!("zkVM: dev mode is disabled. unset RISC0_DEV_MODE environment variable to produce valid proofs")
     }
     let mut table: HashMap<String, Rc<dyn Prover>> = HashMap::new();
     {
@@ -320,7 +320,7 @@ pub fn default_prover() -> Rc<dyn Prover> {
             return prover.clone();
         }
     }
-    if cfg!(not(feature = "disable-dev-mode")) && std::env::var("DEV_MODE").is_ok() {
+    if cfg!(not(feature = "disable-dev-mode")) && std::env::var("RISC0_DEV_MODE").is_ok() {
         eprintln!("WARNING: proving in dev mode");
         if let Some(prover) = provers.get("$devmode") {
             return prover.clone();

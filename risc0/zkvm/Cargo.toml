@@ -70,6 +70,7 @@ typetag = { version = "0.2", optional = true }
 clap = { version = "4.0", features = ["derive"] }
 criterion = { version = "0.5", features = ["html_reports"] }
 human-repr = "1.0"
+temp-env = "0.3"
 tracing-forest = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 

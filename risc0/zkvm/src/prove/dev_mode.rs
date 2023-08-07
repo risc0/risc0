@@ -52,8 +52,8 @@ impl Prover for DevModeProver {
             Receipts generated from this process are invalid and should never be used in production."
         );
 
-        if cfg!(feature = "disable-dev-mode") && std::env::var("DEV_MODE").is_ok() {
-            panic!("zkVM: dev mode is disabled. unset DEV_MODE environment variable to produce valid proofs")
+        if cfg!(feature = "disable-dev-mode") && std::env::var("RISC0_DEV_MODE").is_ok() {
+            panic!("zkVM: dev mode is disabled. unset RISC0_DEV_MODE environment variable to produce valid proofs")
         }
 
         let receipt = Receipt::new(InnerReceipt::Fake, session.journal.clone());
