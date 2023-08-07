@@ -23,7 +23,7 @@ use ethers::{
     core::types::{BlockNumber, Filter},
     prelude::signer::SignerMiddlewareError,
     providers::{Middleware, MiddlewareError, Provider, ProviderError, StreamExt, Ws},
-    types::Log,
+    types::{Log, U64},
     utils::__serde_json::Value,
 };
 use futures::FutureExt;
@@ -38,7 +38,7 @@ pub(crate) async fn recover_delay(
     from: BlockNumber,
     to: BlockNumber,
     sender: mpsc::Sender<Log>,
-) -> Result<()> {
+) -> Result<U64> {
     if let (Some(from), Some(to)) = (from.as_number(), to.as_number()) {
         if from > to {
             error!(?from, ?to, "Invalid block numbers.");
@@ -81,13 +81,13 @@ pub(crate) async fn get_latest_block_with_retry(
     Err(anyhow!("{error_message}"))
 }
 
-
 async fn process_logs_until_block(
     client_config: EthersClientConfig,
     mut from: BlockNumber,
     to: BlockNumber,
     sender: mpsc::Sender<Log>,
-) -> Result<()> {
+) -> Result<U64> {
+    let mut last_processed_block = from.as_number().unwrap_or_default();
     let mut offset = to;
     let mut done = false;
     let mut iterations: u64 = 0;
@@ -104,7 +104,7 @@ async fn process_logs_until_block(
         }
         if done {
             info!("Finished recovering delay.");
-            return Ok(());
+            return Ok(last_processed_block);
         }
         let filter = Filter::new()
             .event("Transfer(address,address,uint256)")
@@ -122,6 +122,9 @@ async fn process_logs_until_block(
                 info!("Subscribed to logs.");
                 while let Some(log) = stream.next().now_or_never().flatten() {
                     trace!(?log, "Processing log.");
+                    if let Some(block_number) = log.block_number {
+                        last_processed_block = max(block_number, last_processed_block);
+                    }
                     if let Err(error) = sender.send(log).await {
                         error!(?error, "Failed to send log to channel.");
                     }
@@ -164,7 +167,8 @@ fn parse_error_response(error: ProviderError) -> Option<(BlockNumber, BlockNumbe
     })
 }
 
-async fn get_latest_block(client: &Provider<Ws>) -> Result<Option<BlockNumber>> {
+#[tracing::instrument]
+pub(crate) async fn get_latest_block(client: &Provider<Ws>) -> Result<Option<BlockNumber>> {
     Ok(client
         .get_block(BlockNumber::Latest)
         .await?
