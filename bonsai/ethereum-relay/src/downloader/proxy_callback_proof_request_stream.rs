@@ -15,11 +15,13 @@
 use anyhow::Result;
 use bonsai_proxy_contract::CallbackRequestFilter;
 use ethers::{
-    providers::Middleware,
-    types::{Address, BlockNumber, Log},
+    providers::{Middleware, SubscriptionStream, PubsubClient, Ws, Provider},
+    types::{Address, BlockNumber, Log}, prelude::{signer::SignerMiddlewareError, k256::ecdsa::SigningKey},
 };
-use tokio::sync::mpsc::Receiver;
-use tracing::{debug, error};
+use ethers_signers::Wallet;
+use futures::{Stream, StreamExt};
+use tokio_stream::wrappers::ReceiverStream;
+use tracing::{debug, error, };
 
 use super::{block_history, block_history::State};
 use crate::{api::error::Error, downloader::event_processor::EventProcessor, EthersClientConfig};
@@ -55,16 +57,17 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
             .address(self.proxy_contract_address)
             .event(EVENT_NAME);
         let client = self.client_config.get_client().await?;
-        let last_processed_block = client.get_block_number().await?;
+        let last_processed_block_number = client.get_block_number().await?;
+        let last_processed_block = BlockNumber::Number(last_processed_block_number);
         let mut state = State {
             client_config: self.client_config.clone(),
             client,
             recreate_client: false,
-            last_processed_block,
+            last_processed_block: last_processed_block_number,
             filter,
-            latest_block: last_processed_block,
-            from: BlockNumber::Number(last_processed_block),
-            to: BlockNumber::Latest,
+            latest_block: last_processed_block_number,
+            from: last_processed_block,
+            to: last_processed_block,
         };
 
         loop {
@@ -76,11 +79,11 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                 let recover_lost_blocks_handler = tokio::spawn(async move {
                     block_history::recover_lost_blocks(state2, tx.clone()).await
                 });
-                self.process_logs(rx).await;
+                self.process_logs(ReceiverStream::new(rx)).await;
                 match recover_lost_blocks_handler.await {
                     Ok(Ok(new_state)) => {
                         state = new_state;
-                        debug!(?state, "Successfully recovered block delay.");
+                        debug!("Successfully recovered block delay.");
                     }
                     Ok(Err(error)) => {
                         error!(?error, "Failed to recover block delay.");
@@ -90,12 +93,15 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                     }
                 }
             }
-            // state = State {
-            //     filter: state.filter.clone().from_block(BlockNumber::Number(state.last_processed_block)),
-            //     ..state
-            // };
-            // let logs = state.client.subscribe_logs(&state.filter).await;
-            // self.match_logs(logs, &mut recreate_client).await;
+            state = State {
+                filter: state
+                    .filter
+                    .clone()
+                    .from_block(BlockNumber::Number(state.last_processed_block)),
+                ..state.clone()
+            };
+            let logs = state.client.subscribe_logs(&state.filter).await;
+            self.match_logs(state.clone(), logs).await;
         }
     }
 
@@ -109,8 +115,9 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
         Ok(state)
     }
 
-    async fn process_logs(&self, mut receiver: Receiver<Log>) {
-        while let Some(log) = receiver.recv().await {
+    async fn process_logs(&self, stream: impl Stream<Item = Log>) {
+        tokio::pin!(stream);
+        while let Some(log) = stream.next().await {
             let parsed_event: Result<CallbackRequestFilter, _> = ethers::contract::parse_log(log);
             match parsed_event {
                 Ok(event) => {
@@ -123,29 +130,27 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
         }
     }
 
-    // async fn match_logs(
-    //     &self,
-    //     logs: Result<
-    //         SubscriptionStream<'_, impl PubsubClient, Log>,
-    //         SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>,
-    //     >,
-    //     recreate_client_flag: &mut bool,
-    // ) {
-    //     match logs {
-    //         Ok(logs) => {
-    //             debug!("Successfully subscribed to logs");
-    //             self.process_logs(logs).await.map_or_else(
-    //                 |error| error!(?error, "Failed to process logs"),
-    //                 |_| {
-    //                     warn!("Proxy stream ended, reconnecting...");
-    //                     *recreate_client_flag = true
-    //                 },
-    //             )
-    //         }
-    //         Err(error) => {
-    //             error!(?error, "Failed to subscribe to logs");
-    //             *recreate_client_flag = true;
-    //         }
-    //     }
-    // }
+    async fn match_logs(
+        &self,
+        state: State,
+        logs: Result<
+            SubscriptionStream<'_, impl PubsubClient, Log>,
+            SignerMiddlewareError<Provider<Ws>, Wallet<SigningKey>>,
+        >,
+    ) -> State {
+        match logs {
+            Ok(logs) => {
+                debug!("Successfully subscribed to logs");
+                self.process_logs(logs).await;
+                state
+            }
+            Err(error) => {
+                error!(?error, "Failed to subscribe to logs");
+                State {
+                    recreate_client: true,
+                    ..state
+                }
+            }
+        }
+    }
 }
