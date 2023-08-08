@@ -103,6 +103,9 @@ jobs:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
+        with:
+          # Recursive checkout required to build Solidity contracts and bindings.
+          submodules: recursive
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
       - run: RISC0_SKIP_BUILD=1 cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
