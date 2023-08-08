@@ -34,7 +34,6 @@ abigen!(
     "out/RiscZeroGroth16Verifier.sol/RiscZeroGroth16Verifier.json"
 );
 
-// TODO(victor): Is this more of a test for the contracts, or the relayer?
 #[cfg(test)]
 mod tests {
 
