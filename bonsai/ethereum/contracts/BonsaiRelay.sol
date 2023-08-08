@@ -62,7 +62,10 @@ contract BonsaiRelay is IBonsaiRelay {
 
             // Validate Callback authorization proof.
             (bytes32 imageId, bytes calldata journal) = parsePayload(callback.payload);
-            require(callbackIsAuthorized(imageId, journal, callback.auth), "BonsaiRelay: callback authorization check failed");
+            require(
+                callbackIsAuthorized(imageId, journal, callback.auth),
+                "BonsaiRelay: callback authorization check failed"
+            );
 
             // invoke callback
             (invocationResults[i],) = callback.callbackContract.call{gas: callback.gasLimit}(callback.payload);
@@ -73,7 +76,9 @@ contract BonsaiRelay is IBonsaiRelay {
     function invokeCallback(Callback calldata callback) external {
         // Validate Callback authorization proof.
         (bytes32 imageId, bytes calldata journal) = parsePayload(callback.payload);
-        require(callbackIsAuthorized(imageId, journal, callback.auth), "BonsaiRelay: callback authorization check failed");
+        require(
+            callbackIsAuthorized(imageId, journal, callback.auth), "BonsaiRelay: callback authorization check failed"
+        );
 
         // invoke callback
         (bool success, bytes memory data) = callback.callbackContract.call{gas: callback.gasLimit}(callback.payload);
