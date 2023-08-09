@@ -1,0 +1,13 @@
+[package]
+name = "bogosort"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+is_sorted = "0.1.1"
+rand = "0.8.5"
+risc0-zkvm = { path = "../../../../risc0/zkvm", default-features = false, features = [
+  "std",
+] }
