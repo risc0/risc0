@@ -18,7 +18,9 @@ include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 #[cfg(test)]
 mod test {
     use hex_literal::hex;
-    use risc0_zkvm::{Executor, ExecutorEnv};
+    use risc0_zkvm::{
+        Executor, ExecutorEnv, LocalExecutor, MemoryImage, Program, MEM_SIZE, PAGE_SIZE,
+    };
 
     use crate::FINALIZE_VOTES_ELF;
 
@@ -43,8 +45,12 @@ mod test {
             .add_input(&TEST_INPUT)
             .build()
             .unwrap();
-        let mut exec = Executor::from_elf(env, FINALIZE_VOTES_ELF).unwrap();
+        let program = Program::load_elf(FINALIZE_VOTES_ELF, MEM_SIZE as u32).unwrap();
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
+        let pc = image.pc;
+        let mut exec = LocalExecutor::new(env, image, pc);
         let session = exec.run().unwrap();
+        dbg!(&session.journal);
         assert_eq!(&session.journal, TEST_OUTPUT);
     }
 }
