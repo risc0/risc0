@@ -14,14 +14,11 @@
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use std::{path::Path, sync::Arc};
+    use std::sync::Arc;
 
-    use bonsai_proxy_contract::CallbackRequestFilter;
+    use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
     use bonsai_sdk::alpha_async::get_client_from_parts;
-    use ethers::{
-        prelude::Middleware,
-        types::{Address, Bytes, Filter, H256},
-    };
+    use ethers::types::{Address, Bytes, H256};
     use tokio::sync::Notify;
 
     use crate::{
@@ -89,7 +86,10 @@ pub(crate) mod tests {
 
     #[tokio::test]
     async fn integration_test_completed_proof_manager() {
-        // Get Anvil
+        abigen!(Proxy, "../ethereum/out/ProxyTest.sol/Proxy.json");
+        use bonsai_ethereum_contracts::i_bonsai_relay;
+        use ethers::prelude::*;
+
         let anvil = utils::get_anvil();
 
         // Get client config
@@ -97,20 +97,22 @@ pub(crate) mod tests {
             .await
             .expect("Failed to get ethers client config");
 
+        let ethers_client = Arc::new(
+            ethers_client_config
+                .get_client()
+                .await
+                .expect("could not get client"),
+        );
+
         // Mock API server
         let (proof_id, server) = get_test_bonsai_server().await;
 
-        // deploy the contracts
-        let compiled_contract =
-            utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
-        let proxy = utils::deploy_contract(
-            (),
-            "Proxy".to_string(),
-            compiled_contract,
-            ethers_client_config.clone(),
-        )
-        .await
-        .unwrap();
+        // deploy the contract
+        let proxy = Proxy::deploy(ethers_client.clone(), ())
+            .expect("should be able to deploy the Counter contract")
+            .send()
+            .await
+            .expect("deployment should succeed");
 
         let bonsai_client = get_client_from_parts(server.uri(), String::default())
             .await
@@ -130,6 +132,7 @@ pub(crate) mod tests {
 
         let mut manager = BonsaiCompleteProofManager::new(
             bonsai_client,
+            true,
             storage.clone(),
             new_complete_proofs_notifier.clone(),
             send_batch_notifier.clone(),
@@ -143,7 +146,7 @@ pub(crate) mod tests {
         storage
             .add_new_bonsai_proof_request(ProofRequestInformation {
                 proof_request_id: proof_id.clone(),
-                callback_proof_request_event: CallbackRequestFilter {
+                callback_proof_request_event: i_bonsai_relay::CallbackRequestFilter {
                     account: Address::default(),
                     image_id: H256::default().into(),
                     input: Bytes::default(),
