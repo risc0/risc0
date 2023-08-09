@@ -14,6 +14,7 @@
 
 use std::path::PathBuf;
 
+use anyhow::Result;
 use cargo_generate::{GenerateArgs, TemplatePath, Vcs};
 use clap::Parser;
 use const_format::concatcp;
@@ -23,8 +24,8 @@ const RISC0_TEMPLATE_DIR: &str = "templates/rust-starter";
 const RISC0_DEFAULT_VERSION: &str = env!("CARGO_PKG_VERSION");
 const RISC0_RELEASE_TAG: &str = concatcp!("v", RISC0_DEFAULT_VERSION);
 
-#[derive(Parser)]
 /// `cargo risczero new`
+#[derive(Parser)]
 pub struct NewCommand {
     /// Name which will be used as the output project name.
     #[arg()]
@@ -83,7 +84,7 @@ pub struct NewCommand {
 
 impl NewCommand {
     /// Execute this command
-    pub fn run(&self) {
+    pub fn run(&self) -> Result<()> {
         let dest_dir = if let Some(dest_dir) = self.dest.clone() {
             dest_dir
         } else {
@@ -158,6 +159,8 @@ impl NewCommand {
             other_args: None,
         })
         .expect("Failed to generate project");
+
+        Ok(())
     }
 }
 
@@ -218,7 +221,7 @@ mod tests {
             proj_name,
         ]);
 
-        new.run();
+        new.run().unwrap();
 
         let proj_path = tmpdir.path().join(proj_name);
 
@@ -255,7 +258,7 @@ mod tests {
             proj_name,
         ]);
 
-        new.run();
+        new.run().unwrap();
 
         let proj_path = tmpdir.path().join(proj_name);
 
@@ -285,7 +288,7 @@ mod tests {
             proj_name,
         ]);
 
-        new.run();
+        new.run().unwrap();
 
         let proj_path = tmpdir.path().join(proj_name);
 

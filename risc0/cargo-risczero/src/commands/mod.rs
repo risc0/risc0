@@ -12,6 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-fn main() {
-    risc0_build::embed_methods();
-}
+pub mod build_toolchain;
+pub mod install;
+pub mod new;
