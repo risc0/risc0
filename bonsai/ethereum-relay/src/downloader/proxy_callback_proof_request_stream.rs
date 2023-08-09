@@ -13,7 +13,7 @@
 // limitations under the License.
 use std::time::Duration;
 
-use bonsai_proxy_contract::CallbackRequestFilter;
+use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use ethers::{
     core::k256::ecdsa::SigningKey,
     middleware::SignerMiddleware,
