@@ -25,7 +25,7 @@ use tar::Archive;
 
 use crate::{
     toolchain::{RustupToolchain, RUSTUP_TOOLCHAIN_NAME, RUST_REPO},
-    utils::risc0_data,
+    utils::{flock, risc0_data},
 };
 
 /// `cargo risczero install`
@@ -48,7 +48,11 @@ struct GithubAsset {
 
 impl Install {
     pub fn run(&self) -> Result<()> {
-        let toolchain_dir = risc0_data()?.join("toolchains");
+        let root_dir = risc0_data()?;
+        let lockfile_path = root_dir.join("rustup-lock");
+        let _lock = flock(&lockfile_path);
+
+        let toolchain_dir = root_dir.join("toolchains");
         let chain = install_prebuilt_toolchain(&toolchain_dir)?;
 
         eprintln!(

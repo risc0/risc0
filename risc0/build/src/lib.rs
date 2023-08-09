@@ -32,6 +32,8 @@ use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
 
+const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
+
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
     methods: Vec<String>,
@@ -222,9 +224,7 @@ where
     println!("Building guest package: cargo {}", args.join(" "));
 
     let mut cmd = Command::new("cargo");
-    for (key, val) in env::vars().filter(|x| x.0.starts_with("CARGO") || x.0.starts_with("RUSTUP"))
-    {
-        println!("{key}: {val}");
+    for (key, _) in env::vars().filter(|x| x.0.starts_with("CARGO") || x.0.starts_with("RUSTUP")) {
         cmd.env_remove(key);
     }
 
@@ -290,6 +290,32 @@ where
     }
 }
 
+fn detect_toolchain(name: &str) {
+    let result = Command::new("rustup")
+        .args(["toolchain", "list", "--verbose"])
+        .stderr(Stdio::inherit())
+        .output()
+        .unwrap();
+    if !result.status.success() {
+        eprintln!("Failed to run: 'rustup toolchain list --verbose'");
+        std::process::exit(result.status.code().unwrap());
+    }
+
+    let stdout = String::from_utf8(result.stdout).unwrap();
+    if stdout
+        .lines()
+        .find(|line| line.trim().starts_with(name))
+        .is_none()
+    {
+        eprintln!("The 'risc0' toolchain could not be found.");
+        eprintln!("To install the risc0 toolchain, use cargo-risczero.");
+        eprintln!("For example:");
+        eprintln!("  cargo install cargo-risczero");
+        eprintln!("  cargo risczero install");
+        std::process::exit(-1);
+    }
+}
+
 /// Options defining how to embed a guest package in
 /// [`embed_methods_with_options`].
 pub struct GuestOptions {
@@ -331,6 +357,8 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
     methods_file
         .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
+
+    detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);

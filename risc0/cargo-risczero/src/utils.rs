@@ -16,11 +16,13 @@
 
 use std::{
     fmt,
-    path::PathBuf,
+    fs::{File, OpenOptions},
+    path::{Path, PathBuf},
     process::{Command, ExitStatus, Output, Stdio},
 };
 
 use anyhow::{anyhow, Context, Result};
+use fs2::FileExt;
 
 pub fn risc0_data() -> Result<PathBuf> {
     let dir = if let Ok(dir) = std::env::var("RISC0_DATA_DIR") {
@@ -114,6 +116,27 @@ pub fn check_success(
         hidden: false,
     }
     .into())
+}
+
+pub struct FileLock(File);
+
+impl Drop for FileLock {
+    fn drop(&mut self) {
+        drop(self.0.unlock());
+    }
+}
+
+pub fn flock(path: &Path) -> Result<FileLock> {
+    let parent = path.parent().unwrap();
+    std::fs::create_dir_all(parent)
+        .context(format!("failed to create directory `{}`", parent.display()))?;
+    let file = OpenOptions::new()
+        .create(true)
+        .read(true)
+        .write(true)
+        .open(path)?;
+    file.lock_exclusive()?;
+    return Ok(FileLock(file));
 }
 
 #[derive(Debug)]

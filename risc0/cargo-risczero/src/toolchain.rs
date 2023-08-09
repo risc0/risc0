@@ -29,11 +29,16 @@ pub const RUST_REPO: &str = "https://github.com/risc0/rust.git";
 /// Branch to use in the custom Rust repo.
 pub const RUST_BRANCH: &str = "risc0";
 
+/// The name of the rustup toolchain
 pub const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
+/// A rustup toolchain manager
 #[derive(Clone, Debug)]
 pub struct RustupToolchain {
+    /// The name of the rustup toolchain
     pub name: String,
+
+    /// The path of the rustup toolchain
     pub path: PathBuf,
 }
 
