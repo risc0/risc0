@@ -24,9 +24,8 @@ use risc0_zkvm_platform::{fileno, PAGE_SIZE, WORD_SIZE};
 use sha2::{Digest as _, Sha256};
 use test_log::test;
 
-use super::{ExecutorEnv, LocalExecutor, TraceEvent};
+use super::{Executor, ExecutorEnv, TraceEvent};
 use crate::{
-    exec::Executor,
     serde::{from_slice, to_vec},
     testutils, ExitCode, MemoryImage, Program, Session,
 };
@@ -34,7 +33,7 @@ use crate::{
 fn run_test(spec: MultiTestSpec) {
     let input = to_vec(&spec).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    LocalExecutor::from_elf(env, MULTI_TEST_ELF)
+    Executor::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -56,7 +55,7 @@ fn basic() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let mut exec = LocalExecutor::new(env, image, program.entry);
+    let mut exec = Executor::new(env, image);
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
 
@@ -90,7 +89,7 @@ fn system_split() {
     let image = MemoryImage::new(&program, PAGE_SIZE as u32).unwrap();
     let pre_image_id = image.compute_id();
 
-    let mut exec = LocalExecutor::new(env, image, program.entry);
+    let mut exec = Executor::new(env, image);
     let session = exec.run().unwrap();
     let segments = session.resolve().unwrap();
 
@@ -136,7 +135,7 @@ fn host_syscall() {
         })
         .build()
         .unwrap();
-    LocalExecutor::from_elf(env, MULTI_TEST_ELF)
+    Executor::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -155,7 +154,7 @@ fn host_syscall_callback_panic() {
         })
         .build()
         .unwrap();
-    LocalExecutor::from_elf(env, MULTI_TEST_ELF)
+    Executor::from_elf(env, MULTI_TEST_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -189,7 +188,7 @@ fn bigint_accel() {
         .unwrap();
 
         let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-        let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(
             session.journal.as_slice(),
@@ -211,7 +210,7 @@ fn env_stdio() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        LocalExecutor::from_elf(env, MULTI_TEST_ELF)
+        Executor::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -258,7 +257,7 @@ fn posix_style_read() {
             .add_input(&spec)
             .build()
             .unwrap();
-        let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+        let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
         let session = exec.run().unwrap();
 
         let actual: Vec<u8> = from_slice(&session.journal).unwrap();
@@ -318,7 +317,7 @@ fn large_io_words() {
         .session_limit(Some(20_000_000))
         .build()
         .unwrap();
-    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
 
     let actual: &[u32] = bytemuck::cast_slice(&session.journal);
@@ -339,7 +338,7 @@ fn large_io_bytes() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        LocalExecutor::from_elf(env, MULTI_TEST_ELF)
+        Executor::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -354,7 +353,7 @@ fn large_sha() {
     let expected = hex::encode(Sha256::digest(&data));
     let input = to_vec(&MultiTestSpec::ShaDigest { data }).unwrap();
     let env = ExecutorEnv::builder().add_input(&input).build().unwrap();
-    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let session = exec.run().unwrap();
     let actual = hex::encode(Digest::try_from(session.journal).unwrap());
     assert_eq!(expected, actual);
@@ -380,7 +379,7 @@ fn std_stdio() {
             .stdout(&mut stdout)
             .build()
             .unwrap();
-        LocalExecutor::from_elf(env, STANDARD_LIB_ELF)
+        Executor::from_elf(env, STANDARD_LIB_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -405,7 +404,7 @@ ENV_VAR3",
         )
         .build()
         .unwrap();
-    let mut exec = LocalExecutor::from_elf(env, STANDARD_LIB_ELF).unwrap();
+    let mut exec = Executor::from_elf(env, STANDARD_LIB_ELF).unwrap();
     let session = exec.run().unwrap();
     let actual = session.journal.as_slice();
     assert_eq!(
@@ -419,7 +418,7 @@ ENV_VAR2=
 
 #[test]
 fn commit_hello_world() {
-    LocalExecutor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
+    Executor::from_elf(ExecutorEnv::default(), HELLO_COMMIT_ELF)
         .unwrap()
         .run()
         .unwrap();
@@ -438,7 +437,7 @@ fn slice_io() {
             .add_input(slice)
             .build()
             .unwrap();
-        let mut exec = LocalExecutor::from_elf(env, SLICE_IO_ELF).unwrap();
+        let mut exec = Executor::from_elf(env, SLICE_IO_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(session.journal, slice);
     };
@@ -453,7 +452,7 @@ fn slice_io() {
 fn fail() {
     let spec = to_vec(&MultiTestSpec::Fail).unwrap();
     let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
-    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("MultiTestSpec::Fail invoked"));
 }
@@ -472,7 +471,7 @@ fn profiler() {
             .trace_callback(prof.make_trace_callback())
             .build()
             .unwrap();
-        LocalExecutor::from_elf(env, MULTI_TEST_ELF)
+        Executor::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -549,7 +548,7 @@ fn trace() {
             .trace_callback(|event| Ok(events.push(event)))
             .build()
             .unwrap();
-        LocalExecutor::from_elf(env, MULTI_TEST_ELF)
+        Executor::from_elf(env, MULTI_TEST_ELF)
             .unwrap()
             .run()
             .unwrap();
@@ -607,7 +606,7 @@ fn trace() {
 fn oom() {
     let spec = to_vec(&MultiTestSpec::Oom).unwrap();
     let env = ExecutorEnv::builder().add_input(&spec).build().unwrap();
-    let mut exec = LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap();
+    let mut exec = Executor::from_elf(env, MULTI_TEST_ELF).unwrap();
     let err = exec.run().err().unwrap();
     assert!(err.to_string().contains("Out of memory!"), "{err:?}");
 }
@@ -630,7 +629,7 @@ fn session_limit() {
             .session_limit(Some(session_cycles))
             .build()
             .unwrap();
-        LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
+        Executor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
     }
 
     // This test should always fail if the last parameter is zero
@@ -664,7 +663,7 @@ fn memory_access() {
             .add_input(&addr)
             .build()
             .unwrap();
-        LocalExecutor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
+        Executor::from_elf(env, MULTI_TEST_ELF).unwrap().run()
     }
 
     access_memory(0x0000_0000).unwrap();

@@ -130,13 +130,11 @@ impl PolyFp<BabyBear> for CircuitImpl {
         args: &[&[BabyBearElem]],
     ) -> BabyBearExtElem {
         let args: Vec<*const BabyBearElem> = args.iter().map(|x| (*x).as_ptr()).collect();
-        unsafe {
-            risc0_circuit_rv32im_poly_fp(cycle, steps, mix as *const BabyBearExtElem, args.as_ptr())
-        }
+        unsafe { risc0_circuit_rv32im_poly_fp(cycle, steps, mix, args.as_ptr()) }
     }
 }
 
-impl<'a> CircuitProveDef<BabyBear> for CircuitImpl {}
+impl CircuitProveDef<BabyBear> for CircuitImpl {}
 
 pub(crate) fn call_step<S, F>(
     ctx: &CircuitStepContext,

@@ -13,9 +13,8 @@
 // limitations under the License.
 
 use clap::{Parser, Subcommand};
-use risc0_zkvm::{prove::default_prover, Executor, ExecutorEnv, LocalExecutor, VerifierContext};
+use risc0_zkvm::{prove::default_prover, ExecutorEnv};
 use risc0_zkvm_methods::{FIB_ELF, FIB_ID};
-use semver::Version;
 use which::which;
 use xshell::{cmd, Shell};
 
@@ -40,7 +39,6 @@ impl Commands {
     }
 
     fn cmd_install(&self) {
-        install_solc();
         install_wasm_tools();
     }
 
@@ -50,11 +48,7 @@ impl Commands {
             .add_input(&[iterations])
             .build()
             .unwrap();
-        let mut exec = LocalExecutor::from_elf(env, FIB_ELF).unwrap();
-        let session = exec.run().unwrap();
-        let prover = default_prover();
-        let ctx = VerifierContext::default();
-        let receipt = prover.prove_session(&ctx, &session).unwrap();
+        let receipt = default_prover().prove_elf(env, FIB_ELF).unwrap();
         let receipt_bytes = bincode::serialize(&receipt).unwrap();
 
         let rust_code = format!(
@@ -66,26 +60,6 @@ pub const FIB_RECEIPT: &[u8] = &{receipt_bytes:?};
 
         std::fs::write("risc0/zkvm/receipts/src/receipts.rs", rust_code).unwrap();
     }
-}
-
-fn install_solc() {
-    const SOLC_VERSION: Version = Version::new(0, 8, 20);
-
-    let sh = Shell::new().unwrap();
-    if cmd!(sh, "cargo install --locked svm-rs").run().is_err() {
-        cmd!(sh, "cargo install --force --locked svm-rs")
-            .run()
-            .unwrap();
-    }
-    if !svm_lib::installed_versions()
-        .unwrap_or_default()
-        .contains(&SOLC_VERSION)
-    {
-        println!("svm install {SOLC_VERSION}");
-        svm_lib::blocking_install(&SOLC_VERSION).unwrap();
-    }
-    println!("svm use {SOLC_VERSION}");
-    svm_lib::use_version(&SOLC_VERSION).unwrap();
 }
 
 fn install_wasm_tools() {

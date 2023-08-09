@@ -275,8 +275,8 @@ where
         _ => unreachable!(),
     }
     let norm = B::from_u64(size as u64).inv();
-    for i in 0..size {
-        io[i] = io[i] * norm;
+    for x in io.iter_mut().take(size) {
+        *x = *x * norm;
     }
 }
 

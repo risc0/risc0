@@ -16,9 +16,9 @@ use chess_core::Inputs;
 use chess_methods::{CHECKMATE_ELF, CHECKMATE_ID};
 use clap::{Arg, Command};
 use risc0_zkvm::{
-    default_executor_from_elf,
+    default_prover,
     serde::{from_slice, to_vec},
-    ExecutorEnv, SessionReceipt,
+    ExecutorEnv, Receipt,
 };
 use shakmaty::{fen::Fen, CastlingMode, Chess, FromSetup, Position, Setup};
 
@@ -55,20 +55,17 @@ fn main() {
     );
 }
 
-fn chess(inputs: &Inputs) -> SessionReceipt {
+fn chess(inputs: &Inputs) -> Receipt {
     let env = ExecutorEnv::builder()
         .add_input(&to_vec(inputs).unwrap())
         .build()
         .unwrap();
 
-    // Make the Executor.
-    let mut exec = default_executor_from_elf(env, CHECKMATE_ELF).unwrap();
+    // Obtain the default prover.
+    let prover = default_prover();
 
-    // Run the executor to produce a session.
-    let session = exec.run().unwrap();
-
-    // Prove the session to produce a receipt.
-    session.prove().unwrap()
+    // Produce a receipt by proving the specified ELF binary.
+    prover.prove_elf(env, CHECKMATE_ELF).unwrap()
 }
 
 #[cfg(test)]

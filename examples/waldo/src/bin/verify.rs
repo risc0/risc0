@@ -16,7 +16,7 @@ use std::{error::Error, fs, path::PathBuf};
 
 use clap::Parser;
 use image::{io::Reader as ImageReader, GenericImageView, RgbImage};
-use risc0_zkvm::{serde, SessionReceipt};
+use risc0_zkvm::{serde, Receipt};
 use waldo_core::{
     image::{ImageMerkleTree, IMAGE_CHUNK_SIZE},
     Journal,
@@ -70,7 +70,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     );
 
     // Load and verify the receipt file.
-    let receipt: SessionReceipt = bincode::deserialize(&fs::read(&args.receipt)?)?;
+    let receipt: Receipt = bincode::deserialize(&fs::read(&args.receipt)?)?;
     receipt.verify(IMAGE_CROP_ID)?;
 
     // Check consistency of the journal against the input Where's Waldo image.

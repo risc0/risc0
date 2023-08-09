@@ -13,6 +13,5 @@
 // limitations under the License.
 
 mod bonsai_pending_proof_requests;
-mod events;
 mod manager;
 mod utils;

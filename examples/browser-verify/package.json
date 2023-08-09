@@ -1,6 +1,5 @@
 {
-  "author": "You <you@example.com>",
-  "name": "rust-webpack-template",
+  "name": "browser-verify",
   "version": "0.1.0",
   "scripts": {
     "build": "rimraf dist pkg && webpack",

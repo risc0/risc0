@@ -65,7 +65,7 @@ impl<W: WordWrite + ?Sized> WordWrite for &mut W {
 }
 
 /// Serialize to a vector of u32 words
-pub fn to_vec<'a, T>(value: &'a T) -> Result<Vec<u32>>
+pub fn to_vec<T>(value: &T) -> Result<Vec<u32>>
 where
     T: serde::Serialize + ?Sized,
 {
@@ -81,7 +81,7 @@ where
 ///
 /// Includes a caller-provided hint `cap` giving the capacity of u32 words
 /// necessary to serialize `value`.
-pub fn to_vec_with_capacity<'a, T>(value: &'a T, cap: usize) -> Result<Vec<u32>>
+pub fn to_vec_with_capacity<T>(value: &T, cap: usize) -> Result<Vec<u32>>
 where
     T: serde::Serialize + ?Sized,
 {

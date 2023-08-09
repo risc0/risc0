@@ -29,7 +29,7 @@ pub const CELLS: usize = 24;
 pub const ROUNDS_HALF_FULL: usize = 4;
 pub const ROUNDS_PARTIAL: usize = 21;
 
-pub const ROUND_CONSTANTS: &'static [Elem] = &baby_bear_array![
+pub const ROUND_CONSTANTS: &[Elem] = &baby_bear_array![
     0x0fa20c37, 0x0795bb97, 0x12c60b9c, 0x0eabd88e, 0x096485ca, 0x07093527, 0x1b1d4e50, 0x30a01ace,
     0x3bd86f5a, 0x69af7c28, 0x3f94775f, 0x731560e8, 0x465a0ecd, 0x574ef807, 0x62fd4870, 0x52ccfe44,
     0x14772b14, 0x4dedf371, 0x260acd7c, 0x1f51dc58, 0x75125532, 0x686a4d7b, 0x54bac179, 0x31947706,
@@ -119,7 +119,7 @@ pub const ROUND_CONSTANTS: &'static [Elem] = &baby_bear_array![
     0x11b31845, 0x3a6424f5, 0x15d2972b, 0x3f3fcaf7, 0x03eb9631, 0x67a5df9c, 0x6bb87fbf, 0x4ad8f8b6,
 ];
 
-pub const MDS: &'static [Elem] = &baby_bear_array![
+pub const MDS: &[Elem] = &baby_bear_array![
     0x0925f057, 0x5bd30478, 0x07ebbe62, 0x2c815225, 0x4d84dac1, 0x4c7998ba, 0x3a7fea49, 0x3aa9a481,
     0x49c11a1e, 0x04d8979d, 0x5fbfade1, 0x2429dfd7, 0x272efaae, 0x46f9efea, 0x22bc6d5a, 0x4f62ff6c,
     0x0cda4bdd, 0x2331370f, 0x02623b6d, 0x195478b1, 0x37dc87b8, 0x59ea764c, 0x00e4d93f, 0x2a00959b,
@@ -194,7 +194,7 @@ pub const MDS: &'static [Elem] = &baby_bear_array![
     0x1cab657a, 0x065031f7, 0x09f468c3, 0x69f29f12, 0x75918d89, 0x6b0b3c00, 0x1a89fae5, 0x1827d23b,
 ];
 
-pub const PARTIAL_COMP_MATRIX: &'static [Elem] = &baby_bear_array![
+pub const PARTIAL_COMP_MATRIX: &[Elem] = &baby_bear_array![
     0x00000000, 0x2d4ee593, 0x6e5b6ad0, 0x2cf43ad5, 0x71b22fcd, 0x4e15d247, 0x3fa282ba, 0x6a48cac3,
     0x41c3fe03, 0x53d79cec, 0x53db9c55, 0x4b2634a7, 0x02b419da, 0x58dc018e, 0x111ee3f5, 0x53366a81,
     0x3f15a4e4, 0x25782723, 0x74c1ba22, 0x329c7226, 0x39ac5313, 0x3ec7ef59, 0x19b6d181, 0x2c3da0d2,
@@ -451,7 +451,7 @@ pub const PARTIAL_COMP_MATRIX: &'static [Elem] = &baby_bear_array![
     0x00000000,
 ];
 
-pub const PARTIAL_COMP_OFFSET: &'static [Elem] = &baby_bear_array![
+pub const PARTIAL_COMP_OFFSET: &[Elem] = &baby_bear_array![
     0x55827d1b, 0x4653e46d, 0x0af39e48, 0x0fdd2c84, 0x25b7f5da, 0x4124ec0d, 0x60cf949e, 0x446d5262,
     0x4be29a19, 0x63f1436a, 0x5f9ff71b, 0x15944dc4, 0x2bee7deb, 0x0b8c3078, 0x412b1077, 0x3a39281c,
     0x60dd3778, 0x54339102, 0x64c10449, 0x0c6b767f, 0x2def1f32, 0x0e501e9a, 0x06bb760b, 0x08244280,

@@ -57,7 +57,7 @@ impl RamPlonk {
         self.main_ram.push(MainRamPlonkRow {
             addr,
             cycle_and_write_flag,
-            val: (u32::from(elems[3]) << 0)
+            val: u32::from(elems[3])
                 + (u32::from(elems[4]) << 8)
                 + (u32::from(elems[5]) << 16)
                 + (u32::from(elems[6]) << 24),
@@ -80,7 +80,7 @@ impl RamPlonk {
         set_elem(0, row.addr);
         set_elem(1, row.cycle_and_write_flag >> 2);
         set_elem(2, row.cycle_and_write_flag & 3);
-        set_elem(3, (row.val >> 0) & 0xFF);
+        set_elem(3, row.val & 0xFF);
         set_elem(4, (row.val >> 8) & 0xFF);
         set_elem(5, (row.val >> 16) & 0xFF);
         set_elem(6, (row.val >> 24) & 0xFF);
@@ -125,7 +125,7 @@ impl BytesPlonk {
         }
 
         let b1 = (self.read_pos >> 8) & 0xFF;
-        let b2 = (self.read_pos >> 0) & 0xFF;
+        let b2 = self.read_pos & 0xFF;
 
         self.counts[self.read_pos] -= 1;
 
@@ -164,7 +164,7 @@ impl<F: field::Field> PlonkAccum<F> {
     pub fn calc_prefix_products(&mut self) {
         let mut tot = F::ExtElem::ONE;
         for val in self.elems.iter_mut() {
-            tot = tot * *val;
+            tot *= *val;
             *val = tot;
         }
     }

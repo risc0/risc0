@@ -14,13 +14,13 @@
 
 #[cfg(test)]
 pub(crate) mod tests {
-    use bonsai_proxy_contract::CallbackRequestFilter;
+    use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
     use bonsai_sdk::alpha::{
         responses::{CreateSessRes, SessionStatusRes, SnarkProof, SnarkStatusRes},
         SessionId,
     };
     use ethers::types::{Address, Bytes, H256, U256};
-    use risc0_zkvm::{receipt::InnerReceipt, SessionReceipt};
+    use risc0_zkvm::{receipt::InnerReceipt, Receipt};
     use uuid::Uuid;
     use wiremock::{
         matchers::{method, path},
@@ -41,7 +41,7 @@ pub(crate) mod tests {
             receipt_url: Some(format!("{}/fake/receipt/path", server.uri())),
         };
 
-        let receipt_data_response = SessionReceipt {
+        let receipt_data_response = Receipt {
             journal: vec![],
             inner: InnerReceipt::Fake,
         };
@@ -126,45 +126,6 @@ pub(crate) mod tests {
 
             // Throwing an error signals for the runner loop to stop.
             Err(anyhow::anyhow!("terminate success").into())
-        }
-    }
-
-    use ethers::{
-        self,
-        providers::{JsonRpcClient, Middleware, Provider, PubsubClient},
-    };
-    use tokio_stream::Stream;
-
-    // This wrapper only exists to provide a nicer API and play well with the rest
-    // of the components.
-    pub(crate) struct EventStream<P: JsonRpcClient> {
-        filter: ethers::types::Filter,
-        provider: Provider<P>,
-    }
-
-    impl<P: JsonRpcClient> EventStream<P> {
-        pub(crate) fn new(provider: Provider<P>, address: ethers::types::Address) -> Self {
-            Self {
-                provider,
-                filter: ethers::types::Filter::new().address(address),
-            }
-        }
-
-        pub(crate) fn from_block(mut self, block: u64) -> Self {
-            self.filter = self.filter.from_block(block);
-            self
-        }
-    }
-
-    impl<P: JsonRpcClient> EventStream<P> {
-        pub(crate) async fn poll(&self) -> impl Stream<Item = ethers::types::Log> + '_ {
-            self.provider.watch(&self.filter).await.unwrap().stream()
-        }
-    }
-
-    impl<P: PubsubClient> EventStream<P> {
-        pub(crate) async fn watch(&self) -> impl Stream<Item = ethers::types::Log> + '_ {
-            self.provider.subscribe_logs(&self.filter).await.unwrap()
         }
     }
 }

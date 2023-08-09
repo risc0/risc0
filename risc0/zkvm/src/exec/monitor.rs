@@ -207,7 +207,7 @@ impl MemoryMonitor {
     }
 
     pub fn load_registers(&self) -> [u32; REG_MAX] {
-        self.registers.clone()
+        self.registers
     }
 
     fn init_registers(&mut self) -> Result<()> {
@@ -292,10 +292,8 @@ impl MemoryMonitor {
         self.store_bytes(addr, &data.to_le_bytes())?;
         self.mark_page(addr);
         if self.enable_trace {
-            self.trace_events.insert(TraceEvent::MemorySet {
-                addr,
-                value: data as u32,
-            });
+            self.trace_events
+                .insert(TraceEvent::MemorySet { addr, value: data });
         }
         Ok(())
     }
@@ -436,7 +434,7 @@ impl Memory for MemoryMonitor {
         match size {
             MemAccessSize::Byte => self.load_u8(addr).map(|x| x as u32).ok(),
             MemAccessSize::HalfWord => self.load_u16(addr).map(|x| x as u32).ok(),
-            MemAccessSize::Word => self.load_u32(addr).map(|x| x as u32).ok(),
+            MemAccessSize::Word => self.load_u32(addr).ok(),
         }
     }
 
