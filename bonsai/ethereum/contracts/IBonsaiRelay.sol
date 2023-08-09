@@ -42,7 +42,7 @@ struct Callback {
 
 /// @notice The interface for the Bonsai relay contract
 interface IBonsaiRelay {
-    /// @notice Event emitted upon rceiving a callback request through requestCallback.
+    /// @notice Event emitted upon receiving a callback request through requestCallback.
     event CallbackRequest(
         address account,
         bytes32 imageId,
@@ -63,8 +63,8 @@ interface IBonsaiRelay {
         uint64 gasLimit
     ) external;
 
-    /// @notice Determines if the given athorization is valid for the image ID and journal.
-    /// @dev A (imageId, jounral) pair should be valid, and the respective callback authorized, if
+    /// @notice Determines if the given authorization is valid for the image ID and journal.
+    /// @dev A (imageId, journal) pair should be valid, and the respective callback authorized, if
     ///     and only if the journal is the result of the correct execution of the zkVM guest.
     function callbackIsAuthorized(bytes32 imageId, bytes calldata journal, CallbackAuthorization calldata auth)
         external
