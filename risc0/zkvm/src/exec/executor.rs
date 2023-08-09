@@ -138,7 +138,7 @@ impl<'a> Executor<'a> {
     ) -> Self {
         let pc = image.pc;
         let pre_image = image.clone();
-        let monitor = MemoryMonitor::new(image, env.trace_callback.is_some());
+        let monitor = MemoryMonitor::new(image, env.trace_callback.is_some(), env.host_randomness);
         let loader = Loader::new();
         let init_cycles = loader.init_cycles();
         let fini_cycles = loader.fini_cycles();

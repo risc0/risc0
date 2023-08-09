@@ -63,6 +63,7 @@ pub struct ExecutorEnv<'a> {
     pub(crate) io: Rc<RefCell<PosixIo<'a>>>,
     pub(crate) input: Vec<u8>,
     pub(crate) trace_callback: Option<Rc<RefCell<TraceCallback<'a>>>>,
+    pub(crate) host_randomness: bool,
 }
 
 impl<'a> ExecutorEnv<'a> {
@@ -113,6 +114,7 @@ impl<'a> Default for ExecutorEnvBuilder<'a> {
                 io: Default::default(),
                 input: Default::default(),
                 trace_callback: Default::default(),
+                host_randomness: false,
             },
         }
     }
@@ -329,6 +331,12 @@ impl<'a> ExecutorEnvBuilder<'a> {
         callback: impl FnMut(TraceEvent) -> Result<()> + 'a,
     ) -> &mut Self {
         self.inner.trace_callback = Some(Rc::new(RefCell::new(callback)));
+        self
+    }
+
+    /// Enable host randomness
+    pub fn enable_host_randomness(&mut self) -> &mut Self {
+        self.inner.host_randomness = true;
         self
     }
 }

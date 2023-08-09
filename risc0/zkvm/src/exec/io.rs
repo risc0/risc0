@@ -85,6 +85,9 @@ pub trait SyscallContext {
         }
         String::from_utf8(s).map_err(anyhow::Error::msg)
     }
+
+    /// Whether the host randomness has been enabled
+    fn host_randomness_enabled(&mut self) -> bool;
 }
 
 /// An I/O handler that returns arbitrary data to the guest. On the
@@ -466,9 +469,12 @@ pub(crate) mod syscalls {
         fn syscall(
             &mut self,
             _syscall: &str,
-            _ctx: &mut dyn SyscallContext,
+            ctx: &mut dyn SyscallContext,
             to_guest: &mut [u32],
         ) -> Result<(u32, u32)> {
+            if !ctx.host_randomness_enabled() {
+                bail!("Guest attempted to use host randomness");
+            }
             log::debug!("SYS_RANDOM: {}", to_guest.len());
             let mut rand_buf = vec![0u8; to_guest.len() * WORD_SIZE];
             getrandom::getrandom(rand_buf.as_mut_slice())?;

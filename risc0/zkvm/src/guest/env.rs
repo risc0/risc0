@@ -51,6 +51,12 @@ pub(crate) fn finalize(halt: bool, user_exit: u8) {
     }
 }
 
+/// Call the zkvm_getrandom function which uses the getrandom crate.
+#[cfg(target_os = "zkvm")]
+pub fn getrandom(dest: &mut [u8]) -> Result<(), getrandom::Error> {
+    super::zkvm_getrandom(dest)
+}
+
 /// Exchange data with the host.
 pub fn syscall(syscall: SyscallName, to_host: &[u8], from_host: &mut [u32]) -> syscall::Return {
     unsafe {

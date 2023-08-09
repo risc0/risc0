@@ -79,10 +79,11 @@ pub struct MemoryMonitor {
     enable_trace: bool,
     pages: Vec<Option<Page>>,
     registers: [u32; REG_MAX],
+    enable_host_randomness: bool,
 }
 
 impl MemoryMonitor {
-    pub fn new(image: MemoryImage, enable_trace: bool) -> Self {
+    pub fn new(image: MemoryImage, enable_trace: bool, enable_host_randomness: bool) -> Self {
         let num_pages = image.info.num_pages as usize + 1;
         let resident = vec![false; num_pages];
         let dirty = vec![false; num_pages];
@@ -101,6 +102,7 @@ impl MemoryMonitor {
             enable_trace,
             pages,
             registers: [0; REG_MAX],
+            enable_host_randomness,
         }
     }
 
@@ -463,6 +465,10 @@ impl SyscallContext for MemoryMonitor {
 
     fn load_u8(&mut self, addr: u32) -> Result<u8> {
         MemoryMonitor::load_u8(self, addr)
+    }
+
+    fn host_randomness_enabled(&mut self) -> bool {
+        self.enable_host_randomness
     }
 }
 
