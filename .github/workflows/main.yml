@@ -31,6 +31,7 @@ jobs:
           node-version: 18
       - run: cargo fmt --all --check
       - run: cargo fmt --all --check --manifest-path examples/Cargo.toml
+      - run: cargo fmt --all --check --manifest-path bonsai/examples/governance/Cargo.toml
       - run: cargo sort --workspace --check
       - run: cargo sort --workspace --check examples
       - run: cargo sort --workspace --check bonsai/examples/governance
@@ -63,6 +64,9 @@ jobs:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
+        with:
+          # Recursive checkout required to build Solidity contracts and bindings.
+          submodules: recursive
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
@@ -71,7 +75,7 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
-      - uses: ./.github/actions/rosetta
+      - run: cargo run --bin cargo-risczero -- risczero install
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: cargo test -F $FEATURE -F profiler
@@ -122,6 +126,9 @@ jobs:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
+        with:
+          # Recursive checkout required to build Solidity contracts and bindings.
+          submodules: recursive
       - uses: ./.github/actions/rustup
       - uses: actions/setup-node@v3
         with:
@@ -129,8 +136,12 @@ jobs:
       - uses: ./.github/actions/sccache
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
+      - run: cargo run --bin cargo-risczero -- risczero install
       - run: cargo test -F $FEATURE
         working-directory: examples
+      - run: cargo test -F $FEATURE
+        working-directory: bonsai/examples/governance
+        if: matrix.device == 'cpu'
 
   doc:
     runs-on: ubuntu-22.04-64c
@@ -138,10 +149,14 @@ jobs:
       # This is a workaround from: https://github.com/actions/checkout/issues/590#issuecomment-970586842
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
+        with:
+          # Recursive checkout required to build Solidity contracts and bindings.
+          submodules: recursive
       - uses: ./.github/actions/rustup
       - uses: ./.github/actions/sccache
         with:
           key: Linux
+      - run: cargo run --bin cargo-risczero -- risczero install
       - run: cargo xtask gen-receipt
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - name: Install mdbook
@@ -164,6 +179,7 @@ jobs:
       - run: "git checkout -f $(git -c user.name=x -c user.email=x@x commit-tree $(git hash-object -t tree /dev/null) < /dev/null) || :"
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
+      - run: cargo run --bin cargo-risczero -- risczero install
       - run: |
           cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
         shell: bash
@@ -185,7 +201,7 @@ jobs:
         with:
           node-version: 18
       - uses: ./.github/actions/sccache
-      - uses: ./.github/actions/rosetta
+      - run: cargo run --bin cargo-risczero -- risczero install
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |

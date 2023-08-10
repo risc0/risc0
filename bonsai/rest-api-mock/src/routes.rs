@@ -126,7 +126,12 @@ pub(crate) async fn snark_status(
 ) -> Result<Json<SnarkStatusRes>, Error> {
     Ok(Json(SnarkStatusRes {
         status: "SUCCEEDED".to_string(),
-        output: Some(dummy_snark()),
+        output: Some(SnarkProof {
+            a: vec![],
+            b: vec![vec![]],
+            c: vec![],
+            public: vec![],
+        }),
     }))
 }
 
@@ -139,21 +144,4 @@ pub(crate) async fn get_receipt(
         .get_receipt(&session_id)
         .ok_or_else(|| anyhow::anyhow!("Receipt not found for session id: {:?}", &session_id))?;
     Ok(receipt)
-}
-
-fn dummy_snark() -> SnarkProof {
-    let zeroes = &hex::encode([0u8; 32]);
-    let a = vec![zeroes.to_string(), zeroes.to_string()];
-    let b = vec![
-        vec![zeroes.to_string(), zeroes.to_string()],
-        vec![zeroes.to_string(), zeroes.to_string()],
-    ];
-    let c = vec![zeroes.to_string(), zeroes.to_string()];
-    let public = vec![
-        zeroes.to_string(),
-        zeroes.to_string(),
-        zeroes.to_string(),
-        zeroes.to_string(),
-    ];
-    SnarkProof { a, b, c, public }
 }

@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{path::Path, sync::Arc};
+use std::sync::Arc;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use ethers::{
-    abi::Tokenize,
-    prelude::{k256::ecdsa::SigningKey, *},
+    prelude::*,
     providers::{Http, Provider, Ws},
     signers::{LocalWallet, Signer},
     utils::AnvilInstance,
 };
 
-use crate::{client_config::WalletKey, EthersClientConfig};
+use crate::{client_config::WalletKey, sdk::utils::k256::ecdsa::SigningKey, EthersClientConfig};
 
 const POLL_INTERVAL: std::time::Duration = std::time::Duration::from_secs(1);
 
@@ -40,7 +39,7 @@ pub fn get_wallet(anvil: Option<&AnvilInstance>) -> Result<Wallet<SigningKey>> {
 }
 
 /// Returns a wallet key identifier defined by the env variable
-/// [WALLET_KEY_IDENTIFIER] or from the given optional [anvil] instance.
+/// `WALLET_KEY_IDENTIFIER` or from the given optional `anvil` instance.
 pub fn get_wallet_key_identifier(anvil: Option<&AnvilInstance>) -> Result<WalletKey> {
     match std::env::var("WALLET_KEY_IDENTIFIER") {
         Ok(wallet_key_identifier) => wallet_key_identifier.try_into(),
@@ -119,58 +118,4 @@ pub fn get_anvil() -> Option<AnvilInstance> {
         Ok(_) => None,
         _ => Some(ethers::utils::Anvil::new().spawn()),
     }
-}
-
-/// Constructs the deployment transaction of the contract based on
-/// the provided constructor arguments and returns a Deployer instance.
-/// You must call send() in order to actually deploy the contract.
-/// Notes:
-///
-/// If there are no constructor arguments, you should pass () as the argument.
-pub async fn deploy_contract<T: Tokenize>(
-    constructor_args: T,
-    contract_name: String,
-    compiled: CompilerOutput,
-    client_config: EthersClientConfig,
-) -> Result<ethers::contract::Contract<SignerMiddleware<Provider<Ws>, LocalWallet>>> {
-    dbg!(&client_config);
-    let (abi, bytecode, _runtime_bytecode) = compiled
-        .find(contract_name.clone())
-        .context(format!(
-            "could not find contract {} in compiler output",
-            contract_name.clone()
-        ))?
-        .into_parts_or_default();
-
-    let client = Arc::new(
-        client_config
-            .get_client()
-            .await
-            .context("could not get client")?,
-    );
-    let factory = ContractFactory::new(abi, bytecode, client.clone());
-    factory
-        .deploy(constructor_args)
-        .map_err(|err| {
-            anyhow!(format!(
-                "constructing deploy transaction failed for {} - {}",
-                contract_name.clone(),
-                err
-            ))
-        })?
-        .send()
-        .await
-        .map_err(|err| {
-            anyhow!(format!(
-                "deployed failed for {} - {}",
-                contract_name.clone(),
-                err
-            ))
-        })
-}
-
-/// Convenience function for compiling all sources under the given path.
-pub fn compile_contracts(path: &Path) -> Result<CompilerOutput> {
-    let compiled = Solc::default().compile_source(path)?;
-    Ok(compiled)
 }
