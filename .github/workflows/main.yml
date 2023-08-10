@@ -76,6 +76,8 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: cargo test -F $FEATURE -F profiler
@@ -137,6 +139,8 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo test -F $FEATURE
         working-directory: examples
       - run: cargo test -F $FEATURE
@@ -157,6 +161,8 @@ jobs:
         with:
           key: Linux
       - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask gen-receipt
       - run: cargo doc --no-deps --exclude=risc0-zkvm-methods --workspace
       - name: Install mdbook
@@ -180,6 +186,8 @@ jobs:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/rustup
       - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           cargo run -p cargo-risczero risczero new --template templates/rust-starter --templ-subdir="" --path $(pwd) --dest ${{ runner.temp }} template-test
         shell: bash
@@ -202,6 +210,8 @@ jobs:
           node-version: 18
       - uses: ./.github/actions/sccache
       - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: |
