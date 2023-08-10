@@ -12,10 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![doc = include_str!("../README.md")]
+
+pub mod sdk;
+
+pub use sdk::{CallbackRequest, Client, ClientError};
+
 mod api;
 mod client_config;
 mod downloader;
-pub mod sdk;
 mod storage;
 mod tests;
 mod uploader;
@@ -45,10 +50,12 @@ static DEFAULT_FILTER: &str = "info";
 #[derive(Clone)]
 /// A relayer to integrate Ethereum with Bonsai.
 pub struct Relayer {
-    /// Toggle to enable the publish mode on the relayer.
-    pub publish_mode: bool,
+    /// Toggle to enable the REST API on the relayer.
+    pub rest_api: bool,
+    /// Toggle for generating real or fake receipts.
+    pub dev_mode: bool,
     /// Port serving the relayer REST API.
-    pub publish_port: String,
+    pub rest_api_port: String,
     /// Bonsai API URL.
     pub bonsai_api_url: String,
     /// Bonsai API key.
@@ -106,6 +113,7 @@ impl Relayer {
 
         let uploader_complete_proof_manager = BonsaiCompleteProofManager::new(
             bonsai_client.clone(),
+            self.dev_mode,
             storage.clone(),
             new_complete_proof_notifier.clone(),
             send_batch_notifier.clone(),
@@ -124,12 +132,12 @@ impl Relayer {
 
         // Start everything
         let server_handle = tokio::spawn(maybe_start_publish_mode(
-            self.publish_mode,
+            self.rest_api,
             state,
-            self.publish_port,
+            self.rest_api_port,
         ));
         let local_bonsai_handle = tokio::spawn(maybe_start_local_bonsai(
-            dev_mode(self.bonsai_api_url.clone()),
+            self.dev_mode,
             self.bonsai_api_url.clone(),
         ));
         let downloader_handle = tokio::spawn(downloader.run());
@@ -141,10 +149,10 @@ impl Relayer {
         info!("Relay started");
 
         tokio::select! {
-            err = server_handle, if self.publish_mode => {
+            err = server_handle, if self.rest_api => {
                 panic!("{}", format!("server API exited: {:?}", err))
             }
-            err = local_bonsai_handle, if dev_mode(self.bonsai_api_url) => {
+            err = local_bonsai_handle, if self.dev_mode => {
                 panic!("{}", format!("local Bonsai service exited: {:?}", err))
             }
             err = downloader_handle => {
@@ -179,8 +187,4 @@ async fn maybe_start_local_bonsai(dev_mode: bool, bonsai_url: String) -> anyhow:
     }
 
     Ok(())
-}
-
-fn dev_mode(bonsai_url: String) -> bool {
-    bonsai_url.contains("localhost") || bonsai_url.contains("127.0.0.1")
 }

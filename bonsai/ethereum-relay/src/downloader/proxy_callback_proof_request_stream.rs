@@ -13,7 +13,7 @@
 // limitations under the License.
 
 use anyhow::Result;
-use bonsai_proxy_contract::CallbackRequestFilter;
+use bonsai_ethereum_contracts::i_bonsai_relay::CallbackRequestFilter;
 use ethers::{
     prelude::{k256::ecdsa::SigningKey, signer::SignerMiddlewareError},
     providers::{Middleware, Provider, PubsubClient, SubscriptionStream, Ws},

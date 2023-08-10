@@ -27,7 +27,7 @@ use axum::{
 };
 use tokio::sync::mpsc;
 use tower_http::trace::{DefaultOnRequest, TraceLayer};
-use tracing::Level;
+use tracing::{info, Level};
 
 use crate::{
     prover::{Prover, ProverHandle},
@@ -73,14 +73,16 @@ pub async fn serve(port: String) -> anyhow::Result<()> {
 
     tokio::spawn(async move { prover.run().await });
 
-    axum::Server::bind(
+    let handle = axum::Server::bind(
         &bind_address
             .parse()
             .context("failed to parse bind address")?,
     )
-    .serve(app(state, prover_handle).into_make_service())
-    .await
-    .context(format!(
+    .serve(app(state, prover_handle).into_make_service());
+
+    info!("Local Bonsai started on {bind_address}");
+
+    handle.await.context(format!(
         "failed to serve Local Bonsai API on {bind_address}"
     ))
 }

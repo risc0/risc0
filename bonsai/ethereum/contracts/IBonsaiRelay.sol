@@ -16,9 +16,33 @@
 
 pragma solidity ^0.8.17;
 
+/// @notice Data required to authorize a callback to be sent through the relay.
+struct CallbackAuthorization {
+    /// @notice SNARK proof acting as the cryptographic seal over the execution results.
+    bytes seal;
+    /// @notice Digest of the zkVM SystemState after execution.
+    /// @dev The relay does not additionally check any property of this digest, but needs the
+    /// digest in order to reconstruct the ReceiptMetadata hash to which the proof is linked.
+    bytes32 postStateDigest;
+}
+
+/// @notice Callback data, provided by the Relay service.
+struct Callback {
+    CallbackAuthorization auth;
+    /// @notice address of the contract to receive the callback.
+    address callbackContract;
+    /// @notice payload containing the callback function selector, journal bytes, and image ID.
+    /// @dev payload is destructured and checked against the authorization data to ensure that
+    ///     the journal is a valid execution result of the zkVM guest defined by the image ID.
+    ///     The payload is then used directly as the calldata for the callback.
+    bytes payload;
+    /// @notice maximum amount of gas the callback function may use.
+    uint64 gasLimit;
+}
+
 /// @notice The interface for the Bonsai relay contract
 interface IBonsaiRelay {
-    /// @notice Event emitted upon rceiving a callback request through requestCallback.
+    /// @notice Event emitted upon receiving a callback request through requestCallback.
     event CallbackRequest(
         address account,
         bytes32 imageId,
@@ -38,4 +62,22 @@ interface IBonsaiRelay {
         bytes4 functionSelector,
         uint64 gasLimit
     ) external;
+
+    /// @notice Determines if the given authorization is valid for the image ID and journal.
+    /// @dev A (imageId, journal) pair should be valid, and the respective callback authorized, if
+    ///     and only if the journal is the result of the correct execution of the zkVM guest.
+    function callbackIsAuthorized(bytes32 imageId, bytes calldata journal, CallbackAuthorization calldata auth)
+        external
+        view
+        returns (bool);
+
+    /// @notice Submit a batch of callbacks, authorized by an attached SNARK proof.
+    /// @dev This function is usually called by the Bonsai Relay. Note that this function does not
+    ///     revert when one of the inner callbacks reverts.
+    /// @return invocationResults a list of booleans indicated if the calldata succeeded or failed.
+    function invokeCallbacks(Callback[] calldata callbacks) external returns (bool[] memory invocationResults);
+
+    /// @notice Submit a single callback, authorized by an attached SNARK proof.
+    /// @dev This function is usually called by the Bonsai Relay. This function reverts if the callback fails.
+    function invokeCallback(Callback calldata callback) external;
 }

@@ -27,7 +27,7 @@ import {console2} from "forge-std/console2.sol";
 import {BytesLib} from "solidity-bytes-utils//BytesLib.sol";
 
 import {BonsaiTest} from "bonsai/BonsaiTest.sol";
-import {IBonsaiRelay} from "bonsai/IBonsaiRelay.sol";
+import {IBonsaiRelay, Callback, CallbackAuthorization} from "bonsai/IBonsaiRelay.sol";
 
 import {BonsaiGovernor} from "../contracts/BonsaiGovernor.sol";
 import {BaselineGovernor} from "../contracts/BaselineGovernor.sol";
@@ -447,7 +447,9 @@ abstract contract BonsaiGovernorTest is GovernorTest, BonsaiTest {
             // Bonsai Relay callbacks use a non-stardard call encoding of
             // { bytes4(selector) || journal bytes || bytes32(imageId) }
             // Here we are calling through the Relay and so assemble to call to be same structure.
-            getBonsaiTestRelay().invokeCallback(address(bonsaiGov), payload, UINT64_MAX);
+            CallbackAuthorization memory auth = CallbackAuthorization(new bytes(0), bytes32(0));
+            Callback memory callback = Callback(auth, address(bonsaiGov), payload, UINT64_MAX);
+            bonsaiRelay.invokeCallback(callback);
         }
     }
 
