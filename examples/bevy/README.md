@@ -30,8 +30,8 @@ The host program can be found in [`src/main.rs`] and the guest program can be fo
 The [host] first [executes] the guest program and then [proves the execution] to construct a [receipt].
 The receipt can be passed to a third party, who can examine the [journal] to check the program's outputs and can [verify] the [receipt] to ensure the integrity of the [guest program]'s execution.
 
-[`src/main.rs`]: /src/main.rs
-[`methods/guest/src/main.rs`]: methods/guest/src/main.rs
+[`src/main.rs`]: https://github.com/risc0/risc0/tree/v0.16.1/examples/bevy/src/main.rs
+[`methods/guest/src/main.rs`]: https://github.com/risc0/risc0/tree/v0.16.1/examples/bevy/methods/guest/src/main.rs
 [host]: https://dev.risczero.com/terminology#host
 [executes]: https://dev.risczero.com/terminology#execute
 [guest program]: https://dev.risczero.com/terminology#guest-program
