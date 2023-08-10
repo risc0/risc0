@@ -52,7 +52,11 @@ impl BuildToolchain {
         };
         let rust_dir = root_dir.join("rust");
 
-        self.prepare_git_repo(RUST_REPO, RUST_BRANCH, &rust_dir)?;
+        let is_ci = std::env::var("CI").is_ok();
+        if !is_ci {
+            self.prepare_git_repo(RUST_REPO, RUST_BRANCH, &rust_dir)?;
+        }
+
         let out = self.build_toolchain(&rust_dir)?;
 
         RustupToolchain::link(RUSTUP_TOOLCHAIN_NAME, &out.toolchain_dir)?;
