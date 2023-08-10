@@ -28,6 +28,8 @@ jobs:
       - name: install rust
         uses: ./.github/actions/rustup
 
+      - run: cargo run --bin cargo-risczero -- risczero install
+
       - name: Install Foundry
         uses: risc0/foundry-toolchain@2fe7e70b520f62368a0e3c464f997df07ede420f
 

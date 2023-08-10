@@ -25,18 +25,11 @@ fn main() {
     }
 
     let map = HashMap::from([
-        (
-            "risc0-zkvm-methods-guest",
-            GuestOptions {
-                features: Vec::new(),
-                std: false,
-            },
-        ),
+        ("risc0-zkvm-methods-guest", GuestOptions::default()),
         (
             "risc0-zkvm-methods-std",
             GuestOptions {
                 features: vec!["test_feature1".to_string(), "test_feature2".to_string()],
-                std: true,
             },
         ),
     ]);
