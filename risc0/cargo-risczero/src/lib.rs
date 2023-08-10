@@ -15,15 +15,13 @@
 #![doc = include_str!("../README.md")]
 #![deny(missing_docs)]
 
+mod commands;
+mod toolchain;
+mod utils;
+
 use clap::{Parser, Subcommand};
 
-use crate::commands::new::NewCommand;
-
-/// Implementations of the commands
-pub mod commands {
-    /// Create a new RISC Zero project
-    pub mod new;
-}
+use crate::commands::{build_toolchain::BuildToolchain, install::Install, new::NewCommand};
 
 #[derive(Parser)]
 #[command(name = "cargo", bin_name = "cargo")]
@@ -45,6 +43,10 @@ pub struct Risczero {
 #[derive(Subcommand)]
 /// Primary commands  of `cargo risczero`.
 pub enum RisczeroCmd {
+    /// Build the riscv32im-risc0-zkvm-elf toolchain.
+    BuildToolchain(BuildToolchain),
+    /// Install the riscv32im-risc0-zkvm-elf toolchain.
+    Install(Install),
     /// Creates a new risczero starter project.
     New(NewCommand),
 }

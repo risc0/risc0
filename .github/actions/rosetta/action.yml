@@ -1,9 +1,0 @@
-name: rosetta install
-description: Install rosetta
-runs:
-  using: composite
-  steps:
-    - if: runner.os == 'macOS' && runner.arch == 'ARM64'
-      run: |
-        pgrep -q oahd && echo Rosetta already installed || /usr/sbin/softwareupdate --install-rosetta --agree-to-license
-      shell: bash

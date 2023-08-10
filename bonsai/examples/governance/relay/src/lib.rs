@@ -16,33 +16,10 @@ use std::time::Duration;
 
 use anyhow::{anyhow, bail, Context, Result};
 use bonsai_sdk::alpha::{responses::SnarkProof, Client, SdkErr};
-use clap::{builder::PossibleValue, ValueEnum};
 use risc0_build::GuestListEntry;
 use risc0_zkvm::{
-    ExecutorEnv, Executor, MemoryImage, Program, ReceiptMetadata, Receipt,
-    MEM_SIZE, PAGE_SIZE,
+    Executor, ExecutorEnv, MemoryImage, Program, Receipt, ReceiptMetadata, MEM_SIZE, PAGE_SIZE,
 };
-
-#[derive(Debug, Copy, Clone)]
-pub enum ProverMode {
-    None,
-    Local,
-    Bonsai,
-}
-
-impl ValueEnum for ProverMode {
-    fn value_variants<'a>() -> &'a [Self] {
-        &[Self::None, Self::Local, Self::Bonsai]
-    }
-
-    fn to_possible_value(&self) -> Option<PossibleValue> {
-        Some(match self {
-            Self::None => PossibleValue::new("none"),
-            Self::Local => PossibleValue::new("local"),
-            Self::Bonsai => PossibleValue::new("bonsai"),
-        })
-    }
-}
 
 /// Result of executing a guest image, possibly containing a proof.
 pub enum Output {
@@ -58,7 +35,7 @@ pub enum Output {
 
 /// Execute and prove the guest locally, on this machine, as opposed to sending
 /// the proof request to the Bonsai service.
-pub fn prove_locally(elf: &[u8], input: Vec<u8>, prove: bool) -> Result<Output> {
+pub fn execute_locally(elf: &[u8], input: Vec<u8>) -> Result<Output> {
     // Execute the guest program, generating the session trace needed to prove the
     // computation.
     let env = ExecutorEnv::builder()
@@ -70,13 +47,6 @@ pub fn prove_locally(elf: &[u8], input: Vec<u8>, prove: bool) -> Result<Output> 
         .run()
         .context(format!("Failed to run executor {:?}", &input))?;
 
-    // Locally prove resulting journal
-    if prove {
-        session.prove().context("Failed to prove session")?;
-        // eprintln!("Completed proof locally");
-    } else {
-        // eprintln!("Completed execution without a proof locally");
-    }
     Ok(Output::Execution {
         journal: session.journal,
     })
@@ -145,12 +115,7 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
             }
         }
     })()?;
-    let metadata = receipt
-        .inner
-        .flat()
-        .last()
-        .ok_or(anyhow!("receipt contains no segments"))?
-        .get_metadata()?;
+    let metadata = receipt.get_metadata()?;
 
     let snark_session = client.create_snark(session.uuid)?;
     let snark_proof: SnarkProof = (|| loop {
@@ -182,9 +147,9 @@ pub fn prove_alpha(elf: &[u8], input: Vec<u8>) -> Result<Output> {
 }
 
 pub fn resolve_guest_entry<'a>(
-    guest_list: &'a [GuestListEntry],
+    guest_list: &[GuestListEntry<'a>],
     guest_binary: &String,
-) -> Result<&'a GuestListEntry> {
+) -> Result<GuestListEntry<'a>> {
     // Search list for requested binary name
     let potential_guest_image_id: [u8; 32] =
         match hex::decode(guest_binary.to_lowercase().trim_start_matches("0x")) {
@@ -208,21 +173,22 @@ pub fn resolve_guest_entry<'a>(
                 found_guests
             )
         })
+        .cloned()
 }
 
 pub async fn resolve_image_output(
     input: &str,
-    guest_entry: &GuestListEntry,
-    prover_mode: ProverMode,
+    guest_entry: &GuestListEntry<'static>,
+    dev_mode: bool,
 ) -> Result<Output> {
     let input = hex::decode(input.trim_start_matches("0x")).context("Failed to decode input")?;
     let elf = guest_entry.elf;
 
-    match prover_mode {
-        ProverMode::Bonsai => tokio::task::spawn_blocking(move || prove_alpha(elf, input))
+    if dev_mode {
+        execute_locally(elf, input)
+    } else {
+        tokio::task::spawn_blocking(move || prove_alpha(elf, input))
             .await
-            .context("Failed to run alpha sub-task")?,
-        ProverMode::Local => prove_locally(elf, input, true),
-        ProverMode::None => prove_locally(elf, input, false),
+            .context("Failed to run alpha sub-task")?
     }
 }
