@@ -48,6 +48,8 @@ jobs:
         with:
           key: ${{ matrix.os }}-${{ matrix.feature }}
       - run: cargo run --bin cargo-risczero -- risczero install
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: cargo bench -F $FEATURE --bench fib -- --output-format=bencher | tee output.txt
       - name: Store benchmark result
         uses: risc0/github-action-benchmark@risc0
