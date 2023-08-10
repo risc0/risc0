@@ -14,12 +14,14 @@
 
 use std::time::Duration;
 
-use bonsai_proxy_contract::SnarkProof;
 use bonsai_sdk::{
-    alpha::{Client, SessionId, SnarkId},
+    alpha::{responses::SnarkProof, Client, SessionId, SnarkId},
     alpha_async::{create_snark, snark_status},
 };
-use ethers::types::U256;
+use ethers::{
+    abi::{Token, Tokenizable},
+    types::U256,
+};
 
 use super::error::CompleteProofError;
 use crate::api;
@@ -67,42 +69,31 @@ pub(crate) async fn get_snark_proof(
     Ok(proof)
 }
 
-pub(crate) async fn encode_snark_proof(
-    proof: bonsai_sdk::alpha::responses::SnarkProof,
-    session_id: SessionId,
-) -> Result<SnarkProof, CompleteProofError> {
-    let r = Rdx::new(session_id);
-    let encoded_proof = SnarkProof {
-        a: [r.rdx(&proof.a[0])?, r.rdx(&proof.a[1])?],
-        b: [
-            [r.rdx(&proof.b[0][0])?, r.rdx(&proof.b[0][1])?],
-            [r.rdx(&proof.b[1][0])?, r.rdx(&proof.b[1][1])?],
-        ],
-        c: [r.rdx(&proof.c[0])?, r.rdx(&proof.c[1])?],
-        pub_signals: [
-            r.rdx(&proof.public[0])?,
-            r.rdx(&proof.public[1])?,
-            r.rdx(&proof.public[2])?,
-            r.rdx(&proof.public[3])?,
-        ],
-    };
-
-    Ok(encoded_proof)
+/// Parse a slice of strings as a fixed array of uint256 tokens.
+pub(crate) fn parse_to_tokens(slice: &[String]) -> anyhow::Result<Token> {
+    Ok(Token::FixedArray(
+        slice
+            .iter()
+            .map(|s| -> anyhow::Result<_> { Ok(U256::from_str_radix(s, 16)?.into_token()) })
+            .collect::<Result<Vec<_>, _>>()?,
+    ))
 }
 
-struct Rdx {
-    id: SessionId,
-}
-
-impl Rdx {
-    fn new(id: SessionId) -> Self {
-        Self { id }
+pub(crate) fn tokenize_snark_proof(proof: &SnarkProof) -> anyhow::Result<Token> {
+    if proof.b.len() != 2 {
+        anyhow::bail!("hex-strings encoded proof is not well formed");
     }
-
-    fn rdx(&self, s: &str) -> Result<U256, CompleteProofError> {
-        U256::from_str_radix(s, 16).map_err(|err| CompleteProofError::UintFromRadix {
-            source: err,
-            id: self.id.clone(),
-        })
+    for pair in [&proof.a, &proof.c].into_iter().chain(proof.b.iter()) {
+        if pair.len() != 2 {
+            anyhow::bail!("hex-strings encoded proof is not well formed");
+        }
     }
+    Ok(Token::FixedArray(vec![
+        parse_to_tokens(&proof.a)?,
+        Token::FixedArray(vec![
+            parse_to_tokens(&proof.b[0])?,
+            parse_to_tokens(&proof.b[1])?,
+        ]),
+        parse_to_tokens(&proof.c)?,
+    ]))
 }

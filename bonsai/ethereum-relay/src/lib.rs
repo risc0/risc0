@@ -12,9 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-mod api;
-mod downloader;
+#![doc = include_str!("../README.md")]
+
 pub mod sdk;
+
+pub use sdk::{CallbackRequest, Client, ClientError};
+
+mod api;
+mod client_config;
+mod downloader;
 mod storage;
 mod tests;
 mod uploader;
@@ -23,11 +29,12 @@ use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use bonsai_sdk::alpha_async::get_client_from_parts;
+pub use client_config::EthersClientConfig;
 use downloader::{
     proxy_callback_proof_processor::ProxyCallbackProofRequestProcessor,
     proxy_callback_proof_request_stream::ProxyCallbackProofRequestStream,
 };
-use ethers::{core::types::Address, prelude::*};
+use ethers::core::types::Address;
 use storage::{in_memory::InMemoryStorage, Storage};
 use tokio::sync::Notify;
 use tracing::info;
@@ -43,10 +50,12 @@ static DEFAULT_FILTER: &str = "info";
 #[derive(Clone)]
 /// A relayer to integrate Ethereum with Bonsai.
 pub struct Relayer {
-    /// Toggle to enable the publish mode on the relayer.
-    pub publish_mode: bool,
+    /// Toggle to enable the REST API on the relayer.
+    pub rest_api: bool,
+    /// Toggle for generating real or fake receipts.
+    pub dev_mode: bool,
     /// Port serving the relayer REST API.
-    pub publish_port: String,
+    pub rest_api_port: String,
     /// Bonsai API URL.
     pub bonsai_api_url: String,
     /// Bonsai API key.
@@ -57,11 +66,7 @@ pub struct Relayer {
 
 impl Relayer {
     /// Run a [Relayer] with an Ethereum Client.
-    pub async fn run<M: Middleware + 'static>(self, ethers_client: Arc<M>) -> Result<()>
-where
-    <M as ethers::providers::Middleware>::Provider: PubsubClient,
-    <<M as ethers::providers::Middleware>::Provider as ethers::providers::PubsubClient>::NotificationStream: Sync,
-{
+    pub async fn run(self, client_config: EthersClientConfig) -> Result<()> {
         // try to load filter from `RUST_LOG` or use reasonably verbose defaults
         let filter = ::tracing_subscriber::EnvFilter::try_from_default_env()
             .unwrap_or_else(|_| DEFAULT_FILTER.into());
@@ -87,7 +92,7 @@ where
         );
 
         let downloader = ProxyCallbackProofRequestStream::new(
-            ethers_client.clone(),
+            client_config.clone(),
             self.relay_contract_address,
             proxy_callback_proof_request_processor.clone(),
         );
@@ -108,12 +113,13 @@ where
 
         let uploader_complete_proof_manager = BonsaiCompleteProofManager::new(
             bonsai_client.clone(),
+            self.dev_mode,
             storage.clone(),
             new_complete_proof_notifier.clone(),
             send_batch_notifier.clone(),
             max_batch_size,
             self.relay_contract_address,
-            ethers_client.clone(),
+            client_config.clone(),
             send_batch_interval,
         );
 
@@ -126,12 +132,12 @@ where
 
         // Start everything
         let server_handle = tokio::spawn(maybe_start_publish_mode(
-            self.publish_mode,
+            self.rest_api,
             state,
-            self.publish_port,
+            self.rest_api_port,
         ));
         let local_bonsai_handle = tokio::spawn(maybe_start_local_bonsai(
-            dev_mode(self.bonsai_api_url.clone()),
+            self.dev_mode,
             self.bonsai_api_url.clone(),
         ));
         let downloader_handle = tokio::spawn(downloader.run());
@@ -143,10 +149,10 @@ where
         info!("Relay started");
 
         tokio::select! {
-            err = server_handle, if self.publish_mode => {
+            err = server_handle, if self.rest_api => {
                 panic!("{}", format!("server API exited: {:?}", err))
             }
-            err = local_bonsai_handle, if dev_mode(self.bonsai_api_url) => {
+            err = local_bonsai_handle, if self.dev_mode => {
                 panic!("{}", format!("local Bonsai service exited: {:?}", err))
             }
             err = downloader_handle => {
@@ -181,8 +187,4 @@ async fn maybe_start_local_bonsai(dev_mode: bool, bonsai_url: String) -> anyhow:
     }
 
     Ok(())
-}
-
-fn dev_mode(bonsai_url: String) -> bool {
-    bonsai_url.contains("localhost") || bonsai_url.contains("127.0.0.1")
 }

@@ -19,7 +19,7 @@ pragma solidity ^0.8.17;
 import {Test} from "forge-std/Test.sol";
 import {Proxy} from "openzeppelin/contracts/proxy/Proxy.sol";
 
-import {IBonsaiRelay} from "./IBonsaiRelay.sol";
+import {IBonsaiRelay, Callback, CallbackAuthorization} from "./IBonsaiRelay.sol";
 
 /// @notice A wrapper for the Bonsai Relay to use in testing for access to the requested callbacks
 ///     without the need to parse logs.
@@ -59,6 +59,27 @@ contract BonsaiRelayQueueWrapper is IBonsaiRelay, Proxy, Test {
         vm.resumeGasMetering();
 
         // Call the wrapped contract, using a delegate call so that any events come from this.
+        _delegate(address(wrapped));
+    }
+
+    // IBonsaiRelay method implementations to satisfy interface.
+
+    /// @inheritdoc IBonsaiRelay
+    function callbackIsAuthorized(bytes32 imageId, bytes calldata journal, CallbackAuthorization calldata auth)
+        external
+        view
+        returns (bool)
+    {
+        return wrapped.callbackIsAuthorized(imageId, journal, auth);
+    }
+
+    /// @inheritdoc IBonsaiRelay
+    function invokeCallbacks(Callback[] calldata) external returns (bool[] memory) {
+        _delegate(address(wrapped));
+    }
+
+    /// @inheritdoc IBonsaiRelay
+    function invokeCallback(Callback calldata) external {
         _delegate(address(wrapped));
     }
 }

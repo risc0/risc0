@@ -15,8 +15,13 @@
 #[cfg(test)]
 mod tests {
 
-    use std::{path::Path, time::SystemTime};
+    use ethers::prelude::*;
+    abigen!(Counter, "../ethereum/out/Counter.sol/Counter.json");
 
+    use std::{sync::Arc, time::SystemTime};
+
+    use anyhow::anyhow;
+    use bonsai_ethereum_contracts::{BonsaiRelay, BonsaiTestRelay, RiscZeroGroth16Verifier};
     use bonsai_ethereum_relay::{
         sdk::{
             client::{CallbackRequest, Client},
@@ -24,7 +29,6 @@ mod tests {
         },
         Relayer,
     };
-    use bonsai_proxy_contract::ProxyContract;
     use bonsai_sdk::{
         alpha::{Client as BonsaiClient, SdkErr},
         alpha_async::{get_client_from_parts, put_image},
@@ -35,6 +39,22 @@ mod tests {
     use tokio::time::{sleep, Duration};
 
     const BONSAI_API_URI: &str = "http://localhost:8081";
+
+    /// Check for the RISC0_DEV_MODE environment variable:
+    /// * Return true if the value is "true" or it is not set.
+    /// * Return false if the value is "false".
+    ///
+    /// NOTE: Default is true, since this is a test environment.
+    fn dev_mode() -> anyhow::Result<bool> {
+        match std::env::var("RISC0_DEV_MODE") {
+            Ok(ref val) if val == "false" => Ok(false),
+            Ok(ref val) if val == "true" => Ok(true),
+            Ok(ref val) if val.is_empty() => Ok(true),
+            Ok(ref val) => Err(anyhow!("invalid boolean value for RISC0_DEV_MODE: {}", val)),
+            Err(std::env::VarError::NotPresent) => Ok(true),
+            Err(e) => Err(e.into()),
+        }
+    }
 
     fn get_bonsai_url() -> String {
         let endpoint = match std::env::var("BONSAI_API_URL") {
@@ -67,29 +87,49 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn e2e_test_counter() {
-        // deploy the contracts
+        // Get Anvil
         let anvil = utils::get_anvil();
-        let ethers_client = utils::get_ethers_client(
-            utils::get_ws_provider(anvil.as_ref()).await.unwrap(),
-            utils::get_wallet(anvil.as_ref()).unwrap(),
-        )
-        .await
-        .unwrap();
-        let proxy = ProxyContract::deploy(ethers_client.clone(), ())
-            .expect("should be able to deploy the proxy contract")
+        // Get client config
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref())
+            .await
+            .expect("Failed to get ethers client config");
+        let ethers_client = Arc::new(
+            ethers_client_config
+                .get_client()
+                .await
+                .expect("Failed to get ethers client"),
+        );
+        let bonsai_relay_contract = match dev_mode().unwrap() {
+            true => {
+                BonsaiTestRelay::deploy(ethers_client.clone(), ethers_client.signer().chain_id())
+                    .expect("should be able to deploy the BonsaiTestRelay contract")
+                    .send()
+                    .await
+                    .expect("deployment should succeed")
+                    .address()
+            }
+            false => {
+                let verifier = RiscZeroGroth16Verifier::deploy(ethers_client.clone(), ())
+                    .expect("should be able to deploy the BonsaiRelay contract")
+                    .send()
+                    .await
+                    .expect("deployment should succeed")
+                    .address();
+
+                BonsaiRelay::deploy(ethers_client.clone(), verifier)
+                    .expect("should be able to deploy the BonsaiRelay contract")
+                    .send()
+                    .await
+                    .expect("deployment should succeed")
+                    .address()
+            }
+        };
+
+        let counter = Counter::deploy(ethers_client.clone(), ())
+            .expect("should be able to deploy the Counter contract")
             .send()
             .await
             .expect("deployment should succeed");
-        let compiled_contract =
-            utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
-        let counter = utils::deploy_contract(
-            (),
-            "Counter".to_string(),
-            compiled_contract,
-            ethers_client.clone(),
-        )
-        .await
-        .unwrap();
         assert_eq!(
             counter
                 .method::<_, U256>("value", ())
@@ -102,15 +142,16 @@ mod tests {
 
         // run the bonsai relayer
         let relayer = Relayer {
-            publish_mode: false,
-            publish_port: "8080".to_string(),
+            rest_api: false,
+            dev_mode: dev_mode().unwrap(),
+            rest_api_port: "8080".to_string(),
             bonsai_api_url: get_bonsai_url(),
             bonsai_api_key: get_api_key(),
-            relay_contract_address: proxy.address(),
+            relay_contract_address: bonsai_relay_contract,
         };
 
         dbg!("starting bonsai relayer");
-        tokio::spawn(relayer.run(ethers_client.clone()));
+        tokio::spawn(relayer.run(ethers_client_config.clone()));
 
         // wait for relay to start
         sleep(Duration::from_secs(2)).await;
@@ -153,7 +194,7 @@ mod tests {
                     ethers_H256::from(image_id_bytes),
                     Bytes::from(input),
                     gas_limit,
-                    proxy.address(),
+                    bonsai_relay_contract,
                 ),
             )
             .expect("request_callback should be a function")
@@ -164,8 +205,9 @@ mod tests {
         let now = SystemTime::now();
         let max_seconds_to_wait = 120;
         let expected_value = U256::from(100);
+        let mut value = U256::from(0);
         while now.elapsed().expect("error occured getting time").as_secs() < max_seconds_to_wait {
-            let value = counter
+            value = counter
                 .method::<_, U256>("value", ())
                 .expect("value should be a function")
                 .call()
@@ -189,34 +231,54 @@ mod tests {
             );
             sleep(Duration::new(1, 0)).await
         }
+        assert_eq!(value, expected_value)
     }
 
     #[tokio::test]
     #[ignore]
     async fn e2e_test_counter_publish_mode() {
-        // deploy the contracts
+        // Get Anvil
         let anvil = utils::get_anvil();
-        let ethers_client = utils::get_ethers_client(
-            utils::get_ws_provider(anvil.as_ref()).await.unwrap(),
-            utils::get_wallet(anvil.as_ref()).unwrap(),
-        )
-        .await
-        .unwrap();
-        let proxy = ProxyContract::deploy(ethers_client.clone(), ())
-            .expect("should be able to deploy the proxy contract")
+        // Get client config
+        let ethers_client_config = utils::get_ethers_client_config(anvil.as_ref())
+            .await
+            .expect("Failed to get ethers client config");
+        let ethers_client = Arc::new(
+            ethers_client_config
+                .get_client()
+                .await
+                .expect("Failed to get ethers client"),
+        );
+        let bonsai_relay_contract = match dev_mode().unwrap() {
+            true => {
+                BonsaiTestRelay::deploy(ethers_client.clone(), ethers_client.signer().chain_id())
+                    .expect("should be able to deploy the BonsaiTestRelay contract")
+                    .send()
+                    .await
+                    .expect("deployment should succeed")
+                    .address()
+            }
+            false => {
+                let verifier = RiscZeroGroth16Verifier::deploy(ethers_client.clone(), ())
+                    .expect("should be able to deploy the BonsaiRelay contract")
+                    .send()
+                    .await
+                    .expect("deployment should succeed")
+                    .address();
+
+                BonsaiRelay::deploy(ethers_client.clone(), verifier)
+                    .expect("should be able to deploy the BonsaiRelay contract")
+                    .send()
+                    .await
+                    .expect("deployment should succeed")
+                    .address()
+            }
+        };
+        let counter = Counter::deploy(ethers_client.clone(), ())
+            .expect("should be able to deploy the Counter contract")
             .send()
             .await
             .expect("deployment should succeed");
-        let compiled_contract =
-            utils::compile_contracts(Path::new("tests/solidity/contracts")).unwrap();
-        let counter = utils::deploy_contract(
-            (),
-            "Counter".to_string(),
-            compiled_contract,
-            ethers_client.clone(),
-        )
-        .await
-        .unwrap();
         assert_eq!(
             counter
                 .method::<_, U256>("value", ())
@@ -229,15 +291,16 @@ mod tests {
 
         // run the bonsai relayer
         let relayer = Relayer {
-            publish_mode: true,
-            publish_port: "8080".to_string(),
+            rest_api: true,
+            dev_mode: dev_mode().unwrap(),
+            rest_api_port: "8080".to_string(),
             bonsai_api_url: get_bonsai_url(),
             bonsai_api_key: get_api_key(),
-            relay_contract_address: proxy.address(),
+            relay_contract_address: bonsai_relay_contract,
         };
 
         dbg!("starting bonsai relayer");
-        tokio::spawn(relayer.run(ethers_client.clone()));
+        tokio::spawn(relayer.run(ethers_client_config.clone()));
 
         // wait for relay to start
         sleep(Duration::from_secs(2)).await;
@@ -284,8 +347,9 @@ mod tests {
         let now = SystemTime::now();
         let max_seconds_to_wait = 120;
         let expected_value = U256::from(100);
+        let mut value = U256::from(0);
         while now.elapsed().expect("error occured getting time").as_secs() < max_seconds_to_wait {
-            let value = counter
+            value = counter
                 .method::<_, U256>("value", ())
                 .expect("value should be a function")
                 .call()
@@ -309,5 +373,6 @@ mod tests {
             );
             sleep(Duration::new(1, 0)).await
         }
+        assert_eq!(value, expected_value)
     }
 }
