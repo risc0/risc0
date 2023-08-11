@@ -26,6 +26,8 @@ mod fri;
 mod merkle;
 pub mod poly_group;
 pub mod prover;
+#[cfg(feature = "soundness")]
+mod soundness;
 pub mod write_iop;
 
 pub use prover::Prover;

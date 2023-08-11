@@ -164,3 +164,4 @@ std = [
   "serde/std",
   "sha2/std",
 ]
+soundness = ["risc0-zkp/soundness"]

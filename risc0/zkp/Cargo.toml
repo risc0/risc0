@@ -29,7 +29,7 @@ serde = { version = "1.0", default-features = false, features = ["derive"] }
 tracing = { version = "0.1", default-features = false, features = [
   "attributes",
 ] }
-
+libm = "0.2"
 [target.'cfg(not(target_os = "zkvm"))'.dependencies]
 ndarray = { version = "0.15", features = ["rayon"], optional = true }
 rand = { version = "0.8", optional = true }
@@ -58,3 +58,4 @@ prove = [
   "std",
 ]
 std = ["anyhow/std"]
+soundness = []

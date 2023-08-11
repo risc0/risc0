@@ -2376,6 +2376,7 @@ dependencies = [
  "ff",
  "hex",
  "lazy_static",
+ "libm",
  "metal",
  "ndarray",
  "paste",
