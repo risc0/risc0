@@ -56,8 +56,6 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, WORD_SIZE};
 
-#[cfg(not(feature = "disable-dev-mode"))]
-use self::dev_mode::DevModeProver;
 use self::{local::LocalProver, remote::RemoteProver};
 use crate::{
     receipt::{Receipt, VerifierContext},
@@ -238,7 +236,7 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
     }
     #[cfg(not(feature = "disable-dev-mode"))]
     {
-        let prover = Rc::new(DevModeProver::new("devmode"));
+        let prover = Rc::new(dev_mode::DevModeProver::new("devmode"));
         table.insert("$devmode".to_string(), prover);
     }
     #[cfg(feature = "cuda")]
