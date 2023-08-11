@@ -47,15 +47,15 @@ jobs:
         run: forge test -vvv
         working-directory: bonsai/ethereum
 
-      - name: run forge tests in bonsai/examples/governance
+      - name: run forge tests in bonsai/examples/governance without zkVM
         env:
           TEST_USE_ZKVM: false
         run: forge test -vvv
         working-directory: bonsai/examples/governance
 
-      - name: run forge tests in bonsai/examples/governance
-        env:
-          TEST_USE_ZKVM: true
-          BONSAI_PROVING: local
-        run: forge test -vvv
-        working-directory: bonsai/examples/governance
+        # TODO(#783): Test currently takes ~1 hour to run, and so it is currently disabled.
+        #- name: run forge tests in bonsai/examples/governance with zkVM
+        #env:
+        #  TEST_USE_ZKVM: true
+        #run: forge test -vvv
+        #working-directory: bonsai/examples/governance
