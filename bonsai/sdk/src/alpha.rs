@@ -210,12 +210,13 @@ impl Client {
     /// construct a client
     pub fn from_env() -> Result<Self, SdkErr> {
         let api_url = std::env::var("BONSAI_API_URL").map_err(|_| SdkErr::MissingApiUrl)?;
+        let api_url = api_url.strip_suffix('/').unwrap_or(&api_url);
         let api_key = std::env::var("BONSAI_API_KEY").map_err(|_| SdkErr::MissingApiKey)?;
 
         let client = construct_req_client(&api_key)?;
 
         Ok(Self {
-            url: api_url,
+            url: api_url.to_string(),
             client,
         })
     }
@@ -223,6 +224,7 @@ impl Client {
     /// Construct a [Client] from url + api key strings
     pub fn from_parts(url: String, key: String) -> Result<Self, SdkErr> {
         let client = construct_req_client(&key)?;
+        let url = url.strip_suffix('/').unwrap_or(&url).to_string();
         Ok(Self { url, client })
     }
 
@@ -401,12 +403,32 @@ mod tests {
     fn client_from_env() {
         let url = "http://127.0.0.1/stage".to_string();
         let apikey = TEST_KEY.to_string();
-        std::env::set_var("BONSAI_API_URL", url.clone());
-        std::env::set_var("BONSAI_API_KEY", apikey);
+        temp_env::with_vars(
+            vec![
+                ("BONSAI_API_URL", Some(url.clone())),
+                ("BONSAI_API_KEY", Some(apikey)),
+            ],
+            || {
+                let client = super::Client::from_env().unwrap();
+                assert_eq!(client.url, url);
+            },
+        );
+    }
 
-        let client = super::Client::from_env().unwrap();
-
-        assert_eq!(client.url, url);
+    #[test]
+    fn client_test_slash_strip() {
+        let url = "http://127.0.0.1/".to_string();
+        let apikey = TEST_KEY.to_string();
+        temp_env::with_vars(
+            vec![
+                ("BONSAI_API_URL", Some(url)),
+                ("BONSAI_API_KEY", Some(apikey)),
+            ],
+            || {
+                let client = super::Client::from_env().unwrap();
+                assert_eq!(client.url, "http://127.0.0.1");
+            },
+        );
     }
 
     #[test]
