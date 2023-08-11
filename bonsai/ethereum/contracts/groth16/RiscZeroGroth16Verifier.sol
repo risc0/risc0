@@ -103,7 +103,7 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
     }
 
     /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
-    ///     given image ID, post-state digest, and journal. Asserts that the input hash
+    ///     given image ID, post-state digest, and journal hash. Asserts that the input hash
     //      is all-zeros (i.e. no committed input) and the exit code is (Halted, 0).
     /// @return true if the receipt passes the verification checks.
     function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes32 journalHash)
@@ -115,5 +115,17 @@ contract RiscZeroGroth16Verifier is IRiscZeroVerifier, Groth16Verifier {
             seal, ReceiptMetadata(imageId, postStateDigest, ExitCode(SystemExitCode.Halted, 0), bytes32(0), journalHash)
         );
         return verify(receipt);
+    }
+
+    /// @notice verifies that the given seal is a valid Groth16 RISC Zero proof of execution over the
+    ///     given image ID, post-state digest, and full journal. Asserts that the input hash
+    //      is all-zeros (i.e. no committed input) and the exit code is (Halted, 0).
+    /// @return true if the receipt passes the verification checks.
+    function verify(bytes memory seal, bytes32 imageId, bytes32 postStateDigest, bytes calldata journal)
+        public
+        view
+        returns (bool)
+    {
+        return verify(seal, imageId, postStateDigest, sha256(journal));
     }
 }
