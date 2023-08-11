@@ -30,6 +30,8 @@
 //! # }
 //! ```
 
+#[cfg(not(feature = "disable-dev-mode"))]
+mod dev_mode;
 mod exec;
 pub(crate) mod loader;
 mod local;
@@ -213,6 +215,12 @@ pub trait Prover {
 }
 
 fn provers() -> HashMap<String, Rc<dyn Prover>> {
+    if cfg!(feature = "disable-dev-mode") && std::env::var("RISC0_DEV_MODE").is_ok() {
+        panic!("zkVM: Inconsistent settings -- please resolve. \
+                The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag. \
+                To produce valid proofs, unset the RISC0_DEV_MODE environment variable. \
+                To enable dev mode and accept INSECURE, invalid proofs, remove the `disable-dev-mode` feature flag.")
+    }
     let mut table: HashMap<String, Rc<dyn Prover>> = HashMap::new();
     {
         let prover = Rc::new(LocalProver::new("cpu", cpu::sha256_hal_eval()));
@@ -225,6 +233,11 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
 
         let prover = Rc::new(RemoteProver::new("bonsai"));
         table.insert("$bonsai".to_string(), prover);
+    }
+    #[cfg(not(feature = "disable-dev-mode"))]
+    {
+        let prover = Rc::new(dev_mode::DevModeProver::new("devmode"));
+        table.insert("$devmode".to_string(), prover);
     }
     #[cfg(feature = "cuda")]
     {
@@ -305,6 +318,12 @@ pub fn default_prover() -> Rc<dyn Prover> {
 
     if let Ok(requested) = std::env::var("RISC0_PROVER") {
         if let Some(prover) = provers.get(&requested) {
+            return prover.clone();
+        }
+    }
+    if cfg!(not(feature = "disable-dev-mode")) && std::env::var("RISC0_DEV_MODE").is_ok() {
+        eprintln!("WARNING: proving in dev mode. This will not generate valid, secure proofs.");
+        if let Some(prover) = provers.get("$devmode") {
             return prover.clone();
         }
     }

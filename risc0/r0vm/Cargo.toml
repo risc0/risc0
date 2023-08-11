@@ -20,10 +20,12 @@ assert_cmd = "2.0"
 assert_fs = "1.0"
 risc0-zkvm-methods = { path = "../zkvm/methods" }
 risc0-zkvm-platform = { workspace = true }
+temp-env = "0.3"
 
 [features]
 cuda = ["risc0-zkvm/cuda"]
 default = []
+disable-dev-mode = ["risc0-zkvm/disable-dev-mode"]
 dual = ["risc0-zkvm/dual"]
 metal = ["risc0-zkvm/metal"]
 profiler = ["risc0-zkvm/profiler"]
