@@ -26,7 +26,7 @@ channel](https://www.youtube.com/@risczero) has many more videos as well.
   GitHub tag. If you're having problems running your code in the zkVM, you can
   see if there's a workaround, and if you're using a workaround, you can track
   when it gets resolved to a permanent solution.
-* And more on [the RISC Zero website](https://dev.risczero.com/)!
+* And more on [the RISC Zero developer website](https://dev.risczero.com/)!
 
 # Crate Feature Flags
 
