@@ -60,3 +60,18 @@ pub const BLAKE2B_CONTROL_ID: RawControlId = [
     "{}", //
     "{}", //
 ];
+
+/// Control ID for Poseidon2
+pub const POSEIDON2_CONTROL_ID: RawControlId = [
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+    "{}", //
+];
