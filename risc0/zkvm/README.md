@@ -11,7 +11,7 @@ resources for using our zkVM that you may also find helpful, especially if
 you're new to the RISC Zero zkVM. These include:
 
 * Our [Hello World](https://github.com/risc0/risc0/tree/main/examples/hello-world) demo -- a minimal zkVM application that works out-of-the-box.
-* Our [zkVM Tutorial]((https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md)) , which walks you through writing your first zkVM project.
+* Our [zkVM Tutorial](https://github.com/risc0/risc0/tree/main/examples/hello-world/tutorial.md), which walks you through writing your first zkVM project.
 * The [`cargo risczero` tool](https://crates.io/crates/cargo-risczero). It
 includes a `new` command which generates code for building and launching a zkVM
 guest and guidance on where projects most commonly modify host and guest code.
