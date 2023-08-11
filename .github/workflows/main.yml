@@ -81,7 +81,8 @@ jobs:
       - run: cargo xtask install
       - run: cargo xtask gen-receipt
       - run: cargo test -F $FEATURE -F profiler
-      - run: cargo test -F $FEATURE --tests -- --ignored
+      - run: cargo test -F $FEATURE --tests -- --ignored --test-threads 1
+      - run: cargo test -F disable-dev-mode -p risc0-zkvm -- tests::dev_mode_panic
       - run: cargo test --manifest-path bonsai/examples/governance/Cargo.toml
         if: matrix.device == 'cpu'
       - run: cargo check -F $FEATURE --benches
