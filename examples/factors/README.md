@@ -2,10 +2,23 @@
 
 The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
 
-To see this example in action, [install Rust] and use `cargo run` in this directory to run it:
+First, [install Rust] if you don't already have it. 
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+
 ```bash
-cargo run
+cargo install cargo-risczero
+cargo risczero install
 ```
+
+Then, run the example with:
+```bash
+cargo run --release
+```
+
+Congratulations! You just constructed a zero-knowledge proof that you know the factors of 391.
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 
 # Tutorial
 
