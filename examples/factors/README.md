@@ -3,11 +3,12 @@
 The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
 
 To see this example in action, [install Rust] and use `cargo run` in this directory to run it:
-```sh
+```bash
 cargo run
 ```
 
 # Tutorial
+
 ## How to Recreate _Factors_
 
 This example is a good introduction for beginners new to RISC Zero; if you're looking to get started creating RISC Zero zkVM projects, you're in the right place!
@@ -18,18 +19,19 @@ We'll spend the rest of this README walking you through how to recreate the fact
 
 First, [install Rust] if you don't already have it. Next you can create a RISC Zero zkVM project with boilerplate already filled out using our [`cargo risczero` tool]:
 
-```sh
+```bash
 ## Install from crates.io
 cargo install cargo-risczero
+cargo risczero install
 
-## Navigate to where you want to create your project
+# Navigate to where you want to create your project
 cd wherever/you/want
 
-## Create a project from our starter template
+# Create a project from our starter template
 cargo risczero new factors
 ```
 This will create a project named `factors` in the directory where you ran the `cargo risczero new` command. Now we can enter our new project's directory and start working on it!
-```sh
+```bash
 cd factors
 ```
 
