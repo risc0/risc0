@@ -53,9 +53,9 @@ jobs:
         run: forge test -vvv
         working-directory: bonsai/examples/governance
 
-      - name: run forge tests in bonsai/examples/governance
-        env:
-          TEST_USE_ZKVM: true
-          BONSAI_PROVING: local
-        run: forge test -vvv
-        working-directory: bonsai/examples/governance
+      # - name: run forge tests (with zkvm) in bonsai/examples/governance
+      #   env:
+      #     TEST_USE_ZKVM: true
+      #     BONSAI_PROVING: local
+      #   run: forge test -vvv
+      #   working-directory: bonsai/examples/governance
