@@ -27,7 +27,7 @@ use crate::{
 /// Instead, the guest code is executed and a fake receipt is returned with
 /// accurate journal contents but no cryptographic information.
 /// Because the receipt is fake, a verifier can only "verify" this receipt
-/// if DevMode is turned on; verification will otherwise fail.
+/// if dev mode is turned on; verification will otherwise fail.
 ///
 /// CONVENIENT, BUT NOT MEANT FOR PRODUCTION
 /// Dev mode supports rapid development by allowing the developer to quickly
@@ -66,16 +66,15 @@ impl Prover for DevModeProver {
     fn prove_session(&self, _ctx: &VerifierContext, session: &Session) -> Result<Receipt> {
         log::info!("prove_session: {}", self.name);
         eprintln!(
-            "WARNING: Proving in DevMode does not generate a valid receipt. \
+            "WARNING: Proving in dev mode does not generate a valid receipt. \
             Receipts generated from this process are invalid and should never be used in production."
         );
 
         if cfg!(feature = "disable-dev-mode") && std::env::var("RISC0_DEV_MODE").is_ok() {
-            panic!("zkVM: dev mode is disabled. unset RISC0_DEV_MODE environment variable to produce valid proofs")
+            panic!("zkVM: dev mode is disabled. Unset RISC0_DEV_MODE environment variable to produce valid proofs")
         }
 
-        let receipt = Receipt::new(InnerReceipt::Fake, session.journal.clone());
-        Ok(receipt)
+        Ok(Receipt::new(InnerReceipt::Fake, session.journal.clone()))
     }
 
     fn prove_segment(&self, _ctx: &VerifierContext, _segment: &Segment) -> Result<SegmentReceipt> {
