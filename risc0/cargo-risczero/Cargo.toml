@@ -10,17 +10,29 @@ readme = "README.md"
 keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 
 [dependencies]
-# Note, due to tempfile = 3.3.0 in cargo-generate
-# we have to downgrade all uses of tempfile to 3.3 in our workspace due to:
-# https://github.com/rust-lang/cargo/issues/7880
+anyhow = { version = "1.0", features = ["backtrace"] }
 cargo-generate = "0.18"
 clap = { version = "4.0", features = ["derive"] }
 const_format = "0.2"
+dirs = "5.0"
+flate2 = "1"
+fs2 = "0.4"
+reqwest = { version = "0.11", default-features = false, features = [
+  "blocking",
+  "json",
+  "rustls-tls",
+  "gzip",
+] }
+serde = { version = "1", features = ["derive"] }
+tar = "0.4"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 
 [dev-dependencies]
-tempfile = "3.3"
+# Note, due to tempfile = ~3.5 in cargo-generate
+# we have to downgrade all uses of tempfile to 3.5 in our workspace due to:
+# https://github.com/rust-lang/cargo/issues/7880
+tempfile = "3.5"
 
 [[bin]]
 path = "src/bin/main.rs"

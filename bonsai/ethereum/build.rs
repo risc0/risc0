@@ -11,20 +11,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-//
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
 
-contract Logger {
-    event Event(uint256 number);
-    uint256[] public logs;
+//! Build Solidity contracts with Foundry when `cargo build` is invoked.
 
-    function log(uint256 number) public {
-        logs.push(number);
-        emit Event(number);
-    }
+use clap::Parser;
+use foundry_cli::cmd::{forge, Cmd};
 
-    function logSize() public view returns (uint256) {
-        return logs.length;
-    }
+fn main() -> anyhow::Result<()> {
+    let cmd = forge::build::BuildArgs::try_parse_from(["--"].into_iter())?;
+    let _ = cmd
+        .run()
+        .map_err(|e| anyhow::anyhow!("{}", e.to_string()))?;
+    Ok(())
 }

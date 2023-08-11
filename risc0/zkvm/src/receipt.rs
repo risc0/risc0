@@ -252,9 +252,16 @@ impl InnerReceipt {
         match self {
             InnerReceipt::Flat(x) => x.verify_with_context(ctx, image_id.into(), journal),
             InnerReceipt::Succinct(x) => x.verify_with_context(ctx),
-            // TODO: add support for dev-mode
-            InnerReceipt::Fake => Err(VerificationError::InvalidProof),
+            InnerReceipt::Fake => Self::verify_fake(),
         }
+    }
+
+    fn verify_fake() -> Result<(), VerificationError> {
+        #[cfg(feature = "std")]
+        if cfg!(not(feature = "disable-dev-mode")) && std::env::var("RISC0_DEV_MODE").is_ok() {
+            return Ok(());
+        }
+        Err(VerificationError::InvalidProof)
     }
 
     /// Returns the [InnerReceipt::Flat] arm, will panic if invalid.
@@ -331,6 +338,20 @@ impl Receipt {
         image_id: impl Into<Digest>,
     ) -> Result<(), VerificationError> {
         self.inner.verify_with_context(ctx, image_id, &self.journal)
+    }
+
+    /// Extract the [ReceiptMetadata] from this receipt for an excution session.
+    pub fn get_metadata(&self) -> Result<ReceiptMetadata, VerificationError> {
+        match self.inner {
+            InnerReceipt::Flat(ref segment_receipts) => segment_receipts
+                .0
+                .iter()
+                .last()
+                .ok_or(VerificationError::ReceiptFormatError)?
+                .get_metadata(),
+            InnerReceipt::Succinct(ref succint_recipt) => Ok(succint_recipt.meta.clone()),
+            InnerReceipt::Fake => unimplemented!("fake receipt does not implement metadata"),
+        }
     }
 }
 

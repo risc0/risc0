@@ -1,0 +1,20 @@
+# Compiler files
+cache/
+tests/out/*
+
+# Ignores development broadcast logs
+!/broadcast
+/broadcast/*/31337/
+/broadcast/**/dry-run/
+
+# Docs
+docs/
+
+# Dotenv file
+.env
+
+# Cargo
+target/
+
+# Misc
+.idea

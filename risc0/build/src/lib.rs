@@ -27,16 +27,12 @@ use std::{
 };
 
 use cargo_metadata::{MetadataCommand, Package};
-use downloader::{Download, Downloader};
 use risc0_binfmt::{MemoryImage, Program};
 use risc0_zkp::core::digest::{Digest, DIGEST_WORDS};
 use risc0_zkvm_platform::{memory, PAGE_SIZE};
 use serde::Deserialize;
-use sha2::{Digest as ShaDigest, Sha256};
-use tempfile::tempdir_in;
-use zip::ZipArchive;
 
-const TARGET_JSON: &str = include_str!("../riscv32im-risc0-zkvm-elf.json");
+const RUSTUP_TOOLCHAIN_NAME: &str = "risc0";
 
 #[derive(Debug, Deserialize)]
 struct Risc0Metadata {
@@ -50,17 +46,18 @@ impl Risc0Metadata {
     }
 }
 
-#[cfg(feature = "guest-list")]
 /// Represents an item in the generated list of compiled guest binaries
-pub struct GuestListEntry {
+#[cfg(feature = "guest-list")]
+#[derive(Debug, Clone)]
+pub struct GuestListEntry<'a> {
     /// The name of the guest binary
-    pub name: &'static str,
+    pub name: &'a str,
     /// The compiled ELF guest binary
-    pub elf: &'static [u8],
+    pub elf: &'a [u8],
     /// The image id of the guest
     pub image_id: [u32; DIGEST_WORDS],
     /// The path to the ELF binary
-    pub path: &'static str,
+    pub path: &'a str,
 }
 
 #[derive(Debug)]
@@ -120,48 +117,6 @@ pub const {upper}_PATH: &str = r#"{elf_path}"#;
     }}"##
         )
     }
-}
-
-#[derive(Debug)]
-struct ZipMapEntry {
-    filename: &'static str,
-    zip_url: &'static str,
-    src_prefix: &'static str,
-    dst_prefix: &'static str,
-}
-
-// Sources for standard library, and where they should be mapped to.
-const RUST_LIB_MAP : &[ZipMapEntry] = &[
-    ZipMapEntry {
-        filename: "6d5dc1eb4c8bb8eaa1dde078396e488810181bdf.zip",
-        zip_url: "https://github.com/risc0/rust/archive/6d5dc1eb4c8bb8eaa1dde078396e488810181bdf.zip",
-        src_prefix: "rust-6d5dc1eb4c8bb8eaa1dde078396e488810181bdf/library",
-        dst_prefix: "library"
-    },
-    ZipMapEntry {
-        filename: "790411f93c4b5eada3c23abb4c9a063fb0b24d99.zip",
-        zip_url: "https://github.com/rust-lang/stdarch/archive/790411f93c4b5eada3c23abb4c9a063fb0b24d99.zip",
-        src_prefix:"stdarch-790411f93c4b5eada3c23abb4c9a063fb0b24d99",
-        dst_prefix: "library/stdarch"
-    },
-    ZipMapEntry {
-        filename: "07872f28cd8a65c3c7428811548dc85f1f2fb05b.zip",
-        zip_url: "https://github.com/rust-lang/backtrace-rs/archive/07872f28cd8a65c3c7428811548dc85f1f2fb05b.zip",
-        src_prefix:"backtrace-rs-07872f28cd8a65c3c7428811548dc85f1f2fb05b",
-        dst_prefix: "library/backtrace"
-    },
-];
-
-fn sha_digest_with_hex(data: &[u8]) -> (Vec<u8>, String) {
-    let bin_sha = Sha256::new().chain_update(data).finalize();
-    (
-        bin_sha.to_vec(),
-        bin_sha
-            .as_slice()
-            .iter()
-            .map(|x| format!("{:02x}", x))
-            .collect(),
-    )
 }
 
 /// Returns the given cargo Package from the metadata.
@@ -236,122 +191,10 @@ where
         .collect()
 }
 
-#[derive(Debug)]
-struct GuestBuildEnv {
-    target_spec: PathBuf,
-    rust_lib_src: PathBuf,
-}
-
-fn setup_guest_build_env<P>(out_dir: P) -> GuestBuildEnv
-where
-    P: AsRef<Path>,
-{
-    // RISCV target specification
-    let target_spec_path = out_dir.as_ref().join("riscv32im-risc0-zkvm-elf.json");
-    fs::write(&target_spec_path, TARGET_JSON).unwrap();
-
-    // Rust standard library.  If any of the RUST_LIB_MAP changed, we
-    // want to have a different hash so that we make sure we recompile.
-    let (_, src_id_hash) = sha_digest_with_hex(format!("{:?}", RUST_LIB_MAP).as_bytes());
-    let rust_lib_path = out_dir.as_ref().join(format!("rust-std_{}", src_id_hash));
-    if !rust_lib_path.exists() {
-        println!(
-            "Standard library {} does not exist; downloading",
-            rust_lib_path.display()
-        );
-
-        download_zip_map(RUST_LIB_MAP, &rust_lib_path);
-    }
-
-    GuestBuildEnv {
-        target_spec: target_spec_path,
-        rust_lib_src: rust_lib_path,
-    }
-}
-
-fn risc0_cache() -> PathBuf {
-    directories::ProjectDirs::from("com.risczero", "RISC Zero", "risc0")
-        .unwrap()
-        .cache_dir()
-        .into()
-}
-
-fn download_zip_map<P>(zip_map: &[ZipMapEntry], dest_base: P)
-where
-    P: AsRef<Path>,
-{
-    let cache_dir = risc0_cache();
-    if !cache_dir.is_dir() {
-        fs::create_dir_all(&cache_dir).unwrap();
-    }
-
-    let temp_dir = tempdir_in(&cache_dir).unwrap();
-    let mut downloader = Downloader::builder()
-        .download_folder(temp_dir.path())
-        .build()
-        .unwrap();
-
-    let tmp_dest_base = dest_base.as_ref().with_extension("downloadtmp");
-    if tmp_dest_base.exists() {
-        fs::remove_dir_all(&tmp_dest_base).unwrap();
-    }
-
-    for zm in zip_map.iter() {
-        let src_prefix = Path::new(&zm.src_prefix);
-        let dst_prefix = tmp_dest_base.join(zm.dst_prefix);
-        fs::create_dir_all(&dst_prefix).unwrap();
-
-        let zip_path = cache_dir.join(zm.filename);
-        if !zip_path.is_file() {
-            println!(
-                "Downloading {}, mapping {} to {}",
-                zm.zip_url,
-                zm.src_prefix,
-                dst_prefix.display()
-            );
-            let dl = Download::new(zm.zip_url);
-            downloader.download(&[dl]).unwrap().iter().for_each(|x| {
-                let summary = x.as_ref().unwrap();
-                println!("Downloaded: {}", summary.file_name.display());
-            });
-            fs::rename(temp_dir.path().join(zm.filename), &zip_path).unwrap();
-        }
-
-        let zip_file = File::open(zip_path).unwrap();
-        let mut zip = ZipArchive::new(zip_file).unwrap();
-        println!("Got zip with {} files", zip.len());
-
-        let mut nwrote: u32 = 0;
-        for i in 0..zip.len() {
-            let mut f = zip.by_index(i).unwrap();
-            let name = f.enclosed_name().unwrap();
-            if let Ok(relative_src) = name.strip_prefix(src_prefix) {
-                let dest_name = dst_prefix.join(relative_src);
-                if f.is_dir() {
-                    fs::create_dir_all(dest_name).unwrap();
-                    continue;
-                }
-                if !f.is_file() {
-                    continue;
-                }
-                std::io::copy(&mut f, &mut File::create(&dest_name).unwrap()).unwrap();
-                nwrote += 1;
-            }
-        }
-        println!("Wrote {} files", nwrote);
-    }
-    fs::rename(&tmp_dest_base, dest_base.as_ref()).unwrap();
-}
-
 // Builds a package that targets the riscv guest into the specified target
 // directory.
-fn build_guest_package<P>(
-    pkg: &Package,
-    target_dir: P,
-    guest_build_env: &GuestBuildEnv,
-    features: Vec<String>,
-    std: bool,
-) where
+fn build_guest_package<P>(pkg: &Package, target_dir: P, features: Vec<String>)
+where
     P: AsRef<Path>,
 {
     let skip_var_name = "RISC0_SKIP_BUILD";
@@ -361,21 +204,13 @@ fn build_guest_package<P>(
     }
 
     fs::create_dir_all(target_dir.as_ref()).unwrap();
-    let cargo = env::var("CARGO").unwrap();
-    let mut std_parts = vec!["alloc", "core", "proc_macro", "panic_abort"];
-    if std {
-        std_parts.push("std");
-    }
-    let build_std = format!("build-std={}", std_parts.join(","));
+
     let mut args = vec![
+        "+risc0",
         "build",
         "--release",
         "--target",
-        guest_build_env.target_spec.to_str().unwrap(),
-        "-Z",
-        build_std.as_str(),
-        "-Z",
-        "build-std-features=compiler-builtins-mem",
+        "riscv32im-risc0-zkvm-elf",
         "--manifest-path",
         pkg.manifest_path.as_str(),
         "--target-dir",
@@ -386,19 +221,13 @@ fn build_guest_package<P>(
         args.push("--features");
         args.push(&features_str);
     }
-    println!("Building guest package: {cargo} {}", args.join(" "));
-    // The RISC0_STANDARD_LIB variable can be set for testing purposes
-    // to override the downloaded standard library.  It should point
-    // to the root of the rust repository.
-    let risc0_standard_lib: String = if let Ok(path) = env::var("RISC0_STANDARD_LIB") {
-        path
-    } else {
-        guest_build_env.rust_lib_src.to_str().unwrap().into()
-    };
+    println!("Building guest package: cargo {}", args.join(" "));
 
-    println!("Using rust standard library root: {}", risc0_standard_lib);
+    let mut cmd = Command::new("cargo");
+    for (key, _) in env::vars().filter(|x| x.0.starts_with("CARGO") || x.0.starts_with("RUSTUP")) {
+        cmd.env_remove(key);
+    }
 
-    let mut cmd = Command::new(cargo);
     let mut child = cmd
         .env(
             "CARGO_ENCODED_RUSTFLAGS",
@@ -406,9 +235,6 @@ fn build_guest_package<P>(
                 // Replace atomic ops with nonatomic versions since the guest is single threaded.
                 "-C",
                 "passes=loweratomic",
-                // Remap absolute pathnames in compiled ELFs for builds that are more reproducible.
-                "-Z",
-                "remap-cwd-prefix=.",
                 // Specify where to start loading the program in
                 // memory.  The clang linker understands the same
                 // command line arguments as the GNU linker does; see
@@ -423,7 +249,6 @@ fn build_guest_package<P>(
             ]
             .join("\x1f"),
         )
-        .env("__CARGO_TESTS_ONLY_SRC_ROOT", risc0_standard_lib)
         .args(args)
         .stderr(Stdio::piped())
         .spawn()
@@ -465,22 +290,42 @@ fn build_guest_package<P>(
     }
 }
 
+fn detect_toolchain(name: &str) {
+    let result = Command::new("rustup")
+        .args(["toolchain", "list", "--verbose"])
+        .stderr(Stdio::inherit())
+        .output()
+        .unwrap();
+    if !result.status.success() {
+        eprintln!("Failed to run: 'rustup toolchain list --verbose'");
+        std::process::exit(result.status.code().unwrap());
+    }
+
+    let stdout = String::from_utf8(result.stdout).unwrap();
+    if stdout
+        .lines()
+        .find(|line| line.trim().starts_with(name))
+        .is_none()
+    {
+        eprintln!("The 'risc0' toolchain could not be found.");
+        eprintln!("To install the risc0 toolchain, use cargo-risczero.");
+        eprintln!("For example:");
+        eprintln!("  cargo install cargo-risczero");
+        eprintln!("  cargo risczero install");
+        std::process::exit(-1);
+    }
+}
+
 /// Options defining how to embed a guest package in
 /// [`embed_methods_with_options`].
 pub struct GuestOptions {
     /// Features for cargo to build the guest with.
     pub features: Vec<String>,
-
-    /// Enable standard library support
-    pub std: bool,
 }
 
 impl Default for GuestOptions {
     fn default() -> Self {
-        GuestOptions {
-            features: vec![],
-            std: true,
-        }
+        GuestOptions { features: vec![] }
     }
 }
 
@@ -513,7 +358,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
         .write_all(b"use risc0_build::GuestListEntry;\n")
         .unwrap();
 
-    let guest_build_env = setup_guest_build_env(out_dir);
+    detect_toolchain(RUSTUP_TOOLCHAIN_NAME);
 
     for guest_pkg in guest_packages {
         println!("Building guest package {}.{}", pkg.name, guest_pkg.name);
@@ -522,13 +367,7 @@ pub fn embed_methods_with_options(mut guest_pkg_to_options: HashMap<&str, GuestO
             .remove(guest_pkg.name.as_str())
             .unwrap_or_default();
 
-        build_guest_package(
-            &guest_pkg,
-            &guest_dir,
-            &guest_build_env,
-            guest_options.features,
-            guest_options.std,
-        );
+        build_guest_package(&guest_pkg, &guest_dir, guest_options.features);
 
         for method in guest_methods(&guest_pkg, &guest_dir) {
             methods_file

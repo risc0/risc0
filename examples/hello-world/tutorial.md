@@ -22,18 +22,19 @@ For more resources for building zkVM applications, check out our [developer docs
 First, [install Rust] if you don't already have it.
 Now, you can create a RISC Zero zkVM project from the command line:
 
-```sh
+```bash
 ## Install from crates.io
 cargo install cargo-risczero
+cargo risczero install
 
-## Navigate to where you want to create your project
+# Navigate to where you want to create your project
 cd wherever/you/want
 
 ## Create a project from our starter template
 cargo risczero new hello-world
 ```
 This will create a project named `hello-world` in the directory where you ran the [`cargo risczero new`] command. Now we can enter our new project's directory and start working on it!
-```sh
+```bash
 cd hello-world
 ```
 

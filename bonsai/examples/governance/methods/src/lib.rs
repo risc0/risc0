@@ -39,7 +39,10 @@ mod test {
 
     #[test]
     fn process_basic_finalization_input() {
-        let env = ExecutorEnv::builder().add_input(&TEST_INPUT).build();
+        let env = ExecutorEnv::builder()
+            .add_input(&TEST_INPUT)
+            .build()
+            .unwrap();
         let mut exec = Executor::from_elf(env, FINALIZE_VOTES_ELF).unwrap();
         let session = exec.run().unwrap();
         assert_eq!(&session.journal, TEST_OUTPUT);

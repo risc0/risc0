@@ -1,0 +1,28 @@
+[package]
+name = "bonsai-ethereum-contracts"
+description = "Bonsai Ethereum contracts"
+version = "0.1.0"
+edition = { workspace = true }
+license = { workspace = true }
+homepage = { workspace = true }
+repository = { workspace = true }
+
+[package.metadata.release]
+release = false
+
+[build-dependencies]
+anyhow = "1.0"
+clap = { version = "4" }
+# Foundry does not have a robust versioning story. Commit below is picked as a known working commit.
+# Commits after July 17th have a minimum rust version of stable 1.70, which conflicts with the toolchain for risc0.
+foundry-cli = { git = "https://github.com/foundry-rs/foundry.git", rev = "8e365beee278975720ecd3eb529b5dd6d17cac3b" }
+
+[dependencies]
+ethers = { version = "2.0", features = ["rustls", "ws"] }
+
+[dev-dependencies]
+risc0-zkvm = { workspace = true, default-features = false }
+tokio = { version = "1", features = ["macros", "rt"] }
+
+[features]
+default = []
