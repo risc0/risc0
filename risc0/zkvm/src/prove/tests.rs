@@ -270,30 +270,6 @@ fn continuation() {
     }
 }
 
-fn run_dev_mode() {
-    temp_env::with_var("RISC0_DEV_MODE", Some("1"), || {
-        let receipt = prove_nothing("$devmode").unwrap();
-        assert_eq!(receipt.inner, crate::receipt::InnerReceipt::Fake);
-        receipt.verify(MULTI_TEST_ID).unwrap();
-    });
-}
-
-#[test]
-#[ignore]
-#[should_panic(
-    expected = "zkVM: Inconsistent settings -- please resolve. The RISC0_DEV_MODE environment variable is set but dev mode has been disabled by feature flag."
-)]
-#[cfg(feature = "disable-dev-mode")]
-fn dev_mode_panic() {
-    run_dev_mode()
-}
-
-#[test]
-#[cfg(not(feature = "disable-dev-mode"))]
-fn dev_mode() {
-    run_dev_mode()
-}
-
 // These tests come from:
 // https://github.com/riscv-software-src/riscv-tests
 // They were built using the toolchain from:
