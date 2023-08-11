@@ -24,6 +24,7 @@ fn main() -> Result<()> {
 
     let Cargo::Risczero(args) = Cargo::parse();
     match args.command {
+        RisczeroCmd::BuildGuest(cmd) => cmd.run(),
         RisczeroCmd::BuildToolchain(cmd) => cmd.run(),
         RisczeroCmd::Install(cmd) => cmd.run(),
         RisczeroCmd::New(cmd) => cmd.run(),
