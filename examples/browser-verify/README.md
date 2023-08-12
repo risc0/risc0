@@ -3,7 +3,7 @@
 Verify a RISC Zero program in your browser using WASM!
 
 ## Quickstart
-In addition to [Rust] [Node.js] , you will need
+In addition to [Rust] and [Node.js], you will need
 ```
 cargo xtask install
 cargo xtask gen-receipt
