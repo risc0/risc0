@@ -106,7 +106,7 @@ Use this command any time you'd like to check your progress.
 
 ## Concept break: How do we run and prove the guest program?
 
-Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/src/main.rs`.
+Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/host/src/main.rs`.
 
 In the starter template project, our host driver program creates an executor environment before constructing a prover.  When `Prover::prove_elf()` is called, it will produce a receipt:
 
@@ -136,7 +136,7 @@ In the starter template project, our host driver program creates an executor env
 
 ## Step 5 (Host): Share two values with the guest
 
-In this step, we'll be continuing to modify `factors/src/main.rs`.
+In this step, we'll be continuing to modify `factors/host/src/main.rs`.
 Let's start by picking some aesthetically pleasing primes:
 ```
 fn main() {
