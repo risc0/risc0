@@ -11,6 +11,18 @@ Currently, this demo accepts an Ethereum transaction hash and replays the transa
 * It currently defaults to the revm default forkid which is BERLIN. Older transactions might vary in results.
 * This demo only runs pre-existing transactions by tx_hash.
 
+## Dependencies
+
+First, [install Rust] if you don't already have it.
+
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
+```
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
+
 ## Building
 
 ```bash
