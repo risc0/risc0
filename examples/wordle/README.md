@@ -2,15 +2,22 @@
 
 ## Quick Start
 
-First, make sure [rustup](https://rustup.rs) is installed. This project uses a [nightly](https://doc.rust-lang.org/book/appendix-07-nightly-rust.html) version of [Rust](https://doc.rust-lang.org/book/ch01-01-installation.html). The [`rust-toolchain.toml`](../../rust-toolchain.toml) file will be used by `cargo` to automatically install the correct version.
+First, [install Rust] if you don't already have it.
 
-To build all methods and play Wordle within the zkVM, run the following command:
-
+Next, install the `cargo-risczero` tool and install the toolchain with:
+```bash
+cargo install cargo-risczero
+cargo risczero install
 ```
-cargo run
+
+Then, run the example with:
+```bash
+cargo run --release
 ```
 
-Then, start guessing 5 letter words!
+Welcome to Wordle! Start guessing 5 letter words!
+
+[install Rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 
 ## About the game
 

@@ -2,7 +2,8 @@
 
 The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
 
-First, [install Rust] if you don't already have it. 
+## Quick Start
+First, [install Rust] if you don't already have it.
 
 Next, install the `cargo-risczero` tool and install the toolchain with:
 
