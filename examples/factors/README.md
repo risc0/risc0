@@ -2,7 +2,8 @@
 
 The _factors_ example is a minimalistic RISC Zero zkVM proof. The prover demonstrates that they know two nontrivial factors (i.e. both greater than 1) of a number, without revealing what those factors are. Thus, the prover demonstrates that a number is composite — and that they know the factors — without revealing any further information about the number.
 
-First, [install Rust] if you don't already have it. 
+## Quick Start
+First, [install Rust] if you don't already have it.
 
 Next, install the `cargo-risczero` tool and install the toolchain with:
 
@@ -106,7 +107,7 @@ Use this command any time you'd like to check your progress.
 
 ## Concept break: How do we run and prove the guest program?
 
-Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/src/main.rs`.
+Our next objective is to provide the guest program with input. Before we implement this, let's take a closer look at how we run and prove the guest program in `factors/host/src/main.rs`.
 
 In the starter template project, our host driver program creates an executor environment before constructing a prover.  When `Prover::prove_elf()` is called, it will produce a receipt:
 
@@ -136,7 +137,7 @@ In the starter template project, our host driver program creates an executor env
 
 ## Step 5 (Host): Share two values with the guest
 
-In this step, we'll be continuing to modify `factors/src/main.rs`.
+In this step, we'll be continuing to modify `factors/host/src/main.rs`.
 Let's start by picking some aesthetically pleasing primes:
 ```
 fn main() {
