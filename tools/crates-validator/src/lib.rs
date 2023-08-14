@@ -195,7 +195,7 @@ impl Validator {
         debug!("generating {}", profile.name);
 
         let filtered_env: std::collections::HashMap<String, String> = std::env::vars()
-            .filter(|&(ref k, _)| {
+            .filter(|(k, _)| {
                 k == "TERM"
                     || k == "TZ"
                     || k == "USER"
@@ -392,7 +392,7 @@ impl Validator {
         // the cargo subcommands will correctly dispatch to rustup to pick the
         // target project's rust-toolchain.toml.
         let mut filtered_env: std::collections::HashMap<String, String> = std::env::vars()
-            .filter(|&(ref k, _)| {
+            .filter(|(k, _)| {
                 k == "TERM" || k == "TZ" || k == "CC" || k == "CXX" || k == "LANG" || k == "PATH"
             })
             .collect();
