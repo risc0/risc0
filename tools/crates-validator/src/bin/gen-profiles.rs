@@ -16,7 +16,7 @@ use std::{
     cell::RefCell,
     collections::{btree_map::Entry, BTreeMap},
     fs::File,
-    io::{Seek, Write},
+    io::Write,
     path::{Path, PathBuf},
 };
 
@@ -75,31 +75,13 @@ async fn download_database() -> Result<PathBuf> {
     let url = "https://static.crates.io/db-dump.tar.gz";
     debug!("Downloading from {}", url);
 
-    debug!("Creating file...");
     let tar_file_path = Path::new("/tmp/db-dump.tar.gz");
-    let (mut downloaded, mut file) = if tar_file_path.exists() {
-        debug!("File already exists, resuming...");
-        let mut file = std::fs::OpenOptions::new()
-            .read(true)
-            .append(true)
-            .open(tar_file_path)
-            .context("Failed to open file")?;
-
-        let file_size = std::fs::metadata(tar_file_path)
-            .context("Failed to get metadata for file '{tar_file_path}'")?
-            .len();
-        file.seek(std::io::SeekFrom::Start(file_size))
-            .context("Failed to seek file.")?;
-        debug!("Resuming from {} bytes", file_size);
-        (file_size, file)
-    } else {
-        debug!("Creating new file...");
-        let file =
-            File::create(tar_file_path).context("Failed to create file '{tar_file_path}'")?;
-        (0, file)
-    };
-
-    debug!("Starting download...");
+    if tar_file_path.exists() {
+        debug!("File already exists, skipping...");
+        return Ok(tar_file_path.to_path_buf());
+    }
+    let mut file =
+        File::create(tar_file_path).context("Failed to create file '{tar_file_path}'")?;
     let resp = reqwest::Client::new()
         .get(url)
         .send()
@@ -115,6 +97,7 @@ async fn download_database() -> Result<PathBuf> {
     pb.set_message(&format!("Downloading {url}"));
 
     let mut stream = resp.bytes_stream();
+    let mut downloaded = 0;
     while let Some(item) = stream.next().await {
         let chunk = item.context("Error while downloading file")?;
         file.write_all(&chunk)
@@ -124,14 +107,7 @@ async fn download_database() -> Result<PathBuf> {
         downloaded = new;
         pb.set_position(new);
     }
-    pb.finish_with_message(&format!(
-        "Downloaded {url} to {path}",
-        url = url,
-        path = tar_file_path
-            .to_str()
-            .context("Failed to convert path to string")?
-    ));
-
+    pb.finish_and_clear();
     Ok(tar_file_path.to_path_buf())
 }
 
@@ -164,7 +140,7 @@ async fn main() -> Result<()> {
     let mut most_recent = BTreeMap::new();
     let mut crates = Vec::new();
 
-    debug!("Loading..");
+    debug!("Loading...");
     let crate_name = &args.name;
     if let Some(name) = crate_name {
         info!("Selecting only {name}");
