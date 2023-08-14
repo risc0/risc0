@@ -31,7 +31,7 @@ use risc0_zkp::{
     },
     ZK_CYCLES,
 };
-use risc0_zkvm_fault::FAULT_CHECKER_ELF;
+use risc0_zkvm_fault_ids::FAULT_CHECKER_ELF;
 use risc0_zkvm_platform::{
     fileno,
     memory::MEM_SIZE,

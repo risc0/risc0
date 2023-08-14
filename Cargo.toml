@@ -49,6 +49,7 @@ risc0-sys = { version = "0.17.0", default-features = false, path = "risc0/sys" }
 risc0-zkp = { version = "0.17.0", default-features = false, path = "risc0/zkp" }
 risc0-zkvm = { version = "0.17.0", default-features = false, path = "risc0/zkvm" }
 risc0-zkvm-fault = { version = "0.17.0", default-features = false, path = "risc0/zkvm/fault" }
+risc0-zkvm-fault-ids = { version = "0.17.0", default-features = false, path = "risc0/zkvm/fault-ids" }
 risc0-zkvm-platform = { version = "0.17.0", default-features = false, path = "risc0/zkvm/platform" }
 
 [profile.bench]

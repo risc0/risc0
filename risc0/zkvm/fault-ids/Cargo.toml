@@ -1,0 +1,8 @@
+[package]
+name = "risc0-zkvm-fault-ids"
+version = { workspace = true }
+edition = { workspace = true }
+
+
+[dependencies]
+

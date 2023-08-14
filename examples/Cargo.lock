@@ -3281,7 +3281,7 @@ dependencies = [
  "risc0-circuit-rv32im",
  "risc0-core",
  "risc0-zkp",
- "risc0-zkvm-fault",
+ "risc0-zkvm-fault-ids",
  "risc0-zkvm-platform",
  "rrs-lib",
  "serde",
@@ -3292,11 +3292,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0-zkvm-fault"
-version = "0.16.1"
-dependencies = [
- "risc0-build",
-]
+name = "risc0-zkvm-fault-ids"
+version = "0.17.0"
 
 [[package]]
 name = "risc0-zkvm-platform"

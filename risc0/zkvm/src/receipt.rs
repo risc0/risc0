@@ -89,7 +89,7 @@ use risc0_zkp::{
     layout::Buffer,
     verify::VerificationError,
 };
-use risc0_zkvm_fault::FAULT_CHECKER_ID;
+use risc0_zkvm_fault_ids::FAULT_CHECKER_ID;
 use risc0_zkvm_platform::WORD_SIZE;
 use serde::{Deserialize, Serialize};
 
