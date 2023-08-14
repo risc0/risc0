@@ -12,15 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::cell::RefCell;
-use std::collections::{btree_map::Entry, BTreeMap};
-use std::fs::File;
-use std::io::{Cursor, Write};
-use std::path::{Path, PathBuf};
+use std::{
+    cell::RefCell,
+    collections::{btree_map::Entry, BTreeMap},
+    fs::File,
+    io::{Seek, Write},
+    path::{Path, PathBuf},
+};
 
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use clap::Parser;
+use indicatif::{ProgressBar, ProgressStyle};
 use risc0_crates_validator::{profiles, CrateProfile, ProfileConfig};
+use tokio_stream::StreamExt;
 use tracing::{debug, info};
 use tracing_subscriber::EnvFilter;
 
@@ -66,29 +70,87 @@ struct Args {
     no_profiles: bool,
 }
 
-fn download_database() -> Result<PathBuf> {
-    let db_url = "https://static.crates.io/db-dump.tar.gz";
-    debug!("Downloading from {}", db_url);
+#[tracing::instrument]
+async fn download_database() -> Result<PathBuf> {
+    let url = "https://static.crates.io/db-dump.tar.gz";
+    debug!("Downloading from {}", url);
 
+    debug!("Creating file...");
     let tar_file_path = Path::new("/tmp/db-dump.tar.gz");
-    let mut tar_file = File::create(tar_file_path)?;
-    let resp = reqwest::blocking::get(db_url)?;
-    let mut content = Cursor::new(resp.bytes()?);
-    std::io::copy(&mut content, &mut tar_file)?;
+    let (mut downloaded, mut file) = if tar_file_path.exists() {
+        debug!("File already exists, resuming...");
+        let mut file = std::fs::OpenOptions::new()
+            .read(true)
+            .append(true)
+            .open(tar_file_path)
+            .context("Failed to open file")?;
+
+        let file_size = std::fs::metadata(tar_file_path)
+            .context("Failed to get metadata for file '{tar_file_path}'")?
+            .len();
+        file.seek(std::io::SeekFrom::Start(file_size))
+            .context("Failed to seek file.")?;
+        debug!("Resuming from {} bytes", file_size);
+        (file_size, file)
+    } else {
+        debug!("Creating new file...");
+        let file =
+            File::create(tar_file_path).context("Failed to create file '{tar_file_path}'")?;
+        (0, file)
+    };
+
+    debug!("Starting download...");
+    let resp = reqwest::Client::new()
+        .get(url)
+        .send()
+        .await
+        .context("Failed to GET from '{url}'")?;
+    let total_size = resp
+        .content_length()
+        .context("Failed to get content length from '{url}'")?;
+    let pb = ProgressBar::new(total_size);
+    pb.set_style(ProgressStyle::default_bar()
+    .template("{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.white/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, {eta})")
+    .progress_chars("█  "));
+    pb.set_message(&format!("Downloading {url}"));
+
+    let mut stream = resp.bytes_stream();
+    while let Some(item) = stream.next().await {
+        let chunk = item.context("Error while downloading file")?;
+        file.write_all(&chunk)
+            .context("Error while writing to file")?;
+        file.flush().context("Error while flushing file")?;
+        let new = std::cmp::min(downloaded + (chunk.len() as u64), total_size);
+        downloaded = new;
+        pb.set_position(new);
+    }
+    pb.finish_with_message(&format!(
+        "Downloaded {url} to {path}",
+        url = url,
+        path = tar_file_path
+            .to_str()
+            .context("Failed to convert path to string")?
+    ));
+
     Ok(tar_file_path.to_path_buf())
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .init();
 
     let args = Args::parse();
 
+    if let (None, None) = (&args.risc0_path, &args.risc0_gh_branch) {
+        bail!("No risc0_path or risc0_gh_branch provided, please provide one in order to generate profile.");
+    }
+
     let db_path = if let Some(path) = args.db_path {
         path
     } else {
-        download_database()?
+        download_database().await?
     };
 
     let config = ProfileConfig {
