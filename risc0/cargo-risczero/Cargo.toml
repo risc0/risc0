@@ -12,18 +12,22 @@ keywords = ["risc0", "risczero", "tool", "cli", "generate"]
 [dependencies]
 anyhow = { version = "1.0", features = ["backtrace"] }
 cargo-generate = "0.18"
+cargo_metadata = "0.17"
 clap = { version = "4.0", features = ["derive"] }
 const_format = "0.2"
 dirs = "5.0"
 docker-generate = "0.1"
 flate2 = "1"
 fs2 = "0.4"
+hex = "0.4"
 reqwest = { version = "0.11", default-features = false, features = [
   "blocking",
   "json",
   "rustls-tls",
   "gzip",
 ] }
+risc0-zkvm = { workspace = true }
+risc0-zkvm-platform = { workspace = true }
 serde = { version = "1", features = ["derive"] }
 tar = "0.4"
 tracing = { version = "0.1", default-features = false }

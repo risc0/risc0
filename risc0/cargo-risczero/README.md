@@ -64,3 +64,18 @@ Use the `build-toolchain` command to build the toolchain locally for your host. 
 [risc-zero]: https://risczero.com
 [install-rust]: https://doc.rust-lang.org/cargo/getting-started/installation.html
 [rust-starter]: https://github.com/risc0/risc0/tree/main/templates/rust-starter
+
+## build-guest
+
+Use the `build-guest` command to build a guest code for the target `riscv32im-risc0-zkvm-elf`. The resulting ELF binary will be saved on `elfs/`. Warning: this requires having docker installed.
+
+### Examples
+
+```bash
+# Build the factors example
+cargo risczero build-guest --manifest-path examples/factors/methods/guest/Cargo.toml
+
+# Build the chess example
+cargo risczero build-guest --manifest-path examples/chess/methods/guest/Cargo.toml
+
+```

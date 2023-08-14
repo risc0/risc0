@@ -13,3 +13,4 @@ Dockerfile
 rust-project.json
 target/
 tmp/
+elfs/

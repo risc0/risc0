@@ -12,95 +12,119 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::{env, fs::File, io::Write, process::Command};
+use std::{
+    fs::{self, File},
+    io::Write,
+    process::Command,
+};
 
 use anyhow::{Context, Result};
+use cargo_metadata::MetadataCommand;
 use clap::Parser;
 use docker_generate::DockerFile;
+use risc0_zkvm::{MemoryImage, Program, MEM_SIZE, PAGE_SIZE};
+use risc0_zkvm_platform::memory;
 
 use crate::utils::CommandExt;
 
-// const CONFIG_TOML: &'static str = include_str!("config.toml");
-const DOCKER_IGNORE: &'static str = "**/target\n**/Dockerfile\n**/.git";
+const DOCKER_IGNORE: &'static str = "**/elfs\n**/target\n**/Dockerfile\n**/.git";
 /// `cargo risczero build-guest`
 #[derive(Parser)]
-pub struct BuildGuest {}
+pub struct BuildGuest {
+    /// Location of the Cargo.toml of the guest code
+    ///
+    /// This path is relative to the current directory
+    #[clap(value_parser, long)]
+    pub manifest_path: String,
+}
 
 impl BuildGuest {
     pub fn run(&self) -> Result<()> {
-        eprintln!("Building the riscv32im-risc0-zkvm-elf guest...");
+        let meta = MetadataCommand::new()
+            .manifest_path(self.manifest_path.as_str())
+            .exec()?;
+        let pkg_name = &meta
+            .root_package()
+            .context("failed to parse Cargo.toml")?
+            .name;
+        eprintln!("Building the riscv32im-risc0-zkvm-elf binary for {pkg_name}...");
+        let package_name = pkg_name.replace("-", "_");
+        self.create_dockerfile(package_name.as_str())?;
+        self.build()?;
+        eprintln!("ELF ready at ./elfs/{package_name}");
+        eprintln!(
+            "ImageID={}",
+            self.image_id(&format!("elfs/{package_name}"))?
+        );
 
-        self.create_dockerfile()
-
-        // Ok(())
+        Ok(())
     }
 
     /// Create the dockerfile.
     ///
     /// Overwrites if a dockerfile already exists.
-    fn create_dockerfile(&self) -> Result<()> {
-        eprintln!("Creating Dockerfile");
-
-        let current_dir = env::current_dir()?;
-        let working_dir = current_dir
-            .iter()
-            .last()
-            .context("invalid path.")?
-            .to_str()
-            .context("invalid path.")?;
-        eprintln!("{}", working_dir);
-
-        let src_env = &[("SRC", working_dir)];
-        let manifest_env = &[(
-            "CARGO_MANIFEST_PATH",
-            "examples/factors/methods/guest/Cargo.toml",
-        )];
+    fn create_dockerfile(&self, pkg_name: &str) -> Result<()> {
+        let manifest_env = &[("CARGO_MANIFEST_PATH", self.manifest_path.as_str())];
+        let pkg_env = &[("PKG_NAME", pkg_name)];
+        let c_flags = format!(
+            "-C passes=loweratomic -C link-arg=-Ttext=0x{:08X} -C link-arg=--fatal-warnings",
+            memory::TEXT_START
+        );
+        let c_flags_env = &[("RUSTFLAGS", c_flags.as_str())];
 
         let build = DockerFile::new()
-            .comment("build stage")
-            .from_alias("build", "rust:1.71.1@sha256:6b5a53fef2818e28548be943a622bfc52d73920fe0f8784f4296227bca30cdf1")
-            .workdir(&working_dir)
-            .run("cargo install cargo-risczero")
-            .run("cargo risczero install")
+            .from_alias("build", "risczero/risc0-guest-builder:v0.17")
+            .workdir("/src")
             .copy(".", ".")
-            .env(src_env)
             .env(manifest_env)
-            .run("ls")
-            .run("cargo +risc0 fetch --target riscv32im-risc0-zkvm-elf --manifest-path $CARGO_MANIFEST_PATH --locked")
+            .env(c_flags_env)
+            .run(
+                "cargo +risc0 fetch --target riscv32im-risc0-zkvm-elf --manifest-path $CARGO_MANIFEST_PATH --locked",
+            )
             .run(
                 "CARGO_TARGET_DIR=target \\\n\
-            \tcargo +risc0 build \\\n\
-            \t--offline \\\n\
-            \t--release \\\n\
-            \t--target riscv32im-risc0-zkvm-elf \\\n\
-            \t--manifest-path $CARGO_MANIFEST_PATH \\\n\
-            \t&& find `target/riscv-guest/riscv32im-risc0-zkvm-elf/release` \\\n\
-            \t-maxdepth 1 -type f -exec test -x {} \\; -exec cp {} /tmp/ \\;",
-            );
+                \tcargo +risc0 build \\\n\
+                \t--locked \\\n\
+                \t--release \\\n\
+                \t--target riscv32im-risc0-zkvm-elf \\\n\
+                \t--manifest-path $CARGO_MANIFEST_PATH");
 
         let binary: DockerFile<'_> = DockerFile::new()
             .comment("binary stage")
             .from_alias("binary", "scratch")
-            .copy_from("build", "/tmp/", "/elfs");
+            .env(pkg_env)
+            .copy_from(
+                "build",
+                "/src/target/riscv32im-risc0-zkvm-elf/release/$PKG_NAME",
+                "$PKG_NAME",
+            );
 
         let file = DockerFile::new().dockerfile(build).dockerfile(binary);
-
-        eprintln!("{}", file.to_string());
         let mut dockerfile = File::create("Dockerfile")?;
         dockerfile.write_all(file.to_string().as_bytes())?;
-
         let mut dockerignore = File::create(".dockerignore")?;
         dockerignore.write_all(DOCKER_IGNORE.as_bytes())?;
 
-        eprintln!("Dockerfile created at {}", current_dir.display());
+        Ok(())
+    }
 
-        // docker build --build-env SRC=$SRC --build-arg MANIFEST_PATH=$MANIFEST_PATH
-        // --build-arg PACKAGE=$PACKAGE --ssh default --output=elfs --target=binaries .
-
+    /// Build the dockerfile and ouputs the ELF.
+    ///
+    /// Overwrites if an ELF with the same name already exists.
+    fn build(&self) -> Result<()> {
         Command::new("docker")
-            .args(["build", "--output=.", "--target=binary", "."])
+            .args(["build", "--output=elfs/", "--target=binary", "."])
             .run_verbose()?;
 
         Ok(())
+    }
+
+    /// Generate the image ID for a given ELF.
+    fn image_id(&self, elf_path: &str) -> Result<String> {
+        let elf = fs::read(elf_path)?;
+        let program = Program::load_elf(&elf, MEM_SIZE as u32).context("unable to load elf")?;
+        let image = MemoryImage::new(&program, PAGE_SIZE as u32)
+            .context("unable to create memory image")?;
+        Ok(hex::encode(image.compute_id()))
     }
 }
