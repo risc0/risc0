@@ -50,10 +50,6 @@ struct Args {
     #[arg(short, long, env)]
     wallet_key_identifier: String,
 
-    /// Toggle to use a KMS client
-    #[arg(long)]
-    use_kms: bool,
-
     /// Bonsai API URL
     #[arg(long, env, default_value_t = DEFAULT_BONSAI_API_URL.to_string())]
     bonsai_api_url: String,
