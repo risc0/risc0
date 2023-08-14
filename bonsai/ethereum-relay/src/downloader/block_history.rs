@@ -45,37 +45,6 @@ pub(crate) async fn recover_delay(state: State, sender: mpsc::Sender<Log>) -> Re
     }
 }
 
-// #[tracing::instrument]
-// pub(crate) async fn get_latest_block_with_retry(
-//     client_config: EthersClientConfig,
-// ) -> Result<BlockNumber> {
-//     let client = client_config.get_client_with_reconnects().await?;
-//     let provider = client.provider();
-//     let mut retries = client_config.retries;
-//     while retries > 0 {
-//         match get_latest_block(provider).await {
-//             Ok(Some(block)) => return Ok(block),
-//             Ok(None) => {
-//                 debug!(
-//                     "Block is still pending, sleeping for {:?}.",
-//                     client_config.wait_time
-//                 );
-//             }
-//             Err(error) => {
-//                 error!(
-//                     ?error,
-//                     "Failed to get latest block, sleeping for {:?}.",
-// client_config.wait_time                 );
-//             }
-//         }
-//         tokio::time::sleep(client_config.wait_time).await;
-//         retries -= 1;
-//     }
-//     let error_message = "Failed to get latest block after {retries:?}
-// retries.";     error!("{error_message}");
-//     Err(anyhow!("{error_message}"))
-// }
-
 async fn process_logs_until_block(state: State, sender: mpsc::Sender<Log>) -> Result<State> {
     let State {
         mut from,
