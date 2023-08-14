@@ -29,7 +29,7 @@ use ethers::{
 use ethers_signers::Wallet;
 use futures::FutureExt;
 use tokio::sync::mpsc::{self, Sender};
-use tracing::{debug, error, info, trace, warn};
+use tracing::{debug, error, trace, warn};
 
 use super::block_history;
 use crate::EthersClientConfig;
@@ -52,6 +52,7 @@ async fn process_logs_until_block(state: State, sender: mpsc::Sender<Log>) -> Re
         client_config,
         ..
     } = state.clone();
+    debug!(?from, ?to, "Starting to recover delay.");
     let mut last_processed_block = from.as_number().unwrap_or_default();
     let mut offset = to;
     let mut done = false;
@@ -68,7 +69,7 @@ async fn process_logs_until_block(state: State, sender: mpsc::Sender<Log>) -> Re
             rebuild_client = false;
         }
         if done {
-            info!("Finished recovering delay.");
+            debug!("Finished recovering delay.");
             return Ok(State {
                 from,
                 last_processed_block,
@@ -88,7 +89,7 @@ async fn process_logs_until_block(state: State, sender: mpsc::Sender<Log>) -> Re
                 error!(?error, "Unknown error found in logs subscription.");
             }
             Ok(mut stream) => {
-                info!("Subscribed to logs.");
+                debug!("Subscribed to logs.");
                 while let Some(log) = stream.next().now_or_never().flatten() {
                     trace!(?log, "Processing log.");
                     if let Some(block_number) = log.block_number {
@@ -98,7 +99,7 @@ async fn process_logs_until_block(state: State, sender: mpsc::Sender<Log>) -> Re
                         error!(?error, "Failed to send log to channel.");
                     }
                 }
-                info!("finished processing logs.");
+                debug!("finished processing logs.");
                 match_block_numbers(&mut from, &mut offset, to, &mut done);
             }
         };
@@ -254,8 +255,6 @@ fn match_block_numbers(
 }
 
 #[derive(Clone, Debug)]
-// TODO: Remove this attribute
-#[allow(dead_code)]
 pub(crate) struct State {
     pub client_config: EthersClientConfig,
     pub client: SignerMiddleware<Provider<Ws>, Wallet<SigningKey>>,
@@ -281,25 +280,33 @@ impl State {
 // #[tracing::instrument]
 pub(crate) async fn recover_lost_blocks(state: State, sender: Sender<Log>) -> Result<State> {
     let latest_block = match block_history::get_latest_block(state.client.provider()).await {
-        Ok(Some(block)) => block.as_number().unwrap_or_default(),
+        Ok(Some(block)) => match block.as_number() {
+            block @ Some(..) => block,
+            None => {
+                error!("Latest block is not a number");
+                None
+            }
+        },
         Ok(None) => {
             warn!("Latest block is not available, retrying...");
-            return Ok(State {
-                recreate_client: true,
-                ..state
-            });
+            None
         }
         Err(error) => {
             error!(?error, "Failed to get latest block number");
-            return Ok(State {
-                recreate_client: true,
-                ..state
-            });
+            None
         }
     };
-    let state = State {
-        latest_block,
-        ..state
-    };
-    block_history::recover_delay(state, sender).await
+    if let Some(latest_block) = latest_block {
+        debug!(?latest_block, "Got latest block number.");
+        let state = State {
+            latest_block,
+            ..state
+        };
+        block_history::recover_delay(state, sender).await
+    } else {
+        Ok(State {
+            recreate_client: true,
+            ..state
+        })
+    }
 }

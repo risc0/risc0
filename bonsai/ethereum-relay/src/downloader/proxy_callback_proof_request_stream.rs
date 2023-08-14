@@ -22,7 +22,7 @@ use ethers::{
 use ethers_signers::Wallet;
 use futures::{Stream, StreamExt};
 use tokio_stream::wrappers::ReceiverStream;
-use tracing::{debug, error};
+use tracing::{debug, error, info};
 
 use super::{block_history, block_history::State};
 use crate::{api::error::Error, downloader::event_processor::EventProcessor, EthersClientConfig};
@@ -65,42 +65,15 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
             client,
             recreate_client: false,
             last_processed_block: last_processed_block_number,
-            filter,
             latest_block: last_processed_block_number,
+            filter,
             from: last_processed_block,
             to: last_processed_block,
         };
 
         loop {
             state = self.recreate_client(state.clone()).await?;
-            let state2 = state.clone();
-            // Recover block delay
-            {
-                let (tx, rx) = tokio::sync::mpsc::channel(100);
-                let recover_lost_blocks_handler = tokio::spawn(async move {
-                    block_history::recover_lost_blocks(state2, tx.clone()).await
-                });
-                self.process_logs(ReceiverStream::new(rx)).await;
-                match recover_lost_blocks_handler.await {
-                    Ok(Ok(new_state)) => {
-                        state = new_state;
-                        debug!("Successfully recovered block delay.");
-                    }
-                    Ok(Err(error)) => {
-                        error!(?error, "Failed to recover block delay.");
-                    }
-                    Err(error) => {
-                        error!(?error, "Tokio Task `recover_last_blocks_handler` failed.");
-                    }
-                }
-            }
-            state = State {
-                filter: state
-                    .filter
-                    .clone()
-                    .from_block(BlockNumber::Number(state.last_processed_block)),
-                ..state.clone()
-            };
+            state = self.recover_block_delay(state.clone()).await;
             let logs = state.client.subscribe_logs(&state.filter).await;
             self.match_logs(state.clone(), logs).await;
         }
@@ -151,6 +124,35 @@ impl<EP: EventProcessor<Event = CallbackRequestFilter> + Sync + Send>
                     recreate_client: true,
                     ..state
                 }
+            }
+        }
+    }
+    async fn recover_block_delay(&self, state: State) -> State {
+        info!(?state, "Starting to recover delay.");
+        let original_state = state.clone();
+        let (tx, rx) = tokio::sync::mpsc::channel(100);
+        let recover_lost_blocks_handler =
+            tokio::spawn(async move { block_history::recover_lost_blocks(state, tx).await });
+        self.process_logs(ReceiverStream::new(rx)).await;
+        match recover_lost_blocks_handler.await {
+            Ok(Ok(new_state)) => {
+                info!(state = ?new_state, "Successfully recovered block delay.");
+                let new_from = BlockNumber::Number(new_state.last_processed_block);
+                let new_to = BlockNumber::Number(new_state.latest_block);
+                State {
+                    filter: new_state.filter.clone().from_block(new_from),
+                    from: new_from,
+                    to: new_to,
+                    ..new_state
+                }
+            }
+            Ok(Err(error)) => {
+                error!(?error, "Failed to recover block delay.");
+                original_state
+            }
+            Err(error) => {
+                error!(?error, "Tokio Task `recover_last_blocks_handler` failed.");
+                original_state
             }
         }
     }
