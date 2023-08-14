@@ -221,28 +221,33 @@ impl Validator {
             cmd.arg("--std");
         }
 
-        if self.context.risc0_path.is_some() && self.context.risc0_gh_branch.is_some() {
-            bail!("Profile assigns both 'risc0_template_path' and 'risc0_gh_branch' pick just one");
-        }
-
-        if let Some(r0_path) = &self.context.risc0_path {
-            let r0_template_path = Path::new(r0_path).join("templates").join("rust-starter");
-            if !r0_template_path.exists() {
-                bail!(
-                    "Failed to find {} on disk",
-                    r0_template_path.to_string_lossy()
-                );
+        match (&self.context.risc0_path, &self.context.risc0_gh_branch) {
+            (None, None) => {
+                bail!("Profile must assign either 'risc0_template_path' or 'risc0_gh_branch'")
             }
-            cmd.arg("--template");
-            cmd.arg(r0_template_path);
-            cmd.arg("--templ-subdir");
-            cmd.arg("");
-            cmd.arg("--path");
-            cmd.arg(r0_path);
-        } else if let Some(branch) = &self.context.risc0_gh_branch {
-            cmd.arg("--branch");
-            cmd.arg(branch);
-        }
+            (Some(..), Some(..)) => bail!(
+                "Profile assigns both 'risc0_template_path' and 'risc0_gh_branch' pick just one"
+            ),
+            (Some(r0_path), None) => {
+                let r0_template_path = Path::new(r0_path).join("templates").join("rust-starter");
+                if !r0_template_path.exists() {
+                    bail!(
+                        "Failed to find {} on disk",
+                        r0_template_path.to_string_lossy()
+                    );
+                }
+                cmd.arg("--template");
+                cmd.arg(r0_template_path);
+                cmd.arg("--templ-subdir");
+                cmd.arg("");
+                cmd.arg("--path");
+                cmd.arg(r0_path);
+            }
+            (None, Some(branch)) => {
+                cmd.arg("--branch");
+                cmd.arg(branch);
+            }
+        };
 
         debug!(
             "running: '{}{}'",
