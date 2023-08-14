@@ -23,12 +23,12 @@ use super::Prover;
 use crate::{ExecutorEnv, Receipt, Segment, SegmentReceipt, Session, VerifierContext};
 
 /// An implementation of a [Prover] that runs proof workloads remotely.
-pub struct RemoteProver {
+pub struct BonsaiProver {
     name: String,
 }
 
-impl RemoteProver {
-    /// construct a remote prover. Unlike the [LocalProver], the hal is taken
+impl BonsaiProver {
+    /// Construct a remote prover. Unlike the [LocalProver], the HAL is taken
     /// care of by the remote prover.
     pub fn new(name: &str) -> Self {
         Self {
@@ -37,7 +37,7 @@ impl RemoteProver {
     }
 }
 
-impl Prover for RemoteProver {
+impl Prover for BonsaiProver {
     fn get_name(&self) -> String {
         self.name.clone()
     }

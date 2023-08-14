@@ -30,13 +30,14 @@
 //! # }
 //! ```
 
+mod bonsai;
 #[cfg(not(feature = "disable-dev-mode"))]
 mod dev_mode;
 mod exec;
+mod ipc;
 pub(crate) mod loader;
 mod local;
 mod plonk;
-mod remote;
 #[cfg(test)]
 mod tests;
 
@@ -56,7 +57,7 @@ use risc0_zkp::{
 };
 use risc0_zkvm_platform::{memory::MEM_SIZE, PAGE_SIZE, WORD_SIZE};
 
-use self::{local::LocalProver, remote::RemoteProver};
+use self::{bonsai::BonsaiProver, local::LocalProver};
 use crate::{
     receipt::{Receipt, VerifierContext},
     ExecutorEnv, Segment, SegmentReceipt, Session,
@@ -231,7 +232,7 @@ fn provers() -> HashMap<String, Rc<dyn Prover>> {
         table.insert("cpu:poseidon".to_string(), prover.clone());
         table.insert("$poseidon".to_string(), prover);
 
-        let prover = Rc::new(RemoteProver::new("bonsai"));
+        let prover = Rc::new(BonsaiProver::new("bonsai"));
         table.insert("$bonsai".to_string(), prover);
     }
     #[cfg(not(feature = "disable-dev-mode"))]
