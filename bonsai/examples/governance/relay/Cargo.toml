@@ -14,6 +14,7 @@ clap = { version = "4.3", features = ["derive", "env"] }
 ethers = { version = "2.0", features = ["rustls", "ws"] }
 ethers-signers = { version = "2.0", features = ["aws"] }
 hex = "0.4.3"
+humantime = "2.1.0"
 methods = { workspace = true }
 risc0-build = { workspace = true, features = ["guest-list"] }
 risc0-zkvm = { workspace = true, default-features = false, features = ["prove"] }
